@@ -28,26 +28,20 @@ class AuthController extends BaseController
         session()->set('username', $userData['username']);
         session()->set('role', $userData['role']);
         switch ($userData['role']) {
-            case 'capacity':
-                return redirect()->to(base_url('/capacity'));
+            case 'gbn':
+                return redirect()->to(base_url('/gbn'));
                 break;
-            case 'planning':
-                return redirect()->to(base_url('/planning'));
+            case 'celup':
+                return redirect()->to(base_url('/celup'));
                 break;
-            case 'aps':
-                return redirect()->to(base_url('/aps'));
+            case 'covering':
+                return redirect()->to(base_url('/covering'));
                 break;
-            case 'user':
-                return redirect()->to(base_url('/user'));
+            case 'monitoring':
+                return redirect()->to(base_url('/monitoring'));
                 break;
-            case 'god':
-                return redirect()->to(base_url('/sudo'));
-                break;
-            case 'sudo':
-                return redirect()->to(base_url('/sudo'));
-                break;
-            case 'ie':
-                return redirect()->to(base_url('/ie'));
+            case 'area':
+                return redirect()->to(base_url('/area'));
                 break;
 
             default:

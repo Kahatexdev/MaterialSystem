@@ -34,6 +34,11 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
+        'gbn' => \App\Filters\GbnAuth::class,
+        'celup' => \App\Filters\CelupAuth::class,
+        'covering' => \App\Filters\CoverAuth::class,
+        'monitoring' => \App\Filters\MonitoringAuth::class,
+        'area' => \App\Filters\AreaAuth::class,
     ];
 
     /**
@@ -103,5 +108,21 @@ class Filters extends BaseFilters
      *
      * @var array<string, array<string, list<string>>>
      */
-    public array $filters = [];
+    public array $filters = [
+        'gbn' => [
+            'before' => ['gbn/*'],
+        ],
+        'celup' => [
+            'before' => ['celup/*'],
+        ],
+        'covering' => [
+            'before' => ['covering/*'],
+        ],
+        'area' => [
+            'before' => ['area/*']
+        ],
+        'monitoring' => [
+            'before' => ['monitoring/*']
+        ]
+    ];
 }
