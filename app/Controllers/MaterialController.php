@@ -29,6 +29,6 @@ class MaterialController extends BaseController
             'title' => 'Material System',
             'role' => $this->role,
         ];
-        return view($this->role . '/index', $data);
+        return view($this->role . '/dashboard/index', $data);
     }
 }

@@ -112,7 +112,7 @@
         </div>
 
     </aside>
-    <?= $this->renderSection('content'); ?>
+    <?= $this->renderSection('header'); ?>
     <div class="modal fade  bd-example-modal-lg" id="LogoutModal" tabindex="-1" role="dialog" aria-labelledby="modalCancel" aria-hidden="true">
         <div class="modal-dialog  modal-dialog-centered" role="document">
             <div class="modal-content">

@@ -1,5 +1,5 @@
 <?php $this->extend($role . '/layout'); ?>
-<?php $this->section('content'); ?>
+<?php $this->section('header'); ?>
 
 
 <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
