@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 
-class MaterialController extends BaseController
+class WarehouseController extends BaseController
 {
     protected $role;
     protected $active;
@@ -27,11 +27,12 @@ class MaterialController extends BaseController
     }
     public function index()
     {
+
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
         ];
-        return view($this->role . '/dashboard/index', $data);
+        return view($this->role . '/warehouse/index', $data);
     }
 }

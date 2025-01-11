@@ -13,6 +13,7 @@ $routes->post('authverify', 'AuthController::login');
 // gbn routes
 $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('', 'MaterialController::index');
+    $routes->get('warehouse', 'WarehouseController::index');
 });
 
 // celup routes
