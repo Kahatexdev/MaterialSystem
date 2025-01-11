@@ -14,6 +14,13 @@ $routes->post('authverify', 'AuthController::login');
 $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('', 'MaterialController::index');
     $routes->get('warehouse', 'WarehouseController::index');
+    $routes->get('pph', 'PphController::index');
+    $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
+    $routes->post('tampilPerStyle', 'PphController::tampilPerStyle');
+    $routes->get('tampilPerDays', 'PphController::tampilPerDays');
+    $routes->post('tampilPerDays', 'PphController::tampilPerDays');
+    $routes->get('tampilPerModel', 'PphController::tampilPerModel');
+    $routes->post('tampilPerModel', 'PphController::tampilPerModel');
 });
 
 // celup routes

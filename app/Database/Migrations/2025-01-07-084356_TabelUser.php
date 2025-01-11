@@ -31,6 +31,7 @@ class TabelUser extends Migration
             'area' => [
                 'type' => 'VARCHAR',
                 'constraint' => 20,
+                'null' => true,
             ],
         ]);
         $this->forge->addKey('id_user', true);
