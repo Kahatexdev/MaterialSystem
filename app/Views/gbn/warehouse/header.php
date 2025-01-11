@@ -1,5 +1,5 @@
 <?php $this->extend($role . '/layout'); ?>
-<?php $this->section('content'); ?>
+<?php $this->section('header'); ?>
 
 
 <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
@@ -14,19 +14,19 @@
                 <ul class="navbar-nav  justify-content-end">
                     <li class="nav-item d-flex align-items-center px-1">
                         <a href="">
-                            <span class=" badge bg-gradient-info ">Submenu1</span>
+                            <span class=" badge bg-gradient-info ">Pemasukan</span>
 
                         </a>
                     </li>
                     <li class="nav-item d-flex align-items-center px-1">
                         <a href="">
-                            <span class=" badge bg-gradient-info ">Submenu2</span>
+                            <span class=" badge bg-gradient-info ">Pengeluaran</span>
 
                         </a>
                     </li>
                     <li class=" nav-item dropdown pe-2 d-flex align-items-center">
                         <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class=" badge bg-gradient-info ">Dropdown <i class="ni ni-bold-down"></i></span>
+                            <span class=" badge bg-gradient-info ">Report <i class="ni ni-bold-down"></i></span>
                         </a>
                         <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
                             <li class="mb-2">
@@ -35,7 +35,7 @@
 
                                         <div class="d-flex flex-column justify-content-center">
                                             <h6 class="text-sm font-weight-normal mb-1">
-                                                <span class="font-weight-bold">dropdown</span>
+                                                <span class="font-weight-bold">tes</span>
                                             </h6>
 
                                         </div>
@@ -67,4 +67,5 @@
             </div>
         </div>
     </nav>
+    <?= $this->renderSection('content'); ?>
     <?php $this->endSection(); ?>
