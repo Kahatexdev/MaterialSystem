@@ -13,6 +13,8 @@ $routes->post('authverify', 'AuthController::login');
 // gbn routes
 $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('', 'MaterialController::index');
+    $routes->get('masterdata', 'MasterdataController::index');
+    $routes->post('import/mu', 'MasterdataController::importMU');
     $routes->get('warehouse', 'WarehouseController::index');
     $routes->get('pph', 'PphController::index');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
