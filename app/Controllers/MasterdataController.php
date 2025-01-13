@@ -13,6 +13,7 @@ class MasterdataController extends BaseController
     protected $role;
     protected $active;
     protected $filters;
+    protected $request;
     public function __construct()
     {
         $this->role = session()->get('role');
@@ -42,78 +43,61 @@ class MasterdataController extends BaseController
     {
         // Get the uploaded file
         $file = $this->request->getFile('file');
-        // dd($file);
+
         // Check if file is uploaded successfully
         if (!$file || !$file->isValid()) {
             return redirect()->back()->with('error', 'No file uploaded or file is invalid.');
         }
 
         try {
-            // Load file Excel atau CSV
+            // Load Excel atau CSV file
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getTempName());
-            $sheetData = $spreadsheet->getActiveSheet()->toArray();
+            $sheet = $spreadsheet->getActiveSheet();
 
-            // Pastikan kolom header sesuai format
-            $headers = array_map('strtolower', $sheetData[0]);
-            $requiredHeaders = ['id_material', 'id_order', 'style_size', 'area', 'inisial', 'color', 'item_type', 'kode_warna', 'warna', 'composition', 'gw', 'qty_pcs', 'loss', 'kgs', 'admin'];
-            if (array_diff($requiredHeaders, $headers)) {
-                return redirect()->back()->with('error', 'Format header file tidak sesuai!');
-            }
-
-            $data = $this->validateWithAPI('MF4599', 'J425114-4 22X6');
-            // Loop data untuk validasi dengan API
+            // Validasi dan proses data
             $validData = [];
             $invalidRows = [];
-            for ($i = 1; $i < count($sheetData); $i++) {
-                $row = array_combine($headers, $sheetData[$i]);
 
-                // Validasi dengan API
-                $order =  $this->validateWithAPI('no_model', 'style_size');
-                if (!$order) {
-                    $invalidRows[] = $sheetData[$i]; // Simpan baris invalid
+            foreach ($sheet->getRowIterator() as $key => $row) {
+                // Skip header
+                if ($key === 1) {
                     continue;
                 }
 
-                // Jika valid, tambahkan ke data untuk diimpor
-                $validData[] = [
-                    'id_material' => $row['id_material'],
-                    'id_order'    => $row['id_order'],
-                    'style_size'  => $row['style_size'],
-                    'area'        => $order['area'],
-                    'inisial'     => $order['inisial'],
-                    'color'       => $row['color'],
-                    'item_type'   => $row['item_type'],
-                    'kode_warna'  => $row['kode_warna'],
-                    'warna'       => $row['warna'],
-                    'composition' => $row['composition'],
-                    'gw'          => $row['gw'],
-                    'qty_pcs'     => $row['qty_pcs'],
-                    'loss'        => $row['loss'],
-                    'kgs'         => $row['kgs'],
-                    'admin'       => $row['admin'],
-                    'created_at'  => date('Y-m-d H:i:s'),
-                    'updated_at'  => date('Y-m-d H:i:s'),
-                ];
+                // Ambil data dari kolom sesuai kebutuhan
+                $no_model = $sheet->getCell('B9')->getValue(); // Kolom 
+                $style_size = $sheet->getCell('D'. $key)->getValue(); // Kolom
+
+                // Validasi data per baris
+                if (!$no_model || !$style_size) {
+                    $invalidRows[] = $key;
+                    continue;
+                }
+
+                $makan = $this->validateWithAPI($no_model, $style_size);
+                // Siapkan data valid untuk disimpan
+                
             }
+            dd ($makan);
+            dd ($validData);
+            // Jika ada data valid, simpan ke database
+            // if (!empty($validData)) {
+            //     // Simpan data ke database menggunakan model (contoh: $this->model->insertBatch())
+            //     $this->model->insertBatch($validData);
+            // }
 
-            if (empty($validData)) {
-                return redirect()->back()->with('error', 'Tidak ada data valid yang dapat diimpor!');
-            }
-
-            // Inisialisasi model dan simpan ke database
-            $materialModel = new MaterialModel();
-            $materialModel->insertBatch($validData);
-
-            $message = 'Data berhasil diimpor!';
+            // Handle hasil proses
             if (!empty($invalidRows)) {
-                $message .= ' Beberapa baris gagal divalidasi dan tidak diimpor.';
+                return redirect()->back()->with('warning', 'Some rows have invalid data: ' . implode(', ', $invalidRows));
             }
 
-            return redirect()->back()->with('success', $message);
+            return redirect()->back()->with('success', 'Data imported successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengimpor data: ' . $e->getMessage());
+            // Handle error
+            return redirect()->back()->with('error', 'An error occurred while importing the file: ' . $e->getMessage());
         }
     }
+
 
 
     private function validateWithAPI($no_model, $style_size)
