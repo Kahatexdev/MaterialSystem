@@ -37,6 +37,12 @@ class TabelMasterOrder extends Migration
             'memo' => [
                 'type' => 'TEXT',
             ],
+            'delivery_awal' => [
+                'type' => 'DATE',
+            ],
+            'delivery_akhir' => [
+                'type' => 'DATE',
+            ],
             'admin' => [
                 'type' => 'VARCHAR',
                 'constraint' => 255,

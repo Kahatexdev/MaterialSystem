@@ -9,6 +9,7 @@ class PphController extends BaseController
 {
     protected $role;
     protected $filters;
+    protected $active;
 
     public function __construct()
     {
@@ -30,7 +31,8 @@ class PphController extends BaseController
     public function index()
     {
         $data = [
-            'title' => 'PPH', // Judul halaman
+            'active' => $this->active,
+            'title' => 'PPH',
             'role' => $this->role,
         ];
         return view($this->role . '/pph/index', $data);

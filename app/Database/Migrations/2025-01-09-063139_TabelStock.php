@@ -72,6 +72,7 @@ class TabelStock extends Migration
             ]
         ]);
         $this->forge->addKey('id_stock', true);
+        $this->forge->addForeignKey('nama_cluster', 'cluster', 'nama_cluster', 'CASCADE', 'CASCADE'); 
         $this->forge->createTable('stock');
     }
 

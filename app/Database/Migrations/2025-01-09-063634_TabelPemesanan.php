@@ -84,6 +84,9 @@ class TabelPemesanan extends Migration
             ]
         ]);
         $this->forge->addKey('id_pemesanan', true);
+        $this->forge->addForeignKey('id_material', 'material', 'id_material', 'CASCADE', 'CASCADE');
+        $this->forge->addForeignKey('id_pengeluaran', 'pengeluaran', 'id_pengeluaran', 'CASCADE', 'CASCADE');
+        $this->forge->addForeignKey('id_retur', 'retur', 'id_retur', 'CASCADE', 'CASCADE');
         $this->forge->createTable('pemesanan');
     }
 

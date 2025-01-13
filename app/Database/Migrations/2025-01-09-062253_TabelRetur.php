@@ -76,6 +76,7 @@ class TabelRetur extends Migration
             ]
         ]);
         $this->forge->addKey('id_retur', true);
+        $this->forge->addForeignKey('kategori', 'kategori_retur', 'nama_kategori', 'CASCADE', 'CASCADE');
         $this->forge->createTable('retur');
     }
 
