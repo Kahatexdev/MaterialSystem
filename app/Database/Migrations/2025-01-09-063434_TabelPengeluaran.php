@@ -63,6 +63,7 @@ class TabelPengeluaran extends Migration
         ]);
         $this->forge->addKey('id_pengeluaran', true);
         $this->forge->addForeignKey('id_out_celup', 'out_celup', 'id_out_celup', 'CASCADE', 'CASCADE');
+        $this->forge->addForeignKey('nama_cluster', 'cluster', 'nama_cluster', 'CASCADE', 'CASCADE'); 
         $this->forge->createTable('pengeluaran');
     }
 
