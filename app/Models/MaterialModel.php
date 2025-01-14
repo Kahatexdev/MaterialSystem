@@ -7,7 +7,7 @@ use CodeIgniter\Model;
 class MaterialModel extends Model
 {
     protected $table            = 'material';
-    protected $primaryKey       = 'id';
+    protected $primaryKey       = 'id_material';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;

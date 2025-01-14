@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use DateTime;
 use CodeIgniter\HTTP\ResponseInterface;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -70,7 +71,6 @@ class MasterdataController extends BaseController
                 return redirect()->back()->with('error', 'Session expired. Please log in again.');
             }
 
-
             // Array untuk menampung data yang dikelompokkan berdasarkan style_size
             $groupedData = [];
 
@@ -83,10 +83,22 @@ class MasterdataController extends BaseController
                 // Ambil data dari kolom sesuai kebutuhan
                 $style_size = $sheet->getCell('D' . $key)->getValue(); // Kolom D
                 $no_model = $sheet->getCell('B9')->getValue(); // Kolom B9
+                $no_model = str_replace([': '], '', $no_model);
                 $no_order = $sheet->getCell('B5')->getValue(); // Kolom B5
+                $no_order = str_replace([': '], '', $no_order);
                 $buyer = $sheet->getCell('B6')->getValue(); // Kolom B6
+                $buyer = str_replace([': '], '', $buyer);
                 $lco_date = $sheet->getCell('B4')->getFormattedValue(); // Kolom B4
+                $lco_date = str_replace([': '], '', $lco_date);
+
+                // dd($no_model, $style_size, $no_order, $buyer, $lco_date);
+                // Konversi format tanggal dari d.m.Y ke Y-m-d
+                $date_object = DateTime::createFromFormat('d.m.Y', $lco_date);
+                if ($date_object) {
+                    $formatted_date = $date_object->format('Y-m-d'); // Format MySQL
+                } 
                 $foll_up = $sheet->getCell('D5')->getValue(); // Kolom D5
+                $foll_up = str_replace([': '], '', $foll_up);
 
                 // Validasi data per baris sebelum dimasukkan ke grup
                 if (!$no_model || !$style_size) {
@@ -96,7 +108,7 @@ class MasterdataController extends BaseController
 
                 // Simpan data dalam kelompok berdasarkan style_size
                 $groupedData[$style_size][] = [
-                    'lco_date' => $lco_date,
+                    'lco_date' => $formatted_date,
                     'no_order' => $no_order,
                     'buyer' => $buyer,
                     'no_model' => $no_model,
@@ -118,7 +130,7 @@ class MasterdataController extends BaseController
                             'no_model' => $validate['no_model'],    
                             'buyer' => $order['buyer'],
                             'foll_up' => $order['foll_up'],
-                            'lco_date' => $order['lco_date'],
+                            'lco_date' => $formatted_date,
                             'memo' => NULL,
                             'delivery_awal' => $validate['delivery_awal'],
                             'delivery_akhir' => $validate['delivery_akhir'],
@@ -138,7 +150,7 @@ class MasterdataController extends BaseController
                 'no_model' => $no_model,
                 'buyer' => $buyer,
                 'foll_up' => $foll_up,
-                'lco_date' => $lco_date,
+                'lco_date' => $formatted_date,
                 'memo' => NULL,
                 'delivery_awal' => $validate['delivery_awal'],
                 'delivery_akhir' => $validate['delivery_akhir'],
@@ -164,7 +176,6 @@ class MasterdataController extends BaseController
                 'Kgs' => 'I', // Kolom untuk "Kgs", sesuaikan dengan header file Anda
             ];
 
-
             // Pastikan semua header yang dibutuhkan ada
             // Iterasi data dimulai dari baris kedua
             foreach ($sheet->getRowIterator(2) as $row) {
@@ -172,13 +183,15 @@ class MasterdataController extends BaseController
 
                 // Ambil data dari sel tertentu
                 $no_model = $sheet->getCell('B9')->getValue(); // Kolom B9
+                $no_model = str_replace([': '], '', $no_model);
                 $style_size = $sheet->getCell('D' . $rowIndex)->getValue(); // Kolom D
                 $no_order = $sheet->getCell('B5')->getValue(); // Kolom B5
-
+                $no_order = str_replace([': '], '', $no_order);
                 // get id_order
                 $id_order = $masterOrderModel->findIdOrder($no_order);
                 // Validasi melalui API
                 $validate = $this->validateWithAPI($no_model, $style_size);
+                // dd($no_model, $style_size, $no_order, $id_order, $validate);
                 if ($validate) {
                     $validDataMaterial[] = [
                         'id_order' => $id_order['id_order'],
@@ -206,16 +219,12 @@ class MasterdataController extends BaseController
             $materialModel->insertBatch($validDataMaterial);
             // dd($validDataOrder, $validDataMaterial);
 
-            
-
             // Redirect ke halaman sebelumnya
             return redirect()->back()->with('success', 'Data berhasil diimport.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
-
-
 
     private function validateWithAPI($no_model, $style_size)
     {
