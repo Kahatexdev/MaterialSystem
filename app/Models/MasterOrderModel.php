@@ -4,15 +4,28 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class MaterialModel extends Model
+class MasterOrderModel extends Model
 {
-    protected $table            = 'material';
-    protected $primaryKey       = 'id';
+    protected $table            = 'master_order';
+    protected $primaryKey       = 'id_order';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id_material', 'id_order', 'style_size', 'area', 'inisial', 'color', 'item_type', 'kode_warna', 'composition', 'gw', 'qty_pcs', 'loss', 'kgs', 'admin', 'created_at', 'updated_at'];
+    protected $allowedFields    = [
+        'id_order',
+        'no_order',
+        'no_model',
+        'buyer',
+        'foll_up',
+        'lco_date',
+        'memo',
+        'delivery_awal',
+        'delivery_akhir',
+        'admin',
+        'created_at',
+        'updated_at',
+    ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -21,7 +34,7 @@ class MaterialModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -43,4 +56,10 @@ class MaterialModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+
+    public function findIdOrder($no_order)
+    {
+        return $this->select('id_order')->where('no_order', $no_order)->first();
+    }
 }

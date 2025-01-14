@@ -1,6 +1,6 @@
 <?php $this->extend($role . '/dashboard/header'); ?>
 <?php $this->section('content'); ?>
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
 <div class="container-fluid py-4">
     <?php if (session()->getFlashdata('success')) : ?>
         <script>
@@ -84,46 +84,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Data Dummy -->
-                    <tr>
-                        <td class="align-middle text-center">
-                            <span class="text-secondary text-xs font-weight-bold">1</span>
-                        </td>
-                        <td class="align-middle text-center">
-                            <span class="text-secondary text-xs font-weight-bold">23/04/18</span>
-                        </td>
-                        <td class="align-middle text-center">
-                            <span class="text-secondary text-xs font-weight-bold">MM</span>
-                        </td>
-                        <td class="align-middle text-center">
-                            <span class="text-secondary text-xs font-weight-bold">MM123</span>
-                        </td>
-                        <td class="align-middle text-center">
-                            <span class="text-secondary text-xs font-weight-bold">NR987</span>
-                        </td>
-                        <td class="align-middle text-center">
-                            <span class="text-secondary text-xs font-weight-bold">KK1A</span>
-                        </td>
-                        <td class="align-middle text-center">
-                            <span class="text-secondary text-xs font-weight-bold">H&M</span>
-                        </td>
-                        <td class="align-middle text-center">
-                            <span class="text-secondary text-xs font-weight-bold">1-1-2026</span>
-                        </td>
-                        <td class="align-middle text-center">
-                            <span class="text-secondary text-xs font-weight-bold">Cijerah</span>
-                        </td>
-                        <td class="align-middle text-center">
-                            <span class="text-secondary text-xs font-weight-bold">Mira</span>
-                        </td>
-                        <td class="align-middle">
-                            <a href="#" class="btn btn-info btn-sm">Detail</a>
-                        </td>
-                    </tr>
-                    <!-- Tambahkan data lainnya -->
+
                 </tbody>
             </table>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <?php $this->endSection(); ?>

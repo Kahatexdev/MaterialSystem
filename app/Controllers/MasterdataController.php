@@ -7,6 +7,8 @@ use CodeIgniter\HTTP\ResponseInterface;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use App\Models\MasterOrderModel;
+use App\Models\MaterialModel;
 
 class MasterdataController extends BaseController
 {
@@ -14,6 +16,7 @@ class MasterdataController extends BaseController
     protected $active;
     protected $filters;
     protected $request;
+    protected $masterOrderModel;
     public function __construct()
     {
         $this->role = session()->get('role');
@@ -22,6 +25,8 @@ class MasterdataController extends BaseController
             return redirect()->to(base_url('/login'));
         }
         $this->isLogedin();
+
+        $this->masterOrderModel = new MasterOrderModel();
     }
     protected function isLogedin()
     {
@@ -50,13 +55,24 @@ class MasterdataController extends BaseController
         }
 
         try {
-            // Load Excel atau CSV file
+            // Load Excel or CSV file
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getTempName());
             $sheet = $spreadsheet->getActiveSheet();
 
-            // Validasi dan proses data
-            $validData = [];
+            // Initialize arrays
+            $validDataOrder = [];
+            $validDataMaterial = [];
             $invalidRows = [];
+            $data = [];
+            // Get username from session
+            $admin = session()->get('username');
+            if (!$admin) {
+                return redirect()->back()->with('error', 'Session expired. Please log in again.');
+            }
+
+
+            // Array untuk menampung data yang dikelompokkan berdasarkan style_size
+            $groupedData = [];
 
             foreach ($sheet->getRowIterator() as $key => $row) {
                 // Skip header
@@ -65,36 +81,137 @@ class MasterdataController extends BaseController
                 }
 
                 // Ambil data dari kolom sesuai kebutuhan
-                $no_model = $sheet->getCell('B9')->getValue(); // Kolom 
-                $style_size = $sheet->getCell('D'. $key)->getValue(); // Kolom
+                $style_size = $sheet->getCell('D' . $key)->getValue(); // Kolom D
+                $no_model = $sheet->getCell('B9')->getValue(); // Kolom B9
+                $no_order = $sheet->getCell('B5')->getValue(); // Kolom B5
+                $buyer = $sheet->getCell('B6')->getValue(); // Kolom B6
+                $lco_date = $sheet->getCell('B4')->getFormattedValue(); // Kolom B4
+                $foll_up = $sheet->getCell('D5')->getValue(); // Kolom D5
 
-                // Validasi data per baris
+                // Validasi data per baris sebelum dimasukkan ke grup
                 if (!$no_model || !$style_size) {
                     $invalidRows[] = $key;
                     continue;
                 }
 
-                $makan = $this->validateWithAPI($no_model, $style_size);
-                // Siapkan data valid untuk disimpan
-                
-            }
-            dd ($makan);
-            dd ($validData);
-            // Jika ada data valid, simpan ke database
-            // if (!empty($validData)) {
-            //     // Simpan data ke database menggunakan model (contoh: $this->model->insertBatch())
-            //     $this->model->insertBatch($validData);
-            // }
-
-            // Handle hasil proses
-            if (!empty($invalidRows)) {
-                return redirect()->back()->with('warning', 'Some rows have invalid data: ' . implode(', ', $invalidRows));
+                // Simpan data dalam kelompok berdasarkan style_size
+                $groupedData[$style_size][] = [
+                    'lco_date' => $lco_date,
+                    'no_order' => $no_order,
+                    'buyer' => $buyer,
+                    'no_model' => $no_model,
+                    'foll_up' => $foll_up,
+                ];
             }
 
-            return redirect()->back()->with('success', 'Data imported successfully.');
+            // Sekarang lakukan validasi hanya sekali per group (style_size)
+            $validDataOrder = [];
+            foreach ($groupedData as $style_size => $orders) {
+                // Misalnya, lakukan validasi untuk setiap grup data
+                foreach ($orders as $order) {
+                    $validate = $this->validateWithAPI($order['no_model'], $style_size);
+
+                    if ($validate != NULL) {
+                        $validDataOrder[] = [
+                            'id_order' => NULL,
+                            'no_order' => $order['no_order'],
+                            'no_model' => $validate['no_model'],    
+                            'buyer' => $order['buyer'],
+                            'foll_up' => $order['foll_up'],
+                            'lco_date' => $order['lco_date'],
+                            'memo' => NULL,
+                            'delivery_awal' => $validate['delivery_awal'],
+                            'delivery_akhir' => $validate['delivery_akhir'],
+                            'admin' => $admin,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => NULL,
+                        ];
+                    } else {
+                        // Jika validasi gagal, bisa menambahkan ke daftar invalid
+                        $invalidRows[] = $order['no_order']; // Anda bisa menambahkan key atau data lain sebagai penanda
+                    }
+                }
+            }
+
+            $data = [
+                'no_order' => $no_order,
+                'no_model' => $no_model,
+                'buyer' => $buyer,
+                'foll_up' => $foll_up,
+                'lco_date' => $lco_date,
+                'memo' => NULL,
+                'delivery_awal' => $validate['delivery_awal'],
+                'delivery_akhir' => $validate['delivery_akhir'],
+                'admin' => $admin,
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
+            
+            // Simpan data order ke database
+            $masterOrderModel = new MasterOrderModel();
+            $masterOrderModel->insert($data);
+
+            // Cari header pada baris pertama
+            // Map header ke kolom
+            $headerMap = [
+                'Color' => 'A', // Kolom untuk "Color", sesuaikan dengan header file Anda
+                'Item Type' => 'B', // Kolom untuk "Item Type", sesuaikan dengan header file Anda
+                'Kode Warna' => 'C', // Kolom untuk "Kode Warna", sesuaikan dengan header file Anda
+                'Item Nr' => 'D', // Kolom untuk "Item Nr", sesuaikan dengan header file Anda
+                'Composition(%)' => 'E', // Kolom untuk "Composition(%)", sesuaikan dengan header file Anda
+                'GW/pc' => 'F', // Kolom untuk "GW/pc", sesuaikan dengan header file Anda
+                'Qty/pcs' => 'G', // Kolom untuk "Qty/pcs", sesuaikan dengan header file Anda
+                'Loss' => 'H', // Kolom untuk "Loss", sesuaikan dengan header file Anda
+                'Kgs' => 'I', // Kolom untuk "Kgs", sesuaikan dengan header file Anda
+            ];
+
+
+            // Pastikan semua header yang dibutuhkan ada
+            // Iterasi data dimulai dari baris kedua
+            foreach ($sheet->getRowIterator(2) as $row) {
+                $rowIndex = $row->getRowIndex();
+
+                // Ambil data dari sel tertentu
+                $no_model = $sheet->getCell('B9')->getValue(); // Kolom B9
+                $style_size = $sheet->getCell('D' . $rowIndex)->getValue(); // Kolom D
+                $no_order = $sheet->getCell('B5')->getValue(); // Kolom B5
+
+                // get id_order
+                $id_order = $masterOrderModel->findIdOrder($no_order);
+                // Validasi melalui API
+                $validate = $this->validateWithAPI($no_model, $style_size);
+                if ($validate) {
+                    $validDataMaterial[] = [
+                        'id_order' => $id_order['id_order'],
+                        'style_size' => $validate['size'],
+                        'area' => $validate['area'],
+                        'inisial' => $validate['inisial'],
+                        'color' => $sheet->getCell($headerMap['Color'] . $rowIndex)->getValue(),
+                        'item_type' => $sheet->getCell($headerMap['Item Type'] . $rowIndex)->getValue(),
+                        'kode_warna' => $sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue(),
+                        'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(),
+                        'gw' => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
+                        'qty_pcs' => $sheet->getCell($headerMap['Qty/pcs'] . $rowIndex)->getValue(),
+                        'loss' => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue(),
+                        'kgs' => $sheet->getCell($headerMap['Kgs'] . $rowIndex)->getValue(),
+                        'admin' => $admin,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ];
+                } else {
+                    $invalidRows[] = $rowIndex; // Tambahkan baris tidak valid
+                }
+            }
+
+            // Simpan data material ke database
+            $materialModel = new MaterialModel();
+            $materialModel->insertBatch($validDataMaterial);
+            // dd($validDataOrder, $validDataMaterial);
+
+            
+
+            // Redirect ke halaman sebelumnya
+            return redirect()->back()->with('success', 'Data berhasil diimport.');
         } catch (\Exception $e) {
-            // Handle error
-            return redirect()->back()->with('error', 'An error occurred while importing the file: ' . $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
@@ -105,7 +222,7 @@ class MasterdataController extends BaseController
         $style_size_encoded = str_replace(' ', '%20', $style_size);
         $param = $no_model . '/' . $style_size_encoded;
 
-        $url = 'http://172.23.39.116/CapacityApps/public/api/orderMaterial/' . $param;
+        $url = 'http://172.23.44.14/CapacityApps/public/api/orderMaterial/' . $param;
 
         try {
             $json = @file_get_contents($url);
