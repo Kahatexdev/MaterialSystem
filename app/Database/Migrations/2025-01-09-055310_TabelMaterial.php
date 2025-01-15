@@ -45,8 +45,7 @@ class TabelMaterial extends Migration
                 'constraint' => 255,
             ],
             'composition' => [
-                'type' => 'VARCHAR',
-                'constraint' => 255,
+                'type' => 'FLOAT',
             ],
             'gw' => [
                 'type' => 'FLOAT',

@@ -18,8 +18,13 @@ class MasterdataController extends BaseController
     protected $filters;
     protected $request;
     protected $masterOrderModel;
+    protected $materialModel;
     public function __construct()
     {
+        $this->masterOrderModel = new MasterOrderModel();
+        $this->materialModel = new MaterialModel();
+
+
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
@@ -27,7 +32,6 @@ class MasterdataController extends BaseController
         }
         $this->isLogedin();
 
-        $this->masterOrderModel = new MasterOrderModel();
     }
     protected function isLogedin()
     {
@@ -37,13 +41,123 @@ class MasterdataController extends BaseController
     }
     public function index()
     {
+        $masterOrder = $this->masterOrderModel->findAll();
+        $material = $this->materialModel->findAll();
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
+            'masterOrder' => $masterOrder,
+            'material' => $material,
         ];
         return view($this->role . '/masterdata/index', $data);
     }
+
+    public function tampilMasterOrder()
+    {
+        if ($this->request->isAJAX()) {
+            $request = $this->request->getPost();
+
+            // Ambil parameter
+            $search = $request['search']['value'] ?? '';
+            $start = intval($request['start']);
+            $length = intval($request['length']);
+            $orderColumnIndex = $request['order'][0]['column'] ?? 1; // Default kolom ke-1
+            $orderDirection = $request['order'][0]['dir'] ?? 'asc';
+            $orderColumnName = $request['columns'][$orderColumnIndex]['data'] ?? 'foll_up';
+
+            // Query total data tanpa filter
+            $totalRecords = $this->masterOrderModel->countAll();
+
+            // Query data dengan filter
+            $query = $this->masterOrderModel->like('foll_up', $search)
+                ->orLike('lco_date', $search)
+                ->orLike('no_model', $search)
+                ->orLike('no_order', $search)
+                ->orLike('buyer', $search)
+                ->orLike('delivery_awal', $search)
+                ->orLike('delivery_akhir', $search)
+                ->orLike('admin', $search);
+
+            $filteredRecords = $query->countAllResults(false); // Total data yang difilter
+
+            // Sorting dan pagination
+            $data = $query->orderBy($orderColumnName, $orderDirection)
+                ->findAll($length, $start);
+
+            // Tambahkan kolom nomor dan tombol aksi
+            foreach ($data as $index => $item) {
+                $data[$index]['no'] = $start + $index + 1;
+
+                // Tombol Detail
+                $data[$index]['action'] = '
+                <button class="btn btn-sm btn-info btn-detail" data-id="' . $item['id_order'] . '">Detail</button>
+                <button class="btn btn-sm btn-warning btn-edit" data-id="' . $item['id_order'] . '">Update</button>
+
+            ';
+            }
+
+            // Format response JSON
+            $response = [
+                'draw' => intval($request['draw']),
+                'recordsTotal' => $totalRecords,
+                'recordsFiltered' => $filteredRecords,
+                'data' => $data,
+            ];
+
+            return $this->response->setJSON($response);
+        }
+
+        return view($this->role . '/masterdata/index', [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ]);
+    }
+
+    public function getOrderDetails($id)
+    {
+        if ($this->request->isAJAX()) {
+            $data = $this->masterOrderModel->find($id);
+
+            if ($data) {
+                return $this->response->setJSON($data);
+            } else {
+                return $this->response->setJSON(['error' => 'Data tidak ditemukan.'], 404);
+            }
+        }
+
+        throw new \CodeIgniter\Exceptions\PageNotFoundException();
+    }
+
+    public function updateOrder()
+    {
+        if ($this->request->isAJAX()) {
+            $id = $this->request->getPost('id_order');
+
+            $data = [
+                'foll_up' => $this->request->getPost('foll_up'),
+                'lco_date' => $this->request->getPost('lco_date'),
+                'no_model' => $this->request->getPost('no_model'),
+                'no_order' => $this->request->getPost('no_order'),
+                'buyer' => $this->request->getPost('buyer'),
+                'delivery_awal' => $this->request->getPost('delivery_awal'),
+                'delivery_akhir' => $this->request->getPost('delivery_akhir'),
+
+                // Tambahkan field lain yang ingin diperbarui
+            ];
+
+            if ($this->masterOrderModel->update($id, $data)) {
+                return $this->response->setJSON(['message' => 'Data berhasil diupdate.']);
+            } else {
+                return $this->response->setJSON(['error' => 'Gagal mengupdate data.'], 500);
+            }
+        }
+
+        throw new \CodeIgniter\Exceptions\PageNotFoundException();
+    }
+
+
 
     public function importMU()
     {
@@ -244,4 +358,157 @@ class MasterdataController extends BaseController
             ])->setStatusCode(500);
         }
     }
+
+    public function material()
+    {
+        $id_order = $this->request->getGet('id_order'); // Ambil id_order dari URL
+
+        if (!$id_order) {
+            // Jika id_order tidak ditemukan, redirect atau tampilkan error
+            return redirect()->to(base_url($this->role . '/masterOrder'))->with('error', 'ID Order tidak ditemukan.');
+        }
+
+        // Fetch data terkait id_order dari database (contoh)
+        $orderData = $this->masterOrderModel->find($id_order);
+
+        if (!$orderData) {
+            // Jika data tidak ditemukan, redirect atau tampilkan error
+            return redirect()->to(base_url($this->role . '/masterOrder'))->with('error', 'Data Order tidak ditemukan.');
+        }
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'orderData' => $orderData, // Kirim data ke view
+        ];
+
+        return view($this->role . '/material/index', $data);
+    }
+
+    public function tampilMaterial()
+    {
+        if ($this->request->isAJAX()) {
+            $request = $this->request->getPost();
+
+            // Ambil parameter
+            $search = $request['search']['value'] ?? '';
+            $start = intval($request['start']);
+            $length = intval($request['length']);
+            $orderColumnIndex = $request['order'][0]['column'] ?? 1; // Default kolom ke-1
+            $orderDirection = $request['order'][0]['dir'] ?? 'asc';
+            $orderColumnName = $request['columns'][$orderColumnIndex]['data'] ?? 'style_size';
+
+            // Query total data tanpa filter
+            $totalRecords = $this->materialModel->countAll();
+
+            // Query data dengan filter
+            $query = $this->materialModel->like('style_size', $search)
+                ->orLike('area', $search)
+                ->orLike('inisial', $search)
+                ->orLike('color', $search)
+                ->orLike('item_type', $search)
+                ->orLike('kode_warna', $search)
+                ->orLike('composition', $search)
+                ->orLike('gw', $search)
+                ->orLike('qty_pcs', $search)
+                ->orLike('loss', $search)
+                ->orLike('kgs', $search)
+                ->orLike('admin', $search);
+
+            $filteredRecords = $query->countAllResults(false); // Total data yang difilter
+
+            // Sorting dan pagination
+            $data = $query->orderBy($orderColumnName, $orderDirection)
+                ->findAll($length, $start);
+
+            // Tambahkan kolom nomor dan tombol aksi
+            foreach ($data as $index => $item) {
+                $data[$index]['no'] = $start + $index + 1;
+
+                // Tombol Detail
+                $data[$index]['action'] = '
+                <button class="btn btn-sm btn-warning btn-edit" data-id="' . $item['id_material'] . '">Update</button>
+                <button class="btn btn-sm btn-danger btn-delete" data-id="' . $item['id_material'] . '">Delete</button>
+
+            ';
+            }
+
+            // Format response JSON
+            $response = [
+                'draw' => intval($request['draw']),
+                'recordsTotal' => $totalRecords,
+                'recordsFiltered' => $filteredRecords,
+                'data' => $data,
+            ];
+
+            return $this->response->setJSON($response);
+        }
+        return view($this->role . '/material/index', [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ]);
+    }
+
+    public function getMaterialDetails($id)
+    {
+        if ($this->request->isAJAX()) {
+            $data = $this->materialModel->find($id);
+
+            if ($data) {
+                return $this->response->setJSON($data);
+            } else {
+                return $this->response->setJSON(['error' => 'Data tidak ditemukan.'], 404);
+            }
+        }
+
+        throw new \CodeIgniter\Exceptions\PageNotFoundException();
+    }
+
+    public function updateMaterial()
+    {
+        if ($this->request->isAJAX()) {
+            $id = $this->request->getPost('id_material');
+
+            $data = [
+                'style_size' => $this->request->getPost('style_size'),
+                'area' => $this->request->getPost('area'),
+                'inisial' => $this->request->getPost('inisial'),
+                'color' => $this->request->getPost('color'),
+                'item_type' => $this->request->getPost('item_type'),
+                'kode_warna' => $this->request->getPost('kode_warna'),
+                'composition' => $this->request->getPost('composition'),
+                'gw' => $this->request->getPost('gw'),
+                'qty_pcs' => $this->request->getPost('qty_pcs'),
+                'loss' => $this->request->getPost('loss'),
+                'kgs' => $this->request->getPost('kgs'),
+
+
+                // Tambahkan field lain yang ingin diperbarui
+            ];
+
+            if ($this->materialModel->update($id, $data)) {
+                return $this->response->setJSON(['message' => 'Data berhasil diupdate.']);
+            } else {
+                return $this->response->setJSON(['error' => 'Gagal mengupdate data.'], 500);
+            }
+        }
+
+        throw new \CodeIgniter\Exceptions\PageNotFoundException();
+    }
+
+    public function deleteMaterial($id)
+    {
+        if ($this->request->isAJAX()) {
+            if ($this->materialModel->delete($id)) {
+                return $this->response->setJSON(['message' => 'Data berhasil dihapus.']);
+            } else {
+                return $this->response->setJSON(['error' => 'Gagal menghapus data.'], 500);
+            }
+        }
+
+        throw new \CodeIgniter\Exceptions\PageNotFoundException();
+    }
+
 }
