@@ -210,7 +210,7 @@ class MasterdataController extends BaseController
                 $date_object = DateTime::createFromFormat('d.m.Y', $lco_date);
                 if ($date_object) {
                     $formatted_date = $date_object->format('Y-m-d'); // Format MySQL
-                } 
+                }
                 $foll_up = $sheet->getCell('D5')->getValue(); // Kolom D5
                 $foll_up = str_replace([': '], '', $foll_up);
 
@@ -241,7 +241,7 @@ class MasterdataController extends BaseController
                         $validDataOrder[] = [
                             'id_order' => NULL,
                             'no_order' => $order['no_order'],
-                            'no_model' => $validate['no_model'],    
+                            'no_model' => $validate['no_model'],
                             'buyer' => $order['buyer'],
                             'foll_up' => $order['foll_up'],
                             'lco_date' => $formatted_date,
@@ -271,7 +271,7 @@ class MasterdataController extends BaseController
                 'admin' => $admin,
                 'created_at' => date('Y-m-d H:i:s'),
             ];
-            
+
             // Simpan data order ke database
             $masterOrderModel = new MasterOrderModel();
             $masterOrderModel->insert($data);
@@ -290,7 +290,6 @@ class MasterdataController extends BaseController
                 'Kgs' => 'I', // Kolom untuk "Kgs", sesuaikan dengan header file Anda
             ];
 
-            // Pastikan semua header yang dibutuhkan ada
             // Iterasi data dimulai dari baris kedua
             foreach ($sheet->getRowIterator(2) as $row) {
                 $rowIndex = $row->getRowIndex();
@@ -301,12 +300,15 @@ class MasterdataController extends BaseController
                 $style_size = $sheet->getCell('D' . $rowIndex)->getValue(); // Kolom D
                 $no_order = $sheet->getCell('B5')->getValue(); // Kolom B5
                 $no_order = str_replace([': '], '', $no_order);
+
                 // get id_order
                 $id_order = $masterOrderModel->findIdOrder($no_order);
+
                 // Validasi melalui API
                 $validate = $this->validateWithAPI($no_model, $style_size);
-                // dd($no_model, $style_size, $no_order, $id_order, $validate);
+
                 if ($validate) {
+                    // Siapkan data untuk dimasukkan ke dalam validDataMaterial
                     $validDataMaterial[] = [
                         'id_order' => $id_order['id_order'],
                         'style_size' => $validate['size'],
@@ -315,7 +317,7 @@ class MasterdataController extends BaseController
                         'color' => $sheet->getCell($headerMap['Color'] . $rowIndex)->getValue(),
                         'item_type' => $sheet->getCell($headerMap['Item Type'] . $rowIndex)->getValue(),
                         'kode_warna' => $sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue(),
-                        'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(),
+                        'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(), // Tetap isi dengan Composition(%) yang valid
                         'gw' => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
                         'qty_pcs' => $sheet->getCell($headerMap['Qty/pcs'] . $rowIndex)->getValue(),
                         'loss' => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue(),
@@ -327,13 +329,12 @@ class MasterdataController extends BaseController
                     $invalidRows[] = $rowIndex; // Tambahkan baris tidak valid
                 }
             }
-
+            // dd($validDataOrder, $validDataMaterial);
             // Simpan data material ke database
             $materialModel = new MaterialModel();
             $materialModel->insertBatch($validDataMaterial);
-            // dd($validDataOrder, $validDataMaterial);
 
-            // Redirect ke halaman sebelumnya
+
             return redirect()->back()->with('success', 'Data berhasil diimport.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
