@@ -36,6 +36,15 @@ class TabelMasterOrder extends Migration
             ],
             'memo' => [
                 'type' => 'TEXT',
+                'null' => true,
+            ],
+            'delivery_awal' => [
+                'type' => 'DATE',
+                'null' => true,
+            ],
+            'delivery_akhir' => [
+                'type' => 'DATE',
+                'null' => true,
             ],
             'admin' => [
                 'type' => 'VARCHAR',
@@ -43,7 +52,6 @@ class TabelMasterOrder extends Migration
             ],
             'created_at' => [
                 'type' => 'DATETIME',
-                'null' => true,
             ],
             'updated_at' => [
                 'type' => 'DATETIME',

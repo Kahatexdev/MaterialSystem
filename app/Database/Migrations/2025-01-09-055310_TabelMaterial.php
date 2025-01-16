@@ -44,13 +44,8 @@ class TabelMaterial extends Migration
                 'type' => 'VARCHAR',
                 'constraint' => 255,
             ],
-            'warna' => [
-                'type' => 'VARCHAR',
-                'constraint' => 255,
-            ],
             'composition' => [
-                'type' => 'VARCHAR',
-                'constraint' => 255,
+                'type' => 'FLOAT',
             ],
             'gw' => [
                 'type' => 'FLOAT',
@@ -70,7 +65,6 @@ class TabelMaterial extends Migration
             ],
             'created_at' => [
                 'type' => 'DATETIME',
-                'null' => true,
             ],
             'updated_at' => [
                 'type' => 'DATETIME',
