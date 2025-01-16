@@ -13,7 +13,7 @@
 
                 <ul class="navbar-nav  justify-content-end">
                     <li class="nav-item d-flex align-items-center px-1">
-                        <a href="<?= base_url(session()->get('role')) . '/masterMaterial' ?>" class="text-decoration-none d-flex align-items-center">
+                        <a href="" class="text-decoration-none d-flex align-items-center">
                             <span class="badge bg-gradient-info">
                                 <i class="fas fa-database me-sm-1"></i>
                                 Master Material</span>

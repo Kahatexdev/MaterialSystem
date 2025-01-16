@@ -81,7 +81,8 @@ class MasterdataController extends BaseController
                 ->orLike('memo', $search)
                 ->orLike('delivery_awal', $search)
                 ->orLike('delivery_akhir', $search)
-                ->orLike('admin', $search);
+                ->orLike('admin', $search)
+                ->orLike('unit', $search);
 
             $filteredRecords = $query->countAllResults(false); // Total data yang difilter
 
@@ -148,6 +149,7 @@ class MasterdataController extends BaseController
                 'memo' => $this->request->getPost('memo'),
                 'delivery_awal' => $this->request->getPost('delivery_awal'),
                 'delivery_akhir' => $this->request->getPost('delivery_akhir'),
+                'unit' => $this->request->getPost('unit'),
 
                 // Tambahkan field lain yang ingin diperbarui
             ];
@@ -257,6 +259,7 @@ class MasterdataController extends BaseController
                             'memo' => NULL,
                             'delivery_awal' => $validate['delivery_awal'],
                             'delivery_akhir' => $validate['delivery_akhir'],
+                            'unit' => NULL,
                             'admin' => $admin,
                             'created_at' => date('Y-m-d H:i:s'),
                             'updated_at' => NULL,
@@ -277,6 +280,7 @@ class MasterdataController extends BaseController
                 'memo' => NULL,
                 'delivery_awal' => $validate['delivery_awal'],
                 'delivery_akhir' => $validate['delivery_akhir'],
+                'unit' => 'CIJERAH',
                 'admin' => $admin,
                 'created_at' => date('Y-m-d H:i:s'),
             ];
@@ -388,17 +392,15 @@ class MasterdataController extends BaseController
         }
     }
 
-    public function material()
+    public function material($id)
     {
-        $id_order = $this->request->getGet('id_order'); // Ambil id_order dari URL
-
-        if (!$id_order) {
+        if (!$id) {
             // Jika id_order tidak ditemukan, redirect atau tampilkan error
             return redirect()->to(base_url($this->role . '/masterOrder'))->with('error', 'ID Order tidak ditemukan.');
         }
 
         // Fetch data terkait id_order dari database (contoh)
-        $orderData = $this->masterOrderModel->find($id_order);
+        $orderData = $this->masterOrderModel->find($id);
 
         if (!$orderData) {
             // Jika data tidak ditemukan, redirect atau tampilkan error
@@ -409,7 +411,7 @@ class MasterdataController extends BaseController
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
-            'orderData' => $orderData, // Kirim data ke view
+            'orderData' => $orderData['no_model']
         ];
 
         return view($this->role . '/material/index', $data);
