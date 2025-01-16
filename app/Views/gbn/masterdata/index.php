@@ -69,7 +69,7 @@
     <div class="card mt-4">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="example" class="display compact" style="width:100%">
+                <table id="example" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>
                         <tr>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
@@ -138,7 +138,7 @@
                             <input type="date" class="form-control" name="delivery_akhir" id="delivery_akhir" required>
                         </div>
                         <!-- Button update dan batal di sebelah kanan -->
-                         <div class="modal-footer">
+                        <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                             <button type="submit" class="btn btn-info">Update</button>
                         </div>
@@ -164,31 +164,37 @@
                         "orderable": false
                     },
                     {
-                        "data": "foll_up"
+                        "data": "foll_up",
                     },
                     {
-                        "data": "lco_date"
+                        "data": "lco_date",
+
                     },
                     {
-                        "data": "no_model"
+                        "data": "no_model",
+
                     },
                     {
-                        "data": "no_order"
+                        "data": "no_order",
                     },
                     {
-                        "data": "buyer"
+                        "data": "buyer",
                     },
                     {
+<<<<<<< HEAD
                         "data": "memo"
                     },
                     {
                         "data": "delivery_awal"
+=======
+                        "data": "delivery_awal",
+>>>>>>> 68b7d0d51708cc22676fd4c639324fa9b80f7ecc
                     },
                     {
-                        "data": "delivery_akhir"
+                        "data": "delivery_akhir",
                     },
                     {
-                        "data": "admin"
+                        "data": "admin",
                     },
                     {
                         "data": "action",
