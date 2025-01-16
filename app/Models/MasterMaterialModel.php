@@ -4,28 +4,16 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class MasterOrderModel extends Model
+class MasterMaterialModel extends Model
 {
-    protected $table            = 'master_order';
-    protected $primaryKey       = 'id_order';
-    protected $useAutoIncrement = true;
+    protected $table            = 'master_material';
+    protected $primaryKey       = 'item_type';
+    protected $useAutoIncrement = false;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [
-        'id_order',
-        'no_order',
-        'no_model',
-        'buyer',
-        'foll_up',
-        'lco_date',
-        'memo',
-        'delivery_awal',
-        'delivery_akhir',
-        'admin',
-        'created_at',
-        'updated_at',
-    ];
+    protected $allowedFields    = ['item_type', 'deskripsi', 'jenis'];
+
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -34,7 +22,7 @@ class MasterOrderModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = true;
+    protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -57,19 +45,8 @@ class MasterOrderModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
-
-    public function findIdOrder($no_order)
+    public function checkItemType($item_type)
     {
-        return $this->select('id_order')->where('no_order', $no_order)->first();
-    }
-
-    public function checkDatabase($no_order, $no_model, $buyer, $lco_date, $foll_up)
-    {
-        return $this->where('no_order', $no_order)
-            ->where('no_model', $no_model)
-            ->where('buyer', $buyer)
-            ->where('lco_date', $lco_date)
-            ->where('foll_up', $foll_up)
-            ->first();
+        return $this->whereIn('item_type', $item_type)->findAll();
     }
 }

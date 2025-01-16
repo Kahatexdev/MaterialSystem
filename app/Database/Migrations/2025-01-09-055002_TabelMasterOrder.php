@@ -46,6 +46,10 @@ class TabelMasterOrder extends Migration
                 'type' => 'DATE',
                 'null' => true,
             ],
+            'unit' => [
+                'type' => 'ENUM',
+                'constraint' => ['CIJERAH', 'MAJALAYA'],
+            ],
             'admin' => [
                 'type' => 'VARCHAR',
                 'constraint' => 255,

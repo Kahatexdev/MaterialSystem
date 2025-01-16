@@ -10,6 +10,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
+use App\Models\MasterMaterialModel;
 
 class MasterdataController extends BaseController
 {
@@ -19,10 +20,12 @@ class MasterdataController extends BaseController
     protected $request;
     protected $masterOrderModel;
     protected $materialModel;
+    protected $masterMaterialModel;
     public function __construct()
     {
         $this->masterOrderModel = new MasterOrderModel();
         $this->materialModel = new MaterialModel();
+        $this->masterMaterialModel = new MasterMaterialModel();
 
 
         $this->role = session()->get('role');
@@ -75,6 +78,7 @@ class MasterdataController extends BaseController
                 ->orLike('no_model', $search)
                 ->orLike('no_order', $search)
                 ->orLike('buyer', $search)
+                ->orLike('memo', $search)
                 ->orLike('delivery_awal', $search)
                 ->orLike('delivery_akhir', $search)
                 ->orLike('admin', $search);
@@ -141,6 +145,7 @@ class MasterdataController extends BaseController
                 'no_model' => $this->request->getPost('no_model'),
                 'no_order' => $this->request->getPost('no_order'),
                 'buyer' => $this->request->getPost('buyer'),
+                'memo' => $this->request->getPost('memo'),
                 'delivery_awal' => $this->request->getPost('delivery_awal'),
                 'delivery_akhir' => $this->request->getPost('delivery_akhir'),
 
@@ -214,6 +219,10 @@ class MasterdataController extends BaseController
                 $foll_up = $sheet->getCell('D5')->getValue(); // Kolom D5
                 $foll_up = str_replace([': '], '', $foll_up);
 
+                $checkdatabase = $this->masterOrderModel->checkDatabase($no_order, $no_model, $buyer, $formatted_date, $foll_up);
+                if ($checkdatabase) {
+                    return redirect()->back()->with('error', 'Data sudah ada di database.');
+                }
                 // Validasi data per baris sebelum dimasukkan ke grup
                 if (!$no_model || !$style_size) {
                     $invalidRows[] = $key;
@@ -272,6 +281,7 @@ class MasterdataController extends BaseController
                 'created_at' => date('Y-m-d H:i:s'),
             ];
 
+            
             // Simpan data order ke database
             $masterOrderModel = new MasterOrderModel();
             $masterOrderModel->insert($data);
@@ -308,6 +318,23 @@ class MasterdataController extends BaseController
                 $validate = $this->validateWithAPI($no_model, $style_size);
 
                 if ($validate) {
+                    // Validasi item type
+                    $item_type = trim($sheet->getCell($headerMap['Item Type'] . $rowIndex)->getValue());
+
+                    // Validasi apakah item_type tidak kosong
+                    if (empty($item_type)) {
+                        return redirect()->back()->with('error', 'Item Type tidak boleh kosong.');
+                    }
+
+                    // Pastikan item_type aman sebelum diteruskan ke model
+                    $item_type = htmlspecialchars($item_type, ENT_QUOTES, 'UTF-8');
+
+                    // Cek keberadaan item_type di database
+                    $checkItemType = $this->masterMaterialModel->checkItemType($item_type);
+
+                    if (!$checkItemType) {
+                        return redirect()->back()->with('error', $item_type . ' tidak ada di database.');
+                    }
                     // Siapkan data untuk dimasukkan ke dalam validDataMaterial
                     $validDataMaterial[] = [
                         'id_order' => $id_order['id_order'],
@@ -315,7 +342,7 @@ class MasterdataController extends BaseController
                         'area' => $validate['area'],
                         'inisial' => $validate['inisial'],
                         'color' => $sheet->getCell($headerMap['Color'] . $rowIndex)->getValue(),
-                        'item_type' => $sheet->getCell($headerMap['Item Type'] . $rowIndex)->getValue(),
+                        'item_type' => $item_type,
                         'kode_warna' => $sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue(),
                         'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(), // Tetap isi dengan Composition(%) yang valid
                         'gw' => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
@@ -329,16 +356,17 @@ class MasterdataController extends BaseController
                     $invalidRows[] = $rowIndex; // Tambahkan baris tidak valid
                 }
             }
-            // dd($validDataOrder, $validDataMaterial);
+            
             // Simpan data material ke database
             $materialModel = new MaterialModel();
             $materialModel->insertBatch($validDataMaterial);
 
-
+            // Redirect ke halaman sebelumnya dengan pesan sukses
             return redirect()->back()->with('success', 'Data berhasil diimport.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat mengimport data.');
     }
 
     private function validateWithAPI($no_model, $style_size)

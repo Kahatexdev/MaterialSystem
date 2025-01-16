@@ -73,6 +73,7 @@ class TabelMaterial extends Migration
         ]);
         $this->forge->addKey('id_material', true);
         $this->forge->addForeignKey('id_order', 'master_order', 'id_order', 'CASCADE', 'CASCADE');
+        $this->forge->addForeignKey('item_type', 'master_material', 'item_type', 'CASCADE', 'CASCADE');
         $this->forge->createTable('material');
     }
 
