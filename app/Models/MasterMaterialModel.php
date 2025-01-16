@@ -47,6 +47,6 @@ class MasterMaterialModel extends Model
 
     public function checkItemType($item_type)
     {
-        return $this->whereIn('item_type', $item_type)->findAll();
+        return $this->where('item_type', $item_type)->findAll();
     }
 }

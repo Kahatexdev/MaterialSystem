@@ -181,14 +181,10 @@
                         "data": "buyer",
                     },
                     {
-<<<<<<< HEAD
-                        "data": "memo"
+                        "data": "memo",
                     },
                     {
-                        "data": "delivery_awal"
-=======
                         "data": "delivery_awal",
->>>>>>> 68b7d0d51708cc22676fd4c639324fa9b80f7ecc
                     },
                     {
                         "data": "delivery_akhir",
