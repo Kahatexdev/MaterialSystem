@@ -17,23 +17,23 @@ class TabelEstimasiStok extends Migration
             ],
             'no_model_old' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'no_model_new' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'item_type' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'kode_warna' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'lot' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'kg_stock' => [
                 'type' => 'FLOAT',
@@ -55,7 +55,7 @@ class TabelEstimasiStok extends Migration
             ],
             'admin' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'created_at' => [
                 'type' => 'DATETIME',

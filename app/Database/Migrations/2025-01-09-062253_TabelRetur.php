@@ -17,23 +17,23 @@ class TabelRetur extends Migration
             ],
             'no_model' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'item_type' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'kode_warna' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'warna' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'area_retur' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'tgl_retur' => [
                 'type' => 'DATE',
@@ -49,11 +49,11 @@ class TabelRetur extends Migration
             ],
             'lot_retur' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'kategori' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'keterangan_gbn' => [
                 'type' => 'TEXT',
@@ -64,7 +64,7 @@ class TabelRetur extends Migration
             ],
             'admin' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'created_at' => [
                 'type' => 'DATETIME',

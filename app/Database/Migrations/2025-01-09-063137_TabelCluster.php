@@ -11,7 +11,7 @@ class TabelCluster extends Migration
         $this->forge->addField([
             'nama_cluster' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'kapasitas' => [
                 'type' => 'INT',
@@ -22,7 +22,7 @@ class TabelCluster extends Migration
             ],
             'group' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'created_at' => [
                 'type' => 'DATETIME',

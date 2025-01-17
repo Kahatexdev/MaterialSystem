@@ -17,15 +17,19 @@ class OpenPo extends Migration
             ],
             'no_model' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'item_type' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'kode_warna' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
+            ],
+            'color' => [
+                'type' => 'VARCHAR',
+                'constraint' => 32,
             ],
             'kg_po' => [
                 'type' => 'FLOAT',
@@ -35,11 +39,11 @@ class OpenPo extends Migration
             ],
             'penanggung_jawab' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'admin' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'created_at' => [
                 'type' => 'DATETIME',

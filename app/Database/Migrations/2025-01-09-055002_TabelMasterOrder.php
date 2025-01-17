@@ -17,19 +17,19 @@ class TabelMasterOrder extends Migration
             ],
             'no_order' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'no_model' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'buyer' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'foll_up' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'lco_date' => [
                 'type' => 'DATE',
@@ -52,7 +52,7 @@ class TabelMasterOrder extends Migration
             ],
             'admin' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'created_at' => [
                 'type' => 'DATETIME',

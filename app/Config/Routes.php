@@ -34,6 +34,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('saveMasterMaterial', 'MastermaterialController::saveMasterMaterial');
     $routes->get('deleteMasterMaterial', 'MastermaterialController::deleteMasterMaterial');
 
+    $routes->get('schedule', 'ScheduleController::index');
+    $routes->get('schedule/getScheduleDetails/(:any)/(:any)/(:any)', 'ScheduleController::getScheduleDetails/$1/$2/$3');
+
     $routes->get('warehouse', 'WarehouseController::index');
     $routes->get('pph', 'PphController::index');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
