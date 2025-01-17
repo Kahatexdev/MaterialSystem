@@ -412,7 +412,7 @@ class MasterdataController extends BaseController
             'no_model' => $orderData['no_model']
         ];
 
-        return view($this->role . '/material/index', $data);
+        return view($this->role . '/mastermaterial/detailMaterial', $data);
     }
 
     public function tampilMaterial()
@@ -564,19 +564,17 @@ class MasterdataController extends BaseController
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
-            'order' => $masterOrder
+            'order' => $masterOrder,
+            'id_order' => $id
         ];
-        return view($this->role . '/material/openPO', $data);
+        return view($this->role . '/mastermaterial/openPO', $data);
     }
 
     public function exportOpenPO()
     {
-        // Ambil data dari form
+
         $data = $this->request->getPost();
 
-        // dd($data);
-
-        // Proses setiap item
         $items = $data['items'] ?? [];
         foreach ($items as $item) {
             $itemData = [

@@ -1,4 +1,4 @@
-<?php $this->extend($role . '/dashboard/header'); ?>
+<?php $this->extend($role . '/masterdata/header'); ?>
 <?php $this->section('content'); ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
 <div class="container-fluid py-4">
@@ -81,6 +81,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Memo</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Unit</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Admin</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                         </tr>
@@ -137,6 +138,10 @@
                             <label for="delivery_akhir" class="form-label">Delivery Akhir</label>
                             <input type="date" class="form-control" name="delivery_akhir" id="delivery_akhir" required>
                         </div>
+                        <div class="mb-3">
+                            <label for="unit" class="form-label">Unit</label>
+                            <input type="text" class="form-control" name="unit" id="unit" required>
+                        </div>
                         <!-- Button update dan batal di sebelah kanan -->
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -190,6 +195,9 @@
                         "data": "delivery_akhir",
                     },
                     {
+                        "data": "unit",
+                    },
+                    {
                         "data": "admin",
                     },
                     {
@@ -229,6 +237,7 @@
                         $('#memo').val(response.memo);
                         $('#delivery_awal').val(response.delivery_awal);
                         $('#delivery_akhir').val(response.delivery_akhir);
+                        $('#unit').val(response.unit);
 
                         // Tambahkan data lain sesuai kebutuhan
 

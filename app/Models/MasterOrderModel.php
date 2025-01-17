@@ -22,6 +22,7 @@ class MasterOrderModel extends Model
         'memo',
         'delivery_awal',
         'delivery_akhir',
+        'unit',
         'admin',
         'created_at',
         'updated_at',

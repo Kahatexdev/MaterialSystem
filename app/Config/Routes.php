@@ -27,8 +27,17 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('openPO/(:num)', 'MasterdataController::openPO/$1');
     $routes->post('openPO/exportPO', 'MasterdataController::exportOpenPO');
     // $routes->post('exportOpenPO/(:any)/(:any)', 'MasterdataController::exportOpenPO/$1/$2');
+    $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
 
     $routes->post('import/mu', 'MasterdataController::importMU');
+
+    $routes->get('masterMaterial', 'MastermaterialController::index');
+    $routes->post('tampilMasterMaterial', 'MastermaterialController::tampilMasterMaterial');
+    $routes->get('getMasterMaterialDetails', 'MastermaterialController::getMasterMaterialDetails');
+    $routes->post('updateMasterMaterial', 'MastermaterialController::updateMasterMaterial');
+    $routes->post('saveMasterMaterial', 'MastermaterialController::saveMasterMaterial');
+    $routes->get('deleteMasterMaterial', 'MastermaterialController::deleteMasterMaterial');
+
     $routes->get('warehouse', 'WarehouseController::index');
     $routes->get('pph', 'PphController::index');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');

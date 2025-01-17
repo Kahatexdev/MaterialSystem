@@ -1,4 +1,4 @@
-<?php $this->extend($role . '/dashboard/header'); ?>
+<?php $this->extend($role . '/mastermaterial/header'); ?>
 <?php $this->section('content'); ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
 <div class="container-fluid py-4">
@@ -30,7 +30,8 @@
     <div class="card card-frame">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 font-weight-bolder">Data PO</h5>
+                <h5 class="mb-0 font-weight-bolder">Form Buka PO</h5>
+                <a href="<?= base_url($role . '/material/' . $id_order) ?>" class="btn btn-info"> Kembali</a>
             </div>
         </div>
     </div>
@@ -40,16 +41,22 @@
         <div class="card-body">
             <form action="<?= base_url($role . '/openPO/exportPO') ?>" method="post">
                 <div class="form-group">
+                    <label>Tujuan</label>
+                    <select class="form-control" name="tujuan_po" id="selectTujuan" onchange="tujuan()">
+                        <option value="-"></option>
+                        <option value="Celup Cones">Celup Cones</option>
+                        <option value="Covering">Covering</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>No Model</label>
                     <input type="text" class="form-control" name="no_model" value="<?= $model ?>" readonly>
                 </div>
                 <div id="kebutuhan-container">
                     <label>Pilih Bahan Baku</label>
                     <div class="input-group kebutuhan-item" style="position: relative;">
-                        <a class="remove" style="position: absolute; top: 0; right: 0; background: none; border: none; cursor: pointer; padding: 10px;">
-                            <img src="<?= base_url('assets/img/cross.svg') ?>" alt="hapus.svg" style="width: 16px; height: 16px;">
-                        </a>
-                        <div class="col-xl-3 mx-2 my-2" style="width: 48%;">
+
+                        <div class="col-lg-3 mx-2 my-2" style="width: 48%;">
                             <div class="form-group">
                                 <label for="itemType">Item Type</label>
                                 <select class="form-control item-type" name="items[0][item_type]">
@@ -66,31 +73,31 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-xl-3 mx-2 my-2" style="width: 48%;">
+                        <div class="col-lg-3 mx-2 my-2" style="width: 48%;">
                             <div class="form-group">
                                 <label>Kode Warna</label>
                                 <input type="text" class="form-control kode-warna" name="items[0][kode_warna]" readonly>
                             </div>
                         </div>
-                        <div class="col-xl-3 mx-2" style="width: 48%;">
+                        <div class="col-lg-3 mx-2" style="width: 48%;">
                             <div class="form-group">
                                 <label>Color</label>
                                 <input type="text" class="form-control color" name="items[0][color]" readonly>
                             </div>
                         </div>
-                        <div class="col-xl-3 mx-2" style="width: 48%;">
+                        <div class="col-lg-3 mx-2" style="width: 48%;">
                             <div class="form-group">
                                 <label for="kgMU">Kg MU</label>
                                 <input type="float" class="form-control kg-mu" readonly>
                             </div>
                         </div>
-                        <div class="col-xl-3 mx-2" style="width: 48%;">
+                        <div class="col-lg-3 mx-2" style="width: 48%;">
                             <div class="form-group">
                                 <label for="kgStok">Kg Stok</label>
                                 <input type="float" class="form-control kg-stok">
                             </div>
                         </div>
-                        <div class="col-xl-3 mx-2" style="width: 48%;">
+                        <div class="col-lg-3 mx-2" style="width: 48%;">
                             <div class="form-group">
                                 <label for="kgKebutuhan">Kg Kebutuhan</label>
                                 <input type="float" class="form-control kg-kebutuhan" name="items[0][kg_po]">
@@ -107,14 +114,7 @@
                     <label for="exampleFormControlInput1">Keterangan</label>
                     <textarea class="form-control" name="keterangan" id="keterangan"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Tujuan</label>
-                    <select class="form-control" name="tujuan_po" id="selectTujuan" onchange="tujuan()">
-                        <option value="-"></option>
-                        <option value="Celup Cones">Celup Cones</option>
-                        <option value="Covering">Covering</option>
-                    </select>
-                </div>
+
                 <div class="form-group">
                     <label>Penerima</label>
                     <input type="text" class="form-control" id="penerima" readonly>
@@ -127,7 +127,7 @@
                         <option value="Megah">Megah</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-success">Save</button>
+                <button type="submit" class="btn btn-success w-100">Save</button>
         </div>
         </form>
     </div>
