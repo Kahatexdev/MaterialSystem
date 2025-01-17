@@ -19,11 +19,13 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('updateOrder', 'MasterdataController::updateOrder');
     $routes->post('deleteOrder', 'MasterdataController::deleteOrder');
 
-    $routes->get('material', 'MasterdataController::material');
+    $routes->get('material/(:any)', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');
     $routes->get('getMaterialDetails/(:num)', 'MasterdataController::getMaterialDetails/$1');
     $routes->post('updateMaterial', 'MasterdataController::updateMaterial');
     $routes->get('deleteMaterial/(:num)', 'MasterdataController::deleteMaterial/$1');
+    $routes->get('openPO/(:num)', 'MasterdataController::openPO/$1');
+    $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
 
     $routes->post('import/mu', 'MasterdataController::importMU');
     $routes->get('warehouse', 'WarehouseController::index');

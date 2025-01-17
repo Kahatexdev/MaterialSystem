@@ -31,6 +31,11 @@
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 font-weight-bolder">Data Material</h5>
+                <form action="<?= base_url($role . '/exportOpenPO/' . $orderData['no_model']) ?>" method="get" target="_blank">
+                    <button type="submit" class="btn btn-outline-info">
+                        <i class="fas fa-file-export me-2"></i>EXPORT PO
+                    </button>
+                </form>
             </div>
         </div>
     </div>

@@ -34,7 +34,6 @@ class MasterdataController extends BaseController
             return redirect()->to(base_url('/login'));
         }
         $this->isLogedin();
-
     }
     protected function isLogedin()
     {
@@ -162,8 +161,6 @@ class MasterdataController extends BaseController
         throw new \CodeIgniter\Exceptions\PageNotFoundException();
     }
 
-
-
     public function importMU()
     {
         // Get the uploaded file
@@ -281,7 +278,7 @@ class MasterdataController extends BaseController
                 'created_at' => date('Y-m-d H:i:s'),
             ];
 
-            
+
             // Simpan data order ke database
             $masterOrderModel = new MasterOrderModel();
             $masterOrderModel->insert($data);
@@ -356,7 +353,7 @@ class MasterdataController extends BaseController
                     $invalidRows[] = $rowIndex; // Tambahkan baris tidak valid
                 }
             }
-            
+
             // Simpan data material ke database
             $materialModel = new MaterialModel();
             $materialModel->insertBatch($validDataMaterial);
@@ -388,9 +385,9 @@ class MasterdataController extends BaseController
         }
     }
 
-    public function material()
+    public function material($id)
     {
-        $id_order = $this->request->getGet('id_order'); // Ambil id_order dari URL
+        $id_order = $id; // Ambil id_order dari URL
 
         if (!$id_order) {
             // Jika id_order tidak ditemukan, redirect atau tampilkan error
@@ -404,12 +401,12 @@ class MasterdataController extends BaseController
             // Jika data tidak ditemukan, redirect atau tampilkan error
             return redirect()->to(base_url($this->role . '/masterOrder'))->with('error', 'Data Order tidak ditemukan.');
         }
-
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
             'orderData' => $orderData, // Kirim data ke view
+            'no_model' => $orderData['no_model']
         ];
 
         return view($this->role . '/material/index', $data);
@@ -540,4 +537,32 @@ class MasterdataController extends BaseController
         throw new \CodeIgniter\Exceptions\PageNotFoundException();
     }
 
+    public function openPO($id)
+    {
+
+        $masterOrder = $this->masterOrderModel->getMaterialOrder($id);
+        $orderData = $this->masterOrderModel->find($id);
+
+        // foreach($masterOrder as $order){
+        //     $model = $order['no_model'];
+        //     $itemType = $order['item_type'];
+        //     $kodeWarna = $order['kode_warna'];
+
+        //     $cek=[
+        //         'no_model'=>$model,
+        //         'item_type'=>$itemType,
+        //         'kode_warna'=>$kodeWarna
+        //     ]
+        //     $cekStok = $this->estimasiStokModel($cek);
+
+        // }
+        $data = [
+            'model' => $orderData['no_model'],
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'order' => $masterOrder
+        ];
+        return view($this->role . '/material/openPO', $data);
+    }
 }
