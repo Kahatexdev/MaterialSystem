@@ -30,7 +30,11 @@
     <div class="card card-frame">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 font-weight-bolder">Data Material</h5>
+                <h5 class="mb-0 font-weight-bolder">Data Material <?= $no_model ?></h5>
+
+                <a href="<?= base_url($role . '/openPO/' . $orderData['id_order']) ?>" class="btn btn-outline-info">
+                    <i class="fas fa-file-import me-2"></i>PO
+                </a>
             </div>
         </div>
     </div>
