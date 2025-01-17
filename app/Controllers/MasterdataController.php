@@ -391,13 +391,15 @@ class MasterdataController extends BaseController
 
     public function material($id)
     {
-        if (!$id) {
+        $id_order = $id; // Ambil id_order dari URL
+
+        if (!$id_order) {
             // Jika id_order tidak ditemukan, redirect atau tampilkan error
             return redirect()->to(base_url($this->role . '/masterOrder'))->with('error', 'ID Order tidak ditemukan.');
         }
 
         // Fetch data terkait id_order dari database (contoh)
-        $orderData = $this->masterOrderModel->find($id);
+        $orderData = $this->masterOrderModel->find($id_order);
 
         if (!$orderData) {
             // Jika data tidak ditemukan, redirect atau tampilkan error
@@ -407,7 +409,8 @@ class MasterdataController extends BaseController
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
-            'orderData' => $orderData['no_model']
+            'orderData' => $orderData, // Kirim data ke view
+            'no_model' => $orderData['no_model']
         ];
 
         return view($this->role . '/material/index', $data);
