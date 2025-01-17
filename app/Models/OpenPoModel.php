@@ -52,4 +52,7 @@ class OpenPoModel extends Model
             ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
             ->findAll();
     }
+    public function tesdoamng() : Returntype {
+        
+    }
 }
