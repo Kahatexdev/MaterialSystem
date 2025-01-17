@@ -45,7 +45,7 @@
     <div class="card mt-4">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="example" class="display compact" style="width:100%">
+                <table id="example" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>
                         <tr>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
