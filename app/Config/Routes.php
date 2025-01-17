@@ -24,6 +24,10 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('getMaterialDetails/(:num)', 'MasterdataController::getMaterialDetails/$1');
     $routes->post('updateMaterial', 'MasterdataController::updateMaterial');
     $routes->get('deleteMaterial/(:num)', 'MasterdataController::deleteMaterial/$1');
+    $routes->get('openPO/(:num)', 'MasterdataController::openPO/$1');
+    $routes->post('openPO/exportPO', 'MasterdataController::exportOpenPO');
+    // $routes->post('exportOpenPO/(:any)/(:any)', 'MasterdataController::exportOpenPO/$1/$2');
+    $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
 
     $routes->post('import/mu', 'MasterdataController::importMU');
 

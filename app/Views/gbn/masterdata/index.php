@@ -214,7 +214,7 @@
             // Event listener untuk tombol Detail Master Order ke halaman Material berdasarkan id_order
             $('#example').on('click', '.btn-detail', function() {
                 const id = $(this).data('id');
-                window.location.href = '<?= base_url($role . '/material') ?>/' + id;
+                window.location.href = '<?= base_url($role . '/material' . '/') ?>' + id;
 
             });
 

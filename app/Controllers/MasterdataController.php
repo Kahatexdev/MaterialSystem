@@ -11,6 +11,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
+use App\Models\OpenPOModel;
 
 class MasterdataController extends BaseController
 {
@@ -21,12 +22,14 @@ class MasterdataController extends BaseController
     protected $masterOrderModel;
     protected $materialModel;
     protected $masterMaterialModel;
+    protected $openPOModel;
+
     public function __construct()
     {
         $this->masterOrderModel = new MasterOrderModel();
         $this->materialModel = new MaterialModel();
         $this->masterMaterialModel = new MasterMaterialModel();
-
+        $this->openPOModel = new OpenPOModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -34,7 +37,6 @@ class MasterdataController extends BaseController
             return redirect()->to(base_url('/login'));
         }
         $this->isLogedin();
-
     }
     protected function isLogedin()
     {
@@ -81,8 +83,7 @@ class MasterdataController extends BaseController
                 ->orLike('memo', $search)
                 ->orLike('delivery_awal', $search)
                 ->orLike('delivery_akhir', $search)
-                ->orLike('admin', $search)
-                ->orLike('unit', $search);
+                ->orLike('admin', $search);
 
             $filteredRecords = $query->countAllResults(false); // Total data yang difilter
 
@@ -149,7 +150,6 @@ class MasterdataController extends BaseController
                 'memo' => $this->request->getPost('memo'),
                 'delivery_awal' => $this->request->getPost('delivery_awal'),
                 'delivery_akhir' => $this->request->getPost('delivery_akhir'),
-                'unit' => $this->request->getPost('unit'),
 
                 // Tambahkan field lain yang ingin diperbarui
             ];
@@ -163,8 +163,6 @@ class MasterdataController extends BaseController
 
         throw new \CodeIgniter\Exceptions\PageNotFoundException();
     }
-
-
 
     public function importMU()
     {
@@ -259,7 +257,6 @@ class MasterdataController extends BaseController
                             'memo' => NULL,
                             'delivery_awal' => $validate['delivery_awal'],
                             'delivery_akhir' => $validate['delivery_akhir'],
-                            'unit' => NULL,
                             'admin' => $admin,
                             'created_at' => date('Y-m-d H:i:s'),
                             'updated_at' => NULL,
@@ -280,12 +277,11 @@ class MasterdataController extends BaseController
                 'memo' => NULL,
                 'delivery_awal' => $validate['delivery_awal'],
                 'delivery_akhir' => $validate['delivery_akhir'],
-                'unit' => 'CIJERAH',
                 'admin' => $admin,
                 'created_at' => date('Y-m-d H:i:s'),
             ];
 
-            
+
             // Simpan data order ke database
             $masterOrderModel = new MasterOrderModel();
             $masterOrderModel->insert($data);
@@ -360,7 +356,7 @@ class MasterdataController extends BaseController
                     $invalidRows[] = $rowIndex; // Tambahkan baris tidak valid
                 }
             }
-            
+
             // Simpan data material ke database
             $materialModel = new MaterialModel();
             $materialModel->insertBatch($validDataMaterial);
@@ -394,27 +390,29 @@ class MasterdataController extends BaseController
 
     public function material($id)
     {
-        if (!$id) {
+        $id_order = $id; // Ambil id_order dari URL
+
+        if (!$id_order) {
             // Jika id_order tidak ditemukan, redirect atau tampilkan error
             return redirect()->to(base_url($this->role . '/masterOrder'))->with('error', 'ID Order tidak ditemukan.');
         }
 
         // Fetch data terkait id_order dari database (contoh)
-        $orderData = $this->masterOrderModel->find($id);
+        $orderData = $this->masterOrderModel->find($id_order);
 
         if (!$orderData) {
             // Jika data tidak ditemukan, redirect atau tampilkan error
             return redirect()->to(base_url($this->role . '/masterOrder'))->with('error', 'Data Order tidak ditemukan.');
         }
-
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
-            'orderData' => $orderData['no_model']
+            'orderData' => $orderData, // Kirim data ke view
+            'no_model' => $orderData['no_model']
         ];
 
-        return view($this->role . '/material/index', $data);
+        return view($this->role . '/mastermaterial/detailMaterial', $data);
     }
 
     public function tampilMaterial()
@@ -542,4 +540,59 @@ class MasterdataController extends BaseController
         throw new \CodeIgniter\Exceptions\PageNotFoundException();
     }
 
+    public function openPO($id)
+    {
+
+        $masterOrder = $this->masterOrderModel->getMaterialOrder($id);
+        $orderData = $this->masterOrderModel->find($id);
+
+        // foreach($masterOrder as $order){
+        //     $model = $order['no_model'];
+        //     $itemType = $order['item_type'];
+        //     $kodeWarna = $order['kode_warna'];
+
+        //     $cek=[
+        //         'no_model'=>$model,
+        //         'item_type'=>$itemType,
+        //         'kode_warna'=>$kodeWarna
+        //     ]
+        //     $cekStok = $this->estimasiStokModel($cek);
+
+        // }
+        $data = [
+            'model' => $orderData['no_model'],
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'order' => $masterOrder,
+            'id_order' => $id
+        ];
+        return view($this->role . '/mastermaterial/openPO', $data);
+    }
+
+    public function exportOpenPO()
+    {
+
+        $data = $this->request->getPost();
+
+        $items = $data['items'] ?? [];
+        foreach ($items as $item) {
+            $itemData = [
+                'role'             => $this->role,
+                'no_model'         => $data['no_model'],
+                'item_type'        => $item['item_type'],
+                'kode_warna'       => $item['kode_warna'],
+                'color'            => $item['color'],
+                'kg_po'            => $item['kg_po'],
+                'keterangan'       => $data['keterangan'],
+                'penanggung_jawab' => $data['penanggung_jawab'],
+                'admin'            => session()->get('username'),
+            ];
+
+            // Simpan data ke database
+            $this->openPOModel->insert($itemData);
+        }
+
+        return redirect()->back()->with('success', 'Data berhasil diimport.');
+    }
 }

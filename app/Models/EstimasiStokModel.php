@@ -4,25 +4,26 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class MasterOrderModel extends Model
+class EstimasiStokModel extends Model
 {
-    protected $table            = 'master_order';
-    protected $primaryKey       = 'id_order';
+    protected $table            = 'estimasi_stok';
+    protected $primaryKey       = 'id_sm';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'id_order',
-        'no_order',
-        'no_model',
-        'buyer',
-        'foll_up',
-        'lco_date',
-        'memo',
-        'delivery_awal',
-        'delivery_akhir',
-        'unit',
+        'no_model_old',
+        'no_model_new',
+        'item_type',
+        'kode_warna',
+        'lot',
+        'kg_stock',
+        'cones_stock',
+        'karung_stock',
+        'kg_aktual',
+        'cns_aktual',
+        'krg_aktual',
         'admin',
         'created_at',
         'updated_at',
@@ -35,7 +36,7 @@ class MasterOrderModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = true;
+    protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -59,26 +60,13 @@ class MasterOrderModel extends Model
     protected $afterDelete    = [];
 
 
-    public function findIdOrder($no_order)
+    public function estimasiStokModel($cek)
     {
-        return $this->select('id_order')->where('no_order', $no_order)->first();
-    }
-
-    public function checkDatabase($no_order, $no_model, $buyer, $lco_date, $foll_up)
-    {
-        return $this->where('no_order', $no_order)
-            ->where('no_model', $no_model)
-            ->where('buyer', $buyer)
-            ->where('lco_date', $lco_date)
-            ->where('foll_up', $foll_up)
+        return $this->select('item_type,kode_warna, sum(kg_aktual) as kg_stok')
+            ->where('no_model_new', $cek['no_model'])
+            ->where('item_type', $cek['item_type'])
+            ->where('kode_warna', $cek['kode_warna'])
+            ->groupBy('kode_warna')
             ->first();
-    }
-    public function getMaterialOrder($id)
-    {
-        return $this->select('no_model,buyer,delivery_akhir, material.item_type, material.color, material.kode_warna, sum(material.kgs) as kg')
-            ->join('material', 'material.id_order=master_order.id_order')
-            ->where('master_order.id_order', $id)
-            ->groupBy('material.kode_warna')
-            ->findAll();
     }
 }
