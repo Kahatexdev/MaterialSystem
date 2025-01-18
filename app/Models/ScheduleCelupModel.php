@@ -51,4 +51,25 @@ class ScheduleCelupModel extends Model
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->findAll();
     }
+
+    public function getScheduleDetails($machine, $date, $lot)
+    {
+        return $this->table('schedule_celup')
+            ->select('*, mesin_celup.no_mesin')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->where('mesin_celup.no_mesin', $machine)
+            ->where('schedule_celup.tanggal_schedule', $date)
+            ->where('schedule_celup.lot_urut', $lot)
+            ->findAll();
+    }
+
+    public function getWeight($machine, $date, $lot)
+    {
+        return $this->table('schedule_celup')
+            ->select('kg_celup')
+            ->where('id_mesin', $machine)
+            ->where('tanggal_schedule', $date)
+            ->where('lot_urut', $lot)
+            ->findAll();
+    }
 }

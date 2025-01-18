@@ -49,4 +49,14 @@ class MasterMaterialModel extends Model
     {
         return $this->where('item_type', $item_type)->findAll();
     }
+
+    public function getJenisBahanBaku()
+    {
+        return $this->select('jenis')->distinct()->findAll();
+    }
+
+    public function getItemtype()
+    {
+        return $this->select('item_type')->findAll();
+    }
 }
