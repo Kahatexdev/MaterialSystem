@@ -46,7 +46,23 @@ class PdfController extends BaseController
     }
     public function generateOpenPO($no_model)
     {
-        $result = $this->openPoModel->getData($no_model);
+        $tujuan = $this->request->getGet('tujuan');
+        $jenis = $this->request->getGet('jenis');
+        $jenis2 = $this->request->getGet('jenis2');
+
+        if ($jenis == 'BENANG') {
+            $penanggung_jawab = 'CI MEGAH';
+        } else {
+            $penanggung_jawab = 'KO HARTANTO';
+        }
+
+        if ($tujuan == 'CELUP') {
+            $penerima = 'RETNO';
+        } else {
+            $penerima = 'PARYANTI';
+        }
+
+        $result = $this->openPoModel->getData($no_model, $jenis, $jenis2);
 
         // Inisialisasi FPDF
         $pdf = new FPDF('L', 'mm', 'A4');
@@ -62,7 +78,7 @@ class PdfController extends BaseController
         $y = $pdf->GetY(); // Simpan posisi Y saat ini
 
         // Menambahkan gambar
-        $pdf->Image('assets/img/logo-kahatex.png', $x + 14, $y + 1, 10, 9); // Lokasi X, Y, lebar, tinggi
+        $pdf->Image('assets/img/logo-kahatex.png', $x + 14, $y + 1, 10, 8); // Lokasi X, Y, lebar, tinggi
 
         // Header
         $pdf->SetFont('Arial', 'B', 7);
@@ -106,14 +122,14 @@ class PdfController extends BaseController
         $pdf->SetFont('Arial', '', 9);
         // Merge cells untuk kolom No, Bentuk Celup, Warna, Kode Warna, Buyer, Nomor Order, Delivery, Untuk Produksi, Contoh Warna, Keterangan Celup
         $pdf->Cell(6, 14, 'No', 1, 0, 'C'); // Merge 2 baris
-        $pdf->Cell(32, 7, 'Benang', 1, 0, 'C'); // Merge 2 kolom ke samping untuk baris pertama
+        $pdf->Cell(37, 7, 'Benang', 1, 0, 'C'); // Merge 2 kolom ke samping untuk baris pertama
         $pdf->MultiCell(17, 7, 'Bentuk Celup', 1, 'C', false); // Merge 2 baris
         $pdf->SetXY($pdf->GetX(), $pdf->GetY() - 14);
-        $pdf->Cell(55, -7, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(60, -7, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
         $pdf->Cell(20, 14, 'Warna', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 14, 'Kode Warna', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(10, 14, 'Buyer', 1, 0, 'C'); // Merge 2 baris
-        $pdf->Cell(30, 14, 'Nomor Order', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(25, 14, 'Nomor Order', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(16, 14, 'Delivery', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(15, 7, 'Qty Pesanan', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(52, 7, 'Permintaan Kelos', 1, 0, 'C'); // Merge 4 kolom
@@ -128,8 +144,8 @@ class PdfController extends BaseController
         // Sub-header untuk kolom "Benang" dan "Permintaan Kelos"
         $pdf->Cell(6, -7, '', 0, 0); // Kosong untuk menyesuaikan posisi
         $pdf->Cell(12, -7, 'Jenis', 1, 0, 'C');
-        $pdf->Cell(20, -7, 'Kode', 1, 0, 'C');
-        $pdf->Cell(113, -7, '', 0, 0); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(25, -7, 'Kode', 1, 0, 'C');
+        $pdf->Cell(108, -7, '', 0, 0); // Kosong untuk menyesuaikan posisi
         $pdf->Cell(15, -7, 'Kg', 1, 0, 'C'); // Merge 4 kolom untuk Permintaan Kelos
         $pdf->Cell(13, -7, 'Kg', 1, 0, 'C');
         $pdf->Cell(13, -7, 'Yard', 1, 0, 'C');
@@ -143,12 +159,12 @@ class PdfController extends BaseController
         foreach ($result as $row) {
             $pdf->Cell(6, 6, $no++, 1, 0, 'C'); // Align center
             $pdf->Cell(12, 6, $row['jenis'], 1, 0, 'C'); // Align center
-            $pdf->Cell(20, 6, $row['item_type'], 1, 0, 'C'); // Align center
+            $pdf->Cell(25, 6, $row['item_type'], 1, 0, 'C'); // Align center
             $pdf->Cell(17, 6, '', 1, 0, 'C'); // Align center (empty)
             $pdf->Cell(20, 6, $row['color'], 1, 0, 'C'); // Align center
             $pdf->Cell(20, 6, $row['kode_warna'], 1, 0, 'C'); // Align center
             $pdf->Cell(10, 6, $row['buyer'], 1, 0, 'C'); // Align center
-            $pdf->Cell(30, 6, $row['no_order'], 1, 0, 'C'); // Align center
+            $pdf->Cell(25, 6, $row['no_order'], 1, 0, 'C'); // Align center
             $pdf->Cell(16, 6, $row['delivery_awal'], 1, 0, 'C'); // Align center
             $pdf->Cell(15, 6, $row['kg_po'], 1, 0, 'C'); // Align center
             $pdf->Cell(13, 6, '', 1, 0, 'C'); // Align center (empty)
@@ -163,19 +179,19 @@ class PdfController extends BaseController
 
 
         $pdf->Cell(150, 5, '', 0, 1, 'C');
-        $pdf->Cell(170, 5, 'UNTUK DEPARTMEN COVERING', 0, 1, 'C');
+        $pdf->Cell(170, 5, 'UNTUK DEPARTMEN ' . $tujuan, 0, 1, 'C');
 
         $pdf->Cell(55, 5, '', 0, 0, 'C');
         $pdf->Cell(55, 5, 'Pemesanan', 0, 0, 'C');
         $pdf->Cell(55, 5, 'Mengetahui', 0, 0, 'C');
-        $pdf->Cell(55, 5, 'Tanda Terima Covering', 0, 1, 'C');
+        $pdf->Cell(55, 5, 'Tanda Terima ' . $tujuan, 0, 1, 'C');
 
         $pdf->Cell(55, 9, '', 0, 1, 'C');
 
         $pdf->Cell(55, 5, '', 0, 0, 'C');
         $pdf->Cell(55, 5, '(                               )', 0, 0, 'C');
-        $pdf->Cell(55, 5, '(                               )', 0, 0, 'C');
-        $pdf->Cell(55, 5, '(                               )', 0, 1, 'C');
+        $pdf->Cell(55, 5, '(       ' . $penanggung_jawab . '       )', 0, 0, 'C');
+        $pdf->Cell(55, 5, '(       ' . $penerima . '       )', 0, 1, 'C');
 
         // Output PDF
         return $this->response->setHeader('Content-Type', 'application/pdf')

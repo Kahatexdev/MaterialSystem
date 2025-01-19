@@ -54,4 +54,17 @@ class OpenPOModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    public function getData($no_model, $jenis, $jenis2)
+    {
+        return $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.penanggung_jawab, open_po.created_at, master_material.jenis, master_order.buyer, master_order.no_order, master_order.delivery_awal')
+            ->where(['open_po.no_model' => $no_model])
+            ->groupStart() // Mulai grup untuk kondisi OR
+            ->where('master_material.jenis', $jenis)
+            ->orWhere('master_material.jenis', $jenis2)
+            ->groupEnd() // Akhiri grup
+            ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
+            ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
+            ->findAll();
+    }
 }
