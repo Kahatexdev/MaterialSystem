@@ -4,7 +4,7 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class OpenPoModel extends Model
+class OpenPOModel extends Model
 {
     protected $table            = 'open_po';
     protected $primaryKey       = 'id_po';
@@ -12,7 +12,18 @@ class OpenPoModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id_po', 'no_model', 'item_type', 'kode_warna', 'color', 'kg_po', 'keterangan', 'penanggung_jawab', 'admin', 'created_at', 'updated_at'];
+    protected $allowedFields    = [
+        'no_model',
+        'item_type',
+        'kode_warna',
+        'color',
+        'kg_po',
+        'keterangan',
+        'penanggung_jawab',
+        'admin',
+        'created_at',
+        'updated_at',
+    ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -21,7 +32,7 @@ class OpenPoModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = true;
+    protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -44,10 +55,14 @@ class OpenPoModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
-    public function getData($no_model)
+    public function getData($no_model, $jenis, $jenis2)
     {
         return $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.penanggung_jawab, open_po.created_at, master_material.jenis, master_order.buyer, master_order.no_order, master_order.delivery_awal')
             ->where(['open_po.no_model' => $no_model])
+            ->groupStart() // Mulai grup untuk kondisi OR
+            ->where('master_material.jenis', $jenis)
+            ->orWhere('master_material.jenis', $jenis2)
+            ->groupEnd() // Akhiri grup
             ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
             ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
             ->findAll();

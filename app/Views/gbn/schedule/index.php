@@ -234,6 +234,7 @@
                                 <!-- Kolom informasi mesin -->
                                 <td class="sticky machine-info">
                                     <strong>Mesin <?= $mesin['no_mesin'] ?></strong><br>
+                                    <input type="hidden" id="no_mesin" value="<?= $mesin['no_mesin'] ?>">
                                     <small>Kapasitas: <?= number_format($mesin['min_caps'], 1) ?> - <?= number_format($mesin['max_caps'], 1) ?> kg </small>
                                     <br>
                                     <small>L/M/D : (<?= $mesin['lmd'] ?>)</small>
@@ -249,7 +250,7 @@
                                     // Loop untuk menampilkan kartu sesuai jumlah lot
                                     for ($lot = 0; $lot < $mesin['jml_lot']; $lot++) {
                                         $jobsForDay = array_filter($scheduleData, function ($job) use ($mesin, $date, $lot) {
-                                            return $job['no_mesin'] == $mesin['no_mesin'] && $job['start_mc'] == $date->format('Y-m-d') && $job['lot_urut'] == $lot + 1;
+                                            return $job['no_mesin'] == $mesin['no_mesin'] && $job['tanggal_schedule'] == $date->format('Y-m-d') && $job['lot_urut'] == $lot + 1;
                                         });
                                         $num = $lot + 1;
                                         if (!empty($jobsForDay)) {
@@ -265,17 +266,21 @@
                                                     $capacityColor = 'bg-danger';
                                                 }
 
-                                                echo "<div class='job-item {$capacityColor}' style='width: {$capacityPercentage}%;'>";
-                                                echo "<button class='btn btn-link display: block;' 
+                                                echo "<div class='job-item {$capacityColor}' style='width: {$capacityPercentage}%; text-align: center;'>"; // Memastikan tombol berada di tengah
+                                                echo "<button class='btn btn-link' 
+                                                        style='display: block; width: 100%; height: 100%; text-align: center;' 
                                                         data-bs-toggle='modal' 
                                                         data-bs-target='#modalSchedule' 
-                                                        onclick='showScheduleModal(\"{$mesin['no_mesin']}\", \"{$date->format('Y-m-d')}\", \"{$job['lot_urut']}\")' 
+                                                        data-no-mesin='{$job['no_mesin']}'
+                                                        data-tanggal-schedule='{$job['tanggal_schedule']}'
+                                                        data-lot-urut='{$job['lot_urut']}'
+                                                        onclick='showScheduleModal(\"{$job['no_mesin']}\", \"{$job['tanggal_schedule']}\", \"{$job['lot_urut']}\")' 
                                                         data-bs-toggle='tooltip' 
                                                         data-bs-placement='top' 
                                                         title='{$job['kg_celup']} kg ({$capacityPercentage}%)'>";
-                                                echo "<div class='d-flex flex-column text-center'>";
-                                                echo "<strong style='font-size: 0.9rem;'>{$job['kode_warna']}</strong>"; // Menampilkan kode warna di dalam tombol
-                                                echo "<span style='font-size: 0.85rem;'>{$job['kg_celup']} kg</span>"; // Menampilkan berat dalam tombol
+                                                echo "<div class='d-flex flex-column align-items-center justify-content-center' style='height: 100%;'>"; // Flexbox untuk pusat vertikal dan horizontal
+                                                echo "<span style='font-size: 0.9rem; color: black; font-weight: bold; text-align: center;'>{$job['kode_warna']}</span>"; // Menampilkan kode warna di tengah
+                                                echo "<span style='font-size: 0.85rem; color: black;'>{$job['kg_celup']} kg</span>"; // Berat juga di tengah
                                                 echo "</div>";
                                                 echo "</button>";
                                                 echo "</div>";
@@ -283,9 +288,14 @@
                                         } else {
                                             // Tampilkan kartu kosong jika tidak ada jadwal
                                             echo "<div class='job-item'>";
-                                            echo "<button class='btn btn-link text-decoration-none' data-bs-toggle='modal' data-bs-target='#modalSchedule' onclick='showScheduleModal(\"{$mesin['no_mesin']}\", \"{$date->format('Y-m-d')}\",\"{$num}\",)'>";
+                                            echo "<button class='btn btn-link text-decoration-none'
+                                                    data-bs-toggle='modal' data-bs-target='#modalSchedule'
+                                                    data-no-mesin='{$mesin['no_mesin']}'
+                                                    data-tanggal-schedule='{$date->format('Y-m-d')}'
+                                                    data-lot-urut='{$num}' 
+                                                    onclick='sendDataToController(this)'>";
                                             echo "<div class='text-muted'>Tidak ada jadwal</div>";
-                                            echo "</button> </div>";
+                                            echo "</button></div>";
                                         }
                                     }
 
@@ -302,22 +312,28 @@
     </div>
 </div>
 
-<!-- modal schedule -->
 <div class="modal fade" id="modalSchedule" tabindex="-1" aria-labelledby="modalScheduleLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalScheduleLabel">Detail Jadwal Mesin Celup</h5>
+                <h5 class="modal-title" id="modalScheduleLabel">Mesin-<?= $mesin['no_mesin'] ?> | <?= $job['tanggal_schedule'] ?> | Lot <?= $num ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="modalScheduleBody">
-                <!-- Content here -->
-                tes modal
-                <input type="text" name="" id="tes">
+                <!-- Konten akan dimuat oleh JavaScript -->
+            </div>
+            <!-- modal footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="addSchedule">Tambah Jadwal</button>
+                <button type="button" class="btn btn-danger">Hapus Jadwal</button>
+                <button type="button" class="btn btn-primary">Edit Jadwal</button>
+
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
 </div>
+
 <script>
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
@@ -326,15 +342,64 @@
 
     function showScheduleModal(machine, date, lotUrut) {
         var modalBody = document.getElementById('modalScheduleBody');
-        modalBody.innerHTML = 'Loading...';
-        var tes = document.getElementById('tes');
-        console.log(machine, date, lotUrut);
-        fetch('<?= base_url($role . '/schedule/getScheduleDetails') ?>/' + machine + '/' + date + '/' + lotUrut)
-            .then(response => response.text())
+        modalBody.innerHTML = '<p class="text-center">Loading...</p>'; // Tampilkan indikator loading
+
+        // Fetch data dari server
+        fetch(`<?= base_url($role . '/schedule/getScheduleDetails') ?>/${machine}/${date}/${lotUrut}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil data jadwal.');
+                }
+                return response.text();
+            })
             .then(data => {
-                modalBody.innerHTML = data;
+                modalBody.innerHTML = data; // Isi modal dengan data yang diterima
+            })
+            .catch(error => {
+                modalBody.innerHTML = `<p class="text-danger text-center">${error.message}</p>`; // Tampilkan pesan error
             });
     }
+
+    function sendDataToController(button) {
+        // Ambil data dari atribut data-*
+        const noMesin = button.getAttribute("data-no-mesin");
+        const tanggalSchedule = button.getAttribute("data-tanggal-schedule");
+        const lotUrut = button.getAttribute("data-lot-urut");
+
+        // Susun URL dengan parameter GET
+        const url = `<?= base_url($role . '/schedule/form') ?>?no_mesin=${noMesin}&tanggal_schedule=${tanggalSchedule}&lot_urut=${lotUrut}`;
+
+        // Redirect ke URL tersebut
+        window.location.href = url;
+    }
+
+    // Tambahkan event listener pada tombol "Tambah Jadwal"
+    document.getElementById("addSchedule").addEventListener("click", function() {
+        sendDataToController(this);
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Seleksi modal dan semua tombol
+        const modalSchedule = document.getElementById("modalSchedule");
+        const modalTitle = modalSchedule.querySelector(".modal-title");
+        const modalBody = modalSchedule.querySelector("#modalScheduleBody");
+
+        // Tambahkan event listener pada setiap tombol yang membuka modal
+        document.querySelectorAll("[data-bs-target='#modalSchedule']").forEach(button => {
+            button.addEventListener("click", function() {
+                // Ambil data dari atribut data-*
+                const noMesin = this.getAttribute("data-no-mesin");
+                const tanggalSchedule = this.getAttribute("data-tanggal-schedule");
+                const lotUrut = this.getAttribute("data-lot-urut");
+
+                // Update judul modal
+                modalTitle.textContent = `Mesin-${noMesin} | ${tanggalSchedule} | Lot ${lotUrut}`;
+
+                // Update konten modal (contoh data body)
+
+            });
+        });
+    });
 </script>
 
 
