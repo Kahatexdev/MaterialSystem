@@ -102,10 +102,10 @@
                                         <input type="float" class="form-control kg-stok" readonly required>
                                     </div>
                                 </div>
-                                <div class="col-lg-3 mx-2" style="width: 48%;">
+                                <div class=" col-lg-3 mx-2" style="width: 48%;">
                                     <div class="form-group">
                                         <label for="kgKebutuhan">Kg Kebutuhan</label>
-                                        <input type="float" class="form-control kg-po" required>
+                                        <input type="float" class="form-control kg-po" name="items[0][kg_po]" required>
                                     </div>
                                 </div>
                                 <div style="width: 100%; text-align: center; margin-top: 10px; margin-bottom:10px;">
@@ -250,7 +250,7 @@
                 <div class="col-lg-3 mx-2" style="width: 48%;">
                     <div class="form-group">
                         <label for="kgKebutuhan">Kg Kebutuhan</label>
-                        <input type="float" class="form-control kg-po" required>
+                        <input type="float" class="form-control kg-po" name="items[${tabIndex - 1}][kg_po]" required>
                     </div>
                 </div>
                 <div style="width: 100%; text-align: center; margin-top: 10px; margin-bottom:10px;">
@@ -355,6 +355,7 @@
         container.find('.kg-mu').val(kgMU);
         container.find('.kg-stok').val(kgStok);
         container.find('.kg-po').val(kgPO);
+        // console.log(kgPO);
     });
 
     function tujuan() {
