@@ -36,7 +36,7 @@
                 </div>
                 <div class="group">
                     <a href="<?= base_url($role . '/openPO/' . $orderData['id_order']) ?>" class="btn btn-outline-info">
-                        <i class="fas fa-file-import me-2"></i>PO
+                        <i class="fas fa-file-import me-2"></i>Buka PO
                     </a>
                     <form action="<?= base_url($role . '/exportOpenPO/' . $orderData['no_model']) ?>" method="get" target="_blank">
                         <button type="submit" class="btn btn-outline-info">
