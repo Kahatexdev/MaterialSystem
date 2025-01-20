@@ -60,9 +60,9 @@ class EstimasiStokModel extends Model
     protected $afterDelete    = [];
 
 
-    public function estimasiStokModel($cek)
+    public function cekStok($cek)
     {
-        return $this->select('item_type,kode_warna, sum(kg_aktual) as kg_stok')
+        return $this->select(' sum(kg_aktual) as kg_stok')
             ->where('no_model_new', $cek['no_model'])
             ->where('item_type', $cek['item_type'])
             ->where('kode_warna', $cek['kode_warna'])
