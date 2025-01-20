@@ -16,27 +16,26 @@ class TabelMesinCelup extends Migration
                 'auto_increment' => true,
             ],
             'no_mesin' => [
-                'type' => 'VARCHAR',
-                'constraint' => 255,
+                'type' => 'INT',
+                'constraint' => 11,
             ],
             'min_caps' => [
+                'type' => 'FLOAT',
+            ],
+            'max_caps' => [
+                'type' => 'FLOAT',
+            ],
+            'jml_lot' => [
                 'type' => 'INT',
                 'constraint' => 11,
             ],
-            'max_caps' => [
-                'type' => 'INT',
-                'constraint' => 11,
+            'lmd' => [
+                'type' => 'VARCHAR',
+                'constraint' => 32,
             ],
             'ket_mesin' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
-            ],
-            'desc' => [
-                'type' => 'TEXT',
-            ],
-            'admin' => [
-                'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'created_at' => [
                 'type' => 'DATETIME',
@@ -52,6 +51,6 @@ class TabelMesinCelup extends Migration
 
     public function down()
     {
-        //
+        $this->forge->dropTable('mesin_celup');
     }
 }

@@ -22,23 +22,23 @@ class TabelScheduleCelup extends Migration
             ],
             'no_po' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'no_model' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'item_type' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'kode_warna' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'warna' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'start_mc' => [
                 'type' => 'DATE',
@@ -46,9 +46,16 @@ class TabelScheduleCelup extends Migration
             'kg_celup' => [
                 'type' => 'FLOAT',
             ],
+            'lot_urut' => [
+                'type' => 'INT',
+                'constraint' => 11,
+            ],
             'lot_celup' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
+            ],
+            'tanggal_schedule' => [
+                'type' => 'DATE',
             ],
             'tanggal_bon' => [
                 'type' => 'DATE',
@@ -92,15 +99,15 @@ class TabelScheduleCelup extends Migration
             ],
             'last_status' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'ket_daily_cek' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'user_cek_status' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'created_at' => [
                 'type' => 'DATETIME',

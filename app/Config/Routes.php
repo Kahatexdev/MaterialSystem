@@ -19,13 +19,29 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('updateOrder', 'MasterdataController::updateOrder');
     $routes->post('deleteOrder', 'MasterdataController::deleteOrder');
 
-    $routes->get('material', 'MasterdataController::material');
+    $routes->get('material/(:any)', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');
     $routes->get('getMaterialDetails/(:num)', 'MasterdataController::getMaterialDetails/$1');
     $routes->post('updateMaterial', 'MasterdataController::updateMaterial');
     $routes->get('deleteMaterial/(:num)', 'MasterdataController::deleteMaterial/$1');
+    $routes->get('openPO/(:num)', 'MasterdataController::openPO/$1');
+    $routes->post('openPO/exportPO', 'MasterdataController::exportOpenPO');
+    // $routes->post('exportOpenPO/(:any)/(:any)', 'MasterdataController::exportOpenPO/$1/$2');
+    $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
 
     $routes->post('import/mu', 'MasterdataController::importMU');
+
+    $routes->get('masterMaterial', 'MastermaterialController::index');
+    $routes->post('tampilMasterMaterial', 'MastermaterialController::tampilMasterMaterial');
+    $routes->get('getMasterMaterialDetails', 'MastermaterialController::getMasterMaterialDetails');
+    $routes->post('updateMasterMaterial', 'MastermaterialController::updateMasterMaterial');
+    $routes->post('saveMasterMaterial', 'MastermaterialController::saveMasterMaterial');
+    $routes->get('deleteMasterMaterial', 'MastermaterialController::deleteMasterMaterial');
+
+    $routes->get('schedule', 'ScheduleController::index');
+    $routes->get('schedule/getScheduleDetails/(:num)/(:any)/(:num)', 'ScheduleController::getScheduleDetails/$1/$2/$3');
+    $routes->get('schedule/form', 'ScheduleController::create');
+
     $routes->get('warehouse', 'WarehouseController::index');
     $routes->get('pph', 'PphController::index');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');

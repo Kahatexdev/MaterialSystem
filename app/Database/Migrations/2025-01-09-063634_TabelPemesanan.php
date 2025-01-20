@@ -72,7 +72,7 @@ class TabelPemesanan extends Migration
             ],
             'admin' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'created_at' => [
                 'type' => 'DATETIME',
@@ -91,6 +91,6 @@ class TabelPemesanan extends Migration
 
     public function down()
     {
-        //
+        $this->forge->dropTable('pemesanan');
     }
 }

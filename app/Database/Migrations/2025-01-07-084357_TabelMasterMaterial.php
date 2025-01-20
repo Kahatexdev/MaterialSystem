@@ -11,12 +11,16 @@ class TabelMasterMaterial extends Migration
         $this->forge->addField([
             'item_type' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'deskripsi' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
+            'jenis' => [
+                'type' => 'ENUM',
+                'constraint' => ['BENANG', 'NYLON', 'SPANDEX', 'KARET'],
+            ],  
         ]);
         $this->forge->addKey('item_type', true);
         $this->forge->createTable('master_material');

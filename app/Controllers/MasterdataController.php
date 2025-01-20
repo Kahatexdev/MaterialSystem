@@ -10,6 +10,8 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
+use App\Models\MasterMaterialModel;
+use App\Models\OpenPOModel;
 
 class MasterdataController extends BaseController
 {
@@ -19,11 +21,15 @@ class MasterdataController extends BaseController
     protected $request;
     protected $masterOrderModel;
     protected $materialModel;
+    protected $masterMaterialModel;
+    protected $openPOModel;
+
     public function __construct()
     {
         $this->masterOrderModel = new MasterOrderModel();
         $this->materialModel = new MaterialModel();
-
+        $this->masterMaterialModel = new MasterMaterialModel();
+        $this->openPOModel = new OpenPOModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -31,7 +37,6 @@ class MasterdataController extends BaseController
             return redirect()->to(base_url('/login'));
         }
         $this->isLogedin();
-
     }
     protected function isLogedin()
     {
@@ -75,6 +80,7 @@ class MasterdataController extends BaseController
                 ->orLike('no_model', $search)
                 ->orLike('no_order', $search)
                 ->orLike('buyer', $search)
+                ->orLike('memo', $search)
                 ->orLike('delivery_awal', $search)
                 ->orLike('delivery_akhir', $search)
                 ->orLike('admin', $search);
@@ -141,6 +147,7 @@ class MasterdataController extends BaseController
                 'no_model' => $this->request->getPost('no_model'),
                 'no_order' => $this->request->getPost('no_order'),
                 'buyer' => $this->request->getPost('buyer'),
+                'memo' => $this->request->getPost('memo'),
                 'delivery_awal' => $this->request->getPost('delivery_awal'),
                 'delivery_akhir' => $this->request->getPost('delivery_akhir'),
 
@@ -156,8 +163,6 @@ class MasterdataController extends BaseController
 
         throw new \CodeIgniter\Exceptions\PageNotFoundException();
     }
-
-
 
     public function importMU()
     {
@@ -214,6 +219,10 @@ class MasterdataController extends BaseController
                 $foll_up = $sheet->getCell('D5')->getValue(); // Kolom D5
                 $foll_up = str_replace([': '], '', $foll_up);
 
+                $checkdatabase = $this->masterOrderModel->checkDatabase($no_order, $no_model, $buyer, $formatted_date, $foll_up);
+                if ($checkdatabase) {
+                    return redirect()->back()->with('error', 'Data sudah ada di database.');
+                }
                 // Validasi data per baris sebelum dimasukkan ke grup
                 if (!$no_model || !$style_size) {
                     $invalidRows[] = $key;
@@ -272,6 +281,7 @@ class MasterdataController extends BaseController
                 'created_at' => date('Y-m-d H:i:s'),
             ];
 
+
             // Simpan data order ke database
             $masterOrderModel = new MasterOrderModel();
             $masterOrderModel->insert($data);
@@ -308,6 +318,23 @@ class MasterdataController extends BaseController
                 $validate = $this->validateWithAPI($no_model, $style_size);
 
                 if ($validate) {
+                    // Validasi item type
+                    $item_type = trim($sheet->getCell($headerMap['Item Type'] . $rowIndex)->getValue());
+
+                    // Validasi apakah item_type tidak kosong
+                    if (empty($item_type)) {
+                        return redirect()->back()->with('error', 'Item Type tidak boleh kosong.');
+                    }
+
+                    // Pastikan item_type aman sebelum diteruskan ke model
+                    $item_type = htmlspecialchars($item_type, ENT_QUOTES, 'UTF-8');
+
+                    // Cek keberadaan item_type di database
+                    $checkItemType = $this->masterMaterialModel->checkItemType($item_type);
+
+                    if (!$checkItemType) {
+                        return redirect()->back()->with('error', $item_type . ' tidak ada di database.');
+                    }
                     // Siapkan data untuk dimasukkan ke dalam validDataMaterial
                     $validDataMaterial[] = [
                         'id_order' => $id_order['id_order'],
@@ -315,7 +342,7 @@ class MasterdataController extends BaseController
                         'area' => $validate['area'],
                         'inisial' => $validate['inisial'],
                         'color' => $sheet->getCell($headerMap['Color'] . $rowIndex)->getValue(),
-                        'item_type' => $sheet->getCell($headerMap['Item Type'] . $rowIndex)->getValue(),
+                        'item_type' => $item_type,
                         'kode_warna' => $sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue(),
                         'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(), // Tetap isi dengan Composition(%) yang valid
                         'gw' => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
@@ -329,16 +356,17 @@ class MasterdataController extends BaseController
                     $invalidRows[] = $rowIndex; // Tambahkan baris tidak valid
                 }
             }
-            // dd($validDataOrder, $validDataMaterial);
+
             // Simpan data material ke database
             $materialModel = new MaterialModel();
             $materialModel->insertBatch($validDataMaterial);
 
-
+            // Redirect ke halaman sebelumnya dengan pesan sukses
             return redirect()->back()->with('success', 'Data berhasil diimport.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat mengimport data.');
     }
 
     private function validateWithAPI($no_model, $style_size)
@@ -360,9 +388,9 @@ class MasterdataController extends BaseController
         }
     }
 
-    public function material()
+    public function material($id)
     {
-        $id_order = $this->request->getGet('id_order'); // Ambil id_order dari URL
+        $id_order = $id; // Ambil id_order dari URL
 
         if (!$id_order) {
             // Jika id_order tidak ditemukan, redirect atau tampilkan error
@@ -376,15 +404,15 @@ class MasterdataController extends BaseController
             // Jika data tidak ditemukan, redirect atau tampilkan error
             return redirect()->to(base_url($this->role . '/masterOrder'))->with('error', 'Data Order tidak ditemukan.');
         }
-
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
             'orderData' => $orderData, // Kirim data ke view
+            'no_model' => $orderData['no_model']
         ];
 
-        return view($this->role . '/material/index', $data);
+        return view($this->role . '/mastermaterial/detailMaterial', $data);
     }
 
     public function tampilMaterial()
@@ -512,4 +540,59 @@ class MasterdataController extends BaseController
         throw new \CodeIgniter\Exceptions\PageNotFoundException();
     }
 
+    public function openPO($id)
+    {
+
+        $masterOrder = $this->masterOrderModel->getMaterialOrder($id);
+        $orderData = $this->masterOrderModel->find($id);
+
+        // foreach($masterOrder as $order){
+        //     $model = $order['no_model'];
+        //     $itemType = $order['item_type'];
+        //     $kodeWarna = $order['kode_warna'];
+
+        //     $cek=[
+        //         'no_model'=>$model,
+        //         'item_type'=>$itemType,
+        //         'kode_warna'=>$kodeWarna
+        //     ]
+        //     $cekStok = $this->estimasiStokModel($cek);
+
+        // }
+        $data = [
+            'model' => $orderData['no_model'],
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'order' => $masterOrder,
+            'id_order' => $id
+        ];
+        return view($this->role . '/mastermaterial/openPO', $data);
+    }
+
+    public function exportOpenPO()
+    {
+
+        $data = $this->request->getPost();
+
+        $items = $data['items'] ?? [];
+        foreach ($items as $item) {
+            $itemData = [
+                'role'             => $this->role,
+                'no_model'         => $data['no_model'],
+                'item_type'        => $item['item_type'],
+                'kode_warna'       => $item['kode_warna'],
+                'color'            => $item['color'],
+                'kg_po'            => $item['kg_po'],
+                'keterangan'       => $data['keterangan'],
+                'penanggung_jawab' => $data['penanggung_jawab'],
+                'admin'            => session()->get('username'),
+            ];
+
+            // Simpan data ke database
+            $this->openPOModel->insert($itemData);
+        }
+
+        return redirect()->back()->with('success', 'Data berhasil diimport.');
+    }
 }

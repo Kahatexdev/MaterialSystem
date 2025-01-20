@@ -28,19 +28,19 @@ class TabelPemasukan extends Migration
             ],
             'no_model' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'item_type' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'kode_warna' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'warna' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'kgs_masuk' => [
                 'type' => 'FLOAT',
@@ -53,7 +53,7 @@ class TabelPemasukan extends Migration
             ],
             'nama_cluster' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'history_order' => [
                 'type' => 'TEXT',
@@ -67,7 +67,7 @@ class TabelPemasukan extends Migration
             ],
             'admin' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'created_at' => [
                 'type' => 'DATETIME',

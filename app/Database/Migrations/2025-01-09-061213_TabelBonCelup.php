@@ -38,7 +38,7 @@ class TabelBonCelup extends Migration
             ],
             'no_surat_jalan' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'detail_sj' => [
                 'type' => 'TEXT',
@@ -49,7 +49,7 @@ class TabelBonCelup extends Migration
             ],
             'admin' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'created_at' => [
                 'type' => 'DATETIME',

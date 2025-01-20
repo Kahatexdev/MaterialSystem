@@ -33,7 +33,7 @@ class TabelOutCelup extends Migration
             ],
             'lot_kirim' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'ganti_retur' => [
                 'type' => 'ENUM',
@@ -41,7 +41,7 @@ class TabelOutCelup extends Migration
             ],
             'admin' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'created_at' => [
                 'type' => 'DATETIME',

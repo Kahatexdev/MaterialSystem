@@ -1,4 +1,4 @@
-<?php $this->extend($role . '/dashboard/header'); ?>
+<?php $this->extend($role . '/masterdata/header'); ?>
 <?php $this->section('content'); ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
 <div class="container-fluid py-4">
@@ -78,8 +78,10 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Order</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Buyer</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Memo</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Unit</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Admin</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                         </tr>
@@ -99,7 +101,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="updateModalLabel">Update Data</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="updateForm">
@@ -125,12 +127,20 @@
                             <input type="text" class="form-control" name="buyer" id="buyer" required>
                         </div>
                         <div class="mb-3">
+                            <label for="memo" class="form-label">Memo</label>
+                            <input type="text" class="form-control" name="memo" id="memo" required>
+                        </div>
+                        <div class="mb-3">
                             <label for="delivery_awal" class="form-label">Delivery Awal</label>
                             <input type="date" class="form-control" name="delivery_awal" id="delivery_awal" required>
                         </div>
                         <div class="mb-3">
                             <label for="delivery_akhir" class="form-label">Delivery Akhir</label>
                             <input type="date" class="form-control" name="delivery_akhir" id="delivery_akhir" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="unit" class="form-label">Unit</label>
+                            <input type="text" class="form-control" name="unit" id="unit" required>
                         </div>
                         <!-- Button update dan batal di sebelah kanan -->
                         <div class="modal-footer">
@@ -176,10 +186,16 @@
                         "data": "buyer",
                     },
                     {
+                        "data": "memo",
+                    },
+                    {
                         "data": "delivery_awal",
                     },
                     {
                         "data": "delivery_akhir",
+                    },
+                    {
+                        "data": "unit",
                     },
                     {
                         "data": "admin",
@@ -198,7 +214,7 @@
             // Event listener untuk tombol Detail Master Order ke halaman Material berdasarkan id_order
             $('#example').on('click', '.btn-detail', function() {
                 const id = $(this).data('id');
-                window.location.href = '<?= base_url($role . '/material') ?>?id_order=' + id;
+                window.location.href = '<?= base_url($role . '/material' . '/') ?>' + id;
 
             });
 
@@ -218,8 +234,10 @@
                         $('#no_model').val(response.no_model);
                         $('#no_order').val(response.no_order);
                         $('#buyer').val(response.buyer);
+                        $('#memo').val(response.memo);
                         $('#delivery_awal').val(response.delivery_awal);
                         $('#delivery_akhir').val(response.delivery_akhir);
+                        $('#unit').val(response.unit);
 
                         // Tambahkan data lain sesuai kebutuhan
 

@@ -17,19 +17,19 @@ class TabelStock extends Migration
             ],
             'no_model' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'item_type' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'kode_warna' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'warna' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'kgs_stock_awal' => [
                 'type' => 'FLOAT',
@@ -39,7 +39,7 @@ class TabelStock extends Migration
             ],
             'lot_awal' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'kgs_in_out' => [
                 'type' => 'FLOAT',
@@ -52,15 +52,15 @@ class TabelStock extends Migration
             ],
             'lot_stock' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'nama_cluster' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'admin' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'created_at' => [
                 'type' => 'DATETIME',
@@ -77,6 +77,6 @@ class TabelStock extends Migration
 
     public function down()
     {
-        //
+        $this->forge->dropTable('stock');
     }
 }

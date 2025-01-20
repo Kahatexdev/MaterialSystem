@@ -30,7 +30,19 @@
     <div class="card card-frame">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 font-weight-bolder">Data Material</h5>
+                <div class="text-header">
+
+                    <h5 class="mb-0 font-weight-bolder">Data Material <?= $no_model ?></h5>
+                </div>
+                <div class="group">
+                    <a href="<?= base_url($role . '/openPO/' . $orderData['id_order']) ?>" class="btn btn-outline-info">
+                        <i class="fas fa-file-import me-2"></i>PO
+                    </a>
+
+                    <button type="submit" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#ExportModal">
+                        <i class="fas fa-file-export me-2"></i>EXPORT PO
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -40,7 +52,7 @@
     <div class="card mt-4">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="example" class="display compact" style="width:100%">
+                <table id="example" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>
                         <tr>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
@@ -138,6 +150,45 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                             <button type="submit" class="btn btn-info">Update</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Export PO -->
+    <div class="modal fade" id="ExportModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateModalLabel">Update Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                    <form action="<?= base_url($role . '/exportOpenPO/' . $orderData['no_model']) ?>" method="get" target="_blank">
+                        <div class="mb-3">
+                            <label for="style_size" class="form-label">Tujuan</label>
+                            <select class="form-control tujuan" name="tujuan" required>
+                                <option value="-">Pilih Tujuan</option>
+                                <option value="CELUP">CELUP</option>
+                                <option value="COVERING">COVERING</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="style_size" class="form-label">Jenis Bahan Baku</label>
+                            <select class="form-control jenis" name="jenis" id="jenis" required>
+                                <option value="-">Pilih Jenis</option>
+                                <option value="BENANG">BENANG</option>
+                                <option value="NYLON">NYLON</option>
+                                <option value="SPANDEX">SPANDEX & KARET</option>
+                            </select>
+                            <input type="hidden" class="form-control" id="jenis2" name="jenis2">
+                        </div>
+                        <!-- Button update dan batal di sebelah kanan -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-info">Generate</button>
                         </div>
 
                     </form>
@@ -307,6 +358,19 @@
                 });
             });
 
+        });
+
+        // Ambil elemen select dan input Karet
+        const jenisSelect = document.getElementById('jenis');
+        const jenis2Input = document.getElementById('jenis2');
+
+        // Tambahkan event listener untuk perubahan pada elemen select
+        jenisSelect.addEventListener('change', function() {
+            if (jenisSelect.value === 'SPANDEX') {
+                jenis2Input.value = 'KARET'; // Jika SPANDEX, isi dengan 'KARET'
+            } else {
+                jenis2Input.value = ''; // Jika bukan SPANDEX, kosongkan input
+            }
         });
     </script>
     <?php $this->endSection(); ?>

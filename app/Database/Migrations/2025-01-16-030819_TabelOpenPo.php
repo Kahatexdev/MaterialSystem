@@ -4,51 +4,42 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class TabelMasterOrder extends Migration
+class OpenPo extends Migration
 {
     public function up()
     {
         $this->forge->addField([
-            'id_order' => [
+            'id_po' => [
                 'type' => 'INT',
                 'constraint' => 11,
                 'unsigned' => true,
                 'auto_increment' => true,
             ],
-            'no_order' => [
-                'type' => 'VARCHAR',
-                'constraint' => 32,
-            ],
             'no_model' => [
                 'type' => 'VARCHAR',
                 'constraint' => 32,
             ],
-            'buyer' => [
+            'item_type' => [
                 'type' => 'VARCHAR',
                 'constraint' => 32,
             ],
-            'foll_up' => [
+            'kode_warna' => [
                 'type' => 'VARCHAR',
                 'constraint' => 32,
             ],
-            'lco_date' => [
-                'type' => 'DATE',
+            'color' => [
+                'type' => 'VARCHAR',
+                'constraint' => 32,
             ],
-            'memo' => [
+            'kg_po' => [
+                'type' => 'FLOAT',
+            ],
+            'keterangan' => [
                 'type' => 'TEXT',
-                'null' => true,
             ],
-            'delivery_awal' => [
-                'type' => 'DATE',
-                'null' => true,
-            ],
-            'delivery_akhir' => [
-                'type' => 'DATE',
-                'null' => true,
-            ],
-            'unit' => [
-                'type' => 'ENUM',
-                'constraint' => ['CIJERAH', 'MAJALAYA'],
+            'penanggung_jawab' => [
+                'type' => 'VARCHAR',
+                'constraint' => 32,
             ],
             'admin' => [
                 'type' => 'VARCHAR',
@@ -59,15 +50,15 @@ class TabelMasterOrder extends Migration
             ],
             'updated_at' => [
                 'type' => 'DATETIME',
-                'null' => true,
-            ]
+                null => true,
+            ],
         ]);
-        $this->forge->addKey('id_order', true);
-        $this->forge->createTable('master_order');
+        $this->forge->addKey('id_po', true);
+        $this->forge->createTable('open_po');
     }
 
     public function down()
     {
-        $this->forge->dropTable('master_order');
+        $this->forge->dropTable('open_po');
     }
 }

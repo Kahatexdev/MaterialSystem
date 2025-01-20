@@ -22,27 +22,27 @@ class TabelMaterial extends Migration
             ],
             'style_size' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'area' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'inisial' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'color' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'item_type' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'kode_warna' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'composition' => [
                 'type' => 'FLOAT',
@@ -61,7 +61,7 @@ class TabelMaterial extends Migration
             ],
             'admin' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 32,
             ],
             'created_at' => [
                 'type' => 'DATETIME',
@@ -73,6 +73,7 @@ class TabelMaterial extends Migration
         ]);
         $this->forge->addKey('id_material', true);
         $this->forge->addForeignKey('id_order', 'master_order', 'id_order', 'CASCADE', 'CASCADE');
+        $this->forge->addForeignKey('item_type', 'master_material', 'item_type', 'CASCADE', 'CASCADE');
         $this->forge->createTable('material');
     }
 
