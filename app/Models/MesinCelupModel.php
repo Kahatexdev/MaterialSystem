@@ -52,4 +52,20 @@ class MesinCelupModel extends Model
             ->orderBy('no_mesin', 'ASC')
             ->findAll();
     }
+
+    public function getMinCaps($no_mesin)
+    {
+        return $this->table('mesin_celup')
+            ->select('min_caps')
+            ->where('no_mesin', $no_mesin)
+            ->first();
+    }
+
+    public function getMaxCaps($no_mesin)
+    {
+        return $this->table('mesin_celup')
+            ->select('max_caps')
+            ->where('no_mesin', $no_mesin)
+            ->first();
+    }
 }

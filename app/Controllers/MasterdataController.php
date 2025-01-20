@@ -12,6 +12,7 @@ use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
 use App\Models\OpenPOModel;
+use App\Models\EstimasiStokModel;
 
 class MasterdataController extends BaseController
 {
@@ -22,6 +23,7 @@ class MasterdataController extends BaseController
     protected $masterOrderModel;
     protected $materialModel;
     protected $masterMaterialModel;
+    protected $estimasiStokModel;
     protected $openPOModel;
 
     public function __construct()
@@ -29,6 +31,7 @@ class MasterdataController extends BaseController
         $this->masterOrderModel = new MasterOrderModel();
         $this->materialModel = new MaterialModel();
         $this->masterMaterialModel = new MasterMaterialModel();
+        $this->estimasiStokModel = new EstimasiStokModel();
         $this->openPOModel = new OpenPOModel();
 
         $this->role = session()->get('role');
@@ -542,23 +545,34 @@ class MasterdataController extends BaseController
 
     public function openPO($id)
     {
-
         $masterOrder = $this->masterOrderModel->getMaterialOrder($id);
         $orderData = $this->masterOrderModel->find($id);
 
-        // foreach($masterOrder as $order){
-        //     $model = $order['no_model'];
-        //     $itemType = $order['item_type'];
-        //     $kodeWarna = $order['kode_warna'];
+        foreach ($masterOrder as &$order) { // Note: pass by reference to modify the original array
+            foreach ($order['kode_warna'] as &$item) {
+                $model = $item['no_model'];
+                $itemType = $item['item_type'];
+                $kodeWarna = $item['kode_warna'];
 
-        //     $cek=[
-        //         'no_model'=>$model,
-        //         'item_type'=>$itemType,
-        //         'kode_warna'=>$kodeWarna
-        //     ]
-        //     $cekStok = $this->estimasiStokModel($cek);
+                $cek = [
+                    'no_model' => $model,
+                    'item_type' => $itemType,
+                    'kode_warna' => $kodeWarna,
+                ];
 
-        // }
+                $cekStok = $this->estimasiStokModel->cekStok($cek);
+
+                if ($cekStok) {
+                    $kebutuhan = max(0, $item['total_kg'] - $cekStok['kg_stok']); // Ensure no negative values
+                    $item['kg_stok'] = $cekStok['kg_stok'];
+                    $item['kg_po'] = $kebutuhan;
+                } else {
+                    $item['kg_stok'] = 0;
+                    $item['kg_po'] = $item['total_kg'];
+                }
+            }
+        }
+
         $data = [
             'model' => $orderData['no_model'],
             'active' => $this->active,
@@ -570,9 +584,8 @@ class MasterdataController extends BaseController
         return view($this->role . '/mastermaterial/openPO', $data);
     }
 
-    public function exportOpenPO()
+    public function saveOpenPO()
     {
-
         $data = $this->request->getPost();
 
         $items = $data['items'] ?? [];
@@ -593,6 +606,6 @@ class MasterdataController extends BaseController
             $this->openPOModel->insert($itemData);
         }
 
-        return redirect()->back()->with('success', 'Data berhasil diimport.');
+        return redirect()->back()->with('success', 'Data berhasil disimpan.');
     }
 }
