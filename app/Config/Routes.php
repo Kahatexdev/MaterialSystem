@@ -45,6 +45,10 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/getWarna', 'ScheduleController::getWarnabyItemTypeandKodeWarna');
     $routes->get('schedule/getPO', 'ScheduleController::getPO');
     $routes->get('schedule/getPODetails', 'ScheduleController::getPODetails');
+    $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
+    $routes->post('schedule/saveSchedule', 'ScheduleController::saveSchedule');
+    $routes->get('schedule/editSchedule/(:num)', 'ScheduleController::editSchedule/$1');
+    $routes->get('schedule/deleteSchedule/(:num)', 'ScheduleController::deleteSchedule/$1');
 
     $routes->get('warehouse', 'WarehouseController::index');
     $routes->get('pph', 'PphController::index');

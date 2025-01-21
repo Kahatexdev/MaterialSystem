@@ -43,4 +43,18 @@ class MaterialModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    public function getQtyPO($id_order, $item_type, $kode_warna)
+    {
+        return $this->db->table('material')
+            ->select('sum(kgs) as kgs')
+            ->where('id_order', $id_order)
+            ->where('item_type', $item_type)
+            ->where('kode_warna', $kode_warna)
+            ->groupBy('id_order')
+            ->groupBy('item_type')
+            ->groupBy('kode_warna')
+            ->get()
+            ->getRowArray();
+    }
 }

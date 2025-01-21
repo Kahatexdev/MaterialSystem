@@ -54,7 +54,8 @@ class ScheduleController extends BaseController
     {
         // Simulasi data jadwal
         $scheduleData = $this->scheduleCelupModel->getScheduleCelup();
-        // dd ($scheduleData);
+        // json_encode($scheduleData);
+        // var_dump ($scheduleData);
         $mesin_celup = $this->mesinCelupModel->getMesinCelupBenang();
         $totalCapacityUsed = array_sum(array_column($scheduleData, 'weight'));
         $totalCapacityMax = array_sum(array_column($mesin_celup, 'max_caps'));
@@ -77,18 +78,12 @@ class ScheduleController extends BaseController
     {
         // Get the schedule details from the model
         $scheduleDetails = $this->scheduleCelupModel->getScheduleDetails($no_mesin, $tanggal_schedule, $lot_urut);
-
-        // Check if data is not empty
         if ($scheduleDetails) {
-            // Load the modal view and pass the scheduleDetails to it
-            echo view($this->role . '/schedule/modal_details', ['scheduleDetails' => $scheduleDetails]);
+            return response()->setJSON($scheduleDetails);
         } else {
-            // If no data is found, display a message
-            echo "<div class='text-center text-danger'>Data tidak ditemukan.</div>";
+            return response()->setStatusCode(ResponseInterface::HTTP_NOT_FOUND);          
         }
     }
-
-
 
     public function create()
     {
@@ -124,7 +119,7 @@ class ScheduleController extends BaseController
         ];
         // var_dump($data);
 
-        return view($this->role . '/schedule/form', $data);
+        return view($this->role . '/schedule/form-create', $data);
     }
 
     public function getItemType()
@@ -182,6 +177,106 @@ class ScheduleController extends BaseController
         } else {
             return $this->response->setJSON(['error' => 'No data found']);
         }
+    }
+
+    public function getQtyPO()
+    {
+        $id_order = $this->request->getGet('id_order');
+        $item_type = $this->request->getGet('item_type');
+        $kode_warna = $this->request->getGet('kode_warna');
+        $qtyPO = $this->materialModel->getQtyPO($id_order, $item_type, $kode_warna);
+
+        if ($qtyPO) {
+            return $this->response->setJSON($qtyPO);
+        } else {
+            return $this->response->setJSON(['error' => 'No data found']);
+        }
+    }
+
+    public function saveSchedule()
+    {
+        // Ambil semua data dari form menggunakan POST
+        $scheduleData = $this->request->getPost();
+
+        // Ambil id_mesin dan no_model
+        $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
+        $poList = $scheduleData['po']; // Array po[]
+
+        $dataBatch = []; // Untuk menyimpan batch data
+
+        // Looping data array untuk menyusun data yang akan disimpan
+        foreach ($poList as $index => $po) {
+            $no_model = $this->masterOrderModel->getNoModel($po);
+
+            $dataBatch[] = [
+                'id_mesin' => $id_mesin['id_mesin'],
+                'no_model' => $no_model['no_model'],
+                'item_type' => $scheduleData['item_type'],
+                'kode_warna' => $scheduleData['kode_warna'],
+                'warna' => $scheduleData['warna'],
+                'start_mc' => $scheduleData['tgl_start_mc'][$index] ?? null,
+                'kg_celup' => $scheduleData['qty_celup'][$index],
+                'lot_urut' => $scheduleData['lot_urut'],
+                'lot_celup' => $scheduleData['lot_celup'] ?? null,
+                'tanggal_schedule' => $scheduleData['tanggal_schedule'],
+                'user_cek_status' => session()->get('username'),
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
+        }
+
+        // Debugging untuk memeriksa data sebelum menyimpannya
+        // var_dump($dataBatch); 
+        // dd($dataBatch);
+
+        // Simpan batch data ke database
+        $result = $this->scheduleCelupModel->insertBatch($dataBatch);
+
+        // Cek apakah data berhasil disimpan
+        if ($result) {
+            return redirect()->to(session()->get('role') . '/schedule')->with('success', 'Jadwal berhasil disimpan!');
+        } else {
+            return redirect()->back()->with('error', 'Gagal menyimpan jadwal!');
+        }
+    }
+
+
+    public function editSchedule($id)
+    {
+        // Ambil data dari database
+        $scheduleData = $this->scheduleCelupModel->getScheduleDetailsById($id);
+        // var_dump($scheduleData);
+        $no_mesin = $this->mesinCelupModel->getNoMesin($scheduleData['id_mesin']);
+        $jenis = $this->masterMaterialModel->select('jenis')->where('item_type', $scheduleData['item_type'])->first();
+        $jenis_bahan_baku = $this->masterMaterialModel->getJenisBahanBaku();
+        $item_type = $this->masterMaterialModel->getItemType();
+        $min = $this->mesinCelupModel->getMinCaps($scheduleData['id_mesin']);
+        $max = $this->mesinCelupModel->getMaxCaps($scheduleData['id_mesin']);
+        $poData = $this->openPoModel->getNomorModel();
+
+        // Get PO details related to the schedule, assuming this is stored in a related table
+        // $poDetails = $this->scheduleCelupModel->getPODetailsByScheduleId($id);
+
+        // Jika data tidak ditemukan, kembalikan ke halaman sebelumnya
+        if (!$scheduleData) {
+            return redirect()->back();
+        }
+
+        // Passing the schedule data, including PO details, to the view
+        $data = [
+            'active' => $this->active,
+            'title' => 'Schedule',
+            'role' => $this->role,
+            'scheduleData' => $scheduleData,
+            'no_mesin' => $no_mesin['no_mesin'],
+            'jenis' => $jenis['jenis'],
+            'jenis_bahan_baku' => $jenis_bahan_baku,
+            'item_type' => $item_type,
+            'min_caps' => $min['min_caps'],
+            'max_caps' => $max['max_caps'],
+            'poData' => $poData,
+        ];
+
+        return view($this->role . '/schedule/form-edit', $data);
     }
 
 
