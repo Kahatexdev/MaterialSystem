@@ -293,7 +293,7 @@
                                                     data-no-mesin='{$mesin['no_mesin']}'
                                                     data-tanggal-schedule='{$date->format('Y-m-d')}'
                                                     data-lot-urut='{$num}' 
-                                                    onclick='sendDataToController(this)'>";
+                                                    onclick='showScheduleModal(\"{$mesin['no_mesin']}\", \"{$date->format('Y-m-d')}\", \"{$num}\")'>";
                                             echo "<div class='text-muted'>Tidak ada jadwal</div>";
                                             echo "</button></div>";
                                         }
@@ -316,55 +316,43 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalScheduleLabel">Mesin-<?= $mesin['no_mesin'] ?> | <?= $job['tanggal_schedule'] ?> | Lot <?= $num ?></h5>
+                <h5 class="modal-title" id="modalScheduleLabel">Jadwal Mesin</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="modalScheduleBody">
-                <!-- Konten akan dimuat oleh JavaScript -->
+                <!-- Isi modal dengan JS -->
             </div>
-            <!-- modal footer -->
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" id="addSchedule">Tambah Jadwal</button>
-                <button type="button" class="btn btn-danger">Hapus Jadwal</button>
-                <button type="button" class="btn btn-primary">Edit Jadwal</button>
-
+                <button type="button" class="btn btn-danger" id="deleteSchedule">Hapus Jadwal</button>
+                <button type="button" class="btn btn-primary" id="editSchedule">Edit Jadwal</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
 </div>
 
+
 <script>
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    });
-
-    function showScheduleModal(machine, date, lotUrut) {
-        var modalBody = document.getElementById('modalScheduleBody');
-        modalBody.innerHTML = '<p class="text-center">Loading...</p>'; // Tampilkan indikator loading
-
-        // Fetch data dari server
-        fetch(`<?= base_url($role . '/schedule/getScheduleDetails') ?>/${machine}/${date}/${lotUrut}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Gagal mengambil data jadwal.');
-                }
-                return response.text();
-            })
-            .then(data => {
-                modalBody.innerHTML = data; // Isi modal dengan data yang diterima
-            })
-            .catch(error => {
-                modalBody.innerHTML = `<p class="text-danger text-center">${error.message}</p>`; // Tampilkan pesan error
+    document.addEventListener("DOMContentLoaded", function() {
+        var tooltipList = [].slice
+            .call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            .map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
             });
-    }
+    });
 
     function sendDataToController(button) {
         // Ambil data dari atribut data-*
         const noMesin = button.getAttribute("data-no-mesin");
         const tanggalSchedule = button.getAttribute("data-tanggal-schedule");
         const lotUrut = button.getAttribute("data-lot-urut");
+
+        // Validasi data untuk memastikan nilainya tidak null atau undefined
+        if (!noMesin || !tanggalSchedule || !lotUrut) {
+            console.error("Data tidak lengkap!");
+            return;
+        }
 
         // Susun URL dengan parameter GET
         const url = `<?= base_url($role . '/schedule/form') ?>?no_mesin=${noMesin}&tanggal_schedule=${tanggalSchedule}&lot_urut=${lotUrut}`;
@@ -374,30 +362,76 @@
     }
 
     // Tambahkan event listener pada tombol "Tambah Jadwal"
-    document.getElementById("addSchedule").addEventListener("click", function() {
-        sendDataToController(this);
+    document.addEventListener("click", function(event) {
+        if (event.target.id === "addSchedule") {
+            sendDataToController(event.target);
+        }
     });
 
     document.addEventListener("DOMContentLoaded", function() {
-        // Seleksi modal dan semua tombol
+        // Definisikan fungsi showScheduleModal terlebih dahulu
+        function showScheduleModal(machine, date, lotUrut) {
+            const modalTitle = document.querySelector("#modalSchedule .modal-title");
+            const modalBody = document.querySelector("#modalScheduleBody");
+
+            // Update modal title
+            modalTitle.textContent = `Mesin-${machine} | ${date} | Lot ${lotUrut}`;
+
+            // Show loading message while fetching data
+            modalBody.innerHTML = `<div class="text-center text-muted">Loading...</div>`;
+
+            // URL for the request
+            const url = `<?= base_url($role . '/schedule/getScheduleDetails') ?>/${machine}/${date}/${lotUrut}`;
+
+            // Fetch schedule details from the server
+            fetch(url)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text(); // Assuming the server returns HTML content (as in your `modal_details` view)
+                })
+                .then((data) => {
+                    // Insert the fetched HTML into the modal body
+                    modalBody.innerHTML = data;
+
+                    // Show the modal after content is loaded
+                    const modal = new bootstrap.Modal(document.getElementById("modalSchedule"));
+                    modal.show();
+                })
+                .catch((error) => {
+                    console.error("Error fetching data:", error);
+                    modalBody.innerHTML = `<div class='text-center text-danger'>Gagal memuat data. Error: ${error.message}</div>`;
+                });
+        }
+
+        // Seleksi elemen modal
         const modalSchedule = document.getElementById("modalSchedule");
         const modalTitle = modalSchedule.querySelector(".modal-title");
-        const modalBody = modalSchedule.querySelector("#modalScheduleBody");
 
-        // Tambahkan event listener pada setiap tombol yang membuka modal
-        document.querySelectorAll("[data-bs-target='#modalSchedule']").forEach(button => {
+        // Tambahkan event listener untuk tombol yang membuka modal
+        document.querySelectorAll("[data-bs-target='#modalSchedule']").forEach((button) => {
             button.addEventListener("click", function() {
-                // Ambil data dari atribut data-*
                 const noMesin = this.getAttribute("data-no-mesin");
                 const tanggalSchedule = this.getAttribute("data-tanggal-schedule");
                 const lotUrut = this.getAttribute("data-lot-urut");
 
-                // Update judul modal
-                modalTitle.textContent = `Mesin-${noMesin} | ${tanggalSchedule} | Lot ${lotUrut}`;
-
-                // Update konten modal (contoh data body)
-
+                // Panggil fungsi untuk menampilkan modal
+                showScheduleModal(noMesin, tanggalSchedule, lotUrut);
             });
+        });
+
+
+        // Tambahkan event listener untuk tombol Tambah Jadwal
+        document.getElementById("addSchedule").addEventListener("click", function() {
+            // Ambil data dari atribut modal
+            const noMesin = modalTitle.textContent.split(" | ")[0].split("-")[1];
+            const tanggalSchedule = modalTitle.textContent.split(" | ")[1];
+            const lotUrut = modalTitle.textContent.split(" | ")[2].split(" ")[1];
+
+            // Redirect ke URL tambah jadwal
+            const url = `<?= base_url($role . '/schedule/form') ?>?no_mesin=${noMesin}&tanggal_schedule=${tanggalSchedule}&lot_urut=${lotUrut}`;
+            window.location.href = url;
         });
     });
 </script>

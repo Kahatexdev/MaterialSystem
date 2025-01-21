@@ -4,7 +4,7 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class OpenPOModel extends Model
+class OpenPoModel extends Model
 {
     protected $table            = 'open_po';
     protected $primaryKey       = 'id_po';
@@ -65,6 +65,21 @@ class OpenPOModel extends Model
             ->groupEnd() // Akhiri grup
             ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
             ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
+            ->findAll();
+    }
+
+    public function getWarnabyItemTypeandKodeWarna($item_type, $kode_warna)
+    {
+        return $this->select('color')
+            ->where('item_type', $item_type)
+            ->where('kode_warna', $kode_warna)
+            ->first();
+    }
+
+    public function getNomorModel()
+    {
+        return $this->select('no_model')
+            ->distinct()
             ->findAll();
     }
 }
