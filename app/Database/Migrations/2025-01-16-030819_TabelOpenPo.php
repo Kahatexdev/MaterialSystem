@@ -37,6 +37,10 @@ class OpenPo extends Migration
             'keterangan' => [
                 'type' => 'TEXT',
             ],
+            'penerima' => [
+                'type' => 'VARCHAR',
+                'constraint' => 32,
+            ],
             'penanggung_jawab' => [
                 'type' => 'VARCHAR',
                 'constraint' => 32,

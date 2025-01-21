@@ -12,7 +12,34 @@ class ScheduleCelupModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [];
+    protected $allowedFields    = [
+        'id_celup',
+        'id_mesin',
+        'no_model',
+        'item_type',
+        'kode_warna',
+        'warna',
+        'start_mc',
+        'kg_celup',
+        'lot_urut',
+        'lot_celup',
+        'tanggal_schedule',
+        'tanggal_bon',
+        'tanggal_celup',
+        'tanggal_bongkar',
+        'tanggal_press',
+        'tanggal_oven',
+        'tanggal_rajut_pagi',
+        'tanggal_kelos',
+        'tanggal_acc',
+        'tanggal_reject',
+        'tanggal_perbaikan',
+        'last_status',
+        'ket_daily_cek',
+        'user_cek_status',
+        'created_at',
+        'updated_at',
+    ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -21,7 +48,7 @@ class ScheduleCelupModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -47,19 +74,25 @@ class ScheduleCelupModel extends Model
     public function getScheduleCelup()
     {
         return $this->table('schedule_celup')
-            ->select('*, mesin_celup.no_mesin')
+            ->select('*, mesin_celup.no_mesin, sum(kg_celup) as total_kg')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->groupBy('schedule_celup.id_mesin')
+            ->groupBy('schedule_celup.tanggal_schedule')
+            ->groupBy('schedule_celup.lot_urut')
             ->findAll();
     }
 
     public function getScheduleDetails($machine, $date, $lot)
     {
         return $this->table('schedule_celup')
-            ->select('*, mesin_celup.no_mesin')
+            ->select('*, mesin_celup.no_mesin, sum(kg_celup) as total_kg')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->where('mesin_celup.no_mesin', $machine)
             ->where('schedule_celup.tanggal_schedule', $date)
             ->where('schedule_celup.lot_urut', $lot)
+            ->groupBy('schedule_celup.id_mesin')
+            ->groupBy('schedule_celup.tanggal_schedule')
+            ->groupBy('schedule_celup.lot_urut')
             ->findAll();
     }
 
@@ -71,5 +104,20 @@ class ScheduleCelupModel extends Model
             ->where('tanggal_schedule', $date)
             ->where('lot_urut', $lot)
             ->findAll();
+    }
+
+    public function saveSchedule($data)
+    {
+        return $this->table('schedule_celup')
+            ->insertbatch($data);
+    }
+
+    public function getScheduleDetailsById($id)
+    {
+        return $this->table('schedule_celup')
+            ->select('*, mesin_celup.no_mesin, sum(kg_celup) as total_kg')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->where('id_celup', $id)
+            ->first();
     }
 }

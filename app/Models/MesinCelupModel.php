@@ -77,4 +77,20 @@ class MesinCelupModel extends Model
             ->where('no_mesin', $no_mesin)
             ->first();
     }
+
+    public function getIdMesin($no_mesin)
+    {
+        return $this->table('mesin_celup')
+            ->select('id_mesin')
+            ->where('no_mesin', $no_mesin)
+            ->first();
+    }
+
+    public function getNoMesin($id_mesin)
+    {
+        return $this->table('mesin_celup')
+            ->select('no_mesin')
+            ->where('id_mesin', $id_mesin)
+            ->first();
+    }
 }
