@@ -410,7 +410,6 @@ class MasterdataController extends BaseController
     {
         $masterOrder = $this->masterOrderModel->getMaterialOrder($id);
         $orderData = $this->masterOrderModel->find($id);
-
         foreach ($masterOrder as &$order) { // Note: pass by reference to modify the original array
             foreach ($order['kode_warna'] as &$item) {
                 $model = $item['no_model'];
