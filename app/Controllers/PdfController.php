@@ -49,17 +49,12 @@ class PdfController extends BaseController
         $tujuan = $this->request->getGet('tujuan');
         $jenis = $this->request->getGet('jenis');
         $jenis2 = $this->request->getGet('jenis2');
-
-        if ($jenis == 'BENANG') {
-            $penanggung_jawab = 'CI MEGAH';
-        } else {
-            $penanggung_jawab = 'KO HARTANTO';
-        }
+        dd($jenis);
 
         if ($tujuan == 'CELUP') {
-            $penerima = 'RETNO';
+            $penerima = 'Retno';
         } else {
-            $penerima = 'PARYANTI';
+            $penerima = 'Paryanti';
         }
 
         $result = $this->openPoModel->getData($no_model, $jenis, $jenis2);
@@ -222,7 +217,11 @@ class PdfController extends BaseController
 
         $pdf->Cell(55, 5, '', 0, 0, 'C');
         $pdf->Cell(55, 5, '(                               )', 0, 0, 'C');
-        $pdf->Cell(55, 5, '(       ' . $penanggung_jawab . '       )', 0, 0, 'C');
+        if (!empty($result)) {
+            $pdf->Cell(55, 5, $result[0]['penanggung_jawab'], 0, 0, 'C');
+        } else {
+            $pdf->Cell(234, 5, ': No penanggung_jawab available', 0, 0, 'C');
+        }
         $pdf->Cell(55, 5, '(       ' . $penerima . '       )', 0, 1, 'C');
 
         // Output PDF
