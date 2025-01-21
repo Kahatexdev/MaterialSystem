@@ -69,10 +69,9 @@
     <div class="card mt-4">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="example" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
+                <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>
                         <tr>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Foll Up</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LCO Date</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
@@ -82,16 +81,43 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Unit</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Admin</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-
+                        <?php foreach ($masterOrder as $data): ?>
+                            <tr>
+                                <td><?= $data['foll_up'] ?></td>
+                                <td><?= $data['lco_date'] ?></td>
+                                <td><?= $data['no_model'] ?></td>
+                                <td><?= $data['no_order'] ?></td>
+                                <td><?= $data['buyer'] ?></td>
+                                <td><?= $data['memo'] ?></td>
+                                <td><?= $data['delivery_awal'] ?></td>
+                                <td><?= $data['delivery_akhir'] ?></td>
+                                <td><?= $data['unit'] ?></td>
+                                <td>
+                                    <a href="<?= base_url($role . '/material/' . $data['id_order']) ?>" class="btn btn-info btn-sm">
+                                        Detail
+                                    </a>
+                                    <button class="btn btn-info btn-sm btn-warning btn-edit" data-id="<?= $data['id_order'] ?>">
+                                        Update
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
-
+            <?php if (empty($masterOrder)) : ?>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-lg-12 text-center">
+                            <p>No data available in the table.</p>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -104,7 +130,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="updateForm">
+                    <form id="updateForm" action="<?= base_url($role . '/updateOrder') ?>" method="post">
                         <input type="hidden" name="id_order" id="id_order">
                         <div class="mb-3">
                             <label for="foll_up" class="form-label">Follow Up</label>
@@ -157,70 +183,16 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="text/javascript">
         $(document).ready(function() {
-            $('#example').DataTable({
-                "processing": true,
-                "serverSide": true,
-                "ajax": {
-                    url: '<?= base_url($role . '/tampilMasterOrder') ?>',
-                    type: 'POST'
-                },
-                "columns": [{
-                        "data": "no",
-                        "orderable": false
-                    },
-                    {
-                        "data": "foll_up",
-                    },
-                    {
-                        "data": "lco_date",
-
-                    },
-                    {
-                        "data": "no_model",
-
-                    },
-                    {
-                        "data": "no_order",
-                    },
-                    {
-                        "data": "buyer",
-                    },
-                    {
-                        "data": "memo",
-                    },
-                    {
-                        "data": "delivery_awal",
-                    },
-                    {
-                        "data": "delivery_akhir",
-                    },
-                    {
-                        "data": "unit",
-                    },
-                    {
-                        "data": "admin",
-                    },
-                    {
-                        "data": "action",
-                        "orderable": false,
-                        "searchable": false,
-                        "className": "text-center"
-                    }
-                ],
-                "order": [
-                    [1, "asc"]
-                ] // Urutkan berdasarkan kolom foll_up
-            });
-            // Event listener untuk tombol Detail Master Order ke halaman Material berdasarkan id_order
-            $('#example').on('click', '.btn-detail', function() {
-                const id = $(this).data('id');
-                window.location.href = '<?= base_url($role . '/material' . '/') ?>' + id;
-
+            $('#dataTable').DataTable({
+                "pageLength": 35,
+                "order": []
             });
 
-            // Event listener tombol Update
-            $('#example').on('click', '.btn-edit', function() {
+            // Event listener untuk submit form update
+
+            $('#dataTable').on('click', '.btn-edit', function() {
                 const id = $(this).data('id');
+                console.log(id);
 
                 // Lakukan AJAX request untuk mendapatkan data
                 $.ajax({
@@ -251,31 +223,6 @@
             });
 
             // Event listener untuk submit form update
-            $('#updateForm').on('submit', function(e) {
-                e.preventDefault(); // Mencegah form reload
-
-                const formData = $(this).serialize(); // Serialisasi data form
-
-                // Lakukan AJAX request untuk update data
-                $.ajax({
-                    url: '<?= base_url($role . '/updateOrder') ?>',
-                    type: 'POST',
-                    data: formData,
-                    success: function(response) {
-                        // Tampilkan pesan sukses
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: 'Data berhasil diupdate.',
-                        });
-                        $('#updateModal').modal('hide'); // Sembunyikan modal
-                        table.ajax.reload(); // Reload tabel
-                    },
-                    error: function() {
-                        alert('Gagal mengupdate data.');
-                    }
-                });
-            });
 
             // // Event listener untuk tombol delete
             // $('#example').on('click', '.btn-delete', function() {

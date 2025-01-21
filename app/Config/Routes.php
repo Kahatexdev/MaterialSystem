@@ -23,7 +23,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');
     $routes->get('getMaterialDetails/(:num)', 'MasterdataController::getMaterialDetails/$1');
     $routes->post('updateMaterial', 'MasterdataController::updateMaterial');
-    $routes->get('deleteMaterial/(:num)', 'MasterdataController::deleteMaterial/$1');
+    $routes->get('deleteMaterial/(:num)/(:num)', 'MasterdataController::deleteMaterial/$1/$2');
     $routes->get('openPO/(:num)', 'MasterdataController::openPO/$1');
     $routes->post('openPO/saveOpenPO', 'MasterdataController::saveOpenPO');
     // $routes->post('exportOpenPO/(:any)/(:any)', 'MasterdataController::exportOpenPO/$1/$2');
@@ -45,6 +45,11 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/getWarna', 'ScheduleController::getWarnabyItemTypeandKodeWarna');
     $routes->get('schedule/getPO', 'ScheduleController::getPO');
     $routes->get('schedule/getPODetails', 'ScheduleController::getPODetails');
+    $routes->get('schedule/mesinCelup', 'ScheduleController::mesinCelup');
+    $routes->post('schedule/saveDataMesin', 'ScheduleController::saveDataMesin');
+    $routes->get('schedule/getMesinDetails/(:num)', 'ScheduleController::getMesinDetails/$1');
+    $routes->post('schedule/updateDataMesin', 'ScheduleController::updateDataMesin');
+    $routes->get('schedule/deleteDataMesin/(:num)', 'ScheduleController::deleteDataMesin/$1');
     $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
     $routes->post('schedule/saveSchedule', 'ScheduleController::saveSchedule');
     $routes->get('schedule/editSchedule/(:num)', 'ScheduleController::editSchedule/$1');

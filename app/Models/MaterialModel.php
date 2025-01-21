@@ -44,6 +44,12 @@ class MaterialModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
+    public function getMaterial($id_order)
+    {
+        return $this->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('material.id_order', $id_order)->findAll();
+    }
+
     public function getQtyPO($id_order, $item_type, $kode_warna)
     {
         return $this->db->table('material')
