@@ -221,8 +221,8 @@
                         <tr>
                             <th class="sticky">Mesin</th>
                             <?php
-                            for ($i = 0; $i < 7; $i++) {
-                                $date = (clone $currentDate)->modify("+$i days");
+                            for ($i = -2; $i <= 4; $i++) { // 2 hari ke belakang hingga 4 hari ke depan
+                                $date = (clone $currentDate)->modify("$i days");
                                 echo "<th>" . $date->format('D, d M') . "</th>";
                             }
                             ?>
@@ -240,11 +240,10 @@
                                     <small>L/M/D : (<?= $mesin['lmd'] ?>)</small>
                                 </td>
 
-                                <!-- Kolom tanggal -->
                                 <?php
-                                for ($i = 0; $i < 7; $i++) {
-                                    $date = (clone $currentDate)->modify("+$i days");
 
+                                for ($i = -2; $i <= 4; $i++) { // 2 hari ke belakang hingga 4 hari ke depan
+                                    $date = (clone $currentDate)->modify("$i days");
 
                                     echo "<td>";
                                     // Loop untuk menampilkan kartu sesuai jumlah lot
@@ -256,8 +255,7 @@
                                         if (!empty($jobsForDay)) {
                                             foreach ($jobsForDay as $job) {
                                                 $capacityColor = 'bg-secondary';
-                                                $capacityPercentage =
-                                                    round((intval($job['kg_celup']) / intval(($mesin['max_caps']))) * 100);
+                                                $capacityPercentage = round((intval($job['kg_celup']) / intval($mesin['max_caps'])) * 100);
                                                 if (intval($job['kg_celup']) > 0 && intval($job['kg_celup']) < intval($mesin['max_caps'] * 69 / 100)) {
                                                     $capacityColor = 'bg-success';
                                                 } elseif (intval($job['kg_celup']) >= intval($mesin['max_caps'] * 70 / 100) && intval($job['kg_celup']) < intval($mesin['max_caps'] * 100 / 100)) {
@@ -266,42 +264,41 @@
                                                     $capacityColor = 'bg-danger';
                                                 }
 
-                                                echo "<div class='job-item {$capacityColor}' style='width: {$capacityPercentage}%; text-align: center;'>"; // Memastikan tombol berada di tengah
+                                                echo "<div class='job-item {$capacityColor}' style='width: {$capacityPercentage}%; text-align: center;'>";
                                                 echo "<button class='btn btn-link' 
-                                                        style='display: block; width: 100%; height: 100%; text-align: center;' 
-                                                        data-bs-toggle='modal' 
-                                                        data-bs-target='#modalSchedule' 
-                                                        data-no-mesin='{$job['no_mesin']}'
-                                                        data-tanggal-schedule='{$job['tanggal_schedule']}'
-                                                        data-lot-urut='{$job['lot_urut']}'
-                                                        onclick='showScheduleModal(\"{$job['no_mesin']}\", \"{$job['tanggal_schedule']}\", \"{$job['lot_urut']}\")' 
-                                                        data-bs-toggle='tooltip' 
-                                                        data-bs-placement='top' 
-                                                        title='{$job['total_kg']} kg ({$capacityPercentage}%)'>";
-                                                echo "<div class='d-flex flex-column align-items-center justify-content-center' style='height: 100%;'>"; // Flexbox untuk pusat vertikal dan horizontal
-                                                echo "<span style='font-size: 0.9rem; color: black; font-weight: bold; text-align: center;'>{$job['kode_warna']}</span>"; // Menampilkan kode warna di tengah
-                                                echo "<span style='font-size: 0.85rem; color: black;'>{$job['total_kg']} kg</span>"; // Berat juga di tengah
+                        style='display: block; width: 100%; height: 100%; text-align: center;' 
+                        data-bs-toggle='modal' 
+                        data-bs-target='#modalSchedule' 
+                        data-no-mesin='{$job['no_mesin']}'
+                        data-tanggal-schedule='{$job['tanggal_schedule']}'
+                        data-lot-urut='{$job['lot_urut']}'
+                        onclick='showScheduleModal(\"{$job['no_mesin']}\", \"{$job['tanggal_schedule']}\", \"{$job['lot_urut']}\")' 
+                        data-bs-toggle='tooltip' 
+                        data-bs-placement='top' 
+                        title='{$job['total_kg']} kg ({$capacityPercentage}%)'>";
+                                                echo "<div class='d-flex flex-column align-items-center justify-content-center' style='height: 100%;'>";
+                                                echo "<span style='font-size: 0.9rem; color: black; font-weight: bold; text-align: center;'>{$job['kode_warna']}</span>";
+                                                echo "<span style='font-size: 0.85rem; color: black;'>{$job['total_kg']} kg</span>";
                                                 echo "</div>";
                                                 echo "</button>";
                                                 echo "</div>";
                                             }
                                         } else {
-                                            // Tampilkan kartu kosong jika tidak ada jadwal
                                             echo "<div class='job-item'>";
                                             echo "<button class='btn btn-link text-decoration-none'
-                                                    data-bs-toggle='modal' data-bs-target='#modalSchedule'
-                                                    data-no-mesin='{$mesin['no_mesin']}'
-                                                    data-tanggal-schedule='{$date->format('Y-m-d')}'
-                                                    data-lot-urut='{$num}' 
-                                                    onclick='showScheduleModal(\"{$mesin['no_mesin']}\", \"{$date->format('Y-m-d')}\", \"{$num}\")'>";
+                    data-bs-toggle='modal' data-bs-target='#modalSchedule'
+                    data-no-mesin='{$mesin['no_mesin']}'
+                    data-tanggal-schedule='{$date->format('Y-m-d')}'
+                    data-lot-urut='{$num}' 
+                    onclick='showScheduleModal(\"{$mesin['no_mesin']}\", \"{$date->format('Y-m-d')}\", \"{$num}\")'>";
                                             echo "<div class='text-muted'>Tidak ada jadwal</div>";
                                             echo "</button></div>";
                                         }
                                     }
-
                                     echo "</td>";
                                 }
                                 ?>
+
                             </tr>
                         <?php endforeach; ?>
 
