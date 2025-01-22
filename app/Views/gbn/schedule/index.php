@@ -1,4 +1,4 @@
-<?php $this->extend($role . '/dashboard/header'); ?>
+<?php $this->extend($role . '/schedule/header'); ?>
 <?php $this->section('content'); ?>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
@@ -277,10 +277,10 @@
                                                         onclick='showScheduleModal(\"{$job['no_mesin']}\", \"{$job['tanggal_schedule']}\", \"{$job['lot_urut']}\")' 
                                                         data-bs-toggle='tooltip' 
                                                         data-bs-placement='top' 
-                                                        title='{$job['kg_celup']} kg ({$capacityPercentage}%)'>";
+                                                        title='{$job['total_kg']} kg ({$capacityPercentage}%)'>";
                                                 echo "<div class='d-flex flex-column align-items-center justify-content-center' style='height: 100%;'>"; // Flexbox untuk pusat vertikal dan horizontal
                                                 echo "<span style='font-size: 0.9rem; color: black; font-weight: bold; text-align: center;'>{$job['kode_warna']}</span>"; // Menampilkan kode warna di tengah
-                                                echo "<span style='font-size: 0.85rem; color: black;'>{$job['kg_celup']} kg</span>"; // Berat juga di tengah
+                                                echo "<span style='font-size: 0.85rem; color: black;'>{$job['total_kg']} kg</span>"; // Berat juga di tengah
                                                 echo "</div>";
                                                 echo "</button>";
                                                 echo "</div>";
@@ -321,13 +321,12 @@
             </div>
             <div class="modal-body" id="modalScheduleBody">
                 <!-- Isi modal dengan JS -->
+
+
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" id="addSchedule">Tambah Jadwal</button>
-                <button type="button" class="btn btn-danger" id="deleteSchedule">Hapus Jadwal</button>
-                <button type="button" class="btn btn-primary" id="editSchedule">Edit Jadwal</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            </div>
+
+
+
         </div>
     </div>
 </div>
@@ -382,27 +381,113 @@
 
             // URL for the request
             const url = `<?= base_url($role . '/schedule/getScheduleDetails') ?>/${machine}/${date}/${lotUrut}`;
-
             // Fetch schedule details from the server
             fetch(url)
+
                 .then((response) => {
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        throw new Error('Tidak Ada Jadwal');
                     }
                     return response.text(); // Assuming the server returns HTML content (as in your `modal_details` view)
                 })
                 .then((data) => {
                     // Insert the fetched HTML into the modal body
-                    modalBody.innerHTML = data;
+                    var tes = JSON.parse(data);
+                    var htmlContent = '';
+                    tes.forEach(function(item) {
+                        htmlContent += `<div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="no_po" class="form-label">No. PO</label>
+                                    <input type="text" class="form-control" id="no_po" value="${item.no_po}" readonly>
+                                    <input type="hidden" id="id_celup" value="${item.id_celup}">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="item_type" class="form-label">Jenis Benang(Item Type)</label>
+                                    <input type="text" class="form-control" id="item_type" value="${item.item_type}" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="kode_warna" class="form-label">Kode Warna</label>
+                                    <input type="text" class="form-control" id="kode_warna" value="${item.kode_warna}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="warna" class="form-label">Warna</label>
+                                    <input type="text" class="form-control" id="warna" value="${item.warna}" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="lot_celup" class="form-label">Lot Celup</label>
+                                    <input type="text" class="form-control" id="lot_celup" value="${item.lot_celup}" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tgl_celup" class="form-label">Tanggal Celup</label>
+                                    <input type="text" class="form-control" id="tgl_celup" value="${item.tanggal_celup}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="total_kg" class="form-label">Total Kg Celup</label>
+                                    <input type="text" class="form-control" id="total_kg" value="${item.total_kg} KG" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="start_mc" class="form-label">Start MC</label>
+                                    <input type="text" class="form-control" id="start_mc" value="${item.start_mc}" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="deliery" class="form-label">Delivery</label>
+                                    <input type="text" class="form-control" id="deliery" value="" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        `;
+                    });
+
+                    htmlContent += `
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" id="deleteSchedule">Hapus Jadwal</button>
+                        <button type="button" class="btn btn-warning text-black" id="editSchedule">Edit Jadwal</button>
+                    </div>`;
+
+                    modalBody.innerHTML = htmlContent;
 
                     // Show the modal after content is loaded
                     const modal = new bootstrap.Modal(document.getElementById("modalSchedule"));
+                    const idCelup = document.getElementById("id_celup").value;
                     modal.show();
+
+                    // Tambahkan event listener untuk tombol "Edit Jadwal"
+                    document.getElementById("editSchedule").addEventListener("click", function() {
+                        redirectToEditSchedule(idCelup);
+                    });
                 })
                 .catch((error) => {
                     console.error("Error fetching data:", error);
-                    modalBody.innerHTML = `<div class='text-center text-danger'>Gagal memuat data. Error: ${error.message}</div>`;
+                    // Jika data tidak ditemukan, tambahkan tombol "Tambah Jadwal"
+                    modalBody.innerHTML = `
+                    <div class="text-center text-danger">${error.message}</div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-info" id="addSchedule">Tambah Jadwal</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    </div>`;
+
+                    // Tambahkan event listener untuk tombol "Tambah Jadwal"
+                    document.getElementById("addSchedule").addEventListener("click", function() {
+                        redirectToAddSchedule(machine, date, lotUrut);
+                    });
                 });
+        }
+
+        // Fungsi untuk redirect ke halaman tambah jadwal
+        function redirectToAddSchedule(machine, date, lotUrut) {
+            const url = `<?= base_url($role . '/schedule/form') ?>?no_mesin=${machine}&tanggal_schedule=${date}&lot_urut=${lotUrut}`;
+            window.location.href = url;
+        }
+
+        // Fungsi untuk redirect ke halaman edit jadwal
+        function redirectToEditSchedule(idCelup) {
+            const url = `<?= base_url($role . '/schedule/editSchedule') ?>/${idCelup}`;
+            window.location.href = url;
         }
 
         // Seleksi elemen modal
@@ -422,17 +507,29 @@
         });
 
 
-        // Tambahkan event listener untuk tombol Tambah Jadwal
-        document.getElementById("addSchedule").addEventListener("click", function() {
-            // Ambil data dari atribut modal
-            const noMesin = modalTitle.textContent.split(" | ")[0].split("-")[1];
-            const tanggalSchedule = modalTitle.textContent.split(" | ")[1];
-            const lotUrut = modalTitle.textContent.split(" | ")[2].split(" ")[1];
+        // // Tambahkan event listener untuk tombol Tambah Jadwal di dalam modal JS
+        // document.getElementById("addSchedule").addEventListener("click", function() {
+        //     // Ambil data dari atribut modal
+        //     const noMesin = modalTitle.textContent.split(" | ")[0].split("-")[1];
+        //     const tanggalSchedule = modalTitle.textContent.split(" | ")[1];
+        //     const lotUrut = modalTitle.textContent.split(" | ")[2].split(" ")[1];
 
-            // Redirect ke URL tambah jadwal
-            const url = `<?= base_url($role . '/schedule/form') ?>?no_mesin=${noMesin}&tanggal_schedule=${tanggalSchedule}&lot_urut=${lotUrut}`;
-            window.location.href = url;
-        });
+        //     // Redirect ke URL tambah jadwal
+        //     const url = `<?= base_url($role . '/schedule/form') ?>?no_mesin=${noMesin}&tanggal_schedule=${tanggalSchedule}&lot_urut=${lotUrut}`;
+        //     window.location.href = url;
+        // });
+
+        // // Tambahkan event listener untuk tombol Edit Jadwal
+        // document.getElementById("editSchedule").addEventListener("click", function() {
+        //     // Ambil data dari atribut modal
+        //     const noMesin = modalTitle.textContent.split(" | ")[0].split("-")[1];
+        //     const tanggalSchedule = modalTitle.textContent.split(" | ")[1];
+        //     const lotUrut = modalTitle.textContent.split(" | ")[2].split(" ")[1];
+
+        //     // Redirect ke URL edit jadwal
+        //     const url = `<?= base_url($role . '/schedule/form') ?>?no_mesin=${noMesin}&tanggal_schedule=${tanggalSchedule}&lot_urut=${lotUrut}`;
+        //     window.location.href = url;
+        // });
     });
 </script>
 

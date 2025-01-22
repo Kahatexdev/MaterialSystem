@@ -39,14 +39,15 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <form action="<?= base_url('/schedule/save') ?>" method="post">
+                        <form action="<?= base_url(session('role') . '/schedule/saveSchedule') ?>" method="post">
                             <div class="row">
                                 <div class="col-md-3">
                                     <!-- No Mesin -->
                                     <div class="mb-3">
                                         <label for="no_mesin" class="form-label">No Mesin</label>
                                         <input type="text" class="form-control" id="no_mesin" name="no_mesin" value="<?= $no_mesin ?>" readonly>
-
+                                        <input type="hidden" name="tanggal_schedule" value="<?= $tanggal_schedule ?>">
+                                        <input type="hidden" name="lot_urut" value="<?= $lot_urut ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -323,6 +324,7 @@
                     const poId = poSelect.value;
                     const deliveryAwalInput = row.querySelector("input[name='delivery_awal[]']");
                     const deliveryAkhirInput = row.querySelector("input[name='delivery_akhir[]']");
+                    const qtyPOInput = row.querySelector("input[name='qty_po[]']");
 
                     if (poId) {
                         // Fetch data untuk PO yang dipilih
@@ -346,6 +348,31 @@
                             },
                             error: function(xhr, status, error) {
                                 console.error("Error fetching PO details:", error);
+                            }
+                        });
+
+                        // Fetch data qty PO
+                        $.ajax({
+                            url: '<?= base_url(session('role') . "/schedule/getQtyPO") ?>',
+                            type: 'GET',
+                            data: {
+                                id_order: poId,
+                                item_type: itemTypeValue,
+                                kode_warna: kodeWarnaValue
+                            },
+                            dataType: 'json',
+                            success: function(qtyPO) {
+                                if (qtyPO) {
+                                    // Update qty PO berdasarkan data yang diterima
+                                    if (qtyPO.kgs) {
+                                        qtyPOInput.value = parseFloat(qtyPO.kgs).toFixed(2);
+                                    }
+                                } else {
+                                    console.log("Data Qty PO tidak ditemukan");
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error("Error fetching Qty PO:", error);
                             }
                         });
                     }
@@ -387,8 +414,8 @@
             // Validation for each qty_celup input
             qtyCelupInputs.forEach(input => {
                 const kg = parseFloat(input.value);
-                if (kg < min || kg > max) {
-                    input.setCustomValidity(`Qty Celup harus diantara ${min} dan ${max}`);
+                if (kg > max) {
+                    input.setCustomValidity(`Qty Celup Melebihi Kapasitas ${max}`);
                 } else {
                     input.setCustomValidity('');
                 }
@@ -456,7 +483,7 @@
 
     });
 </script>
-<script>
+<!-- <script>
     // DOM Elements
     document.addEventListener('DOMContentLoaded', function() {
         const minCaps = document.getElementById('min_caps');
@@ -499,6 +526,6 @@
             });
         }
     });
-</script>
+</script> -->
 
 <?php $this->endSection(); ?>

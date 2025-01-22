@@ -12,7 +12,16 @@ class MesinCelupModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [];
+    protected $allowedFields    = [
+        'no_mesin',
+        'min_caps',
+        'max_caps',
+        'jml_lot',
+        'lmd',
+        'ket_mesin',
+        'created_at',
+        'updated_at',
+    ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -21,7 +30,7 @@ class MesinCelupModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -66,6 +75,22 @@ class MesinCelupModel extends Model
         return $this->table('mesin_celup')
             ->select('max_caps')
             ->where('no_mesin', $no_mesin)
+            ->first();
+    }
+
+    public function getIdMesin($no_mesin)
+    {
+        return $this->table('mesin_celup')
+            ->select('id_mesin')
+            ->where('no_mesin', $no_mesin)
+            ->first();
+    }
+
+    public function getNoMesin($id_mesin)
+    {
+        return $this->table('mesin_celup')
+            ->select('no_mesin')
+            ->where('id_mesin', $id_mesin)
             ->first();
     }
 }

@@ -24,7 +24,7 @@ class ScheduleController extends BaseController
     protected $masterMaterialModel;
     protected $openPoModel;
     protected $masterOrderModel;
-    
+
     public function __construct()
     {
         $this->request = \Config\Services::request();
@@ -54,7 +54,8 @@ class ScheduleController extends BaseController
     {
         // Simulasi data jadwal
         $scheduleData = $this->scheduleCelupModel->getScheduleCelup();
-        // dd ($scheduleData);
+        // json_encode($scheduleData);
+        // var_dump ($scheduleData);
         $mesin_celup = $this->mesinCelupModel->getMesinCelupBenang();
         $totalCapacityUsed = array_sum(array_column($scheduleData, 'weight'));
         $totalCapacityMax = array_sum(array_column($mesin_celup, 'max_caps'));
@@ -77,18 +78,12 @@ class ScheduleController extends BaseController
     {
         // Get the schedule details from the model
         $scheduleDetails = $this->scheduleCelupModel->getScheduleDetails($no_mesin, $tanggal_schedule, $lot_urut);
-
-        // Check if data is not empty
         if ($scheduleDetails) {
-            // Load the modal view and pass the scheduleDetails to it
-            echo view($this->role . '/schedule/modal_details', ['scheduleDetails' => $scheduleDetails]);
+            return response()->setJSON($scheduleDetails);
         } else {
-            // If no data is found, display a message
-            echo "<div class='text-center text-danger'>Data tidak ditemukan.</div>";
+            return response()->setStatusCode(ResponseInterface::HTTP_NOT_FOUND);
         }
     }
-
-
 
     public function create()
     {
@@ -97,7 +92,7 @@ class ScheduleController extends BaseController
         $tanggal_schedule = $this->request->getGet('tanggal_schedule');
         $lot_urut = $this->request->getGet('lot_urut');
         $no_model = $this->request->getGet('no_model');
-        
+
         $jenis_bahan_baku = $this->masterMaterialModel->getJenisBahanBaku();
         $item_type = $this->masterMaterialModel->getItemType();
         $min = $this->mesinCelupModel->getMinCaps($no_mesin);
@@ -124,7 +119,7 @@ class ScheduleController extends BaseController
         ];
         // var_dump($data);
 
-        return view($this->role . '/schedule/form', $data);
+        return view($this->role . '/schedule/form-create', $data);
     }
 
     public function getItemType()
@@ -183,6 +178,4 @@ class ScheduleController extends BaseController
             return $this->response->setJSON(['error' => 'No data found']);
         }
     }
-
-
 }

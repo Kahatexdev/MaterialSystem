@@ -84,7 +84,7 @@
                                 <td><?= $data['loss'] ?></td>
                                 <td><?= $data['kgs'] ?></td>
                                 <td>
-                                    <button class="btn btn-info btn-sm btn-warning btn-edit" data-id="<?= $data['id_material'] ?>">
+                                    <button class="btn btn-sm btn-warning btn-edit" data-id="<?= $data['id_material'] ?>">
                                         Update
                                     </button>
                                     <button class="btn btn-danger btn-sm btn-delete" data-id="<?= $data['id_material'] ?>">
@@ -116,8 +116,8 @@
                     </div>
                     <div class="modal-body">
                         <form id="updateForm" action="<?= base_url($role . '/updateMaterial') ?>" method="post">
-                            <input type="text" name="id_material" id="id_material">
-                            <input type="text" name="id_order" id="id_order">
+                            <input type="hidden" name="id_material" id="id_material">
+                            <input type="hidden" name="id_order" id="id_order">
                             <div class="mb-3">
                                 <label for="style_size" class="form-label">Style Size</label>
                                 <input type="text" class="form-control" id="style_size" name="style_size" required>

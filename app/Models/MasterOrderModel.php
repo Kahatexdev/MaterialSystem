@@ -76,7 +76,7 @@ class MasterOrderModel extends Model
 
     public function getMaterialOrder($id)
     {
-        return $this->select('no_model,buyer, delivery_awal, delivery_akhir, material.item_type, material.color, material.kode_warna, sum(material.kgs) as kg')
+        $data = $this->select('no_model,buyer, delivery_awal, delivery_akhir, material.item_type, material.color, material.kode_warna, sum(material.kgs) as total_kg')
             ->join('material', 'material.id_order=master_order.id_order')
             ->where('master_order.id_order', $id)
             ->groupBy(['material.item_type', 'material.kode_warna'])
@@ -101,7 +101,6 @@ class MasterOrderModel extends Model
                 'total_kg' => $row['total_kg'],
             ];
         }
-
         return $result;
     }
 
@@ -117,6 +116,13 @@ class MasterOrderModel extends Model
         return $this->select('delivery_awal, delivery_akhir')
             ->where('id_order', $id_order)
             ->distinct()
+            ->first();
+    }
+
+    public function getNoModel($id_order)
+    {
+        return $this->select('no_model')
+            ->where('id_order', $id_order)
             ->first();
     }
 }
