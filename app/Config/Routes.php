@@ -49,6 +49,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
     $routes->post('mesin/saveDataMesin', 'MesinCelupController::saveDataMesin');
     $routes->get('mesin/getMesinDetails/(:num)', 'MesinCelupController::getMesinDetails/$1');
+    $routes->post('mesin/cekNoMesin', 'MesinCelupController::cekNoMesin');
     $routes->post('mesin/updateDataMesin', 'MesinCelupController::updateDataMesin');
     $routes->get('mesin/deleteDataMesin/(:num)', 'MesinCelupController::deleteDataMesin/$1');
 
