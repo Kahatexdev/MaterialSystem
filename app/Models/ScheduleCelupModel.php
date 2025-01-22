@@ -203,4 +203,33 @@ class ScheduleCelupModel extends Model
             ->distinct()
             ->findAll();
     }
+
+    public function getNoModel($no_mesin, $tanggal_schedule, $lot_urut)
+    {
+        return $this->table('schedule_celup')
+        ->select('schedule_celup.no_model, master_order.no_model as master_no_model, master_order.id_order')
+        ->where('schedule_celup.no_mesin', $no_mesin)
+            ->where('schedule_celup.tanggal_schedule', $tanggal_schedule)
+            ->where('schedule_celup.lot_urut', $lot_urut)
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->join('master_order', 'master_order.id_order = schedule_celup.id_order')  // Fix join with correct table
+            ->distinct()
+            ->findAll();  // Use findAll() for multiple results
+    }
+
+    public function getScheduleCelupbyDate($startDate = null, $endDate = null)
+    {
+        $builder = $this->db->table('schedule_celup')
+            ->select('schedule_celup.*, mesin_celup.no_mesin, sum(schedule_celup.kg_celup) as total_kg')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->where('tanggal_schedule >=', $startDate->format('Y-m-d'))
+            ->where('tanggal_schedule <=', $endDate->format('Y-m-d'))
+            ->groupBy('schedule_celup.id_mesin')
+            ->groupBy('schedule_celup.tanggal_schedule')
+            ->groupBy('schedule_celup.lot_urut');
+
+        return $builder->get()->getResultArray();
+    }
+
+
 }

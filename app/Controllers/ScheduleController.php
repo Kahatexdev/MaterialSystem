@@ -52,14 +52,31 @@ class ScheduleController extends BaseController
 
     public function index()
     {
-        // Simulasi data jadwal
-        $scheduleData = $this->scheduleCelupModel->getScheduleCelup();
-        // json_encode($scheduleData);
-        // var_dump ($scheduleData);
+        // Ambil parameter filter dari query string
+        $startDate = $this->request->getGet('start_date');
+        $endDate = $this->request->getGet('end_date');
+
+        if ($startDate == null && $endDate == null) {
+            $startDate = date('Y-m-d');
+            $endDate = date('Y-m-d');
+        }
+
+        // Konversi tanggal ke format DateTime jika tersedia
+        $startDateObj = $startDate ? new \DateTime($startDate) : null;
+        $endDateObj = $endDate ? new \DateTime($endDate) : null;
+
+        // Ambil data jadwal dari model (filter berdasarkan tanggal jika tersedia)
+        $scheduleData = $this->scheduleCelupModel->getScheduleCelupbyDate($startDateObj, $endDateObj);
+        // Ambil data mesin celup
         $mesin_celup = $this->mesinCelupModel->getMesinCelupBenang();
+
+        // Hitung total kapasitas yang sudah digunakan
         $totalCapacityUsed = array_sum(array_column($scheduleData, 'weight'));
+
+        // Hitung total kapasitas maksimum dari semua mesin celup
         $totalCapacityMax = array_sum(array_column($mesin_celup, 'max_caps'));
-        // dd ($mesin_celup);
+
+        // Siapkan data untuk dikirimkan ke view
         $data = [
             'active' => $this->active,
             'title' => 'Schedule',
@@ -68,11 +85,18 @@ class ScheduleController extends BaseController
             'mesin_celup' => $mesin_celup,
             'totalCapacityUsed' => $totalCapacityUsed,
             'totalCapacityMax' => $totalCapacityMax,
-            'currentDate' => new \DateTime('2025-01-14'),
+            'currentDate' => new \DateTime(),
+            'filter' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+            ],
         ];
 
+        // Render view dengan data yang sudah disiapkan
         return view($this->role . '/schedule/index', $data);
     }
+
+
 
     public function getScheduleDetails($no_mesin, $tanggal_schedule, $lot_urut)
     {
@@ -81,7 +105,7 @@ class ScheduleController extends BaseController
         if ($scheduleDetails) {
             return response()->setJSON($scheduleDetails);
         } else {
-            return response()->setStatusCode(ResponseInterface::HTTP_NOT_FOUND);          
+            return response()->setStatusCode(ResponseInterface::HTTP_NOT_FOUND);
         }
     }
 
@@ -179,79 +203,7 @@ class ScheduleController extends BaseController
         }
     }
 
-    public function mesinCelup()
-    {
-        $mesinCelup = $this->mesinCelupModel->findAll();
-        $data = [
-            'active' => $this->active,
-            'title' => 'Schedule',
-            'role' => $this->role,
-            'mesinCelup' => $mesinCelup,
-        ];
-
-        return view($this->role . '/schedule/datamesin', $data);
-    }
-
-    public function saveDataMesin()
-    {
-        $data = $this->request->getPost();
-        if ($this->mesinCelupModel->save($data)) {
-            return redirect()->to(base_url($this->role . '/schedule/mesinCelup'))->with('success', 'Data berhasil disimpan.');
-        } else {
-            return redirect()->to(base_url($this->role . '/schedule/mesinCelup'))->with('error', 'Data gagal disimpan.');
-        }
-    }
-
-    public function getMesinDetails($id)
-    {
-        if ($this->request->isAJAX()) {
-            $data = $this->mesinCelupModel->find($id);
-
-            if ($data) {
-                return $this->response->setJSON([
-                    'id_mesin' => $data['id_mesin'],
-                    'no_mesin' => $data['no_mesin'],
-                    'ket_mesin' => $data['ket_mesin'],
-                    'min_caps' => $data['min_caps'],
-                    'max_caps' => $data['max_caps'],
-                    'desc' => $data['desc'],
-                    'admin' => $data['admin']
-                ]);
-            } else {
-                return $this->response->setJSON(['error' => 'Data tidak ditemukan.']);
-            }
-        }
-
-        throw new \CodeIgniter\Exceptions\PageNotFoundException();
-    }
-
-    public function updateDataMesin()
-    {
-        $id_mesin = $this->request->getPost('id_mesin');
-        $data = [
-            'no_mesin' => $this->request->getPost('no_mesin'),
-            'ket_mesin' => $this->request->getPost('ket_mesin'),
-            'min_caps' => $this->request->getPost('min_caps'),
-            'max_caps' => $this->request->getPost('max_caps'),
-            'desc' => $this->request->getPost('desc'),
-            'admin' => $this->request->getPost('admin'),
-        ];
-
-        if ($this->mesinCelupModel->update($id_mesin, $data)) {
-            return redirect()->to(base_url($this->role . '/schedule/mesinCelup'))->with('success', 'Data berhasil diubah.');
-        } else {
-            return redirect()->to(base_url($this->role . '/schedule/mesinCelup'))->with('error', 'Data gagal diubah.');
-        }
-    }
-
-    public function deleteDataMesin($id)
-    {
-        if ($this->mesinCelupModel->delete($id)) {
-            return redirect()->to(base_url($this->role . '/schedule/mesinCelup'))->with('success', 'Data berhasil dihapus.');
-        } else {
-            return redirect()->to(base_url($this->role . '/schedule/mesinCelup'))->with('error', 'Data gagal dihapus.');
-        }
-    }    public function getQtyPO()
+    public function getQtyPO()
     {
         $id_order = $this->request->getGet('id_order');
         $item_type = $this->request->getGet('item_type');
@@ -291,6 +243,7 @@ class ScheduleController extends BaseController
                 'lot_urut' => $scheduleData['lot_urut'],
                 'lot_celup' => $scheduleData['lot_celup'] ?? null,
                 'tanggal_schedule' => $scheduleData['tanggal_schedule'],
+                'last_status' => 'scheduled',
                 'user_cek_status' => session()->get('username'),
                 'created_at' => date('Y-m-d H:i:s'),
             ];
@@ -310,47 +263,6 @@ class ScheduleController extends BaseController
             return redirect()->back()->with('error', 'Gagal menyimpan jadwal!');
         }
     }
-
-
-    // public function editSchedule($id)
-    // {
-    //     // Ambil data dari database
-    //     $scheduleData = $this->scheduleCelupModel->getScheduleDetailsById($id);
-    //     // var_dump($scheduleData);
-    //     $no_mesin = $this->mesinCelupModel->getNoMesin($scheduleData['id_mesin']);
-    //     $jenis = $this->masterMaterialModel->select('jenis')->where('item_type', $scheduleData['item_type'])->first();
-    //     $jenis_bahan_baku = $this->masterMaterialModel->getJenisBahanBaku();
-    //     $item_type = $this->masterMaterialModel->getItemType();
-    //     $min = $this->mesinCelupModel->getMinCaps($scheduleData['id_mesin']);
-    //     $max = $this->mesinCelupModel->getMaxCaps($scheduleData['id_mesin']);
-    //     $poData = $this->openPoModel->getNomorModel();
-
-    //     // Get PO details related to the schedule, assuming this is stored in a related table
-    //     // $poDetails = $this->scheduleCelupModel->getPODetailsByScheduleId($id);
-
-    //     // Jika data tidak ditemukan, kembalikan ke halaman sebelumnya
-    //     if (!$scheduleData) {
-    //         return redirect()->back();
-    //     }
-
-    //     // Passing the schedule data, including PO details, to the view
-    //     $data = [
-    //         'active' => $this->active,
-    //         'title' => 'Schedule',
-    //         'role' => $this->role,
-    //         'scheduleData' => $scheduleData,
-    //         'no_mesin' => $no_mesin['no_mesin'],
-    //         'jenis' => $jenis['jenis'],
-    //         'jenis_bahan_baku' => $jenis_bahan_baku,
-    //         'item_type' => $item_type,
-    //         'min_caps' => $min['min_caps'],
-    //         'max_caps' => $max['max_caps'],
-    //         'poData' => $poData,
-    //     ];
-
-    //     return view($this->role . '/schedule/form-edit', $data);
-    // }
-
 
     public function editSchedule()
     {
@@ -372,8 +284,9 @@ class ScheduleController extends BaseController
         // $item_type = $this->masterMaterialModel->getItemType();
         $min = $this->mesinCelupModel->getMinCaps($no_mesin);
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
+        $id_order = $this->masterOrderModel->getIdOrder($no_model);
         $po = $this->openPoModel->getNomorModel();
-        // var_dump($scheduleData);
+        // var_dump($po);
         $readonly = true;
         // Jika data tidak ditemukan, kembalikan ke halaman sebelumnya
         if (!$no_mesin || !$tanggal_schedule || !$lot_urut) {
@@ -421,5 +334,80 @@ class ScheduleController extends BaseController
 
         return view($this->role . '/schedule/form-edit', $data);
     }
+
+    public function updateSchedule()
+    {
+        // Ambil semua data dari form menggunakan POST
+        $scheduleData = $this->request->getPost();
+
+        // Ambil id_mesin dan no_model
+        $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
+        $poList = $scheduleData['po']; // Array po[]
+
+        $dataBatch = []; // Untuk menyimpan batch data
+        $updateMessage = null; // Menyimpan status pesan update atau insert
+
+        // Looping data array untuk menyusun data yang akan disimpan
+        foreach ($poList as $index => $po) {
+            $id_celup = $scheduleData['id_celup'][$index] ?? null; // Dapatkan id_celup, jika ada
+            $dataBatch[] = [
+                'id_celup' => $id_celup, // ID ini bisa null untuk baris baru
+                'id_mesin' => $id_mesin['id_mesin'],
+                'no_model' => $poList[$index],
+                'item_type' => $scheduleData['item_type'],
+                'kode_warna' => $scheduleData['kode_warna'],
+                'warna' => $scheduleData['warna'],
+                'start_mc' => $scheduleData['start_mc'][$index] ?? null,
+                'delivery_awal' => $scheduleData['delivery_awal'][$index] ?? null,
+                'delivery_akhir' => $scheduleData['delivery_akhir'][$index] ?? null,
+                'qty_po' => $scheduleData['qty_po'][$index] ?? null,
+                'qty_po_plus' => $scheduleData['qty_po_plus'][$index] ?? null,
+                'kg_celup' => $scheduleData['qty_celup'][$index] ?? null,
+                'po_plus' => $scheduleData['po_plus'][$index] ?? null,
+                'lot_urut' => $scheduleData['lot_urut'],
+                'lot_celup' => $scheduleData['lot_celup'] ?? null,
+                'tanggal_schedule' => $scheduleData['tanggal_schedule'],
+                'tanggal_celup' => $scheduleData['tanggal_celup'],
+                'ket_daily_cek' => $scheduleData['ket_daily_cek'],
+                'user_cek_status' => session()->get('username'),
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
+        }
+
+        // Cek apakah data sudah ada, gunakan id_celup untuk mencari
+        foreach ($dataBatch as $data) {
+            $existingSchedule = $this->scheduleCelupModel->where([
+                'id_celup' => $data['id_celup'],
+            ])->first();
+
+            if ($existingSchedule) {
+                // Update data yang sudah ada
+                $updateSuccess = $this->scheduleCelupModel->update($data['id_celup'], $data);
+                if ($updateSuccess) {
+                    $updateMessage = 'Jadwal berhasil diupdate!';
+                } else {
+                    $updateMessage = 'Gagal mengupdate jadwal!';
+                }
+            } else {
+                // Insert data baru
+                $insertSuccess = $this->scheduleCelupModel->insert($data);
+                if ($insertSuccess) {
+                    $updateMessage = 'Jadwal berhasil disimpan!';
+                } else {
+                    $updateMessage = 'Gagal menyimpan jadwal!';
+                }
+            }
+        }
+
+        // Redirect setelah seluruh proses selesai
+        if ($updateMessage) {
+            return redirect()->to(session()->get('role') . '/schedule')->with('success', $updateMessage);
+        } else {
+            return redirect()->back()->with('error', 'Gagal menyimpan atau mengupdate jadwal!');
+        }
+    }
+
+
+
 
 }

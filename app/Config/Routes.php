@@ -45,15 +45,17 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/getWarna', 'ScheduleController::getWarnabyItemTypeandKodeWarna');
     $routes->get('schedule/getPO', 'ScheduleController::getPO');
     $routes->get('schedule/getPODetails', 'ScheduleController::getPODetails');
-    $routes->get('schedule/mesinCelup', 'ScheduleController::mesinCelup');
-    $routes->post('schedule/saveDataMesin', 'ScheduleController::saveDataMesin');
-    $routes->get('schedule/getMesinDetails/(:num)', 'ScheduleController::getMesinDetails/$1');
-    $routes->post('schedule/updateDataMesin', 'ScheduleController::updateDataMesin');
-    $routes->get('schedule/deleteDataMesin/(:num)', 'ScheduleController::deleteDataMesin/$1');
     $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
     $routes->post('schedule/saveSchedule', 'ScheduleController::saveSchedule');
     $routes->get('schedule/editSchedule', 'ScheduleController::editSchedule');
+    $routes->post('schedule/updateSchedule', 'ScheduleController::updateSchedule');
     $routes->get('schedule/deleteSchedule/(:num)', 'ScheduleController::deleteSchedule/$1');
+
+    $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
+    $routes->post('mesin/saveDataMesin', 'MesinCelupController::saveDataMesin');
+    $routes->get('mesin/getMesinDetails/(:num)', 'MesinCelupController::getMesinDetails/$1');
+    $routes->post('mesin/updateDataMesin', 'MesinCelupController::updateDataMesin');
+    $routes->get('mesin/deleteDataMesin/(:num)', 'MesinCelupController::deleteDataMesin/$1');
 
     $routes->get('warehouse', 'WarehouseController::index');
     $routes->get('pph', 'PphController::index');

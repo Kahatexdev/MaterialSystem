@@ -49,7 +49,6 @@ class PdfController extends BaseController
         $tujuan = $this->request->getGet('tujuan');
         $jenis = $this->request->getGet('jenis');
         $jenis2 = $this->request->getGet('jenis2');
-        dd($jenis);
 
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';

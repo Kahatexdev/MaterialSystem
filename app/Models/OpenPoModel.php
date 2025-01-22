@@ -78,7 +78,8 @@ class OpenPoModel extends Model
 
     public function getNomorModel()
     {
-        return $this->select('no_model')
+        return $this->select('open_po.no_model, master_order.no_model, master_order.id_order')
+            ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
             ->distinct()
             ->findAll();
     }

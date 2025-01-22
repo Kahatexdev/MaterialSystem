@@ -13,16 +13,14 @@ class MesinCelupModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'id_mesin',
         'no_mesin',
-        'ket_mesin',
         'min_caps',
         'max_caps',
+        'jml_lot',
+        'lmd',
         'ket_mesin',
-        'desc',
-        'admin',
         'created_at',
-        'updated_at'
+        'updated_at',
     ];
 
     protected bool $allowEmptyInserts = false;

@@ -72,4 +72,12 @@ class MaterialModel extends Model
             ->first();
     }
 
+    public function getNomorModel($id_order)
+    {
+        return $this->select('no_model, master_order.id_order')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('material.id_order', $id_order)
+            ->first();
+    }
+
 }

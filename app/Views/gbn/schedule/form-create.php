@@ -144,7 +144,7 @@
                                                         <td><input type="date" class="form-control" name="delivery_akhir[]" readonly></td>
                                                         <td><input type="number" class="form-control" name="qty_po[]" readonly></td>
                                                         <td><input type="number" class="form-control" name="qty_po_plus[]" readonly></td>
-                                                        <td><input type="number" class="form-control" name="qty_celup[]" required></td>
+                                                        <td><input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required></td>
                                                         <td>
                                                             <select class="form-select" name="po_plus[]" required>
                                                                 <option value="0">Pilih PO(+)</option>
@@ -437,7 +437,7 @@
                 <td><input type="date" class="form-control" name="delivery_akhir[]" readonly></td>
                 <td><input type="number" class="form-control" name="qty_po[]" readonly></td>
                 <td><input type="number" class="form-control" name="qty_po_plus[]" readonly></td>
-                <td><input type="number" class="form-control" name="qty_celup[]" required></td>
+                <td><input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required></td>
                 <td>
                     <select class="form-select" name="po_plus[]" required>
                         <option value="0">Pilih PO(+)</option>

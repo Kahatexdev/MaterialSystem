@@ -48,9 +48,9 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Mesin</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Min Capacity</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Max Capacity</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jumlah LOT</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LMD</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan Mesin</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Deskripsi</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Admin</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                         </tr>
                     </thead>
@@ -60,9 +60,9 @@
                                 <td><?= $data['no_mesin'] ?></td>
                                 <td><?= $data['min_caps'] ?></td>
                                 <td><?= $data['max_caps'] ?></td>
+                                <td><?= $data['jml_lot'] ?></td>
+                                <td><?= $data['lmd'] ?></td>
                                 <td><?= $data['ket_mesin'] ?></td>
-                                <td><?= $data['desc'] ?></td>
-                                <td><?= $data['admin'] ?></td>
                                 <td>
                                     <button class="btn btn-warning btn-edit" data-id="<?= $data['id_mesin'] ?>">Update</button>
                                     <button class="btn btn-danger btn-delete" data-id="<?= $data['id_mesin'] ?>">Delete</button>
@@ -93,30 +93,30 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="<?= base_url($role . '/schedule/saveDataMesin') ?>" method="post">
+                    <form action="<?= base_url($role . '/mesin/saveDataMesin') ?>" method="post">
                         <div class="mb-3">
                             <label for="no_mesin" class="form-label">No Mesin</label>
-                            <input type="text" class="form-control" name="no_mesin" id="no_mesin" required>
+                            <input type="number" class="form-control" name="no_mesin" id="no_mesin" required>
                         </div>
                         <div class="mb-3">
                             <label for="min_caps" class="form-label">Min Capacity</label>
-                            <input type="text" class="form-control" name="min_caps" id="min_caps" required>
+                            <input type="number" class="form-control" name="min_caps" id="min_caps" required>
                         </div>
                         <div class="mb-3">
                             <label for="max_caps" class="form-label">Max Capacity</label>
-                            <input type="text" class="form-control" name="max_caps" id="max_caps" required>
+                            <input type="number" class="form-control" name="max_caps" id="max_caps" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="jml_lot" class="form-label">Jumlah LOT</label>
+                            <input type="number" class="form-control" name="jml_lot" id="jml_lot" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lmd" class="form-label">LMD</label>
+                            <input type="text" class="form-control" name="lmd" id="lmd" required>
                         </div>
                         <div class="mb-3">
                             <label for="ket_mesin" class="form-label">Keterangan Mesin</label>
                             <input type="text" class="form-control" name="ket_mesin" id="ket_mesin" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="desc" class="form-label">Deskripsi</label>
-                            <input type="text" class="form-control" name="desc" id="desc" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="admin" class="form-label">Admin</label>
-                            <input type="text" class="form-control" name="admin" id="admin" required>
                         </div>
                         <!-- Action Button -->
                         <div class="modal-footer">
@@ -138,31 +138,31 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="<?= base_url($role . '/schedule/updateDataMesin') ?>" method="post">
+                    <form action="<?= base_url($role . '/mesin/updateDataMesin') ?>" method="post">
                         <input type="hidden" name="id_mesin" id="id_mesin">
                         <div class="mb-3">
                             <label for="no_mesin" class="form-label">No Mesin</label>
-                            <input type="text" class="form-control" name="no_mesin" id="no_mesin" required>
+                            <input type="text" class="form-control" name="no_mesin" id="no_mesinE" required>
                         </div>
                         <div class="mb-3">
                             <label for="min_caps" class="form-label">Min Capacity</label>
-                            <input type="text" class="form-control" name="min_caps" id="min_caps" required>
+                            <input type="text" class="form-control" name="min_caps" id="min_capsE" required>
                         </div>
                         <div class="mb-3">
                             <label for="max_caps" class="form-label">Max Capacity</label>
-                            <input type="text" class="form-control" name="max_caps" id="max_caps" required>
+                            <input type="text" class="form-control" name="max_caps" id="max_capsE" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="jml_lot" class="form-label">Jumlah LOT</label>
+                            <input type="text" class="form-control" name="jml_lot" id="jml_lotE" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lmd" class="form-label">LMD</label>
+                            <input type="text" class="form-control" name="lmd" id="lmdE" required>
                         </div>
                         <div class="mb-3">
                             <label for="ket_mesin" class="form-label">Keterangan Mesin</label>
-                            <input type="text" class="form-control" name="ket_mesin" id="ket_mesin" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="desc" class="form-label">Deskripsi</label>
-                            <input type="text" class="form-control" name="desc" id="desc" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="admin" class="form-label">Admin</label>
-                            <input type="text" class="form-control" name="admin" id="admin" required>
+                            <input type="text" class="form-control" name="ket_mesin" id="ket_mesinE" required>
                         </div>
                         <!-- Action Button -->
                         <div class="modal-footer">
@@ -178,75 +178,60 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="text/javascript">
         $(document).ready(function() {
-
-            // Event listener untuk submit form update
-            $('#dataTable').on('click', '.btn-edit', function() {
-                const id = $(this).data('id');
-
-                // Lakukan AJAX request untuk mendapatkan data
-                $.ajax({
-                    url: '<?= base_url($role . '/schedule/getMesinDetails') ?>/' + id,
-                    type: 'GET',
-                    success: function(response) {
-                        // Isi data ke dalam form modal
-                        $('#id_mesin').val(response.id_mesin);
-                        $('#no_mesin').val(response.no_mesin);
-                        $('#min_caps').val(response.min_caps);
-                        $('#max_caps').val(response.max_caps);
-                        $('#ket_mesin').val(response.ket_mesin);
-                        $('#desc').val(response.desc);
-                        $('#admin').val(response.admin);
-                        // Show modal dialog
-                        $('#updateModal').modal('show');
-                    },
-                    error: function(xhr, status, error) {
-                        console.error(xhr.responseText);
-                    }
-                });
+            $('#dataTable').DataTable({
+                "pageLength": 35,
+                "order": []
             });
+            $(document).ready(function() {
 
-            // Event listener untuk tombol delete
-            $('#dataTable').on('click', '.btn-delete', function() {
-                const id = $(this).data('id');
-                // Tampilkan konfirmasi
-                Swal.fire({
-                    title: 'Apakah Anda yakin?',
-                    text: "Data yang dihapus tidak dapat dikembalikan!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Ya, hapus!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Kirim request ke server
-                        $.ajax({
-                            url: '<?= base_url($role . '/schedule/deleteDataMesin') ?>',
-                            type: 'POST',
-                            data: {
-                                id: id
-                            },
-                            success: function(response) {
-                                // Tampilkan pesan sukses
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil!',
-                                    text: response,
-                                });
-                                // Refresh tabel
-                                $('#example').DataTable().ajax.reload();
-                            },
-                            error: function(xhr, status, error) {
-                                // Tampilkan pesan error
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error!',
-                                    text: xhr.responseText,
-                                });
-                            }
-                        });
-                    }
+                // Event listener untuk submit form update
+                $('#dataTable').on('click', '.btn-edit', function() {
+                    const id = $(this).data('id');
+
+                    // Lakukan AJAX request untuk mendapatkan data
+                    $.ajax({
+                        url: '<?= base_url($role . '/mesin/getMesinDetails') ?>/' + id,
+                        type: 'GET',
+                        success: function(response) {
+
+                            // Isi data ke dalam form modal
+                            $('#id_mesin').val(response.id_mesin);
+                            $('#no_mesinE').val(response.no_mesin);
+                            $('#min_capsE').val(response.min_caps);
+                            $('#max_capsE').val(response.max_caps);
+                            $('#jml_lotE').val(response.jml_lot);
+                            $('#lmdE').val(response.lmd);
+                            $('#ket_mesinE').val(response.ket_mesin);
+                            // Show modal dialog
+                            $('#updateModal').modal('show');
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr.responseText);
+                        }
+                    });
+                });
+
+                // Event listener untuk tombol delete
+                $('#dataTable').on('click', '.btn-delete', function() {
+                    const id = $(this).data('id');
+
+                    // Tampilkan konfirmasi
+                    Swal.fire({
+                        title: 'Apakah Anda yakin?',
+                        text: "Data yang dihapus tidak dapat dikembalikan!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Ya, hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Kirim request ke server
+                            window.location = '<?= base_url($role . '/mesin/deleteDataMesin') ?>/' + id;
+
+                        }
+                    });
                 });
             });
         });

@@ -30,6 +30,8 @@
     <script src="<?= base_url('assets/js/dataTables.min.js') ?>"></script>
     <link href="<?= base_url('assets/css/select2.min.css') ?>" rel="stylesheet" />
     <link href="<?= base_url('assets/node_modules/sweetalert2/dist/sweetalert2.min.css') ?>" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
+
 
     <!-- kalender -->
 
@@ -310,6 +312,7 @@
     </footer>
     </div>
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="<?= base_url('assets/js/select2.min.js') ?>"></script>
     <script src="<?= base_url('assets/js/core/popper.min.js') ?>"></script>
     <script src="<?= base_url('assets/js/core/bootstrap.min.js') ?>"></script>

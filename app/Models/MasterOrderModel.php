@@ -133,4 +133,11 @@ class MasterOrderModel extends Model
             ->first();
     }
 
+    public function getIdOrder($noModel)
+    {
+        return $this->select('id_order')
+        ->where('no_model', $noModel)
+            ->first();
+    }
+
 }

@@ -1,4 +1,4 @@
-<?php $this->extend($role . '/dashboard/header'); ?>
+<?php $this->extend($role . '/schedule/header'); ?>
 <?php $this->section('content'); ?>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
 <style>
@@ -38,7 +38,8 @@
                                 <!-- No Mesin -->
                                 <div class="form-group" id="noMesinGroup">
                                     <label for="no_mesin" class="form-label">No Mesin</label>
-                                    <input type="text" class="form-control" id="no_mesin" name="no_mesin" value="<?= $no_mesin ?>" readonly <?= $readonly ? 'disabled' : '' ?>>
+                                    <input type="text" class="form-control" id="no_mesin" name="no_mesin" value="<?= $no_mesin ?>" readonly <?= $readonly ? 'readonly' : '' ?>>
+                                    <input type="hidden" name="lot_urut" value="<?= $lot_urut ?>">
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -66,7 +67,7 @@
                                 <!-- Jenis Bahan Baku -->
                                 <div class="form-group" id="jenisBahanBakuGroup">
                                     <label for="jenis_bahan_baku" class="form-label">Jenis Bahan Baku</label>
-                                    <select class="form-select" id="jenis_bahan_baku" name="jenis_bahan_baku" <?= $readonly ? 'disabled' : '' ?> required>
+                                    <select class="form-select" id="jenis_bahan_baku" name="jenis_bahan_baku" <?= $readonly ? 'readonly' : '' ?> required>
                                         <option value="">Pilih Jenis Bahan Baku</option>
                                         <?php foreach ($jenis_bahan_baku as $bahan): ?>
                                             <option value="<?= $bahan['jenis'] ?>" <?= $jenis == $bahan['jenis'] ? 'selected' : '' ?>><?= $bahan['jenis'] ?></option>
@@ -78,7 +79,7 @@
                                 <!-- Item Type -->
                                 <div class="form-group" id="itemTypeGroup">
                                     <label for="item_type">Item Type</label>
-                                    <select class="form-select" name="item_type" id="item_type" <?= $readonly ? 'disabled' : '' ?> required>
+                                    <select class="form-select" name="item_type" id="item_type" <?= $readonly ? 'readonly' : '' ?> required>
                                         <option value="">Pilih Item Type</option>
                                         <?php foreach ($item_type as $option): ?>
                                             <option value="<?= $option['item_type'] ?>" <?= $item_type[0]['item_type'] == $option['item_type'] ? 'selected' : '' ?>><?= $option['item_type'] ?></option>
@@ -90,14 +91,14 @@
                                 <!-- Kode Warna -->
                                 <div class="form-group" id="kodeWarnaGroup">
                                     <label for="kode_warna">Kode Warna</label>
-                                    <input type="text" class="form-control" name="kode_warna" id="kode_warna" value="<?= $kode_warna[0]['kode_warna'] ?>" required readonly <?= $readonly ? 'disabled' : '' ?>>
+                                    <input type="text" class="form-control" name="kode_warna" id="kode_warna" value="<?= $kode_warna[0]['kode_warna'] ?>" required readonly <?= $readonly ? 'readonly' : '' ?>>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <!-- Warna -->
                                 <div class="form-group" id="warnaGroup">
                                     <label for="warna" class="form-label">Warna</label>
-                                    <input type="text" class="form-control" id="warna" name="warna" maxlength="32" value="<?= $warna[0]['warna'] ?>" readonly <?= $readonly ? 'disabled' : '' ?>>
+                                    <input type="text" class="form-control" id="warna" name="warna" maxlength="32" value="<?= $warna[0]['warna'] ?>" readonly <?= $readonly ? 'readonly' : '' ?>>
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -146,6 +147,7 @@
                                                 <th class="text-center">Qty PO(+)</th>
                                                 <th class="text-center">Qty Celup</th>
                                                 <th class="text-center">PO(+)</th>
+                                                <th class="text-center">Status</th>
                                                 <th class="text-center">
                                                     <button type="button" class="btn btn-info" id="addRow">
                                                         <i class="fas fa-plus"></i>
@@ -160,8 +162,7 @@
                                                         <select class="form-select po-select" name="po[<?= $index ?>]" <?= $readonly ? 'readonly' : '' ?> required>
                                                             <option value="">Pilih PO</option>
                                                             <?php foreach ($po as $option): ?>
-                                                                <option value="<?= $option['no_model'] ?>" <?= $row['no_model'] == $option['no_model'] ? 'selected' : '' ?>>
-                                                                    <?= $option['no_model'] ?>
+                                                                <option value="<?= $option['id_order'] ?>" <?= $row['no_model'] == $option['no_model'] ? 'selected' : '' ?>><?= $option['no_model'] ?>
                                                                 </option>
                                                             <?php endforeach; ?>
                                                         </select>
@@ -173,13 +174,13 @@
                                                         <input type="date" class="form-control start_mc" name="start_mc[<?= $index ?>]" value="<?= $row['start_mc'] ?>" required <?= $readonly ? 'readonly' : '' ?>>
                                                     </td>
                                                     <td>
-                                                        <input type="date" class="form-control delivery_awal" name="delivery_awal[<?= $index ?>]" value="<?= $row['delivery_awal'] ?>" required <?= $readonly ? 'disabled' : '' ?>>
+                                                        <input type="date" class="form-control delivery_awal" name="delivery_awal[<?= $index ?>]" value="<?= $row['delivery_awal'] ?>" required <?= $readonly ? 'readonly' : '' ?>>
                                                     </td>
                                                     <td>
-                                                        <input type="date" class="form-control delivery_akhir" name="delivery_akhir[<?= $index ?>]" value="<?= $row['delivery_akhir'] ?>" required <?= $readonly ? 'disabled' : '' ?>>
+                                                        <input type="date" class="form-control delivery_akhir" name="delivery_akhir[<?= $index ?>]" value="<?= $row['delivery_akhir'] ?>" required <?= $readonly ? 'readonly' : '' ?>>
                                                     </td>
                                                     <td>
-                                                        <input type="number" class="form-control qty_po" name="qty_po[<?= $index ?>]" value="<?= number_format((float)$row['qty_po'], 2, '.', '') ?>" required <?= $readonly ? 'disabled' : '' ?>>
+                                                        <input type="number" class="form-control qty_po" name="qty_po[<?= $index ?>]" value="<?= number_format((float)$row['qty_po'], 2, '.', '') ?>" required <?= $readonly ? 'readonly' : '' ?>>
                                                     </td>
                                                     <td>
                                                         <input type="number" class="form-control qty_po_plus" name="qty_po_plus[<?= $index ?>]" value="" required readonly>
@@ -193,7 +194,14 @@
                                                             <option value="1" <?= $row['po_plus'] == '1' ? 'selected' : '' ?>>Iya</option>
                                                             <option value="0" <?= $row['po_plus'] == '0' ? 'selected' : '' ?>>Bukan</option>
                                                         </select>
+                                                        <input type="hidden" name="id_celup[<?= $index ?>]" value="<?= $row['id_celup'] ?>">
                                                     </td>
+
+                                                    <td>
+                                                        <!-- <label class="badge bg-<?= $row['last_status'] == 'sceduled' ? 'success' : 'info' ?>"><?= $row['last_status'] ?></label> -->
+                                                        <input type="text" class="form-control last_status" name="last_status[<?= $index ?>]" value="<?= $row['last_status'] ?>" readonly>
+                                                    </td>
+
                                                     <td class="text-center">
                                                         <button type="button" class="btn btn-danger removeRow">
                                                             <i class="fas fa-trash"></i>
@@ -202,7 +210,9 @@
                                                 </tr>
                                             <?php endforeach; ?>
                                         </tbody>
-
+                                        <!-- <pre>
+                                            <?= print_r($scheduleData) ?>
+                                        </pre> -->
                                         <tfoot>
                                             <tr>
                                                 <td class="text-center"><strong>Total Qty Celup</strong></td>
@@ -242,30 +252,17 @@
         function updatePODropdown() {
             const itemTypeValue = itemType.value.trim();
             const kodeWarnaValue = kodeWarna.value.trim();
+            // console.log(itemTypeValue, kodeWarnaValue);
 
             // Iterasi setiap baris dalam tabel
             const rows = poTable.querySelectorAll("tbody tr");
-            // Iterasi melalui setiap row dan periksa apakah ada data yang cocok
-            rows.forEach(function(row) {
-                var noMesinInRow = row.querySelector('[name^="po"]').value; // Asumsi 'po' adalah no_mesin
-                var tanggalScheduleInRow = row.querySelector('[name^="start_mc"]').value; // Asumsi 'start_mc' adalah tanggal_schedule
-                var lotUrutInRow = row.querySelector('[name^="lot_urut"]').value; // Asumsi 'qty_celup' adalah lot_urut (ubah sesuai jika berbeda)
 
-                // Bandingkan data yang ditemukan dengan parameter yang diberikan
-                if (noMesinInRow === itemTypeValue && tanggalScheduleInRow === kodeWarnaValue) {
-                    // Jika data cocok, tampilkan baris
-                    row.style.display = "";
-                } else {
-                    // Jika tidak cocok, sembunyikan baris
-                    row.style.display = "none";
-                }
-            });
-
+            // console.log(rows);
             rows.forEach((row) => {
                 const poSelect = row.querySelector(".po-select");
                 const selectedValue = poSelect.value; // Simpan nilai yang dipilih sebelumnya
 
-                poSelect.innerHTML = '<option value="">Pilih PO</option>'; // Reset dropdown
+                // poSelect.innerHTML = '<option value="">Pilih PO</option>'; // Reset dropdown
 
                 // Pastikan itemType dan kodeWarna ada
                 if (itemTypeValue && kodeWarnaValue) {
@@ -279,10 +276,11 @@
                         },
                         dataType: 'json',
                         success: function(data) {
+                            // console.log(data);
                             if (data.length) {
                                 data.forEach((po) => {
                                     const option = document.createElement("option");
-                                    option.value = po.id_order;
+                                    option.value = po.no_model;
                                     option.textContent = po.no_model;
                                     poSelect.appendChild(option);
                                 });
@@ -298,6 +296,70 @@
                         }
                     });
                 }
+
+                // Update delivery_awal dan delivery_akhir
+                const startMcInput = row.querySelector(".start_mc");
+                const deliveryAwalInput = row.querySelector(".delivery_awal");
+                const deliveryAkhirInput = row.querySelector(".delivery_akhir");
+
+                // Menambahkan event listener untuk perubahan pilihan pada dropdown PO
+                poSelect.addEventListener("change", function() {
+                    const poId = poSelect.value;
+                    const deliveryAwalInput = row.querySelector("input[name='delivery_awal[]']");
+                    const deliveryAkhirInput = row.querySelector("input[name='delivery_akhir[]']");
+                    const qtyPOInput = row.querySelector("input[name='qty_po[]']");
+
+                    if (poId) {
+                        // Fetch data untuk PO yang dipilih
+                        $.ajax({
+                            url: '<?= base_url(session('role') . "/schedule/getPODetails") ?>', // Ganti dengan URL yang sesuai untuk mengambil detail PO
+                            type: 'GET',
+                            data: {
+                                id_order: poId
+                            },
+                            dataType: 'json',
+                            success: function(poDetails) {
+                                if (poDetails) {
+                                    // Update delivery_awal dan delivery_akhir berdasarkan data yang diterima
+                                    if (poDetails.delivery_awal && poDetails.delivery_akhir) {
+                                        deliveryAwalInput.value = poDetails.delivery_awal;
+                                        deliveryAkhirInput.value = poDetails.delivery_akhir;
+                                    }
+                                } else {
+                                    console.log("Data PO tidak ditemukan");
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error("Error fetching PO details:", error);
+                            }
+                        });
+
+                        // Fetch data qty PO
+                        $.ajax({
+                            url: '<?= base_url(session('role') . "/schedule/getQtyPO") ?>',
+                            type: 'GET',
+                            data: {
+                                id_order: poId,
+                                item_type: itemTypeValue,
+                                kode_warna: kodeWarnaValue
+                            },
+                            dataType: 'json',
+                            success: function(qtyPO) {
+                                if (qtyPO) {
+                                    // Update qty PO berdasarkan data yang diterima
+                                    if (qtyPO.kgs) {
+                                        qtyPOInput.value = parseFloat(qtyPO.kgs).toFixed(2);
+                                    }
+                                } else {
+                                    console.log("Data Qty PO tidak ditemukan");
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error("Error fetching Qty PO:", error);
+                            }
+                        });
+                    }
+                });
             });
         }
 
@@ -307,15 +369,22 @@
             const max = parseFloat(maxCaps.value) || 0;
 
             let total = 0;
-            const qtyCelupInputs = document.querySelectorAll('input[name^="qty_celup"]');
+            const qtyCelupInputs = document.querySelectorAll('input[name="qty_celup[]"]');
+            const lastStatusInputs = document.querySelectorAll('input[name="last_status[]"]'); // Ambil last_status berdasarkan index
 
-            qtyCelupInputs.forEach(input => {
-                total += parseFloat(input.value) || 0;
+            // Loop melalui setiap row dan pastikan hanya qty_celup yang statusnya bukan 'done' yang dihitung
+            qtyCelupInputs.forEach((input) => {
+                const row = input.closest("tr"); // Mendapatkan baris terdekat
+                const lastStatus = row.querySelector('input[name^="last_status"]').value; // Mendapatkan status di baris tersebut
+                console.log(lastStatus);
+                if (lastStatus !== 'done') {
+                    total += parseFloat(input.value) || 0; // Jika status bukan 'done', tambahkan qty_celup ke total
+                }
             });
 
             // Update total qty celup
             totalQtyCelup.value = total.toFixed(2); // Update dengan 2 angka di belakang koma
-
+            console.log(total);
             // Hitung sisa kapasitas
             const sisa = max - total;
             sisaKapasitas.value = sisa.toFixed(2); // Update dengan 2 angka di belakang koma
@@ -345,31 +414,31 @@
         document.getElementById("addRow").addEventListener("click", function() {
             const tbody = poTable.querySelector("tbody");
             const newRow = `
-        <tr>
-            <td>
-                <select class="form-select po-select" name="po[]" required>
-                    <option value="">Pilih PO</option>
-                </select>
-            </td>
-            <td><input type="date" class="form-control" name="tgl_start_mc[]" readonly></td>
-            <td><input type="date" class="form-control" name="delivery_awal[]" readonly></td>
-            <td><input type="date" class="form-control" name="delivery_akhir[]" readonly></td>
-            <td><input type="number" class="form-control" name="qty_po[]" readonly></td>
-            <td><input type="number" class="form-control" name="qty_po_plus[]" readonly></td>
-            <td><input type="number" class="form-control qty_celup" name="qty_celup[]" required></td>
-            <td>
-                <select class="form-select" name="po_plus[]" required>
-                    <option value="0">Pilih PO(+)</option>
-                    <option value="1">Ya</option>
-                    <option value="0">Tidak</option>
-                </select>
-            </td>
-            <td class="text-center">
-                <button type="button" class="btn btn-danger removeRow">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        </tr>`;
+                        <tr>
+                            <td>
+                                <select class="form-select po-select" name="po[]" required>
+                                    <option value="">Pilih PO</option>
+                                </select>
+                            </td>
+                            <td><input type="date" class="form-control" name="tgl_start_mc[]" readonly></td>
+                            <td><input type="date" class="form-control" name="delivery_awal[]" readonly></td>
+                            <td><input type="date" class="form-control" name="delivery_akhir[]" readonly></td>
+                            <td><input type="number" class="form-control" name="qty_po[]" readonly></td>
+                            <td><input type="number" class="form-control" name="qty_po_plus[]" readonly></td>
+                            <td><input type="number" step="0.01" min="0.01" class="form-control qty_celup" name="qty_celup[]" required></td>
+                            <td>
+                                <select class="form-select" name="po_plus[]" required>
+                                    <option value="0">Pilih PO(+)</option>
+                                    <option value="1">Ya</option>
+                                    <option value="0">Tidak</option>
+                                </select>
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-danger removeRow">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>`;
 
             tbody.insertAdjacentHTML("beforeend", newRow);
 
