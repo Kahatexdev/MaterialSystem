@@ -158,15 +158,15 @@
                         </div>
                         <div class="mb-3">
                             <label for="delivery_awal" class="form-label">Delivery Awal</label>
-                            <input type="date" class="form-control" name="delivery_awal" id="delivery_awal" required>
+                            <input type="date" class="form-control" name="delivery_awal" id="delivery_awal" required readonly>
                         </div>
                         <div class="mb-3">
                             <label for="delivery_akhir" class="form-label">Delivery Akhir</label>
-                            <input type="date" class="form-control" name="delivery_akhir" id="delivery_akhir" required>
+                            <input type="date" class="form-control" name="delivery_akhir" id="delivery_akhir" required readonly>
                         </div>
                         <div class="mb-3">
                             <label for="unit" class="form-label">Unit</label>
-                            <input type="text" class="form-control" name="unit" id="unit" required>
+                            <input type="text" class="form-control" name="unit" id="unit" required readonly>
                         </div>
                         <!-- Button update dan batal di sebelah kanan -->
                         <div class="modal-footer">

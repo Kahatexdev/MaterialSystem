@@ -1,6 +1,23 @@
 <?php $this->extend($role . '/schedule/header'); ?>
 <?php $this->section('content'); ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
+<style>
+    /* Positive feedback */
+    .feedback-success {
+        color: green;
+        font-weight: bold;
+        animation: fadeIn 0.5s ease-in-out;
+        font-size: 12px;
+    }
+
+    /* Negative feedback */
+    .feedback-error {
+        color: red;
+        font-weight: bold;
+        animation: fadeIn 0.5s ease-in-out;
+        font-size: 12px;
+    }
+</style>
 <div class="container-fluid py-4">
     <?php if (session()->getFlashdata('success')) : ?>
         <script>
@@ -30,8 +47,8 @@
     <div class="card card-frame">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 font-weight-bolder">Data Order</h5>
-                <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#tambahModal">
+                <h5 class="mb-0 font-weight-bolder">Data Mesin Celup</h5>
+                <button type="button" class="btn btn-outline-info mb-0" data-bs-toggle="modal" data-bs-target="#tambahModal">
                     <i class="fas fa-plus me-2"></i>Tambah Mesin
                 </button>
             </div>
@@ -39,48 +56,50 @@
     </div>
 
     <!-- Tabel Data -->
-    <div class="card mt-4">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Mesin</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Min Capacity</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Max Capacity</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jumlah LOT</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LMD</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan Mesin</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($mesinCelup as $data) : ?>
+    <div class="row mt-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="dataTable" class="table table-striped table-hover table-bordered text-xs font-bolder" style="width: 100%;">
+                        <thead>
                             <tr>
-                                <td><?= $data['no_mesin'] ?></td>
-                                <td><?= $data['min_caps'] ?></td>
-                                <td><?= $data['max_caps'] ?></td>
-                                <td><?= $data['jml_lot'] ?></td>
-                                <td><?= $data['lmd'] ?></td>
-                                <td><?= $data['ket_mesin'] ?></td>
-                                <td>
-                                    <button class="btn btn-warning btn-edit" data-id="<?= $data['id_mesin'] ?>">Update</button>
-                                    <button class="btn btn-danger btn-delete" data-id="<?= $data['id_mesin'] ?>">Delete</button>
-                                </td>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Mesin</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Min Capacity</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Max Capacity</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jumlah LOT</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LMD</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan Mesin</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-            <?php if (empty($mesinCelup)) : ?>
-                <div class="card-footer">
-                    <div class="row">
-                        <div class="col-lg-12 text-center">
-                            <p>No data available in the table.</p>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($mesinCelup as $data) : ?>
+                                <tr>
+                                    <td class="text-center align-middle"><?= $data['no_mesin'] ?></td>
+                                    <td class="text-center align-middle"><?= $data['min_caps'] ?></td>
+                                    <td class="text-center align-middle"><?= $data['max_caps'] ?></td>
+                                    <td class="text-center align-middle"><?= $data['jml_lot'] ?></td>
+                                    <td class="text-center align-middle"><?= $data['lmd'] ?></td>
+                                    <td class="text-center align-middle"><?= $data['ket_mesin'] ?></td>
+                                    <td class="text-center align-middle">
+                                        <button class="btn btn-warning btn-edit" data-id="<?= $data['id_mesin'] ?>">Update</button>
+                                        <button class="btn btn-danger btn-delete" data-id="<?= $data['id_mesin'] ?>">Delete</button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php if (empty($mesinCelup)) : ?>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-lg-12 text-center">
+                                <p>No data available in the table.</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            <?php endif; ?>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 
@@ -93,10 +112,11 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="<?= base_url($role . '/mesin/saveDataMesin') ?>" method="post">
+                    <form action="<?= base_url($role . '/mesin/saveDataMesin') ?>" method="post" id="form-mesin">
                         <div class="mb-3">
                             <label for="no_mesin" class="form-label">No Mesin</label>
                             <input type="number" class="form-control" name="no_mesin" id="no_mesin" required>
+                            <div id="no_mesin_feedback" class=""></div>
                         </div>
                         <div class="mb-3">
                             <label for="min_caps" class="form-label">Min Capacity</label>
@@ -118,10 +138,9 @@
                             <label for="ket_mesin" class="form-label">Keterangan Mesin</label>
                             <input type="text" class="form-control" name="ket_mesin" id="ket_mesin" required>
                         </div>
-                        <!-- Action Button -->
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-info">Tambah</button>
+                            <button type="submit" class="btn btn-info add-btn">Tambah</button>
                         </div>
                     </form>
                 </div>
@@ -143,6 +162,7 @@
                         <div class="mb-3">
                             <label for="no_mesin" class="form-label">No Mesin</label>
                             <input type="text" class="form-control" name="no_mesin" id="no_mesinE" required>
+                            <div id="no_mesin_feedbackE" class=""></div>
                         </div>
                         <div class="mb-3">
                             <label for="min_caps" class="form-label">Min Capacity</label>
@@ -167,7 +187,7 @@
                         <!-- Action Button -->
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-info">Update</button>
+                            <button type="submit" class="btn btn-info update-btn">Update</button>
                         </div>
                     </form>
                 </div>
@@ -229,11 +249,40 @@
                         if (result.isConfirmed) {
                             // Kirim request ke server
                             window.location = '<?= base_url($role . '/mesin/deleteDataMesin') ?>/' + id;
-
                         }
                     });
                 });
             });
+        });
+
+        document.getElementById('no_mesin').addEventListener('input', function() {
+            const noMesinInput = this.value;
+            const noMesinFeedback = document.getElementById('no_mesin_feedback');
+            const addButton = document.querySelector('.add-btn');
+
+            $.ajax({
+                url: '<?= base_url($role . '/mesin/cekNoMesin') ?>',
+                type: 'POST',
+                data: {
+                    no_mesin: noMesinInput
+                },
+                success: function(response) {
+                    if (response.error) {
+                        noMesinFeedback.textContent = 'Nomor Mesin Bisa Digunakan';
+                        noMesinFeedback.classList.remove('feedback-error');
+                        noMesinFeedback.classList.add('feedback-success');
+                        addButton.removeAttribute('disabled');
+                    } else {
+                        noMesinFeedback.textContent = 'Nomor Mesin Sudah Ada Di Database';
+                        noMesinFeedback.classList.remove('feedback-success');
+                        noMesinFeedback.classList.add('feedback-error');
+                        addButton.setAttribute('disabled', 'disabled');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            })
         });
     </script>
 

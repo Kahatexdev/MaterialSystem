@@ -45,15 +45,59 @@ class MesinCelupController extends BaseController
         return view($this->role . '/schedule/datamesin', $data);
     }
 
+    public function cekNoMesin()
+    {
+        if ($this->request->isAJAX()) {
+            $noMesin = $this->request->getPost('no_mesin');
+            $cekMesin = $this->mesinCelupModel->where('no_mesin', $noMesin)->first();
+
+            if ($cekMesin) {
+                return $this->response->setJSON(['success' => true]);
+            } else {
+                return $this->response->setJSON(['error' => true]);
+            }
+        }
+
+        throw new \CodeIgniter\Exceptions\PageNotFoundException();
+    }
+
+
     public function saveDataMesin()
     {
         $data = $this->request->getPost();
+        // $noMesin = $data['no_mesin'];
+        // $cekMesin = $this->mesinCelupModel->where('no_mesin', $noMesin)->first();
+
+        // if ($cekMesin) {
+        //     return redirect()->to(base_url($this->role . '/mesin/mesinCelup'))->with('error', 'No Mesin sudah ada.');
+        // }
+
         if ($this->mesinCelupModel->save($data)) {
             return redirect()->to(base_url($this->role . '/mesin/mesinCelup'))->with('success', 'Data berhasil disimpan.');
         } else {
             return redirect()->to(base_url($this->role . '/mesin/mesinCelup'))->with('error', 'Data gagal disimpan.');
         }
     }
+
+    // public function saveDataMesin()
+    // {
+    //     $data = $this->request->getPost();
+
+    //     $rules = [
+    //         'no_mesin' => 'required|is_unique[mesin_celup.no_mesin]',
+    //     ];
+
+    //     if (!$this->validate($rules)) {
+    //         // Kirim error validasi ke view
+    //         return redirect()->back()->withInput()->with('validation', \Config\Services::validation()->listErrors());
+    //     }
+
+    //     if ($this->mesinCelupModel->save($data)) {
+    //         return redirect()->to(base_url($this->role . '/mesin/mesinCelup'))->with('success', 'Data berhasil disimpan.');
+    //     } else {
+    //         return redirect()->to(base_url($this->role . '/mesin/mesinCelup'))->with('error', 'Data gagal disimpan.');
+    //     }
+    // }
 
     public function getMesinDetails($id)
     {
@@ -81,6 +125,7 @@ class MesinCelupController extends BaseController
     public function updateDataMesin()
     {
         $id_mesin = $this->request->getPost('id_mesin');
+
         $data = [
             'no_mesin' => $this->request->getPost('no_mesin'),
             'min_caps' => $this->request->getPost('min_caps'),
@@ -89,6 +134,12 @@ class MesinCelupController extends BaseController
             'lmd' => $this->request->getPost('lmd'),
             'ket_mesin' => $this->request->getPost('ket_mesin'),
         ];
+
+        // $noMesin = $data['no_mesin'];
+        // $cekMesin = $this->mesinCelupModel->where('no_mesin', $noMesin)->first();
+        // if ($cekMesin) {
+        //     return redirect()->to(base_url($this->role . '/mesin/mesinCelup'))->with('error', 'No Mesin sudah ada.');
+        // }
 
         if ($this->mesinCelupModel->update($id_mesin, $data)) {
             return redirect()->to(base_url($this->role . '/mesin/mesinCelup'))->with('success', 'Data berhasil diubah.');
