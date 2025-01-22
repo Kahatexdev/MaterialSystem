@@ -11,6 +11,7 @@ use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
 use App\Models\OpenPoModel;
 use App\Models\MasterOrderModel;
+use DateTime;
 
 class ScheduleController extends BaseController
 {
@@ -60,6 +61,7 @@ class ScheduleController extends BaseController
         $totalCapacityUsed = array_sum(array_column($scheduleData, 'weight'));
         $totalCapacityMax = array_sum(array_column($mesin_celup, 'max_caps'));
         // dd ($mesin_celup);
+        $today = date('Y-m-d', strtotime('today'));
         $data = [
             'active' => $this->active,
             'title' => 'Schedule',
@@ -68,7 +70,7 @@ class ScheduleController extends BaseController
             'mesin_celup' => $mesin_celup,
             'totalCapacityUsed' => $totalCapacityUsed,
             'totalCapacityMax' => $totalCapacityMax,
-            'currentDate' => new \DateTime('2025-01-14'),
+            'currentDate' => new DateTime($today),
         ];
 
         return view($this->role . '/schedule/index', $data);

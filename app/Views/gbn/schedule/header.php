@@ -14,13 +14,13 @@
                 <ul class="navbar-nav  justify-content-end">
                     <li class="nav-item d-flex align-items-center px-1">
                         <a href="<?= base_url($role . '/mesin/mesinCelup') ?>">
-                            <span class=" badge bg-gradient-info ">Data Mesin</span>
+                            <span class=" badge bg-gradient-info ">Data Mesin Celup</span>
 
                         </a>
                     </li>
                     <li class="nav-item d-flex align-items-center px-1">
                         <a href="">
-                            <span class=" badge bg-gradient-info ">Submenu2</span>
+                            <span class=" badge bg-gradient-info ">Benang</span>
 
                         </a>
                     </li>
