@@ -52,7 +52,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/deleteDataMesin/(:num)', 'ScheduleController::deleteDataMesin/$1');
     $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
     $routes->post('schedule/saveSchedule', 'ScheduleController::saveSchedule');
-    $routes->get('schedule/editSchedule/(:num)', 'ScheduleController::editSchedule/$1');
+    $routes->get('schedule/editSchedule', 'ScheduleController::editSchedule');
     $routes->get('schedule/deleteSchedule/(:num)', 'ScheduleController::deleteSchedule/$1');
 
     $routes->get('warehouse', 'WarehouseController::index');

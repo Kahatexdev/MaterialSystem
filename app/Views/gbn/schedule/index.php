@@ -458,7 +458,7 @@
 
                     // Tambahkan event listener untuk tombol "Edit Jadwal"
                     document.getElementById("editSchedule").addEventListener("click", function() {
-                        redirectToEditSchedule(idCelup);
+                        redirectToEditSchedule(machine, date, lotUrut);
                     });
                 })
                 .catch((error) => {
@@ -485,8 +485,8 @@
         }
 
         // Fungsi untuk redirect ke halaman edit jadwal
-        function redirectToEditSchedule(idCelup) {
-            const url = `<?= base_url($role . '/schedule/editSchedule') ?>/${idCelup}`;
+        function redirectToEditSchedule(machine, date, lotUrut) {
+            const url = `<?= base_url($role . '/schedule/editSchedule') ?>?no_mesin=${machine}&tanggal_schedule=${date}&lot_urut=${lotUrut}`;
             window.location.href = url;
         }
 

@@ -312,44 +312,114 @@ class ScheduleController extends BaseController
     }
 
 
-    public function editSchedule($id)
+    // public function editSchedule($id)
+    // {
+    //     // Ambil data dari database
+    //     $scheduleData = $this->scheduleCelupModel->getScheduleDetailsById($id);
+    //     // var_dump($scheduleData);
+    //     $no_mesin = $this->mesinCelupModel->getNoMesin($scheduleData['id_mesin']);
+    //     $jenis = $this->masterMaterialModel->select('jenis')->where('item_type', $scheduleData['item_type'])->first();
+    //     $jenis_bahan_baku = $this->masterMaterialModel->getJenisBahanBaku();
+    //     $item_type = $this->masterMaterialModel->getItemType();
+    //     $min = $this->mesinCelupModel->getMinCaps($scheduleData['id_mesin']);
+    //     $max = $this->mesinCelupModel->getMaxCaps($scheduleData['id_mesin']);
+    //     $poData = $this->openPoModel->getNomorModel();
+
+    //     // Get PO details related to the schedule, assuming this is stored in a related table
+    //     // $poDetails = $this->scheduleCelupModel->getPODetailsByScheduleId($id);
+
+    //     // Jika data tidak ditemukan, kembalikan ke halaman sebelumnya
+    //     if (!$scheduleData) {
+    //         return redirect()->back();
+    //     }
+
+    //     // Passing the schedule data, including PO details, to the view
+    //     $data = [
+    //         'active' => $this->active,
+    //         'title' => 'Schedule',
+    //         'role' => $this->role,
+    //         'scheduleData' => $scheduleData,
+    //         'no_mesin' => $no_mesin['no_mesin'],
+    //         'jenis' => $jenis['jenis'],
+    //         'jenis_bahan_baku' => $jenis_bahan_baku,
+    //         'item_type' => $item_type,
+    //         'min_caps' => $min['min_caps'],
+    //         'max_caps' => $max['max_caps'],
+    //         'poData' => $poData,
+    //     ];
+
+    //     return view($this->role . '/schedule/form-edit', $data);
+    // }
+
+
+    public function editSchedule()
     {
-        // Ambil data dari database
-        $scheduleData = $this->scheduleCelupModel->getScheduleDetailsById($id);
-        // var_dump($scheduleData);
-        $no_mesin = $this->mesinCelupModel->getNoMesin($scheduleData['id_mesin']);
-        $jenis = $this->masterMaterialModel->select('jenis')->where('item_type', $scheduleData['item_type'])->first();
+        $no_mesin = $this->request->getGet('no_mesin');
+        $tanggal_schedule = $this->request->getGet('tanggal_schedule');
+        $lot_urut = $this->request->getGet('lot_urut');
+        $no_model = $this->request->getGet('no_model');
+
+        $scheduleData = $this->scheduleCelupModel->getScheduleDetailsData($no_mesin, $tanggal_schedule, $lot_urut);
+        $master_order = $this->masterOrderModel->findAll();
         $jenis_bahan_baku = $this->masterMaterialModel->getJenisBahanBaku();
-        $item_type = $this->masterMaterialModel->getItemType();
-        $min = $this->mesinCelupModel->getMinCaps($scheduleData['id_mesin']);
-        $max = $this->mesinCelupModel->getMaxCaps($scheduleData['id_mesin']);
-        $poData = $this->openPoModel->getNomorModel();
-
-        // Get PO details related to the schedule, assuming this is stored in a related table
-        // $poDetails = $this->scheduleCelupModel->getPODetailsByScheduleId($id);
-
+        $item_type = $this->scheduleCelupModel->getItemTypeByParameter($no_mesin, $tanggal_schedule, $lot_urut);
+        $kode_warna = $this->scheduleCelupModel->getKodeWarnaByParameter($no_mesin, $tanggal_schedule, $lot_urut);
+        $warna = $this->scheduleCelupModel->getWarnaByParameter($no_mesin, $tanggal_schedule, $lot_urut);
+        $tanggal_celup = $this->scheduleCelupModel->getTanggalCelup($no_mesin, $tanggal_schedule, $lot_urut);
+        $lot_celup = $this->scheduleCelupModel->getLotCelup($no_mesin, $tanggal_schedule, $lot_urut);
+        $ket_daily_cek = $this->scheduleCelupModel->getKetDailyCek($no_mesin, $tanggal_schedule, $lot_urut);
+        $jenis = $this->masterMaterialModel->select('jenis')->where('item_type', $scheduleData[0]['item_type'])->first();
+        // $item_type = $this->masterMaterialModel->getItemType();
+        $min = $this->mesinCelupModel->getMinCaps($no_mesin);
+        $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
+        $po = $this->openPoModel->getNomorModel();
+        // var_dump($scheduleData);
+        $readonly = true;
         // Jika data tidak ditemukan, kembalikan ke halaman sebelumnya
-        if (!$scheduleData) {
+        if (!$no_mesin || !$tanggal_schedule || !$lot_urut) {
             return redirect()->back();
         }
 
-        // Passing the schedule data, including PO details, to the view
+        foreach ($scheduleData as &$row) {
+            // Ambil delivery_awal dan delivery_akhir dari tabel master_order
+            $deliveryDates = $this->masterOrderModel->getDeliveryDates($row['no_model']);
+            if ($deliveryDates) {
+                $row['delivery_awal'] = $deliveryDates['delivery_awal'] ?? null;
+                $row['delivery_akhir'] = $deliveryDates['delivery_akhir'] ?? null;
+            } else {
+                $row['delivery_awal'] = null;
+                $row['delivery_akhir'] = null;
+            }
+
+            // Hitung qty_po dari tabel order_details
+            $qtyPO = $this->materialModel->getQtyPOByNoModel($row['no_model']);
+            $row['qty_po'] = $qtyPO['qty_po'] ?? 0; // Default 0 jika tidak ada data
+        }
+
+
         $data = [
             'active' => $this->active,
             'title' => 'Schedule',
             'role' => $this->role,
+            'no_mesin' => $no_mesin,
+            'tanggal_schedule' => $tanggal_schedule,
+            'lot_urut' => $lot_urut,
             'scheduleData' => $scheduleData,
-            'no_mesin' => $no_mesin['no_mesin'],
-            'jenis' => $jenis['jenis'],
             'jenis_bahan_baku' => $jenis_bahan_baku,
+            'jenis' => $jenis['jenis'],
             'item_type' => $item_type,
+            'kode_warna' => $kode_warna,
+            'warna' => $warna,
+            'tanggal_celup' => $tanggal_celup,
+            'lot_celup' => $lot_celup,
+            'ket_daily_cek' => $ket_daily_cek,
             'min_caps' => $min['min_caps'],
             'max_caps' => $max['max_caps'],
-            'poData' => $poData,
+            'po' => $po,
+            'readonly' => $readonly,
         ];
 
         return view($this->role . '/schedule/form-edit', $data);
     }
-
 
 }

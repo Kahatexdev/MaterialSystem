@@ -120,4 +120,87 @@ class ScheduleCelupModel extends Model
             ->where('id_celup', $id)
             ->first();
     }
+
+    public function getScheduleDetailsData($machine, $date, $lot)
+    {
+        return $this->table('schedule_celup')
+        ->select('*, mesin_celup.no_mesin')
+        ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+        ->where('mesin_celup.no_mesin', $machine)
+            ->where('schedule_celup.tanggal_schedule', $date)
+            ->where('schedule_celup.lot_urut', $lot)
+            ->groupBy('schedule_celup.id_celup')
+            ->findAll();
+    }
+
+    public function getItemTypeByParameter($no_mesin, $tanggal_schedule, $lot_urut)
+    {
+        return $this->table('schedule_celup')
+            ->select('item_type')
+            ->where('no_mesin', $no_mesin)
+            ->where('tanggal_schedule', $tanggal_schedule)
+            ->where('lot_urut', $lot_urut)
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->distinct()
+            ->findAll();
+    }
+
+    public function getKodeWarnaByParameter($no_mesin, $tanggal_schedule, $lot_urut)
+    {
+        return $this->table('schedule_celup')
+            ->select('kode_warna')
+            ->where('no_mesin', $no_mesin)
+            ->where('tanggal_schedule', $tanggal_schedule)
+            ->where('lot_urut', $lot_urut)
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->distinct()
+            ->findAll();
+    }
+
+    public function getWarnaByParameter($no_mesin, $tanggal_schedule, $lot_urut)
+    {
+        return $this->table('schedule_celup')
+            ->select('warna')
+            ->where('no_mesin', $no_mesin)
+            ->where('tanggal_schedule', $tanggal_schedule)
+            ->where('lot_urut', $lot_urut)
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->distinct()
+            ->findAll();
+    }
+
+    public function getTanggalCelup($no_mesin, $tanggal_schedule, $lot_urut)
+    {
+        return $this->table('schedule_celup')
+            ->select('tanggal_celup')
+            ->where('no_mesin', $no_mesin)
+            ->where('tanggal_schedule', $tanggal_schedule)
+            ->where('lot_urut', $lot_urut)
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->distinct()
+            ->findAll();
+    }
+
+    public function getLotCelup($no_mesin, $tanggal_schedule)
+    {
+        return $this->table('schedule_celup')
+            ->select('lot_celup')
+            ->where('no_mesin', $no_mesin)
+            ->where('tanggal_schedule', $tanggal_schedule)
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->distinct()
+            ->findAll();
+    }
+
+    public function getKetDailyCek($no_mesin, $tanggal_schedule, $lot_urut)
+    {
+        return $this->table('schedule_celup')
+            ->select('ket_daily_cek')
+            ->where('no_mesin', $no_mesin)
+            ->where('tanggal_schedule', $tanggal_schedule)
+            ->where('lot_urut', $lot_urut)
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->distinct()
+            ->findAll();
+    }
 }

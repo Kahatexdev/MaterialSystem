@@ -63,4 +63,13 @@ class MaterialModel extends Model
             ->get()
             ->getRowArray();
     }
+
+    public function getQtyPOByNoModel($noModel)
+    {
+        return $this->select('SUM(kgs) as qty_po')
+        ->where('no_model', $noModel)
+        ->join('master_order', 'master_order.id_order = material.id_order')
+            ->first();
+    }
+
 }
