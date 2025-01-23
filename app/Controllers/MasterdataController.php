@@ -138,7 +138,7 @@ class MasterdataController extends BaseController
                 }
 
                 // Ambil data dari kolom sesuai kebutuhan
-                $style_size = $sheet->getCell('D' . $key)->getValue(); // Kolom D
+                $style_size = htmlspecialchars_decode($sheet->getCell('D' . $key)->getValue()); // Kolom D
                 $no_model = $sheet->getCell('B9')->getValue(); // Kolom B9
                 $no_model = str_replace([': '], '', $no_model);
                 $no_order = $sheet->getCell('B5')->getValue(); // Kolom B5
@@ -280,7 +280,7 @@ class MasterdataController extends BaseController
                         'area' => $validate['area'],
                         'inisial' => $validate['inisial'],
                         'color' => $sheet->getCell($headerMap['Color'] . $rowIndex)->getValue(),
-                        'item_type' => $item_type,
+                        'item_type' => htmlspecialchars_decode($item_type),
                         'kode_warna' => $sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue(),
                         'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(), // Tetap isi dengan Composition(%) yang valid
                         'gw' => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
@@ -294,7 +294,6 @@ class MasterdataController extends BaseController
                     $invalidRows[] = $rowIndex; // Tambahkan baris tidak valid
                 }
             }
-
             // Simpan data material ke database
             $materialModel = new MaterialModel();
             $materialModel->insertBatch($validDataMaterial);

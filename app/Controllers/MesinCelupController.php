@@ -64,7 +64,7 @@ class MesinCelupController extends BaseController
     public function saveDataMesin()
     {
         $data = $this->request->getPost();
-
+        // dd($data);
         $lmdValues = $this->request->getPost('lmd') ?? []; // Ambil nilai checkbox
 
         // Validasi aturan kombinasi
@@ -129,6 +129,10 @@ class MesinCelupController extends BaseController
             ->where('no_mesin', $no_mesin)
             ->where('id_mesin !=', $id_mesin) // Pastikan tidak mengecek diri sendiri
             ->first();
+        $ketMc = $this->mesinCelupModel
+            ->where('no_mesin', $no_mesin)
+            ->groupBy('ket_mesin')
+            ->findAll();
 
         if ($cekNoMesin) {
             // Jika duplikat ditemukan, kembalikan pesan error
@@ -157,6 +161,7 @@ class MesinCelupController extends BaseController
             'jml_lot' => $this->request->getPost('jml_lot'),
             'lmd' => $lmdData,
             'ket_mesin' => $this->request->getPost('ket_mesin'),
+            'ketMc' => $ketMc,
         ];
 
         if ($this->mesinCelupModel->update($id_mesin, $data)) {
