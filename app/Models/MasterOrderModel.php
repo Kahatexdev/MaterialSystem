@@ -125,4 +125,19 @@ class MasterOrderModel extends Model
             ->where('id_order', $id_order)
             ->first();
     }
+
+    public function getDeliveryDates($noModel)
+    {
+        return $this->select('delivery_awal, delivery_akhir')
+        ->where('no_model', $noModel)
+            ->first();
+    }
+
+    public function getIdOrder($noModel)
+    {
+        return $this->select('id_order')
+        ->where('no_model', $noModel)
+            ->first();
+    }
+
 }

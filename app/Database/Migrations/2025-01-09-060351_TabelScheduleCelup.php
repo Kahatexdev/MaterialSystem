@@ -105,6 +105,10 @@ class TabelScheduleCelup extends Migration
                 'type' => 'VARCHAR',
                 'constraint' => 32,
             ],
+            'po_plus' => [
+                'type' => 'ENUM',
+                'constraint' => [1, 0],
+            ],
             'user_cek_status' => [
                 'type' => 'VARCHAR',
                 'constraint' => 32,

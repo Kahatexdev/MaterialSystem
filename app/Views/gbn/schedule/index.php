@@ -140,6 +140,30 @@
         color: #558b2f;
     }
 
+    .job-item .btn {
+        display: block;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+    }
+
+    .job-item .btn span {
+        font-size: 0.9rem;
+        color: black;
+        font-weight: bold;
+    }
+
+    .job-item .btn .total-kg {
+        font-size: 0.85rem;
+    }
+
+    .no-schedule .btn {
+        background-color: #f8f9fa;
+        border: 1px dashed #ccc;
+        color: #6c757d;
+    }
+
+
     .bg-success {
         background-color: #66bb6a !important;
     }
@@ -158,6 +182,29 @@
 </style>
 
 <div class="container-fluid py-4">
+    <?php if (session()->getFlashdata('success')) : ?>
+        <script>
+            $(document).ready(function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    html: '<?= session()->getFlashdata('success') ?>',
+                });
+            });
+        </script>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')) : ?>
+        <script>
+            $(document).ready(function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    html: '<?= session()->getFlashdata('error') ?>',
+                });
+            });
+        </script>
+    <?php endif; ?>
     <h1 class="display-5 mb-4 text-center" style="color: #2e7d32; font-weight: 600;">Schedule Mesin Celup</h1>
 
     <div class="card mb-4">
@@ -184,27 +231,16 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 mb-3 mb-md-0">
-                    <div class="date-navigation d-flex align-items-center">
-                        <button class="btn btn-link text-decoration-none text-success">
-                            <i class="bi bi-chevron-left"></i>
-                        </button>
-                        <input type="date" class="form-control border-0" value="<?= $currentDate->format('Y-m-d') ?>">
-                        <button class="btn btn-link text-decoration-none text-success">
-                            <i class="bi bi-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <div class="d-flex justify-content-md-end gap-2">
-                        <button class="btn btn-filter">
+                        <input type="date" id="start_date" class="form-control" placeholder="Start Date">
+                        <input type="date" id="end_date" class="form-control" placeholder="End Date">
+                        <button class="btn btn-filter" id="filter_date_range">
                             <i class="bi bi-funnel me-2"></i>Filter
                         </button>
-                        <button class="btn btn-outline-success">
-                            <i class="bi bi-arrow-clockwise"></i>
-                        </button>
-                        <button class="btn btn-outline-success">
-                            <i class="bi bi-download"></i>
+                        <!-- reset tamggal -->
+                        <button class="btn btn-filter" id="reset_date_range">
+                            <i class="bi bi-arrow-counterclockwise me-2"></i>Reset
                         </button>
                     </div>
                 </div>
@@ -221,92 +257,136 @@
                         <tr>
                             <th class="sticky">Mesin</th>
                             <?php
-                            for ($i = -2; $i <= 4; $i++) { // 2 hari ke belakang hingga 4 hari ke depan
-                                $date = (clone $currentDate)->modify("$i days");
+                            // Set startDate dan endDate
+                            $startDate = new DateTime($filter['start_date']);
+                            $endDate = new DateTime($filter['end_date']);
+
+                            // Tambahkan satu hari pada $endDateClone untuk mencakup tanggal terakhir
+                            $endDateClone = clone $endDate;
+                            $endDateClone->add(new DateInterval('P1D'));
+
+                            // Interval 1 hari
+                            $dateInterval = new DateInterval('P1D');
+                            $datePeriod = new DatePeriod($startDate, $dateInterval, $endDateClone);
+
+                            // Loop tanggal
+                            foreach ($datePeriod as $date) {
                                 echo "<th>" . $date->format('D, d M') . "</th>";
                             }
                             ?>
                         </tr>
                     </thead>
                     <tbody>
+                        <?php
+                        // Kelompokkan scheduleData untuk mempercepat akses
+                        $scheduleGrouped = [];
+                        foreach ($scheduleData as $job) {
+                            // Pastikan tanggal disimpan dengan format yang sesuai (Y-m-d)
+                            $key = "{$job['no_mesin']} | " . (new DateTime($job['tanggal_schedule']))->format('Y-m-d') . " | {$job['lot_urut']}";
+                            // Jika key sudah ada, gabungkan total_kg-nya
+                            if (isset($scheduleGrouped[$key])) {
+                                $scheduleGrouped[$key]['total_kg'] += $job['total_kg'];
+                            } else {
+                                $scheduleGrouped[$key] = $job;
+                            }
+                        }
+                        // echo '<pre>';
+                        // print_r($scheduleData); // Debug untuk melihat seluruh data schedule
+                        // echo '</pre>';
+                        // Menentukan threshold kapasitas mesin
+                        function getCapacityColor($kgCelup, $maxCaps)
+                        {
+                            $lowThreshold = $maxCaps * 0.69; // 69%
+                            $midThreshold = $maxCaps * 0.70; // 70%
+                            $highThreshold = $maxCaps;       // 100%
+
+                            if ($kgCelup < $lowThreshold) {
+                                return 'bg-success';
+                            } elseif ($kgCelup < $highThreshold) {
+                                return 'bg-warning';
+                            } else {
+                                return 'bg-danger';
+                            }
+                        }
+
+                        // Fungsi untuk menampilkan tombol jadwal
+                        function renderJobButton($job, $mesin, $capacityColor, $capacityPercentage)
+                        {
+                            $kgCelup = number_format($job['total_kg'], 2);
+                            return "
+                                <button class='btn btn-link {$capacityColor}' 
+                                    data-bs-toggle='modal' 
+                                    data-bs-target='#modalSchedule'
+                                    data-no-mesin='{$job['no_mesin']}'
+                                    data-tanggal-schedule='{$job['tanggal_schedule']}'
+                                    data-lot-urut='{$job['lot_urut']}'
+                                    title='{$job['total_kg']} kg ({$capacityPercentage}%)'>
+                                    <div class='d-flex flex-column align-items-center justify-content-center' style='height: 100%;'>
+                                        <span style='font-size: 0.9rem; color: black; font-weight: bold;'>{$job['kode_warna']}</span>
+                                        <span style='font-size: 0.85rem; color: black;'>{$kgCelup} KG</span>
+                                    </div>
+                                </button>";
+                        }
+
+                        ?>
+                        <!-- Tabel Mesin -->
                         <?php foreach ($mesin_celup as $mesin): ?>
                             <tr>
                                 <!-- Kolom informasi mesin -->
                                 <td class="sticky machine-info">
                                     <strong>Mesin <?= $mesin['no_mesin'] ?></strong><br>
                                     <input type="hidden" id="no_mesin" value="<?= $mesin['no_mesin'] ?>">
-                                    <small>Kapasitas: <?= number_format($mesin['min_caps'], 1) ?> - <?= number_format($mesin['max_caps'], 1) ?> kg </small>
-                                    <br>
+                                    <small>Kapasitas: <?= number_format($mesin['min_caps'], 1) ?> - <?= number_format($mesin['max_caps'], 1) ?> kg </small><br>
                                     <small>L/M/D : (<?= $mesin['lmd'] ?>)</small>
                                 </td>
 
-                                <?php
+                                <!-- Kolom tanggal -->
+                                <?php foreach ($datePeriod as $date): ?>
+                                    <td>
+                                        <?php
+                                        // Loop untuk menampilkan kartu sesuai jumlah lot
+                                        for ($lot = 0; $lot < $mesin['jml_lot']; $lot++) {
+                                            $num = $lot + 1;
+                                            // Periksa apakah tanggal dan lot sudah sesuai dengan jadwal
+                                            $key = "{$mesin['no_mesin']} | " . $date->format('Y-m-d') . " | " . $num;
+                                            $job = $scheduleGrouped[$key] ?? null;
 
-                                for ($i = -2; $i <= 4; $i++) { // 2 hari ke belakang hingga 4 hari ke depan
-                                    $date = (clone $currentDate)->modify("$i days");
+                                            if ($job) {
+                                                // Menghitung kapasitas dan warna berdasarkan kapasitas
+                                                $capacityPercentage = ($job['total_kg'] / $mesin['max_caps']) * 100;
+                                                $capacityColor = getCapacityColor($job['total_kg'], $mesin['max_caps']);
 
-                                    echo "<td>";
-                                    // Loop untuk menampilkan kartu sesuai jumlah lot
-                                    for ($lot = 0; $lot < $mesin['jml_lot']; $lot++) {
-                                        $jobsForDay = array_filter($scheduleData, function ($job) use ($mesin, $date, $lot) {
-                                            return $job['no_mesin'] == $mesin['no_mesin'] && $job['tanggal_schedule'] == $date->format('Y-m-d') && $job['lot_urut'] == $lot + 1;
-                                        });
-                                        $num = $lot + 1;
-                                        if (!empty($jobsForDay)) {
-                                            foreach ($jobsForDay as $job) {
-                                                $capacityColor = 'bg-secondary';
-                                                $capacityPercentage = round((intval($job['kg_celup']) / intval($mesin['max_caps'])) * 100);
-                                                if (intval($job['kg_celup']) > 0 && intval($job['kg_celup']) < intval($mesin['max_caps'] * 69 / 100)) {
-                                                    $capacityColor = 'bg-success';
-                                                } elseif (intval($job['kg_celup']) >= intval($mesin['max_caps'] * 70 / 100) && intval($job['kg_celup']) < intval($mesin['max_caps'] * 100 / 100)) {
-                                                    $capacityColor = 'bg-warning';
-                                                } elseif (intval($job['kg_celup']) == intval($mesin['max_caps'] * 100 / 100)) {
-                                                    $capacityColor = 'bg-danger';
-                                                }
-
-                                                echo "<div class='job-item {$capacityColor}' style='width: {$capacityPercentage}%; text-align: center;'>";
-                                                echo "<button class='btn btn-link' 
-                        style='display: block; width: 100%; height: 100%; text-align: center;' 
-                        data-bs-toggle='modal' 
-                        data-bs-target='#modalSchedule' 
-                        data-no-mesin='{$job['no_mesin']}'
-                        data-tanggal-schedule='{$job['tanggal_schedule']}'
-                        data-lot-urut='{$job['lot_urut']}'
-                        onclick='showScheduleModal(\"{$job['no_mesin']}\", \"{$job['tanggal_schedule']}\", \"{$job['lot_urut']}\")' 
-                        data-bs-toggle='tooltip' 
-                        data-bs-placement='top' 
-                        title='{$job['total_kg']} kg ({$capacityPercentage}%)'>";
-                                                echo "<div class='d-flex flex-column align-items-center justify-content-center' style='height: 100%;'>";
-                                                echo "<span style='font-size: 0.9rem; color: black; font-weight: bold; text-align: center;'>{$job['kode_warna']}</span>";
-                                                echo "<span style='font-size: 0.85rem; color: black;'>{$job['total_kg']} kg</span>";
+                                                // Render button untuk lot yang ada jadwalnya
+                                                echo "<div class='job-item'>";
+                                                echo renderJobButton($job, $mesin, $capacityColor, number_format($capacityPercentage, 1));
                                                 echo "</div>";
-                                                echo "</button>";
-                                                echo "</div>";
+                                            } else {
+                                                // Tampilkan kartu kosong jika tidak ada jadwal
+                                                echo "<div class='job-item no-schedule'>";
+                                                echo "<button class='btn btn-light text-muted text-decoration-none'
+                                                        data-bs-toggle='modal' 
+                                                        data-bs-target='#modalSchedule'
+                                                        data-no-mesin='{$mesin['no_mesin']}'
+                                                        data-tanggal-schedule='{$date->format('Y-m-d')}'
+                                                        data-lot-urut='{$num}'>";
+                                                echo "<div class='text-muted'>Tidak ada jadwal</div>";
+                                                echo "</button></div>";
                                             }
-                                        } else {
-                                            echo "<div class='job-item'>";
-                                            echo "<button class='btn btn-link text-decoration-none'
-                    data-bs-toggle='modal' data-bs-target='#modalSchedule'
-                    data-no-mesin='{$mesin['no_mesin']}'
-                    data-tanggal-schedule='{$date->format('Y-m-d')}'
-                    data-lot-urut='{$num}' 
-                    onclick='showScheduleModal(\"{$mesin['no_mesin']}\", \"{$date->format('Y-m-d')}\", \"{$num}\")'>";
-                                            echo "<div class='text-muted'>Tidak ada jadwal</div>";
-                                            echo "</button></div>";
                                         }
-                                    }
-                                    echo "</td>";
-                                }
-                                ?>
-
+                                        ?>
+                                    </td>
+                                <?php endforeach; ?>
                             </tr>
                         <?php endforeach; ?>
+
+
 
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
 </div>
 
 <div class="modal fade" id="modalSchedule" tabindex="-1" aria-labelledby="modalScheduleLabel" aria-hidden="true">
@@ -390,6 +470,7 @@
                 .then((data) => {
                     // Insert the fetched HTML into the modal body
                     var tes = JSON.parse(data);
+                    var totalKg = parseFloat(tes[0].total_kg).toFixed(2);
                     var htmlContent = '';
                     tes.forEach(function(item) {
                         htmlContent += `<div class="row">
@@ -425,15 +506,15 @@
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="total_kg" class="form-label">Total Kg Celup</label>
-                                    <input type="text" class="form-control" id="total_kg" value="${item.total_kg} KG" readonly>
+                                    <input type="text" class="form-control" id="total_kg" value="${totalKg}" readonly>
                                 </div>
                                 <div class="mb-3">
                                     <label for="start_mc" class="form-label">Start MC</label>
                                     <input type="text" class="form-control" id="start_mc" value="${item.start_mc}" readonly>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="deliery" class="form-label">Delivery</label>
-                                    <input type="text" class="form-control" id="deliery" value="" readonly>
+                                    <label for="last_status" class="form-label">Last Status</label>
+                                    <input type="text" class="form-control" id="last_status" value="${item.last_status}" readonly>
                                 </div>
                             </div>
                         </div>
@@ -455,7 +536,7 @@
 
                     // Tambahkan event listener untuk tombol "Edit Jadwal"
                     document.getElementById("editSchedule").addEventListener("click", function() {
-                        redirectToEditSchedule(idCelup);
+                        redirectToEditSchedule(machine, date, lotUrut);
                     });
                 })
                 .catch((error) => {
@@ -482,8 +563,8 @@
         }
 
         // Fungsi untuk redirect ke halaman edit jadwal
-        function redirectToEditSchedule(idCelup) {
-            const url = `<?= base_url($role . '/schedule/editSchedule') ?>/${idCelup}`;
+        function redirectToEditSchedule(machine, date, lotUrut) {
+            const url = `<?= base_url($role . '/schedule/editSchedule') ?>?no_mesin=${machine}&tanggal_schedule=${date}&lot_urut=${lotUrut}`;
             window.location.href = url;
         }
 
@@ -504,29 +585,43 @@
         });
 
 
-        // // Tambahkan event listener untuk tombol Tambah Jadwal di dalam modal JS
-        // document.getElementById("addSchedule").addEventListener("click", function() {
-        //     // Ambil data dari atribut modal
-        //     const noMesin = modalTitle.textContent.split(" | ")[0].split("-")[1];
-        //     const tanggalSchedule = modalTitle.textContent.split(" | ")[1];
-        //     const lotUrut = modalTitle.textContent.split(" | ")[2].split(" ")[1];
+        document.getElementById('filter_date_range').addEventListener('click', function() {
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
 
-        //     // Redirect ke URL tambah jadwal
-        //     const url = `<?= base_url($role . '/schedule/form') ?>?no_mesin=${noMesin}&tanggal_schedule=${tanggalSchedule}&lot_urut=${lotUrut}`;
-        //     window.location.href = url;
-        // });
+            if (!startDate || !endDate) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Silakan pilih rentang tanggal.',
+                });
+                return;
+            }
 
-        // // Tambahkan event listener untuk tombol Edit Jadwal
-        // document.getElementById("editSchedule").addEventListener("click", function() {
-        //     // Ambil data dari atribut modal
-        //     const noMesin = modalTitle.textContent.split(" | ")[0].split("-")[1];
-        //     const tanggalSchedule = modalTitle.textContent.split(" | ")[1];
-        //     const lotUrut = modalTitle.textContent.split(" | ")[2].split(" ")[1];
+            // Redirect ke URL dengan parameter filter
+            const url = `<?= base_url($role . '/schedule') ?>?start_date=${startDate}&end_date=${endDate}`;
+            window.location.href = url;
+        });
 
-        //     // Redirect ke URL edit jadwal
-        //     const url = `<?= base_url($role . '/schedule/form') ?>?no_mesin=${noMesin}&tanggal_schedule=${tanggalSchedule}&lot_urut=${lotUrut}`;
-        //     window.location.href = url;
-        // });
+        // reset filter tanggal
+        document.getElementById('reset_date_range').addEventListener('click', function() {
+            // Redirect ke URL dengan parameter filter menampilkan data 2 hari kebelakang dan 7 hari kedepan
+            const start_date = new Date();
+            const end_date = new Date();
+            start_date.setDate(start_date.getDate() - 2);
+            end_date.setDate(end_date.getDate() + 7);
+
+            const startDate = start_date.toISOString().split('T')[0];
+
+            const endDate = end_date.toISOString().split('T')[0];
+
+            // Redirect ke URL dengan parameter filter
+            const url = `<?= base_url($role . '/schedule') ?>?start_date=${startDate}&end_date=${endDate}`;
+            window.location.href = url;
+        });
+
+
+
     });
 </script>
 
