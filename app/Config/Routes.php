@@ -39,6 +39,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('deleteMasterMaterial', 'MastermaterialController::deleteMasterMaterial');
 
     $routes->get('schedule', 'ScheduleController::index');
+    $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
+    $routes->get('schedule/nylon', 'ScheduleController::nylon');
     $routes->get('schedule/getScheduleDetails/(:any)/(:any)/(:any)', 'ScheduleController::getScheduleDetails/$1/$2/$3');
     $routes->get('schedule/form', 'ScheduleController::create');
     $routes->get('schedule/getItemType', 'ScheduleController::getItemType');
@@ -70,7 +72,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
 
 // celup routes
 $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
-    $routes->get('', 'inicontroller::index');
+    $routes->get('', 'CelupController::index');
+    $routes->get('schedule', 'CelupController::schedule');
+    $routes->get('outCelup', 'CelupController::outCelup');
 });
 
 
