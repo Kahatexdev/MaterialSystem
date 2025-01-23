@@ -124,9 +124,9 @@ class ScheduleCelupModel extends Model
     public function getScheduleDetailsData($machine, $date, $lot)
     {
         return $this->table('schedule_celup')
-        ->select('*, mesin_celup.no_mesin')
-        ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-        ->where('mesin_celup.no_mesin', $machine)
+            ->select('*, mesin_celup.no_mesin')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->where('mesin_celup.no_mesin', $machine)
             ->where('schedule_celup.tanggal_schedule', $date)
             ->where('schedule_celup.lot_urut', $lot)
             ->groupBy('schedule_celup.id_celup')
@@ -207,8 +207,8 @@ class ScheduleCelupModel extends Model
     public function getNoModel($no_mesin, $tanggal_schedule, $lot_urut)
     {
         return $this->table('schedule_celup')
-        ->select('schedule_celup.no_model, master_order.no_model as master_no_model, master_order.id_order')
-        ->where('schedule_celup.no_mesin', $no_mesin)
+            ->select('schedule_celup.no_model, master_order.no_model as master_no_model, master_order.id_order')
+            ->where('schedule_celup.no_mesin', $no_mesin)
             ->where('schedule_celup.tanggal_schedule', $tanggal_schedule)
             ->where('schedule_celup.lot_urut', $lot_urut)
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
@@ -231,5 +231,14 @@ class ScheduleCelupModel extends Model
         return $builder->get()->getResultArray();
     }
 
-
+    public function getSchedule()
+    {
+        return $this->select('schedule_celup.*, mesin_celup.no_mesin, sum(schedule_celup.kg_celup) as total_kg')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->where('schedule_celup.last_status', 'scheduled')
+            ->groupBy('schedule_celup.id_mesin')
+            ->groupBy('schedule_celup.tanggal_schedule')
+            ->groupBy('schedule_celup.lot_urut')
+            ->findAll();
+    }
 }

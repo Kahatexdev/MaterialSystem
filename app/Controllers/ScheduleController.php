@@ -68,6 +68,7 @@ class ScheduleController extends BaseController
 
         // Ambil data jadwal dari model (filter berdasarkan tanggal jika tersedia)
         $scheduleData = $this->scheduleCelupModel->getScheduleCelupbyDate($startDateObj, $endDateObj);
+        var_dump($scheduleData);
         // Ambil data mesin celup
         $mesin_celup = $this->mesinCelupModel->getMesinCelupBenang();
 
@@ -408,8 +409,4 @@ class ScheduleController extends BaseController
             return redirect()->back()->with('error', 'Gagal menyimpan atau mengupdate jadwal!');
         }
     }
-
-
-
-
 }
