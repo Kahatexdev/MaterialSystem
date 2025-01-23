@@ -162,7 +162,7 @@
                                                         <select class="form-select po-select" name="po[<?= $index ?>]" <?= $readonly ? 'readonly' : '' ?> required>
                                                             <option value="">Pilih PO</option>
                                                             <?php foreach ($po as $option): ?>
-                                                                <option value="<?= $option['id_order'] ?>" <?= $row['no_model'] == $option['no_model'] ? 'selected' : '' ?>><?= $option['no_model'] ?>
+                                                                <option value="<?= $row['no_model'] ?>" <?= $row['no_model'] == $option['no_model'] ? 'selected' : '' ?>><?= $option['no_model'] ?>
                                                                 </option>
                                                             <?php endforeach; ?>
                                                         </select>
@@ -198,8 +198,7 @@
                                                     </td>
 
                                                     <td>
-                                                        <!-- <label class="badge bg-<?= $row['last_status'] == 'sceduled' ? 'success' : 'info' ?>"><?= $row['last_status'] ?></label> -->
-                                                        <input type="text" class="form-control last_status" name="last_status[<?= $index ?>]" value="<?= $row['last_status'] ?>" readonly>
+                                                        <input type="text" class="form-control last_status" name="last_status[<?= $index ?>]" value="<?= $row['last_status'] ?>" required <?= $readonly ? 'readonly' : '' ?>>
                                                     </td>
 
                                                     <td class="text-center">
@@ -210,9 +209,6 @@
                                                 </tr>
                                             <?php endforeach; ?>
                                         </tbody>
-                                        <!-- <pre>
-                                            <?= print_r($scheduleData) ?>
-                                        </pre> -->
                                         <tfoot>
                                             <tr>
                                                 <td class="text-center"><strong>Total Qty Celup</strong></td>
@@ -252,67 +248,25 @@
         function updatePODropdown() {
             const itemTypeValue = itemType.value.trim();
             const kodeWarnaValue = kodeWarna.value.trim();
-            // console.log(itemTypeValue, kodeWarnaValue);
 
             // Iterasi setiap baris dalam tabel
-            const rows = poTable.querySelectorAll("tbody tr");
+            const rows = document.querySelectorAll("#poTable tbody tr");
 
-            // console.log(rows);
-            rows.forEach((row) => {
+            rows.forEach((row, index) => {
                 const poSelect = row.querySelector(".po-select");
-                const selectedValue = poSelect.value; // Simpan nilai yang dipilih sebelumnya
-
-                // poSelect.innerHTML = '<option value="">Pilih PO</option>'; // Reset dropdown
-
-                // Pastikan itemType dan kodeWarna ada
-                if (itemTypeValue && kodeWarnaValue) {
-                    // Gunakan jQuery AJAX untuk fetch data PO
-                    $.ajax({
-                        url: '<?= base_url(session('role') . "/schedule/getPO") ?>',
-                        type: 'GET',
-                        data: {
-                            item_type: itemTypeValue,
-                            kode_warna: kodeWarnaValue
-                        },
-                        dataType: 'json',
-                        success: function(data) {
-                            // console.log(data);
-                            if (data.length) {
-                                data.forEach((po) => {
-                                    const option = document.createElement("option");
-                                    option.value = po.no_model;
-                                    option.textContent = po.no_model;
-                                    poSelect.appendChild(option);
-                                });
-
-                                // Setelah data di-fetch, setel kembali nilai yang dipilih
-                                if (selectedValue) {
-                                    poSelect.value = selectedValue;
-                                }
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Error fetching PO data:", error);
-                        }
-                    });
-                }
-
-                // Update delivery_awal dan delivery_akhir
                 const startMcInput = row.querySelector(".start_mc");
                 const deliveryAwalInput = row.querySelector(".delivery_awal");
                 const deliveryAkhirInput = row.querySelector(".delivery_akhir");
+                const qtyPOInput = row.querySelector(".qty_po");
 
-                // Menambahkan event listener untuk perubahan pilihan pada dropdown PO
+                // Tambahkan event listener untuk dropdown PO
                 poSelect.addEventListener("change", function() {
                     const poId = poSelect.value;
-                    const deliveryAwalInput = row.querySelector("input[name='delivery_awal[]']");
-                    const deliveryAkhirInput = row.querySelector("input[name='delivery_akhir[]']");
-                    const qtyPOInput = row.querySelector("input[name='qty_po[]']");
 
                     if (poId) {
                         // Fetch data untuk PO yang dipilih
                         $.ajax({
-                            url: '<?= base_url(session('role') . "/schedule/getPODetails") ?>', // Ganti dengan URL yang sesuai untuk mengambil detail PO
+                            url: '<?= base_url(session('role') . "/schedule/getPODetails") ?>',
                             type: 'GET',
                             data: {
                                 id_order: poId
@@ -320,13 +274,9 @@
                             dataType: 'json',
                             success: function(poDetails) {
                                 if (poDetails) {
-                                    // Update delivery_awal dan delivery_akhir berdasarkan data yang diterima
-                                    if (poDetails.delivery_awal && poDetails.delivery_akhir) {
-                                        deliveryAwalInput.value = poDetails.delivery_awal;
-                                        deliveryAkhirInput.value = poDetails.delivery_akhir;
-                                    }
-                                } else {
-                                    console.log("Data PO tidak ditemukan");
+                                    startMcInput.value = poDetails.start_mc || "";
+                                    deliveryAwalInput.value = poDetails.delivery_awal || "";
+                                    deliveryAkhirInput.value = poDetails.delivery_akhir || "";
                                 }
                             },
                             error: function(xhr, status, error) {
@@ -341,17 +291,12 @@
                             data: {
                                 id_order: poId,
                                 item_type: itemTypeValue,
-                                kode_warna: kodeWarnaValue
+                                kode_warna: kodeWarnaValue,
                             },
                             dataType: 'json',
                             success: function(qtyPO) {
                                 if (qtyPO) {
-                                    // Update qty PO berdasarkan data yang diterima
-                                    if (qtyPO.kgs) {
-                                        qtyPOInput.value = parseFloat(qtyPO.kgs).toFixed(2);
-                                    }
-                                } else {
-                                    console.log("Data Qty PO tidak ditemukan");
+                                    qtyPOInput.value = parseFloat(qtyPO.kgs).toFixed(2);
                                 }
                             },
                             error: function(xhr, status, error) {
@@ -363,33 +308,43 @@
             });
         }
 
-        // Hitung kapasitas
+
+        // Hitung sisa kapasitas
         function calculateCapacity() {
-            const min = parseFloat(minCaps.value) || 0;
             const max = parseFloat(maxCaps.value) || 0;
 
             let total = 0;
-            const qtyCelupInputs = document.querySelectorAll('input[name="qty_celup[]"]');
-            const lastStatusInputs = document.querySelectorAll('input[name="last_status[]"]'); // Ambil last_status berdasarkan index
+            const rows = poTable.querySelectorAll("tbody tr");
 
-            // Loop melalui setiap row dan pastikan hanya qty_celup yang statusnya bukan 'done' yang dihitung
-            qtyCelupInputs.forEach((input) => {
-                const row = input.closest("tr"); // Mendapatkan baris terdekat
-                const lastStatus = row.querySelector('input[name^="last_status"]').value; // Mendapatkan status di baris tersebut
-                console.log(lastStatus);
-                if (lastStatus !== 'done') {
-                    total += parseFloat(input.value) || 0; // Jika status bukan 'done', tambahkan qty_celup ke total
+            rows.forEach((row, index) => {
+                const qtyCelupInput = row.querySelector('input[name^="qty_celup["]');
+                const lastStatusInput = row.querySelector('input[name^="last_status["]');
+
+                if (qtyCelupInput && lastStatusInput) {
+                    const qtyCelup = parseFloat(qtyCelupInput.value) || 0;
+                    const lastStatus = lastStatusInput.value;
+
+                    if (lastStatus === 'scheduled') {
+                        total += qtyCelup;
+                    }
+                } else {
+                    console.warn(`Input qty_celup atau last_status tidak ditemukan di baris ke-${index}`);
                 }
             });
 
             // Update total qty celup
-            totalQtyCelup.value = total.toFixed(2); // Update dengan 2 angka di belakang koma
-            console.log(total);
+            totalQtyCelup.value = total.toFixed(2);
+
             // Hitung sisa kapasitas
             const sisa = max - total;
-            sisaKapasitas.value = sisa.toFixed(2); // Update dengan 2 angka di belakang koma
+            sisaKapasitas.value = sisa.toFixed(2);
 
             // Validasi qty_celup
+            validateQtyCelup(max);
+        }
+        // Validasi qty_celup untuk setiap input
+        function validateQtyCelup(max) {
+            const qtyCelupInputs = document.querySelectorAll('input[name="qty_celup[]"]');
             qtyCelupInputs.forEach(input => {
                 const kg = parseFloat(input.value);
                 if (kg > max) {
@@ -400,10 +355,7 @@
             });
         }
 
-        // Pastikan elemen sudah ada sebelum memanggil fungsi
-        calculateCapacity();
-
-        // Menambahkan event listener untuk input qty_celup
+        // Tambahkan event listener untuk input qty_celup
         poTable.addEventListener("input", function(e) {
             if (e.target.classList.contains("qty_celup")) {
                 calculateCapacity();
@@ -412,57 +364,68 @@
 
         // Event listener untuk menambah baris baru
         document.getElementById("addRow").addEventListener("click", function() {
-            const tbody = poTable.querySelector("tbody");
+            const tbody = document.querySelector("#poTable tbody");
+            const newIndex = tbody.querySelectorAll("tr").length;
+
             const newRow = `
-                        <tr>
-                            <td>
-                                <select class="form-select po-select" name="po[]" required>
-                                    <option value="">Pilih PO</option>
-                                </select>
-                            </td>
-                            <td><input type="date" class="form-control" name="tgl_start_mc[]" readonly></td>
-                            <td><input type="date" class="form-control" name="delivery_awal[]" readonly></td>
-                            <td><input type="date" class="form-control" name="delivery_akhir[]" readonly></td>
-                            <td><input type="number" class="form-control" name="qty_po[]" readonly></td>
-                            <td><input type="number" class="form-control" name="qty_po_plus[]" readonly></td>
-                            <td><input type="number" step="0.01" min="0.01" class="form-control qty_celup" name="qty_celup[]" required></td>
-                            <td>
-                                <select class="form-select" name="po_plus[]" required>
-                                    <option value="0">Pilih PO(+)</option>
-                                    <option value="1">Ya</option>
-                                    <option value="0">Tidak</option>
-                                </select>
-                            </td>
-                            <td class="text-center">
-                                <button type="button" class="btn btn-danger removeRow">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>`;
+        <tr>
+            <td>
+                <select class="form-select po-select" name="po[${newIndex}]" required>
+                    <option value="">Pilih PO</option>
+                    <?php foreach ($po as $option): ?>
+                        <option value="<?= $option['id_order'] ?>"><?= $option['no_model'] ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <input type="hidden" name="po[${newIndex}]" value=<?= $option['no_model'] ?>>
+            </td>
+            <td><input type="date" class="form-control start_mc" name="start_mc[${newIndex}]" readonly></td>
+            <td><input type="date" class="form-control delivery_awal" name="delivery_awal[${newIndex}]" readonly></td>
+            <td><input type="date" class="form-control delivery_akhir" name="delivery_akhir[${newIndex}]" readonly></td>
+            <td><input type="number" class="form-control qty_po" name="qty_po[${newIndex}]" readonly></td>
+            <td><input type="number" class="form-control qty_po_plus" name="qty_po_plus[${newIndex}]" required readonly></td>
+            <td><input type="number" step="0.01" class="form-control qty_celup" name="qty_celup[${newIndex}]" required></td>
+            <td>
+                <select class="form-select po_plus" name="po_plus[${newIndex}]" required>
+                    <option value="">Pilih PO(+)</option>
+                    <option value="1">Iya</option>
+                    <option value="0">Bukan</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" class="form-control last_status" name="last_status[${newIndex}]" value="scheduled" required readonly>
+            </td>
+            <td class="text-center">
+                <button type="button" class="btn btn-danger removeRow">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>`;
 
             tbody.insertAdjacentHTML("beforeend", newRow);
 
-            // Re-query qty_celup inputs dan tambahkan event listener baru
-            const qtyCelupInputs = document.querySelectorAll('input[name="qty_celup[]"]');
-            qtyCelupInputs.forEach(input => {
-                input.addEventListener('input', calculateCapacity);
-            });
-
-            // Recalculate capacity and update PO dropdown for new row
+            // Panggil fungsi untuk memperbarui dropdown dan event listener pada baris baru
             updatePODropdown();
             calculateCapacity();
         });
 
-        // Event delegation untuk menghapus baris
-        poTable.addEventListener("click", function(e) {
-            if (e.target.classList.contains("removeRow") || e.target.closest(".removeRow")) {
-                e.target.closest("tr").remove();
-                calculateCapacity(); // Recalculate capacity after row removal
+
+        // Event listener untuk menghapus baris
+        document.querySelector("#poTable").addEventListener("click", function(event) {
+            if (event.target.closest(".removeRow")) {
+                const row = event.target.closest("tr");
+                row.remove();
+
+                // Perbarui ulang semua elemen dalam tabel
+                updatePODropdown();
+                calculateCapacity();
             }
         });
+
+
         // Since itemType and kodeWarna are not editable in form edit, we don't add event listeners for changes
         // Instead, we just call updatePODropdown once to populate dropdown options based on initial values
         updatePODropdown();
+        calculateCapacity();
     });
 </script>
 

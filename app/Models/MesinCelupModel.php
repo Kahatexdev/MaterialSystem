@@ -93,4 +93,22 @@ class MesinCelupModel extends Model
             ->where('id_mesin', $id_mesin)
             ->first();
     }
+
+    public function getMesinCelupAcrylic()
+    {
+        return $this->table('mesin_celup')
+            ->select('*')
+            ->where('ket_mesin', 'ACRYLIC')
+            ->orderBy('no_mesin', 'ASC')
+            ->findAll();
+    }
+
+    public function getMesinCelupNylon()
+    {
+        return $this->table('mesin_celup')
+            ->select('*')
+            ->where('ket_mesin', 'NYLON')
+            ->orderBy('no_mesin', 'ASC')
+            ->findAll();
+    }
 }

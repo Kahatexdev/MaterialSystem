@@ -132,7 +132,26 @@
                         </div>
                         <div class="mb-3">
                             <label for="lmd" class="form-label">LMD</label>
-                            <input type="text" class="form-control" name="lmd" id="lmd" required>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="L">
+                                <label class="form-check-label" for="L">L</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="M">
+                                <label class="form-check-label" for="M">M</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="D">
+                                <label class="form-check-label" for="D">D</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="WHITE">
+                                <label class="form-check-label" for="WHITE">WHITE</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="BLACK">
+                                <label class="form-check-label" for="BLACK">BLACK</label>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="ket_mesin" class="form-label">Keterangan Mesin</label>
@@ -178,8 +197,28 @@
                         </div>
                         <div class="mb-3">
                             <label for="lmd" class="form-label">LMD</label>
-                            <input type="text" class="form-control" name="lmd" id="lmdE" required>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="L" id="lmd_L">
+                                <label class="form-check-label" for="lmd_L">L</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="M" id="lmd_M">
+                                <label class="form-check-label" for="lmd_M">M</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="D" id="lmd_D">
+                                <label class="form-check-label" for="lmd_D">D</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="WHITE" id="lmd_WHITE">
+                                <label class="form-check-label" for="lmd_WHITE">WHITE</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="BLACK" id="lmd_BLACK">
+                                <label class="form-check-label" for="lmd_BLACK">BLACK</label>
+                            </div>
                         </div>
+
                         <div class="mb-3">
                             <label for="ket_mesin" class="form-label">Keterangan Mesin</label>
                             <input type="text" class="form-control" name="ket_mesin" id="ket_mesinE" required>
@@ -220,7 +259,12 @@
                             $('#min_capsE').val(response.min_caps);
                             $('#max_capsE').val(response.max_caps);
                             $('#jml_lotE').val(response.jml_lot);
-                            $('#lmdE').val(response.lmd);
+                            // Atur checkbox
+                            const lmdValues = response.lmd.split('');
+                            $('input[name="lmd[]"]').prop('checked', false); // Reset semua checkbox
+                            lmdValues.forEach(function(value) {
+                                $(`#lmd_${value}`).prop('checked', true); // Centang checkbox yang sesuai
+                            });
                             $('#ket_mesinE').val(response.ket_mesin);
                             // Show modal dialog
                             $('#updateModal').modal('show');

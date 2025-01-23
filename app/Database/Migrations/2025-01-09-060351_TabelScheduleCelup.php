@@ -53,6 +53,7 @@ class TabelScheduleCelup extends Migration
             'lot_celup' => [
                 'type' => 'VARCHAR',
                 'constraint' => 32,
+                'null' => true,
             ],
             'tanggal_schedule' => [
                 'type' => 'DATE',

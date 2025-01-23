@@ -78,9 +78,21 @@ class OpenPoModel extends Model
 
     public function getNomorModel()
     {
-        return $this->select('open_po.no_model, master_order.no_model, master_order.id_order')
+        return $this->select('open_po.no_model, master_order.id_order')
             ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
             ->distinct()
             ->findAll();
+    }
+
+    public function getFilteredPO($itemType, $kodeWarna)
+    {
+        return $this->db->table('open_po')
+        ->select('open_po.no_model, master_order.delivery_awal, master_order.delivery_akhir, master_order.id_order')
+        ->join('master_order', 'master_order.no_model = open_po.no_model')
+        ->where('open_po.item_type', $itemType)
+        ->where('open_po.kode_warna', $kodeWarna)
+        ->distinct()
+        ->get()
+        ->getResultArray();
     }
 }
