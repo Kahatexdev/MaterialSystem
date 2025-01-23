@@ -488,7 +488,7 @@ class ScheduleController extends BaseController
         // Render view dengan data yang sudah disiapkan
         return view($this->role . '/schedule/acrylic', $data);
     }
-    
+
     public function nylon()
     {
         // Ambil parameter filter dari query string
@@ -537,6 +537,4 @@ class ScheduleController extends BaseController
         // Render view dengan data yang sudah disiapkan
         return view($this->role . '/schedule/nylon', $data);
     }
-
-
 }

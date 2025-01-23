@@ -73,7 +73,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
 
 // celup routes
 $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
-    $routes->get('', 'inicontroller::index');
+    $routes->get('', 'CelupController::index');
+    $routes->get('schedule', 'CelupController::schedule');
+    $routes->get('outCelup', 'CelupController::outCelup');
 });
 
 
