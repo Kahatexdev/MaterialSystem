@@ -61,43 +61,40 @@ class MesinCelupController extends BaseController
         throw new \CodeIgniter\Exceptions\PageNotFoundException();
     }
 
-
     public function saveDataMesin()
     {
         $data = $this->request->getPost();
-        // $noMesin = $data['no_mesin'];
-        // $cekMesin = $this->mesinCelupModel->where('no_mesin', $noMesin)->first();
 
-        // if ($cekMesin) {
-        //     return redirect()->to(base_url($this->role . '/mesin/mesinCelup'))->with('error', 'No Mesin sudah ada.');
-        // }
+        $lmdValues = $this->request->getPost('lmd') ?? []; // Ambil nilai checkbox
 
-        if ($this->mesinCelupModel->save($data)) {
+        // Validasi aturan kombinasi
+        $allowedLMD = ['L', 'M', 'D'];
+        $allowedSingle = ['WHITE', 'BLACK'];
+
+        $selectedLMD = array_intersect($lmdValues, $allowedLMD); // Pilihan LMD
+        $selectedSingle = array_intersect($lmdValues, $allowedSingle); // Pilihan WHITE/BLACK
+
+        if (count($selectedSingle) > 1 || (count($selectedSingle) > 0 && count($selectedLMD) > 0)) {
+            return redirect()->back()->with('error', 'Pilih kombinasi LMD atau pilih salah satu antara WHITE dan BLACK.');
+        }
+
+        $lmdData = implode('', $lmdValues);
+
+        $saveData = [
+            'no_mesin' => $data['no_mesin'],
+            'min_caps' => $data['min_caps'],
+            'max_caps' => $data['max_caps'],
+            'jml_lot' => $data['jml_lot'],
+            'lmd' => $lmdData,
+            'ket_mesin' => $data['ket_mesin'],
+        ];
+
+        if ($this->mesinCelupModel->save($saveData)) {
             return redirect()->to(base_url($this->role . '/mesin/mesinCelup'))->with('success', 'Data berhasil disimpan.');
         } else {
             return redirect()->to(base_url($this->role . '/mesin/mesinCelup'))->with('error', 'Data gagal disimpan.');
         }
     }
-
-    // public function saveDataMesin()
-    // {
-    //     $data = $this->request->getPost();
-
-    //     $rules = [
-    //         'no_mesin' => 'required|is_unique[mesin_celup.no_mesin]',
-    //     ];
-
-    //     if (!$this->validate($rules)) {
-    //         // Kirim error validasi ke view
-    //         return redirect()->back()->withInput()->with('validation', \Config\Services::validation()->listErrors());
-    //     }
-
-    //     if ($this->mesinCelupModel->save($data)) {
-    //         return redirect()->to(base_url($this->role . '/mesin/mesinCelup'))->with('success', 'Data berhasil disimpan.');
-    //     } else {
-    //         return redirect()->to(base_url($this->role . '/mesin/mesinCelup'))->with('error', 'Data gagal disimpan.');
-    //     }
-    // }
 
     public function getMesinDetails($id)
     {
@@ -125,6 +122,19 @@ class MesinCelupController extends BaseController
     public function updateDataMesin()
     {
         $id_mesin = $this->request->getPost('id_mesin');
+        $no_mesin = $this->request->getPost('no_mesin');
+
+        $cekNoMesin = $this->mesinCelupModel
+            ->where('no_mesin', $no_mesin)
+            ->where('id_mesin !=', $id_mesin) // Pastikan tidak mengecek diri sendiri
+            ->first();
+
+        if ($cekNoMesin) {
+            // Jika duplikat ditemukan, kembalikan pesan error
+            return redirect()->to(base_url($this->role . '/mesin/mesinCelup'))
+                ->withInput()
+                ->with('error', 'No Mesin sudah ada di database.');
+        }
 
         $data = [
             'no_mesin' => $this->request->getPost('no_mesin'),
@@ -134,12 +144,6 @@ class MesinCelupController extends BaseController
             'lmd' => $this->request->getPost('lmd'),
             'ket_mesin' => $this->request->getPost('ket_mesin'),
         ];
-
-        // $noMesin = $data['no_mesin'];
-        // $cekMesin = $this->mesinCelupModel->where('no_mesin', $noMesin)->first();
-        // if ($cekMesin) {
-        //     return redirect()->to(base_url($this->role . '/mesin/mesinCelup'))->with('error', 'No Mesin sudah ada.');
-        // }
 
         if ($this->mesinCelupModel->update($id_mesin, $data)) {
             return redirect()->to(base_url($this->role . '/mesin/mesinCelup'))->with('success', 'Data berhasil diubah.');

@@ -132,7 +132,26 @@
                         </div>
                         <div class="mb-3">
                             <label for="lmd" class="form-label">LMD</label>
-                            <input type="text" class="form-control" name="lmd" id="lmd" required>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="L">
+                                <label class="form-check-label" for="L">L</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="M">
+                                <label class="form-check-label" for="M">M</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="D">
+                                <label class="form-check-label" for="D">D</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="WHITE">
+                                <label class="form-check-label" for="WHITE">WHITE</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="BLACK">
+                                <label class="form-check-label" for="BLACK">BLACK</label>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="ket_mesin" class="form-label">Keterangan Mesin</label>
@@ -178,7 +197,26 @@
                         </div>
                         <div class="mb-3">
                             <label for="lmd" class="form-label">LMD</label>
-                            <input type="text" class="form-control" name="lmd" id="lmdE" required>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="L">
+                                <label class="form-check-label" for="L">L</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="M">
+                                <label class="form-check-label" for="M">M</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="D">
+                                <label class="form-check-label" for="D">D</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="WHITE">
+                                <label class="form-check-label" for="WHITE">WHITE</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="lmd[]" value="BLACK">
+                                <label class="form-check-label" for="BLACK">BLACK</label>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="ket_mesin" class="form-label">Keterangan Mesin</label>
