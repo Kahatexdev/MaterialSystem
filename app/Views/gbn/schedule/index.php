@@ -205,6 +205,18 @@
             });
         </script>
     <?php endif; ?>
+
+    <?php if (session()->getFlashdata('info')) : ?>
+        <script>
+            $(document).ready(function() {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info!',
+                    html: '<?= session()->getFlashdata('info') ?>',
+                });
+            });
+        </script>
+    <?php endif; ?>
     <h1 class="display-5 mb-4 text-center" style="color: #2e7d32; font-weight: 600;">Schedule Mesin Celup</h1>
 
     <div class="card mb-4">
@@ -269,11 +281,40 @@
                             $dateInterval = new DateInterval('P1D');
                             $datePeriod = new DatePeriod($startDate, $dateInterval, $endDateClone);
 
-                            // Loop tanggal
+                            // Tanggal hari ini
+                            $today = new DateTime();
+
+                            // Tanggal 3 hari ke belakang
+                            $threeDaysAgo = (clone $today)->sub(new DateInterval('P4D'));
+
+                            // Tanggal 6 hari ke depan
+                            $sixDaysAhead = (clone $today)->add(new DateInterval('P6D'));
+
                             foreach ($datePeriod as $date) {
-                                echo "<th>" . $date->format('D, d M') . "</th>";
+                                // Periksa apakah hari Minggu
+                                if ($date->format('w') == 0) { // 0 adalah kode untuk hari Minggu
+                                    echo "<th style='color: red;'>" . $date->format('D, d M') . "</th>";
+                                }
+                                // Periksa apakah tanggal adalah hari ini
+                                elseif ($date->format('Y-m-d') === $today->format('Y-m-d')) {
+                                    echo "<th style='background-color: #ffeb3b; color: #000;'>" . $date->format('D, d M') . "</th>";
+                                }
+                                // Periksa apakah tanggal adalah 3 hari ke belakang
+                                elseif ($date >= $threeDaysAgo && $date < $today) {
+                                    echo "<th style='color: #6c757d;'>" . $date->format('D, d M') . "</th>";
+                                }
+                                // Periksa apakah tanggal adalah 6 hari ke depan
+                                elseif ($date > $today && $date <= $sixDaysAhead) {
+                                    echo "<th style='color: rgb(31, 193, 199);'>" . $date->format('D, d M') . "</th>";
+                                }
+                                // Tanggal lain
+                                else {
+                                    echo "<th>" . $date->format('D, d M') . "</th>";
+                                }
                             }
                             ?>
+
+
                         </tr>
                     </thead>
                     <tbody>
@@ -283,16 +324,18 @@
                         foreach ($scheduleData as $job) {
                             // Pastikan tanggal disimpan dengan format yang sesuai (Y-m-d)
                             $key = "{$job['no_mesin']} | " . (new DateTime($job['tanggal_schedule']))->format('Y-m-d') . " | {$job['lot_urut']}";
-                            // Jika key sudah ada, gabungkan total_kg-nya
-                            if (isset($scheduleGrouped[$key])) {
-                                $scheduleGrouped[$key]['total_kg'] += $job['total_kg'];
-                            } else {
-                                $scheduleGrouped[$key] = $job;
+
+                            // Cek last_status sebelum memasukkan data ke dalam kelompok
+                            if (in_array($job['last_status'], ['scheduled', 'celup', 'reschedule'])) {
+                                // Jika key sudah ada, gabungkan total_kg-nya
+                                if (isset($scheduleGrouped[$key])) {
+                                    $scheduleGrouped[$key]['total_kg'] += $job['total_kg'];
+                                } else {
+                                    $scheduleGrouped[$key] = $job;
+                                }
                             }
                         }
-                        // echo '<pre>';
-                        // print_r($scheduleData); // Debug untuk melihat seluruh data schedule
-                        // echo '</pre>';
+
                         // Menentukan threshold kapasitas mesin
                         function getCapacityColor($kgCelup, $maxCaps)
                         {
@@ -327,8 +370,8 @@
                                     </div>
                                 </button>";
                         }
-
                         ?>
+
                         <!-- Tabel Mesin -->
                         <?php foreach ($mesin_celup as $mesin): ?>
                             <tr>
@@ -372,6 +415,7 @@
                                                 echo "<div class='text-muted'>Tidak ada jadwal</div>";
                                                 echo "</button></div>";
                                             }
+
                                         }
                                         ?>
                                     </td>
@@ -472,12 +516,12 @@
                     var tes = JSON.parse(data);
                     var totalKg = parseFloat(tes[0].total_kg).toFixed(2);
                     var htmlContent = '';
-                    tes.forEach(function(item) {
+                    tes.forEach(function(item, index) {
                         htmlContent += `<div class="row">
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="no_po" class="form-label">No. PO</label>
-                                    <input type="text" class="form-control" id="no_po" value="${item.no_po}" readonly>
+                                    <label for="po" class="form-label">PO</label>
+                                    <input type="text" class="form-control" id="po" value="${item.no_model}" readonly>
                                     <input type="hidden" id="id_celup" value="${item.id_celup}">
                                 </div>
                                 <div class="mb-3">
@@ -505,8 +549,8 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="total_kg" class="form-label">Total Kg Celup</label>
-                                    <input type="text" class="form-control" id="total_kg" value="${totalKg}" readonly>
+                                    <label for="kg_celup" class="form-label">Kg Celup</label>
+                                    <input type="text" class="form-control" id="kg_celup" value="${item.kg_celup}" readonly>
                                 </div>
                                 <div class="mb-3">
                                     <label for="start_mc" class="form-label">Start MC</label>
@@ -516,9 +560,13 @@
                                     <label for="last_status" class="form-label">Last Status</label>
                                     <input type="text" class="form-control" id="last_status" value="${item.last_status}" readonly>
                                 </div>
-                            </div>
+                            </div> 
                         </div>
                         `;
+                        // Tambahkan garis pembatas jika bukan item terakhir
+                        if (index < tes.length - 1) {
+                            htmlContent += `<div class="modal-footer"></div>`;
+                        }
                     });
 
                     htmlContent += `
@@ -608,8 +656,8 @@
             // Redirect ke URL dengan parameter filter menampilkan data 2 hari kebelakang dan 7 hari kedepan
             const start_date = new Date();
             const end_date = new Date();
-            start_date.setDate(start_date.getDate() - 2);
-            end_date.setDate(end_date.getDate() + 7);
+            start_date.setDate(start_date.getDate() - 3);
+            end_date.setDate(end_date.getDate() + 6);
 
             const startDate = start_date.toISOString().split('T')[0];
 

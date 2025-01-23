@@ -48,6 +48,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/getPO', 'ScheduleController::getPO');
     $routes->get('schedule/getPODetails', 'ScheduleController::getPODetails');
     $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
+    $routes->get('schedule/getNoModel', 'ScheduleController::getNoModel');
     $routes->post('schedule/saveSchedule', 'ScheduleController::saveSchedule');
     $routes->get('schedule/editSchedule', 'ScheduleController::editSchedule');
     $routes->post('schedule/updateSchedule', 'ScheduleController::updateSchedule');

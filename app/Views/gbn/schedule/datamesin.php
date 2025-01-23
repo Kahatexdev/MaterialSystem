@@ -132,30 +132,46 @@
                         </div>
                         <div class="mb-3">
                             <label for="lmd" class="form-label">LMD</label>
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" name="lmd[]" value="L">
-                                <label class="form-check-label" for="L">L</label>
-                            </div>
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" name="lmd[]" value="M">
-                                <label class="form-check-label" for="M">M</label>
-                            </div>
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" name="lmd[]" value="D">
-                                <label class="form-check-label" for="D">D</label>
-                            </div>
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" name="lmd[]" value="WHITE">
-                                <label class="form-check-label" for="WHITE">WHITE</label>
-                            </div>
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" name="lmd[]" value="BLACK">
-                                <label class="form-check-label" for="BLACK">BLACK</label>
+                            <div class="row">
+                                <!-- Kolom Kiri -->
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="lmd[]" value="L">
+                                        <label class="form-check-label" for="L">L</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="lmd[]" value="M">
+                                        <label class="form-check-label" for="M">M</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="lmd[]" value="D">
+                                        <label class="form-check-label" for="D">D</label>
+                                    </div>
+                                </div>
+
+                                <!-- Kolom Kanan -->
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="lmd[]" value="WHITE">
+                                        <label class="form-check-label" for="WHITE">WHITE</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="lmd[]" value="BLACK">
+                                        <label class="form-check-label" for="BLACK">BLACK</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="ket_mesin" class="form-label">Keterangan Mesin</label>
-                            <input type="text" class="form-control" name="ket_mesin" id="ket_mesin" required>
+                            <!-- <input type="text" class="form-control" name="ket_mesin" id="ket_mesin" required> -->
+                            <select class="form-select" name="ket_mesin" id="ket_mesin" required>
+                                <option value="">Pilih Keterangan Mesin</option>
+                                <option value="BENANG">BENANG</option>
+                                <option value="MC BENANG SAMPLE">MC BENANG SAMPLE</option>
+                                <option value="ACRYLIC">ACRYLIC</option>
+                                <option value="NYLON">NYLON</option>
+                            </select>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -197,31 +213,42 @@
                         </div>
                         <div class="mb-3">
                             <label for="lmd" class="form-label">LMD</label>
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" name="lmd[]" value="L" id="lmd_L">
-                                <label class="form-check-label" for="lmd_L">L</label>
-                            </div>
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" name="lmd[]" value="M" id="lmd_M">
-                                <label class="form-check-label" for="lmd_M">M</label>
-                            </div>
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" name="lmd[]" value="D" id="lmd_D">
-                                <label class="form-check-label" for="lmd_D">D</label>
-                            </div>
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" name="lmd[]" value="WHITE" id="lmd_WHITE">
-                                <label class="form-check-label" for="lmd_WHITE">WHITE</label>
-                            </div>
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" name="lmd[]" value="BLACK" id="lmd_BLACK">
-                                <label class="form-check-label" for="lmd_BLACK">BLACK</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="lmd[]" value="L" id="lmd_L">
+                                        <label class="form-check-label" for="lmd_L">L</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="lmd[]" value="M" id="lmd_M">
+                                        <label class="form-check-label" for="lmd_M">M</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="lmd[]" value="D" id="lmd_D">
+                                        <label class="form-check-label" for="lmd_D">D</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="lmd[]" value="WHITE" id="lmd_WHITE">
+                                        <label class="form-check-label" for="lmd_WHITE">WHITE</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="lmd[]" value="BLACK" id="lmd_BLACK">
+                                        <label class="form-check-label" for="lmd_BLACK">BLACK</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
                         <div class="mb-3">
                             <label for="ket_mesin" class="form-label">Keterangan Mesin</label>
-                            <input type="text" class="form-control" name="ket_mesin" id="ket_mesinE" required>
+                            <select class="form-select" name="ket_mesin" id="ket_mesinE" required>
+                                <option value="">Pilih Keterangan Mesin</option>
+                                <option value="BENANG">BENANG</option>
+                                <option value="MC BENANG SAMPLE">MC BENANG SAMPLE</option>
+                                <option value="ACRYLIC">ACRYLIC</option>
+                                <option value="NYLON">NYLON</option>
+                            </select>
                         </div>
                         <!-- Action Button -->
                         <div class="modal-footer">
