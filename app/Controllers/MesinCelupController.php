@@ -100,7 +100,7 @@ class MesinCelupController extends BaseController
     {
         if ($this->request->isAJAX()) {
             $data = $this->mesinCelupModel->find($id);
-            log_message('info', 'Data mesin: ' . print_r($data, true));
+
             if ($data) {
                 return $this->response->setJSON([
                     'id_mesin' => $data['id_mesin'],
@@ -123,6 +123,7 @@ class MesinCelupController extends BaseController
     {
         $id_mesin = $this->request->getPost('id_mesin');
         $no_mesin = $this->request->getPost('no_mesin');
+        $lmdValues = $this->request->getPost('lmd') ?? [];
 
         $cekNoMesin = $this->mesinCelupModel
             ->where('no_mesin', $no_mesin)
@@ -136,12 +137,25 @@ class MesinCelupController extends BaseController
                 ->with('error', 'No Mesin sudah ada di database.');
         }
 
+        // Validasi kombinasi
+        $allowedLMD = ['L', 'M', 'D'];
+        $allowedSingle = ['WHITE', 'BLACK'];
+
+        $selectedLMD = array_intersect($lmdValues, $allowedLMD); // Pilihan LMD
+        $selectedSingle = array_intersect($lmdValues, $allowedSingle); // Pilihan WHITE/BLACK
+
+        if (count($selectedSingle) > 1 || (count($selectedSingle) > 0 && count($selectedLMD) > 0)) {
+            return redirect()->back()->withInput()->with('error', 'Kombinasi pilihan tidak valid. Pilih kombinasi LMD atau salah satu antara WHITE dan BLACK.');
+        }
+
+        $lmdData = implode(',', $lmdValues);
+
         $data = [
             'no_mesin' => $this->request->getPost('no_mesin'),
             'min_caps' => $this->request->getPost('min_caps'),
             'max_caps' => $this->request->getPost('max_caps'),
             'jml_lot' => $this->request->getPost('jml_lot'),
-            'lmd' => $this->request->getPost('lmd'),
+            'lmd' => $lmdData,
             'ket_mesin' => $this->request->getPost('ket_mesin'),
         ];
 
