@@ -244,7 +244,8 @@ class ScheduleCelupModel extends Model
 
     public function getScheduleDone()
     {
-        return $this->where('last_status', 'done')
+        return $this->select('schedule_celup.*, IF(po_plus = "0", kg_celup, 0) AS qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus')
+            ->where('last_status', 'done')
             ->groupBy('id_celup')
             ->findAll();
     }

@@ -75,6 +75,7 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('', 'CelupController::index');
     $routes->get('schedule', 'CelupController::schedule');
     $routes->get('outCelup', 'CelupController::outCelup');
+    $routes->get('insertBon//:(num)', 'CelupController::insertBon/$1');
 });
 
 

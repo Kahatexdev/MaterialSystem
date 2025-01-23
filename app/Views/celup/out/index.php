@@ -226,7 +226,10 @@
                             <!-- <th class="sticky">Tanggal Schedule</th> -->
                             <th class="sticky">Qty PO</th>
                             <th class="sticky">Qty PO(+)</th>
+                            <th class="sticky">Tanggal Celup</th>
                             <th class="sticky">Qty Celup</th>
+                            <th class="sticky">Qty Celup(+)</th>
+                            <th class="sticky">Aksi</th>
                             <!-- <th class="sticky">LOT Celup</th>
                             <th class="sticky">Bon</th>
                             <th class="sticky">Celup</th>
@@ -255,8 +258,14 @@
                                 <td><?= $sch['kode_warna'] ?></td>
                                 <td><?= $sch['warna'] ?></td>
                                 <td><?= $sch['start_mc'] ?></td>
-                            <?php } ?>
+                                <td></td>
+                                <td></td>
+                                <td><?= $sch['tanggal_schedule'] ?></td>
+                                <td><?= number_format($sch['qty_celup'], 2) ?></td>
+                                <td><?= number_format($sch['qty_celup_plus'], 2) ?></td>
+                                <td><a href="<?= base_url($role . "/insertBon/" . $sch['id_celup']) ?>" class="btn btn-info">Bon</a></td>
                         </tr>
+                    <?php } ?>
                     </tbody>
                 </table>
             </div>

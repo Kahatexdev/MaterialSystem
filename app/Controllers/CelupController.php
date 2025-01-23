@@ -72,10 +72,9 @@ class CelupController extends BaseController
         $data = [
             'role' => $this->role,
             'active' => $this->active,
-            'title' => "",
+            'title' => "Out Celup",
             'schedule' => $scheduleDone,
         ];
-        // dd($data);
         return view($this->role . '/out/index', $data);
     }
 }
