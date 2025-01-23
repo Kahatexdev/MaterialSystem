@@ -201,11 +201,38 @@ class ScheduleController extends BaseController
         $id_order = $this->request->getGet('id_order');
         $poDetails = $this->masterOrderModel->getDelivery($id_order);
 
-        if ($poDetails) {
-            return $this->response->setJSON($poDetails);
-        } else {
-            return $this->response->setJSON(['error' => 'No data found']);
+        if (empty($poDetails)) {
+            return $this->response->setJSON(['error' => 'Order not found']);
         }
+
+        $model = $poDetails['no_model'];
+        $reqStartMc = 'http://172.23.29.116/CapacityApps/public/api/reqstartmc/' . $model;
+
+        try {
+            // Fetch API response
+            $json = file_get_contents($reqStartMc);
+
+            if ($json === false) {
+                throw new \Exception('Failed to fetch data from the API.');
+            }
+
+            // Decode JSON response
+            $startMc = json_decode($json, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \Exception('Invalid JSON response: ' . json_last_error_msg());
+            }
+
+            // Assign start_mesin data
+            $poDetails['start_mesin'] = $startMc;
+        } catch (\Exception $e) {
+            // Handle error and assign fallback value
+            $poDetails['start_mesin'] = 'Data Not Found';
+            log_message('error', 'Error fetching API data: ' . $e->getMessage());
+        }
+
+        // Return response
+        return $this->response->setJSON($poDetails);
     }
 
     public function getQtyPO()
@@ -351,13 +378,12 @@ class ScheduleController extends BaseController
         } else {
             return $this->response->setJSON(['error' => 'No data found']);
         }
-    
     }
     public function updateSchedule()
     {
         // Ambil semua data dari form menggunakan POST
         $scheduleData = $this->request->getPost();
-// dd ($scheduleData);
+        // dd ($scheduleData);
         // Ambil id_mesin dan no_model
         $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
         $poList = $scheduleData['po']; // Array po[]
@@ -393,7 +419,7 @@ class ScheduleController extends BaseController
                 'created_at' => date('Y-m-d H:i:s'),
             ];
         }
-    // dd ($dataBatch);
+        // dd ($dataBatch);
         // Cek apakah data sudah ada, gunakan id_celup untuk mencari
         foreach ($dataBatch as $data) {
             $existingSchedule = $this->scheduleCelupModel->where([
