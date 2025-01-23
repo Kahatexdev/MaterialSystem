@@ -408,8 +408,4 @@ class ScheduleController extends BaseController
             return redirect()->back()->with('error', 'Gagal menyimpan atau mengupdate jadwal!');
         }
     }
-
-
-
-
 }
