@@ -65,16 +65,6 @@ class MasterMaterialModel extends Model
         return $this->select('item_type')->where('jenis', $jenis)->findAll();
     }
 
-    public function getFilteredPO($itemType, $kodeWarna)
-    {
-        return $this->db->table('material')
-        ->select('master_order.id_order, master_order.no_model, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir')
-        ->join('master_order', 'master_order.id_order = material.id_order')
-        ->where('material.item_type', $itemType)
-        ->where('material.kode_warna', $kodeWarna)
-        ->distinct()
-        ->get()
-        ->getResultArray();
-    }
+    
 
 }
