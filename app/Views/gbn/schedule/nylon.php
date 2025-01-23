@@ -269,9 +269,36 @@
                             $dateInterval = new DateInterval('P1D');
                             $datePeriod = new DatePeriod($startDate, $dateInterval, $endDateClone);
 
-                            // Loop tanggal
+                            // Tanggal hari ini
+                            $today = new DateTime();
+
+                            // Tanggal 3 hari ke belakang
+                            $threeDaysAgo = (clone $today)->sub(new DateInterval('P4D'));
+
+                            // Tanggal 6 hari ke depan
+                            $sixDaysAhead = (clone $today)->add(new DateInterval('P6D'));
+
                             foreach ($datePeriod as $date) {
-                                echo "<th>" . $date->format('D, d M') . "</th>";
+                                // Periksa apakah hari Minggu
+                                if ($date->format('w') == 0) { // 0 adalah kode untuk hari Minggu
+                                    echo "<th style='color: red;'>" . $date->format('D, d M') . "</th>";
+                                }
+                                // Periksa apakah tanggal adalah hari ini
+                                elseif ($date->format('Y-m-d') === $today->format('Y-m-d')) {
+                                    echo "<th style='background-color: #ffeb3b; color: #000;'>" . $date->format('D, d M') . "</th>";
+                                }
+                                // Periksa apakah tanggal adalah 3 hari ke belakang
+                                elseif ($date >= $threeDaysAgo && $date < $today) {
+                                    echo "<th style='color: #6c757d;'>" . $date->format('D, d M') . "</th>";
+                                }
+                                // Periksa apakah tanggal adalah 6 hari ke depan
+                                elseif ($date > $today && $date <= $sixDaysAhead) {
+                                    echo "<th style='color: rgb(31, 193, 199);'>" . $date->format('D, d M') . "</th>";
+                                }
+                                // Tanggal lain
+                                else {
+                                    echo "<th>" . $date->format('D, d M') . "</th>";
+                                }
                             }
                             ?>
                         </tr>
@@ -608,7 +635,7 @@
             // Redirect ke URL dengan parameter filter menampilkan data 2 hari kebelakang dan 7 hari kedepan
             const start_date = new Date();
             const end_date = new Date();
-            start_date.setDate(start_date.getDate() - 2);
+            start_date.setDate(start_date.getDate() - 3);
             end_date.setDate(end_date.getDate() + 7);
 
             const startDate = start_date.toISOString().split('T')[0];

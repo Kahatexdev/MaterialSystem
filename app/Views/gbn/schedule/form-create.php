@@ -444,7 +444,9 @@
                         <option value="1">Ya</option>
                         <option value="0">Tidak</option>
                     </select>
+                    <input type="hidden" name="last_status[]" value="scheduled">
                 </td>
+                
                 <td class="text-center">
                     <button type="button" class="btn btn-danger removeRow">
                         <i class="fas fa-trash"></i>
