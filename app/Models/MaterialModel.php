@@ -71,6 +71,10 @@ class MaterialModel extends Model
             ->where('item_type', $itemType)
             ->where('kode_warna', $kodeWarna)
             ->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('no_model', $noModel)
+            ->where('item_type', $itemType)
+            ->where('kode_warna', $kodeWarna)
+            ->join('master_order', 'master_order.id_order = material.id_order')
             ->first();
     }
 
@@ -81,7 +85,6 @@ class MaterialModel extends Model
             ->where('material.id_order', $id_order)
             ->first();
     }
-
     public function getQtyPOForCelup($nomodel, $itemtype, $kodewarna)
     {
         return $this->select('master_order.no_model, master_order.delivery_awal, master_order.delivery_akhir, material.item_type, material.kode_warna, material.color, sum(material.kgs) as qty_po')
