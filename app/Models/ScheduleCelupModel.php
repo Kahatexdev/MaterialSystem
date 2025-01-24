@@ -251,4 +251,43 @@ class ScheduleCelupModel extends Model
             ->findAll();
     }
 
+    public function cekItemtypeandKodeWarna($no_mesin, $tanggal_schedule, $lot_urut)
+    {
+        return $this->table('schedule_celup')
+            ->select('item_type, kode_warna')
+            ->where('no_mesin', $no_mesin)
+            ->where('tanggal_schedule', $tanggal_schedule)
+            ->where('lot_urut', $lot_urut)
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->distinct()
+            ->findAll();
+    }
+
+    public function cekSisaJatah($no_model, $item_type, $kode_warna)
+    {
+        return $this->select('
+            SUM(schedule_celup.kg_celup) AS total_kg, 
+           
+            material.qty_po, 
+            material.id_order, 
+            material.item_type, 
+            material.kode_warna, 
+            master_order.no_model
+        ')
+        ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
+        ->join(
+            '(SELECT SUM(material.kgs) AS qty_po, id_order, item_type, kode_warna 
+                 FROM material 
+                 GROUP BY id_order, item_type, kode_warna) AS material',
+            'material.id_order = master_order.id_order',
+            'left'
+        )
+        ->where('schedule_celup.no_model', $no_model)
+            ->where('material.item_type', $item_type)
+            ->where('material.kode_warna', $kode_warna)
+
+            ->groupBy('material.kode_warna')
+            ->findAll(); // Mengembalikan semua hasil sesuai pengelompokan
+    }
+
 }

@@ -101,36 +101,6 @@
                                     <input type="text" class="form-control" id="warna" name="warna" maxlength="32" value="<?= $warna[0]['warna'] ?>" readonly <?= $readonly ? 'readonly' : '' ?>>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <!-- Tanggal Schedule -->
-                                <div class="form-group" id="tanggalScheduleGroup">
-                                    <label for="tanggal_schedule">Tanggal Schedule</label>
-                                    <input type="date" class="form-control" name="tanggal_schedule" id="tanggal_schedule" value="<?= $tanggal_schedule ?>" required readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <!-- Tanggal Aktual Celup -->
-                                <div class="form-group" id="tanggalAktualCelupGroup">
-                                    <label for="tanggal_celup">Tanggal Aktual Celup</label>
-                                    <input type="date" class="form-control" name="tanggal_celup" id="tanggal_celup" value="<?= $tanggal_celup[0]['tanggal_celup'] ?>">
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <!-- Lot Celup -->
-                                <div class="form-group" id="lotCelupGroup">
-                                    <label for="lot_celup">Lot Celup</label>
-                                    <input type="text" class="form-control" name="lot_celup" id="lot_celup"
-                                        value="<?= $lot_celup[0]['lot_celup'] ?>">
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <!-- Lot Celup -->
-                                <div class="form-group" id="ketDailyCekGroup">
-                                    <label for="ket_daily_cek">Keterangan</label>
-                                    <input type="text" class="form-control" name="ket_daily_cek" id="ket_daily_cek"
-                                        value="<?= $ket_daily_cek[0]['ket_daily_cek'] ?>">
-                                </div>
-                            </div>
 
                         </div>
                         <div class="row">
@@ -171,7 +141,7 @@
                                                         <?php endif; ?>
                                                     </td>
                                                     <td>
-                                                        <input type="date" class="form-control start_mc" name="start_mc[<?= $index ?>]" value="<?= $row['start_mc'] ?>" required <?= $readonly ? 'readonly' : '' ?>>
+                                                        <input type="date" class="form-control start_mc" name="start_mc[<?= $index ?>]" value="<?= $start_mc ?>" required <?= $readonly ? 'readonly' : '' ?>>
                                                     </td>
                                                     <td>
                                                         <input type="date" class="form-control delivery_awal" name="delivery_awal[<?= $index ?>]" value="<?= $row['delivery_awal'] ?>" required <?= $readonly ? 'readonly' : '' ?>>
@@ -195,6 +165,9 @@
                                                             <option value="0" <?= $row['po_plus'] == '0' ? 'selected' : '' ?>>Bukan</option>
                                                         </select>
                                                         <input type="hidden" name="id_celup[<?= $index ?>]" value="<?= $row['id_celup'] ?>">
+                                                        <input type="hidden" name="tanggal_schedule" value="<?= $row['tanggal_schedule'] ?>">
+                                                        <input type="hidden" name="item_type[<?= $index ?>]" value="<?= $row['item_type'] ?>">
+                                                        <input type="hidden" name="kode_warna[<?= $index ?>]" value="<?= $row['kode_warna'] ?>">
                                                     </td>
 
                                                     <td>
@@ -202,6 +175,9 @@
                                                     </td>
 
                                                     <td class="text-center">
+                                                        <button type="button" class="btn btn-warning editRow" data-toggle="modal" data-target="#editModal" data-id="<?= $row['id_celup'] ?>" data-tanggalSchedule="<?= $row['tanggal_schedule'] ?>" data-toggle="tooltip" title="Edit">
+                                                            <i class="fas fa-calendar"></i>
+                                                        </button>
                                                         <button type="button" class="btn btn-danger removeRow">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
@@ -214,6 +190,12 @@
                                                 <td class="text-center"><strong>Total Qty Celup</strong></td>
                                                 <td colspan="8" class="text-center">
                                                     <input type="number" class="form-control" id="total_qty_celup" name="total_qty_celup" value="0" readonly>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-center"><strong>Sisa Jatah</strong></td>
+                                                <td colspan="8" class="text-center">
+                                                    <input type="number" class="form-control" id="sisaJatah" name="sisa_jatah" value="0" readonly>
                                                 </td>
                                             </tr>
                                         </tfoot>
@@ -232,6 +214,30 @@
     </div>
 </div>
 
+<!-- Modal Edit -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Tanggal Schedule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id_celup" id="idCelup">
+                    <div class="form-group mb-3">
+                        <label for="tanggal_schedule" class="form-label">Tanggal Schedule</label>
+                        <input type="date" class="form-control" id="tanggal_schedule" name="tanggal_schedule" value="<?= $tanggal_schedule ?>" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-info">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <script>
@@ -243,7 +249,7 @@
         const maxCaps = document.getElementById('max_caps');
         const sisaKapasitas = document.getElementById('sisa_kapasitas');
         const totalQtyCelup = document.getElementById('total_qty_celup');
-
+        // const tglSchedule = document.getElementById('tanggal_schedule');
 
         // Loop melalui semua baris tabel
         document.querySelectorAll('tr[data-status]').forEach(function(row) {
@@ -255,6 +261,55 @@
                     input.setAttribute('disabled', true); // Untuk tombol dan select
                 });
             }
+        });
+
+        // Event listener untuk tombol edit
+        document.querySelectorAll('.editRow').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const idCelup = button.getAttribute('data-id');
+                const modal = new bootstrap.Modal(document.getElementById('editModal'));
+                const modalTglSchedule = document.getElementById('tanggal_schedule');
+                const modalIdCelup = document.getElementById('idCelup');
+
+                // Set value id_celup pada modal
+                modalIdCelup.value = idCelup;
+
+                // Set value status pada modal
+                modalTglSchedule.value = button.getAttribute('data-tanggalSchedule');
+
+                modal.show();
+            });
+        });
+
+        // ajax update tanggal schedule
+        $('#editModal form').submit(function(e) {
+            e.preventDefault();
+            const idCelup = $('#idCelup').val();
+            const tanggalSchedule = $('#tanggal_schedule').val();
+
+            $.ajax({
+                url: '<?= base_url(session('role') . '/schedule/updateTglSchedule') ?>',
+                type: 'POST',
+                data: {
+                    id_celup: idCelup,
+                    tanggal_schedule: tanggalSchedule,
+                    no_mesin: $('#no_mesin').val(),
+                    lot_urut: $('#lot_urut').val()
+                },
+                dataType: 'json',
+                success: function(response) {
+                    console.log('Response:', response);
+                    if (response.success) {
+                        alert('Tanggal Schedule berhasil diubah');
+                        location.reload();
+                    } else {
+                        alert('Gagal mengubah tanggal schedule');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
         });
 
         // Fungsi untuk memperbarui dropdown PO dan input delivery setelah memilih PO
@@ -271,6 +326,7 @@
                 const deliveryAwalInput = row.querySelector(".delivery_awal");
                 const deliveryAkhirInput = row.querySelector(".delivery_akhir");
                 const qtyPOInput = row.querySelector(".qty_po");
+                const sisaJatah = document.getElementById('sisaJatah');
 
                 // Tambahkan event listener untuk dropdown PO
                 poSelect.addEventListener("change", function() {
@@ -282,14 +338,20 @@
                             url: '<?= base_url(session('role') . "/schedule/getPODetails") ?>',
                             type: 'GET',
                             data: {
-                                id_order: poId
+                                id_order: poId,
+                                itemType: itemTypeValue,
+                                kodeWarna: kodeWarnaValue
                             },
                             dataType: 'json',
                             success: function(poDetails) {
+                                console.log('PO Details:', poDetails);
                                 if (poDetails) {
-                                    startMcInput.value = poDetails.start_mc || "";
+                                    startMcInput.value = poDetails.start_mesin || "";
                                     deliveryAwalInput.value = poDetails.delivery_awal || "";
                                     deliveryAkhirInput.value = poDetails.delivery_akhir || "";
+                                    sisaJatah.value = parseFloat(poDetails.sisa_jatah).toFixed(2);
+
+
                                 }
                             },
                             error: function(xhr, status, error) {
@@ -325,8 +387,8 @@
         // Hitung sisa kapasitas
         function calculateCapacity() {
             const max = parseFloat(maxCaps.value) || 0;
-
             let total = 0;
+
             const rows = poTable.querySelectorAll("tbody tr");
 
             rows.forEach((row, index) => {
@@ -345,35 +407,129 @@
                 }
             });
 
-            // Update total qty celup
-            totalQtyCelup.value = total.toFixed(2);
-
-            // Hitung sisa kapasitas
+            totalQtyCelup.value = total.toFixed(2); // Total qty celup
             const sisa = max - total;
-            sisaKapasitas.value = sisa.toFixed(2);
+            sisaKapasitas.value = sisa.toFixed(2); // Sisa kapasitas
 
-            // Validasi qty_celup
-            validateQtyCelup(max);
+            // Debugging log
+            console.log(`Max Capacity: ${max}, Total: ${total}, Remaining: ${sisa}`);
+
+            // Jika sisa kapasitas < 0, beri peringatan
+            if (sisa < 0) {
+                alert('Sisa kapasitas tidak mencukupi!');
+            }
+
+            validateQtyCelup(max); // Validasi untuk qty celup
+            validateSisaJatah(); // Validasi sisa jatah
         }
+
         // Validasi qty_celup untuk setiap input
         function validateQtyCelup(max) {
             const qtyCelupInputs = document.querySelectorAll('input[name="qty_celup[]"]');
+            let isOverCapacity = false;
+
             qtyCelupInputs.forEach(input => {
-                const kg = parseFloat(input.value);
+                const kg = parseFloat(input.value) || 0;
+
                 if (kg > max) {
                     input.setCustomValidity(`Qty Celup Melebihi Kapasitas ${max}`);
+                    isOverCapacity = true;
+                } else if (parseFloat(sisaKapasitas.value) < 0) {
+                    input.setCustomValidity(`Sisa Kapasitas Tidak Mencukupi`);
+                    isOverCapacity = true;
                 } else {
                     input.setCustomValidity('');
                 }
             });
+
+            // Jika over capacity, tampilkan pesan
+            if (isOverCapacity) {
+                alert('Sisa kapasitas tidak mencukupi atau melebihi kapasitas maksimum.');
+            }
         }
 
-        // Tambahkan event listener untuk input qty_celup
-        poTable.addEventListener("input", function(e) {
-            if (e.target.classList.contains("qty_celup")) {
-                calculateCapacity();
+        // Event Listener untuk Input `qty_celup`
+        poTable.addEventListener('input', function(e) {
+            if (e.target.classList.contains('qty_celup')) {
+                const row = e.target.closest('tr');
+                validateSisaJatah(); // Validasi sisa jatah setelah input qty_celup
+                calculateCapacity(); // Hitung ulang kapasitas setelah validasi
             }
         });
+
+        function validateSisaJatah() {
+            const rows = poTable.querySelectorAll("tbody tr");
+            let isValid = true;
+
+            // Collect all necessary data to send in one request
+            let requestData = [];
+
+            rows.forEach((row) => {
+                const noModelInput = row.querySelector('input[name^="po["]');
+                const itemTypeInput = row.querySelector('input[name^="item_type["]');
+                const kodeWarnaInput = row.querySelector('input[name^="kode_warna["]');
+                const qtyCelupInput = row.querySelector('input[name^="qty_celup["]');
+                const currentQtyCelupInput = row.querySelector('input[name^="current_qty_celup["]'); // Hidden input
+
+                if (noModelInput && itemTypeInput && kodeWarnaInput && qtyCelupInput) {
+                    const noModel = noModelInput.value;
+                    const itemType = itemTypeInput.value;
+                    const kodeWarna = kodeWarnaInput.value;
+                    const qtyCelup = parseFloat(qtyCelupInput.value) || 0;
+                    const currentQtyCelup = parseFloat(currentQtyCelupInput?.value) || 0;
+
+                    // Collect the data to send
+                    requestData.push({
+                        no_model: noModel,
+                        item_type: itemType,
+                        kode_warna: kodeWarna,
+                        qty_celup: qtyCelup ?? 0,
+                        current_qty_celup: currentQtyCelup
+                    });
+                } else {
+                    console.warn('Data tidak lengkap untuk validasi.', row);
+                    isValid = false;
+                }
+            });
+
+            // if (!isValid) {
+            //     alert('Ada baris data yang tidak lengkap untuk validasi.');
+            //     return;
+            // }
+
+            // Send a single AJAX request for all rows
+            $.ajax({
+                url: '<?= base_url("/schedule/validateSisaJatah") ?>',
+                type: 'POST',
+                data: {
+                    rows: requestData
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (!response.success) {
+                        // Show validation error for each row
+                        response.errors.forEach((error, index) => {
+                            const qtyCelupInput = rows[index].querySelector('input[name^="qty_celup["]');
+                            qtyCelupInput.setCustomValidity(error.message);
+                            alert(error.message);
+                        });
+                    } else {
+                        // If successful, reset custom validity for all rows
+                        rows.forEach((row) => {
+                            const qtyCelupInput = row.querySelector('input[name^="qty_celup["]');
+                            qtyCelupInput.setCustomValidity('');
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat memvalidasi sisa jatah.');
+                }
+            });
+        }
+
+
+
 
         // Event listener untuk menambah baris baru
         document.getElementById("addRow").addEventListener("click", function() {
@@ -419,39 +575,31 @@
             // Ambil elemen select yang baru ditambahkan
             const newSelect = tbody.querySelector(`select[name="po-select[${newIndex}]"]`);
 
-            // Event listener untuk menangani perubahan pilihan
+            // Event listener untuk mengatur PO
             newSelect.addEventListener('change', function() {
                 const selectedValue = newSelect.value; // Ambil value yang dipilih
-                console.log('Selected PO ID:', selectedValue); // Tampilkan di console atau proses sesuai kebutuhan
 
-                // get no_model from selectedValue id_order
-                const noModel = selectedValue;
-
-                // query untuk mendapatkan no_model berdasarkan id_order yang dipilih agar bisa disave ke database
+                // Ambil `no_model` berdasarkan `id_order`
                 $.ajax({
-                    url: '<?= base_url(session('role') . "/schedule/getNoModel") ?>',
+                    url: '<?= base_url(session("role") . "/schedule/getNoModel") ?>',
                     type: 'GET',
                     data: {
-                        id_order: noModel
+                        id_order: selectedValue
                     },
                     dataType: 'json',
                     success: function(response) {
                         console.log('No Model:', response.no_model);
-                        // set value po ke input hidden
                         newSelect.nextElementSibling.value = response.no_model;
                     },
                     error: function(xhr, status, error) {
                         console.error("Error fetching No Model:", error);
-                    }
+                    },
                 });
-
-
-
             });
 
-            // Panggil fungsi untuk memperbarui dropdown dan event listener pada baris baru
-            updatePODropdown();
+            // Perbarui dropdown dan event listener pada baris baru
             calculateCapacity();
+            updatePODropdown();
         });
 
 
@@ -459,17 +607,68 @@
         document.querySelector("#poTable").addEventListener("click", function(event) {
             if (event.target.closest(".removeRow")) {
                 const row = event.target.closest("tr");
-                row.remove();
 
-                // Perbarui ulang semua elemen dalam tabel
-                updatePODropdown();
-                calculateCapacity();
+                // Validasi jika ada input ID Celup pada baris
+                const idCelupInput = row.querySelector('input[name^="id_celup["]');
+                const idCelup = idCelupInput ? idCelupInput.value : null;
+
+                if (idCelup) {
+                    // SweetAlert konfirmasi sebelum menghapus
+                    Swal.fire({
+                        title: "Apakah Anda Yakin?",
+                        text: "Data Schedule akan dihapus",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Ya, hapus!",
+                        cancelButtonText: "Batal",
+                        dangerMode: true,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Kirim permintaan AJAX untuk menghapus data
+                            $.ajax({
+                                url: '<?= base_url(session('role') . '/schedule/deleteSchedule') ?>',
+                                type: 'POST',
+                                data: {
+                                    id_celup: idCelup
+                                },
+                                dataType: 'json',
+                                success: function(response) {
+                                    if (response.success) {
+                                        Swal.fire("Berhasil!", "Data Schedule berhasil dihapus.", "success").then(() => {
+                                            row.remove();
+                                            calculateCapacity();
+                                        });
+                                    } else {
+                                        Swal.fire("Gagal!", "Data Schedule gagal dihapus.", "error");
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    Swal.fire("Error!", "Terjadi kesalahan pada server.", "error");
+                                },
+                            });
+                        }
+                    });
+                } else {
+                    // Jika id_celup tidak ditemukan atau null, cukup hapus barisnya saja
+                    Swal.fire({
+                        title: "Hapus Baris?",
+                        text: "Baris ini akan dihapus tanpa mengirim data ke server.",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Ya, hapus!",
+                        cancelButtonText: "Batal",
+                        dangerMode: true,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            row.remove();
+                            calculateCapacity();
+                        }
+                    });
+                }
             }
         });
 
-
-        // Since itemType and kodeWarna are not editable in form edit, we don't add event listeners for changes
-        // Instead, we just call updatePODropdown once to populate dropdown options based on initial values
+        // Panggil fungsi untuk memperbarui dropdown PO dan event listener pada baris yang sudah ada
         updatePODropdown();
         calculateCapacity();
     });

@@ -199,6 +199,8 @@ class ScheduleController extends BaseController
     public function getPODetails()
     {
         $id_order = $this->request->getGet('id_order');
+        $itemType = $this->request->getGet('itemType');
+        $kodeWarna = $this->request->getGet('kodeWarna');
         $poDetails = $this->masterOrderModel->getDelivery($id_order);
 
         if (empty($poDetails)) {
@@ -206,8 +208,19 @@ class ScheduleController extends BaseController
         }
 
         $model = $poDetails['no_model'];
-        $reqStartMc = 'http://172.23.29.116/CapacityApps/public/api/reqstartmc/' . $model;
+        // var_dump($model);
+        $reqStartMc = 'http://172.23.39.116/CapacityApps/public/api/reqstartmc/' . $model;
+        $cekSisaJatah = $this->scheduleCelupModel->cekSisaJatah($model, $itemType, $kodeWarna);
+        $sisa_jatah = 0;
+        if ($cekSisaJatah) {
+            $qty_po = isset($cekSisaJatah[0]['qty_po']) ? (float) $cekSisaJatah[0]['qty_po'] : 0;
+            $total_kg = isset($cekSisaJatah[0]['total_kg']) ? (float) $cekSisaJatah[0]['total_kg'] : 0;
+            // var_dump($total_kg);
 
+            $sisa_jatah = $qty_po - $total_kg ;
+        }else{
+            $sisa_jatah = $cekSisaJatah[0]['qty_po'] ;
+        }
         try {
             // Fetch API response
             $json = file_get_contents($reqStartMc);
@@ -218,16 +231,18 @@ class ScheduleController extends BaseController
 
             // Decode JSON response
             $startMc = json_decode($json, true);
-
+            // var_dump($startMc);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new \Exception('Invalid JSON response: ' . json_last_error_msg());
             }
 
             // Assign start_mesin data
-            $poDetails['start_mesin'] = $startMc;
+            $poDetails['start_mesin'] = $startMc['start_mc'];
+            $poDetails['sisa_jatah'] = $sisa_jatah;
         } catch (\Exception $e) {
             // Handle error and assign fallback value
             $poDetails['start_mesin'] = 'Data Not Found';
+            $poDetails['sisa_jatah'] = $sisa_jatah;
             log_message('error', 'Error fetching API data: ' . $e->getMessage());
         }
 
@@ -341,6 +356,7 @@ class ScheduleController extends BaseController
             // Hitung qty_po dari tabel order_details
             $qtyPO = $this->materialModel->getQtyPOByNoModel($row['no_model'], $row['item_type'], $row['kode_warna']);
             $row['qty_po'] = $qtyPO['qty_po'] ?? 0; // Default 0 jika tidak ada data
+            $start_mc = $row['start_mc'];
         }
 
         $data = [
@@ -348,6 +364,7 @@ class ScheduleController extends BaseController
             'title' => 'Schedule',
             'role' => $this->role,
             'no_mesin' => $no_mesin,
+            'start_mc' => $start_mc,
             'tanggal_schedule' => $tanggal_schedule,
             'lot_urut' => $lot_urut,
             'scheduleData' => $scheduleData,
@@ -395,6 +412,9 @@ class ScheduleController extends BaseController
         foreach ($poList as $index => $po) {
             $id_celup = $scheduleData['id_celup'][$index] ?? null; // Dapatkan id_celup, jika ada
             $last_status = $scheduleData['last_status'][$index] ?? 'scheduled'; // Default status
+            $start_mc = $scheduleData['start_mc'][$index] ?? null; // Default status
+            $delivery_awal = $scheduleData['delivery_awal'][$index] ?? null; // Default status
+            $delivery_akhir = $scheduleData['delivery_akhir'][$index] ?? null; // Default status
             $dataBatch[] = [
                 'id_celup' => $id_celup, // ID ini bisa null untuk baris baru
                 'id_mesin' => $id_mesin['id_mesin'],
@@ -402,18 +422,12 @@ class ScheduleController extends BaseController
                 'item_type' => $scheduleData['item_type'],
                 'kode_warna' => $scheduleData['kode_warna'],
                 'warna' => $scheduleData['warna'],
-                'start_mc' => $scheduleData['start_mc'][$index] ?? null,
-                'delivery_awal' => $scheduleData['delivery_awal'][$index] ?? null,
-                'delivery_akhir' => $scheduleData['delivery_akhir'][$index] ?? null,
-                'qty_po' => $scheduleData['qty_po'][$index] ?? null,
-                'qty_po_plus' => $scheduleData['qty_po_plus'][$index] ?? null,
+                'start_mc' => $start_mc,
                 'kg_celup' => $scheduleData['qty_celup'][$index] ?? null,
                 'po_plus' => $scheduleData['po_plus'][$index] ?? null,
                 'lot_urut' => $scheduleData['lot_urut'],
                 'lot_celup' => $scheduleData['lot_celup'] ?? null,
                 'tanggal_schedule' => $scheduleData['tanggal_schedule'],
-                'tanggal_celup' => $scheduleData['tanggal_celup'],
-                'ket_daily_cek' => $scheduleData['ket_daily_cek'],
                 'last_status' => $last_status,
                 'user_cek_status' => session()->get('username'),
                 'created_at' => date('Y-m-d H:i:s'),
@@ -425,7 +439,7 @@ class ScheduleController extends BaseController
             $existingSchedule = $this->scheduleCelupModel->where([
                 'id_celup' => $data['id_celup'],
             ])->first();
-
+            // dd ($existingSchedule);
             if ($existingSchedule) {
                 // Periksa apakah ada perubahan data
                 $hasChanges = false;
@@ -563,4 +577,117 @@ class ScheduleController extends BaseController
         // Render view dengan data yang sudah disiapkan
         return view($this->role . '/schedule/nylon', $data);
     }
+
+    public function updateTglSchedule()
+    {
+        $id_celup = $this->request->getPost('id_celup');
+        $tanggal_schedule = $this->request->getPost('tanggal_schedule');
+        $no_mesin = $this->request->getPost('no_mesin');
+        $lot_urut = $this->request->getPost('lot_urut');
+
+        $cekData = $this->scheduleCelupModel->cekItemtypeandKodeWarna($no_mesin, $tanggal_schedule, $lot_urut);
+        $data = [
+            'tanggal_schedule' => $tanggal_schedule,
+        ];
+
+        $result = $this->scheduleCelupModel->update($id_celup, $data);
+
+        if ($result) {
+            return $this->response->setJSON(['success' => 'Tanggal schedule berhasil diupdate!']);
+        } else {
+            return $this->response->setJSON(['error' => 'Gagal mengupdate tanggal schedule!']);
+        }
+    }
+
+    public function deleteSchedule()
+    {
+        $id_celup = $this->request->getPost('id_celup');
+        $result = $this->scheduleCelupModel->delete($id_celup);
+
+        if ($result) {
+            return $this->response->setJSON(['success' => 'Jadwal berhasil dihapus!']);
+        } else {
+            return $this->response->setJSON(['error' => 'Gagal menghapus jadwal!']);
+        }
+    }
+
+    public function validateSisaJatah()
+    {
+        $rows = $this->request->getPost('rows');
+
+        $errors = [];
+        $isValid = true;
+
+        foreach ($rows as $row) {
+            $no_model = $row['no_model'];
+            $item_type = $row['item_type'];
+            $kode_warna = $row['kode_warna'];
+            $qty_celup = (float) $row['qty_celup'];
+            $current_qty_celup = (float) $row['current_qty_celup'];
+
+            // Validasi input
+            if (empty($no_model) || empty($item_type) || empty($kode_warna) || $qty_celup <= 0) {
+                $errors[] = [
+                    'message' => 'Input tidak valid. Pastikan semua data terisi dengan benar.'
+                ];
+                $isValid = false;
+                continue;
+            }
+
+            // Panggil query untuk cek sisa jatah
+            $query = $this->scheduleCelupModel->cekSisaJatah($no_model, $item_type, $kode_warna);
+
+            if ($query && isset($query[0])) {
+                $result = $query[0];
+                $qty_po = isset($result['qty_po']) ? (float) $result['qty_po'] : 0;
+                $total_kg = isset($result['total_kg']) ? (float) $result['total_kg'] : 0;
+
+                $sisa_jatah = $qty_po - $total_kg + $current_qty_celup;
+                
+                if ($sisa_jatah< 0) {
+                    $errors[] = [
+                        'message' => 'Sisa Jatah tidak mencukupi.',
+                        'sisa_jatah' => $sisa_jatah,
+                        'total_kg' => $total_kg,
+                        'qty_po' => $qty_po,
+                        'qtycelup' => $qty_celup,
+                    ];
+                    $isValid = false;
+                }else{
+                    return $this->response->setJSON([
+                        'success' => true,
+                        'message' => 'Sisa Jatah mencukupi.',
+                        'sisa_jatah' => $sisa_jatah,
+                        'total_kg' => $total_kg,
+                        'qty_po' => $qty_po
+                    ]);
+                }
+            } else {
+                $errors[] = [
+                    'message' => 'Data tidak ditemukan.'
+                ];
+                $isValid = false;
+            }
+        }
+
+        if ($isValid) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Sisa Jatah mencukupi.',
+                'sisa_jatah' => $sisa_jatah,
+                'total_kg' => $total_kg,
+                'qty_po' => $qty_po
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'errors' => $errors
+            ]);
+        }
+    }
+
+
+
+
+
 }
