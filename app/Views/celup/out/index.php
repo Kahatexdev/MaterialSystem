@@ -226,7 +226,7 @@
                             <!-- <th class="sticky">Tanggal Schedule</th> -->
                             <th class="sticky">Qty PO</th>
                             <th class="sticky">Qty PO(+)</th>
-                            <th class="sticky">Tanggal Celup</th>
+                            <!-- <th class="sticky">Tanggal Celup</th> -->
                             <th class="sticky">Qty Celup</th>
                             <th class="sticky">Qty Celup(+)</th>
                             <th class="sticky">Aksi</th>
@@ -253,17 +253,17 @@
                             $no = 1;
                             foreach ($schedule as $sch) { ?>
                                 <td><?= $no++ ?></td>
-                                <td><?= $sch['no_model'] ?></td>
-                                <td><?= $sch['item_type'] ?></td>
-                                <td><?= $sch['kode_warna'] ?></td>
+                                <td><?= $sch['noModel'] ?></td>
+                                <td><?= $sch['itemType'] ?></td>
+                                <td><?= $sch['kodeWarna'] ?></td>
                                 <td><?= $sch['warna'] ?></td>
-                                <td><?= $sch['start_mc'] ?></td>
+                                <td><?= $sch['startMc'] ?></td>
+                                <td><?= $sch['qtyPo'] ?></td>
                                 <td></td>
-                                <td></td>
-                                <td><?= $sch['tanggal_schedule'] ?></td>
-                                <td><?= number_format($sch['qty_celup'], 2) ?></td>
-                                <td><?= number_format($sch['qty_celup_plus'], 2) ?></td>
-                                <td><a href="<?= base_url($role . "/insertBon/" . $sch['id_celup']) ?>" class="btn btn-info">Bon</a></td>
+                                <!-- <td><?= $sch['tanggalSchedule'] ?></td> -->
+                                <td><?= $sch['qtyCelup'] ?></td>
+                                <td><?= $sch['qtyCelupPlus'] ?></td>
+                                <td><a href="<?= base_url($role . "/insertBon/" . $sch['idCelup']) ?>" class="btn btn-info">Bon</a></td>
                         </tr>
                     <?php } ?>
                     </tbody>

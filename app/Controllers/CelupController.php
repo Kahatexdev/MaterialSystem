@@ -68,13 +68,47 @@ class CelupController extends BaseController
     public function outCelup()
     {
         $scheduleDone = $this->scheduleCelupModel->getScheduleDone();
+        $uniqueData = [];
+
+        foreach ($scheduleDone as $key => $id) {
+            // Log::debug($key); // atau var_dump($key);
+            $noModel = $id['no_model'];
+            $itemType = $id['item_type'];
+            $kodeWarna = $id['kode_warna'];
+
+            $dataPo = $this->materialModel->getQtyPOForCelup($noModel, $itemType, $kodeWarna);
+
+            $uniqueData[$key] = [
+                'idCelup' => $id['id_celup'],
+                'noModel' => $noModel,
+                'itemType' => $itemType,
+                'kodeWarna' => $kodeWarna,
+                'warna' => $id['warna'],
+                'startMc' => $id['start_mc'],
+                'qtyPo' => number_format($dataPo['qty_po'], 2),
+                'qtyPoPlus' => '',
+                'tanggalSchedule' => $id['tanggal_schedule'],
+                'qtyCelup' => number_format($id['qty_celup'], 2),
+                'qtyCelupPlus' => number_format($id['qty_celup_plus'], 2),
+            ];
+        }
 
         $data = [
             'role' => $this->role,
             'active' => $this->active,
             'title' => "Out Celup",
-            'schedule' => $scheduleDone,
+            'schedule' => $uniqueData,
         ];
         return view($this->role . '/out/index', $data);
+    }
+
+    public function retur()
+    {
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => 'Retur',
+        ];
+        return view($this->role . '/retur/index', $data);
     }
 }
