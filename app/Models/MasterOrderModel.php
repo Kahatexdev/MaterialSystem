@@ -113,7 +113,7 @@ class MasterOrderModel extends Model
 
     public function getDelivery($id_order)
     {
-        return $this->select('delivery_awal, delivery_akhir')
+        return $this->select('no_model,delivery_awal, delivery_akhir')
             ->where('id_order', $id_order)
             ->distinct()
             ->first();
@@ -129,15 +129,14 @@ class MasterOrderModel extends Model
     public function getDeliveryDates($noModel)
     {
         return $this->select('delivery_awal, delivery_akhir')
-        ->where('no_model', $noModel)
+            ->where('no_model', $noModel)
             ->first();
     }
 
     public function getIdOrder($noModel)
     {
         return $this->select('id_order')
-        ->where('no_model', $noModel)
+            ->where('no_model', $noModel)
             ->first();
     }
-
 }

@@ -157,7 +157,7 @@
                                         </thead>
                                         <tbody>
                                             <?php foreach ($scheduleData as $index => $row): ?>
-                                                <tr>
+                                                <tr data-status="<?= $row['last_status'] ?>">
                                                     <td>
                                                         <select class="form-select po-select" name="po[<?= $index ?>]" <?= $readonly ? 'readonly' : '' ?> required>
                                                             <option value="">Pilih PO</option>
@@ -244,6 +244,19 @@
         const sisaKapasitas = document.getElementById('sisa_kapasitas');
         const totalQtyCelup = document.getElementById('total_qty_celup');
 
+
+        // Loop melalui semua baris tabel
+        document.querySelectorAll('tr[data-status]').forEach(function(row) {
+            const status = row.getAttribute('data-status');
+            // Jika status adalah 'celup', 'done', atau 'sent', buat semua input disabled
+            if (['celup', 'done', 'sent'].includes(status)) {
+                row.querySelectorAll('input, select, button').forEach(function(input) {
+                    input.setAttribute('readonly', true); // Untuk input teks
+                    input.setAttribute('disabled', true); // Untuk tombol dan select
+                });
+            }
+        });
+
         // Fungsi untuk memperbarui dropdown PO dan input delivery setelah memilih PO
         function updatePODropdown() {
             const itemTypeValue = itemType.value.trim();
@@ -324,7 +337,7 @@
                     const qtyCelup = parseFloat(qtyCelupInput.value) || 0;
                     const lastStatus = lastStatusInput.value;
 
-                    if (lastStatus === 'scheduled') {
+                    if (lastStatus === 'scheduled' || lastStatus === 'celup' || lastStatus === 'reschedule') {
                         total += qtyCelup;
                     }
                 } else {
@@ -370,13 +383,13 @@
             const newRow = `
         <tr>
             <td>
-                <select class="form-select po-select" name="po[${newIndex}]" required>
+                <select class="form-select po-select" name="po-select[${newIndex}]" required>
                     <option value="">Pilih PO</option>
                     <?php foreach ($po as $option): ?>
                         <option value="<?= $option['id_order'] ?>"><?= $option['no_model'] ?></option>
                     <?php endforeach; ?>
                 </select>
-                <input type="hidden" name="po[${newIndex}]" value=<?= $option['no_model'] ?>>
+                <input type="hidden" name="po[${newIndex}]" value="">
             </td>
             <td><input type="date" class="form-control start_mc" name="start_mc[${newIndex}]" readonly></td>
             <td><input type="date" class="form-control delivery_awal" name="delivery_awal[${newIndex}]" readonly></td>
@@ -402,6 +415,39 @@
         </tr>`;
 
             tbody.insertAdjacentHTML("beforeend", newRow);
+
+            // Ambil elemen select yang baru ditambahkan
+            const newSelect = tbody.querySelector(`select[name="po-select[${newIndex}]"]`);
+
+            // Event listener untuk menangani perubahan pilihan
+            newSelect.addEventListener('change', function() {
+                const selectedValue = newSelect.value; // Ambil value yang dipilih
+                console.log('Selected PO ID:', selectedValue); // Tampilkan di console atau proses sesuai kebutuhan
+
+                // get no_model from selectedValue id_order
+                const noModel = selectedValue;
+
+                // query untuk mendapatkan no_model berdasarkan id_order yang dipilih agar bisa disave ke database
+                $.ajax({
+                    url: '<?= base_url(session('role') . "/schedule/getNoModel") ?>',
+                    type: 'GET',
+                    data: {
+                        id_order: noModel
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log('No Model:', response.no_model);
+                        // set value po ke input hidden
+                        newSelect.nextElementSibling.value = response.no_model;
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error fetching No Model:", error);
+                    }
+                });
+
+
+
+            });
 
             // Panggil fungsi untuk memperbarui dropdown dan event listener pada baris baru
             updatePODropdown();
