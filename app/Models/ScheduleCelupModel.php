@@ -233,9 +233,20 @@ class ScheduleCelupModel extends Model
 
     public function getSchedule()
     {
-        return $this->select('schedule_celup.*, mesin_celup.no_mesin, sum(schedule_celup.kg_celup) as total_kg')
+        return $this->select('schedule_celup.*, mesin_celup.no_mesin, IF(po_plus = "0", kg_celup, 0) AS qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-            ->where('schedule_celup.last_status', 'scheduled')
+            ->where('schedule_celup.last_status <>', 'done')
+            ->groupBy('schedule_celup.id_mesin')
+            ->groupBy('schedule_celup.tanggal_schedule')
+            ->groupBy('schedule_celup.lot_urut')
+            ->findAll();
+    }
+
+    public function getDataByIdCelup($id)
+    {
+        return $this->select('schedule_celup.*, IF(po_plus = "0", kg_celup, 0) AS qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus, mesin_celup.no_mesin')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->where('schedule_celup.id_celup', $id)
             ->groupBy('schedule_celup.id_mesin')
             ->groupBy('schedule_celup.tanggal_schedule')
             ->groupBy('schedule_celup.lot_urut')

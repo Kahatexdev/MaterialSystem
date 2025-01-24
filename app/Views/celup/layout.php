@@ -128,7 +128,7 @@
                                 </g>
                             </svg>
                         </div>
-                        <span class="nav-link-text ms-1">Pemesanan</span>
+                        <span class="nav-link-text ms-1">Out Celup</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -150,7 +150,7 @@
                                 </g>
                             </svg>
                         </div>
-                        <span class="nav-link-text ms-1">PO+</span>
+                        <span class="nav-link-text ms-1">Retur</span>
                     </a>
                 </li>
             </ul>

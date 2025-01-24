@@ -30,7 +30,7 @@ class TabelScheduleCelup extends Migration
             ],
             'item_type' => [
                 'type' => 'VARCHAR',
-                'constraint' => 32,
+                'constraint' => 100,
             ],
             'kode_warna' => [
                 'type' => 'VARCHAR',
@@ -53,6 +53,7 @@ class TabelScheduleCelup extends Migration
             'lot_celup' => [
                 'type' => 'VARCHAR',
                 'constraint' => 32,
+                'null' => true,
             ],
             'tanggal_schedule' => [
                 'type' => 'DATE',
@@ -107,7 +108,7 @@ class TabelScheduleCelup extends Migration
             ],
             'po_plus' => [
                 'type' => 'ENUM',
-                'constraint' => [1, 0],
+                'constraint' => ['1', '0'],
             ],
             'user_cek_status' => [
                 'type' => 'VARCHAR',
