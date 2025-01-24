@@ -217,7 +217,7 @@
                             <div class="d-flex gap-2">
                                 <input type="date" name="filter_tglsch" class="form-control" placeholder="Tanggal Schedule">
                                 <input type="text" name="filter_nomodel" class="form-control" placeholder="No Model / Kode Warna">
-                                <button class="btn btn-filter" type="submit">
+                                <button class="btn btn-filter" id="filter_date_range" type="submit">
                                     <i class="bi bi-funnel me-2"></i>Filter
                                 </button>
                             </div>
@@ -541,11 +541,6 @@
             const url = `<?= base_url($role . '/schedule') ?>?start_date=${startDate}&end_date=${endDate}`;
             window.location.href = url;
         });
-
-
-
     });
 </script>
-
-
 <?php $this->endSection(); ?>

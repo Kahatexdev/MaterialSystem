@@ -25,7 +25,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('updateMaterial', 'MasterdataController::updateMaterial');
     $routes->get('deleteMaterial/(:num)/(:num)', 'MasterdataController::deleteMaterial/$1/$2');
     $routes->get('openPO/(:num)', 'MasterdataController::openPO/$1');
-    $routes->post('openPO/saveOpenPO', 'MasterdataController::saveOpenPO');
+    $routes->post('openPO/saveOpenPO/(:num)', 'MasterdataController::saveOpenPO/$1');
     // $routes->post('exportOpenPO/(:any)/(:any)', 'MasterdataController::exportOpenPO/$1/$2');
     $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
 
@@ -48,6 +48,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/getPO', 'ScheduleController::getPO');
     $routes->get('schedule/getPODetails', 'ScheduleController::getPODetails');
     $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
+    $routes->get('schedule/getNoModel', 'ScheduleController::getNoModel');
     $routes->post('schedule/saveSchedule', 'ScheduleController::saveSchedule');
     $routes->get('schedule/editSchedule', 'ScheduleController::editSchedule');
     $routes->post('schedule/updateSchedule', 'ScheduleController::updateSchedule');
@@ -77,6 +78,9 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->post('schedule', 'CelupController::schedule');
     $routes->get('edit/(:num)', 'CelupController::editStatus/$1');
     $routes->post('updateSchedule/(:num)', 'CelupController::updateSchedule/$1');
+
+    $routes->get('outCelup', 'CelupController::outCelup');
+    $routes->get('insertBon//:(num)', 'CelupController::insertBon/$1');
 });
 
 

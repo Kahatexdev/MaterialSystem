@@ -39,11 +39,11 @@
     <!-- Form -->
     <div class="card mt-4">
         <div class="card-body">
-            <form action="<?= base_url($role . '/openPO/saveOpenPO') ?>" method="post">
+            <form action="<?= base_url($role . '/openPO/saveOpenPO/' . $id_order) ?>" method="post">
                 <div class="form-group">
                     <label>Tujuan</label>
                     <select class="form-control" name="tujuan_po" id="selectTujuan" onchange="tujuan()" required>
-                        <option value="">Pilih</option>
+                        <option value="">Pilih Tujuan</option>
                         <option value="Celup Cones">Celup Cones</option>
                         <option value="Covering">Covering</option>
                     </select>
@@ -126,7 +126,7 @@
                 </div>
                 <div class="form-group">
                     <label>Penerima</label>
-                    <input type="text" class="form-control" id="penerima" readonly required>
+                    <input type="text" class="form-control" id="penerima" name="penerima" readonly required>
                 </div>
                 <div class="form-group">
                     <label>Penanggung Jawab</label>

@@ -58,8 +58,10 @@ class ScheduleController extends BaseController
         $endDate = $this->request->getGet('end_date');
 
         if ($startDate == null && $endDate == null) {
-            $startDate = date('Y-m-d');
-            $endDate = date('Y-m-d');
+            // Jika startdate tidak tersedia, gunakan tanggal 3 hari ke belakang
+            $startDate = date('Y-m-d', strtotime('-3 days'));
+            // end date 7 hari ke depan
+            $endDate = date('Y-m-d', strtotime('+6 days'));
         }
 
         // Konversi tanggal ke format DateTime jika tersedia
@@ -69,6 +71,7 @@ class ScheduleController extends BaseController
         // Ambil data jadwal dari model (filter berdasarkan tanggal jika tersedia)
         $scheduleData = $this->scheduleCelupModel->getScheduleCelupbyDate($startDateObj, $endDateObj);
 
+        // dd ($scheduleData);
         // Ambil data mesin celup
         $mesin_celup = $this->mesinCelupModel->getMesinCelupBenang();
 
@@ -199,11 +202,38 @@ class ScheduleController extends BaseController
         $id_order = $this->request->getGet('id_order');
         $poDetails = $this->masterOrderModel->getDelivery($id_order);
 
-        if ($poDetails) {
-            return $this->response->setJSON($poDetails);
-        } else {
-            return $this->response->setJSON(['error' => 'No data found']);
+        if (empty($poDetails)) {
+            return $this->response->setJSON(['error' => 'Order not found']);
         }
+
+        $model = $poDetails['no_model'];
+        $reqStartMc = 'http://172.23.29.116/CapacityApps/public/api/reqstartmc/' . $model;
+
+        try {
+            // Fetch API response
+            $json = file_get_contents($reqStartMc);
+
+            if ($json === false) {
+                throw new \Exception('Failed to fetch data from the API.');
+            }
+
+            // Decode JSON response
+            $startMc = json_decode($json, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \Exception('Invalid JSON response: ' . json_last_error_msg());
+            }
+
+            // Assign start_mesin data
+            $poDetails['start_mesin'] = $startMc;
+        } catch (\Exception $e) {
+            // Handle error and assign fallback value
+            $poDetails['start_mesin'] = 'Data Not Found';
+            log_message('error', 'Error fetching API data: ' . $e->getMessage());
+        }
+
+        // Return response
+        return $this->response->setJSON($poDetails);
     }
 
     public function getQtyPO()
@@ -290,6 +320,7 @@ class ScheduleController extends BaseController
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
         $id_order = $this->masterOrderModel->getIdOrder($no_model);
         $po = $this->openPoModel->getNomorModel();
+        // dd ($po);
         // var_dump($id_order);
         $readonly = true;
         // Jika data tidak ditemukan, kembalikan ke halaman sebelumnya
@@ -334,15 +365,26 @@ class ScheduleController extends BaseController
             'po' => $po,
             'readonly' => $readonly,
         ];
-
+        // dd ($data);
         return view($this->role . '/schedule/form-edit', $data);
     }
 
+    public function getNoModel()
+    {
+        $id_order = $this->request->getGet('id_order');
+        $no_model = $this->masterOrderModel->getNoModel($id_order);
+
+        if ($no_model) {
+            return $this->response->setJSON($no_model);
+        } else {
+            return $this->response->setJSON(['error' => 'No data found']);
+        }
+    }
     public function updateSchedule()
     {
         // Ambil semua data dari form menggunakan POST
         $scheduleData = $this->request->getPost();
-
+        // dd ($scheduleData);
         // Ambil id_mesin dan no_model
         $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
         $poList = $scheduleData['po']; // Array po[]
@@ -353,10 +395,11 @@ class ScheduleController extends BaseController
         // Looping data array untuk menyusun data yang akan disimpan
         foreach ($poList as $index => $po) {
             $id_celup = $scheduleData['id_celup'][$index] ?? null; // Dapatkan id_celup, jika ada
+            $last_status = $scheduleData['last_status'][$index] ?? 'scheduled'; // Default status
             $dataBatch[] = [
                 'id_celup' => $id_celup, // ID ini bisa null untuk baris baru
                 'id_mesin' => $id_mesin['id_mesin'],
-                'no_model' => $poList[$index],
+                'no_model' => $scheduleData['po'][$index],
                 'item_type' => $scheduleData['item_type'],
                 'kode_warna' => $scheduleData['kode_warna'],
                 'warna' => $scheduleData['warna'],
@@ -372,11 +415,12 @@ class ScheduleController extends BaseController
                 'tanggal_schedule' => $scheduleData['tanggal_schedule'],
                 'tanggal_celup' => $scheduleData['tanggal_celup'],
                 'ket_daily_cek' => $scheduleData['ket_daily_cek'],
+                'last_status' => $last_status,
                 'user_cek_status' => session()->get('username'),
                 'created_at' => date('Y-m-d H:i:s'),
             ];
         }
-
+        // dd ($dataBatch);
         // Cek apakah data sudah ada, gunakan id_celup untuk mencari
         foreach ($dataBatch as $data) {
             $existingSchedule = $this->scheduleCelupModel->where([
@@ -384,12 +428,23 @@ class ScheduleController extends BaseController
             ])->first();
 
             if ($existingSchedule) {
-                // Update data yang sudah ada
-                $updateSuccess = $this->scheduleCelupModel->update($data['id_celup'], $data);
-                if ($updateSuccess) {
-                    $updateMessage = 'Jadwal berhasil diupdate!';
-                } else {
-                    $updateMessage = 'Gagal mengupdate jadwal!';
+                // Periksa apakah ada perubahan data
+                $hasChanges = false;
+                foreach ($data as $key => $value) {
+                    if ($key !== 'created_at' && $key !== 'user_cek_status' && $existingSchedule[$key] != $value) {
+                        $hasChanges = true;
+                        break;
+                    }
+                }
+
+                // Update hanya jika ada perubahan
+                if ($hasChanges) {
+                    $updateSuccess = $this->scheduleCelupModel->update($data['id_celup'], $data);
+                    if ($updateSuccess) {
+                        $updateMessage = 'Jadwal berhasil diupdate!';
+                    } else {
+                        $updateMessage = 'Gagal mengupdate jadwal!';
+                    }
                 }
             } else {
                 // Insert data baru
@@ -406,9 +461,10 @@ class ScheduleController extends BaseController
         if ($updateMessage) {
             return redirect()->to(session()->get('role') . '/schedule')->with('success', $updateMessage);
         } else {
-            return redirect()->back()->with('error', 'Gagal menyimpan atau mengupdate jadwal!');
+            return redirect()->back()->with('info', 'Tidak ada perubahan yang disimpan.');
         }
     }
+
 
 
     public function acrylic()
@@ -418,8 +474,10 @@ class ScheduleController extends BaseController
         $endDate = $this->request->getGet('end_date');
 
         if ($startDate == null && $endDate == null) {
-            $startDate = date('Y-m-d');
-            $endDate = date('Y-m-d');
+            // Jika startdate tidak tersedia, gunakan tanggal 3 hari ke belakang
+            $startDate = date('Y-m-d', strtotime('-3 days'));
+            // end date 7 hari ke depan
+            $endDate = date('Y-m-d', strtotime('+6 days'));
         }
 
         // Konversi tanggal ke format DateTime jika tersedia
@@ -458,6 +516,7 @@ class ScheduleController extends BaseController
         return view($this->role . '/schedule/acrylic', $data);
     }
 
+
     public function nylon()
     {
         // Ambil parameter filter dari query string
@@ -465,8 +524,10 @@ class ScheduleController extends BaseController
         $endDate = $this->request->getGet('end_date');
 
         if ($startDate == null && $endDate == null) {
-            $startDate = date('Y-m-d');
-            $endDate = date('Y-m-d');
+            // Jika startdate tidak tersedia, gunakan tanggal 3 hari ke belakang
+            $startDate = date('Y-m-d', strtotime('-3 days'));
+            // end date 7 hari ke depan
+            $endDate = date('Y-m-d', strtotime('+6 days'));
         }
 
         // Konversi tanggal ke format DateTime jika tersedia

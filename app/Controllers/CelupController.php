@@ -266,4 +266,16 @@ class CelupController extends BaseController
         // Redirect ke halaman sebelumnya dengan pesan sukses
         return redirect()->to(base_url(session()->get('role') . '/schedule'))->withInput()->with('success', 'Data Berhasil diupdate');
     }
+    public function outCelup()
+    {
+        $scheduleDone = $this->scheduleCelupModel->getScheduleDone();
+
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "Out Celup",
+            'schedule' => $scheduleDone,
+        ];
+        return view($this->role . '/out/index', $data);
+    }
 }

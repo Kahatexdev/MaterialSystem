@@ -437,7 +437,17 @@ class MasterMaterialSeeder extends Seeder
                 'jenis' => 'BENANG'
             ],
             [
+                'item_type' => 'ACRYLIC MELANG &amp; JIMONT 1/32',
+                'deskripsi' => 'ACRYLIC MELANG 1/32',
+                'jenis' => 'BENANG'
+            ],
+            [
                 'item_type' => 'ACRYLIC MELANG & JIMONT 1/36',
+                'deskripsi' => 'ACRYLIC MELANG 1/36',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'ACRYLIC MELANG &amp; JIMONT 1/36',
                 'deskripsi' => 'ACRYLIC MELANG 1/36',
                 'jenis' => 'BENANG'
             ],
