@@ -21,7 +21,7 @@ class OpenPo extends Migration
             ],
             'item_type' => [
                 'type' => 'VARCHAR',
-                'constraint' => 32,
+                'constraint' => 100,
             ],
             'kode_warna' => [
                 'type' => 'VARCHAR',

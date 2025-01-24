@@ -211,38 +211,18 @@
         <div class="card-body">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <h6 class="text-muted mb-3"><strong>Keterangan Kapasitas:</strong></h6>
-                    <div class="d-flex gap-3 align-items-center">
-                        <div class="d-flex align-items-center">
-                            <div class="capacity-bar bg-secondary me-2" style="width: 30px; height: 12px;"></div>
-                            <span class="text-muted">0%</span>
+                    <form method="post" action="<?= base_url($role . '/schedule') ?>">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <p class="mb-0">Tanggal Schedule</p>
+                            <div class="d-flex gap-2">
+                                <input type="date" name="filter_tglsch" class="form-control" placeholder="Tanggal Schedule">
+                                <input type="text" name="filter_nomodel" class="form-control" placeholder="No Model / Kode Warna">
+                                <button class="btn btn-filter" id="filter_date_range" type="submit">
+                                    <i class="bi bi-funnel me-2"></i>Filter
+                                </button>
+                            </div>
                         </div>
-                        <div class="d-flex align-items-center">
-                            <div class="capacity-bar bg-success me-2" style="width: 30px; height: 12px;"></div>
-                            <span class="text-muted">1% - 69%</span>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <div class="capacity-bar bg-warning me-2" style="width: 30px; height: 12px;"></div>
-                            <span class="text-muted">70% - 99%</span>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <div class="capacity-bar bg-danger me-2" style="width: 30px; height: 12px;"></div>
-                            <span class="text-muted">100%</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="d-flex justify-content-md-end gap-2">
-                        <input type="date" id="start_date" class="form-control" placeholder="Start Date">
-                        <input type="date" id="end_date" class="form-control" placeholder="End Date">
-                        <button class="btn btn-filter" id="filter_date_range">
-                            <i class="bi bi-funnel me-2"></i>Filter
-                        </button>
-                        <!-- reset tamggal -->
-                        <button class="btn btn-filter" id="reset_date_range">
-                            <i class="bi bi-arrow-counterclockwise me-2"></i>Reset
-                        </button>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -268,6 +248,7 @@
                             <th class="sticky">Qty PO</th>
                             <th class="sticky">Qty PO(+)</th>
                             <th class="sticky">Qty Celup</th>
+                            <th class="sticky">Qty Celup(+)</th>
                             <th class="sticky">LOT Celup</th>
                             <th class="sticky">Bon</th>
                             <th class="sticky">Celup</th>
@@ -280,15 +261,14 @@
                             <th class="sticky">Reject</th>
                             <th class="sticky">Perbaikan</th>
                             <th class="sticky">Ket Daily Cek</th>
-                            <th class="sticky">Edit</th>
-                            <th class="sticky">Ket Sch</th>
                             <th class="sticky">Updated By</th>
+                            <th class="sticky">Edit</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
                         $no = 1;
-                        foreach ($data_sch as $data):
+                        foreach ($uniqueData as $data):
                         ?>
                             <tr>
                                 <td><?= $no++; ?></td>
@@ -297,28 +277,28 @@
                                 <td><?= $data['item_type']; ?></td>
                                 <td><?= $data['kode_warna']; ?></td>
                                 <td><?= $data['warna']; ?></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
+                                <td><?= $data['start_mc']; ?></td>
+                                <td><?= $data['del_awal']; ?></td>
+                                <td><?= $data['del_akhir']; ?></td>
+                                <td><?= $data['tgl_schedule']; ?></td>
+                                <td><?= $data['qty_po']; ?></td>
+                                <td><?= $data['qty_po_plus']; ?></td>
+                                <td><?= $data['qty_celup']; ?></td>
+                                <td><?= $data['qty_celup_plus']; ?></td>
+                                <td><?= $data['lot_celup']; ?></td>
+                                <td><?= $data['tgl_bon']; ?></td>
+                                <td><?= $data['tgl_celup']; ?></td>
+                                <td><?= $data['tgl_bongkar']; ?></td>
+                                <td><?= $data['tgl_press']; ?></td>
+                                <td><?= $data['tgl_oven']; ?></td>
+                                <td><?= $data['tgl_rajut_pagi']; ?></td>
+                                <td><?= $data['tgl_acc']; ?></td>
+                                <td><?= $data['tgl_kelos']; ?></td>
+                                <td><?= $data['tgl_reject']; ?></td>
+                                <td><?= $data['tgl_pb']; ?></td>
+                                <td><?= $data['ket_daily_cek']; ?></td>
+                                <td><?= $data['admin']; ?></td>
+                                <td><a href="<?= base_url($role . '/edit/' . $data['id_celup']) ?>"><i class="bi bi-pencil"></i></a></td>
                             </tr>
                         <?php
                         endforeach;
@@ -561,11 +541,6 @@
             const url = `<?= base_url($role . '/schedule') ?>?start_date=${startDate}&end_date=${endDate}`;
             window.location.href = url;
         });
-
-
-
     });
 </script>
-
-
 <?php $this->endSection(); ?>

@@ -11,6 +11,8 @@ $routes->post('/logout', 'AuthController::logout');
 $routes->post('authverify', 'AuthController::login');
 
 // gbn routes
+$routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJatah');
+
 $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('', 'MaterialController::index');
     $routes->get('masterdata', 'MasterdataController::index');
@@ -52,7 +54,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('schedule/saveSchedule', 'ScheduleController::saveSchedule');
     $routes->get('schedule/editSchedule', 'ScheduleController::editSchedule');
     $routes->post('schedule/updateSchedule', 'ScheduleController::updateSchedule');
-    $routes->get('schedule/deleteSchedule/(:num)', 'ScheduleController::deleteSchedule/$1');
+    $routes->post('schedule/updateTglSchedule', 'ScheduleController::updateTglSchedule');
+    $routes->post('schedule/deleteSchedule', 'ScheduleController::deleteSchedule');
+    // $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJatah');
 
     $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
     $routes->post('mesin/saveDataMesin', 'MesinCelupController::saveDataMesin');
@@ -75,9 +79,14 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
 $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('', 'CelupController::index');
     $routes->get('schedule', 'CelupController::schedule');
+    $routes->post('schedule', 'CelupController::schedule');
+    $routes->get('edit/(:num)', 'CelupController::editStatus/$1');
+    $routes->post('updateSchedule/(:num)', 'CelupController::updateSchedule/$1');
+
     $routes->get('outCelup', 'CelupController::outCelup');
     $routes->get('insertBon/(:num)', 'CelupController::insertBon/$1');
     $routes->post('outCelup/saveBon/(:num)', 'CelupController::saveBon/$1');
+    $routes->get('retur', 'CelupController::retur');
 });
 
 

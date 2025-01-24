@@ -61,27 +61,262 @@ class CelupController extends BaseController
     }
     public function schedule()
     {
+        $filterTglSch = $this->request->getPost('filter_tglsch');
+        $filterNoModel = $this->request->getPost('filter_nomodel');
+
+        // Ambil data schedule
         $sch = $this->scheduleCelupModel->getSchedule();
+
+        // Filter data jika ada input filter
+        if ($filterTglSch && $filterNoModel) {
+            // Filter berdasarkan tanggal dan nomor model atau kode warna
+            $sch = array_filter($sch, function ($data) use ($filterTglSch, $filterNoModel) {
+                return $data['tanggal_schedule'] === $filterTglSch &&
+                    (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
+            });
+        } elseif ($filterTglSch) {
+            // Filter berdasarkan tanggal saja
+            $sch = array_filter($sch, function ($data) use ($filterTglSch) {
+                return $data['tanggal_schedule'] === $filterTglSch;
+            });
+        } elseif ($filterNoModel) {
+            // Filter berdasarkan nomor model atau kode warna saja
+            $sch = array_filter($sch, function ($data) use ($filterNoModel) {
+                return (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
+            });
+        }
+
+
+        $uniqueData = [];
+        foreach ($sch as $key => $id) {
+            // Ambil parameter dari data schedule
+            $nomodel = $id['no_model'];
+            $itemtype = $id['item_type'];
+            $kodewarna = $id['kode_warna'];
+
+            // Debug untuk memastikan parameter tidak null
+            if (empty($nomodel) || empty($itemtype) || empty($kodewarna)) {
+                log_message('error', "Parameter null: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
+                continue; // Skip data jika ada parameter kosong
+            }
+
+            // Panggil fungsi model untuk mendapatkan qty_po dan warna
+            $pdk = $this->materialModel->getQtyPOForCelup($nomodel, $itemtype, $kodewarna);
+
+            // Pastikan $pdk memiliki data valid sebelum dipakai
+            if (!$pdk) {
+                log_message('error', "Data null dari model: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
+                continue; // Skip jika $pdk kosong
+            }
+
+            $keys = $id['no_model'] . '-' . $id['item_type'] . '-' . $id['kode_warna'];
+
+            // Pastikan key belum ada, jika belum maka tambahkan data
+            if (!isset($uniqueData[$key])) {
+
+                // Buat array data unik
+                $uniqueData[] = [
+                    'no_model' => $nomodel,
+                    'item_type' => $itemtype,
+                    'kode_warna' => $kodewarna,
+                    'warna' => $pdk['color'],
+                    'start_mc' => $id['start_mc'],
+                    'del_awal' => $pdk['delivery_awal'],
+                    'del_akhir' => $pdk['delivery_akhir'],
+                    'qty_po' => $pdk['qty_po'],
+                    'qty_po_plus' => 0,
+                    'qty_celup' => $id['qty_celup'],
+                    'no_mesin' => $id['no_mesin'],
+                    'id_celup' => $id['id_celup'],
+                    'lot_celup' => $id['lot_celup'],
+                    'lot_urut' => $id['lot_urut'],
+                    'tgl_schedule' => $id['tanggal_schedule'],
+                    'tgl_bon' => $id['tanggal_bon'],
+                    'tgl_celup' => $id['tanggal_celup'],
+                    'tgl_bongkar' => $id['tanggal_bongkar'],
+                    'tgl_press' => $id['tanggal_press'],
+                    'tgl_oven' => $id['tanggal_oven'],
+                    'tgl_rajut_pagi' => $id['tanggal_rajut_pagi'],
+                    'tgl_kelos' => $id['tanggal_kelos'],
+                    'tgl_acc' => $id['tanggal_acc'],
+                    'tgl_reject' => $id['tanggal_reject'],
+                    'tgl_pb' => $id['tanggal_perbaikan'],
+                    'last_status' => $id['last_status'],
+                    'ket_daily_cek' => $id['ket_daily_cek'],
+                    'qty_celup_plus' => $id['qty_celup_plus'],
+                    'admin' => $id['user_cek_status'],
+                ];
+            }
+        }
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Schedule',
+            'role' => $this->role,
+            'data_sch' => $sch,
+            'uniqueData' => $uniqueData,
+        ];
+        return view($this->role . '/schedule/index', $data);
+    }
+    public function editStatus($id)
+    {
+        $sch = $this->scheduleCelupModel->getDataByIdCelup($id);
+        $uniqueData = [];
+        foreach ($sch as $key => $id) {
+            // Ambil parameter dari data schedule
+            $nomodel = $id['no_model'];
+            $itemtype = $id['item_type'];
+            $kodewarna = $id['kode_warna'];
+
+            // Debug untuk memastikan parameter tidak null
+            if (empty($nomodel) || empty($itemtype) || empty($kodewarna)) {
+                log_message('error', "Parameter null: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
+                continue; // Skip data jika ada parameter kosong
+            }
+
+            // Panggil fungsi model untuk mendapatkan qty_po dan warna
+            $pdk = $this->materialModel->getQtyPOForCelup($nomodel, $itemtype, $kodewarna);
+
+            // Pastikan $pdk memiliki data valid sebelum dipakai
+            if (!$pdk) {
+                log_message('error', "Data null dari model: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
+                continue; // Skip jika $pdk kosong
+            }
+            $keys = $id['no_model'] . '-' . $id['item_type'] . '-' . $id['kode_warna'];
+
+            // Pastikan key belum ada, jika belum maka tambahkan data
+            if (!isset($uniqueData[$key])) {
+                // Buat array data unik
+                $uniqueData[$keys] = [
+                    'no_model' => $nomodel,
+                    'item_type' => $itemtype,
+                    'kode_warna' => $kodewarna,
+                    'warna' => $pdk['color'],
+                    'start_mc' => $id['start_mc'],
+                    'del_awal' => $pdk['delivery_awal'],
+                    'del_akhir' => $pdk['delivery_akhir'],
+                    'qty_po' => $pdk['qty_po'],
+                    'qty_po_plus' => 0,
+                    'qty_celup' => $id['qty_celup'],
+                    'no_mesin' => $id['no_mesin'],
+                    'id_celup' => $id['id_celup'],
+                    'lot_celup' => $id['lot_celup'],
+                    'lot_urut' => $id['lot_urut'],
+                    'tgl_schedule' => $id['tanggal_schedule'],
+                    'tgl_bon' => $id['tanggal_bon'],
+                    'tgl_celup' => $id['tanggal_celup'],
+                    'tgl_bongkar' => $id['tanggal_bongkar'],
+                    'tgl_press' => $id['tanggal_press'],
+                    'tgl_oven' => $id['tanggal_oven'],
+                    'tgl_rajut_pagi' => $id['tanggal_rajut_pagi'],
+                    'tgl_kelos' => $id['tanggal_kelos'],
+                    'tgl_acc' => $id['tanggal_acc'],
+                    'tgl_reject' => $id['tanggal_reject'],
+                    'tgl_pb' => $id['tanggal_perbaikan'],
+                    'last_status' => $id['last_status'],
+                    'ket_daily_cek' => $id['ket_daily_cek'],
+                    'qty_celup_plus' => $id['qty_celup_plus'],
+                    'admin' => $id['user_cek_status'],
+                ];
+            }
+        }
+        // dd($uniqueData);
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
             'data_sch' => $sch,
+            'uniqueData' => $uniqueData,
         ];
-        return view($this->role . '/schedule/index', $data);
+        return view($this->role . '/schedule/form-edit', $data);
     }
+    public function updateSchedule($id)
+    {
+        $lotCelup = $this->request->getPost('lot_celup');
+        $tglBon = $this->request->getPost('tgl_bon');
+        $tglCelup = $this->request->getPost('tgl_celup');
+        $tglBongkar = $this->request->getPost('tgl_bongkar');
+        $tglPress = $this->request->getPost('tgl_press');
+        $tglOven = $this->request->getPost('tgl_oven');
+        $tglRajut = $this->request->getPost('tgl_rajut');
+        $tglACC = $this->request->getPost('tgl_acc');
+        $tglKelos = $this->request->getPost('tgl_kelos');
+        $tglReject = $this->request->getPost('tgl_reject');
+        $tglPB = $this->request->getPost('tgl_pb');
+        $ketDailyCek = $this->request->getPost('ket_daily_cek');
 
+        // Hanya masukkan nilai jika tidak kosong atau null
+        $dataUpdate = [];
+        if ($lotCelup) $dataUpdate['lot_celup'] = $lotCelup;
+        if ($tglBon) $dataUpdate['tanggal_bon'] = $tglBon;
+        if ($tglCelup) $dataUpdate['tangggal_celup'] = $tglCelup;
+        if ($tglBongkar) $dataUpdate['tanggal_bongkar'] = $tglBongkar;
+        if ($tglPress) $dataUpdate['tanggal_press'] = $tglPress;
+        if ($tglOven) $dataUpdate['tanggal_oven'] = $tglOven;
+        if ($tglRajut) $dataUpdate['tanggal_rajut'] = $tglRajut;
+        if ($tglACC) $dataUpdate['tanggal_acc'] = $tglACC;
+        if ($tglKelos) $dataUpdate['tanggal_kelos'] = $tglKelos;
+        if ($tglReject) $dataUpdate['tanggal_reject'] = $tglReject;
+        if ($tglPB) $dataUpdate['tanggal_pb'] = $tglPB;
+        if ($ketDailyCek) $dataUpdate['ket_daily_cek'] = $ketDailyCek;
+
+        // Validasi apakah data dengan ID yang diberikan ada
+        $existingProduction = $this->scheduleCelupModel->find($id);
+        if (!$existingProduction) {
+            return redirect()->back()->with('error', 'Data tidak ditemukan.');
+        }
+
+        // Perbarui data di database
+        $this->scheduleCelupModel->update($id, $dataUpdate);
+
+        // Redirect ke halaman sebelumnya dengan pesan sukses
+        return redirect()->to(base_url(session()->get('role') . '/schedule'))->withInput()->with('success', 'Data Berhasil diupdate');
+    }
     public function outCelup()
     {
         $scheduleDone = $this->scheduleCelupModel->getScheduleDone();
+        $uniqueData = [];
+
+        foreach ($scheduleDone as $key => $id) {
+            // Log::debug($key); // atau var_dump($key);
+            $noModel = $id['no_model'];
+            $itemType = $id['item_type'];
+            $kodeWarna = $id['kode_warna'];
+
+            $dataPo = $this->materialModel->getQtyPOForCelup($noModel, $itemType, $kodeWarna);
+
+            $uniqueData[$key] = [
+                'idCelup' => $id['id_celup'],
+                'noModel' => $noModel,
+                'itemType' => $itemType,
+                'kodeWarna' => $kodeWarna,
+                'warna' => $id['warna'],
+                'startMc' => $id['start_mc'],
+                'qtyPo' => number_format($dataPo['qty_po'], 2),
+                'qtyPoPlus' => '',
+                'tanggalSchedule' => $id['tanggal_schedule'],
+                'qtyCelup' => number_format($id['qty_celup'], 2),
+                'qtyCelupPlus' => number_format($id['qty_celup_plus'], 2),
+            ];
+        }
 
         $data = [
             'role' => $this->role,
             'active' => $this->active,
             'title' => "Out Celup",
-            'schedule' => $scheduleDone,
+            'schedule' => $uniqueData,
         ];
         return view($this->role . '/out/index', $data);
+    }
+
+    public function retur()
+    {
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => 'Retur',
+        ];
+        return view($this->role . '/retur/index', $data);
     }
 
     public function insertBon($id_celup)

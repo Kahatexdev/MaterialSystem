@@ -147,7 +147,7 @@
                                                         <td><input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required></td>
                                                         <td>
                                                             <select class="form-select" name="po_plus[]" required>
-                                                                <option value="0">Pilih PO(+)</option>
+                                                                <option value="">Pilih PO(+)</option>
                                                                 <option value="1">Ya</option>
                                                                 <option value="0">Tidak</option>
                                                             </select>
@@ -324,6 +324,7 @@
                     const poId = poSelect.value;
                     const deliveryAwalInput = row.querySelector("input[name='delivery_awal[]']");
                     const deliveryAkhirInput = row.querySelector("input[name='delivery_akhir[]']");
+                    const startMcInput = row.querySelector("input[name='tgl_start_mc[]']");
                     const qtyPOInput = row.querySelector("input[name='qty_po[]']");
 
                     if (poId) {
@@ -341,6 +342,7 @@
                                     if (poDetails.delivery_awal && poDetails.delivery_akhir) {
                                         deliveryAwalInput.value = poDetails.delivery_awal;
                                         deliveryAkhirInput.value = poDetails.delivery_akhir;
+                                        startMcInput.value = poDetails.start_mesin;
                                     }
                                 } else {
                                     console.log("Data PO tidak ditemukan");

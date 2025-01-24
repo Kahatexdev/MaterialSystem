@@ -330,6 +330,9 @@
                                 // Jika key sudah ada, gabungkan total_kg-nya
                                 if (isset($scheduleGrouped[$key])) {
                                     $scheduleGrouped[$key]['total_kg'] += $job['total_kg'];
+                                    // format total_kg menjadi 2 angka di belakang koma
+                                    $scheduleGrouped[$key]['total_kg'] = number_format($scheduleGrouped[$key]['total_kg'], 2);
+
                                 } else {
                                     $scheduleGrouped[$key] = $job;
                                 }
@@ -356,6 +359,7 @@
                         function renderJobButton($job, $mesin, $capacityColor, $capacityPercentage)
                         {
                             $kgCelup = number_format($job['total_kg'], 2);
+                            $totalKg = number_format($job['total_kg'], 2);
                             return "
                                 <button class='btn btn-link {$capacityColor}' 
                                     data-bs-toggle='modal' 
@@ -363,8 +367,9 @@
                                     data-no-mesin='{$job['no_mesin']}'
                                     data-tanggal-schedule='{$job['tanggal_schedule']}'
                                     data-lot-urut='{$job['lot_urut']}'
-                                    title='{$job['total_kg']} kg ({$capacityPercentage}%)'>
-                                    <div class='d-flex flex-column align-items-center justify-content-center' style='height: 100%;'>
+                                    title='{$totalKg} kg ({$capacityPercentage}%)'
+                                    style='width: {$capacityPercentage}%;'>
+                                    <div class='d-flex flex-column align-items-center justify-content-center' style='height: 100%; width: 100%;'>
                                         <span style='font-size: 0.9rem; color: black; font-weight: bold;'>{$job['kode_warna']}</span>
                                         <span style='font-size: 0.85rem; color: black;'>{$kgCelup} KG</span>
                                     </div>
@@ -401,7 +406,7 @@
 
                                                 // Render button untuk lot yang ada jadwalnya
                                                 echo "<div class='job-item'>";
-                                                echo renderJobButton($job, $mesin, $capacityColor, number_format($capacityPercentage, 1));
+                                                echo renderJobButton($job, $mesin, $capacityColor, number_format($capacityPercentage, 2));
                                                 echo "</div>";
                                             } else {
                                                 // Tampilkan kartu kosong jika tidak ada jadwal
@@ -571,8 +576,8 @@
 
                     htmlContent += `
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" id="deleteSchedule">Hapus Jadwal</button>
-                        <button type="button" class="btn btn-warning text-black" id="editSchedule">Edit Jadwal</button>
+                        <button type="button" class="btn btn-info" id="editSchedule">Edit Jadwal</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                     </div>`;
 
                     modalBody.innerHTML = htmlContent;
