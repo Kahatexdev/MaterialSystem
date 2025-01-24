@@ -221,9 +221,9 @@ class ScheduleCelupModel extends Model
     public function getScheduleCelupbyDate($startDate = null, $endDate = null)
     {
         $builder = $this->db->table('schedule_celup')
-        ->select('schedule_celup.*, mesin_celup.no_mesin, SUM(schedule_celup.kg_celup) as total_kg')
-        ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-        ->where('tanggal_schedule >=', $startDate->format('Y-m-d'))
+            ->select('schedule_celup.*, mesin_celup.no_mesin, SUM(schedule_celup.kg_celup) as total_kg')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->where('tanggal_schedule >=', $startDate->format('Y-m-d'))
             ->where('tanggal_schedule <=', $endDate->format('Y-m-d'))
             ->whereIn('schedule_celup.last_status', ['scheduled', 'celup', 'reschedule']) // Filter berdasarkan last_status
             ->groupBy('schedule_celup.id_mesin')
@@ -251,5 +251,4 @@ class ScheduleCelupModel extends Model
             ->groupBy('id_celup')
             ->findAll();
     }
-
 }

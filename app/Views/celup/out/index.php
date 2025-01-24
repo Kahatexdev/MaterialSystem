@@ -1,4 +1,4 @@
-<?php $this->extend($role . '/schedule/header'); ?>
+<?php $this->extend($role . '/out/header'); ?>
 <?php $this->section('content'); ?>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
@@ -263,7 +263,7 @@
                                 <td><?= $sch['tanggal_schedule'] ?></td>
                                 <td><?= number_format($sch['qty_celup'], 2) ?></td>
                                 <td><?= number_format($sch['qty_celup_plus'], 2) ?></td>
-                                <td><a href="<?= base_url($role . "/insertBon/" . $sch['id_celup']) ?>" class="btn btn-info">Bon</a></td>
+                                <td><a href="<?= base_url($role . '/insertBon/' . $sch['id_celup']) ?>" class="btn btn-info">Bon</a></td>
                         </tr>
                     <?php } ?>
                     </tbody>
