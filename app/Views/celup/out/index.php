@@ -226,7 +226,10 @@
                             <!-- <th class="sticky">Tanggal Schedule</th> -->
                             <th class="sticky">Qty PO</th>
                             <th class="sticky">Qty PO(+)</th>
+                            <!-- <th class="sticky">Tanggal Celup</th> -->
                             <th class="sticky">Qty Celup</th>
+                            <th class="sticky">Qty Celup(+)</th>
+                            <th class="sticky">Aksi</th>
                             <!-- <th class="sticky">LOT Celup</th>
                             <th class="sticky">Bon</th>
                             <th class="sticky">Celup</th>
@@ -250,13 +253,19 @@
                             $no = 1;
                             foreach ($schedule as $sch) { ?>
                                 <td><?= $no++ ?></td>
-                                <td><?= $sch['no_model'] ?></td>
-                                <td><?= $sch['item_type'] ?></td>
-                                <td><?= $sch['kode_warna'] ?></td>
+                                <td><?= $sch['noModel'] ?></td>
+                                <td><?= $sch['itemType'] ?></td>
+                                <td><?= $sch['kodeWarna'] ?></td>
                                 <td><?= $sch['warna'] ?></td>
-                                <td><?= $sch['start_mc'] ?></td>
-                            <?php } ?>
+                                <td><?= $sch['startMc'] ?></td>
+                                <td><?= $sch['qtyPo'] ?></td>
+                                <td></td>
+                                <!-- <td><?= $sch['tanggalSchedule'] ?></td> -->
+                                <td><?= $sch['qtyCelup'] ?></td>
+                                <td><?= $sch['qtyCelupPlus'] ?></td>
+                                <td><a href="<?= base_url($role . "/insertBon/" . $sch['idCelup']) ?>" class="btn btn-info">Bon</a></td>
                         </tr>
+                    <?php } ?>
                     </tbody>
                 </table>
             </div>

@@ -34,6 +34,4 @@ class MaterialController extends BaseController
         ];
         return view($this->role . '/dashboard/index', $data);
     }
-
-
 }

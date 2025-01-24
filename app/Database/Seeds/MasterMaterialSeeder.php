@@ -1493,6 +1493,411 @@ class MasterMaterialSeeder extends Seeder
                 'deskripsi' => 'POLYESTER RAYON 20S 55/45',
                 'jenis' => 'BENANG'
             ],
+            [
+                'item_type' => 'CTN MODAL 20S 100%',
+                'deskripsi' => 'COTTON MODAL 100% 20S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN MODAL 32S 50/50',
+                'deskripsi' => 'COTTON MODAL 50/50 32S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN BCI MODAL 20S 30/70',
+                'deskripsi' => 'COTTON 20S BCI 30/70 MODAL',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'MISTY MODAL 20S ANTI BACTERY',
+                'deskripsi' => 'COTTON MISTY MODAL 20S ANTI BACTERY',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN MISTY MODAL 20S ANTI BACTERY',
+                'deskripsi' => 'COTTON MISTY MODAL 20S ANTI BACTERY',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'T/C CB 90/10 32S',
+                'deskripsi' => 'T/C COMBED 32S 90/10',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'T/C CB 90/10 32S PRL',
+                'deskripsi' => 'T/C COMBED 32S 90/10 32S PARALEL',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CVC RECY 32S',
+                'deskripsi' => 'CVC RECYCLE 32S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'POLY THERMOLYTE 20S 100%',
+                'deskripsi' => 'POLY THERMOLYTE 100% 20S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'VISCOSE 30S 100%',
+                'deskripsi' => 'VISCOSE 100% 30S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN NON ORG SPD LYCRA 20D/32S',
+                'deskripsi' => 'CTN NON ORG SPDX LYCRA 20D/32S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN NON ORG SPD TEXL 20D/32S',
+                'deskripsi' => 'CTN NON ORG SPDX TEXLAN 20D/32S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN ORG SPD LYCRA 20D/32S',
+                'deskripsi' => 'CTN ORG SPDX LYCRA 20D/32S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN ORG SPD TEXL 20D/32S',
+                'deskripsi' => 'CTN ORG SPDX TEXLON 20D/32S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN CD ORG SPD CREORA 20D/32S',
+                'deskripsi' => 'CTN CD ORG SPDX CREORA 20D/32S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN CD NON ORG SPD CREORA 20D/32S',
+                'deskripsi' => 'CTN NON ORG SPDX CREORA CD 20D/32S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'ACRYLIC MELANG 1/32',
+                'deskripsi' => 'ACRYLIC MELANG & JIMONT 1/32',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'ACRYLIC MELANG 1/36',
+                'deskripsi' => 'ACRYLIC MELANG & JIMONT 1/36',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN CB NEPS 32S',
+                'deskripsi' => 'COTTON COMBED NEPS 32S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN CD NEPS 20S 80/20 BCI',
+                'deskripsi' => 'COTTON CARDED NEPS 20S 80/20 BCI',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CD MISTY NEPS 20S 98/2',
+                'deskripsi' => 'COTTON CARDED MISTY NEPS 20S 98/2',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CD MISTY NEPS 20S 80/20 BCI',
+                'deskripsi' => 'COTTON CARDED MISTY NEPS 20S 80/20 BCI',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN CD NEPS ORG 20S',
+                'deskripsi' => 'COTTON CARDED NEPS ORGANIC 20S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN MISTY 20S ANTI BACTERY',
+                'deskripsi' => 'COTTON MISTY 20S ANTI BACTERY',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN MISTY ORG 20S 100%',
+                'deskripsi' => 'COTTON MISTY ORG 20S 100%',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'MISTY ORG SPD LYCR 20D/32S',
+                'deskripsi' => 'MISTY ORG SPD LYCRA 20D/32S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'MISTY ORG SPD TEXL 20D/32S',
+                'deskripsi' => 'MISTY ORG SPD TEXLON 20D/32S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'MISTY NON ORG SPD LYCR 20D/32S',
+                'deskripsi' => 'MISTY NON ORG SPD LYCRA 20D/32S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'MISTY NON ORG SPD TEXL 20D/32S',
+                'deskripsi' => 'MISTY NON ORG SPD TEXL 20D/32S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN BM MISTY ORG 20S 100%',
+                'deskripsi' => 'COTTON BM MISTY ORG 100% 20S',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN CB MERCERIZED 2/40',
+                'deskripsi' => 'COTTON MERCERIZED 2/40',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN CB 20S 70/30 RECY',
+                'deskripsi' => 'COTTON COMBED 70/30 20S RECYCLE',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN CB 20S 65/35 RECY',
+                'deskripsi' => 'COTTON COMBED 65/35 20S RECYCLE',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN CB 32S 70/30 RECY',
+                'deskripsi' => 'COTTON COMBED 70/30 32S RECYCLE',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'CTN RECY 20S 100%',
+                'deskripsi' => 'COTTON RECYCLE 20S 100%',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'MISTY CB 32S 70/30 RECY',
+                'deskripsi' => 'MISTY CB 32S 70/30 RECYCLE',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'MISTY CB 20S 70/30 RECY',
+                'deskripsi' => 'MISTY CB 20S 70/30 RECYCLE',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'LIP NYLON 70D/2 RECY',
+                'deskripsi' => 'LIPATAN NYLON 70D/2 (KHUSUS LIPATAN) RECYCLE',
+                'jenis' => 'NYLON'
+            ],
+            [
+                'item_type' => 'NYLON JHT 70D/2 RECY',
+                'deskripsi' => 'NYLON JAHIT 70D/2 RECYCLE',
+                'jenis' => 'NYLON'
+            ],
+            [
+                'item_type' => 'NYLON JHT 40D/2 RECY',
+                'deskripsi' => 'NYLON JAHIT 40D/2 RECYCLE',
+                'jenis' => 'NYLON'
+            ],
+            [
+                'item_type' => 'NYLON 70D/2 RECY',
+                'deskripsi' => 'NYLON 70D/2 RECYCLE',
+                'jenis' => 'NYLON'
+            ],
+            [
+                'item_type' => 'KARET 100/40/40 N RECY',
+                'deskripsi' => 'KARET 100/40/40N RECYCLE',
+                'jenis' => 'KARET'
+            ],
+            [
+                'item_type' => 'KARET 100/75/75 P RECY',
+                'deskripsi' => 'KARET 100/75P/75P RECYCLE (REVISI DARI 100/75P RECYCLE)',
+                'jenis' => 'KARET'
+            ],
+            [
+                'item_type' => 'KARET 100/75/75 P RECY LYCRA',
+                'deskripsi' => 'KARET 100/75P/75P RECYCLE LYCRA (revisenya dupon)',
+                'jenis' => 'KARET'
+            ],
+            [
+                'item_type' => 'KARET 140D/75P RECY',
+                'deskripsi' => 'KARET 140D/75P RECYCLE',
+                'jenis' => 'KARET'
+            ],
+            [
+                'item_type' => 'KARET 180/75/75 P RECY',
+                'deskripsi' => 'KARET 180/75P RECYCLE (RW & BLACK) (revise KARET 180/75/75 P RECYCLE)',
+                'jenis' => 'KARET'
+            ],
+            [
+                'item_type' => 'KARET 180/75P RECY LYCRA',
+                'deskripsi' => 'KARET 180/75P RECYCLE LYCRA (revisenya dupon)',
+                'jenis' => 'KARET'
+            ],
+            [
+                'item_type' => 'KARET 176/75/75 P RECY LYCRA',
+                'deskripsi' => 'KARET 176/75P/75 P RECYCLE LYCRA (revisenya dupon INI BACKUPNYA UKURAN 180/75P)',
+                'jenis' => 'KARET'
+            ],
+            [
+                'item_type' => 'KARET 176/50/50 P RECY LYCRA',
+                'deskripsi' => 'KARET 176/50/50 P RECYCLE LYCRA (revisenya dupon)',
+                'jenis' => 'KARET'
+            ],
+            [
+                'item_type' => 'KARET 100/40/40 N RECY LYCRA',
+                'deskripsi' => 'KARET 100/40/40 N RECYCLE LYCRA (revisenya dupon)',
+                'jenis' => 'KARET'
+            ],
+            [
+                'item_type' => 'KARET 180/75P RECY LYCRA 3.8',
+                'deskripsi' => 'KARET 180/75P RECYCLE LYCRA 3.8',
+                'jenis' => 'KARET'
+            ],
+            [
+                'item_type' => 'POLYESTER 150D RECY',
+                'deskripsi' => 'POLYESTER 150D RECYCLE',
+                'jenis' => 'NYLON'
+            ],
+            [
+                'item_type' => 'POLYESTER 140D RECY',
+                'deskripsi' => 'POLYESTER 140D RECYCLE',
+                'jenis' => 'NYLON'
+            ],
+            [
+                'item_type' => 'POLYESTER 140D/48F RECY',
+                'deskripsi' => 'POLYESTER 140D/48F RECYCLE',
+                'jenis' => 'NYLON'
+            ],
+            [
+                'item_type' => 'POLYESTER 75D/1 RECY',
+                'deskripsi' => 'POLYESTER 75D/1 RECYCLE',
+                'jenis' => 'NYLON'
+            ],
+            [
+                'item_type' => 'POLYESTER 75D/72F RECY',
+                'deskripsi' => 'POLYESTER 75D/72F RECYCLE',
+                'jenis' => 'NYLON'
+            ],
+            [
+                'item_type' => 'SPDX 20/70N RECY 3.8',
+                'deskripsi' => 'SPDX 20/70N RECYCLE (FADISH) 3,8',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/70N RECY 4',
+                'deskripsi' => 'SPDX 20/70N RECYCLE (FADISH) 4',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/150P',
+                'deskripsi' => 'SPANDEX 20/150P (REVISE DARI 20/140P)',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 30/150P',
+                'deskripsi' => 'SPANDEX 30/150P',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/150P RECY',
+                'deskripsi' => 'SPANDEX 20/150P RECYCLE',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/150P RECY 3.8',
+                'deskripsi' => 'SPANDEX 20/150P RECYCLE FADISH/AIRJET 3.8',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/150P RECY 4',
+                'deskripsi' => 'SPANDEX 20/150P RECYCLE FADISH/AIRJET 4',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/150P RECY LYCRA',
+                'deskripsi' => 'SPANDEX 20/150P RECYCLE LYCRA (revisenya dupon)',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/150P RECY LYCRA 3.8',
+                'deskripsi' => 'SPANDEX 20/150P RECYCLE LYCRA 3.8 (revisenya dupon)',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 30/75P RECY',
+                'deskripsi' => 'SPANDEX 30/75P RECYCLE',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/75P RECY',
+                'deskripsi' => 'SPANDEX 20/75P RECYCLE',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/75P RECY 3.8',
+                'deskripsi' => 'SPANDEX 20/75P RECYCLE (FADIS AIRJET/AIKI) 3.8',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/75P RECY 3.1',
+                'deskripsi' => 'SPANDEX 20/75P RECYCLE (FADIS AIRJET/AIKI) 3.1',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/50P RECY',
+                'deskripsi' => 'SPANDEX 20/50P RECYCLE',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20D/75P RECY',
+                'deskripsi' => 'SPANDEX 20D/75P RECYCLE',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/75P RECY DUPON 3.8',
+                'deskripsi' => 'SPANDEX 20/75P RECYCLE LYCRA FADIS/AIRJET/DUPON 3.8',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/75P RECY U/STOCKING',
+                'deskripsi' => 'SPANDEX 20/75P RECYCLE U/STOCKING',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/75P RECY 4',
+                'deskripsi' => 'SPANDEX 20/75P RECYCLE FADIS/AIRJET/AIKI 4',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/75P RECY LYCRA 4',
+                'deskripsi' => 'SPANDEX 20/75P RECYCLE LYCRA FADIS/AIRJET/AIKI 4 (revisenya dupon)',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/75P RECY LYCRA',
+                'deskripsi' => 'SPANDEX 20/75P RECYCLE LYCRA (revisenya dupon)',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/75P RECY LYCRA 3.8',
+                'deskripsi' => 'SPANDEX 20/75P RECYCLE LYCRA 3.8 (revisenya dupon)',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'SPDX 20/70N RECY LYCRA',
+                'deskripsi' => 'SPANDEX 20/70N RECYCLE LYCRA (revisenya dupon)',
+                'jenis' => 'SPANDEX'
+            ],
+            [
+                'item_type' => 'CTN CB 32S 70/30 RECY X2',
+                'deskripsi' => 'COTTON COMBED 20S 70/30 RECYCLE X2',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'LUREX POLY 150D (WARNA LUREX)X(KODE POLYESTER)',
+                'deskripsi' => 'LUREX 1/150 X POLYESTER 150D TWIST',
+                'jenis' => 'BENANG'
+            ],
+            [
+                'item_type' => 'SPUN POLYESTER 32S MVS',
+                'deskripsi' => '32S MVS SPUN POLYESTER',
+                'jenis' => 'BENANG'
+            ],
         ];
         $this->db->table('master_material')->insertBatch($data);
     }

@@ -221,9 +221,9 @@ class ScheduleCelupModel extends Model
     public function getScheduleCelupbyDate($startDate = null, $endDate = null)
     {
         $builder = $this->db->table('schedule_celup')
-        ->select('schedule_celup.*, mesin_celup.no_mesin, SUM(schedule_celup.kg_celup) as total_kg')
-        ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-        ->where('tanggal_schedule >=', $startDate->format('Y-m-d'))
+            ->select('schedule_celup.*, mesin_celup.no_mesin, SUM(schedule_celup.kg_celup) as total_kg')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->where('tanggal_schedule >=', $startDate->format('Y-m-d'))
             ->where('tanggal_schedule <=', $endDate->format('Y-m-d'))
             ->whereIn('schedule_celup.last_status', ['scheduled', 'celup', 'reschedule']) // Filter berdasarkan last_status
             ->groupBy('schedule_celup.id_mesin')
@@ -235,22 +235,32 @@ class ScheduleCelupModel extends Model
 
     public function getSchedule()
     {
-        return $this->select('schedule_celup.*, mesin_celup.no_mesin, sum(schedule_celup.kg_celup) as total_kg')
+        return $this->select('schedule_celup.*, mesin_celup.no_mesin, IF(po_plus = "0", kg_celup, 0) AS qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-            ->where('schedule_celup.last_status', 'scheduled')
+            ->where('schedule_celup.last_status <>', 'done')
             ->groupBy('schedule_celup.id_mesin')
             ->groupBy('schedule_celup.tanggal_schedule')
             ->groupBy('schedule_celup.lot_urut')
             ->findAll();
     }
 
+    public function getDataByIdCelup($id)
+    {
+        return $this->select('schedule_celup.*, IF(po_plus = "0", kg_celup, 0) AS qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus, mesin_celup.no_mesin')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->where('schedule_celup.id_celup', $id)
+            ->groupBy('schedule_celup.id_mesin')
+            ->groupBy('schedule_celup.tanggal_schedule')
+            ->groupBy('schedule_celup.lot_urut')
+            ->findAll();
+    }
     public function getScheduleDone()
     {
-        return $this->where('last_status', 'done')
+        return $this->select('schedule_celup.*, IF(po_plus = "0", kg_celup, 0) AS qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus')
+            ->where('last_status', 'done')
             ->groupBy('id_celup')
             ->findAll();
     }
-
     public function cekItemtypeandKodeWarna($no_mesin, $tanggal_schedule, $lot_urut)
     {
         return $this->table('schedule_celup')

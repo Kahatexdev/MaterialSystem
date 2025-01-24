@@ -32,7 +32,7 @@ class TabelPemasukan extends Migration
             ],
             'item_type' => [
                 'type' => 'VARCHAR',
-                'constraint' => 32,
+                'constraint' => 100,
             ],
             'kode_warna' => [
                 'type' => 'VARCHAR',
@@ -80,7 +80,7 @@ class TabelPemasukan extends Migration
         $this->forge->addKey('id_pemasukan', true);
         $this->forge->addForeignKey('id_out_celup', 'out_celup', 'id_out_celup', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('id_retur', 'retur', 'id_retur', 'CASCADE', 'CASCADE');
-        $this->forge->addForeignKey('nama_cluster', 'cluster', 'nama_cluster', 'CASCADE', 'CASCADE'); 
+        $this->forge->addForeignKey('nama_cluster', 'cluster', 'nama_cluster', 'CASCADE', 'CASCADE');
         $this->forge->createTable('pemasukan');
     }
 

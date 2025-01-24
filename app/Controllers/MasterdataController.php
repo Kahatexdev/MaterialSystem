@@ -328,7 +328,6 @@ class MasterdataController extends BaseController
     public function material($id)
     {
         $id_order = $id; // Ambil id_order dari URL
-
         if (!$id_order) {
             return redirect()->to(base_url($this->role . '/masterOrder'))->with('error', 'ID Order tidak ditemukan.');
         }
@@ -393,7 +392,6 @@ class MasterdataController extends BaseController
         }
     }
 
-
     public function deleteMaterial($id, $idorder)
     {
 
@@ -445,9 +443,11 @@ class MasterdataController extends BaseController
         return view($this->role . '/mastermaterial/openPO', $data);
     }
 
-    public function saveOpenPO()
+    public function saveOpenPO($id)
     {
         $data = $this->request->getPost();
+        $id_order = $id;
+        // dd($id_order);
 
         $items = $data['items'] ?? [];
         foreach ($items as $item) {
@@ -459,14 +459,14 @@ class MasterdataController extends BaseController
                 'color'            => $item['color'],
                 'kg_po'            => $item['kg_po'],
                 'keterangan'       => $data['keterangan'],
+                'penerima'         => $data['penerima'],
                 'penanggung_jawab' => $data['penanggung_jawab'],
                 'admin'            => session()->get('username'),
             ];
-
             // Simpan data ke database
             $this->openPOModel->insert($itemData);
         }
 
-        return redirect()->back()->with('success', 'Data berhasil disimpan.');
+        return redirect()->to(base_url($this->role . '/material/' . $id_order))->with('success', 'Data PO Berhasil Di Tambahkan.');
     }
 }

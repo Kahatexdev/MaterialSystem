@@ -21,7 +21,7 @@ class TabelStock extends Migration
             ],
             'item_type' => [
                 'type' => 'VARCHAR',
-                'constraint' => 32,
+                'constraint' => 100,
             ],
             'kode_warna' => [
                 'type' => 'VARCHAR',
@@ -71,7 +71,7 @@ class TabelStock extends Migration
             ]
         ]);
         $this->forge->addKey('id_stock', true);
-        $this->forge->addForeignKey('nama_cluster', 'cluster', 'nama_cluster', 'CASCADE', 'CASCADE'); 
+        $this->forge->addForeignKey('nama_cluster', 'cluster', 'nama_cluster', 'CASCADE', 'CASCADE');
         $this->forge->createTable('stock');
     }
 

@@ -70,6 +70,7 @@ class ScheduleController extends BaseController
 
         // Ambil data jadwal dari model (filter berdasarkan tanggal jika tersedia)
         $scheduleData = $this->scheduleCelupModel->getScheduleCelupbyDate($startDateObj, $endDateObj);
+
         // dd ($scheduleData);
         // Ambil data mesin celup
         $mesin_celup = $this->mesinCelupModel->getMesinCelupBenang();
@@ -528,6 +529,7 @@ class ScheduleController extends BaseController
         // Render view dengan data yang sudah disiapkan
         return view($this->role . '/schedule/acrylic', $data);
     }
+
 
     public function nylon()
     {
