@@ -275,7 +275,7 @@ class ScheduleCelupModel extends Model
 
     public function cekSisaJatah($no_model, $item_type, $kode_warna)
     {
-        return $this->select('
+        $data = $this->select('
             SUM(schedule_celup.kg_celup) AS total_kg, 
            
             material.qty_po, 
@@ -298,5 +298,11 @@ class ScheduleCelupModel extends Model
 
             ->groupBy('material.kode_warna')
             ->findAll(); // Mengembalikan semua hasil sesuai pengelompokan
+
+        if (!$data) {
+            return $data['qty_po'][0];
+        } else {
+            return $data;
+        }
     }
 }
