@@ -219,9 +219,9 @@ class ScheduleController extends BaseController
             $total_kg = isset($cekSisaJatah[0]['total_kg']) ? (float) $cekSisaJatah[0]['total_kg'] : 0;
             // var_dump($total_kg);
 
-            $sisa_jatah = $qty_po - $total_kg ;
-        }else{
-            $sisa_jatah = $cekSisaJatah[0]['qty_po'] ;
+            $sisa_jatah = $qty_po - $total_kg;
+        } else {
+            $sisa_jatah = $cekSisaJatah['qty_po'];
         }
         try {
             // Fetch API response
@@ -648,8 +648,8 @@ class ScheduleController extends BaseController
                 $total_kg = isset($result['total_kg']) ? (float) $result['total_kg'] : 0;
 
                 $sisa_jatah = $qty_po - $total_kg + $current_qty_celup;
-                
-                if ($sisa_jatah< 0) {
+
+                if ($sisa_jatah < 0) {
                     $errors[] = [
                         'message' => 'Sisa Jatah tidak mencukupi.',
                         'sisa_jatah' => $sisa_jatah,
@@ -658,7 +658,7 @@ class ScheduleController extends BaseController
                         'qtycelup' => $qty_celup,
                     ];
                     $isValid = false;
-                }else{
+                } else {
                     return $this->response->setJSON([
                         'success' => true,
                         'message' => 'Sisa Jatah mencukupi.',
@@ -690,9 +690,4 @@ class ScheduleController extends BaseController
             ]);
         }
     }
-
-
-
-
-
 }

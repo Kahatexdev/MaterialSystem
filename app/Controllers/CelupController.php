@@ -64,12 +64,9 @@ class CelupController extends BaseController
         $filterTglSch = $this->request->getPost('filter_tglsch');
         $filterNoModel = $this->request->getPost('filter_nomodel');
 
-        // Ambil data schedule
         $sch = $this->scheduleCelupModel->getSchedule();
 
-        // Filter data jika ada input filter
         if ($filterTglSch && $filterNoModel) {
-            // Filter berdasarkan tanggal dan nomor model atau kode warna
             $sch = array_filter($sch, function ($data) use ($filterTglSch, $filterNoModel) {
                 return $data['tanggal_schedule'] === $filterTglSch &&
                     (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
@@ -103,7 +100,6 @@ class CelupController extends BaseController
             // Panggil fungsi model untuk mendapatkan qty_po dan warna
             $pdk = $this->materialModel->getQtyPOForCelup($nomodel, $itemtype, $kodewarna);
 
-            // Pastikan $pdk memiliki data valid sebelum dipakai
             if (!$pdk) {
                 log_message('error', "Data null dari model: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
                 continue; // Skip jika $pdk kosong
@@ -121,30 +117,12 @@ class CelupController extends BaseController
                     'kode_warna' => $kodewarna,
                     'warna' => $pdk['color'],
                     'start_mc' => $id['start_mc'],
-                    'del_awal' => $pdk['delivery_awal'],
-                    'del_akhir' => $pdk['delivery_akhir'],
-                    'qty_po' => $pdk['qty_po'],
-                    'qty_po_plus' => 0,
                     'qty_celup' => $id['qty_celup'],
                     'no_mesin' => $id['no_mesin'],
                     'id_celup' => $id['id_celup'],
                     'lot_celup' => $id['lot_celup'],
                     'lot_urut' => $id['lot_urut'],
                     'tgl_schedule' => $id['tanggal_schedule'],
-                    'tgl_bon' => $id['tanggal_bon'],
-                    'tgl_celup' => $id['tanggal_celup'],
-                    'tgl_bongkar' => $id['tanggal_bongkar'],
-                    'tgl_press' => $id['tanggal_press'],
-                    'tgl_oven' => $id['tanggal_oven'],
-                    'tgl_rajut_pagi' => $id['tanggal_rajut_pagi'],
-                    'tgl_kelos' => $id['tanggal_kelos'],
-                    'tgl_acc' => $id['tanggal_acc'],
-                    'tgl_reject' => $id['tanggal_reject'],
-                    'tgl_pb' => $id['tanggal_perbaikan'],
-                    'last_status' => $id['last_status'],
-                    'ket_daily_cek' => $id['ket_daily_cek'],
-                    'qty_celup_plus' => $id['qty_celup_plus'],
-                    'admin' => $id['user_cek_status'],
                 ];
             }
         }
@@ -156,7 +134,7 @@ class CelupController extends BaseController
             'data_sch' => $sch,
             'uniqueData' => $uniqueData,
         ];
-        return view($this->role . '/schedule/index', $data);
+        return view($this->role . '/schedule/reqschedule', $data);
     }
     public function editStatus($id)
     {

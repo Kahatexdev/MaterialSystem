@@ -18,15 +18,43 @@
 
                         </a>
                     </li>
-                    <li class="nav-item d-flex align-items-center px-1">
-                        <a href="">
-                            <span class=" badge bg-gradient-info ">Benang</span>
-
+                    <li class=" nav-item dropdown pe-2 d-flex align-items-center">
+                        <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class=" badge bg-gradient-info ">Schedule <i class="ni ni-bold-down"></i></span>
                         </a>
+                        <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
+                            <li class="mb-2">
+                                <a class="dropdown-item border-radius-md" href="<?= base_url($role . '/schedule/acrylic') ?>">
+                                    <div class="d-flex py-1">
+
+                                        <div class="d-flex flex-column justify-content-center">
+                                            <h6 class="text-sm font-weight-normal mb-1">
+                                                <span class="font-weight-bold">Acrylic</span>
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </a>
+                                <a class="dropdown-item border-radius-md" href="<?= base_url($role . '/schedule') ?>">
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <h6 class="text-sm font-weight-normal mb-1">
+                                            <span class="font-weight-bold">Benang</span>
+                                        </h6>
+                                    </div>
+                                </a>
+                                <a class="dropdown-item border-radius-md" href="<?= base_url($role . '/schedule/nylon') ?>">
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <h6 class="text-sm font-weight-normal mb-1">
+                                            <span class="font-weight-bold">Nylon</span>
+                                        </h6>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+
                     </li>
                     <li class=" nav-item dropdown pe-2 d-flex align-items-center">
                         <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class=" badge bg-gradient-info ">Dropdown <i class="ni ni-bold-down"></i></span>
+                            <span class=" badge bg-gradient-info ">Reports <i class="ni ni-bold-down"></i></span>
                         </a>
                         <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
                             <li class="mb-2">
@@ -35,10 +63,23 @@
 
                                         <div class="d-flex flex-column justify-content-center">
                                             <h6 class="text-sm font-weight-normal mb-1">
-                                                <span class="font-weight-bold">dropdown</span>
+                                                <span class="font-weight-bold">Acrylic</span>
                                             </h6>
-
                                         </div>
+                                    </div>
+                                </a>
+                                <a class="dropdown-item border-radius-md" href="<?= base_url($role . '/schedule') ?>">
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <h6 class="text-sm font-weight-normal mb-1">
+                                            <span class="font-weight-bold">Benang</span>
+                                        </h6>
+                                    </div>
+                                </a>
+                                <a class="dropdown-item border-radius-md" href="">
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <h6 class="text-sm font-weight-normal mb-1">
+                                            <span class="font-weight-bold">Nylon</span>
+                                        </h6>
                                     </div>
                                 </a>
                             </li>
