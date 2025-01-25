@@ -78,10 +78,13 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
 // celup routes
 $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('', 'CelupController::index');
-    $routes->get('schedule', 'CelupController::schedule');
+    $routes->get('schedule', 'ScheduleController::index');
+    $routes->get('reqschedule', 'CelupController::schedule');
     $routes->post('schedule', 'CelupController::schedule');
     $routes->get('edit/(:num)', 'CelupController::editStatus/$1');
     $routes->post('updateSchedule/(:num)', 'CelupController::updateSchedule/$1');
+
+    $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
 
     $routes->get('outCelup', 'CelupController::outCelup');
     $routes->get('insertBon/(:num)', 'CelupController::insertBon/$1');
