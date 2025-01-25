@@ -71,10 +71,6 @@ class MaterialModel extends Model
             ->where('item_type', $itemType)
             ->where('kode_warna', $kodeWarna)
             ->join('master_order', 'master_order.id_order = material.id_order')
-            ->where('no_model', $noModel)
-            ->where('item_type', $itemType)
-            ->where('kode_warna', $kodeWarna)
-            ->join('master_order', 'master_order.id_order = material.id_order')
             ->first();
     }
 
