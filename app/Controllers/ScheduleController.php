@@ -210,7 +210,8 @@ class ScheduleController extends BaseController
 
         $model = $poDetails['no_model'];
         // var_dump($model);
-        $reqStartMc = 'http://172.23.39.116/CapacityApps/public/api/reqstartmc/' . $model;
+        $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $model;
+        $kg_kebutuhan = $this->openPoModel->getKgKebutuhan($model, $itemType, $kodeWarna);
         $cekSisaJatah = $this->scheduleCelupModel->cekSisaJatah($model, $itemType, $kodeWarna);
         $sisa_jatah = 0;
         if ($cekSisaJatah) {
@@ -240,10 +241,12 @@ class ScheduleController extends BaseController
             // Assign start_mesin data
             $poDetails['start_mesin'] = $startMc['start_mc'];
             $poDetails['sisa_jatah'] = $sisa_jatah;
+            $poDetails['kg_kebutuhan'] = $kg_kebutuhan['kg_po'];
         } catch (\Exception $e) {
             // Handle error and assign fallback value
             $poDetails['start_mesin'] = 'Data Not Found';
             $poDetails['sisa_jatah'] = $sisa_jatah;
+            $poDetails['kg_kebutuhan'] = $kg_kebutuhan['kg_po'];
             log_message('error', 'Error fetching API data: ' . $e->getMessage());
         }
 
@@ -323,7 +326,7 @@ class ScheduleController extends BaseController
         $master_order = $this->masterOrderModel->findAll();
         $jenis_bahan_baku = $this->masterMaterialModel->getJenisBahanBaku();
         $item_type = $this->scheduleCelupModel->getItemTypeByParameter($no_mesin, $tanggal_schedule, $lot_urut);
-        // print_r($item_type);
+        // dd($item_type);
         $kode_warna = $this->scheduleCelupModel->getKodeWarnaByParameter($no_mesin, $tanggal_schedule, $lot_urut);
         $warna = $this->scheduleCelupModel->getWarnaByParameter($no_mesin, $tanggal_schedule, $lot_urut);
         $tanggal_celup = $this->scheduleCelupModel->getTanggalCelup($no_mesin, $tanggal_schedule, $lot_urut);
@@ -334,8 +337,8 @@ class ScheduleController extends BaseController
         $min = $this->mesinCelupModel->getMinCaps($no_mesin);
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
         $id_order = $this->masterOrderModel->getIdOrder($no_model);
-        $po = $this->openPoModel->getNomorModel();
-        // dd ($po);
+        $po = $this->openPoModel->getFilteredPO($item_type[0]['item_type'], $kode_warna[0]['kode_warna']);
+// dd ($po);
         // var_dump($id_order);
         $readonly = true;
         // Jika data tidak ditemukan, kembalikan ke halaman sebelumnya

@@ -217,7 +217,7 @@
             });
         </script>
     <?php endif; ?>
-    <h1 class="display-5 mb-4 text-center" style="color: #2e7d32; font-weight: 600;">Schedule Mesin Celup</h1>
+    <h1 class="display-5 mb-4 text-center" style="color: #2e7d32; font-weight: 600;">Schedule Mesin Celup Benang</h1>
 
     <div class="card mb-4">
         <div class="card-body">
@@ -367,8 +367,7 @@
                                     data-no-mesin='{$job['no_mesin']}'
                                     data-tanggal-schedule='{$job['tanggal_schedule']}'
                                     data-lot-urut='{$job['lot_urut']}'
-                                    title='{$totalKg} kg ({$capacityPercentage}%)'
-                                    style='width: {$capacityPercentage}%;'>
+                                    title='{$totalKg} kg ({$capacityPercentage}%)'>
                                     <div class='d-flex flex-column align-items-center justify-content-center' style='height: 100%; width: 100%;'>
                                         <span style='font-size: 0.9rem; color: black; font-weight: bold;'>{$job['kode_warna']}</span>
                                         <span style='font-size: 0.85rem; color: black;'>{$kgCelup} KG</span>
