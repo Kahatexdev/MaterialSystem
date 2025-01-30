@@ -14,8 +14,7 @@
                 <ul class="navbar-nav  justify-content-end">
                     <li class="nav-item d-flex align-items-center px-1">
                         <a href="">
-                            <span class=" badge bg-gradient-info ">Submenu1</span>
-
+                            <span class=" badge bg-gradient-info ">Out</span>
                         </a>
                     </li>
                     <li class="nav-item d-flex align-items-center px-1">

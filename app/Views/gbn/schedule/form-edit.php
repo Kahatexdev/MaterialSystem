@@ -115,6 +115,8 @@
                                                 <th class="text-center">Delivery Akhir</th>
                                                 <th class="text-center">Qty PO</th>
                                                 <th class="text-center">Qty PO(+)</th>
+                                                <th class="text-center">Kg Kebutuhan</th>
+                                                <th class="text-center">Tagihan Schedule</th>
                                                 <th class="text-center">Qty Celup</th>
                                                 <th class="text-center">PO(+)</th>
                                                 <th class="text-center">Status</th>
@@ -156,6 +158,12 @@
                                                         <input type="number" class="form-control qty_po_plus" name="qty_po_plus[<?= $index ?>]" value="" required readonly>
                                                     </td>
                                                     <td>
+                                                        <input type="number" class="form-control kg_kebutuhan" name="kg_kebutuhan[<?= $index ?>]" value="<?= $row['kg_kebutuhan'] ?? 0 ?>" readonly>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="form-control tagihan_schedule" name="tagihan_schedule[<?= $index ?>]" value="<?= $row['tagihan_schedule'] ?? 0 ?>" readonly>
+                                                    </td>
+                                                    <td>
                                                         <input type="number" step="0.01" class="form-control qty_celup" name="qty_celup[<?= $index ?>]" value="<?= $row['kg_celup'] ?>" required>
                                                     </td>
                                                     <td>
@@ -171,11 +179,12 @@
                                                     </td>
 
                                                     <td>
-                                                        <input type="text" class="form-control last_status" name="last_status[<?= $index ?>]" value="<?= $row['last_status'] ?>" required <?= $readonly ? 'readonly' : '' ?>>
+                                                        <span class="badge bg-<?= $row['last_status'] == 'scheduled' ? 'info' : ($row['last_status'] == 'celup' ? 'warning' : 'success') ?>"><?= $row['last_status'] ?></span>
+                                                        <input type="hidden" class="form-control last_status" name="last_status[<?= $index ?>]" value="<?= $row['last_status'] ?>" ?>
                                                     </td>
 
                                                     <td class="text-center">
-                                                        <button type="button" class="btn btn-warning editRow" data-toggle="modal" data-target="#editModal" data-id="<?= $row['id_celup'] ?>" data-tanggalSchedule="<?= $row['tanggal_schedule'] ?>" data-toggle="tooltip" title="Edit">
+                                                        <button type="button" class="btn btn-info editRow" data-toggle="modal" data-target="#editModal" data-id="<?= $row['id_celup'] ?>" data-tanggalSchedule="<?= $row['tanggal_schedule'] ?>" data-toggle="tooltip" title="Edit">
                                                             <i class="fas fa-calendar"></i>
                                                         </button>
                                                         <button type="button" class="btn btn-danger removeRow">
@@ -187,15 +196,9 @@
                                         </tbody>
                                         <tfoot>
                                             <tr>
-                                                <td class="text-center"><strong>Total Qty Celup</strong></td>
-                                                <td colspan="8" class="text-center">
+                                                <td colspan="8" class="text-center"><strong>Total Qty Celup</strong></td>
+                                                <td colspan="4" class="text-center">
                                                     <input type="number" class="form-control" id="total_qty_celup" name="total_qty_celup" value="0" readonly>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="text-center"><strong>Sisa Jatah</strong></td>
-                                                <td colspan="8" class="text-center">
-                                                    <input type="number" class="form-control" id="sisaJatah" name="sisa_jatah" value="0" readonly>
                                                 </td>
                                             </tr>
                                         </tfoot>
@@ -320,13 +323,14 @@
             // Iterasi setiap baris dalam tabel
             const rows = document.querySelectorAll("#poTable tbody tr");
 
-            rows.forEach((row, index) => {
+            rows.forEach((row) => {
                 const poSelect = row.querySelector(".po-select");
                 const startMcInput = row.querySelector(".start_mc");
                 const deliveryAwalInput = row.querySelector(".delivery_awal");
                 const deliveryAkhirInput = row.querySelector(".delivery_akhir");
                 const qtyPOInput = row.querySelector(".qty_po");
-                const sisaJatah = document.getElementById('sisaJatah');
+                const kgKebutuhanInput = row.querySelector(".kg_kebutuhan");
+                const tagihanSchInput = row.querySelector(".tagihan_schedule");
 
                 // Tambahkan event listener untuk dropdown PO
                 poSelect.addEventListener("change", function() {
@@ -335,7 +339,7 @@
                     if (poId) {
                         // Fetch data untuk PO yang dipilih
                         $.ajax({
-                            url: '<?= base_url(session('role') . "/schedule/getPODetails") ?>',
+                            url: '<?= base_url(session("role") . "/schedule/getPODetails") ?>',
                             type: 'GET',
                             data: {
                                 id_order: poId,
@@ -349,9 +353,18 @@
                                     startMcInput.value = poDetails.start_mesin || "";
                                     deliveryAwalInput.value = poDetails.delivery_awal || "";
                                     deliveryAkhirInput.value = poDetails.delivery_akhir || "";
-                                    sisaJatah.value = parseFloat(poDetails.sisa_jatah).toFixed(2);
+                                    kgKebutuhanInput.value = parseFloat(poDetails.kg_kebutuhan || 0).toFixed(2);
 
+                                    // Hitung tagihan schedule setelah data tersedia
+                                    const kgKebutuhan = parseFloat(poDetails.kg_kebutuhan || 0);
+                                    const qtyCelup = parseFloat(row.querySelector('input[name^="qty_celup["]').value) || 0;
+                                    const tagihanSch = kgKebutuhan - qtyCelup;
 
+                                    tagihanSchInput.value = tagihanSch.toFixed(2);
+
+                                    console.log('kg kebutuhan:', kgKebutuhan);
+                                    console.log('qty celup:', qtyCelup);
+                                    console.log('tagihan schedule:', tagihanSch);
                                 }
                             },
                             error: function(xhr, status, error) {
@@ -361,7 +374,7 @@
 
                         // Fetch data qty PO
                         $.ajax({
-                            url: '<?= base_url(session('role') . "/schedule/getQtyPO") ?>',
+                            url: '<?= base_url(session("role") . "/schedule/getQtyPO") ?>',
                             type: 'GET',
                             data: {
                                 id_order: poId,
@@ -371,7 +384,7 @@
                             dataType: 'json',
                             success: function(qtyPO) {
                                 if (qtyPO) {
-                                    qtyPOInput.value = parseFloat(qtyPO.kgs).toFixed(2);
+                                    qtyPOInput.value = parseFloat(qtyPO.kgs || 0).toFixed(2);
                                 }
                             },
                             error: function(xhr, status, error) {
@@ -382,6 +395,7 @@
                 });
             });
         }
+
 
 
         // Hitung sisa kapasitas
@@ -552,6 +566,8 @@
             <td><input type="date" class="form-control delivery_akhir" name="delivery_akhir[${newIndex}]" readonly></td>
             <td><input type="number" class="form-control qty_po" name="qty_po[${newIndex}]" readonly></td>
             <td><input type="number" class="form-control qty_po_plus" name="qty_po_plus[${newIndex}]" required readonly></td>
+            <td><input type="number" class="form-control kg_kebutuhan" name="kg_kebutuhan[${newIndex}]" readonly></td>
+            <td><input type="number" class="form-control tagihan_schedule" name="tagihan_schedule[${newIndex}]" readonly></td>
             <td><input type="number" step="0.01" class="form-control qty_celup" name="qty_celup[${newIndex}]" required></td>
             <td>
                 <select class="form-select po_plus" name="po_plus[${newIndex}]" required>
@@ -561,7 +577,8 @@
                 </select>
             </td>
             <td>
-                <input type="text" class="form-control last_status" name="last_status[${newIndex}]" value="scheduled" required readonly>
+                <span class="badge bg-info">scheduled</span>
+                <input type="hidden" class="form-control last_status" name="last_status[${newIndex}]" value="scheduled" required readonly>
             </td>
             <td class="text-center">
                 <button type="button" class="btn btn-danger removeRow">
