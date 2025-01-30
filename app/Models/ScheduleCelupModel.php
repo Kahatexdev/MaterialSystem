@@ -275,34 +275,35 @@ class ScheduleCelupModel extends Model
 
     public function cekSisaJatah($no_model, $item_type, $kode_warna)
     {
+        // Query untuk mengambil data
         $data = $this->select('
-            SUM(schedule_celup.kg_celup) AS total_kg, 
-           
-            material.qty_po, 
-            material.id_order, 
-            material.item_type, 
-            material.kode_warna, 
-            master_order.no_model
-        ')
+        SUM(schedule_celup.kg_celup) AS total_kg, 
+        material.qty_po, 
+        material.id_order, 
+        material.item_type, 
+        material.kode_warna, 
+        master_order.no_model
+    ')
             ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
             ->join(
                 '(SELECT SUM(material.kgs) AS qty_po, id_order, item_type, kode_warna 
-                 FROM material 
-                 GROUP BY id_order, item_type, kode_warna) AS material',
+         FROM material 
+         GROUP BY id_order, item_type, kode_warna) AS material',
                 'material.id_order = master_order.id_order',
                 'left'
             )
             ->where('schedule_celup.no_model', $no_model)
             ->where('material.item_type', $item_type)
             ->where('material.kode_warna', $kode_warna)
-
             ->groupBy('material.kode_warna')
             ->findAll(); // Mengembalikan semua hasil sesuai pengelompokan
 
-        if (!$data) {
-            return $data['qty_po'][0];
-        } else {
+        // Jika data ditemukan, kembalikan data
+        if (!empty($data)) {
             return $data;
         }
+
+        // Jika data tidak ditemukan, kembalikan nilai default (misalnya null atau array kosong)
+        return null;
     }
 }
