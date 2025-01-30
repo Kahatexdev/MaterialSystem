@@ -29,6 +29,7 @@ class ScheduleCelupModel extends Model
         'tanggal_bongkar',
         'tanggal_press',
         'tanggal_oven',
+        'tanggal_tl',
         'tanggal_rajut_pagi',
         'tanggal_kelos',
         'tanggal_acc',

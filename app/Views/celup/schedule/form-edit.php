@@ -28,7 +28,7 @@
                 <?php foreach ($uniqueData as $data): ?>
                     <div class="card-header">
                         <div class="card-header d-flex justify-content-between">
-                            <h3 class="card-title">Form Edit Status Celup</h3>
+                            <h3 class="card-title">Form Edit Status Celup PO <?= implode(', ', $po) ?></h3>
                             <a href="<?= base_url($role . '/reqschedule') ?>" class="btn btn-secondary ms-auto">Back</a>
                         </div>
                         <div class="card-header d-flex justify-content-between">
@@ -43,13 +43,6 @@
                                     <div class="form-group" id="noMesinGroup">
                                         <label for="no_mesin" class="form-label">No Mesin</label>
                                         <input type="text" class="form-control" id="no_mesin" name="no_mesin" value="<?= $data['no_mesin'] ?>" disabled>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <!-- No Model -->
-                                    <div class="form-group" id="noModelGroup">
-                                        <label for="no_model" class="form-label">PO</label>
-                                        <input type="text" class="form-control" name="no_model" id="no_model" value="<?= $data['no_model'] ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -172,6 +165,13 @@
                                     </div>
                                 </div>
                                 <div class="col-md-3">
+                                    <!-- Tanggal TL -->
+                                    <div class="form-group" id="tglTLGroup">
+                                        <label for="tgl_tl">Tanggal TL</label>
+                                        <input type="date" class="form-control" name="tgl_tl" id="tgl_tl" value="<?= $data['tgl_tl'] ?>">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
                                     <!-- Tanggal Rajut Pagi -->
                                     <div class="form-group" id="tglRajutGroup">
                                         <label for="tgl_rajut">Tanggal Rajut Pagi</label>
@@ -210,7 +210,7 @@
                                     <!-- Ket Daily Cek -->
                                     <div class="form-group" id="ketDailyCekGroup">
                                         <label for="ket_daily_cek">Ket Daily Cek</label>
-                                        <input type="text" class="form-control" name="ket_daily_cek" id="ket_daily_cek" value="<?= $data['ket_daily_cek'] ?>">
+                                        <input type="text" class="form-control" name="ket_daily_cek" id="ket_daily_cek" value="<?= $data['ket_daily_cek'] ?>" disabled>
                                     </div>
                                 </div>
                             </div>

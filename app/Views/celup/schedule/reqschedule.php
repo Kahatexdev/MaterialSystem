@@ -217,12 +217,11 @@
                                     Request Schedule Mesin Celup
                                 </h3>
                             </div>
-                            <div class="d-flex ">
+                            <div class="d-flex">
                                 <p class="mb-0">Tanggal Schedule</p>
                                 <input type="date" name="filter_tglsch" class="form-control" placeholder="Tanggal Schedule">
                             </div>
-
-                            <div class="d-flex ">
+                            <div class="d-flex">
                                 <input type="text" name="filter_nomodel" class="form-control" placeholder="No Model / Kode Warna">
                                 <button class="btn btn-filter" id="filter_date_range" type="submit">
                                     <i class="bi bi-funnel me-2"></i>Filter
@@ -249,9 +248,7 @@
                             <th class="sticky">Kode Warna</th>
                             <th class="sticky">Warna</th>
                             <th class="sticky">Start Mc</th>
-
                             <th class="sticky">Tanggal Schedule</th>
-
                             <th class="sticky">Action</th>
                         </tr>
                     </thead>
