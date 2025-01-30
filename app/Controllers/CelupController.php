@@ -319,15 +319,27 @@ class CelupController extends BaseController
         return view($this->role . '/retur/index', $data);
     }
 
-    public function insertBon($id_celup)
+    // public function insertBon($id_celup)
+    // {
+    //     $no_model = $this->masterOrderModel->getNoModel($id_celup);
+    //     $data = [
+    //         'role' => $this->role,
+    //         'active' => $this->active,
+    //         'title' => "Out Celup",
+    //         'id_celup' => $id_celup,
+    //         'no_model' => $no_model['no_model'],
+    //     ];
+    //     return view($this->role . '/out/createBon', $data);
+    // }
+    public function insertBon()
     {
-        $no_model = $this->masterOrderModel->getNoModel($id_celup);
+        // $no_model = $this->masterOrderModel->getNoModel($id_celup);
         $data = [
             'role' => $this->role,
             'active' => $this->active,
             'title' => "Out Celup",
-            'id_celup' => $id_celup,
-            'no_model' => $no_model['no_model'],
+            // 'id_celup' => $id_celup,
+            // 'no_model' => $no_model['no_model'],
         ];
         return view($this->role . '/out/createBon', $data);
     }
@@ -348,11 +360,11 @@ class CelupController extends BaseController
             'no_surat_jalan' => $data['no_surat_jalan'],
             'detail_sj' => $data['detail_sj'],
             'ganti_retur' => $data['ganti_retur'],
-            'admin' => $data['admin'],
+            'admin' => session()->get('username'),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => '',
         ];
-        // dd($saveDataBon);
+
         $this->bonCelupModel->insert($saveDataBon);
 
         $id_bon = $this->bonCelupModel->insertID();
@@ -365,7 +377,7 @@ class CelupController extends BaseController
             'cones_kirim' => $data['cones_kirim'],
             'lot_kirim' => $data['lot_kirim'],
             'ganti_retur' => $data['ganti_retur'],
-            'admin' => $data['admin'],
+            'admin' => session()->get('username'),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => '',
         ];

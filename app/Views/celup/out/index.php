@@ -206,6 +206,7 @@
         </script>
     <?php endif; ?>
     <h1 class="display-5 mb-4 text-center" style="color: #2e7d32; font-weight: 600;">Out Celup</h1>
+    <a href="<?= base_url($role . '/insertBon') ?>" class="btn btn-info">Create BON</a>
 
 
     <div class="card">
