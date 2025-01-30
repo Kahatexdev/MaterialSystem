@@ -36,6 +36,7 @@ class ScheduleCelupModel extends Model
         'tanggal_perbaikan',
         'last_status',
         'ket_daily_cek',
+        'po_plus',
         'user_cek_status',
         'created_at',
         'updated_at',

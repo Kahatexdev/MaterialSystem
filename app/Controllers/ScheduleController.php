@@ -298,6 +298,7 @@ class ScheduleController extends BaseController
     {
         // Ambil semua data dari form menggunakan POST
         $scheduleData = $this->request->getPost();
+        // dd($this->request->getPost());
 
         // Ambil id_mesin dan no_model
         $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
@@ -321,6 +322,7 @@ class ScheduleController extends BaseController
                 'lot_celup' => $scheduleData['lot_celup'] ?? null,
                 'tanggal_schedule' => $scheduleData['tanggal_schedule'],
                 'last_status' => 'scheduled',
+                'po_plus' => $scheduleData['po_plus'][$index] ?? null,
                 'user_cek_status' => session()->get('username'),
                 'created_at' => date('Y-m-d H:i:s'),
             ];
@@ -332,6 +334,7 @@ class ScheduleController extends BaseController
 
         // Simpan batch data ke database
         $result = $this->scheduleCelupModel->insertBatch($dataBatch);
+        // dd($result);
 
         // Cek apakah data berhasil disimpan
         if ($result) {
@@ -346,55 +349,55 @@ class ScheduleController extends BaseController
         $no_mesin = $this->request->getGet('no_mesin');
         $tanggal_schedule = $this->request->getGet('tanggal_schedule');
         $lot_urut = $this->request->getGet('lot_urut');
-        $no_model = $this->request->getGet('no_model');
 
+        // Ambil data terkait schedule dan material
         $scheduleData = $this->scheduleCelupModel->getScheduleDetailsData($no_mesin, $tanggal_schedule, $lot_urut);
         $master_order = $this->masterOrderModel->findAll();
         $jenis_bahan_baku = $this->masterMaterialModel->getJenisBahanBaku();
         $item_type = $this->scheduleCelupModel->getItemTypeByParameter($no_mesin, $tanggal_schedule, $lot_urut);
-        // dd($item_type);
         $kode_warna = $this->scheduleCelupModel->getKodeWarnaByParameter($no_mesin, $tanggal_schedule, $lot_urut);
         $warna = $this->scheduleCelupModel->getWarnaByParameter($no_mesin, $tanggal_schedule, $lot_urut);
         $tanggal_celup = $this->scheduleCelupModel->getTanggalCelup($no_mesin, $tanggal_schedule, $lot_urut);
         $lot_celup = $this->scheduleCelupModel->getLotCelup($no_mesin, $tanggal_schedule, $lot_urut);
         $ket_daily_cek = $this->scheduleCelupModel->getKetDailyCek($no_mesin, $tanggal_schedule, $lot_urut);
         $jenis = $this->masterMaterialModel->select('jenis')->where('item_type', $scheduleData[0]['item_type'])->first();
-        // $item_type = $this->masterMaterialModel->getItemType();
         $min = $this->mesinCelupModel->getMinCaps($no_mesin);
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
-        $id_order = $this->masterOrderModel->getIdOrder($no_model);
         $po = $this->openPoModel->getFilteredPO($item_type[0]['item_type'], $kode_warna[0]['kode_warna']);
-        // dd ($po);
-        // var_dump($id_order);
-        $readonly = true;
-        // Jika data tidak ditemukan, kembalikan ke halaman sebelumnya
-        if (!$no_mesin || !$tanggal_schedule || !$lot_urut) {
-            return redirect()->back();
+        $model = $this->masterOrderModel->getNoModel($po[0]['id_order']);
+        $kg_kebutuhan = $this->openPoModel->getKgKebutuhan($model, $item_type[0]['item_type'], $kode_warna[0]['kode_warna']);
+        // dd($model, $item_type, $kode_warna, $kg_kebutuhan);
+        // Cek sisa jatah
+        $cekSisaJatah = $this->scheduleCelupModel->cekSisaJatah($model, $item_type[0]['item_type'], $kode_warna[0]['kode_warna']);
+        $sisa_jatah = 0;
+
+        if (!empty($cekSisaJatah)) {
+            $qty_po = (float) ($cekSisaJatah[0]['qty_po'] ?? 0);
+            $total_kg = (float) ($cekSisaJatah[0]['total_kg'] ?? 0);
+            $sisa_jatah = $qty_po - $total_kg;
+        } else {
+            $sisa_jatah = (float) ($kg_kebutuhan['kg_po'] ?? 0);
         }
 
+        // Update scheduleData dengan informasi tambahan
         foreach ($scheduleData as &$row) {
-            // Ambil delivery_awal dan delivery_akhir dari tabel master_order
             $deliveryDates = $this->masterOrderModel->getDeliveryDates($row['no_model']);
-            if ($deliveryDates) {
-                $row['delivery_awal'] = $deliveryDates['delivery_awal'] ?? null;
-                $row['delivery_akhir'] = $deliveryDates['delivery_akhir'] ?? null;
-            } else {
-                $row['delivery_awal'] = null;
-                $row['delivery_akhir'] = null;
-            }
+            $row['delivery_awal'] = $deliveryDates['delivery_awal'] ?? null;
+            $row['delivery_akhir'] = $deliveryDates['delivery_akhir'] ?? null;
 
-            // Hitung qty_po dari tabel order_details
+            // Menghitung qty_po per item
             $qtyPO = $this->materialModel->getQtyPOByNoModel($row['no_model'], $row['item_type'], $row['kode_warna']);
-            $row['qty_po'] = $qtyPO['qty_po'] ?? 0; // Default 0 jika tidak ada data
-            $start_mc = $row['start_mc'];
+            $row['qty_po'] = $qtyPO['qty_po'] ?? 0;
+            $row['start_mc'] = $row['start_mc'];
         }
 
+        // Persiapkan data untuk view
         $data = [
             'active' => $this->active,
             'title' => 'Schedule',
             'role' => $this->role,
             'no_mesin' => $no_mesin,
-            'start_mc' => $start_mc,
+            'start_mc' => $scheduleData[0]['start_mc'] ?? null, // pastikan ini valid
             'tanggal_schedule' => $tanggal_schedule,
             'lot_urut' => $lot_urut,
             'scheduleData' => $scheduleData,
@@ -409,11 +412,18 @@ class ScheduleController extends BaseController
             'min_caps' => $min['min_caps'],
             'max_caps' => $max['max_caps'],
             'po' => $po,
-            'readonly' => $readonly,
+            'sisa_jatah' => $sisa_jatah,
+            'kg_kebutuhan' => $kg_kebutuhan['kg_po'] ?? 0,
+            'readonly' => true,
         ];
-        // dd ($data);
+
+        // Jangan gunakan dd() di production
+        // dd($data); // hapus dd()
+
         return view($this->role . '/schedule/form-edit', $data);
     }
+
+
 
     public function getNoModel()
     {
