@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
+use Picqer\Barcode\BarcodeGeneratorPNG;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
@@ -186,6 +187,7 @@ class CelupController extends BaseController
                     'tgl_bongkar' => $id['tanggal_bongkar'],
                     'tgl_press' => $id['tanggal_press'],
                     'tgl_oven' => $id['tanggal_oven'],
+                    'tgl_tl' => $id['tanggal_tl'],
                     'tgl_rajut_pagi' => $id['tanggal_rajut_pagi'],
                     'tgl_kelos' => $id['tanggal_kelos'],
                     'tgl_acc' => $id['tanggal_acc'],
@@ -205,6 +207,7 @@ class CelupController extends BaseController
             'role' => $this->role,
             'data_sch' => $sch,
             'uniqueData' => $uniqueData,
+            'po' => array_column($uniqueData, 'no_model'),
         ];
         return view($this->role . '/schedule/form-edit', $data);
     }
@@ -216,21 +219,55 @@ class CelupController extends BaseController
         $tglBongkar = $this->request->getPost('tgl_bongkar');
         $tglPress = $this->request->getPost('tgl_press');
         $tglOven = $this->request->getPost('tgl_oven');
+        $tglTL = $this->request->getPost('tgl_tl');
         $tglRajut = $this->request->getPost('tgl_rajut');
         $tglACC = $this->request->getPost('tgl_acc');
         $tglKelos = $this->request->getPost('tgl_kelos');
         $tglReject = $this->request->getPost('tgl_reject');
         $tglPB = $this->request->getPost('tgl_pb');
-        $ketDailyCek = $this->request->getPost('ket_daily_cek');
+
+        // Array untuk menyimpan nama variabel dan nilai tanggal
+        $dates = [
+            'Buka Bon' => $tglBon,
+            'Celup' => $tglCelup,
+            'Bongkar' => $tglBongkar,
+            'Press' => $tglPress,
+            'Oven' => $tglOven,
+            'TL' => $tglTL,
+            'Rajut Pagi' => $tglRajut,
+            'ACC' => $tglACC,
+            'Kelos' => $tglKelos,
+            'Reject' => $tglReject,
+            'PB' => $tglPB,
+        ];
+
+        // Filter tanggal yang kosong atau null
+        $filteredDates = array_filter($dates, function ($value) {
+            return !empty($value);
+        });
+
+        // Cari tanggal terbaru beserta labelnya
+        $mostRecentDate = null;
+        $mostRecentLabel = null;
+        if (!empty($filteredDates)) {
+            $mostRecentDate = max($filteredDates); // Tanggal paling baru
+            $mostRecentLabel = array_search($mostRecentDate, $filteredDates); // Cari label sesuai tanggal
+        }
+
+        // Set nilai ketDailyCek berdasarkan tanggal terbaru dan labelnya
+        if ($mostRecentDate && $mostRecentLabel) {
+            $ketDailyCek = "$mostRecentLabel ($mostRecentDate)";
+        }
 
         // Hanya masukkan nilai jika tidak kosong atau null
         $dataUpdate = [];
         if ($lotCelup) $dataUpdate['lot_celup'] = $lotCelup;
         if ($tglBon) $dataUpdate['tanggal_bon'] = $tglBon;
-        if ($tglCelup) $dataUpdate['tangggal_celup'] = $tglCelup;
+        if ($tglCelup) $dataUpdate['tanggal_celup'] = $tglCelup;
         if ($tglBongkar) $dataUpdate['tanggal_bongkar'] = $tglBongkar;
         if ($tglPress) $dataUpdate['tanggal_press'] = $tglPress;
         if ($tglOven) $dataUpdate['tanggal_oven'] = $tglOven;
+        if ($tglTL) $dataUpdate['tanggal_tl'] = $tglTL;
         if ($tglRajut) $dataUpdate['tanggal_rajut'] = $tglRajut;
         if ($tglACC) $dataUpdate['tanggal_acc'] = $tglACC;
         if ($tglKelos) $dataUpdate['tanggal_kelos'] = $tglKelos;
@@ -248,8 +285,9 @@ class CelupController extends BaseController
         $this->scheduleCelupModel->update($id, $dataUpdate);
 
         // Redirect ke halaman sebelumnya dengan pesan sukses
-        return redirect()->to(base_url(session()->get('role') . '/schedule'))->withInput()->with('success', 'Data Berhasil diupdate');
+        return redirect()->to(base_url(session()->get('role') . '/reqschedule'))->withInput()->with('success', 'Data Berhasil diupdate');
     }
+
     public function outCelup()
     {
         $scheduleDone = $this->scheduleCelupModel->getScheduleDone();
@@ -363,5 +401,20 @@ class CelupController extends BaseController
         $this->outCelupModel->insert($saveDataOutCelup);
 
         return redirect()->to(base_url($this->role . '/outCelup'))->with('success', 'BON Berhasil Di Simpan.');
+    }
+    public function generate($text = '1') // Contoh default text
+    {
+        // Inisialisasi generator barcode
+        $generator = new BarcodeGeneratorPNG();
+
+        // Generate barcode PNG
+        $barcode = $generator->getBarcode($text, $generator::TYPE_CODE_93);
+
+        // Atur header agar output berupa gambar PNG
+        header('Content-Type: image/png');
+
+        // Tampilkan barcode
+        echo $barcode;
+        exit;
     }
 }

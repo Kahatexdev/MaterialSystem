@@ -60,7 +60,7 @@
 
                                         <!-- Surat Jalan Section -->
                                         <div class="row g-3 mt-3">
-                                            <div class="col-md-3">
+                                            <div class="col-md-2">
                                                 <label>Detail Surat Jalan</label>
                                                 <select class="form-control" name="detail_sj" id="detail_sj" required>
                                                     <option value="">Pilih Surat Jalan</option>
@@ -76,7 +76,7 @@
                                                 <label>Tanggal Datang</label>
                                                 <input type="date" class="form-control" id="tgl_datang" name="tgl_datang" required>
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="col-md-2">
                                                 <label>LMD</label>
                                                 <select class="form-control" name="l_m_d" required>
                                                     <option value="">Pilih LMD</option>
@@ -89,53 +89,76 @@
                                                 <label>Harga</label>
                                                 <input type="number" class="form-control" id="harga" name="harga" required>
                                             </div>
+                                            <div class="col-md-2">
+                                                <label for="ganti-retur">Ganti Retur</label>
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <label>
+                                                            <input type="radio" name="ganti_retur" value="1"> Ya
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label>
+                                                            <input type="radio" name="ganti_retur" value="0"> Tidak
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <!-- Additional Fields -->
                                         <div class="row g-3 mt-3">
-                                            <div class="col-md-2">
-                                                <label>GW</label>
-                                                <input type="number" class="form-control" id="gw" name="gw" required>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <label>NW</label>
-                                                <input type="number" class="form-control" id="nw" name="nw" required>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <label>Cones</label>
-                                                <input type="number" class="form-control" id="cones" name="cones" required>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label>Karung</label>
-                                                <input type="number" class="form-control" id="karung" name="karung" required>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label>Ganti Retur</label>
-                                                <select class="form-control" name="ganti_retur">
-                                                    <option value="">Pilih</option>
-                                                    <option value="1">Ya</option>
-                                                    <option value="0">Tidak</option>
-                                                </select>
+                                            <div class="row g-3 mt-3">
+                                                <div class="col-md-3">
+                                                    <label>GW</label>
+                                                    <input type="number" class="form-control" id="gw" name="gw" required>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>NW</label>
+                                                    <input type="number" class="form-control" id="nw" name="nw" required>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>Cones</label>
+                                                    <input type="number" class="form-control" id="cones" name="cones" required>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>Karung</label>
+                                                    <input type="number" class="form-control" id="karung" name="karung" required>
+                                                </div>
                                             </div>
                                         </div>
 
                                         <!-- Out Celup Section -->
                                         <div class="row g-3 mt-3">
-                                            <div class="col-md-3">
-                                                <label>GW Kirim</label>
-                                                <input type="number" class="form-control" id="gw_kirim" name="gw_kirim" required>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label>Kgs Kirim</label>
-                                                <input type="number" class="form-control" id="kgs_kirim" name="kgs_kirim" required>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label>Cones Kirim</label>
-                                                <input type="number" class="form-control" id="cones_kirim" name="cones_kirim" required>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label>Lot Kirim</label>
-                                                <input type="text" class="form-control" id="lot_kirim" name="lot_kirim" required>
+                                            <div class="table-responsive">
+                                                <table id="poTable" class="table table-bordered table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="text-center">GW Kirim</th>
+                                                            <th class="text-center">Kgs Kirim</th>
+                                                            <th class="text-center">Cones Kirim</th>
+                                                            <th class="text-center">Lot Kirim</th>
+                                                            <th class="text-center">
+                                                                <button type="button" class="btn btn-info" id="addRow">
+                                                                    <i class="fas fa-plus"></i>
+                                                                </button>
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td><input type="number" class="form-control" name="gw_kirim[]" readonly></td>
+                                                            <td><input type="number" class="form-control" name="kgs_kirim[]" readonly></td>
+                                                            <td><input type="number" class="form-control" name="cones_kirim[]" readonly></td>
+                                                            <td><input type="number" class="form-control" name="lot_kirim[]" readonly></td>
+                                                            <td class="text-center">
+                                                                <button type="button" class="btn btn-danger removeRow">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
                                         <!-- Buttons -->
@@ -415,6 +438,42 @@
             penerima.value = 'Retno';
         }
     }
+
+    // Event listener untuk baris baru
+    document.getElementById("addRow").addEventListener("click", function() {
+        const tbody = poTable.querySelector("tbody");
+        const newRow = `
+    <tr>
+        <td><input type="number" class="form-control" name="gw_kirim[]" readonly></td>
+        <td><input type="number" class="form-control" name="kgs_kirim[]" readonly></td>
+        <td><input type="number" class="form-control" name="cones_kirim[]" readonly></td>
+        <td><input type="number" class="form-control" name="lot_kirim[]" readonly></td>
+        <td class="text-center">
+            <button type="button" class="btn btn-danger removeRow">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    </tr>`;
+        tbody.insertAdjacentHTML("beforeend", newRow);
+        updatePODropdown(); // Perbarui dropdown PO di baris baru
+        // Re-query qty_celup inputs after adding a new row
+        qtyCelupInputs = document.querySelectorAll('input[name="qty_celup[]"]');
+        // Add event listener for new qty_celup input fields
+        qtyCelupInputs.forEach(input => {
+            input.addEventListener('input', calculateCapacity);
+        });
+
+        // Recalculate capacity
+        calculateCapacity(); // Update capacity when a new row is added
+    });
+
+    // Event delegation untuk menghapus baris
+    poTable.addEventListener("click", function(e) {
+        if (e.target.classList.contains("removeRow") || e.target.closest(".removeRow")) {
+            e.target.closest("tr").remove();
+            calculateCapacity(); // Recalculate capacity after row removal
+        }
+    });
 </script>
 
 
