@@ -9,6 +9,8 @@ $routes->get('/', 'AuthController::index');
 $routes->get('/login', 'AuthController::index');
 $routes->post('/logout', 'AuthController::logout');
 $routes->post('authverify', 'AuthController::login');
+$routes->get('generate', 'CelupController::generate');
+
 
 // gbn routes
 $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJatah');

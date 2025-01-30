@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
+use Picqer\Barcode\BarcodeGeneratorPNG;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
@@ -400,5 +401,20 @@ class CelupController extends BaseController
         $this->outCelupModel->insert($saveDataOutCelup);
 
         return redirect()->to(base_url($this->role . '/outCelup'))->with('success', 'BON Berhasil Di Simpan.');
+    }
+    public function generate($text = '1') // Contoh default text
+    {
+        // Inisialisasi generator barcode
+        $generator = new BarcodeGeneratorPNG();
+
+        // Generate barcode PNG
+        $barcode = $generator->getBarcode($text, $generator::TYPE_CODE_93);
+
+        // Atur header agar output berupa gambar PNG
+        header('Content-Type: image/png');
+
+        // Tampilkan barcode
+        echo $barcode;
+        exit;
     }
 }
