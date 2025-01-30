@@ -199,55 +199,84 @@ class ScheduleController extends BaseController
 
     public function getPODetails()
     {
+        // Ambil parameter dari request
         $id_order = $this->request->getGet('id_order');
-        $itemType = $this->request->getGet('itemType');
-        $kodeWarna = $this->request->getGet('kodeWarna');
+        $itemType = $this->request->getGet('item_type');
+        $kodeWarna = $this->request->getGet('kode_warna');
+
+        // Validasi parameter
+        if (empty($id_order) || empty($itemType) || empty($kodeWarna)) {
+            return $this->response->setJSON(['error' => 'Missing required parameters']);
+        }
+
+        // Ambil detail PO dari model
         $poDetails = $this->masterOrderModel->getDelivery($id_order);
 
+        // Jika PO tidak ditemukan
         if (empty($poDetails)) {
             return $this->response->setJSON(['error' => 'Order not found']);
         }
 
+        // Ambil nomor model dari detail PO
         $model = $poDetails['no_model'];
-        // var_dump($model);
-        $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $model;
+
+        // Ambil data kg_kebutuhan dari model
+        $kg_kebutuhan = $this->openPoModel->getKgKebutuhan($model, $itemType, $kodeWarna);
+
+        // Ambil data sisa jatah dari model
         $cekSisaJatah = $this->scheduleCelupModel->cekSisaJatah($model, $itemType, $kodeWarna);
+
+        // Hitung sisa jatah
         $sisa_jatah = 0;
-        if ($cekSisaJatah) {
+        if (!empty($cekSisaJatah)) {
             $qty_po = isset($cekSisaJatah[0]['qty_po']) ? (float) $cekSisaJatah[0]['qty_po'] : 0;
             $total_kg = isset($cekSisaJatah[0]['total_kg']) ? (float) $cekSisaJatah[0]['total_kg'] : 0;
-            // var_dump($total_kg);
-
             $sisa_jatah = $qty_po - $total_kg;
         } else {
-            $sisa_jatah = $cekSisaJatah['qty_po'];
+            // Jika tidak ada schedule, sisa jatah sama dengan qty_po
+            $sisa_jatah = isset($kg_kebutuhan['kg_po']) ? (float) $kg_kebutuhan['kg_po'] : 0;
         }
+
+        // URL API untuk mengambil data start mesin
+        $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $model;
+
         try {
-            // Fetch API response
+            // Fetch data dari API
             $json = file_get_contents($reqStartMc);
 
+            // Jika gagal mengambil data dari API
             if ($json === false) {
                 throw new \Exception('Failed to fetch data from the API.');
             }
 
             // Decode JSON response
             $startMc = json_decode($json, true);
-            // var_dump($startMc);
+
+            // Jika JSON tidak valid
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new \Exception('Invalid JSON response: ' . json_last_error_msg());
             }
 
-            // Assign start_mesin data
+            // Jika data start_mc tidak ditemukan dalam response
+            if (!isset($startMc['start_mc'])) {
+                throw new \Exception('Start MC data not found in API response.');
+            }
+
+            // Assign data ke $poDetails
             $poDetails['start_mesin'] = $startMc['start_mc'];
             $poDetails['sisa_jatah'] = $sisa_jatah;
+            $poDetails['kg_kebutuhan'] = $kg_kebutuhan['kg_po'] ?? 0; // Default 0 jika kg_po tidak ada
         } catch (\Exception $e) {
-            // Handle error and assign fallback value
+            // Handle error dan assign fallback value
             $poDetails['start_mesin'] = 'Data Not Found';
             $poDetails['sisa_jatah'] = $sisa_jatah;
+            $poDetails['kg_kebutuhan'] = $kg_kebutuhan['kg_po'] ?? 0; // Default 0 jika kg_po tidak ada
+
+            // Log error
             log_message('error', 'Error fetching API data: ' . $e->getMessage());
         }
 
-        // Return response
+        // Kembalikan response dalam format JSON
         return $this->response->setJSON($poDetails);
     }
 
@@ -323,7 +352,7 @@ class ScheduleController extends BaseController
         $master_order = $this->masterOrderModel->findAll();
         $jenis_bahan_baku = $this->masterMaterialModel->getJenisBahanBaku();
         $item_type = $this->scheduleCelupModel->getItemTypeByParameter($no_mesin, $tanggal_schedule, $lot_urut);
-        // print_r($item_type);
+        // dd($item_type);
         $kode_warna = $this->scheduleCelupModel->getKodeWarnaByParameter($no_mesin, $tanggal_schedule, $lot_urut);
         $warna = $this->scheduleCelupModel->getWarnaByParameter($no_mesin, $tanggal_schedule, $lot_urut);
         $tanggal_celup = $this->scheduleCelupModel->getTanggalCelup($no_mesin, $tanggal_schedule, $lot_urut);
@@ -334,7 +363,7 @@ class ScheduleController extends BaseController
         $min = $this->mesinCelupModel->getMinCaps($no_mesin);
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
         $id_order = $this->masterOrderModel->getIdOrder($no_model);
-        $po = $this->openPoModel->getNomorModel();
+        $po = $this->openPoModel->getFilteredPO($item_type[0]['item_type'], $kode_warna[0]['kode_warna']);
         // dd ($po);
         // var_dump($id_order);
         $readonly = true;
