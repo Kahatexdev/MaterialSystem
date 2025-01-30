@@ -2,6 +2,13 @@
 <?php $this->section('content'); ?>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
 <style>
+    /* Mengurangi ukuran font untuk catatan kecil */
+    small.text-warning {
+        font-size: 0.8em;
+        color: #ffc107;
+        /* Warna kuning */
+    }
+
     .select2-container {
         width: 100% !important;
         /* Pastikan Select2 menyesuaikan dengan lebar container */
@@ -123,7 +130,10 @@
                                                         <th class="text-center">Delivery Akhir</th>
                                                         <th class="text-center">Qty PO</th>
                                                         <th class="text-center">Qty PO(+)</th>
-                                                        <th class="text-center">Qty Celup</th>
+                                                        <th class="text-center">Kg Kebutuhan</th>
+                                                        <th class="text-center">Tagihan SCH</th>
+                                                        <th class="text-center">Qty Celup
+                                                        </th>
                                                         <th class="text-center">PO(+)</th>
                                                         <th class="text-center">
                                                             <button type="button" class="btn btn-info" id="addRow">
@@ -144,6 +154,16 @@
                                                         <td><input type="date" class="form-control" name="delivery_akhir[]" readonly></td>
                                                         <td><input type="number" class="form-control" name="qty_po[]" readonly></td>
                                                         <td><input type="number" class="form-control" name="qty_po_plus[]" readonly></td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-info">
+                                                                <span class="kg_kebutuhan">0.00</span> KG <!-- Ganti id dengan class -->
+                                                            </span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-info">
+                                                                <span class="sisa_jatah">0.00</span> KG <!-- Ganti id dengan class -->
+                                                            </span>
+                                                        </td>
                                                         <td><input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required></td>
                                                         <td>
                                                             <select class="form-select" name="po_plus[]" required>
@@ -273,6 +293,7 @@
         const maxCaps = document.getElementById('max_caps');
         const sisaKapasitas = document.getElementById('sisa_kapasitas');
         const totalQtyCelup = document.getElementById('total_qty_celup');
+        const sisaJatahElement = document.getElementById('sisa_jatah'); // Elemen untuk menampilkan sisa_jatah
 
         // Fungsi untuk memperbarui dropdown PO dan input delivery setelah memilih PO
         function updatePODropdown() {
@@ -326,14 +347,18 @@
                     const deliveryAkhirInput = row.querySelector("input[name='delivery_akhir[]']");
                     const startMcInput = row.querySelector("input[name='tgl_start_mc[]']");
                     const qtyPOInput = row.querySelector("input[name='qty_po[]']");
+                    const kgKebutuhanElement = row.querySelector(".kg_kebutuhan"); // Gunakan class
+                    const sisaJatahElement = row.querySelector(".sisa_jatah"); // Gunakan class
 
                     if (poId) {
                         // Fetch data untuk PO yang dipilih
                         $.ajax({
-                            url: '<?= base_url(session('role') . "/schedule/getPODetails") ?>', // Ganti dengan URL yang sesuai untuk mengambil detail PO
+                            url: '<?= base_url(session('role') . "/schedule/getPODetails") ?>',
                             type: 'GET',
                             data: {
-                                id_order: poId
+                                id_order: poId,
+                                item_type: itemTypeValue,
+                                kode_warna: kodeWarnaValue
                             },
                             dataType: 'json',
                             success: function(poDetails) {
@@ -343,6 +368,16 @@
                                         deliveryAwalInput.value = poDetails.delivery_awal;
                                         deliveryAkhirInput.value = poDetails.delivery_akhir;
                                         startMcInput.value = poDetails.start_mesin;
+                                    }
+
+                                    // Update sisa_jatah dari response API
+                                    if (poDetails.sisa_jatah !== undefined) {
+                                        sisaJatahElement.textContent = parseFloat(poDetails.sisa_jatah).toFixed(2);
+                                    }
+
+                                    // Update kg_kebutuhan dari response API
+                                    if (poDetails.kg_kebutuhan !== undefined) {
+                                        kgKebutuhanElement.textContent = parseFloat(poDetails.kg_kebutuhan).toFixed(2);
                                     }
                                 } else {
                                     console.log("Data PO tidak ditemukan");
@@ -401,6 +436,10 @@
             const max = parseFloat(maxCaps.value);
             let total = 0;
 
+            // Ambil nilai sisa_jatah dari baris yang aktif
+            const sisaJatahElement = document.querySelector(".sisa_jatah"); // Gunakan class
+            const sisaJatah = parseFloat(sisaJatahElement.textContent) || 0;
+
             // Calculate total qty celup
             qtyCelupInputs.forEach(input => {
                 total += parseFloat(input.value) || 0;
@@ -413,6 +452,11 @@
             const sisa = max - total;
             sisaKapasitas.value = sisa;
 
+            // Check if total qty_celup exceeds sisa_jatah
+            if (total > sisaJatah) {
+                alert(`Total Qty Celup (${total.toFixed(2)} KG) melebihi Tagihan SCH (${sisaJatah.toFixed(2)} KG). Harap periksa kembali!`);
+            }
+
             // Validation for each qty_celup input
             qtyCelupInputs.forEach(input => {
                 const kg = parseFloat(input.value);
@@ -424,37 +468,42 @@
             });
         }
 
+        // Event Listeners for initial qty_celup inputs
+        qtyCelupInputs.forEach(input => {
+            input.addEventListener('input', calculateCapacity);
+        });
+
         // Event listener untuk baris baru
         document.getElementById("addRow").addEventListener("click", function() {
             const tbody = poTable.querySelector("tbody");
             const newRow = `
-            <tr>
-                <td>
-                    <select class="form-select po-select" name="po[]" required>
-                        <option value="">Pilih PO</option>
-                    </select>
-                </td>
-                <td><input type="date" class="form-control" name="tgl_start_mc[]" readonly></td>
-                <td><input type="date" class="form-control" name="delivery_awal[]" readonly></td>
-                <td><input type="date" class="form-control" name="delivery_akhir[]" readonly></td>
-                <td><input type="number" class="form-control" name="qty_po[]" readonly></td>
-                <td><input type="number" class="form-control" name="qty_po_plus[]" readonly></td>
-                <td><input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required></td>
-                <td>
-                    <select class="form-select" name="po_plus[]" required>
-                        <option value="0">Pilih PO(+)</option>
-                        <option value="1">Ya</option>
-                        <option value="0">Tidak</option>
-                    </select>
-                    <input type="hidden" name="last_status[]" value="scheduled">
-                </td>
-                
-                <td class="text-center">
-                    <button type="button" class="btn btn-danger removeRow">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>`;
+    <tr>
+        <td>
+            <select class="form-select po-select" name="po[]" required>
+                <option value="">Pilih PO</option>
+            </select>
+        </td>
+        <td><input type="date" class="form-control" name="tgl_start_mc[]" readonly></td>
+        <td><input type="date" class="form-control" name="delivery_awal[]" readonly></td>
+        <td><input type="date" class="form-control" name="delivery_akhir[]" readonly></td>
+        <td><input type="number" class="form-control" name="qty_po[]" readonly></td>
+        <td><input type="number" class="form-control" name="qty_po_plus[]" readonly></td>
+        <td class="text-center"><span class="badge bg-info"><span class="kg_kebutuhan">0.00</span> KG</span></td>
+        <td class="text-center"><span class="badge bg-info"><span class="sisa_jatah">0.00</span> KG</span></td>
+        <td><input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required></td>
+        <td>
+            <select class="form-select" name="po_plus[]" required>
+                <option value="">Pilih PO(+)</option>
+                <option value="1">Ya</option>
+                <option value="0">Tidak</option>
+            </select>
+        </td>
+        <td class="text-center">
+            <button type="button" class="btn btn-danger removeRow">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    </tr>`;
             tbody.insertAdjacentHTML("beforeend", newRow);
             updatePODropdown(); // Perbarui dropdown PO di baris baru
             // Re-query qty_celup inputs after adding a new row

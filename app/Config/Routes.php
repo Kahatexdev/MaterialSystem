@@ -87,7 +87,8 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
 
     $routes->get('outCelup', 'CelupController::outCelup');
-    $routes->get('insertBon/(:num)', 'CelupController::insertBon/$1');
+    // $routes->get('insertBon/(:num)', 'CelupController::insertBon/$1');
+    $routes->get('insertBon', 'CelupController::insertBon');
     $routes->post('outCelup/saveBon/(:num)', 'CelupController::saveBon/$1');
     $routes->get('retur', 'CelupController::retur');
 });
