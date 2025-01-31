@@ -154,12 +154,64 @@ class ScheduleController extends BaseController
 
     public function getItemType()
     {
-        $jenis = $this->request->getGet('jenis');
-        $itemTypes = $this->masterMaterialModel->getItemTypeByJenis($jenis);
+        // Ambil kodeWarna dan warna dari parameter GET
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $warna = $this->request->getGet('warna');
 
-        // Assuming $itemTypes is an array of objects with 'item_type' as the key
-        return $this->response->setJSON($itemTypes);
+        // Validasi kodeWarna dan warna
+        if (empty($kodeWarna) || empty($warna)) {
+            return $this->response->setJSON([]); // Kembalikan array kosong jika kodeWarna atau warna tidak valid
+        }
+
+        // Ambil item_type dari model
+        $itemType = $this->openPoModel->getItemType($kodeWarna, $warna);
+
+        // Kembalikan item_type dalam format JSON
+        return $this->response->setJSON($itemType);
     }
+
+    public function getKodeWarna()
+    {
+        // Ambil query dari parameter GET
+        $query = $this->request->getGet('query');
+
+        // Validasi query
+        if (empty($query) || strlen($query) < 3) {
+            return $this->response->setJSON([]); // Kembalikan array kosong jika query tidak valid
+        }
+
+        // Ambil data dari model
+        $results = $this->openPoModel->getKodeWarna($query);
+
+        // Format data untuk dikirim ke frontend
+        $suggestions = [];
+        foreach ($results as $result) {
+            $suggestions[] = [
+                'kode_warna' => $result['kode_warna'], // Sesuaikan dengan nama kolom di database
+            ];
+        }
+
+        // Kembalikan data dalam format JSON
+        return $this->response->setJSON($suggestions);
+    }
+
+    public function getWarna()
+    {
+        // Ambil kode_warna dari parameter GET
+        $kodeWarna = $this->request->getGet('kode_warna');
+
+        // Validasi kode_warna
+        if (empty($kodeWarna)) {
+            return $this->response->setJSON([]); // Kembalikan array kosong jika kode_warna tidak valid
+        }
+
+        // Ambil warna dari model
+        $warna = $this->openPoModel->getWarna($kodeWarna);
+
+        // Kembalikan warna dalam format JSON
+        return $this->response->setJSON($warna);
+    }
+
 
     public function getWarnabyItemTypeandKodeWarna()
     {
@@ -178,24 +230,20 @@ class ScheduleController extends BaseController
 
     public function getPO()
     {
-        $itemType = $this->request->getGet('item_type');
-        $kodeWarna = $this->request->getGet('kode_warna');
+        $kode_warna = $this->request->getGet('kode_warna');
+        $warna = $this->request->getGet('warna');
+        $item_type = $this->request->getGet('item_type');
+        // $item_type = urldecode($this->request->getGet('item_type'));
 
-        // Debugging untuk memastikan parameter diterima
-        // var_dump($itemType, $kodeWarna);
+        $po = $this->openPoModel->getFilteredPO($kode_warna, $warna, $item_type);
 
-        if (!$itemType || !$kodeWarna) {
-            return $this->response->setJSON([]);
-        }
-
-        $poData = $this->openPoModel->getFilteredPO($itemType, $kodeWarna);
-
-        if ($poData) {
-            return $this->response->setJSON($poData);
+        if ($po) {
+            return $this->response->setJSON($po);
         } else {
             return $this->response->setJSON(['error' => 'No data found']);
         }
     }
+
 
     public function getPODetails()
     {
@@ -205,8 +253,12 @@ class ScheduleController extends BaseController
         $kodeWarna = $this->request->getGet('kode_warna');
 
         // Validasi parameter
-        if (empty($id_order) || empty($itemType) || empty($kodeWarna)) {
-            return $this->response->setJSON(['error' => 'Missing required parameters']);
+        if (empty($id_order)) {
+            return $this->response->setJSON(['error' => 'Invalid request id_order']); // Kembalikan error jika parameter tidak valid
+        } elseif (empty($itemType)) {
+            return $this->response->setJSON(['error' => 'Invalid request itemtype']); // Kembalikan error jika parameter tidak valid
+        } elseif (empty($kodeWarna)) {
+            return $this->response->setJSON(['error' => 'Invalid request kode_warna']); // Kembalikan error jika parameter tidak valid
         }
 
         // Ambil detail PO dari model
@@ -225,7 +277,7 @@ class ScheduleController extends BaseController
 
         // Ambil data sisa jatah dari model
         $cekSisaJatah = $this->scheduleCelupModel->cekSisaJatah($model, $itemType, $kodeWarna);
-
+        $qty_po = $cekSisaJatah[0]['qty_po'] ?? 0;
         // Hitung sisa jatah
         $sisa_jatah = 0;
         if (!empty($cekSisaJatah)) {
@@ -264,11 +316,13 @@ class ScheduleController extends BaseController
 
             // Assign data ke $poDetails
             $poDetails['start_mesin'] = $startMc['start_mc'];
+            $poDetails['qty_po'] = $qty_po;
             $poDetails['sisa_jatah'] = $sisa_jatah;
             $poDetails['kg_kebutuhan'] = $kg_kebutuhan['kg_po'] ?? 0; // Default 0 jika kg_po tidak ada
         } catch (\Exception $e) {
             // Handle error dan assign fallback value
             $poDetails['start_mesin'] = 'Data Not Found';
+            $poDetails['qty_po'] = $qty_po;
             $poDetails['sisa_jatah'] = $sisa_jatah;
             $poDetails['kg_kebutuhan'] = $kg_kebutuhan['kg_po'] ?? 0; // Default 0 jika kg_po tidak ada
 

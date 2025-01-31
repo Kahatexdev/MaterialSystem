@@ -85,17 +85,18 @@ class OpenPoModel extends Model
             ->findAll();
     }
 
-    public function getFilteredPO($itemType, $kodeWarna)
+    public function getFilteredPO($kodeWarna, $warna, $item_type)
     {
-        return $this->db->table('open_po')
-            ->select('open_po.no_model, master_order.delivery_awal, master_order.delivery_akhir, master_order.id_order')
-            ->join('master_order', 'master_order.no_model = open_po.no_model')
-            ->where('open_po.item_type', $itemType)
-            ->where('open_po.kode_warna', $kodeWarna)
+        $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, master_order.delivery_awal, master_order.delivery_akhir, master_order.id_order')
+        ->join('master_order', 'master_order.no_model = open_po.no_model')
+        ->where('open_po.kode_warna', $kodeWarna)
+            ->where('open_po.color', $warna)
+            ->where('open_po.item_type', $item_type)
             ->distinct()
             ->get()
             ->getResultArray();
     }
+
 
     public function getKgKebutuhan($noModel, $itemType, $kodeWarna)
     {
@@ -104,5 +105,30 @@ class OpenPoModel extends Model
             ->where('item_type', $itemType)
             ->where('kode_warna', $kodeWarna)
             ->first();
+    }
+
+    public function getKodeWarna($query)
+    {
+        return $this->select('kode_warna')
+            ->like('kode_warna', $query)
+            ->distinct()
+            ->findAll();
+    }
+
+    public function getWarna($kodeWarna)
+    {
+        return $this->select('color')
+            ->where('kode_warna', $kodeWarna)
+            ->distinct()
+            ->findAll();
+    }
+
+    public function getItemType($kodeWarna, $warna)
+    {
+        return $this->select('item_type')
+            ->where('kode_warna', $kodeWarna)
+            ->where('color', $warna)
+            ->distinct()
+            ->findAll();
     }
 }
