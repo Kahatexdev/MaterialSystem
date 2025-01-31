@@ -89,15 +89,15 @@
                                                 <label>Harga</label>
                                                 <input type="number" class="form-control" id="harga" name="harga" required>
                                             </div>
-                                            <div class="col-md-2">
-                                                <label for="ganti-retur">Ganti Retur</label>
+                                            <div class="col-md-1">
+                                                <label for="ganti-retur" class="text-center">Ganti Retur</label>
                                                 <div class="row">
                                                     <div class="col-md-3">
                                                         <label>
                                                             <input type="radio" name="ganti_retur" value="1"> Ya
                                                         </label>
                                                     </div>
-                                                    <div class="col-md-3">
+                                                    <div class="col-md-4">
                                                         <label>
                                                             <input type="radio" name="ganti_retur" value="0"> Tidak
                                                         </label>
@@ -134,6 +134,7 @@
                                                 <table id="poTable" class="table table-bordered table-striped">
                                                     <thead>
                                                         <tr>
+                                                            <th width=30 class="text-center">No</th>
                                                             <th class="text-center">GW Kirim</th>
                                                             <th class="text-center">Kgs Kirim</th>
                                                             <th class="text-center">Cones Kirim</th>
@@ -147,14 +148,15 @@
                                                     </thead>
                                                     <tbody>
                                                         <tr>
+                                                            <td><input type="text" class="form-control text-center" name="identitas_krg[]" value="1" readonly></td>
                                                             <td><input type="number" class="form-control" name="gw_kirim[]" readonly></td>
                                                             <td><input type="number" class="form-control" name="kgs_kirim[]" readonly></td>
                                                             <td><input type="number" class="form-control" name="cones_kirim[]" readonly></td>
                                                             <td><input type="number" class="form-control" name="lot_kirim[]" readonly></td>
                                                             <td class="text-center">
-                                                                <button type="button" class="btn btn-danger removeRow">
+                                                                <!-- <button type="button" class="btn btn-danger removeRow">
                                                                     <i class="fas fa-trash"></i>
-                                                                </button>
+                                                                </button> -->
                                                             </td>
                                                         </tr>
                                                     </tbody>
@@ -442,8 +444,10 @@
     // Event listener untuk baris baru
     document.getElementById("addRow").addEventListener("click", function() {
         const tbody = poTable.querySelector("tbody");
+        const newIndex = tbody.querySelectorAll("tr").length + 1;
         const newRow = `
     <tr>
+        <td><input type="text" class="form-control text-center" name="identitas_krg[]" value="${newIndex}" readonly></td>
         <td><input type="number" class="form-control" name="gw_kirim[]" readonly></td>
         <td><input type="number" class="form-control" name="kgs_kirim[]" readonly></td>
         <td><input type="number" class="form-control" name="cones_kirim[]" readonly></td>
