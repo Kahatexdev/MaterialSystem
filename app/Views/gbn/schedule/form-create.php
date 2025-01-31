@@ -1,4 +1,4 @@
-<?php $this->extend($role . '/dashboard/header'); ?>
+<?php $this->extend($role . '/schedule/header'); ?>
 <?php $this->section('content'); ?>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
 <style>
@@ -31,6 +31,25 @@
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 38px;
         /* Tinggi ikon panah */
+    }
+
+    .suggestions-box {
+        position: absolute;
+        border: 1px solid #ccc;
+        background-color: #fff;
+        max-height: 150px;
+        overflow-y: auto;
+        width: 100%;
+        z-index: 1000;
+    }
+
+    .suggestions-box div {
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    .suggestions-box div:hover {
+        background-color: #f0f0f0;
     }
 </style>
 <div class="container-fluid">
@@ -96,11 +115,12 @@
                                     <!-- Item Type -->
                                     <div class="mb-3">
                                         <label for="item_type" class="form-label">Item Type</label>
-                                        <select class="form-select" id="item_type" name="item_type" required>
-                                            <option value="">Pilih Item Type</option>
-                                        </select>
+                                        <input type="text" class="form-control" id="item_type" name="item_type" required placeholder="Pilih Item Type">
+                                        <div id="suggestions" class="suggestions-box" style="display: none;"></div>
                                     </div>
                                 </div>
+
+
                                 <div class="col-md-3">
                                     <!-- Kode Warna -->
                                     <div class="mb-3">
@@ -238,18 +258,47 @@
             fetch('<?= base_url(session('role') . "/schedule/getItemType") ?>?jenis=' + jenis)
                 .then(response => response.json())
                 .then(data => {
-                    // Add new options to the 'item_type' dropdown
-                    data.forEach(item => {
-                        const option = document.createElement('option');
-                        option.value = item.item_type;
-                        option.textContent = item.item_type;
-                        itemType.appendChild(option);
+                    const itemTypeInput = document.getElementById('item_type');
+                    const suggestionsBox = document.getElementById('suggestions');
+
+                    // Prepare the item types for search
+                    const itemTypes = data.map(item => item.item_type);
+
+                    // Listen for the 'input' event to filter items as the user types
+                    itemTypeInput.addEventListener('input', function() {
+                        const query = itemTypeInput.value.toLowerCase();
+                        if (query.length >= 3) { // Only show suggestions if 3 or more characters are typed
+                            const filteredItems = itemTypes.filter(item => item.toLowerCase().includes(query));
+                            displaySuggestions(filteredItems);
+                        } else {
+                            suggestionsBox.style.display = 'none'; // Hide suggestions if input is too short
+                        }
                     });
+
+                    // Display suggestions in the box
+                    function displaySuggestions(items) {
+                        suggestionsBox.innerHTML = ''; // Clear previous suggestions
+                        if (items.length > 0) {
+                            suggestionsBox.style.display = 'block'; // Show suggestions box
+                            items.forEach(item => {
+                                const suggestionDiv = document.createElement('div');
+                                suggestionDiv.textContent = item;
+                                suggestionDiv.addEventListener('click', function() {
+                                    itemTypeInput.value = item; // Set value on click
+                                    suggestionsBox.style.display = 'none'; // Hide suggestions after selection
+                                });
+                                suggestionsBox.appendChild(suggestionDiv);
+                            });
+                        } else {
+                            suggestionsBox.style.display = 'none'; // Hide if no matches
+                        }
+                    }
                 })
                 .catch(error => {
                     console.error('Error fetching item types:', error);
                 });
         }
+
     });
 
     // DOM Elements and Event Listeners for fetching warna based on item_type and kode_warna
@@ -477,33 +526,33 @@
         document.getElementById("addRow").addEventListener("click", function() {
             const tbody = poTable.querySelector("tbody");
             const newRow = `
-    <tr>
-        <td>
-            <select class="form-select po-select" name="po[]" required>
-                <option value="">Pilih PO</option>
-            </select>
-        </td>
-        <td><input type="date" class="form-control" name="tgl_start_mc[]" readonly></td>
-        <td><input type="date" class="form-control" name="delivery_awal[]" readonly></td>
-        <td><input type="date" class="form-control" name="delivery_akhir[]" readonly></td>
-        <td><input type="number" class="form-control" name="qty_po[]" readonly></td>
-        <td><input type="number" class="form-control" name="qty_po_plus[]" readonly></td>
-        <td class="text-center"><span class="badge bg-info"><span class="kg_kebutuhan">0.00</span> KG</span></td>
-        <td class="text-center"><span class="badge bg-info"><span class="sisa_jatah">0.00</span> KG</span></td>
-        <td><input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required></td>
-        <td>
-            <select class="form-select" name="po_plus[]" required>
-                <option value="">Pilih PO(+)</option>
-                <option value="1">Ya</option>
-                <option value="0">Tidak</option>
-            </select>
-        </td>
-        <td class="text-center">
-            <button type="button" class="btn btn-danger removeRow">
-                <i class="fas fa-trash"></i>
-            </button>
-        </td>
-    </tr>`;
+            <tr>
+                <td>
+                    <select class="form-select po-select" name="po[]" required>
+                        <option value="">Pilih PO</option>
+                    </select>
+                </td>
+                <td><input type="date" class="form-control" name="tgl_start_mc[]" readonly></td>
+                <td><input type="date" class="form-control" name="delivery_awal[]" readonly></td>
+                <td><input type="date" class="form-control" name="delivery_akhir[]" readonly></td>
+                <td><input type="number" class="form-control" name="qty_po[]" readonly></td>
+                <td><input type="number" class="form-control" name="qty_po_plus[]" readonly></td>
+                <td class="text-center"><span class="badge bg-info"><span class="kg_kebutuhan">0.00</span> KG</span></td>
+                <td class="text-center"><span class="badge bg-info"><span class="sisa_jatah">0.00</span> KG</span></td>
+                <td><input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required></td>
+                <td>
+                    <select class="form-select" name="po_plus[]" required>
+                        <option value="">Pilih PO(+)</option>
+                        <option value="1">Ya</option>
+                        <option value="0">Tidak</option>
+                    </select>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-danger removeRow">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>`;
             tbody.insertAdjacentHTML("beforeend", newRow);
             updatePODropdown(); // Perbarui dropdown PO di baris baru
             // Re-query qty_celup inputs after adding a new row
@@ -526,59 +575,10 @@
         });
     });
 
-    $(document).ready(function() {
-        $('#item_type').select2({
-            placeholder: 'Pilih Item Type',
-            allowClear: true,
-            width: '100%' // Pastikan elemen Select2 responsif
-        });
 
+    $(document).ready(function() {
 
     });
 </script>
-<!-- <script>
-    // DOM Elements
-    document.addEventListener('DOMContentLoaded', function() {
-        const minCaps = document.getElementById('min_caps');
-        const maxCaps = document.getElementById('max_caps');
-        const sisaKapasitas = document.getElementById('sisa_kapasitas');
-        const qtyCelupInputs = document.querySelectorAll('input[name="qty_celup[]"]');
-        const totalQtyCelup = document.getElementById('total_qty_celup');
-
-        // Event Listeners
-        qtyCelupInputs.forEach(input => {
-            input.addEventListener('input', calculateCapacity);
-        });
-
-        // Functions
-        function calculateCapacity() {
-            const min = parseFloat(minCaps.value);
-            const max = parseFloat(maxCaps.value);
-            let total = 0;
-
-            // Calculate total qty celup
-            qtyCelupInputs.forEach(input => {
-                total += parseFloat(input.value) || 0;
-            });
-
-            // Update total qty celup
-            totalQtyCelup.value = total;
-
-            // Calculate remaining capacity
-            const sisa = max - total;
-            sisaKapasitas.value = sisa;
-
-            // Validation for each qty_celup input
-            qtyCelupInputs.forEach(input => {
-                const kg = parseFloat(input.value);
-                if (kg < min || kg > max) {
-                    input.setCustomValidity(`Qty Celup harus diantara ${min} dan ${max}`);
-                } else {
-                    input.setCustomValidity('');
-                }
-            });
-        }
-    });
-</script> -->
 
 <?php $this->endSection(); ?>
