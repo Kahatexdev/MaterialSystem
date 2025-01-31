@@ -205,47 +205,38 @@
             });
         </script>
     <?php endif; ?>
-    <h1 class="display-5 mb-4 text-center" style="color: #2e7d32; font-weight: 600;">Out Celup</h1>
-    <a href="<?= base_url($role . '/insertBon') ?>" class="btn btn-info">Create BON</a>
 
+    <div class="card card-frame">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-header">
+                    <h1 class="display-5 mb-4 text-center" style="color: #2e7d32; font-weight: 600;">Out Celup</h1>
+                </div>
+                <div class="group">
+                    <a href="<?= base_url($role . '/insertBon') ?>" class="btn btn-info">
+                        <i class="ni ni-single-copy-04 me-2"></i>Create BON</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <div class="card">
+    <div class="card mt-3">
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table">
                     <thead>
                         <tr>
                             <th class="sticky">No</th>
-                            <!-- <th class="sticky">No Mc</th> -->
                             <th class="sticky">PO</th>
                             <th class="sticky">Jenis Benang</th>
                             <th class="sticky">Kode Warna</th>
                             <th class="sticky">Warna</th>
                             <th class="sticky">Start Mc</th>
-                            <!-- <th class="sticky">Delivery Export Awal</th>
-                            <th class="sticky">Delivery Export Akhir</th> -->
-                            <!-- <th class="sticky">Tanggal Schedule</th> -->
                             <th class="sticky">Qty PO</th>
                             <th class="sticky">Qty PO(+)</th>
-                            <!-- <th class="sticky">Tanggal Celup</th> -->
                             <th class="sticky">Qty Celup</th>
                             <th class="sticky">Qty Celup(+)</th>
                             <th class="sticky">Aksi</th>
-                            <!-- <th class="sticky">LOT Celup</th>
-                            <th class="sticky">Bon</th>
-                            <th class="sticky">Celup</th>
-                            <th class="sticky">Bongkar</th>
-                            <th class="sticky">Press</th>
-                            <th class="sticky">Oven</th>
-                            <th class="sticky">Rajut Pagi</th>
-                            <th class="sticky">ACC</th>
-                            <th class="sticky">Kelos</th>
-                            <th class="sticky">Reject</th>
-                            <th class="sticky">Perbaikan</th>
-                            <th class="sticky">Ket Daily Cek</th>
-                            <th class="sticky">Edit</th>
-                            <th class="sticky">Ket Sch</th>
-                            <th class="sticky">Updated By</th> -->
                         </tr>
                     </thead>
                     <tbody>
