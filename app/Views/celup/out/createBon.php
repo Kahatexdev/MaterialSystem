@@ -13,7 +13,25 @@
                 <div class="card-body">
                     <form action="<?= base_url($role . '/outCelup/saveBon/') ?>" method="post">
                         <div id="kebutuhan-container">
-                            <label>Form Input Bon</label>
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <label>Detail Surat Jalan</label>
+                                    <select class="form-control" name="detail_sj" id="detail_sj" required>
+                                        <option value="">Pilih Surat Jalan</option>
+                                        <option value="COVER MAJALAYA">COVER MAJALAYA</option>
+                                        <option value="IMPOR DARI KOREA">IMPOR DARI KOREA</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label>No Surat Jalan</label>
+                                    <input type="text" class="form-control" id="no_surat_jalan" name="no_surat_jalan" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label>Tanggal Datang</label>
+                                    <input type="date" class="form-control" id="tgl_datang" name="tgl_datang" required>
+                                </div>
+                            </div>
+                            <!--  -->
                             <nav>
                                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
                                     <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">1</button>
@@ -59,22 +77,6 @@
 
                                         <!-- Surat Jalan Section -->
                                         <div class="row g-3 mt-3">
-                                            <div class="col-md-2">
-                                                <label>Detail Surat Jalan</label>
-                                                <select class="form-control" name="detail_sj" id="detail_sj" required>
-                                                    <option value="">Pilih Surat Jalan</option>
-                                                    <option value="COVER MAJALAYA">COVER MAJALAYA</option>
-                                                    <option value="IMPOR DARI KOREA">IMPOR DARI KOREA</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <label>No Surat Jalan</label>
-                                                <input type="text" class="form-control" id="no_surat_jalan" name="no_surat_jalan" required>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <label>Tanggal Datang</label>
-                                                <input type="date" class="form-control" id="tgl_datang" name="tgl_datang" required>
-                                            </div>
                                             <div class="col-md-2">
                                                 <label>LMD</label>
                                                 <select class="form-control" name="l_m_d" required>

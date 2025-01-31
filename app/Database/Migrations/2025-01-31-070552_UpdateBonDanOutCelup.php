@@ -9,7 +9,7 @@ class UpdateBonDanOutCelup extends Migration
     public function up()
     {
         // Hapus field dari tabel bon_celup
-        $this->forge->dropColumn('bon_celup', ['gw', 'nw', 'cones', 'karung']);
+        $this->forge->dropColumn('bon_celup', ['gw', 'nw', 'cones', 'karung', 'ganti_retur']);
     }
 
     public function down()
@@ -18,9 +18,11 @@ class UpdateBonDanOutCelup extends Migration
         $this->forge->addColumn('bon_celup', [
             'gw' => [
                 'type' => 'FLOAT',
+                'after' => 'harga',
             ],
             'nw' => [
                 'type' => 'FLOAT',
+                'after' => 'gw',
             ],
             'cones' => [
                 'type' => 'INT',
@@ -29,6 +31,11 @@ class UpdateBonDanOutCelup extends Migration
             'karung' => [
                 'type' => 'INT',
                 'after' => 'cones',
+            ],
+            'ganti_retur' => [
+                'type' => 'ENUM',
+                'constraint' => ['0', '1'],
+                'after' => 'detail_sj',
             ],
         ]);
     }
