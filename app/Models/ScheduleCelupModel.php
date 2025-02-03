@@ -308,4 +308,40 @@ class ScheduleCelupModel extends Model
         // Jika data tidak ditemukan, kembalikan nilai default (misalnya null atau array kosong)
         return null;
     }
+    public function getCelupDone()
+    {
+        return $this->table('schedule_celup')
+            ->select('no_model')
+            ->where('last_status', 'done')
+            ->groupBy('id_celup')
+            ->findAll();
+    }
+    public function getItemTypeByNoModel($noModel)
+    {
+        return $this->table('schedule_celup')
+            ->select('item_type')
+            ->where('no_model', $noModel)
+            ->where('last_status', 'done')
+            ->groupBy('item_type')
+            ->findAll();
+    }
+    public function getKodeWarnaByNoModelDanItemType($noModel, $itemType)
+    {
+        return $this->table('schedule_celup')
+            ->select('kode_warna')
+            ->where('no_model', $noModel)
+            ->where('item_type', $itemType)
+            ->groupBy('kode_warna')
+            ->findAll();
+    }
+    public function getWarnaByNoModelItemDanKode($noModel, $itemType, $kodeWarna)
+    {
+        return $this->table('schedule_celup')
+            ->select('warna')
+            ->where('no_model', $noModel)
+            ->where('item_type', $itemType)
+            ->where('kode_warna', $kodeWarna)
+            ->groupBy('warna')
+            ->first();
+    }
 }
