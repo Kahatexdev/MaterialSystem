@@ -15,11 +15,16 @@
                         <div id="kebutuhan-container">
                             <div class="row mb-4">
                                 <div class="col-md-4">
+                                    <input type="hidden" name="id_celup">
                                     <label>Detail Surat Jalan</label>
                                     <select class="form-control" name="detail_sj" id="detail_sj" required>
                                         <option value="">Pilih Surat Jalan</option>
                                         <option value="COVER MAJALAYA">COVER MAJALAYA</option>
-                                        <option value="IMPOR DARI KOREA">IMPOR DARI KOREA</option>
+                                        <option value="IMPORT DARI KOREA">IMPORT DARI KOREA</option>
+                                        <option value="JS MISTY">JS MISTY</option>
+                                        <option value="JS SOLID">JS SOLID</option>
+                                        <option value="JS KHTEX">JS KHTEX</option>
+                                        <option value="PO(+)">PO(+)</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4">
@@ -42,60 +47,53 @@
                                     <!-- Form Items -->
                                     <div class="kebutuhan-item">
                                         <div class="row g-3">
-                                            <div class="col-md-3">
+                                            <div class="col-md-4">
                                                 <label>No Model</label>
-                                                <select class="form-control" name="no_model" id="no_model" required>
+                                                <select class="form-control" name="items[0][no_model]" id="no_model" required>
                                                     <option value="">Pilih No Model</option>
-
+                                                    <?php foreach ($no_model as $model) { ?>
+                                                        <option value="<?= $model['no_model'] ?>"><?= $model['no_model'] ?></option>
+                                                    <?php } ?>
                                                 </select>
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="col-md-4">
                                                 <label>Item Type</label>
-                                                <select class="form-control" name="tujuan_po" id="selectTujuan" required>
-                                                    <option value="">Pilih Item Type</option>
-                                                    <option value="Celup Cones">QWERTY</option>
-                                                    <option value="Covering">ZXCVB</option>
+                                                <select class="form-control" name="items[0][item_type]" id="item_type" required>
                                                 </select>
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="col-md-4">
                                                 <label>Kode Warna</label>
-                                                <select class="form-control" name="tujuan_po" id="selectTujuan" required>
-                                                    <option value="">Pilih Kode Warna</option>
-                                                    <option value="Celup Cones">QWERTY</option>
-                                                    <option value="Covering">ZXCVB</option>
+                                                <select class="form-control text-uppercase" name="items[0][kode_warna]" id="kode_warna" required>
                                                 </select>
                                             </div>
-                                            <div class="col-md-3">
-                                                <label>Warna</label>
-                                                <select class="form-control" name="tujuan_po" id="selectTujuan" required>
-                                                    <option value="">Pilih Warna</option>
-                                                    <option value="Celup Cones">QWERTY</option>
-                                                    <option value="Covering">ZXCVB</option>
-                                                </select>
-                                            </div>
+
                                         </div>
 
                                         <!-- Surat Jalan Section -->
                                         <div class="row g-3 mt-3">
-                                            <div class="col-md-2">
+                                            <div class="col-md-4">
+                                                <label>Warna</label>
+                                                <input type="text" class="form-control" name="items[0][warna]" id="warna" required>
+                                            </div>
+                                            <div class="col-md-4">
                                                 <label>LMD</label>
-                                                <select class="form-control" name="l_m_d" required>
+                                                <select class="form-control" name="l_m_d" id="l_m_d" required>
                                                     <option value="">Pilih LMD</option>
                                                     <option value="L">L</option>
                                                     <option value="M">M</option>
                                                     <option value="D">D</option>
                                                 </select>
                                             </div>
-                                            <div class="col-md-2">
+                                            <div class="col-md-3">
                                                 <label>Harga</label>
-                                                <input type="number" class="form-control" id="harga" name="harga" required>
+                                                <input type="number" class="form-control" name="harga" id="harga" required>
                                             </div>
                                             <div class="col-md-1">
                                                 <label for="ganti-retur" class="text-center">Ganti Retur</label>
                                                 <div class="row">
                                                     <div class="col-md-3">
                                                         <label>
-                                                            <input type="checkbox" name="ganti_retur" value="1">
+                                                            <input type="checkbox" name="ganti_retur" id=" ganti_retur">
                                                         </label>
                                                     </div>
                                                     <div class="col-md-4">
@@ -130,10 +128,10 @@
                                                     <tbody>
                                                         <tr>
                                                             <td><input type="text" class="form-control text-center" name="identitas_krg[]" value="1" readonly></td>
-                                                            <td><input type="number" class="form-control" name="gw_kirim[]" readonly></td>
-                                                            <td><input type="number" class="form-control" name="kgs_kirim[]" readonly></td>
-                                                            <td><input type="number" class="form-control" name="cones_kirim[]" readonly></td>
-                                                            <td><input type="number" class="form-control" name="lot_kirim[]" readonly></td>
+                                                            <td><input type="number" class="form-control gw_kirim_input" name="gw_kirim[]"></td>
+                                                            <td><input type="number" class="form-control kgs_kirim_input" name="kgs_kirim[]"></td>
+                                                            <td><input type="number" class="form-control cones_kirim_input" name="cones_kirim[]"></td>
+                                                            <td><input type="number" class="form-control lot_kirim_input" name="lot_kirim[]"></td>
                                                             <td class="text-center">
                                                                 <!-- <button type="button" class="btn btn-danger removeRow">
                                                                         <i class="fas fa-trash"></i>
@@ -178,12 +176,13 @@
                                 </div>
                             </div>
                         </div>
-                    </form>
-                    <div class="row mt-3">
-                        <div class="col-12 text-center">
-                            <button type="submit" class="btn btn-info w-100">Save</button>
+                        <div class="row mt-3">
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-info w-100">Save</button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
+
                 </div>
             </div>
         </div>
@@ -193,7 +192,115 @@
 <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.all.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
+    // Ambil item type berdasarkan no model
+    document.addEventListener('change', function(event) {
+        if (event.target && event.target.id === 'no_model') {
+            const noModel = event.target.value; // Ambil nilai no_model yang dipilih
+            const itemTypeDropdown = event.target.closest('.row').querySelector('#item_type');
+
+            if (noModel) {
+                // Kirim request AJAX ke controller CodeIgniter
+                $.ajax({
+                    url: '<?= base_url($role . '/createBon/getItemType') ?>',
+                    type: 'POST',
+                    data: {
+                        no_model: noModel
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        itemTypeDropdown.innerHTML = '<option value="">Pilih Item Type</option>';
+                        if (response.length > 0) {
+                            response.forEach(item => {
+                                itemTypeDropdown.innerHTML += `<option value="${item.item_type}">${item.item_type}</option>`;
+                            });
+                        } else {
+                            itemTypeDropdown.innerHTML = '<option value="">No items found</option>';
+                        }
+                    },
+                    error: function() {
+                        alert('Error fetching data. Please try again.');
+                    }
+                });
+            } else {
+                itemTypeDropdown.innerHTML = '';
+            }
+        }
+    });
+
+    // Ambil kode warna berdasarkan no_model dan item_type
+    document.addEventListener('change', function(event) {
+        if (event.target && event.target.id === 'item_type') {
+            const itemType = event.target.value;
+            const noModel = event.target.closest('.row').querySelector('#no_model').value;
+            const kodeWarnaDropdown = event.target.closest('.row').querySelector('#kode_warna');
+
+            if (noModel && itemType) {
+                $.ajax({
+                    url: '<?= base_url($role . '/createBon/getKodeWarna') ?>',
+                    type: 'POST',
+                    data: {
+                        no_model: noModel,
+                        item_type: itemType
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        kodeWarnaDropdown.innerHTML = '<option value="">Pilih Kode Warna</option>';
+                        if (response.length > 0) {
+                            response.forEach(color => {
+                                kodeWarnaDropdown.innerHTML += `<option value="${color.kode_warna}">${color.kode_warna}</option>`;
+                            });
+                        } else {
+                            kodeWarnaDropdown.innerHTML = '<option value="">No color codes found</option>';
+                        }
+                    },
+                    error: function() {
+                        alert('Error fetching color codes. Please try again.');
+                    }
+                });
+            } else {
+                kodeWarnaDropdown.innerHTML = '<option value="">Pilih Kode Warna</option>';
+            }
+        }
+    });
+
+    // Ambil item type berdasarkan no model, item_type dan kode warna
+    document.addEventListener('change', function(event) {
+        if (event.target && event.target.id === 'kode_warna') {
+            const kodeWarna = event.target.value;
+            const itemType = event.target.closest('.row').querySelector('#item_type').value;
+            const noModel = event.target.closest('.row').querySelector('#no_model').value;
+            const warnaInput = event.target.closest('.kebutuhan-item').querySelector('[id="warna"]');
+
+            if (noModel && itemType && kodeWarna) {
+                $.ajax({
+                    url: '<?= base_url($role . '/createBon/getWarna') ?>',
+                    type: 'POST',
+                    data: {
+                        no_model: noModel,
+                        item_type: itemType,
+                        kode_warna: kodeWarna
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.warna) {
+                            warnaInput.value = response.warna; // Tetapkan nilai
+                        } else {
+                            console.error('Warna tidak ditemukan di response:', response);
+                            warnaInput.value = ''; // Kosongkan jika tidak ada
+                        }
+                    },
+                    error: function() {
+                        alert('Error fetching warna. Please try again.');
+                    }
+                });
+            } else {
+                warnaInput.value = '';
+            }
+        }
+    });
+    // 
     document.addEventListener("DOMContentLoaded", function() {
         const navTab = document.getElementById("nav-tab");
         const navTabContent = document.getElementById("nav-tabContent");
@@ -258,77 +365,53 @@
             newTabPane.innerHTML = `
             <div class="kebutuhan-item">
                                         <div class="row g-3">
-                                            <div class="col-md-3">
+                                            <div class="col-md-4">
                                                 <label>No Model</label>
-                                                <select class="form-control" name="tujuan_po" id="selectTujuan" required>
+                                                <select class="form-control" name="items[${tabIndex - 1}][no_model]" id="no_model" required>
                                                     <option value="">Pilih No Model</option>
-                                                    <option value="Celup Cones">QWERTY</option>
-                                                    <option value="Covering">ZXCVB</option>
+                                                    <?php foreach ($no_model as $model) { ?>
+                                                        <option value="<?= $model['no_model'] ?>"><?= $model['no_model'] ?></option>
+                                                    <?php } ?>
                                                 </select>
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="col-md-4">
                                                 <label>Item Type</label>
-                                                <select class="form-control" name="tujuan_po" id="selectTujuan" required>
-                                                    <option value="">Pilih Item Type</option>
-                                                    <option value="Celup Cones">QWERTY</option>
-                                                    <option value="Covering">ZXCVB</option>
+                                                <select class="form-control" name="items[${tabIndex - 1}][item_type]" id="item_type" required>
                                                 </select>
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="col-md-4">
                                                 <label>Kode Warna</label>
-                                                <select class="form-control" name="tujuan_po" id="selectTujuan" required>
-                                                    <option value="">Pilih Kode Warna</option>
-                                                    <option value="Celup Cones">QWERTY</option>
-                                                    <option value="Covering">ZXCVB</option>
+                                                <select class="form-control" name="items[${tabIndex - 1}][kode_warna]" id="kode_warna" required>
                                                 </select>
                                             </div>
-                                            <div class="col-md-3">
-                                                <label>Warna</label>
-                                                <select class="form-control" name="tujuan_po" id="selectTujuan" required>
-                                                    <option value="">Pilih Warna</option>
-                                                    <option value="Celup Cones">QWERTY</option>
-                                                    <option value="Covering">ZXCVB</option>
-                                                </select>
-                                            </div>
+
                                         </div>
 
                                         <!-- Surat Jalan Section -->
                                         <div class="row g-3 mt-3">
-                                            <div class="col-md-2">
-                                                <label>Detail Surat Jalan</label>
-                                                <select class="form-control" name="detail_sj" id="detail_sj" required>
-                                                    <option value="">Pilih Surat Jalan</option>
-                                                    <option value="COVER MAJALAYA">COVER MAJALAYA</option>
-                                                    <option value="IMPOR DARI KOREA">IMPOR DARI KOREA</option>
-                                                </select>
+                                            <div class="col-md-4">
+                                                <label>Warna</label>
+                                                <input type="text" class="form-control" name="items[${tabIndex - 1}][warna]" id="warna" required readonly>
                                             </div>
-                                            <div class="col-md-2">
-                                                <label>No Surat Jalan</label>
-                                                <input type="text" class="form-control" id="no_surat_jalan" name="no_surat_jalan" required>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <label>Tanggal Datang</label>
-                                                <input type="date" class="form-control" id="tgl_datang" name="tgl_datang" required>
-                                            </div>
-                                            <div class="col-md-2">
+                                            <div class="col-md-4">
                                                 <label>LMD</label>
-                                                <select class="form-control" name="l_m_d" required>
+                                                <select class="form-control" name="items[${tabIndex - 1}][l_m_d]" id="l_m_d" required>
                                                     <option value="">Pilih LMD</option>
                                                     <option value="L">L</option>
                                                     <option value="M">M</option>
                                                     <option value="D">D</option>
                                                 </select>
                                             </div>
-                                            <div class="col-md-2">
+                                            <div class="col-md-3">
                                                 <label>Harga</label>
-                                                <input type="number" class="form-control" id="harga" name="harga" required>
+                                                <input type="number" class="form-control" name="items[${tabIndex - 1}][harga]" id="harga" required>
                                             </div>
                                             <div class="col-md-1">
                                                 <label for="ganti-retur" class="text-center">Ganti Retur</label>
                                                 <div class="row">
                                                     <div class="col-md-3">
                                                         <label>
-                                                            <input type="checkbox" name="ganti_retur" value="1">
+                                                            <input type="checkbox" name="items[${tabIndex - 1}][ganti_retur" id=" ganti_retur">
                                                         </label>
                                                     </div>
                                                     <div class="col-md-4">
@@ -337,7 +420,6 @@
                                                 </div>
                                             </div>
                                         </div>
-
                                         <div class="mt-5">
                                             <h3>Form Barcode</h3>
                                         </div>
@@ -363,10 +445,11 @@
                                                     <tbody>
                                                         <tr>
                                                             <td><input type="text" class="form-control text-center" name="identitas_krg[]" value="1" readonly></td>
-                                                            <td><input type="number" class="form-control" name="gw_kirim[]" readonly></td>
-                                                            <td><input type="number" class="form-control" name="kgs_kirim[]" readonly></td>
-                                                            <td><input type="number" class="form-control" name="cones_kirim[]" readonly></td>
-                                                            <td><input type="number" class="form-control" name="lot_kirim[]" readonly></td>
+                                                            <td><input type="number" class="form-control gw_kirim_input" name="gw_kirim[]"></td>
+                                                            <td><input type="number" class="form-control kgs_kirim_input" name="kgs_kirim[]"></td>
+                                                            <td><input type="number" class="form-control cones_kirim_input" name="cones_kirim[]"></td>
+                                                            <td><input type="number" class="form-control lot_kirim_input" name="lot_kirim[]"></td>
+
                                                             <td class="text-center">
                                                                 <!-- <button type="button" class="btn btn-danger removeRow">
                                                                         <i class="fas fa-trash"></i>
@@ -423,6 +506,52 @@
             });
 
             tabIndex++;
+            // Add row functionality
+            const addRowButton = newTabPane.querySelector("#addRow");
+            const removeRowButton = newTabPane.querySelector("#removeRow");
+            const newPoTable = newTabPane.querySelector(`#${newPoTableId}`);
+
+            addRowButton.addEventListener("click", function() {
+                const rowCount = newPoTable.querySelectorAll("tbody tr").length + 1;
+                const newRow = document.createElement("tr");
+
+                newRow.innerHTML = `
+                <td><input type="text" class="form-control text-center" name="identitas_krg[]" value="${rowCount}" readonly></td>
+                <td><input type="number" class="form-control gw_kirim_input" name="gw_kirim[]"></td>
+                <td><input type="number" class="form-control kgs_kirim_input" name="kgs_kirim[]"></td>
+                <td><input type="number" class="form-control cones_kirim_input" name="cones_kirim[]"></td>
+                <td><input type="number" class="form-control lot_kirim_input" name="lot_kirim[]"></td>
+                <td class="text-center">
+                <button type="button" class="btn btn-danger removeRow"><i class="fas fa-trash"></i></button>
+                </td>
+                `;
+
+                newPoTable.querySelector("tbody").appendChild(newRow);
+
+                // Tambahkan event listener untuk tombol hapus (removeRow) pada baris baru
+                newRow.querySelector(".removeRow").addEventListener("click", function() {
+                    newRow.remove();
+                    updateRowNumbers(newPoTable);
+                    calculateTotals(newPoTable); // Perbarui total setelah baris dihapus
+                });
+                // Recalculate totals when new row is added
+                newRow.querySelectorAll('input').forEach(input => {
+                    input.addEventListener('input', function() {
+                        calculateTotals(newPoTable);
+                    });
+                });
+                calculateTotals(newPoTable);
+
+            });
+
+            // Event listeners for input changes
+            newPoTable.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', function() {
+                    calculateTotals(newPoTable);
+                });
+            });
+
+            calculateTotals(newPoTable);
         }
 
         // Fungsi untuk menghapus tab dan kontennya
@@ -455,46 +584,54 @@
         updateTabNumbers();
     });
 
-    document.addEventListener("click", function(event) {
-        const activeTab = document.querySelector(".tab-pane.active"); // Ambil tab aktif
-        if (!activeTab) return;
+    document.addEventListener('DOMContentLoaded', () => {
+        const poTable = document.getElementById('poTable');
 
-        const poTable = activeTab.querySelector("table"); // Cari tabel di dalam tab aktif
-        if (!poTable) return;
+        // Tambahkan event listener pada semua input di tbody
+        poTable.querySelectorAll('tbody input').forEach(input => {
+            input.addEventListener('input', () => {
+                calculateTotals(poTable);
+            });
+        });
 
-        // Menambah baris pada tabel yang sesuai dengan tab aktif
-        if (event.target.id === "addRow" || event.target.closest("#addRow")) {
-            const tbody = poTable.querySelector("tbody");
-            const newIndex = tbody.querySelectorAll("tr").length + 1;
-            const newRow = `
-            <tr>
-                <td><input type="text" class="form-control text-center" name="identitas_krg[]" value="${newIndex}" readonly></td>
-                <td><input type="number" class="form-control" name="gw_kirim[]" readonly></td>
-                <td><input type="number" class="form-control" name="kgs_kirim[]" readonly></td>
-                <td><input type="number" class="form-control" name="cones_kirim[]" readonly></td>
-                <td><input type="number" class="form-control" name="lot_kirim[]" readonly></td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-danger removeRow">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>`;
+        // Tombol tambah baris
+        document.getElementById('addRow').addEventListener('click', () => {
+            const tbody = poTable.querySelector('tbody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+            <td><input type="text" class="form-control text-center" name="identitas_krg[]" value="" readonly></td>
+            <td><input type="number" class="form-control" name="gw_kirim[]"></td>
+            <td><input type="number" class="form-control" name="kgs_kirim[]"></td>
+            <td><input type="number" class="form-control" name="cones_kirim[]"></td>
+            <td><input type="number" class="form-control" name="lot_kirim[]"></td>
+            <td class="text-center">
+                <button type="button" class="btn btn-danger removeRow"><i class="fas fa-trash"></i></button>
+            </td>
+        `;
+            tbody.appendChild(newRow);
 
-            tbody.insertAdjacentHTML("beforeend", newRow);
-            calculateTotals(poTable);
-        }
+            // Update nomor baris
+            updateRowNumbers(poTable);
 
-        // Menghapus baris di tabel tab aktif
-        if (event.target.classList.contains("removeRow") || event.target.closest(".removeRow")) {
-            const row = event.target.closest("tr");
-            if (!row) return;
+            // Tambahkan event listener ke input baru
+            newRow.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', () => {
+                    calculateTotals(poTable);
+                });
+            });
 
-            row.remove(); // Hapus baris
+            // Event listener untuk tombol hapus baris
+            newRow.querySelector('.removeRow').addEventListener('click', () => {
+                newRow.remove();
+                updateRowNumbers(poTable);
+                calculateTotals(poTable);
+            });
+        });
 
-            updateRowNumbers(poTable); // Perbarui nomor baris di tabel yang sesuai
-            calculateTotals(poTable); // Hitung ulang total hanya untuk tabel dalam tab aktif
-        }
+        // Panggil pertama kali untuk inisialisasi
+        calculateTotals(poTable);
     });
+
 
     function updateRowNumbers(poTable) {
         const rows = poTable.querySelectorAll('tbody tr');
@@ -531,11 +668,14 @@
         poTable.querySelector('#total_lot_kirim').value = totalLot;
     }
 
+
+    addNewTab();
     // Hitung total saat halaman dimuat
-    document.addEventListener("DOMContentLoaded", function() {
-        calculateTotals();
-    });
+    // document.addEventListener("DOMContentLoaded", function() {
+    //     calculateTotals();
+    // });
 </script>
+
 
 
 <?php $this->endSection(); ?>

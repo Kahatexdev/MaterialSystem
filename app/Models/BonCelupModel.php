@@ -60,10 +60,22 @@ class BonCelupModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
+    public function getData()
+    {
+        return $this->select('bon_celup.id_bon, bon_celup.tgl_datang, bon_celup.l_m_d, bon_celup.harga, bon_celup.no_surat_jalan, bon_celup.detail_sj')
+            ->findAll();
+    }
+
     public function saveBon($saveDataBon, $saveDataOutCelup)
     {
         $this->db->table('bon_celup')->insert($saveDataBon);
 
         $this->db->table('out_celup')->insert($saveDataOutCelup);
+    }
+
+    public function getDataById($id)
+    {
+        return $this->select('bon_celup.*')
+            ->first();
     }
 }

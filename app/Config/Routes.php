@@ -9,7 +9,7 @@ $routes->get('/', 'AuthController::index');
 $routes->get('/login', 'AuthController::index');
 $routes->post('/logout', 'AuthController::logout');
 $routes->post('authverify', 'AuthController::login');
-$routes->get('generate', 'CelupController::generate');
+// $routes->get('generate', 'CelupController::generate');
 
 
 // gbn routes
@@ -93,9 +93,13 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
 
     $routes->get('outCelup', 'CelupController::outCelup');
     // $routes->get('insertBon/(:num)', 'CelupController::insertBon/$1');
-    $routes->get('insertBon', 'CelupController::insertBon');
-    $routes->post('outCelup/saveBon/(:num)', 'CelupController::saveBon/$1');
+    $routes->get('createBon', 'CelupController::createBon');
+    $routes->post('createBon/getItemType', 'CelupController::getItemType');
+    $routes->post('createBon/getKodeWarna', 'CelupController::getKodeWarna');
+    $routes->post('createBon/getWarna', 'CelupController::getWarna');
+    $routes->post('outCelup/saveBon/', 'CelupController::saveBon');
     $routes->get('retur', 'CelupController::retur');
+    $routes->get('generate/(:num)', 'CelupController::generateBarcode/$1');
 });
 
 
