@@ -87,14 +87,14 @@ class OpenPoModel extends Model
 
     public function getFilteredPO($kodeWarna, $warna, $item_type)
     {
-        $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, master_order.delivery_awal, master_order.delivery_akhir, master_order.id_order')
+        return $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, master_order.delivery_awal, master_order.delivery_akhir, master_order.id_order')
         ->join('master_order', 'master_order.no_model = open_po.no_model')
-        ->where('open_po.kode_warna', $kodeWarna)
-            ->where('open_po.color', $warna)
-            ->where('open_po.item_type', $item_type)
-            ->distinct()
-            ->get()
-            ->getResultArray();
+        ->where('open_po.kode_warna', $kodeWarna)  // Ganti like dengan where
+        ->where('open_po.color', $warna)
+        ->where('open_po.item_type', $item_type) // Ganti like dengan where
+        ->distinct()
+        ->get()
+        ->getResultArray();
     }
 
 

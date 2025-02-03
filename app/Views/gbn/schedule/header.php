@@ -48,7 +48,15 @@
                                         </h6>
                                     </div>
                                 </a>
+                                <a class="dropdown-item border-radius-md" href="<?= base_url($role . '/schedule/sample') ?>">
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <h6 class="text-sm font-weight-normal mb-1">
+                                            <span class="font-weight-bold">MC Sample</span>
+                                        </h6>
+                                    </div>
+                                </a>
                             </li>
+
                         </ul>
 
                     </li>

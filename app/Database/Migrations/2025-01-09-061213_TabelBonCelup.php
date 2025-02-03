@@ -15,6 +15,11 @@ class TabelBonCelup extends Migration
                 'unsigned' => true,
                 'auto_increment' => true,
             ],
+            'id_celup' => [
+                'type' => 'INT',
+                'constraint' => 11,
+                'unsigned' => true,
+            ],
             'tgl_datang' => [
                 'type' => 'DATE',
             ],

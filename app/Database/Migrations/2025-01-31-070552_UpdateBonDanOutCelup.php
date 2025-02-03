@@ -8,8 +8,20 @@ class UpdateBonDanOutCelup extends Migration
 {
     public function up()
     {
+        $this->forge->addColumn('schedule_celup', [
+            'id_bon' => [
+                'type' => 'INT',
+                'constraint' => 11,
+                'unsigned' => true,
+                'after' => 'id_mesin',
+                'null' => true,
+            ],
+        ]);
+        
         // Hapus field dari tabel bon_celup
         $this->forge->dropColumn('bon_celup', ['gw', 'nw', 'cones', 'karung', 'ganti_retur']);
+
+
     }
 
     public function down()
@@ -38,5 +50,6 @@ class UpdateBonDanOutCelup extends Migration
                 'after' => 'detail_sj',
             ],
         ]);
+
     }
 }

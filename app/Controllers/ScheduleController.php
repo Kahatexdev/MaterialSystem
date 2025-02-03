@@ -234,13 +234,17 @@ class ScheduleController extends BaseController
         $warna = $this->request->getGet('warna');
         $item_type = $this->request->getGet('item_type');
         // $item_type = urldecode($this->request->getGet('item_type'));
+        // Debugging parameters
+        // var_dump($kode_warna, $warna, $item_type);
 
         $po = $this->openPoModel->getFilteredPO($kode_warna, $warna, $item_type);
 
+        // var_dump($po);
+        // Kembalikan response dalam format JSON
         if ($po) {
             return $this->response->setJSON($po);
         } else {
-            return $this->response->setJSON(['error' => 'No data found']);
+            return $this->response->setJSON(['error' => 'Kosong']);
         }
     }
 
@@ -249,8 +253,10 @@ class ScheduleController extends BaseController
     {
         // Ambil parameter dari request
         $id_order = $this->request->getGet('id_order');
-        $itemType = $this->request->getGet('item_type');
+        // $itemType = $this->request->getGet('item_type');
+        $itemType = urldecode($this->request->getGet('item_type'));
         $kodeWarna = $this->request->getGet('kode_warna');
+
 
         // Validasi parameter
         if (empty($id_order)) {
@@ -367,7 +373,7 @@ class ScheduleController extends BaseController
             $dataBatch[] = [
                 'id_mesin' => $id_mesin['id_mesin'],
                 'no_model' => $no_model['no_model'],
-                'item_type' => $scheduleData['item_type'],
+                'item_type' => $scheduleData['item_type'][$index] ?? null,
                 'kode_warna' => $scheduleData['kode_warna'],
                 'warna' => $scheduleData['warna'],
                 'start_mc' => $scheduleData['tgl_start_mc'][$index] ?? null,
@@ -403,36 +409,42 @@ class ScheduleController extends BaseController
         $no_mesin = $this->request->getGet('no_mesin');
         $tanggal_schedule = $this->request->getGet('tanggal_schedule');
         $lot_urut = $this->request->getGet('lot_urut');
-
         // Ambil data terkait schedule dan material
         $scheduleData = $this->scheduleCelupModel->getScheduleDetailsData($no_mesin, $tanggal_schedule, $lot_urut);
+        // dd ($no_mesin, $tanggal_schedule, $lot_urut, $scheduleData); 
         $master_order = $this->masterOrderModel->findAll();
         $jenis_bahan_baku = $this->masterMaterialModel->getJenisBahanBaku();
         $item_type = $this->scheduleCelupModel->getItemTypeByParameter($no_mesin, $tanggal_schedule, $lot_urut);
+        // dd ($item_type);    
         $kode_warna = $this->scheduleCelupModel->getKodeWarnaByParameter($no_mesin, $tanggal_schedule, $lot_urut);
         $warna = $this->scheduleCelupModel->getWarnaByParameter($no_mesin, $tanggal_schedule, $lot_urut);
         $tanggal_celup = $this->scheduleCelupModel->getTanggalCelup($no_mesin, $tanggal_schedule, $lot_urut);
         $lot_celup = $this->scheduleCelupModel->getLotCelup($no_mesin, $tanggal_schedule, $lot_urut);
         $ket_daily_cek = $this->scheduleCelupModel->getKetDailyCek($no_mesin, $tanggal_schedule, $lot_urut);
-        $jenis = $this->masterMaterialModel->select('jenis')->where('item_type', $scheduleData[0]['item_type'])->first();
+
+        $jenis = $this->masterMaterialModel->select('jenis')->where('item_type', $item_type[0]['item_type'])->first();
+        // dd ($jenis);
         $min = $this->mesinCelupModel->getMinCaps($no_mesin);
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
-        $po = $this->openPoModel->getFilteredPO($item_type[0]['item_type'], $kode_warna[0]['kode_warna']);
+        $po = $this->openPoModel->getFilteredPO($kode_warna[0]['kode_warna'], $warna[0]['warna'], $item_type[0]['item_type']);
+        // dd ($po);
         $model = $this->masterOrderModel->getNoModel($po[0]['id_order']);
         $kg_kebutuhan = $this->openPoModel->getKgKebutuhan($model, $item_type[0]['item_type'], $kode_warna[0]['kode_warna']);
         // dd($model, $item_type, $kode_warna, $kg_kebutuhan);
         // Cek sisa jatah
         $cekSisaJatah = $this->scheduleCelupModel->cekSisaJatah($model, $item_type[0]['item_type'], $kode_warna[0]['kode_warna']);
+        $qty_po = $cekSisaJatah[0]['qty_po'] ?? 0;
+        // Hitung sisa jatah
         $sisa_jatah = 0;
-
         if (!empty($cekSisaJatah)) {
-            $qty_po = (float) ($cekSisaJatah[0]['qty_po'] ?? 0);
-            $total_kg = (float) ($cekSisaJatah[0]['total_kg'] ?? 0);
+            $qty_po = isset($cekSisaJatah[0]['qty_po']) ? (float) $cekSisaJatah[0]['qty_po'] : 0;
+            $total_kg = isset($cekSisaJatah[0]['total_kg']) ? (float) $cekSisaJatah[0]['total_kg'] : 0;
             $sisa_jatah = $qty_po - $total_kg;
         } else {
-            $sisa_jatah = (float) ($kg_kebutuhan['kg_po'] ?? 0);
+            // Jika tidak ada schedule, sisa jatah sama dengan qty_po
+            $sisa_jatah = isset($kg_kebutuhan['kg_po']) ? (float) $kg_kebutuhan['kg_po'] : 0;
         }
-
+        // dd ($cekSisaJatah, $qty_po, $total_kg, $sisa_jatah);
         // Update scheduleData dengan informasi tambahan
         foreach ($scheduleData as &$row) {
             $deliveryDates = $this->masterOrderModel->getDeliveryDates($row['no_model']);
@@ -443,7 +455,9 @@ class ScheduleController extends BaseController
             $qtyPO = $this->materialModel->getQtyPOByNoModel($row['no_model'], $row['item_type'], $row['kode_warna']);
             $row['qty_po'] = $qtyPO['qty_po'] ?? 0;
             $row['start_mc'] = $row['start_mc'];
+            // dd ($row['no_model'], $row['item_type'], $row['kode_warna']);
         }
+        // dd($scheduleData);
 
         // Persiapkan data untuk view
         $data = [
@@ -498,12 +512,14 @@ class ScheduleController extends BaseController
         // Ambil id_mesin dan no_model
         $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
         $poList = $scheduleData['po']; // Array po[]
-
+        
         $dataBatch = []; // Untuk menyimpan batch data
         $updateMessage = null; // Menyimpan status pesan update atau insert
-
+        
         // Looping data array untuk menyusun data yang akan disimpan
         foreach ($poList as $index => $po) {
+            $noModel = $this->masterOrderModel->getNoModel($scheduleData['po'][$index]);
+            // dd($noModel);
             $id_celup = $scheduleData['id_celup'][$index] ?? null; // Dapatkan id_celup, jika ada
             $last_status = $scheduleData['last_status'][$index] ?? 'scheduled'; // Default status
             $start_mc = $scheduleData['start_mc'][$index] ?? null; // Default status
@@ -512,8 +528,8 @@ class ScheduleController extends BaseController
             $dataBatch[] = [
                 'id_celup' => $id_celup, // ID ini bisa null untuk baris baru
                 'id_mesin' => $id_mesin['id_mesin'],
-                'no_model' => $scheduleData['po'][$index],
-                'item_type' => $scheduleData['item_type'],
+                'no_model' => $noModel['no_model'],
+                'item_type' => $scheduleData['item_type'][$index] ?? null,
                 'kode_warna' => $scheduleData['kode_warna'],
                 'warna' => $scheduleData['warna'],
                 'start_mc' => $start_mc,
@@ -553,6 +569,7 @@ class ScheduleController extends BaseController
                         $updateMessage = 'Gagal mengupdate jadwal!';
                     }
                 }
+                // dd ($updateMessage);
             } else {
                 // Insert data baru
                 $insertSuccess = $this->scheduleCelupModel->insert($data);
@@ -779,5 +796,54 @@ class ScheduleController extends BaseController
                 'errors' => $errors
             ]);
         }
+    }
+
+    public function sample()
+    {
+        // Ambil parameter filter dari query string
+        $startDate = $this->request->getGet('start_date');
+        $endDate = $this->request->getGet('end_date');
+
+        if ($startDate == null && $endDate == null) {
+            // Jika startdate tidak tersedia, gunakan tanggal 3 hari ke belakang
+            $startDate = date('Y-m-d', strtotime('-3 days'));
+            // end date 7 hari ke depan
+            $endDate = date('Y-m-d', strtotime('+6 days'));
+        }
+
+        // Konversi tanggal ke format DateTime jika tersedia
+        $startDateObj = $startDate ? new \DateTime($startDate) : null;
+        $endDateObj = $endDate ? new \DateTime($endDate) : null;
+
+        // Ambil data jadwal dari model (filter berdasarkan tanggal jika tersedia)
+        $scheduleData = $this->scheduleCelupModel->getScheduleCelupbyDate($startDateObj, $endDateObj);
+        // Ambil data mesin celup
+        $mesin_celup = $this->mesinCelupModel->getMesinCelupSample();
+
+        // Hitung total kapasitas yang sudah digunakan
+        $totalCapacityUsed = array_sum(array_column($scheduleData, 'weight'));
+
+        // Hitung total kapasitas maksimum dari semua mesin celup
+        $totalCapacityMax = array_sum(array_column($mesin_celup, 'max_caps'));
+
+        // Siapkan data untuk dikirimkan ke view
+        $today = date('Y-m-d', strtotime('today'));
+        $data = [
+            'active' => $this->active,
+            'title' => 'Schedule',
+            'role' => $this->role,
+            'scheduleData' => $scheduleData,
+            'mesin_celup' => $mesin_celup,
+            'totalCapacityUsed' => $totalCapacityUsed,
+            'totalCapacityMax' => $totalCapacityMax,
+            'currentDate' => new \DateTime(),
+            'filter' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+            ],
+        ];
+
+        // Render view dengan data yang sudah disiapkan
+        return view($this->role . '/schedule/sample', $data);
     }
 }
