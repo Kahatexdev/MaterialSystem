@@ -213,7 +213,7 @@
                     <h3>Out Celup</h3>
                 </div>
                 <div class="group">
-                    <a href="<?= base_url($role . '/insertBon') ?>" class="btn btn-info">
+                    <a href="<?= base_url($role . '/createBon') ?>" class="btn btn-info">
                         <i class="ni ni-single-copy-04 me-2"></i>Create BON</a>
                 </div>
             </div>
