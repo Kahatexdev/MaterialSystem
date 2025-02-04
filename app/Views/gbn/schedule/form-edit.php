@@ -24,6 +24,80 @@
         pointer-events: none;
         background-color: #e9ecef;
     }
+
+    .table-responsive {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        background-color: #197706;
+        color: #ffffff;
+        font-weight: 600;
+        text-transform: uppercase;
+        padding: 15px;
+    }
+
+    .table tbody td {
+        padding: 15px;
+        vertical-align: middle;
+    }
+
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-control,
+    .form-select {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 8px 12px;
+        width: 100%;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #197706;
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+
+    /* Button Styles */
+    .btn {
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-weight: 600;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+    }
+
+    .btn-info {
+        background-color: #197706;
+        border-color: #197706;
+        color: #ffffff;
+    }
+
+    .btn-info:hover {
+        background-color: #0e5e02;
+        border-color: #0e5e02;
+    }
+
+    .btn-danger {
+        background-color: #e74c3c;
+        border-color: #e74c3c;
+    }
+
+    .btn-danger:hover {
+        background-color: #c0392b;
+        border-color: #c0392b;
+    }
 </style>
 <div class="container-fluid">
     <div class="row">
@@ -86,106 +160,154 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="table-responsive">
-                                            <table id="poTable" class="table table-bordered table-striped">
-                                                <thead>
-                                                    <tr>
-                                                        <th class="text-center">Item Type</th>
-                                                        <th class="text-center">PO</th>
-                                                        <th class="text-center">Tgl Start MC</th>
-                                                        <th class="text-center">Delivery Awal</th>
-                                                        <th class="text-center">Delivery Akhir</th>
-                                                        <th class="text-center">Qty PO</th>
-                                                        <th class="text-center">Qty PO(+)</th>
-                                                        <th class="text-center">Kg Kebutuhan</th>
-                                                        <th class="text-center">Tagihan SCH</th>
-                                                        <th class="text-center">Qty Celup</th>
-                                                        <th class="text-center">PO(+)</th>
-                                                        <th class="text-center">Status</th>
-                                                        <th class="text-center">
-                                                            <button type="button" class="btn btn-info" id="addRow">
-                                                                <i class="fas fa-plus"></i>
-                                                            </button>
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php foreach ($scheduleData as $detail): ?>
-                                                        <tr>
-                                                            <td>
-                                                                <select class="form-select item-type" name="item_type[]" required>
-                                                                    <option value="">Pilih Item Type</option>
-                                                                    <?php foreach ($scheduleData as $item): ?>
-                                                                        <option value="<?= $item['item_type'] ?>" <?= ($item['item_type'] == $detail['item_type']) ? 'selected' : '' ?>><?= $item['item_type'] ?></option>
-                                                                    <?php endforeach; ?>
-                                                                </select>
-                                                                <input type="hidden" name="id_celup[]" value="<?= $detail['id_celup'] ?>">
-                                                            </td>
-                                                            <td>
-                                                                <select class="form-select po-select" name="po[]" required>
-                                                                    <option value="">Pilih PO</option>
-                                                                    <?php foreach ($scheduleData as $po): ?>
-                                                                        <option value="<?= $po['id_order'] ?>" <?= ($po['id_order'] == $detail['id_order']) ? 'selected' : '' ?>><?= $po['no_model'] ?></option>
-                                                                    <?php endforeach; ?>
-                                                                </select>
-                                                            </td>
-                                                            <td><input type="date" class="form-control" name="tgl_start_mc[]" value="<?= $detail['start_mc'] ?>" readonly></td>
-                                                            <td><input type="date" class="form-control" name="delivery_awal[]" value="<?= $detail['delivery_awal'] ?>" readonly></td>
-                                                            <td><input type="date" class="form-control" name="delivery_akhir[]" value="<?= $detail['delivery_akhir'] ?>" readonly></td>
-                                                            <td><input type="number" class="form-control" name="qty_po[]" value="<?= $detail['qty_po'] ?>" readonly></td>
-                                                            <td><input type="number" class="form-control" name="qty_po_plus[]" value="" readonly></td>
-                                                            <td class="text-center">
-                                                                <span class="badge bg-info">
-                                                                    <span class="kg_kebutuhan"><?= $kg_kebutuhan ?></span> KG
-                                                                </span>
-                                                            </td>
-                                                            <td class="text-center">
-                                                                <span class="badge bg-info">
-                                                                    <span class="sisa_jatah"><?= $sisa_jatah ?></span> KG
-                                                                </span>
-                                                            </td>
-                                                            <td><input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" value="<?= $detail['kg_celup'] ?>" required></td>
-                                                            <td>
-                                                                <select class="form-select" name="po_plus[]" required>
-                                                                    <option value="">Pilih PO(+)</option>
-                                                                    <option value="1" <?= ($detail['po_plus'] == 1) ? 'selected' : '' ?>>Ya</option>
-                                                                    <option value="0" <?= ($detail['po_plus'] == 0) ? 'selected' : '' ?>>Tidak</option>
-                                                                </select>
-                                                            </td>
-                                                            <td class="text-center">
-                                                                <span class="badge bg-<?= $detail['last_status'] == 'scheduled' ? 'info' : ($detail['last_status'] == 'celup' ? 'warning' : 'success') ?>"><?= $detail['last_status'] ?></span>
-                                                                <input type="hidden" class="form-control last_status" name="last_status[]" value="<?= $detail['last_status'] ?>">
-                                                            </td>
-                                                            <td class="text-center">
-                                                                <button type="button" class="btn btn-info editRow" data-toggle="modal" data-target="#editModal" data-id="<?= $detail['id_celup'] ?>" data-tanggalSchedule="<?= $detail['tanggal_schedule'] ?>" data-toggle="tooltip" title="Edit">
-                                                                    <i class="fas fa-calendar"></i>
-                                                                </button>
-                                                                <button type="button" class="btn btn-danger removeRow">
-                                                                    <i class="fas fa-trash"></i>
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    <?php endforeach; ?>
-                                                </tbody>
-                                                <tfoot>
+                                <div class="col-md-12">
+                                    <div class="table-responsive">
+                                        <table id="poTable" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center">No</th>
+                                                    <th class="text-center">Order</th>
+                                                    <th class="text-center">
+                                                        <button type="button" class="btn btn-info" id="addRow">
+                                                            <i class="fas fa-plus"></i>
+                                                        </button>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php $no = 1; ?>
+                                                <?php foreach ($scheduleData as $detail): ?>
                                                     <tr>
                                                         <td class="text-center">
-                                                            <strong>Total Qty Celup</strong>
+                                                            <?= $no++ ?>
                                                         </td>
-                                                        <td colspan="8" class="text-center">
-                                                            <input type="number" class="form-control" id="total_qty_celup" name="total_qty_celup" value="" readonly>
+                                                        <td>
+                                                            <div class="row">
+                                                                <div class="col-6">
+                                                                    <div class="form-group">
+                                                                        <label for="itemtype"> Item Type</label>
+                                                                        <select class="form-select item-type" name="item_type[]" required>
+                                                                            <?php foreach ($scheduleData as $item): ?>
+                                                                                <option value="<?= $item['item_type'] ?>" <?= ($item['item_type'] == $detail['item_type']) ? 'selected' : '' ?>><?= $item['item_type'] ?></option>
+                                                                            <?php endforeach; ?>
+                                                                        </select>
+                                                                        <input type="hidden" name="id_celup[]" value="<?= $detail['id_celup'] ?>">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <div class="form-group">
+                                                                        <label for="po"> PO</label>
+                                                                        <select class="form-select po-select" name="po[]" required>
+                                                                            <?php foreach ($scheduleData as $po): ?>
+                                                                                <option value="<?= $po['id_order'] ?>" <?= ($po['id_order'] == $detail['id_order']) ? 'selected' : '' ?>><?= $po['no_model'] ?></option>
+                                                                            <?php endforeach; ?>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-4">
+                                                                    <div class="form-group">
+                                                                        <label for="tgl_start_mc"> Tgl Start MC</label>
+                                                                        <input type="date" class="form-control" name="tgl_start_mc[]" value="<?= $detail['start_mc'] ?>" readonly>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <div class="form-group">
+                                                                        <label for="delivery_awal"> Delivery Awal</label>
+                                                                        <input type="date" class="form-control" name="delivery_awal[]" value="<?= $detail['delivery_awal'] ?>" readonly>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <div class="form-group">
+                                                                        <label for="delivery_akhir"> Delivery Akhir</label>
+                                                                        <input type="date" class="form-control" name="delivery_akhir[]" value="<?= $detail['delivery_akhir'] ?>" readonly>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-4">
+                                                                    <div class="form-group">
+                                                                        <label for="qty_po"> Qty PO</label>
+                                                                        <input type="number" class="form-control" name="qty_po[]" value="<?= number_format($detail['qty_po'], 2) ?>" readonly>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <div class="form-group">
+                                                                        <label for="qty_po_plus"> Qty PO (+)</label>
+                                                                        <input type="number" class="form-control" name="qty_po_plus[]" value="" readonly>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <div class="form-group">
+                                                                        <label for="po_plus">PO +</label>
+                                                                        <select class="form-select po-plus" name="po_plus[]" required>
+                                                                            <option value="1" <?= ($detail['po_plus'] == 1) ? 'selected' : '' ?>>Ya</option>
+                                                                            <option value="0" <?= ($detail['po_plus'] == 0) ? 'selected' : '' ?>>Tidak</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-3">
+                                                                    <div class="form-group">
+                                                                        <label for="qty_celup">KG Kebutuhan :</label>
+                                                                        <br />
+                                                                        <span class="badge bg-info">
+                                                                            <span class="kg_kebutuhan"><?= $kg_kebutuhan ?></span> KG
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-3">
+                                                                    <div class="form-group">
+                                                                        <label for="qty_celup">Sisa Jatah :</label>
+                                                                        <br />
+                                                                        <span class="badge bg-info">
+                                                                            <span class="sisa_jatah"><?= number_format($sisa_jatah, 2) ?></span> KG
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-3">
+                                                                    <label for="last_status">Last Status</label>
+                                                                    <br />
+                                                                    <span class="badge bg-<?= $detail['last_status'] == 'scheduled' ? 'info' : ($detail['last_status'] == 'celup' ? 'warning' : 'success') ?>"><?= $detail['last_status'] ?></span>
+                                                                    <input type="hidden" class="form-control last_status" name="last_status[]" value="<?= $detail['last_status'] ?>">
+                                                                </div>
+                                                                <div class="col-3">
+                                                                    <label for="qty_celup">Qty Celup</label>
+                                                                    <input type="number" class="form-control" name="qty_celup[]" value="<?= $detail['kg_celup'] ?>" required>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button type="button" class="btn btn-info editRow" data-id="<?= $detail['id_celup'] ?>" data-tanggalschedule="<?= $tanggal_schedule ?>">
+                                                                <i class="fas fa-calendar-alt"></i>
+                                                            </button>
+                                                            <button type="button" class="btn btn-danger removeRow">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
                                                         </td>
                                                     </tr>
-                                                </tfoot>
-                                            </table>
-                                        </div>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td class="text-center">
+                                                        <strong>Total Qty Celup</strong>
+                                                    </td>
+                                                    <td colspan="8" class="text-center">
+                                                        <input type="number" class="form-control" id="total_qty_celup" name="total_qty_celup" value="" readonly>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
                                     </div>
                                 </div>
+
                                 <div class="text-end">
                                     <button type="submit" class="btn btn-info w-100">Update Jadwal</button>
                                 </div>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -527,49 +649,110 @@
             const tbody = poTable.querySelector("tbody");
             const newRow = document.createElement("tr");
             newRow.innerHTML = `
-    <td>
-        <select class="form-select item-type" name="item_type[]" required>
-            <option value="">Pilih Item Type</option>
-        </select>
-    </td>
-    <td>
-        <select class="form-select po-select" name="po[]" required>
-            <option value="">Pilih PO</option>
-        </select>
-    </td>
-    <td><input type="date" class="form-control" name="tgl_start_mc[]" readonly></td>
-    <td><input type="date" class="form-control" name="delivery_awal[]" readonly></td>
-    <td><input type="date" class="form-control" name="delivery_akhir[]" readonly></td>
-    <td><input type="number" class="form-control" name="qty_po[]" readonly></td>
-    <td><input type="number" class="form-control" name="qty_po_plus[]" readonly></td>
-    <td class="text-center">
-        <span class="badge bg-info">
-            <span class="kg_kebutuhan">0.00</span> KG
-        </span>
-    </td>
-    <td class="text-center">
-        <span class="badge bg-info">
-            <span class="sisa_jatah">0.00</span> KG
-        </span>
-    </td>
-    <td><input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required></td>
-    <td>
-        <select class="form-select" name="po_plus[]" required>
-            <option value="">Pilih PO(+)</option>
-            <option value="1">Ya</option>
-            <option value="0">Tidak</option>
-        </select>
-    </td>
-    <td>
-        <span class="badge bg-info">scheduled</span>
-        <input type="hidden" class="form-control last_status" name="last_status[]" value="scheduled">
-    </td>
-    <td class="text-center">
-        <button type="button" class="btn btn-danger removeRow">
-            <i class="fas fa-trash"></i>
-        </button>
-    </td>
-    `;
+                <td class="text-center">${tbody.rows.length + 1}</td>
+                <td>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="itemtype"> Item Type</label>
+                                <select class="form-select item-type" name="item_type[]" required>
+                                    <option value="">Pilih Item Type</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="po">PO</label>
+                                <select class="form-select po-select" name="po[]" required>
+                                    <option value="">Pilih PO</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="tgl_start_mc">Tgl Start MC</label>
+                                <input type="date" class="form-control" name="tgl_start_mc[]" readonly>
+                            </div>
+                        </div>
+
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="delivery_awal">Delivery Awal</label>
+                                <input type="date" class="form-control" name="delivery_awal[]" readonly>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group ">
+                                <label for="delivery_akhir">Delivery Akhir</label>
+                                <input type="date" class="form-control" name="delivery_akhir[]" readonly>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="qty_po">Qty PO</label>
+                                <input type="number" class="form-control" name="qty_po[]" readonly>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="qty_po_plus">Qty PO (+)</label>
+                                <input type="number" class="form-control" name="qty_po_plus[]" readonly>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="kg_kebutuhan">PO +</label>
+                                <select class="form-select" name="po_plus[]" required>
+                                    <option value="">Pilih PO(+)</option>
+                                    <option value="1">Ya</option>
+                                    <option value="0">Tidak</option>
+                                </select>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <label for="qty_celup">KG Kebutuhan :</label>
+                                    <br />
+                                    <span class="badge bg-info">
+                                        <span class="kg_kebutuhan">0.00</span> KG
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <label for="qty_celup">Sisa Jatah :</label>
+                                    <br />
+                                    <span class="badge bg-info">
+                                        <span class="sisa_jatah">0.00</span> KG
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <label for="last_status">Last Status</label>
+                                <br />
+                                <span class="badge bg-info">scheduled</span>
+                                <input type="hidden" class="form-control last_status" name="last_status[]" value="scheduled">
+                            </div>
+                            <div class="col-3">
+                                <label for="qty_celup">Qty Celup</label>
+                                <input type="number" class="form-control" name="qty_celup[]" value="" required>
+                            </div>
+                        </div>
+
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-danger removeRow">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+                `;
             tbody.appendChild(newRow);
 
             // Ambil elemen item-type di baris baru
