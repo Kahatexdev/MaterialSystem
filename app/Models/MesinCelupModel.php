@@ -111,4 +111,13 @@ class MesinCelupModel extends Model
             ->orderBy('no_mesin', 'ASC')
             ->findAll();
     }
+
+    public function getMesinCelupSample()
+    {
+        return $this->table('mesin_celup')
+        ->select('*')
+            ->where('ket_mesin', 'MC BENANG SAMPLE')
+            ->orderBy('no_mesin', 'ASC')
+            ->findAll();
+    }
 }
