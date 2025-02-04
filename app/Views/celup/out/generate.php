@@ -214,7 +214,7 @@
                 </div>
                 <div class="group">
                     <a href="<?= base_url($role . '/insertBon') ?>" class="btn btn-info">
-                        <i class="ni ni-single-copy-04 me-2"></i>Create BON</a>
+                        <i class="ni ni-single-copy-04 me-2"></i>PRINT</a>
                 </div>
             </div>
         </div>

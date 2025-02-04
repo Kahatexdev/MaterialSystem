@@ -409,6 +409,9 @@ class CelupController extends BaseController
     public function generateBarcode($id)
     {
         $dataBon = $this->bonCelupModel->getDataById($id);
+        dd($dataBon);
+        $idBon = $dataBon['id_bon'];
+        $detailBon = $this->outCelupModel->getDetailBonByIdBon($idBon);
         $data = [
             'role' => $this->role,
             'active' => $this->active,

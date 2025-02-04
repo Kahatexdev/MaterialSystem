@@ -23,7 +23,7 @@
                                         <option value="IMPORT DARI KOREA">IMPORT DARI KOREA</option>
                                         <option value="JS MISTY">JS MISTY</option>
                                         <option value="JS SOLID">JS SOLID</option>
-                                        <option value="JS KHTEX">JS KHTEX</option>
+                                        <option value="KHTEX">KHTEX</option>
                                         <option value="PO(+)">PO(+)</option>
                                     </select>
                                 </div>
@@ -63,7 +63,7 @@
                                             </div>
                                             <div class="col-md-4">
                                                 <label>Kode Warna</label>
-                                                <select class="form-control text-uppercase" name="items[0][kode_warna]" id="kode_warna" required>
+                                                <select class="form-control" name="items[0][kode_warna]" id="kode_warna" required>
                                                 </select>
                                             </div>
 
