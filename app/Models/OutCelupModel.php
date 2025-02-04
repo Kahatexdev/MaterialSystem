@@ -70,4 +70,15 @@ class OutCelupModel extends Model
             ->groupBy('id_out_celup')
             ->findAll();
     }
+
+    public function getDataOut($id)
+    {
+        return $this->db->table('out_celup')
+            ->select('out_celup.*, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna')
+            ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup')
+            ->where('out_celup.id_out_celup', $id)
+            ->distinct()
+            ->get()
+            ->getResultArray();
+    }
 }
