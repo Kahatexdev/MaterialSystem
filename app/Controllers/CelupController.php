@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
-use Picqer\Barcode\BarcodeGeneratorPNG;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
@@ -12,6 +11,7 @@ use App\Models\OpenPoModel;
 use App\Models\ScheduleCelupModel;
 use App\Models\OutCelupModel;
 use App\Models\BonCelupModel;
+use Picqer\Barcode\BarcodeGeneratorPNG;
 
 class CelupController extends BaseController
 {
@@ -300,37 +300,13 @@ class CelupController extends BaseController
 
     public function outCelup()
     {
-        $scheduleDone = $this->scheduleCelupModel->getScheduleDone();
-        $uniqueData = [];
-
-        foreach ($scheduleDone as $key => $id) {
-            // Log::debug($key); // atau var_dump($key);
-            $noModel = $id['no_model'];
-            $itemType = $id['item_type'];
-            $kodeWarna = $id['kode_warna'];
-
-            $dataPo = $this->materialModel->getQtyPOForCelup($noModel, $itemType, $kodeWarna);
-
-            $uniqueData[$key] = [
-                'idCelup' => $id['id_celup'],
-                'noModel' => $noModel,
-                'itemType' => $itemType,
-                'kodeWarna' => $kodeWarna,
-                'warna' => $id['warna'],
-                'startMc' => $id['start_mc'],
-                'qtyPo' => number_format($dataPo['qty_po'], 2),
-                'qtyPoPlus' => '',
-                'tanggalSchedule' => $id['tanggal_schedule'],
-                'qtyCelup' => number_format($id['qty_celup'], 2),
-                'qtyCelupPlus' => number_format($id['qty_celup_plus'], 2),
-            ];
-        }
+        $bonCelup = $this->bonCelupModel->getData();
 
         $data = [
             'role' => $this->role,
             'active' => $this->active,
             'title' => "Out Celup",
-            'schedule' => $uniqueData,
+            'bonCelup' => $bonCelup,
         ];
         return view($this->role . '/out/index', $data);
     }
@@ -345,51 +321,78 @@ class CelupController extends BaseController
         return view($this->role . '/retur/index', $data);
     }
 
-    // public function insertBon($id_celup)
-    // {
-    //     $no_model = $this->masterOrderModel->getNoModel($id_celup);
-    //     $data = [
-    //         'role' => $this->role,
-    //         'active' => $this->active,
-    //         'title' => "Out Celup",
-    //         'id_celup' => $id_celup,
-    //         'no_model' => $no_model['no_model'],
-    //     ];
-    //     return view($this->role . '/out/createBon', $data);
-    // }
-    public function insertBon()
+    public function createBon()
     {
-        // $no_model = $this->masterOrderModel->getNoModel($id_celup);
+        $no_model = $this->scheduleCelupModel->getCelupDone();
         $data = [
             'role' => $this->role,
             'active' => $this->active,
             'title' => "Out Celup",
-            // 'id_celup' => $id_celup,
-            // 'no_model' => $no_model['no_model'],
+            'no_model' => $no_model,
         ];
         return view($this->role . '/out/createBon', $data);
+    }
+
+    public function getItemType()
+    {
+        $noModel = $this->request->getPost('no_model');
+
+        if (!$noModel) {
+            return $this->response->setJSON(['error' => 'No model provided'], 400);
+        }
+
+        $itemType = $this->scheduleCelupModel->getItemTypeByNoModel($noModel);
+
+        return $this->response->setJSON($itemType);
+    }
+
+    public function getKodeWarna()
+    {
+        $noModel = $this->request->getPost('no_model');
+        $itemType = $this->request->getPost('item_type');
+
+        if (!$noModel || !$itemType) {
+            return $this->response->setJSON(['error' => 'Invalid input'], 400);
+        }
+
+        // Ambil data dari model
+        $kodeWarna = $this->scheduleCelupModel->getKodeWarnaByNoModelDanItemType($noModel, $itemType);
+
+        return $this->response->setJSON($kodeWarna);
+    }
+
+    public function getWarna()
+    {
+        $noModel = $this->request->getPost('no_model');
+        $itemType = $this->request->getPost('item_type');
+        $kodeWarna = $this->request->getPost('kode_warna');
+
+        if (!$noModel || !$itemType) {
+            return $this->response->setJSON(['error' => 'Invalid input'], 400);
+        }
+
+        // Ambil data dari model
+        $colorCodes = $this->scheduleCelupModel->getWarnaByNoModelItemDanKode($noModel, $itemType, $kodeWarna);
+
+        return $this->response->setJSON($colorCodes);
     }
 
     public function saveBon()
     {
         $data = $this->request->getPost();
-
+        $gantiRetur = isset($data['ganti_retur']) ? 1 : 0;
         $saveDataBon = [
             'id_celup' => $data['id_celup'],
+            'detail_sj' => $data['detail_sj'],
+            'no_surat_jalan' => $data['no_surat_jalan'],
             'tgl_datang' => $data['tgl_datang'],
             'l_m_d' => $data['l_m_d'],
             'harga' => $data['harga'],
-            'gw' => $data['gw'],
-            'nw' => $data['nw'],
-            'cones' => $data['cones'],
-            'karung' => $data['karung'],
-            'no_surat_jalan' => $data['no_surat_jalan'],
-            'detail_sj' => $data['detail_sj'],
-            'ganti_retur' => $data['ganti_retur'],
             'admin' => session()->get('username'),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => '',
         ];
+        dd($saveDataBon);
 
         $this->bonCelupModel->insert($saveDataBon);
 
@@ -402,7 +405,7 @@ class CelupController extends BaseController
             'kgs_kirim' => $data['kgs_kirim'],
             'cones_kirim' => $data['cones_kirim'],
             'lot_kirim' => $data['lot_kirim'],
-            'ganti_retur' => $data['ganti_retur'],
+            'ganti_retur' => $gantiRetur,
             'admin' => session()->get('username'),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => '',
@@ -412,19 +415,32 @@ class CelupController extends BaseController
 
         return redirect()->to(base_url($this->role . '/outCelup'))->with('success', 'BON Berhasil Di Simpan.');
     }
-    public function generate($text = '1') // Contoh default text
+
+    public function generateBarcode($id)
     {
-        // Inisialisasi generator barcode
-        $generator = new BarcodeGeneratorPNG();
+        $dataBon = $this->bonCelupModel->getDataById($id);
+        dd($dataBon);
+        $idBon = $dataBon['id_bon'];
+        $detailBon = $this->outCelupModel->getDetailBonByIdBon($idBon);
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "Generate",
+            'dataBon' => $dataBon,
+        ];
+        return view($this->role . '/out/generate', $data);
+        // // Pastikan ID yang dikirim adalah angka valid
+        // if (!is_numeric($id)) {
+        //     return "Invalid ID";
+        // }
 
-        // Generate barcode PNG
-        $barcode = $generator->getBarcode($text, $generator::TYPE_CODE_93);
+        // // Buat instance barcode generator
+        // $generator = new BarcodeGeneratorPNG();
+        // $barcode = $generator->getBarcode($id, $generator::TYPE_UPC_A);
 
-        // Atur header agar output berupa gambar PNG
-        header('Content-Type: image/png');
-
-        // Tampilkan barcode
-        echo $barcode;
-        exit;
+        // // Set header sebagai gambar PNG
+        // header('Content-Type: image/png');
+        // echo $barcode;
+        // exit;
     }
 }

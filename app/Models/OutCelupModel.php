@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use PHPUnit\Framework\Attributes\IgnoreFunctionForCodeCoverage;
 
 class OutCelupModel extends Model
 {
@@ -16,6 +17,9 @@ class OutCelupModel extends Model
         'id_out_celup',
         'id_bon',
         'id_celup',
+        'l_m_d',
+        'harga',
+        'no_karung',
         'gw_kirim',
         'kgs_kirim',
         'cones_kirim',

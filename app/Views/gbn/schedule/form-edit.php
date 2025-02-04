@@ -19,8 +19,86 @@
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 38px;
     }
-</style>
 
+    .locked-input {
+        pointer-events: none;
+        background-color: #e9ecef;
+    }
+
+    .table-responsive {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        background-color: #197706;
+        color: #ffffff;
+        font-weight: 600;
+        text-transform: uppercase;
+        padding: 15px;
+    }
+
+    .table tbody td {
+        padding: 15px;
+        vertical-align: middle;
+    }
+
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-control,
+    .form-select {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 8px 12px;
+        width: 100%;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #197706;
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+
+    /* Button Styles */
+    .btn {
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-weight: 600;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+    }
+
+    .btn-info {
+        background-color: #197706;
+        border-color: #197706;
+        color: #ffffff;
+    }
+
+    .btn-info:hover {
+        background-color: #0e5e02;
+        border-color: #0e5e02;
+    }
+
+    .btn-danger {
+        background-color: #e74c3c;
+        border-color: #e74c3c;
+    }
+
+    .btn-danger:hover {
+        background-color: #c0392b;
+        border-color: #c0392b;
+    }
+</style>
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
@@ -32,186 +110,206 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <form action="<?= base_url(session('role') . '/schedule/updateSchedule') ?>" method="post">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <!-- No Mesin -->
-                                <div class="form-group" id="noMesinGroup">
-                                    <label for="no_mesin" class="form-label">No Mesin</label>
-                                    <input type="text" class="form-control" id="no_mesin" name="no_mesin" value="<?= $no_mesin ?>" readonly <?= $readonly ? 'readonly' : '' ?>>
-                                    <input type="hidden" name="lot_urut" value="<?= $lot_urut ?>">
+                    <div class="row">
+                        <form action="<?= base_url(session('role') . '/schedule/updateSchedule') ?>" method="post">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label for="no_mesin" class="form-label">No Mesin</label>
+                                        <input type="text" class="form-control" id="no_mesin" name="no_mesin" value="<?= $no_mesin ?>" readonly>
+                                        <input type="hidden" name="tanggal_schedule" value="<?= $tanggal_schedule ?>">
+                                        <input type="hidden" name="lot_urut" value="<?= $lot_urut ?>">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label for="min_caps" class="form-label">Min Caps</label>
+                                        <input type="number" class="form-control" id="min_caps" name="min_caps" value="<?= $min_caps ?>" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label for="max_caps" class="form-label">Max Caps</label>
+                                        <input type="number" class="form-control" id="max_caps" name="max_caps" value="<?= $max_caps ?>" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label for="sisa_kapasitas" class="form-label">Sisa Kapasitas</label>
+                                        <input type="number" class="form-control" id="sisa_kapasitas" name="sisa_kapasitas" value="<?= $max_caps ?>" data-max-caps="<?= $max_caps ?>" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="jenis_bahan_baku" class="form-label">Jenis Bahan Baku</label>
+                                        <input type="text" class="form-control" id="jenis_bahan_baku" name="jenis_bahan_baku" value="<?= $jenis ?>" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="kode_warna" class="form-label">Kode Warna</label>
+                                        <input type="text" class="form-control" id="kode_warna" name="kode_warna" value="<?= $kode_warna[0]['kode_warna'] ?>" required readonly>
+                                        <div id="suggestionsKWarna" class="suggestions-box" style="display: none;"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="warna" class="form-label">Warna</label>
+                                        <input type="text" class="form-control" id="warna" name="warna" value="<?= $warna[0]['warna'] ?>" maxlength="32" required readonly>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <!-- Min Caps -->
-                                <div class="form-group" id="minCapsGroup">
-                                    <label for="min_caps" class="form-label">Minimum Kapasitas</label>
-                                    <input type="number" class="form-control" name="min_caps" id="min_caps" value="<?= $min_caps ?>" required readonly <?= $readonly ? 'readonly' : '' ?>>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <!-- Max Caps -->
-                                <div class="form-group" id="maxCapsGroup">
-                                    <label for="max_caps" class="form-label">Maximum Kapasitas</label>
-                                    <input type="number" class="form-control" name="max_caps" id="max_caps" value="<?= $max_caps ?>" required readonly <?= $readonly ? 'readonly' : '' ?>>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <!-- Sisa Kapasitas -->
-                                <div class="form-group" id="sisaKapasitasGroup">
-                                    <label for="sisa_kapasitas" class="form-label">Sisa Kapasitas</label>
-                                    <input type="number" class="form-control" name="sisa_kapasitas" id="sisa_kapasitas" value="" required readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <!-- Jenis Bahan Baku -->
-                                <div class="form-group" id="jenisBahanBakuGroup">
-                                    <label for="jenis_bahan_baku" class="form-label">Jenis Bahan Baku</label>
-                                    <select class="form-select" id="jenis_bahan_baku" name="jenis_bahan_baku" <?= $readonly ? 'readonly' : '' ?> required>
-                                        <option value="">Pilih Jenis Bahan Baku</option>
-                                        <?php foreach ($jenis_bahan_baku as $bahan): ?>
-                                            <option value="<?= $bahan['jenis'] ?>" <?= $jenis == $bahan['jenis'] ? 'selected' : '' ?>><?= $bahan['jenis'] ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <!-- Item Type -->
-                                <div class="form-group" id="itemTypeGroup">
-                                    <label for="item_type">Item Type</label>
-                                    <select class="form-select" name="item_type" id="item_type" <?= $readonly ? 'readonly' : '' ?> required>
-                                        <option value="">Pilih Item Type</option>
-                                        <?php foreach ($item_type as $option): ?>
-                                            <option value="<?= $option['item_type'] ?>" <?= $item_type[0]['item_type'] == $option['item_type'] ? 'selected' : '' ?>><?= $option['item_type'] ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <!-- Kode Warna -->
-                                <div class="form-group" id="kodeWarnaGroup">
-                                    <label for="kode_warna">Kode Warna</label>
-                                    <input type="text" class="form-control" name="kode_warna" id="kode_warna" value="<?= $kode_warna[0]['kode_warna'] ?>" required readonly <?= $readonly ? 'readonly' : '' ?>>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <!-- Warna -->
-                                <div class="form-group" id="warnaGroup">
-                                    <label for="warna" class="form-label">Warna</label>
-                                    <input type="text" class="form-control" id="warna" name="warna" maxlength="32" value="<?= $warna[0]['warna'] ?>" readonly <?= $readonly ? 'readonly' : '' ?>>
-                                </div>
-                            </div>
-
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="table-responsive">
-                                    <table id="poTable" class="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-center">PO</th>
-                                                <th class="text-center">Tgl Start MC</th>
-                                                <th class="text-center">Delivery Awal</th>
-                                                <th class="text-center">Delivery Akhir</th>
-                                                <th class="text-center">Qty PO</th>
-                                                <th class="text-center">Qty PO(+)</th>
-                                                <th class="text-center">Kg Kebutuhan</th>
-                                                <th class="text-center">Tagihan SCH</th>
-                                                <th class="text-center">Qty Celup</th>
-                                                <th class="text-center">PO(+)</th>
-                                                <th class="text-center">Status</th>
-                                                <th class="text-center">
-                                                    <button type="button" class="btn btn-info" id="addRow">
-                                                        <i class="fas fa-plus"></i>
-                                                    </button>
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($scheduleData as $index => $row): ?>
-                                                <tr data-status="<?= $row['last_status'] ?>">
-                                                    <td>
-                                                        <select class="form-select po-select" name="po[<?= $index ?>]" <?= $readonly ? 'readonly' : '' ?> required>
-                                                            <option value="">Pilih PO</option>
-                                                            <?php foreach ($po as $option): ?>
-                                                                <option value="<?= $option['no_model'] ?>" <?= ($row['no_model'] ?? '') == $option['no_model'] ? 'selected' : '' ?>>
-                                                                    <?= $option['no_model'] ?>
-                                                                </option>
-                                                            <?php endforeach; ?>
-                                                        </select>
-                                                        <?php if ($readonly): ?>
-                                                            <input type="hidden" name="po[<?= $index ?>]" value="<?= $row['no_model'] ?>">
-                                                        <?php endif; ?>
-                                                    </td>
-                                                    <td>
-                                                        <input type="date" class="form-control start_mc" name="start_mc[<?= $index ?>]" value="<?= $start_mc ?>" required <?= $readonly ? 'readonly' : '' ?>>
-                                                    </td>
-                                                    <td>
-                                                        <input type="date" class="form-control delivery_awal" name="delivery_awal[<?= $index ?>]" value="<?= $row['delivery_awal'] ?>" required <?= $readonly ? 'readonly' : '' ?>>
-                                                    </td>
-                                                    <td>
-                                                        <input type="date" class="form-control delivery_akhir" name="delivery_akhir[<?= $index ?>]" value="<?= $row['delivery_akhir'] ?>" required <?= $readonly ? 'readonly' : '' ?>>
-                                                    </td>
-                                                    <td>
-                                                        <input type="number" class="form-control qty_po" name="qty_po[<?= $index ?>]" value="<?= number_format((float)$row['qty_po'], 2, '.', '') ?>" required <?= $readonly ? 'readonly' : '' ?>>
-                                                    </td>
-                                                    <td>
-                                                        <input type="number" class="form-control qty_po_plus" name="qty_po_plus[<?= $index ?>]" value="" required readonly>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-info"><span class="kg_kebutuhan"><?= number_format((float)$kg_kebutuhan, 2, '.', '') ?></span> KG</span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-info"><span class="tagihan_schedule"><?= number_format((float)$sisa_jatah, 2, '.', '') ?></span> KG</span>
-                                                    </td>
-                                                    <td>
-                                                        <input type="number" step="0.01" class="form-control qty_celup" name="qty_celup[<?= $index ?>]" value="<?= $row['kg_celup'] ?>" required>
-                                                    </td>
-                                                    <td>
-                                                        <select class="form-select po_plus" name="po_plus[<?= $index ?>]" required>
-                                                            <option value="">Pilih PO(+)</option>
-                                                            <option value="1" <?= $row['po_plus'] == '1' ? 'selected' : '' ?>>Iya</option>
-                                                            <option value="0" <?= $row['po_plus'] == '0' ? 'selected' : '' ?>>Bukan</option>
-                                                        </select>
-                                                        <input type="hidden" name="id_celup[<?= $index ?>]" value="<?= $row['id_celup'] ?>">
-                                                        <input type="hidden" name="tanggal_schedule" value="<?= $row['tanggal_schedule'] ?>">
-                                                        <input type="hidden" name="item_type[<?= $index ?>]" value="<?= $row['item_type'] ?>">
-                                                        <input type="hidden" name="kode_warna[<?= $index ?>]" value="<?= $row['kode_warna'] ?>">
-                                                    </td>
-
-                                                    <td>
-                                                        <span class="badge bg-<?= $row['last_status'] == 'scheduled' ? 'info' : ($row['last_status'] == 'celup' ? 'warning' : 'success') ?>"><?= $row['last_status'] ?></span>
-                                                        <input type="hidden" class="form-control last_status" name="last_status[<?= $index ?>]" value="<?= $row['last_status'] ?>" ?>
-                                                    </td>
-
-                                                    <td class="text-center">
-                                                        <button type="button" class="btn btn-info editRow" data-toggle="modal" data-target="#editModal" data-id="<?= $row['id_celup'] ?>" data-tanggalSchedule="<?= $row['tanggal_schedule'] ?>" data-toggle="tooltip" title="Edit">
-                                                            <i class="fas fa-calendar"></i>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="table-responsive">
+                                        <table id="poTable" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center">No</th>
+                                                    <th class="text-center">Order</th>
+                                                    <th class="text-center">
+                                                        <button type="button" class="btn btn-info" id="addRow">
+                                                            <i class="fas fa-plus"></i>
                                                         </button>
-                                                        <button type="button" class="btn btn-danger removeRow">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php $no = 1; ?>
+                                                <?php foreach ($scheduleData as $detail): ?>
+                                                    <tr>
+                                                        <td class="text-center">
+                                                            <?= $no++ ?>
+                                                        </td>
+                                                        <td>
+                                                            <div class="row">
+                                                                <div class="col-6">
+                                                                    <div class="form-group">
+                                                                        <label for="itemtype"> Item Type</label>
+                                                                        <select class="form-select item-type" name="item_type[]" required>
+                                                                            <?php foreach ($scheduleData as $item): ?>
+                                                                                <option value="<?= $item['item_type'] ?>" <?= ($item['item_type'] == $detail['item_type']) ? 'selected' : '' ?>><?= $item['item_type'] ?></option>
+                                                                            <?php endforeach; ?>
+                                                                        </select>
+                                                                        <input type="hidden" name="id_celup[]" value="<?= $detail['id_celup'] ?>">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <div class="form-group">
+                                                                        <label for="po"> PO</label>
+                                                                        <select class="form-select po-select" name="po[]" required>
+                                                                            <?php foreach ($scheduleData as $po): ?>
+                                                                                <option value="<?= $po['id_order'] ?>" <?= ($po['id_order'] == $detail['id_order']) ? 'selected' : '' ?>><?= $po['no_model'] ?></option>
+                                                                            <?php endforeach; ?>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-4">
+                                                                    <div class="form-group">
+                                                                        <label for="tgl_start_mc"> Tgl Start MC</label>
+                                                                        <input type="date" class="form-control" name="tgl_start_mc[]" value="<?= $detail['start_mc'] ?>" readonly>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <div class="form-group">
+                                                                        <label for="delivery_awal"> Delivery Awal</label>
+                                                                        <input type="date" class="form-control" name="delivery_awal[]" value="<?= $detail['delivery_awal'] ?>" readonly>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <div class="form-group">
+                                                                        <label for="delivery_akhir"> Delivery Akhir</label>
+                                                                        <input type="date" class="form-control" name="delivery_akhir[]" value="<?= $detail['delivery_akhir'] ?>" readonly>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-4">
+                                                                    <div class="form-group">
+                                                                        <label for="qty_po"> Qty PO</label>
+                                                                        <input type="number" class="form-control" name="qty_po[]" value="<?= number_format($detail['qty_po'], 2) ?>" readonly>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <div class="form-group">
+                                                                        <label for="qty_po_plus"> Qty PO (+)</label>
+                                                                        <input type="number" class="form-control" name="qty_po_plus[]" value="" readonly>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <div class="form-group">
+                                                                        <label for="po_plus">PO +</label>
+                                                                        <select class="form-select po-plus" name="po_plus[]" required>
+                                                                            <option value="1" <?= ($detail['po_plus'] == 1) ? 'selected' : '' ?>>Ya</option>
+                                                                            <option value="0" <?= ($detail['po_plus'] == 0) ? 'selected' : '' ?>>Tidak</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-3">
+                                                                    <div class="form-group">
+                                                                        <label for="qty_celup">KG Kebutuhan :</label>
+                                                                        <br />
+                                                                        <span class="badge bg-info">
+                                                                            <span class="kg_kebutuhan"><?= $kg_kebutuhan ?></span> KG
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-3">
+                                                                    <div class="form-group">
+                                                                        <label for="qty_celup">Sisa Jatah :</label>
+                                                                        <br />
+                                                                        <span class="badge bg-info">
+                                                                            <span class="sisa_jatah"><?= number_format($sisa_jatah, 2) ?></span> KG
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-3">
+                                                                    <label for="last_status">Last Status</label>
+                                                                    <br />
+                                                                    <span class="badge bg-<?= $detail['last_status'] == 'scheduled' ? 'info' : ($detail['last_status'] == 'celup' ? 'warning' : 'success') ?>"><?= $detail['last_status'] ?></span>
+                                                                    <input type="hidden" class="form-control last_status" name="last_status[]" value="<?= $detail['last_status'] ?>">
+                                                                </div>
+                                                                <div class="col-3">
+                                                                    <label for="qty_celup">Qty Celup</label>
+                                                                    <input type="number" class="form-control" name="qty_celup[]" value="<?= $detail['kg_celup'] ?>" required>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button type="button" class="btn btn-info editRow" data-id="<?= $detail['id_celup'] ?>" data-tanggalschedule="<?= $tanggal_schedule ?>">
+                                                                <i class="fas fa-calendar-alt"></i>
+                                                            </button>
+                                                            <button type="button" class="btn btn-danger removeRow">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td class="text-center">
+                                                        <strong>Total Qty Celup</strong>
+                                                    </td>
+                                                    <td colspan="8" class="text-center">
+                                                        <input type="number" class="form-control" id="total_qty_celup" name="total_qty_celup" value="" readonly>
                                                     </td>
                                                 </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <td colspan="8" class="text-center"><strong>Total Qty Celup</strong></td>
-                                                <td colspan="4" class="text-center">
-                                                    <input type="number" class="form-control" id="total_qty_celup" name="total_qty_celup" value="0" readonly>
-                                                </td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-info w-100">Update Jadwal</button>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="text-end">
-                            <button type="submit" class="btn btn-info w-100">Simpan Jadwal</button>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -242,21 +340,24 @@
         </div>
     </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const itemType = document.getElementById("item_type");
-        const kodeWarna = document.getElementById("kode_warna");
+        const kodeWarna = document.getElementById('kode_warna');
+        const suggestionsBoxKWarna = document.getElementById('suggestionsKWarna');
+        const warnaInput = document.getElementById('warna');
         const poTable = document.getElementById("poTable");
 
-        // Optimasi Event Handling untuk Status Row
-        document.querySelectorAll('tr[data-status]').forEach(row => {
-            const status = row.getAttribute('data-status');
-            if (['celup', 'done', 'sent'].includes(status)) {
-                row.querySelectorAll('input, select, button').forEach(input => {
-                    input.disabled = true;
-                    input.readOnly = true;
+
+        // buatlah semua input dan select jadi readonly jika last_status 'celup', 'done', 'sent'
+        const lastStatuses = document.querySelectorAll('.last_status');
+        lastStatuses.forEach(status => {
+            if (status.value === 'celup' || status.value === 'done' || status.value === 'sent') {
+                const row = status.closest('tr');
+                const inputs = row.querySelectorAll('input, select, button');
+                inputs.forEach(input => {
+                    input.classList.add('locked-input');
                 });
             }
         });
@@ -305,83 +406,130 @@
                 });
         });
 
-        // Optimasi PO Dropdown dengan Event Delegation
-        poTable.addEventListener('change', function(e) {
-            if (e.target.classList.contains('po-select')) {
-                const row = e.target.closest('tr');
-                const poId = e.target.value;
-                const itemTypeValue = itemType.value;
-                const kodeWarnaValue = kodeWarna.value;
-
-                if (!poId) {
-                    resetRowInputs(row);
-                    return;
-                }
-
-                fetchPODetails(row, poId, itemTypeValue, kodeWarnaValue);
-                fetchQtyPO(row, poId, itemTypeValue, kodeWarnaValue);
+        // ✅ Event delegation untuk kode_warna input
+        kodeWarna.addEventListener('input', function() {
+            const query = kodeWarna.value.trim();
+            if (query.length >= 3) {
+                fetchData('getKodeWarna', {
+                    query
+                }, displayKodeWarnaSuggestions);
+                fetchData('getWarna', {
+                    kode_warna: query
+                }, (data) => {
+                    if (data.length > 0) {
+                        warnaInput.value = data[0].color;
+                        fetchItemType(query, data[0].color);
+                    }
+                });
+            } else {
+                suggestionsBoxKWarna.style.display = 'none';
             }
         });
 
-        // Fungsi Bantuan
-        function resetRowInputs(row) {
-            const inputs = row.querySelectorAll('input');
-            inputs.forEach(input => input.value = '');
+        // ✅ Fungsi utilitas untuk fetching data
+        function fetchData(endpoint, params, callback) {
+            const url = new URL(`<?= base_url(session('role') . "/schedule/") ?>${endpoint}`);
+            Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(callback)
+                .catch(error => console.error(`Error fetching ${endpoint}:`, error));
         }
 
-        async function fetchPODetails(row, poId, itemType, kodeWarna) {
-            try {
-                const response = await $.ajax({
-                    url: '<?= base_url(session("role") . "/schedule/getPODetails") ?>',
-                    type: 'GET',
-                    data: {
-                        id_order: poId,
-                        itemType,
-                        kodeWarna
-                    }
+        // ✅ Fungsi menampilkan saran kode warna
+        function displayKodeWarnaSuggestions(suggestions) {
+            suggestionsBoxKWarna.innerHTML = '';
+            if (suggestions.length > 0) {
+                suggestionsBoxKWarna.style.display = 'block';
+                suggestions.forEach(suggestion => {
+                    const suggestionDiv = document.createElement('div');
+                    suggestionDiv.textContent = suggestion;
+                    suggestionDiv.addEventListener('click', () => {
+                        kodeWarna.value = suggestion;
+                        suggestionsBoxKWarna.style.display = 'none';
+                    });
+                    suggestionsBoxKWarna.appendChild(suggestionDiv);
                 });
-
-                const kgKebutuhan = parseFloat(response.kg_kebutuhan || 0);
-                const tagihanSch = parseFloat(response.sisa_jatah || 0);
-                const qtyCelup = parseFloat(row.querySelector('[name^="qty_celup["]').value) || 0;
-
-                row.querySelector('.start_mc').value = response.start_mesin || '';
-                row.querySelector('.delivery_awal').value = response.delivery_awal || '';
-                row.querySelector('.delivery_akhir').value = response.delivery_akhir || '';
-                row.querySelector('.kg_kebutuhan').value = kgKebutuhan.toFixed(2);
-                row.querySelector('.tagihan_schedule').value = tagihanSch.toFixed(2);
-
-            } catch (error) {
-                console.error("Error fetching PO details:", error);
-                alert('Gagal memuat detail PO');
+            } else {
+                suggestionsBoxKWarna.style.display = 'none';
             }
         }
 
-        async function fetchQtyPO(row, poId, itemType, kodeWarna) {
-            try {
-                const response = await $.ajax({
-                    url: '<?= base_url(session("role") . "/schedule/getQtyPO") ?>',
-                    type: 'GET',
-                    data: {
-                        id_order: poId,
-                        item_type: itemType,
-                        kode_warna: kodeWarna
-                    }
-                });
-
-                if (response) {
-                    row.querySelector('.qty_po').value = parseFloat(response.kgs || 0).toFixed(2);
+        // ✅ Fungsi fetch item type
+        function fetchItemType(kodeWarna, warna, targetSelect) {
+            fetchData('getItemType', {
+                kode_warna: kodeWarna,
+                warna
+            }, (data) => {
+                if (targetSelect) {
+                    populateSelect(targetSelect, data, 'item_type', 'item_type');
                 }
-            } catch (error) {
-                console.error("Error fetching Qty PO:", error);
-                alert('Gagal memuat Qty PO');
+            });
+        }
+
+        // ✅ Fungsi utilitas untuk mengisi select dropdown
+        function populateSelect(selectElement, data, valueKey, textKey) {
+            selectElement.innerHTML = '<option value="">Pilih ' + textKey + '</option>';
+            if (data.length > 0) {
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item[valueKey];
+                    option.textContent = item[textKey];
+                    selectElement.appendChild(option);
+                });
+            } else {
+                selectElement.innerHTML = '<option value="">Tidak ada data</option>';
             }
         }
 
-        // Hitung sisa kapasitas
-        function calculateCapacity() {
-            const max = parseFloat(maxCaps.value) || 0;
-            let total = 0;
+        // ✅ Fungsi fetch PO by kode warna, warna, dan item type
+        function fetchPOByKodeWarna(kodeWarna, warna, itemType, poSelect) {
+            fetchData('getPO', {
+                kode_warna: kodeWarna,
+                warna,
+                item_type: itemType
+            }, (data) => {
+                populateSelect(poSelect, data, 'id_order', 'no_model');
+
+                // ✅ Update sisa_jatah dari data yang diterima
+                const row = poSelect.closest("tr");
+                if (row && data.length > 0) {
+                    row.querySelector(".sisa_jatah").textContent = data[0].sisa_jatah.toFixed(2);
+                }
+            });
+        }
+
+        // ✅ Event delegation untuk input qty_celup
+        poTable.addEventListener("input", function(e) {
+            if (e.target.name === "qty_celup[]") {
+                const row = e.target.closest("tr");
+
+                const qtyCelup = parseFloat(row.querySelector("input[name='qty_celup[]']").value) || 0;
+                const kgKebutuhan = parseFloat(row.querySelector(".kg_kebutuhan").textContent) || 0;
+                const sisaJatah = kgKebutuhan - qtyCelup; // Menghitung sisa_jatah
+
+                // Update sisa_jatah di tampilan
+                row.querySelector(".sisa_jatah").textContent = sisaJatah.toFixed(2);
+
+                // Menyimpan nilai tagihan SCH di row jika diperlukan (optional, jika ingin diakses oleh baris lain)
+                row.dataset.sisaJatah = sisaJatah.toFixed(2); // Menyimpan nilai sisa_jatah dalam data attribute
+
+                // Hitung total qty celup dan sisa kapasitas
+                calculateTotalAndRemainingCapacity();
+            }
+        });
+
+        function calculateTotalAndRemainingCapacity() {
+            let totalQtyCelup = 0;
+            const poTable = document.getElementById("poTable");
+            if (!poTable) {
+                console.warn("⚠️ poTable tidak ditemukan di halaman.");
+                return;
+            }
 
             const rows = poTable.querySelectorAll("tbody tr");
 
@@ -394,187 +542,308 @@
                     const lastStatus = lastStatusInput.value;
 
                     if (lastStatus === 'scheduled' || lastStatus === 'celup' || lastStatus === 'reschedule') {
-                        total += qtyCelup;
+                        totalQtyCelup += qtyCelup;
                     }
                 } else {
-                    console.warn(`Input qty_celup atau last_status tidak ditemukan di baris ke-${index}`);
+                    console.warn(`⚠️ Input qty_celup atau last_status tidak ditemukan di baris ke-${index}`);
                 }
             });
 
-            totalQtyCelup.value = total.toFixed(2); // Total qty celup
-            const sisa = max - total;
-            sisaKapasitas.value = sisa.toFixed(2); // Sisa kapasitas
-
-            // Debugging log
-            console.log(`Max Capacity: ${max}, Total: ${total}, Remaining: ${sisa}`);
-
-            // Jika sisa kapasitas < 0, beri peringatan
-            if (sisa < 0) {
-                alert('Sisa kapasitas tidak mencukupi!');
+            const totalQtyCelupElement = document.getElementById("total_qty_celup");
+            if (totalQtyCelupElement) {
+                totalQtyCelupElement.value = totalQtyCelup.toFixed(2);
             }
 
-            validateQtyCelup(max); // Validasi untuk qty celup
-            validateSisaJatah(); // Validasi sisa jatah
+            const maxCaps = parseFloat(document.getElementById("max_caps").value) || 0;
+            if (totalQtyCelup > maxCaps) {
+                alert("⚠️ Total Qty Celup melebihi Max Caps!");
+            }
+
+            rows.forEach((row, index) => {
+                const sisaJatahElement = row.querySelector(".sisa_jatah");
+                if (sisaJatahElement) {
+                    const sisaJatah = parseFloat(sisaJatahElement.textContent) || 0;
+                    sisaJatahElement.style.color = sisaJatah < 0 ? "red" : "white";
+                    // tampilkan 2 angka di belakang koma
+                    sisaJatahElement.textContent = sisaJatah.toFixed(2);
+                    if (sisaJatah < 0) {
+                        alert(`⚠️ Sisa Jatah di baris ke-${index} negatif!`);
+                    }
+                }
+            });
+
+            const sisaKapasitasElement = document.getElementById("sisa_kapasitas");
+            if (sisaKapasitasElement) {
+                sisaKapasitasElement.value = (maxCaps - totalQtyCelup).toFixed(2);
+            }
         }
 
-        // Validasi qty_celup untuk setiap input
-        function validateQtyCelup(max) {
-            const qtyCelupInputs = document.querySelectorAll('input[name="qty_celup[]"]');
-            let isOverCapacity = false;
 
-            qtyCelupInputs.forEach(input => {
-                const kg = parseFloat(input.value) || 0;
 
-                if (kg > max) {
-                    input.setCustomValidity(`Qty Celup Melebihi Kapasitas ${max}`);
-                    isOverCapacity = true;
-                } else if (parseFloat(sisaKapasitas.value) < 0) {
-                    input.setCustomValidity(`Sisa Kapasitas Tidak Mencukupi`);
-                    isOverCapacity = true;
+        // ✅ Event delegation untuk perubahan PO
+        poTable.addEventListener("change", function(e) {
+            if (e.target.classList.contains("po-select")) {
+                const poSelect = e.target;
+                const selectedOption = poSelect.options[poSelect.selectedIndex];
+                const tr = poSelect.closest("tr");
+
+                const itemTypeValue = tr.querySelector("select[name^='item_type']").value;
+                const kodeWarnaValue = document.querySelector("input[name='kode_warna']").value;
+
+                if (selectedOption.value && itemTypeValue && kodeWarnaValue) {
+                    fetchPODetails(selectedOption.value, tr, itemTypeValue, kodeWarnaValue);
                 } else {
-                    input.setCustomValidity('');
+                    resetPODetails(tr);
                 }
-            });
-
-            // Jika over capacity, tampilkan pesan
-            if (isOverCapacity) {
-                alert('Sisa kapasitas tidak mencukupi atau melebihi kapasitas maksimum.');
-            }
-        }
-
-        // Event Listener untuk Input `qty_celup`
-        poTable.addEventListener('input', function(e) {
-            if (e.target.classList.contains('qty_celup')) {
-                const row = e.target.closest('tr');
-                validateSisaJatah(); // Validasi sisa jatah setelah input qty_celup
-                calculateCapacity(); // Hitung ulang kapasitas setelah validasi
             }
         });
 
-        function validateSisaJatah() {
-            const rows = poTable.querySelectorAll("tbody tr");
-            let isValid = true;
 
-            // Collect all necessary data to send in one request
-            let requestData = [];
+        function fetchPODetails(poNo, tr, itemType, kodeWarna) {
+            fetchData('getPODetails', {
+                id_order: poNo,
+                item_type: itemType,
+                kode_warna: kodeWarna
+            }, (data) => {
+                console.log("PO Details Fetched:", data); // Debugging log
+                if (data && !data.error) {
+                    const fields = {
+                        'tgl_start_mc[]': data.start_mesin || '',
+                        'delivery_awal[]': data.delivery_awal || '',
+                        'delivery_akhir[]': data.delivery_akhir || '',
+                        'qty_po[]': parseFloat(data.kg_kebutuhan).toFixed(2),
+                        'qty_po_plus[]': parseFloat(data.qty_po_plus).toFixed(2),
+                        '.kg_kebutuhan': parseFloat(data.kg_kebutuhan).toFixed(2),
+                        '.sisa_jatah': parseFloat(data.sisa_jatah).toFixed(2)
+                    };
 
-            rows.forEach((row) => {
-                const noModelInput = row.querySelector('input[name^="po["]');
-                const itemTypeInput = row.querySelector('input[name^="item_type["]');
-                const kodeWarnaInput = row.querySelector('input[name^="kode_warna["]');
-                const qtyCelupInput = row.querySelector('input[name^="qty_celup["]');
-                const currentQtyCelupInput = row.querySelector('input[name^="current_qty_celup["]'); // Hidden input
+                    Object.keys(fields).forEach(key => {
+                        const element = tr.querySelector(key.startsWith('.') ? key : `input[name="${key}"]`);
+                        if (element) {
+                            if (key.startsWith('.')) {
+                                element.textContent = fields[key];
+                            } else {
+                                element.value = fields[key];
+                            }
+                        }
+                    });
+                    calculateTotalAndRemainingCapacity();
+                }
+            });
+        }
 
-                if (noModelInput && itemTypeInput && kodeWarnaInput && qtyCelupInput) {
-                    const noModel = noModelInput.value;
-                    const itemType = itemTypeInput.value;
-                    const kodeWarna = kodeWarnaInput.value;
-                    const qtyCelup = parseFloat(qtyCelupInput.value) || 0;
-                    const currentQtyCelup = parseFloat(currentQtyCelupInput?.value) || 0;
+        // ✅ Fungsi reset detail PO
+        function resetPODetails(tr) {
+            const fields = ['tgl_start_mc[]', 'delivery_awal[]', 'delivery_akhir[]', 'qty_po[]', 'qty_po_plus[]'];
+            fields.forEach(field => {
+                const element = tr.querySelector(`input[name="${field}"]`);
+                if (element) element.value = '';
+            });
 
-                    // Collect the data to send
-                    requestData.push({
-                        no_model: noModel,
-                        item_type: itemType,
-                        kode_warna: kodeWarna,
-                        qty_celup: qtyCelup ?? 0,
-                        current_qty_celup: currentQtyCelup
+            const spans = tr.querySelectorAll('.kg_kebutuhan, .sisa_jatah');
+            spans.forEach(span => span.textContent = '0.00');
+        }
+
+        // ✅ Event delegation untuk menambah baris baru
+        document.getElementById("addRow").addEventListener("click", function() {
+            const tbody = poTable.querySelector("tbody");
+            const newRow = document.createElement("tr");
+            newRow.innerHTML = `
+                <td class="text-center">${tbody.rows.length + 1}</td>
+                <td>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="itemtype"> Item Type</label>
+                                <select class="form-select item-type" name="item_type[]" required>
+                                    <option value="">Pilih Item Type</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="po">PO</label>
+                                <select class="form-select po-select" name="po[]" required>
+                                    <option value="">Pilih PO</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="tgl_start_mc">Tgl Start MC</label>
+                                <input type="date" class="form-control" name="tgl_start_mc[]" readonly>
+                            </div>
+                        </div>
+
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="delivery_awal">Delivery Awal</label>
+                                <input type="date" class="form-control" name="delivery_awal[]" readonly>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group ">
+                                <label for="delivery_akhir">Delivery Akhir</label>
+                                <input type="date" class="form-control" name="delivery_akhir[]" readonly>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="qty_po">Qty PO</label>
+                                <input type="number" class="form-control" name="qty_po[]" readonly>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="qty_po_plus">Qty PO (+)</label>
+                                <input type="number" class="form-control" name="qty_po_plus[]" readonly>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="kg_kebutuhan">PO +</label>
+                                <select class="form-select" name="po_plus[]" required>
+                                    <option value="">Pilih PO(+)</option>
+                                    <option value="1">Ya</option>
+                                    <option value="0">Tidak</option>
+                                </select>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <label for="qty_celup">KG Kebutuhan :</label>
+                                    <br />
+                                    <span class="badge bg-info">
+                                        <span class="kg_kebutuhan">0.00</span> KG
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <label for="qty_celup">Sisa Jatah :</label>
+                                    <br />
+                                    <span class="badge bg-info">
+                                        <span class="sisa_jatah">0.00</span> KG
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <label for="last_status">Last Status</label>
+                                <br />
+                                <span class="badge bg-info">scheduled</span>
+                                <input type="hidden" class="form-control last_status" name="last_status[]" value="scheduled">
+                            </div>
+                            <div class="col-3">
+                                <label for="qty_celup">Qty Celup</label>
+                                <input type="number" class="form-control" name="qty_celup[]" value="" required>
+                            </div>
+                        </div>
+
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-danger removeRow">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+                `;
+            tbody.appendChild(newRow);
+
+            // Ambil elemen item-type di baris baru
+            const itemTypeSelect = newRow.querySelector(".item-type");
+
+            // Fetch item type hanya untuk item-type di baris baru
+            fetchItemType(kodeWarna.value, warnaInput.value, itemTypeSelect);
+
+            // Tambahkan event listener untuk perubahan item type
+            itemTypeSelect.addEventListener("change", function() {
+                const itemTypeValue = this.value;
+                const poSelect = newRow.querySelector(".po-select");
+                if (itemTypeValue) {
+                    fetchPOByKodeWarna(kodeWarna.value, warnaInput.value, itemTypeValue, poSelect);
+                }
+            });
+        });
+
+
+        document.querySelector("#poTable").addEventListener("click", function(event) {
+            if (event.target.closest(".removeRow")) {
+                const row = event.target.closest("tr");
+                const table = document.querySelector("#poTable tbody");
+
+                // Validasi jika ada input ID Celup pada baris
+                const idCelupInput = row.querySelector('input[name^="id_celup["]');
+                const idCelup = idCelupInput ? idCelupInput.value : null;
+
+                if (idCelup) {
+                    // SweetAlert konfirmasi sebelum menghapus
+                    Swal.fire({
+                        title: "Apakah Anda Yakin?",
+                        text: "Data Schedule akan dihapus",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Ya, hapus!",
+                        cancelButtonText: "Batal",
+                        dangerMode: true,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Kirim permintaan AJAX untuk menghapus data
+                            $.ajax({
+                                url: '<?= base_url(session('role') . '/schedule/deleteSchedule') ?>',
+                                type: 'POST',
+                                data: {
+                                    id_celup: idCelup
+                                },
+                                dataType: 'json',
+                                success: function(response) {
+                                    if (response.success) {
+                                        Swal.fire("Berhasil!", "Data Schedule berhasil dihapus.", "success").then(() => {
+                                            row.remove();
+                                            if (table.rows.length === 0) {
+                                                window.location.href = '<?= base_url(session('role') . '/schedule') ?>';
+                                            } else {
+                                                calculateTotalAndRemainingCapacity();
+                                            }
+                                        });
+                                    } else {
+                                        Swal.fire("Gagal!", "Data Schedule gagal dihapus.", "error");
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    Swal.fire("Error!", "Terjadi kesalahan pada server.", "error");
+                                },
+                            });
+                        }
                     });
                 } else {
-                    console.warn('Data tidak lengkap untuk validasi.', row);
-                    isValid = false;
+                    // Jika id_celup tidak ditemukan atau null, cukup hapus barisnya saja
+                    Swal.fire({
+                        title: "Hapus Baris?",
+                        text: "Baris ini akan dihapus tanpa mengirim data ke server.",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Ya, hapus!",
+                        cancelButtonText: "Batal",
+                        dangerMode: true,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            row.remove();
+                            if (table.rows.length === 0) {
+                                window.location.href = '<?= base_url(session('role') . '/schedule') ?>';
+                            } else {
+                                calculateTotalAndRemainingCapacity();
+                            }
+                        }
+                    });
                 }
-            });
-
-            // if (!isValid) {
-            //     alert('Ada baris data yang tidak lengkap untuk validasi.');
-            //     return;
-            // }
-
-            // Send a single AJAX request for all rows
-            $.ajax({
-                url: '<?= base_url("/schedule/validateSisaJatah") ?>',
-                type: 'POST',
-                data: {
-                    rows: requestData
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (!response.success) {
-                        // Show validation error for each row
-                        response.errors.forEach((error, index) => {
-                            const qtyCelupInput = rows[index].querySelector('input[name^="qty_celup["]');
-                            qtyCelupInput.setCustomValidity(error.message);
-                            alert(error.message);
-                        });
-                    } else {
-                        // If successful, reset custom validity for all rows
-                        rows.forEach((row) => {
-                            const qtyCelupInput = row.querySelector('input[name^="qty_celup["]');
-                            qtyCelupInput.setCustomValidity('');
-                        });
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan saat memvalidasi sisa jatah.');
-                }
-            });
-        }
-
-        // Event listener untuk menambah baris baru
-        document.getElementById("addRow").addEventListener("click", function() {
-            const tbody = document.querySelector("#poTable tbody");
-            const newIndex = tbody.querySelectorAll("tr").length;
-
-            const newRow = `
-                <tr>
-                    <td>
-                        <select class="form-select po-select" name="po-select[${newIndex}]" required>
-                            <option value="">Pilih PO</option>
-                            <?php foreach ($po as $option): ?>
-                                <option value="<?= $option['id_order'] ?>"><?= $option['no_model'] ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        <input type="hidden" name="po[${newIndex}]" value="">
-                    </td>
-                    <td><input type="date" class="form-control start_mc" name="start_mc[${newIndex}]" readonly></td>
-                    <td><input type="date" class="form-control delivery_awal" name="delivery_awal[${newIndex}]" readonly></td>
-                    <td><input type="date" class="form-control delivery_akhir" name="delivery_akhir[${newIndex}]" readonly></td>
-                    <td><input type="number" class="form-control qty_po" name="qty_po[${newIndex}]" readonly></td>
-                    <td><input type="number" class="form-control qty_po_plus" name="qty_po_plus[${newIndex}]" required readonly></td>
-                    <td class="text-center"><span class="badge bg-info"><span class="kg_kebutuhan">0.00</span> KG</span></td>
-                    <td class="text-center"><span class="badge bg-info"><span class="tagihan_schedule">0.00</span> KG</span></td>
-                    <td><input type="number" step="0.01" class="form-control qty_celup" name="qty_celup[${newIndex}]" required></td>
-                    <td>
-                        <select class="form-select po_plus" name="po_plus[${newIndex}]" required>
-                            <option value="">Pilih PO(+)</option>
-                            <option value="1">Iya</option>
-                            <option value="0">Bukan</option>
-                        </select>
-                    </td>
-                    <td>
-                        <span class="badge bg-info">scheduled</span>
-                        <input type="hidden" class="form-control last_status" name="last_status[${newIndex}]" value="scheduled" required readonly>
-                    </td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-danger removeRow">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
-            tbody.insertAdjacentHTML('beforeend', newRow);
-        });
-
-        // Event listener untuk menghapus baris
-        poTable.addEventListener('click', function(e) {
-            if (e.target.classList.contains('removeRow')) {
-                e.target.closest('tr').remove();
             }
         });
     });
 </script>
-
-
 <?php $this->endSection(); ?>

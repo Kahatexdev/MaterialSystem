@@ -213,8 +213,8 @@
                     <h3>Out Celup</h3>
                 </div>
                 <div class="group">
-                    <a href="<?= base_url($role . '/createBon') ?>" class="btn btn-info">
-                        <i class="ni ni-single-copy-04 me-2"></i>Create BON</a>
+                    <a href="<?= base_url($role . '/insertBon') ?>" class="btn btn-info">
+                        <i class="ni ni-single-copy-04 me-2"></i>PRINT</a>
                 </div>
             </div>
         </div>
@@ -223,34 +223,54 @@
     <div class="card mt-3">
         <div class="card-body">
             <div class="table-responsive">
+                <!-- Bon Pengiriman -->
                 <table class="table">
                     <thead>
                         <tr>
-                            <th class="sticky text-center align-middle">No</th>
-                            <th class="sticky text-center align-middle">Tanggal Kirim</th>
-                            <th class="sticky text-center align-middle">No Surat Jalan</th>
-                            <th class="sticky text-center align-middle">Detail Surat Jalan</th>
-                            <th class="sticky text-center align-middle">Aksi</th>
+                            <th class="sticky text-center align-middle" rowspan="3" colspan="2">
+                                <div class="text-center">
+                                    <img src="<?= base_url('assets/img/logo-kahatex.png') ?>" alt="Deskripsi Gambar" width="100">
+                                    <div>PT.KAHATEX</div>
+                                </div>
+                            </th>
+                            <th class="sticky text-center align-middle" colspan="13">FORMULIR</th>
+                        </tr>
+                        <tr>
+                            <th class="sticky text-center align-middle" colspan="13">DEPARTEMEN KELOS WARNA</th>
+                        </tr>
+                        <tr>
+                            <th class="sticky text-center align-middle" colspan="13">BON PENGIRIMAN</th>
+                        </tr>
+                        <tr>
+                            <th class="sticky text-left align-middle" colspan="2">No. Dokumen</th>
+                            <th class="sticky text-left align-middle" colspan="7">FOR-KWA-006/REV_03/HAL_1/1</th>
+                            <th class="sticky text-center align-middle" colspan="3">TANGGAL REVISI</th>
+                            <th class="sticky text-center align-middle" colspan="2">07 Januari 2021</th>
+                        </tr>
+                        <tr>
+                            <th class="sticky text-left align-middle" colspan="2">NAMA LANGGANAN</th>
+                            <th class="sticky text-left align-middle" colspan="3">KAOS KAKI</th>
+                            <th class="sticky text-left align-middle" colspan="4">NO SURAT JALAN : </th>
+                            <th class="sticky text-left align-middle" colspan="6">TANGGAL : </th>
+                        </tr>
+                        <tr>
+                            <th class="sticky text-center align-middle" rowspan="2">NO PO</th>
+                            <th class="sticky text-center align-middle" rowspan="2">JENIS BENANG</th>
+                            <th class="sticky text-center align-middle" rowspan="2">KODE BENANG</th>
+                            <th class="sticky text-center align-middle" rowspan="2">KODE WARNA</th>
+                            <th class="sticky text-center align-middle" rowspan="2">WARNA</th>
+                            <th class="sticky text-center align-middle" rowspan="2">LOT CELUP</th>
+                            <th class="sticky text-center align-middle" rowspan="2">L/M/D</th>
+                            <th class="sticky text-center align-middle">HARGA</th>
+                            <th class="sticky text-center align-middle" colspan="2">QTY</th>
+                            <th class="sticky text-center align-middle" colspan="3">TOTAL</th>
+                            <th class="sticky text-center align-middle" rowspan="2">KETERANGAN</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <?php
-                            $no = 1;
-                            foreach ($bonCelup as $bon) { ?>
-                                <td class="text-center align-middle"><?= $no++ ?></td>
-                                <td class="text-center align-middle"><?= $bon['tgl_datang'] ?></td>
-                                <td class="text-center align-middle"><?= $bon['no_surat_jalan'] ?></td>
-                                <td class="text-center align-middle"><?= $bon['detail_sj'] ?></td>
-                                <td class="text-center align-middle"><a href="<?= base_url($role . '/generate/' . $bon['id_bon']) ?>" class="btn btn-info">Barcode</a></td>
-                        </tr>
-                    <?php } ?>
-                    </tbody>
                 </table>
             </div>
         </div>
     </div>
-
 </div>
 
 

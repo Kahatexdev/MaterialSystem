@@ -127,11 +127,24 @@ class ScheduleCelupModel extends Model
     public function getScheduleDetailsData($machine, $date, $lot)
     {
         return $this->table('schedule_celup')
-            ->select('*, mesin_celup.no_mesin')
-            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-            ->where('mesin_celup.no_mesin', $machine)
+        ->select('
+            schedule_celup.*, 
+            mesin_celup.no_mesin, 
+            sum(schedule_celup.kg_celup) as total_kg,
+            master_order.no_model, 
+            master_order.id_order, 
+            material.kode_warna,
+            material.item_type,
+        ')
+        ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin', 'left')
+        ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
+        ->join('material', 'material.id_order = master_order.id_order AND schedule_celup.item_type = material.item_type AND schedule_celup.kode_warna = material.kode_warna', 'left')
+        ->where('mesin_celup.no_mesin', $machine)
             ->where('schedule_celup.tanggal_schedule', $date)
             ->where('schedule_celup.lot_urut', $lot)
+            ->groupBy('schedule_celup.id_mesin')
+            ->groupBy('schedule_celup.tanggal_schedule')
+            ->groupBy('schedule_celup.lot_urut')
             ->groupBy('schedule_celup.id_celup')
             ->findAll();
     }
@@ -144,7 +157,6 @@ class ScheduleCelupModel extends Model
             ->where('tanggal_schedule', $tanggal_schedule)
             ->where('lot_urut', $lot_urut)
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-            ->distinct()
             ->findAll();
     }
 
@@ -307,5 +319,41 @@ class ScheduleCelupModel extends Model
 
         // Jika data tidak ditemukan, kembalikan nilai default (misalnya null atau array kosong)
         return null;
+    }
+    public function getCelupDone()
+    {
+        return $this->table('schedule_celup')
+            ->select('no_model')
+            ->where('last_status', 'done')
+            ->groupBy('id_celup')
+            ->findAll();
+    }
+    public function getItemTypeByNoModel($noModel)
+    {
+        return $this->table('schedule_celup')
+            ->select('item_type')
+            ->where('no_model', $noModel)
+            ->where('last_status', 'done')
+            ->groupBy('item_type')
+            ->findAll();
+    }
+    public function getKodeWarnaByNoModelDanItemType($noModel, $itemType)
+    {
+        return $this->table('schedule_celup')
+            ->select('kode_warna')
+            ->where('no_model', $noModel)
+            ->where('item_type', $itemType)
+            ->groupBy('kode_warna')
+            ->findAll();
+    }
+    public function getWarnaByNoModelItemDanKode($noModel, $itemType, $kodeWarna)
+    {
+        return $this->table('schedule_celup')
+            ->select('warna')
+            ->where('no_model', $noModel)
+            ->where('item_type', $itemType)
+            ->where('kode_warna', $kodeWarna)
+            ->groupBy('warna')
+            ->first();
     }
 }

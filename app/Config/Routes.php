@@ -9,7 +9,7 @@ $routes->get('/', 'AuthController::index');
 $routes->get('/login', 'AuthController::index');
 $routes->post('/logout', 'AuthController::logout');
 $routes->post('authverify', 'AuthController::login');
-$routes->get('generate', 'CelupController::generate');
+// $routes->get('generate', 'CelupController::generate');
 
 
 // gbn routes
@@ -45,10 +45,13 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
     $routes->get('schedule/nylon', 'ScheduleController::nylon');
+    $routes->get('schedule/sample', 'ScheduleController::sample');
     $routes->get('schedule/getScheduleDetails/(:any)/(:any)/(:any)', 'ScheduleController::getScheduleDetails/$1/$2/$3');
     $routes->get('schedule/form', 'ScheduleController::create');
     $routes->get('schedule/getItemType', 'ScheduleController::getItemType');
-    $routes->get('schedule/getWarna', 'ScheduleController::getWarnabyItemTypeandKodeWarna');
+    $routes->get('schedule/getKodeWarna', 'ScheduleController::getKodeWarna');
+    $routes->get('schedule/getWarna', 'ScheduleController::getWarna');
+    // $routes->get('schedule/getWarna', 'ScheduleController::getWarnabyItemTypeandKodeWarna');
     $routes->get('schedule/getPO', 'ScheduleController::getPO');
     $routes->get('schedule/getPODetails', 'ScheduleController::getPODetails');
     $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
@@ -97,9 +100,13 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
 
     $routes->get('outCelup', 'CelupController::outCelup');
     // $routes->get('insertBon/(:num)', 'CelupController::insertBon/$1');
-    $routes->get('insertBon', 'CelupController::insertBon');
-    $routes->post('outCelup/saveBon/(:num)', 'CelupController::saveBon/$1');
+    $routes->get('createBon', 'CelupController::createBon');
+    $routes->post('createBon/getItemType', 'CelupController::getItemType');
+    $routes->post('createBon/getKodeWarna', 'CelupController::getKodeWarna');
+    $routes->post('createBon/getWarna', 'CelupController::getWarna');
+    $routes->post('outCelup/saveBon/', 'CelupController::saveBon');
     $routes->get('retur', 'CelupController::retur');
+    $routes->get('generate/(:num)', 'CelupController::generateBarcode/$1');
 });
 
 
