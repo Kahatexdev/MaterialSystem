@@ -13,13 +13,12 @@
 
                 <ul class="navbar-nav  justify-content-end">
                     <li class="nav-item d-flex align-items-center px-1">
-                        <a href="">
+                        <a href="<?= base_url($role . '/pemasukan') ?>">
                             <span class=" badge bg-gradient-info ">Pemasukan</span>
-
                         </a>
                     </li>
                     <li class="nav-item d-flex align-items-center px-1">
-                        <a href="">
+                        <a href="<?= base_url($role . '/pengeluaran') ?>">
                             <span class=" badge bg-gradient-info ">Pengeluaran</span>
 
                         </a>

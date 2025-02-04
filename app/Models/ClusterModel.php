@@ -4,24 +4,19 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class OutCelupModel extends Model
+class ClusterModel extends Model
 {
-    protected $table            = 'out_celup';
-    protected $primaryKey       = 'id_out_celup';
+    protected $table            = 'cluster';
+    protected $primaryKey       = 'nama_cluster';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'id_out_celup',
-        'id_bon',
-        'id_celup',
-        'gw_kirim',
-        'kgs_kirim',
-        'cones_kirim',
-        'lot_kirim',
-        'ganti_retur',
-        'admin',
+        'nama_cluster',
+        'kapasitas',
+        'keterangan',
+        'group',
         'created_at',
         'updated_at',
     ];
@@ -33,7 +28,7 @@ class OutCelupModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = true;
+    protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -56,14 +51,8 @@ class OutCelupModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
-    public function getDataOut($id)
+    public function getDataCluster()
     {
-        return $this->db->table('out_celup')
-            ->select('out_celup.*, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna')
-            ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup')
-            ->where('out_celup.id_out_celup', $id)
-            ->distinct()
-            ->get()
-            ->getResultArray();
+        return $this->findAll();
     }
 }

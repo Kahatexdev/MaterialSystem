@@ -275,6 +275,16 @@ class CelupController extends BaseController
         if ($tglPB) $dataUpdate['tanggal_pb'] = $tglPB;
         if ($ketDailyCek) $dataUpdate['ket_daily_cek'] = $ketDailyCek;
 
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglCelup)) {
+            $dataUpdate['last_status'] = 'celup';
+        }
+
+        // Jika tgl_kelos diisi, update last_status menjadi 'done'
+        if (!empty($tglKelos)) {
+            $dataUpdate['last_status'] = 'done';
+        }
+
         // Validasi apakah data dengan ID yang diberikan ada
         $existingProduction = $this->scheduleCelupModel->find($id);
         if (!$existingProduction) {

@@ -51,9 +51,7 @@
 
                                 <button class="btn btn-info mt-4" type="submit" name="warna" value="" id=""> Submit</button>
                             </div>
-
                         </div>
-
                     </div>
 
                 </div>

@@ -264,7 +264,7 @@
                                 <!-- <td><?= $sch['tanggalSchedule'] ?></td> -->
                                 <td><?= $sch['qtyCelup'] ?></td>
                                 <td><?= $sch['qtyCelupPlus'] ?></td>
-                                <td><a href="<?= base_url($role . "/insertBon/" . $sch['idCelup']) ?>" class="btn btn-info">Bon</a></td>
+                                <td><a href="<?= base_url($role . "/bon/" . $sch['idCelup']) ?>" class="btn btn-info">Bon</a></td>
                         </tr>
                     <?php } ?>
                     </tbody>
