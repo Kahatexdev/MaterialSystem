@@ -159,6 +159,9 @@
                                                                 <input type="hidden" class="form-control last_status" name="last_status[]" value="<?= $detail['last_status'] ?>">
                                                             </td>
                                                             <td class="text-center">
+                                                                <button type="button" class="btn btn-info editRow" data-toggle="modal" data-target="#editModal" data-id="<?= $detail['id_celup'] ?>" data-tanggalSchedule="<?= $detail['tanggal_schedule'] ?>" data-toggle="tooltip" title="Edit">
+                                                                    <i class="fas fa-calendar"></i>
+                                                                </button>
                                                                 <button type="button" class="btn btn-danger removeRow">
                                                                     <i class="fas fa-trash"></i>
                                                                 </button>
@@ -190,6 +193,31 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Edit -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Tanggal Schedule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id_celup" id="idCelup">
+                    <div class="form-group mb-3">
+                        <label for="tanggal_schedule" class="form-label">Tanggal Schedule</label>
+                        <input type="date" class="form-control" id="tanggal_schedule" name="tanggal_schedule" value="<?= $tanggal_schedule ?>" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-info">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -205,14 +233,56 @@
         lastStatuses.forEach(status => {
             if (status.value === 'celup' || status.value === 'done' || status.value === 'sent') {
                 const row = status.closest('tr');
-                const inputs = row.querySelectorAll('input, select');
+                const inputs = row.querySelectorAll('input, select, button');
                 inputs.forEach(input => {
                     input.classList.add('locked-input');
                 });
             }
         });
 
+        // Event Delegation untuk Tombol Edit
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('editRow')) {
+                const button = e.target;
+                const idCelup = button.dataset.id;
+                const modal = new bootstrap.Modal(document.getElementById('editModal'));
 
+                document.getElementById('idCelup').value = idCelup;
+                document.getElementById('tanggal_schedule').value = button.dataset.tanggalschedule;
+
+                modal.show();
+            }
+        });
+
+        // Ajax Submit dengan Error Handling
+        $('#editModal form').submit(function(e) {
+            e.preventDefault();
+            const formData = {
+                id_celup: $('#idCelup').val(),
+                tanggal_schedule: $('#tanggal_schedule').val(),
+                no_mesin: $('#no_mesin').val(),
+                lot_urut: $('#lot_urut').val()
+            };
+
+            $.ajax({
+                    url: '<?= base_url(session('role') . '/schedule/updateTglSchedule') ?>',
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json'
+                })
+                .done(response => {
+                    if (response.success) {
+                        alert('Update berhasil!');
+                        location.reload();
+                    } else {
+                        alert('Gagal: ' + (response.message || 'Terjadi kesalahan'));
+                    }
+                })
+                .fail((xhr, status, error) => {
+                    alert(`Error: ${error}`);
+                    console.error('Detail error:', xhr.responseText);
+                });
+        });
 
         // ✅ Event delegation untuk kode_warna input
         kodeWarna.addEventListener('input', function() {
@@ -406,37 +476,6 @@
             }
         });
 
-        // ✅ Fungsi fetch detail PO
-        // function fetchPODetails(poNo, tr, itemType, kodeWarna) {
-        //     fetchData('getPODetails', {
-        //         id_order: poNo,
-        //         item_type: itemType,
-        //         kode_warna: kodeWarna
-        //     }, (data) => {
-        //         if (data && !data.error) {
-        //             const fields = {
-        //                 'tgl_start_mc[]': data.start_mesin || '',
-        //                 'delivery_awal[]': data.delivery_awal || '',
-        //                 'delivery_akhir[]': data.delivery_akhir || '',
-        //                 'qty_po[]': parseFloat(data.kg_kebutuhan).toFixed(2),
-        //                 'qty_po_plus[]': parseFloat(data.qty_po_plus).toFixed(2),
-        //                 '.kg_kebutuhan': parseFloat(data.kg_kebutuhan).toFixed(2),
-        //                 '.sisa_jatah': parseFloat(data.sisa_jatah).toFixed(2)
-        //             };
-
-        //             Object.keys(fields).forEach(key => {
-        //                 const element = tr.querySelector(key.startsWith('.') ? key : `input[name="${key}"]`);
-        //                 if (element) {
-        //                     if (key.startsWith('.')) {
-        //                         element.textContent = fields[key];
-        //                     } else {
-        //                         element.value = fields[key];
-        //                     }
-        //                 }
-        //             });
-        //         }
-        //     });
-        // }
 
         function fetchPODetails(poNo, tr, itemType, kodeWarna) {
             fetchData('getPODetails', {
@@ -550,14 +589,78 @@
         });
 
 
-        // ✅ Event delegation untuk menghapus baris
-        poTable.addEventListener("click", function(e) {
-            if (e.target.classList.contains("removeRow")) {
-                e.target.closest("tr").remove();
-                calculateTotalAndRemainingCapacity();
+        document.querySelector("#poTable").addEventListener("click", function(event) {
+            if (event.target.closest(".removeRow")) {
+                const row = event.target.closest("tr");
+                const table = document.querySelector("#poTable tbody");
+
+                // Validasi jika ada input ID Celup pada baris
+                const idCelupInput = row.querySelector('input[name^="id_celup["]');
+                const idCelup = idCelupInput ? idCelupInput.value : null;
+
+                if (idCelup) {
+                    // SweetAlert konfirmasi sebelum menghapus
+                    Swal.fire({
+                        title: "Apakah Anda Yakin?",
+                        text: "Data Schedule akan dihapus",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Ya, hapus!",
+                        cancelButtonText: "Batal",
+                        dangerMode: true,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Kirim permintaan AJAX untuk menghapus data
+                            $.ajax({
+                                url: '<?= base_url(session('role') . '/schedule/deleteSchedule') ?>',
+                                type: 'POST',
+                                data: {
+                                    id_celup: idCelup
+                                },
+                                dataType: 'json',
+                                success: function(response) {
+                                    if (response.success) {
+                                        Swal.fire("Berhasil!", "Data Schedule berhasil dihapus.", "success").then(() => {
+                                            row.remove();
+                                            if (table.rows.length === 0) {
+                                                window.location.href = '<?= base_url(session('role') . '/schedule') ?>';
+                                            } else {
+                                                calculateTotalAndRemainingCapacity();
+                                            }
+                                        });
+                                    } else {
+                                        Swal.fire("Gagal!", "Data Schedule gagal dihapus.", "error");
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    Swal.fire("Error!", "Terjadi kesalahan pada server.", "error");
+                                },
+                            });
+                        }
+                    });
+                } else {
+                    // Jika id_celup tidak ditemukan atau null, cukup hapus barisnya saja
+                    Swal.fire({
+                        title: "Hapus Baris?",
+                        text: "Baris ini akan dihapus tanpa mengirim data ke server.",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Ya, hapus!",
+                        cancelButtonText: "Batal",
+                        dangerMode: true,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            row.remove();
+                            if (table.rows.length === 0) {
+                                window.location.href = '<?= base_url(session('role') . '/schedule') ?>';
+                            } else {
+                                calculateTotalAndRemainingCapacity();
+                            }
+                        }
+                    });
+                }
             }
         });
-        calculateTotalAndRemainingCapacity();
     });
 </script>
 <?php $this->endSection(); ?>

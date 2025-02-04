@@ -570,8 +570,8 @@
 
                     htmlContent += `
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" id="deleteSchedule">Hapus Jadwal</button>
-                        <button type="button" class="btn btn-warning text-black" id="editSchedule">Edit Jadwal</button>
+                        <button type="button" class="btn btn-info" id="editSchedule">Edit Jadwal</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                     </div>`;
 
                     modalBody.innerHTML = htmlContent;
