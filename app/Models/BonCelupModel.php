@@ -68,12 +68,8 @@ class BonCelupModel extends Model
 
     public function getDataById($id)
     {
-        return $this->select('schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, bon_celup.*, out_celup.*')
-            ->join('out_celup', 'out_celup.id_bon = out_celup.id_bon', 'left')
-            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'right')
-            ->where('bon_celup.id_bon', $id)
-            ->groupBy('id_out_celup')
-            ->findAll();
+        return $this->select('bon_celup.*')
+            ->first();
         //     return $this->select('bon_celup.*, out_celup.*, scheule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna')
         // ->join('out_celup', 'out_celup.id_bon=bon_celup.id_bon', 'left')
         // ->join('schedule_celup', 'out_celup.id_bon=bon_celup.id_bon')

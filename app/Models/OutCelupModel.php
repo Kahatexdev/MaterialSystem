@@ -59,4 +59,15 @@ class OutCelupModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    public function getDetailBonByIdBon($id)
+    {
+        return $this->select('master_order.buyer, master_material.ukuran, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, out_celup.*')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'right')
+            ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'right')
+            ->join('master_material', 'master_material.item_type = schedule_celup.item_type', 'right')
+            ->where('out_celup.id_bon', $id)
+            ->groupBy('id_out_celup')
+            ->findAll();
+    }
 }

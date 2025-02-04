@@ -243,15 +243,15 @@
                         </tr>
                         <tr>
                             <th class="sticky text-left align-middle" colspan="2">No. Dokumen</th>
-                            <th class="sticky text-left align-middle" colspan="7">FOR-KWA-006/REV_03/HAL_1/1</th>
+                            <th class="sticky text-left align-middle" colspan="8">FOR-KWA-006/REV_03/HAL_1/1</th>
                             <th class="sticky text-center align-middle" colspan="3">TANGGAL REVISI</th>
                             <th class="sticky text-center align-middle" colspan="2">07 Januari 2021</th>
                         </tr>
                         <tr>
                             <th class="sticky text-left align-middle" colspan="2">NAMA LANGGANAN</th>
                             <th class="sticky text-left align-middle" colspan="3">KAOS KAKI</th>
-                            <th class="sticky text-left align-middle" colspan="4">NO SURAT JALAN : </th>
-                            <th class="sticky text-left align-middle" colspan="6">TANGGAL : </th>
+                            <th class="sticky text-left align-middle" colspan="6">NO SURAT JALAN : <?= $dataBon['no_surat_jalan'] ?></th>
+                            <th class="sticky text-left align-middle" colspan="4">TANGGAL : <?= $dataBon['tgl_datang'] ?></th>
                         </tr>
                         <tr>
                             <th class="sticky text-center align-middle" rowspan="2">NO PO</th>
@@ -262,11 +262,107 @@
                             <th class="sticky text-center align-middle" rowspan="2">LOT CELUP</th>
                             <th class="sticky text-center align-middle" rowspan="2">L/M/D</th>
                             <th class="sticky text-center align-middle">HARGA</th>
+                            <th class="sticky text-center align-middle" rowspan="2">CONES</th>
                             <th class="sticky text-center align-middle" colspan="2">QTY</th>
                             <th class="sticky text-center align-middle" colspan="3">TOTAL</th>
                             <th class="sticky text-center align-middle" rowspan="2">KETERANGAN</th>
                         </tr>
+                        <tr>
+                            <th class="sticky text-center align-middle">PER KG</th>
+                            <th class="sticky text-center align-middle">GW (KG)</th>
+                            <th class="sticky text-center align-middle">NW (KG)</th>
+                            <th class="sticky text-center align-middle">CONES</th>
+                            <th class="sticky text-center align-middle">GW (KG)</th>
+                            <th class="sticky text-center align-middle">NW (KG)</th>
+                        </tr>
                     </thead>
+                    <tbody>
+                        <tr>
+                            <?php
+                            $prevBon = null; // Variabel untuk menyimpan data sebelumnya
+                            foreach ($dataBon['groupedDetails'] as $bon) { ?>
+                                <td class="text-center"><?= $bon['no_model'] ?></td>
+                                <td class="text-center"><?= $bon['item_type'] ?></td>
+                                <td class="text-center"><?= $bon['kode_warna'] ?></td>
+                                <td class="text-center"><?= $bon['warna'] ?></td>
+                                <td class="text-center"><?= $bon['ukuran'] ?></td>
+                                <td class="text-center"><?= $bon['lot_kirim'] ?></td>
+                                <td class="text-center"><?= $bon['l_m_d'] ?></td>
+                                <td class="text-center"><?= $bon['harga'] ?></td>
+                                <?php
+                                $row = 0;
+                                foreach ($bon['detailPengiriman'] as $detail) {
+                                    $row++;
+                                    if ($row == 1) { ?>
+                                        <td class="text-center"><?= $detail['cones_kirim'] ?></td>
+                                        <td class="text-center"><?= $detail['gw_kirim'] ?></td>
+                                        <td class="text-center"><?= $detail['kgs_kirim'] ?></td>
+                                        <td class="text-center"><?= $bon['totals']['cones_kirim'] ?></td>
+                                        <td class="text-center"><?= $bon['totals']['gw_kirim'] ?></td>
+                                        <td class="text-center"><?= $bon['totals']['kgs_kirim'] ?></td>
+                                        <td class="text-center"><?= $bon['jmlKarung'] . " KARUNG" . $bon['ganti_retur'] ?></td>
+                                    <?php } elseif ($row == 2) {
+                                    ?>
+                                        <td class="text-center"><?= $bon['buyer'] ?></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-center"><?= $detail['cones_kirim'] ?></td>
+                                        <td class="text-center"><?= $detail['gw_kirim'] ?></td>
+                                        <td class="text-center"><?= $detail['kgs_kirim'] ?></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    <?php } else { ?>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-center"><?= $detail['cones_kirim'] ?></td>
+                                        <td class="text-center"><?= $detail['gw_kirim'] ?></td>
+                                        <td class="text-center"><?= $detail['kgs_kirim'] ?></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    <?php } ?>
+                        </tr>
+                <?php }
+                            } ?>
+                    </tbody>
+                    <footer>
+                        <tr>
+                            <th class="sticky text-center align-middle">KETERANGAN : </th>
+                            <th class="sticky text-left align-middle" colspan="8">GW = GROSS WEIGHT</th>
+                            <th class="sticky text-center align-middle" colspan="4">PENGIRIM</th>
+                            <th class="sticky text-center align-middle" colspan="2">PENERIMA</th>
+                        </tr>
+                        <tr>
+                            <th class="sticky text-left align-middle"></th>
+                            <th class="sticky text-left align-middle" colspan="14">NW = NETT WEIGHT</th>
+                        </tr>
+                        <tr>
+                            <th class="sticky text-left align-middle"></th>
+                            <th class="sticky text-left align-middle" colspan="14">L = LIGHT</th>
+                        <tr>
+                            <th class="sticky text-left align-middle"></th>
+                            <th class="sticky text-left align-middle" colspan="14">M = MEDIUM</th>
+                        </tr>
+                        <tr>
+                            <th class="sticky text-left align-middle"></th>
+                            <th class="sticky text-left align-middle" colspan="8">D = DARK</th>
+                            <th class="sticky text-center align-middle" colspan="4">(_____________________________)</th>
+                            <th class="sticky text-center align-middle" colspan="2">(_____________________________)</th>
+                        </tr>
+                    </footer>
                 </table>
             </div>
         </div>
