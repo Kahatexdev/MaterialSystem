@@ -331,61 +331,58 @@
             }
         });
 
-        // ✅ Fungsi untuk menghitung total_qty_celup dan memeriksa max_caps serta tagihan SCH
         function calculateTotalAndRemainingCapacity() {
+            let totalQtyCelup = 0;
             const poTable = document.getElementById("poTable");
             if (!poTable) {
                 console.warn("⚠️ poTable tidak ditemukan di halaman.");
                 return;
             }
 
-            let totalQtyCelup = 0; // Total qty celup untuk seluruh baris
+            const rows = poTable.querySelectorAll("tbody tr");
 
-            // Mengambil semua input qty_celup[] dalam tabel
-            const qtyCelupInputs = poTable.querySelectorAll("input[name='qty_celup[]']");
+            rows.forEach((row, index) => {
+                const qtyCelupInput = row.querySelector('input[name^="qty_celup["]');
+                const lastStatusInput = row.querySelector('input[name^="last_status["]');
 
-            qtyCelupInputs.forEach(input => {
-                // Menghitung qty celup per baris
-                const qtyCelup = parseFloat(input.value) || 0;
-                totalQtyCelup += qtyCelup; // Menambahkan qty celup ke total
+                if (qtyCelupInput && lastStatusInput) {
+                    const qtyCelup = parseFloat(qtyCelupInput.value) || 0;
+                    const lastStatus = lastStatusInput.value;
+
+                    if (lastStatus === 'scheduled' || lastStatus === 'celup' || lastStatus === 'reschedule') {
+                        totalQtyCelup += qtyCelup;
+                    }
+                } else {
+                    console.warn(`⚠️ Input qty_celup atau last_status tidak ditemukan di baris ke-${index}`);
+                }
             });
 
-            // Update nilai total_qty_celup
             const totalQtyCelupElement = document.getElementById("total_qty_celup");
             if (totalQtyCelupElement) {
-                totalQtyCelupElement.value = totalQtyCelup.toFixed(2); // Menampilkan total qty celup
+                totalQtyCelupElement.value = totalQtyCelup.toFixed(2);
             }
 
-            // Cek apakah total qty celup melebihi max caps
             const maxCaps = parseFloat(document.getElementById("max_caps").value) || 0;
             if (totalQtyCelup > maxCaps) {
                 alert("⚠️ Total Qty Celup melebihi Max Caps!");
             }
 
-            // Memeriksa qty celup per baris dengan sisa_jatah
-            const rows = poTable.querySelectorAll("tbody tr");
-            rows.forEach(row => {
-                const qtyCelup = parseFloat(row.querySelector("input[name='qty_celup[]']")?.value || 0);
-                const tagihanSCH = parseFloat(row.querySelector(".sisa_jatah").textContent) || 0;
-
-                // Jika qty_celup sudah ada dari data sebelumnya, langsung tampilkan sisa_jatah tanpa perhitungan
-                if (qtyCelup > 0 && tagihanSCH > 0) {
-                    row.querySelector(".sisa_jatah").textContent = tagihanSCH.toFixed(2);
-                } else {
-                    // 🔥 Lewati validasi jika .sisa_jatah masih default (0.00)
-                    if (tagihanSCH === 0) return;
-
-                    // Cek apakah qty celup per baris melebihi tagihan SCH
-                    if (qtyCelup > tagihanSCH) {
-                        alert(`⚠️ Qty Celup di baris ini melebihi Tagihan SCH! (Tagihan SCH: ${tagihanSCH.toFixed(2)})`);
+            rows.forEach((row, index) => {
+                const sisaJatahElement = row.querySelector(".sisa_jatah");
+                if (sisaJatahElement) {
+                    const sisaJatah = parseFloat(sisaJatahElement.textContent) || 0;
+                    sisaJatahElement.style.color = sisaJatah < 0 ? "red" : "white";
+                    // tampilkan 2 angka di belakang koma
+                    sisaJatahElement.textContent = sisaJatah.toFixed(2);
+                    if (sisaJatah < 0) {
+                        alert(`⚠️ Sisa Jatah di baris ke-${index} negatif!`);
                     }
                 }
             });
 
-            // Update sisa kapasitas (maxCaps - totalQtyCelup)
             const sisaKapasitasElement = document.getElementById("sisa_kapasitas");
             if (sisaKapasitasElement) {
-                sisaKapasitasElement.value = (maxCaps - totalQtyCelup).toFixed(2); // Menampilkan sisa kapasitas
+                sisaKapasitasElement.value = (maxCaps - totalQtyCelup).toFixed(2);
             }
         }
 
