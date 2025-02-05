@@ -3821,11 +3821,6 @@ class ClusterSeeder extends Seeder
                 'group' => 'III',
             ],
             [
-                'nama_cluster' => 'III.F.02.A',
-                'kapasitas' => '450',
-                'group' => 'III',
-            ],
-            [
                 'nama_cluster' => 'III.F.03.A',
                 'kapasitas' => '450',
                 'group' => 'III',
@@ -4097,86 +4092,6 @@ class ClusterSeeder extends Seeder
             ],
             [
                 'nama_cluster' => 'III.I.13.A',
-                'kapasitas' => '250',
-                'group' => 'III',
-            ],
-            [
-                'nama_cluster' => 'III.I.14.A',
-                'kapasitas' => '250',
-                'group' => 'III',
-            ],
-            [
-                'nama_cluster' => 'III.I.15.A',
-                'kapasitas' => '250',
-                'group' => 'III',
-            ],
-            [
-                'nama_cluster' => 'III.I.16.A',
-                'kapasitas' => '250',
-                'group' => 'III',
-            ],
-            [
-                'nama_cluster' => 'III.J.01.A',
-                'kapasitas' => '250',
-                'group' => 'III',
-            ],
-            [
-                'nama_cluster' => 'III.J.02.A',
-                'kapasitas' => '250',
-                'group' => 'III',
-            ],
-            [
-                'nama_cluster' => 'III.J.03.A',
-                'kapasitas' => '250',
-                'group' => 'III',
-            ],
-            [
-                'nama_cluster' => 'III.J.04.A',
-                'kapasitas' => '250',
-                'group' => 'III',
-            ],
-            [
-                'nama_cluster' => 'III.J.05.A',
-                'kapasitas' => '250',
-                'group' => 'III',
-            ],
-            [
-                'nama_cluster' => 'III.J.06.A',
-                'kapasitas' => '250',
-                'group' => 'III',
-            ],
-            [
-                'nama_cluster' => 'III.J.07.A',
-                'kapasitas' => '250',
-                'group' => 'III',
-            ],
-            [
-                'nama_cluster' => 'III.J.08.A',
-                'kapasitas' => '250',
-                'group' => 'III',
-            ],
-            [
-                'nama_cluster' => 'III.J.09.A',
-                'kapasitas' => '250',
-                'group' => 'III',
-            ],
-            [
-                'nama_cluster' => 'III.J.10.A',
-                'kapasitas' => '250',
-                'group' => 'III',
-            ],
-            [
-                'nama_cluster' => 'III.J.11.A',
-                'kapasitas' => '250',
-                'group' => 'III',
-            ],
-            [
-                'nama_cluster' => 'III.J.12.A',
-                'kapasitas' => '250',
-                'group' => 'III',
-            ],
-            [
-                'nama_cluster' => 'III.J.13.A',
                 'kapasitas' => '250',
                 'group' => 'III',
             ],

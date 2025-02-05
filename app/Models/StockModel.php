@@ -3,28 +3,29 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
-use PHPUnit\Framework\Attributes\IgnoreFunctionForCodeCoverage;
 
-class OutCelupModel extends Model
+class StockModel extends Model
 {
-    protected $table            = 'out_celup';
-    protected $primaryKey       = 'id_out_celup';
+    protected $table            = 'stock';
+    protected $primaryKey       = 'id_stock';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'id_out_celup',
-        'id_bon',
-        'id_celup',
-        'l_m_d',
-        'harga',
-        'no_karung',
-        'gw_kirim',
-        'kgs_kirim',
-        'cones_kirim',
-        'lot_kirim',
-        'ganti_retur',
+        'id_stock',
+        'no_model',
+        'item_type',
+        'kode_warna',
+        'warna',
+        'kgs_stock_awal',
+        'cns_stock_awal',
+        'lot_awal',
+        'kgs_in_out',
+        'cns_in_out',
+        'krg_in_out',
+        'lot_stock',
+        'nama_cluster',
         'admin',
         'created_at',
         'updated_at',
@@ -37,7 +38,7 @@ class OutCelupModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = true;
+    protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -59,15 +60,4 @@ class OutCelupModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
-
-    public function getDataOut($id)
-    {
-        return $this->db->table('out_celup')
-            ->select('out_celup.*, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.lot_kirim')
-            ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup')
-            ->where('out_celup.id_out_celup', $id)
-            ->distinct()
-            ->get()
-            ->getResultArray();
-    }
 }

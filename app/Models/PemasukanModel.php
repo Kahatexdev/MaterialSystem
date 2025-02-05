@@ -23,6 +23,7 @@ class PemasukanModel extends Model
         'kgs_masuk',
         'cns_masuk',
         'tgl_masuk',
+        'nama_cluster',
         'history_order',
         'history_jalur',
         'out_jalur',
