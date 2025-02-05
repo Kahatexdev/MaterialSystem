@@ -70,6 +70,87 @@
         /* Warna latar saat hover */
     }
 
+    /* Table Styles */
+    .table-responsive {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        background-color: #197706;
+        color: #ffffff;
+        font-weight: 600;
+        text-transform: uppercase;
+        padding: 15px;
+    }
+
+    .table tbody td {
+        padding: 15px;
+        vertical-align: middle;
+    }
+
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-control,
+    .form-select {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 8px 12px;
+        width: 100%;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #197706;
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+
+    /* Button Styles */
+    .btn {
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-weight: 600;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+    }
+
+    .btn-info {
+        background-color: #197706;
+        border-color: #197706;
+        color: #ffffff;
+    }
+
+    .btn-info:hover {
+        background-color: #0e5e02;
+        border-color: #0e5e02;
+    }
+
+    .btn-danger {
+        background-color: #e74c3c;
+        border-color: #e74c3c;
+    }
+
+    .btn-danger:hover {
+        background-color: #c0392b;
+        border-color: #c0392b;
+    }
+
+    /* Badge Styles */
+
+
+
+
+
     /* Responsive Design */
     @media (max-width: 768px) {
         .suggestions-box {
@@ -188,85 +269,133 @@
                             </div>
                             <div class="row">
                                 <!-- form input addmore-->
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="table-responsive">
-                                            <table id="poTable" class="table table-bordered table-striped">
-                                                <thead>
-                                                    <tr>
-                                                        <th class="text-center">Item Type</th>
-                                                        <th class="text-center">PO</th>
-                                                        <th class="text-center">Tgl Start MC</th>
-                                                        <th class="text-center">Delivery Awal</th>
-                                                        <th class="text-center">Delivery Akhir</th>
-                                                        <th class="text-center">Qty PO</th>
-                                                        <th class="text-center">Qty PO(+)</th>
-                                                        <th class="text-center">Kg Kebutuhan</th>
-                                                        <th class="text-center">Tagihan SCH</th>
-                                                        <th class="text-center">Qty Celup
-                                                        </th>
-                                                        <th class="text-center">PO(+)</th>
-                                                        <th class="text-center">
-                                                            <button type="button" class="btn btn-info" id="addRow">
-                                                                <i class="fas fa-plus"></i>
-                                                            </button>
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td>
-                                                            <select class="form-select item-type" name="item_type[]" required>
-                                                                <option value="">Pilih Item Type</option>
-                                                            </select>
-                                                        </td>
-                                                        <td>
-                                                            <select class="form-select po-select" name="po[]" required>
-                                                                <option value="">Pilih PO</option>
-                                                            </select>
-                                                        </td>
-                                                        <td><input type="date" class="form-control" name="tgl_start_mc[]" readonly></td>
-                                                        <td><input type="date" class="form-control" name="delivery_awal[]" readonly></td>
-                                                        <td><input type="date" class="form-control" name="delivery_akhir[]" readonly></td>
-                                                        <td><input type="number" class="form-control" name="qty_po[]" readonly></td>
-                                                        <td><input type="number" class="form-control" name="qty_po_plus[]" readonly></td>
-                                                        <td class="text-center">
-                                                            <span class="badge bg-info">
-                                                                <span class="kg_kebutuhan">0.00</span> KG <!-- Ganti id dengan class -->
-                                                            </span>
-                                                        </td>
-                                                        <td class="text-center">
-                                                            <span class="badge bg-info">
-                                                                <span class="sisa_jatah">0.00</span> KG <!-- Ganti id dengan class -->
-                                                            </span>
-                                                        </td>
-                                                        <td><input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required></td>
-                                                        <td>
-                                                            <select class="form-select" name="po_plus[]" required>
-                                                                <option value="">Pilih PO(+)</option>
-                                                                <option value="1">Ya</option>
-                                                                <option value="0">Tidak</option>
-                                                            </select>
-                                                        </td>
-                                                        <td class="text-center">
-                                                            <button type="button" class="btn btn-danger removeRow">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                                <tfoot>
-                                                    <tr>
-                                                        <td class="text-center">
-                                                            <strong>Total Qty Celup</strong>
-                                                        </td>
-                                                        <td colspan="8" class="text-center">
-                                                            <input type="number" class="form-control" id="total_qty_celup" name="total_qty_celup" value="0" readonly>
-                                                        </td>
-                                                    </tr>
-                                                </tfoot>
-                                            </table>
-                                        </div>
+                                <div class="col-md-12">
+                                    <div class="table-responsive">
+                                        <table id="poTable" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center">No</th>
+                                                    <th class="text-center">Order</th>
+                                                    <th class="text-center">
+                                                        <button type="button" class="btn btn-info" id="addRow">
+                                                            <i class="fas fa-plus"></i>
+                                                        </button>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="text-center">1</td>
+                                                    <td>
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <div class="form-group">
+                                                                    <label for="itemtype"> Item Type</label>
+                                                                    <select class="form-select item-type" name="item_type[]" required>
+                                                                        <option value="">Pilih Item Type</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="form-group">
+                                                                    <label for="po">PO</label>
+                                                                    <select class="form-select po-select" name="po[]" required>
+                                                                        <option value="">Pilih PO</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-4">
+                                                                <div class="form-group">
+                                                                    <label for="tgl_start_mc">Tgl Start MC</label>
+                                                                    <input type="date" class="form-control" name="tgl_start_mc[]" readonly>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-4">
+                                                                <div class="form-group">
+                                                                    <label for="delivery_awal">Delivery Awal</label>
+                                                                    <input type="date" class="form-control" name="delivery_awal[]" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-4">
+                                                                <div class="form-group ">
+                                                                    <label for="delivery_akhir">Delivery Akhir</label>
+                                                                    <input type="date" class="form-control" name="delivery_akhir[]" readonly>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-4">
+                                                                <div class="form-group">
+                                                                    <label for="qty_po">Qty PO</label>
+                                                                    <input type="number" class="form-control" name="qty_po[]" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-4">
+                                                                <div class="form-group">
+                                                                    <label for="qty_po_plus">Qty PO (+)</label>
+                                                                    <input type="number" class="form-control" name="qty_po_plus[]" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-4">
+                                                                <div class="form-group">
+                                                                    <label for="kg_kebutuhan">PO +</label>
+                                                                    <select class="form-select" name="po_plus[]" required>
+                                                                        <option value="">Pilih PO(+)</option>
+                                                                        <option value="1">Ya</option>
+                                                                        <option value="0">Tidak</option>
+                                                                    </select>
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-4">
+                                                                    <div class="form-group">
+                                                                        <label for="qty_celup">KG Kebutuhan :</label>
+                                                                        <br />
+                                                                        <span class="badge bg-info">
+                                                                            <span class="kg_kebutuhan">0.00</span> KG <!-- Ganti id dengan class -->
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <div class="form-group">
+                                                                        <label for="qty_celup">Tagihan Sch :</label>
+                                                                        <br />
+                                                                        <span class="badge bg-info">
+                                                                            <span class="sisa_jatah">0.00</span> KG <!-- Ganti id dengan class -->
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-4">
+                                                                    <div class="form-group">
+                                                                        <label for="qty_celup">Qty Celup</label>
+                                                                        <input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                    </td>
+                                                    <td class="text-center">
+
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td class="text-center">
+                                                        <strong>Total Qty Celup</strong>
+                                                    </td>
+                                                    <td colspan="8" class="text-center">
+                                                        <input type="number" class="form-control" id="total_qty_celup" name="total_qty_celup" value="0" readonly>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
                                     </div>
                                 </div>
 
@@ -274,8 +403,8 @@
                                 <div class="text-end">
                                     <button type="submit" class="btn btn-info w-100">Simpan Jadwal</button>
                                 </div>
+                            </div>
                         </form>
-
                     </div>
                 </div>
             </div>
@@ -298,16 +427,6 @@
         const itemType = document.querySelector("select[name='item_type']"); // Pastikan ini adalah elemen <select>
         const poSelect = document.querySelector("select[name='po[]']"); // Pastikan ini adalah elemen <select>
 
-        // ✅ Event listener untuk kode_warna input serta tampilkan warna
-        kodeWarna.addEventListener('input', function() {
-            const query = kodeWarna.value;
-            if (query.length >= 3) {
-                fetchKodeWarnaSuggestions(query);
-                fetchWarnaByKodeWarna(query);
-            } else {
-                suggestionsBoxKWarna.style.display = 'none';
-            }
-        });
 
 
         // ✅ Fungsi Fetch Data Kode Warna
@@ -342,7 +461,6 @@
                 suggestionsBoxKWarna.style.display = 'none';
             }
         }
-
         // ✅ Fungsi Fetch Data Warna berdasarkan Kode Warna
         function fetchWarnaByKodeWarna(kodeWarna) {
             fetch('<?= base_url(session('role') . "/schedule/getWarna") ?>?kode_warna=' + kodeWarna)
@@ -358,6 +476,24 @@
                     warnaInput.value = 'Error mengambil warna';
                 });
         }
+        kodeWarna.addEventListener('change', function() {
+            kodeWarna.value = suggestionsBoxKWarna.textContent;
+            console.log(kodeWarna.value);
+            const query = kodeWarna.value;
+            fetchWarnaByKodeWarna(query);
+        });
+
+        // ✅ Event listener untuk kode_warna input serta tampilkan warna
+        kodeWarna.addEventListener('input', function() {
+            const query = kodeWarna.value;
+            if (query.length >= 3) {
+                fetchKodeWarnaSuggestions(query);
+            } else {
+                suggestionsBoxKWarna.style.display = 'none';
+            }
+        });
+
+
 
         function fetchItemType(kodeWarna, warna) {
             fetch(`<?= base_url(session('role') . "/schedule/getItemType") ?>?kode_warna=${kodeWarna}&warna=${warna}`)
@@ -599,45 +735,107 @@
             const tbody = poTable.querySelector("tbody");
             const newRow = document.createElement("tr");
             newRow.innerHTML = `
-        <td>
-            <select class="form-select item-type" name="item_type[]" required>
-                <option value="">Pilih Item Type</option>
-            </select>
-        </td>
-        <td>
-            <select class="form-select po-select" name="po[]" required>
-                <option value="">Pilih PO</option>
-            </select>
-        </td>
-        <td><input type="date" class="form-control" name="tgl_start_mc[]" readonly></td>
-        <td><input type="date" class="form-control" name="delivery_awal[]" readonly></td>
-        <td><input type="date" class="form-control" name="delivery_akhir[]" readonly></td>
-        <td><input type="number" class="form-control" name="qty_po[]" readonly></td>
-        <td><input type="number" class="form-control" name="qty_po_plus[]" readonly></td>
-        <td class="text-center">
-            <span class="badge bg-info">
-                <span class="kg_kebutuhan">0.00</span> KG
-            </span>
-        </td>
-        <td class="text-center">
-            <span class="badge bg-info">
-                <span class="sisa_jatah">0.00</span> KG
-            </span>
-        </td>
-        <td><input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required></td>
-        <td>
-            <select class="form-select" name="po_plus[]" required>
-                <option value="">Pilih PO(+)</option>
-                <option value="1">Ya</option>
-                <option value="0">Tidak</option>
-            </select>
-        </td>
-        <td class="text-center">
-            <button type="button" class="btn btn-danger removeRow">
-                <i class="fas fa-trash"></i>
-            </button>
-        </td>
-    `;
+                <td class="text-center">${tbody.rows.length + 1}</td>
+                <td>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="itemtype"> Item Type</label>
+                                <select class="form-select item-type" name="item_type[]" required>
+                                    <option value="">Pilih Item Type</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="po">PO</label>
+                                <select class="form-select po-select" name="po[]" required>
+                                    <option value="">Pilih PO</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="tgl_start_mc">Tgl Start MC</label>
+                                <input type="date" class="form-control" name="tgl_start_mc[]" readonly>
+                            </div>
+                        </div>
+
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="delivery_awal">Delivery Awal</label>
+                                <input type="date" class="form-control" name="delivery_awal[]" readonly>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group ">
+                                <label for="delivery_akhir">Delivery Akhir</label>
+                                <input type="date" class="form-control" name="delivery_akhir[]" readonly>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="qty_po">Qty PO</label>
+                                <input type="number" class="form-control" name="qty_po[]" readonly>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="qty_po_plus">Qty PO (+)</label>
+                                <input type="number" class="form-control" name="qty_po_plus[]" readonly>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="kg_kebutuhan">PO +</label>
+                                <select class="form-select" name="po_plus[]" required>
+                                    <option value="">Pilih PO(+)</option>
+                                    <option value="1">Ya</option>
+                                    <option value="0">Tidak</option>
+                                </select>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label for="qty_celup">KG Kebutuhan :</label>
+                                    <span class="badge bg-info">
+                                        <span class="kg_kebutuhan">0.00</span> KG <!-- Ganti id dengan class -->
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label for="qty_celup">Tagihan Sch :</label>
+
+                                    <span class="badge bg-info">
+                                        <span class="sisa_jatah">0.00</span> KG <!-- Ganti id dengan class -->
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label for="qty_celup">Qty Celup</label>
+                                    <input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required>
+                                </div>
+                            </div>
+                        </div>
+
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-danger removeRow">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                        
+                </td>
+            `;
             tbody.appendChild(newRow);
 
             // Mengisi opsi item_type di baris baru

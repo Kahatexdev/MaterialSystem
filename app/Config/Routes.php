@@ -61,6 +61,11 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('schedule/updateSchedule', 'ScheduleController::updateSchedule');
     $routes->post('schedule/updateTglSchedule', 'ScheduleController::updateTglSchedule');
     $routes->post('schedule/deleteSchedule', 'ScheduleController::deleteSchedule');
+
+    $routes->get('schedule/reqschedule', 'ScheduleController::reqschedule');
+    $routes->post('schedule/reqschedule', 'ScheduleController::reqschedule');
+    $routes->get('schedule/reqschedule/show/(:num)', 'ScheduleController::showschedule/$1');
+
     // $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJatah');
 
     $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
@@ -71,6 +76,13 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('mesin/deleteDataMesin/(:num)', 'MesinCelupController::deleteDataMesin/$1');
 
     $routes->get('warehouse', 'WarehouseController::index');
+    $routes->get('pemasukan', 'WarehouseController::pemasukan');
+    $routes->post('pemasukan', 'WarehouseController::pemasukan');
+    $routes->post('reset_pemasukan', 'WarehouseController::reset_pemasukan');
+    $routes->post('hapus_pemasukan', 'WarehouseController::hapusListPemasukan');
+    $routes->post('proses_pemasukan', 'WarehouseController::prosesPemasukan');
+    $routes->get('pengeluaran', 'WarehouseController::pengeluaran');
+
     $routes->get('pph', 'PphController::index');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
     $routes->post('tampilPerStyle', 'PphController::tampilPerStyle');

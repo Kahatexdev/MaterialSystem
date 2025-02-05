@@ -846,4 +846,158 @@ class ScheduleController extends BaseController
         // Render view dengan data yang sudah disiapkan
         return view($this->role . '/schedule/sample', $data);
     }
+
+    public function reqschedule()
+    {
+        $filterTglSch = $this->request->getPost('filter_tglsch');
+        $filterNoModel = $this->request->getPost('filter_nomodel');
+
+        $sch = $this->scheduleCelupModel->getSchedule();
+
+        if ($filterTglSch && $filterNoModel) {
+            $sch = array_filter($sch, function ($data) use ($filterTglSch, $filterNoModel) {
+                return $data['tanggal_schedule'] === $filterTglSch &&
+                    (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
+            });
+        } elseif ($filterTglSch) {
+            // Filter berdasarkan tanggal saja
+            $sch = array_filter($sch, function ($data) use ($filterTglSch) {
+                return $data['tanggal_schedule'] === $filterTglSch;
+            });
+        } elseif ($filterNoModel) {
+            // Filter berdasarkan nomor model atau kode warna saja
+            $sch = array_filter($sch, function ($data) use ($filterNoModel) {
+                return (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
+            });
+        }
+
+
+        $uniqueData = [];
+        foreach ($sch as $key => $id) {
+            // Ambil parameter dari data schedule
+            $nomodel = $id['no_model'];
+            $itemtype = $id['item_type'];
+            $kodewarna = $id['kode_warna'];
+
+            // Debug untuk memastikan parameter tidak null
+            if (empty($nomodel) || empty($itemtype) || empty($kodewarna)) {
+                log_message('error', "Parameter null: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
+                continue; // Skip data jika ada parameter kosong
+            }
+
+            // Panggil fungsi model untuk mendapatkan qty_po dan warna
+            $pdk = $this->materialModel->getQtyPOForCelup($nomodel, $itemtype, $kodewarna);
+
+            if (!$pdk) {
+                log_message('error', "Data null dari model: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
+                continue; // Skip jika $pdk kosong
+            }
+
+            $keys = $id['no_model'] . '-' . $id['item_type'] . '-' . $id['kode_warna'];
+
+            // Pastikan key belum ada, jika belum maka tambahkan data
+            if (!isset($uniqueData[$key])) {
+
+                // Buat array data unik
+                $uniqueData[] = [
+                    'no_model' => $nomodel,
+                    'item_type' => $itemtype,
+                    'kode_warna' => $kodewarna,
+                    'warna' => $pdk['color'],
+                    'start_mc' => $id['start_mc'],
+                    'qty_celup' => $id['qty_celup'],
+                    'no_mesin' => $id['no_mesin'],
+                    'id_celup' => $id['id_celup'],
+                    'lot_celup' => $id['lot_celup'],
+                    'lot_urut' => $id['lot_urut'],
+                    'tgl_schedule' => $id['tanggal_schedule'],
+                    'last_status' => $id['last_status'],
+                ];
+            }
+        }
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Schedule',
+            'role' => $this->role,
+            'data_sch' => $sch,
+            'uniqueData' => $uniqueData,
+        ];
+        return view($this->role . '/schedule/reqschedule', $data);
+    }
+
+    public function showschedule($id)
+    {
+        $sch = $this->scheduleCelupModel->getDataByIdCelup($id);
+        $uniqueData = [];
+        foreach ($sch as $key => $id) {
+            // Ambil parameter dari data schedule
+            $nomodel = $id['no_model'];
+            $itemtype = $id['item_type'];
+            $kodewarna = $id['kode_warna'];
+
+            // Debug untuk memastikan parameter tidak null
+            if (empty($nomodel) || empty($itemtype) || empty($kodewarna)) {
+                log_message('error', "Parameter null: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
+                continue; // Skip data jika ada parameter kosong
+            }
+
+            // Panggil fungsi model untuk mendapatkan qty_po dan warna
+            $pdk = $this->materialModel->getQtyPOForCelup($nomodel, $itemtype, $kodewarna);
+
+            // Pastikan $pdk memiliki data valid sebelum dipakai
+            if (!$pdk) {
+                log_message('error', "Data null dari model: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
+                continue; // Skip jika $pdk kosong
+            }
+            $keys = $id['no_model'] . '-' . $id['item_type'] . '-' . $id['kode_warna'];
+
+            // Pastikan key belum ada, jika belum maka tambahkan data
+            if (!isset($uniqueData[$key])) {
+                // Buat array data unik
+                $uniqueData[$keys] = [
+                    'no_model' => $nomodel,
+                    'item_type' => $itemtype,
+                    'kode_warna' => $kodewarna,
+                    'warna' => $pdk['color'],
+                    'start_mc' => $id['start_mc'],
+                    'del_awal' => $pdk['delivery_awal'],
+                    'del_akhir' => $pdk['delivery_akhir'],
+                    'qty_po' => $pdk['qty_po'],
+                    'qty_po_plus' => 0,
+                    'qty_celup' => $id['qty_celup'],
+                    'no_mesin' => $id['no_mesin'],
+                    'id_celup' => $id['id_celup'],
+                    'lot_celup' => $id['lot_celup'],
+                    'lot_urut' => $id['lot_urut'],
+                    'tgl_schedule' => $id['tanggal_schedule'],
+                    'tgl_bon' => $id['tanggal_bon'],
+                    'tgl_celup' => $id['tanggal_celup'],
+                    'tgl_bongkar' => $id['tanggal_bongkar'],
+                    'tgl_press' => $id['tanggal_press'],
+                    'tgl_oven' => $id['tanggal_oven'],
+                    'tgl_tl' => $id['tanggal_tl'],
+                    'tgl_rajut_pagi' => $id['tanggal_rajut_pagi'],
+                    'tgl_kelos' => $id['tanggal_kelos'],
+                    'tgl_acc' => $id['tanggal_acc'],
+                    'tgl_reject' => $id['tanggal_reject'],
+                    'tgl_pb' => $id['tanggal_perbaikan'],
+                    'last_status' => $id['last_status'],
+                    'ket_daily_cek' => $id['ket_daily_cek'],
+                    'qty_celup_plus' => $id['qty_celup_plus'],
+                    'admin' => $id['user_cek_status'],
+                ];
+            }
+        }
+        // dd($uniqueData);
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'data_sch' => $sch,
+            'uniqueData' => $uniqueData,
+            'po' => array_column($uniqueData, 'no_model'),
+        ];
+        return view($this->role . '/schedule/form-show', $data);
+    }
 }

@@ -570,8 +570,8 @@
 
                     htmlContent += `
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" id="deleteSchedule">Hapus Jadwal</button>
-                        <button type="button" class="btn btn-warning text-black" id="editSchedule">Edit Jadwal</button>
+                        <button type="button" class="btn btn-info" id="editSchedule">Edit Jadwal</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                     </div>`;
 
                     modalBody.innerHTML = htmlContent;
@@ -598,9 +598,20 @@
 
                     // Tambahkan event listener untuk tombol "Tambah Jadwal"
                     document.getElementById("addSchedule").addEventListener("click", function() {
+                        if (isSunday(date)) {
+                            alert("⚠️ Tidak dapat menambahkan jadwal pada hari Minggu.");
+                            return; // Hentikan proses jika hari Minggu
+                        }
                         redirectToAddSchedule(machine, date, lotUrut);
                     });
                 });
+        }
+
+        // Fungsi untuk mengecek apakah tanggal tertentu adalah hari Minggu
+        function isSunday(date) {
+            const sunday = 0; // 0 adalah kode untuk hari Minggu
+            const tgl = new Date(date); // Konversi string date ke objek Date
+            return tgl.getDay() === sunday;
         }
 
         // Fungsi untuk redirect ke halaman tambah jadwal
