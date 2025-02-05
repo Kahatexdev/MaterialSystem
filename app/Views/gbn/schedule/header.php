@@ -18,6 +18,12 @@
 
                         </a>
                     </li>
+                    <li class="nav-item d-flex align-items-center px-1">
+                        <a href="<?= base_url($role . '/schedule/reqschedule') ?>">
+                            <span class=" badge bg-gradient-info ">Reqschedule</span>
+
+                        </a>
+                    </li>
                     <li class=" nav-item dropdown pe-2 d-flex align-items-center">
                         <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class=" badge bg-gradient-info ">Schedule <i class="ni ni-bold-down"></i></span>
