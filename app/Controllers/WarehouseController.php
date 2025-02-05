@@ -207,4 +207,13 @@ class WarehouseController extends BaseController
         ];
         return view($this->role . '/warehouse/form-pengeluaran', $data);
     }
+
+    public function search()
+    {
+        $noModel = $this->request->getPost('noModel');
+        $warna = $this->request->getPost('warna');
+
+        $results = $this->materialModel->search($noModel, $warna);
+        return $this->response->setJSON($results);
+    }
 }
