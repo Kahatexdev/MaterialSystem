@@ -4,20 +4,28 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class BonCelupModel extends Model
+class PemasukanModel extends Model
 {
-    protected $table            = 'bon_celup';
-    protected $primaryKey       = 'id_bon';
+    protected $table            = 'pemasukan';
+    protected $primaryKey       = 'id_pemasukan';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'id_bon',
-        'id_celup',
-        'tgl_datang',
-        'no_surat_jalan',
-        'detail_sj',
+        'id_pemasukan',
+        'id_out_celup',
+        'id_retur',
+        'no_model',
+        'item_type',
+        'kode_warna',
+        'warna',
+        'kgs_masuk',
+        'cns_masuk',
+        'tgl_masuk',
+        'history_order',
+        'history_jalur',
+        'out_jalur',
         'admin',
         'created_at',
         'updated_at',
@@ -30,7 +38,7 @@ class BonCelupModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = true;
+    protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -52,27 +60,4 @@ class BonCelupModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
-
-    public function getData()
-    {
-        return $this->select('bon_celup.id_bon, bon_celup.tgl_datang, bon_celup.no_surat_jalan, bon_celup.detail_sj')
-            ->findAll();
-    }
-
-    public function saveBon($saveDataBon, $saveDataOutCelup)
-    {
-        $this->db->table('bon_celup')->insert($saveDataBon);
-
-        $this->db->table('out_celup')->insert($saveDataOutCelup);
-    }
-
-    public function getDataById($id)
-    {
-        return $this->select('bon_celup.*')
-            ->first();
-        //     return $this->select('bon_celup.*, out_celup.*, scheule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna')
-        // ->join('out_celup', 'out_celup.id_bon=bon_celup.id_bon', 'left')
-        // ->join('schedule_celup', 'out_celup.id_bon=bon_celup.id_bon')
-        //     ->();
-    }
 }

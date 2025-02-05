@@ -275,6 +275,16 @@ class CelupController extends BaseController
         if ($tglPB) $dataUpdate['tanggal_pb'] = $tglPB;
         if ($ketDailyCek) $dataUpdate['ket_daily_cek'] = $ketDailyCek;
 
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglCelup)) {
+            $dataUpdate['last_status'] = 'celup';
+        }
+
+        // Jika tgl_kelos diisi, update last_status menjadi 'done'
+        if (!empty($tglKelos)) {
+            $dataUpdate['last_status'] = 'done';
+        }
+
         // Validasi apakah data dengan ID yang diberikan ada
         $existingProduction = $this->scheduleCelupModel->find($id);
         if (!$existingProduction) {
@@ -408,7 +418,55 @@ class CelupController extends BaseController
 
     public function generateBarcode($id)
     {
-        $dataBon = $this->bonCelupModel->getDataById($id);
+        // data ALL BON
+        $dataBon = $this->bonCelupModel->getDataById($id); // get data by id_bon
+        $detailBon = $this->outCelupModel->getDetailBonByIdBon($id); // get data detail bon by id_bon
+        // Mengelompokkan data detailBon berdasarkan no_model, item_type, dan kode_warna
+        $groupedDetails = [];
+        foreach ($detailBon as $detail) {
+            $key = $detail['no_model'] . '|' . $detail['item_type'] . '|' . $detail['kode_warna'];
+            $jmlKarung =
+                $gantiRetur = ($detail['ganti_retur'] == 1) ? ' / Ganti Retur' : '';
+            if (!isset($groupedDetails[$key])) {
+                $groupedDetails[$key] = [
+                    'no_model' => $detail['no_model'],
+                    'item_type' => $detail['item_type'],
+                    'kode_warna' => $detail['kode_warna'],
+                    'warna' => $detail['warna'],
+                    'buyer' => $detail['buyer'],
+                    'ukuran' => $detail['ukuran'],
+                    'lot_kirim' => $detail['lot_kirim'],
+                    'l_m_d' => $detail['l_m_d'],
+                    'harga' => $detail['harga'],
+                    'detailPengiriman' =>  [],
+                    'totals' => [
+                        'cones_kirim' => 0,
+                        'gw_kirim' => 0,
+                        'kgs_kirim' => 0,
+                    ],
+                    'ganti_retur' => $gantiRetur,
+                    'jmlKarung' => 0,
+                ];
+            }
+            // Menambahkan data pengiriman untuk grup ini tanpa dijumlahkan
+            $groupedDetails[$key]['detailPengiriman'][] = [
+                'cones_kirim' => $detail['cones_kirim'],
+                'gw_kirim' => $detail['gw_kirim'],
+                'kgs_kirim' => $detail['kgs_kirim'],
+            ];
+            // Menambahkan nilai ke total
+            $groupedDetails[$key]['totals']['cones_kirim'] += $detail['cones_kirim'];
+            $groupedDetails[$key]['totals']['gw_kirim'] += $detail['gw_kirim'];
+            $groupedDetails[$key]['totals']['kgs_kirim'] += $detail['kgs_kirim'];
+
+            // Menghitung jumlah baris data detailBon pada grup ini (jumlah karung)
+            $groupedDetails[$key]['jmlKarung'] = count($groupedDetails[$key]['detailPengiriman']);
+        }
+
+        // Menggabungkan data utama dan detail yang sudah dikelompokkan
+        $dataBon['groupedDetails'] = array_values($groupedDetails);
+        // dd($dataBon);
+
         $data = [
             'role' => $this->role,
             'active' => $this->active,
