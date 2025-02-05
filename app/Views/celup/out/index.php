@@ -207,16 +207,13 @@
     <?php endif; ?>
 
     <div class="card card-frame">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="text-header">
-                    <h3>Out Celup</h3>
-                </div>
-                <div class="group">
-                    <a href="<?= base_url($role . '/createBon') ?>" class="btn btn-info">
-                        <i class="ni ni-single-copy-04 me-2"></i>Create BON</a>
-                </div>
+        <div class="card-body d-flex justify-content-between align-items-center" style="min-height: 80px;">
+            <div class="text-header">
+                <h3 class="m-0">Out Celup</h3>
             </div>
+            <a href="<?= base_url($role . '/createBon') ?>" class="btn btn-info">
+                <i class="ni ni-single-copy-04 me-2"></i>Create BON
+            </a>
         </div>
     </div>
 
@@ -227,6 +224,12 @@
                     <thead>
                         <tr>
                             <th class="sticky text-center align-middle">No</th>
+                            <!-- <th class="sticky text-center align-middle">No Model</th>
+                            <th class="sticky text-center align-middle">Item Type</th>
+                            <th class="sticky text-center align-middle">Kode Warna</th>
+                            <th class="sticky text-center align-middle">Warna</th>
+                            <th class="sticky text-center align-middle">Lot Kirim</th>
+                            <th class="sticky text-center align-middle">Qty Kirim</th> -->
                             <th class="sticky text-center align-middle">Tanggal Kirim</th>
                             <th class="sticky text-center align-middle">No Surat Jalan</th>
                             <th class="sticky text-center align-middle">Detail Surat Jalan</th>

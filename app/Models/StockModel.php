@@ -60,4 +60,14 @@ class StockModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    public function cekStok($cek)
+    {
+        return $this->select(' sum(kgs_stock_awal) as kg_stok')
+            ->where('no_model', $cek['no_model'])
+            ->where('item_type', $cek['item_type'])
+            ->where('kode_warna', $cek['kode_warna'])
+            ->groupBy('kode_warna')
+            ->first();
+    }
 }

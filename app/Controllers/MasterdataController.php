@@ -13,6 +13,7 @@ use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
 use App\Models\OpenPOModel;
 use App\Models\EstimasiStokModel;
+use App\Models\StockModel;
 
 class MasterdataController extends BaseController
 {
@@ -25,6 +26,7 @@ class MasterdataController extends BaseController
     protected $masterMaterialModel;
     protected $estimasiStokModel;
     protected $openPOModel;
+    protected $stockModel;
 
     public function __construct()
     {
@@ -33,6 +35,7 @@ class MasterdataController extends BaseController
         $this->masterMaterialModel = new MasterMaterialModel();
         $this->estimasiStokModel = new EstimasiStokModel();
         $this->openPOModel = new OpenPOModel();
+        $this->stockModel = new StockModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -419,7 +422,7 @@ class MasterdataController extends BaseController
                     'kode_warna' => $kodeWarna,
                 ];
 
-                $cekStok = $this->estimasiStokModel->cekStok($cek);
+                $cekStok = $this->stockModel->cekStok($cek);
 
                 if ($cekStok) {
                     $kebutuhan = max(0, $item['total_kg'] - $cekStok['kg_stok']); // Ensure no negative values
