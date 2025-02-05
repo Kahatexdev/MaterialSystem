@@ -14,17 +14,9 @@ class BonCelupModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'id_bon',
-        'id_celup',
         'tgl_datang',
-        'l_m_d',
-        'harga',
-        'gw',
-        'nw',
-        'cones',
-        'karung',
         'no_surat_jalan',
         'detail_sj',
-        'ganti_retur',
         'admin',
         'created_at',
         'updated_at',
@@ -62,7 +54,7 @@ class BonCelupModel extends Model
 
     public function getData()
     {
-        return $this->select('bon_celup.id_bon, bon_celup.tgl_datang, bon_celup.l_m_d, bon_celup.harga, bon_celup.no_surat_jalan, bon_celup.detail_sj')
+        return $this->select('bon_celup.id_bon, bon_celup.tgl_datang, bon_celup.no_surat_jalan, bon_celup.detail_sj')
             ->findAll();
     }
 

@@ -228,8 +228,6 @@
                         <tr>
                             <th class="sticky text-center align-middle">No</th>
                             <th class="sticky text-center align-middle">Tanggal Kirim</th>
-                            <th class="sticky text-center align-middle">LMD</th>
-                            <th class="sticky text-center align-middle">Harga</th>
                             <th class="sticky text-center align-middle">No Surat Jalan</th>
                             <th class="sticky text-center align-middle">Detail Surat Jalan</th>
                             <th class="sticky text-center align-middle">Aksi</th>
@@ -242,8 +240,6 @@
                             foreach ($bonCelup as $bon) { ?>
                                 <td class="text-center align-middle"><?= $no++ ?></td>
                                 <td class="text-center align-middle"><?= $bon['tgl_datang'] ?></td>
-                                <td class="text-center align-middle"><?= $bon['l_m_d'] ?></td>
-                                <td class="text-center align-middle"><?= $bon['harga'] ?></td>
                                 <td class="text-center align-middle"><?= $bon['no_surat_jalan'] ?></td>
                                 <td class="text-center align-middle"><?= $bon['detail_sj'] ?></td>
                                 <td class="text-center align-middle"><a href="<?= base_url($role . '/generate/' . $bon['id_bon']) ?>" class="btn btn-info">Barcode</a></td>
