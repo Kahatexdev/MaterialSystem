@@ -14,6 +14,7 @@ use App\Models\OutCelupModel;
 use App\Models\BonCelupModel;
 use App\Models\ClusterModel;
 use App\Models\PemasukanModel;
+use App\Models\StockModel;
 
 class WarehouseController extends BaseController
 {
@@ -30,6 +31,7 @@ class WarehouseController extends BaseController
     protected $bonCelupModel;
     protected $clusterModel;
     protected $pemasukanModel;
+    protected $stockModel;
 
     public function __construct()
     {
@@ -42,6 +44,7 @@ class WarehouseController extends BaseController
         $this->bonCelupModel = new BonCelupModel();
         $this->clusterModel = new ClusterModel();
         $this->pemasukanModel = new PemasukanModel();
+        $this->stockModel = new StockModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -118,23 +121,24 @@ class WarehouseController extends BaseController
 
         if (empty($checkedIds)) {
             session()->setFlashdata('error', 'Tidak ada data yang dipilih.');
-            return redirect()->to('/pemasukan');
+            return redirect()->to($this->role . '/pemasukan');
         }
 
         $idOutCelup = $this->request->getPost('id_out_celup');
         $noModels = $this->request->getPost('no_model');
         $itemTypes = $this->request->getPost('item_type');
         $kodeWarnas = $this->request->getPost('kode_warna');
+        $warnas = $this->request->getPost('warna');
         $kgsMasuks = $this->request->getPost('kgs_masuk');
         $cnsMasuks = $this->request->getPost('cns_masuk');
         $tglMasuks = $this->request->getPost('tgl_masuk');
         $namaClusters = $this->request->getPost('cluster');
-        var_dump($namaClusters);
+        $lotKirim = $this->request->getPost('lot_kirim');
 
         // Pastikan data tidak kosong
         if (empty($idOutCelup) || !is_array($idOutCelup)) {
             session()->setFlashdata('error', 'Data yang dikirim kosong atau tidak valid.');
-            return redirect()->to('/pemasukan');
+            return redirect()->to($this->role . '/pemasukan');
         }
 
         // Pastikan nama_cluster ada di dalam tabel cluster
@@ -142,35 +146,96 @@ class WarehouseController extends BaseController
 
         if ($clusterExists === 0) {
             session()->setFlashdata('error', 'Cluster yang dipilih tidak valid.');
-            return redirect()->to('/pemasukan');
+            return redirect()->to($this->role . '/pemasukan');
         }
 
         $dataPemasukan = [];
 
-        foreach ($idOutCelup as $key => $idOut) {
+        foreach ($checkedIds as $key => $idOut) {
             $dataPemasukan[] = [
                 'id_out_celup' => $idOutCelup[$key] ?? null,
                 'no_model' => $noModels[$key] ?? null,
                 'item_type' => $itemTypes[$key] ?? null,
                 'kode_warna' => $kodeWarnas[$key] ?? null,
+                'warna' => $warnas[$key] ?? null,
                 'kgs_masuk' => $kgsMasuks[$key] ?? null,
                 'cns_masuk' => $cnsMasuks[$key] ?? null,
                 'tgl_masuk' => $tglMasuks[$key] ?? null,
-                'nama_cluster' => $namaClusters ?? null,
+                'nama_cluster' => $namaClusters,
+                'admin' => session()->get('username')
             ];
         }
 
         // Debugging: cek apakah data tidak kosong sebelum insert
         if (empty($dataPemasukan)) {
             session()->setFlashdata('error', 'Tidak ada data yang dimasukkan.');
-            return redirect()->to('/pemasukan');
+            return redirect()->to($this->role . '/pemasukan');
         }
 
-        // Gunakan insertBatch untuk menyimpan banyak data
+        // Ambil data session
+        $checked = session()->get('dataOut');
+
+        // Jika session tidak kosong
+        if (!empty($checked)) {
+            // Ambil daftar ID yang ingin dihapus
+            $idToRemove = array_column($dataPemasukan, 'id_out_celup');
+
+            // Filter session agar hanya menyisakan data yang tidak ada di $dataPemasukan
+            $filteredChecked = array_filter($checked, function ($tes) use ($idToRemove) {
+                return !in_array($tes['id_out_celup'], $idToRemove);
+            });
+
+            // Jika hasil filtering masih ada data, simpan kembali ke session
+            if (!empty($filteredChecked)) {
+                session()->set('dataOut', array_values($filteredChecked));
+            } else {
+                // Hapus session jika tidak ada data tersisa
+                session()->remove('dataOut');
+            }
+        }
+
+        //insert tabel pemasukan
         $this->pemasukanModel->insertBatch($dataPemasukan);
+
+        $dataStock = [];
+        foreach ($checkedIds as $key => $idOut) {
+            $dataStock[] = [
+                'no_model' => $noModels[$key] ?? null,
+                'item_type' => $itemTypes[$key] ?? null,
+                'kode_warna' => $kodeWarnas[$key] ?? null,
+                'warna' => $warnas[$key] ?? null,
+                'kgs_in_out' => $kgsMasuks[$key] ?? null,
+                'cns_in_out' => $cnsMasuks[$key] ?? null,
+                'krg_in_out' => 1, // Asumsikan setiap pemasukan hanya 1 kali
+                'lot_stock' => $lotKirim,
+                'nama_cluster' => $namaClusters,
+                'admin' => session()->get('username')
+            ];
+        }
+
+        foreach ($dataStock as $stock) {
+            $existingStock = $this->stockModel
+                ->where('no_model', $stock['no_model'])
+                ->where('item_type', $stock['item_type'])
+                ->where('kode_warna', $stock['kode_warna'])
+                ->first(); // Ambil satu record yang sesuai
+
+            if ($existingStock) {
+                // Jika sudah ada, update jumlahnya
+                $this->stockModel->update($existingStock['id_stock'], [
+                    'kgs_in_out' => $existingStock['kgs_in_out'] + $stock['kgs_in_out'],
+                    'cns_in_out' => $existingStock['cns_in_out'] + $stock['cns_in_out'],
+                    'krg_in_out' => $existingStock['krg_in_out'] + 1
+                ]);
+            } else {
+                // Jika belum ada, insert data baru
+                $this->stockModel->insert($stock);
+            }
+        }
+
         session()->setFlashdata('success', 'Data berhasil dimasukkan.');
 
-        return redirect()->to('/pemasukan');
+        return redirect()->to($this->role . '/pemasukan');
     }
     public function reset_pemasukan()
     {

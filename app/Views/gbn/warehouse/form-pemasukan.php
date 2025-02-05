@@ -82,6 +82,7 @@
                                             ?>
                                                 <tr>
                                                     <input type="hidden" name="id_out_celup[]" value="<?= $data['id_out_celup'] ?>">
+                                                    <input type="hidden" name="lot_kirim[]" value="<?= $data['lot_kirim'] ?>">
                                                     <td align="center"><input type="checkbox" name="checked_id[]" class="checkbox" value="<?= $no - 1 ?>"> <?= $no++ ?></td>
                                                     <td>
                                                         <div class="form-group d-flex justify-content-end">
@@ -143,8 +144,8 @@
                             </div>
                             <div class="d-flex align-items-center gap-4 mt-2">
                                 <label for="cluster" class="mb-0">Pilih Cluster :</label>
-                                <select class="form-select" type="text" name="cluster" id="cluster">
-                                    <option value=""></option>
+                                <select class="form-select" type="text" name="cluster" id="cluster" required>
+                                    <option value="0"></option>
                                     <?php foreach ($cluster as $id) : ?>
                                         <option value="<?= $id['nama_cluster'] ?>"><?= $id['nama_cluster'] ?></option>
                                     <?php endforeach; ?>
