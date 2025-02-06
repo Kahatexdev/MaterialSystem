@@ -81,4 +81,30 @@ class OutCelupModel extends Model
             ->get()
             ->getResultArray();
     }
+
+    public function getDataOutCelup()
+    {
+    return $this->db->table('out_celup')
+        ->select('bon_celup.id_bon, 
+                  GROUP_CONCAT(DISTINCT schedule_celup.no_model ORDER BY schedule_celup.no_model ASC SEPARATOR ", ") as no_model_list, 
+                  bon_celup.tgl_datang, 
+                  bon_celup.no_surat_jalan, 
+                  bon_celup.detail_sj')
+        ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup')
+        ->join('bon_celup', 'out_celup.id_bon = bon_celup.id_bon')
+        ->groupBy('bon_celup.id_bon')
+        ->get()
+        ->getResultArray();
+    }
+
+    public function getDetailByIdBon($id_bon)
+    {
+        return $this->select('schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, 
+                              out_celup.l_m_d, out_celup.harga, out_celup.ganti_retur, 
+                              out_celup.gw_kirim, out_celup.kgs_kirim, out_celup.cones_kirim, 
+                              out_celup.lot_kirim')
+            ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup')
+            ->where('out_celup.id_bon', $id_bon)
+            ->findAll();
+    }
 }

@@ -300,16 +300,28 @@ class CelupController extends BaseController
 
     public function outCelup()
     {
-        $bonCelup = $this->bonCelupModel->getData();
-
+        $outCelup = $this->outCelupModel->getDataOutCelup();
+        // dd($outCelup);
         $data = [
             'role' => $this->role,
             'active' => $this->active,
             'title' => "Out Celup",
-            'bonCelup' => $bonCelup,
+            'outCelup' => $outCelup,
         ];
         return view($this->role . '/out/index', $data);
     }
+
+    public function getDetail($id_bon)
+    {
+        $data = $this->outCelupModel->getDetailByIdBon($id_bon);
+
+        if (!$data) {
+            return $this->response->setJSON(['error' => 'Data tidak ditemukan']);
+        }
+
+        return $this->response->setJSON($data);
+    }
+
 
     public function retur()
     {
