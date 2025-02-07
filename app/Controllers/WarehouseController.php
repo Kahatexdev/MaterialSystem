@@ -278,7 +278,106 @@ class WarehouseController extends BaseController
         $noModel = $this->request->getPost('noModel');
         $warna = $this->request->getPost('warna');
 
-        $results = $this->materialModel->search($noModel, $warna);
-        return $this->response->setJSON($results);
+        $results = $this->stockModel->searchStock($noModel, $warna);
+        // Konversi stdClass menjadi array
+        $resultsArray = json_decode(json_encode($results), true);
+        // var_dump($resultsArray);
+        // Hitung total kgs_in_out untuk seluruh data
+        $totalKgsByCluster = []; // Array untuk menyimpan total Kgs per cluster
+        $capacityByCluster = []; // Array untuk menyimpan kapasitas per cluster
+
+        foreach ($resultsArray as $item) {
+            $namaCluster = $item['nama_cluster'];
+            $kgs = (float)$item['Kgs'];
+            $kapasitas = (float)$item['kapasitas'];
+
+            // Inisialisasi total Kgs dan kapasitas untuk cluster jika belum ada
+            if (!isset($totalKgsByCluster[$namaCluster])) {
+                $totalKgsByCluster[$namaCluster] = 0;
+                $capacityByCluster[$namaCluster] = $kapasitas;
+            }
+
+            // Tambahkan Kgs ke total untuk nama_cluster tersebut
+            $totalKgsByCluster[$namaCluster] += $kgs;
+        }
+
+        // Iterasi melalui data dan hitung sisa kapasitas
+        foreach ($resultsArray as &$item) { // Gunakan reference '&' agar perubahan berlaku pada item
+            $namaCluster = $item['nama_cluster'];
+            $totalKgsInCluster = $totalKgsByCluster[$namaCluster];
+            $kapasitasCluster = $capacityByCluster[$namaCluster];
+
+            $sisa_space = $kapasitasCluster - $totalKgsInCluster;
+            $item['sisa_space'] = max(0, $sisa_space); // Pastikan sisa_space tidak negatif
+        }
+        // var_dump ($resultsArray);
+        return $this->response->setJSON($resultsArray);
     }
+
+    public function getSisaKapasitas()
+    {
+        $results = $this->stockModel->getKapasitas();
+
+        $resultsArray = json_decode(json_encode($results), true);
+
+        foreach ($resultsArray as &$item) {
+            $sisaSpace = $item['kapasitas'] - $item['Kgs'];
+            $item['sisa_space'] = $sisaSpace;
+        }
+        // var_dump($resultsArray);
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $resultsArray 
+        ]
+        );
+    }
+
+    public function updateCluster()
+    {
+        if ($this->request->isAJAX()) {
+            $idStock = $this->request->getPost('id_stock');
+            $namaCluster = $this->request->getPost('nama_cluster');
+
+            $stockModel = new StockModel();
+            $update = $stockModel->updateClusterStock($idStock, $namaCluster);
+
+            if ($update) {
+                return $this->response->setJSON(['success' => true, 'message' => 'Cluster berhasil diperbarui']);
+            } else {
+                return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui cluster']);
+            }
+        }
+    }
+
+    public function getNoModel()
+    {
+        $results = $this->stockModel->getNoModel();
+        
+        $resultsArray = json_decode(json_encode($results), true);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $resultsArray
+        ]);
+    }
+
+    public function updateNoModel()
+    {
+        if ($this->request->isAJAX()) {
+            $idStock = $this->request->getPost('id_stock');
+            $noModel = $this->request->getPost('noModel');
+
+            $stockModel = new StockModel();
+            $update = $stockModel->update($idStock, ['no_model' => $noModel]);
+
+            if ($update) {
+                return $this->response->setJSON(['success' => true, 'message' => 'No Model berhasil diperbarui']);
+            } else {
+                return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui No Model']);
+            }
+        }
+    }
+
+
+
 }

@@ -170,7 +170,7 @@
 
                             <div class="mb-3">
                                 <label for="kgs" class="form-label">Kgs</label>
-                                <input type="text" class="form-control" id="kgs" name="kgs" required>
+                                <input type="number" class="form-control" id="kgs" name="kgs" required>
                             </div>
                             <!-- Button update dan batal di sebelah kanan -->
                             <div class="modal-footer">
