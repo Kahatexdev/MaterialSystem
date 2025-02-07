@@ -115,7 +115,7 @@ class MesinCelupModel extends Model
     public function getMesinCelupSample()
     {
         return $this->table('mesin_celup')
-        ->select('*')
+            ->select('*')
             ->where('ket_mesin', 'MC BENANG SAMPLE')
             ->orderBy('no_mesin', 'ASC')
             ->findAll();

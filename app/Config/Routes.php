@@ -109,6 +109,7 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
 
     $routes->get('outCelup', 'CelupController::outCelup');
+    $routes->get('outCelup/getDetail/(:num)', 'CelupController::getDetail/$1');
     // $routes->get('insertBon/(:num)', 'CelupController::insertBon/$1');
     $routes->get('createBon', 'CelupController::createBon');
     $routes->post('createBon/getItemType', 'CelupController::getItemType');
