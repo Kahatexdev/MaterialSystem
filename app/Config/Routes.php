@@ -84,6 +84,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pengeluaran', 'WarehouseController::pengeluaran');
     $routes->post('warehouse/search', 'WarehouseController::search');
     $routes->post('warehouse/sisaKapasitas', 'WarehouseController::getSisaKapasitas');
+    $routes->post('warehouse/getCluster', 'WarehouseController::getClusterbyId');
     $routes->post('warehouse/updateCluster', 'WarehouseController::updateCluster');
     $routes->post('warehouse/getNoModel', 'WarehouseController::getNoModel');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
