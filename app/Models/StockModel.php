@@ -20,6 +20,7 @@ class StockModel extends Model
         'warna',
         'kgs_stock_awal',
         'cns_stock_awal',
+        'krg_stock_awal',
         'lot_awal',
         'kgs_in_out',
         'cns_in_out',
@@ -80,7 +81,9 @@ class StockModel extends Model
         $builder->select('
             stock.*, 
             COALESCE(SUM(stock.kgs_in_out), 0) AS Kgs, 
+            COALESCE(SUM(stock.kgs_stock_awal), 0) AS KgsStockAwal, 
             COALESCE(SUM(stock.krg_in_out), 0) AS Krg, 
+            COALESCE(SUM(stock.krg_stock_awal), 0) AS KrgStockAwal,
             cluster.*
         ')
         ->join('cluster', 'cluster.nama_cluster = stock.nama_cluster', 'left')
@@ -101,8 +104,11 @@ class StockModel extends Model
     {
         $builder = $this->db->table('cluster');
         $builder->select('cluster.nama_cluster, cluster.kapasitas,
-                      COALESCE(SUM(stock.kgs_in_out), 0) AS Kgs, 
-                      COALESCE(SUM(stock.krg_in_out), 0) AS Krg')
+                      COALESCE(SUM(stock.kgs_in_out), 0) AS Kgs,
+                      COALESCE(SUM(stock.kgs_stock_awal), 0) AS KgsStockAwal, 
+                      COALESCE(SUM(stock.krg_in_out), 0) AS Krg, 
+                      COALESCE(SUM(stock.krg_stock_awal), 0) AS KrgStockAwal'
+                      )
         ->join('stock', 'cluster.nama_cluster = stock.nama_cluster', 'left') // Left join agar semua cluster tampil
         ->groupBy('cluster.nama_cluster'); // Hanya group by nama_cluster
 

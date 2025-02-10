@@ -153,6 +153,8 @@
                         output = `<div class="alert alert-warning text-center">Data tidak ditemukan</div>`;
                     } else {
                         response.forEach(item => {
+                            let totalKgs = item.Kgs && item.Kgs > 0 ? item.Kgs : item.KgsStockAwal;
+                            let totalKrg = item.Krg && item.Krg > 0 ? item.Krg : item.KrgStockAwal;
                             output += `
                         <div class="result-card">
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -168,12 +170,12 @@
                                 <div class="col-md-4">
                                     <p><strong>Kode Warna:</strong> ${item.kode_warna}</p>
                                     <p><strong>Warna:</strong> ${item.warna}</p>
-                                    <p><strong>Total KGs:</strong> ${item.Kgs || 0} KG | <strong>Total KRG:</strong> ${item.Krg || 0}</p>
+                                    <p><strong>Total KGs:</strong> ${totalKgs} KG | ${totalKrg} KRG</p>
                                 </div>
                                 <div class="col-md-4 d-flex flex-column gap-2">
                                     <button class="btn btn-outline-info btn-sm">In/Out</button>
-                                    <button class="btn btn-outline-info btn-sm pindahPalet" data-id="${item.id_stock}">Pindah Pallet</button>
-                                    <button class="btn btn-outline-info btn-sm pindahOrder" data-id="${item.id_stock}">Pindah Order</button>
+                                    <button class="btn btn-outline-info btn-sm pindahPalet" data-id="${item.id_stock}" data-cluster="${item.nama_cluster}" data-lot="${item.lot_stock}">Pindah Palet</button>
+                                    <button class="btn btn-outline-info btn-sm pindahOrder" data-id="${item.id_stock}" data-noModel="${item.no_model}" data-cluster="${item.nama_cluster}" data-lot="${item.lot_stock}">Pindah Order</button>
                                 </div>
                             </div>
                         </div>`;
@@ -196,6 +198,8 @@
         });
         $(document).on('click', '.pindahPalet', function() {
             let idStock = $(this).data('id'); // Ambil id_stock dari tombol yang diklik
+            let clusterOld = $(this).data('cluster');
+            let lot = $(this).data('lot');
 
             $.ajax({
                 url: '<?= base_url(session()->get('role') . '/warehouse/sisaKapasitas') ?>',
@@ -208,7 +212,8 @@
                         response.data.forEach(cluster => {
                             clusterOptions += `<option value="${cluster.nama_cluster}">
                         ${cluster.nama_cluster} (Sisa Space: ${cluster.sisa_space} KG)
-                    </option>`;
+                    </option>
+                    `;
                         });
 
                         Swal.fire({
@@ -218,7 +223,6 @@
                             <select id="clusterSelect" name="namaCluster" class="form-control">
                                 ${clusterOptions}
                             </select>
-                            
                             <label for="kgs">KGs Pindah Pallet</label>
                             <input type="number" name="kgs" min=1 class="form-control mt-2" placeholder="Jumlah Pindah (KG)">
 
@@ -247,7 +251,12 @@
                                     method: 'POST',
                                     data: {
                                         id_stock: idStock,
-                                        nama_cluster: result.value
+                                        cluster_old: clusterOld,
+                                        nama_cluster: result.value,
+                                        kgs: $('input[name="kgs"]').val(),
+                                        cones: $('input[name="cones"]').val(),
+                                        krg: $('input[name="krg"]').val(),
+                                        lot: lot
                                     },
                                     dataType: 'json',
                                     success: function(updateResponse) {
@@ -277,6 +286,9 @@
 
         $(document).on('click', '.pindahOrder', function() {
             let idStock = $(this).data('id'); // Ambil id_stock dari tombol yang diklik
+            let noModel = $(this).data('noModel');
+            let namaCluster = $(this).data('cluster');
+            let lot = $(this).data('lot');
 
             $.ajax({
                 url: '<?= base_url(session()->get('role') . '/warehouse/getNoModel') ?>',
@@ -296,11 +308,17 @@
                             title: 'Pindah Order',
                             html: `
                             <label for="noModelSelect">Pilih No Model</label>
-                    <select id="noModelSelect" name="noModel" class="form-control">
-                        ${noModelOptions}
-                    </select>
-                    <label for="qty">Jumlah Pindah (KG)</label>
-                    <input type="number" name="qty" min=1 class="form-control mt-2" placeholder="Jumlah Pindah (KG)">
+                            <select id="noModelSelect" name="noModel" class="form-control">
+                                ${noModelOptions}
+                            </select>
+                            <label for="kgs">KGs Pindah Order</label>
+                            <input type="number" name="kgs" min=1 class="form-control mt-2" placeholder="Jumlah Pindah Order (KG)">
+
+                            <label for"cones">Cones Pindah Order</label>
+                            <input type="number" name="cones" min=1 class="form-control mt-2" placeholder="Jumlah Pindah Order (Cones)">
+
+                            <label for="krg">KRG Pindah Order</label>
+                            <input type="number" name="krg" min=1 class="form-control mt-2" placeholder="Jumlah Pindah Order (KRG)">
                     `,
                             showCancelButton: true,
                             confirmButtonText: 'Pindah',
@@ -321,7 +339,13 @@
                                     method: 'POST',
                                     data: {
                                         id_stock: idStock,
-                                        no_model: result.value
+                                        namaCluster: namaCluster,
+                                        no_model: result.value,
+                                        kgs: $('input[name="kgs"]').val(),
+                                        cones: $('input[name="cones"]').val(),
+                                        krg: $('input[name="krg"]').val(),
+                                        lot: lot
+
                                     },
                                     dataType: 'json',
                                     success: function(updateResponse) {
