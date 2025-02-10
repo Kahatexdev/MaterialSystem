@@ -62,50 +62,56 @@
                     <!-- Tab Konten Item Type -->
                     <div class="tab-content" id="nav-tabContent">
                         <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
-                            <div class="input-group kebutuhan-item" style="position: relative;">
-                                <div class="col-lg-3 mx-2 my-2" style="width: 48%;">
-                                    <div class="form-group">
-                                        <label for="itemType">Item Type</label>
-                                        <select class="form-control item-type" name="items[0][item_type]" required>
-                                            <option value="">Pilih Item Type</option>
-                                            <?php foreach ($order as $type): ?>
-                                                <option value="<?= $type['item_type'] ?>">
-                                                    <?= $type['item_type'] ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
+                            <div class="kebutuhan-item">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="itemType">Item Type</label>
+                                            <select class="form-control item-type" name="items[0][item_type]" required>
+                                                <option value="">Pilih Item Type</option>
+                                                <?php foreach ($order as $type): ?>
+                                                    <option value="<?= $type['item_type'] ?>">
+                                                        <?= $type['item_type'] ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Kode Warna</label>
+                                            <select class="form-control kode-warna" name="items[0][kode_warna]" required>
+                                                <option value="">Pilih Kode Warna</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-3 mx-2 my-2" style="width: 48%;">
-                                    <div class="form-group">
-                                        <label>Kode Warna</label>
-                                        <select class="form-control kode-warna" name="items[0][kode_warna]" required>
-                                            <option value="">Pilih Kode Warna</option>
-                                        </select>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Color</label>
+                                            <input type="text" class="form-control color" name="items[0][color]" readonly required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="kgMU">Kg MU</label>
+                                            <input type="float" class="form-control kg-mu" readonly required>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-3 mx-2" style="width: 48%;">
-                                    <div class="form-group">
-                                        <label>Color</label>
-                                        <input type="text" class="form-control color" name="items[0][color]" readonly required>
+                                <div class="row">
+                                    <div class=" col-md-6">
+                                        <div class="form-group">
+                                            <label for="kgStok">Kg Stok</label>
+                                            <input type="float" class="form-control kg-stok" readonly required>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-lg-3 mx-2" style="width: 48%;">
-                                    <div class="form-group">
-                                        <label for="kgMU">Kg MU</label>
-                                        <input type="float" class="form-control kg-mu" readonly required>
-                                    </div>
-                                </div>
-                                <div class=" col-lg-3 mx-2" style="width: 48%;">
-                                    <div class="form-group">
-                                        <label for="kgStok">Kg Stok</label>
-                                        <input type="float" class="form-control kg-stok" readonly required>
-                                    </div>
-                                </div>
-                                <div class=" col-lg-3 mx-2" style="width: 48%;">
-                                    <div class="form-group">
-                                        <label for="kgKebutuhan">Kg Kebutuhan</label>
-                                        <input type="float" class="form-control kg-po" name="items[0][kg_po]" required>
+                                    <div class=" col-md-6">
+                                        <div class="form-group">
+                                            <label for="kgKebutuhan">Kg Kebutuhan</label>
+                                            <input type="float" class="form-control kg-po" name="items[0][kg_po]" required>
+                                        </div>
                                     </div>
                                 </div>
                                 <div style="width: 100%; text-align: center; margin-top: 10px; margin-bottom:10px;">
@@ -207,61 +213,67 @@
 
             // Tambahkan elemen `input-group` ke tab baru
             newTabPane.innerHTML = `
-            <div class="input-group kebutuhan-item" style="position: relative;">
-                <div class="col-lg-3 mx-2 my-2" style="width: 48%;">
-                    <div class="form-group">
-                        <label for="itemType">Item Type</label>
-                        <select class="form-control item-type" name="items[${tabIndex - 1}][item_type]" required>
-                            <option value="">Pilih Item Type</option>
-                                <?php foreach ($order as $type): ?>
-                                    <option value="<?= $type['item_type'] ?>">
-                                        <?= $type['item_type'] ?>
-                                    </option>
-                                <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-lg-3 mx-2 my-2" style="width: 48%;">
-                    <div class="form-group">
-                        <label>Kode Warna</label>
-                        <select class="form-control kode-warna" name="items[${tabIndex - 1}][kode_warna]" required>
-                            <option value="">Pilih Kode Warna</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-lg-3 mx-2" style="width: 48%;">
-                    <div class="form-group">
-                        <label>Color</label>
-                        <input type="text" class="form-control color" name="items[${tabIndex - 1}][color]" readonly required>
-                    </div>
-                </div>
-                <div class="col-lg-3 mx-2" style="width: 48%;">
-                    <div class="form-group">
-                        <label for="kgMU">Kg MU</label>
-                        <input type="float" class="form-control kg-mu" readonly required>
-                    </div>
-                </div>
-                <div class="col-lg-3 mx-2" style="width: 48%;">
-                    <div class="form-group">
-                        <label for="kgStok">Kg Stok</label>
-                        <input type="float" class="form-control kg-stok" readonly required>
-                    </div>
-                </div>
-                <div class="col-lg-3 mx-2" style="width: 48%;">
-                    <div class="form-group">
-                        <label for="kgKebutuhan">Kg Kebutuhan</label>
-                        <input type="float" class="form-control kg-po" name="items[${tabIndex - 1}][kg_po]" required>
-                    </div>
-                </div>
-                <div style="width: 100%; text-align: center; margin-top: 10px; margin-bottom:10px;">
-                    <button class="btn btn-icon btn-3 btn-outline-info add-more" type="button">
-                        <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
-                    </button>
-                    <button class="btn btn-icon btn-3 btn-outline-danger remove-tab" type="button">
-                        <span class="btn-inner--icon"><i class="fas fa-trash"></i></span>
-                    </button>
-                </div>
-            </div>
+                            <div class="kebutuhan-item">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="itemType">Item Type</label>
+                                            <select class="form-control item-type" name="items[${tabIndex - 1}][item_type]" required>
+                                                <option value="">Pilih Item Type</option>
+                                                <?php foreach ($order as $type): ?>
+                                                    <option value="<?= $type['item_type'] ?>">
+                                                        <?= $type['item_type'] ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Kode Warna</label>
+                                            <select class="form-control kode-warna" name="items[${tabIndex - 1}][kode_warna]" required>
+                                                <option value="">Pilih Kode Warna</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Color</label>
+                                            <input type="text" class="form-control color" name="items[${tabIndex - 1}][color]" readonly required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="kgMU">Kg MU</label>
+                                            <input type="float" class="form-control kg-mu" readonly required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class=" col-md-6">
+                                        <div class="form-group">
+                                            <label for="kgStok">Kg Stok</label>
+                                            <input type="float" class="form-control kg-stok" readonly required>
+                                        </div>
+                                    </div>
+                                    <div class=" col-md-6">
+                                        <div class="form-group">
+                                            <label for="kgKebutuhan">Kg Kebutuhan</label>
+                                            <input type="float" class="form-control kg-po" name="items[${tabIndex - 1}][kg_po]" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="width: 100%; text-align: center; margin-top: 10px; margin-bottom:10px;">
+                                    <button class="btn btn-icon btn-3 btn-outline-info add-more" type="button">
+                                        <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
+                                    </button>
+                                    <button class="btn btn-icon btn-3 btn-outline-danger remove-tab" type="button">
+                                        <span class="btn-inner--icon"><i class="fas fa-trash"></i></span>
+                                    </button>
+                                </div>
+                            </div>
         `;
 
             navTabContent.appendChild(newTabPane);
@@ -348,6 +360,7 @@
         let kgPO = selectedOption.data('kg-po');
 
         kgMU = parseFloat(kgMU).toFixed(2);
+        kgStok = parseFloat(kgStok).toFixed(2);
         kgPO = parseFloat(kgPO).toFixed(2);
 
         let container = $(this).closest('.kebutuhan-item');

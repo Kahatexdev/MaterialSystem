@@ -92,6 +92,13 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('reset_pengeluaran', 'WarehouseController::resetPengeluaranJalur');
     $routes->post('hapus_pengeluaran', 'WarehouseController::hapusListPengeluaran');
     $routes->get('pengiriman_area', 'WarehouseController::pengirimanArea');
+    $routes->get('pengeluaran', 'WarehouseController::pengeluaran');
+    $routes->post('warehouse/search', 'WarehouseController::search');
+    $routes->post('warehouse/sisaKapasitas', 'WarehouseController::getSisaKapasitas');
+    $routes->post('warehouse/getCluster', 'WarehouseController::getClusterbyId');
+    $routes->post('warehouse/updateCluster', 'WarehouseController::updateCluster');
+    $routes->post('warehouse/getNoModel', 'WarehouseController::getNoModel');
+    $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
 
     $routes->get('pph', 'PphController::index');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
@@ -114,6 +121,10 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
 
     $routes->get('outCelup', 'CelupController::outCelup');
+    $routes->get('outCelup/getDetail/(:num)', 'CelupController::getDetail/$1');
+    $routes->get('outCelup/editBon/(:num)', 'CelupController::editBon/$1');
+    $routes->post('outCelup/updateBon/(:num)', 'CelupController::updateBon/$1');
+    $routes->delete('outCelup/deleteBon/(:num)', 'CelupController::deleteBon/$1');
     // $routes->get('insertBon/(:num)', 'CelupController::insertBon/$1');
     $routes->get('createBon', 'CelupController::createBon');
     $routes->post('createBon/getItemType', 'CelupController::getItemType');

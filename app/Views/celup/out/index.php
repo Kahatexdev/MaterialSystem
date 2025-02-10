@@ -1,183 +1,10 @@
 <?php $this->extend($role . '/out/header'); ?>
 <?php $this->section('content'); ?>
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
 <style>
-    .card {
-        border-radius: 20px;
-        box-shadow: 0 10px 20px rgba(76, 175, 80, 0.1);
-        border: none;
-        background-color: white;
-        transition: all 0.3s ease;
-    }
-
-    .card:hover {
-        box-shadow: 0 15px 30px rgba(76, 175, 80, 0.15);
-        transform: translateY(-5px);
-    }
-
-    .table {
-        border-radius: 15px;
-        /* overflow: hidden; */
-        border-collapse: separate;
-        /* Ganti dari collapse ke separate */
-        border-spacing: 0;
-        /* Pastikan jarak antar sel tetap rapat */
-        overflow: auto;
-        position: relative;
-    }
-
-    .table th {
-        background-color: #e8f5e9;
-        border: none;
-        font-size: 0.9rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #2e7d32;
-    }
-
-    .table td {
-        border: none;
-        vertical-align: middle;
-        font-size: 0.9rem;
-        padding: 1rem 0.75rem;
-    }
-
-    .table tr:nth-child(even) {
-        background-color: #f1f8e9;
-    }
-
-    .table th.sticky {
-        position: sticky;
-        top: 0;
-        /* Untuk tetap di bagian atas saat menggulir vertikal */
-        z-index: 3;
-        /* Pastikan header terlihat di atas elemen lain */
-        background-color: #e8f5e9;
-        /* Warna latar belakang */
-    }
-
-    .table td.sticky {
-        position: sticky;
-        left: 0;
-        /* Untuk tetap di sisi kiri saat menggulir horizontal */
-        z-index: 2;
-        /* Prioritas lebih rendah dari header */
-        background-color: #e8f5e9;
-        /* Tambahkan warna latar belakang */
-        box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
-        /* Memberikan efek bayangan untuk memisahkan kolom */
-
-    }
-
-
-    .capacity-bar {
-        height: 6px;
-        border-radius: 3px;
-        margin-bottom: 5px;
-    }
-
-    .btn {
-        border-radius: 12px;
-        padding: 0.6rem 1.2rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-    }
-
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
-    }
-
-    .btn-filter {
-        background: linear-gradient(135deg, #4caf50, #81c784);
-        color: white;
-        border: none;
-    }
-
-    .btn-filter:hover {
-        background: linear-gradient(135deg, #43a047, #66bb6a);
-    }
-
-    .date-navigation {
-        background-color: white;
-        border-radius: 15px;
-        padding: 0.5rem;
-        box-shadow: 0 4px 6px rgba(76, 175, 80, 0.1);
-    }
-
-    .date-navigation input[type="date"] {
-        border: none;
-        font-weight: 500;
-        color: #2e7d32;
-    }
-
-    .machine-info {
-        font-size: 0.85rem;
-    }
-
-    .machine-info strong {
-        font-size: 1rem;
-        color: #2e7d32;
-    }
-
-    .job-item {
-        background-color: white;
-        border-radius: 10px;
-        padding: 0.7rem;
-        margin-bottom: 0.7rem;
-        box-shadow: 0 2px 4px rgba(76, 175, 80, 0.1);
-        transition: all 0.2s ease;
-    }
-
-    .job-item:hover {
-        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
-    }
-
-    .job-item span {
-        font-size: 0.8rem;
-        color: #558b2f;
-    }
-
-    .job-item .btn {
-        display: block;
-        width: 100%;
-        height: 100%;
-        text-align: center;
-    }
-
-    .job-item .btn span {
-        font-size: 0.9rem;
-        color: black;
-        font-weight: bold;
-    }
-
-    .job-item .btn .total-kg {
-        font-size: 0.85rem;
-    }
-
-    .no-schedule .btn {
-        background-color: #f8f9fa;
-        border: 1px dashed #ccc;
-        color: #6c757d;
-    }
-
-
-    .bg-success {
-        background-color: #66bb6a !important;
-    }
-
-    .bg-warning {
-        background-color: #ffd54f !important;
-    }
-
-    .bg-danger {
-        background-color: #ef5350 !important;
-    }
-
-    .text-success {
-        color: #43a047 !important;
+    @media (min-width: 992px) {
+        .modal-dialog-custom {
+            max-width: 90%;
+        }
     }
 </style>
 
@@ -207,51 +34,192 @@
     <?php endif; ?>
 
     <div class="card card-frame">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="text-header">
-                    <h3>Out Celup</h3>
-                </div>
-                <div class="group">
-                    <a href="<?= base_url($role . '/createBon') ?>" class="btn btn-info">
-                        <i class="ni ni-single-copy-04 me-2"></i>Create BON</a>
-                </div>
+        <div class="card-body d-flex justify-content-between align-items-center" style="min-height: 80px;">
+            <div class="text-header">
+                <h3 class="m-0">Out Celup</h3>
             </div>
+            <a href="<?= base_url($role . '/createBon') ?>" class="btn btn-info">
+                <i class="ni ni-single-copy-04 me-2"></i>Create BON
+            </a>
         </div>
     </div>
 
     <div class="card mt-3">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table">
+                <table id="dataTable" class="table table-compact table-hover table-bordered">
                     <thead>
                         <tr>
-                            <th class="sticky text-center align-middle">No</th>
-                            <th class="sticky text-center align-middle">Tanggal Kirim</th>
-                            <th class="sticky text-center align-middle">No Surat Jalan</th>
-                            <th class="sticky text-center align-middle">Detail Surat Jalan</th>
-                            <th class="sticky text-center align-middle">Aksi</th>
+                            <th class="text-center align-middle">No </th>
+                            <th class="text-center align-middle">No Model</th>
+                            <th class="text-center align-middle">Tanggal Kirim</th>
+                            <th class="text-center align-middle">No Surat Jalan</th>
+                            <th class="text-center align-middle">Detail Surat Jalan</th>
+                            <th class="text-center align-middle">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <?php
-                            $no = 1;
-                            foreach ($bonCelup as $bon) { ?>
+                        <?php $no = 1;
+                        foreach ($outCelup as $out) : ?>
+                            <tr>
                                 <td class="text-center align-middle"><?= $no++ ?></td>
-                                <td class="text-center align-middle"><?= $bon['tgl_datang'] ?></td>
-                                <td class="text-center align-middle"><?= $bon['no_surat_jalan'] ?></td>
-                                <td class="text-center align-middle"><?= $bon['detail_sj'] ?></td>
-                                <td class="text-center align-middle"><a href="<?= base_url($role . '/generate/' . $bon['id_bon']) ?>" class="btn btn-info">Barcode</a></td>
-                        </tr>
-                    <?php } ?>
+                                <td class="text-center align-middle"><?= $out['no_model_list'] ?></td>
+                                <td class="text-center align-middle"><?= $out['tgl_datang'] ?></td>
+                                <td class="text-center align-middle"><?= $out['no_surat_jalan'] ?></td>
+                                <td class="text-center align-middle"><?= $out['detail_sj'] ?></td>
+                                <td class="text-center align-middle">
+                                    <button class="btn bg-gradient-dark btn-detail" data-id="<?= $out['id_bon'] ?>" data-toggle="modal" data-target="#detailModal">Detail</button>
+                                    <a href="<?= base_url($role . '/generate/' . $out['id_bon']) ?>" class="btn bg-gradient-info">Barcode</a>
+                                </td>
+                            </tr>
+                        <?php endforeach ?>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-
 </div>
 
+<!-- Modal Detail -->
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-custom" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailModalLabel">Detail Bon</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="ni ni-fat-remove"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th class="text-center">No Model</th>
+                                <th class="text-center">Item Type</th>
+                                <th class="text-center">Kode Warna</th>
+                                <th class="text-center">Warna</th>
+                                <th class="text-center">LMD</th>
+                                <th class="text-center">Harga</th>
+                                <th class="text-center">Ganti Retur</th>
+                                <th class="text-center">GW Kirim</th>
+                                <th class="text-center">Kgs Kirim</th>
+                                <th class="text-center">Cones Kirim</th>
+                                <th class="text-center">Lot Kirim</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailModalBody">
+                            <!-- Data akan dimasukkan di sini -->
+                        </tbody>
+                    </table>
+                    <tfoot>
+                        <div class="d-flex justify-content-end">
+                            <a type="button" href="<?= base_url($role . '/outCelup/editBon/' . $out['id_bon']) ?>" class="btn btn-warning btn-edit me-2">Edit</a>
+                            <button type="button" class="btn btn-danger btn-delete" id="deleteButton" data-id-delete="<?= $out['id_bon'] ?>">Delete</button>
+                        </div>
+                    </tfoot>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detail Bon -->
+<script>
+    $(document).ready(function() {
+        $('#dataTable').DataTable();
+
+        // Event listener untuk tombol detail (menggunakan jQuery)
+        $(document).on("click", ".btn-detail", function() {
+            let id_bon = $(this).data("id");
+
+            // Fetch data dari server
+            $.ajax({
+                url: "<?= base_url($role . '/outCelup/getDetail/') ?>" + id_bon,
+                type: "GET",
+                dataType: "json",
+                success: function(data) {
+                    let detailBody = $("#detailModalBody");
+                    detailBody.empty(); // Hapus isi sebelumnya
+
+                    if (data.error) {
+                        detailBody.html(`<tr><td colspan="11" class="text-center">${data.error}</td></tr>`);
+                    } else {
+                        $.each(data, function(index, item) {
+                            let gantiReturText = item.ganti_retur == 1 ? "Ya" : "Tidak";
+                            detailBody.append(`
+                                <tr>
+                                    <td class="text-center">${item.no_model}</td>
+                                    <td class="text-center">${item.item_type}</td>
+                                    <td class="text-center">${item.kode_warna}</td>
+                                    <td class="text-center">${item.warna}</td>
+                                    <td class="text-center">${item.l_m_d}</td>
+                                    <td class="text-center">${item.harga}</td>
+                                    <td class="text-center">${gantiReturText}</td>
+                                    <td class="text-center">${item.gw_kirim}</td>
+                                    <td class="text-center">${item.kgs_kirim}</td>
+                                    <td class="text-center">${item.cones_kirim}</td>
+                                    <td class="text-center">${item.lot_kirim}</td>
+                                </tr>
+                            `);
+                        });
+                    }
+
+                    // Menampilkan modal setelah data di-load
+                    $("#detailModal").modal("show");
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error fetching detail:", error);
+                    alert("Terjadi kesalahan saat mengambil data detail.");
+                }
+            });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Tambahkan event listener ke semua tombol delete dalam modal
+        document.querySelectorAll(".btn-delete").forEach(button => {
+            button.addEventListener("click", function() {
+                let id = this.getAttribute("data-id-delete");
+
+                Swal.fire({
+                    title: "Konfirmasi Hapus",
+                    text: "Apakah Anda yakin ingin menghapus data ini?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Ya, Hapus!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch("<?= base_url($role . '/outCelup/deleteBon/') ?>" + id, {
+                                method: "DELETE",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire("Terhapus!", "Data berhasil dihapus.", "success").then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire("Gagal!", "Terjadi kesalahan saat menghapus.", "error");
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error:", error);
+                                Swal.fire("Error!", "Terjadi kesalahan pada server.", "error");
+                            });
+                    }
+                });
+            });
+        });
+    });
+</script>
 
 <?php $this->endSection(); ?>

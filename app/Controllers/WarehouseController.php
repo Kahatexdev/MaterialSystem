@@ -15,6 +15,8 @@ use App\Models\BonCelupModel;
 use App\Models\ClusterModel;
 use App\Models\PemasukanModel;
 use App\Models\StockModel;
+use App\Models\HistoryPindahPalet;
+use App\Models\historyPindahOrder;
 
 class WarehouseController extends BaseController
 {
@@ -32,6 +34,9 @@ class WarehouseController extends BaseController
     protected $clusterModel;
     protected $pemasukanModel;
     protected $stockModel;
+    protected $historyPindahPalet;
+    protected $historyPindahOrder;
+
 
     public function __construct()
     {
@@ -45,6 +50,8 @@ class WarehouseController extends BaseController
         $this->clusterModel = new ClusterModel();
         $this->pemasukanModel = new PemasukanModel();
         $this->stockModel = new StockModel();
+        $this->historyPindahPalet = new HistoryPindahPalet();
+        $this->historyPindahOrder = new HistoryPindahOrder();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -461,6 +468,300 @@ class WarehouseController extends BaseController
 
         return view($this->role . '/warehouse/form-pengeluaran', $data);
     }
+
+    public function search()
+    {
+        $noModel = $this->request->getPost('noModel');
+        $warna = $this->request->getPost('warna');
+
+        $results = $this->stockModel->searchStock($noModel, $warna);
+        // Konversi stdClass menjadi array
+        $resultsArray = json_decode(json_encode($results), true);
+        // var_dump($resultsArray);
+        // Hitung total kgs_in_out untuk seluruh data
+        $totalKgsByCluster = []; // Array untuk menyimpan total Kgs per cluster
+        $capacityByCluster = []; // Array untuk menyimpan kapasitas per cluster
+
+        foreach ($resultsArray as $item) {
+            $namaCluster = $item['nama_cluster'];
+            $kgs = (float)$item['Kgs'];
+            $kgsStockAwal = (float)$item['KgsStockAwal'];
+            $kapasitas = (float)$item['kapasitas'];
+
+            // Inisialisasi total Kgs dan kapasitas untuk cluster jika belum ada
+            if (!isset($totalKgsByCluster[$namaCluster])) {
+                $totalKgsByCluster[$namaCluster] = 0;
+                $totalKgsStockAwalByCluster[$namaCluster] = 0;
+                $capacityByCluster[$namaCluster] = $kapasitas;
+            }
+
+            // Tambahkan Kgs ke total untuk nama_cluster tersebut
+            $totalKgsByCluster[$namaCluster] += $kgs;
+            $totalKgsStockAwalByCluster[$namaCluster] += $kgsStockAwal;
+        }
+
+        // Iterasi melalui data dan hitung sisa kapasitas
+        foreach ($resultsArray as &$item) { // Gunakan reference '&' agar perubahan berlaku pada item
+            $namaCluster = $item['nama_cluster'];
+            $totalKgsInCluster = $totalKgsByCluster[$namaCluster];
+            $totalKgsStockAwalInCluster = $totalKgsStockAwalByCluster[$namaCluster];
+            $kapasitasCluster = $capacityByCluster[$namaCluster];
+
+            $sisa_space = $kapasitasCluster - $totalKgsInCluster - $totalKgsStockAwalInCluster;
+            $item['sisa_space'] = max(0, $sisa_space); // Pastikan sisa_space tidak negatif
+        }
+        // var_dump ($resultsArray);
+        return $this->response->setJSON($resultsArray);
+    }
+
+    public function getSisaKapasitas()
+    {
+        $results = $this->stockModel->getKapasitas();
+
+        $resultsArray = json_decode(json_encode($results), true);
+
+        foreach ($resultsArray as &$item) {
+            $sisaSpace = $item['kapasitas'] - $item['Kgs'] - $item['KgsStockAwal'];
+            $item['sisa_space'] = $sisaSpace;
+        }
+        // var_dump($resultsArray);
+        return $this->response->setJSON(
+            [
+                'success' => true,
+                'data' => $resultsArray
+            ]
+        );
+    }
+
+    public function getClusterbyId()
+    {
+        $id = $this->request->getPost('id');
+        $results = $this->clusterModel->getClusterById($id);
+        $resultsArray = json_decode(json_encode($results), true);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $resultsArray
+        ]);
+    }
+
+    public function updateCluster()
+    {
+        if ($this->request->isAJAX()) {
+            $idStock = $this->request->getPost('id_stock');
+            $clusterOld = $this->request->getPost('cluster_old');
+            $namaCluster = $this->request->getPost('nama_cluster');
+            $kgs = $this->request->getPost('kgs');
+            $cones = $this->request->getPost('cones');
+            $karung = $this->request->getPost('krg');
+            $lot = $this->request->getPost('lot');
+            // var_dump($karung, $lot);
+            $idStock = $this->stockModel->where('id_stock', $idStock)->first();
+            if (empty($idStock['lot_stock'])) {
+                $lot = $idStock['lot_awal'];
+            } else {
+                $lot = $idStock['lot_stock'];
+            }
+            $noModel = $idStock['no_model'];
+            $itemType = $idStock['item_type'];
+            $kodeWarna = $idStock['kode_warna'];
+            $warna = $idStock['warna'];
+
+            if ($idStock['kgs_in_out'] < $kgs || $idStock['cns_in_out'] < $cones || $idStock['krg_in_out'] < $karung) {
+                $kgsInOut = $idStock['kgs_stock_awal'] - $kgs;
+                $cnsInOut = $idStock['cns_stock_awal'] - $cones;
+                $krgInOut = $idStock['krg_stock_awal'] - $karung;
+            } else {
+                $kgsInOut = $idStock['kgs_in_out'] - $kgs;
+                $cnsInOut = $idStock['cns_in_out'] - $cones;
+                $krgInOut = $idStock['krg_in_out'] - $karung;
+            }
+            // $kgsInOut = $idStock['kgs_in_out']-$kgs;
+            // $cnsInOut = $idStock['cns_in_out']-$cones;
+            // $krgInOut = $idStock['krg_in_out']-$karung;
+            // $lotStock = "";
+            // var_dump($idStock, $clusterOld, $namaCluster, $kgs, $cones, $karung, $lot);
+
+            $dataStock = [
+                'no_model' => $noModel,
+                'item_type' => $itemType,
+                'kode_warna' => $kodeWarna,
+                'warna' => $warna,
+                'kgs_in_out' => $kgs,
+                'cns_in_out' => $cones,
+                'krg_in_out' => number_format($karung, 0, '.', ''),
+                'lot_stock' => $lot,
+                'nama_cluster' => $namaCluster,
+                'admin' => session()->get('username'),
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+            // var_dump ($data, $dataStock);
+            $this->stockModel->insert($dataStock);
+            log_message('debug', 'Data Stock: ' . print_r($dataStock, true));
+
+            $data = [
+                'id_stock_old' => $idStock['id_stock'],
+                'id_stock_new' => $this->stockModel->getInsertID(),
+                'cluster_old' => $clusterOld,
+                'cluster_new' => $namaCluster,
+                'kgs' => $kgs,
+                'cns' => $cones,
+                'lot' => $lot
+            ];
+
+            $stockNew = $this->historyPindahPalet->insert($data);
+            log_message('debug', 'Data Cluster: ' . print_r($stockNew, true));
+
+            // $update = $this->historyPindahPalet->updateIdStockNew($idStock['id_stock'], $this->stockModel->getInsertID());
+            // log_message('debug', 'Data Update: ' . print_r($update, true));
+            // log_message('debug', 'Data ID Stock: ' . print_r($idStock['id_stock'], true));
+            // log_message('debug', 'Data ID Stock New: ' . print_r($this->stockModel->getInsertID(), true));
+            // var_dump ($update);
+            if ($idStock['kgs_in_out'] < $kgs || $idStock['cns_in_out'] < $cones || $idStock['krg_in_out'] < $karung) {
+                $updateStock = $this->stockModel->update($idStock['id_stock'], [
+                    'kgs_stock_awal' => $kgsInOut,
+                    'cns_stock_awal' => $cnsInOut,
+                    'krg_stock_awal' => $krgInOut,
+                    'lot_stock' => $lot
+                ]);
+            } else {
+                $updateStock = $this->stockModel->update($idStock['id_stock'], [
+                    'kgs_in_out' => $kgsInOut,
+                    'cns_in_out' => $cnsInOut,
+                    'krg_in_out' => $krgInOut,
+                    'lot_stock' => $lot
+                ]);
+            }
+
+            // $updateStock = $this->stockModel->update($idStock['id_stock'], [
+            //     'kgs_in_out' => $kgsInOut,
+            //     'cns_in_out' => $cnsInOut,
+            //     'krg_in_out' => $krgInOut,
+            //     'lot_stock' => $lot
+            // ]);
+            log_message('debug', 'Data Update Stock: ' . print_r($updateStock, true));
+
+            if ($stockNew && $updateStock) {
+                return $this->response->setJSON(['success' => true, 'message' => 'Cluster berhasil diperbarui']);
+            } else {
+                return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui Cluster']);
+            }
+        } else {
+            return redirect()->to(base_url($this->role . '/warehouse'));
+        }
+    }
+
+    public function getNoModel()
+    {
+        $results = $this->stockModel->getNoModel();
+
+        $resultsArray = json_decode(json_encode($results), true);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $resultsArray
+        ]);
+    }
+
+    public function updateNoModel()
+    {
+        if ($this->request->isAJAX()) {
+            $idStock = $this->request->getPost('id_stock');
+            $clusterOld = $this->request->getPost('namaCluster');
+            $noModel = $this->request->getPost('no_model');
+            $kgs = $this->request->getPost('kgs');
+            $cones = $this->request->getPost('cones');
+            $karung = $this->request->getPost('krg');
+            $lot = $this->request->getPost('lot');
+            log_message('debug', 'Data No Model: ' . print_r($noModel, true));
+            log_message('debug', 'Data clusterOld: ' . print_r($clusterOld, true));
+
+            $idStock = $this->stockModel->where('id_stock', $idStock)->first();
+            if (empty($idStock['lot_stock'])) {
+                $lot = $idStock['lot_awal'];
+            } else {
+                $lot = $idStock['lot_stock'];
+            }
+
+            $findData = $this->masterOrderModel->where('no_model', $noModel)->first();
+            log_message('debug', 'Data Order: ' . print_r($findData, true));
+            $material = $this->materialModel->getMaterialByIdOrderItemTypeKodeWarna($findData['id_order'], $idStock['item_type'], $idStock['kode_warna']);
+            log_message('debug', 'Data Material: ' . print_r($material, true));
+
+            $noModel = $findData['no_model'];
+            $itemType = $material[0]['item_type'];
+            $kodeWarna = $material[0]['kode_warna'];
+            $warna = $material[0]['color'];
+
+            // $itemType = $material['item_type'];
+            // $kodeWarna = $material['kode_warna'];
+            // $warna = $material['color'];
+
+            if ($idStock['kgs_in_out'] < $kgs || $idStock['cns_in_out'] < $cones || $idStock['krg_in_out'] < $karung) {
+                $kgsInOut = $idStock['kgs_stock_awal'] - $kgs;
+                $cnsInOut = $idStock['cns_stock_awal'] - $cones;
+                $krgInOut = $idStock['krg_stock_awal'] - $karung;
+            } else {
+                $kgsInOut = $idStock['kgs_in_out'] - $kgs;
+                $cnsInOut = $idStock['cns_in_out'] - $cones;
+                $krgInOut = $idStock['krg_in_out'] - $karung;
+            }
+
+            $dataStock = [
+                'no_model' => $noModel,
+                'item_type' => $itemType,
+                'kode_warna' => $kodeWarna,
+                'warna' => $warna,
+                'kgs_stock_awal' => $kgs,
+                'cns_stock_awal' => $cones,
+                'krg_stock_awal' => number_format($karung, 0, '.', ''),
+                'lot_awal' => $lot,
+                'nama_cluster' => $clusterOld,
+                'admin' => session()->get('username'),
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+
+            $this->stockModel->insert($dataStock);
+            log_message('debug', 'Data Stock: ' . print_r($dataStock, true));
+
+            $data = [
+                'id_stock_old' => $idStock['id_stock'],
+                'id_stock_new' => $this->stockModel->getInsertID(),
+                'nama_cluster' => $clusterOld,
+                'kgs' => $kgs,
+                'cns' => $cones,
+                'lot' => $lot
+            ];
+
+            $stockNew = $this->historyPindahOrder->insert($data);
+            log_message('debug', 'Data Cluster: ' . print_r($stockNew, true));
+
+            if ($idStock['kgs_in_out'] < $kgs || $idStock['cns_in_out'] < $cones || $idStock['krg_in_out'] < $karung) {
+                $updateStock = $this->stockModel->update($idStock['id_stock'], [
+                    'kgs_stock_awal' => $kgsInOut,
+                    'cns_stock_awal' => $cnsInOut,
+                    'krg_stock_awal' => $krgInOut,
+                    'lot_stock' => $lot
+                ]);
+            } else {
+                $updateStock = $this->stockModel->update($idStock['id_stock'], [
+                    'kgs_in_out' => $kgsInOut,
+                    'cns_in_out' => $cnsInOut,
+                    'krg_in_out' => $krgInOut,
+                    'lot_stock' => $lot
+                ]);
+            }
+
+            if ($stockNew && $updateStock) {
+                return $this->response->setJSON(['success' => true, 'message' => 'Cluster berhasil diperbarui']);
+            } else {
+                return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui Cluster']);
+            }
+        } else {
+            return redirect()->to(base_url($this->role . '/warehouse'));
+        }
+    }
+
     public function prosesPengeluaranJalur()
     {
         $checkedIds = $this->request->getPost('checked_id'); // Ambil index yang dicentang

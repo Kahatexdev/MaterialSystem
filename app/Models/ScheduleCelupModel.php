@@ -15,6 +15,7 @@ class ScheduleCelupModel extends Model
     protected $allowedFields    = [
         'id_celup',
         'id_mesin',
+        'id_bon',
         'no_model',
         'item_type',
         'kode_warna',
@@ -365,5 +366,10 @@ class ScheduleCelupModel extends Model
             ->where('kode_warna', $kodeWarna)
             ->groupBy('id_celup')
             ->first();
+    }
+    public function getScheduleBon($id_bon)
+    {
+        return $this->where('id_bon', $id_bon)
+            ->findAll();
     }
 }

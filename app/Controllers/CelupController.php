@@ -300,15 +300,26 @@ class CelupController extends BaseController
 
     public function outCelup()
     {
-        $bonCelup = $this->bonCelupModel->getData();
-
+        $outCelup = $this->outCelupModel->getDataOutCelup();
+        // dd($outCelup);
         $data = [
             'role' => $this->role,
             'active' => $this->active,
             'title' => "Out Celup",
-            'bonCelup' => $bonCelup,
+            'outCelup' => $outCelup,
         ];
         return view($this->role . '/out/index', $data);
+    }
+
+    public function getDetail($id_bon)
+    {
+        $data = $this->outCelupModel->getDetailByIdBon($id_bon);
+
+        if (!$data) {
+            return $this->response->setJSON(['error' => 'Data tidak ditemukan']);
+        }
+
+        return $this->response->setJSON($data);
     }
 
     public function retur()
@@ -380,8 +391,7 @@ class CelupController extends BaseController
     public function saveBon()
     {
         $data = $this->request->getPost();
-        // dd($data);
-        // Simpan data bon
+
         $saveDataBon = [
             'detail_sj' => $data['detail_sj'],
             'no_surat_jalan' => $data['no_surat_jalan'],
@@ -395,55 +405,159 @@ class CelupController extends BaseController
 
         $id_bon = $this->bonCelupModel->insertID();
 
-        // Ambil nilai input untuk parameter pencarian id_celup
-        $itemType = $data['items'][0]['item_type'] ?? null;
-        $kodeWarna = $data['items'][0]['kode_warna'] ?? null;
-        $noModel = $data['items'][0]['no_model'] ?? null;
-
-
         $noKarung = $data['no_karung'] ?? [];
         // $gantiRetur = isset($data['ganti_retur']) ? '1' : '0';
         $tab = count($data['harga']);
 
-        if (!empty($noModel)) {
-            $saveDataOutCelup = [];
 
+        $saveDataOutCelup = [];
+
+        for ($h = 0; $h < $tab; $h++) {
+            // Ambil nilai input untuk parameter pencarian id_celup
+            $itemType = $data['items'][$h]['item_type'] ?? null;
+            $kodeWarna = $data['items'][$h]['kode_warna'] ?? null;
+            $noModel = $data['items'][$h]['no_model'] ?? null;
             $id_celup = $this->scheduleCelupModel->getIdCelupbyNoModelItemTypeKodeWarna($noModel, $itemType, $kodeWarna);
+            $this->scheduleCelupModel->update($id_celup['id_celup'], ['id_bon' => $id_bon]);
+            $gantiRetur = isset($data['ganti_retur'][$h]) ? $data['ganti_retur'][$h] : '0';
+            // Pastikan no_karung tidak kosong dan merupakan array
+            if (!empty($data['no_karung'][$h]) && is_array($data['no_karung'][$h])) {
+                $jmldatapertab = count($data['no_karung'][$h]); // Ambil jumlah data yang benar
 
-            for ($h = 0; $h < $tab; $h++) {
-                $gantiRetur = isset($data['ganti_retur'][$h]) ? $data['ganti_retur'][$h] : '0';
-                // Pastikan no_karung tidak kosong dan merupakan array
-                if (!empty($data['no_karung'][$h]) && is_array($data['no_karung'][$h])) {
-                    $jmldatapertab = count($data['no_karung'][$h]); // Ambil jumlah data yang benar
-
-                    for ($i = 0; $i < $jmldatapertab; $i++) {
-                        $saveDataOutCelup[] = [
-                            'id_bon' => $id_bon,
-                            'id_celup' => $id_celup['id_celup'] ?? null,
-                            'l_m_d' => $data['l_m_d'][$h] ?? null,
-                            'harga' => $data['harga'][$h] ?? null,
-                            'no_karung' => $data['no_karung'][$h][$i] ?? null, // Ambil dari indeks $i
-                            'gw_kirim' => $data['gw_kirim'][$h][$i] ?? null,
-                            'kgs_kirim' => $data['kgs_kirim'][$h][$i] ?? null,
-                            'cones_kirim' => $data['cones_kirim'][$h][$i] ?? null,
-                            'lot_kirim' => $data['lot_kirim'][$h][$i] ?? '',
-                            'ganti_retur' => $gantiRetur,
-                            'admin' => session()->get('username'),
-                            'created_at' => date('Y-m-d H:i:s'),
-                            'updated_at' => '',
-                        ];
-                    }
+                for ($i = 0; $i < $jmldatapertab; $i++) {
+                    $saveDataOutCelup[] = [
+                        'id_bon' => $id_bon,
+                        'id_celup' => $id_celup['id_celup'] ?? null,
+                        'l_m_d' => $data['l_m_d'][$h] ?? null,
+                        'harga' => $data['harga'][$h] ?? null,
+                        'no_karung' => $data['no_karung'][$h][$i] ?? null, // Ambil dari indeks $i
+                        'gw_kirim' => $data['gw_kirim'][$h][$i] ?? null,
+                        'kgs_kirim' => $data['kgs_kirim'][$h][$i] ?? null,
+                        'cones_kirim' => $data['cones_kirim'][$h][$i] ?? null,
+                        'lot_kirim' => $data['lot_kirim'][$h][$i] ?? '',
+                        'ganti_retur' => $gantiRetur,
+                        'admin' => session()->get('username'),
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => '',
+                    ];
                 }
             }
-
-            // Debugging sebelum insert
-            // dd($saveDataOutCelup);
         }
+
+        // Debugging sebelum insert
+        // dd($saveDataOutCelup);
+
         $this->outCelupModel->insertBatch($saveDataOutCelup);
 
         return redirect()->to(base_url($this->role . '/outCelup'))->with('success', 'BON Berhasil Di Simpan.');
     }
 
+    public function editBon($id_bon)
+    {
+        $bonData = $this->bonCelupModel->where('id_bon', $id_bon)->first();
+        $celupData = $this->scheduleCelupModel->getScheduleBon($id_bon);
+
+        $items = [];
+
+        foreach ($celupData as $dt) {
+            $idCelup = $dt['id_celup'];
+            $karungData = $this->outCelupModel->dataCelup($id_bon, $idCelup);
+
+            // Buat array baru untuk setiap item
+            $item = [
+                'id_celup'   => $idCelup,
+                'model'      => $dt['no_model'],
+                'itemType'   => $dt['item_type'],
+                'kodeWarna'  => $dt['kode_warna'],
+                'warna'      => $dt['warna'],
+                'karung'     => [] // Inisialisasi array karung kosong
+            ];
+
+            // Tambahkan semua data karung ke dalam array
+            foreach ($karungData as $out) {
+                $item['karung'][] = [
+                    'id_out_celup' => $out['id_out_celup'],
+                    'l_m_d'        => $out['l_m_d'],
+                    'harga'        => $out['harga'],
+                    'no_karung'    => $out['no_karung'],
+                    'gw_kirim'     => $out['gw_kirim'],
+                    'kgs_kirim'    => $out['kgs_kirim'],
+                    'cones_kirim'  => $out['cones_kirim'],
+                    'lot_kirim'    => $out['lot_kirim'],
+                ];
+                $item['l_m_d'] = $out['l_m_d'];
+                $item['harga'] = $out['harga'];
+                $item['ganti_retur'] = $out['ganti_retur'];
+            }
+
+            // Tambahkan item ke dalam array utama
+            $items[] = $item;
+        }
+
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "Out Celup",
+            'bon' => $bonData,
+            'item' => $items
+
+        ];
+
+        return view($this->role . '/out/editBon', $data);
+    }
+
+    public function updateBon()
+    {
+        $id_bon = $this->request->getPost('id_bon');
+
+        $dataBon = [
+            'tgl_datang' => $this->request->getPost('tgl_datang'),
+            'no_surat_jalan' => $this->request->getPost('no_surat_jalan'),
+            'detail_sj' => $this->request->getPost('detail_sj'),
+        ];
+
+        // Update data utama di bonCelupModel
+        $this->bonCelupModel->update($id_bon, $dataBon);
+
+        // Update setiap karung
+        $id_out_celup_list = $this->request->getPost('id_out_celup');
+        $no_karung_list = $this->request->getPost('no_karung');
+        $l_m_d_list = $this->request->getPost('l_m_d');
+        $harga_list = $this->request->getPost('harga');
+        $ganti_retur_list = $this->request->getPost('ganti_retur');
+        $gw_kirim_list = $this->request->getPost('gw_kirim');
+        $kgs_kirim_list = $this->request->getPost('kgs_kirim');
+        $cones_kirim_list = $this->request->getPost('cones_kirim');
+        $lot_kirim_list = $this->request->getPost('lot_kirim');
+
+        foreach ($id_out_celup_list as $index => $karungIds) {
+            // Loop setiap karung dalam satu celup
+            foreach ($karungIds as $karungIndex => $id_out_celup) {
+
+                $dataKarung = [
+                    'no_karung'    => $no_karung_list[$index][$karungIndex],
+                    'l_m_d'        => $l_m_d_list[$index][$karungIndex],
+                    'harga'        => floatval(str_replace(',', '.', $harga_list[$index] ?? 0)),
+                    'ganti_retur'  => $ganti_retur_list[$index][$karungIndex],
+                    'gw_kirim'     => $gw_kirim_list[$index][$karungIndex],
+                    'kgs_kirim'    => $kgs_kirim_list[$index][$karungIndex],
+                    'cones_kirim'  => $cones_kirim_list[$index][$karungIndex],
+                    'lot_kirim'    => $lot_kirim_list[$index][$karungIndex],
+                ];
+                // dd($dataKarung);
+                $this->outCelupModel->update($id_out_celup, $dataKarung);
+            }
+        }
+        // Redirect kembali dengan pesan sukses
+        return redirect()->to(base_url($this->role . '/outCelup'))->with('success', 'Data berhasil diperbarui');
+    }
+
+    public function deleteBon($id)
+    {
+        $this->scheduleCelupModel->where('id_bon', $id)->set(['id_bon' => null])->update();
+        $this->bonCelupModel->delete($id);
+        return $this->response->setJSON(['success' => true]);
+    }
 
     public function generateBarcode($id)
     {

@@ -57,7 +57,7 @@
                                         <input type="text" class="form-control" id="no_surat_jalan" name="no_surat_jalan">
                                     </div>
                                     <div class="col-md-4">
-                                        <label>Tanggal Datang</label>
+                                        <label>Tanggal Kirim</label>
                                         <input type="date" class="form-control" id="tgl_datang" name="tgl_datang">
                                     </div>
                                 </div>
@@ -132,7 +132,7 @@
                                             </div>
 
                                             <div class="mt-5">
-                                                <h3>Form Barcode</h3>
+                                                <h3>Form Input Data Karung</h3>
                                             </div>
 
                                             <!-- Out Celup Section -->

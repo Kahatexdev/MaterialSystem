@@ -234,7 +234,7 @@
                                     <!-- Sisa Kapasitas hitung pakai JS -->
                                     <div class="mb-3">
                                         <label for="sisa_kapasitas" class="form-label">Sisa Kapasitas</label>
-                                        <input type="number" class="form-control" id="sisa_kapasitas" name="sisa_kapasitas" value="<?= $max_caps ?>" data-max-caps="<?= $max_caps ?>" readonly>
+                                        <input type="number" min=0 class="form-control" id="sisa_kapasitas" name="sisa_kapasitas" value="<?= $max_caps ?>" data-max-caps="<?= $max_caps ?>" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -599,6 +599,8 @@
             // Periksa apakah total_qty_celup melebihi max_caps
             if (totalQtyCelup > maxCaps) {
                 alert("⚠️ Total Qty Celup melebihi Max Caps!");
+                totalQtyCelupElement.classList.add("is-invalid");
+                totalQtyCelupElement.focus();
             }
 
             // Periksa apakah qty_celup di setiap baris melebihi tagihan SCH di baris tersebut
@@ -609,6 +611,8 @@
 
                 if (qtyCelup > tagihanSCH) {
                     alert(`⚠️ Qty Celup di baris ini melebihi Tagihan SCH! (Tagihan SCH: ${tagihanSCH.toFixed(2)})`);
+                    row.querySelector("input[name='qty_celup[]']").classList.add("is-invalid");
+                    row.querySelector("input[name='qty_celup[]']").focus();
                 }
             });
 
@@ -617,6 +621,13 @@
             if (sisaKapasitasElement) {
                 const sisaKapasitas = maxCaps - totalQtyCelup;
                 sisaKapasitasElement.value = sisaKapasitas.toFixed(2); // Format 2 angka di belakang koma
+                if (sisaKapasitas < 0) {
+                    alert("⚠️ Sisa Kapasitas negatif!");
+                    sisaKapasitasElement.classList.add("is-invalid");
+                    sisaKapasitasElement.focus();
+                } else {
+                    sisaKapasitasElement.classList.remove("is-invalid");
+                }
             }
         }
 
