@@ -81,7 +81,17 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('reset_pemasukan', 'WarehouseController::reset_pemasukan');
     $routes->post('hapus_pemasukan', 'WarehouseController::hapusListPemasukan');
     $routes->post('proses_pemasukan', 'WarehouseController::prosesPemasukan');
-    $routes->get('pengeluaran', 'WarehouseController::pengeluaran');
+    $routes->get('getItemTypeByModel/(:any)', 'WarehouseController::getItemTypeByModel/$1');
+    $routes->get('getKodeWarnaByModelAndItemType/(:any)/(:any)', 'WarehouseController::getKodeWarna/$1/$2');
+    $routes->get('getWarnaDanLot/(:any)/(:any)/(:any)', 'WarehouseController::getWarnaDanLot/$1/$2/$3');
+    $routes->get('getKgsDanCones/(:any)/(:any)/(:any)/(:any)/(:any)', 'WarehouseController::getKgsDanCones/$1/$2/$3/$4/$5');
+    $routes->post('getcluster', 'WarehouseController::getCluster');
+    $routes->post('proses_pemasukan_manual', 'WarehouseController::prosesPemasukanManual');
+    $routes->get('pengeluaran_jalur', 'WarehouseController::pengeluaranJalur');
+    $routes->post('pengeluaran_jalur', 'WarehouseController::pengeluaranJalur');
+    $routes->post('reset_pengeluaran', 'WarehouseController::resetPengeluaranJalur');
+    $routes->post('hapus_pengeluaran', 'WarehouseController::hapusListPengeluaran');
+    $routes->get('pengiriman_area', 'WarehouseController::pengirimanArea');
 
     $routes->get('pph', 'PphController::index');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');

@@ -61,4 +61,15 @@ class PemasukanModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    public function getDataForOut($id)
+    {
+        return $this->db->table('pemasukan')
+            ->select('pemasukan.*, out_celup.lot_kirim')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
+            ->where('pemasukan.id_out_celup', $id)
+            ->distinct()
+            ->get()
+            ->getResultArray();
+    }
 }
