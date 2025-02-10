@@ -94,4 +94,12 @@ class MaterialModel extends Model
             ->groupBy('material.kode_warna')
             ->first();
     }
+
+    public function getMaterialByIdOrderItemTypeKodeWarna($id_order, $item_type, $kode_warna)
+    {
+        return $this->where('id_order', $id_order)
+            ->where('item_type', $item_type)
+            ->where('kode_warna', $kode_warna)
+            ->findAll();
+    }
 }

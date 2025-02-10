@@ -43,7 +43,33 @@
 
     <!-- Bootstrap CSS -->
 
+    <!-- style -->
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            /* secondary color is abu-abu*/
+            --secondary-color: #778899;
+        }
+            .form-control {
+                border: none;
+                border-bottom: 2px solid var(--primary-color);
+                border-radius: 0;
+                padding: 0.75rem 0;
+                margin-bottom: 1rem;
+                transition: all 0.3s ease;
+            }
 
+            .form-control:focus {
+                box-shadow: none;
+                border-color: var(--secondary-color);
+            }
+
+            .badge {
+                padding: 0.5rem 1rem;
+                border-radius: 20px;
+                font-size: 0.9rem;
+            }
+    </style>
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
