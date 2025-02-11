@@ -11,7 +11,10 @@ use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
 use App\Models\OpenPoModel;
+use App\Models\BonCelupModel;
+use App\Models\OutCelupModel;
 use FPDF;
+use Picqer\Barcode\BarcodeGeneratorPNG;
 
 class PdfController extends BaseController
 {
@@ -23,12 +26,16 @@ class PdfController extends BaseController
     protected $materialModel;
     protected $masterMaterialModel;
     protected $openPoModel;
+    protected $bonCelupModel;
+    protected $outCelupModel;
     public function __construct()
     {
         $this->masterOrderModel = new MasterOrderModel();
         $this->materialModel = new MaterialModel();
         $this->masterMaterialModel = new MasterMaterialModel();
         $this->openPoModel = new OpenPoModel();
+        $this->bonCelupModel = new BonCelupModel();
+        $this->outCelupModel = new OutCelupModel();
 
 
         $this->role = session()->get('role');
@@ -226,5 +233,380 @@ class PdfController extends BaseController
         // Output PDF
         return $this->response->setHeader('Content-Type', 'application/pdf')
             ->setBody($pdf->Output('S'));
+    }
+
+    public function printBon($idBon)
+    {
+        // data ALL BON
+        $dataBon = $this->bonCelupModel->getDataById($idBon); // get data by id_bon
+        $detailBon = $this->outCelupModel->getDetailBonByIdBon($idBon); // get data detail bon by id_bon
+        // dd($detailBon);        // Mengelompokkan data detailBon berdasarkan no_model, item_type, dan kode_warna
+        $groupedDetails = [];
+        foreach ($detailBon as $detail) {
+            $key = $detail['no_model'] . '|' . $detail['item_type'] . '|' . $detail['kode_warna'];
+            $jmlKarung =
+                $gantiRetur = ($detail['ganti_retur'] == 1) ? ' / Ganti Retur' : '';
+            if (!isset($groupedDetails[$key])) {
+                $groupedDetails[$key] = [
+                    'no_model' => $detail['no_model'],
+                    'item_type' => $detail['item_type'],
+                    'kode_warna' => $detail['kode_warna'],
+                    'warna' => $detail['warna'],
+                    'buyer' => $detail['buyer'],
+                    'ukuran' => $detail['ukuran'],
+                    'lot_kirim' => $detail['lot_kirim'],
+                    'l_m_d' => $detail['l_m_d'],
+                    'harga' => $detail['harga'],
+                    'detailPengiriman' =>  [],
+                    'totals' => [
+                        'cones_kirim' => 0,
+                        'gw_kirim' => 0,
+                        'kgs_kirim' => 0,
+                    ],
+                    'ganti_retur' => $gantiRetur,
+                    'jmlKarung' => 0,
+                    'barcodes' => [], // Untuk menyimpan barcode
+                ];
+            }
+            // Menambahkan data pengiriman untuk grup ini tanpa dijumlahkan
+            $groupedDetails[$key]['detailPengiriman'][] = [
+                'id_out_celup' => $detail['id_out_celup'],
+                'cones_kirim' => $detail['cones_kirim'],
+                'gw_kirim' => $detail['gw_kirim'],
+                'kgs_kirim' => $detail['kgs_kirim'],
+                'lot_kirim' => $detail['lot_kirim'],
+                'no_karung' => $detail['no_karung'],
+            ];
+            // Menambahkan nilai ke total
+            $groupedDetails[$key]['totals']['gw_kirim'] += $detail['gw_kirim'];
+            $groupedDetails[$key]['totals']['kgs_kirim'] += $detail['kgs_kirim'];
+            $groupedDetails[$key]['totals']['cones_kirim'] += $detail['cones_kirim'];
+
+            // Menghitung jumlah baris data detailBon pada grup ini (jumlah karung)
+            $groupedDetails[$key]['jmlKarung'] = count($groupedDetails[$key]['detailPengiriman']);
+
+            // Tambahkan ID outCelup
+            $groupedDetails[$key]['idsOutCelup'][] = $detail['id_out_celup'];
+        }
+
+        // Buat instance Barcode Generator
+        $generator = new BarcodeGeneratorPNG();
+
+        // Hasilkan barcode untuk setiap ID outCelup di grup
+        foreach ($groupedDetails as &$group) {
+            foreach ($group['detailPengiriman'] as $outCelup => $id) {
+                // Hasilkan barcode dan encode sebagai base64
+                $barcode = $generator->getBarcode($id['id_out_celup'], $generator::TYPE_EAN_13);
+                $group['barcodes'][] = [
+                    'no_model' => $group['no_model'],
+                    'item_type' => $group['item_type'],
+                    'kode_warna' => $group['kode_warna'],
+                    'warna' => $group['warna'],
+                    'id_out_celup' => $id['id_out_celup'],
+                    'gw' => $id['gw_kirim'],
+                    'kgs' => $id['kgs_kirim'],
+                    'cones' => $id['cones_kirim'],
+                    'lot' => $id['lot_kirim'],
+                    'no_karung' => $id['no_karung'],
+                    'barcode' => base64_encode($barcode),
+                ];
+            }
+        }
+
+        // Menggabungkan data utama dan detail yang sudah dikelompokkan
+        $dataBon['groupedDetails'] = array_values($groupedDetails);
+
+        // Inisialisasi FPDF
+        $pdf = new FPDF('L', 'mm', [176, 250]); // Mengatur ukuran kertas menjadi B5
+        $pdf->AddPage();
+
+        // Tambahkan border margin
+        $pdf->SetDrawColor(0, 0, 0);
+        $pdf->SetLineWidth(0.4);
+        $pdf->Rect(5, 5, 240, 165);
+
+        // Tambahkan double border margin
+        $pdf->SetDrawColor(0, 0, 0);
+        $pdf->SetLineWidth(0.4);
+        $pdf->Rect(6, 6, 238, 163);
+
+        // Kembalikan ke properti default untuk border
+        $pdf->SetDrawColor(0, 0, 0); // Tetap hitam jika digunakan pada elemen lain
+        $pdf->SetLineWidth(0.2);    // Kembali ke garis default
+
+        $pdf->SetMargins(6, 6, 6, 6); // Margin kiri, atas, kanan
+        $pdf->SetXY(6, 6); // Mulai di margin kiri (X=5) dan sedikit di bawah border (Y=5)
+        $pdf->SetAutoPageBreak(true,); // Aktifkan auto page break dengan margin bawah 10
+
+        // Menambahkan gambar
+        $pdf->Image('assets/img/logo-kahatex.png', 21, 7, 12, 10); // X=10 untuk margin, Y=10 untuk margin atas
+
+        // Header
+        $pdf->SetX(6); // Pastikan posisi X sejajar margin
+        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->Cell(44, 15, '', 1, 0, 'C');
+
+        // Set warna latar belakang menjadi biru telur asin (RGB: 170, 255, 255)
+        $pdf->SetFillColor(170, 255, 255);
+        $pdf->Cell(194, 5, 'FORMULIR', 0, 1, 'C', 1);
+
+        $pdf->SetFillColor(255, 255, 255); // Ubah latar belakang menjadi putih
+
+        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->Cell(40, 5, '', 0, 0, 'L');
+        $pdf->Cell(194, 5, 'DEPARTMEN KELOS WARNA', 0, 1, 'C');
+
+        $pdf->SetX(6); // Pastikan posisi X sejajar margin
+        $pdf->SetFont('Arial', 'B', 8);
+        $pdf->Cell(44, 6, 'PT. KAHATEX', 0, 0, 'C');
+
+        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->Cell(194, 5, 'BON PENGIRIMAN', 1, 1, 'C');
+
+
+        // Tabel Header Atas
+        $pdf->SetX(6); // Pastikan posisi X sejajar margin
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->Cell(44, 5, 'No. Dokumen', 1, 0, 'L');
+        $pdf->Cell(123, 5, 'FOR-KWA-006/REV_03/HAL_1/1', 1, 0, 'L');
+        $pdf->Cell(28, 5, 'Tanggal Revisi', 1, 0, 'L');
+        $pdf->Cell(43, 5, '07 Januari 2021', 1, 1, 'L');
+
+        $pdf->SetX(6); // Pastikan posisi X sejajar margin
+        $pdf->Cell(44, 4, 'NAMA LANGGANAN', 0, 0, 'L');
+        $pdf->Cell(69, 4, 'KAOS KAKI', 0, 0, 'L');
+        $pdf->Cell(62, 4, 'NO SURAT JALAN : ' . $dataBon['no_surat_jalan'], 0, 0, 'L');
+        $pdf->Cell(36, 4, 'TANGGAL : ' . $dataBon['tgl_datang'], 0, 1, 'L');
+
+        $pdf->SetX(6); // Pastikan posisi X sejajar margin
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->Cell(20, 12, 'NO PO', 1, 0, 'C');
+        $pdf->Cell(24, 12, 'JENIS BENANG', 1, 0, 'C');
+        // Menentukan posisi awal untuk KODE BENANG
+        $xKB = $pdf->GetX();
+        $yKB = $pdf->GetY();
+        $pdf->MultiCell(13, 6, 'KODE BENANG', 1, 'C', false); // wrap text
+        // Mengembalikan posisi setelah MultiCell
+        $pdf->SetXY($xKB + 13, $yKB);
+
+        $pdf->Cell(38, 12, 'KODE WARNA', 1, 0, 'C');
+        $pdf->Cell(20, 12, 'WARNA', 1, 0, 'C');
+        $pdf->Cell(15, 12, 'LOT CELUP', 1, 0, 'C');
+        $pdf->Cell(8, 12, 'L/M/D', 1, 0, 'C');
+        // Membagi kolom "HARGA" menjadi dua baris
+        $xHarga = $pdf->GetX();
+        $yHarga = $pdf->GetY();
+        $pdf->Cell(10, 6, 'HARGA', 1, 2, 'C'); // Baris pertama (HARGA)
+        $pdf->SetXY($xHarga, $yHarga + 6);
+        $pdf->Cell(10, 6, 'PER KG', 1, 0, 'C'); // Baris kedua (PER KG)
+
+        // Kolom "CONES" dengan tinggi penuh sejajar kolom paling awal
+        $pdf->SetXY($xHarga + 10, $yHarga); // Mengatur posisi kolom "CONES" kembali ke baris awal
+        $pdf->Cell(10, 12, 'CONES', 1, 0, 'C');
+
+        $xQty = $pdf->GetX();
+        $yQty = $pdf->GetY();
+        $pdf->Cell(20, 4, 'QTY', 1, 2, 'C');
+        $pdf->SetXY($xQty, $yQty + 4);
+        $xGw = $pdf->GetX();
+        $yGw = $pdf->GetY();
+        $pdf->MultiCell(10, 4, 'GW (KG)', 1, 'C', false); // wrap text
+        // Mengembalikan posisi setelah MultiCell
+        $pdf->SetXY($xGw + 10, $yGw);
+        $pdf->MultiCell(10, 4, 'NW (KG)', 1, 'C', false); // wrap text
+        // Mengembalikan posisi setelah MultiCell
+        $pdf->SetXY($xGw + 10, $yGw);
+        $pdf->SetXY($xQty + 20, $yQty);
+
+        $xTotal = $pdf->GetX();
+        $yTotal = $pdf->GetY();
+        $pdf->Cell(30, 4, 'TOTAL', 1, 1, 'C');
+        $pdf->SetXY($xTotal, $yTotal + 4);
+        $pdf->Cell(10, 8, 'CONES', 1, 0, 'C');
+        $xGw = $pdf->GetX();
+        $yGw = $pdf->GetY();
+        $pdf->MultiCell(10, 4, 'GW (KG)', 1, 'C', false); // wrap text
+        // Mengembalikan posisi setelah MultiCell
+        $pdf->SetXY($xGw + 10, $yGw);
+        $pdf->MultiCell(10, 4, 'NW (KG)', 1, 'C', false); // wrap text
+        // Mengembalikan posisi setelah MultiCell
+        $pdf->SetXY($xGw + 10, $yGw);
+        $pdf->SetXY($xQty + 20, $yQty);
+
+        $pdf->SetXY($xTotal + 30, $yTotal);
+        $pdf->Cell(30, 12, 'KETERANGAN', 1, 1, 'C');
+
+        $pdf->SetFont('Arial', '', 6);
+
+        $prevNoModel = null; // Variabel untuk menyimpan no_model sebelumnya
+        $row = 0;
+
+        foreach ($dataBon['groupedDetails'] as $bon) {
+            // Cek jika no_model berubah
+            if ($prevNoModel !== null && $bon['no_model'] !== $prevNoModel) {
+                // Tambahkan dua baris kosong
+                for ($i = 0; $i < 2; $i++) {
+                    $pdf->SetX(6);
+                    $pdf->Cell(20, 4, '', 1, 0, 'C');
+                    $pdf->Cell(24, 4, '', 1, 0, 'C');
+                    $pdf->Cell(13, 4, '', 1, 0, 'C');
+                    $pdf->Cell(38, 4, '', 1, 0, 'C');
+                    $pdf->Cell(20, 4, '', 1, 0, 'C');
+                    $pdf->Cell(15, 4, '', 1, 0, 'C');
+                    $pdf->Cell(8, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(30, 4, '', 1, 1, 'L');
+                }
+                $row = 0; // jika no model berubah $row kembali ke 0
+            }
+
+            $pdf->SetX(6); // Pastikan posisi X sejajar margin
+            $pdf->Cell(20, 4, $bon['no_model'], 1, 0, 'C');
+            $x2 = $pdf->GetX();
+            $y2 = $pdf->GetY();
+
+            // MultiCell untuk kolom item_type (tinggi fleksibel)
+            $pdf->MultiCell(24, 4, $bon['item_type'], 1, 'C', false);
+            $multiCellHeight1 = $pdf->GetY() - $y2;
+
+            // Kembalikan posisi untuk kolom berikutnya
+            $pdf->SetXY($x2 + 24, $y2);
+
+            // MultiCell untuk kolom ukuran (tinggi fleksibel)
+            $x3 = $pdf->GetX();
+            $pdf->MultiCell(13, 4, '1/36', 1, 'C', false);
+            $multiCellHeight2 = $pdf->GetY() - $y2;
+
+            // Kembalikan posisi untuk kolom berikutnya
+            $pdf->SetXY($x3 + 13, $y2);
+
+            // MultiCell untuk kolom kode warna (tinggi fleksibel)
+            $x4 = $pdf->GetX();
+            $pdf->MultiCell(38, 4, $bon['kode_warna'], 1, 'C', false);
+            $multiCellHeight3 = $pdf->GetY() - $y2;
+
+            // Kembalikan posisi untuk kolom berikutnya
+            $pdf->SetXY($x4 + 38, $y2);
+
+            // MultiCell untuk kolom warna (tinggi fleksibel)
+            $x5 = $pdf->GetX();
+            $pdf->MultiCell(20, 4, $bon['warna'], 1, 'C', false);
+            $multiCellHeight4 = $pdf->GetY() - $y2;
+
+            // Kembalikan posisi untuk kolom berikutnya
+            $pdf->SetXY($x5 + 20, $y2);
+
+            // MultiCell untuk kolom lot_kirim (tinggi fleksibel)
+            $x6 = $pdf->GetX();
+            $pdf->MultiCell(15, 4, $bon['lot_kirim'], 1, 'C', false);
+            $multiCellHeight5 = $pdf->GetY() - $y2;
+
+            // Hitung tinggi maksimum dari semua kolom
+            $maxHeight = max($multiCellHeight1, $multiCellHeight2, $multiCellHeight3, $multiCellHeight4, $multiCellHeight5, 8);
+
+            // Kembalikan posisi untuk kolom berikutnya
+            $pdf->SetXY($x6 + 15, $y2);
+            $pdf->Cell(8, 4, $bon['l_m_d'], 1, 0, 'C');
+            $pdf->Cell(10, 4, $bon['harga'], 1, 0, 'C');
+
+            foreach ($bon['detailPengiriman'] as $detail) {
+                $row++;
+                if ($row == 1) {
+                    $pdf->Cell(10, 4, $detail['cones_kirim'], 1, 0, 'C');
+                    $pdf->Cell(10, 4, $detail['gw_kirim'], 1, 0, 'C');
+                    $pdf->Cell(10, 4, $detail['kgs_kirim'], 1, 0, 'C');
+                    $pdf->Cell(10, 4, $bon['totals']['cones_kirim'], 1, 0, 'C');
+                    $pdf->Cell(10, 4, $bon['totals']['gw_kirim'], 1, 0, 'C');
+                    $pdf->Cell(10, 4, $bon['totals']['kgs_kirim'], 1, 0, 'C');
+                    $pdf->Cell(30, 4, $bon['jmlKarung'] . " KARUNG" . $bon['ganti_retur'], 1, 1, 'L');
+                } elseif ($row == 2) {
+                    $pdf->SetX(6); // Pastikan posisi X sejajar margin
+                    $pdf->Cell(20, 4, $bon['buyer'] . ' KK', 1, 0, 'C');
+                    $pdf->Cell(24, 4, '', 1, 0, 'C');
+                    $pdf->Cell(13, 4, '', 1, 0, 'C');
+                    $pdf->Cell(38, 4, '', 1, 0, 'C');
+                    $pdf->Cell(20, 4, '', 1, 0, 'C');
+                    $pdf->Cell(15, 4, '', 1, 0, 'C');
+                    $pdf->Cell(8, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, $detail['cones_kirim'], 1, 0, 'C');
+                    $pdf->Cell(10, 4, $detail['gw_kirim'], 1, 0, 'C');
+                    $pdf->Cell(10, 4, $detail['kgs_kirim'], 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(30, 4, '', 1, 1, 'L');
+                } else {
+                    $pdf->SetX(6); // Pastikan posisi X sejajar margin
+                    $pdf->Cell(20, 4, '', 1, 0, 'C');
+                    $pdf->Cell(24, 4, '', 1, 0, 'C');
+                    $pdf->Cell(13, 4, '', 1, 0, 'C');
+                    $pdf->Cell(38, 4, '', 1, 0, 'C');
+                    $pdf->Cell(20, 4, '', 1, 0, 'C');
+                    $pdf->Cell(15, 4, '', 1, 0, 'C');
+                    $pdf->Cell(8, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, $detail['cones_kirim'], 1, 0, 'C');
+                    $pdf->Cell(10, 4, $detail['gw_kirim'], 1, 0, 'C');
+                    $pdf->Cell(10, 4, $detail['kgs_kirim'], 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(30, 4, '', 1, 1, 'L');
+                }
+            }
+            var_dump($row);
+
+            $prevNoModel = $bon['no_model']; // Pindahkan pembaruan variabel ke sini
+        }
+
+        // Tambahkan dua baris kosong
+        for ($i = 0; $i < 22; $i++) {
+            $pdf->SetX(6);
+            $pdf->Cell(20, 4, '', 1, 0, 'C');
+            $pdf->Cell(24, 4, '', 1, 0, 'C');
+            $pdf->Cell(13, 4, '', 1, 0, 'C');
+            $pdf->Cell(38, 4, '', 1, 0, 'C');
+            $pdf->Cell(20, 4, '', 1, 0, 'C');
+            $pdf->Cell(15, 4, '', 1, 0, 'C');
+            $pdf->Cell(8, 4, '', 1, 0, 'C');
+            $pdf->Cell(10, 4, '', 1, 0, 'C');
+            $pdf->Cell(10, 4, '', 1, 0, 'C');
+            $pdf->Cell(10, 4, '', 1, 0, 'C');
+            $pdf->Cell(10, 4, '', 1, 0, 'C');
+            $pdf->Cell(10, 4, '', 1, 0, 'C');
+            $pdf->Cell(10, 4, '', 1, 0, 'C');
+            $pdf->Cell(10, 4, '', 1, 0, 'C');
+            $pdf->Cell(30, 4, '', 1, 1, 'L');
+        }
+        // Data keterangan
+        $keterangan = [
+            'KETERANGAN :' => 'GW = GROSS WEIGHT',
+            '1' => 'NW = NET WEIGHT',
+            '2' => 'L = LIGHT',
+            '3' => 'M = MEDIUM',
+            '4' => 'D = DARK',
+        ];
+
+        // Looping untuk mencetak kolom keterangan
+        foreach ($keterangan as $key => $value) {
+            $pdf->SetX(6); // Pastikan posisi X sejajar margin
+            $pdf->Cell(20, 3, ($key == "KETERANGAN :") ? $key : '', 0, 0, 'L'); // Kolom pertama (key)
+            $pdf->Cell(37, 3, $value, 0, 0, 'L'); // Kolom kedua (value)
+            $pdf->Cell(90, 3, '', 0, 0, 'L'); // Kosong
+            $pdf->Cell(30, 3, $key === 'KETERANGAN :' ? 'PENGIRIM' : '', 0, 0, 'C'); // Hanya baris pertama ada "PENGIRIM"
+            $pdf->Cell(20, 3, '', 0, 0, 'L'); // Kosong
+            $pdf->Cell(30, 3, $key === 'KETERANGAN :' ? 'PENERIMA' : '', 0, 0, 'C'); // Hanya baris pertama ada "PENERIMA"
+            $pdf->Cell(11, 3, '', 0, 1, 'L'); // Kolom terakhir kosong
+        }
+        // Output PDF
+        // return $this->response->setHeader('Content-Type', 'application/pdf')
+        // ->setBody($pdf->Output('S'));
     }
 }
