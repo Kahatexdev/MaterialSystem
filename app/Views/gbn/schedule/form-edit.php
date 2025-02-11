@@ -275,7 +275,7 @@
                                                                 </div>
                                                                 <div class="col-3">
                                                                     <label for="qty_celup">Qty Celup</label>
-                                                                    <input type="number" class="form-control" name="qty_celup[]" value="<?= $detail['kg_celup'] ?>" required>
+                                                                    <input type="number" class="form-control" step="0.01" min="0.01" name="qty_celup[]" value="<?= $detail['kg_celup'] ?>" required>
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -395,7 +395,7 @@
                 .done(response => {
                     if (response.success) {
                         alert('Update berhasil!');
-                        location.reload();
+                        location.href = '<?= base_url(session('role') . '/schedule') ?>';
                     } else {
                         alert('Gagal: ' + (response.message || 'Terjadi kesalahan'));
                     }
