@@ -84,6 +84,9 @@ class StockModel extends Model
             COALESCE(SUM(stock.kgs_stock_awal), 0) AS KgsStockAwal, 
             COALESCE(SUM(stock.krg_in_out), 0) AS Krg, 
             COALESCE(SUM(stock.krg_stock_awal), 0) AS KrgStockAwal,
+            COALESCE(SUM(stock.cns_in_out), 0) AS Cns, 
+            COALESCE(SUM(stock.cns_stock_awal), 0) AS CnsStockAwal,
+
             cluster.*
         ')
         ->join('cluster', 'cluster.nama_cluster = stock.nama_cluster', 'left')
@@ -95,7 +98,9 @@ class StockModel extends Model
             'stock.lot_stock',
             'stock.nama_cluster',
             'cluster.kapasitas'
-        ]);
+        ])
+        ->orderBy('stock.nama_cluster', 'ASC')
+        ->limit(10);
         
         return $builder->get()->getResult();
     }
