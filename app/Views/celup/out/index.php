@@ -44,7 +44,6 @@
         </div>
     </div>
 
-
     <div class="card mt-3">
         <div class="card-body">
             <div class="table-responsive">
@@ -81,7 +80,7 @@
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal Detail -->
 <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-custom" role="document">
         <div class="modal-content">
@@ -114,11 +113,19 @@
                             <!-- Data akan dimasukkan di sini -->
                         </tbody>
                     </table>
+                    <tfoot>
+                        <div class="d-flex justify-content-end">
+                            <a type="button" href="<?= base_url($role . '/outCelup/editBon/' . $out['id_bon']) ?>" class="btn btn-warning btn-edit me-2">Edit</a>
+                            <button type="button" class="btn btn-danger btn-delete" id="deleteButton" data-id-delete="<?= $out['id_bon'] ?>">Delete</button>
+                        </div>
+                    </tfoot>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Detail Bon -->
 <script>
     $(document).ready(function() {
         $('#dataTable').DataTable();
@@ -166,6 +173,50 @@
                     console.error("Error fetching detail:", error);
                     alert("Terjadi kesalahan saat mengambil data detail.");
                 }
+            });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Tambahkan event listener ke semua tombol delete dalam modal
+        document.querySelectorAll(".btn-delete").forEach(button => {
+            button.addEventListener("click", function() {
+                let id = this.getAttribute("data-id-delete");
+
+                Swal.fire({
+                    title: "Konfirmasi Hapus",
+                    text: "Apakah Anda yakin ingin menghapus data ini?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Ya, Hapus!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch("<?= base_url($role . '/outCelup/deleteBon/') ?>" + id, {
+                                method: "DELETE",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire("Terhapus!", "Data berhasil dihapus.", "success").then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire("Gagal!", "Terjadi kesalahan saat menghapus.", "error");
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error:", error);
+                                Swal.fire("Error!", "Terjadi kesalahan pada server.", "error");
+                            });
+                    }
+                });
             });
         });
     });
