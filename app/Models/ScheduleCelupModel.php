@@ -127,7 +127,7 @@ class ScheduleCelupModel extends Model
     public function getScheduleDetailsData($machine, $date, $lot)
     {
         return $this->table('schedule_celup')
-        ->select('
+            ->select('
             schedule_celup.*, 
             mesin_celup.no_mesin, 
             sum(schedule_celup.kg_celup) as total_kg,
@@ -136,10 +136,10 @@ class ScheduleCelupModel extends Model
             material.kode_warna,
             material.item_type,
         ')
-        ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin', 'left')
-        ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
-        ->join('material', 'material.id_order = master_order.id_order AND schedule_celup.item_type = material.item_type AND schedule_celup.kode_warna = material.kode_warna', 'left')
-        ->where('mesin_celup.no_mesin', $machine)
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin', 'left')
+            ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
+            ->join('material', 'material.id_order = master_order.id_order AND schedule_celup.item_type = material.item_type AND schedule_celup.kode_warna = material.kode_warna', 'left')
+            ->where('mesin_celup.no_mesin', $machine)
             ->where('schedule_celup.tanggal_schedule', $date)
             ->where('schedule_celup.lot_urut', $lot)
             ->groupBy('schedule_celup.id_mesin')
@@ -291,25 +291,31 @@ class ScheduleCelupModel extends Model
     {
         // Query untuk mengambil data
         $data = $this->select('
-        SUM(schedule_celup.kg_celup) AS total_kg, 
-        material.qty_po, 
-        material.id_order, 
-        material.item_type, 
-        material.kode_warna, 
+        SUM(schedule_celup.kg_celup) AS total_kg,
+        material.qty_po,
+        material.id_order,
+        schedule_celup.item_type,
+        schedule_celup.kode_warna,
         master_order.no_model
     ')
             ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
             ->join(
-                '(SELECT SUM(material.kgs) AS qty_po, id_order, item_type, kode_warna 
-         FROM material 
-         GROUP BY id_order, item_type, kode_warna) AS material',
-                'material.id_order = master_order.id_order',
+                '(SELECT 
+            SUM(material.kgs) AS qty_po, 
+            id_order, 
+            item_type, 
+            kode_warna
+          FROM material
+          GROUP BY id_order, item_type, kode_warna) AS material',
+                'material.id_order = master_order.id_order
+         AND material.item_type = schedule_celup.item_type
+         AND material.kode_warna = schedule_celup.kode_warna',
                 'left'
             )
             ->where('schedule_celup.no_model', $no_model)
-            ->where('material.item_type', $item_type)
-            ->where('material.kode_warna', $kode_warna)
-            ->groupBy('material.kode_warna')
+            ->where('schedule_celup.item_type', $item_type)
+            ->where('schedule_celup.kode_warna', $kode_warna)
+            ->groupBy('schedule_celup.kode_warna')
             ->findAll(); // Mengembalikan semua hasil sesuai pengelompokan
 
         // Jika data ditemukan, kembalikan data
@@ -320,6 +326,7 @@ class ScheduleCelupModel extends Model
         // Jika data tidak ditemukan, kembalikan nilai default (misalnya null atau array kosong)
         return null;
     }
+
     public function getCelupDone()
     {
         return $this->table('schedule_celup')
