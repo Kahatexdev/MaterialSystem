@@ -133,3 +133,11 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
 $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('', 'inicontroller::index');
 });
+
+// api routes
+$routes->group(
+    '/api',
+    function ($routes) {
+        $routes->get('bsKaryawan/(:any)', 'ApiController::bsKaryawan/$1');
+    }
+);

@@ -16,7 +16,7 @@ use App\Models\ClusterModel;
 use App\Models\PemasukanModel;
 use App\Models\StockModel;
 use App\Models\HistoryPindahPalet;
-use App\Models\historyPindahOrder;
+use App\Models\HistoryPindahOrder;
 
 class WarehouseController extends BaseController
 {
@@ -336,10 +336,11 @@ class WarehouseController extends BaseController
             $item['sisa_space'] = $sisaSpace;
         }
         // var_dump($resultsArray);
-        return $this->response->setJSON([
-            'success' => true,
-            'data' => $resultsArray 
-        ]
+        return $this->response->setJSON(
+            [
+                'success' => true,
+                'data' => $resultsArray
+            ]
         );
     }
 
@@ -367,7 +368,7 @@ class WarehouseController extends BaseController
             $lot = $this->request->getPost('lot');
             // var_dump($karung, $lot);
             $idStock = $this->stockModel->where('id_stock', $idStock)->first();
-            if(empty($idStock['lot_stock'])){
+            if (empty($idStock['lot_stock'])) {
                 $lot = $idStock['lot_awal'];
             } else {
                 $lot = $idStock['lot_stock'];
@@ -377,14 +378,14 @@ class WarehouseController extends BaseController
             $kodeWarna = $idStock['kode_warna'];
             $warna = $idStock['warna'];
 
-            if($idStock['kgs_in_out']<$kgs || $idStock['cns_in_out']<$cones || $idStock['krg_in_out']<$karung){
+            if ($idStock['kgs_in_out'] < $kgs || $idStock['cns_in_out'] < $cones || $idStock['krg_in_out'] < $karung) {
                 $kgsInOut = $idStock['kgs_stock_awal'] - $kgs;
                 $cnsInOut = $idStock['cns_stock_awal'] - $cones;
                 $krgInOut = $idStock['krg_stock_awal'] - $karung;
             } else {
-                $kgsInOut = $idStock['kgs_in_out']-$kgs;
-                $cnsInOut = $idStock['cns_in_out']-$cones;
-                $krgInOut = $idStock['krg_in_out']-$karung;
+                $kgsInOut = $idStock['kgs_in_out'] - $kgs;
+                $cnsInOut = $idStock['cns_in_out'] - $cones;
+                $krgInOut = $idStock['krg_in_out'] - $karung;
             }
             // $kgsInOut = $idStock['kgs_in_out']-$kgs;
             // $cnsInOut = $idStock['cns_in_out']-$cones;
@@ -408,7 +409,7 @@ class WarehouseController extends BaseController
             // var_dump ($data, $dataStock);
             $this->stockModel->insert($dataStock);
             log_message('debug', 'Data Stock: ' . print_r($dataStock, true));
-            
+
             $data = [
                 'id_stock_old' => $idStock['id_stock'],
                 'id_stock_new' => $this->stockModel->getInsertID(),
@@ -421,13 +422,13 @@ class WarehouseController extends BaseController
 
             $stockNew = $this->historyPindahPalet->insert($data);
             log_message('debug', 'Data Cluster: ' . print_r($stockNew, true));
-            
+
             // $update = $this->historyPindahPalet->updateIdStockNew($idStock['id_stock'], $this->stockModel->getInsertID());
             // log_message('debug', 'Data Update: ' . print_r($update, true));
             // log_message('debug', 'Data ID Stock: ' . print_r($idStock['id_stock'], true));
             // log_message('debug', 'Data ID Stock New: ' . print_r($this->stockModel->getInsertID(), true));
             // var_dump ($update);
-            if ($idStock['kgs_in_out']<$kgs || $idStock['cns_in_out']<$cones || $idStock['krg_in_out']<$karung) {
+            if ($idStock['kgs_in_out'] < $kgs || $idStock['cns_in_out'] < $cones || $idStock['krg_in_out'] < $karung) {
                 $updateStock = $this->stockModel->update($idStock['id_stock'], [
                     'kgs_stock_awal' => $kgsInOut,
                     'cns_stock_awal' => $cnsInOut,
@@ -450,7 +451,7 @@ class WarehouseController extends BaseController
             //     'lot_stock' => $lot
             // ]);
             log_message('debug', 'Data Update Stock: ' . print_r($updateStock, true));
-        
+
             if ($stockNew && $updateStock) {
                 return $this->response->setJSON(['success' => true, 'message' => 'Cluster berhasil diperbarui']);
             } else {
@@ -464,7 +465,7 @@ class WarehouseController extends BaseController
     public function getNoModel()
     {
         $results = $this->stockModel->getNoModel();
-        
+
         $resultsArray = json_decode(json_encode($results), true);
 
         return $this->response->setJSON([
@@ -487,7 +488,7 @@ class WarehouseController extends BaseController
             log_message('debug', 'Data clusterOld: ' . print_r($clusterOld, true));
 
             $idStock = $this->stockModel->where('id_stock', $idStock)->first();
-            if(empty($idStock['lot_stock'])){
+            if (empty($idStock['lot_stock'])) {
                 $lot = $idStock['lot_awal'];
             } else {
                 $lot = $idStock['lot_stock'];
@@ -507,14 +508,14 @@ class WarehouseController extends BaseController
             // $kodeWarna = $material['kode_warna'];
             // $warna = $material['color'];
 
-            if($idStock['kgs_in_out']<$kgs || $idStock['cns_in_out']<$cones || $idStock['krg_in_out']<$karung){
+            if ($idStock['kgs_in_out'] < $kgs || $idStock['cns_in_out'] < $cones || $idStock['krg_in_out'] < $karung) {
                 $kgsInOut = $idStock['kgs_stock_awal'] - $kgs;
                 $cnsInOut = $idStock['cns_stock_awal'] - $cones;
                 $krgInOut = $idStock['krg_stock_awal'] - $karung;
             } else {
-                $kgsInOut = $idStock['kgs_in_out']-$kgs;
-                $cnsInOut = $idStock['cns_in_out']-$cones;
-                $krgInOut = $idStock['krg_in_out']-$karung;
+                $kgsInOut = $idStock['kgs_in_out'] - $kgs;
+                $cnsInOut = $idStock['cns_in_out'] - $cones;
+                $krgInOut = $idStock['krg_in_out'] - $karung;
             }
 
             $dataStock = [
@@ -545,8 +546,8 @@ class WarehouseController extends BaseController
 
             $stockNew = $this->historyPindahOrder->insert($data);
             log_message('debug', 'Data Cluster: ' . print_r($stockNew, true));
-            
-            if ($idStock['kgs_in_out']<$kgs || $idStock['cns_in_out']<$cones || $idStock['krg_in_out']<$karung) {
+
+            if ($idStock['kgs_in_out'] < $kgs || $idStock['cns_in_out'] < $cones || $idStock['krg_in_out'] < $karung) {
                 $updateStock = $this->stockModel->update($idStock['id_stock'], [
                     'kgs_stock_awal' => $kgsInOut,
                     'cns_stock_awal' => $cnsInOut,
@@ -571,5 +572,4 @@ class WarehouseController extends BaseController
             return redirect()->to(base_url($this->role . '/warehouse'));
         }
     }
-
 }
