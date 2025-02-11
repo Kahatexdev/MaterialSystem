@@ -28,13 +28,13 @@
     }
 
     .table th {
-        background-color: #e8f5e9;
+        background-color: #e3f2fd;
         border: none;
         font-size: 0.9rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        color: #2e7d32;
+        color: #1565c0;
     }
 
     .table td {
@@ -45,32 +45,23 @@
     }
 
     .table tr:nth-child(even) {
-        background-color: #f1f8e9;
+        background-color: #bbdefb;
     }
 
     .table th.sticky {
         position: sticky;
         top: 0;
-        /* Untuk tetap di bagian atas saat menggulir vertikal */
         z-index: 3;
-        /* Pastikan header terlihat di atas elemen lain */
-        background-color: #e8f5e9;
-        /* Warna latar belakang */
+        background-color: #e3f2fd;
     }
 
     .table td.sticky {
         position: sticky;
         left: 0;
-        /* Untuk tetap di sisi kiri saat menggulir horizontal */
         z-index: 2;
-        /* Prioritas lebih rendah dari header */
-        background-color: #e8f5e9;
-        /* Tambahkan warna latar belakang */
+        background-color: #e3f2fd;
         box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
-        /* Memberikan efek bayangan untuk memisahkan kolom */
-
     }
-
 
     .capacity-bar {
         height: 6px;
@@ -87,30 +78,30 @@
 
     .btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+        box-shadow: 0 4px 8px rgba(33, 150, 243, 0.2);
     }
 
     .btn-filter {
-        background: linear-gradient(135deg, #4caf50, #81c784);
+        background: linear-gradient(135deg, #1e88e5, #64b5f6);
         color: white;
         border: none;
     }
 
     .btn-filter:hover {
-        background: linear-gradient(135deg, #43a047, #66bb6a);
+        background: linear-gradient(135deg, #1976d2, #42a5f5);
     }
 
     .date-navigation {
         background-color: white;
         border-radius: 15px;
         padding: 0.5rem;
-        box-shadow: 0 4px 6px rgba(76, 175, 80, 0.1);
+        box-shadow: 0 4px 6px rgba(33, 150, 243, 0.1);
     }
 
     .date-navigation input[type="date"] {
         border: none;
         font-weight: 500;
-        color: #2e7d32;
+        color: #1565c0;
     }
 
     .machine-info {
@@ -119,7 +110,7 @@
 
     .machine-info strong {
         font-size: 1rem;
-        color: #2e7d32;
+        color: #1565c0;
     }
 
     .job-item {
@@ -127,17 +118,17 @@
         border-radius: 10px;
         padding: 0.7rem;
         margin-bottom: 0.7rem;
-        box-shadow: 0 2px 4px rgba(76, 175, 80, 0.1);
+        box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
         transition: all 0.2s ease;
     }
 
     .job-item:hover {
-        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+        box-shadow: 0 4px 8px rgba(33, 150, 243, 0.2);
     }
 
     .job-item span {
         font-size: 0.8rem;
-        color: #558b2f;
+        color: #0d47a1;
     }
 
     .job-item .btn {
@@ -217,7 +208,7 @@
             });
         </script>
     <?php endif; ?>
-    <h1 class="display-5 mb-4 text-center" style="color: #2e7d32; font-weight: 600;">Schedule Mesin Celup Benang</h1>
+    <h1 class="display-5 mb-4 text-center" style="color:rgb(0, 85, 124); font-weight: 600;">Schedule Mesin Celup Benang</h1>
 
     <div class="card mb-4">
         <div class="card-body">

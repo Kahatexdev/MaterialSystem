@@ -155,6 +155,12 @@
                         response.forEach(item => {
                             let totalKgs = item.Kgs && item.Kgs > 0 ? item.Kgs : item.KgsStockAwal;
                             let totalKrg = item.Krg && item.Krg > 0 ? item.Krg : item.KrgStockAwal;
+
+                            // Cek jika totalKgs, totalKrg, dan totalCones semuanya 0, lewati iterasi
+                            if (totalKgs == 0 && totalKrg == 0) {
+                                return;
+                            }
+
                             output += `
                         <div class="result-card">
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -163,14 +169,14 @@
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-4">
-                                    <p><strong>Lot Jalur:</strong> ${item.lot_stock}</p>
+                                    <p><strong>Lot Jalur:</strong> ${item.lot_stock || item.lot_awal}</p>
                                     <p><strong>Space:</strong> ${item.kapasitas || 0} KG</p>
                                     <p><strong>Sisa Space:</strong> ${item.sisa_space || 0} KG</p>
                                 </div>
                                 <div class="col-md-4">
                                     <p><strong>Kode Warna:</strong> ${item.kode_warna}</p>
                                     <p><strong>Warna:</strong> ${item.warna}</p>
-                                    <p><strong>Total KGs:</strong> ${totalKgs} KG | ${totalKrg} KRG</p>
+                                    <p><strong>Total KGs:</strong> ${totalKgs} KG | ${totalKrg} KRG | ${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out} Cones</p>
                                 </div>
                                 <div class="col-md-4 d-flex flex-column gap-2">
                                     <button class="btn btn-outline-info btn-sm">In/Out</button>

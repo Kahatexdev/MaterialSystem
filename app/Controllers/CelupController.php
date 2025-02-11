@@ -559,12 +559,13 @@ class CelupController extends BaseController
         return $this->response->setJSON(['success' => true]);
     }
 
-    public function generateBarcode($id)
+
+    public function generateBarcode($idBon)
     {
         // data ALL BON
-        $dataBon = $this->bonCelupModel->getDataById($id); // get data by id_bon
-        $detailBon = $this->outCelupModel->getDetailBonByIdBon($id); // get data detail bon by id_bon
-        // Mengelompokkan data detailBon berdasarkan no_model, item_type, dan kode_warna
+        $dataBon = $this->bonCelupModel->getDataById($idBon); // get data by id_bon
+        $detailBon = $this->outCelupModel->getDetailBonByIdBon($idBon); // get data detail bon by id_bon
+        // dd($detailBon);        // Mengelompokkan data detailBon berdasarkan no_model, item_type, dan kode_warna
         $groupedDetails = [];
         foreach ($detailBon as $detail) {
             $key = $detail['no_model'] . '|' . $detail['item_type'] . '|' . $detail['kode_warna'];
@@ -589,46 +590,65 @@ class CelupController extends BaseController
                     ],
                     'ganti_retur' => $gantiRetur,
                     'jmlKarung' => 0,
+                    'barcodes' => [], // Untuk menyimpan barcode
                 ];
             }
             // Menambahkan data pengiriman untuk grup ini tanpa dijumlahkan
             $groupedDetails[$key]['detailPengiriman'][] = [
+                'id_out_celup' => $detail['id_out_celup'],
                 'cones_kirim' => $detail['cones_kirim'],
                 'gw_kirim' => $detail['gw_kirim'],
                 'kgs_kirim' => $detail['kgs_kirim'],
+                'lot_kirim' => $detail['lot_kirim'],
+                'no_karung' => $detail['no_karung'],
             ];
             // Menambahkan nilai ke total
-            $groupedDetails[$key]['totals']['cones_kirim'] += $detail['cones_kirim'];
             $groupedDetails[$key]['totals']['gw_kirim'] += $detail['gw_kirim'];
             $groupedDetails[$key]['totals']['kgs_kirim'] += $detail['kgs_kirim'];
+            $groupedDetails[$key]['totals']['cones_kirim'] += $detail['cones_kirim'];
 
             // Menghitung jumlah baris data detailBon pada grup ini (jumlah karung)
             $groupedDetails[$key]['jmlKarung'] = count($groupedDetails[$key]['detailPengiriman']);
+
+            // Tambahkan ID outCelup
+            $groupedDetails[$key]['idsOutCelup'][] = $detail['id_out_celup'];
+        }
+
+        // Buat instance Barcode Generator
+        $generator = new BarcodeGeneratorPNG();
+
+        // Hasilkan barcode untuk setiap ID outCelup di grup
+        foreach ($groupedDetails as &$group) {
+            foreach ($group['detailPengiriman'] as $outCelup => $id) {
+                // Hasilkan barcode dan encode sebagai base64
+                $barcode = $generator->getBarcode($id['id_out_celup'], $generator::TYPE_EAN_13);
+                $group['barcodes'][] = [
+                    'no_model' => $group['no_model'],
+                    'item_type' => $group['item_type'],
+                    'kode_warna' => $group['kode_warna'],
+                    'warna' => $group['warna'],
+                    'id_out_celup' => $id['id_out_celup'],
+                    'gw' => $id['gw_kirim'],
+                    'kgs' => $id['kgs_kirim'],
+                    'cones' => $id['cones_kirim'],
+                    'lot' => $id['lot_kirim'],
+                    'no_karung' => $id['no_karung'],
+                    'barcode' => base64_encode($barcode),
+                ];
+            }
         }
 
         // Menggabungkan data utama dan detail yang sudah dikelompokkan
         $dataBon['groupedDetails'] = array_values($groupedDetails);
-        // dd($dataBon);
 
         $data = [
             'role' => $this->role,
             'active' => $this->active,
             'title' => "Generate",
+            'id_bon' => $idBon,
             'dataBon' => $dataBon,
         ];
+        // dd($data);
         return view($this->role . '/out/generate', $data);
-        // // Pastikan ID yang dikirim adalah angka valid
-        // if (!is_numeric($id)) {
-        //     return "Invalid ID";
-        // }
-
-        // // Buat instance barcode generator
-        // $generator = new BarcodeGeneratorPNG();
-        // $barcode = $generator->getBarcode($id, $generator::TYPE_UPC_A);
-
-        // // Set header sebagai gambar PNG
-        // header('Content-Type: image/png');
-        // echo $barcode;
-        // exit;
     }
 }
