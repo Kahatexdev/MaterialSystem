@@ -83,7 +83,7 @@
     }
 
     .table thead th {
-        background-color: #197706;
+        background-color: rgb(0, 77, 94);
         color: #ffffff;
         font-weight: 600;
         text-transform: uppercase;
@@ -111,7 +111,7 @@
 
     .form-control:focus,
     .form-select:focus {
-        border-color: #197706;
+        border-color: rgb(0, 147, 152);
         box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
     }
 
@@ -124,16 +124,6 @@
         transition: all 0.3s ease;
     }
 
-    .btn-info {
-        background-color: #197706;
-        border-color: #197706;
-        color: #ffffff;
-    }
-
-    .btn-info:hover {
-        background-color: #0e5e02;
-        border-color: #0e5e02;
-    }
 
     .btn-danger {
         background-color: #e74c3c;
