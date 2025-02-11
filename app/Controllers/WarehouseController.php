@@ -16,7 +16,7 @@ use App\Models\ClusterModel;
 use App\Models\PemasukanModel;
 use App\Models\StockModel;
 use App\Models\HistoryPindahPalet;
-use App\Models\historyPindahOrder;
+use App\Models\HistoryPindahOrder;
 
 class WarehouseController extends BaseController
 {
