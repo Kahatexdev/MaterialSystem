@@ -36,7 +36,7 @@
                         <h3>Form Input Bon Pengiriman</h3>
                     </div>
                     <div class="card-body">
-                        <form action="<?= base_url($role . '/outCelup/saveBon/') ?>" method="post">
+                        <form action="<?= base_url($role . '/outCelup/saveBon') ?>" method="post">
                             <div id="kebutuhan-container">
                                 <div class="row mb-4">
                                     <div class="col-md-4">
