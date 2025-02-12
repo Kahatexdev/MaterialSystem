@@ -424,7 +424,7 @@
             fetch('<?= base_url(session('role') . "/schedule/getKodeWarna") ?>?query=' + query)
                 .then(response => response.json())
                 .then(data => {
-                    console.log("Kode Warna Data:", data);
+                    // console.log("Kode Warna Data:", data);
                     const kodeWarnaSuggestions = data.map(item => item.kode_warna);
                     displayKodeWarnaSuggestions(kodeWarnaSuggestions);
                 })
@@ -456,7 +456,7 @@
             fetch('<?= base_url(session('role') . "/schedule/getWarna") ?>?kode_warna=' + kodeWarna)
                 .then(response => response.json())
                 .then(data => {
-                    console.log("Warna Data:", data);
+                    // console.log("Warna Data:", data);
                     // Pastikan ada data sebelum mengakses indeks pertama
                     warnaInput.value = data[0].color;
                     fetchItemType(kodeWarna, data[0].color);
@@ -468,7 +468,7 @@
         }
         kodeWarna.addEventListener('change', function() {
             kodeWarna.value = suggestionsBoxKWarna.textContent;
-            console.log(kodeWarna.value);
+            // console.log(kodeWarna.value);
             const query = kodeWarna.value;
             fetchWarnaByKodeWarna(query);
         });
@@ -489,7 +489,7 @@
             fetch(`<?= base_url(session('role') . "/schedule/getItemType") ?>?kode_warna=${kodeWarna}&warna=${warna}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log("Item Type Data:", data);
+                    // console.log("Item Type Data:", data);
                     const itemType = document.querySelector(".item-type");
 
                     if (data.length > 0) {
@@ -506,7 +506,7 @@
                         // Tambahkan event listener untuk menangani perubahan pilihan item type
                         $(itemType).on('change', function() {
                             const itemTypeValue = $(itemType).val(); // Gunakan .val() untuk mengambil nilai yang dipilih
-                            console.log("Item Type Value:", itemTypeValue);
+                            // console.log("Item Type Value:", itemTypeValue);
 
                             // Panggil fetchPOByKodeWarna jika nilai item type terpilih
                             if (itemTypeValue) {
@@ -533,10 +533,10 @@
             // Menyusun URL untuk pengambilan data PO
             const url = `<?= base_url(session('role') . "/schedule/getPO") ?>?kode_warna=${kodeWarna}&warna=${warna}&item_type=${itemTypeEncoded}`;
 
-            console.log("Request URL:", url); // Debugging URL
-            console.log("Item Type:", itemType);
-            console.log("Kode Warna:", kodeWarna);
-            console.log("Warna:", warna);
+            // console.log("Request URL:", url); // Debugging URL
+            // console.log("Item Type:", itemType);
+            // console.log("Kode Warna:", kodeWarna);
+            // console.log("Warna:", warna);
 
             // Gunakan fetch API untuk melakukan request
             fetch(url)
@@ -545,7 +545,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log("PO Data:", data); // Debugging data
+                    // console.log("PO Data:", data); // Debugging data
 
                     if (Array.isArray(data) && data.length > 0) {
                         poSelect.innerHTML = '<option value="">Pilih PO</option>'; // Reset PO select
@@ -635,14 +635,14 @@
                 const selectedOption = poSelect.options[poSelect.selectedIndex];
                 const tr = poSelect.closest("tr");
 
-                console.log("PO Select changed. Selected value:", selectedOption.value); // Log nilai yang dipilih
+                // console.log("PO Select changed. Selected value:", selectedOption.value); // Log nilai yang dipilih
 
                 // Ambil nilai dari elemen <select> dan <input>
                 const itemTypeValue = tr.querySelector("select[name^='item_type']").value;
                 const kodeWarnaValue = document.querySelector("input[name='kode_warna']").value; // Ambil nilai dari <input>
 
-                console.log("Item Type:", itemTypeValue); // Log nilai itemType
-                console.log("Kode Warna:", kodeWarnaValue); // Log nilai kodeWarna
+                // console.log("Item Type:", itemTypeValue); // Log nilai itemType
+                // console.log("Kode Warna:", kodeWarnaValue); // Log nilai kodeWarna
 
                 if (!itemTypeValue || !kodeWarnaValue) {
                     console.error("Item Type atau Kode Warna tidak boleh kosong.");
@@ -650,10 +650,10 @@
                 }
 
                 if (selectedOption.value) {
-                    console.log("Fetching PO details for PO No:", selectedOption.value); // Log sebelum fetch
+                    // console.log("Fetching PO details for PO No:", selectedOption.value); // Log sebelum fetch
                     fetchPODetails(selectedOption.value, tr, itemTypeValue, kodeWarnaValue);
                 } else {
-                    console.log("No PO selected. Resetting fields."); // Log jika tidak ada PO yang dipilih
+                    // console.log("No PO selected. Resetting fields."); // Log jika tidak ada PO yang dipilih
                     // Reset fields if no PO is selected
                     const tglStartMC = tr.querySelector("input[name='tgl_start_mc[]']");
                     const deliveryAwal = tr.querySelector("input[name='delivery_awal[]']");
@@ -677,16 +677,16 @@
         // ✅ Fungsi Fetch Detail PO
         function fetchPODetails(poNo, tr, itemType, kodeWarna) {
             const url = `<?= base_url(session('role') . "/schedule/getPODetails") ?>?id_order=${poNo}&item_type=${itemType}&kode_warna=${kodeWarna}`;
-            console.log("Request URL:", url); // Log URL yang digunakan untuk fetch
+            // console.log("Request URL:", url); // Log URL yang digunakan untuk fetch
 
             fetch(url)
                 .then(response => {
-                    console.log("Response received from server."); // Log saat response diterima
+                    // console.log("Response received from server."); // Log saat response diterima
                     if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(data => {
-                    console.log("Data received from server:", data); // Log data yang diterima dari server
+                    // console.log("Data received from server:", data); // Log data yang diterima dari server
 
                     if (data && !data.error) { // Pastikan tidak ada error
                         const tglStartMC = tr.querySelector("input[name='tgl_start_mc[]']");
@@ -711,7 +711,7 @@
                         kgKebutuhan.textContent = parseFloat(data.kg_kebutuhan).toFixed(2) || '0.00';
                         sisaJatah.textContent = parseFloat(data.sisa_jatah).toFixed(2) || '0.00';
 
-                        console.log("Data filled into the form:", { // Log data yang diisi ke form
+                        // console.log("Data filled into the form:", { // Log data yang diisi ke form
                             tglStartMC: tglStartMC.value,
                             deliveryAwal: deliveryAwal.value,
                             deliveryAkhir: deliveryAkhir.value,
@@ -723,6 +723,7 @@
                     } else {
                         console.error('Error fetching PO details:', data.error || 'No data found'); // Log error
                     }
+                    
                 })
                 .catch(error => {
                     console.error('Error fetching PO details:', error); // Log error jika fetch gagal
@@ -861,7 +862,7 @@
             fetch(`<?= base_url(session('role') . "/schedule/getItemType") ?>?kode_warna=${kodeWarna}&warna=${warna}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log("Item Type Data:", data);
+                    // console.log("Item Type Data:", data);
                     if (data.length > 0) {
                         itemTypeSelect.innerHTML = '<option value="">Pilih Item Type</option>';
                         data.forEach(item => {

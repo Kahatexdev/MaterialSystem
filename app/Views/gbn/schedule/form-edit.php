@@ -490,6 +490,7 @@
                 const row = poSelect.closest("tr");
                 if (row && data.length > 0) {
                     row.querySelector(".sisa_jatah").textContent = data[0].sisa_jatah.toFixed(2);
+                    // console.log("Sisa Jatah Updated:", data[0].sisa_jatah);
                 }
             });
         }
@@ -501,7 +502,7 @@
 
                 const qtyCelup = parseFloat(row.querySelector("input[name='qty_celup[]']").value) || 0;
                 const kgKebutuhan = parseFloat(row.querySelector(".kg_kebutuhan").textContent) || 0;
-                const sisaJatah = kgKebutuhan - qtyCelup; // Menghitung sisa_jatah
+                const sisaJatah = <?= $sisa_jatah ?>;
 
                 // Update sisa_jatah di tampilan
                 row.querySelector(".sisa_jatah").textContent = sisaJatah.toFixed(2);
@@ -596,7 +597,7 @@
                 item_type: itemType,
                 kode_warna: kodeWarna
             }, (data) => {
-                console.log("PO Details Fetched:", data); // Debugging log
+                // console.log("PO Details Fetched:", data); // Debugging log
                 if (data && !data.error) {
                     const fields = {
                         'tgl_start_mc[]': data.start_mesin || '',

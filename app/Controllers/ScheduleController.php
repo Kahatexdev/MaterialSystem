@@ -455,7 +455,7 @@ class ScheduleController extends BaseController
             $qtyPO = $this->materialModel->getQtyPOByNoModel($row['no_model'], $row['item_type'], $row['kode_warna']);
             $row['qty_po'] = $qtyPO['qty_po'] ?? 0;
             $row['start_mc'] = $row['start_mc'];
-            // dd ($row['no_model'], $row['item_type'], $row['kode_warna']);
+            // dd ($row['no_model'], $row['item_type'], $row['start_mc']);
         }
         // dd($scheduleData);
 

@@ -140,6 +140,7 @@ class CelupController extends BaseController
     public function editStatus($id)
     {
         $sch = $this->scheduleCelupModel->getDataByIdCelup($id);
+        // dd ($sch);
         $uniqueData = [];
         foreach ($sch as $key => $id) {
             // Ambil parameter dari data schedule
@@ -211,6 +212,7 @@ class CelupController extends BaseController
         ];
         return view($this->role . '/schedule/form-edit', $data);
     }
+    
     public function updateSchedule($id)
     {
         $lotCelup = $this->request->getPost('lot_celup');
@@ -290,7 +292,7 @@ class CelupController extends BaseController
         if (!$existingProduction) {
             return redirect()->back()->with('error', 'Data tidak ditemukan.');
         }
-
+        // dd ($dataUpdate);
         // Perbarui data di database
         $this->scheduleCelupModel->update($id, $dataUpdate);
 
