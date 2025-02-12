@@ -465,7 +465,7 @@ class ScheduleController extends BaseController
             'title' => 'Schedule',
             'role' => $this->role,
             'no_mesin' => $no_mesin,
-            'start_mc' => $scheduleData[0]['start_mc'] ?? null, // pastikan ini valid
+            'start_mc' => $scheduleData[0]['start_mc'] ?? '0000 - 00 - 00', // pastikan ini valid
             'tanggal_schedule' => $tanggal_schedule,
             'lot_urut' => $lot_urut,
             'scheduleData' => $scheduleData,
@@ -512,10 +512,10 @@ class ScheduleController extends BaseController
         // Ambil id_mesin dan no_model
         $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
         $poList = $scheduleData['po']; // Array po[]
-        
+
         $dataBatch = []; // Untuk menyimpan batch data
         $updateMessage = null; // Menyimpan status pesan update atau insert
-        
+
         // Looping data array untuk menyusun data yang akan disimpan
         foreach ($poList as $index => $po) {
             $noModel = $this->masterOrderModel->getNoModel($scheduleData['po'][$index]);

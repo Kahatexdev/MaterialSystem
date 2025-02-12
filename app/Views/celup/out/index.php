@@ -114,9 +114,8 @@
                         </tbody>
                     </table>
                     <tfoot>
-                        <div class="d-flex justify-content-end">
-                            <a type="button" href="<?= base_url($role . '/outCelup/editBon/' . $out['id_bon']) ?>" class="btn btn-warning btn-edit me-2">Edit</a>
-                            <button type="button" class="btn btn-danger btn-delete" id="deleteButton" data-id-delete="<?= $out['id_bon'] ?>">Delete</button>
+                        <div class="d-flex justify-content-end" id="footerModal">
+
                         </div>
                     </tfoot>
                 </div>
@@ -130,7 +129,7 @@
     $(document).ready(function() {
         $('#dataTable').DataTable();
 
-        // Event listener untuk tombol detail (menggunakan jQuery)
+        // Event listener untuk tombol detail
         $(document).on("click", ".btn-detail", function() {
             let id_bon = $(this).data("id");
 
@@ -141,7 +140,10 @@
                 dataType: "json",
                 success: function(data) {
                     let detailBody = $("#detailModalBody");
+                    let footerModal = $("#footerModal");
+
                     detailBody.empty(); // Hapus isi sebelumnya
+                    footerModal.empty(); // Hapus footer sebelumnya
 
                     if (data.error) {
                         detailBody.html(`<tr><td colspan="11" class="text-center">${data.error}</td></tr>`);
@@ -149,22 +151,30 @@
                         $.each(data, function(index, item) {
                             let gantiReturText = item.ganti_retur == 1 ? "Ya" : "Tidak";
                             detailBody.append(`
-                                <tr>
-                                    <td class="text-center">${item.no_model}</td>
-                                    <td class="text-center">${item.item_type}</td>
-                                    <td class="text-center">${item.kode_warna}</td>
-                                    <td class="text-center">${item.warna}</td>
-                                    <td class="text-center">${item.l_m_d}</td>
-                                    <td class="text-center">${item.harga}</td>
-                                    <td class="text-center">${gantiReturText}</td>
-                                    <td class="text-center">${item.gw_kirim}</td>
-                                    <td class="text-center">${item.kgs_kirim}</td>
-                                    <td class="text-center">${item.cones_kirim}</td>
-                                    <td class="text-center">${item.lot_kirim}</td>
-                                </tr>
-                            `);
+                            <tr>
+                                <td class="text-center">${item.no_model}</td>
+                                <td class="text-center">${item.item_type}</td>
+                                <td class="text-center">${item.kode_warna}</td>
+                                <td class="text-center">${item.warna}</td>
+                                <td class="text-center">${item.l_m_d}</td>
+                                <td class="text-center">${item.harga}</td>
+                                <td class="text-center">${gantiReturText}</td>
+                                <td class="text-center">${item.gw_kirim}</td>
+                                <td class="text-center">${item.kgs_kirim}</td>
+                                <td class="text-center">${item.cones_kirim}</td>
+                                <td class="text-center">${item.lot_kirim}</td>
+                            </tr>
+                        `);
                         });
                     }
+
+                    // Tambahkan tombol edit dan delete ke footer modal
+                    footerModal.append(`
+                    <a type="button" href="<?= base_url($role . '/outCelup/editBon/') ?>${id_bon}" 
+                        class="btn btn-warning btn-edit me-2">Edit</a>
+                    <button type="button" class="btn btn-danger btn-delete" 
+                        id="deleteButton" data-id-delete="${id_bon}">Delete</button>
+                `);
 
                     // Menampilkan modal setelah data di-load
                     $("#detailModal").modal("show");

@@ -555,13 +555,82 @@ class WarehouseController extends BaseController
             $cones = $this->request->getPost('cones');
             $karung = $this->request->getPost('krg');
             $lot = $this->request->getPost('lot');
-            // var_dump($karung, $lot);
+
             $idStock = $this->stockModel->where('id_stock', $idStock)->first();
-            if (empty($idStock['lot_stock'])) {
-                $lot = $idStock['lot_awal'];
-            } else {
-                $lot = $idStock['lot_stock'];
+
+            if (!$idStock) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Stock tidak ditemukan']);
             }
+
+
+            $kgsInput = (int)$kgs;
+            $cnsInput = (int)$cones;
+            $krgInput = (int)$karung;
+
+            $kgsInOut = !empty($idStock['kgs_in_out']) ? (int)$idStock['kgs_in_out'] : 0;
+            $kgsStockAwal = !empty($idStock['kgs_stock_awal']) ? (int)$idStock['kgs_stock_awal'] : 0;
+
+            $cnsInOut = !empty($idStock['cns_in_out']) ? (int)$idStock['cns_in_out'] : 0;
+            $cnsStockAwal = !empty($idStock['cns_stock_awal']) ? (int)$idStock['cns_stock_awal'] : 0;
+
+            $krgInOut = !empty($idStock['krg_in_out']) ? (int)$idStock['krg_in_out'] : 0;
+            $krgStockAwal = !empty($idStock['krg_stock_awal']) ? (int)$idStock['krg_stock_awal'] : 0;
+
+            // Gunakan stok yang tersedia
+            $stokKgsTersedia = $kgsInOut > 0 ? $kgsInOut : $kgsStockAwal;
+            $stokCnsTersedia = $cnsInOut > 0 ? $cnsInOut : $cnsStockAwal;
+            $stokKrgTersedia = $krgInOut > 0 ? $krgInOut : $krgStockAwal;
+
+            // Validasi: Pastikan stok cukup sebelum lanjut
+            if ($stokKgsTersedia < $kgsInput) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Jumlah KGS melebihi stok yang tersedia']);
+            }
+            if ($stokCnsTersedia < $cnsInput) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Jumlah Cones melebihi stok yang tersedia']);
+            }
+            if ($stokKrgTersedia < $krgInput) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Jumlah Karung melebihi stok yang tersedia']);
+            }
+
+            // Perhitungan stok setelah pengurangan
+            if (
+                $kgsInOut > 0
+            ) {
+                $kgsInOut -= $kgsInput;
+            } else {
+                $kgsStockAwal -= $kgsInput;
+            }
+
+            if (
+                $cnsInOut > 0
+            ) {
+                $cnsInOut -= $cnsInput;
+            } else {
+                $cnsStockAwal -= $cnsInput;
+            }
+
+            if (
+                $krgInOut > 0
+            ) {
+                $krgInOut -= $krgInput;
+            } else {
+                $krgStockAwal -= $krgInput;
+            }
+
+            // Hindari nilai negatif
+            $kgsInOut = max(0, $kgsInOut);
+            $kgsStockAwal = max(0, $kgsStockAwal);
+
+            $cnsInOut = max(0, $cnsInOut);
+            $cnsStockAwal = max(0, $cnsStockAwal);
+
+            $krgInOut = max(0, $krgInOut);
+            $krgStockAwal = max(0, $krgStockAwal);
+
+            // Menentukan lot yang digunakan
+            $lot = !empty($idStock['lot_stock']) ? $idStock['lot_stock'] : $idStock['lot_awal'];
+            log_message('debug', 'Lot yang digunakan: ' . $lot);
+
             $noModel = $idStock['no_model'];
             $itemType = $idStock['item_type'];
             $kodeWarna = $idStock['kode_warna'];
@@ -587,59 +656,59 @@ class WarehouseController extends BaseController
                 'item_type' => $itemType,
                 'kode_warna' => $kodeWarna,
                 'warna' => $warna,
-                'kgs_in_out' => $kgs,
-                'cns_in_out' => $cones,
-                'krg_in_out' => number_format($karung, 0, '.', ''),
-                'lot_stock' => $lot,
+                'kgs_stock_awal' => empty($idStock['lot_stock']) ? $kgs : 0,
+                'kgs_in_out' => !empty($idStock['lot_stock']) ? $kgs : 0,
+                'cns_stock_awal' => empty($idStock['lot_stock']) ? $cones : 0,
+                'cns_in_out' => !empty($idStock['lot_stock']) ? $cones : 0,
+                'krg_stock_awal' => empty($idStock['lot_stock']) ? $karung : 0,
+                'krg_in_out' => !empty($idStock['lot_stock']) ? number_format($karung, 0, '.', '') : 0,
+                'lot_stock' => !empty($idStock['lot_stock']) ? $idStock['lot_stock'] : '',  // Pastikan lot_stock hanya diisi jika ada
+                'lot_awal' => empty($idStock['lot_stock']) ? $idStock['lot_awal'] : '',  // Gunakan lot_awal jika lot_stock kosong
                 'nama_cluster' => $namaCluster,
                 'admin' => session()->get('username'),
                 'created_at' => date('Y-m-d H:i:s')
             ];
-            // var_dump ($data, $dataStock);
-            $this->stockModel->insert($dataStock);
-            log_message('debug', 'Data Stock: ' . print_r($dataStock, true));
 
-            $data = [
+            $this->stockModel->insert($dataStock);
+
+            // Ambil ID dari stok baru setelah insert
+            $idStockNew = $this->stockModel->getInsertID();
+
+            if (!$idStockNew) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Gagal menyimpan data stock baru']);
+            }
+
+            // Simpan riwayat pemindahan palet
+            $dataHistory = [
                 'id_stock_old' => $idStock['id_stock'],
-                'id_stock_new' => $this->stockModel->getInsertID(),
+                'id_stock_new' => $idStockNew,
                 'cluster_old' => $clusterOld,
                 'cluster_new' => $namaCluster,
                 'kgs' => $kgs,
                 'cns' => $cones,
-                'lot' => $lot
+                'krg' => $karung, // Tambahkan jumlah karung ke log history
+                'lot' => $lot,
+                'created_at' => date('Y-m-d H:i:s')
             ];
 
-            $stockNew = $this->historyPindahPalet->insert($data);
-            log_message('debug', 'Data Cluster: ' . print_r($stockNew, true));
+            $stockNew = $this->historyPindahPalet->insert($dataHistory);
 
-            // $update = $this->historyPindahPalet->updateIdStockNew($idStock['id_stock'], $this->stockModel->getInsertID());
-            // log_message('debug', 'Data Update: ' . print_r($update, true));
-            // log_message('debug', 'Data ID Stock: ' . print_r($idStock['id_stock'], true));
-            // log_message('debug', 'Data ID Stock New: ' . print_r($this->stockModel->getInsertID(), true));
-            // var_dump ($update);
-            if ($idStock['kgs_in_out'] < $kgs || $idStock['cns_in_out'] < $cones || $idStock['krg_in_out'] < $karung) {
-                $updateStock = $this->stockModel->update($idStock['id_stock'], [
-                    'kgs_stock_awal' => $kgsInOut,
-                    'cns_stock_awal' => $cnsInOut,
-                    'krg_stock_awal' => $krgInOut,
-                    'lot_stock' => $lot
-                ]);
-            } else {
-                $updateStock = $this->stockModel->update($idStock['id_stock'], [
-                    'kgs_in_out' => $kgsInOut,
-                    'cns_in_out' => $cnsInOut,
-                    'krg_in_out' => $krgInOut,
-                    'lot_stock' => $lot
-                ]);
+            if (!$stockNew) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Gagal menyimpan riwayat pemindahan palet']);
             }
 
-            // $updateStock = $this->stockModel->update($idStock['id_stock'], [
-            //     'kgs_in_out' => $kgsInOut,
-            //     'cns_in_out' => $cnsInOut,
-            //     'krg_in_out' => $krgInOut,
-            //     'lot_stock' => $lot
-            // ]);
-            log_message('debug', 'Data Update Stock: ' . print_r($updateStock, true));
+            // Update ke database
+            $updateStock = $this->stockModel->update($idStock['id_stock'], [
+                'kgs_in_out' => $kgsInOut,
+                'kgs_stock_awal' => $kgsStockAwal,
+                'cns_in_out' => $cnsInOut,
+                'cns_stock_awal' => $cnsStockAwal,
+                'krg_in_out' => $krgInOut,
+                'krg_stock_awal' => $krgStockAwal,
+                'lot_stock' => !empty($idStock['lot_stock']) ? $idStock['lot_stock'] : '', // Hanya isi jika ada
+                'lot_awal' => empty($idStock['lot_stock']) ? $idStock['lot_awal'] : '', // Hanya isi jika lot_stock kosong
+            ]);
+
 
             if ($stockNew && $updateStock) {
                 return $this->response->setJSON(['success' => true, 'message' => 'Cluster berhasil diperbarui']);
@@ -650,6 +719,7 @@ class WarehouseController extends BaseController
             return redirect()->to(base_url($this->role . '/warehouse'));
         }
     }
+
 
     public function getNoModel()
     {
@@ -669,23 +739,41 @@ class WarehouseController extends BaseController
             $idStock = $this->request->getPost('id_stock');
             $clusterOld = $this->request->getPost('namaCluster');
             $noModel = $this->request->getPost('no_model');
-            $kgs = $this->request->getPost('kgs');
-            $cones = $this->request->getPost('cones');
-            $karung = $this->request->getPost('krg');
-            $lot = $this->request->getPost('lot');
+            $kgs = (int) $this->request->getPost('kgs');
+            $cones = (int) $this->request->getPost('cones');
+            $karung = (int) $this->request->getPost('krg');
+
             log_message('debug', 'Data No Model: ' . print_r($noModel, true));
             log_message('debug', 'Data clusterOld: ' . print_r($clusterOld, true));
 
+            // Ambil data stok lama
             $idStock = $this->stockModel->where('id_stock', $idStock)->first();
-            if (empty($idStock['lot_stock'])) {
-                $lot = $idStock['lot_awal'];
-            } else {
-                $lot = $idStock['lot_stock'];
+            if (!$idStock) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Stock tidak ditemukan']);
             }
 
+            // Ambil lot_awal atau lot_stock
+            $lot = !empty($idStock['lot_stock']) ? $idStock['lot_stock'] : $idStock['lot_awal'];
+
+            // Cari data order berdasarkan no_model
             $findData = $this->masterOrderModel->where('no_model', $noModel)->first();
+            if (!$findData) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Order tidak ditemukan']);
+            }
+
             log_message('debug', 'Data Order: ' . print_r($findData, true));
-            $material = $this->materialModel->getMaterialByIdOrderItemTypeKodeWarna($findData['id_order'], $idStock['item_type'], $idStock['kode_warna']);
+
+            // Cari material berdasarkan order
+            $material = $this->materialModel->getMaterialByIdOrderItemTypeKodeWarna(
+                $findData['id_order'],
+                $idStock['item_type'],
+                $idStock['kode_warna']
+            );
+
+            if (empty($material)) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Material tidak ditemukan']);
+            }
+
             log_message('debug', 'Data Material: ' . print_r($material, true));
 
             $noModel = $findData['no_model'];
@@ -713,50 +801,73 @@ class WarehouseController extends BaseController
                 'kode_warna' => $kodeWarna,
                 'warna' => $warna,
                 'kgs_stock_awal' => $kgs,
+                'kgs_in_out' => 0,
                 'cns_stock_awal' => $cones,
-                'krg_stock_awal' => number_format($karung, 0, '.', ''),
+                'cns_in_out' => 0,
+                'krg_stock_awal' => $karung,
+                'krg_in_out' => 0,
                 'lot_awal' => $lot,
                 'nama_cluster' => $clusterOld,
                 'admin' => session()->get('username'),
                 'created_at' => date('Y-m-d H:i:s')
             ];
 
-            $this->stockModel->insert($dataStock);
+            // Insert data stock baru
+            if (!$this->stockModel->insert($dataStock)) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Gagal menyimpan stock baru']);
+            }
+
             log_message('debug', 'Data Stock: ' . print_r($dataStock, true));
 
-            $data = [
+            // Ambil ID stock baru
+            $idStockNew = $this->stockModel->getInsertID();
+            if (!$idStockNew) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Gagal mendapatkan ID stock baru']);
+            }
+
+            // Simpan riwayat pemindahan order
+            $dataHistory = [
                 'id_stock_old' => $idStock['id_stock'],
-                'id_stock_new' => $this->stockModel->getInsertID(),
+                'id_stock_new' => $idStockNew,
                 'nama_cluster' => $clusterOld,
                 'kgs' => $kgs,
                 'cns' => $cones,
-                'lot' => $lot
+                'krg' => $karung,
+                'lot' => $lot,
+                'created_at' => date('Y-m-d H:i:s')
             ];
 
-            $stockNew = $this->historyPindahOrder->insert($data);
-            log_message('debug', 'Data Cluster: ' . print_r($stockNew, true));
-
-            if ($idStock['kgs_in_out'] < $kgs || $idStock['cns_in_out'] < $cones || $idStock['krg_in_out'] < $karung) {
-                $updateStock = $this->stockModel->update($idStock['id_stock'], [
-                    'kgs_stock_awal' => $kgsInOut,
-                    'cns_stock_awal' => $cnsInOut,
-                    'krg_stock_awal' => $krgInOut,
-                    'lot_stock' => $lot
-                ]);
-            } else {
-                $updateStock = $this->stockModel->update($idStock['id_stock'], [
-                    'kgs_in_out' => $kgsInOut,
-                    'cns_in_out' => $cnsInOut,
-                    'krg_in_out' => $krgInOut,
-                    'lot_stock' => $lot
-                ]);
+            if (!$this->historyPindahOrder->insert($dataHistory)) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Gagal menyimpan riwayat pemindahan order']);
             }
 
-            if ($stockNew && $updateStock) {
-                return $this->response->setJSON(['success' => true, 'message' => 'Cluster berhasil diperbarui']);
-            } else {
-                return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui Cluster']);
+            log_message('debug', 'Data Cluster: ' . print_r($dataHistory, true));
+
+            // Validasi stok cukup sebelum dikurangkan
+            $kgsInOut = max(0, $idStock['kgs_in_out'] - $kgs);
+            $cnsInOut = max(0, $idStock['cns_in_out'] - $cones);
+            $krgInOut = max(0, $idStock['krg_in_out'] - $karung);
+            $kgsStockAwal = max(0, $idStock['kgs_stock_awal'] - $kgs);
+            $cnsStockAwal = max(0, $idStock['cns_stock_awal'] - $cones);
+            $krgStockAwal = max(0, $idStock['krg_stock_awal'] - $karung);
+
+            // Update stock lama dengan mengurangi stok yang dipindahkan
+            $updateStockData = [
+                'kgs_stock_awal' => $kgsStockAwal,
+                'cns_stock_awal' => $cnsStockAwal,
+                'krg_stock_awal' => $krgStockAwal,
+                'kgs_in_out' => $kgsInOut,
+                'cns_in_out' => $cnsInOut,
+                'krg_in_out' => $krgInOut,
+                'lot_stock' => !empty($idStock['lot_stock']) ? $idStock['lot_stock'] : '', // Hanya isi jika ada
+                'lot_awal' => empty($idStock['lot_stock']) ? $idStock['lot_awal'] : '', // Hanya isi jika lot_stock kosong
+            ];
+
+            if (!$this->stockModel->update($idStock['id_stock'], $updateStockData)) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui stock lama']);
             }
+
+            return $this->response->setJSON(['success' => true, 'message' => 'Cluster berhasil diperbarui']);
         } else {
             return redirect()->to(base_url($this->role . '/warehouse'));
         }

@@ -127,12 +127,14 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->delete('outCelup/deleteBon/(:num)', 'CelupController::deleteBon/$1');
     // $routes->get('insertBon/(:num)', 'CelupController::insertBon/$1');
     $routes->get('createBon', 'CelupController::createBon');
+    $routes->get('createBon/autoComplete/noModel', 'CelupController::getNoModel');
     $routes->post('createBon/getItemType', 'CelupController::getItemType');
     $routes->post('createBon/getKodeWarna', 'CelupController::getKodeWarna');
     $routes->post('createBon/getWarna', 'CelupController::getWarna');
     $routes->post('outCelup/saveBon/', 'CelupController::saveBon');
     $routes->get('retur', 'CelupController::retur');
     $routes->get('generate/(:num)', 'CelupController::generateBarcode/$1');
+    $routes->get('printBon/(:num)', 'PdfController::printBon/$1');
 });
 
 

@@ -155,6 +155,12 @@
                         response.forEach(item => {
                             let totalKgs = item.Kgs && item.Kgs > 0 ? item.Kgs : item.KgsStockAwal;
                             let totalKrg = item.Krg && item.Krg > 0 ? item.Krg : item.KrgStockAwal;
+
+                            // Cek jika totalKgs, totalKrg, dan totalCones semuanya 0, lewati iterasi
+                            if (totalKgs == 0 && totalKrg == 0) {
+                                return;
+                            }
+
                             output += `
                         <div class="result-card">
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -163,19 +169,19 @@
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-4">
-                                    <p><strong>Lot Jalur:</strong> ${item.lot_stock}</p>
+                                    <p><strong>Lot Jalur:</strong> ${item.lot_stock || item.lot_awal}</p>
                                     <p><strong>Space:</strong> ${item.kapasitas || 0} KG</p>
                                     <p><strong>Sisa Space:</strong> ${item.sisa_space || 0} KG</p>
                                 </div>
                                 <div class="col-md-4">
                                     <p><strong>Kode Warna:</strong> ${item.kode_warna}</p>
                                     <p><strong>Warna:</strong> ${item.warna}</p>
-                                    <p><strong>Total KGs:</strong> ${totalKgs} KG | ${totalKrg} KRG</p>
+                                    <p><strong>Total KGs:</strong> ${totalKgs} KG | ${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out} Cones | ${totalKrg} KRG </p>
                                 </div>
                                 <div class="col-md-4 d-flex flex-column gap-2">
                                     <button class="btn btn-outline-info btn-sm">In/Out</button>
-                                    <button class="btn btn-outline-info btn-sm pindahPalet" data-id="${item.id_stock}" data-cluster="${item.nama_cluster}" data-lot="${item.lot_stock}">Pindah Palet</button>
-                                    <button class="btn btn-outline-info btn-sm pindahOrder" data-id="${item.id_stock}" data-noModel="${item.no_model}" data-cluster="${item.nama_cluster}" data-lot="${item.lot_stock}">Pindah Order</button>
+                                    <button class="btn btn-outline-info btn-sm pindahPalet" data-id="${item.id_stock}" data-cluster="${item.nama_cluster}" data-lot="${item.lot_stock}" data-kgs="${totalKgs}" data-cones="${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out}" data-krg="${totalKrg}">Pindah Palet</button>
+                                    <button class="btn btn-outline-info btn-sm pindahOrder" data-id="${item.id_stock}" data-noModel="${item.no_model}" data-cluster="${item.nama_cluster}" data-lot="${item.lot_stock}" data-kgs="${totalKgs}" data-cones="${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out}" data-krg="${totalKrg}">Pindah Order</button>
                                 </div>
                             </div>
                         </div>`;
@@ -196,10 +202,15 @@
                 $('#result').html('');
             });
         });
+
+
         $(document).on('click', '.pindahPalet', function() {
             let idStock = $(this).data('id'); // Ambil id_stock dari tombol yang diklik
-            let clusterOld = $(this).data('cluster');
+            let clusterOld = $(this).data('cluster'); // Cluster saat ini
             let lot = $(this).data('lot');
+            let kgs = $(this).data('kgs');
+            let cones = $(this).data('cones');
+            let krg = $(this).data('krg');
 
             $.ajax({
                 url: '<?= base_url(session()->get('role') . '/warehouse/sisaKapasitas') ?>',
@@ -211,51 +222,73 @@
 
                         response.data.forEach(cluster => {
                             clusterOptions += `<option value="${cluster.nama_cluster}">
-                        ${cluster.nama_cluster} (Sisa Space: ${cluster.sisa_space} KG)
-                    </option>
-                    `;
+                        ${cluster.nama_cluster} (Sisa: ${cluster.sisa_space} KG)
+                    </option>`;
                         });
 
                         Swal.fire({
                             title: 'Pindah Pallet',
                             html: `
-                            <label for="clusterSelect">Pilih Cluster</label>
-                            <select id="clusterSelect" name="namaCluster" class="form-control">
-                                ${clusterOptions}
-                            </select>
-                            <label for="kgs">KGs Pindah Pallet</label>
-                            <input type="number" name="kgs" min=1 class="form-control mt-2" placeholder="Jumlah Pindah (KG)">
+                        <div class="text-left">
+                            <p class="mb-2">Cluster Saat Ini: <strong>${clusterOld}</strong></p>
+                        </div>
 
-                            <label for"cones">Cones Pindah Pallet</label>
-                            <input type="number" name="cones" min=1 class="form-control mt-2" placeholder="Jumlah Pindah (Cones)">
+                        <label for="clusterSelect" class="font-weight-bold">Pilih Cluster</label>
+                        <select id="clusterSelect" name="namaCluster" class="form-control mb-3">
+                            ${clusterOptions}
+                        </select>
 
-                            <label for="krg">KRG Pindah Pallet</label>
-                            <input type="number" name="krg" min=1 class="form-control mt-2" placeholder="Jumlah Pindah (KRG)">
-                            `,
+                        <label for="kgs" class="font-weight-bold">KGs Pindah</label>
+                        <input type="number" id="kgs" name="kgs" min="1" max="${kgs}" value="${kgs}" class="form-control mb-2" placeholder="Jumlah (KG)">
+
+                        <label for="cones" class="font-weight-bold">Cones Pindah</label>
+                        <input type="number" id="cones" name="cones" min="1" max="${cones}" value="${cones}" class="form-control mb-2" placeholder="Jumlah (Cones)">
+
+                        <label for="krg" class="font-weight-bold">KRG Pindah</label>
+                        <input type="number" id="krg" name="krg" min="1" max="${krg}" value="${krg}" class="form-control mb-3" placeholder="Jumlah (KRG)">
+                    `,
                             showCancelButton: true,
                             confirmButtonText: 'Pindah',
                             confirmButtonColor: '#2e7d32',
+                            cancelButtonText: 'Batal',
                             cancelButtonColor: '#778899',
+                            customClass: {
+                                popup: 'swal-wide'
+                            },
                             preConfirm: () => {
                                 const selectedCluster = Swal.getPopup().querySelector('#clusterSelect').value;
+                                const inputKgs = Swal.getPopup().querySelector('#kgs').value;
+                                const inputCones = Swal.getPopup().querySelector('#cones').value;
+                                const inputKrg = Swal.getPopup().querySelector('#krg').value;
+
                                 if (!selectedCluster) {
-                                    Swal.showValidationMessage(`Silahkan pilih cluster`);
+                                    Swal.showValidationMessage(`⚠ Silahkan pilih cluster`);
+                                } else if (!inputKgs || inputKgs <= 0 || inputKgs > kgs ||
+                                    !inputCones || inputCones <= 0 || inputCones > cones ||
+                                    !inputKrg || inputKrg <= 0 || inputKrg > krg) {
+                                    Swal.showValidationMessage(`⚠ Masukkan jumlah yang valid sesuai stok`);
                                 }
-                                return selectedCluster;
+
+                                return {
+                                    selectedCluster,
+                                    inputKgs,
+                                    inputCones,
+                                    inputKrg
+                                };
                             }
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                // AJAX untuk update nama_cluster di stock
+                                // AJAX untuk update cluster di stock
                                 $.ajax({
                                     url: '<?= base_url(session()->get('role') . '/warehouse/updateCluster') ?>',
                                     method: 'POST',
                                     data: {
                                         id_stock: idStock,
                                         cluster_old: clusterOld,
-                                        nama_cluster: result.value,
-                                        kgs: $('input[name="kgs"]').val(),
-                                        cones: $('input[name="cones"]').val(),
-                                        krg: $('input[name="krg"]').val(),
+                                        nama_cluster: result.value.selectedCluster,
+                                        kgs: result.value.inputKgs,
+                                        cones: result.value.inputCones,
+                                        krg: result.value.inputKrg,
                                         lot: lot
                                     },
                                     dataType: 'json',
@@ -284,11 +317,15 @@
             });
         });
 
+
         $(document).on('click', '.pindahOrder', function() {
             let idStock = $(this).data('id'); // Ambil id_stock dari tombol yang diklik
             let noModel = $(this).data('noModel');
             let namaCluster = $(this).data('cluster');
             let lot = $(this).data('lot');
+            let kgs = $(this).data('kgs');
+            let cones = $(this).data('cones');
+            let krg = $(this).data('krg');
 
             $.ajax({
                 url: '<?= base_url(session()->get('role') . '/warehouse/getNoModel') ?>',
@@ -307,29 +344,47 @@
                         Swal.fire({
                             title: 'Pindah Order',
                             html: `
-                            <label for="noModelSelect">Pilih No Model</label>
-                            <select id="noModelSelect" name="noModel" class="form-control">
-                                ${noModelOptions}
-                            </select>
-                            <label for="kgs">KGs Pindah Order</label>
-                            <input type="number" name="kgs" min=1 class="form-control mt-2" placeholder="Jumlah Pindah Order (KG)">
+                                <label for="noModelSelect" class="font-weight-bold">Pilih No Model</label>
+                                <select id="noModelSelect" name="noModel" class="form-control mb-3">
+                                    ${noModelOptions}
+                                </select>
 
-                            <label for"cones">Cones Pindah Order</label>
-                            <input type="number" name="cones" min=1 class="form-control mt-2" placeholder="Jumlah Pindah Order (Cones)">
+                                <label for="kgs" class="font-weight-bold">KGs Pindah</label>
+                                <input type="number" id="kgs" name="kgs" min="1" max="${kgs}" value="${kgs}" class="form-control mb-2" placeholder="Jumlah (KG)">
 
-                            <label for="krg">KRG Pindah Order</label>
-                            <input type="number" name="krg" min=1 class="form-control mt-2" placeholder="Jumlah Pindah Order (KRG)">
-                    `,
+                                <label for="cones" class="font-weight-bold">Cones Pindah</label>
+                                <input type="number" id="cones" name="cones" min="1" max="${cones}" value="${cones}" class="form-control mb-2" placeholder="Jumlah (Cones)">
+
+                                <label for="krg" class="font-weight-bold">KRG Pindah</label>
+                                <input type="number" id="krg" name="krg" min="1" max="${krg}" value="${krg}" class="form-control mb-3" placeholder="Jumlah (KRG)">
+                            `,
                             showCancelButton: true,
                             confirmButtonText: 'Pindah',
                             confirmButtonColor: '#2e7d32',
                             cancelButtonColor: '#778899',
+                            customClass: {
+                                popup: 'swal-wide'
+                            },
                             preConfirm: () => {
                                 const selectedNoModel = Swal.getPopup().querySelector('#noModelSelect').value;
+                                const inputKgs = Swal.getPopup().querySelector('#kgs').value;
+                                const inputCones = Swal.getPopup().querySelector('#cones').value;
+                                const inputKrg = Swal.getPopup().querySelector('#krg').value;
+
                                 if (!selectedNoModel) {
-                                    Swal.showValidationMessage(`Silahkan pilih No Model`);
+                                    Swal.showValidationMessage(`⚠ Silahkan pilih No Model`);
+                                } else if (!inputKgs || inputKgs <= 0 || inputKgs > kgs ||
+                                    !inputCones || inputCones <= 0 || inputCones > cones ||
+                                    !inputKrg || inputKrg <= 0 || inputKrg > krg) {
+                                    Swal.showValidationMessage(`⚠ Masukkan jumlah yang valid sesuai stok`);
                                 }
-                                return selectedNoModel;
+
+                                return {
+                                    selectedNoModel,
+                                    inputKgs,
+                                    inputCones,
+                                    inputKrg
+                                };
                             }
                         }).then((result) => {
                             if (result.isConfirmed) {
@@ -340,12 +395,11 @@
                                     data: {
                                         id_stock: idStock,
                                         namaCluster: namaCluster,
-                                        no_model: result.value,
-                                        kgs: $('input[name="kgs"]').val(),
-                                        cones: $('input[name="cones"]').val(),
-                                        krg: $('input[name="krg"]').val(),
+                                        no_model: result.value.selectedNoModel,
+                                        kgs: result.value.inputKgs,
+                                        cones: result.value.inputCones,
+                                        krg: result.value.inputKrg,
                                         lot: lot
-
                                     },
                                     dataType: 'json',
                                     success: function(updateResponse) {
