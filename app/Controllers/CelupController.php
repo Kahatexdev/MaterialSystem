@@ -212,7 +212,7 @@ class CelupController extends BaseController
         ];
         return view($this->role . '/schedule/form-edit', $data);
     }
-    
+
     public function updateSchedule($id)
     {
         $lotCelup = $this->request->getPost('lot_celup');
@@ -222,7 +222,7 @@ class CelupController extends BaseController
         $tglPress = $this->request->getPost('tgl_press');
         $tglOven = $this->request->getPost('tgl_oven');
         $tglTL = $this->request->getPost('tgl_tl');
-        $tglRajut = $this->request->getPost('tgl_rajut');
+        $tglRajut = $this->request->getPost('tgl_rajut_pagi');
         $tglACC = $this->request->getPost('tgl_acc');
         $tglKelos = $this->request->getPost('tgl_kelos');
         $tglReject = $this->request->getPost('tgl_reject');
@@ -258,7 +258,8 @@ class CelupController extends BaseController
 
         // Set nilai ketDailyCek berdasarkan tanggal terbaru dan labelnya
         if ($mostRecentDate && $mostRecentLabel) {
-            $ketDailyCek = "$mostRecentLabel ($mostRecentDate)";
+            $mostRecentDateFormatted = date('d-m-Y', strtotime($mostRecentDate)); // Format: DD-MM-YYYY
+            $ketDailyCek = "$mostRecentLabel ($mostRecentDateFormatted)";
         }
 
         // Hanya masukkan nilai jika tidak kosong atau null
@@ -270,11 +271,11 @@ class CelupController extends BaseController
         if ($tglPress) $dataUpdate['tanggal_press'] = $tglPress;
         if ($tglOven) $dataUpdate['tanggal_oven'] = $tglOven;
         if ($tglTL) $dataUpdate['tanggal_tl'] = $tglTL;
-        if ($tglRajut) $dataUpdate['tanggal_rajut'] = $tglRajut;
+        if ($tglRajut) $dataUpdate['tanggal_rajut_pagi'] = $tglRajut;
         if ($tglACC) $dataUpdate['tanggal_acc'] = $tglACC;
         if ($tglKelos) $dataUpdate['tanggal_kelos'] = $tglKelos;
         if ($tglReject) $dataUpdate['tanggal_reject'] = $tglReject;
-        if ($tglPB) $dataUpdate['tanggal_pb'] = $tglPB;
+        if ($tglPB) $dataUpdate['tanggal_perbaikan'] = $tglPB;
         if ($ketDailyCek) $dataUpdate['ket_daily_cek'] = $ketDailyCek;
 
         // Jika tgl_celup diisi, update last_status menjadi 'celup'

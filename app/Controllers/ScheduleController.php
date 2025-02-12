@@ -176,7 +176,7 @@ class ScheduleController extends BaseController
         $query = $this->request->getGet('query');
 
         // Validasi query
-        if (empty($query) || strlen($query) < 3) {
+        if (empty($query) || strlen($query) < 2) {
             return $this->response->setJSON([]); // Kembalikan array kosong jika query tidak valid
         }
 

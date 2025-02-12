@@ -177,7 +177,7 @@
                                     <!-- Tanggal Rajut Pagi -->
                                     <div class="form-group" id="tglRajutGroup">
                                         <label for="tgl_rajut">Tanggal Rajut Pagi</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_rajut" id="tgl_rajut" value="<?= $data['tgl_rajut_pagi'] ?>">
+                                        <input type="datetime-local" class="form-control" name="tgl_rajut_pagi" id="tgl_rajut_pagi" value="<?= $data['tgl_rajut_pagi'] ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-3">

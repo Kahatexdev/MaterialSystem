@@ -333,7 +333,7 @@ class ScheduleCelupModel extends Model
         return $this->table('schedule_celup')
             ->select('no_model')
             ->where('last_status', 'done')
-            ->groupBy('id_celup')
+            ->groupBy('no_model')
             ->findAll();
     }
     public function getNoModelCreateBon()

@@ -476,7 +476,7 @@
         // ✅ Event listener untuk kode_warna input serta tampilkan warna
         kodeWarna.addEventListener('input', function() {
             const query = kodeWarna.value;
-            if (query.length >= 3) {
+            if (query.length >= 1) {
                 fetchKodeWarnaSuggestions(query);
             } else {
                 suggestionsBoxKWarna.style.display = 'none';
@@ -711,19 +711,10 @@
                         kgKebutuhan.textContent = parseFloat(data.kg_kebutuhan).toFixed(2) || '0.00';
                         sisaJatah.textContent = parseFloat(data.sisa_jatah).toFixed(2) || '0.00';
 
-                        // console.log("Data filled into the form:", { // Log data yang diisi ke form
-                            tglStartMC: tglStartMC.value,
-                            deliveryAwal: deliveryAwal.value,
-                            deliveryAkhir: deliveryAkhir.value,
-                            qtyPO: qtyPO.value,
-                            qtyPOPlus: qtyPOPlus.value,
-                            kgKebutuhan: kgKebutuhan.textContent,
-                            sisaJatah: sisaJatah.textContent
-                        });
                     } else {
                         console.error('Error fetching PO details:', data.error || 'No data found'); // Log error
                     }
-                    
+
                 })
                 .catch(error => {
                     console.error('Error fetching PO details:', error); // Log error jika fetch gagal
