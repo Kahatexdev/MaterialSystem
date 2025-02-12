@@ -405,6 +405,7 @@ class WarehouseController extends BaseController
 
             // Perhitungan stok setelah pengurangan
             if (
+                
                 $kgsInOut > 0
             ) {
                 $kgsInOut -= $kgsInput;
@@ -413,6 +414,7 @@ class WarehouseController extends BaseController
             }
 
             if (
+                
                 $cnsInOut > 0
             ) {
                 $cnsInOut -= $cnsInput;
@@ -421,6 +423,7 @@ class WarehouseController extends BaseController
             }
 
             if (
+                
                 $krgInOut > 0
             ) {
                 $krgInOut -= $krgInput;
@@ -447,8 +450,21 @@ class WarehouseController extends BaseController
             $kodeWarna = $idStock['kode_warna'];
             $warna = $idStock['warna'];
 
+            if ($idStock['kgs_in_out'] < $kgs || $idStock['cns_in_out'] < $cones || $idStock['krg_in_out'] < $karung) {
+                $kgsInOut = $idStock['kgs_stock_awal'] - $kgs;
+                $cnsInOut = $idStock['cns_stock_awal'] - $cones;
+                $krgInOut = $idStock['krg_stock_awal'] - $karung;
+            } else {
+                $kgsInOut = $idStock['kgs_in_out'] - $kgs;
+                $cnsInOut = $idStock['cns_in_out'] - $cones;
+                $krgInOut = $idStock['krg_in_out'] - $karung;
+            }
+            // $kgsInOut = $idStock['kgs_in_out']-$kgs;
+            // $cnsInOut = $idStock['cns_in_out']-$cones;
+            // $krgInOut = $idStock['krg_in_out']-$karung;
+            // $lotStock = "";
+            // var_dump($idStock, $clusterOld, $namaCluster, $kgs, $cones, $karung, $lot);
 
-            // Jika lot_stock kosong, maka masukkan ke _stock_awal, bukan _in_out
             $dataStock = [
                 'no_model' => $noModel,
                 'item_type' => $itemType,
@@ -579,7 +595,20 @@ class WarehouseController extends BaseController
             $kodeWarna = $material[0]['kode_warna'];
             $warna = $material[0]['color'];
 
-            // Data stok baru selalu masuk ke _stock_awal karena pindah order
+            // $itemType = $material['item_type'];
+            // $kodeWarna = $material['kode_warna'];
+            // $warna = $material['color'];
+
+            if ($idStock['kgs_in_out'] < $kgs || $idStock['cns_in_out'] < $cones || $idStock['krg_in_out'] < $karung) {
+                $kgsInOut = $idStock['kgs_stock_awal'] - $kgs;
+                $cnsInOut = $idStock['cns_stock_awal'] - $cones;
+                $krgInOut = $idStock['krg_stock_awal'] - $karung;
+            } else {
+                $kgsInOut = $idStock['kgs_in_out'] - $kgs;
+                $cnsInOut = $idStock['cns_in_out'] - $cones;
+                $krgInOut = $idStock['krg_in_out'] - $karung;
+            }
+
             $dataStock = [
                 'no_model' => $noModel,
                 'item_type' => $itemType,
@@ -656,5 +685,154 @@ class WarehouseController extends BaseController
         } else {
             return redirect()->to(base_url($this->role . '/warehouse'));
         }
+    }
+
+    public function prosesPengeluaranJalur()
+    {
+        $checkedIds = $this->request->getPost('checked_id'); // Ambil index yang dicentang
+
+        if (empty($checkedIds)) {
+            session()->setFlashdata('error', 'Tidak ada data yang dipilih.');
+            return redirect()->to($this->role . '/pengeluaran_jalur');
+        }
+
+        $idOutCelup = $this->request->getPost('id_out_celup');
+        $noModels = $this->request->getPost('no_model');
+        $itemTypes = $this->request->getPost('item_type');
+        $kodeWarnas = $this->request->getPost('kode_warna');
+        $warnas = $this->request->getPost('warna');
+        $kgsKeluars = $this->request->getPost('kgs_keluar');
+        $cnsKeluars = $this->request->getPost('cns_keluar');
+        $tglMasuks = $this->request->getPost('tgl_keluar');
+        $namaClusters = $this->request->getPost('nama_cluster');
+        $lotKirim = $this->request->getPost('lot_kirim');
+
+        // Pastikan data tidak kosong
+        if (empty($idOutCelup) || !is_array($idOutCelup)) {
+            session()->setFlashdata('error', 'Data yang dikirim kosong atau tidak valid.');
+            return redirect()->to($this->role . '/pengeluaran_jalur');
+        }
+
+        // Pastikan nama_cluster ada di dalam tabel cluster
+        $clusterExists = $this->clusterModel->where('nama_cluster', $namaClusters)->countAllResults();
+
+        if ($clusterExists === 0) {
+            session()->setFlashdata('error', 'Cluster yang dipilih tidak valid.');
+            return redirect()->to($this->role . '/pengeluaran_jalur');
+        }
+
+        $dataPemasukan = [];
+
+        foreach ($checkedIds as $key => $idOut) {
+            $dataPemasukan[] = [
+                'id_out_celup' => $idOutCelup[$key] ?? null,
+                'no_model' => $noModels[$key] ?? null,
+                'item_type' => $itemTypes[$key] ?? null,
+                'kode_warna' => $kodeWarnas[$key] ?? null,
+                'warna' => $warnas[$key] ?? null,
+                'kgs_masuk' => $kgsMasuks[$key] ?? null,
+                'cns_masuk' => $cnsMasuks[$key] ?? null,
+                'tgl_masuk' => $tglMasuks[$key] ?? null,
+                'nama_cluster' => $namaClusters,
+                'admin' => session()->get('username')
+            ];
+        }
+
+        // Debugging: cek apakah data tidak kosong sebelum insert
+        if (empty($dataPemasukan)) {
+            session()->setFlashdata('error', 'Tidak ada data yang dimasukkan.');
+            return redirect()->to($this->role . '/pengeluaran_jalur');
+        }
+
+        // Ambil data session
+        $checked = session()->get('dataOutJalur');
+
+        // Jika session tidak kosong
+        if (!empty($checked)) {
+            // Ambil daftar ID yang ingin dihapus
+            $idToRemove = array_column($dataPemasukan, 'id_out_celup');
+
+            // Filter session agar hanya menyisakan data yang tidak ada di $dataPemasukan
+            $filteredChecked = array_filter($checked, function ($tes) use ($idToRemove) {
+                return !in_array($tes['id_out_celup'], $idToRemove);
+            });
+
+            // Jika hasil filtering masih ada data, simpan kembali ke session
+            if (!empty($filteredChecked)) {
+                session()->set('dataOutJalur', array_values($filteredChecked));
+            } else {
+                // Hapus session jika tidak ada data tersisa
+                session()->remove('dataOutJalur');
+            }
+        }
+
+        //insert tabel pemasukan
+        $this->pemasukanModel->insertBatch($dataPemasukan);
+
+        $dataStock = [];
+        foreach ($checkedIds as $key => $idOut) {
+            $dataStock[] = [
+                'no_model' => $noModels[$key] ?? null,
+                'item_type' => $itemTypes[$key] ?? null,
+                'kode_warna' => $kodeWarnas[$key] ?? null,
+                'warna' => $warnas[$key] ?? null,
+                'kgs_in_out' => $kgsMasuks[$key] ?? null,
+                'cns_in_out' => $cnsMasuks[$key] ?? null,
+                'krg_in_out' => 1, // Asumsikan setiap pemasukan hanya 1 kali
+                'lot_stock' => $lotKirim[$key] ?? null,
+                'nama_cluster' => $namaClusters,
+                'admin' => session()->get('username')
+            ];
+        }
+
+        foreach ($dataStock as $stock) {
+            $existingStock = $this->stockModel
+                ->where('no_model', $stock['no_model'])
+                ->where('item_type', $stock['item_type'])
+                ->where('kode_warna', $stock['kode_warna'])
+                ->first(); // Ambil satu record yang sesuai
+
+            if ($existingStock) {
+                // Jika sudah ada, update jumlahnya
+                $this->stockModel->update($existingStock['id_stock'], [
+                    'kgs_in_out' => $existingStock['kgs_in_out'] + $stock['kgs_in_out'],
+                    'cns_in_out' => $existingStock['cns_in_out'] + $stock['cns_in_out'],
+                    'krg_in_out' => $existingStock['krg_in_out'] + 1
+                ]);
+            } else {
+                // Jika belum ada, insert data baru
+                $this->stockModel->insert($stock);
+            }
+        }
+
+        session()->setFlashdata('success', 'Data berhasil dimasukkan.');
+
+        return redirect()->to($this->role . '/pengeluaran_jalur');
+    }
+    public function resetPengeluaranJalur()
+    {
+        session()->remove('dataOutJalur');
+        return redirect()->to(base_url($this->role . '/pengeluaran_jalur'));
+    }
+    public function hapusListPengeluaran()
+    {
+        $id = $this->request->getPost('id');
+
+        // Ambil data dari session
+        $existingData = session()->get('dataOutJalur') ?? [];
+
+        // Cek apakah data dengan ID yang dikirim ada di session
+        foreach ($existingData as $key => $item) {
+            if ($item['id_out_celup'] == $id) {
+                // Hapus data tersebut dari array
+                unset($existingData[$key]);
+                // Update session dengan data yang sudah dihapus
+                session()->set('dataOutJalur', array_values($existingData));
+                // Debug response
+                return $this->response->setJSON(['success' => true, 'message' => 'Data berhasil dihapus']);
+            }
+        }
+
+        return $this->response->setJSON(['success' => false, 'message' => 'Data tidak ditemukan']);
     }
 }

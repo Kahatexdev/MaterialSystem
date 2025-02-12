@@ -346,6 +346,21 @@ class CelupController extends BaseController
         return view($this->role . '/out/createBon', $data);
     }
 
+    public function getNoModel()
+    {
+        if ($this->request->isAJAX()) {
+            $models = $this->scheduleCelupModel->getCelupDone();
+
+            $data = [];
+            foreach ($models as $model) {
+                $data[] = $model['no_model'];
+            }
+
+            return $this->response->setJSON($data);
+        }
+    }
+
+
     public function getItemType()
     {
         $noModel = $this->request->getPost('no_model');

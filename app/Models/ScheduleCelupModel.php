@@ -336,6 +336,10 @@ class ScheduleCelupModel extends Model
             ->groupBy('id_celup')
             ->findAll();
     }
+    public function getNoModelCreateBon()
+    {
+        return $this->select('no_model')->distinct()->orderBy('no_model', 'ASC');
+    }
     public function getItemTypeByNoModel($noModel)
     {
         return $this->table('schedule_celup')
