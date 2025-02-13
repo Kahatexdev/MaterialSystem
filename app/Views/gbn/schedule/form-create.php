@@ -402,8 +402,8 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <!-- Add JavaScript to initialize Select2 -->
 
 <script>
@@ -712,14 +712,14 @@
                         sisaJatah.textContent = parseFloat(data.sisa_jatah).toFixed(2) || '0.00';
 
                         // console.log("Data filled into the form:", { // Log data yang diisi ke form
-                            tglStartMC: tglStartMC.value,
-                            deliveryAwal: deliveryAwal.value,
-                            deliveryAkhir: deliveryAkhir.value,
-                            qtyPO: qtyPO.value,
-                            qtyPOPlus: qtyPOPlus.value,
-                            kgKebutuhan: kgKebutuhan.textContent,
-                            sisaJatah: sisaJatah.textContent
-                        });
+                        //     tglStartMC: tglStartMC.value,
+                        //     deliveryAwal: deliveryAwal.value,
+                        //     deliveryAkhir: deliveryAkhir.value,
+                        //     qtyPO: qtyPO.value,
+                        //     qtyPOPlus: qtyPOPlus.value,
+                        //     kgKebutuhan: kgKebutuhan.textContent,
+                        //     sisaJatah: sisaJatah.textContent
+                        // });
                     } else {
                         console.error('Error fetching PO details:', data.error || 'No data found'); // Log error
                     }
