@@ -281,7 +281,32 @@
                     <tbody>
                         <tr>
                             <?php
-                            foreach ($dataBon['groupedDetails'] as $bon) { ?>
+                            $counter = [];
+                            $prevNoModel = null; // Variabel untuk menyimpan no_model sebelumnya
+                            $prevItemType = null; // Variabel untuk menyimpan item_type sebelumnya
+                            $prevKodeWarna = null; // Variabel untuk menyimpan kode_warna sebelumnya
+                            foreach ($dataBon['groupedDetails'] as $bon) {
+                                $key = $bon['no_model'] . '_' . $bon['item_type'] . '_' . $bon['kode_warna'];
+                                // Jika kombinasi tersebut belum ada di array counter, buat entri baru
+                                if (!isset($counter[$key])) {
+                                    $counter[$key] = 0;
+                                }
+                                foreach ($bon['detailPengiriman'] as $detail) {
+                                    $counter[$key]++;
+                                }
+                                // Cek jika item_type atau kode_warna berubah
+                                if (($prevNoModel !== null && $bon['no_model'] !== $prevItemType) && ($prevItemType !== null && $bon['item_type'] !== $prevItemType) &&
+                                    ($prevKodeWarna !== null && $bon['kode_warna'] !== $prevKodeWarna)
+                                ) {
+                                    // Tambahkan dua baris kosong
+                                    for ($i = 0; $i < 3; $i++) {
+                                        echo
+                                        '<tr>';
+                                        '<td class="text-center" colspan="15"></td>';
+                                        '</tr>';
+                                    }
+                                }
+                            ?>
                                 <td class="text-center"><?= $bon['no_model'] ?></td>
                                 <td class="text-center"><?= $bon['item_type'] ?></td>
                                 <td class="text-center"><?= $bon['kode_warna'] ?></td>
@@ -294,7 +319,7 @@
                                 $row = 0;
                                 foreach ($bon['detailPengiriman'] as $detail) {
                                     $row++;
-                                    if ($row == 1) { ?>
+                                    if ($counter[$key] == 1) { ?>
                                         <td class="text-center"><?= $detail['cones_kirim'] ?></td>
                                         <td class="text-center"><?= $detail['gw_kirim'] ?></td>
                                         <td class="text-center"><?= $detail['kgs_kirim'] ?></td>
@@ -302,42 +327,75 @@
                                         <td class="text-center"><?= $bon['totals']['gw_kirim'] ?></td>
                                         <td class="text-center"><?= $bon['totals']['kgs_kirim'] ?></td>
                                         <td class="text-center"><?= $bon['jmlKarung'] . " KARUNG" . $bon['ganti_retur'] ?></td>
-                                    <?php } elseif ($row == 2) {
-                                    ?>
-                                        <td class="text-center"><?= $bon['buyer'] ?></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td class="text-center"><?= $detail['cones_kirim'] ?></td>
-                                        <td class="text-center"><?= $detail['gw_kirim'] ?></td>
-                                        <td class="text-center"><?= $detail['kgs_kirim'] ?></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                    <?php } else { ?>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td class="text-center"><?= $detail['cones_kirim'] ?></td>
-                                        <td class="text-center"><?= $detail['gw_kirim'] ?></td>
-                                        <td class="text-center"><?= $detail['kgs_kirim'] ?></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                    <?php } ?>
                         </tr>
-                <?php }
+                        <tr>
+                            <td class="text-center"><?= $bon['buyer'] ?> KK</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="text-center"><?= $detail['cones_kirim'] ?></td>
+                            <td class="text-center"><?= $detail['gw_kirim'] ?></td>
+                            <td class="text-center"><?= $detail['kgs_kirim'] ?></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <?php } else {
+                                        if ($row == 1) { ?>
+                            <td class="text-center"><?= $detail['cones_kirim'] ?></td>
+                            <td class="text-center"><?= $detail['gw_kirim'] ?></td>
+                            <td class="text-center"><?= $detail['kgs_kirim'] ?></td>
+                            <td class="text-center"><?= $bon['totals']['cones_kirim'] ?></td>
+                            <td class="text-center"><?= $bon['totals']['gw_kirim'] ?></td>
+                            <td class="text-center"><?= $bon['totals']['kgs_kirim'] ?></td>
+                            <td class="text-center"><?= $bon['jmlKarung'] . " KARUNG" . $bon['ganti_retur'] ?></td>
+                            </tr>
+                        <?php } elseif ($row == 2) { ?>
+                            <td class="text-center"><?= $bon['buyer'] ?> KK</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="text-center"><?= $detail['cones_kirim'] ?></td>
+                            <td class="text-center"><?= $detail['gw_kirim'] ?></td>
+                            <td class="text-center"><?= $detail['kgs_kirim'] ?></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            </tr>
+                        <?php } else { ?>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="text-center"><?= $detail['cones_kirim'] ?></td>
+                            <td class="text-center"><?= $detail['gw_kirim'] ?></td>
+                            <td class="text-center"><?= $detail['kgs_kirim'] ?></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            </tr>
+                    <?php }
+                                    } ?>
+                    </tr>
+            <?php }
+                                $prevNoModel = $bon['no_model']; // Pindahkan pembaruan variabel ke sini
+                                $prevItemType = $bon['item_type']; // Pindahkan pembaruan variabel ke sini
+                                $prevKodeWarna = $bon['kode_warna']; // Pindahkan pembaruan variabel ke sini
                             } ?>
                     </tbody>
                     <footer>
