@@ -1,8 +1,16 @@
 <?php $this->extend($role . '/out/header'); ?>
 <?php $this->section('content'); ?>
 
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
+<style>
+    /* Auto Complete */
+    .ui-state-active {
+        background: rgb(230, 153, 233) !important;
+        color: #fff !important;
+    }
+</style>
 <div class="container-fluid py-4">
     <?php if (session()->getFlashdata('success')) : ?>
         <script>
@@ -74,12 +82,7 @@
                                             <div class="row g-3">
                                                 <div class="col-md-4">
                                                     <label>No Model</label>
-                                                    <select class="form-control" name="items[0][no_model]" id="no_model" required>
-                                                        <option value="">Pilih No Model</option>
-                                                        <?php foreach ($no_model as $model) { ?>
-                                                            <option value="<?= $model['no_model'] ?>"><?= $model['no_model'] ?></option>
-                                                        <?php } ?>
-                                                    </select>
+                                                    <input type="text" class="form-control" name="items[0][no_model]" id="no_model" required placeholder="Pilih No Model">
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label>Item Type</label>
@@ -220,6 +223,7 @@
     <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.all.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
     <script>
         // Ambil item type berdasarkan no model
@@ -328,7 +332,7 @@
                 }
             }
         });
-        // 
+
         document.addEventListener("DOMContentLoaded", function() {
             const navTab = document.getElementById("nav-tab");
             const navTabContent = document.getElementById("nav-tabContent");
@@ -390,6 +394,11 @@
                 const totalConesId = `total_cones_kirim_${tabIndex}`;
                 const totalLotId = `total_lot_kirim_${tabIndex}`;
 
+                const newInputId = `no_model_${tabIndex}`;
+                const itemTypeId = `item_type_${tabIndex}`;
+                const kodeWarnaId = `kode_warna_${tabIndex}`;
+                const warnaId = `warna_${tabIndex}`;
+
                 // Tambahkan tab baru ke nav-tab
                 const newTabButton = document.createElement("button");
                 newTabButton.className = "nav-link";
@@ -418,31 +427,27 @@
                                         <div class="row g-3">
                                             <div class="col-md-4">
                                                 <label>No Model</label>
-                                                <select class="form-control" name="items[${tabIndex - 1}][no_model]" id="no_model" required>
-                                                    <option value="">Pilih No Model</option>
-                                                    <?php foreach ($no_model as $model) { ?>
-                                                        <option value="<?= $model['no_model'] ?>"><?= $model['no_model'] ?></option>
-                                                    <?php } ?>
-                                                </select>
+                                                <input type="text" class="form-control no-model" name="items[${tabIndex - 1}][no_model]" id="${newInputId}" required placeholder="Pilih No Model">
                                             </div>
                                             <div class="col-md-4">
                                                 <label>Item Type</label>
-                                                <select class="form-control" name="items[${tabIndex - 1}][item_type]" id="item_type" required>
+                                                <select class="form-control item-type" name="items[${tabIndex - 1}][item_type]" id="${itemTypeId}" required>
+                                                    <option value="">Pilih Item Type</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-4">
                                                 <label>Kode Warna</label>
-                                                <select class="form-control" name="items[${tabIndex - 1}][kode_warna]" id="kode_warna" required>
+                                                <select class="form-control kode-warna" name="items[${tabIndex - 1}][kode_warna]" id="${kodeWarnaId}" required>
+                                                    <option value="">Pilih Kode Warna</option>
                                                 </select>
                                             </div>
-
                                         </div>
 
                                         <!-- Surat Jalan Section -->
                                         <div class="row g-3 mt-3">
                                             <div class="col-md-4">
                                                 <label>Warna</label>
-                                                <input type="text" class="form-control" name="items[${tabIndex - 1}][warna]" id="warna" required readonly>
+                                                <input type="text" class="form-control warna" name="items[${tabIndex - 1}][warna]" id="${warnaId}" required readonly>
                                             </div>
                                             <div class="col-md-4">
                                                 <label>LMD</label>
@@ -473,7 +478,7 @@
                                             </div>
                                         </div>
                                         <div class="mt-5">
-                                            <h3>Form Barcode</h3>
+                                            <h3>Form Input Data Karung</h3>
                                         </div>
 
                                         <!-- Out Celup Section -->
@@ -607,11 +612,93 @@
                         calculateTotals(newPoTable);
                     });
                 });
+                // Terapkan autocomplete ke input baru
+                applyAutocomplete(`#${newInputId}`);
+
+                // Event untuk memuat Item Type berdasarkan No Model
+                $(`#${newInputId}`).on("change", function() {
+                    let noModel = $(this).val();
+                    $.ajax({
+                        url: "<?= base_url($role . '/createBon/getItemType') ?>",
+                        type: "POST",
+                        data: {
+                            no_model: noModel
+                        },
+                        dataType: "json",
+                        success: function(data) {
+                            let itemTypeDropdown = $(`#${itemTypeId}`);
+                            itemTypeDropdown.empty().append('<option value="">Pilih Item Type</option>');
+                            data.forEach(function(item) {
+                                itemTypeDropdown.append(`<option value="${item.item_type}">${item.item_type}</option>`);
+                            });
+                        }
+                    });
+                });
+
+                // Event untuk memuat Kode Warna berdasarkan Item Type dan No Model
+                $(`#${itemTypeId}`).on("change", function() {
+                    let itemType = $(this).val();
+                    let noModel = $(`#${newInputId}`).val();
+                    $.ajax({
+                        url: "<?= base_url($role . '/createBon/getKodeWarna') ?>",
+                        type: "POST",
+                        data: {
+                            no_model: noModel,
+                            item_type: itemType
+                        },
+                        dataType: "json",
+                        success: function(data) {
+                            let kodeWarnaDropdown = $(`#${kodeWarnaId}`);
+                            kodeWarnaDropdown.empty().append('<option value="">Pilih Kode Warna</option>');
+                            data.forEach(function(item) {
+                                kodeWarnaDropdown.append(`<option value="${item.kode_warna}">${item.kode_warna}</option>`);
+                            });
+                        }
+                    });
+                });
+
+                // Event untuk mengisi Warna berdasarkan Kode Warna
+                $(`#${kodeWarnaId}`).on("change", function() {
+                    let kodeWarna = $(this).val();
+                    let noModel = $(`#${newInputId}`).val();
+                    let itemType = $(`#${itemTypeId}`).val();
+                    $.ajax({
+                        url: "<?= base_url($role . '/createBon/getWarna') ?>",
+                        type: "POST",
+                        data: {
+                            no_model: noModel,
+                            item_type: itemType,
+                            kode_warna: kodeWarna
+                        },
+                        dataType: "json",
+                        success: function(data) {
+                            $(`#${warnaId}`).val(data.warna);
+                        }
+                    });
+                });
 
                 tabIndex++;
                 calculateTotals(newPoTable);
             }
 
+            // Fungsi autocomplete
+            function applyAutocomplete(selector) {
+                $(selector).autocomplete({
+                    source: function(request, response) {
+                        $.ajax({
+                            url: "<?= base_url($role . '/createBon/autoComplete/noModel') ?>",
+                            type: "GET",
+                            dataType: "json",
+                            success: function(data) {
+                                response(data);
+                            }
+                        });
+                    },
+                    minLength: 2
+                });
+            }
+            // Terapkan autocomplete untuk input pertama
+            applyAutocomplete("#no_model");
             // Fungsi untuk menghapus tab dan kontennya
             function removeTab(tabButton, tabPane) {
                 if (navTab.children.length > 1) {
@@ -742,7 +829,5 @@
 
         addNewTab();
     </script>
-
-
 
     <?php $this->endSection(); ?>

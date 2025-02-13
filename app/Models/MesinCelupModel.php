@@ -53,6 +53,14 @@ class MesinCelupModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
+    public function getAllMesinCelup()
+    {
+        return $this->table('mesin_celup')
+            ->select('*')
+            ->orderBy('no_mesin', 'ASC')
+            ->findAll();
+    }
+
     public function getMesinCelupBenang()
     {
         return $this->table('mesin_celup')

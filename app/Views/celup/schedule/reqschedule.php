@@ -28,13 +28,14 @@
     }
 
     .table th {
-        background-color: #e8f5e9;
+
+        background-color: rgb(8, 38, 83);
         border: none;
         font-size: 0.9rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        color: #2e7d32;
+        color: rgb(255, 255, 255);
     }
 
     .table td {
@@ -45,30 +46,22 @@
     }
 
     .table tr:nth-child(even) {
-        background-color: #f1f8e9;
+        background-color: rgb(237, 237, 237);
     }
 
     .table th.sticky {
         position: sticky;
         top: 0;
-        /* Untuk tetap di bagian atas saat menggulir vertikal */
         z-index: 3;
-        /* Pastikan header terlihat di atas elemen lain */
-        background-color: #e8f5e9;
-        /* Warna latar belakang */
+        background-color: rgb(4, 55, 91);
     }
 
     .table td.sticky {
         position: sticky;
         left: 0;
-        /* Untuk tetap di sisi kiri saat menggulir horizontal */
         z-index: 2;
-        /* Prioritas lebih rendah dari header */
-        background-color: #e8f5e9;
-        /* Tambahkan warna latar belakang */
+        background-color: #e3f2fd;
         box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
-        /* Memberikan efek bayangan untuk memisahkan kolom */
-
     }
 
 
@@ -87,30 +80,30 @@
 
     .btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+        box-shadow: 0 4px 8px rgba(33, 150, 243, 0.2);
     }
 
     .btn-filter {
-        background: linear-gradient(135deg, #4caf50, #81c784);
+        background: linear-gradient(135deg, #1e88e5, #64b5f6);
         color: white;
         border: none;
     }
 
     .btn-filter:hover {
-        background: linear-gradient(135deg, #43a047, #66bb6a);
+        background: linear-gradient(135deg, #1976d2, #42a5f5);
     }
 
     .date-navigation {
         background-color: white;
         border-radius: 15px;
         padding: 0.5rem;
-        box-shadow: 0 4px 6px rgba(76, 175, 80, 0.1);
+        box-shadow: 0 4px 6px rgba(33, 150, 243, 0.1);
     }
 
     .date-navigation input[type="date"] {
         border: none;
         font-weight: 500;
-        color: #2e7d32;
+        color: #1565c0;
     }
 
     .machine-info {
@@ -208,29 +201,24 @@
 
     <div class="card mb-4">
         <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-12">
-                    <form method="post" action="<?= base_url($role . '/schedule') ?>">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="header">
-                                <h3>
-                                    Request Schedule Mesin Celup
-                                </h3>
-                            </div>
-                            <div class="d-flex">
-                                <p class="mb-0">Tanggal Schedule</p>
-                                <input type="date" name="filter_tglsch" class="form-control" placeholder="Tanggal Schedule">
-                            </div>
-                            <div class="d-flex">
-                                <input type="text" name="filter_nomodel" class="form-control" placeholder="No Model / Kode Warna">
-                                <button class="btn btn-filter" id="filter_date_range" type="submit">
-                                    <i class="bi bi-funnel me-2"></i>Filter
-                                </button>
-                            </div>
+            <form method="post" action="<?= base_url($role . '/schedule') ?>">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                    <h3 class="mb-0 text-center text-md-start">Request Schedule Mesin Celup</h3>
+                    <div class="d-flex flex-column flex-md-row gap-2 align-items-center">
+                        <div class="d-flex flex-column">
+                            <label for="filter_tglsch" class="form-label">Tanggal Schedule</label>
+                            <input type="date" id="filter_tglsch" name="filter_tglsch" class="form-control" placeholder="Tanggal Schedule">
                         </div>
-                    </form>
+                        <div class="d-flex flex-column">
+                            <label for="filter_nomodel" class="form-label">No Model / Kode Warna</label>
+                            <input type="text" id="filter_nomodel" name="filter_nomodel" class="form-control" placeholder="No Model / Kode Warna">
+                        </div>
+                        <button class="btn btn-filter mt-md-4" id="filter_date_range" type="submit">
+                            <i class="bi bi-funnel me-2"></i>Filter
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -266,7 +254,8 @@
                                 <td><?= $data['warna']; ?></td>
                                 <td><?= $data['start_mc']; ?></td>
                                 <td><?= $data['tgl_schedule']; ?></td>
-                                <td><a href="<?= base_url($role . '/edit/' . $data['id_celup']) ?>" class="btn btn-info"><i class="fa fa-info"> Detail</i></a></td>
+                                <td><a href="<?= base_url($role . '/edit/' . $data['id_celup']) ?>" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Detail">
+                                        <i class="fas fa-eye"></i></a></td>
                             </tr>
                         <?php
                         endforeach;

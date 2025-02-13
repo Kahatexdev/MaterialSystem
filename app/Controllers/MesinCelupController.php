@@ -34,7 +34,7 @@ class MesinCelupController extends BaseController
 
     public function mesinCelup()
     {
-        $mesinCelup = $this->mesinCelupModel->findAll();
+        $mesinCelup = $this->mesinCelupModel->getAllMesinCelup();
         $data = [
             'active' => $this->active,
             'title' => 'Schedule',

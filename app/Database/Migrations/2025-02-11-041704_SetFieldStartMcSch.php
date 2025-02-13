@@ -13,7 +13,7 @@ class SetFieldStartMcSch extends Migration
 
         $forge->modifyColumn('schedule_celup', [
             'start_mc' => [
-                'type' => 'DATETIME',  // Ganti tipe data sesuai dengan kolom yang ingin diubah
+                'type' => 'DATE',  // Ganti tipe data sesuai dengan kolom yang ingin diubah
                 'null' => true,  // Membuat kolom bisa NULL
             ]
         ]);
@@ -26,7 +26,7 @@ class SetFieldStartMcSch extends Migration
 
         $forge->modifyColumn('schedule_celup', [
             'start_mc' => [
-                'type' => 'DATETIME',
+                'type' => 'DATE',
                 'null' => false,  // Mengubah kembali menjadi non-nullable
             ]
         ]);
