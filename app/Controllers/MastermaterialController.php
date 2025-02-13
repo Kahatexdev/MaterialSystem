@@ -150,15 +150,17 @@ class MastermaterialController extends BaseController
     public function updateMasterMaterial()
     {
         if ($this->request->isAJAX()) {
-            $id = esc($this->request->getPost('item_type'));
+
+            $id = $this->request->getPost('item_type_old');
+
             $data = [
+                'item_type' => esc($this->request->getPost('item_type')),
                 'deskripsi' => esc($this->request->getPost('deskripsi')),
                 'jenis' => esc($this->request->getPost('jenis')),
-
                 // Tambahkan field lain yang ingin diperbarui
             ];
 
-            if ($this->masterMaterialModel->update($id, $data)) {
+            if ($this->masterMaterialModel->updateMasterMaterial($id, $data)) {
                 return $this->response->setJSON(['message' => 'Data berhasil diupdate.']);
             } else {
                 return $this->response->setJSON(['error' => 'Gagal mengupdate data.'], 500);
@@ -182,5 +184,4 @@ class MastermaterialController extends BaseController
 
         throw new \CodeIgniter\Exceptions\PageNotFoundException();
     }
-
 }

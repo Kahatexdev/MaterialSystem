@@ -77,6 +77,7 @@
                         <div class="mb-3">
                             <label for="item_type" class="form-label">Item Type</label>
                             <input type="text" class="form-control" name="item_type" id="item_type" required>
+                            <input type="hidden" name="item_type_old" id="item_type_old">
                         </div>
                         <div class="mb-3">
                             <label for="deskripsi" class="form-label">Deskripsi</label>
@@ -185,14 +186,14 @@
                 $.ajax({
                     url: '<?= base_url($role . "/getMasterMaterialDetails") ?>',
                     type: 'GET',
-                    data:
-                    {
-                        id:id,
+                    data: {
+                        id: id,
                     },
                     success: function(response) {
                         console.log('Response dari server: ', response);
                         // Isi form dengan data yang diterima
                         $('#item_type').val(response.item_type);
+                        $('#item_type_old').val(response.item_type);
                         $('#deskripsi').val(response.deskripsi);
                         $('#jenis').val(response.jenis);
 
