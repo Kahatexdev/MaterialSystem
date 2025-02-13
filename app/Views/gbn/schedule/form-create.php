@@ -115,6 +115,16 @@
         box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
     }
 
+    .form-check-label {
+        /* bold */
+        font-weight: 600;
+
+    }
+
+    .form-check-input {
+        height: 30px;
+    }
+
     /* Button Styles */
     .btn {
         padding: 10px 20px;
@@ -332,43 +342,38 @@
                                                             </div>
                                                             <div class="col-4">
                                                                 <div class="form-group">
-                                                                    <label for="kg_kebutuhan">PO +</label>
-                                                                    <select class="form-select" name="po_plus[]" required>
-                                                                        <option value="">Pilih PO(+)</option>
-                                                                        <option value="1">Ya</option>
-                                                                        <option value="0">Tidak</option>
-                                                                    </select>
+                                                                    <label for="qty_celup">Qty Celup</label>
+                                                                    <input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required>
                                                                 </div>
-
                                                             </div>
-                                                            <div class="row">
-                                                                <div class="col-4">
-                                                                    <div class="form-group">
-                                                                        <label for="qty_celup">KG Kebutuhan :</label>
-                                                                        <br />
-                                                                        <span class="badge bg-info">
-                                                                            <span class="kg_kebutuhan">0.00</span> KG <!-- Ganti id dengan class -->
-                                                                        </span>
-                                                                    </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-4">
+                                                                <div class="form-group">
+                                                                    <label for="qty_celup">KG Kebutuhan :</label>
+                                                                    <br />
+                                                                    <span class="badge bg-info">
+                                                                        <span class="kg_kebutuhan">0.00</span> KG <!-- Ganti id dengan class -->
+                                                                    </span>
                                                                 </div>
-                                                                <div class="col-4">
-                                                                    <div class="form-group">
-                                                                        <label for="qty_celup">Tagihan Sch :</label>
-                                                                        <br />
-                                                                        <span class="badge bg-info">
-                                                                            <span class="sisa_jatah">0.00</span> KG <!-- Ganti id dengan class -->
-                                                                        </span>
-                                                                    </div>
+                                                            </div>
+                                                            <div class="col-4">
+                                                                <div class="form-group">
+                                                                    <label for="qty_celup">Tagihan Sch :</label>
+                                                                    <br />
+                                                                    <span class="badge bg-info">
+                                                                        <span class="sisa_jatah">0.00</span> KG <!-- Ganti id dengan class -->
+                                                                    </span>
                                                                 </div>
-
-                                                                <div class="col-4">
-                                                                    <div class="form-group">
-                                                                        <label for="qty_celup">Qty Celup</label>
-                                                                        <input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required>
-                                                                    </div>
+                                                            </div>
+                                                            <div class="col-4 d-flex align-items-center">
+                                                                <div class="form-group">
+                                                                    <label for="po_plus">PO +</label>
+                                                                    <input type="checkbox" id="po_plus" class="form-control form-check-input" name="po_plus[]" value="1">
                                                                 </div>
                                                             </div>
 
+                                                        </div>
                                                     </td>
                                                     <td class="text-center">
 
@@ -476,7 +481,7 @@
         // ✅ Event listener untuk kode_warna input serta tampilkan warna
         kodeWarna.addEventListener('input', function() {
             const query = kodeWarna.value;
-            if (query.length >= 3) {
+            if (query.length >= 1) {
                 fetchKodeWarnaSuggestions(query);
             } else {
                 suggestionsBoxKWarna.style.display = 'none';
@@ -603,6 +608,8 @@
                     alert(`⚠️ Qty Celup di baris ini melebihi Tagihan SCH! (Tagihan SCH: ${tagihanSCH.toFixed(2)})`);
                     row.querySelector("input[name='qty_celup[]']").classList.add("is-invalid");
                     row.querySelector("input[name='qty_celup[]']").focus();
+                    // reset qty celup
+                    row.querySelector("input[name='qty_celup[]']").value = '';
                 }
             });
 
@@ -711,19 +718,10 @@
                         kgKebutuhan.textContent = parseFloat(data.kg_kebutuhan).toFixed(2) || '0.00';
                         sisaJatah.textContent = parseFloat(data.sisa_jatah).toFixed(2) || '0.00';
 
-                        // console.log("Data filled into the form:", { // Log data yang diisi ke form
-                        //     tglStartMC: tglStartMC.value,
-                        //     deliveryAwal: deliveryAwal.value,
-                        //     deliveryAkhir: deliveryAkhir.value,
-                        //     qtyPO: qtyPO.value,
-                        //     qtyPOPlus: qtyPOPlus.value,
-                        //     kgKebutuhan: kgKebutuhan.textContent,
-                        //     sisaJatah: sisaJatah.textContent
-                        // });
                     } else {
                         console.error('Error fetching PO details:', data.error || 'No data found'); // Log error
                     }
-                    
+
                 })
                 .catch(error => {
                     console.error('Error fetching PO details:', error); // Log error jika fetch gagal
@@ -794,41 +792,36 @@
                         </div>
                         <div class="col-4">
                             <div class="form-group">
-                                <label for="kg_kebutuhan">PO +</label>
-                                <select class="form-select" name="po_plus[]" required>
-                                    <option value="">Pilih PO(+)</option>
-                                    <option value="1">Ya</option>
-                                    <option value="0">Tidak</option>
-                                </select>
-                            </div>
-
-                        </div>
-                        <div class="row">
-                            <div class="col-4">
-                                <div class="form-group">
-                                    <label for="qty_celup">KG Kebutuhan :</label>
-                                    <span class="badge bg-info">
-                                        <span class="kg_kebutuhan">0.00</span> KG <!-- Ganti id dengan class -->
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="form-group">
-                                    <label for="qty_celup">Tagihan Sch :</label>
-
-                                    <span class="badge bg-info">
-                                        <span class="sisa_jatah">0.00</span> KG <!-- Ganti id dengan class -->
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="col-4">
-                                <div class="form-group">
-                                    <label for="qty_celup">Qty Celup</label>
-                                    <input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required>
-                                </div>
+                                <label for="qty_celup">Qty Celup</label>
+                                <input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required>
                             </div>
                         </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="qty_celup">KG Kebutuhan :</label>
+                                <span class="badge bg-info">
+                                    <span class="kg_kebutuhan">0.00</span> KG <!-- Ganti id dengan class -->
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="qty_celup">Tagihan Sch :</label>
+
+                                <span class="badge bg-info">
+                                    <span class="sisa_jatah">0.00</span> KG <!-- Ganti id dengan class -->
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-4 d-flex align-items-center">
+                            <div class="form-group">
+                                <label for="po_plus">PO +</label>
+                                <input type="checkbox" id="po_plus" class="form-control form-check-input" name="po_plus[]" value="1">
+                            </div>
+                        </div>
+                    </div>
 
                 </td>
                 <td class="text-center">

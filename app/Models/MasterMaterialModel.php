@@ -64,4 +64,9 @@ class MasterMaterialModel extends Model
     {
         return $this->select('item_type')->where('jenis', $jenis)->findAll();
     }
+
+    public function updateMasterMaterial($id, $data)
+    {
+        return $this->where('item_type', $id)->set($data)->update();
+    }
 }

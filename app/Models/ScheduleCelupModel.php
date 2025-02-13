@@ -290,7 +290,6 @@ class ScheduleCelupModel extends Model
 
     public function cekSisaJatah($no_model, $item_type, $kode_warna)
     {
-        // Query untuk mengambil data
         $data = $this->select('
         SUM(schedule_celup.kg_celup) AS total_kg,
         material.qty_po,
@@ -299,41 +298,41 @@ class ScheduleCelupModel extends Model
         schedule_celup.kode_warna,
         master_order.no_model
     ')
-            ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
-            ->join(
-                '(SELECT 
+        ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
+        ->join(
+            '(SELECT 
             SUM(material.kgs) AS qty_po, 
             id_order, 
             item_type, 
             kode_warna
           FROM material
           GROUP BY id_order, item_type, kode_warna) AS material',
-                'material.id_order = master_order.id_order
+            'material.id_order = master_order.id_order
          AND material.item_type = schedule_celup.item_type
          AND material.kode_warna = schedule_celup.kode_warna',
-                'left'
-            )
+            'left'
+        )
             ->where('schedule_celup.no_model', $no_model)
             ->where('schedule_celup.item_type', $item_type)
             ->where('schedule_celup.kode_warna', $kode_warna)
-            ->groupBy('schedule_celup.kode_warna')
-            ->findAll(); // Mengembalikan semua hasil sesuai pengelompokan
+            // Ubah groupBy menjadi berdasarkan field yang unik per record
+            ->groupBy(['schedule_celup.kode_warna', 'schedule_celup.id_celup'])
+            ->findAll();
 
-        // Jika data ditemukan, kembalikan data
         if (!empty($data)) {
             return $data;
         }
 
-        // Jika data tidak ditemukan, kembalikan nilai default (misalnya null atau array kosong)
         return null;
     }
+
 
     public function getCelupDone()
     {
         return $this->table('schedule_celup')
             ->select('no_model')
             ->where('last_status', 'done')
-            ->groupBy('id_celup')
+            ->groupBy('no_model')
             ->findAll();
     }
     public function getNoModelCreateBon()

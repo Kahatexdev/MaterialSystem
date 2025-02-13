@@ -69,6 +69,11 @@
         box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
     }
 
+    .form-check-input {
+        height: 30px;
+    }
+
+
     /* Button Styles */
     .btn {
         padding: 10px 20px;
@@ -230,13 +235,8 @@
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-4">
-                                                                    <div class="form-group">
-                                                                        <label for="po_plus">PO +</label>
-                                                                        <select class="form-select po-plus" name="po_plus[]" required>
-                                                                            <option value="1" <?= ($detail['po_plus'] == 1) ? 'selected' : '' ?>>Ya</option>
-                                                                            <option value="0" <?= ($detail['po_plus'] == 0) ? 'selected' : '' ?>>Tidak</option>
-                                                                        </select>
-                                                                    </div>
+                                                                    <label for="qty_celup">Qty Celup</label>
+                                                                    <input type="number" class="form-control" step="0.01" min="0.01" name="qty_celup[]" value="<?= $detail['kg_celup'] ?>" required>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
@@ -245,16 +245,16 @@
                                                                         <label for="qty_celup">KG Kebutuhan :</label>
                                                                         <br />
                                                                         <span class="badge bg-info">
-                                                                            <span class="kg_kebutuhan"><?= $kg_kebutuhan ?></span> KG
+                                                                            <span class="kg_kebutuhan"><?= $detail['kg_kebutuhan'] ?></span> KG
                                                                         </span>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-3">
                                                                     <div class="form-group">
-                                                                        <label for="qty_celup">Sisa Jatah :</label>
+                                                                        <label for="sisa_jatah">Sisa Jatah :</label>
                                                                         <br />
                                                                         <span class="badge bg-info">
-                                                                            <span class="sisa_jatah"><?= number_format($sisa_jatah, 2) ?></span> KG
+                                                                            <span class="sisa_jatah" data-sisajatah="<?= number_format($detail['sisa_jatah'], 2) ?>"><?= number_format($detail['sisa_jatah'], 2) ?></span> KG
                                                                         </span>
                                                                     </div>
                                                                 </div>
@@ -264,9 +264,11 @@
                                                                     <span class="badge bg-<?= $detail['last_status'] == 'scheduled' ? 'info' : ($detail['last_status'] == 'celup' ? 'warning' : 'success') ?>"><?= $detail['last_status'] ?></span>
                                                                     <input type="hidden" class="form-control last_status" name="last_status[]" value="<?= $detail['last_status'] ?>">
                                                                 </div>
-                                                                <div class="col-3">
-                                                                    <label for="qty_celup">Qty Celup</label>
-                                                                    <input type="number" class="form-control" step="0.01" min="0.01" name="qty_celup[]" value="<?= $detail['kg_celup'] ?>" required>
+                                                                <div class="col-3 d-flex align-items-center">
+                                                                    <div class="form-group">
+                                                                        <label for="po_plus">PO +</label>
+                                                                        <input type="checkbox" id="po_plus" class="form-control form-check-input" name="po_plus[]" value="1" <?= $detail['po_plus'] == 1 ? 'checked' : '' ?>>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -523,47 +525,73 @@
                 return;
             }
 
+            // Ambil semua baris pada tbody
             const rows = poTable.querySelectorAll("tbody tr");
 
+            // Hitung total Qty Celup berdasarkan status
             rows.forEach((row, index) => {
-                const qtyCelupInput = row.querySelector('input[name^="qty_celup["]');
-                const lastStatusInput = row.querySelector('input[name^="last_status["]');
+                const qtyCelupInput = row.querySelector('input[name="qty_celup[]"]');
+                const lastStatusInput = row.querySelector('input[name="last_status[]"]');
 
                 if (qtyCelupInput && lastStatusInput) {
                     const qtyCelup = parseFloat(qtyCelupInput.value) || 0;
-                    const lastStatus = lastStatusInput.value;
+                    const lastStatus = lastStatusInput.value.trim();
 
-                    if (lastStatus === 'scheduled' || lastStatus === 'celup' || lastStatus === 'reschedule') {
+                    // Jumlahkan hanya jika status sesuai
+                    if (["scheduled", "celup", "reschedule"].includes(lastStatus)) {
                         totalQtyCelup += qtyCelup;
                     }
                 } else {
-                    console.warn(`⚠️ Input qty_celup atau last_status tidak ditemukan di baris ke-${index}`);
+                    console.warn(`⚠️ Input qty_celup atau last_status tidak ditemukan di baris ke-${index + 1}`);
                 }
             });
 
+            // Update elemen total qty celup
             const totalQtyCelupElement = document.getElementById("total_qty_celup");
             if (totalQtyCelupElement) {
                 totalQtyCelupElement.value = totalQtyCelup.toFixed(2);
             }
 
-            const maxCaps = parseFloat(document.getElementById("max_caps").value) || 0;
+            // Validasi terhadap max capacity
+            const maxCapsInput = document.getElementById("max_caps");
+            const maxCaps = maxCapsInput ? parseFloat(maxCapsInput.value) || 0 : 0;
             if (totalQtyCelup > maxCaps) {
                 alert("⚠️ Total Qty Celup melebihi Max Caps!");
+                if (totalQtyCelupElement) {
+                    totalQtyCelupElement.classList.add("is-invalid");
+                    totalQtyCelupElement.focus();
+                }
+            } else {
+                if (totalQtyCelupElement) {
+                    totalQtyCelupElement.classList.remove("is-invalid");
+                }
             }
 
+            // Perbarui tampilan sisa jatah per baris menggunakan nilai masing-masing baris
             rows.forEach((row, index) => {
                 const sisaJatahElement = row.querySelector(".sisa_jatah");
-                if (sisaJatahElement) {
-                    const sisaJatah = parseFloat(sisaJatahElement.textContent) || 0;
-                    sisaJatahElement.style.color = sisaJatah < 0 ? "red" : "white";
-                    // tampilkan 2 angka di belakang koma
-                    sisaJatahElement.textContent = sisaJatah.toFixed(2);
-                    if (sisaJatah < 0) {
-                        alert(`⚠️ Sisa Jatah di baris ke-${index} negatif!`);
+                const qtyCelupInput = row.querySelector('input[name="qty_celup[]"]');
+                if (sisaJatahElement && qtyCelupInput) {
+                    // Ambil nilai sisa jatah asli dari data attribute pada elemen
+                    const originalSisaJatah = parseFloat(sisaJatahElement.dataset.sisajatah) || 0;
+                    console.log("Original Sisa Jatah:", originalSisaJatah);
+                    // Tampilkan nilai sisa jatah asli untuk setiap baris
+                    sisaJatahElement.textContent = originalSisaJatah.toFixed(2);
+
+                    const qtyCelup = parseFloat(qtyCelupInput.value) || 0;
+                    if (qtyCelup > originalSisaJatah) {
+                        alert(`⚠️ Qty Celup di baris ke-${index + 1} melebihi sisa jatah (${originalSisaJatah.toFixed(2)})!`);
+                        sisaJatahElement.classList.add("text-danger");
+                        qtyCelupInput.classList.add("is-invalid");
+                        qtyCelupInput.focus();
+                    } else {
+                        sisaJatahElement.classList.remove("text-danger");
+                        qtyCelupInput.classList.remove("is-invalid");
                     }
                 }
             });
 
+            // Update sisa kapasitas global
             const sisaKapasitasElement = document.getElementById("sisa_kapasitas");
             if (sisaKapasitasElement) {
                 sisaKapasitasElement.value = (maxCaps - totalQtyCelup).toFixed(2);
@@ -697,46 +725,43 @@
                             </div>
                         </div>
                         <div class="col-4">
+                            <label for="qty_celup">Qty Celup</label>
+                            <input type="number" class="form-control" name="qty_celup[]" value="" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3">
                             <div class="form-group">
-                                <label for="kg_kebutuhan">PO +</label>
-                                <select class="form-select" name="po_plus[]" required>
-                                    <option value="">Pilih PO(+)</option>
-                                    <option value="1">Ya</option>
-                                    <option value="0">Tidak</option>
-                                </select>
-                            </div>
-
-                        </div>
-                        <div class="row">
-                            <div class="col-3">
-                                <div class="form-group">
-                                    <label for="qty_celup">KG Kebutuhan :</label>
-                                    <br />
-                                    <span class="badge bg-info">
-                                        <span class="kg_kebutuhan">0.00</span> KG
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="col-3">
-                                <div class="form-group">
-                                    <label for="qty_celup">Sisa Jatah :</label>
-                                    <br />
-                                    <span class="badge bg-info">
-                                        <span class="sisa_jatah">0.00</span> KG
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="col-3">
-                                <label for="last_status">Last Status</label>
+                                <label for="qty_celup">KG Kebutuhan :</label>
                                 <br />
-                                <span class="badge bg-info">scheduled</span>
-                                <input type="hidden" class="form-control last_status" name="last_status[]" value="scheduled">
-                            </div>
-                            <div class="col-3">
-                                <label for="qty_celup">Qty Celup</label>
-                                <input type="number" class="form-control" name="qty_celup[]" value="" required>
+                                <span class="badge bg-info">
+                                    <span class="kg_kebutuhan">0.00</span> KG
+                                </span>
                             </div>
                         </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="sisa_jatah">Sisa Jatah :</label>
+                                <br />
+                                <span class="badge bg-info">
+                                    <span class="sisa_jatah">0.00</span> KG
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <label for="last_status">Last Status</label>
+                            <br />
+                            <span class="badge bg-info">scheduled</span>
+                            <input type="hidden" class="form-control last_status" name="last_status[]" value="scheduled">
+                        </div>
+                        <div class="col-3 d-flex align-items-center">
+                            <div class="form-group">
+                                <label for="po_plus">PO +</label>
+                                <input type="checkbox" id="po_plus" class="form-control form-check-input" name="po_plus[]" value="1">
+                            </div>
+                        </div>
+                        
+                    </div>
 
                 </td>
                 <td class="text-center">

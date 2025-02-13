@@ -176,7 +176,7 @@ class ScheduleController extends BaseController
         $query = $this->request->getGet('query');
 
         // Validasi query
-        if (empty($query) || strlen($query) < 3) {
+        if (empty($query) || strlen($query) < 2) {
             return $this->response->setJSON([]); // Kembalikan array kosong jika query tidak valid
         }
 
@@ -382,7 +382,7 @@ class ScheduleController extends BaseController
                 'lot_celup' => $scheduleData['lot_celup'] ?? null,
                 'tanggal_schedule' => $scheduleData['tanggal_schedule'],
                 'last_status' => 'scheduled',
-                'po_plus' => $scheduleData['po_plus'][$index] ?? null,
+                'po_plus' => $scheduleData['po_plus'][$index] ?? 0,
                 'user_cek_status' => session()->get('username'),
                 'created_at' => date('Y-m-d H:i:s'),
             ];
@@ -436,27 +436,49 @@ class ScheduleController extends BaseController
         $qty_po = $cekSisaJatah[0]['qty_po'] ?? 0;
         // Hitung sisa jatah
         $sisa_jatah = 0;
-        if (!empty($cekSisaJatah)) {
-            $qty_po = isset($cekSisaJatah[0]['qty_po']) ? (float) $cekSisaJatah[0]['qty_po'] : 0;
-            $total_kg = isset($cekSisaJatah[0]['total_kg']) ? (float) $cekSisaJatah[0]['total_kg'] : 0;
-            $sisa_jatah = $qty_po - $total_kg;
-        } else {
-            // Jika tidak ada schedule, sisa jatah sama dengan qty_po
-            $sisa_jatah = isset($kg_kebutuhan['kg_po']) ? (float) $kg_kebutuhan['kg_po'] : 0;
-        }
-        // dd ($cekSisaJatah, $qty_po, $total_kg, $sisa_jatah);
-        // Update scheduleData dengan informasi tambahan
         foreach ($scheduleData as &$row) {
+            // Ambil tanggal pengiriman untuk row ini
             $deliveryDates = $this->masterOrderModel->getDeliveryDates($row['no_model']);
-            $row['delivery_awal'] = $deliveryDates['delivery_awal'] ?? null;
+            $row['delivery_awal']  = $deliveryDates['delivery_awal'] ?? null;
             $row['delivery_akhir'] = $deliveryDates['delivery_akhir'] ?? null;
 
             // Menghitung qty_po per item
-            $qtyPO = $this->materialModel->getQtyPOByNoModel($row['no_model'], $row['item_type'], $row['kode_warna']);
+            $qtyPO = $this->materialModel->getQtyPOByNoModel(
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna']
+            );
             $row['qty_po'] = $qtyPO['qty_po'] ?? 0;
+
+            // Ambil data kg kebutuhan untuk row ini
+            $kg_kebutuhan = $this->openPoModel->getKgKebutuhan(
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna']
+            );
+
+            $row['kg_kebutuhan'] = $kg_kebutuhan['kg_po'] ?? 0;
+
+            // Cek sisa jatah berdasarkan schedule celup untuk row ini
+            $cekSisaJatahRow = $this->scheduleCelupModel->cekSisaJatah(
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna']
+            );
+
+            if (!empty($cekSisaJatahRow)) {
+                $qty_po_val = isset($cekSisaJatahRow[0]['qty_po']) ? (float)$cekSisaJatahRow[0]['qty_po'] : 0;
+                $total_kg   = isset($cekSisaJatahRow[0]['total_kg']) ? (float)$cekSisaJatahRow[0]['total_kg'] : 0;
+                $row['sisa_jatah'] = $qty_po_val - $total_kg;
+            } else {
+                // Jika tidak ada schedule, gunakan kg_po dari kg_kebutuhan
+                $row['sisa_jatah'] = isset($kg_kebutuhan['kg_po']) ? (float)$kg_kebutuhan['kg_po'] : 0;
+            }
+            // Jika perlu, simpan kembali nilai start_mc (bila ada pemrosesan tambahan)
             $row['start_mc'] = $row['start_mc'];
-            // dd ($row['no_model'], $row['item_type'], $row['start_mc']);
         }
+
+
         // dd($scheduleData);
 
         // Persiapkan data untuk view
@@ -486,7 +508,7 @@ class ScheduleController extends BaseController
         ];
 
         // Jangan gunakan dd() di production
-        // dd($data); // hapus dd()
+        dd($data); // hapus dd()
 
         return view($this->role . '/schedule/form-edit', $data);
     }
@@ -534,7 +556,7 @@ class ScheduleController extends BaseController
                 'warna' => $scheduleData['warna'],
                 'start_mc' => $start_mc,
                 'kg_celup' => $scheduleData['qty_celup'][$index] ?? null,
-                'po_plus' => $scheduleData['po_plus'][$index] ?? null,
+                'po_plus' => $scheduleData['po_plus'][$index] ?? 0,
                 'lot_urut' => $scheduleData['lot_urut'],
                 'lot_celup' => $scheduleData['lot_celup'] ?? null,
                 'tanggal_schedule' => $scheduleData['tanggal_schedule'],
