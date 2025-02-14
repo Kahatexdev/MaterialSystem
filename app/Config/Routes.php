@@ -154,6 +154,6 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
 $routes->group(
     '/api',
     function ($routes) {
-        $routes->get('bsKaryawan/(:any)', 'ApiController::bsKaryawan/$1');
+        $routes->get('statusbahanbaku/(:any)', 'ApiController::statusbahanbaku/$1');
     }
 );

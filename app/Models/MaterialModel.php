@@ -102,4 +102,11 @@ class MaterialModel extends Model
             ->where('kode_warna', $kode_warna)
             ->findAll();
     }
+    public function orderPerArea($area)
+    {
+        return $this->select('master_order.no_model, area, kode_warna, item_type, warna')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('area', $area)
+            ->findAll();
+    }
 }

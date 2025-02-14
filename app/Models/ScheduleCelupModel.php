@@ -333,4 +333,8 @@ class ScheduleCelupModel extends Model
         return $this->where('id_bon', $id_bon)
             ->findAll();
     }
+    public function schedulePerArea($model, $itemType, $kodeWarna)
+    {
+        $data = $this->select();
+    }
 }
