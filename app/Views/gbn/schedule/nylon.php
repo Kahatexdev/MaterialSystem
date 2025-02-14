@@ -75,7 +75,7 @@
 
     <div class="card">
         <div class="card-body">
-            <div class="table-responsive">
+            <div class="table-responsive" style="width:auto; height: 780px; overflow-y: auto; overflow-x: auto;">
                 <table class="table">
                     <thead>
                         <tr>
@@ -103,28 +103,19 @@
                             $sixDaysAhead = (clone $today)->add(new DateInterval('P6D'));
 
                             foreach ($datePeriod as $date) {
-                                // Periksa apakah hari Minggu
-                                if ($date->format('w') == 0) { // 0 adalah kode untuk hari Minggu
-                                    echo "<th style='color: red;'>" . $date->format('D, d M') . "</th>";
+                                // Misalnya tambahkan class sticky ke semua th
+                                if ($date->format('w') == 0) {
+                                    echo "<th class='sticky' style='color: red;'>" . $date->format('D, d M') . "</th>";
+                                } elseif ($date->format('Y-m-d') === $today->format('Y-m-d')) {
+                                    echo "<th class='sticky' style='background-color: #ffeb3b; color: #000;'>" . $date->format('D, d M') . "</th>";
+                                } elseif ($date >= $threeDaysAgo && $date < $today) {
+                                    echo "<th class='sticky' style='color: #6c757d;'>" . $date->format('D, d M') . "</th>";
+                                } elseif ($date > $today && $date <= $sixDaysAhead) {
+                                    echo "<th class='sticky' style='color: rgb(31, 193, 199);'>" . $date->format('D, d M') . "</th>";
+                                } else {
+                                    echo "<th class='sticky'>" . $date->format('D, d M') . "</th>";
                                 }
-                                // Periksa apakah tanggal adalah hari ini
-                                elseif ($date->format('Y-m-d') === $today->format('Y-m-d')) {
-                                    echo "<th style='background-color: #ffeb3b; color: #000;'>" . $date->format('D, d M') . "</th>";
-                                }
-                                // Periksa apakah tanggal adalah 3 hari ke belakang
-                                elseif ($date >= $threeDaysAgo && $date < $today) {
-                                    echo "<th style='color: #6c757d;'>" . $date->format('D, d M') . "</th>";
-                                }
-                                // Periksa apakah tanggal adalah 6 hari ke depan
-                                elseif ($date > $today && $date <= $sixDaysAhead) {
-                                    echo "<th style='color: rgb(31, 193, 199);'>" . $date->format('D, d M') . "</th>";
-                                }
-                                // Tanggal lain
-                                else {
-                                    echo "<th>" . $date->format('D, d M') . "</th>";
-                                }
-                            }
-                            ?>
+                            } ?>
                         </tr>
                     </thead>
                     <tbody>

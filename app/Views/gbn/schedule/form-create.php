@@ -259,6 +259,7 @@
                                         <div id="suggestionsKWarna" class="suggestions-box" style="display: none;"></div>
                                     </div>
                                 </div>
+
                                 <div class="col-md-4">
                                     <!-- Warna -->
                                     <div class="mb-3">
@@ -421,15 +422,38 @@
         const poTable = document.getElementById("poTable");
         const itemType = document.querySelector("select[name='item_type']"); // Pastikan ini adalah elemen <select>
         const poSelect = document.querySelector("select[name='po[]']"); // Pastikan ini adalah elemen <select>
+        // Variabel untuk debounce dan flag ketika saran dipilih
+        let debounceTimer;
+        let suggestionSelected = false;
 
+        // Event listener untuk input pada field kode warna
+        kodeWarna.addEventListener('input', function() {
+            // Jika user baru saja memilih saran, jangan langsung fetch lagi
+            if (suggestionSelected) {
+                suggestionSelected = false;
+                return;
+            }
 
+            clearTimeout(debounceTimer);
+            const query = kodeWarna.value;
 
-        // ✅ Fungsi Fetch Data Kode Warna
+            // Gunakan debounce agar fetch tidak terlalu sering dipanggil
+            debounceTimer = setTimeout(() => {
+                fetchKodeWarnaSuggestions(query);
+            }, 300);
+        });
+
+        // Fungsi untuk mengambil data saran dari backend
         function fetchKodeWarnaSuggestions(query) {
-            fetch('<?= base_url(session('role') . "/schedule/getKodeWarna") ?>?query=' + query)
+            // Jika query kurang dari 2 karakter, sembunyikan kotak saran
+            if (query.length < 2) {
+                suggestionsBoxKWarna.style.display = 'none';
+                return;
+            }
+
+            fetch('<?= base_url(session('role') . "/schedule/getKodeWarna") ?>?query=' + encodeURIComponent(query))
                 .then(response => response.json())
                 .then(data => {
-                    // console.log("Kode Warna Data:", data);
                     const kodeWarnaSuggestions = data.map(item => item.kode_warna);
                     displayKodeWarnaSuggestions(kodeWarnaSuggestions);
                 })
@@ -438,55 +462,111 @@
                 });
         }
 
-        // ✅ Fungsi Menampilkan Kode Warna Suggestion
+        // Fungsi untuk menampilkan saran di kotak saran
         function displayKodeWarnaSuggestions(suggestions) {
-            suggestionsBoxKWarna.innerHTML = ''; // Clear previous suggestions
+            suggestionsBoxKWarna.innerHTML = ''; // Bersihkan saran sebelumnya
+
             if (suggestions.length > 0) {
-                suggestionsBoxKWarna.style.display = 'block'; // Show suggestions box
+                suggestionsBoxKWarna.style.display = 'block'; // Tampilkan kotak saran
+
                 suggestions.forEach(suggestion => {
                     const suggestionDiv = document.createElement('div');
                     suggestionDiv.textContent = suggestion;
+
+                    // Ketika saran diklik, update nilai input dengan saran yang dipilih
                     suggestionDiv.addEventListener('click', function() {
+                        suggestionSelected = true;
                         kodeWarna.value = suggestion;
                         suggestionsBoxKWarna.style.display = 'none';
                     });
+
                     suggestionsBoxKWarna.appendChild(suggestionDiv);
                 });
             } else {
                 suggestionsBoxKWarna.style.display = 'none';
             }
         }
-        // ✅ Fungsi Fetch Data Warna berdasarkan Kode Warna
-        function fetchWarnaByKodeWarna(kodeWarna) {
-            fetch('<?= base_url(session('role') . "/schedule/getWarna") ?>?kode_warna=' + kodeWarna)
+
+        // Event listener untuk input pada field kode warna
+        kodeWarna.addEventListener('input', function() {
+            // Jika user baru saja memilih saran, jangan langsung fetch lagi
+            if (suggestionSelected) {
+                suggestionSelected = false;
+                return;
+            }
+
+            clearTimeout(debounceTimer);
+            const query = kodeWarna.value;
+
+            // Gunakan debounce agar fetch tidak terlalu sering dipanggil
+            debounceTimer = setTimeout(() => {
+                fetchKodeWarnaSuggestions(query);
+            }, 300);
+        });
+
+        // Fungsi untuk mengambil data saran dari backend
+        function fetchKodeWarnaSuggestions(query) {
+            // Jika query kurang dari 2 karakter, sembunyikan kotak saran
+            if (query.length < 2) {
+                suggestionsBoxKWarna.style.display = 'none';
+                return;
+            }
+
+            fetch('<?= base_url(session('role') . "/schedule/getKodeWarna") ?>?query=' + encodeURIComponent(query))
                 .then(response => response.json())
                 .then(data => {
-                    // console.log("Warna Data:", data);
-                    // Pastikan ada data sebelum mengakses indeks pertama
-                    warnaInput.value = data[0].color;
-                    fetchItemType(kodeWarna, data[0].color);
+                    const kodeWarnaSuggestions = data.map(item => item.kode_warna);
+                    displayKodeWarnaSuggestions(kodeWarnaSuggestions);
+                })
+                .catch(error => {
+                    console.error('Error fetching kode warna suggestions:', error);
+                });
+        }
+
+        // Fungsi untuk menampilkan saran di kotak saran
+        function displayKodeWarnaSuggestions(suggestions) {
+            suggestionsBoxKWarna.innerHTML = ''; // Bersihkan saran sebelumnya
+
+            if (suggestions.length > 0) {
+                suggestionsBoxKWarna.style.display = 'block'; // Tampilkan kotak saran
+
+                suggestions.forEach(suggestion => {
+                    const suggestionDiv = document.createElement('div');
+                    suggestionDiv.textContent = suggestion;
+
+                    // Ketika saran diklik, update nilai input dan langsung panggil fetchWarnaByKodeWarna
+                    suggestionDiv.addEventListener('click', function() {
+                        suggestionSelected = true;
+                        kodeWarna.value = suggestion;
+                        suggestionsBoxKWarna.style.display = 'none';
+                        // Panggil fetch untuk mendapatkan warna berdasarkan kode warna yang dipilih
+                        fetchWarnaByKodeWarna(suggestion);
+                    });
+
+                    suggestionsBoxKWarna.appendChild(suggestionDiv);
+                });
+            } else {
+                suggestionsBoxKWarna.style.display = 'none';
+            }
+        }
+
+        // Fungsi Fetch Data Warna berdasarkan Kode Warna
+        function fetchWarnaByKodeWarna(kodeWarnaValue) {
+            fetch('<?= base_url(session('role') . "/schedule/getWarna") ?>?kode_warna=' + encodeURIComponent(kodeWarnaValue))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        warnaInput.value = data[0].color;
+                        fetchItemType(kodeWarnaValue, data[0].color);
+                    } else {
+                        warnaInput.value = 'Warna tidak ditemukan';
+                    }
                 })
                 .catch(error => {
                     console.error('Error fetching warna by kode warna:', error);
                     warnaInput.value = 'Error mengambil warna';
                 });
         }
-        kodeWarna.addEventListener('change', function() {
-            kodeWarna.value = suggestionsBoxKWarna.textContent;
-            // console.log(kodeWarna.value);
-            const query = kodeWarna.value;
-            fetchWarnaByKodeWarna(query);
-        });
-
-        // ✅ Event listener untuk kode_warna input serta tampilkan warna
-        kodeWarna.addEventListener('input', function() {
-            const query = kodeWarna.value;
-            if (query.length >= 1) {
-                fetchKodeWarnaSuggestions(query);
-            } else {
-                suggestionsBoxKWarna.style.display = 'none';
-            }
-        });
 
 
 
@@ -683,7 +763,7 @@
 
         // ✅ Fungsi Fetch Detail PO
         function fetchPODetails(poNo, tr, itemType, kodeWarna) {
-            const url = `<?= base_url(session('role') . "/schedule/getPODetails") ?>?id_order=${poNo}&item_type=${itemType}&kode_warna=${kodeWarna}`;
+            const url = `<?= base_url(session('role') . "/schedule/getPODetails") ?>?id_order=${poNo}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}`;
             // console.log("Request URL:", url); // Log URL yang digunakan untuk fetch
 
             fetch(url)

@@ -504,80 +504,6 @@
             });
         }
 
-        // // Fungsi menghitung total Qty Celup dan sisa kapasitas
-        // function calculateTotalAndRemainingCapacity() {
-        //     let totalQtyCelup = 0;
-        //     if (!poTable) {
-        //         console.warn("⚠️ poTable tidak ditemukan di halaman.");
-        //         return;
-        //     }
-        //     const rows = poTable.querySelectorAll("tbody tr");
-
-        //     rows.forEach((row, index) => {
-        //         const qtyCelupInput = row.querySelector('input[name="qty_celup[]"]');
-        //         const lastStatusInput = row.querySelector('input[name="last_status[]"]');
-        //         if (qtyCelupInput && lastStatusInput) {
-        //             const qtyCelup = parseFloat(qtyCelupInput.value) || 0;
-        //             const lastStatus = lastStatusInput.value.trim();
-        //             if (["scheduled", "celup", "reschedule"].includes(lastStatus)) {
-        //                 totalQtyCelup += qtyCelup;
-        //             }
-        //         } else {
-        //             console.warn(`⚠️ Input qty_celup atau last_status tidak ditemukan di baris ke-${index + 1}`);
-        //         }
-        //     });
-
-        //     const totalQtyCelupElement = document.getElementById("total_qty_celup");
-        //     if (totalQtyCelupElement) {
-        //         totalQtyCelupElement.value = totalQtyCelup.toFixed(2);
-        //     }
-
-        //     const maxCapsInput = document.getElementById("max_caps");
-        //     const maxCaps = maxCapsInput ? parseFloat(maxCapsInput.value) || 0 : 0;
-        //     if (totalQtyCelup > maxCaps) {
-        //         alert("⚠️ Total Qty Celup melebihi Max Caps!");
-        //         if (totalQtyCelupElement) {
-        //             totalQtyCelupElement.classList.add("is-invalid");
-        //             totalQtyCelupElement.focus();
-        //         }
-        //     } else {
-        //         if (totalQtyCelupElement) {
-        //             totalQtyCelupElement.classList.remove("is-invalid");
-        //         }
-        //     }
-
-        //     rows.forEach((row, index) => {
-        //         const sisaJatahElement = row.querySelector(".sisa_jatah");
-        //         const qtyCelupInput = row.querySelector('input[name="qty_celup[]"]');
-        //         if (sisaJatahElement && qtyCelupInput) {
-        //             const originalSisaJatah = parseFloat(sisaJatahElement.dataset.sisajatah) || 0;
-        //             sisaJatahElement.textContent = originalSisaJatah.toFixed(2);
-        //             const qtyCelup = parseFloat(qtyCelupInput.value) || 0;
-        //             if (qtyCelup > originalSisaJatah) {
-        //                 alert(`⚠️ Qty Celup di baris ke-${index + 1} melebihi sisa jatah (${originalSisaJatah.toFixed(2)})!`);
-        //                 sisaJatahElement.classList.add("text-danger");
-        //                 qtyCelupInput.classList.add("is-invalid");
-        //                 qtyCelupInput.focus();
-        //             } else {
-        //                 sisaJatahElement.classList.remove("text-danger");
-        //                 qtyCelupInput.classList.remove("is-invalid");
-        //             }
-        //         }
-        //     });
-
-        //     const sisaKapasitasElement = document.getElementById("sisa_kapasitas");
-        //     if (sisaKapasitasElement) {
-        //         sisaKapasitasElement.value = (maxCaps - totalQtyCelup).toFixed(2);
-        //     }
-        // }
-
-        // // Tambahkan event listener pada setiap input qty_celup agar perhitungan otomatis
-        // if (poTable) {
-        //     poTable.querySelectorAll('input[name="qty_celup[]"]').forEach(input => {
-        //         input.addEventListener('input', calculateTotalAndRemainingCapacity);
-        //     });
-        // }
-
         // ✅ Fungsi untuk menghitung total_qty_celup dan memeriksa max_caps serta tagihan SCH
         function calculateTotalAndRemainingCapacity() {
             const rows = poTable.querySelectorAll("tbody tr");
@@ -644,16 +570,6 @@
                 } else {
                     sisaKapasitasElement.classList.remove("is-invalid");
                 }
-
-                // // Disable atau enable tombol submit berdasarkan sisa kapasitas
-                // const submitButton = document.getElementById("submitButton");
-                // if (submitButton) {
-                //     if (sisaKapasitas < 0) {
-                //         submitButton.disabled = true;
-                //     } else {
-                //         submitButton.disabled = false;
-                //     }
-                // }
             }
         }
 
@@ -685,7 +601,7 @@
 
         // Fungsi Fetch Detail PO
         function fetchPODetails(poNo, tr, itemType, kodeWarna) {
-            const url = `<?= base_url(session('role') . "/schedule/getPODetails") ?>?id_order=${poNo}&item_type=${itemType}&kode_warna=${kodeWarna}`;
+            const url = `<?= base_url(session('role') . "/schedule/getPODetails") ?>?id_order=${poNo}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}`;
             fetch(url)
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');

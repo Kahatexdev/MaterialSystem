@@ -195,6 +195,7 @@ class ScheduleController extends BaseController
         return $this->response->setJSON($suggestions);
     }
 
+
     public function getWarna()
     {
         // Ambil kode_warna dari parameter GET
