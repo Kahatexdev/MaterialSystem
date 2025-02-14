@@ -346,65 +346,12 @@ class CelupController extends BaseController
         ];
         return view($this->role . '/out/createBon', $data);
     }
-
-    public function getNoModel()
+    public function getItem($id)
     {
-        if ($this->request->isAJAX()) {
-            $models = $this->scheduleCelupModel->getCelupDone();
-
-            $data = [];
-            foreach ($models as $model) {
-                $data[] = $model['no_model'];
-            }
-
-            return $this->response->setJSON($data);
-        }
+        $item = $this->scheduleCelupModel->getScheduleDetailsById($id);
+        return $this->response->setJSON($item);
     }
 
-
-    public function getItemType()
-    {
-        $noModel = $this->request->getPost('no_model');
-
-        if (!$noModel) {
-            return $this->response->setJSON(['error' => 'No model provided'], 400);
-        }
-
-        $itemType = $this->scheduleCelupModel->getItemTypeByNoModel($noModel);
-
-        return $this->response->setJSON($itemType);
-    }
-
-    public function getKodeWarna()
-    {
-        $noModel = $this->request->getPost('no_model');
-        $itemType = $this->request->getPost('item_type');
-
-        if (!$noModel || !$itemType) {
-            return $this->response->setJSON(['error' => 'Invalid input'], 400);
-        }
-
-        // Ambil data dari model
-        $kodeWarna = $this->scheduleCelupModel->getKodeWarnaByNoModelDanItemType($noModel, $itemType);
-
-        return $this->response->setJSON($kodeWarna);
-    }
-
-    public function getWarna()
-    {
-        $noModel = $this->request->getPost('no_model');
-        $itemType = $this->request->getPost('item_type');
-        $kodeWarna = $this->request->getPost('kode_warna');
-
-        if (!$noModel || !$itemType) {
-            return $this->response->setJSON(['error' => 'Invalid input'], 400);
-        }
-
-        // Ambil data dari model
-        $colorCodes = $this->scheduleCelupModel->getWarnaByNoModelItemDanKode($noModel, $itemType, $kodeWarna);
-
-        return $this->response->setJSON($colorCodes);
-    }
 
     public function saveBon()
     {
@@ -431,12 +378,10 @@ class CelupController extends BaseController
         $saveDataOutCelup = [];
 
         for ($h = 0; $h < $tab; $h++) {
-            // Ambil nilai input untuk parameter pencarian id_celup
-            $itemType = $data['items'][$h]['item_type'] ?? null;
-            $kodeWarna = $data['items'][$h]['kode_warna'] ?? null;
-            $noModel = $data['items'][$h]['no_model'] ?? null;
-            $id_celup = $this->scheduleCelupModel->getIdCelupbyNoModelItemTypeKodeWarna($noModel, $itemType, $kodeWarna);
-            $this->scheduleCelupModel->update($id_celup['id_celup'], ['id_bon' => $id_bon]);
+
+            $id_celup = $data['items'][$h]['id_celup'] ?? null;
+            $lot = $this->scheduleCelupModel->select('lot_celup')->where('id_celup', $id_celup)->first();
+            $this->scheduleCelupModel->update($id_celup, ['id_bon' => $id_bon, 'last_status' => 'sent']);
             $gantiRetur = isset($data['ganti_retur'][$h]) ? $data['ganti_retur'][$h] : '0';
             // Pastikan no_karung tidak kosong dan merupakan array
             if (!empty($data['no_karung'][$h]) && is_array($data['no_karung'][$h])) {
@@ -445,14 +390,14 @@ class CelupController extends BaseController
                 for ($i = 0; $i < $jmldatapertab; $i++) {
                     $saveDataOutCelup[] = [
                         'id_bon' => $id_bon,
-                        'id_celup' => $id_celup['id_celup'] ?? null,
+                        'id_celup' => $id_celup ?? null,
                         'l_m_d' => $data['l_m_d'][$h] ?? null,
                         'harga' => $data['harga'][$h] ?? null,
                         'no_karung' => $data['no_karung'][$h][$i] ?? null, // Ambil dari indeks $i
                         'gw_kirim' => $data['gw_kirim'][$h][$i] ?? null,
                         'kgs_kirim' => $data['kgs_kirim'][$h][$i] ?? null,
                         'cones_kirim' => $data['cones_kirim'][$h][$i] ?? null,
-                        'lot_kirim' => $data['lot_kirim'][$h][$i] ?? '',
+                        'lot_kirim' => $lot['lot_celup'],
                         'ganti_retur' => $gantiRetur,
                         'admin' => session()->get('username'),
                         'created_at' => date('Y-m-d H:i:s'),

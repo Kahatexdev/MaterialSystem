@@ -281,10 +281,10 @@ class ScheduleCelupModel extends Model
 
     public function getCelupDone()
     {
-        return $this->table('schedule_celup')
-            ->select('no_model')
+        return $this
+            ->select('id_celup,no_model, item_type, kode_warna, warna')
             ->where('last_status', 'done')
-            ->groupBy('no_model')
+            ->groupBy('id_celup')
             ->findAll();
     }
     public function getNoModelCreateBon()

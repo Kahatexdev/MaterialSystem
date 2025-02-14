@@ -48,7 +48,7 @@
                             <div id="kebutuhan-container">
                                 <div class="row mb-4">
                                     <div class="col-md-4">
-                                        <input type="hidden" name="id_celup">
+
                                         <label>Detail Surat Jalan</label>
                                         <select class="form-control" name="detail_sj" id="detail_sj">
                                             <option value="">Pilih Surat Jalan</option>
@@ -79,15 +79,22 @@
                                     <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
                                         <!-- Form Items -->
                                         <div class="kebutuhan-item">
-                                            <div class="row g-3">
+                                            <div class="row g-3 mb-2">
                                                 <div class="col-md-12">
-
+                                                    <label for="itemType">Done Celup</label>
+                                                    <select class="form-control" id="add_item" name="add_item">
+                                                        <option value="">Pilih Item </option>
+                                                        <?php foreach ($no_model as $item): ?>
+                                                            <option value="<?= $item['id_celup'] ?>"><?= $item['no_model'] ?> | <?= $item['item_type'] ?> |<?= $item['kode_warna'] ?> | <?= $item['warna'] ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
                                                 </div>
                                             </div>
                                             <div class="row g-3">
 
                                                 <div class="col-md-4">
                                                     <label>No Model</label>
+                                                    <input type="text" class="form-control" name="items[0][id_celup]" id="id_celup" required placeholder="Pilih No Model" readonly hidden>
                                                     <input type="text" class="form-control" name="items[0][no_model]" id="no_model" required placeholder="Pilih No Model" readonly>
                                                 </div>
                                                 <div class="col-md-4">
@@ -190,7 +197,7 @@
                                                                 <td><input type="float" class="form-control" id="total_gw_kirim" name="total_gw_kirim" placeholder="GW" readonly></td>
                                                                 <td><input type="float" class="form-control" id="total_kgs_kirim" name="total_kgs_kirim" placeholder="NW" readonly></td>
                                                                 <td><input type="float" class="form-control" id="total_cones_kirim" name="total_cones_kirim" placeholder="Cones" readonly></td>
-                                                                <td><input type="float" class="form-control" id="total_lot_kirim" name="total_lot_kirim" placeholder="Lot" readonly></td>
+
                                                                 <td></td>
                                                             </tr>
                                                         </tfoot>
@@ -231,8 +238,30 @@
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
     <script>
-        // Ambil item type berdasarkan no model
+        $(document).ready(function() {
 
+            $('#add_item').select2();
+            $('#add_item').on("select2:select", function() {
+                let idcelup = $(this).val(); // Ambil value yang dipilih di select2
+
+                $.ajax({
+                    url: "<?= base_url($role . '/createBon/getItem/') ?>" + idcelup,
+                    type: "POST",
+                    data: {
+                        id: idcelup
+                    }, // Kirim dalam format object
+                    dataType: "json",
+                    success: function(data) {
+                        $('#no_model').val(data.no_model);
+                        $('#item_type').val(data.item_type);
+                        $('#kode_warna').val(data.kode_warna);
+                        $('#warna').val(data.warna);
+                        $('#id_celup').val(idcelup);
+                    }
+                });
+            });
+
+        });
 
         document.addEventListener("DOMContentLoaded", function() {
             const navTab = document.getElementById("nav-tab");
@@ -296,6 +325,7 @@
                 const totalLotId = `total_lot_kirim_${tabIndex}`;
 
                 const newInputId = `no_model_${tabIndex}`;
+                const id_celup = `id_celup_${tabIndex}`;
                 const itemTypeId = `item_type_${tabIndex}`;
                 const kodeWarnaId = `kode_warna_${tabIndex}`;
                 const warnaId = `warna_${tabIndex}`;
@@ -325,9 +355,21 @@
                 // Tambahkan elemen `input-group` ke tab baru
                 newTabPane.innerHTML = `
             <div class="kebutuhan-item">
-                                        <div class="row g-3">
+                                        <div class="row g-3 mb-2">
+                                                <div class="col-md-12">
+                                                    <label for="itemType">Done Celup</label>
+                                                    <select class="form-control slc2" id="add_item_${tabIndex}" name="add_item">
+                                                        <option value="">Pilih Item </option>
+                                                        <?php foreach ($no_model as $item): ?>
+                                                            <option value="<?= $item['id_celup'] ?>"><?= $item['no_model'] ?> | <?= $item['item_type'] ?> |<?= $item['kode_warna'] ?> | <?= $item['warna'] ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                           <div class="row g-3">
                                             <div class="col-md-4">
                                                 <label>No Model</label>
+                                                <input type="text" class="form-control no-model" name="items[${tabIndex - 1}][id_celup]" id="${id_celup}" required placeholder="Pilih No Model" hidden>
                                                 <input type="text" class="form-control no-model" name="items[${tabIndex - 1}][no_model]" id="${newInputId}" required placeholder="Pilih No Model">
                                             </div>
                                             <div class="col-md-4">
@@ -348,7 +390,9 @@
                                         <div class="row g-3 mt-3">
                                             <div class="col-md-4">
                                                 <label>Warna</label>
-                                                <input type="text" class="form-control warna" name="items[${tabIndex - 1}][warna]" id="${warnaId}" required readonly>
+                                                   <select class="form-control kode-warna" name="items[${tabIndex - 1}][kode_warna]" id="${warnaId}" required>
+                                                    <option value="">Pilih Kode Warna</option>
+                                                </select>
                                             </div>
                                             <div class="col-md-4">
                                                 <label>LMD</label>
@@ -406,7 +450,6 @@
                                                             <td><input type="float" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex - 1}][0]"></td>
                                                             <td><input type="float" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex - 1}][0]"></td>
                                                             <td><input type="float" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex - 1}][0]"></td>
-                                                            <td><input type="text" class="form-control lot_kirim_input" name="lot_kirim[${tabIndex - 1}][0]"></td>
 
                                                             <td class="text-center">
                                                                 <!-- <button type="button" class="btn btn-danger removeRow">
@@ -452,6 +495,32 @@
             `;
 
                 navTabContent.appendChild(newTabPane);
+                document.getElementById(newContentId).querySelectorAll('.slc2').forEach(el => {
+                    $(el).select2({
+                        width: '100%'
+                    });
+
+                    $(el).on("select2:select", function() {
+                        let idcelup = $(this).val(); // Ambil value yang dipilih di select2
+
+                        $.ajax({
+                            url: "<?= base_url($role . '/createBon/getItem/') ?>" + idcelup,
+                            type: "POST",
+                            data: {
+                                id: idcelup
+                            }, // Kirim dalam format object
+                            dataType: "json",
+                            success: function(data) {
+                                // Update elemen input dan select di dalam tab baru
+                                document.getElementById(id_celup).value = idcelup;
+                                document.getElementById(newInputId).value = data.no_model;
+                                document.getElementById(itemTypeId).innerHTML = `<option value="${data.item_type}" selected>${data.item_type}</option>`;
+                                document.getElementById(kodeWarnaId).innerHTML = `<option value="${data.kode_warna}" selected>${data.kode_warna}</option>`;
+                                document.getElementById(warnaId).innerHTML = `<option value="${data.warna}" selected>${data.warna}</option>`;
+                            }
+                        });
+                    });
+                });
 
                 // Pindahkan ke tab baru
                 const bootstrapTab = new bootstrap.Tab(newTabButton);
@@ -459,6 +528,7 @@
 
                 // Event listener tombol
                 newTabPane.querySelector(".add-more").addEventListener("click", addNewTab);
+
                 newTabPane.querySelector(".remove-tab").addEventListener("click", function() {
                     removeTab(newTabButton, newTabPane);
                 });
@@ -513,13 +583,7 @@
                         calculateTotals(newPoTable);
                     });
                 });
-                // Terapkan autocomplete ke input baru
-                applyAutocomplete(`#${newInputId}`);
 
-                // Event untuk memuat Item Type berdasarkan No Model
-
-
-                // Event untuk memuat Kode Warna berdasarkan Item Type dan No Model
 
 
                 tabIndex++;
