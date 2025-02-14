@@ -26,6 +26,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('material/(:any)', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');
     $routes->get('getMaterialDetails/(:num)', 'MasterdataController::getMaterialDetails/$1');
+    $routes->post('tambahMaterial', 'MaterialController::tambahMaterial');
     $routes->post('updateMaterial', 'MasterdataController::updateMaterial');
     $routes->get('deleteMaterial/(:num)/(:num)', 'MasterdataController::deleteMaterial/$1/$2');
     $routes->get('openPO/(:num)', 'MasterdataController::openPO/$1');

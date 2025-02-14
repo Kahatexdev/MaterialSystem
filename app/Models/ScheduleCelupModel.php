@@ -245,6 +245,7 @@ class ScheduleCelupModel extends Model
         $data = $this->select('
         SUM(schedule_celup.kg_celup) AS total_kg,
         material.id_order,
+        material.qty_po,
         schedule_celup.item_type,
         schedule_celup.kode_warna,
         master_order.no_model
