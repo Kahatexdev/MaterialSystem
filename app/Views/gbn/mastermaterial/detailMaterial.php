@@ -1,4 +1,4 @@
-<?php $this->extend($role . '/dashboard/header'); ?>
+<?php $this->extend($role . '/mastermaterial/header'); ?>
 <?php $this->section('content'); ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
 <div class="container-fluid py-4">
@@ -35,10 +35,12 @@
                     <h5 class="mb-0 font-weight-bolder">Data Material <?= $no_model ?></h5>
                 </div>
                 <div class="group">
+                    <button type="button" class="btn btn-outline-info me-2" data-bs-toggle="modal" data-bs-target="#tambahModal">
+                        <i class="fas fa-plus me-2"></i>Tambah Material
+                    </button>
                     <a href="<?= base_url($role . '/openPO/' . $id_order) ?>" class="btn btn-outline-info">
                         <i class="fas fa-file-import me-2"></i>Buka PO
                     </a>
-
                     <button type="submit" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#ExportModal">
                         <i class="fas fa-file-export me-2"></i>EXPORT PO
                     </button>
@@ -46,7 +48,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- Tabel Data -->
     <div class="card mt-4">
@@ -89,6 +90,7 @@
                                     </button>
                                     <button class="btn btn-danger btn-sm btn-delete" data-id="<?= $data['id_material'] ?>">
                                         Delete
+                                    </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -104,6 +106,104 @@
                     </div>
                 </div>
             <?php endif; ?>
+        </div>
+
+        <!-- Modal Tambah Data -->
+        <div class="modal fade" id="tambahModal" tabindex="-1" aria-labelledby="tambahModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="tambahModalLabel">Tambah Data Material</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="<?= base_url($role . '/tambahMaterial') ?>" method="post" id="form-material">
+                            <input type="hidden" name="id_order" value="<?= $id_order ?>">
+                            <div class="mb-3">
+                                <label for="style_size" class="form-label">Style Size</label>
+                                <input type="text" class="form-control" id="add_style_size" name="style_size" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="area" class="form-label">Area</label>
+                                <select class="form-control" name="area" id="add_area">
+                                    <option value="">Pilih Area</option>
+                                    <option value="KK1A">KK1A</option>
+                                    <option value="KK1B">KK1B</option>
+                                    <option value="KK2A">KK2A</option>
+                                    <option value="KK2B">KK2B</option>
+                                    <option value="KK2C">KK2C</option>
+                                    <option value="KK5G">KK5G</option>
+                                    <option value="KK7K">KK7K</option>
+                                    <option value="KK7L">KK7L</option>
+                                    <option value="KK8D">KK8D</option>
+                                    <option value="KK8F">KK8F</option>
+                                    <option value="KK8J">KK8J</option>
+                                    <option value="KK9">KK9</option>
+                                    <option value="KK10">KK10</option>
+                                    <option value="KK11M">KK11M</option>
+                                    <option value="Belum Ada Area">Belum Ada Area</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="inisial" class="form-label">Inisial</label>
+                                <input type="text" class="form-control" id="add_inisial" name="inisial" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="itemType">Item Type</label>
+                                <select class="form-control" id="add_item_type" name="item_type">
+                                    <option value="">Pilih Item Type</option>
+                                    <?php foreach ($itemType as $item): ?>
+                                        <option value="<?= $item['item_type'] ?>"><?= $item['item_type'] ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="kode_warna" class="form-label">Kode Warna</label>
+                                <input type="text" class="form-control" id="add_kode_warna" name="kode_warna" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="color" class="form-label">Color</label>
+                                <input type="text" class="form-control" id="add_color" name="color" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="composition" class="form-label">Composition (%)</label>
+                                <input type="number" step="0.01" class="form-control" id="add_composition" name="composition" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="gw" class="form-label">GW</label>
+                                <input type="number" step="0.01" class="form-control" id="add_gw" name="gw" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="qty_pcs" class="form-label">Qty(pcs)</label>
+                                <input type="number" step="0.01" class="form-control" id="add_qty_pcs" name="qty_pcs" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="qty_pcs" class="form-label">Loss</label>
+                                <input type="number" step="0.01" class="form-control" id="add_loss" name="loss" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="qty_pcs" class="form-label">Kgs</label>
+                                <input type="number" step="0.01" class="form-control" id="add_kgs" name="kgs" required>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-info">Tambah</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Modal Edit Data Material -->
@@ -222,84 +322,96 @@
                 </div>
             </div>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script type="text/javascript">
-            $(document).ready(function() {
-                $('#dataTable').DataTable({
-                    "pageLength": 35,
-                    "order": []
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#tambahModal').on('shown.bs.modal', function() {
+                $('#add_item_type').select2({
+                    dropdownParent: $('#tambahModal'),
                 });
-                // Event listener tombol Update
-                $('#dataTable').on('click', '.btn-edit', function() {
-                    const id = $(this).data('id');
+            });
+        });
 
-                    // Lakukan AJAX request untuk mendapatkan data
-                    $.ajax({
-                        url: '<?= base_url($role . '/getMaterialDetails') ?>/' + id,
-                        type: 'GET',
-                        success: function(response) {
-                            // Isi data ke dalam form modal
-                            $('#id_material').val(response.id_material);
-                            $('#id_order').val(response.id_order);
-                            $('#style_size').val(response.style_size);
-                            $('#area').val(response.area);
-                            $('#inisial').val(response.inisial);
-                            $('#color').val(response.color);
-                            $('#item_type').val(response.item_type);
-                            $('#kode_warna').val(response.kode_warna);
-                            $('#composition').val(response.composition);
-                            $('#gw').val(response.gw);
-                            $('#qty_pcs').val(response.qty_pcs);
-                            $('#loss').val(response.loss);
-                            $('#kgs').val(response.kgs);
-                            // Show modal dialog
-                            $('#updateModal').modal('show');
-                        },
-                        error: function(xhr, status, error) {
-                            console.error(xhr.responseText);
-                        }
-                    });
+        $(document).ready(function() {
+            $('#dataTable').DataTable({
+                "pageLength": 35,
+                "order": []
+            });
+            // Event listener tombol Update
+            $('#dataTable').on('click', '.btn-edit', function() {
+                const id = $(this).data('id');
+
+                // Lakukan AJAX request untuk mendapatkan data
+                $.ajax({
+                    url: '<?= base_url($role . '/getMaterialDetails') ?>/' + id,
+                    type: 'GET',
+                    success: function(response) {
+                        // Isi data ke dalam form modal
+                        $('#id_material').val(response.id_material);
+                        $('#id_order').val(response.id_order);
+                        $('#style_size').val(response.style_size);
+                        $('#area').val(response.area);
+                        $('#inisial').val(response.inisial);
+                        $('#color').val(response.color);
+                        $('#item_type').val(response.item_type);
+                        $('#kode_warna').val(response.kode_warna);
+                        $('#composition').val(response.composition);
+                        $('#gw').val(response.gw);
+                        $('#qty_pcs').val(response.qty_pcs);
+                        $('#loss').val(response.loss);
+                        $('#kgs').val(response.kgs);
+                        // Show modal dialog
+                        $('#updateModal').modal('show');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
                 });
-
-                // Event listener untuk submit form update
-
-
-                // Event listener tombol Delete
-                $('#dataTable').on('click', '.btn-delete', function() {
-                    const id = $(this).data('id');
-                    const idOrder = <?= $id_order ?>;
-                    console.log(idOrder, id);
-                    // Tampilkan konfirmasi dialog
-                    Swal.fire({
-                        title: 'Apakah Anda yakin?',
-                        text: "Data yang dihapus tidak dapat dikembalikan!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Ya, hapus!',
-                        cancelButtonText: 'Batal'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Redirect ke link hapus
-                            window.location = '<?= base_url($role . '/deleteMaterial') ?>/' + id + '/' + idOrder;
-                        }
-                    });
-                });
-
             });
 
-            // Ambil elemen select dan input Karet
-            const jenisSelect = document.getElementById('jenis');
-            const jenis2Input = document.getElementById('jenis2');
+            // Event listener untuk submit form update
 
-            // Tambahkan event listener untuk perubahan pada elemen select
-            jenisSelect.addEventListener('change', function() {
-                if (jenisSelect.value === 'SPANDEX') {
-                    jenis2Input.value = 'KARET'; // Jika SPANDEX, isi dengan 'KARET'
-                } else {
-                    jenis2Input.value = ''; // Jika bukan SPANDEX, kosongkan input
-                }
+
+            // Event listener tombol Delete
+            $('#dataTable').on('click', '.btn-delete', function() {
+                const id = $(this).data('id');
+                const idOrder = <?= $id_order ?>;
+                console.log(idOrder, id);
+                // Tampilkan konfirmasi dialog
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Redirect ke link hapus
+                        window.location = '<?= base_url($role . '/deleteMaterial') ?>/' + id + '/' + idOrder;
+                    }
+                });
             });
-        </script>
-        <?php $this->endSection(); ?>
+
+        });
+
+        // Ambil elemen select dan input Karet
+        const jenisSelect = document.getElementById('jenis');
+        const jenis2Input = document.getElementById('jenis2');
+
+        // Tambahkan event listener untuk perubahan pada elemen select
+        jenisSelect.addEventListener('change', function() {
+            if (jenisSelect.value === 'SPANDEX') {
+                jenis2Input.value = 'KARET'; // Jika SPANDEX, isi dengan 'KARET'
+            } else {
+                jenis2Input.value = ''; // Jika bukan SPANDEX, kosongkan input
+            }
+        });
+    </script>
+
+    <?php $this->endSection(); ?>

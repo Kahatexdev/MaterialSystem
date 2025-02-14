@@ -293,7 +293,7 @@ class MasterdataController extends BaseController
         if (!$id_order) {
             return redirect()->to(base_url($this->role . '/masterOrder'))->with('error', 'ID Order tidak ditemukan.');
         }
-
+        $itemType = $this->masterMaterialModel->getItemType();
         $orderData = $this->materialModel->getMaterial($id_order);
         $model = $orderData[0]['no_model'];
         if (!$orderData) {
@@ -305,7 +305,8 @@ class MasterdataController extends BaseController
             'role' => $this->role,
             'orderData' => $orderData,
             'no_model' => $model,
-            'id_order' => $id_order
+            'id_order' => $id_order,
+            'itemType' => $itemType,
         ];
 
         return view($this->role . '/mastermaterial/detailMaterial', $data);
