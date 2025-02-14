@@ -693,7 +693,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    // console.log("Data received from server:", data); // Log data yang diterima dari server
+                    console.log("Data received from server:", data); // Log data yang diterima dari server
 
                     if (data && !data.error) { // Pastikan tidak ada error
                         const tglStartMC = tr.querySelector("input[name='tgl_start_mc[]']");
