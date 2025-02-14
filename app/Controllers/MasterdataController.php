@@ -177,7 +177,7 @@ class MasterdataController extends BaseController
                     'foll_up' => $foll_up,
                 ];
             }
-
+            // dd($groupedData);
             // Sekarang lakukan validasi hanya sekali per group (style_size)
             $validDataOrder = [];
             foreach ($groupedData as $style_size => $orders) {
@@ -309,7 +309,7 @@ class MasterdataController extends BaseController
             // Redirect ke halaman sebelumnya dengan pesan sukses
             return redirect()->back()->with('success', 'Data berhasil diimport.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()->with('error', 'PDK Belum di input ke CapacityApps');
         }
         return redirect()->back()->with('error', 'Terjadi kesalahan saat mengimport data.');
     }

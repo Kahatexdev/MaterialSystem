@@ -43,16 +43,6 @@ class MaterialController extends BaseController
         return view($this->role . '/dashboard/index', $data);
     }
 
-    public function getItemType()
-    {
-        $search = $this->request->getGet('search');
-        $item_type = $this->masterMaterialModel->getItemTypeAutoComplete($search);
-
-        // Ubah agar response JSON langsung berupa array, bukan di dalam key 'item_type'
-        return $this->response->setJSON($item_type);
-    }
-
-
     public function tambahMaterial()
     {
         $data = $this->request->getPost();

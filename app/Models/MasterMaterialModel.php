@@ -69,16 +69,8 @@ class MasterMaterialModel extends Model
     {
         return $this->where('item_type', $id)->set($data)->update();
     }
-    public function getItemTypeAutoComplete($search = null)
+    public function getJenisByitemType($item_type)
     {
-        $builder = $this->table('master_material')
-            ->select('item_type')
-            ->distinct();
-
-        if (!empty($search)) {
-            $builder->like('item_type', $search, 'both'); // Filter pencarian
-        }
-
-        return $builder->limit(10)->get()->getResultArray(); // Batasi hasil ke 10 item
+        return $this->select('jenis')->where('item_type', $item_type)->first();
     }
 }
