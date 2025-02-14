@@ -69,4 +69,8 @@ class MasterMaterialModel extends Model
     {
         return $this->where('item_type', $id)->set($data)->update();
     }
+    public function getJenisByitemType($item_type)
+    {
+        return $this->select('jenis')->where('item_type', $item_type)->first();
+    }
 }

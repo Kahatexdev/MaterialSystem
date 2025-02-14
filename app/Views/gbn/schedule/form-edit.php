@@ -144,14 +144,14 @@
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="kode_warna" class="form-label">Kode Warna</label>
-                                        <input type="text" class="form-control" id="kode_warna" name="kode_warna" value="<?= $kode_warna[0]['kode_warna'] ?>" required readonly>
+                                        <input type="text" class="form-control" id="kode_warna" name="kode_warna" value="<?= $kode_warna ?>" required readonly>
                                         <div id="suggestionsKWarna" class="suggestions-box" style="display: none;"></div>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="warna" class="form-label">Warna</label>
-                                        <input type="text" class="form-control" id="warna" name="warna" value="<?= $warna[0]['warna'] ?>" maxlength="32" required readonly>
+                                        <input type="text" class="form-control" id="warna" name="warna" value="<?= $warna ?>" maxlength="32" required readonly>
                                     </div>
                                 </div>
                             </div>
@@ -195,7 +195,7 @@
                                                                         <label for="po"> PO</label>
                                                                         <select class="form-select po-select" name="po[]" required>
                                                                             <?php foreach ($scheduleData as $po): ?>
-                                                                                <option value="<?= $po['id_order'] ?>" <?= ($po['id_order'] == $detail['id_order']) ? 'selected' : '' ?>><?= $po['no_model'] ?></option>
+                                                                                <option value="<?= $po['no_model'] ?>" <?= ($po['no_model'] == $detail['no_model']) ? 'selected' : '' ?>><?= $po['no_model'] ?></option>
                                                                             <?php endforeach; ?>
                                                                         </select>
                                                                     </div>
@@ -236,7 +236,7 @@
                                                                 </div>
                                                                 <div class="col-4">
                                                                     <label for="qty_celup">Qty Celup</label>
-                                                                    <input type="number" class="form-control" step="0.01" min="0.01" name="qty_celup[]" value="<?= $detail['kg_celup'] ?>" required>
+                                                                    <input type="number" class="form-control" step="0.01" min="0.01" name="qty_celup[]" value="<?= $detail['qty_celup'] ?>" required>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
@@ -488,34 +488,17 @@
             }, (data) => {
                 populateSelect(poSelect, data, 'id_order', 'no_model');
 
+                console.log(data);
                 // ✅ Update sisa_jatah dari data yang diterima
                 const row = poSelect.closest("tr");
                 if (row && data.length > 0) {
-                    row.querySelector(".sisa_jatah").textContent = data[0].sisa_jatah.toFixed(2);
+                    row.querySelector(".sisa_jatah").textContent = data.sisa_jatah.toFixed(2);
                     // console.log("Sisa Jatah Updated:", data[0].sisa_jatah);
-                }
+                } else {}
             });
         }
 
-        // ✅ Event delegation untuk input qty_celup
-        poTable.addEventListener("input", function(e) {
-            if (e.target.name === "qty_celup[]") {
-                const row = e.target.closest("tr");
 
-                const qtyCelup = parseFloat(row.querySelector("input[name='qty_celup[]']").value) || 0;
-                const kgKebutuhan = parseFloat(row.querySelector(".kg_kebutuhan").textContent) || 0;
-                const sisaJatah = <?= $sisa_jatah ?>;
-
-                // Update sisa_jatah di tampilan
-                row.querySelector(".sisa_jatah").textContent = sisaJatah.toFixed(2);
-
-                // Menyimpan nilai tagihan SCH di row jika diperlukan (optional, jika ingin diakses oleh baris lain)
-                row.dataset.sisaJatah = sisaJatah.toFixed(2); // Menyimpan nilai sisa_jatah dalam data attribute
-
-                // Hitung total qty celup dan sisa kapasitas
-                calculateTotalAndRemainingCapacity();
-            }
-        });
 
         function calculateTotalAndRemainingCapacity() {
             let totalQtyCelup = 0;
@@ -625,7 +608,7 @@
                 item_type: itemType,
                 kode_warna: kodeWarna
             }, (data) => {
-                // console.log("PO Details Fetched:", data); // Debugging log
+                console.log("PO Details Fetched:", data); // Debugging log
                 if (data && !data.error) {
                     const fields = {
                         'tgl_start_mc[]': data.start_mesin || '',
@@ -741,7 +724,7 @@
                         </div>
                         <div class="col-3">
                             <div class="form-group">
-                                <label for="sisa_jatah">Sisa Jatah :</label>
+                                <label for="ss">Sisa Jatah :</label>
                                 <br />
                                 <span class="badge bg-info">
                                     <span class="sisa_jatah">0.00</span> KG
