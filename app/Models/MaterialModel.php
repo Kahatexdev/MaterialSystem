@@ -104,9 +104,10 @@ class MaterialModel extends Model
     }
     public function orderPerArea($area)
     {
-        return $this->select('master_order.no_model, area, kode_warna, item_type, warna')
+        return $this->select('master_order.no_model, area, kode_warna, item_type, color')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('area', $area)
+            ->groupBy('no_model,item_type,kode_warna,color')
             ->findAll();
     }
 
