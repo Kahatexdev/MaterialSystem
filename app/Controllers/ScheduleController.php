@@ -1004,7 +1004,7 @@ class ScheduleController extends BaseController
                 ];
             }
         }
-
+        dd($uniqueData);
         $data = [
             'active' => $this->active,
             'title' => 'Schedule',

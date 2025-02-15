@@ -337,9 +337,9 @@
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td class="text-center"><?= $detail['cones_kirim'] ?></td>
-                            <td class="text-center"><?= $detail['gw_kirim'] ?></td>
-                            <td class="text-center"><?= $detail['kgs_kirim'] ?></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
                             <td></td>
                             <td></td>
                             <td></td>

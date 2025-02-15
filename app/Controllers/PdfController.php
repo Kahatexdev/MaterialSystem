@@ -240,12 +240,14 @@ class PdfController extends BaseController
         // data ALL BON
         $dataBon = $this->bonCelupModel->getDataById($idBon); // get data by id_bon
         $detailBon = $this->outCelupModel->getDetailBonByIdBon($idBon); // get data detail bon by id_bon
-        // dd($detailBon);        // Mengelompokkan data detailBon berdasarkan no_model, item_type, dan kode_warna
+        // dd($detailBon);
+
+        // Mengelompokkan data detailBon berdasarkan no_model, item_type, dan kode_warna
         $groupedDetails = [];
         foreach ($detailBon as $detail) {
             $key = $detail['no_model'] . '|' . $detail['item_type'] . '|' . $detail['kode_warna'];
             $jmlKarung =
-                $gantiRetur = ($detail['ganti_retur'] == 1) ? ' / Ganti Retur' : '';
+                $gantiRetur = ($detail['ganti_retur'] == 1) ? ' / GANTI RETUR' : '';
             if (!isset($groupedDetails[$key])) {
                 $groupedDetails[$key] = [
                     'no_model' => $detail['no_model'],
@@ -315,6 +317,8 @@ class PdfController extends BaseController
 
         // Menggabungkan data utama dan detail yang sudah dikelompokkan
         $dataBon['groupedDetails'] = array_values($groupedDetails);
+
+        // dd($dataBon);
 
         // Inisialisasi FPDF
         $pdf = new FPDF('L', 'mm', [176, 250]); // Mengatur ukuran kertas menjadi B5
@@ -445,7 +449,6 @@ class PdfController extends BaseController
         $row = 0;
         $currentRow = 0; // Variabel untuk menghitung jumlah baris yang sudah tercetak
 
-        // dd($dataBon);
         foreach ($dataBon['groupedDetails'] as $bon) {
             $pdf->SetFont('Arial', '', 6);
             // Mengelompokkan berdasarkan no_model, item_type, dan kode_warna
@@ -458,34 +461,10 @@ class PdfController extends BaseController
             foreach ($bon['detailPengiriman'] as $detail) {
                 $counter[$key]++;
             }
-            // dd($counter[$key]);
 
-            // Cek jika item_type atau kode_warna berubah
-            if (($prevNoModel !== null && $bon['no_model'] !== $prevItemType) && ($prevItemType !== null && $bon['item_type'] !== $prevItemType) &&
-                ($prevKodeWarna !== null && $bon['kode_warna'] !== $prevKodeWarna)
-            ) {
-                // Tambahkan dua baris kosong
-                for ($i = 0; $i < 2; $i++) {
-                    $pdf->SetX(6);
-                    $pdf->Cell(20, 4, '', 1, 0, 'C');
-                    $pdf->Cell(24, 4, '', 1, 0, 'C');
-                    $pdf->Cell(13, 4, '', 1, 0, 'C');
-                    $pdf->Cell(38, 4, '', 1, 0, 'C');
-                    $pdf->Cell(20, 4, '', 1, 0, 'C');
-                    $pdf->Cell(15, 4, '', 1, 0, 'C');
-                    $pdf->Cell(8, 4, '', 1, 0, 'C');
-                    $pdf->Cell(10, 4, '', 1, 0, 'C');
-                    $pdf->Cell(10, 4, '', 1, 0, 'C');
-                    $pdf->Cell(10, 4, '', 1, 0, 'C');
-                    $pdf->Cell(10, 4, '', 1, 0, 'C');
-                    $pdf->Cell(10, 4, '', 1, 0, 'C');
-                    $pdf->Cell(10, 4, '', 1, 0, 'C');
-                    $pdf->Cell(10, 4, '', 1, 0, 'C');
-                    $pdf->Cell(30, 4, '', 1, 1, 'L');
-                    $currentRow++; // Update baris yang sudah dicetak
-                }
-                $row = 0;
-            }
+            // Hitung jumlah detail untuk grup saat ini
+            $jmlDetail = count($bon['detailPengiriman']);
+            $jmlBaris = ($jmlDetail === 1) ? 3 : 2;
 
             $pdf->SetX(6); // Pastikan posisi X sejajar margin
             $pdf->Cell(20, 4, $bon['no_model'], 1, 0, 'C');
@@ -527,6 +506,7 @@ class PdfController extends BaseController
             $pdf->Cell(8, 4, $bon['l_m_d'], 1, 0, 'C');
             $pdf->Cell(10, 4, $bon['harga'], 1, 0, 'C');
             foreach ($bon['detailPengiriman'] as $detail) {
+                // var_dump($row);
                 $row++;
                 if ($counter[$key] == 1) {
                     $pdf->Cell(10, 4, $detail['cones_kirim'], 1, 0, 'C');
@@ -536,7 +516,6 @@ class PdfController extends BaseController
                     $pdf->Cell(10, 4, $bon['totals']['gw_kirim'], 1, 0, 'C');
                     $pdf->Cell(10, 4, $bon['totals']['kgs_kirim'], 1, 0, 'C');
 
-                    $xKet = $pdf->GetX();
                     $pdf->MultiCell(30, 4, $bon['jmlKarung'] . " KARUNG" . $bon['ganti_retur'], 1, 'L', false);
 
                     $currentRow++;
@@ -544,7 +523,7 @@ class PdfController extends BaseController
                     $yBuyer = $pdf->GetY();
                     $pdf->SetX($xBuyer); // Kembali ke posisi X tempat sebelumnya
                     $pdf->MultiCell(20, 4, $bon['buyer'] . ' KK', 1, 'C', false); // Menerapkan MultiCell untuk 'buyer'
-                    $pdf->SetXY($xBuyer + 20, $yBuyer); // Kembalikan posisi untuk kolom berikutnya
+                    $pdf->SetXY($xBuyer + 20, $yBuyer - 4); // Kembalikan posisi untuk kolom berikutnya
                     $pdf->Cell(24, 4, '', 1, 0, 'C');
                     $pdf->Cell(13, 4, '', 1, 0, 'C');
                     $pdf->Cell(38, 4, '', 1, 0, 'C');
@@ -568,18 +547,27 @@ class PdfController extends BaseController
                         $pdf->Cell(10, 4, $bon['totals']['cones_kirim'], 1, 0, 'C');
                         $pdf->Cell(10, 4, $bon['totals']['gw_kirim'], 1, 0, 'C');
                         $pdf->Cell(10, 4, $bon['totals']['kgs_kirim'], 1, 0, 'C');
+                        // MultiCell untuk 'jmlKarung' dan 'ganti_retur'
+                        $xKet = $pdf->GetX();
+                        $yKet = $pdf->GetY();
                         $pdf->MultiCell(30, 4, $bon['jmlKarung'] . " KARUNG" . $bon['ganti_retur'], 1, 'L', false);
+
+                        // Kembali ke posisi X untuk melanjutkan dari bawah MultiCell
+                        $pdf->SetXY($xKet, $yKet + 4);
                         $currentRow++; // Update baris yang sudah dicetak
                     } elseif ($row == 2) {
-                        // Nambahkeun Cell pikeun no_model (sama kayak kode awal)
-                        $x2 = $pdf->GetX();
-                        $y2 = $pdf->GetY();
+                        // Baris kedua
+                        $pdf->SetX(6); // Set posisi X kembali ke margin
+                        $xBuyer = $pdf->GetX(); // Simpan posisi X saat ini
+                        $yBuyer = $pdf->GetY(); // Simpan posisi Y saat ini
 
-                        // MultiCell pikeun kolom buyer (tinggi otomatis sesuai panjang teks)
-                        $pdf->SetX($x2); // Kembali ke posisi X tempat sebelumnya
-                        $pdf->MultiCell(20, 4, $bon['buyer'] . ' KK', 1, 'C', false); // Menerapkan MultiCell untuk 'buyer'
-                        $pdf->SetXY($x2 + 20, $y2);
+                        // MultiCell untuk 'buyer'
+                        $pdf->MultiCell(20, 4, $bon['buyer'] . ' KK', 1, 'C', false);
 
+                        // Perbarui posisi kursor setelah MultiCell selesai
+                        $maxHeight = $pdf->GetY() - $yBuyer; // Hitung tinggi yang digunakan oleh MultiCell
+                        $pdf->SetXY($xBuyer + 20, $yBuyer); // Geser posisi X sejajar setelah MultiCell
+                        // dd($xBuyer, $yBuyer);
 
                         $pdf->Cell(24, 4, '', 1, 0, 'C');
                         $pdf->Cell(13, 4, '', 1, 0, 'C');
@@ -617,14 +605,49 @@ class PdfController extends BaseController
                     }
                 }
             }
-            // var_dump($row);
 
-            $prevNoModel = $bon['no_model']; // Pindahkan pembaruan variabel ke sini
-            $prevItemType = $bon['item_type']; // Pindahkan pembaruan variabel ke sini
-            $prevKodeWarna = $bon['kode_warna']; // Pindahkan pembaruan variabel ke sini
+            if (
+                $prevNoModel === null || // artinya data pertama
+                ($bon['no_model'] !== $prevNoModel) ||
+                ($bon['item_type'] !== $prevItemType) ||
+                ($bon['kode_warna'] !== $prevKodeWarna)
+            ) {
+                // Tentukan jumlah baris kosong yang ingin ditambahkan
+                for ($i = 0; $i < $jmlBaris; $i++) {
+
+                    $pdf->SetX(6);
+                    // Cetak baris kosong dengan format sel yang sesuai
+                    $pdf->Cell(20, 4, '', 1, 0, 'C');
+                    $pdf->Cell(24, 4, '', 1, 0, 'C');
+                    $pdf->Cell(13, 4, '', 1, 0, 'C');
+                    $pdf->Cell(38, 4, '', 1, 0, 'C');
+                    $pdf->Cell(20, 4, '', 1, 0, 'C');
+                    $pdf->Cell(15, 4, '', 1, 0, 'C');
+                    $pdf->Cell(8, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(10, 4, '', 1, 0, 'C');
+                    $pdf->Cell(30, 4, '', 1, 1, 'L'); // Pindah ke baris baru
+                    $currentRow++; // Update baris yang sudah dicetak
+                }
+
+                // Reset posisi baris saat ini
+                $row = 0;
+            }
+
+            // Perbarui nilai sebelumnya
+            $prevNoModel = $bon['no_model'];
+            $prevItemType = $bon['item_type'];
+            $prevKodeWarna = $bon['kode_warna'];
+            // var_dump($prevNoModel, $prevItemType, $prevKodeWarna);
         }
+        // var_dump($prevNoModel);
         // Tambahkan baris kosong jika jumlah baris yang dicetak kurang dari 28
-        while ($currentRow < $totalRows) {
+        while ($currentRow <= $totalRows) {
             $pdf->SetX(6);
             $pdf->Cell(20, 4, '', 1, 0, 'C');
             $pdf->Cell(24, 4, '', 1, 0, 'C');
@@ -664,38 +687,37 @@ class PdfController extends BaseController
             $pdf->Cell(11, 3, '', 0, 1, 'L'); // Kolom terakhir kosong
         }
 
+
         // Menambahkan halaman baru
         $pdf->AddPage();
         $pdf->SetY(1);
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->Cell(0, 8, 'BARCODE', 0, 1, 'C');
 
-        foreach ($dataBon['groupedDetails'] as $group) {
-            dd($dataBon);
-            $barcodeCount = 0; // Counter untuk jumlah barcode di halaman saat ini
+        $barcodeCount = 0; // Counter untuk jumlah barcode di halaman saat ini
+        foreach ($dataBon['groupedDetails'] as $groups) {
 
-            foreach ($group['barcodes'] as $barcode) {
+            foreach ($groups['barcodes'] as $barcode) {
                 // Konfigurasi jarak antar kolom dan baris
                 $jarakKolom = 2; // Jarak horizontal antar kolom
                 $jarakBaris = 2; // Jarak vertikal antar baris
 
                 // Perhitungan posisi X dan Y untuk 6 barcode per halaman (3 kolom × 2 baris)
                 $colIndex = $barcodeCount % 3; // Tiga kolom per baris
-                $rowIndex = floor($barcodeCount / 3); // Baris berdasarkan jumlah barcode
+                $rowIndex = floor($barcodeCount / 3) % 2; // Dua baris per halaman
 
-                $startX = 10 + ($colIndex * (75 + $jarakKolom)); // Posisi horizontal dengan jarak antar kolom
-                $startY = 8 + ($rowIndex * (81 + $jarakBaris));  // Posisi vertikal dengan jarak antar baris
+                $startX = 10 + ($colIndex * (75 + $jarakKolom)); // Posisi horizontal
+                $startY = 8 + ($rowIndex * (81 + $jarakBaris));  // Posisi vertikal
 
-                // Jika jumlah barcode mencapai batas (4 per halaman), tambahkan halaman baru
+                // Jika jumlah barcode mencapai batas (6 per halaman), tambahkan halaman baru
                 if ($barcodeCount > 0 && $barcodeCount % 6 === 0) {
                     $pdf->AddPage(); // Tambahkan halaman baru
                     $startX = 10; // Reset posisi X
                     $startY = 8; // Reset posisi Y
-                    $barcodeCount = 0; // Reset counter untuk halaman baru
                 }
 
                 // Menggambar kotak di sekitar detail
-                $pdf->Rect($startX, $startY, 75, 81); // Lebar kotak 105, tinggi kotak 55
+                $pdf->Rect($startX, $startY, 75, 81); // Kotak barcode
 
                 // Menyimpan gambar barcode
                 $imageData = base64_decode($barcode['barcode']);
@@ -704,10 +726,10 @@ class PdfController extends BaseController
 
                 // Menentukan posisi X agar gambar berada di tengah kotak secara horizontal
                 $imageWidth = 40; // Lebar gambar
-                $centerX = $startX + (75 - $imageWidth) / 2; // Menyesuaikan posisi agar gambar di tengah
-                $pdf->Image($tempImagePath, $centerX, $startY + 3, $imageWidth); // Menambahkan gambar ke PDF
+                $centerX = $startX + (75 - $imageWidth) / 2; // Menyesuaikan posisi
+                $pdf->Image($tempImagePath, $centerX, $startY + 3, $imageWidth); // Tambahkan gambar
 
-                // Menghapus file gambar sementara setelah digunakan
+                // Menghapus file gambar sementara
                 unlink($tempImagePath);
 
                 // Menghitung berapa banyak baris yang sudah tercetak di dalam MultiCell
@@ -771,8 +793,8 @@ class PdfController extends BaseController
             }
         }
 
-        // // Output PDF
+        // Output PDF
         return $this->response->setHeader('Content-Type', 'application/pdf')
-            ->setBody($pdf->Output('S'));
+            ->setBody($pdf->Output('Bon Pengiriman.pdf', 'I'));
     }
 }
