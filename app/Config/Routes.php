@@ -31,6 +31,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('deleteMaterial/(:num)/(:num)', 'MasterdataController::deleteMaterial/$1/$2');
     $routes->get('openPO/(:num)', 'MasterdataController::openPO/$1');
     $routes->post('openPO/saveOpenPO/(:num)', 'MasterdataController::saveOpenPO/$1');
+    $routes->post('updateArea/(:num)', 'MaterialController::updateArea/$1');
     // $routes->post('exportOpenPO/(:any)/(:any)', 'MasterdataController::exportOpenPO/$1/$2');
     $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
 

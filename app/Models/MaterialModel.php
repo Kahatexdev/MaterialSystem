@@ -109,4 +109,17 @@ class MaterialModel extends Model
             ->where('area', $area)
             ->findAll();
     }
+
+    public function getArea()
+    {
+        return $this->select('area')
+            ->distinct()
+            ->findAll();
+    }
+    public function updateAreaPerNoModel($id_order, $area)
+    {
+        return $this->where('id_order', $id_order)
+            ->set(['area' => $area])
+            ->update();
+    }
 }
