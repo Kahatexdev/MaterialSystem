@@ -382,11 +382,6 @@ class ScheduleController extends BaseController
             ];
         }
 
-        // Debugging untuk memeriksa data sebelum menyimpannya
-        // var_dump($dataBatch); 
-        // dd($dataBatch);
-
-        // Simpan batch data ke database
         $result = $this->scheduleCelupModel->insertBatch($dataBatch);
         // dd($result);
 
@@ -410,7 +405,7 @@ class ScheduleController extends BaseController
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
 
         $scheduleData = $this->scheduleCelupModel->getScheduleDetailsData($id_mesin, $tanggal_schedule, $lot_urut);
-        $jenis = '';
+        $jenis = [];
         $kodeWarna = '';
         $warna = '';
         foreach ($scheduleData as &$row) {
@@ -448,7 +443,7 @@ class ScheduleController extends BaseController
             'readonly' => true,
             'min_caps' => $min['min_caps'],
             'max_caps' => $max['max_caps'],
-            'jenis' => $jenis,
+            'jenis' => $jenis['jenis'],
             'kode_warna' => $kodeWarna,
             'warna' => $warna,
         ];

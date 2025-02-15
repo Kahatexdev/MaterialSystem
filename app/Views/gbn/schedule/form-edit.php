@@ -396,7 +396,7 @@
                 .done(response => {
                     if (response.success) {
                         alert('Update berhasil!');
-                        location.reload();
+                        window.location.href = '<?= base_url(session('role') . '/schedule') ?>';
                     } else {
                         alert('Gagal: ' + (response.message || 'Terjadi kesalahan'));
                     }
