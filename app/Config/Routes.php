@@ -26,10 +26,12 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('material/(:any)', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');
     $routes->get('getMaterialDetails/(:num)', 'MasterdataController::getMaterialDetails/$1');
+    $routes->post('tambahMaterial', 'MaterialController::tambahMaterial');
     $routes->post('updateMaterial', 'MasterdataController::updateMaterial');
     $routes->get('deleteMaterial/(:num)/(:num)', 'MasterdataController::deleteMaterial/$1/$2');
     $routes->get('openPO/(:num)', 'MasterdataController::openPO/$1');
     $routes->post('openPO/saveOpenPO/(:num)', 'MasterdataController::saveOpenPO/$1');
+    $routes->post('updateArea/(:num)', 'MaterialController::updateArea/$1');
     // $routes->post('exportOpenPO/(:any)/(:any)', 'MasterdataController::exportOpenPO/$1/$2');
     $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
 
@@ -127,10 +129,8 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->delete('outCelup/deleteBon/(:num)', 'CelupController::deleteBon/$1');
     // $routes->get('insertBon/(:num)', 'CelupController::insertBon/$1');
     $routes->get('createBon', 'CelupController::createBon');
-    $routes->get('createBon/autoComplete/noModel', 'CelupController::getNoModel');
-    $routes->post('createBon/getItemType', 'CelupController::getItemType');
-    $routes->post('createBon/getKodeWarna', 'CelupController::getKodeWarna');
-    $routes->post('createBon/getWarna', 'CelupController::getWarna');
+    $routes->post('createBon/getItem/(:num)', 'CelupController::getItem/$1');
+
     $routes->post('outCelup/saveBon/', 'CelupController::saveBon');
     $routes->get('retur', 'CelupController::retur');
     $routes->get('generate/(:num)', 'CelupController::generateBarcode/$1');
@@ -154,6 +154,6 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
 $routes->group(
     '/api',
     function ($routes) {
-        $routes->get('bsKaryawan/(:any)', 'ApiController::bsKaryawan/$1');
+        $routes->get('statusbahanbaku/(:any)', 'ApiController::statusbahanbaku/$1');
     }
 );

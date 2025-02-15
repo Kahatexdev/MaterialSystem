@@ -48,7 +48,7 @@
                             <div id="kebutuhan-container">
                                 <div class="row mb-4">
                                     <div class="col-md-4">
-                                        <input type="hidden" name="id_celup">
+
                                         <label>Detail Surat Jalan</label>
                                         <select class="form-control" name="detail_sj" id="detail_sj">
                                             <option value="">Pilih Surat Jalan</option>
@@ -79,20 +79,32 @@
                                     <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
                                         <!-- Form Items -->
                                         <div class="kebutuhan-item">
+                                            <div class="row g-3 mb-2">
+                                                <div class="col-md-12">
+                                                    <label for="itemType">Done Celup</label>
+                                                    <select class="form-control" id="add_item" name="add_item">
+                                                        <option value="">Pilih Item </option>
+                                                        <?php foreach ($no_model as $item): ?>
+                                                            <option value="<?= $item['id_celup'] ?>"><?= $item['no_model'] ?> | <?= $item['item_type'] ?> |<?= $item['kode_warna'] ?> | <?= $item['warna'] ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                            </div>
                                             <div class="row g-3">
+
                                                 <div class="col-md-4">
                                                     <label>No Model</label>
-                                                    <input type="text" class="form-control" name="items[0][no_model]" id="no_model" required placeholder="Pilih No Model">
+                                                    <input type="text" class="form-control" name="items[0][id_celup]" id="id_celup" required placeholder="Pilih No Model" readonly hidden>
+                                                    <input type="text" class="form-control" name="items[0][no_model]" id="no_model" required placeholder="Pilih No Model" readonly>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label>Item Type</label>
-                                                    <select class="form-control" name="items[0][item_type]" id="item_type" required>
-                                                    </select>
+                                                    <input type="text" class="form-control" name="items[0][item_type]" id="item_type" required placeholder="Pilih No Model" readonly>
+
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label>Kode Warna</label>
-                                                    <select class="form-control text-uppercase" name="items[0][kode_warna]" id="kode_warna" required>
-                                                    </select>
+                                                    <input type="text" class="form-control" name="items[0][kode_warna]" id="kode_warna" required placeholder="Pilih No Model" readonly>
                                                 </div>
 
                                             </div>
@@ -185,7 +197,7 @@
                                                                 <td><input type="float" class="form-control" id="total_gw_kirim" name="total_gw_kirim" placeholder="GW" readonly></td>
                                                                 <td><input type="float" class="form-control" id="total_kgs_kirim" name="total_kgs_kirim" placeholder="NW" readonly></td>
                                                                 <td><input type="float" class="form-control" id="total_cones_kirim" name="total_cones_kirim" placeholder="Cones" readonly></td>
-                                                                <td><input type="float" class="form-control" id="total_lot_kirim" name="total_lot_kirim" placeholder="Lot" readonly></td>
+
                                                                 <td></td>
                                                             </tr>
                                                         </tfoot>
@@ -226,111 +238,29 @@
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
     <script>
-        // Ambil item type berdasarkan no model
-        document.addEventListener('change', function(event) {
-            if (event.target && event.target.id === 'no_model') {
-                const noModel = event.target.value; // Ambil nilai no_model yang dipilih
-                const itemTypeDropdown = event.target.closest('.row').querySelector('#item_type');
+        $(document).ready(function() {
 
-                if (noModel) {
-                    // Kirim request AJAX ke controller CodeIgniter
-                    $.ajax({
-                        url: '<?= base_url($role . '/createBon/getItemType') ?>',
-                        type: 'POST',
-                        data: {
-                            no_model: noModel
-                        },
-                        dataType: 'json',
-                        success: function(response) {
-                            itemTypeDropdown.innerHTML = '<option value="">Pilih Item Type</option>';
-                            if (response.length > 0) {
-                                response.forEach(item => {
-                                    itemTypeDropdown.innerHTML += `<option value="${item.item_type}">${item.item_type}</option>`;
-                                });
-                            } else {
-                                itemTypeDropdown.innerHTML = '<option value="">No items found</option>';
-                            }
-                        },
-                        error: function() {
-                            alert('Error fetching data. Please try again.');
-                        }
-                    });
-                } else {
-                    itemTypeDropdown.innerHTML = '';
-                }
-            }
-        });
+            $('#add_item').select2();
+            $('#add_item').on("select2:select", function() {
+                let idcelup = $(this).val(); // Ambil value yang dipilih di select2
 
-        // Ambil kode warna berdasarkan no_model dan item_type
-        document.addEventListener('change', function(event) {
-            if (event.target && event.target.id === 'item_type') {
-                const itemType = event.target.value;
-                const noModel = event.target.closest('.row').querySelector('#no_model').value;
-                const kodeWarnaDropdown = event.target.closest('.row').querySelector('#kode_warna');
+                $.ajax({
+                    url: "<?= base_url($role . '/createBon/getItem/') ?>" + idcelup,
+                    type: "POST",
+                    data: {
+                        id: idcelup
+                    }, // Kirim dalam format object
+                    dataType: "json",
+                    success: function(data) {
+                        $('#no_model').val(data.no_model);
+                        $('#item_type').val(data.item_type);
+                        $('#kode_warna').val(data.kode_warna);
+                        $('#warna').val(data.warna);
+                        $('#id_celup').val(idcelup);
+                    }
+                });
+            });
 
-                if (noModel && itemType) {
-                    $.ajax({
-                        url: '<?= base_url($role . '/createBon/getKodeWarna') ?>',
-                        type: 'POST',
-                        data: {
-                            no_model: noModel,
-                            item_type: itemType
-                        },
-                        dataType: 'json',
-                        success: function(response) {
-                            kodeWarnaDropdown.innerHTML = '<option value="">Pilih Kode Warna</option>';
-                            if (response.length > 0) {
-                                response.forEach(color => {
-                                    kodeWarnaDropdown.innerHTML += `<option value="${color.kode_warna}">${color.kode_warna}</option>`;
-                                });
-                            } else {
-                                kodeWarnaDropdown.innerHTML = '<option value="">No color codes found</option>';
-                            }
-                        },
-                        error: function() {
-                            alert('Error fetching color codes. Please try again.');
-                        }
-                    });
-                } else {
-                    kodeWarnaDropdown.innerHTML = '<option value="">Pilih Kode Warna</option>';
-                }
-            }
-        });
-
-        // Ambil item type berdasarkan no model, item_type dan kode warna
-        document.addEventListener('change', function(event) {
-            if (event.target && event.target.id === 'kode_warna') {
-                const kodeWarna = event.target.value;
-                const itemType = event.target.closest('.row').querySelector('#item_type').value;
-                const noModel = event.target.closest('.row').querySelector('#no_model').value;
-                const warnaInput = event.target.closest('.kebutuhan-item').querySelector('[id="warna"]');
-
-                if (noModel && itemType && kodeWarna) {
-                    $.ajax({
-                        url: '<?= base_url($role . '/createBon/getWarna') ?>',
-                        type: 'POST',
-                        data: {
-                            no_model: noModel,
-                            item_type: itemType,
-                            kode_warna: kodeWarna
-                        },
-                        dataType: 'json',
-                        success: function(response) {
-                            if (response.warna) {
-                                warnaInput.value = response.warna; // Tetapkan nilai
-                            } else {
-                                console.error('Warna tidak ditemukan di response:', response);
-                                warnaInput.value = ''; // Kosongkan jika tidak ada
-                            }
-                        },
-                        error: function() {
-                            alert('Error fetching warna. Please try again.');
-                        }
-                    });
-                } else {
-                    warnaInput.value = '';
-                }
-            }
         });
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -395,6 +325,7 @@
                 const totalLotId = `total_lot_kirim_${tabIndex}`;
 
                 const newInputId = `no_model_${tabIndex}`;
+                const id_celup = `id_celup_${tabIndex}`;
                 const itemTypeId = `item_type_${tabIndex}`;
                 const kodeWarnaId = `kode_warna_${tabIndex}`;
                 const warnaId = `warna_${tabIndex}`;
@@ -424,9 +355,21 @@
                 // Tambahkan elemen `input-group` ke tab baru
                 newTabPane.innerHTML = `
             <div class="kebutuhan-item">
-                                        <div class="row g-3">
+                                        <div class="row g-3 mb-2">
+                                                <div class="col-md-12">
+                                                    <label for="itemType">Done Celup</label>
+                                                    <select class="form-control slc2" id="add_item_${tabIndex}" name="add_item">
+                                                        <option value="">Pilih Item </option>
+                                                        <?php foreach ($no_model as $item): ?>
+                                                            <option value="<?= $item['id_celup'] ?>"><?= $item['no_model'] ?> | <?= $item['item_type'] ?> |<?= $item['kode_warna'] ?> | <?= $item['warna'] ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                           <div class="row g-3">
                                             <div class="col-md-4">
                                                 <label>No Model</label>
+                                                <input type="text" class="form-control no-model" name="items[${tabIndex - 1}][id_celup]" id="${id_celup}" required placeholder="Pilih No Model" hidden>
                                                 <input type="text" class="form-control no-model" name="items[${tabIndex - 1}][no_model]" id="${newInputId}" required placeholder="Pilih No Model">
                                             </div>
                                             <div class="col-md-4">
@@ -447,7 +390,9 @@
                                         <div class="row g-3 mt-3">
                                             <div class="col-md-4">
                                                 <label>Warna</label>
-                                                <input type="text" class="form-control warna" name="items[${tabIndex - 1}][warna]" id="${warnaId}" required readonly>
+                                                   <select class="form-control kode-warna" name="items[${tabIndex - 1}][kode_warna]" id="${warnaId}" required>
+                                                    <option value="">Pilih Kode Warna</option>
+                                                </select>
                                             </div>
                                             <div class="col-md-4">
                                                 <label>LMD</label>
@@ -505,7 +450,6 @@
                                                             <td><input type="float" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex - 1}][0]"></td>
                                                             <td><input type="float" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex - 1}][0]"></td>
                                                             <td><input type="float" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex - 1}][0]"></td>
-                                                            <td><input type="text" class="form-control lot_kirim_input" name="lot_kirim[${tabIndex - 1}][0]"></td>
 
                                                             <td class="text-center">
                                                                 <!-- <button type="button" class="btn btn-danger removeRow">
@@ -551,6 +495,32 @@
             `;
 
                 navTabContent.appendChild(newTabPane);
+                document.getElementById(newContentId).querySelectorAll('.slc2').forEach(el => {
+                    $(el).select2({
+                        width: '100%'
+                    });
+
+                    $(el).on("select2:select", function() {
+                        let idcelup = $(this).val(); // Ambil value yang dipilih di select2
+
+                        $.ajax({
+                            url: "<?= base_url($role . '/createBon/getItem/') ?>" + idcelup,
+                            type: "POST",
+                            data: {
+                                id: idcelup
+                            }, // Kirim dalam format object
+                            dataType: "json",
+                            success: function(data) {
+                                // Update elemen input dan select di dalam tab baru
+                                document.getElementById(id_celup).value = idcelup;
+                                document.getElementById(newInputId).value = data.no_model;
+                                document.getElementById(itemTypeId).innerHTML = `<option value="${data.item_type}" selected>${data.item_type}</option>`;
+                                document.getElementById(kodeWarnaId).innerHTML = `<option value="${data.kode_warna}" selected>${data.kode_warna}</option>`;
+                                document.getElementById(warnaId).innerHTML = `<option value="${data.warna}" selected>${data.warna}</option>`;
+                            }
+                        });
+                    });
+                });
 
                 // Pindahkan ke tab baru
                 const bootstrapTab = new bootstrap.Tab(newTabButton);
@@ -558,6 +528,7 @@
 
                 // Event listener tombol
                 newTabPane.querySelector(".add-more").addEventListener("click", addNewTab);
+
                 newTabPane.querySelector(".remove-tab").addEventListener("click", function() {
                     removeTab(newTabButton, newTabPane);
                 });
@@ -612,94 +583,14 @@
                         calculateTotals(newPoTable);
                     });
                 });
-                // Terapkan autocomplete ke input baru
-                applyAutocomplete(`#${newInputId}`);
 
-                // Event untuk memuat Item Type berdasarkan No Model
-                $(`#${newInputId}`).on("change", function() {
-                    let noModel = $(this).val();
-                    $.ajax({
-                        url: "<?= base_url($role . '/createBon/getItemType') ?>",
-                        type: "POST",
-                        data: {
-                            no_model: noModel
-                        },
-                        dataType: "json",
-                        success: function(data) {
-                            let itemTypeDropdown = $(`#${itemTypeId}`);
-                            itemTypeDropdown.empty().append('<option value="">Pilih Item Type</option>');
-                            data.forEach(function(item) {
-                                itemTypeDropdown.append(`<option value="${item.item_type}">${item.item_type}</option>`);
-                            });
-                        }
-                    });
-                });
 
-                // Event untuk memuat Kode Warna berdasarkan Item Type dan No Model
-                $(`#${itemTypeId}`).on("change", function() {
-                    let itemType = $(this).val();
-                    let noModel = $(`#${newInputId}`).val();
-                    $.ajax({
-                        url: "<?= base_url($role . '/createBon/getKodeWarna') ?>",
-                        type: "POST",
-                        data: {
-                            no_model: noModel,
-                            item_type: itemType
-                        },
-                        dataType: "json",
-                        success: function(data) {
-                            let kodeWarnaDropdown = $(`#${kodeWarnaId}`);
-                            kodeWarnaDropdown.empty().append('<option value="">Pilih Kode Warna</option>');
-                            data.forEach(function(item) {
-                                kodeWarnaDropdown.append(`<option value="${item.kode_warna}">${item.kode_warna}</option>`);
-                            });
-                        }
-                    });
-                });
-
-                // Event untuk mengisi Warna berdasarkan Kode Warna
-                $(`#${kodeWarnaId}`).on("change", function() {
-                    let kodeWarna = $(this).val();
-                    let noModel = $(`#${newInputId}`).val();
-                    let itemType = $(`#${itemTypeId}`).val();
-                    $.ajax({
-                        url: "<?= base_url($role . '/createBon/getWarna') ?>",
-                        type: "POST",
-                        data: {
-                            no_model: noModel,
-                            item_type: itemType,
-                            kode_warna: kodeWarna
-                        },
-                        dataType: "json",
-                        success: function(data) {
-                            $(`#${warnaId}`).val(data.warna);
-                        }
-                    });
-                });
 
                 tabIndex++;
                 calculateTotals(newPoTable);
             }
 
-            // Fungsi autocomplete
-            function applyAutocomplete(selector) {
-                $(selector).autocomplete({
-                    source: function(request, response) {
-                        $.ajax({
-                            url: "<?= base_url($role . '/createBon/autoComplete/noModel') ?>",
-                            type: "GET",
-                            dataType: "json",
-                            success: function(data) {
-                                response(data);
-                            }
-                        });
-                    },
-                    minLength: 2
-                });
-            }
-            // Terapkan autocomplete untuk input pertama
-            applyAutocomplete("#no_model");
-            // Fungsi untuk menghapus tab dan kontennya
+
             function removeTab(tabButton, tabPane) {
                 if (navTab.children.length > 1) {
                     tabButton.remove();
@@ -766,12 +657,6 @@
                     });
                 });
 
-                // Event listener untuk tombol hapus baris
-                // newRow.querySelector('.removeRow').addEventListener('click', () => {
-                //     newRow.remove();
-                //     updateRowNumbers(poTable);
-                //     calculateTotals(poTable);
-                // });
             });
 
             // Panggil pertama kali untuk inisialisasi

@@ -25,6 +25,7 @@
     <link id="pagestyle" href="<?= base_url('assets/css/soft-ui-dashboard.css?v=1.0.7') ?>" rel="stylesheet" />
     <!-- Nepcha Analytics (nepcha.com) -->
     <!-- Nepcha is a easy-to-use web analytics. No cookies and fully compliant with GDPR, CCPA and PECR. -->
+
     <script src="<?= base_url('assets/js/jquery/jquery-3.7.1.min.js') ?>" crossorigin="anonymous"></script>
     <link href="<?= base_url('assets/css/dataTables.dataTables.css') ?>" rel="stylesheet">
     <script src="<?= base_url('assets/js/dataTables.min.js') ?>"></script>
@@ -50,25 +51,26 @@
             /* secondary color is abu-abu*/
             --secondary-color: #778899;
         }
-            .form-control {
-                border: none;
-                border-bottom: 2px solid var(--primary-color);
-                border-radius: 0;
-                padding: 0.75rem 0;
-                margin-bottom: 1rem;
-                transition: all 0.3s ease;
-            }
 
-            .form-control:focus {
-                box-shadow: none;
-                border-color: var(--secondary-color);
-            }
+        .form-control {
+            border: none;
+            border-bottom: 2px solid var(--primary-color);
+            border-radius: 0;
+            padding: 0.75rem 0;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
 
-            .badge {
-                padding: 0.5rem 1rem;
-                border-radius: 20px;
-                font-size: 0.9rem;
-            }
+        .form-control:focus {
+            box-shadow: none;
+            border-color: var(--secondary-color);
+        }
+
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 

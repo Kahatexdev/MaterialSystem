@@ -60,4 +60,12 @@ class ApiController extends BaseController
     {
         //
     }
+    public function statusbahanbaku($area)
+    {
+        $model = $this->materialModel->orderPerArea($area);
+        $res = [];
+        foreach ($model as &$row) {
+            $schedule = $this->scheduleCelupModel->schedulePerArea($row['no_model'], $row['item_type'], $row['kode_warna']);
+        }
+    }
 }

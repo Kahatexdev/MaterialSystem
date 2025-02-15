@@ -172,8 +172,7 @@
                     footerModal.append(`
                     <a type="button" href="<?= base_url($role . '/outCelup/editBon/') ?>${id_bon}" 
                         class="btn btn-warning btn-edit me-2">Edit</a>
-                    <button type="button" class="btn btn-danger btn-delete" 
-                        id="deleteButton" data-id-delete="${id_bon}">Delete</button>
+                    <button type="button" class="btn btn-danger btn-delete" data-id="${id_bon}">Delete</button>
                 `);
 
                     // Menampilkan modal setelah data di-load
@@ -186,9 +185,51 @@
             });
         });
     });
+
+    // Event listener untuk tombol delete (AJAX DELETE)
+    $(document).on("click", ".btn-delete", function() {
+        let id_bon = $(this).data("id");
+
+        Swal.fire({
+            title: "Apakah Anda yakin?",
+            text: "Data yang dihapus tidak bisa dikembalikan!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Ya, Hapus!",
+            cancelButtonText: "Batal"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "<?= base_url($role . '/outCelup/deleteBon/') ?>" + id_bon,
+                    type: "DELETE",
+                    success: function(response) {
+                        Swal.fire({
+                            title: "Deleted!",
+                            text: "Data berhasil dihapus.",
+                            icon: "success",
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            $("#detailModal").modal("hide"); // Tutup modal
+                            location.reload(); // Refresh halaman
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire({
+                            title: "Error!",
+                            text: "Gagal menghapus data.",
+                            icon: "error"
+                        });
+                    }
+                });
+            }
+        });
+    });
 </script>
 
-<script>
+<!-- <script>
     document.addEventListener("DOMContentLoaded", function() {
         // Tambahkan event listener ke semua tombol delete dalam modal
         document.querySelectorAll(".btn-delete").forEach(button => {
@@ -230,6 +271,6 @@
             });
         });
     });
-</script>
+</script> -->
 
 <?php $this->endSection(); ?>

@@ -66,7 +66,7 @@ class MaterialModel extends Model
 
     public function getQtyPOByNoModel($noModel, $itemType, $kodeWarna)
     {
-        return $this->select('SUM(kgs) as qty_po')
+        return $this->select('SUM(kgs) as qty_po,master_order.delivery_awal, master_order.delivery_akhir')
             ->join('master_order', 'master_order.id_order = material.id_order')
             ->where('no_model', $noModel)
             ->where('item_type', $itemType)
@@ -101,5 +101,25 @@ class MaterialModel extends Model
             ->where('item_type', $item_type)
             ->where('kode_warna', $kode_warna)
             ->findAll();
+    }
+    public function orderPerArea($area)
+    {
+        return $this->select('master_order.no_model, area, kode_warna, item_type, warna')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('area', $area)
+            ->findAll();
+    }
+
+    public function getArea()
+    {
+        return $this->select('area')
+            ->distinct()
+            ->findAll();
+    }
+    public function updateAreaPerNoModel($id_order, $area)
+    {
+        return $this->where('id_order', $id_order)
+            ->set(['area' => $area])
+            ->update();
     }
 }
