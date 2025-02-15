@@ -721,7 +721,7 @@ class PdfController extends BaseController
 
                 // Menyimpan gambar barcode
                 $imageData = base64_decode($barcode['barcode']);
-                $tempImagePath = WRITEPATH . 'uploads/barcode_temp.png'; // Path file sementara
+                $tempImagePath = WRITEPATH . 'uploads/barcode_temp' . $barcodeCount . '.png'; // Path file sementara
                 file_put_contents($tempImagePath, $imageData);
 
                 // Menentukan posisi X agar gambar berada di tengah kotak secara horizontal
