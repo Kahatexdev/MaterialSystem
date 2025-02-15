@@ -110,4 +110,17 @@ class MaterialModel extends Model
             ->groupBy('no_model,item_type,kode_warna,color')
             ->findAll();
     }
+
+    public function getArea()
+    {
+        return $this->select('area')
+            ->distinct()
+            ->findAll();
+    }
+    public function updateAreaPerNoModel($id_order, $area)
+    {
+        return $this->where('id_order', $id_order)
+            ->set(['area' => $area])
+            ->update();
+    }
 }

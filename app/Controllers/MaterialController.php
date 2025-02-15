@@ -70,4 +70,15 @@ class MaterialController extends BaseController
             return redirect()->to(base_url($this->role . '/material/' . $idOrder))->with('error', 'Data gagal disimpan.');
         }
     }
+
+    public function updateArea($id_order)
+    {
+        $getArea = $this->request->getPost('edit_all_area');
+
+        if ($this->materialModel->updateAreaPerNoModel($id_order, $getArea)) {
+            return redirect()->to(base_url($this->role . '/material/' . $id_order))->with('success', 'Data berhasil diupdate.');
+        } else {
+            return redirect()->to(base_url($this->role . '/material/' . $id_order))->with('error', 'Data gagal diupdate.');
+        }
+    }
 }
