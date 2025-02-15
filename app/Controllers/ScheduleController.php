@@ -448,7 +448,7 @@ class ScheduleController extends BaseController
             'readonly' => true,
             'min_caps' => $min['min_caps'],
             'max_caps' => $max['max_caps'],
-            'jenis' => $jenis,
+            'jenis' => $jenis['jenis'],
             'kode_warna' => $kodeWarna,
             'warna' => $warna,
         ];
