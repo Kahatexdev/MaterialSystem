@@ -336,6 +336,32 @@ class ScheduleCelupModel extends Model
     }
     public function schedulePerArea($model, $itemType, $kodeWarna)
     {
-        $data = $this->select();
+        return $this->select(
+            [
+                'start_mc',
+                'kg_celup',
+                'lot_urut',
+                'lot_celup',
+                'tanggal_schedule',
+                'tanggal_bon',
+                'tanggal_celup',
+                'tanggal_bongkar',
+                'tanggal_press',
+                'tanggal_oven',
+                'tanggal_tl',
+                'tanggal_rajut_pagi',
+                'tanggal_kelos',
+                'tanggal_acc',
+                'tanggal_reject',
+                'tanggal_perbaikan',
+                'last_status',
+                'ket_daily_cek',
+                'po_plus',
+            ]
+        )
+            ->where('no_model', $model)
+            ->where('item_type', $itemType)
+            ->where('kode_warna', $kodeWarna)
+            ->findAll();
     }
 }
