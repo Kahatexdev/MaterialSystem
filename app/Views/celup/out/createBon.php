@@ -158,7 +158,7 @@
                                                             <tr>
                                                                 <th width=100 class="text-center">No Karung</th>
                                                                 <th class="text-center">GW Kirim</th>
-                                                                <th class="text-center">Kgs Kirim</th>
+                                                                <th class="text-center">NW Kirim</th>
                                                                 <th class="text-center">Cones Kirim</th>
                                                                 <th class="text-center">Lot Kirim</th>
                                                                 <th class="text-center">
