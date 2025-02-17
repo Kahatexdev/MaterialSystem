@@ -102,4 +102,16 @@ class MaterialModel extends Model
             ->where('kode_warna', $kode_warna)
             ->findAll();
     }
+
+    public function getDataArea()
+    {
+        $query = $this->distinct()
+            ->select('area')
+            ->orderBy('area', 'ASC')
+            ->findAll();
+
+        // Mengubah hasil query menjadi array dengan nilai 'area' saja
+        $uniqueArea = array_column($query, 'area');
+        return $uniqueArea;
+    }
 }

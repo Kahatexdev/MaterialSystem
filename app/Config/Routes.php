@@ -91,14 +91,28 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('pengeluaran_jalur', 'WarehouseController::pengeluaranJalur');
     $routes->post('reset_pengeluaran', 'WarehouseController::resetPengeluaranJalur');
     $routes->post('hapus_pengeluaran', 'WarehouseController::hapusListPengeluaran');
-    $routes->get('pengiriman_area', 'WarehouseController::pengirimanArea');
-    $routes->get('pengeluaran', 'WarehouseController::pengeluaran');
+    $routes->post('proses_pengeluaran_jalur', 'WarehouseController::prosesPengeluaranJalur');
+    $routes->get('getItemTypeForOut/(:any)', 'WarehouseController::getItemTypeForOut/$1');
+    $routes->get('getKodeWarnaForOut/(:any)/(:any)', 'WarehouseController::getKodeWarnaForOut/$1/$2');
+    $routes->get('getWarnaDanLotForOut/(:any)/(:any)/(:any)', 'WarehouseController::getWarnaDanLotForOut/$1/$2/$3');
+    $routes->get('getKgsCnsClusterForOut/(:any)/(:any)/(:any)/(:any)', 'WarehouseController::getKgsCnsClusterForOut/$1/$2/$3/$4');
+    $routes->post('proses_pengeluaran_manual', 'WarehouseController::prosesPengeluaranJalurManual');
+    //
     $routes->post('warehouse/search', 'WarehouseController::search');
     $routes->post('warehouse/sisaKapasitas', 'WarehouseController::getSisaKapasitas');
     $routes->post('warehouse/getCluster', 'WarehouseController::getClusterbyId');
     $routes->post('warehouse/updateCluster', 'WarehouseController::updateCluster');
     $routes->post('warehouse/getNoModel', 'WarehouseController::getNoModel');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
+    //
+    $routes->get('pemesanan', 'PemesananController::index');
+    $routes->get('pemesananperarea/(:any)', 'PemesananController::pemesananPerArea/$1');
+    $routes->get('detailpemesanan/(:any)/(:any)', 'PemesananController::detailPemesanan/$1/$2');
+    $routes->get('pengiriman_area', 'PemesananController::pengirimanArea');
+    $routes->post('pengiriman_area', 'PemesananController::pengirimanArea');
+    $routes->post('reset_pengiriman/(:any)/(:any)', 'PemesananController::resetPengirimanArea/$1/$2');
+    $routes->post('hapus_pengiriman', 'PemesananController::hapusListPengiriman');
+    $routes->post('proses_pengiriman', 'PemesananController::prosesPengirimanArea');
 
     $routes->get('pph', 'PphController::index');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
