@@ -158,9 +158,8 @@
                                                             <tr>
                                                                 <th width=100 class="text-center">No Karung</th>
                                                                 <th class="text-center">GW Kirim</th>
-                                                                <th class="text-center">Kgs Kirim</th>
+                                                                <th class="text-center">NW Kirim</th>
                                                                 <th class="text-center">Cones Kirim</th>
-                                                                <th class="text-center">Lot Kirim</th>
                                                                 <th class="text-center">
                                                                     <button type="button" class="btn btn-info" id="addRow">
                                                                         <i class="fas fa-plus"></i>
@@ -322,7 +321,6 @@
                 const totalGwId = `total_gw_kirim_${tabIndex}`;
                 const totalKgsId = `total_kgs_kirim_${tabIndex}`;
                 const totalConesId = `total_cones_kirim_${tabIndex}`;
-                const totalLotId = `total_lot_kirim_${tabIndex}`;
 
                 const newInputId = `no_model_${tabIndex}`;
                 const id_celup = `id_celup_${tabIndex}`;
@@ -436,7 +434,6 @@
                                                             <th class="text-center">GW Kirim</th>
                                                             <th class="text-center">Kgs Kirim</th>
                                                             <th class="text-center">Cones Kirim</th>
-                                                            <th class="text-center">Lot Kirim</th>
                                                             <th class="text-center">
                                                                 <button type="button" class="btn btn-info" id="addRow">
                                                                     <i class="fas fa-plus"></i>
@@ -465,7 +462,6 @@
                                                             <th class="text-center">Total GW</th>
                                                             <th class="text-center">Total NW</th>
                                                             <th class="text-center">Total Cones</th>
-                                                            <th class="text-center">Total Lot</th>
                                                             <th></th>
                                                         </tr>
                                                          <tr>
@@ -473,7 +469,6 @@
                                                             <td><input type="float" class="form-control" id="${totalGwId}" readonly></td>
                                                             <td><input type="float" class="form-control" id="${totalKgsId}" readonly></td>
                                                             <td><input type="float" class="form-control" id="${totalConesId}" readonly></td>
-                                                            <td><input type="float" class="form-control" id="${totalLotId}" readonly></td>
                                                             <td></td>
                                                         </tr>
                                                     </tfoot>
@@ -553,7 +548,6 @@
                     <td><input type="float" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex-2}][${rowCount-1}]"></td>
                     <td><input type="float" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex-2}][${rowCount-1}]"></td>
                     <td><input type="float" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex-2}][${rowCount-1}]"></td>
-                    <td><input type="text" class="form-control lot_kirim_input" name="lot_kirim[${tabIndex-2}][${rowCount-1}]"></td>
                     <td class="text-center">
                     <button type="button" class="btn btn-danger removeRow"><i class="fas fa-trash"></i></button>
                     </td>
@@ -640,7 +634,6 @@
             <td><input type="float" class="form-control" name="gw_kirim[0][${rowCount-1}]"></td>
             <td><input type="float" class="form-control" name="kgs_kirim[0][${rowCount-1}]"></td>
             <td><input type="float" class="form-control" name="cones_kirim[0][${rowCount-1}]"></td>
-            <td><input type="text" class="form-control" name="lot_kirim[0][${rowCount-1}]"></td>
             <td class="text-center">
                 <button type="button" class="btn btn-danger removeRow"><i class="fas fa-trash"></i></button>
             </td>
@@ -695,7 +688,6 @@
                 tfoot.querySelector("input[id^='total_gw_kirim']").value = totalGW;
                 tfoot.querySelector("input[id^='total_kgs_kirim']").value = totalKgs;
                 tfoot.querySelector("input[id^='total_cones_kirim']").value = totalCones;
-                tfoot.querySelector("input[id^='total_lot_kirim']").value = totalRows;
             }
         }
 
