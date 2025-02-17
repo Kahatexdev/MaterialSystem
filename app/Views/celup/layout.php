@@ -30,17 +30,38 @@
     <script src="<?= base_url('assets/js/dataTables.min.js') ?>"></script>
     <link href="<?= base_url('assets/css/select2.min.css') ?>" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
-
-
-    <!-- kalender -->
-
-
     <link rel="stylesheet" href="<?= base_url('assets/calendar/fonts/icomoon/style.css') ?>">
 
     <link href='<?= base_url('assets/calendar/fullcalendar/packages/core/main.css') ?>' rel='stylesheet' />
     <link href='<?= base_url('assets/calendar/fullcalendar/packages/daygrid/main.css') ?>' rel='stylesheet' />
 
-    <!-- Bootstrap CSS -->
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            /* secondary color is abu-abu*/
+            --secondary-color: #778899;
+        }
+
+        .form-control {
+            border: none;
+            border-bottom: 2px solid var(--primary-color);
+            border-radius: 0;
+            padding: 0.75rem 0;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            box-shadow: none;
+            border-color: var(--secondary-color);
+        }
+
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+    </style>
 
 
 </head>
@@ -87,7 +108,7 @@
                     <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Main Menu</h6>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link   <?= set_active($active . '/schedule') ?>" href="<?= base_url($role . '/reqschedule') ?>">
+                    <a class="nav-link   <?= set_active($active . '/reqschedule') ?>" href="<?= base_url($role . '/reqschedule') ?>">
                         <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                             <svg width="12px" height="12px" viewBox="0 0 40 44" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                                 <title>document</title>

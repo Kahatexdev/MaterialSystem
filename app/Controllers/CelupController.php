@@ -210,7 +210,7 @@ class CelupController extends BaseController
             'uniqueData' => $uniqueData,
             'po' => array_column($uniqueData, 'no_model'),
         ];
-        return view($this->role . '/schedule/form-edit', $data);
+        return view($this->role . '/schedule/edit-status', $data);
     }
 
     public function updateSchedule($id)
