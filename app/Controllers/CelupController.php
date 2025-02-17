@@ -419,7 +419,6 @@ class CelupController extends BaseController
     {
         $bonData = $this->bonCelupModel->where('id_bon', $id_bon)->first();
         $celupData = $this->scheduleCelupModel->getScheduleBon($id_bon);
-        dd($bonData);
         $items = [];
 
         foreach ($celupData as $dt) {
