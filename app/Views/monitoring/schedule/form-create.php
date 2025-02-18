@@ -95,36 +95,101 @@
         vertical-align: middle;
     }
 
-    legend {
-        font-weight: bold;
-        font-size: 16px;
-        margin-bottom: 8px;
-    }
-
-    fieldset {
-        border: 1px solid #ccc;
-        padding: 10px;
-        border-radius: 5px;
-    }
-
+    /* Form Styles */
     .form-group {
-        display: flex;
-        flex-direction: column;
+        margin-bottom: 15px;
     }
 
-    .col-4.d-flex {
-        gap: 10px;
+    .form-control,
+    .form-select {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 8px 12px;
+        width: 100%;
+        transition: border-color 0.3s ease;
     }
 
-    .form-group div {
-        display: flex;
-        align-items: center;
-        gap: 15px;
+    .form-control:focus,
+    .form-select:focus {
+        border-color: rgb(0, 147, 152);
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+
+    .form-check-label {
+        /* bold */
+        font-weight: 600;
+
+    }
+
+    .form-check-input {
+        height: 30px;
+    }
+
+    /* Button Styles */
+    .btn {
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-weight: 600;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
     }
 
 
-    input[type="radio"] {
-        margin-right: 5px;
+    .btn-danger {
+        background-color: #e74c3c;
+        border-color: #e74c3c;
+    }
+
+    .btn-danger:hover {
+        background-color: #c0392b;
+        border-color: #c0392b;
+    }
+
+    /* Badge Styles */
+
+
+
+
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .suggestions-box {
+            max-height: 120px;
+            /* Mengurangi tinggi maksimal untuk layar kecil */
+            font-size: 12px;
+            /* Mengurangi ukuran font untuk layar kecil */
+            width: calc(100% - 20px);
+            /* Lebar lebih kecil untuk layar kecil */
+            left: 10px;
+            /* Menyesuaikan posisi untuk layar kecil */
+            right: 10px;
+            /* Menyesuaikan posisi untuk layar kecil */
+        }
+
+        .suggestions-box div {
+            padding: 6px;
+            /* Mengurangi padding untuk layar kecil */
+        }
+    }
+
+    @media (max-width: 480px) {
+        .suggestions-box {
+            max-height: 100px;
+            /* Lebih kecil lagi untuk layar sangat kecil */
+            font-size: 11px;
+            /* Ukuran font lebih kecil */
+            width: calc(100% - 10px);
+            /* Lebar lebih kecil untuk layar sangat kecil */
+            left: 5px;
+            /* Menyesuaikan posisi untuk layar sangat kecil */
+            right: 5px;
+            /* Menyesuaikan posisi untuk layar sangat kecil */
+        }
+
+        .suggestions-box div {
+            padding: 4px;
+            /* Padding lebih kecil */
+        }
     }
 </style>
 <div class="container-fluid">
@@ -304,18 +369,11 @@
                                                             </div>
                                                             <div class="col-4 d-flex align-items-center">
                                                                 <div class="form-group">
-                                                                    <label for="qty_celup">PO + :</label>
-                                                                    <fieldset>
-                                                                        <legend></legend>
-                                                                        <div>
-                                                                            <input type="radio" id="po_plus" name="po_plus[]" value="1">
-                                                                            <label for="iya">Iya</label>
-                                                                            <input type="radio" id="po_plus" name="po_plus[]" value="0">
-                                                                            <label for="tidak">Tidak</label>
-                                                                        </div>
-                                                                    </fieldset>
+                                                                    <label for="po_plus">PO +</label>
+                                                                    <input type="checkbox" id="po_plus" class="form-control form-check-input" name="po_plus[]" value="1">
                                                                 </div>
                                                             </div>
+
                                                         </div>
                                                     </td>
                                                     <td class="text-center">
@@ -837,18 +895,10 @@
                                 </span>
                             </div>
                         </div>
-                         <div class="col-4 d-flex align-items-center">
+                        <div class="col-4 d-flex align-items-center">
                             <div class="form-group">
-                                <label for="qty_celup">PO + :</label>
-                                <fieldset>
-                                    <legend></legend>
-                                    <div>
-                                        <input type="radio" id="po_plus" name="po_plus[]" value="1">
-                                        <label for="iya">Iya</label>
-                                        <input type="radio" id="po_plus" name="po_plus[]" value="0">
-                                        <label for="tidak">Tidak</label>
-                                    </div>
-                                </fieldset>
+                                <label for="po_plus">PO +</label>
+                                <input type="checkbox" id="po_plus" class="form-control form-check-input" name="po_plus[]" value="1">
                             </div>
                         </div>
                     </div>

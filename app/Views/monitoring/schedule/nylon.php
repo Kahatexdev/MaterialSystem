@@ -3,6 +3,8 @@
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
 
+
+
 <div class="container-fluid py-4">
     <?php if (session()->getFlashdata('success')) : ?>
         <script>
@@ -27,19 +29,7 @@
             });
         </script>
     <?php endif; ?>
-
-    <?php if (session()->getFlashdata('info')) : ?>
-        <script>
-            $(document).ready(function() {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Info!',
-                    html: '<?= session()->getFlashdata('info') ?>',
-                });
-            });
-        </script>
-    <?php endif; ?>
-    <h1 class="display-5 mb-4 text-center" style="color:rgb(0, 85, 124); font-weight: 600;">Schedule Mesin Celup Benang</h1>
+    <h1 class="display-5 mb-4 text-center" style="color:rgb(0, 85, 124); font-weight: 600;">Schedule Mesin Celup</br>Nylon & Polyester</h1>
 
     <div class="card mb-4">
         <div class="card-body">
@@ -128,7 +118,6 @@
                             } ?>
                         </tr>
                     </thead>
-
                     <tbody>
                         <?php
                         // Kelompokkan scheduleData untuk mempercepat akses
@@ -136,20 +125,16 @@
                         foreach ($scheduleData as $job) {
                             // Pastikan tanggal disimpan dengan format yang sesuai (Y-m-d)
                             $key = "{$job['no_mesin']} | " . (new DateTime($job['tanggal_schedule']))->format('Y-m-d') . " | {$job['lot_urut']}";
-
-                            // Cek last_status sebelum memasukkan data ke dalam kelompok
-                            if (in_array($job['last_status'], ['scheduled', 'celup', 'reschedule'])) {
-                                // Jika key sudah ada, gabungkan total_kg-nya
-                                if (isset($scheduleGrouped[$key])) {
-                                    $scheduleGrouped[$key]['total_kg'] += $job['total_kg'];
-                                    // format total_kg menjadi 2 angka di belakang koma
-                                    $scheduleGrouped[$key]['total_kg'] = number_format($scheduleGrouped[$key]['total_kg'], 2);
-                                } else {
-                                    $scheduleGrouped[$key] = $job;
-                                }
+                            // Jika key sudah ada, gabungkan total_kg-nya
+                            if (isset($scheduleGrouped[$key])) {
+                                $scheduleGrouped[$key]['total_kg'] += $job['total_kg'];
+                            } else {
+                                $scheduleGrouped[$key] = $job;
                             }
                         }
-
+                        // echo '<pre>';
+                        // print_r($scheduleData); // Debug untuk melihat seluruh data schedule
+                        // echo '</pre>';
                         // Menentukan threshold kapasitas mesin
                         function getCapacityColor($kgCelup, $maxCaps)
                         {
@@ -170,7 +155,6 @@
                         function renderJobButton($job, $mesin, $capacityColor, $capacityPercentage)
                         {
                             $kgCelup = number_format($job['total_kg'], 2);
-                            $totalKg = number_format($job['total_kg'], 2);
                             return "
                                 <button class='btn btn-link {$capacityColor}' 
                                     data-bs-toggle='modal' 
@@ -178,15 +162,15 @@
                                     data-no-mesin='{$job['no_mesin']}'
                                     data-tanggal-schedule='{$job['tanggal_schedule']}'
                                     data-lot-urut='{$job['lot_urut']}'
-                                    title='{$totalKg} kg ({$capacityPercentage}%)'>
-                                    <div class='d-flex flex-column align-items-center justify-content-center' style='height: 100%; width: 100%;'>
+                                    title='{$job['total_kg']} kg ({$capacityPercentage}%)'>
+                                    <div class='d-flex flex-column align-items-center justify-content-center' style='height: 100%;'>
                                         <span style='font-size: 0.9rem; color: black; font-weight: bold;'>{$job['kode_warna']}</span>
                                         <span style='font-size: 0.85rem; color: black;'>{$kgCelup} KG</span>
                                     </div>
                                 </button>";
                         }
-                        ?>
 
+                        ?>
                         <!-- Tabel Mesin -->
                         <?php foreach ($mesin_celup as $mesin): ?>
                             <tr>
@@ -216,7 +200,7 @@
 
                                                 // Render button untuk lot yang ada jadwalnya
                                                 echo "<div class='job-item'>";
-                                                echo renderJobButton($job, $mesin, $capacityColor, number_format($capacityPercentage, 2));
+                                                echo renderJobButton($job, $mesin, $capacityColor, number_format($capacityPercentage, 1));
                                                 echo "</div>";
                                             } else {
                                                 // Tampilkan kartu kosong jika tidak ada jadwal
@@ -248,13 +232,11 @@
 </div>
 
 <div class="modal fade" id="modalSchedule" tabindex="-1" aria-labelledby="modalScheduleLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalScheduleLabel">Jadwal Mesin</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="modalScheduleBody">
                 <!-- Isi modal dengan JS -->
@@ -332,12 +314,12 @@
                     var tes = JSON.parse(data);
                     var totalKg = parseFloat(tes[0].total_kg).toFixed(2);
                     var htmlContent = '';
-                    tes.forEach(function(item, index) {
+                    tes.forEach(function(item) {
                         htmlContent += `<div class="row">
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="po" class="form-label">PO</label>
-                                    <input type="text" class="form-control" id="po" value="${item.no_model}" readonly>
+                                    <label for="no_po" class="form-label">No. PO</label>
+                                    <input type="text" class="form-control" id="no_po" value="${item.no_model}" readonly>
                                     <input type="hidden" id="id_celup" value="${item.id_celup}">
                                 </div>
                                 <div class="mb-3">
@@ -365,8 +347,8 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="kg_celup" class="form-label">Kg Celup</label>
-                                    <input type="text" class="form-control" id="kg_celup" value="${item.kg_celup}" readonly>
+                                    <label for="total_kg" class="form-label">Total Kg Celup</label>
+                                    <input type="text" class="form-control" id="total_kg" value="${totalKg}" readonly>
                                 </div>
                                 <div class="mb-3">
                                     <label for="start_mc" class="form-label">Start MC</label>
@@ -376,19 +358,15 @@
                                     <label for="last_status" class="form-label">Last Status</label>
                                     <input type="text" class="form-control" id="last_status" value="${item.last_status}" readonly>
                                 </div>
-                            </div> 
+                            </div>
                         </div>
                         `;
-                        // Tambahkan garis pembatas jika bukan item terakhir
-                        if (index < tes.length - 1) {
-                            htmlContent += `<div class="modal-footer"></div>`;
-                        }
                     });
 
                     htmlContent += `
                     <div class="modal-footer">
                         <button type="button" class="btn btn-info" id="editSchedule">Edit Jadwal</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                     </div>`;
 
                     modalBody.innerHTML = htmlContent;
@@ -407,11 +385,11 @@
                     console.error("Error fetching data:", error);
                     // Jika data tidak ditemukan, tambahkan tombol "Tambah Jadwal"
                     modalBody.innerHTML = `
-                <div class="text-center text-danger">${error.message}</div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-info" id="addSchedule">Tambah Jadwal</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                </div>`;
+                    <div class="text-center text-danger">${error.message}</div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-info" id="addSchedule">Tambah Jadwal</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    </div>`;
 
                     // Tambahkan event listener untuk tombol "Tambah Jadwal"
                     document.getElementById("addSchedule").addEventListener("click", function() {
@@ -474,7 +452,7 @@
             }
 
             // Redirect ke URL dengan parameter filter
-            const url = `<?= base_url($role . '/schedule') ?>?start_date=${startDate}&end_date=${endDate}`;
+            const url = `<?= base_url($role . '/schedule/nylon') ?>?start_date=${startDate}&end_date=${endDate}`;
             window.location.href = url;
         });
 
@@ -484,14 +462,14 @@
             const start_date = new Date();
             const end_date = new Date();
             start_date.setDate(start_date.getDate() - 3);
-            end_date.setDate(end_date.getDate() + 6);
+            end_date.setDate(end_date.getDate() + 7);
 
             const startDate = start_date.toISOString().split('T')[0];
 
             const endDate = end_date.toISOString().split('T')[0];
 
             // Redirect ke URL dengan parameter filter
-            const url = `<?= base_url($role . '/schedule') ?>?start_date=${startDate}&end_date=${endDate}`;
+            const url = `<?= base_url($role . '/schedule/nylon') ?>?start_date=${startDate}&end_date=${endDate}`;
             window.location.href = url;
         });
 

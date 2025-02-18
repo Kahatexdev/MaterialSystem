@@ -39,7 +39,7 @@
             });
         </script>
     <?php endif; ?>
-    <h1 class="display-5 mb-4 text-center" style="color:rgb(0, 85, 124); font-weight: 600;">Schedule Mesin Celup Benang</h1>
+    <h1 class="display-5 mb-4 text-center" style="color:rgb(0, 85, 124); font-weight: 600;">Schedule Mesin Celup Sample</h1>
 
     <div class="card mb-4">
         <div class="card-body">
@@ -128,7 +128,6 @@
                             } ?>
                         </tr>
                     </thead>
-
                     <tbody>
                         <?php
                         // Kelompokkan scheduleData untuk mempercepat akses
@@ -142,8 +141,6 @@
                                 // Jika key sudah ada, gabungkan total_kg-nya
                                 if (isset($scheduleGrouped[$key])) {
                                     $scheduleGrouped[$key]['total_kg'] += $job['total_kg'];
-                                    // format total_kg menjadi 2 angka di belakang koma
-                                    $scheduleGrouped[$key]['total_kg'] = number_format($scheduleGrouped[$key]['total_kg'], 2);
                                 } else {
                                     $scheduleGrouped[$key] = $job;
                                 }
@@ -170,7 +167,6 @@
                         function renderJobButton($job, $mesin, $capacityColor, $capacityPercentage)
                         {
                             $kgCelup = number_format($job['total_kg'], 2);
-                            $totalKg = number_format($job['total_kg'], 2);
                             return "
                                 <button class='btn btn-link {$capacityColor}' 
                                     data-bs-toggle='modal' 
@@ -178,8 +174,8 @@
                                     data-no-mesin='{$job['no_mesin']}'
                                     data-tanggal-schedule='{$job['tanggal_schedule']}'
                                     data-lot-urut='{$job['lot_urut']}'
-                                    title='{$totalKg} kg ({$capacityPercentage}%)'>
-                                    <div class='d-flex flex-column align-items-center justify-content-center' style='height: 100%; width: 100%;'>
+                                    title='{$job['total_kg']} kg ({$capacityPercentage}%)'>
+                                    <div class='d-flex flex-column align-items-center justify-content-center' style='height: 100%;'>
                                         <span style='font-size: 0.9rem; color: black; font-weight: bold;'>{$job['kode_warna']}</span>
                                         <span style='font-size: 0.85rem; color: black;'>{$kgCelup} KG</span>
                                     </div>
@@ -216,7 +212,7 @@
 
                                                 // Render button untuk lot yang ada jadwalnya
                                                 echo "<div class='job-item'>";
-                                                echo renderJobButton($job, $mesin, $capacityColor, number_format($capacityPercentage, 2));
+                                                echo renderJobButton($job, $mesin, $capacityColor, number_format($capacityPercentage, 1));
                                                 echo "</div>";
                                             } else {
                                                 // Tampilkan kartu kosong jika tidak ada jadwal
@@ -248,13 +244,11 @@
 </div>
 
 <div class="modal fade" id="modalSchedule" tabindex="-1" aria-labelledby="modalScheduleLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalScheduleLabel">Jadwal Mesin</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="modalScheduleBody">
                 <!-- Isi modal dengan JS -->
@@ -388,7 +382,7 @@
                     htmlContent += `
                     <div class="modal-footer">
                         <button type="button" class="btn btn-info" id="editSchedule">Edit Jadwal</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                     </div>`;
 
                     modalBody.innerHTML = htmlContent;
@@ -407,11 +401,11 @@
                     console.error("Error fetching data:", error);
                     // Jika data tidak ditemukan, tambahkan tombol "Tambah Jadwal"
                     modalBody.innerHTML = `
-                <div class="text-center text-danger">${error.message}</div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-info" id="addSchedule">Tambah Jadwal</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                </div>`;
+                    <div class="text-center text-danger">${error.message}</div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-info" id="addSchedule">Tambah Jadwal</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    </div>`;
 
                     // Tambahkan event listener untuk tombol "Tambah Jadwal"
                     document.getElementById("addSchedule").addEventListener("click", function() {
@@ -474,7 +468,7 @@
             }
 
             // Redirect ke URL dengan parameter filter
-            const url = `<?= base_url($role . '/schedule') ?>?start_date=${startDate}&end_date=${endDate}`;
+            const url = `<?= base_url($role . '/schedule/acrylic') ?>?start_date=${startDate}&end_date=${endDate}`;
             window.location.href = url;
         });
 
@@ -491,7 +485,7 @@
             const endDate = end_date.toISOString().split('T')[0];
 
             // Redirect ke URL dengan parameter filter
-            const url = `<?= base_url($role . '/schedule') ?>?start_date=${startDate}&end_date=${endDate}`;
+            const url = `<?= base_url($role . '/schedule/sample') ?>?start_date=${startDate}&end_date=${endDate}`;
             window.location.href = url;
         });
 

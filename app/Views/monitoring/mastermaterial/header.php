@@ -20,7 +20,6 @@
                         </a>
                     </li>
 
-
                     <li class="nav-item d-flex align-items-center">
                         <a href="" data-bs-toggle="modal" data-bs-target="#LogoutModal" class=" nav-link text-body font-weight-bold px-0">
                             <i class="fa fa-user me-sm-1"></i>
@@ -36,8 +35,6 @@
                             </div>
                         </a>
                     </li>
-
-
 
                 </ul>
             </div>

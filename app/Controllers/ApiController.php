@@ -102,4 +102,43 @@ class ApiController extends ResourceController
         }
         return $this->respond($res, 200);
     }
+    public function cekBahanBaku($model)
+    {
+        $material = $this->materialModel->MaterialPerOrder($model);
+        $res = [];
+        foreach ($material as &$row) {
+            $schedule = $this->scheduleCelupModel->schedulePerArea($row['no_model'], $row['item_type'], $row['kode_warna']);
+
+            $scheduleData = !empty($schedule) ? $schedule[0] : [];
+
+            $fields = [
+                'start_mc',
+                'kg_celup',
+                'lot_urut',
+                'lot_celup',
+                'tanggal_schedule',
+                'tanggal_bon',
+                'tanggal_celup',
+                'tanggal_bongkar',
+                'tanggal_press',
+                'tanggal_oven',
+                'tanggal_tl',
+                'tanggal_rajut_pagi',
+                'tanggal_kelos',
+                'tanggal_acc',
+                'tanggal_reject',
+                'tanggal_perbaikan',
+                'last_status',
+                'ket_daily_cek',
+                'po_plus'
+            ];
+
+            foreach ($fields as $field) {
+                $row[$field] = $scheduleData[$field] ?? ''; // Isi dengan data jadwal atau kosong jika tidak ada
+            }
+
+            $res[] = $row;
+        }
+        return $this->respond($res, 200);
+    }
 }

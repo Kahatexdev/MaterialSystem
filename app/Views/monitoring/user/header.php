@@ -1,7 +1,6 @@
 <?php $this->extend($role . '/layout'); ?>
 <?php $this->section('header'); ?>
 
-
 <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
     <!-- Navbar -->
     <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" navbar-scroll="true">
@@ -13,13 +12,12 @@
 
                 <ul class="navbar-nav  justify-content-end">
                     <li class="nav-item d-flex align-items-center px-1">
-                        <a href="<?= base_url(session()->get('role')) . '/masterMaterial' ?>" class="text-decoration-none d-flex align-items-center">
+                        <a href="<?= base_url(session()->get('role')) . '/dropdown' ?>" class="text-decoration-none d-flex align-items-center">
                             <span class="badge bg-gradient-info">
                                 <i class="fas fa-database me-sm-1"></i>
-                                Master Material</span>
+                                Dropdown</span>
                         </a>
                     </li>
-
 
                     <li class="nav-item d-flex align-items-center">
                         <a href="" data-bs-toggle="modal" data-bs-target="#LogoutModal" class=" nav-link text-body font-weight-bold px-0">
@@ -36,9 +34,6 @@
                             </div>
                         </a>
                     </li>
-
-
-
                 </ul>
             </div>
         </div>

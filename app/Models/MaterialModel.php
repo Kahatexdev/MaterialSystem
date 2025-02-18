@@ -132,6 +132,14 @@ class MaterialModel extends Model
             ->set(['area' => $area])
             ->update();
     }
+    public function MaterialPerOrder($model)
+    {
+        return $this->select('master_order.no_model, area, kode_warna, item_type, color, sum(kgs) as qty_po')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('master_order.no_model', $model)
+            ->groupBy('no_model,item_type,kode_warna,color')
+            ->findAll();
+    }
     public function getDataArea()
     {
         $query = $this->distinct()
