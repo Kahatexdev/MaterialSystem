@@ -102,23 +102,12 @@ class MaterialModel extends Model
             ->where('kode_warna', $kode_warna)
             ->findAll();
     }
-    public function orderPerArea($area, $search = null)
+    public function orderPerArea($area)
     {
-        $builder = $this->select('master_order.no_model, area, material.kode_warna, material.item_type, material.color, sum(kgs) as qty_po')
+        return $this->select('master_order.no_model, area, material.kode_warna, material.item_type, material.color, sum(kgs) as qty_po')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->join('schedule_celup', 'schedule_celup.id_material = material.id_material', 'left')
             ->where('area', $area)
-            ->groupBy('no_model,material.item_type,material.kode_warna,material.color');
-
-        if (!empty($search)) {
-            $builder->groupStart()
-                ->like('master_order.no_model', $search)
-                ->orLike('kode_warna', $search)
-                ->orLike('schedule_celup.tanggal_schedule', $search)
-                ->orLike('schedule_celup.lot_celup', $search)
-                ->groupEnd();
-        }
-        return $builder->findAll();
+            ->groupBy('no_model,material.item_type,material.kode_warna,material.color')->findAll();
     }
     public function getArea()
     {
