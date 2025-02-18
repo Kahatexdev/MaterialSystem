@@ -338,6 +338,7 @@ class CelupController extends BaseController
     public function createBon()
     {
         $no_model = $this->scheduleCelupModel->getCelupDone();
+        // dd($no_model);
         $data = [
             'role' => $this->role,
             'active' => $this->active,
@@ -464,7 +465,7 @@ class CelupController extends BaseController
             'item' => $items
 
         ];
-
+        // dd($data);
         return view($this->role . '/out/editBon', $data);
     }
 
