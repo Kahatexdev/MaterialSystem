@@ -257,10 +257,22 @@
                                                                     <div class="form-group">
                                                                         <label for="last_status">Last Status</label>
                                                                         <br />
-                                                                        <span class="badge bg-<?= $detail['last_status'] == 'scheduled' ? 'info' : ($detail['last_status'] == 'celup' ? 'warning' : 'success') ?>"><?= $detail['last_status'] ?></span>
-                                                                        <input type="hidden" class="form-control last_status" name="last_status[]" value="<?= $detail['last_status'] ?>">
+                                                                        <?php
+                                                                        $status = $detail['last_status'];
+                                                                        if (in_array($status, ['scheduled', 'retur', 'reschedule'])) {
+                                                                            $badgeColor = 'info';
+                                                                        } elseif (in_array($status, ['bon', 'celup', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc', 'reject', 'perbaikan'])) {
+                                                                            $badgeColor = 'warning';
+                                                                        } else {
+                                                                            in_array($status, ['done', 'sent']);
+                                                                            $badgeColor = 'success';
+                                                                        }
+                                                                        ?>
+                                                                        <span class="badge bg-<?= $badgeColor ?>"><?= htmlspecialchars($status) ?></span>
+                                                                        <input type="hidden" class="form-control last_status" name="last_status[]" value="<?= htmlspecialchars($status) ?>">
                                                                     </div>
                                                                 </div>
+
                                                                 <div class="col-3 d-flex align-items-center">
                                                                     <div class="form-group">
                                                                         <label for="qty_celup">PO + :</label>
@@ -350,11 +362,13 @@
         // Buat semua input dan select jadi readonly/disabled jika last_status 'celup', 'done', atau 'sent'
         const lastStatuses = document.querySelectorAll('.last_status');
         lastStatuses.forEach(status => {
-            if (status.value === 'celup' || status.value === 'done' || status.value === 'sent') {
+            const statusValue = status.value || status.textContent.trim().toLowerCase(); // Ambil value atau teks
+            const lockedStatuses = ['bon', 'celup', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc', 'done', 'reject', 'perbaikan', 'sent'];
+
+            if (lockedStatuses.includes(statusValue)) {
                 const row = status.closest('tr');
                 const elements = row.querySelectorAll('input, select, button');
                 elements.forEach(el => {
-                    // Untuk input, gunakan readonly; untuk select dan button, gunakan disabled
                     if (el.tagName.toLowerCase() === 'input') {
                         el.setAttribute('readonly', true);
                     } else {
@@ -364,6 +378,7 @@
                 });
             }
         });
+
 
         // Event delegation untuk tombol Edit (gunakan closest untuk menangani klik pada ikon di dalam tombol)
         document.addEventListener('click', function(e) {

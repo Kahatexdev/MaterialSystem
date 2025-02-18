@@ -278,9 +278,43 @@ class CelupController extends BaseController
         if ($tglPB) $dataUpdate['tanggal_perbaikan'] = $tglPB;
         if ($ketDailyCek) $dataUpdate['ket_daily_cek'] = $ketDailyCek;
 
+        // Jika tgl_bon diisi, update last_status menjadi 'bon'
+        if (!empty($tglBon)) {
+            $dataUpdate['last_status'] = 'bon';
+        }
+
         // Jika tgl_celup diisi, update last_status menjadi 'celup'
         if (!empty($tglCelup)) {
             $dataUpdate['last_status'] = 'celup';
+        }
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglBongkar)) {
+            $dataUpdate['last_status'] = 'bongkar';
+        }
+
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglPress)) {
+            $dataUpdate['last_status'] = 'press';
+        }
+
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglOven)) {
+            $dataUpdate['last_status'] = 'oven';
+        }
+
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglTL)) {
+            $dataUpdate['last_status'] = 'tl';
+        }
+
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglRajut)) {
+            $dataUpdate['last_status'] = 'rajut';
+        }
+
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglACC)) {
+            $dataUpdate['last_status'] = 'acc';
         }
 
         // Jika tgl_kelos diisi, update last_status menjadi 'done'
@@ -288,12 +322,22 @@ class CelupController extends BaseController
             $dataUpdate['last_status'] = 'done';
         }
 
+        // Jika tgl_kelos diisi, update last_status menjadi 'done'
+        if (!empty($tglReject)) {
+            $dataUpdate['last_status'] = 'reject';
+        }
+
+        // Jika tgl_kelos diisi, update last_status menjadi 'done'
+        if (!empty($tglPB)) {
+            $dataUpdate['last_status'] = 'perbaikan';
+        }
+
         // Validasi apakah data dengan ID yang diberikan ada
         $existingProduction = $this->scheduleCelupModel->find($id);
         if (!$existingProduction) {
             return redirect()->back()->with('error', 'Data tidak ditemukan.');
         }
-        // dd ($dataUpdate);
+        dd($dataUpdate);
         // Perbarui data di database
         $this->scheduleCelupModel->update($id, $dataUpdate);
 

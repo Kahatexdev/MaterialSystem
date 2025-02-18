@@ -11,6 +11,7 @@ use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
 use App\Models\OpenPoModel;
 use App\Models\MasterOrderModel;
+use CodeIgniter\CLI\Console;
 use DateTime;
 
 class ScheduleController extends BaseController
@@ -55,6 +56,7 @@ class ScheduleController extends BaseController
     {
         // Ambil parameter filter dari query string
         $startDate = $this->request->getGet('start_date');
+        dd($startDate);
         $endDate = $this->request->getGet('end_date');
 
         if ($startDate == null && $endDate == null) {
