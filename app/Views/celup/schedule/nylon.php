@@ -29,19 +29,7 @@
             });
         </script>
     <?php endif; ?>
-
-    <?php if (session()->getFlashdata('info')) : ?>
-        <script>
-            $(document).ready(function() {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Info!',
-                    html: '<?= session()->getFlashdata('info') ?>',
-                });
-            });
-        </script>
-    <?php endif; ?>
-    <h1 class="display-5 mb-4 text-center" style="color:rgb(0, 85, 124); font-weight: 600;">Schedule Mesin Celup Acrylic</h1>
+    <h1 class="display-5 mb-4 text-center" style="color:rgb(0, 85, 124); font-weight: 600;">Schedule Mesin Celup</br>Nylon & Polyester</h1>
 
     <div class="card mb-4">
         <div class="card-body">
@@ -137,18 +125,16 @@
                         foreach ($scheduleData as $job) {
                             // Pastikan tanggal disimpan dengan format yang sesuai (Y-m-d)
                             $key = "{$job['no_mesin']} | " . (new DateTime($job['tanggal_schedule']))->format('Y-m-d') . " | {$job['lot_urut']}";
-
-                            // Cek last_status sebelum memasukkan data ke dalam kelompok
-                            if (in_array($job['last_status'], ['scheduled', 'celup', 'reschedule'])) {
-                                // Jika key sudah ada, gabungkan total_kg-nya
-                                if (isset($scheduleGrouped[$key])) {
-                                    $scheduleGrouped[$key]['total_kg'] += $job['total_kg'];
-                                } else {
-                                    $scheduleGrouped[$key] = $job;
-                                }
+                            // Jika key sudah ada, gabungkan total_kg-nya
+                            if (isset($scheduleGrouped[$key])) {
+                                $scheduleGrouped[$key]['total_kg'] += $job['total_kg'];
+                            } else {
+                                $scheduleGrouped[$key] = $job;
                             }
                         }
-
+                        // echo '<pre>';
+                        // print_r($scheduleData); // Debug untuk melihat seluruh data schedule
+                        // echo '</pre>';
                         // Menentukan threshold kapasitas mesin
                         function getCapacityColor($kgCelup, $maxCaps)
                         {
@@ -183,8 +169,8 @@
                                     </div>
                                 </button>";
                         }
-                        ?>
 
+                        ?>
                         <!-- Tabel Mesin -->
                         <?php foreach ($mesin_celup as $mesin): ?>
                             <tr>
@@ -328,12 +314,12 @@
                     var tes = JSON.parse(data);
                     var totalKg = parseFloat(tes[0].total_kg).toFixed(2);
                     var htmlContent = '';
-                    tes.forEach(function(item, index) {
+                    tes.forEach(function(item) {
                         htmlContent += `<div class="row">
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="po" class="form-label">PO</label>
-                                    <input type="text" class="form-control" id="po" value="${item.no_model}" readonly>
+                                    <label for="no_po" class="form-label">No. PO</label>
+                                    <input type="text" class="form-control" id="no_po" value="${item.no_model}" readonly>
                                     <input type="hidden" id="id_celup" value="${item.id_celup}">
                                 </div>
                                 <div class="mb-3">
@@ -361,8 +347,8 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="kg_celup" class="form-label">Kg Celup</label>
-                                    <input type="text" class="form-control" id="kg_celup" value="${item.kg_celup}" readonly>
+                                    <label for="total_kg" class="form-label">Total Kg Celup</label>
+                                    <input type="text" class="form-control" id="total_kg" value="${totalKg}" readonly>
                                 </div>
                                 <div class="mb-3">
                                     <label for="start_mc" class="form-label">Start MC</label>
@@ -372,13 +358,9 @@
                                     <label for="last_status" class="form-label">Last Status</label>
                                     <input type="text" class="form-control" id="last_status" value="${item.last_status}" readonly>
                                 </div>
-                            </div> 
+                            </div>
                         </div>
                         `;
-                        // Tambahkan garis pembatas jika bukan item terakhir
-                        if (index < tes.length - 1) {
-                            htmlContent += `<div class="modal-footer"></div>`;
-                        }
                     });
 
                     htmlContent += `
@@ -405,7 +387,7 @@
                     modalBody.innerHTML = `
                     <div class="text-center text-danger">${error.message}</div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-info" id="addSchedule">Tambah Jadwal</button>
+                        
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                     </div>`;
 
@@ -470,7 +452,7 @@
             }
 
             // Redirect ke URL dengan parameter filter
-            const url = `<?= base_url($role . '/schedule/acrylic') ?>?start_date=${startDate}&end_date=${endDate}`;
+            const url = `<?= base_url($role . '/schedule/nylon') ?>?start_date=${startDate}&end_date=${endDate}`;
             window.location.href = url;
         });
 
@@ -480,14 +462,14 @@
             const start_date = new Date();
             const end_date = new Date();
             start_date.setDate(start_date.getDate() - 3);
-            end_date.setDate(end_date.getDate() + 6);
+            end_date.setDate(end_date.getDate() + 7);
 
             const startDate = start_date.toISOString().split('T')[0];
 
             const endDate = end_date.toISOString().split('T')[0];
 
             // Redirect ke URL dengan parameter filter
-            const url = `<?= base_url($role . '/schedule/acrylic') ?>?start_date=${startDate}&end_date=${endDate}`;
+            const url = `<?= base_url($role . '/schedule/nylon') ?>?start_date=${startDate}&end_date=${endDate}`;
             window.location.href = url;
         });
 

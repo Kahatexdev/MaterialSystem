@@ -2,8 +2,9 @@
 
 namespace App\Controllers;
 
-use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
+use CodeIgniter\RESTful\ResourceController;
+use CodeIgniter\API\ResponseTrait;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
@@ -17,7 +18,7 @@ use App\Models\StockModel;
 use App\Models\HistoryPindahPalet;
 use App\Models\HistoryPindahOrder;
 
-class ApiController extends BaseController
+class ApiController extends ResourceController
 {
     protected $role;
     protected $active;
@@ -59,5 +60,46 @@ class ApiController extends BaseController
     public function index()
     {
         //
+    }
+    public function statusbahanbaku($area)
+    {
+        $search = $this->request->getGet('search');
+        $model = $this->materialModel->orderPerArea($area, $search);
+
+        $res = [];
+        foreach ($model as &$row) {
+            $schedule = $this->scheduleCelupModel->schedulePerArea($row['no_model'], $row['item_type'], $row['kode_warna']);
+
+            $scheduleData = !empty($schedule) ? $schedule[0] : [];
+
+            $fields = [
+                'start_mc',
+                'kg_celup',
+                'lot_urut',
+                'lot_celup',
+                'tanggal_schedule',
+                'tanggal_bon',
+                'tanggal_celup',
+                'tanggal_bongkar',
+                'tanggal_press',
+                'tanggal_oven',
+                'tanggal_tl',
+                'tanggal_rajut_pagi',
+                'tanggal_kelos',
+                'tanggal_acc',
+                'tanggal_reject',
+                'tanggal_perbaikan',
+                'last_status',
+                'ket_daily_cek',
+                'po_plus'
+            ];
+
+            foreach ($fields as $field) {
+                $row[$field] = $scheduleData[$field] ?? ''; // Isi dengan data jadwal atau kosong jika tidak ada
+            }
+
+            $res[] = $row;
+        }
+        return $this->respond($res, 200);
     }
 }

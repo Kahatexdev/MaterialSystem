@@ -66,7 +66,7 @@ class MaterialModel extends Model
 
     public function getQtyPOByNoModel($noModel, $itemType, $kodeWarna)
     {
-        return $this->select('SUM(kgs) as qty_po')
+        return $this->select('SUM(kgs) as qty_po,master_order.delivery_awal, master_order.delivery_akhir')
             ->join('master_order', 'master_order.id_order = material.id_order')
             ->where('no_model', $noModel)
             ->where('item_type', $itemType)
@@ -102,7 +102,36 @@ class MaterialModel extends Model
             ->where('kode_warna', $kode_warna)
             ->findAll();
     }
+    public function orderPerArea($area, $search = null)
+    {
+        $builder = $this->select('master_order.no_model, area, kode_warna, item_type, color, sum(kgs) as qty_po')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->join('schedule_celup', 'schedule_celup.id_material = material.id_material', 'left')
+            ->where('area', $area)
+            ->groupBy('no_model,item_type,kode_warna,color');
 
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('master_order.no_model', $search)
+                ->orLike('kode_warna', $search)
+                ->orLike('schedule_celup.tanggal_schedule', $search)
+                ->orLike('schedule_celup.lot_celup', $search)
+                ->groupEnd();
+        }
+        return $builder->findAll();
+    }
+    public function getArea()
+    {
+        return $this->select('area')
+            ->distinct()
+            ->findAll();
+    }
+    public function updateAreaPerNoModel($id_order, $area)
+    {
+        return $this->where('id_order', $id_order)
+            ->set(['area' => $area])
+            ->update();
+    }
     public function getDataArea()
     {
         $query = $this->distinct()

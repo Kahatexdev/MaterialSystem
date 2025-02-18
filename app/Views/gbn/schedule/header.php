@@ -25,6 +25,13 @@
         position: relative;
     }
 
+    .table thead {
+        position: sticky;
+        top: 0;
+        z-index: 4;
+        /* z-index lebih tinggi dari baris konten */
+    }
+
     .table th {
 
         background-color: rgb(8, 38, 83);
@@ -53,6 +60,7 @@
         z-index: 3;
         background-color: rgb(4, 55, 91);
     }
+
 
     .table td.sticky {
         position: sticky;

@@ -105,214 +105,168 @@ class MasterdataController extends BaseController
             return redirect()->to(base_url($this->role . '/masterdata'))->with('error', 'Data gagal diupdate.');
         }
     }
+
     public function importMU()
     {
-        // Get the uploaded file
+        // Ambil file yang diupload
         $file = $this->request->getFile('file');
-
-        // Check if file is uploaded successfully
         if (!$file || !$file->isValid()) {
             return redirect()->back()->with('error', 'No file uploaded or file is invalid.');
         }
-        $masterOrderModel = new MasterOrderModel();
+
+        // Inisialisasi model-model
+        $masterOrderModel    = new MasterOrderModel();
+        $materialModel       = new MaterialModel();
+        $masterMaterialModel = new MasterMaterialModel();
+
+        // Ambil username admin dari session
+        $admin = session()->get('username');
+        if (!$admin) {
+            return redirect()->back()->with('error', 'Session expired. Please log in again.');
+        }
 
         try {
-            // Load Excel or CSV file
+            // Load file Excel/CSV
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getTempName());
-            $sheet = $spreadsheet->getActiveSheet();
+            $sheet       = $spreadsheet->getActiveSheet();
 
-            // Initialize arrays
-            $validDataOrder = [];
-            $validDataMaterial = [];
-            $invalidRows = [];
-            $data = [];
-            // Get username from session
-            $admin = session()->get('username');
-            if (!$admin) {
-                return redirect()->back()->with('error', 'Session expired. Please log in again.');
+            // Ambil data header master order dari sel-sel tertentu
+            $no_model    = str_replace([': '], '', $sheet->getCell('B9')->getValue());
+            $no_order    = str_replace([': '], '', $sheet->getCell('B5')->getValue());
+            $buyer       = str_replace([': '], '', $sheet->getCell('B6')->getValue());
+            $lco_dateRaw = str_replace([': '], '', $sheet->getCell('B4')->getFormattedValue());
+            $foll_up     = str_replace([': '], '', $sheet->getCell('D5')->getValue());
+
+            // Konversi format tanggal dari d.m.Y ke Y-m-d
+            $date_object = DateTime::createFromFormat('d.m.Y', $lco_dateRaw);
+            if ($date_object) {
+                $lco_date = $date_object->format('Y-m-d');
+            } else {
+                return redirect()->back()->with('error', 'Format tanggal LCO tidak valid.');
             }
 
-            // Array untuk menampung data yang dikelompokkan berdasarkan style_size
-            $groupedData = [];
+            // Cek apakah master order sudah ada di database
+            $orderExists = $masterOrderModel->checkDatabase($no_order, $no_model, $buyer, $lco_date, $foll_up);
 
-            foreach ($sheet->getRowIterator() as $key => $row) {
-                // Skip header
-                if ($key === 1) {
-                    continue;
-                }
-
-                // Ambil data dari kolom sesuai kebutuhan
-                $style_size = htmlspecialchars_decode($sheet->getCell('D' . $key)->getValue()); // Kolom D
-                $no_model = $sheet->getCell('B9')->getValue(); // Kolom B9
-                $no_model = str_replace([': '], '', $no_model);
-                $no_order = $sheet->getCell('B5')->getValue(); // Kolom B5
-                $no_order = str_replace([': '], '', $no_order);
-                $buyer = $sheet->getCell('B6')->getValue(); // Kolom B6
-                $buyer = str_replace([': '], '', $buyer);
-                $lco_date = $sheet->getCell('B4')->getFormattedValue(); // Kolom B4
-                $lco_date = str_replace([': '], '', $lco_date);
-
-                // dd($no_model, $style_size, $no_order, $buyer, $lco_date);
-                // Konversi format tanggal dari d.m.Y ke Y-m-d
-                $date_object = DateTime::createFromFormat('d.m.Y', $lco_date);
-                if ($date_object) {
-                    $formatted_date = $date_object->format('Y-m-d'); // Format MySQL
-                }
-                $foll_up = $sheet->getCell('D5')->getValue(); // Kolom D5
-                $foll_up = str_replace([': '], '', $foll_up);
-
-
-                // Validasi data per baris sebelum dimasukkan ke grup
-                if (!$no_model || !$style_size) {
-                    $invalidRows[] = $key;
-                    continue;
-                }
-
-                // Simpan data dalam kelompok berdasarkan style_size
-                $groupedData[$style_size][] = [
-                    'lco_date' => $formatted_date,
-                    'no_order' => $no_order,
-                    'buyer' => $buyer,
-                    'no_model' => $no_model,
-                    'foll_up' => $foll_up,
-                ];
-            }
-
-            // Sekarang lakukan validasi hanya sekali per group (style_size)
-            $validDataOrder = [];
-            foreach ($groupedData as $style_size => $orders) {
-                // Misalnya, lakukan validasi untuk setiap grup data
-                foreach ($orders as $order) {
-                    $validate = $this->validateWithAPI($order['no_model'], $style_size);
-
-                    if ($validate != NULL) {
-                        $validDataOrder[] = [
-                            'id_order' => NULL,
-                            'no_order' => $order['no_order'],
-                            'no_model' => $validate['no_model'],
-                            'buyer' => $order['buyer'],
-                            'foll_up' => $order['foll_up'],
-                            'lco_date' => $formatted_date,
-                            'memo' => NULL,
-                            'delivery_awal' => $validate['delivery_awal'],
-                            'delivery_akhir' => $validate['delivery_akhir'],
-                            'admin' => $admin,
-                            'created_at' => date('Y-m-d H:i:s'),
-                            'updated_at' => NULL,
-                        ];
-                    } else {
-                        // Jika validasi gagal, bisa menambahkan ke daftar invalid
-                        $invalidRows[] = $order['no_order']; // Anda bisa menambahkan key atau data lain sebagai penanda
+            // Jika master order belum ada, lakukan validasi dengan mencari baris material yang memiliki style_size valid
+            if (!$orderExists) {
+                $validate = null;
+                foreach ($sheet->getRowIterator() as $key => $row) {
+                    // Lewati baris header
+                    if ($key == 1) {
+                        continue;
+                    }
+                    $style_size = $sheet->getCell('D' . $key)->getValue();
+                    if (!empty($no_model) && !empty($style_size)) {
+                        $validate = $this->validateWithAPI($no_model, $style_size);
+                        if ($validate) {
+                            break; // Gunakan validasi dari baris pertama yang valid
+                        }
                     }
                 }
+
+                if (!$validate) {
+                    return redirect()->back()->with('error', 'Validasi master order gagal, tidak ditemukan style size yang valid.');
+                }
+
+                // Siapkan data master order
+                $masterData = [
+                    'no_order'       => $no_order,
+                    'no_model'       => $no_model,
+                    'buyer'          => $buyer,
+                    'foll_up'        => $foll_up,
+                    'lco_date'       => $lco_date,
+                    'memo'           => NULL,
+                    'delivery_awal'  => $validate['delivery_awal'],
+                    'delivery_akhir' => $validate['delivery_akhir'],
+                    'admin'          => $admin,
+                    'created_at'     => date('Y-m-d H:i:s'),
+                    'updated_at'     => NULL,
+                ];
+                $masterOrderModel->insert($masterData);
             }
 
-            $data = [
-                'no_order' => $no_order,
-                'no_model' => $no_model,
-                'buyer' => $buyer,
-                'foll_up' => $foll_up,
-                'lco_date' => $formatted_date,
-                'memo' => NULL,
-                'delivery_awal' => $validate['delivery_awal'],
-                'delivery_akhir' => $validate['delivery_akhir'],
-                'admin' => $admin,
-                'created_at' => date('Y-m-d H:i:s'),
+            // Dapatkan id_order untuk digunakan pada tabel material
+            $orderData = $masterOrderModel->findIdOrder($no_order);
+            if (!$orderData) {
+                return redirect()->back()->with('error', 'Gagal menemukan ID Order untuk ' . $no_order);
+            }
+            $id_order = $orderData['id_order'];
+
+            // Mapping header untuk data material
+            $headerMap = [
+                'Color'          => 'A',
+                'Item Type'      => 'B',
+                'Kode Warna'     => 'C',
+                'Item Nr'        => 'D',
+                'Composition(%)' => 'E',
+                'GW/pc'          => 'F',
+                'Qty/pcs'        => 'G',
+                'Loss'           => 'H',
+                'Kgs'            => 'I',
             ];
 
-            // Cek master order model apakah sudah ada di database
-            $checkdatabase = $this->masterOrderModel->checkDatabase($no_order, $no_model, $buyer, $formatted_date, $foll_up);
-            if ($checkdatabase) {
-                // return redirect()->back()->with('error', 'Data sudah ada di database.');
-                // Cari header pada baris pertama
-                // Map header ke kolom
-                $headerMap = [
-                    'Color' => 'A', // Kolom untuk "Color", sesuaikan dengan header file Anda
-                    'Item Type' => 'B', // Kolom untuk "Item Type", sesuaikan dengan header file Anda
-                    'Kode Warna' => 'C', // Kolom untuk "Kode Warna", sesuaikan dengan header file Anda
-                    'Item Nr' => 'D', // Kolom untuk "Item Nr", sesuaikan dengan header file Anda
-                    'Composition(%)' => 'E', // Kolom untuk "Composition(%)", sesuaikan dengan header file Anda
-                    'GW/pc' => 'F', // Kolom untuk "GW/pc", sesuaikan dengan header file Anda
-                    'Qty/pcs' => 'G', // Kolom untuk "Qty/pcs", sesuaikan dengan header file Anda
-                    'Loss' => 'H', // Kolom untuk "Loss", sesuaikan dengan header file Anda
-                    'Kgs' => 'I', // Kolom untuk "Kgs", sesuaikan dengan header file Anda
-                ];
+            $validDataMaterial = [];
+            $invalidRows       = [];
 
-                // Iterasi data dimulai dari baris kedua
-                foreach ($sheet->getRowIterator(2) as $row) {
-                    $rowIndex = $row->getRowIndex();
-
-                    // Ambil data dari sel tertentu
-                    $no_model = $sheet->getCell('B9')->getValue(); // Kolom B9
-                    $no_model = str_replace([': '], '', $no_model);
-                    $style_size = $sheet->getCell('D' . $rowIndex)->getValue(); // Kolom D
-                    $no_order = $sheet->getCell('B5')->getValue(); // Kolom B5
-                    $no_order = str_replace([': '], '', $no_order);
-
-                    // get id_order
-                    $id_order = $masterOrderModel->findIdOrder($no_order);
-
-                    // Validasi melalui API
-                    $validate = $this->validateWithAPI($no_model, $style_size);
-
-                    if ($validate) {
-                        // Validasi item type
-                        $item_type = trim($sheet->getCell($headerMap['Item Type'] . $rowIndex)->getValue());
-
-                        // Validasi apakah item_type tidak kosong
-                        if (empty($item_type)) {
-                            return redirect()->back()->with('error', 'Item Type tidak boleh kosong.');
-                        }
-
-                        // Pastikan item_type aman sebelum diteruskan ke model
-                        $item_type = htmlspecialchars($item_type, ENT_QUOTES, 'UTF-8');
-
-                        // Cek keberadaan item_type di database
-                        $checkItemType = $this->masterMaterialModel->checkItemType($item_type);
-
-                        if (!$checkItemType) {
-                            return redirect()->back()->with('error', $item_type . ' tidak ada di database.');
-                        }
-                        // Siapkan data untuk dimasukkan ke dalam validDataMaterial
-                        $validDataMaterial[] = [
-                            'id_order' => $id_order['id_order'],
-                            'style_size' => $validate['size'],
-                            'area' => $validate['area'],
-                            'inisial' => $validate['inisial'],
-                            'color' => $sheet->getCell($headerMap['Color'] . $rowIndex)->getValue(),
-                            'item_type' => htmlspecialchars_decode($item_type),
-                            'kode_warna' => $sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue(),
-                            'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(), // Tetap isi dengan Composition(%) yang valid
-                            'gw' => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
-                            'qty_pcs' => $sheet->getCell($headerMap['Qty/pcs'] . $rowIndex)->getValue(),
-                            'loss' => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue(),
-                            'kgs' => $sheet->getCell($headerMap['Kgs'] . $rowIndex)->getValue(),
-                            'admin' => $admin,
-                            'created_at' => date('Y-m-d H:i:s'),
-                        ];
-                    } else {
-                        $invalidRows[] = $rowIndex; // Tambahkan baris tidak valid
-                    }
+            // Iterasi baris data material (misalnya mulai dari baris kedua)
+            foreach ($sheet->getRowIterator(2) as $row) {
+                $rowIndex  = $row->getRowIndex();
+                $style_size = $sheet->getCell('D' . $rowIndex)->getValue();
+                if (empty($no_model) || empty($style_size)) {
+                    $invalidRows[] = $rowIndex;
+                    continue;
                 }
-                // Simpan data material ke database
-                $materialModel = new MaterialModel();
-                $materialModel->insertBatch($validDataMaterial);
-            } else {
-                // Simpan data order ke database
-                $masterOrderModel->insert($data);
+
+                $validate = $this->validateWithAPI($no_model, $style_size);
+                if (!$validate) {
+                    $invalidRows[] = $rowIndex;
+                    continue;
+                }
+
+                // Ambil dan sanitasi item type
+                $item_type = trim($sheet->getCell($headerMap['Item Type'] . $rowIndex)->getValue());
+                if (empty($item_type)) {
+                    return redirect()->back()->with('error', 'Item Type tidak boleh kosong pada baris ' . $rowIndex);
+                }
+                $item_type = htmlspecialchars($item_type, ENT_QUOTES, 'UTF-8');
+
+                // Cek apakah item type ada di database
+                $checkItemType = $masterMaterialModel->checkItemType($item_type);
+                if (!$checkItemType) {
+                    return redirect()->back()->with('error', $item_type . ' tidak ada di database pada baris ' . $rowIndex);
+                }
+
+                // Siapkan data material
+                $validDataMaterial[] = [
+                    'id_order'   => $id_order,
+                    'style_size' => $validate['size'],
+                    'area'       => $validate['area'],
+                    'inisial'    => $validate['inisial'],
+                    'color'      => $sheet->getCell($headerMap['Color'] . $rowIndex)->getValue(),
+                    'item_type'  => htmlspecialchars_decode($item_type),
+                    'kode_warna' => $sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue(),
+                    'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(),
+                    'gw'         => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
+                    'qty_pcs'    => $sheet->getCell($headerMap['Qty/pcs'] . $rowIndex)->getValue(),
+                    'loss'       => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue(),
+                    'kgs'        => $sheet->getCell($headerMap['Kgs'] . $rowIndex)->getValue(),
+                    'admin'      => $admin,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ];
             }
 
+            // Simpan data material jika ada data yang valid
+            if (!empty($validDataMaterial)) {
+                $materialModel->insertBatch($validDataMaterial);
+            }
 
-
-
-
-            // Redirect ke halaman sebelumnya dengan pesan sukses
             return redirect()->back()->with('success', 'Data berhasil diimport.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengimport data: ' . $e->getMessage());
         }
-        return redirect()->back()->with('error', 'Terjadi kesalahan saat mengimport data.');
     }
+
 
     private function validateWithAPI($no_model, $style_size)
     {
@@ -339,8 +293,9 @@ class MasterdataController extends BaseController
         if (!$id_order) {
             return redirect()->to(base_url($this->role . '/masterOrder'))->with('error', 'ID Order tidak ditemukan.');
         }
-
+        $itemType = $this->masterMaterialModel->getItemType();
         $orderData = $this->materialModel->getMaterial($id_order);
+        $areaData = array_column($orderData, 'area');
         $model = $orderData[0]['no_model'];
         if (!$orderData) {
             return redirect()->to(base_url($this->role . '/masterOrder'))->with('error', 'Data Order tidak ditemukan.');
@@ -351,7 +306,9 @@ class MasterdataController extends BaseController
             'role' => $this->role,
             'orderData' => $orderData,
             'no_model' => $model,
-            'id_order' => $id_order
+            'id_order' => $id_order,
+            'itemType' => $itemType,
+            'area' => $areaData,
         ];
 
         return view($this->role . '/mastermaterial/detailMaterial', $data);

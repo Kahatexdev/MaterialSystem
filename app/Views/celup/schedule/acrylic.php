@@ -405,7 +405,7 @@
                     modalBody.innerHTML = `
                     <div class="text-center text-danger">${error.message}</div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-info" id="addSchedule">Tambah Jadwal</button>
+                        
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                     </div>`;
 

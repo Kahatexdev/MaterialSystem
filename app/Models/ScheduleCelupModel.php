@@ -127,63 +127,15 @@ class ScheduleCelupModel extends Model
 
     public function getScheduleDetailsData($machine, $date, $lot)
     {
-        return $this->table('schedule_celup')
-            ->select('
-            schedule_celup.*, 
-            mesin_celup.no_mesin, 
-            sum(schedule_celup.kg_celup) as total_kg,
-            master_order.no_model, 
-            master_order.id_order, 
-            material.kode_warna,
-            material.item_type,
-        ')
-            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin', 'left')
-            ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
-            ->join('material', 'material.id_order = master_order.id_order AND schedule_celup.item_type = material.item_type AND schedule_celup.kode_warna = material.kode_warna', 'left')
-            ->where('mesin_celup.no_mesin', $machine)
-            ->where('schedule_celup.tanggal_schedule', $date)
-            ->where('schedule_celup.lot_urut', $lot)
-            ->groupBy('schedule_celup.id_mesin')
-            ->groupBy('schedule_celup.tanggal_schedule')
-            ->groupBy('schedule_celup.lot_urut')
-            ->groupBy('schedule_celup.id_celup')
+        return $this->select('schedule_celup.id_celup,sum(schedule_celup.kg_celup) as qty_celup,schedule_celup.item_type, schedule_celup.no_model,schedule_celup.start_mc, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.last_status, schedule_celup.po_plus')
+            ->where('tanggal_schedule', $date)
+            ->where('id_mesin', $machine)
+            ->where('lot_urut', $lot)
+            ->groupBy('id_celup')
             ->findAll();
     }
 
-    public function getItemTypeByParameter($no_mesin, $tanggal_schedule, $lot_urut)
-    {
-        return $this->table('schedule_celup')
-            ->select('item_type')
-            ->where('no_mesin', $no_mesin)
-            ->where('tanggal_schedule', $tanggal_schedule)
-            ->where('lot_urut', $lot_urut)
-            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-            ->findAll();
-    }
 
-    public function getKodeWarnaByParameter($no_mesin, $tanggal_schedule, $lot_urut)
-    {
-        return $this->table('schedule_celup')
-            ->select('kode_warna')
-            ->where('no_mesin', $no_mesin)
-            ->where('tanggal_schedule', $tanggal_schedule)
-            ->where('lot_urut', $lot_urut)
-            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-            ->distinct()
-            ->findAll();
-    }
-
-    public function getWarnaByParameter($no_mesin, $tanggal_schedule, $lot_urut)
-    {
-        return $this->table('schedule_celup')
-            ->select('warna')
-            ->where('no_mesin', $no_mesin)
-            ->where('tanggal_schedule', $tanggal_schedule)
-            ->where('lot_urut', $lot_urut)
-            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-            ->distinct()
-            ->findAll();
-    }
 
     public function getTanggalCelup($no_mesin, $tanggal_schedule, $lot_urut)
     {
@@ -252,8 +204,9 @@ class ScheduleCelupModel extends Model
     {
         return $this->select('schedule_celup.*, mesin_celup.no_mesin, IF(po_plus = "0", kg_celup, 0) AS qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-            ->where('schedule_celup.last_status <>', 'done')
+            ->where('schedule_celup.last_status !=', 'done')
             ->groupBy('schedule_celup.id_mesin')
+            ->groupBy('schedule_celup.id_celup')
             ->groupBy('schedule_celup.tanggal_schedule')
             ->groupBy('schedule_celup.lot_urut')
             ->findAll();
@@ -290,11 +243,10 @@ class ScheduleCelupModel extends Model
 
     public function cekSisaJatah($no_model, $item_type, $kode_warna)
     {
-        // Query untuk mengambil data
         $data = $this->select('
         SUM(schedule_celup.kg_celup) AS total_kg,
-        material.qty_po,
         material.id_order,
+        material.qty_po,
         schedule_celup.item_type,
         schedule_celup.kode_warna,
         master_order.no_model
@@ -316,24 +268,24 @@ class ScheduleCelupModel extends Model
             ->where('schedule_celup.no_model', $no_model)
             ->where('schedule_celup.item_type', $item_type)
             ->where('schedule_celup.kode_warna', $kode_warna)
-            ->groupBy('schedule_celup.kode_warna')
-            ->findAll(); // Mengembalikan semua hasil sesuai pengelompokan
+            // Ubah groupBy menjadi berdasarkan field yang unik per record
+            ->groupBy(['schedule_celup.kode_warna'])
+            ->findAll();
 
-        // Jika data ditemukan, kembalikan data
         if (!empty($data)) {
             return $data;
         }
 
-        // Jika data tidak ditemukan, kembalikan nilai default (misalnya null atau array kosong)
         return null;
     }
 
+
     public function getCelupDone()
     {
-        return $this->table('schedule_celup')
-            ->select('no_model')
+        return $this
+            ->select('id_celup,no_model, item_type, kode_warna, warna')
             ->where('last_status', 'done')
-            ->groupBy('no_model')
+            ->groupBy('id_celup')
             ->findAll();
     }
     public function getNoModelCreateBon()
@@ -381,6 +333,36 @@ class ScheduleCelupModel extends Model
     public function getScheduleBon($id_bon)
     {
         return $this->where('id_bon', $id_bon)
+            ->findAll();
+    }
+    public function schedulePerArea($model, $itemType, $kodeWarna)
+    {
+        return $this->select(
+            [
+                'start_mc',
+                'kg_celup',
+                'lot_urut',
+                'lot_celup',
+                'tanggal_schedule',
+                'tanggal_bon',
+                'tanggal_celup',
+                'tanggal_bongkar',
+                'tanggal_press',
+                'tanggal_oven',
+                'tanggal_tl',
+                'tanggal_rajut_pagi',
+                'tanggal_kelos',
+                'tanggal_acc',
+                'tanggal_reject',
+                'tanggal_perbaikan',
+                'last_status',
+                'ket_daily_cek',
+                'po_plus',
+            ]
+        )
+            ->where('no_model', $model)
+            ->where('item_type', $itemType)
+            ->where('kode_warna', $kodeWarna)
             ->findAll();
     }
 }

@@ -115,6 +115,16 @@
         box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
     }
 
+    .form-check-label {
+        /* bold */
+        font-weight: 600;
+
+    }
+
+    .form-check-input {
+        height: 30px;
+    }
+
     /* Button Styles */
     .btn {
         padding: 10px 20px;
@@ -249,6 +259,7 @@
                                         <div id="suggestionsKWarna" class="suggestions-box" style="display: none;"></div>
                                     </div>
                                 </div>
+
                                 <div class="col-md-4">
                                     <!-- Warna -->
                                     <div class="mb-3">
@@ -332,43 +343,38 @@
                                                             </div>
                                                             <div class="col-4">
                                                                 <div class="form-group">
-                                                                    <label for="kg_kebutuhan">PO +</label>
-                                                                    <select class="form-select" name="po_plus[]" required>
-                                                                        <option value="">Pilih PO(+)</option>
-                                                                        <option value="1">Ya</option>
-                                                                        <option value="0">Tidak</option>
-                                                                    </select>
+                                                                    <label for="qty_celup">Qty Celup</label>
+                                                                    <input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required>
                                                                 </div>
-
                                                             </div>
-                                                            <div class="row">
-                                                                <div class="col-4">
-                                                                    <div class="form-group">
-                                                                        <label for="qty_celup">KG Kebutuhan :</label>
-                                                                        <br />
-                                                                        <span class="badge bg-info">
-                                                                            <span class="kg_kebutuhan">0.00</span> KG <!-- Ganti id dengan class -->
-                                                                        </span>
-                                                                    </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-4">
+                                                                <div class="form-group">
+                                                                    <label for="qty_celup">KG Kebutuhan :</label>
+                                                                    <br />
+                                                                    <span class="badge bg-info">
+                                                                        <span class="kg_kebutuhan">0.00</span> KG <!-- Ganti id dengan class -->
+                                                                    </span>
                                                                 </div>
-                                                                <div class="col-4">
-                                                                    <div class="form-group">
-                                                                        <label for="qty_celup">Tagihan Sch :</label>
-                                                                        <br />
-                                                                        <span class="badge bg-info">
-                                                                            <span class="sisa_jatah">0.00</span> KG <!-- Ganti id dengan class -->
-                                                                        </span>
-                                                                    </div>
+                                                            </div>
+                                                            <div class="col-4">
+                                                                <div class="form-group">
+                                                                    <label for="qty_celup">Tagihan Sch :</label>
+                                                                    <br />
+                                                                    <span class="badge bg-info">
+                                                                        <span class="sisa_jatah">0.00</span> KG <!-- Ganti id dengan class -->
+                                                                    </span>
                                                                 </div>
-
-                                                                <div class="col-4">
-                                                                    <div class="form-group">
-                                                                        <label for="qty_celup">Qty Celup</label>
-                                                                        <input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required>
-                                                                    </div>
+                                                            </div>
+                                                            <div class="col-4 d-flex align-items-center">
+                                                                <div class="form-group">
+                                                                    <label for="po_plus">PO +</label>
+                                                                    <input type="checkbox" id="po_plus" class="form-control form-check-input" name="po_plus[]" value="1">
                                                                 </div>
                                                             </div>
 
+                                                        </div>
                                                     </td>
                                                     <td class="text-center">
 
@@ -402,8 +408,8 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <!-- Add JavaScript to initialize Select2 -->
 
 <script>
@@ -416,15 +422,38 @@
         const poTable = document.getElementById("poTable");
         const itemType = document.querySelector("select[name='item_type']"); // Pastikan ini adalah elemen <select>
         const poSelect = document.querySelector("select[name='po[]']"); // Pastikan ini adalah elemen <select>
+        // Variabel untuk debounce dan flag ketika saran dipilih
+        let debounceTimer;
+        let suggestionSelected = false;
 
+        // Event listener untuk input pada field kode warna
+        kodeWarna.addEventListener('input', function() {
+            // Jika user baru saja memilih saran, jangan langsung fetch lagi
+            if (suggestionSelected) {
+                suggestionSelected = false;
+                return;
+            }
 
+            clearTimeout(debounceTimer);
+            const query = kodeWarna.value;
 
-        // ✅ Fungsi Fetch Data Kode Warna
+            // Gunakan debounce agar fetch tidak terlalu sering dipanggil
+            debounceTimer = setTimeout(() => {
+                fetchKodeWarnaSuggestions(query);
+            }, 300);
+        });
+
+        // Fungsi untuk mengambil data saran dari backend
         function fetchKodeWarnaSuggestions(query) {
-            fetch('<?= base_url(session('role') . "/schedule/getKodeWarna") ?>?query=' + query)
+            // Jika query kurang dari 2 karakter, sembunyikan kotak saran
+            if (query.length < 2) {
+                suggestionsBoxKWarna.style.display = 'none';
+                return;
+            }
+
+            fetch('<?= base_url(session('role') . "/schedule/getKodeWarna") ?>?query=' + encodeURIComponent(query))
                 .then(response => response.json())
                 .then(data => {
-                    // console.log("Kode Warna Data:", data);
                     const kodeWarnaSuggestions = data.map(item => item.kode_warna);
                     displayKodeWarnaSuggestions(kodeWarnaSuggestions);
                 })
@@ -433,55 +462,111 @@
                 });
         }
 
-        // ✅ Fungsi Menampilkan Kode Warna Suggestion
+        // Fungsi untuk menampilkan saran di kotak saran
         function displayKodeWarnaSuggestions(suggestions) {
-            suggestionsBoxKWarna.innerHTML = ''; // Clear previous suggestions
+            suggestionsBoxKWarna.innerHTML = ''; // Bersihkan saran sebelumnya
+
             if (suggestions.length > 0) {
-                suggestionsBoxKWarna.style.display = 'block'; // Show suggestions box
+                suggestionsBoxKWarna.style.display = 'block'; // Tampilkan kotak saran
+
                 suggestions.forEach(suggestion => {
                     const suggestionDiv = document.createElement('div');
                     suggestionDiv.textContent = suggestion;
+
+                    // Ketika saran diklik, update nilai input dengan saran yang dipilih
                     suggestionDiv.addEventListener('click', function() {
+                        suggestionSelected = true;
                         kodeWarna.value = suggestion;
                         suggestionsBoxKWarna.style.display = 'none';
                     });
+
                     suggestionsBoxKWarna.appendChild(suggestionDiv);
                 });
             } else {
                 suggestionsBoxKWarna.style.display = 'none';
             }
         }
-        // ✅ Fungsi Fetch Data Warna berdasarkan Kode Warna
-        function fetchWarnaByKodeWarna(kodeWarna) {
-            fetch('<?= base_url(session('role') . "/schedule/getWarna") ?>?kode_warna=' + kodeWarna)
+
+        // Event listener untuk input pada field kode warna
+        kodeWarna.addEventListener('input', function() {
+            // Jika user baru saja memilih saran, jangan langsung fetch lagi
+            if (suggestionSelected) {
+                suggestionSelected = false;
+                return;
+            }
+
+            clearTimeout(debounceTimer);
+            const query = kodeWarna.value;
+
+            // Gunakan debounce agar fetch tidak terlalu sering dipanggil
+            debounceTimer = setTimeout(() => {
+                fetchKodeWarnaSuggestions(query);
+            }, 300);
+        });
+
+        // Fungsi untuk mengambil data saran dari backend
+        function fetchKodeWarnaSuggestions(query) {
+            // Jika query kurang dari 2 karakter, sembunyikan kotak saran
+            if (query.length < 2) {
+                suggestionsBoxKWarna.style.display = 'none';
+                return;
+            }
+
+            fetch('<?= base_url(session('role') . "/schedule/getKodeWarna") ?>?query=' + encodeURIComponent(query))
                 .then(response => response.json())
                 .then(data => {
-                    // console.log("Warna Data:", data);
-                    // Pastikan ada data sebelum mengakses indeks pertama
-                    warnaInput.value = data[0].color;
-                    fetchItemType(kodeWarna, data[0].color);
+                    const kodeWarnaSuggestions = data.map(item => item.kode_warna);
+                    displayKodeWarnaSuggestions(kodeWarnaSuggestions);
+                })
+                .catch(error => {
+                    console.error('Error fetching kode warna suggestions:', error);
+                });
+        }
+
+        // Fungsi untuk menampilkan saran di kotak saran
+        function displayKodeWarnaSuggestions(suggestions) {
+            suggestionsBoxKWarna.innerHTML = ''; // Bersihkan saran sebelumnya
+
+            if (suggestions.length > 0) {
+                suggestionsBoxKWarna.style.display = 'block'; // Tampilkan kotak saran
+
+                suggestions.forEach(suggestion => {
+                    const suggestionDiv = document.createElement('div');
+                    suggestionDiv.textContent = suggestion;
+
+                    // Ketika saran diklik, update nilai input dan langsung panggil fetchWarnaByKodeWarna
+                    suggestionDiv.addEventListener('click', function() {
+                        suggestionSelected = true;
+                        kodeWarna.value = suggestion;
+                        suggestionsBoxKWarna.style.display = 'none';
+                        // Panggil fetch untuk mendapatkan warna berdasarkan kode warna yang dipilih
+                        fetchWarnaByKodeWarna(suggestion);
+                    });
+
+                    suggestionsBoxKWarna.appendChild(suggestionDiv);
+                });
+            } else {
+                suggestionsBoxKWarna.style.display = 'none';
+            }
+        }
+
+        // Fungsi Fetch Data Warna berdasarkan Kode Warna
+        function fetchWarnaByKodeWarna(kodeWarnaValue) {
+            fetch('<?= base_url(session('role') . "/schedule/getWarna") ?>?kode_warna=' + encodeURIComponent(kodeWarnaValue))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        warnaInput.value = data[0].color;
+                        fetchItemType(kodeWarnaValue, data[0].color);
+                    } else {
+                        warnaInput.value = 'Warna tidak ditemukan';
+                    }
                 })
                 .catch(error => {
                     console.error('Error fetching warna by kode warna:', error);
                     warnaInput.value = 'Error mengambil warna';
                 });
         }
-        kodeWarna.addEventListener('change', function() {
-            kodeWarna.value = suggestionsBoxKWarna.textContent;
-            // console.log(kodeWarna.value);
-            const query = kodeWarna.value;
-            fetchWarnaByKodeWarna(query);
-        });
-
-        // ✅ Event listener untuk kode_warna input serta tampilkan warna
-        kodeWarna.addEventListener('input', function() {
-            const query = kodeWarna.value;
-            if (query.length >= 1) {
-                fetchKodeWarnaSuggestions(query);
-            } else {
-                suggestionsBoxKWarna.style.display = 'none';
-            }
-        });
 
 
 
@@ -603,6 +688,8 @@
                     alert(`⚠️ Qty Celup di baris ini melebihi Tagihan SCH! (Tagihan SCH: ${tagihanSCH.toFixed(2)})`);
                     row.querySelector("input[name='qty_celup[]']").classList.add("is-invalid");
                     row.querySelector("input[name='qty_celup[]']").focus();
+                    // reset qty celup
+                    row.querySelector("input[name='qty_celup[]']").value = '';
                 }
             });
 
@@ -676,7 +763,7 @@
 
         // ✅ Fungsi Fetch Detail PO
         function fetchPODetails(poNo, tr, itemType, kodeWarna) {
-            const url = `<?= base_url(session('role') . "/schedule/getPODetails") ?>?id_order=${poNo}&item_type=${itemType}&kode_warna=${kodeWarna}`;
+            const url = `<?= base_url(session('role') . "/schedule/getPODetails") ?>?id_order=${poNo}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}`;
             // console.log("Request URL:", url); // Log URL yang digunakan untuk fetch
 
             fetch(url)
@@ -686,7 +773,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    // console.log("Data received from server:", data); // Log data yang diterima dari server
+                    console.log("Data received from server:", data); // Log data yang diterima dari server
 
                     if (data && !data.error) { // Pastikan tidak ada error
                         const tglStartMC = tr.querySelector("input[name='tgl_start_mc[]']");
@@ -785,41 +872,36 @@
                         </div>
                         <div class="col-4">
                             <div class="form-group">
-                                <label for="kg_kebutuhan">PO +</label>
-                                <select class="form-select" name="po_plus[]" required>
-                                    <option value="">Pilih PO(+)</option>
-                                    <option value="1">Ya</option>
-                                    <option value="0">Tidak</option>
-                                </select>
-                            </div>
-
-                        </div>
-                        <div class="row">
-                            <div class="col-4">
-                                <div class="form-group">
-                                    <label for="qty_celup">KG Kebutuhan :</label>
-                                    <span class="badge bg-info">
-                                        <span class="kg_kebutuhan">0.00</span> KG <!-- Ganti id dengan class -->
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="form-group">
-                                    <label for="qty_celup">Tagihan Sch :</label>
-
-                                    <span class="badge bg-info">
-                                        <span class="sisa_jatah">0.00</span> KG <!-- Ganti id dengan class -->
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="col-4">
-                                <div class="form-group">
-                                    <label for="qty_celup">Qty Celup</label>
-                                    <input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required>
-                                </div>
+                                <label for="qty_celup">Qty Celup</label>
+                                <input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required>
                             </div>
                         </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="qty_celup">KG Kebutuhan :</label>
+                                <span class="badge bg-info">
+                                    <span class="kg_kebutuhan">0.00</span> KG <!-- Ganti id dengan class -->
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="qty_celup">Tagihan Sch :</label>
+
+                                <span class="badge bg-info">
+                                    <span class="sisa_jatah">0.00</span> KG <!-- Ganti id dengan class -->
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-4 d-flex align-items-center">
+                            <div class="form-group">
+                                <label for="po_plus">PO +</label>
+                                <input type="checkbox" id="po_plus" class="form-control form-check-input" name="po_plus[]" value="1">
+                            </div>
+                        </div>
+                    </div>
 
                 </td>
                 <td class="text-center">
