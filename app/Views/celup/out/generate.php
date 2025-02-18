@@ -309,9 +309,9 @@
                             ?>
                                 <td class="text-center"><?= $bon['no_model'] ?></td>
                                 <td class="text-center"><?= $bon['item_type'] ?></td>
+                                <td class="text-center"><?= $bon['ukuran'] ?></td>
                                 <td class="text-center"><?= $bon['kode_warna'] ?></td>
                                 <td class="text-center"><?= $bon['warna'] ?></td>
-                                <td class="text-center"><?= $bon['ukuran'] ?></td>
                                 <td class="text-center"><?= $bon['lot_kirim'] ?></td>
                                 <td class="text-center"><?= $bon['l_m_d'] ?></td>
                                 <td class="text-center"><?= $bon['harga'] ?></td>
