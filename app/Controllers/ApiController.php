@@ -63,10 +63,12 @@ class ApiController extends ResourceController
     }
     public function statusbahanbaku($area)
     {
+        $search = $this->request->getGet('search');
         $model = $this->materialModel->orderPerArea($area);
+
         $res = [];
         foreach ($model as &$row) {
-            $schedule = $this->scheduleCelupModel->schedulePerArea($row['no_model'], $row['item_type'], $row['kode_warna']);
+            $schedule = $this->scheduleCelupModel->schedulePerArea($row['no_model'], $row['item_type'], $row['kode_warna'], $search);
 
             $scheduleData = !empty($schedule) ? $schedule[0] : [];
 
@@ -102,10 +104,11 @@ class ApiController extends ResourceController
     }
     public function cekBahanBaku($model)
     {
+        $search = '';
         $material = $this->materialModel->MaterialPerOrder($model);
         $res = [];
         foreach ($material as &$row) {
-            $schedule = $this->scheduleCelupModel->schedulePerArea($row['no_model'], $row['item_type'], $row['kode_warna']);
+            $schedule = $this->scheduleCelupModel->schedulePerArea($row['no_model'], $row['item_type'], $row['kode_warna'], $search);
 
             $scheduleData = !empty($schedule) ? $schedule[0] : [];
 

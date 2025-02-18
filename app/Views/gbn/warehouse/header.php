@@ -98,11 +98,15 @@
                                 <span class="d-lg-inline-block d-none ms-1">Pemasukan</span>
                             </a>
                         </li>
-                        <li class="nav-item d-flex align-items-center">
-                            <a href="<?= base_url($role . '/pengeluaran') ?>" class="nav-link text-body font-weight-bold px-2" title="Pengeluaran" data-bs-toggle="tooltip" data-bs-placement="bottom">
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-arrow-up"></i>
                                 <span class="d-lg-inline-block d-none ms-1">Pengeluaran</span>
                             </a>
+                            <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownMenuLink">
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/pengeluaran_jalur') ?>">Pengeluaran Jalur</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/pengiriman_area') ?>">Pengiriman Area</a></li>
+                            </ul>
                         </li>
                         <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">

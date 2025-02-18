@@ -335,9 +335,9 @@ class ScheduleCelupModel extends Model
         return $this->where('id_bon', $id_bon)
             ->findAll();
     }
-    public function schedulePerArea($model, $itemType, $kodeWarna)
+    public function schedulePerArea($model, $itemType, $kodeWarna, $search)
     {
-        return $this->select(
+        $builder = $this->select(
             [
                 'start_mc',
                 'kg_celup',
@@ -362,7 +362,17 @@ class ScheduleCelupModel extends Model
         )
             ->where('no_model', $model)
             ->where('item_type', $itemType)
-            ->where('kode_warna', $kodeWarna)
-            ->findAll();
+            ->where('kode_warna', $kodeWarna);
+
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('no_model', $search)
+                ->orLike('kode_warna', $search)
+                ->orLike('tanggal_schedule', $search)
+                ->orLike('lot_celup', $search)
+                ->groupEnd();
+        }
+
+        return $builder->findAll();
     }
 }

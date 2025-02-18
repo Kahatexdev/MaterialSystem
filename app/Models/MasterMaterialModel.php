@@ -69,8 +69,16 @@ class MasterMaterialModel extends Model
     {
         return $this->where('item_type', $id)->set($data)->update();
     }
-    public function getJenisByitemType($item_type)
+
+    public function getJenis()
     {
-        return $this->select('jenis')->where('item_type', $item_type)->first();
+        $query = $this->distinct()
+            ->select('jenis')
+            ->orderBy('jenis', 'ASC')
+            ->findAll();
+
+        // Mengubah hasil query menjadi array dengan nilai 'area' saja
+        $uniqueArea = array_column($query, 'jenis');
+        return $uniqueArea;
     }
 }
