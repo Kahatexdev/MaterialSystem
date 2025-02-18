@@ -13,14 +13,38 @@
 
                 <ul class="navbar-nav  justify-content-end">
                     <li class="nav-item d-flex align-items-center px-1">
-                        <a href="<?= base_url(session()->get('role')) . '/masterMaterial' ?>" class="text-decoration-none d-flex align-items-center">
-                            <span class="badge bg-gradient-info">
-                                <i class="fas fa-database me-sm-1"></i>
-                                Master Material</span>
+                        <a href="">
+                            <span class=" badge bg-gradient-info ">Submenu1</span>
+
                         </a>
                     </li>
+                    <li class="nav-item d-flex align-items-center px-1">
+                        <a href="">
+                            <span class=" badge bg-gradient-info ">Submenu2</span>
 
+                        </a>
+                    </li>
+                    <li class=" nav-item dropdown pe-2 d-flex align-items-center">
+                        <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class=" badge bg-gradient-info ">Dropdown <i class="ni ni-bold-down"></i></span>
+                        </a>
+                        <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
+                            <li class="mb-2">
+                                <a class="dropdown-item border-radius-md" href="javascript:;">
+                                    <div class="d-flex py-1">
 
+                                        <div class="d-flex flex-column justify-content-center">
+                                            <h6 class="text-sm font-weight-normal mb-1">
+                                                <span class="font-weight-bold">dropdown</span>
+                                            </h6>
+
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+
+                    </li>
                     <li class="nav-item d-flex align-items-center">
                         <a href="" data-bs-toggle="modal" data-bs-target="#LogoutModal" class=" nav-link text-body font-weight-bold px-0">
                             <i class="fa fa-user me-sm-1"></i>

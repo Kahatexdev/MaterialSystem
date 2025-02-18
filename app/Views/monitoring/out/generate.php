@@ -213,7 +213,7 @@
                     <h3>Out Celup</h3>
                 </div>
                 <div class="group">
-                    <a href="<?= base_url($role . '/printBon/' . $id_bon) ?>" class="btn btn-info" target="_blank">
+                    <a href="<?= base_url($role . '/printBon/' . $id_bon) ?>" class="btn btn-info">
                         <i class="ni ni-single-copy-04 me-2"></i>
                         PRINT
                     </a>
@@ -309,9 +309,9 @@
                             ?>
                                 <td class="text-center"><?= $bon['no_model'] ?></td>
                                 <td class="text-center"><?= $bon['item_type'] ?></td>
-                                <td class="text-center"><?= $bon['ukuran'] ?></td>
                                 <td class="text-center"><?= $bon['kode_warna'] ?></td>
                                 <td class="text-center"><?= $bon['warna'] ?></td>
+                                <td class="text-center"><?= $bon['ukuran'] ?></td>
                                 <td class="text-center"><?= $bon['lot_kirim'] ?></td>
                                 <td class="text-center"><?= $bon['l_m_d'] ?></td>
                                 <td class="text-center"><?= $bon['harga'] ?></td>

@@ -210,7 +210,6 @@
         </div>
 
         <!-- Modal Edit Data Material -->
-        <!-- Modal Edit Data Material -->
         <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">

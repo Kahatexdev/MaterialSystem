@@ -2,38 +2,29 @@
 <?php $this->section('content'); ?>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
 <style>
-    /* Mengurangi ukuran font untuk catatan kecil */
-    small.text-warning {
-        font-size: 0.8em;
-        color: #ffc107;
-        /* Warna kuning */
-    }
-
     .select2-container {
         width: 100% !important;
-        /* Pastikan Select2 menyesuaikan dengan lebar container */
     }
 
     .select2-container--default .select2-selection--single {
         height: 38px;
-        /* Sesuaikan dengan desain form lainnya */
         border: 1px solid #ced4da;
-        /* Gaya default untuk input */
         border-radius: 0.25rem;
-        /* Tambahkan border radius agar seragam */
     }
 
     .select2-container--default .select2-selection--single .select2-selection__rendered {
         line-height: 38px;
-        /* Tengah secara vertikal */
     }
 
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 38px;
-        /* Tinggi ikon panah */
     }
 
-    /* Table Styles */
+    .locked-input {
+        pointer-events: none;
+        background-color: #e9ecef;
+    }
+
     .table-responsive {
         background-color: #ffffff;
         border-radius: 8px;
@@ -58,37 +49,51 @@
         vertical-align: middle;
     }
 
-    legend {
-        font-weight: bold;
-        font-size: 16px;
-        margin-bottom: 8px;
-    }
-
-    fieldset {
-        border: 1px solid #ccc;
-        padding: 10px;
-        border-radius: 5px;
-    }
-
+    /* Form Styles */
     .form-group {
-        display: flex;
-        flex-direction: column;
+        margin-bottom: 15px;
     }
 
-    .col-3.d-flex {
-        gap: 10px;
+    .form-control,
+    .form-select {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 8px 12px;
+        width: 100%;
+        transition: border-color 0.3s ease;
     }
 
-    .form-group div {
-        display: flex;
-        align-items: center;
-        gap: 5px;
+    .form-control:focus,
+    .form-select:focus {
+        border-color: rgb(0, 147, 152);
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+
+    .form-check-input {
+        height: 30px;
     }
 
 
-    /* input[type="radio"] {
-        margin-right: 5px;
-    } */
+    /* Button Styles */
+    .btn {
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-weight: 600;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+    }
+
+
+
+    .btn-danger {
+        background-color: #e74c3c;
+        border-color: #e74c3c;
+    }
+
+    .btn-danger:hover {
+        background-color: #c0392b;
+        border-color: #c0392b;
+    }
 </style>
 <div class="container-fluid">
     <div class="row">
@@ -254,25 +259,15 @@
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-3">
-                                                                    <div class="form-group">
-                                                                        <label for="last_status">Last Status</label>
-                                                                        <br />
-                                                                        <span class="badge bg-<?= $detail['last_status'] == 'scheduled' ? 'info' : ($detail['last_status'] == 'celup' ? 'warning' : 'success') ?>"><?= $detail['last_status'] ?></span>
-                                                                        <input type="hidden" class="form-control last_status" name="last_status[]" value="<?= $detail['last_status'] ?>">
-                                                                    </div>
+                                                                    <label for="last_status">Last Status</label>
+                                                                    <br />
+                                                                    <span class="badge bg-<?= $detail['last_status'] == 'scheduled' ? 'info' : ($detail['last_status'] == 'celup' ? 'warning' : 'success') ?>"><?= $detail['last_status'] ?></span>
+                                                                    <input type="hidden" class="form-control last_status" name="last_status[]" value="<?= $detail['last_status'] ?>">
                                                                 </div>
                                                                 <div class="col-3 d-flex align-items-center">
                                                                     <div class="form-group">
-                                                                        <label for="qty_celup">PO + :</label>
-                                                                        <fieldset>
-                                                                            <legend></legend>
-                                                                            <div>
-                                                                                <input type="radio" id="po_plus" name="po_plus[]" value="1" <?= isset($detail['po_plus']) && $detail['po_plus'] == 1 ? 'checked' : '' ?>>
-                                                                                <label for="iya">Iya</label>
-                                                                                <input type="radio" id="po_plus" name="po_plus[]" value="0" <?= isset($detail['po_plus']) && $detail['po_plus'] == 0 ? 'checked' : '' ?>>
-                                                                                <label for="tidak">Tidak</label>
-                                                                            </div>
-                                                                        </fieldset>
+                                                                        <label for="po_plus">PO +</label>
+                                                                        <input type="checkbox" id="po_plus" class="form-control form-check-input" name="po_plus[]" value="1" <?= $detail['po_plus'] == 1 ? 'checked' : '' ?>>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -745,27 +740,18 @@
             </div>
         </div>
         <div class="col-3">
-            <div class="form-group">
             <label for="last_status">Last Status</label>
             <br />
             <span class="badge bg-info">scheduled</span>
             <input type="hidden" class="form-control last_status" name="last_status[]" value="scheduled">
-            </div>
         </div>
-         <div class="col-3 d-flex align-items-center">
+        <div class="col-3 d-flex align-items-center">
             <div class="form-group">
-            <label for="qty_celup">PO + :</label>
-            <fieldset>
-                <legend></legend>
-                <div>
-                    <input type="radio" id="po_plus" name="po_plus[]" value="1">
-                    <label for="iya">Iya</label>
-                    <input type="radio" id="po_plus" name="po_plus[]" value="0">
-                    <label for="tidak">Tidak</label>
-                </div>
-            </fieldset>
+                <label for="po_plus">PO +</label>
+                <input type="checkbox" id="po_plus" class="form-control form-check-input" name="po_plus[]" value="1">
             </div>
         </div>
+
     </div>
 
 </td>
