@@ -158,5 +158,6 @@ $routes->group(
     '/api',
     function ($routes) {
         $routes->get('statusbahanbaku/(:any)', 'ApiController::statusbahanbaku/$1');
+        $routes->get('cekBahanBaku/(:any)', 'ApiController::cekBahanBaku/$1');
     }
 );
