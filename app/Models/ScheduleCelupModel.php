@@ -283,7 +283,7 @@ class ScheduleCelupModel extends Model
     public function getCelupDone()
     {
         return $this
-            ->select('id_celup,no_model, item_type, kode_warna, warna')
+            ->select('id_celup,no_model, item_type, kode_warna, warna, lot_celup')
             ->where('last_status', 'done')
             ->groupBy('id_celup')
             ->findAll();

@@ -2,184 +2,7 @@
 <?php $this->section('content'); ?>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-<style>
-    .card {
-        border-radius: 20px;
-        box-shadow: 0 10px 20px rgba(76, 175, 80, 0.1);
-        border: none;
-        background-color: white;
-        transition: all 0.3s ease;
-    }
 
-    .card:hover {
-        box-shadow: 0 15px 30px rgba(76, 175, 80, 0.15);
-        transform: translateY(-5px);
-    }
-
-    .table {
-        border-radius: 15px;
-        /* overflow: hidden; */
-        border-collapse: separate;
-        /* Ganti dari collapse ke separate */
-        border-spacing: 0;
-        /* Pastikan jarak antar sel tetap rapat */
-        overflow: auto;
-        position: relative;
-    }
-
-    .table th {
-        background-color: #e8f5e9;
-        border: none;
-        font-size: 0.9rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #2e7d32;
-    }
-
-    .table td {
-        border: none;
-        vertical-align: middle;
-        font-size: 0.9rem;
-        padding: 1rem 0.75rem;
-    }
-
-    .table tr:nth-child(even) {
-        background-color: #f1f8e9;
-    }
-
-    .table th.sticky {
-        position: sticky;
-        top: 0;
-        /* Untuk tetap di bagian atas saat menggulir vertikal */
-        z-index: 3;
-        /* Pastikan header terlihat di atas elemen lain */
-        background-color: #e8f5e9;
-        /* Warna latar belakang */
-    }
-
-    .table td.sticky {
-        position: sticky;
-        left: 0;
-        /* Untuk tetap di sisi kiri saat menggulir horizontal */
-        z-index: 2;
-        /* Prioritas lebih rendah dari header */
-        background-color: #e8f5e9;
-        /* Tambahkan warna latar belakang */
-        box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
-        /* Memberikan efek bayangan untuk memisahkan kolom */
-
-    }
-
-
-    .capacity-bar {
-        height: 6px;
-        border-radius: 3px;
-        margin-bottom: 5px;
-    }
-
-    .btn {
-        border-radius: 12px;
-        padding: 0.6rem 1.2rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-    }
-
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
-    }
-
-    .btn-filter {
-        background: linear-gradient(135deg, #4caf50, #81c784);
-        color: white;
-        border: none;
-    }
-
-    .btn-filter:hover {
-        background: linear-gradient(135deg, #43a047, #66bb6a);
-    }
-
-    .date-navigation {
-        background-color: white;
-        border-radius: 15px;
-        padding: 0.5rem;
-        box-shadow: 0 4px 6px rgba(76, 175, 80, 0.1);
-    }
-
-    .date-navigation input[type="date"] {
-        border: none;
-        font-weight: 500;
-        color: #2e7d32;
-    }
-
-    .machine-info {
-        font-size: 0.85rem;
-    }
-
-    .machine-info strong {
-        font-size: 1rem;
-        color: #2e7d32;
-    }
-
-    .job-item {
-        background-color: white;
-        border-radius: 10px;
-        padding: 0.7rem;
-        margin-bottom: 0.7rem;
-        box-shadow: 0 2px 4px rgba(76, 175, 80, 0.1);
-        transition: all 0.2s ease;
-    }
-
-    .job-item:hover {
-        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
-    }
-
-    .job-item span {
-        font-size: 0.8rem;
-        color: #558b2f;
-    }
-
-    .job-item .btn {
-        display: block;
-        width: 100%;
-        height: 100%;
-        text-align: center;
-    }
-
-    .job-item .btn span {
-        font-size: 0.9rem;
-        color: black;
-        font-weight: bold;
-    }
-
-    .job-item .btn .total-kg {
-        font-size: 0.85rem;
-    }
-
-    .no-schedule .btn {
-        background-color: #f8f9fa;
-        border: 1px dashed #ccc;
-        color: #6c757d;
-    }
-
-
-    .bg-success {
-        background-color: #66bb6a !important;
-    }
-
-    .bg-warning {
-        background-color: #ffd54f !important;
-    }
-
-    .bg-danger {
-        background-color: #ef5350 !important;
-    }
-
-    .text-success {
-        color: #43a047 !important;
-    }
-</style>
 
 <div class="container-fluid py-4">
     <?php if (session()->getFlashdata('success')) : ?>
@@ -217,7 +40,7 @@
             });
         </script>
     <?php endif; ?>
-    <h1 class="display-5 mb-4 text-center" style="color: #2e7d32; font-weight: 600;">Schedule Mesin Celup</h1>
+    <h1 class="display-5 mb-4 text-center" style="color:rgb(0, 85, 124); font-weight: 600;">Schedule Mesin Celup Benang</h1>
 
     <div class="card mb-4">
         <div class="card-body">
@@ -263,7 +86,7 @@
 
     <div class="card">
         <div class="card-body">
-            <div class="table-responsive">
+            <div class="table-responsive" style="width:auto; height: 780px; overflow-y: auto; overflow-x: auto;">
                 <table class="table">
                     <thead>
                         <tr>
@@ -291,32 +114,22 @@
                             $sixDaysAhead = (clone $today)->add(new DateInterval('P6D'));
 
                             foreach ($datePeriod as $date) {
-                                // Periksa apakah hari Minggu
-                                if ($date->format('w') == 0) { // 0 adalah kode untuk hari Minggu
-                                    echo "<th style='color: red;'>" . $date->format('D, d M') . "</th>";
+                                // Misalnya tambahkan class sticky ke semua th
+                                if ($date->format('w') == 0) {
+                                    echo "<th class='sticky' style='color: red;'>" . $date->format('D, d M') . "</th>";
+                                } elseif ($date->format('Y-m-d') === $today->format('Y-m-d')) {
+                                    echo "<th class='sticky' style='background-color: #ffeb3b; color: #000;'>" . $date->format('D, d M') . "</th>";
+                                } elseif ($date >= $threeDaysAgo && $date < $today) {
+                                    echo "<th class='sticky' style='color: #6c757d;'>" . $date->format('D, d M') . "</th>";
+                                } elseif ($date > $today && $date <= $sixDaysAhead) {
+                                    echo "<th class='sticky' style='color: rgb(31, 193, 199);'>" . $date->format('D, d M') . "</th>";
+                                } else {
+                                    echo "<th class='sticky'>" . $date->format('D, d M') . "</th>";
                                 }
-                                // Periksa apakah tanggal adalah hari ini
-                                elseif ($date->format('Y-m-d') === $today->format('Y-m-d')) {
-                                    echo "<th style='background-color: #ffeb3b; color: #000;'>" . $date->format('D, d M') . "</th>";
-                                }
-                                // Periksa apakah tanggal adalah 3 hari ke belakang
-                                elseif ($date >= $threeDaysAgo && $date < $today) {
-                                    echo "<th style='color: #6c757d;'>" . $date->format('D, d M') . "</th>";
-                                }
-                                // Periksa apakah tanggal adalah 6 hari ke depan
-                                elseif ($date > $today && $date <= $sixDaysAhead) {
-                                    echo "<th style='color: rgb(31, 193, 199);'>" . $date->format('D, d M') . "</th>";
-                                }
-                                // Tanggal lain
-                                else {
-                                    echo "<th>" . $date->format('D, d M') . "</th>";
-                                }
-                            }
-                            ?>
-
-
+                            } ?>
                         </tr>
                     </thead>
+
                     <tbody>
                         <?php
                         // Kelompokkan scheduleData untuk mempercepat akses
@@ -366,8 +179,7 @@
                                     data-no-mesin='{$job['no_mesin']}'
                                     data-tanggal-schedule='{$job['tanggal_schedule']}'
                                     data-lot-urut='{$job['lot_urut']}'
-                                    title='{$totalKg} kg ({$capacityPercentage}%)'
-                                    style='width: {$capacityPercentage}%;'>
+                                    title='{$totalKg} kg ({$capacityPercentage}%)'>
                                     <div class='d-flex flex-column align-items-center justify-content-center' style='height: 100%; width: 100%;'>
                                         <span style='font-size: 0.9rem; color: black; font-weight: bold;'>{$job['kode_warna']}</span>
                                         <span style='font-size: 0.85rem; color: black;'>{$kgCelup} KG</span>
@@ -594,17 +406,28 @@
                     console.error("Error fetching data:", error);
                     // Jika data tidak ditemukan, tambahkan tombol "Tambah Jadwal"
                     modalBody.innerHTML = `
-                    <div class="text-center text-danger">${error.message}</div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-info" id="addSchedule">Tambah Jadwal</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    </div>`;
+                <div class="text-center text-danger">${error.message}</div>
+                <div class="modal-footer">
+                    
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>`;
 
                     // Tambahkan event listener untuk tombol "Tambah Jadwal"
                     document.getElementById("addSchedule").addEventListener("click", function() {
+                        if (isSunday(date)) {
+                            alert("⚠️ Tidak dapat menambahkan jadwal pada hari Minggu.");
+                            return; // Hentikan proses jika hari Minggu
+                        }
                         redirectToAddSchedule(machine, date, lotUrut);
                     });
                 });
+        }
+
+        // Fungsi untuk mengecek apakah tanggal tertentu adalah hari Minggu
+        function isSunday(date) {
+            const sunday = 0; // 0 adalah kode untuk hari Minggu
+            const tgl = new Date(date); // Konversi string date ke objek Date
+            return tgl.getDay() === sunday;
         }
 
         // Fungsi untuk redirect ke halaman tambah jadwal

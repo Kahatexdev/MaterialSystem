@@ -210,6 +210,7 @@
         </div>
 
         <!-- Modal Edit Data Material -->
+        <!-- Modal Edit Data Material -->
         <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -253,34 +254,33 @@
 
                             <div class="mb-3">
                                 <label for="composition" class="form-label">Composition (%)</label>
-                                <input type="text" class="form-control" id="composition" name="composition" required>
+                                <input type="number" step="0.01" class="form-control" id="composition" name="composition" required>
                             </div>
 
                             <div class="mb-3">
                                 <label for="gw" class="form-label">GW</label>
-                                <input type="text" class="form-control" id="gw" name="gw" required>
+                                <input type="number" step="0.01" class="form-control" id="gw" name="gw" required>
                             </div>
 
                             <div class="mb-3">
                                 <label for="qty_pcs" class="form-label">Qty(pcs)</label>
-                                <input type="text" class="form-control" id="qty_pcs" name="qty_pcs" required>
+                                <input type="number" step="0.01" class="form-control" id="qty_pcs" name="qty_pcs" required>
                             </div>
 
                             <div class="mb-3">
                                 <label for="loss" class="form-label">Loss</label>
-                                <input type="text" class="form-control" id="loss" name="loss" required>
+                                <input type="number" step="0.01" class="form-control" id="loss" name="loss" required>
                             </div>
 
                             <div class="mb-3">
                                 <label for="kgs" class="form-label">Kgs</label>
-                                <input type="number" class="form-control" id="kgs" name="kgs" required>
+                                <input type="number" step="0.01" class="form-control" id="kgs" name="kgs" required>
                             </div>
                             <!-- Button update dan batal di sebelah kanan -->
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                                 <button type="submit" class="btn btn-info">Update</button>
                             </div>
-
                         </form>
                     </div>
                 </div>
