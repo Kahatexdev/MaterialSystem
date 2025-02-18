@@ -299,7 +299,8 @@ class PdfController extends BaseController
         foreach ($groupedDetails as &$group) {
             foreach ($group['detailPengiriman'] as $outCelup => $id) {
                 // Hasilkan barcode dan encode sebagai base64
-                $barcode = $generator->getBarcode($id['id_out_celup'], $generator::TYPE_EAN_13);
+                $id_out_celup = str_pad($id['id_out_celup'], 12, '0', STR_PAD_LEFT);
+                $barcode = $generator->getBarcode($id_out_celup, $generator::TYPE_EAN_13);
                 $group['barcodes'][] = [
                     'no_model' => $group['no_model'],
                     'item_type' => $group['item_type'],

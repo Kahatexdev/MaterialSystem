@@ -18,6 +18,8 @@ use App\Models\StockModel;
 use App\Models\HistoryPindahPalet;
 use App\Models\HistoryPindahOrder;
 use App\Models\PengeluaranModel;
+use Picqer\Barcode\BarcodeGeneratorPNG;
+
 
 class WarehouseController extends BaseController
 {
@@ -80,7 +82,14 @@ class WarehouseController extends BaseController
     }
     public function pemasukan()
     {
+        $generator = new BarcodeGeneratorPNG();
+
         $id = $this->request->getPost('barcode');
+        // $id = base64_decode($id);
+        $id_out_celup = str_pad($id, 12, '0', STR_PAD_LEFT);
+        $barcode = $generator->getBarcode($id_out_celup, $generator::TYPE_EAN_13);
+
+
         $cluster = $this->clusterModel->getDataCluster();
 
         // Ambil data dari session (jika ada)
@@ -99,7 +108,7 @@ class WarehouseController extends BaseController
             $outCelup = $this->outCelupModel->getDataOut($id);
 
             if (empty($outCelup)) {
-                session()->setFlashdata('error', 'Barcode tidak ditemukan di database!');
+                session()->setFlashdata('error', 'Barcode tidak ditemukan di database!' . $id);
                 return redirect()->to(base_url($this->role . '/pemasukan'));
             } elseif (!empty($outCelup)) {
                 // Tambahkan data baru ke dalam array

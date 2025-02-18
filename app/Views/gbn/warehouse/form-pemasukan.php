@@ -120,7 +120,7 @@
                                             foreach ($dataOut as $data) {
                                             ?>
                                                 <tr>
-                                                    <input type="hidden" name="id_out_celup[]" value="<?= $data['id_out_celup'] ?>">
+                                                    <input type="text" name="id_out_celup[]" value="<?= $data['id_out_celup'] ?>">
                                                     <td align="center"><input type="checkbox" name="checked_id[]" class="checkbox" value="<?= $no - 1 ?>"> <?= $no++ ?></td>
                                                     <td>
                                                         <div class="form-group d-flex justify-content-end">
@@ -334,12 +334,56 @@
         document.getElementById('barcode').addEventListener('input', function() {
             if (isSubmitting) return; // Cegah double submission
             setTimeout(() => {
-                if (this.value.trim() !== '') {
+                let scannedValue = this.value.trim();
+
+                // Tentukan jumlah angka 0 yang dihapus berdasarkan panjang data
+                if (scannedValue.length < 10) {
+                    // Hapus 11 angka 0 di depan jika panjang data kurang dari 10
+                    scannedValue = scannedValue.replace(/^0{11}/, '');
+                } else if (scannedValue.length < 100) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{10}/, '');
+                } else if (scannedValue.length < 1000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{9}/, '');
+                } else if (scannedValue.length < 10000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{8}/, '');
+                } else if (scannedValue.length < 100000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{7}/, '');
+                } else if (scannedValue.length < 1000000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{8}/, '');
+                } else if (scannedValue.length < 10000000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{7}/, '');
+                } else if (scannedValue.length < 100000000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{6}/, '');
+                } else if (scannedValue.length < 1000000000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{5}/, '');
+                } else if (scannedValue.length < 10000000000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{4}/, '');
+                } else if (scannedValue.length < 100000000000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{3}/, '');
+                } else if (scannedValue.length < 1000000000000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{2}/, '');
+                }
+
+
+                if (scannedValue !== '') {
                     isSubmitting = true;
-                    this.form.submit();
+                    this.value = scannedValue; // Perbarui input field dengan nilai yang sudah dimodifikasi
+                    this.form.submit(); // Kirim form
                 }
             }, 300);
         });
+
 
         $(document).ready(function() {
             $('#select_all').on('click', function() {
