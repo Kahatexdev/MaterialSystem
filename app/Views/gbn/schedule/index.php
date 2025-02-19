@@ -138,7 +138,7 @@
                             $key = "{$job['no_mesin']} | " . (new DateTime($job['tanggal_schedule']))->format('Y-m-d') . " | {$job['lot_urut']}";
 
                             // Cek last_status sebelum memasukkan data ke dalam kelompok
-                            if (in_array($job['last_status'], ['scheduled', 'celup', 'reschedule'])) {
+                            if (in_array($job['last_status'], ['scheduled', 'bon', 'celup', 'bongkar', 'press', 'over', 'tes luntur', 'rajut pagi', 'reschedule'])) {
                                 // Jika key sudah ada, gabungkan total_kg-nya
                                 if (isset($scheduleGrouped[$key])) {
                                     $scheduleGrouped[$key]['total_kg'] += $job['total_kg'];

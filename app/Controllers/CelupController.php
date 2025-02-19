@@ -283,6 +283,11 @@ class CelupController extends BaseController
             $dataUpdate['last_status'] = 'celup';
         }
 
+        // Jika tgl_bon diisi, update last_status menjadi 'bon'
+        if (!empty($tglBon)) {
+            $dataUpdate['last_status'] = 'bon';
+        }
+
         // Jika tgl_kelos diisi, update last_status menjadi 'done'
         if (!empty($tglKelos)) {
             $dataUpdate['last_status'] = 'done';
