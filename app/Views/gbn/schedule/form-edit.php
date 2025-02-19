@@ -2,29 +2,38 @@
 <?php $this->section('content'); ?>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
 <style>
+    /* Mengurangi ukuran font untuk catatan kecil */
+    small.text-warning {
+        font-size: 0.8em;
+        color: #ffc107;
+        /* Warna kuning */
+    }
+
     .select2-container {
         width: 100% !important;
+        /* Pastikan Select2 menyesuaikan dengan lebar container */
     }
 
     .select2-container--default .select2-selection--single {
         height: 38px;
+        /* Sesuaikan dengan desain form lainnya */
         border: 1px solid #ced4da;
+        /* Gaya default untuk input */
         border-radius: 0.25rem;
+        /* Tambahkan border radius agar seragam */
     }
 
     .select2-container--default .select2-selection--single .select2-selection__rendered {
         line-height: 38px;
+        /* Tengah secara vertikal */
     }
 
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 38px;
+        /* Tinggi ikon panah */
     }
 
-    .locked-input {
-        pointer-events: none;
-        background-color: #e9ecef;
-    }
-
+    /* Table Styles */
     .table-responsive {
         background-color: #ffffff;
         border-radius: 8px;
@@ -49,51 +58,37 @@
         vertical-align: middle;
     }
 
-    /* Form Styles */
+    legend {
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+
+    fieldset {
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
     .form-group {
-        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
     }
 
-    .form-control,
-    .form-select {
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 8px 12px;
-        width: 100%;
-        transition: border-color 0.3s ease;
+    .col-3.d-flex {
+        gap: 10px;
     }
 
-    .form-control:focus,
-    .form-select:focus {
-        border-color: rgb(0, 147, 152);
-        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
-    }
-
-    .form-check-input {
-        height: 30px;
+    .form-group div {
+        display: flex;
+        align-items: center;
+        gap: 5px;
     }
 
 
-    /* Button Styles */
-    .btn {
-        padding: 10px 20px;
-        border-radius: 4px;
-        font-weight: 600;
-        text-transform: uppercase;
-        transition: all 0.3s ease;
-    }
-
-
-
-    .btn-danger {
-        background-color: #e74c3c;
-        border-color: #e74c3c;
-    }
-
-    .btn-danger:hover {
-        background-color: #c0392b;
-        border-color: #c0392b;
-    }
+    /* input[type="radio"] {
+        margin-right: 5px;
+    } */
 </style>
 <div class="container-fluid">
     <div class="row">
@@ -236,7 +231,7 @@
                                                                 </div>
                                                                 <div class="col-4">
                                                                     <label for="qty_celup">Qty Celup</label>
-                                                                    <input type="number" class="form-control" step="0.01" min="0.01" name="qty_celup[]" value="<?= $detail['qty_celup'] ?>" required>
+                                                                    <input type="number" class="form-control" step="0.01" min="0.01" name="qty_celup[]" value="<?= number_format($detail['qty_celup'], 2) ?>" required>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
@@ -259,15 +254,37 @@
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-3">
-                                                                    <label for="last_status">Last Status</label>
-                                                                    <br />
-                                                                    <span class="badge bg-<?= $detail['last_status'] == 'scheduled' ? 'info' : ($detail['last_status'] == 'celup' ? 'warning' : 'success') ?>"><?= $detail['last_status'] ?></span>
-                                                                    <input type="hidden" class="form-control last_status" name="last_status[]" value="<?= $detail['last_status'] ?>">
+                                                                    <div class="form-group">
+                                                                        <label for="last_status">Last Status</label>
+                                                                        <br />
+                                                                        <?php
+                                                                        $status = $detail['last_status'];
+                                                                        if (in_array($status, ['scheduled', 'retur', 'reschedule'])) {
+                                                                            $badgeColor = 'info';
+                                                                        } elseif (in_array($status, ['bon', 'celup', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc', 'reject', 'perbaikan'])) {
+                                                                            $badgeColor = 'warning';
+                                                                        } else {
+                                                                            in_array($status, ['done', 'sent']);
+                                                                            $badgeColor = 'success';
+                                                                        }
+                                                                        ?>
+                                                                        <span class="badge bg-<?= $badgeColor ?>"><?= htmlspecialchars($status) ?></span>
+                                                                        <input type="hidden" class="form-control last_status" name="last_status[]" value="<?= htmlspecialchars($status) ?>">
+                                                                    </div>
                                                                 </div>
+
                                                                 <div class="col-3 d-flex align-items-center">
                                                                     <div class="form-group">
-                                                                        <label for="po_plus">PO +</label>
-                                                                        <input type="checkbox" id="po_plus" class="form-control form-check-input" name="po_plus[]" value="1" <?= $detail['po_plus'] == 1 ? 'checked' : '' ?>>
+                                                                        <label for="qty_celup">PO + :</label>
+                                                                        <fieldset>
+                                                                            <legend></legend>
+                                                                            <div>
+                                                                                <input type="radio" id="po_plus" name="po_plus[]" value="1" <?= isset($detail['po_plus']) && $detail['po_plus'] == 1 ? 'checked' : '' ?>>
+                                                                                <label for="iya">Iya</label>
+                                                                                <input type="radio" id="po_plus" name="po_plus[]" value="0" <?= isset($detail['po_plus']) && $detail['po_plus'] == 0 ? 'checked' : '' ?>>
+                                                                                <label for="tidak">Tidak</label>
+                                                                            </div>
+                                                                        </fieldset>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -345,11 +362,13 @@
         // Buat semua input dan select jadi readonly/disabled jika last_status 'celup', 'done', atau 'sent'
         const lastStatuses = document.querySelectorAll('.last_status');
         lastStatuses.forEach(status => {
-            if (status.value === 'celup' || status.value === 'done' || status.value === 'sent') {
+            const statusValue = status.value || status.textContent.trim().toLowerCase(); // Ambil value atau teks
+            const lockedStatuses = ['bon', 'celup', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc', 'done', 'reject', 'perbaikan', 'sent'];
+
+            if (lockedStatuses.includes(statusValue)) {
                 const row = status.closest('tr');
                 const elements = row.querySelectorAll('input, select, button');
                 elements.forEach(el => {
-                    // Untuk input, gunakan readonly; untuk select dan button, gunakan disabled
                     if (el.tagName.toLowerCase() === 'input') {
                         el.setAttribute('readonly', true);
                     } else {
@@ -359,6 +378,7 @@
                 });
             }
         });
+
 
         // Event delegation untuk tombol Edit (gunakan closest untuk menangani klik pada ikon di dalam tombol)
         document.addEventListener('click', function(e) {
@@ -396,7 +416,7 @@
                 .done(response => {
                     if (response.success) {
                         alert('Update berhasil!');
-                        location.reload();
+                        window.location.href = '<?= base_url(session('role') . '/schedule') ?>';
                     } else {
                         alert('Gagal: ' + (response.message || 'Terjadi kesalahan'));
                     }
@@ -513,7 +533,7 @@
             rows.forEach(row => {
                 const lastStatusEl = row.querySelector("input[name='last_status[]']");
                 const lastStatus = lastStatusEl ? lastStatusEl.value.trim() : "";
-                if (["scheduled", "celup", "reschedule"].includes(lastStatus)) {
+                if (["scheduled", "bon", "celup", "bongkar", "press", "oven", "tes luntur", "rajut pagi", "reschedule"].includes(lastStatus)) {
                     const qtyCelup = parseFloat(row.querySelector("input[name='qty_celup[]']").value) || 0;
                     totalQtyCelup += qtyCelup;
                 }
@@ -529,7 +549,7 @@
             const maxCaps = parseFloat(document.getElementById("max_caps").value) || 0;
 
             // Periksa apakah total_qty_celup melebihi max_caps
-            if (totalQtyCelup > maxCaps) {
+            if (totalQtyCelup >= maxCaps) {
                 alert("⚠️ Total Qty Celup melebihi Max Caps!");
                 totalQtyCelupElement.classList.add("is-invalid");
                 totalQtyCelupElement.focus();
@@ -537,33 +557,54 @@
                 totalQtyCelupElement.classList.remove("is-invalid");
             }
 
-            // Periksa apakah qty_celup di setiap baris yang memiliki last_status valid melebihi tagihan SCH di baris tersebut
+            // Perbarui sisa jatah tiap baris (jika qty_celup sudah terisi, hitung ulang berdasarkan nilai asli)
             rows.forEach(row => {
                 const lastStatusEl = row.querySelector("input[name='last_status[]']");
                 const lastStatus = lastStatusEl ? lastStatusEl.value.trim() : "";
-                if (["scheduled", "celup", "reschedule"].includes(lastStatus)) {
+                if (["scheduled", "bon", "celup", "bongkar", "press", "oven", "tes luntur", "rajut pagi", "reschedule"].includes(lastStatus)) {
                     const qtyCelupInput = row.querySelector("input[name='qty_celup[]']");
-                    const qtyCelup = parseFloat(qtyCelupInput.value) || 0;
-                    const tagihanSCH = parseFloat(row.querySelector(".sisa_jatah").textContent) || 0;
+                    // Ambil nilai baru dari input
+                    const newQty = parseFloat(qtyCelupInput.value) || 0;
+                    const sisaJatahEl = row.querySelector(".sisa_jatah");
 
-                    if (qtyCelup > tagihanSCH) {
-                        alert(`⚠️ Qty Celup di baris ini melebihi Tagihan SCH! (Tagihan SCH: ${tagihanSCH.toFixed(2)})`);
-                        qtyCelupInput.classList.add("is-invalid");
-                        qtyCelupInput.focus();
-                        // Reset qty celup
-                        qtyCelupInput.value = '';
-                    } else {
-                        qtyCelupInput.classList.remove("is-invalid");
+                    // Pastikan nilai asli tagihan SCH disimpan (misal, di data-original)
+                    let originalTagihan = parseFloat(sisaJatahEl.getAttribute("data-original"));
+                    if (!originalTagihan) {
+                        // Jika belum disimpan, ambil dari textContent dan simpan
+                        originalTagihan = parseFloat(sisaJatahEl.textContent) || 0;
+                        // console.log("Original tagihan:", originalTagihan);
+                        sisaJatahEl.setAttribute("data-original", originalTagihan);
+                        // console.log("Data original tagihan:", sisaJatahEl.getAttribute("data-original"));
                     }
+                    // let newSisa = originalTagihan + newQty;
+
+                    // // Hitung sisa jatah berdasarkan nilai asli dikurangi qty_celup yang baru
+
+                    // // Jika hasil negatif, artinya input melebihi quota; koreksi ke maksimum
+                    // if (newSisa < 0) {
+                    //     alert(`⚠️ Qty Celup di baris ini melebihi Tagihan SCH! (Tagihan SCH: ${originalTagihan.toFixed(2)})`);
+                    //     qtyCelupInput.classList.add("is-invalid");
+                    //     // Reset nilai ke maksimum yang diizinkan
+                    //     qtyCelupInput.value = originalTagihan.toFixed(2);
+                    //     newSisa = 0;
+                    //     qtyCelupInput.focus();
+                    // } else {
+                    //     qtyCelupInput.classList.remove("is-invalid");
+                    // }
+
+                    // Update tampilan sisa jatah (selalu dihitung dari originalTagihan)
+                    sisaJatahEl.textContent = newSisa.toFixed(2);
+                    // Opsional: simpan nilai qty sebelumnya jika diperlukan untuk perhitungan lain
+                    qtyCelupInput.setAttribute("data-old-qty", newQty);
                 }
             });
 
-            // Update sisa kapasitas
+            // Update sisa kapasitas overall
             const sisaKapasitasElement = document.getElementById("sisa_kapasitas");
             if (sisaKapasitasElement) {
                 const sisaKapasitas = maxCaps - totalQtyCelup;
                 sisaKapasitasElement.value = sisaKapasitas.toFixed(2); // Format 2 angka di belakang koma
-                if (sisaKapasitas < 0) {
+                if (sisaKapasitas <= 0) {
                     alert("⚠️ Sisa Kapasitas negatif!");
                     sisaKapasitasElement.classList.add("is-invalid");
                     sisaKapasitasElement.focus();
@@ -579,6 +620,7 @@
                 calculateTotalAndRemainingCapacity();
             }
         });
+
 
 
         // Event delegation untuk perubahan pada dropdown PO
@@ -740,18 +782,27 @@
             </div>
         </div>
         <div class="col-3">
+            <div class="form-group">
             <label for="last_status">Last Status</label>
             <br />
             <span class="badge bg-info">scheduled</span>
             <input type="hidden" class="form-control last_status" name="last_status[]" value="scheduled">
-        </div>
-        <div class="col-3 d-flex align-items-center">
-            <div class="form-group">
-                <label for="po_plus">PO +</label>
-                <input type="checkbox" id="po_plus" class="form-control form-check-input" name="po_plus[]" value="1">
             </div>
         </div>
-
+         <div class="col-3 d-flex align-items-center">
+            <div class="form-group">
+            <label for="qty_celup">PO + :</label>
+            <fieldset>
+                <legend></legend>
+                <div>
+                    <input type="radio" id="po_plus" name="po_plus[]" value="1">
+                    <label for="iya">Iya</label>
+                    <input type="radio" id="po_plus" name="po_plus[]" value="0">
+                    <label for="tidak">Tidak</label>
+                </div>
+            </fieldset>
+            </div>
+        </div>
     </div>
 
 </td>

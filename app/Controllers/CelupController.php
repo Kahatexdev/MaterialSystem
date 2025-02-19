@@ -210,7 +210,7 @@ class CelupController extends BaseController
             'uniqueData' => $uniqueData,
             'po' => array_column($uniqueData, 'no_model'),
         ];
-        return view($this->role . '/schedule/form-edit', $data);
+        return view($this->role . '/schedule/edit-status', $data);
     }
 
     public function updateSchedule($id)
@@ -278,9 +278,48 @@ class CelupController extends BaseController
         if ($tglPB) $dataUpdate['tanggal_perbaikan'] = $tglPB;
         if ($ketDailyCek) $dataUpdate['ket_daily_cek'] = $ketDailyCek;
 
+        // Jika tgl_bon diisi, update last_status menjadi 'bon'
+        if (!empty($tglBon)) {
+            $dataUpdate['last_status'] = 'bon';
+        }
+
         // Jika tgl_celup diisi, update last_status menjadi 'celup'
         if (!empty($tglCelup)) {
             $dataUpdate['last_status'] = 'celup';
+        }
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglBongkar)) {
+            $dataUpdate['last_status'] = 'bongkar';
+        }
+
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglPress)) {
+            $dataUpdate['last_status'] = 'press';
+        }
+
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglOven)) {
+            $dataUpdate['last_status'] = 'oven';
+        }
+
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglTL)) {
+            $dataUpdate['last_status'] = 'tl';
+        }
+
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglRajut)) {
+            $dataUpdate['last_status'] = 'rajut';
+        }
+
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglACC)) {
+            $dataUpdate['last_status'] = 'acc';
+        }
+
+        // Jika tgl_bon diisi, update last_status menjadi 'bon'
+        if (!empty($tglBon)) {
+            $dataUpdate['last_status'] = 'bon';
         }
 
         // Jika tgl_kelos diisi, update last_status menjadi 'done'
@@ -288,12 +327,22 @@ class CelupController extends BaseController
             $dataUpdate['last_status'] = 'done';
         }
 
+        // Jika tgl_kelos diisi, update last_status menjadi 'done'
+        if (!empty($tglReject)) {
+            $dataUpdate['last_status'] = 'reject';
+        }
+
+        // Jika tgl_kelos diisi, update last_status menjadi 'done'
+        if (!empty($tglPB)) {
+            $dataUpdate['last_status'] = 'perbaikan';
+        }
+
         // Validasi apakah data dengan ID yang diberikan ada
         $existingProduction = $this->scheduleCelupModel->find($id);
         if (!$existingProduction) {
             return redirect()->back()->with('error', 'Data tidak ditemukan.');
         }
-        // dd ($dataUpdate);
+        dd($dataUpdate);
         // Perbarui data di database
         $this->scheduleCelupModel->update($id, $dataUpdate);
 
@@ -338,6 +387,7 @@ class CelupController extends BaseController
     public function createBon()
     {
         $no_model = $this->scheduleCelupModel->getCelupDone();
+        // dd($no_model);
         $data = [
             'role' => $this->role,
             'active' => $this->active,
@@ -346,65 +396,12 @@ class CelupController extends BaseController
         ];
         return view($this->role . '/out/createBon', $data);
     }
-
-    public function getNoModel()
+    public function getItem($id)
     {
-        if ($this->request->isAJAX()) {
-            $models = $this->scheduleCelupModel->getCelupDone();
-
-            $data = [];
-            foreach ($models as $model) {
-                $data[] = $model['no_model'];
-            }
-
-            return $this->response->setJSON($data);
-        }
+        $item = $this->scheduleCelupModel->getScheduleDetailsById($id);
+        return $this->response->setJSON($item);
     }
 
-
-    public function getItemType()
-    {
-        $noModel = $this->request->getPost('no_model');
-
-        if (!$noModel) {
-            return $this->response->setJSON(['error' => 'No model provided'], 400);
-        }
-
-        $itemType = $this->scheduleCelupModel->getItemTypeByNoModel($noModel);
-
-        return $this->response->setJSON($itemType);
-    }
-
-    public function getKodeWarna()
-    {
-        $noModel = $this->request->getPost('no_model');
-        $itemType = $this->request->getPost('item_type');
-
-        if (!$noModel || !$itemType) {
-            return $this->response->setJSON(['error' => 'Invalid input'], 400);
-        }
-
-        // Ambil data dari model
-        $kodeWarna = $this->scheduleCelupModel->getKodeWarnaByNoModelDanItemType($noModel, $itemType);
-
-        return $this->response->setJSON($kodeWarna);
-    }
-
-    public function getWarna()
-    {
-        $noModel = $this->request->getPost('no_model');
-        $itemType = $this->request->getPost('item_type');
-        $kodeWarna = $this->request->getPost('kode_warna');
-
-        if (!$noModel || !$itemType) {
-            return $this->response->setJSON(['error' => 'Invalid input'], 400);
-        }
-
-        // Ambil data dari model
-        $colorCodes = $this->scheduleCelupModel->getWarnaByNoModelItemDanKode($noModel, $itemType, $kodeWarna);
-
-        return $this->response->setJSON($colorCodes);
-    }
 
     public function saveBon()
     {
@@ -431,12 +428,10 @@ class CelupController extends BaseController
         $saveDataOutCelup = [];
 
         for ($h = 0; $h < $tab; $h++) {
-            // Ambil nilai input untuk parameter pencarian id_celup
-            $itemType = $data['items'][$h]['item_type'] ?? null;
-            $kodeWarna = $data['items'][$h]['kode_warna'] ?? null;
-            $noModel = $data['items'][$h]['no_model'] ?? null;
-            $id_celup = $this->scheduleCelupModel->getIdCelupbyNoModelItemTypeKodeWarna($noModel, $itemType, $kodeWarna);
-            $this->scheduleCelupModel->update($id_celup['id_celup'], ['id_bon' => $id_bon]);
+
+            $id_celup = $data['items'][$h]['id_celup'] ?? null;
+            $lot = $this->scheduleCelupModel->select('lot_celup')->where('id_celup', $id_celup)->first();
+            $this->scheduleCelupModel->update($id_celup, ['id_bon' => $id_bon, 'last_status' => 'sent']);
             $gantiRetur = isset($data['ganti_retur'][$h]) ? $data['ganti_retur'][$h] : '0';
             // Pastikan no_karung tidak kosong dan merupakan array
             if (!empty($data['no_karung'][$h]) && is_array($data['no_karung'][$h])) {
@@ -445,14 +440,14 @@ class CelupController extends BaseController
                 for ($i = 0; $i < $jmldatapertab; $i++) {
                     $saveDataOutCelup[] = [
                         'id_bon' => $id_bon,
-                        'id_celup' => $id_celup['id_celup'] ?? null,
+                        'id_celup' => $id_celup ?? null,
                         'l_m_d' => $data['l_m_d'][$h] ?? null,
                         'harga' => $data['harga'][$h] ?? null,
                         'no_karung' => $data['no_karung'][$h][$i] ?? null, // Ambil dari indeks $i
                         'gw_kirim' => $data['gw_kirim'][$h][$i] ?? null,
                         'kgs_kirim' => $data['kgs_kirim'][$h][$i] ?? null,
                         'cones_kirim' => $data['cones_kirim'][$h][$i] ?? null,
-                        'lot_kirim' => $data['lot_kirim'][$h][$i] ?? '',
+                        'lot_kirim' => $lot['lot_celup'],
                         'ganti_retur' => $gantiRetur,
                         'admin' => session()->get('username'),
                         'created_at' => date('Y-m-d H:i:s'),
@@ -474,7 +469,6 @@ class CelupController extends BaseController
     {
         $bonData = $this->bonCelupModel->where('id_bon', $id_bon)->first();
         $celupData = $this->scheduleCelupModel->getScheduleBon($id_bon);
-
         $items = [];
 
         foreach ($celupData as $dt) {
@@ -520,7 +514,7 @@ class CelupController extends BaseController
             'item' => $items
 
         ];
-
+        // dd($data);
         return view($this->role . '/out/editBon', $data);
     }
 
@@ -639,7 +633,8 @@ class CelupController extends BaseController
         foreach ($groupedDetails as &$group) {
             foreach ($group['detailPengiriman'] as $outCelup => $id) {
                 // Hasilkan barcode dan encode sebagai base64
-                $barcode = $generator->getBarcode($id['id_out_celup'], $generator::TYPE_EAN_13);
+                $id_out_celup = str_pad($id['id_out_celup'], 12, '0', STR_PAD_LEFT);
+                $barcode = $generator->getBarcode($id_out_celup, $generator::TYPE_EAN_13);
                 $group['barcodes'][] = [
                     'no_model' => $group['no_model'],
                     'item_type' => $group['item_type'],
@@ -655,7 +650,7 @@ class CelupController extends BaseController
                 ];
             }
         }
-
+        // dd($id_out_celup, $barcode);
         // Menggabungkan data utama dan detail yang sudah dikelompokkan
         $dataBon['groupedDetails'] = array_values($groupedDetails);
 

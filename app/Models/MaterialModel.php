@@ -102,4 +102,43 @@ class MaterialModel extends Model
             ->where('kode_warna', $kode_warna)
             ->findAll();
     }
+    public function orderPerArea($area)
+    {
+        return $this->select('master_order.no_model, area, material.kode_warna, material.item_type, material.color, sum(kgs) as qty_po')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('area', $area)
+            ->groupBy('no_model,material.item_type,material.kode_warna,material.color')
+            ->findAll();
+    }
+    public function getArea()
+    {
+        return $this->select('area')
+            ->distinct()
+            ->findAll();
+    }
+    public function updateAreaPerNoModel($id_order, $area)
+    {
+        return $this->where('id_order', $id_order)
+            ->set(['area' => $area])
+            ->update();
+    }
+    public function MaterialPerOrder($model)
+    {
+        return $this->select('master_order.no_model, area, kode_warna, item_type, color, sum(kgs) as qty_po')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('master_order.no_model', $model)
+            ->groupBy('no_model,item_type,kode_warna,color')
+            ->findAll();
+    }
+    public function getDataArea()
+    {
+        $query = $this->distinct()
+            ->select('area')
+            ->orderBy('area', 'ASC')
+            ->findAll();
+
+        // Mengubah hasil query menjadi array dengan nilai 'area' saja
+        $uniqueArea = array_column($query, 'area');
+        return $uniqueArea;
+    }
 }

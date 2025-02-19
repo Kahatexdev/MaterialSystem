@@ -1,5 +1,43 @@
 <?php $this->extend($role . '/warehouse/header'); ?>
 <?php $this->section('content'); ?>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    /* Menghilangkan border default Select2 */
+    .select2-container--default .select2-selection--single {
+        border: none;
+        /* Hilangkan border samping & atas */
+        border-bottom: 2px solid rgb(34, 121, 37);
+        /* Garis bawah hijau */
+        border-radius: 0 0 10px 10px;
+        /* Sudut bawah melengkung */
+        height: 38px;
+        /* Sesuaikan tinggi */
+        padding-left: 8px;
+        background-color: #fff;
+        /* Warna latar belakang */
+    }
+
+    /* Warna garis bawah saat fokus */
+    .select2-container--default .select2-selection--single:focus,
+    .select2-container--default .select2-selection--single:active {
+        border-bottom: 2px solid rgb(34, 121, 37);
+        /* Warna lebih gelap saat aktif */
+        outline: none;
+        box-shadow: none;
+    }
+
+    /* Styling teks di dalam Select2 */
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #333;
+        font-size: 16px;
+    }
+
+    /* Mengatur posisi ikon dropdown */
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        top: 50%;
+        transform: translateY(-50%);
+    }
+</style>
 <div class="container-fluid py-4">
     <?php if (session()->getFlashdata('success')) : ?>
         <script>
@@ -35,7 +73,7 @@
                         <div class="d-flex gap-2">
                             <button class="btn bg-gradient-info" data-bs-toggle="modal" data-bs-target="#inputManual">Input</button>
                             <form action="<?= base_url($role . '/reset_pemasukan') ?>" method="post">
-                                <button type="submit" class="btn bg-gradient-warning">Reset Data</button>
+                                <button type="submit" class="btn bg-gradient-secondary"><i class="fas fa-redo"></i> Reset Data</button>
                             </form>
                         </div>
                     </div>
@@ -67,7 +105,7 @@
                             <div class="col-lg-12 col-md-12 col-sm-12">
                                 <div class="table-responsive">
                                     <table id="inTable" class="table table-bordered table-striped">
-                                        <thead>
+                                        <thead class="table-secondary">
                                             <tr>
                                                 <th width=30 class="text-center"><input type="checkbox" name="select_all" id="select_all" value=""></th>
                                                 <th class="text-center">Orders</th>
@@ -82,7 +120,7 @@
                                             foreach ($dataOut as $data) {
                                             ?>
                                                 <tr>
-                                                    <input type="hidden" name="id_out_celup[]" value="<?= $data['id_out_celup'] ?>">
+                                                    <input type="text" name="id_out_celup[]" value="<?= $data['id_out_celup'] ?>">
                                                     <td align="center"><input type="checkbox" name="checked_id[]" class="checkbox" value="<?= $no - 1 ?>"> <?= $no++ ?></td>
                                                     <td>
                                                         <div class="form-group d-flex justify-content-end">
@@ -126,7 +164,7 @@
                                                             <div class="col-6">
                                                                 <div class="form-group">
                                                                     <label for=""> Kgs Kirim:</label>
-                                                                    <input type="number" class="form-control" name="kgs_kirim[]" value="<?= $data['kgs_kirim'] ?>" readonly>
+                                                                    <input type="number" class="form-control kgs_kirim" name="kgs_kirim[]" value="<?= $data['kgs_kirim'] ?>" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="col-6">
@@ -137,7 +175,9 @@
                                                             </div>
                                                         </div>
                                                         <div class="form-group d-flex justify-content-end">
-                                                            <button type="button" class="btn btn-block  bg-gradient-danger btn-hapus" data-id="<?= $data['id_out_celup'] ?>">Hapus</button>
+                                                            <button type="button" class="btn btn-danger removeRow btn-hapus" data-id="<?= $data['id_out_celup'] ?>">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -148,15 +188,27 @@
                                     </table>
                                 </div>
                             </div>
-                            <div class="d-flex align-items-center gap-4 mt-2">
-                                <label for="cluster" class="mb-0">Pilih Cluster :</label>
-                                <select class="form-select" type="text" name="cluster" id="cluster" required>
-                                    <option value="0"></option>
-                                    <?php foreach ($cluster as $id) : ?>
-                                        <option value="<?= $id['nama_cluster'] ?>"><?= $id['nama_cluster'] ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <button type="submit" class="btn bg-gradient-success">Save</button>
+                            <div class="row mt-2">
+                                <div class="col-md-4">
+                                    <label for="ttl_kgs" class="form-label">Total Kgs:</label>
+                                    <input type="text" class="form-control" name="ttl_kgs" id="ttl_kgs" readonly>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="cluster" class="form-label">Pilih Cluster:</label>
+                                    <select class="form-control" name=" cluster" id="cluster" required>
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="sisa_kapasitas" class="form-label">Sisa Kapasitas:</label>
+                                    <input type="number" class="form-control sisa_kapasitas" name="sisa_kapasitas" value="" readonly>
+                                </div>
+
+                                <div class="col-md-12 d-flex align-items-end">
+                                    <button type="submit" class="btn bg-gradient-info w-100">Simpan Pemasukan</button>
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -169,7 +221,7 @@
         <div class="modal-dialog " role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Form Input Manual</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Form Input Pemasukan Manual</h5>
                     <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
@@ -231,7 +283,7 @@
                                 <div class="form-group">
                                     <label for=""> No Karung:</label>
                                     <input type="number" class="form-control" id="no_karung" name="no_karung" value="" required>
-                                    <input type="text" id="id_out_celup" name="id_out_celup" value="">
+                                    <input type="hidden" id="id_out_celup" name="id_out_celup" value="">
                                 </div>
                             </div>
                         </div>
@@ -275,18 +327,63 @@
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script type="text/javascript">
         let isSubmitting = false;
 
         document.getElementById('barcode').addEventListener('input', function() {
             if (isSubmitting) return; // Cegah double submission
             setTimeout(() => {
-                if (this.value.trim() !== '') {
+                let scannedValue = this.value.trim();
+
+                // Tentukan jumlah angka 0 yang dihapus berdasarkan panjang data
+                if (scannedValue.length < 10) {
+                    // Hapus 11 angka 0 di depan jika panjang data kurang dari 10
+                    scannedValue = scannedValue.replace(/^0{11}/, '');
+                } else if (scannedValue.length < 100) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{10}/, '');
+                } else if (scannedValue.length < 1000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{9}/, '');
+                } else if (scannedValue.length < 10000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{8}/, '');
+                } else if (scannedValue.length < 100000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{7}/, '');
+                } else if (scannedValue.length < 1000000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{8}/, '');
+                } else if (scannedValue.length < 10000000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{7}/, '');
+                } else if (scannedValue.length < 100000000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{6}/, '');
+                } else if (scannedValue.length < 1000000000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{5}/, '');
+                } else if (scannedValue.length < 10000000000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{4}/, '');
+                } else if (scannedValue.length < 100000000000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{3}/, '');
+                } else if (scannedValue.length < 1000000000000) {
+                    // Hapus 10 angka 0 di depan jika panjang data kurang dari 100
+                    scannedValue = scannedValue.replace(/^0{2}/, '');
+                }
+
+
+                if (scannedValue !== '') {
                     isSubmitting = true;
-                    this.form.submit();
+                    this.value = scannedValue; // Perbarui input field dengan nilai yang sudah dimodifikasi
+                    this.form.submit(); // Kirim form
                 }
             }, 300);
         });
+
 
         $(document).ready(function() {
             $('#select_all').on('click', function() {
@@ -305,7 +402,8 @@
         $(document).ready(function() {
             $('#cluster').select2({
                 placeholder: "Pilih Cluster",
-                allowClear: true
+                allowClear: true,
+                minimumResultsForSearch: 0
             });
         });
 
@@ -325,6 +423,92 @@
                         alert('Terjadi kesalahan saat menghapus data.');
                     }
                 }, 'json');
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Ambil semua checkbox dan input total
+            let checkboxes = document.querySelectorAll(".checkbox");
+            let ttlKgsInput = document.getElementById("ttl_kgs");
+
+            function updateTotalKgs() {
+                let total = 0;
+                checkboxes.forEach((checkbox, index) => {
+                    if (checkbox.checked) {
+                        let kgsInput = document.querySelectorAll(".kgs_kirim")[index];
+                        total += parseFloat(kgsInput.value) || 0;
+                    }
+                });
+
+                // Set value dan trigger event change
+                let ttlKgsInput = document.getElementById("ttl_kgs");
+                ttlKgsInput.value = total.toFixed(2);
+
+                // Trigger event change secara manual
+                let event = new Event("change", {
+                    bubbles: true
+                });
+                ttlKgsInput.dispatchEvent(event);
+            }
+
+            // Tambahkan event listener ke setiap checkbox
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener("change", updateTotalKgs);
+            });
+
+            // Untuk fitur "Select All"
+            document.getElementById("select_all").addEventListener("change", function() {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateTotalKgs();
+            });
+        });
+
+        //fungsi untuk memilih cluster
+        $(document).ready(function() {
+            $('#ttl_kgs').on("change", function() {
+                var kgsKirim = $(this).val()?.trim(); // Cari input warna terkait
+                var $clusterSelect = $("#cluster");
+
+                console.log("Kgs Kirim:", kgsKirim);
+                console.log("Cluster:", cluster);
+
+                var url = '<?= base_url($role . "/getcluster") ?>';
+
+                console.log("URL request:", url);
+
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: {
+                        kgs: kgsKirim
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        console.log("Respons dari server:", response);
+                        // Set Cluster
+                        $clusterSelect.empty(); // Kosongkan dulu
+                        $clusterSelect.append('<option value="">Pilih Cluster</option>'); // Tambahin opsi default
+                        if (response.length > 0) {
+                            response.forEach(function(cluster) {
+                                $clusterSelect.append('<option value="' + cluster.nama_cluster + '" data-sisa_kapasitas="' + cluster.sisa_kapasitas + '">' + cluster.nama_cluster + '</option>');
+                            });
+                        } else {
+                            console.warn("Cluster tidak ditemukan!");
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Terjadi kesalahan:", error);
+                        console.error("Respons yang diterima:", xhr.responseText);
+                    }
+                });
+            });
+            // Event listener saat cluster dipilih
+            $(document).on("change", "#cluster", function() {
+                var sisaKapasitas = $(this).find("option:selected").attr("data-sisa_kapasitas") || "";
+                console.log("Sisa Kapasitas:", sisaKapasitas);
+                $(".sisa_kapasitas").val(sisaKapasitas);
             });
         });
     </script>
@@ -484,7 +668,7 @@
                 }
             });
         });
-        //fungsi untuk memilih cluster
+        //fungsi untuk memilih cluster di modal
         $(document).ready(function() {
             $('input[name="kgs_kirim"]').on("change", function() {
                 var kgsKirim = $(this).val()?.trim(); // Cari input warna terkait

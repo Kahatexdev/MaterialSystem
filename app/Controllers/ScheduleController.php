@@ -11,6 +11,7 @@ use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
 use App\Models\OpenPoModel;
 use App\Models\MasterOrderModel;
+use CodeIgniter\CLI\Console;
 use DateTime;
 
 class ScheduleController extends BaseController
@@ -55,6 +56,7 @@ class ScheduleController extends BaseController
     {
         // Ambil parameter filter dari query string
         $startDate = $this->request->getGet('start_date');
+        dd($startDate);
         $endDate = $this->request->getGet('end_date');
 
         if ($startDate == null && $endDate == null) {
@@ -382,11 +384,6 @@ class ScheduleController extends BaseController
             ];
         }
 
-        // Debugging untuk memeriksa data sebelum menyimpannya
-        // var_dump($dataBatch); 
-        // dd($dataBatch);
-
-        // Simpan batch data ke database
         $result = $this->scheduleCelupModel->insertBatch($dataBatch);
         // dd($result);
 
@@ -410,7 +407,7 @@ class ScheduleController extends BaseController
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
 
         $scheduleData = $this->scheduleCelupModel->getScheduleDetailsData($id_mesin, $tanggal_schedule, $lot_urut);
-        $jenis = '';
+        $jenis = [];
         $kodeWarna = '';
         $warna = '';
         foreach ($scheduleData as &$row) {
@@ -1004,7 +1001,7 @@ class ScheduleController extends BaseController
                 ];
             }
         }
-
+        // dd($uniqueData);
         $data = [
             'active' => $this->active,
             'title' => 'Schedule',

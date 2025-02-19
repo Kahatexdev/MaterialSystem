@@ -192,7 +192,7 @@ class ScheduleCelupModel extends Model
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->where('tanggal_schedule >=', $startDate->format('Y-m-d'))
             ->where('tanggal_schedule <=', $endDate->format('Y-m-d'))
-            ->whereIn('schedule_celup.last_status', ['scheduled', 'celup', 'reschedule']) // Filter berdasarkan last_status
+            ->whereIn('schedule_celup.last_status', ['scheduled', 'celup', 'reschedule', 'bon', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc', 'reject', 'perbaikan']) // Filter berdasarkan last_status
             ->groupBy('schedule_celup.id_mesin')
             ->groupBy('schedule_celup.tanggal_schedule')
             ->groupBy('schedule_celup.lot_urut');
@@ -204,8 +204,9 @@ class ScheduleCelupModel extends Model
     {
         return $this->select('schedule_celup.*, mesin_celup.no_mesin, IF(po_plus = "0", kg_celup, 0) AS qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-            ->where('schedule_celup.last_status <>', 'done')
+            ->where('schedule_celup.last_status !=', 'done')
             ->groupBy('schedule_celup.id_mesin')
+            ->groupBy('schedule_celup.id_celup')
             ->groupBy('schedule_celup.tanggal_schedule')
             ->groupBy('schedule_celup.lot_urut')
             ->findAll();
@@ -281,10 +282,10 @@ class ScheduleCelupModel extends Model
 
     public function getCelupDone()
     {
-        return $this->table('schedule_celup')
-            ->select('no_model')
+        return $this
+            ->select('id_celup,no_model, item_type, kode_warna, warna, lot_celup')
             ->where('last_status', 'done')
-            ->groupBy('no_model')
+            ->groupBy('id_celup')
             ->findAll();
     }
     public function getNoModelCreateBon()
@@ -333,5 +334,45 @@ class ScheduleCelupModel extends Model
     {
         return $this->where('id_bon', $id_bon)
             ->findAll();
+    }
+    public function schedulePerArea($model, $itemType, $kodeWarna, $search)
+    {
+        $builder = $this->select(
+            [
+                'start_mc',
+                'kg_celup',
+                'lot_urut',
+                'lot_celup',
+                'tanggal_schedule',
+                'tanggal_bon',
+                'tanggal_celup',
+                'tanggal_bongkar',
+                'tanggal_press',
+                'tanggal_oven',
+                'tanggal_tl',
+                'tanggal_rajut_pagi',
+                'tanggal_kelos',
+                'tanggal_acc',
+                'tanggal_reject',
+                'tanggal_perbaikan',
+                'last_status',
+                'ket_daily_cek',
+                'po_plus',
+            ]
+        )
+            ->where('no_model', $model)
+            ->where('item_type', $itemType)
+            ->where('kode_warna', $kodeWarna);
+
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('no_model', $search)
+                ->orLike('kode_warna', $search)
+                ->orLike('tanggal_schedule', $search)
+                ->orLike('lot_celup', $search)
+                ->groupEnd();
+        }
+
+        return $builder->findAll();
     }
 }
