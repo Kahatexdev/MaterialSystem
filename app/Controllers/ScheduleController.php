@@ -56,7 +56,7 @@ class ScheduleController extends BaseController
     {
         // Ambil parameter filter dari query string
         $startDate = $this->request->getGet('start_date');
-        dd($startDate);
+        // dd($startDate);
         $endDate = $this->request->getGet('end_date');
 
         if ($startDate == null && $endDate == null) {

@@ -337,7 +337,6 @@ class CelupController extends BaseController
         if (!$existingProduction) {
             return redirect()->back()->with('error', 'Data tidak ditemukan.');
         }
-        dd($dataUpdate);
         // Perbarui data di database
         $this->scheduleCelupModel->update($id, $dataUpdate);
 
@@ -645,8 +644,9 @@ class CelupController extends BaseController
                 ];
             }
         }
-        // dd($id_out_celup, $barcode);
-        // Menggabungkan data utama dan detail yang sudah dikelompokkan
+        // dd($id_out_celup, $barcode, base64_encode($barcode));
+        // Menggabungkan data utama dan detail yang sudah d        ikelompokkan
+
         $dataBon['groupedDetails'] = array_values($groupedDetails);
 
         $data = [

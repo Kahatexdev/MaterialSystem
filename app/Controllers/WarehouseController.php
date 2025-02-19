@@ -20,7 +20,6 @@ use App\Models\HistoryPindahOrder;
 use App\Models\PengeluaranModel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 
-
 class WarehouseController extends BaseController
 {
     protected $role;
@@ -82,13 +81,7 @@ class WarehouseController extends BaseController
     }
     public function pemasukan()
     {
-        $generator = new BarcodeGeneratorPNG();
-
         $id = $this->request->getPost('barcode');
-        // $id = base64_decode($id);
-        $id_out_celup = str_pad($id, 12, '0', STR_PAD_LEFT);
-        $barcode = $generator->getBarcode($id_out_celup, $generator::TYPE_EAN_13);
-
 
         $cluster = $this->clusterModel->getDataCluster();
 
@@ -99,7 +92,7 @@ class WarehouseController extends BaseController
             // Cek apakah barcode sudah ada di data yang tersimpan
             foreach ($existingData as $item) {
                 if ($item['id_out_celup'] == $id) {
-                    session()->setFlashdata('error', 'Barcode sudah ada di tabel!');
+                    session()->setFlashdata('error', 'Barcode sudah ada di tabel!' . $id);
                     return redirect()->to(base_url($this->role . '/pemasukan'));
                 }
             }
