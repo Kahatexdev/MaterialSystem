@@ -192,7 +192,7 @@ class ScheduleCelupModel extends Model
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->where('tanggal_schedule >=', $startDate->format('Y-m-d'))
             ->where('tanggal_schedule <=', $endDate->format('Y-m-d'))
-            ->whereIn('schedule_celup.last_status', ['scheduled', 'bon', 'celup', 'bongkar', 'press', 'oven', 'tes luntur', 'rajut pagi', 'reschedule']) // Filter berdasarkan last_status
+            ->whereIn('schedule_celup.last_status', ['scheduled', 'celup', 'reschedule', 'bon', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc', 'reject', 'perbaikan']) // Filter berdasarkan last_status
             ->groupBy('schedule_celup.id_mesin')
             ->groupBy('schedule_celup.tanggal_schedule')
             ->groupBy('schedule_celup.lot_urut');
@@ -335,9 +335,9 @@ class ScheduleCelupModel extends Model
         return $this->where('id_bon', $id_bon)
             ->findAll();
     }
-    public function schedulePerArea($model, $itemType, $kodeWarna)
+    public function schedulePerArea($model, $itemType, $kodeWarna, $search)
     {
-        return $this->select(
+        $builder = $this->select(
             [
                 'start_mc',
                 'kg_celup',
@@ -362,7 +362,17 @@ class ScheduleCelupModel extends Model
         )
             ->where('no_model', $model)
             ->where('item_type', $itemType)
-            ->where('kode_warna', $kodeWarna)
-            ->findAll();
+            ->where('kode_warna', $kodeWarna);
+
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('no_model', $search)
+                ->orLike('kode_warna', $search)
+                ->orLike('tanggal_schedule', $search)
+                ->orLike('lot_celup', $search)
+                ->groupEnd();
+        }
+
+        return $builder->findAll();
     }
 }

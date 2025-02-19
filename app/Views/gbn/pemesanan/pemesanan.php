@@ -10,7 +10,7 @@
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-capitalize font-weight-bold"><?= $title; ?></p>
                                 <h5 class="font-weight-bolder mb-0">
-                                    Data Pemesanan Berdasarkan Area
+                                    Data Pemesanan Berdasarkan Jenis
                                 </h5>
                             </div>
                         </div>
@@ -27,16 +27,16 @@
     </div>
     <div class="row">
 
-        <?php foreach ($area as $ar) : ?>
+        <?php foreach ($jenis as $jn) : ?>
             <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4 mt-2">
-                <a href="<?= base_url($role . '/pemesananperarea/' . $ar) ?>">
+                <a href="<?= base_url($role . '/detailpemesanan/' . $area . '/' . $jn) ?>">
                     <div class="card">
                         <div class="card-body p-3">
                             <div class="row">
 
                                 <div class="col-8">
                                     <div class="numbers">
-                                        <p class="text-sm mb-0 text-capitalize font-weight-bold"><?= $ar ?></p>
+                                        <p class="text-sm mb-0 text-capitalize font-weight-bold"><?= $jn ?></p>
                                         <h5 class="font-weight-bolder mb-0">
                                         </h5>
                                     </div>
