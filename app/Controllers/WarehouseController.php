@@ -79,6 +79,8 @@ class WarehouseController extends BaseController
     public function pemasukan()
     {
         $id = $this->request->getPost('barcode');
+        $id = base64_decode($id);
+        dd($id);
         $cluster = $this->clusterModel->getDataCluster();
 
         // Ambil data dari session (jika ada)
