@@ -51,6 +51,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Deskripsi</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jenis</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Ukuran</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                         </tr>
                     </thead>
@@ -93,6 +94,10 @@
                                 <option value="KARET">KARET</option>
                             </select>
                         </div>
+                        <div class="mb-3">
+                            <label for="ukuran" class="form-label">Ukuran</label>
+                            <input type="text" class="form-control" name="ukuran" id="ukuran" required>
+                        </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                             <button type="submit" class="btn btn-info">Update</button>
@@ -131,6 +136,10 @@
                                 <option value="KARET">KARET</option>
                             </select>
                         </div>
+                        <div class="mb-3">
+                            <label for="ukuran" class="form-label">Ukuran</label>
+                            <input type="text" class="form-control" name="ukuran" id="ukuran" required>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -167,6 +176,9 @@
                         "data": "jenis"
                     },
                     {
+                        "data": "ukuran"
+                    },
+                    {
                         "data": "action",
                         "orderable": false,
                         "searchable": false,
@@ -196,6 +208,7 @@
                         $('#item_type_old').val(response.item_type);
                         $('#deskripsi').val(response.deskripsi);
                         $('#jenis').val(response.jenis);
+                        $('#ukuran').val(response.ukuran);
 
                         // Tampilkan modal
                         $('#updateModal').modal('show');

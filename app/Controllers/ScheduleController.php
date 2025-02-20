@@ -56,7 +56,6 @@ class ScheduleController extends BaseController
     {
         // Ambil parameter filter dari query string
         $startDate = $this->request->getGet('start_date');
-        // dd($startDate);
         $endDate = $this->request->getGet('end_date');
 
         if ($startDate == null && $endDate == null) {
@@ -451,11 +450,8 @@ class ScheduleController extends BaseController
             'warna' => $warna,
         ];
 
-
         return view($this->role . '/schedule/form-edit', $data);
     }
-
-
 
     public function getNoModel()
     {

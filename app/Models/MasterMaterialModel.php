@@ -12,7 +12,7 @@ class MasterMaterialModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['item_type', 'deskripsi', 'jenis'];
+    protected $allowedFields    = ['item_type', 'deskripsi', 'jenis', 'ukuran'];
 
 
     protected bool $allowEmptyInserts = false;
@@ -87,5 +87,8 @@ class MasterMaterialModel extends Model
         return $uniqueArea;
     }
 
-
+    public function getJenisByitemType($item_type)
+    {
+        return $this->select('jenis')->where('item_type', $item_type)->findAll();
+    }
 }

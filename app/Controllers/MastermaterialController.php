@@ -68,6 +68,7 @@ class MastermaterialController extends BaseController
                 ->like('item_type', $search)
                 ->orLike('deskripsi', $search)
                 ->orLike('jenis', $search)
+                ->orLike('ukuran', $search)
                 ->groupEnd();
 
             $filteredRecords = $query->countAllResults(false);
@@ -133,6 +134,7 @@ class MastermaterialController extends BaseController
                 'item_type' => esc($this->request->getPost('item_type')),
                 'deskripsi' => esc($this->request->getPost('deskripsi')),
                 'jenis' => esc($this->request->getPost('jenis')),
+                'ukuran' => esc($this->request->getPost('ukuran')),
 
                 // Tambahkan field lain yang ingin disimpan
             ];
@@ -157,6 +159,7 @@ class MastermaterialController extends BaseController
                 'item_type' => esc($this->request->getPost('item_type')),
                 'deskripsi' => esc($this->request->getPost('deskripsi')),
                 'jenis' => esc($this->request->getPost('jenis')),
+                'ukuran' => esc($this->request->getPost('ukuran')),
                 // Tambahkan field lain yang ingin diperbarui
             ];
 
