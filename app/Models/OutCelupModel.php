@@ -136,10 +136,7 @@ class OutCelupModel extends Model
             ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup')
             ->where('schedule_celup.no_model', $no_model)
             ->where('schedule_celup.item_type', $item_type)
-            ->groupBy('schedule_celup.no_model')
-            ->groupBy('schedule_celup.item_type')
             ->groupBy('schedule_celup.kode_warna')
-            ->distinct()
             ->get()
             ->getResultArray();
     }
