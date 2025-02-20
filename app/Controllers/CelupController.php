@@ -585,6 +585,7 @@ class CelupController extends BaseController
             foreach ($group['detailPengiriman'] as $outCelup => $id) {
                 // Hasilkan barcode dan encode sebagai base64
                 $barcode = $generator->getBarcode($id['id_out_celup'], $generator::TYPE_EAN_13);
+
                 $group['barcodes'][] = [
                     'no_model' => $group['no_model'],
                     'item_type' => $group['item_type'],

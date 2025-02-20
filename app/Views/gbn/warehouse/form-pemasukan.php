@@ -333,6 +333,8 @@
 
         document.getElementById('barcode').addEventListener('input', function() {
             if (isSubmitting) return; // Cegah double submission
+            var barcode = this.value
+            console.log(barcode);
             setTimeout(() => {
                 if (this.value.trim() !== '') {
                     isSubmitting = true;
