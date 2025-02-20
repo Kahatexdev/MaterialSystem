@@ -593,7 +593,7 @@
                     // }
 
                     // Update tampilan sisa jatah (selalu dihitung dari originalTagihan)
-                    sisaJatahEl.textContent = newSisa.toFixed(2);
+                    // sisaJatahEl.textContent = newSisa.toFixed(2);
                     // Opsional: simpan nilai qty sebelumnya jika diperlukan untuk perhitungan lain
                     qtyCelupInput.setAttribute("data-old-qty", newQty);
                 }
