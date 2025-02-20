@@ -150,4 +150,14 @@ class PemasukanModel extends Model
             ->get()
             ->getResultArray();
     }
+    public function stockInOut($no_model, $item_type, $kode_warna)
+    {
+        return $this->select('no_model,item_type,kode_warna,sum(kgs_masuk) as masuk, sum(pengeluaran.kgs_out) as keluar')
+            ->join('pengeluaran', 'pengeluaran.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->where('no_model', $no_model)
+            ->where('item_type', $item_type)
+            ->where('kode_warna', $kode_warna)
+            ->groupBy('kode_warna')
+            ->findAll();
+    }
 }

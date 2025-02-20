@@ -11,6 +11,7 @@ use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
 use App\Models\OpenPoModel;
 use App\Models\MasterOrderModel;
+use CodeIgniter\CLI\Console;
 use DateTime;
 
 class ScheduleController extends BaseController
@@ -431,6 +432,7 @@ class ScheduleController extends BaseController
         }
         unset($row);
         // Persiapkan data untuk view
+        // dd ($jenis);
         $data = [
             'active' => $this->active,
             'title' => 'Schedule',
@@ -443,16 +445,13 @@ class ScheduleController extends BaseController
             'readonly' => true,
             'min_caps' => $min['min_caps'],
             'max_caps' => $max['max_caps'],
-            'jenis' => $jenis['jenis'],
+            'jenis' => $jenis[0]['jenis'],
             'kode_warna' => $kodeWarna,
             'warna' => $warna,
         ];
 
-
         return view($this->role . '/schedule/form-edit', $data);
     }
-
-
 
     public function getNoModel()
     {

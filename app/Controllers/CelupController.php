@@ -278,9 +278,43 @@ class CelupController extends BaseController
         if ($tglPB) $dataUpdate['tanggal_perbaikan'] = $tglPB;
         if ($ketDailyCek) $dataUpdate['ket_daily_cek'] = $ketDailyCek;
 
+        // Jika tgl_bon diisi, update last_status menjadi 'bon'
+        if (!empty($tglBon)) {
+            $dataUpdate['last_status'] = 'bon';
+        }
+
         // Jika tgl_celup diisi, update last_status menjadi 'celup'
         if (!empty($tglCelup)) {
             $dataUpdate['last_status'] = 'celup';
+        }
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglBongkar)) {
+            $dataUpdate['last_status'] = 'bongkar';
+        }
+
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglPress)) {
+            $dataUpdate['last_status'] = 'press';
+        }
+
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglOven)) {
+            $dataUpdate['last_status'] = 'oven';
+        }
+
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglTL)) {
+            $dataUpdate['last_status'] = 'tl';
+        }
+
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglRajut)) {
+            $dataUpdate['last_status'] = 'rajut';
+        }
+
+        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglACC)) {
+            $dataUpdate['last_status'] = 'acc';
         }
 
         // Jika tgl_kelos diisi, update last_status menjadi 'done'
@@ -288,12 +322,21 @@ class CelupController extends BaseController
             $dataUpdate['last_status'] = 'done';
         }
 
+        // Jika tgl_kelos diisi, update last_status menjadi 'done'
+        if (!empty($tglReject)) {
+            $dataUpdate['last_status'] = 'reject';
+        }
+
+        // Jika tgl_kelos diisi, update last_status menjadi 'done'
+        if (!empty($tglPB)) {
+            $dataUpdate['last_status'] = 'perbaikan';
+        }
+
         // Validasi apakah data dengan ID yang diberikan ada
         $existingProduction = $this->scheduleCelupModel->find($id);
         if (!$existingProduction) {
             return redirect()->back()->with('error', 'Data tidak ditemukan.');
         }
-        // dd ($dataUpdate);
         // Perbarui data di database
         $this->scheduleCelupModel->update($id, $dataUpdate);
 
@@ -584,8 +627,8 @@ class CelupController extends BaseController
         foreach ($groupedDetails as &$group) {
             foreach ($group['detailPengiriman'] as $outCelup => $id) {
                 // Hasilkan barcode dan encode sebagai base64
-                $barcode = $generator->getBarcode($id['id_out_celup'], $generator::TYPE_EAN_13);
-
+                $id_out_celup = str_pad($id['id_out_celup'], 12, '0', STR_PAD_LEFT);
+                $barcode = $generator->getBarcode($id_out_celup, $generator::TYPE_EAN_13);
                 $group['barcodes'][] = [
                     'no_model' => $group['no_model'],
                     'item_type' => $group['item_type'],
@@ -601,8 +644,9 @@ class CelupController extends BaseController
                 ];
             }
         }
+        // dd($id_out_celup, $barcode, base64_encode($barcode));
+        // Menggabungkan data utama dan detail yang sudah d        ikelompokkan
 
-        // Menggabungkan data utama dan detail yang sudah dikelompokkan
         $dataBon['groupedDetails'] = array_values($groupedDetails);
 
         $data = [
