@@ -142,4 +142,20 @@ class ApiController extends ResourceController
         }
         return $this->respond($res, 200);
     }
+
+    public function cekStok($model)
+    {
+        $material = $this->materialModel->MaterialPerOrder($model);
+        $res = [];
+        foreach ($material as &$row) {
+
+            $stock = $this->stockModel->stockInOut($row['no_model'], $row['item_type'], $row['kode_warna']) ?? ['stock' => 0];
+            $inout = $this->pemasukanModel->stockInOut($row['no_model'], $row['item_type'], $row['kode_warna']) ?? ['masuk' => 0, 'keluar' => 0];
+            $row['stock'] = $stock['stock'] ?? 0;
+            $row['masuk'] = $inout['masuk'] ?? 0;
+            $row['keluar'] = $inout['keluar'];
+            $res[] = $row;
+        }
+        return $this->respond($res, 200);
+    }
 }
