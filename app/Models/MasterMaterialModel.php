@@ -81,4 +81,9 @@ class MasterMaterialModel extends Model
         $uniqueArea = array_column($query, 'jenis');
         return $uniqueArea;
     }
+
+    public function getJenisByitemType($item_type)
+    {
+        return $this->select('jenis')->where('item_type', $item_type)->findAll();
+    }
 }
