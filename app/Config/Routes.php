@@ -295,5 +295,6 @@ $routes->group(
         $routes->get('statusbahanbaku/(:any)', 'ApiController::statusbahanbaku/$1');
         $routes->get('cekBahanBaku/(:any)', 'ApiController::cekBahanBaku/$1');
         $routes->get('cekStok/(:any)', 'ApiController::cekStok/$1');
+        $routes->post('getMU/(:any)/(:any)', 'ApiController::getMU/$1/$2');
     }
 );
