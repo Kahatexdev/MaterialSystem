@@ -191,6 +191,10 @@
                                                             <button type="button" class="btn btn-danger removeRow btn-hapus" data-id="<?= $data['id_out_celup'] ?>">
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
+                                                            <!-- Tombol Komplain -->
+                                                            <button type="button" class="btn btn-warning btn-komplain ms-2" data-id="<?= $data['id_out_celup'] ?>">
+                                                                <i class="fas fa-exclamation-triangle"></i> Komplain
+                                                            </button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -327,6 +331,32 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
                                 <button type="submit" class="btn bg-gradient-info">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal Komplain -->
+            <div class="modal fade" id="complainModal" tabindex="-1" aria-labelledby="complainModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form id="complainForm">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="complainModalLabel">Komplain Barang</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Hidden field untuk ID barang -->
+                                <input type="hidden" name="id_out_celup" id="complain_id">
+                                <div class="mb-3">
+                                    <label for="complain_reason" class="form-label">Alasan Komplain</label>
+                                    <textarea class="form-control" name="complain_reason" id="complain_reason" rows="3" required></textarea>
+                                </div>
+                                <!-- Tambahkan field lain jika diperlukan -->
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-primary">Kirim Komplain</button>
                             </div>
                         </form>
                     </div>
@@ -484,6 +514,31 @@
     });
 </script>
 <script>
+    // --- Fitur Komplain ---
+    // Buka modal komplain saat tombol "Komplain" ditekan
+    $(document).on("click", ".btn-komplain", function() {
+        var id = $(this).data("id");
+        $("#complain_id").val(id);
+        $("#complain_reason").val(""); // Bersihkan textarea
+        $("#complainModal").modal("show");
+    });
+
+    // Kirim data komplain melalui AJAX
+    $("#complainForm").on("submit", function(e) {
+        e.preventDefault();
+        var formData = $(this).serialize();
+        $.post("<?= base_url($role . '/komplain_pemasukan') ?>", formData, function(response) {
+            if (response.success) {
+                alert("Komplain berhasil dikirim.");
+                $("#complainModal").modal("hide");
+            } else {
+                alert("Terjadi kesalahan saat mengirim komplain.");
+            }
+        }, "json").fail(function() {
+            alert("Terjadi kesalahan pada server.");
+        });
+    });
+    // --- End Fitur Komplain ---
     // UNTUK MODAL
     // Tangani perubahan pada input no_model
     $('#no_model').on('change', function() {
@@ -494,9 +549,6 @@
         loadKodeWarna();
     });
 
-    // $(document).on('change', '.item_type', function() {
-    //     loadKodeWarna($(this));
-    // });
 
     // Fungsi untuk load Item Types
     function loadItemTypes() {

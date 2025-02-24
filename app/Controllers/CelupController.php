@@ -425,6 +425,7 @@ class CelupController extends BaseController
 
             $id_celup = $data['items'][$h]['id_celup'] ?? null;
             $lot = $this->scheduleCelupModel->select('lot_celup')->where('id_celup', $id_celup)->first();
+            // dd($lot, $id_celup, $id_bon);
             $this->scheduleCelupModel->update($id_celup, ['id_bon' => $id_bon, 'last_status' => 'sent']);
             $gantiRetur = isset($data['ganti_retur'][$h]) ? $data['ganti_retur'][$h] : '0';
             // Pastikan no_karung tidak kosong dan merupakan array
