@@ -178,6 +178,10 @@
                                                             <button type="button" class="btn btn-danger removeRow btn-hapus" data-id="<?= $data['id_out_celup'] ?>">
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
+                                                            <!-- Tombol Komplain -->
+                                                            <button type="button" class="btn btn-warning btn-komplain ms-2" data-id="<?= $data['id_out_celup'] ?>" data-bs-toggle="modal" data-bs-target="#complainModal">
+                                                                <i class="fas fa-exclamation-triangle"></i> Komplain
+                                                            </button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -316,11 +320,46 @@
                                     <input type="number" class="form-control" name="sisa_kapasitas" id="sisa_kapasitas" value="" readonly>
                                 </div>
                             </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="">Alasan</label>
+                                    <p style="color: red; font-size: 12px;"> ⚠ Hanya diisi untuk komplain</p>
+                                    <input type="text" class="form-control" name="alasan" id="alasan" value="">
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <input type="hidden" name="action" id="action" value="">
                         <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn bg-gradient-info">Save</button>
+                        <button type="submit" class="btn bg-gradient-warning" onclick="setAction('komplain')"><i class="fas fa-exclamation-triangle"></i> Komplain</button>
+                        <button type="submit" class="btn bg-gradient-info" onclick="setAction('simpan')">Simpan Pemasukan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Komplain -->
+    <div class="modal fade" id="complainModal" tabindex="-1" aria-labelledby="complainModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="<?= base_url($role . '/komplain_pemasukan') ?>" method="post" id="complainForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="complainModalLabel">Komplain Barang</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Hidden field untuk ID barang -->
+                        <input type="hidden" name="id_out_celup" id="complain_id">
+                        <div class="mb-3">
+                            <label for="complain_reason" class="form-label">Alasan Komplain</label>
+                            <textarea class="form-control" name="alasan" id="complain_reason" rows="3" required></textarea>
+                        </div>
+                        <!-- Tambahkan field lain jika diperlukan -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Kirim Komplain</button>
                     </div>
                 </form>
             </div>
@@ -505,13 +544,13 @@
         }
 
         // Fungsi untuk load Kode Warna
-        function loadKodeWarna() {
+        function loadKodeWarna(noModel, itemType) {
             var $row = $(".row");
             var noModel = $('#no_model').val().trim();
             var itemType = $('#item_type').val().trim(); // Dapatkan itemType dengan benar
 
             if (noModel && itemType) {
-                var url = '<?= base_url($role . "/getKodeWarnaByModelAndItemType") ?>/' + encodeURIComponent(noModel) + '/' + encodeURIComponent(itemType);
+                var url = `<?= base_url($role . "/getKodeWarnaByModelAndItemType") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}`;
 
                 $.ajax({
                     url: url,
@@ -536,11 +575,13 @@
         // Fungsi untuk load Warna dan Lot berdasarkan Kode Warna
         $(document).ready(function() {
             $(".kode-warna").on("change", function() {
+                // Ambil container/form terdekat (sesuaikan jika perlu)
+                var $form = $(this).closest("form");
                 var noModel = $("#no_model").val().trim();
                 var itemType = $("#item_type").val().trim();
-                var kodeWarna = $(this).val()?.trim();
-                var $warnaInput = $('input[name="warna"]'); // Cari input warna terkait
-                var $lotSelect = $(".lot-kirim");
+                var kodeWarna = $(this).val().trim();
+                var $warnaInput = $form.find('input[name="warna"]'); // Cari input warna di dalam form terkait
+                var $lotSelect = $form.find(".lot-kirim");
 
                 console.log("No Model:", noModel);
                 console.log("Item Type:", itemType);
@@ -551,42 +592,45 @@
                     return;
                 }
 
-                var url = '<?= base_url($role . "/getWarnaDanLot") ?>/' + encodeURIComponent(noModel) + '/' + encodeURIComponent(itemType) + '/' + encodeURIComponent(kodeWarna);
+                if (noModel && itemType && kodeWarna) {
 
-                console.log("URL request:", url);
+                    var url = `<?= base_url($role . "/getWarnaDanLot") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}&kodeWarna=${kodeWarna}`;
+                    console.log("URL request:", url);
 
-                $.ajax({
-                    url: url,
-                    type: "GET",
-                    dataType: "json",
-                    success: function(response) {
-                        console.log("Respons dari server:", response);
-                        //set warna
-                        if (response.warna) {
-                            $warnaInput.val(response.warna);
-                        } else {
-                            alert("Warna tidak ditemukan!");
-                            $warnaInput.val("");
+                    $.ajax({
+                        url: url,
+                        type: "GET",
+                        dataType: "json",
+                        success: function(response) {
+                            console.log("Respons dari server:", response);
+
+                            // Set warna jika ditemukan (cek juga jika string tidak hanya spasi)
+                            if (response.warna && response.warna.trim() !== "") {
+                                $warnaInput.val(response.warna);
+                            } else {
+                                alert("Warna tidak ditemukan!");
+                                $warnaInput.val("");
+                            }
+
+                            // Set lot
+                            $lotSelect.empty().append('<option value="">Pilih Lot</option>');
+                            if (response.lot && response.lot.length > 0) {
+                                $.each(response.lot, function(index, lot) {
+                                    $lotSelect.append('<option value="' + lot.lot_kirim + '">' + lot.lot_kirim + '</option>');
+                                });
+                            } else {
+                                console.warn("Lot tidak ditemukan!");
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Terjadi kesalahan:", error);
+                            console.error("Respons yang diterima:", xhr.responseText);
                         }
-
-                        // Set lot
-                        $lotSelect.empty(); // Kosongkan dulu
-                        $lotSelect.append('<option value="">Pilih Lot</option>'); // Tambahin opsi default
-                        if (response.lot && response.lot.length > 0) {
-                            response.lot.forEach(function(lot) {
-                                $lotSelect.append('<option value="' + lot.lot_kirim + '">' + lot.lot_kirim + '</option>');
-                            });
-                        } else {
-                            console.warn("Lot tidak ditemukan!");
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("Terjadi kesalahan:", error);
-                        console.error("Respons yang diterima:", xhr.responseText);
-                    }
-                });
+                    });
+                }
             });
         });
+
         // Fungsi untuk Load Kgs Kirim dan Cones Kirim
         $(document).ready(function() {
             $('#no_karung').change(function() {
@@ -604,7 +648,8 @@
 
                 if (lotKirim) {
                     $.ajax({
-                        url: '<?= base_url($role . "/getKgsDanCones") ?>/' + encodeURIComponent(noModel) + '/' + encodeURIComponent(itemType) + '/' + encodeURIComponent(kodeWarna) + '/' + encodeURIComponent(lotKirim) + '/' + encodeURIComponent(noKarung),
+
+                        url: `<?= base_url($role . "/getKgsDanCones") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}&kodeWarna=${kodeWarna}&lotKirim=${lotKirim}&noKarung=${noKarung}`,
                         type: 'GET',
                         dataType: 'json',
                         success: function(response) {
@@ -670,6 +715,26 @@
                 $("#sisa_kapasitas").val(sisaKapasitas);
             });
         });
+
+        //Untuk modal komplain
+        document.addEventListener("DOMContentLoaded", function() {
+            // Tangkap semua tombol komplain
+            const komplainButtons = document.querySelectorAll(".btn-komplain");
+
+            komplainButtons.forEach(button => {
+                button.addEventListener("click", function() {
+                    // Ambil data-id dari tombol yang ditekan
+                    const idOutCelup = this.getAttribute("data-id");
+
+                    // Masukkan nilai id_out_celup ke dalam input di modal
+                    document.getElementById("complain_id").value = idOutCelup;
+                });
+            });
+        });
+
+        function setAction(value) {
+            document.getElementById('action').value = value;
+        }
     </script>
 
     <?php $this->endSection(); ?>

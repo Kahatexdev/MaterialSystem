@@ -11,6 +11,7 @@ use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
 use App\Models\OpenPoModel;
 use App\Models\MasterOrderModel;
+use CodeIgniter\CLI\Console;
 use DateTime;
 
 class ScheduleController extends BaseController
@@ -448,7 +449,6 @@ class ScheduleController extends BaseController
             'kode_warna' => $kodeWarna,
             'warna' => $warna,
         ];
-
 
         return view($this->role . '/schedule/form-edit', $data);
     }

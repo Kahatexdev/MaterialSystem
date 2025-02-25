@@ -231,7 +231,7 @@
                                                                 </div>
                                                                 <div class="col-4">
                                                                     <label for="qty_celup">Qty Celup</label>
-                                                                    <input type="number" class="form-control" step="0.01" min="0.01" name="qty_celup[]" value="<?= $detail['qty_celup'] ?>" required>
+                                                                    <input type="number" class="form-control" step="0.01" min="0.01" name="qty_celup[]" value="<?= number_format($detail['qty_celup'], 2) ?>" required>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
@@ -257,10 +257,22 @@
                                                                     <div class="form-group">
                                                                         <label for="last_status">Last Status</label>
                                                                         <br />
-                                                                        <span class="badge bg-<?= $detail['last_status'] == 'scheduled' ? 'info' : ($detail['last_status'] == 'celup' ? 'warning' : 'success') ?>"><?= $detail['last_status'] ?></span>
-                                                                        <input type="hidden" class="form-control last_status" name="last_status[]" value="<?= $detail['last_status'] ?>">
+                                                                        <?php
+                                                                        $status = $detail['last_status'];
+                                                                        if (in_array($status, ['scheduled', 'retur', 'reschedule'])) {
+                                                                            $badgeColor = 'info';
+                                                                        } elseif (in_array($status, ['bon', 'celup', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc', 'reject', 'perbaikan'])) {
+                                                                            $badgeColor = 'warning';
+                                                                        } else {
+                                                                            in_array($status, ['done', 'sent']);
+                                                                            $badgeColor = 'success';
+                                                                        }
+                                                                        ?>
+                                                                        <span class="badge bg-<?= $badgeColor ?>"><?= htmlspecialchars($status) ?></span>
+                                                                        <input type="hidden" class="form-control last_status" name="last_status[]" value="<?= htmlspecialchars($status) ?>">
                                                                     </div>
                                                                 </div>
+
                                                                 <div class="col-3 d-flex align-items-center">
                                                                     <div class="form-group">
                                                                         <label for="qty_celup">PO + :</label>
@@ -350,11 +362,13 @@
         // Buat semua input dan select jadi readonly/disabled jika last_status 'celup', 'done', atau 'sent'
         const lastStatuses = document.querySelectorAll('.last_status');
         lastStatuses.forEach(status => {
-            if (status.value === 'celup' || status.value === 'done' || status.value === 'sent') {
+            const statusValue = status.value || status.textContent.trim().toLowerCase(); // Ambil value atau teks
+            const lockedStatuses = ['bon', 'celup', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc', 'done', 'reject', 'perbaikan', 'sent'];
+
+            if (lockedStatuses.includes(statusValue)) {
                 const row = status.closest('tr');
                 const elements = row.querySelectorAll('input, select, button');
                 elements.forEach(el => {
-                    // Untuk input, gunakan readonly; untuk select dan button, gunakan disabled
                     if (el.tagName.toLowerCase() === 'input') {
                         el.setAttribute('readonly', true);
                     } else {
@@ -364,6 +378,7 @@
                 });
             }
         });
+
 
         // Event delegation untuk tombol Edit (gunakan closest untuk menangani klik pada ikon di dalam tombol)
         document.addEventListener('click', function(e) {
@@ -518,7 +533,7 @@
             rows.forEach(row => {
                 const lastStatusEl = row.querySelector("input[name='last_status[]']");
                 const lastStatus = lastStatusEl ? lastStatusEl.value.trim() : "";
-                if (["scheduled", "celup", "reschedule"].includes(lastStatus)) {
+                if (["scheduled", "bon", "celup", "bongkar", "press", "oven", "tes luntur", "rajut pagi", "reschedule"].includes(lastStatus)) {
                     const qtyCelup = parseFloat(row.querySelector("input[name='qty_celup[]']").value) || 0;
                     totalQtyCelup += qtyCelup;
                 }
@@ -534,7 +549,7 @@
             const maxCaps = parseFloat(document.getElementById("max_caps").value) || 0;
 
             // Periksa apakah total_qty_celup melebihi max_caps
-            if (totalQtyCelup > maxCaps) {
+            if (totalQtyCelup >= maxCaps) {
                 alert("⚠️ Total Qty Celup melebihi Max Caps!");
                 totalQtyCelupElement.classList.add("is-invalid");
                 totalQtyCelupElement.focus();
@@ -542,33 +557,54 @@
                 totalQtyCelupElement.classList.remove("is-invalid");
             }
 
-            // Periksa apakah qty_celup di setiap baris yang memiliki last_status valid melebihi tagihan SCH di baris tersebut
+            // Perbarui sisa jatah tiap baris (jika qty_celup sudah terisi, hitung ulang berdasarkan nilai asli)
             rows.forEach(row => {
                 const lastStatusEl = row.querySelector("input[name='last_status[]']");
                 const lastStatus = lastStatusEl ? lastStatusEl.value.trim() : "";
-                if (["scheduled", "celup", "reschedule"].includes(lastStatus)) {
+                if (["scheduled", "bon", "celup", "bongkar", "press", "oven", "tes luntur", "rajut pagi", "reschedule"].includes(lastStatus)) {
                     const qtyCelupInput = row.querySelector("input[name='qty_celup[]']");
-                    const qtyCelup = parseFloat(qtyCelupInput.value) || 0;
-                    const tagihanSCH = parseFloat(row.querySelector(".sisa_jatah").textContent) || 0;
+                    // Ambil nilai baru dari input
+                    const newQty = parseFloat(qtyCelupInput.value) || 0;
+                    const sisaJatahEl = row.querySelector(".sisa_jatah");
 
-                    if (qtyCelup > tagihanSCH) {
-                        alert(`⚠️ Qty Celup di baris ini melebihi Tagihan SCH! (Tagihan SCH: ${tagihanSCH.toFixed(2)})`);
-                        qtyCelupInput.classList.add("is-invalid");
-                        qtyCelupInput.focus();
-                        // Reset qty celup
-                        qtyCelupInput.value = '';
-                    } else {
-                        qtyCelupInput.classList.remove("is-invalid");
+                    // Pastikan nilai asli tagihan SCH disimpan (misal, di data-original)
+                    let originalTagihan = parseFloat(sisaJatahEl.getAttribute("data-original"));
+                    if (!originalTagihan) {
+                        // Jika belum disimpan, ambil dari textContent dan simpan
+                        originalTagihan = parseFloat(sisaJatahEl.textContent) || 0;
+                        // console.log("Original tagihan:", originalTagihan);
+                        sisaJatahEl.setAttribute("data-original", originalTagihan);
+                        // console.log("Data original tagihan:", sisaJatahEl.getAttribute("data-original"));
                     }
+                    // let newSisa = originalTagihan + newQty;
+
+                    // // Hitung sisa jatah berdasarkan nilai asli dikurangi qty_celup yang baru
+
+                    // // Jika hasil negatif, artinya input melebihi quota; koreksi ke maksimum
+                    // if (newSisa < 0) {
+                    //     alert(`⚠️ Qty Celup di baris ini melebihi Tagihan SCH! (Tagihan SCH: ${originalTagihan.toFixed(2)})`);
+                    //     qtyCelupInput.classList.add("is-invalid");
+                    //     // Reset nilai ke maksimum yang diizinkan
+                    //     qtyCelupInput.value = originalTagihan.toFixed(2);
+                    //     newSisa = 0;
+                    //     qtyCelupInput.focus();
+                    // } else {
+                    //     qtyCelupInput.classList.remove("is-invalid");
+                    // }
+
+                    // Update tampilan sisa jatah (selalu dihitung dari originalTagihan)
+                    // sisaJatahEl.textContent = newSisa.toFixed(2);
+                    // Opsional: simpan nilai qty sebelumnya jika diperlukan untuk perhitungan lain
+                    qtyCelupInput.setAttribute("data-old-qty", newQty);
                 }
             });
 
-            // Update sisa kapasitas
+            // Update sisa kapasitas overall
             const sisaKapasitasElement = document.getElementById("sisa_kapasitas");
             if (sisaKapasitasElement) {
                 const sisaKapasitas = maxCaps - totalQtyCelup;
                 sisaKapasitasElement.value = sisaKapasitas.toFixed(2); // Format 2 angka di belakang koma
-                if (sisaKapasitas < 0) {
+                if (sisaKapasitas <= 0) {
                     alert("⚠️ Sisa Kapasitas negatif!");
                     sisaKapasitasElement.classList.add("is-invalid");
                     sisaKapasitasElement.focus();
@@ -584,6 +620,7 @@
                 calculateTotalAndRemainingCapacity();
             }
         });
+
 
 
         // Event delegation untuk perubahan pada dropdown PO

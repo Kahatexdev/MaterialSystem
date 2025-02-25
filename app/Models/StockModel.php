@@ -75,7 +75,8 @@ class StockModel extends Model
 
         if (!empty($warna)) {
             $builder->like('stock.kode_warna', $warna);
-        }  $builder->like('kode_warna', $warna);
+        }
+        $builder->like('kode_warna', $warna);
 
         // Query dengan agregasi SUM(kgs_in_out) dan perhitungan sisa kapasitas
         $builder->select('
@@ -89,33 +90,34 @@ class StockModel extends Model
 
             cluster.*
         ')
-        ->join('cluster', 'cluster.nama_cluster = stock.nama_cluster', 'left')
-        ->groupBy([
-            'stock.no_model',
-            'stock.kode_warna',
-            'stock.warna',
-            'stock.item_type',
-            'stock.lot_stock',
-            'stock.nama_cluster',
-            'cluster.kapasitas'
-        ])
-        ->orderBy('stock.nama_cluster', 'ASC')
-        ->limit(10);
-        
+            ->join('cluster', 'cluster.nama_cluster = stock.nama_cluster', 'left')
+            ->groupBy([
+                'stock.no_model',
+                'stock.kode_warna',
+                'stock.warna',
+                'stock.item_type',
+                'stock.lot_stock',
+                'stock.nama_cluster',
+                'cluster.kapasitas'
+            ])
+            ->orderBy('stock.nama_cluster', 'ASC')
+            ->limit(10);
+
         return $builder->get()->getResult();
     }
 
     public function getKapasitas()
     {
         $builder = $this->db->table('cluster');
-        $builder->select('cluster.nama_cluster, cluster.kapasitas,
+        $builder->select(
+            'cluster.nama_cluster, cluster.kapasitas,
                       COALESCE(SUM(stock.kgs_in_out), 0) AS Kgs,
                       COALESCE(SUM(stock.kgs_stock_awal), 0) AS KgsStockAwal, 
                       COALESCE(SUM(stock.krg_in_out), 0) AS Krg, 
                       COALESCE(SUM(stock.krg_stock_awal), 0) AS KrgStockAwal'
-                      )
-        ->join('stock', 'cluster.nama_cluster = stock.nama_cluster', 'left') // Left join agar semua cluster tampil
-        ->groupBy('cluster.nama_cluster'); // Hanya group by nama_cluster
+        )
+            ->join('stock', 'cluster.nama_cluster = stock.nama_cluster', 'left') // Left join agar semua cluster tampil
+            ->groupBy('cluster.nama_cluster'); // Hanya group by nama_cluster
 
         return $builder->get()->getResult();
     }
@@ -123,17 +125,17 @@ class StockModel extends Model
     public function updateClusterStock($idStock, $namaCluster)
     {
         return $this->db->table('stock')
-        ->where('id_stock', $idStock)
+            ->where('id_stock', $idStock)
             ->update(['nama_cluster' => $namaCluster]);
     }
 
     public function getNoModel()
     {
         return $this->select('material.item_type, material.kode_warna, master_order.no_model')
-        ->from('material')
-        ->join('master_order', 'master_order.id_order = material.id_order')
-        ->join('stock s', 'material.item_type = s.item_type AND material.kode_warna = s.kode_warna') // Memberikan alias 's' untuk table stock
-        ->distinct()
+            ->from('material')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->join('stock s', 'material.item_type = s.item_type AND material.kode_warna = s.kode_warna') // Memberikan alias 's' untuk table stock
+            ->distinct()
             ->get()
             ->getResult();
     }
@@ -144,6 +146,15 @@ class StockModel extends Model
             ->where('no_model', $cek['no_model'])
             ->where('item_type', $cek['item_type'])
             ->where('kode_warna', $cek['kode_warna'])
+            ->groupBy('kode_warna')
+            ->first();
+    }
+    public function stockInOut($model, $itemType, $kodeWarna)
+    {
+        return $this->select('sum(kgs_stock_awal+kgs_in_out) as stock')
+            ->where('no_model', $model)
+            ->where('item_type', $itemType)
+            ->where('kode_Warna', $kodeWarna)
             ->groupBy('kode_warna')
             ->first();
     }

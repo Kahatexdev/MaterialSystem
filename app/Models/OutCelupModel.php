@@ -136,10 +136,7 @@ class OutCelupModel extends Model
             ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup')
             ->where('schedule_celup.no_model', $no_model)
             ->where('schedule_celup.item_type', $item_type)
-            ->groupBy('schedule_celup.no_model')
-            ->groupBy('schedule_celup.item_type')
             ->groupBy('schedule_celup.kode_warna')
-            ->distinct()
             ->get()
             ->getResultArray();
     }
@@ -190,5 +187,12 @@ class OutCelupModel extends Model
         log_message('error', 'Query getKgsDanCones: ' . $sql); // Log ke CI4 logs
 
         return $query->getRowArray(); // Pastikan return berbentuk array
+    }
+
+    public function getIdCelup($idOut)
+    {
+        return $this->select('id_celup')
+            ->where('id_out_celup', $idOut)
+            ->first();
     }
 }

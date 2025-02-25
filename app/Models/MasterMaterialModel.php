@@ -12,7 +12,7 @@ class MasterMaterialModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['item_type', 'deskripsi', 'jenis'];
+    protected $allowedFields    = ['item_type', 'deskripsi', 'jenis', 'ukuran'];
 
 
     protected bool $allowEmptyInserts = false;
@@ -65,6 +65,11 @@ class MasterMaterialModel extends Model
         return $this->select('item_type')->where('jenis', $jenis)->findAll();
     }
 
+    public function getJenisByitemType($item_type)
+    {
+        return $this->select('jenis')->where('item_type', $item_type)->findAll();
+    }
+
     public function updateMasterMaterial($id, $data)
     {
         return $this->where('item_type', $id)->set($data)->update();
@@ -80,10 +85,5 @@ class MasterMaterialModel extends Model
         // Mengubah hasil query menjadi array dengan nilai 'area' saja
         $uniqueArea = array_column($query, 'jenis');
         return $uniqueArea;
-    }
-
-    public function getJenisByitemType($item_type)
-    {
-        return $this->select('jenis')->where('item_type', $item_type)->findAll();
     }
 }
