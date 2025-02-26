@@ -360,94 +360,123 @@ class WarehouseController extends BaseController
     }
     public function prosesPemasukanManual()
     {
-        $idOutCelup = $this->request->getPost('id_out_celup');
-        $noModels = $this->request->getPost('no_model');
-        $itemTypes = $this->request->getPost('item_type');
-        $kodeWarnas = $this->request->getPost('kode_warna');
-        $warnas = $this->request->getPost('warna');
-        $kgsMasuks = $this->request->getPost('kgs_kirim');
-        $cnsMasuks = $this->request->getPost('cns_kirim');
-        $tglMasuks = $this->request->getPost('tgl_kirim');
-        $namaClusters = $this->request->getPost('cluster');
-        $lotKirim = $this->request->getPost('lot_kirim');
+        $action = $this->request->getPost('action'); // Ambil nilai tombol yang diklik
 
-        // Pastikan nama_cluster ada di dalam tabel cluster
-        $clusterExists = $this->clusterModel->where('nama_cluster', $namaClusters)->countAllResults();
+        if ($action === 'komplain') {
+            $idOutCelup = $this->request->getPost('id_out_celup');
+            $alasan = $this->request->getPost('alasan');
 
-        if ($clusterExists === 0) {
-            session()->setFlashdata('error', 'Cluster yang dipilih tidak valid.');
+            $idCelup = $this->outCelupModel->getIdCelup($idOutCelup);
+
+            if (!$idCelup) {
+                session()->setFlashdata('error', 'Data tidak ditemukan.');
+                return redirect()->back();
+            }
+            $update = $this->scheduleCelupModel
+                ->where('id_celup', $idCelup)
+                ->set([
+                    'last_status' => 'complain',
+                    'ket_daily_cek' => $alasan
+                ])
+                ->update();
+
+            if ($update) {
+                session()->setFlashdata('success', 'Komplain berhasil dikirim.');
+            } else {
+                session()->setFlashdata('error', 'Komplain gagal dikirim.');
+            }
             return redirect()->to($this->role . '/pemasukan');
-        }
+        } elseif ($action === 'simpan') {
 
-        $dataPemasukan = [];
+            $idOutCelup = $this->request->getPost('id_out_celup');
+            $noModels = $this->request->getPost('no_model');
+            $itemTypes = $this->request->getPost('item_type');
+            $kodeWarnas = $this->request->getPost('kode_warna');
+            $warnas = $this->request->getPost('warna');
+            $kgsMasuks = $this->request->getPost('kgs_kirim');
+            $cnsMasuks = $this->request->getPost('cns_kirim');
+            $tglMasuks = $this->request->getPost('tgl_kirim');
+            $namaClusters = $this->request->getPost('cluster');
+            $lotKirim = $this->request->getPost('lot_kirim');
 
-        $dataPemasukan[] = [
-            'id_out_celup' => $idOutCelup,
-            'no_model' => $noModels,
-            'item_type' => $itemTypes,
-            'kode_warna' => $kodeWarnas,
-            'warna' => $warnas,
-            'kgs_masuk' => $kgsMasuks,
-            'cns_masuk' => $cnsMasuks,
-            'tgl_masuk' => $tglMasuks,
-            'nama_cluster' => $namaClusters,
-            'admin' => session()->get('username')
-        ];
-        // dd($dataPemasukan);
-        // Debugging: cek apakah data tidak kosong sebelum insert
-        if (empty($dataPemasukan)) {
-            session()->setFlashdata('error', 'Tidak ada data yang dimasukkan.');
-            return redirect()->to($this->role . '/pemasukan');
-        }
+            // Pastikan nama_cluster ada di dalam tabel cluster
+            $clusterExists = $this->clusterModel->where('nama_cluster', $namaClusters)->countAllResults();
 
-        $cekDuplikat = $this->pemasukanModel
-            ->whereIn('id_out_celup', array_column($dataPemasukan, 'id_out_celup'))
-            ->countAllResults();
+            if ($clusterExists === 0) {
+                session()->setFlashdata('error', 'Cluster yang dipilih tidak valid.');
+                return redirect()->to($this->role . '/pemasukan');
+            }
 
-        if ($cekDuplikat == 0) {
-            //insert tabel pemasukan
-            if ($this->pemasukanModel->insertBatch($dataPemasukan)) {
+            $dataPemasukan = [];
 
-                $dataStock = [];
-                $dataStock[] = [
-                    'no_model' => $noModels,
-                    'item_type' => $itemTypes,
-                    'kode_warna' => $kodeWarnas,
-                    'warna' => $warnas,
-                    'kgs_in_out' => $kgsMasuks,
-                    'cns_in_out' => $cnsMasuks,
-                    'krg_in_out' => 1, // Asumsikan setiap pemasukan hanya 1 kali
-                    'lot_stock' => $lotKirim,
-                    'nama_cluster' => $namaClusters,
-                    'admin' => session()->get('username')
-                ];
+            $dataPemasukan[] = [
+                'id_out_celup' => $idOutCelup,
+                'no_model' => $noModels,
+                'item_type' => $itemTypes,
+                'kode_warna' => $kodeWarnas,
+                'warna' => $warnas,
+                'kgs_masuk' => $kgsMasuks,
+                'cns_masuk' => $cnsMasuks,
+                'tgl_masuk' => $tglMasuks,
+                'nama_cluster' => $namaClusters,
+                'admin' => session()->get('username')
+            ];
+            // dd($dataPemasukan);
+            // Debugging: cek apakah data tidak kosong sebelum insert
+            if (empty($dataPemasukan)) {
+                session()->setFlashdata('error', 'Tidak ada data yang dimasukkan.');
+                return redirect()->to($this->role . '/pemasukan');
+            }
 
-                foreach ($dataStock as $stock) {
-                    $existingStock = $this->stockModel
-                        ->where('no_model', $stock['no_model'])
-                        ->where('item_type', $stock['item_type'])
-                        ->where('kode_warna', $stock['kode_warna'])
-                        ->where('lot_stock', $stock['lot_stock'])
-                        ->first(); // Ambil satu record yang sesuai
+            $cekDuplikat = $this->pemasukanModel
+                ->whereIn('id_out_celup', array_column($dataPemasukan, 'id_out_celup'))
+                ->countAllResults();
 
-                    if ($existingStock) {
-                        // Jika sudah ada, update jumlahnya
-                        $this->stockModel->update($existingStock['id_stock'], [
-                            'kgs_in_out' => $existingStock['kgs_in_out'] + $stock['kgs_in_out'],
-                            'cns_in_out' => $existingStock['cns_in_out'] + $stock['cns_in_out'],
-                            'krg_in_out' => $existingStock['krg_in_out'] + 1
-                        ]);
-                    } else {
-                        // Jika belum ada, insert data baru
-                        $this->stockModel->insert($stock);
+            if ($cekDuplikat == 0) {
+                //insert tabel pemasukan
+                if ($this->pemasukanModel->insertBatch($dataPemasukan)) {
+
+                    $dataStock = [];
+                    $dataStock[] = [
+                        'no_model' => $noModels,
+                        'item_type' => $itemTypes,
+                        'kode_warna' => $kodeWarnas,
+                        'warna' => $warnas,
+                        'kgs_in_out' => $kgsMasuks,
+                        'cns_in_out' => $cnsMasuks,
+                        'krg_in_out' => 1, // Asumsikan setiap pemasukan hanya 1 kali
+                        'lot_stock' => $lotKirim,
+                        'nama_cluster' => $namaClusters,
+                        'admin' => session()->get('username')
+                    ];
+
+                    foreach ($dataStock as $stock) {
+                        $existingStock = $this->stockModel
+                            ->where('no_model', $stock['no_model'])
+                            ->where('item_type', $stock['item_type'])
+                            ->where('kode_warna', $stock['kode_warna'])
+                            ->where('lot_stock', $stock['lot_stock'])
+                            ->first(); // Ambil satu record yang sesuai
+
+                        if ($existingStock) {
+                            // Jika sudah ada, update jumlahnya
+                            $this->stockModel->update($existingStock['id_stock'], [
+                                'kgs_in_out' => $existingStock['kgs_in_out'] + $stock['kgs_in_out'],
+                                'cns_in_out' => $existingStock['cns_in_out'] + $stock['cns_in_out'],
+                                'krg_in_out' => $existingStock['krg_in_out'] + 1
+                            ]);
+                        } else {
+                            // Jika belum ada, insert data baru
+                            $this->stockModel->insert($stock);
+                        }
                     }
                 }
+                session()->setFlashdata('success', 'Data berhasil dimasukkan.');
+            } else {
+                session()->setFlashdata('error', 'Gagal, Data pemasukan sudah ada.');
             }
-            session()->setFlashdata('success', 'Data berhasil dimasukkan.');
-        } else {
-            session()->setFlashdata('error', 'Gagal, Data pemasukan sudah ada.');
+            return redirect()->to($this->role . '/pemasukan');
         }
-        return redirect()->to($this->role . '/pemasukan');
     }
     public function pengeluaranJalur()
     {
@@ -1052,5 +1081,43 @@ class WarehouseController extends BaseController
         }
 
         return redirect()->to($this->role . '/pengeluaran_jalur');
+    }
+    public function prosesComplain()
+    {
+        $idOutCelup = $this->request->getPost('id_out_celup');
+        $alasan = $this->request->getPost('alasan');
+
+        $idCelup = $this->outCelupModel->getIdCelup($idOutCelup);
+
+        if (!$idCelup) {
+            session()->setFlashdata('error', 'Data tidak ditemukan.');
+            return redirect()->back();
+        }
+
+        $update = $this->scheduleCelupModel
+            ->where('id_celup', $idCelup)
+            ->set([
+                'last_status' => 'complain',
+                'ket_daily_cek' => $alasan
+            ])
+            ->update();
+
+        if ($update) {
+            // Ambil session dataOut
+            $existingData = session()->get('dataOut') ?? [];
+
+            // Hapus data berdasarkan idOutCelup
+            $filteredData = array_filter($existingData, function ($item) use ($idOutCelup) {
+                return $item['id_out_celup'] != $idOutCelup;
+            });
+
+            // Simpan kembali dataOut ke session tanpa data yang dihapus
+            session()->set('dataOut', array_values($filteredData));
+
+            session()->setFlashdata('success', 'Data berhasil dikomplain');
+        } else {
+            session()->setFlashdata('error', 'Gagal mengkomplain data.');
+        }
+        return redirect()->back();
     }
 }

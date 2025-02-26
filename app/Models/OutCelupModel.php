@@ -188,4 +188,11 @@ class OutCelupModel extends Model
 
         return $query->getRowArray(); // Pastikan return berbentuk array
     }
+
+    public function getIdCelup($idOut)
+    {
+        return $this->select('id_celup')
+            ->where('id_out_celup', $idOut)
+            ->first();
+    }
 }

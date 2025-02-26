@@ -64,7 +64,7 @@ class MasterMaterialModel extends Model
     {
         return $this->select('item_type')->where('jenis', $jenis)->findAll();
     }
-    
+
     public function getJenisByitemType($item_type)
     {
         return $this->select('jenis')->where('item_type', $item_type)->findAll();
