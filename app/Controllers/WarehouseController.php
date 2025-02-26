@@ -130,6 +130,21 @@ class WarehouseController extends BaseController
     }
     public function prosesPemasukan()
     {
+        $action = $this->request->getPost('action'); // Ambil tombol yang diklik
+
+        if ($action === 'simpan') {
+            // Proses Simpan Pemasukan
+            return $this->prosesSimpanPemasukan();
+        } elseif ($action === 'komplain') {
+            // Proses Komplain
+            return $this->prosesKomplain();
+        } else {
+            session()->setFlashdata('error', 'Aksi tidak valid.');
+            return redirect()->to($this->role . '/pemasukan');
+        }
+    }
+    public function prosesSimpanPemasukan()
+    {
         $checkedIds = $this->request->getPost('checked_id'); // Ambil index yang dicentang
 
         if (empty($checkedIds)) {
@@ -255,6 +270,51 @@ class WarehouseController extends BaseController
             }
         } else {
             session()->setFlashdata('error', 'Gagal, Data pemasukan sudah ada.');
+        }
+        return redirect()->to($this->role . '/pemasukan');
+    }
+    private function prosesKomplain()
+    {
+        $checkedIds = $this->request->getPost('checked_id');
+
+        if (empty($checkedIds)) {
+            session()->setFlashdata('error', 'Tidak ada data yang dipilih untuk dikomplain.');
+            return redirect()->to($this->role . '/pemasukan');
+        }
+
+        $idOutCelup = $this->request->getPost('id_out_celup');
+        $alasan = $this->request->getPost('alasan');
+
+        $idCelup = $this->outCelupModel->getIdCelups($idOutCelup);
+
+
+        // Tambahkan proses komplain sesuai kebutuhanmu
+        $update = $this->scheduleCelupModel
+            ->whereIn('id_celup', array_column($idCelup, 'id_celup'))
+            ->set([
+                'last_status' => 'complain',
+                'ket_daily_cek' => $alasan
+            ])
+            ->update();
+
+        if ($update) {
+            // Ambil session dataOut
+            $existingData = session()->get('dataOut') ?? [];
+
+            // Pastikan $idOutCelup dalam bentuk array
+            $idOutCelup = is_array($idOutCelup) ? $idOutCelup : [$idOutCelup];
+
+            // Hapus data berdasarkan idOutCelup
+            $filteredData = array_filter($existingData, function ($item) use ($idOutCelup) {
+                return !in_array($item['id_out_celup'], $idOutCelup);
+            });
+
+            // Simpan kembali dataOut ke session tanpa data yang dihapus
+            session()->set('dataOut', array_values($filteredData));
+
+            session()->setFlashdata('success', 'Data berhasil dikomplain');
+        } else {
+            session()->setFlashdata('error', 'Gagal mengkomplain data.');
         }
         return redirect()->to($this->role . '/pemasukan');
     }
