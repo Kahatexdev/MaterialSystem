@@ -160,7 +160,11 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
 
 // covering routes
 $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
-    $routes->get('', 'inicontroller::index');
+    $routes->get('', 'CoveringController::index');
+    $routes->get('po', 'CoveringController::po');
+    $routes->get('schedule', 'CoveringController::schedule');
+    $routes->get('poDetail/(:any)', 'CoveringController::poDetail/$1');
+    $routes->get('getDetailByNoModel/(:any)/(:any)', 'CoveringController::getDetailByNoModel/$1/$2');
 });
 
 
