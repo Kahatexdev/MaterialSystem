@@ -131,4 +131,34 @@ class OpenPoModel extends Model
             ->distinct()
             ->findAll();
     }
+
+    public function getPOCovering()
+    {
+        return $this->select('DATE(open_po.created_at) tgl_po')
+        ->where('penerima', 'Paryanti')
+        ->groupBy('tgl_po')
+        ->findAll();
+    }
+
+    public function getPODetailCovering($tgl_po)
+    {
+        return $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan,open_po.penerima, open_po.penanggung_jawab,open_po.admin, open_po.created_at,open_po.updated_at')
+            ->where('penerima', 'Paryanti')
+            ->where('DATE(open_po.created_at)', $tgl_po)
+            ->groupBy('open_po.no_model')
+            ->findAll();
+    }
+
+    public function getDetailByNoModel($tgl_po, $noModel)
+    {
+        return $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.penerima, open_po.penanggung_jawab, open_po.admin, open_po.created_at, open_po.updated_at')
+            ->where('DATE(open_po.created_at)', $tgl_po)
+            ->where('open_po.no_model', $noModel)
+            ->where('penerima', 'Paryanti')
+            ->groupBy('open_po.no_model')
+            ->groupBy('open_po.item_type')
+            ->groupBy('open_po.kode_warna')
+
+            ->findAll();
+    }
 }
