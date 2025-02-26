@@ -161,10 +161,7 @@ class ApiController extends ResourceController
     public function getMU($model, $styleSize)
     {
         $mu = $this->materialModel->getMU($model, $styleSize);
-        $res = [];
-        foreach ($mu as &$data) {
-            $res[] = $data;
-        }
-        return $this->respond($res, 200);
+
+        return $this->respond($mu, 200);
     }
 }

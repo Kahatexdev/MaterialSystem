@@ -155,13 +155,6 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
 });
 
 
-
-// covering routes
-$routes->group('/covering', ['filter' => 'covering'], function ($routes) {
-    $routes->get('', 'inicontroller::index');
-});
-
-
 // monitoring routes
 $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('', 'MonitoringController::index');
@@ -295,6 +288,6 @@ $routes->group(
         $routes->get('statusbahanbaku/(:any)', 'ApiController::statusbahanbaku/$1');
         $routes->get('cekBahanBaku/(:any)', 'ApiController::cekBahanBaku/$1');
         $routes->get('cekStok/(:any)', 'ApiController::cekStok/$1');
-        $routes->post('getMU/(:any)/(:any)', 'ApiController::getMU/$1/$2');
+        $routes->get('getMU/(:any)/(:any)', 'ApiController::getMU/$1/$2');
     }
 );
