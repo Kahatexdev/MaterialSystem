@@ -203,13 +203,7 @@
         <div class="card-body">
             <form method="post" action="<?= base_url($role . '/schedule') ?>">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                    <h3 class="mb-0 text-center text-md-start">Request PO</h3>
-                    <div class="d-flex justify-content-md-end gap-2">
-                            <input type="date" id="start_date" class="form-control" placeholder="Start Date">
-                        <button class="btn btn-filter mt-md-4" id="filter_date_range" type="submit">
-                            <i class="bi bi-funnel me-2"></i>Filter
-                        </button>
-                    </div>
+                    <h3 class="mb-0 text-center text-md-start">Request PO GBN</h3>
                 </div>
             </form>
         </div>
@@ -222,9 +216,9 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th class="sticky">No</th>
-                            <th class="sticky">Tanggal PO</th>
-                            <th class="sticky">Action</th>
+                            <th class="sticky text-center">No</th>
+                            <th class="sticky text-center">Tanggal PO</th>
+                            <th class="sticky text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -232,11 +226,15 @@
                             <?php $no = 1; ?>
                             <?php foreach ($poCovering as $po) : ?>
                                 <tr>
-                                    <td class="sticky"><?= $no++ ?></td>
-                                    <td class="sticky"><?= $po['tgl_po'] ?></td>
-                                    <td class="sticky">
-                                        <a class="btn btn-info" href="<?= base_url($role . '/poDetail/' . $po['tgl_po']) ?>">
+                                    <td class="sticky text-center"><?= $no++ ?></td>
+                                    <td class="sticky text-center"><?= $po['tgl_po'] ?></td>
+                                    <td class="sticky text-center">
+                                        <a class="btn bg-gradient-info" href="<?= base_url($role . '/poDetail/' . $po['tgl_po']) ?>">
                                             <i class="bi bi-eye me-2"></i>Lihat PO
+                                        </a>
+                                        <!-- export PO -->
+                                        <a class="btn bg-gradient-success" href="<?= base_url($role . '/po/exportPO/' . $po['tgl_po']) ?>">
+                                            <i class="bi bi-file-earmark-arrow-down me-2"></i>Export PO
                                         </a>
                                     </td>
                                 </tr>

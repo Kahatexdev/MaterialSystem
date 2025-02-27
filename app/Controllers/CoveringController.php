@@ -92,9 +92,12 @@ class CoveringController extends BaseController
         if (empty($coveringData)) {
             $coveringData[0] = [
                 'no_model' => '',
-                'item_type' => '',
+                'no_po' => '',
+                'id_po' => '',
                 'itemTypeCovering' => '',
                 'kodeWarnaCovering' => '',
+                'warnaCovering' => '',
+                'keterangan' => '',
                 'qty_covering' => ''
             ];
         }
@@ -139,30 +142,77 @@ class CoveringController extends BaseController
     public function savePOCovering()
     {
         $data = $this->request->getPost();
+        // $no_po = $data['no_po'];
+        // dd ($data);
         $coveringData = session()->get('covering_data') ?? [];
         $data['covering_data'] = $coveringData;
-
+        // dd ($data);
         // Pastikan selected_items ada dan merupakan array
         $selectedItems = $data['selected_items'] ?? [];
-        $existingSelectedItems = session()->get('selected_items') ?? [];
+        if (empty($selectedItems)) {
+            return redirect()->back()->with('error', 'Tidak ada item yang dipilih.');
+        }
 
+        $existingSelectedItems = session()->get('selected_items') ?? [];
         $data['selected_items'] = [];
 
-        foreach ($selectedItems as $selectedIndex) {
-            if (isset($coveringData[$selectedIndex])) {
-                $selectedItem = $coveringData[$selectedIndex];
-                $data['selected_items'][] = $selectedItem;
-                $existingSelectedItems[$selectedIndex] = $selectedItem;
+        // Load model
+        $openPoModel = new \App\Models\OpenPoModel();
+        $db = \Config\Database::connect();
+        $db->transBegin(); // Mulai transaksi database
 
-                // Hapus item yang telah dipilih dari coveringData
-                unset($coveringData[$selectedIndex]);
+        try {
+            foreach ($selectedItems as $selectedIndex) {
+                if (isset($coveringData[$selectedIndex])) {
+                    $selectedItem = $coveringData[$selectedIndex];
+                    $data['selected_items'][] = $selectedItem;
+                    $existingSelectedItems[$selectedIndex] = $selectedItem;
+                    // dd ($selectedItem);
+                    // Siapkan data untuk disimpan ke database
+                    $insertData = [
+                        'no_model' => $data['no_po'],
+                        'item_type' => $selectedItem['itemTypeCovering'],
+                        'kode_warna' => $selectedItem['kodeWarnaCovering'],
+                        'color' => $selectedItem['warnaCovering'], // Sesuaikan jika ada data warna
+                        'kg_po' => $selectedItem['qty_covering'],
+                        'keterangan' => $selectedItem['keterangan'], // Sesuaikan jika ada keterangan
+                        'penerima' => 'Retno', // Sesuaikan dengan pengguna yang login
+                        'penanggung_jawab' => 'Paryanti', // Sesuaikan dengan pengguna yang login
+                        'admin' => session()->get('username') ?? '', // Ambil admin dari session
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                        'id_induk' => $selectedItem['id_po'] // Sesuaikan jika ada ID induk
+                    ];
+                    // Simpan ke database
+                    if (!$openPoModel->insert($insertData)) {
+                        throw new \Exception('Gagal menyimpan data ke database.');
+                    }
+
+                    // Hapus item yang telah dipilih dari coveringData hanya jika berhasil disimpan
+                    unset($coveringData[$selectedIndex]);
+                }
             }
+
+            $db->transCommit(); // Commit transaksi jika semua berhasil
+        } catch (\Exception $e) {
+            $db->transRollback(); // Rollback transaksi jika ada kegagalan
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
 
         // Simpan kembali array yang telah diperbarui ke sesi
         session()->set('covering_data', array_values($coveringData));
         session()->set('selected_items', $existingSelectedItems);
 
-        print_r($data);
+        return redirect('covering/po')->with('success', 'Data berhasil disimpan.');
     }
+
+    // function unset session by index
+    public function unsetSession($index)
+    {
+        $coveringData = session()->get('covering_data') ?? [];
+        unset($coveringData[$index]);
+        session()->set('covering_data', $coveringData);
+        return redirect()->back()->with('success', 'Data berhasil dihapus dari session');
+    }
+
 }

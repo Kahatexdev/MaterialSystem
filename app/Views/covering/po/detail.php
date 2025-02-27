@@ -59,16 +59,25 @@
                 <div class="card-body">
                     <div class="table-responsive">
                         <form method="POST" action="<?= base_url($role . '/po/savePOCovering') ?>" id="coveringCelupForm">
+                            <div class="form-group">
+                                <label>No PO</label>
+                                <input type="text" class="form-control"
+                                    name="no_po"
+                                    value=""
+                                    required>
+                            </div>
                             <table class="table table-flush" id="datatable-basic">
                                 <thead class="thead-light">
                                     <tr>
                                         <th>Select</th>
                                         <th>No</th>
                                         <th>No Model</th>
-                                        <th>Item Type</th>
                                         <th>Item Type Covering</th>
-                                        <th>Kode Warna Covering</th>
+                                        <th>Kode Warna</th>
+                                        <th>Warna</th>
                                         <th>Qty Covering</th>
+                                        <th>Keterangan</th>
+                                        <th>Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -77,11 +86,14 @@
                                         echo "<tr>";
                                         echo "<td><input type='checkbox' name='selected_items[]' value='{$index}'></td>";
                                         echo "<td>" . ($index + 1) . "</td>";
-                                        echo "<td>" . htmlspecialchars($item['no_model']) . "</td>";
-                                        echo "<td>" . htmlspecialchars($item['item_type']) . "</td>";
-                                        echo "<td>" . htmlspecialchars($item['itemTypeCovering']) . "</td>";
-                                        echo "<td>" . htmlspecialchars($item['kodeWarnaCovering']) . "</td>";
-                                        echo "<td>" . htmlspecialchars($item['qty_covering']) . "</td>";
+                                        echo "<td>{$item['no_model']}</td>";
+                                        echo "<td>{$item['itemTypeCovering']}</td>";
+                                        echo "<td>{$item['kodeWarnaCovering']}</td>";
+                                        echo "<td>{$item['warnaCovering']}</td>";
+                                        echo "<td>{$item['qty_covering']}</td>";
+                                        echo "<td>{$item['keterangan']}</td>";
+                                        // echo "<input type='hidden' name='items[{$index}][id_po]' value='{$item['id_po']}'>";
+                                        echo "<td><a href='" . base_url($role . '/po/deletePOCovering/' . $index) . "' class='btn btn-danger'><i class='fas fa-trash'></i></a></td>";
                                         echo "</tr>";
                                     }
                                     ?>
@@ -118,7 +130,7 @@
                         // Buat card untuk setiap item
                         response.forEach(function(item, index) {
                             var cardHtml = `
-                                <div class="col-md-4 mb-4">
+                                <div class="col-md-6 mb-4">
                                     <div class="card h-100">
                                         <div class="card-header bg-gradient-info text-white">
                                             <h6 class="card-title">Item Type PO : ${item.item_type}</h6>
@@ -128,8 +140,8 @@
                                         <div class="card-body">
                                             <div class="row">
                                                 <div class="col-12">
-                                                    <input type="hidden" name="items[${index}][no_model]" value="${noModel}">
-                                                    <input type="hidden" name="items[${index}][item_type]" value="${item.item_type}">
+                                                    <input type="hidden" name="items[${index}][id_po]" value="${item.id_po}">
+                                                    <input type="hidden" name="items[${index}][no_model]" value="${item.no_model}">
                                                     
                                                     <div class="form-group">
                                                         <label>Item Type Covering</label>
@@ -148,11 +160,26 @@
                                                     </div>
                                                     
                                                     <div class="form-group">
+                                                        <label>Warna</label>
+                                                        <input type="text" class="form-control" 
+                                                            name="items[${index}][warnaCovering]"
+                                                            value="${item.color}"
+                                                            required>
+                                                    </div>
+
+                                                    <div class="form-group">
                                                         <label>Qty Covering</label>
                                                         <input type="number" class="form-control" 
                                                             name="items[${index}][qty_covering]" 
                                                             step="0.01" 
                                                             required>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label>Keterangan</label>
+                                                        <textarea class="form-control" 
+                                                            name="items[${index}][keterangan]">
+                                                            ${item.keterangan}</textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -185,33 +212,24 @@
                 method: "POST",
                 data: formData,
                 success: function(response) {
-                    alert('Data berhasil disimpan di session');
-                    location.reload(); // Refresh halaman setelah data ditambahkan
+                    Swal.fire({
+                        title: "Sukses!",
+                        text: "Data berhasil disimpan di session",
+                        icon: "success",
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        location.reload(); // Refresh halaman setelah alert selesai
+                    });
                 },
                 error: function(xhr, status, error) {
                     console.error("AJAX Error: " + status + error);
-                    alert('Gagal menyimpan data');
-                }
-            });
-        });
-
-        // Submit form untuk menyimpan data covering
-        $('#coveringCelupForm').submit(function(e) {
-            e.preventDefault();
-            var formData = $(this).serializeArray();
-
-            $.ajax({
-                url: "<?= base_url($role . '/po/savePOCovering') ?>",
-                method: "POST",
-                data: formData,
-                success: function(response) {
-                    console.log(response);
-                    alert('Data berhasil disimpan');
-                    location.reload(); // Refresh halaman setelah data diperbarui atau dihapus
-                },
-                error: function(xhr, status, error) {
-                    console.error("AJAX Error: " + status + error);
-                    alert('Gagal menyimpan data');
+                    Swal.fire({
+                        title: "Gagal!",
+                        text: "Gagal menyimpan data",
+                        icon: "error",
+                        confirmButtonText: "OK"
+                    });
                 }
             });
         });
