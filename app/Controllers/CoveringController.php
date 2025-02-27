@@ -88,6 +88,7 @@ class CoveringController extends BaseController
         $tgl_po = urldecode($tgl_po);
         $tgl_po = date('Y-m-d', strtotime($tgl_po));
         $poDetail = $this->openPoModel->getPODetailCovering($tgl_po);
+        $coveringData = session()->get('covering_data');
         // dd ($poDetail);
         $data = [
             'active' => $this->active,
@@ -95,6 +96,7 @@ class CoveringController extends BaseController
             'role' => $this->role,
             'tgl_po' => $tgl_po,
             'poDetail' => $poDetail,
+            'coveringData' => $coveringData,
         ];
         return view($this->role . '/po/detail', $data);
     }
@@ -107,4 +109,55 @@ class CoveringController extends BaseController
         $detail = $this->openPoModel->getDetailByNoModel($tgl_po,$noModel);
         return $this->response->setJSON($detail);
     }
+
+    public function simpanKeSession()
+    {
+        // Ambil data dari POST
+        $items = $this->request->getPost('items');
+
+        // Ambil data lama dari session jika ada
+        $existingData = session()->get('covering_data') ?? [];
+
+        // Gabungkan data baru dengan data lama
+        $updatedData = array_merge($existingData, $items);
+
+        // Simpan ke session
+        session()->set('covering_data', $updatedData);
+
+        // Beri response atau redirect
+        return redirect()->back()->with('success', 'Data berhasil disimpan di session');
+    }
+
+    public function savePOCovering()
+    {
+        $data = $this->request->getPost();
+        $coveringData = session()->get('covering_data') ?? [];
+        $data['covering_data'] = $coveringData;
+
+        // Pastikan selected_items ada dan merupakan array
+        $selectedItems = $data['selected_items'] ?? [];
+        $existingSelectedItems = session()->get('selected_items') ?? [];
+
+        $data['selected_items'] = [];
+
+        foreach ($selectedItems as $selectedIndex) {
+            if (isset($coveringData[$selectedIndex])) {
+                $selectedItem = $coveringData[$selectedIndex];
+                $data['selected_items'][] = $selectedItem;
+                $existingSelectedItems[$selectedIndex] = $selectedItem;
+
+                // Hapus item yang telah dipilih dari coveringData
+                unset($coveringData[$selectedIndex]);
+            }
+        }
+
+        // Simpan kembali array yang telah diperbarui ke sesi
+        session()->set('covering_data', array_values($coveringData));
+        session()->set('selected_items', $existingSelectedItems);
+
+        print_r($data);
+    }
+
+
+
 }

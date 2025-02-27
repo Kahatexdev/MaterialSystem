@@ -1,4 +1,4 @@
-<?php $this->extend($role . '/schedule/header'); ?>
+<?php $this->extend($role . '/po/header'); ?>
 <?php $this->section('content'); ?>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
@@ -91,14 +91,14 @@
                     <thead>
                         <tr>
                             <th class="sticky">Mesin</th>
-                            
+
                         </tr>
                     </thead>
 
                     <tbody>
-                       
+
                         <!-- Tabel Mesin -->
-                        
+
 
                     </tbody>
                 </table>

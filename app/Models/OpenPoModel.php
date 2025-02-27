@@ -158,7 +158,6 @@ class OpenPoModel extends Model
             ->groupBy('open_po.no_model')
             ->groupBy('open_po.item_type')
             ->groupBy('open_po.kode_warna')
-
             ->findAll();
     }
 }

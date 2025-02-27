@@ -43,21 +43,53 @@
                             <!-- Item cards akan diisi di sini -->
                         </div>
 
-                        <!-- Bagian Umum -->
-                        <div class="row mt-4">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="tanggalCovering">Tanggal Covering</label>
-                                    <input type="date" class="form-control" name="tanggalCovering" required>
-                                </div>
-                            </div>
-
-                        </div>
 
                         <div class="text-end mt-4">
-                            <button type="submit" class="btn btn-primary">Simpan Semua Data</button>
+                            <button type="submit" class="btn btn-info w-100">Simpan Ke Tabel</button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3" id="CelupcoveringFormContainer" style="display: none;">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <form method="POST" action="<?= base_url($role . '/po/savePOCovering') ?>" id="coveringCelupForm">
+                            <table class="table table-flush" id="datatable-basic">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Select</th>
+                                        <th>No</th>
+                                        <th>No Model</th>
+                                        <th>Item Type</th>
+                                        <th>Item Type Covering</th>
+                                        <th>Kode Warna Covering</th>
+                                        <th>Qty Covering</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    foreach ($coveringData as $index => $item) {
+                                        echo "<tr>";
+                                        echo "<td><input type='checkbox' name='selected_items[]' value='{$index}'></td>";
+                                        echo "<td>" . ($index + 1) . "</td>";
+                                        echo "<td>" . htmlspecialchars($item['no_model']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($item['item_type']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($item['itemTypeCovering']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($item['kodeWarnaCovering']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($item['qty_covering']) . "</td>";
+                                        echo "</tr>";
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
+                            <button type="submit" class="btn btn-info w-100">Buat PO ke Celupan</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -81,6 +113,7 @@
                         $('#detailContainer').empty();
                         $('#itemCardsContainer').empty();
                         $('#coveringFormContainer').show();
+                        $('#CelupcoveringFormContainer').show();
 
                         // Buat card untuk setiap item
                         response.forEach(function(item, index) {
@@ -109,11 +142,10 @@
                                                     <div class="form-group">
                                                         <label>Kode Warna</label>
                                                         <input type="text" class="form-control" 
-                                                            name="items[${index}][kode_warna]" 
+                                                            name="items[${index}][kodeWarnaCovering]" 
                                                             value="${item.kode_warna}" 
                                                             required>
                                                     </div>
-                                                    
                                                     
                                                     <div class="form-group">
                                                         <label>Qty Covering</label>
@@ -143,51 +175,48 @@
             }
         });
 
-        // Submit form
+        // Submit form untuk menyimpan ke session
         $('#coveringForm').submit(function(e) {
             e.preventDefault();
-
             var formData = $(this).serializeArray();
-            var postData = {
-                tanggal_covering: $('input[name="tanggalCovering"]').val(),
-                keterangan: $('textarea[name="keterangan"]').val(),
-                items: []
-            };
 
-            // Format data items
-            $('[name^="items["]').each(function() {
-                var name = $(this).attr('name');
-                var matches = name.match(/items\[(\d+)\]\[(\w+)\]/);
-
-                if (matches) {
-                    var index = matches[1];
-                    var field = matches[2];
-
-                    if (!postData.items[index]) {
-                        postData.items[index] = {};
-                    }
-                    postData.items[index][field] = $(this).val();
-                }
-            });
-
-            // Kirim ke server
             $.ajax({
-                url: "<?= base_url($role . '/simpanCovering') ?>",
+                url: "<?= base_url($role . '/po/simpanKeSession') ?>",
                 method: "POST",
-                data: postData,
-                dataType: "json",
+                data: formData,
                 success: function(response) {
-                    alert('Data covering berhasil disimpan!');
-                    $('#coveringForm')[0].reset();
-                    $('#coveringFormContainer').hide();
+                    alert('Data berhasil disimpan di session');
+                    location.reload(); // Refresh halaman setelah data ditambahkan
                 },
                 error: function(xhr, status, error) {
                     console.error("AJAX Error: " + status + error);
-                    alert('Gagal menyimpan data covering');
+                    alert('Gagal menyimpan data');
+                }
+            });
+        });
+
+        // Submit form untuk menyimpan data covering
+        $('#coveringCelupForm').submit(function(e) {
+            e.preventDefault();
+            var formData = $(this).serializeArray();
+
+            $.ajax({
+                url: "<?= base_url($role . '/po/savePOCovering') ?>",
+                method: "POST",
+                data: formData,
+                success: function(response) {
+                    console.log(response);
+                    alert('Data berhasil disimpan');
+                    location.reload(); // Refresh halaman setelah data diperbarui atau dihapus
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX Error: " + status + error);
+                    alert('Gagal menyimpan data');
                 }
             });
         });
     });
 </script>
+
 
 <?php $this->endSection(); ?>

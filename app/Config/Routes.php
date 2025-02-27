@@ -165,6 +165,8 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('schedule', 'CoveringController::schedule');
     $routes->get('poDetail/(:any)', 'CoveringController::poDetail/$1');
     $routes->get('getDetailByNoModel/(:any)/(:any)', 'CoveringController::getDetailByNoModel/$1/$2');
+    $routes->post('po/simpanKeSession', 'CoveringController::simpanKeSession');
+    $routes->post('po/savePOCovering', 'CoveringController::savePOCovering');
 });
 
 
