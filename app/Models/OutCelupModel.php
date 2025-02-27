@@ -195,4 +195,11 @@ class OutCelupModel extends Model
             ->where('id_out_celup', $idOut)
             ->first();
     }
+
+    public function getIdCelups($idOut)
+    {
+        return $this->select('id_celup')
+            ->whereIn('id_out_celup', $idOut)
+            ->findAll();
+    }
 }

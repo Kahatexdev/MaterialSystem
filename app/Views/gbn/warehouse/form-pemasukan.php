@@ -179,7 +179,7 @@
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
                                                             <!-- Tombol Komplain -->
-                                                            <button type="button" class="btn btn-warning btn-komplain ms-2" data-id="<?= $data['id_out_celup'] ?>" data-bs-toggle="modal" data-bs-target="#complainModal">
+                                                            <button type="button" class="btn bg-gradient-warning btn-komplain ms-2" data-id="<?= $data['id_out_celup'] ?>" data-bs-toggle="modal" data-bs-target="#complainModal">
                                                                 <i class="fas fa-exclamation-triangle"></i> Komplain
                                                             </button>
                                                         </div>
@@ -193,25 +193,34 @@
                                 </div>
                             </div>
                             <div class="row mt-2">
-                                <div class="col-md-4">
+                                <div class="col-md-4 sm-12">
                                     <label for="ttl_kgs" class="form-label">Total Kgs:</label>
                                     <input type="text" class="form-control" name="ttl_kgs" id="ttl_kgs" readonly>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-4 sm-12">
                                     <label for="cluster" class="form-label">Pilih Cluster:</label>
-                                    <select class="form-control" name=" cluster" id="cluster" required>
+                                    <select class="form-control" name=" cluster" id="cluster">
                                         <option value=""></option>
                                     </select>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-4 sm-12">
                                     <label for="sisa_kapasitas" class="form-label">Sisa Kapasitas:</label>
                                     <input type="number" class="form-control sisa_kapasitas" name="sisa_kapasitas" value="" readonly>
                                 </div>
 
+                                <div class="col-md-12 sm-12">
+                                    <label for="alasan" class="form-label">Alasan:</label>
+                                    <p style="color: red; font-size: 12px;"> ⚠ Hanya diisi untuk komplain</p>
+                                    <input type="text" class="form-control" name="alasan" value="">
+                                </div>
+
                                 <div class="col-md-12 d-flex align-items-end">
-                                    <button type="submit" class="btn bg-gradient-info w-100">Simpan Pemasukan</button>
+                                    <button type="submit" name="action" value="simpan" class="btn bg-gradient-info w-100">Simpan Pemasukan</button>
+                                </div>
+                                <div class="col-md-12 d-flex align-items-end">
+                                    <button type="submit" name="action" value="komplain" class="btn bg-gradient-warning w-100"><i class="fas fa-exclamation-triangle"></i> Komplain</button>
                                 </div>
                             </div>
                         </div>
