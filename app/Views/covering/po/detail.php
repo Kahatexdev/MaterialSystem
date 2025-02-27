@@ -53,7 +53,7 @@
         </div>
     </div>
 
-    <div class="row mt-3" id="CelupcoveringFormContainer" style="display: none;">
+    <div class="row mt-3" id="CelupcoveringFormContainer">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">

@@ -89,7 +89,15 @@ class CoveringController extends BaseController
         $tgl_po = date('Y-m-d', strtotime($tgl_po));
         $poDetail = $this->openPoModel->getPODetailCovering($tgl_po);
         $coveringData = session()->get('covering_data');
-        // dd ($poDetail);
+        if (empty($coveringData)) {
+            $coveringData[0] = [
+                'no_model' => '',
+                'item_type' => '',
+                'itemTypeCovering' => '',
+                'kodeWarnaCovering' => '',
+                'qty_covering' => ''
+            ];
+        }
         $data = [
             'active' => $this->active,
             'title' => 'PO Celup',
@@ -106,7 +114,7 @@ class CoveringController extends BaseController
         $tgl_po = urldecode($tgl_po);
         $tgl_po = date('Y-m-d', strtotime($tgl_po));
         $noModel = urldecode($noModel);
-        $detail = $this->openPoModel->getDetailByNoModel($tgl_po,$noModel);
+        $detail = $this->openPoModel->getDetailByNoModel($tgl_po, $noModel);
         return $this->response->setJSON($detail);
     }
 
@@ -157,7 +165,4 @@ class CoveringController extends BaseController
 
         print_r($data);
     }
-
-
-
 }
