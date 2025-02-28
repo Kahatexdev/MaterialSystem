@@ -98,7 +98,6 @@ class OpenPoModel extends Model
         ->getResultArray();
     }
 
-
     public function getKgKebutuhan($noModel, $itemType, $kodeWarna)
     {
         return $this->select('kg_po')

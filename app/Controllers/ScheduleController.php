@@ -235,11 +235,16 @@ class ScheduleController extends BaseController
         $kode_warna = $this->request->getGet('kode_warna');
         $warna = $this->request->getGet('warna');
         $item_type = $this->request->getGet('item_type');
-        // $item_type = urldecode($this->request->getGet('item_type'));
-        // Debugging parameters
-        // var_dump($kode_warna, $warna, $item_type);
+        $id_induk = 20; 
+        // $this->request->getGet('id_induk');
 
-        $po = $this->openPoModel->getFilteredPO($kode_warna, $warna, $item_type);
+        if(!empty($id_induk)){
+            $id_po = $this->openPoModel->find($id_induk);
+            $po = $this->openPoModel->getFilteredPO($id_po['kode_warna'], $id_po['color'], $id_po['item_type']);
+            // var_dump ($po);
+        }else{
+            $po = $this->openPoModel->getFilteredPO($kode_warna, $warna, $item_type);
+        }
 
         // var_dump($po);
         // Kembalikan response dalam format JSON
