@@ -165,11 +165,12 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
 $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('', 'CoveringController::index');
     $routes->get('po', 'CoveringController::po');
-    $routes->get('schedule', 'CoveringController::schedule');
+    $routes->get('schedule', 'ScheduleController::index');
     $routes->get('poDetail/(:any)', 'CoveringController::poDetail/$1');
     $routes->get('getDetailByNoModel/(:any)/(:any)', 'CoveringController::getDetailByNoModel/$1/$2');
     $routes->post('po/simpanKeSession', 'CoveringController::simpanKeSession');
     $routes->post('po/savePOCovering', 'CoveringController::savePOCovering');
+    $routes->get('po/deletePOCovering/(:any)', 'CoveringController::unsetSession/$1');
 });
 
 

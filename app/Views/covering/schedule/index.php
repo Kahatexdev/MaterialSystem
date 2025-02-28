@@ -1,4 +1,4 @@
-<?php $this->extend($role . '/po/header'); ?>
+<?php $this->extend($role . '/schedule/header'); ?>
 <?php $this->section('content'); ?>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
@@ -40,7 +40,7 @@
             });
         </script>
     <?php endif; ?>
-    <h1 class="display-5 mb-4 text-center" style="color:rgb(0, 85, 124); font-weight: 600;">Schedule Mesin Celup Spandex & Karet</h1>
+    <h1 class="display-5 mb-4 text-center" style="color:rgb(0, 85, 124); font-weight: 600;">Schedule Mesin Celup Benang</h1>
 
     <div class="card mb-4">
         <div class="card-body">
@@ -91,13 +91,153 @@
                     <thead>
                         <tr>
                             <th class="sticky">Mesin</th>
+                            <?php
+                            // Set startDate dan endDate
+                            $startDate = new DateTime($filter['start_date']);
+                            $endDate = new DateTime($filter['end_date']);
 
+                            // Tambahkan satu hari pada $endDateClone untuk mencakup tanggal terakhir
+                            $endDateClone = clone $endDate;
+                            $endDateClone->add(new DateInterval('P1D'));
+
+                            // Interval 1 hari
+                            $dateInterval = new DateInterval('P1D');
+                            $datePeriod = new DatePeriod($startDate, $dateInterval, $endDateClone);
+
+                            // Tanggal hari ini
+                            $today = new DateTime();
+
+                            // Tanggal 3 hari ke belakang
+                            $threeDaysAgo = (clone $today)->sub(new DateInterval('P4D'));
+
+                            // Tanggal 6 hari ke depan
+                            $sixDaysAhead = (clone $today)->add(new DateInterval('P6D'));
+
+                            foreach ($datePeriod as $date) {
+                                // Misalnya tambahkan class sticky ke semua th
+                                if ($date->format('w') == 0) {
+                                    echo "<th class='sticky' style='color: red;'>" . $date->format('D, d M') . "</th>";
+                                } elseif ($date->format('Y-m-d') === $today->format('Y-m-d')) {
+                                    echo "<th class='sticky' style='background-color: #ffeb3b; color: #000;'>" . $date->format('D, d M') . "</th>";
+                                } elseif ($date >= $threeDaysAgo && $date < $today) {
+                                    echo "<th class='sticky' style='color: #6c757d;'>" . $date->format('D, d M') . "</th>";
+                                } elseif ($date > $today && $date <= $sixDaysAhead) {
+                                    echo "<th class='sticky' style='color: rgb(31, 193, 199);'>" . $date->format('D, d M') . "</th>";
+                                } else {
+                                    echo "<th class='sticky'>" . $date->format('D, d M') . "</th>";
+                                }
+                            } ?>
                         </tr>
                     </thead>
 
                     <tbody>
+                        <?php
+                        // Kelompokkan scheduleData untuk mempercepat akses
+                        $scheduleGrouped = [];
+                        foreach ($scheduleData as $job) {
+                            // Pastikan tanggal disimpan dengan format yang sesuai (Y-m-d)
+                            $key = "{$job['no_mesin']} | " . (new DateTime($job['tanggal_schedule']))->format('Y-m-d') . " | {$job['lot_urut']}";
+
+                            // Cek last_status sebelum memasukkan data ke dalam kelompok
+                            if (in_array($job['last_status'], ['scheduled', 'celup', 'reschedule'])) {
+                                // Jika key sudah ada, gabungkan total_kg-nya
+                                if (isset($scheduleGrouped[$key])) {
+                                    $scheduleGrouped[$key]['total_kg'] += $job['total_kg'];
+                                    // format total_kg menjadi 2 angka di belakang koma
+                                    $scheduleGrouped[$key]['total_kg'] = number_format($scheduleGrouped[$key]['total_kg'], 2);
+                                } else {
+                                    $scheduleGrouped[$key] = $job;
+                                }
+                            }
+                        }
+
+                        // Menentukan threshold kapasitas mesin
+                        function getCapacityColor($kgCelup, $maxCaps)
+                        {
+                            $lowThreshold = $maxCaps * 0.69; // 69%
+                            $midThreshold = $maxCaps * 0.70; // 70%
+                            $highThreshold = $maxCaps;       // 100%
+
+                            if ($kgCelup < $lowThreshold) {
+                                return 'bg-success';
+                            } elseif ($kgCelup < $highThreshold) {
+                                return 'bg-warning';
+                            } else {
+                                return 'bg-danger';
+                            }
+                        }
+
+                        // Fungsi untuk menampilkan tombol jadwal
+                        function renderJobButton($job, $mesin, $capacityColor, $capacityPercentage)
+                        {
+                            $kgCelup = number_format($job['total_kg'], 2);
+                            $totalKg = number_format($job['total_kg'], 2);
+                            return "
+                                <button class='btn btn-link {$capacityColor}' 
+                                    data-bs-toggle='modal' 
+                                    data-bs-target='#modalSchedule'
+                                    data-no-mesin='{$job['no_mesin']}'
+                                    data-tanggal-schedule='{$job['tanggal_schedule']}'
+                                    data-lot-urut='{$job['lot_urut']}'
+                                    title='{$totalKg} kg ({$capacityPercentage}%)'>
+                                    <div class='d-flex flex-column align-items-center justify-content-center' style='height: 100%; width: 100%;'>
+                                        <span style='font-size: 0.9rem; color: black; font-weight: bold;'>{$job['kode_warna']}</span>
+                                        <span style='font-size: 0.85rem; color: black;'>{$kgCelup} KG</span>
+                                    </div>
+                                </button>";
+                        }
+                        ?>
 
                         <!-- Tabel Mesin -->
+                        <?php foreach ($mesin_celup as $mesin): ?>
+                            <tr>
+                                <!-- Kolom informasi mesin -->
+                                <td class="sticky machine-info">
+                                    <strong>Mesin <?= $mesin['no_mesin'] ?></strong><br>
+                                    <input type="hidden" id="no_mesin" value="<?= $mesin['no_mesin'] ?>">
+                                    <small>Kapasitas: <?= number_format($mesin['min_caps'], 1) ?> - <?= number_format($mesin['max_caps'], 1) ?> kg </small><br>
+                                    <small>L/M/D : (<?= $mesin['lmd'] ?>)</small>
+                                </td>
+
+                                <!-- Kolom tanggal -->
+                                <?php foreach ($datePeriod as $date): ?>
+                                    <td>
+                                        <?php
+                                        // Loop untuk menampilkan kartu sesuai jumlah lot
+                                        for ($lot = 0; $lot < $mesin['jml_lot']; $lot++) {
+                                            $num = $lot + 1;
+                                            // Periksa apakah tanggal dan lot sudah sesuai dengan jadwal
+                                            $key = "{$mesin['no_mesin']} | " . $date->format('Y-m-d') . " | " . $num;
+                                            $job = $scheduleGrouped[$key] ?? null;
+
+                                            if ($job) {
+                                                // Menghitung kapasitas dan warna berdasarkan kapasitas
+                                                $capacityPercentage = ($job['total_kg'] / $mesin['max_caps']) * 100;
+                                                $capacityColor = getCapacityColor($job['total_kg'], $mesin['max_caps']);
+
+                                                // Render button untuk lot yang ada jadwalnya
+                                                echo "<div class='job-item'>";
+                                                echo renderJobButton($job, $mesin, $capacityColor, number_format($capacityPercentage, 2));
+                                                echo "</div>";
+                                            } else {
+                                                // Tampilkan kartu kosong jika tidak ada jadwal
+                                                echo "<div class='job-item no-schedule'>";
+                                                echo "<button class='btn btn-light text-muted text-decoration-none'
+                                                        data-bs-toggle='modal' 
+                                                        data-bs-target='#modalSchedule'
+                                                        data-no-mesin='{$mesin['no_mesin']}'
+                                                        data-tanggal-schedule='{$date->format('Y-m-d')}'
+                                                        data-lot-urut='{$num}'>";
+                                                echo "<div class='text-muted'>Tidak ada jadwal</div>";
+                                                echo "</button></div>";
+                                            }
+                                        }
+                                        ?>
+                                    </td>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php endforeach; ?>
+
 
 
                     </tbody>

@@ -189,20 +189,12 @@
             <div class="collgbne navbar-collgbne mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
 
                 <ul class="navbar-nav  justify-content-end">
-                    <li class="nav-item d-flex align-items-center">
-                        <a href="<?= base_url($role . '/mesin/mesinCelup') ?>" class="nav-link text-body font-weight-bold px-2">
-                            <i class="fas fa-database"></i>
-                            <span class="d-lg-inline-block d-none ms-1">Data Mesin Celup</span>
-                        </a>
-                    </li>
                     <li class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-calendar-alt"></i>
                             <span class="d-lg-inline-block d-none ms-1">Schedule</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownMenuLink">
-                            <li><a class="dropdown-item" href="<?= base_url($role . '/schedule/acrylic') ?>">Acrylic</a></li>
-                            <li><a class="dropdown-item" href="<?= base_url($role . '/schedule') ?>">Benang</a></li>
                             <li><a class="dropdown-item" href="<?= base_url($role . '/schedule/nylon') ?>">Nylon</a></li>
                         </ul>
                     </li>
@@ -212,8 +204,6 @@
                             <span class="d-lg-inline-block d-none ms-1">Reports</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownReports">
-                            <li><a class="dropdown-item" href="#">Acrylic</a></li>
-                            <li><a class="dropdown-item" href="#">Benang</a></li>
                             <li><a class="dropdown-item" href="#">Nylon</a></li>
                         </ul>
                     </li>

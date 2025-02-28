@@ -556,7 +556,7 @@
         function fetchPOByKodeWarna(kodeWarna, warna, itemType, poSelect) {
             // Encode itemType jika perlu
             const itemTypeEncoded = encodeURIComponent(itemType);
-
+            // const id_induk = document.getElementById('id_induk').value;
             // Menyusun URL untuk pengambilan data PO
             const url = `<?= base_url(session('role') . "/schedule/getPO") ?>?kode_warna=${kodeWarna}&warna=${warna}&item_type=${itemTypeEncoded}`;
 

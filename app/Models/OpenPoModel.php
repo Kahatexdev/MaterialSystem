@@ -24,6 +24,7 @@ class OpenPoModel extends Model
         'admin',
         'created_at',
         'updated_at',
+        'id_induk',
     ];
 
     protected bool $allowEmptyInserts = false;
@@ -97,7 +98,6 @@ class OpenPoModel extends Model
         ->getResultArray();
     }
 
-
     public function getKgKebutuhan($noModel, $itemType, $kodeWarna)
     {
         return $this->select('kg_po')
@@ -136,13 +136,14 @@ class OpenPoModel extends Model
     {
         return $this->select('DATE(open_po.created_at) tgl_po')
         ->where('penerima', 'Paryanti')
+        ->orderBy('tgl_po', 'DESC')
         ->groupBy('tgl_po')
         ->findAll();
     }
 
     public function getPODetailCovering($tgl_po)
     {
-        return $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan,open_po.penerima, open_po.penanggung_jawab,open_po.admin, open_po.created_at,open_po.updated_at')
+        return $this->select('open_po.id_po,open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan,open_po.penerima, open_po.penanggung_jawab,open_po.admin, open_po.created_at,open_po.updated_at')
             ->where('penerima', 'Paryanti')
             ->where('DATE(open_po.created_at)', $tgl_po)
             ->groupBy('open_po.no_model')
@@ -151,7 +152,7 @@ class OpenPoModel extends Model
 
     public function getDetailByNoModel($tgl_po, $noModel)
     {
-        return $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.penerima, open_po.penanggung_jawab, open_po.admin, open_po.created_at, open_po.updated_at')
+        return $this->select('open_po.id_po, open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.penerima, open_po.penanggung_jawab, open_po.admin, open_po.created_at, open_po.updated_at')
             ->where('DATE(open_po.created_at)', $tgl_po)
             ->where('open_po.no_model', $noModel)
             ->where('penerima', 'Paryanti')
