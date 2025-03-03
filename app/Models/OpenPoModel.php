@@ -97,6 +97,16 @@ class OpenPoModel extends Model
             ->get()
             ->getResultArray();
     }
+    public function getFilteredCovering($kodeWarna, $warna, $item_type)
+    {
+        return $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po')
+            ->where('open_po.kode_warna', $kodeWarna)  // Ganti like dengan where
+            ->where('open_po.color', $warna)
+            ->where('open_po.item_type', $item_type) // Ganti like dengan where
+            ->distinct()
+            ->get()
+            ->getResultArray();
+    }
 
     public function getKgKebutuhan($noModel, $itemType, $kodeWarna)
     {
@@ -188,5 +198,25 @@ class OpenPoModel extends Model
             ->where('open_po.id_induk IS NOT NULL')
             ->where('DATE(open_po.created_at)', $tgl_po)
             ->findAll();
+    }
+    public function
+    getQtyPOForCvr($noModel, $itemType, $kodeWarna)
+    {
+        return $this->select('sum(kg_po) as qty_po')
+            ->where('open_po.no_model', $noModel)
+            ->where('open_po.item_type', $itemType)
+            ->where('open_po.kode_warna', $kodeWarna)
+            ->groupBy('open_po.no_model')
+            ->groupBy('open_po.item_type')
+            ->groupBy('open_po.kode_warna')
+            ->first();
+    }
+    public function getIdInduk($noModel, $itemType, $kodeWarna)
+    {
+        return $this->select('id_induk')
+            ->where('open_po.no_model', $noModel)
+            ->where('open_po.item_type', $itemType)
+            ->where('open_po.kode_warna', $kodeWarna)
+            ->first();
     }
 }

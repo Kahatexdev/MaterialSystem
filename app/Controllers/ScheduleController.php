@@ -242,13 +242,19 @@ class ScheduleController extends BaseController
         if (empty($kode_warna) || empty($warna) || empty($item_type)) {
             return $this->response->setJSON(['error' => 'Parameter tidak lengkap']);
         }
-
-        // Jika id_induk tersedia, coba ambil data PO berdasarkan id_induk
+        $po = [];
         if (!empty($id_induk)) {
             $id_po = $this->openPoModel->find($id_induk);
             if (!empty($id_po)) {
-                $po = $this->openPoModel->getFilteredPO($id_po['kode_warna'], $id_po['color'], $id_po['item_type']);
-            } else {
+                $deliv = $this->openPoModel->getFilteredPO($id_po['kode_warna'], $id_po['color'], $id_po['item_type']);
+                $po = $this->openPoModel->getFilteredCovering($kode_warna, $warna, $item_type);
+                foreach($po as &$dt){
+                    $dt['id_order'] = $deliv[0]['id_order'];
+                    $dt['delivery_awal']  = $deliv[0]['delivery_awal'];
+                    $dt['delivery_akhir'] = $deliv[0]['delivery_akhir'];
+                }              
+          
+             } else {
                 // Jika id_induk tidak valid, gunakan parameter yang dikirim
                 $po = $this->openPoModel->getFilteredPO($kode_warna, $warna, $item_type);
             }
@@ -367,23 +373,19 @@ class ScheduleController extends BaseController
 
     public function saveSchedule()
     {
-        // Ambil semua data dari form menggunakan POST
         $scheduleData = $this->request->getPost();
         // dd($this->request->getPost());
 
         // Ambil id_mesin dan no_model
         $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
         $poList = $scheduleData['po']; // Array po[]
-
         $dataBatch = []; // Untuk menyimpan batch data
 
-        // Looping data array untuk menyusun data yang akan disimpan
         foreach ($poList as $index => $po) {
             $no_model = $this->masterOrderModel->getNoModel($po);
-
             $dataBatch[] = [
                 'id_mesin' => $id_mesin['id_mesin'],
-                'no_model' => $no_model['no_model'],
+                'no_model' => $scheduleData['po'][$index],
                 'item_type' => $scheduleData['item_type'][$index] ?? null,
                 'kode_warna' => $scheduleData['kode_warna'],
                 'warna' => $scheduleData['warna'],
@@ -422,20 +424,41 @@ class ScheduleController extends BaseController
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
 
         $scheduleData = $this->scheduleCelupModel->getScheduleDetailsData($id_mesin, $tanggal_schedule, $lot_urut);
+        // dd ($scheduleData);
         // $jenis = [];
         $kodeWarna = '';
         $warna = '';
         foreach ($scheduleData as &$row) {
             $itemType = $row['item_type'];
             $kodeWarna = $row['kode_warna'];
+            // dd ($kodeWarna);
             $noModel = $row['no_model'];
             $warna = $row['warna'];
             $qty_celup = (float) $row['qty_celup']; // Pastikan jadi float
             // $jenis = $this->masterMaterialModel->getJenisByitemType($itemType);
             // Ambil data order dan validasi
-            $Order = $this->materialModel->getQtyPOByNoModel($noModel, $itemType, $kodeWarna);
-            $kg_kebutuhan = $this->openPoModel->getKgKebutuhan($noModel, $itemType, $kodeWarna);
 
+            $Order = $this->materialModel->getQtyPOByNoModel($noModel, $itemType, $kodeWarna);
+            $id_induk = $this->openPoModel->getIdInduk($noModel, $itemType, $kodeWarna);
+            if ($id_induk) {
+                $id_po = $this->openPoModel->find($id_induk['id_induk']);
+                if (isset($id_po['kode_warna'], $id_po['color'], $id_po['item_type'])) {
+                    $kodeWarnaCovering = $id_po['kode_warna'];
+                    $warnaCovering     = $id_po['color'];
+                    $itemTypeCovering  = $id_po['item_type'];
+                    // dd ($kodeWarnaCovering, $warnaCovering, $itemTypeCovering); 
+                    $deliv = $this->openPoModel->getFilteredPO($kodeWarnaCovering, $warnaCovering, $itemTypeCovering);
+                    $Order = $this->openPoModel->getQtyPOForCvr($noModel, $itemType, $kodeWarna);
+                    $Order['delivery_awal'] = $deliv[0]['delivery_awal'];
+                    $Order['delivery_akhir'] = $deliv[0]['delivery_akhir'];
+                } else {
+                    // Tangani kondisi saat id_po tidak memiliki key yang diharapkan.
+                    // Misalnya, log error atau set nilai default
+                    log_message('error', 'Field kode_warna tidak ditemukan pada hasil openPoModel->find()');
+                }
+            }
+
+            $kg_kebutuhan = $this->openPoModel->getKgKebutuhan($noModel, $itemType, $kodeWarna);
             $row['delivery_awal'] = $Order['delivery_awal'] ?? null;
             $row['delivery_akhir'] = $Order['delivery_akhir'] ?? null;
             $row['qty_po'] = $Order['qty_po'] ?? 0;
@@ -447,8 +470,8 @@ class ScheduleController extends BaseController
             $row['sisa_jatah'] = $kg_po - $qty_celup;
         }
         unset($row);
+        // dd ($scheduleData);
         // Persiapkan data untuk view
-        // dd ($jenis);
         $data = [
             'active' => $this->active,
             'title' => 'Schedule',
@@ -579,10 +602,12 @@ class ScheduleController extends BaseController
     {
         // Ambil semua data dari form menggunakan POST
         $scheduleData = $this->request->getPost();
+        // dd($scheduleData);
         // Ambil id_mesin berdasarkan no_mesin yang dikirimkan
         $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
         $poList = $scheduleData['po']; // Array po[]
-
+        // dd ($scheduleData, $id_mesin, $poList);
+        
         $dataBatch = []; // Untuk menyimpan batch data
         $updateMessage = null; // Menyimpan status pesan update atau insert
 
@@ -600,12 +625,24 @@ class ScheduleController extends BaseController
                 } else {
                     // Jika tidak ada, ambil dari masterOrderModel
                     $findNoModel = $this->masterOrderModel->getNoModel($po);
-                    $no_model = $findNoModel['no_model'] ?? null;
+                    if (empty($findNoModel)) {
+                        // Misalnya, log error atau tetapkan nilai default
+                        log_message('error', "No model not found for PO: {$po}");
+                        $no_model = $scheduleData['po'][$i];
+                    } else {
+                        $no_model = $findNoModel['no_model'];
+                    }
                 }
             } else {
-                // Jika baris baru, ambil no_model dari masterOrderModel
+                // Jika id_celup null, ambil no_model dari masterOrderModel
                 $findNoModel = $this->masterOrderModel->getNoModel($po);
-                $no_model = $findNoModel['no_model'] ?? null;
+                if (empty($findNoModel)) {
+                    // Misalnya, log error atau tetapkan nilai default
+                    log_message('error', "No model not found for PO: {$po}");
+                    $no_model = $scheduleData['po'][$i];
+                } else {
+                    $no_model = $findNoModel['no_model'];
+                }
             }
 
             // Ambil nilai lainnya dengan menggunakan indeks counter $i
@@ -617,7 +654,7 @@ class ScheduleController extends BaseController
             $dataBatch[] = [
                 'id_celup'         => $id_celup, // Bisa null untuk baris baru
                 'id_mesin'         => $id_mesin['id_mesin'],
-                'no_model'         => $no_model,
+                'no_model'         => $no_model, // Gunakan no_model yang sudah didapat
                 'item_type'        => $scheduleData['item_type'][$i] ?? null,
                 // Pastikan indeks digunakan jika data berupa array per baris
                 'kode_warna'       => $scheduleData['kode_warna'] ?? null,

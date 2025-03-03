@@ -484,7 +484,7 @@
                         poSelect.innerHTML = '<option value="">Pilih PO</option>';
                         data.forEach(po => {
                             const option = document.createElement('option');
-                            option.value = po.id_order;
+                            option.value = po.no_model;
                             option.textContent = po.no_model;
                             poSelect.appendChild(option);
                         });

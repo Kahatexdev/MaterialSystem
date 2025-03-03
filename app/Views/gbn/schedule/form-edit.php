@@ -195,7 +195,7 @@
                                                                         <label for="po"> PO</label>
                                                                         <select class="form-select po-select" name="po[]" required>
                                                                             <?php foreach ($scheduleData as $po): ?>
-                                                                                <option value="<?= $po['no_model'] ?>" <?= ($po['no_model'] == $detail['no_model']) ? 'selected' : '' ?>><?= $po['no_model'] ?></option>
+                                                                                <option value="<?= $detail['no_model'] ?>" ?><?= $po['no_model'] ?></option>
                                                                             <?php endforeach; ?>
                                                                         </select>
                                                                     </div>
@@ -249,7 +249,7 @@
                                                                         </span>
                                                                     </div>
                                                                 </div>
-                                                                <!-- <div class="col-3">
+                                                                <div class="col-3">
                                                                     <div class="form-group">
                                                                         <label for="sisa_jatah">Sisa Jatah :</label>
                                                                         <br />
@@ -257,7 +257,7 @@
                                                                             <span class="sisa_jatah" data-sisajatah="<?= number_format($detail['sisa_jatah'], 2) ?>"><?= number_format($detail['sisa_jatah'], 2) ?></span> KG
                                                                         </span>
                                                                     </div>
-                                                                </div> -->
+                                                                </div>
                                                                 <div class="col-3">
                                                                     <div class="form-group">
                                                                         <label for="last_status">Last Status</label>
@@ -359,24 +359,23 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        // Element referensi
         const kodeWarna = document.getElementById('kode_warna');
         const suggestionsBoxKWarna = document.getElementById('suggestionsKWarna');
         const warnaInput = document.getElementById('warna');
         const poTable = document.getElementById("poTable");
 
-        // Buat semua input dan select menjadi readonly/disabled jika last_status termasuk status terkunci
-        const lastStatuses = document.querySelectorAll('.last_status');
-        lastStatuses.forEach(status => {
-            const statusValue = status.value || status.textContent.trim().toLowerCase();
-            const lockedStatuses = ['bon', 'celup', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc', 'done', 'reject', 'perbaikan', 'sent'];
+        // Inisialisasi locked statuses (status yang mengunci input)
+        const lockedStatuses = ['bon', 'celup', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc', 'done', 'reject', 'perbaikan', 'sent'];
+        document.querySelectorAll('.last_status').forEach(status => {
+            const statusValue = (status.value || status.textContent).trim().toLowerCase();
             if (lockedStatuses.includes(statusValue)) {
                 const row = status.closest('tr');
-                const elements = row.querySelectorAll('input, select, button');
-                elements.forEach(el => {
+                row.querySelectorAll('input, select, button').forEach(el => {
                     if (el.tagName.toLowerCase() === 'input') {
-                        el.setAttribute('readonly', true);
+                        el.readOnly = true;
                     } else {
-                        el.setAttribute('disabled', true);
+                        el.disabled = true;
                     }
                     el.classList.add('locked-input');
                 });
@@ -400,7 +399,7 @@
             }
         });
 
-        // Ajax Submit untuk modal edit
+        // Ajax submit untuk modal edit menggunakan jQuery
         $('#editModal form').submit(function(e) {
             e.preventDefault();
             const formData = {
@@ -430,7 +429,7 @@
                 });
         });
 
-        // Event handler untuk input kode_warna
+        // Event handler untuk input kode warna
         if (kodeWarna) {
             kodeWarna.addEventListener('input', function() {
                 const query = kodeWarna.value.trim();
@@ -455,7 +454,7 @@
             });
         }
 
-        // Fungsi utilitas untuk fetching data
+        // Fungsi utilitas untuk fetching data dengan URL building
         function fetchData(endpoint, params, callback) {
             const url = new URL(`<?= base_url(session('role') . "/schedule/") ?>${endpoint}`);
             Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
@@ -487,7 +486,7 @@
             }
         }
 
-        // Fungsi fetch item type (update dropdown targetSelect)
+        // Fungsi fetch item type untuk mengisi dropdown targetSelect
         function fetchItemType(kodeWarna, warna, targetSelect) {
             fetchData('getItemType', {
                 kode_warna: kodeWarna,
@@ -499,7 +498,7 @@
             });
         }
 
-        // Fungsi utilitas untuk mengisi select dropdown
+        // Fungsi untuk mengisi select dropdown dengan data
         function populateSelect(selectElement, data, valueKey, textKey) {
             selectElement.innerHTML = `<option value="">Pilih ${textKey}</option>`;
             if (data.length > 0) {
@@ -507,7 +506,6 @@
                     const option = document.createElement('option');
                     option.value = item[valueKey];
                     option.textContent = item[textKey];
-                    // Simpan nilai id_induk jika tersedia
                     if (item.id_induk) {
                         option.setAttribute("data-id-induk", item.id_induk);
                     }
@@ -518,25 +516,26 @@
             }
         }
 
-        // (Optional) Fungsi fetch PO by kode warna, warna, dan item type
-        function fetchPOByKodeWarna(kodeWarna, warna, itemType, poSelect) {
+        // Fungsi fetch PO berdasarkan kode warna, warna, dan item type
+        function fetchPOByKodeWarna(kodeWarna, warna, itemType, idInduk, poSelect) {
             fetchData('getPO', {
                 kode_warna: kodeWarna,
                 warna,
-                item_type: itemType
+                item_type: itemType,
+                id_induk: idInduk
             }, (data) => {
-                populateSelect(poSelect, data, 'id_order', 'no_model');
+                populateSelect(poSelect, data, 'no_model', 'no_model');
                 console.log(data);
             });
         }
 
-        // Fungsi untuk menghitung total_qty_celup dan sisa kapasitas
+        // Fungsi untuk menghitung total Qty Celup dan sisa kapasitas
         function calculateTotalAndRemainingCapacity() {
             const rows = poTable.querySelectorAll("tbody tr");
             let totalQtyCelup = 0;
             rows.forEach(row => {
                 const lastStatusEl = row.querySelector("input[name='last_status[]']");
-                const lastStatus = lastStatusEl ? lastStatusEl.value.trim() : "";
+                const lastStatus = lastStatusEl ? lastStatusEl.value.trim().toLowerCase() : "";
                 if (["scheduled", "bon", "celup", "bongkar", "press", "oven", "tes luntur", "rajut pagi", "reschedule"].includes(lastStatus)) {
                     const qtyCelup = parseFloat(row.querySelector("input[name='qty_celup[]']").value) || 0;
                     totalQtyCelup += qtyCelup;
@@ -568,6 +567,7 @@
             }
         }
 
+        // Update perhitungan kapasitas saat input qty_celup berubah
         poTable.addEventListener("input", function(e) {
             if (e.target.name === "qty_celup[]") {
                 calculateTotalAndRemainingCapacity();
@@ -584,21 +584,19 @@
                     const itemTypeValue = itemTypeSelect.value;
                     const kodeWarnaValue = document.querySelector("input[name='kode_warna']").value;
                     const warna = document.querySelector("input[name='warna']").value;
-                    // Ambil id_induk dari opsi item type yang terpilih
-                    const idIndukValue = itemTypeSelect.selectedOptions[0].getAttribute("data-id-induk") || 0;
+                    const idIndukValue = itemTypeSelect.selectedOptions[0]?.getAttribute("data-id-induk") || 0;
                     if (poSelect.value && itemTypeValue && kodeWarnaValue) {
-                        // Panggil getQtyPO yang mengacu pada id_induk terlebih dahulu
                         fetchQtyAndKebutuhanPO(kodeWarnaValue, tr, warna, itemTypeValue, idIndukValue);
-                        // Kemudian panggil getPODetails untuk data schedule
                         fetchPODetails(poSelect.value, tr, itemTypeValue, kodeWarnaValue);
                     } else {
                         resetPODetails(tr);
                     }
                 }
             });
+
         }
 
-        // Fungsi Fetch Detail PO – update data schedule dan qty_po
+        // Fungsi Fetch Detail PO untuk update data schedule dan qty_po
         function fetchPODetails(poNo, tr, itemType, kodeWarna) {
             const url = `<?= base_url(session('role') . "/schedule/getPODetails") ?>?id_order=${poNo}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}`;
             fetch(url)
@@ -609,15 +607,10 @@
                 .then(data => {
                     console.log("Data received from server:", data);
                     if (data && !data.error) {
-                        const tglStartMC = tr.querySelector("input[name='tgl_start_mc[]']");
-                        const deliveryAwal = tr.querySelector("input[name='delivery_awal[]']");
-                        const deliveryAkhir = tr.querySelector("input[name='delivery_akhir[]']");
-                        const qtyPO = tr.querySelector("input[name='qty_po[]']");
-                        // Update schedule dan qty_po secara konsisten
-                        tglStartMC.value = data.start_mesin || '';
-                        deliveryAwal.value = data.delivery_awal || '';
-                        deliveryAkhir.value = data.delivery_akhir || '';
-                        qtyPO.value = parseFloat(data.kg_kebutuhan).toFixed(2);
+                        tr.querySelector("input[name='tgl_start_mc[]']").value = data.start_mesin || '';
+                        tr.querySelector("input[name='delivery_awal[]']").value = data.delivery_awal || '';
+                        tr.querySelector("input[name='delivery_akhir[]']").value = data.delivery_akhir || '';
+                        // tr.querySelector("input[name='qty_po[]']").value = parseFloat(data.kg_po).toFixed(2);
                     } else {
                         console.error('Error fetching PO details:', data.error || 'No data found');
                     }
@@ -640,15 +633,10 @@
                 })
                 .then(data => {
                     if (data && !data.error) {
-                        const qtyPO = tr.querySelector("input[name='qty_po[]']");
-                        const qtyPOPlus = tr.querySelector("input[name='qty_po_plus[]']");
-                        const kgKebutuhan = tr.querySelector(".kg_kebutuhan");
-                        const sisaJatah = tr.querySelector(".sisa_jatah");
-                        // Update secara konsisten sesuai respons backend
-                        qtyPO.value = parseFloat(data.kg_po).toFixed(2);
-                        qtyPOPlus.value = parseFloat(data.qty_po_plus).toFixed(2) || '';
-                        kgKebutuhan.textContent = parseFloat(data.kg_po).toFixed(2) || '0.00';
-                        sisaJatah.textContent = parseFloat(data.sisa_jatah).toFixed(2) || '0.00';
+                        tr.querySelector("input[name='qty_po[]']").value = parseFloat(data.kg_po).toFixed(2);
+                        tr.querySelector("input[name='qty_po_plus[]']").value = parseFloat(data.qty_po_plus).toFixed(2) || '';
+                        tr.querySelector(".kg_kebutuhan").textContent = parseFloat(data.kg_po).toFixed(2);
+                        tr.querySelector(".sisa_jatah").textContent = parseFloat(data.sisa_jatah).toFixed(2) || '0.00';
                     } else {
                         console.error('Error fetching Qty PO details:', data.error || 'No data found');
                     }
@@ -658,15 +646,14 @@
                 });
         }
 
-        // Fungsi reset detail PO
+        // Fungsi reset detail PO (jika dropdown PO tidak valid)
         function resetPODetails(tr) {
             const fields = ['tgl_start_mc[]', 'delivery_awal[]', 'delivery_akhir[]', 'qty_po[]', 'qty_po_plus[]'];
             fields.forEach(field => {
                 const element = tr.querySelector(`input[name="${field}"]`);
                 if (element) element.value = '';
             });
-            const spans = tr.querySelectorAll('.kg_kebutuhan, .sisa_jatah');
-            spans.forEach(span => span.textContent = '0.00');
+            tr.querySelectorAll('.kg_kebutuhan, .sisa_jatah').forEach(span => span.textContent = '0.00');
         }
 
         // Inisialisasi perhitungan kapasitas saat load halaman
@@ -677,121 +664,124 @@
             const tbody = poTable.querySelector("tbody");
             const newRow = document.createElement("tr");
             newRow.innerHTML = `
-<td class="text-center">${tbody.rows.length + 1}</td>
-<td>
-    <div class="row">
-        <div class="col-6">
+      <td class="text-center">${tbody.rows.length + 1}</td>
+      <td>
+        <div class="row">
+          <div class="col-6">
             <div class="form-group">
-                <label for="itemtype"> Item Type</label>
-                <select class="form-select item-type" name="item_type[]" required>
-                    <option value="">Pilih Item Type</option>
-                </select>
+              <label for="itemtype"> Item Type</label>
+              <select class="form-select item-type" name="item_type[]" required>
+                <option value="">Pilih Item Type</option>
+              </select>
             </div>
-        </div>
-        <div class="col-6">
+          </div>
+          <div class="col-6">
             <div class="form-group">
-                <label for="po">PO</label>
-                <select class="form-select po-select" name="po[]" required>
-                    <option value="">Pilih PO</option>
-                </select>
+              <label for="po">PO</label>
+              <select class="form-select po-select" name="po[]" required>
+                <option value="">Pilih PO</option>
+              </select>
             </div>
+          </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-4">
+        <div class="row">
+          <div class="col-4">
             <div class="form-group">
-                <label for="tgl_start_mc">Tgl Start MC</label>
-                <input type="date" class="form-control" name="tgl_start_mc[]" readonly>
+              <label for="tgl_start_mc">Tgl Start MC</label>
+              <input type="date" class="form-control" name="tgl_start_mc[]" readonly>
             </div>
-        </div>
-        <div class="col-4">
+          </div>
+          <div class="col-4">
             <div class="form-group">
-                <label for="delivery_awal">Delivery Awal</label>
-                <input type="date" class="form-control" name="delivery_awal[]" readonly>
+              <label for="delivery_awal">Delivery Awal</label>
+              <input type="date" class="form-control" name="delivery_awal[]" readonly>
             </div>
-        </div>
-        <div class="col-4">
-            <div class="form-group ">
-                <label for="delivery_akhir">Delivery Akhir</label>
-                <input type="date" class="form-control" name="delivery_akhir[]" readonly>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-4">
+          </div>
+          <div class="col-4">
             <div class="form-group">
-                <label for="qty_po">Qty PO</label>
-                <input type="number" class="form-control" name="qty_po[]" readonly>
+              <label for="delivery_akhir">Delivery Akhir</label>
+              <input type="date" class="form-control" name="delivery_akhir[]" readonly>
             </div>
+          </div>
         </div>
-        <div class="col-4">
+        <div class="row">
+          <div class="col-4">
             <div class="form-group">
-                <label for="qty_po_plus">Qty PO (+)</label>
-                <input type="number" class="form-control" name="qty_po_plus[]" readonly>
+              <label for="qty_po">Qty PO</label>
+              <input type="number" class="form-control" name="qty_po[]" readonly>
             </div>
-        </div>
-        <div class="col-4">
+          </div>
+          <div class="col-4">
+            <div class="form-group">
+              <label for="qty_po_plus">Qty PO (+)</label>
+              <input type="number" class="form-control" name="qty_po_plus[]" readonly>
+            </div>
+          </div>
+          <div class="col-4">
             <label for="qty_celup">Qty Celup</label>
-            <input type="number" class="form-control" name="qty_celup[]" value="" required>
+            <input type="number" step=0.1 class="form-control" name="qty_celup[]" required>
+          </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-6">
+        <div class="row">
+          <div class="col-6">
             <div class="form-group">
-                <label for="qty_celup">KG Kebutuhan :</label>
-                <br />
-                <span class="badge bg-info">
-                    <span class="kg_kebutuhan">0.00</span> KG
-                </span>
+              <label for="qty_celup">KG Kebutuhan :</label>
+              <br />
+              <span class="badge bg-info">
+                <span class="kg_kebutuhan">0.00</span> KG
+              </span>
             </div>
-        </div>
-        <div class="col-3">
+          </div>
+          <div class="col-3">
             <div class="form-group">
-                <label for="last_status">Last Status</label>
-                <br />
-                <span class="badge bg-info">scheduled</span>
-                <input type="hidden" class="form-control last_status" name="last_status[]" value="scheduled">
+              <label for="last_status">Last Status</label>
+              <br />
+              <span class="badge bg-info">scheduled</span>
+              <input type="hidden" class="form-control last_status" name="last_status[]" value="scheduled">
             </div>
-        </div>
-         <div class="col-3 d-flex align-items-center">
+          </div>
+          <div class="col-3 d-flex align-items-center">
             <div class="form-group">
-                <label for="qty_celup">PO + :</label>
-                <fieldset>
-                    <legend></legend>
-                    <div>
-                        <input type="radio" id="po_plus" name="po_plus[]" value="1">
-                        <label for="iya">Iya</label>
-                        <input type="radio" id="po_plus" name="po_plus[]" value="0">
-                        <label for="tidak">Tidak</label>
-                    </div>
-                </fieldset>
+              <label for="qty_celup">PO + :</label>
+              <fieldset>
+                <legend></legend>
+                <div>
+                  <input type="radio" id="po_plus" name="po_plus[]" value="1">
+                  <label for="iya">Iya</label>
+                  <input type="radio" id="po_plus" name="po_plus[]" value="0">
+                  <label for="tidak">Tidak</label>
+                </div>
+              </fieldset>
             </div>
+          </div>
         </div>
-    </div>
-</td>
-<td class="text-center">
-    <button type="button" class="btn btn-danger removeRow">
-        <i class="fas fa-trash"></i>
-    </button>
-</td>
-`;
+      </td>
+      <td class="text-center">
+        <button type="button" class="btn btn-danger removeRow">
+          <i class="fas fa-trash"></i>
+        </button>
+      </td>
+    `;
             tbody.appendChild(newRow);
             const itemTypeSelect = newRow.querySelector(".item-type");
             fetchItemType(kodeWarna.value, warnaInput.value, itemTypeSelect);
+
             itemTypeSelect.addEventListener("change", function() {
                 const itemTypeValue = this.value;
+                const idInduk = this.selectedOptions[0]?.getAttribute("data-id-induk") || 0;
                 const poSelect = newRow.querySelector(".po-select");
                 if (itemTypeValue) {
-                    fetchPOByKodeWarna(kodeWarna.value, warnaInput.value, itemTypeValue, poSelect);
+                    fetchPOByKodeWarna(kodeWarna.value, warnaInput.value, itemTypeValue, idInduk, poSelect);
                 }
             });
         });
 
         // Event delegation untuk menghapus baris
-        document.querySelector("#poTable").addEventListener("click", function(event) {
-            if (event.target.closest(".removeRow")) {
-                const row = event.target.closest("tr");
-                const table = document.querySelector("#poTable tbody");
+        poTable.addEventListener("click", function(event) {
+            const removeBtn = event.target.closest(".removeRow");
+            if (removeBtn) {
+                const row = removeBtn.closest("tr");
+                const tbody = poTable.querySelector("tbody");
                 const idCelupInput = row.querySelector('input[name^="id_celup["]');
                 const idCelup = idCelupInput ? idCelupInput.value : null;
                 if (idCelup) {
@@ -816,7 +806,7 @@
                                     if (response.success) {
                                         Swal.fire("Berhasil!", "Data Schedule berhasil dihapus.", "success").then(() => {
                                             row.remove();
-                                            if (table.rows.length === 0) {
+                                            if (tbody.rows.length === 0) {
                                                 window.location.href = '<?= base_url(session('role') . '/schedule') ?>';
                                             } else {
                                                 calculateTotalAndRemainingCapacity();
@@ -844,7 +834,7 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             row.remove();
-                            if (table.rows.length === 0) {
+                            if (tbody.rows.length === 0) {
                                 window.location.href = '<?= base_url(session('role') . '/schedule') ?>';
                             } else {
                                 calculateTotalAndRemainingCapacity();
@@ -856,5 +846,6 @@
         });
     });
 </script>
+
 
 <?php $this->endSection(); ?>
