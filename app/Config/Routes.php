@@ -14,6 +14,7 @@ $routes->post('authverify', 'AuthController::login');
 
 // gbn routes
 $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJatah');
+// $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
 
 $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('', 'MaterialController::index');
