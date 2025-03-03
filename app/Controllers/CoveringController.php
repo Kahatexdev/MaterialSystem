@@ -215,4 +215,11 @@ class CoveringController extends BaseController
         return redirect()->back()->with('success', 'Data berhasil dihapus dari session');
     }
 
+    public function exportOpenPO($tgl_po)
+    {
+        $tgl_po = urldecode($tgl_po);
+        $tgl_po = date('Y-m-d', strtotime($tgl_po));
+        $poDetail = $this->openPoModel->getPoForCelup($tgl_po);
+        dd($poDetail);
+    }
 }

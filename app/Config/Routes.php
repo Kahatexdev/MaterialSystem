@@ -174,6 +174,7 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('po/simpanKeSession', 'CoveringController::simpanKeSession');
     $routes->post('po/savePOCovering', 'CoveringController::savePOCovering');
     $routes->get('po/deletePOCovering/(:any)', 'CoveringController::unsetSession/$1');
+    $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
 });
 
 
