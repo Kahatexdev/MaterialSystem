@@ -232,28 +232,41 @@ class ScheduleController extends BaseController
 
     public function getPO()
     {
+        // Ambil parameter dari GET request
         $kode_warna = $this->request->getGet('kode_warna');
-        $warna = $this->request->getGet('warna');
-        $item_type = $this->request->getGet('item_type');
-        $id_induk = 20; 
-        // $this->request->getGet('id_induk');
+        $warna      = $this->request->getGet('warna');
+        $item_type  = $this->request->getGet('item_type');
+        $id_induk   = $this->request->getGet('id_induk');
 
-        if(!empty($id_induk)){
+        // Validasi parameter wajib
+        if (empty($kode_warna) || empty($warna) || empty($item_type)) {
+            return $this->response->setJSON(['error' => 'Parameter tidak lengkap']);
+        }
+
+        // Jika id_induk tersedia, coba ambil data PO berdasarkan id_induk
+        if (!empty($id_induk)) {
             $id_po = $this->openPoModel->find($id_induk);
-            $po = $this->openPoModel->getFilteredPO($id_po['kode_warna'], $id_po['color'], $id_po['item_type']);
-            // var_dump ($po);
-        }else{
+            if (!empty($id_po)) {
+                $po = $this->openPoModel->getFilteredPO($id_po['kode_warna'], $id_po['color'], $id_po['item_type']);
+            } else {
+                // Jika id_induk tidak valid, gunakan parameter yang dikirim
+                $po = $this->openPoModel->getFilteredPO($kode_warna, $warna, $item_type);
+            }
+        } else {
+            // Jika id_induk tidak tersedia, gunakan parameter yang dikirim
             $po = $this->openPoModel->getFilteredPO($kode_warna, $warna, $item_type);
         }
 
-        // var_dump($po);
-        // Kembalikan response dalam format JSON
-        if ($po) {
+        // Kembalikan data PO jika ditemukan, atau error jika tidak ada data
+        if (!empty($po)) {
             return $this->response->setJSON($po);
         } else {
-            return $this->response->setJSON(['error' => 'Kosong']);
+            return $this->response->setJSON(['error' => 'Data PO kosong']);
         }
     }
+
+
+
 
 
     public function getPODetails()
@@ -342,10 +355,11 @@ class ScheduleController extends BaseController
 
     public function getQtyPO()
     {
-        $id_order = $this->request->getGet('id_order');
-        $item_type = $this->request->getGet('item_type');
-        $kode_warna = $this->request->getGet('kode_warna');
-        $qtyPO = $this->materialModel->getQtyPO($id_order, $item_type, $kode_warna);
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $color = $this->request->getGet('warna');
+        $itemTypeEncoded = urldecode($this->request->getGet('item_type'));
+        $idInduk = $this->request->getGet('id_induk');
+        $qtyPO = $this->openPoModel->getQtyPO($kodeWarna, $color, $itemTypeEncoded, $idInduk);
 
         if ($qtyPO) {
             return $this->response->setJSON($qtyPO);

@@ -53,6 +53,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/getItemType', 'ScheduleController::getItemType');
     $routes->get('schedule/getKodeWarna', 'ScheduleController::getKodeWarna');
     $routes->get('schedule/getWarna', 'ScheduleController::getWarna');
+    // $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
+
     // $routes->get('schedule/getWarna', 'ScheduleController::getWarnabyItemTypeandKodeWarna');
     $routes->get('schedule/getPO', 'ScheduleController::getPO');
     $routes->get('schedule/getPODetails', 'ScheduleController::getPODetails');
