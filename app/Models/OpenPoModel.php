@@ -107,6 +107,16 @@ class OpenPoModel extends Model
             ->first();
     }
 
+    public function getQtyPO($kodeWarna, $warna, $itemTypeEncoded, $idInduk)
+    {
+        return $this->select('kg_po')
+            ->where('kode_warna', $kodeWarna)
+            ->where('color', $warna)
+            ->where('item_type', $itemTypeEncoded)
+            ->where('id_induk', $idInduk)
+            ->first();
+    }
+
     public function getKodeWarna($query)
     {
         return $this->select('kode_warna')
@@ -125,7 +135,7 @@ class OpenPoModel extends Model
 
     public function getItemType($kodeWarna, $warna)
     {
-        return $this->select('item_type')
+        return $this->select('item_type, id_induk')
             ->where('kode_warna', $kodeWarna)
             ->where('color', $warna)
             ->distinct()

@@ -527,18 +527,21 @@
                             const option = document.createElement('option');
                             option.value = item.item_type;
                             option.textContent = item.item_type;
+                            option.setAttribute("data-id-induk", item.id_induk); // Menyimpan id_induk
                             itemType.appendChild(option);
                         });
 
                         // Tambahkan event listener untuk menangani perubahan pilihan item type
                         $(itemType).on('change', function() {
                             const itemTypeValue = $(itemType).val(); // Gunakan .val() untuk mengambil nilai yang dipilih
-                            // console.log("Item Type Value:", itemTypeValue);
+                            const selectedOption = this.options[this.selectedIndex]; // Mendapatkan opsi yang dipilih
+                            const idIndukValue = selectedOption.getAttribute("data-id-induk"); // Ambil id_induk dari opsi yang dipilih
 
                             // Panggil fetchPOByKodeWarna jika nilai item type terpilih
                             if (itemTypeValue) {
                                 const poSelect = document.querySelector(".po-select");
-                                fetchPOByKodeWarna(kodeWarna, warna, itemTypeValue, poSelect);
+                                fetchPOByKodeWarna(kodeWarna, warna, itemTypeValue, idIndukValue, poSelect);
+                                fetchQtyAndKebutuhanPO(kodeWarna, warna, itemTypeValue, idIndukValue, poSelect);
                             }
                         });
 
@@ -553,30 +556,23 @@
         }
 
         // ✅ function untuk fetch data PO by kode warna, warna, item type
-        function fetchPOByKodeWarna(kodeWarna, warna, itemType, poSelect) {
-            // Encode itemType jika perlu
+        function fetchPOByKodeWarna(kodeWarna, warna, itemType, idInduk, poSelect) {
+            // Encode itemType jika diperlukan
             const itemTypeEncoded = encodeURIComponent(itemType);
-            // const id_induk = document.getElementById('id_induk').value;
-            // Menyusun URL untuk pengambilan data PO
-            const url = `<?= base_url(session('role') . "/schedule/getPO") ?>?kode_warna=${kodeWarna}&warna=${warna}&item_type=${itemTypeEncoded}`;
+            // Menyusun URL dengan menambahkan id_induk sebagai parameter
+            const url = `<?= base_url(session('role') . "/schedule/getPO") ?>?kode_warna=${kodeWarna}&warna=${warna}&item_type=${itemTypeEncoded}&id_induk=${idInduk}`;
 
-            // console.log("Request URL:", url); // Debugging URL
-            // console.log("Item Type:", itemType);
-            // console.log("Kode Warna:", kodeWarna);
-            // console.log("Warna:", warna);
+            console.log("Request URL:", url);
 
-            // Gunakan fetch API untuk melakukan request
             fetch(url)
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(data => {
-                    // console.log("PO Data:", data); // Debugging data
-
+                    console.log("PO Data:", data);
                     if (Array.isArray(data) && data.length > 0) {
-                        poSelect.innerHTML = '<option value="">Pilih PO</option>'; // Reset PO select
-                        // Menambahkan pilihan PO ke select dropdown
+                        poSelect.innerHTML = '<option value="">Pilih PO</option>';
                         data.forEach(po => {
                             const option = document.createElement('option');
                             option.value = po.id_order;
@@ -586,12 +582,34 @@
                     } else {
                         poSelect.innerHTML = '<option value="">Tidak ada PO</option>';
                     }
-
                 })
                 .catch(error => {
-                    console.error('Error fetching PO data:', error); // Debugging error
+                    console.error('Error fetching PO data:', error);
                     poSelect.innerHTML = '<option value="">Gagal mengambil PO</option>';
                 });
+        }
+
+        function fetchQtyAndKebutuhanPO(kodeWarna, warna, itemType, idInduk, poSelect) {
+            const itemTypeEncoded = encodeURIComponent(itemType);
+
+            const url = `<?= base_url(session('role') . "/schedule/getQtyPO") ?>?kode_warna=${kodeWarna}&warna=${warna}&item_type=${itemTypeEncoded}&id_induk=${idInduk}`;
+
+            console.log("Request URL:", url);
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Qty Data:", data);
+                    
+                })
+                .catch(error => {
+                    console.error('Error fetching PO data:', error);
+                    // poSelect.innerHTML = '<option value="">Gagal mengambil PO</option>';
+                });
+
         }
 
         // ✅ Fungsi untuk menghitung total_qty_celup dan memeriksa max_caps serta tagihan SCH

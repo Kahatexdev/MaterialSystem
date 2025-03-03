@@ -318,7 +318,7 @@
                             <div class="col-6">
                                 <div class="form-group">
                                     <label for="">Cluster</label>
-                                    <select class="form-select cluster" id="cluster" name="cluster" required>
+                                    <select class="form-select cluster" id="cluster" name="cluster">
                                         <option value="">Pilih Cluster</option>
                                     </select>
                                 </div>
