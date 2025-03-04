@@ -240,7 +240,7 @@
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-6">
+                                                                <div class="col-3">
                                                                     <div class="form-group">
                                                                         <label for="qty_celup">KG Kebutuhan :</label>
                                                                         <br />
@@ -723,7 +723,7 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-6">
+          <div class="col-3">
             <div class="form-group">
               <label for="qty_celup">KG Kebutuhan :</label>
               <br />

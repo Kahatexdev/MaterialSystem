@@ -253,7 +253,7 @@ class ScheduleController extends BaseController
                     $dt['delivery_awal']  = $deliv[0]['delivery_awal'];
                     $dt['delivery_akhir'] = $deliv[0]['delivery_akhir'];
                 }              
-          
+                // var_dump($po);
              } else {
                 // Jika id_induk tidak valid, gunakan parameter yang dikirim
                 $po = $this->openPoModel->getFilteredPO($kode_warna, $warna, $item_type);
@@ -279,6 +279,7 @@ class ScheduleController extends BaseController
         $itemType = urldecode($this->request->getGet('item_type'));
         $kodeWarna = $this->request->getGet('kode_warna');
 
+        // \var_dump($id_order, $itemType, $kodeWarna);
         // Validasi parameter
         if (empty($id_order)) {
             return $this->response->setJSON(['error' => 'Invalid request id_order']);

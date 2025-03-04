@@ -487,7 +487,16 @@
                             option.value = po.no_model;
                             option.textContent = po.no_model;
                             poSelect.appendChild(option);
+                            // const tglStartMC = tr.querySelector("input[name='tgl_start_mc[]']");
+                            const deliveryAwal = tr.querySelector("input[name='delivery_awal[]']");
+                            const deliveryAkhir = tr.querySelector("input[name='delivery_akhir[]']");
+                            // Update data schedule dan qty_po tanpa cek kondisi (selalu gunakan data terbaru)
+                            // tglStartMC.value = po.start_mesin || '';
+                            deliveryAwal.value = po.delivery_awal || '';
+                            deliveryAkhir.value = po.delivery_akhir || '';
+
                         });
+
                     } else {
                         poSelect.innerHTML = '<option value="">Tidak ada PO</option>';
                     }
@@ -513,9 +522,11 @@
                     console.log("Qty Data:", data);
                     if (data && !data.error) {
                         // Hanya update field tambahan (qty_po_plus, KG Kebutuhan dan Sisa Jatah)
+                        const qtyPO = tr.querySelector("input[name='qty_po[]']");
                         const qtyPOPlus = tr.querySelector("input[name='qty_po_plus[]']");
                         const kgKebutuhan = tr.querySelector(".kg_kebutuhan");
                         const sisaJatah = tr.querySelector(".sisa_jatah");
+                        qtyPO.value = parseFloat(data.kg_po).toFixed(2);
                         qtyPOPlus.value = parseFloat(data.qty_po_plus).toFixed(2) || '';
                         kgKebutuhan.textContent = parseFloat(data.kg_po).toFixed(2) || '0.00';
                         sisaJatah.textContent = parseFloat(data.sisa_jatah).toFixed(2) || '0.00';
@@ -540,14 +551,13 @@
                     console.log("Data received from server:", data);
                     if (data && !data.error) {
                         const tglStartMC = tr.querySelector("input[name='tgl_start_mc[]']");
-                        const deliveryAwal = tr.querySelector("input[name='delivery_awal[]']");
-                        const deliveryAkhir = tr.querySelector("input[name='delivery_akhir[]']");
-                        const qtyPO = tr.querySelector("input[name='qty_po[]']");
-                        // Update data schedule dan qty_po tanpa cek kondisi (selalu gunakan data terbaru)
+                        // const deliveryAwal = tr.querySelector("input[name='delivery_awal[]']");
+                        // const deliveryAkhir = tr.querySelector("input[name='delivery_akhir[]']");
+                        // const qtyPO = tr.querySelector("input[name='qty_po[]']");
+                        // // Update data schedule dan qty_po tanpa cek kondisi (selalu gunakan data terbaru)
                         tglStartMC.value = data.start_mesin || '';
-                        deliveryAwal.value = data.delivery_awal || '';
-                        deliveryAkhir.value = data.delivery_akhir || '';
-                        qtyPO.value = parseFloat(data.kg_kebutuhan).toFixed(2);
+                        // deliveryAwal.value = data.delivery_awal || '';
+                        // deliveryAkhir.value = data.delivery_akhir || '';
                     } else {
                         console.error('Error fetching PO details:', data.error || 'No data found');
                     }
