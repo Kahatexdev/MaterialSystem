@@ -168,7 +168,32 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
 $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('', 'CoveringController::index');
     $routes->get('po', 'CoveringController::po');
-    $routes->get('schedule', 'ScheduleController::index');
+    $routes->get('schedule', 'CoveringController::schedule');
+    $routes->get('schedule/getScheduleDetails/(:any)/(:any)/(:any)', 'ScheduleController::getScheduleDetails/$1/$2/$3');
+    $routes->get('schedule/form', 'ScheduleController::create');
+    $routes->get('schedule/getItemType', 'ScheduleController::getItemType');
+    $routes->get('schedule/getKodeWarna', 'ScheduleController::getKodeWarna');
+    $routes->get('schedule/getWarna', 'ScheduleController::getWarna');
+    // $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
+
+    // $routes->get('schedule/getWarna', 'ScheduleController::getWarnabyItemTypeandKodeWarna');
+    $routes->get('schedule/getPO', 'ScheduleController::getPO');
+    $routes->get('schedule/getPODetails', 'ScheduleController::getPODetails');
+    $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
+    $routes->get('schedule/getNoModel', 'ScheduleController::getNoModel');
+    $routes->post('schedule/saveSchedule', 'ScheduleController::saveSchedule');
+    $routes->get('schedule/editSchedule', 'ScheduleController::editSchedule');
+    $routes->post('schedule/updateSchedule', 'ScheduleController::updateSchedule');
+    $routes->post('schedule/updateTglSchedule', 'ScheduleController::updateTglSchedule');
+    $routes->post('schedule/deleteSchedule', 'ScheduleController::deleteSchedule');
+
+    $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
+    $routes->post('mesin/saveDataMesin', 'MesinCelupController::saveDataMesin');
+    $routes->get('mesin/getMesinDetails/(:num)', 'MesinCelupController::getMesinDetails/$1');
+    $routes->post('mesin/cekNoMesin', 'MesinCelupController::cekNoMesin');
+    $routes->post('mesin/updateDataMesin', 'MesinCelupController::updateDataMesin');
+    $routes->get('mesin/deleteDataMesin/(:num)', 'MesinCelupController::deleteDataMesin/$1');
+    
     $routes->get('poDetail/(:any)', 'CoveringController::poDetail/$1');
     $routes->get('getDetailByNoModel/(:any)/(:any)', 'CoveringController::getDetailByNoModel/$1/$2');
     $routes->post('po/simpanKeSession', 'CoveringController::simpanKeSession');

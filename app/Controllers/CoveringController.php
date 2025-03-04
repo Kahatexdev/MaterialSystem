@@ -11,6 +11,7 @@ use App\Models\OpenPoModel;
 use App\Models\ScheduleCelupModel;
 use App\Models\OutCelupModel;
 use App\Models\BonCelupModel;
+use App\Models\MesinCelupModel;
 
 class CoveringController extends BaseController
 {
@@ -18,6 +19,7 @@ class CoveringController extends BaseController
     protected $active;
     protected $filters;
     protected $request;
+    protected $mesinCelupModel;
     protected $masterOrderModel;
     protected $materialModel;
     protected $masterMaterialModel;
@@ -30,6 +32,7 @@ class CoveringController extends BaseController
     {
         $this->masterOrderModel = new MasterOrderModel();
         $this->materialModel = new MaterialModel();
+        $this->mesinCelupModel = new MesinCelupModel();
         $this->masterMaterialModel = new MasterMaterialModel();
         $this->openPoModel = new OpenPoModel();
         $this->scheduleCelupModel = new ScheduleCelupModel();
@@ -75,11 +78,52 @@ class CoveringController extends BaseController
 
     public function schedule()
     {
+        // Ambil parameter filter dari query string
+        $startDate = $this->request->getGet('start_date');
+        $endDate = $this->request->getGet('end_date');
+
+        if ($startDate == null && $endDate == null) {
+            // Jika startdate tidak tersedia, gunakan tanggal 3 hari ke belakang
+            $startDate = date('Y-m-d', strtotime('-3 days'));
+            // end date 7 hari ke depan
+            $endDate = date('Y-m-d', strtotime('+6 days'));
+        }
+
+        // Konversi tanggal ke format DateTime jika tersedia
+        $startDateObj = $startDate ? new \DateTime($startDate) : null;
+        $endDateObj = $endDate ? new \DateTime($endDate) : null;
+
+        // Ambil data jadwal dari model (filter berdasarkan tanggal jika tersedia)
+        $scheduleData = $this->scheduleCelupModel->getScheduleCelupbyDate($startDateObj, $endDateObj);
+
+        // dd ($scheduleData);
+        // Ambil data mesin celup
+        $mesin_celup = $this->mesinCelupModel->orderBy('no_mesin', 'ASC')->findAll();
+
+        // Hitung total kapasitas yang sudah digunakan
+        $totalCapacityUsed = array_sum(array_column($scheduleData, 'weight'));
+
+        // Hitung total kapasitas maksimum dari semua mesin celup
+        $totalCapacityMax = array_sum(array_column($mesin_celup, 'max_caps'));
+
+        // Siapkan data untuk dikirimkan ke view
+        $today = date('Y-m-d', strtotime('today'));
         $data = [
             'active' => $this->active,
-            'title' => 'Schedule Celup',
+            'title' => 'Schedule',
             'role' => $this->role,
+            'scheduleData' => $scheduleData,
+            'mesin_celup' => $mesin_celup,
+            'totalCapacityUsed' => $totalCapacityUsed,
+            'totalCapacityMax' => $totalCapacityMax,
+            'currentDate' => new \DateTime(),
+            'filter' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+            ],
         ];
+
+        // Render view dengan data yang sudah disiapkan
         return view($this->role . '/schedule/index', $data);
     }
 
