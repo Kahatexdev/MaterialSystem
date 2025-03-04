@@ -158,7 +158,6 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->post('retur', 'CelupController::retur');
     $routes->get('editretur/(:num)', 'CelupController::editRetur/$1');
     $routes->post('proseseditretur/(:num)', 'CelupController::prosesEditRetur/$1');
-    $routes->get('generate/(:num)', 'CelupController::generateBarcode/$1');
     $routes->get('printBon/(:num)', 'PdfController::printBon/$1');
 });
 
@@ -193,11 +192,7 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('mesin/cekNoMesin', 'MesinCelupController::cekNoMesin');
     $routes->post('mesin/updateDataMesin', 'MesinCelupController::updateDataMesin');
     $routes->get('mesin/deleteDataMesin/(:num)', 'MesinCelupController::deleteDataMesin/$1');
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> b2c5c6214b37b4aaeeefdf4399e8c44b59cde046
     $routes->get('poDetail/(:any)', 'CoveringController::poDetail/$1');
     $routes->get('getDetailByNoModel/(:any)/(:any)', 'CoveringController::getDetailByNoModel/$1/$2');
     $routes->post('po/simpanKeSession', 'CoveringController::simpanKeSession');
