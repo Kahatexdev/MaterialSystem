@@ -127,7 +127,7 @@ class ScheduleCelupModel extends Model
 
     public function getScheduleDetailsData($machine, $date, $lot)
     {
-        return $this->select('schedule_celup.id_celup,sum(schedule_celup.kg_celup) as qty_celup,schedule_celup.item_type, schedule_celup.no_model,schedule_celup.start_mc, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.last_status, schedule_celup.po_plus')
+        return $this->select('schedule_celup.id_celup,sum(schedule_celup.kg_celup) as qty_celup,schedule_celup.item_type, schedule_celup.no_model, DATE(schedule_celup.start_mc) AS start_mc, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.last_status, schedule_celup.po_plus')
             ->where('tanggal_schedule', $date)
             ->where('id_mesin', $machine)
             ->where('lot_urut', $lot)
@@ -214,7 +214,7 @@ class ScheduleCelupModel extends Model
 
     public function getDataByIdCelup($id)
     {
-        return $this->select('schedule_celup.*, IF(po_plus = "0", kg_celup, 0) AS qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus, mesin_celup.no_mesin')
+        return $this->select('schedule_celup.*, sum(kg_celup) as qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus, mesin_celup.no_mesin')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->where('schedule_celup.id_celup', $id)
             ->groupBy('schedule_celup.id_mesin')
@@ -374,5 +374,16 @@ class ScheduleCelupModel extends Model
         }
 
         return $builder->findAll();
+    }
+    public function getDataComplain()
+    {
+        return $this->select('schedule_celup.*, mesin_celup.no_mesin, IF(po_plus = "0", kg_celup, 0) AS qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->where('schedule_celup.last_status', 'complain')
+            ->groupBy('schedule_celup.id_mesin')
+            ->groupBy('schedule_celup.id_celup')
+            ->groupBy('schedule_celup.tanggal_schedule')
+            ->groupBy('schedule_celup.lot_urut')
+            ->findAll();
     }
 }

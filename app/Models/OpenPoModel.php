@@ -89,13 +89,23 @@ class OpenPoModel extends Model
     public function getFilteredPO($kodeWarna, $warna, $item_type)
     {
         return $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, master_order.delivery_awal, master_order.delivery_akhir, master_order.id_order')
-        ->join('master_order', 'master_order.no_model = open_po.no_model')
-        ->where('open_po.kode_warna', $kodeWarna)  // Ganti like dengan where
-        ->where('open_po.color', $warna)
-        ->where('open_po.item_type', $item_type) // Ganti like dengan where
-        ->distinct()
-        ->get()
-        ->getResultArray();
+            ->join('master_order', 'master_order.no_model = open_po.no_model')
+            ->where('open_po.kode_warna', $kodeWarna)  // Ganti like dengan where
+            ->where('open_po.color', $warna)
+            ->where('open_po.item_type', $item_type) // Ganti like dengan where
+            ->distinct()
+            ->get()
+            ->getResultArray();
+    }
+    public function getFilteredCovering($kodeWarna, $warna, $item_type)
+    {
+        return $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po')
+            ->where('open_po.kode_warna', $kodeWarna)  // Ganti like dengan where
+            ->where('open_po.color', $warna)
+            ->where('open_po.item_type', $item_type) // Ganti like dengan where
+            ->distinct()
+            ->get()
+            ->getResultArray();
     }
 
     public function getKgKebutuhan($noModel, $itemType, $kodeWarna)
@@ -106,6 +116,24 @@ class OpenPoModel extends Model
             ->where('kode_warna', $kodeWarna)
             ->first();
     }
+
+    public function getQtyPO($kodeWarna, $warna, $itemTypeEncoded, $idInduk)
+    {
+        $this->select('kg_po')
+        ->where('kode_warna', $kodeWarna)
+            ->where('color', $warna)
+            ->where('item_type', $itemTypeEncoded);
+
+        // Jika $idInduk null, kita ingin menganggapnya sebagai 0
+        $nilai = is_null($idInduk) ? 0 : $idInduk;
+        // Menggunakan COALESCE untuk membandingkan id_induk, sehingga NULL dianggap 0
+        $this->where("COALESCE(id_induk, 0) = {$nilai}", null, false);
+
+        return $this->first();
+    }
+
+
+
 
     public function getKodeWarna($query)
     {
@@ -125,7 +153,7 @@ class OpenPoModel extends Model
 
     public function getItemType($kodeWarna, $warna)
     {
-        return $this->select('item_type')
+        return $this->select('item_type, id_induk')
             ->where('kode_warna', $kodeWarna)
             ->where('color', $warna)
             ->distinct()
@@ -135,10 +163,10 @@ class OpenPoModel extends Model
     public function getPOCovering()
     {
         return $this->select('DATE(open_po.created_at) tgl_po')
-        ->where('penerima', 'Paryanti')
-        ->orderBy('tgl_po', 'DESC')
-        ->groupBy('tgl_po')
-        ->findAll();
+            ->where('penerima', 'Paryanti')
+            ->orderBy('tgl_po', 'DESC')
+            ->groupBy('tgl_po')
+            ->findAll();
     }
 
     public function getPODetailCovering($tgl_po)
@@ -160,5 +188,35 @@ class OpenPoModel extends Model
             ->groupBy('open_po.item_type')
             ->groupBy('open_po.kode_warna')
             ->findAll();
+    }
+
+    public function getPoForCelup($tgl_po)
+    {
+        return $this->select('open_po.*, master_material.jenis, master_order.buyer, master_order.no_order, master_order.delivery_awal')
+            ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
+            ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
+            ->where('open_po.id_induk IS NOT NULL')
+            ->where('DATE(open_po.created_at)', $tgl_po)
+            ->findAll();
+    }
+    public function
+    getQtyPOForCvr($noModel, $itemType, $kodeWarna)
+    {
+        return $this->select('sum(kg_po) as qty_po')
+            ->where('open_po.no_model', $noModel)
+            ->where('open_po.item_type', $itemType)
+            ->where('open_po.kode_warna', $kodeWarna)
+            ->groupBy('open_po.no_model')
+            ->groupBy('open_po.item_type')
+            ->groupBy('open_po.kode_warna')
+            ->first();
+    }
+    public function getIdInduk($noModel, $itemType, $kodeWarna)
+    {
+        return $this->select('id_induk')
+            ->where('open_po.no_model', $noModel)
+            ->where('open_po.item_type', $itemType)
+            ->where('open_po.kode_warna', $kodeWarna)
+            ->first();
     }
 }

@@ -244,7 +244,7 @@
 </div>
 
 <div class="modal fade" id="modalSchedule" tabindex="-1" aria-labelledby="modalScheduleLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalScheduleLabel">Jadwal Mesin</h5>
@@ -252,12 +252,7 @@
             </div>
             <div class="modal-body" id="modalScheduleBody">
                 <!-- Isi modal dengan JS -->
-
-
             </div>
-
-
-
         </div>
     </div>
 </div>
