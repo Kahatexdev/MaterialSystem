@@ -4,15 +4,22 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
+use App\Models\MaterialModel;
+
 
 class PphController extends BaseController
 {
     protected $role;
     protected $filters;
     protected $active;
+    protected $materialModel;
+
 
     public function __construct()
     {
+        $this->materialModel = new MaterialModel();
+
+
         $this->role = session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
             return redirect()->to(base_url('/login'));
@@ -30,12 +37,26 @@ class PphController extends BaseController
 
     public function index()
     {
+        $area = $this->materialModel->getDataArea();
         $data = [
             'active' => $this->active,
             'title' => 'PPH',
             'role' => $this->role,
+            'area' => $area,
         ];
+       
         return view($this->role . '/pph/index', $data);
+    }
+
+    public function pphPerArea($area)
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'PPH',
+            'role' => $this->role,
+            'area' => $area,
+        ];
+        return view($this->role . '/pph/pphPerArea', $data);
     }
     public function tampilPerStyle()
     {
