@@ -206,6 +206,7 @@ class ScheduleCelupModel extends Model
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->where('schedule_celup.last_status !=', 'done')
             ->where('schedule_celup.last_status !=', 'sent')
+            ->where('schedule_celup.last_status !=', 'complain')
             ->groupBy('schedule_celup.id_mesin')
             ->groupBy('schedule_celup.id_celup')
             ->groupBy('schedule_celup.tanggal_schedule')

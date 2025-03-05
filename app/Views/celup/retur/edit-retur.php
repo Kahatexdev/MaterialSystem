@@ -216,9 +216,11 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div class="text-end">
-                                <button type="submit" class="btn btn-info w-100">Simpan</button>
+                                <button type="submit" name="submit_type" value="celup_ulang" class="btn btn-warning w-100">Celup Ulang</button>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" name="submit_type" value="simpan" class="btn btn-info w-100">Simpan</button>
                             </div>
                         </form>
                     </div>
@@ -231,7 +233,9 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <script>
-
+    function setAction(value) {
+        document.getElementById('action').value = value;
+    }
 </script>
 
 <?php $this->endSection(); ?>

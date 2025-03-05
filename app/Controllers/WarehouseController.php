@@ -276,14 +276,17 @@ class WarehouseController extends BaseController
     private function prosesKomplain()
     {
         $checkedIds = $this->request->getPost('checked_id');
+        $idOutCelup = $this->request->getPost('id_out_celup');
+        $alasan = $this->request->getPost('alasan');
 
         if (empty($checkedIds)) {
             session()->setFlashdata('error', 'Tidak ada data yang dipilih untuk dikomplain.');
             return redirect()->to($this->role . '/pemasukan');
+        } elseif (empty($alasan)) {
+            session()->setFlashdata('error', 'Alasan Tidak boleh kosong.');
+            return redirect()->to($this->role . '/pemasukan');
         }
 
-        $idOutCelup = $this->request->getPost('id_out_celup');
-        $alasan = $this->request->getPost('alasan');
 
         $idCelup = $this->outCelupModel->getIdCelups($idOutCelup);
 
@@ -430,6 +433,9 @@ class WarehouseController extends BaseController
 
             if (!$idCelup) {
                 session()->setFlashdata('error', 'Data tidak ditemukan.');
+                return redirect()->back();
+            } elseif (empty($alasan)) {
+                session()->setFlashdata('error', 'Alasan tidak boleh kosong.');
                 return redirect()->back();
             }
             $update = $this->scheduleCelupModel

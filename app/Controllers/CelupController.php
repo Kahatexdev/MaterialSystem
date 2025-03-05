@@ -819,145 +819,138 @@ class CelupController extends BaseController
 
     public function prosesEditRetur($id)
     {
-        $lotCelup = $this->request->getPost('lot_celup');
-        $tglBon = $this->request->getPost('tgl_bon');
-        $tglCelup = $this->request->getPost('tgl_celup');
-        $tglBongkar = $this->request->getPost('tgl_bongkar');
-        $tglPress = $this->request->getPost('tgl_press');
-        $tglOven = $this->request->getPost('tgl_oven');
-        $tglTL = $this->request->getPost('tgl_tl');
-        $tglRajut = $this->request->getPost('tgl_rajut_pagi');
-        $tglACC = $this->request->getPost('tgl_acc');
-        $tglKelos = $this->request->getPost('tgl_kelos');
-        $tglReject = $this->request->getPost('tgl_reject');
-        $tglPB = $this->request->getPost('tgl_pb');
+        $submitType = $this->request->getPost('submit_type');
 
-        // Array untuk menyimpan nama variabel dan nilai tanggal
-        $dates = [
-            'Buka Bon' => $tglBon,
-            'Celup' => $tglCelup,
-            'Bongkar' => $tglBongkar,
-            'Press' => $tglPress,
-            'Oven' => $tglOven,
-            'TL' => $tglTL,
-            'Rajut Pagi' => $tglRajut,
-            'ACC' => $tglACC,
-            'Kelos' => $tglKelos,
-            'Reject' => $tglReject,
-            'PB' => $tglPB,
-        ];
+        if ($submitType === 'celup_ulang') {
+            $dataUpdate = [
+                'lot_celup' => NULL,
+                'tanggal_bon' => NULL,
+                'tanggal_celup' => NULL,
+                'tanggal_bongkar' => NULL,
+                'tanggal_press' => NULL,
+                'tanggal_oven' => NULL,
+                'tanggal_tl' => NULL,
+                'tanggal_rajut_pagi' => NULL,
+                'tanggal_acc' => NULL,
+                'tanggal_kelos' => NULL,
+                'tanggal_reject' => NULL,
+                'tanggal_perbaikan' => NULL,
+                'last_status' => 'scheduled',
+                'user_cek_status' => session('username'),
+            ];
 
-        // Filter tanggal yang kosong atau null
-        $filteredDates = array_filter($dates, function ($value) {
-            return !empty($value);
-        });
+            $update = $this->scheduleCelupModel->update($id, $dataUpdate);
 
-        // Cari tanggal terbaru beserta labelnya
-        $mostRecentDate = null;
-        $mostRecentLabel = null;
-        if (!empty($filteredDates)) {
-            $mostRecentDate = max($filteredDates); // Tanggal paling baru
-            $mostRecentLabel = array_search($mostRecentDate, $filteredDates); // Cari label sesuai tanggal
+            // Redirect ke halaman sebelumnya dengan pesan sukses
+            return redirect()->to(base_url(session()->get('role') . '/retur'))->withInput()->with('success', 'Berhasil Reschedule');
+        } elseif ($submitType === 'simpan') {
+            $lotCelup = $this->request->getPost('lot_celup');
+            $tglBon = $this->request->getPost('tgl_bon');
+            $tglCelup = $this->request->getPost('tgl_celup');
+            $tglBongkar = $this->request->getPost('tgl_bongkar');
+            $tglPress = $this->request->getPost('tgl_press');
+            $tglOven = $this->request->getPost('tgl_oven');
+            $tglTL = $this->request->getPost('tgl_tl');
+            $tglRajut = $this->request->getPost('tgl_rajut_pagi');
+            $tglACC = $this->request->getPost('tgl_acc');
+            $tglKelos = $this->request->getPost('tgl_kelos');
+            $tglReject = $this->request->getPost('tgl_reject');
+            $tglPB = $this->request->getPost('tgl_pb');
+
+            // Array untuk menyimpan nama variabel dan nilai tanggal
+            $dates = [
+                'Buka Bon' => $tglBon,
+                'Celup' => $tglCelup,
+                'Bongkar' => $tglBongkar,
+                'Press' => $tglPress,
+                'Oven' => $tglOven,
+                'TL' => $tglTL,
+                'Rajut Pagi' => $tglRajut,
+                'ACC' => $tglACC,
+                'Kelos' => $tglKelos,
+                'Reject' => $tglReject,
+                'PB' => $tglPB,
+            ];
+
+            // Filter tanggal yang kosong atau null
+            $filteredDates = array_filter($dates, function ($value) {
+                return !empty($value);
+            });
+
+            // Cari tanggal terbaru beserta labelnya
+            $mostRecentDate = null;
+            $mostRecentLabel = null;
+            if (!empty($filteredDates)) {
+                $mostRecentDate = max($filteredDates); // Tanggal paling baru
+                $mostRecentLabel = array_search($mostRecentDate, $filteredDates); // Cari label sesuai tanggal
+            }
+
+            // Set nilai ketDailyCek berdasarkan tanggal terbaru dan labelnya
+            if ($mostRecentDate && $mostRecentLabel) {
+                $mostRecentDateFormatted = date('d-m-Y', strtotime($mostRecentDate)); // Format: DD-MM-YYYY
+                $ketDailyCek = "$mostRecentLabel ($mostRecentDateFormatted)";
+            }
+
+            // Hanya masukkan nilai jika tidak kosong atau null
+            $dataUpdate = [];
+            if ($lotCelup) $dataUpdate['lot_celup'] = $lotCelup;
+            if ($tglBon) $dataUpdate['tanggal_bon'] = $tglBon;
+            if ($tglCelup) $dataUpdate['tanggal_celup'] = $tglCelup;
+            if ($tglBongkar) $dataUpdate['tanggal_bongkar'] = $tglBongkar;
+            if ($tglPress) $dataUpdate['tanggal_press'] = $tglPress;
+            if ($tglOven) $dataUpdate['tanggal_oven'] = $tglOven;
+            if ($tglTL) $dataUpdate['tanggal_tl'] = $tglTL;
+            if ($tglRajut) $dataUpdate['tanggal_rajut_pagi'] = $tglRajut;
+            if ($tglACC) $dataUpdate['tanggal_acc'] = $tglACC;
+            if ($tglKelos) $dataUpdate['tanggal_kelos'] = $tglKelos;
+            if ($tglReject) $dataUpdate['tanggal_reject'] = $tglReject;
+            if ($tglPB) $dataUpdate['tanggal_perbaikan'] = $tglPB;
+            if ($ketDailyCek) $dataUpdate['ket_daily_cek'] = $ketDailyCek;
+
+            // Prioritaskan status dengan urutan yang benar
+            if (!empty($tglReject)) {
+                $dataUpdate['last_status'] = 'reject';
+            } elseif (!empty($tglPB)) {
+                $dataUpdate['last_status'] = 'perbaikan';
+            } elseif (!empty($tglKelos)) {
+                $dataUpdate['last_status'] = 'done';
+            } elseif (!empty($tglACC)) {
+                $dataUpdate['last_status'] = 'acc';
+            } elseif (!empty($tglRajut)) {
+                $dataUpdate['last_status'] = 'rajut';
+            } elseif (!empty($tglTL)) {
+                $dataUpdate['last_status'] = 'tl';
+            } elseif (!empty($tglOven)) {
+                $dataUpdate['last_status'] = 'oven';
+            } elseif (!empty($tglPress)) {
+                $dataUpdate['last_status'] = 'press';
+            } elseif (!empty($tglBongkar)) {
+                $dataUpdate['last_status'] = 'bongkar';
+            } elseif (!empty($tglCelup)) {
+                $dataUpdate['last_status'] = 'celup';
+            } elseif (!empty($tglBon)) {
+                $dataUpdate['last_status'] = 'bon';
+            } elseif (!empty($lotCelup)) {
+                $dataUpdate['last_status'] = 'done';
+            }
+
+            // Validasi apakah data dengan ID yang diberikan ada
+            $existingProduction = $this->scheduleCelupModel->find($id);
+            if (!$existingProduction) {
+                return redirect()->back()->with('error', 'Data tidak ditemukan.');
+            }
+
+            // Perbarui data di database
+            $update = $this->scheduleCelupModel->update($id, $dataUpdate);
+
+            // Jika update berhasil dan lot_celup diisi, update out_celup
+            if ($update && !empty($lotCelup)) {
+                $this->outCelupModel->where('id_celup', $id)
+                    ->set('lot_kirim', $lotCelup)
+                    ->update();
+            }
+            // Redirect ke halaman sebelumnya dengan pesan sukses
+            return redirect()->to(base_url(session()->get('role') . '/retur'))->withInput()->with('success', 'Data Berhasil diupdate');
         }
-
-        // Set nilai ketDailyCek berdasarkan tanggal terbaru dan labelnya
-        if ($mostRecentDate && $mostRecentLabel) {
-            $mostRecentDateFormatted = date('d-m-Y', strtotime($mostRecentDate)); // Format: DD-MM-YYYY
-            $ketDailyCek = "$mostRecentLabel ($mostRecentDateFormatted)";
-        }
-
-        // Hanya masukkan nilai jika tidak kosong atau null
-        $dataUpdate = [];
-        if ($lotCelup) $dataUpdate['lot_celup'] = $lotCelup;
-        if ($tglBon) $dataUpdate['tanggal_bon'] = $tglBon;
-        if ($tglCelup) $dataUpdate['tanggal_celup'] = $tglCelup;
-        if ($tglBongkar) $dataUpdate['tanggal_bongkar'] = $tglBongkar;
-        if ($tglPress) $dataUpdate['tanggal_press'] = $tglPress;
-        if ($tglOven) $dataUpdate['tanggal_oven'] = $tglOven;
-        if ($tglTL) $dataUpdate['tanggal_tl'] = $tglTL;
-        if ($tglRajut) $dataUpdate['tanggal_rajut_pagi'] = $tglRajut;
-        if ($tglACC) $dataUpdate['tanggal_acc'] = $tglACC;
-        if ($tglKelos) $dataUpdate['tanggal_kelos'] = $tglKelos;
-        if ($tglReject) $dataUpdate['tanggal_reject'] = $tglReject;
-        if ($tglPB) $dataUpdate['tanggal_perbaikan'] = $tglPB;
-        if ($ketDailyCek) $dataUpdate['ket_daily_cek'] = $ketDailyCek;
-
-        // Jika lot diisi, update last_status menjadi 'done'
-        if (!empty($lotCelup)) {
-            $dataUpdate['lot_celup'] = 'done';
-        }
-
-        // Jika tgl_bon diisi, update last_status menjadi 'bon'
-        if (!empty($tglBon)) {
-            $dataUpdate['last_status'] = 'bon';
-        }
-
-        // Jika tgl_celup diisi, update last_status menjadi 'celup'
-        if (!empty($tglCelup)) {
-            $dataUpdate['last_status'] = 'celup';
-        }
-        // Jika tgl_celup diisi, update last_status menjadi 'celup'
-        if (!empty($tglBongkar)) {
-            $dataUpdate['last_status'] = 'bongkar';
-        }
-
-        // Jika tgl_celup diisi, update last_status menjadi 'celup'
-        if (!empty($tglPress)) {
-            $dataUpdate['last_status'] = 'press';
-        }
-
-        // Jika tgl_celup diisi, update last_status menjadi 'celup'
-        if (!empty($tglOven)) {
-            $dataUpdate['last_status'] = 'oven';
-        }
-
-        // Jika tgl_celup diisi, update last_status menjadi 'celup'
-        if (!empty($tglTL)) {
-            $dataUpdate['last_status'] = 'tl';
-        }
-
-        // Jika tgl_celup diisi, update last_status menjadi 'celup'
-        if (!empty($tglRajut)) {
-            $dataUpdate['last_status'] = 'rajut';
-        }
-
-        // Jika tgl_celup diisi, update last_status menjadi 'celup'
-        if (!empty($tglACC)) {
-            $dataUpdate['last_status'] = 'acc';
-        }
-
-        // Jika tgl_kelos diisi, update last_status menjadi 'done'
-        if (!empty($tglKelos)) {
-            $dataUpdate['last_status'] = 'done';
-        }
-
-        // Jika tgl_kelos diisi, update last_status menjadi 'done'
-        if (!empty($tglReject)) {
-            $dataUpdate['last_status'] = 'reject';
-        }
-
-        // Jika tgl_kelos diisi, update last_status menjadi 'done'
-        if (!empty($tglPB)) {
-            $dataUpdate['last_status'] = 'perbaikan';
-        }
-
-        // Validasi apakah data dengan ID yang diberikan ada
-        $existingProduction = $this->scheduleCelupModel->find($id);
-        if (!$existingProduction) {
-            return redirect()->back()->with('error', 'Data tidak ditemukan.');
-        }
-
-        // Perbarui data di database
-        $update = $this->scheduleCelupModel->update($id, $dataUpdate);
-
-        // Jika update berhasil dan lot_celup diisi, update out_celup
-        if ($update && !empty($lotCelup)) {
-            $this->outCelupModel->where('id_celup', $id)
-                ->set('lot_kirim', $lotCelup)
-                ->update();
-        }
-
-        // Redirect ke halaman sebelumnya dengan pesan sukses
-        return redirect()->to(base_url(session()->get('role') . '/retur'))->withInput()->with('success', 'Data Berhasil diupdate');
     }
 }
