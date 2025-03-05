@@ -201,7 +201,7 @@
 
     <div class="card mb-4">
         <div class="card-body">
-            <form method="post" action="<?= base_url($role . '/schedule') ?>">
+            <form method="post" action="<?= base_url($role . '/schedule/reqschedule') ?>">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
                     <h3 class="mb-0 text-center text-md-start">Request Schedule Mesin Celup</h3>
                     <div class="d-flex flex-column flex-md-row gap-2 align-items-center">
@@ -254,7 +254,7 @@
                                 <td><?= $data['warna']; ?></td>
                                 <td><?= $data['start_mc']; ?></td>
                                 <td><?= $data['tgl_schedule']; ?></td>
-                                <td><a href="<?= base_url($role . '/edit/' . $data['id_celup']) ?>" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Detail">
+                                <td><a href="<?= base_url($role . '/schedule/reqschedule/show/' . $data['id_celup']) ?>" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Detail">
                                         <i class="fas fa-eye"></i></a></td>
                             </tr>
                         <?php

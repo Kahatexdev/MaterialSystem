@@ -157,10 +157,24 @@ class CelupController extends BaseController
             // Panggil fungsi model untuk mendapatkan qty_po dan warna
             $pdk = $this->materialModel->getQtyPOForCelup($nomodel, $itemtype, $kodewarna);
 
-            // Pastikan $pdk memiliki data valid sebelum dipakai
             if (!$pdk) {
-                log_message('error', "Data null dari model: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
-                continue; // Skip jika $pdk kosong
+                $id_induk = $this->openPoModel->getIdInduk($nomodel, $itemtype, $kodewarna);
+                if ($id_induk) {
+                    $id_po = $this->openPoModel->find($id_induk['id_induk']);
+                    if (isset($id_po['kode_warna'], $id_po['color'], $id_po['item_type'])) {
+                        $kodeWarnaCovering = $id_po['kode_warna'];
+                        $warnaCovering     = $id_po['color'];
+                        $itemTypeCovering  = $id_po['item_type'];
+                        // dd ($kodeWarnaCovering, $warnaCovering, $itemTypeCovering); 
+                        $deliv = $this->openPoModel->getFilteredPO($kodeWarnaCovering, $warnaCovering, $itemTypeCovering);
+                        $pdk = $this->openPoModel->getQtyPOForCvr($nomodel, $itemtype, $kodewarna);
+                        $pdk['delivery_awal'] = $deliv[0]['delivery_awal'];
+                        $pdk['delivery_akhir'] = $deliv[0]['delivery_akhir'];
+                    } else {
+
+                        log_message('error', 'Field kode_warna tidak ditemukan pada hasil openPoModel->find()');
+                    }
+                }
             }
             $keys = $id['no_model'] . '-' . $id['item_type'] . '-' . $id['kode_warna'];
 
@@ -171,7 +185,7 @@ class CelupController extends BaseController
                     'no_model' => $nomodel,
                     'item_type' => $itemtype,
                     'kode_warna' => $kodewarna,
-                    'warna' => $pdk['color'],
+                    'warna' => $id['warna'],
                     'start_mc' => $id['start_mc'],
                     'del_awal' => $pdk['delivery_awal'],
                     'del_akhir' => $pdk['delivery_akhir'],
@@ -640,12 +654,11 @@ class CelupController extends BaseController
         // data ALL BON
         $dataBon = $this->bonCelupModel->getDataById($idBon); // get data by id_bon
         $detailBon = $this->outCelupModel->getDetailBonByIdBon($idBon); // get data detail bon by id_bon
-        // dd($detailBon);        // Mengelompokkan data detailBon berdasarkan no_model, item_type, dan kode_warna
         $groupedDetails = [];
         foreach ($detailBon as $detail) {
             $key = $detail['no_model'] . '|' . $detail['item_type'] . '|' . $detail['kode_warna'];
-            $jmlKarung =
-                $gantiRetur = ($detail['ganti_retur'] == 1) ? ' / Ganti Retur' : '';
+
+            $gantiRetur = ($detail['ganti_retur'] == 1) ? ' / Ganti Retur' : '';
             if (!isset($groupedDetails[$key])) {
                 $groupedDetails[$key] = [
                     'no_model' => $detail['no_model'],
@@ -713,8 +726,7 @@ class CelupController extends BaseController
                 ];
             }
         }
-        // dd($id_out_celup, $barcode, base64_encode($barcode));
-        // Menggabungkan data utama dan detail yang sudah d        ikelompokkan
+
 
         $dataBon['groupedDetails'] = array_values($groupedDetails);
 

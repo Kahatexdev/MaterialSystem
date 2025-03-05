@@ -14,6 +14,7 @@ $routes->post('authverify', 'AuthController::login');
 
 // gbn routes
 $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJatah');
+// $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
 
 $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('', 'MaterialController::index');
@@ -53,6 +54,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/getItemType', 'ScheduleController::getItemType');
     $routes->get('schedule/getKodeWarna', 'ScheduleController::getKodeWarna');
     $routes->get('schedule/getWarna', 'ScheduleController::getWarna');
+    // $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
+
     // $routes->get('schedule/getWarna', 'ScheduleController::getWarnabyItemTypeandKodeWarna');
     $routes->get('schedule/getPO', 'ScheduleController::getPO');
     $routes->get('schedule/getPODetails', 'ScheduleController::getPODetails');
@@ -133,7 +136,7 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
     $routes->get('schedule/nylon', 'ScheduleController::nylon');
-    $routes->get('reqschedule', 'CelupController::schedule');
+    $routes->get('reqschedule', 'ScheduleController::reqschedule');
     $routes->post('schedule', 'CelupController::schedule');
     $routes->get('edit/(:num)', 'CelupController::editStatus/$1');
     $routes->post('updateSchedule/(:num)', 'CelupController::updateSchedule/$1');
@@ -155,7 +158,6 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->post('retur', 'CelupController::retur');
     $routes->get('editretur/(:num)', 'CelupController::editRetur/$1');
     $routes->post('proseseditretur/(:num)', 'CelupController::prosesEditRetur/$1');
-    $routes->get('generate/(:num)', 'CelupController::generateBarcode/$1');
     $routes->get('printBon/(:num)', 'PdfController::printBon/$1');
 });
 
@@ -165,12 +167,38 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
 $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('', 'CoveringController::index');
     $routes->get('po', 'CoveringController::po');
-    $routes->get('schedule', 'ScheduleController::index');
+    $routes->get('schedule', 'CoveringController::schedule');
+    $routes->get('schedule/getScheduleDetails/(:any)/(:any)/(:any)', 'ScheduleController::getScheduleDetails/$1/$2/$3');
+    $routes->get('schedule/form', 'ScheduleController::create');
+    $routes->get('schedule/getItemType', 'ScheduleController::getItemType');
+    $routes->get('schedule/getKodeWarna', 'ScheduleController::getKodeWarna');
+    $routes->get('schedule/getWarna', 'ScheduleController::getWarna');
+    // $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
+
+    // $routes->get('schedule/getWarna', 'ScheduleController::getWarnabyItemTypeandKodeWarna');
+    $routes->get('schedule/getPO', 'ScheduleController::getPO');
+    $routes->get('schedule/getPODetails', 'ScheduleController::getPODetails');
+    $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
+    $routes->get('schedule/getNoModel', 'ScheduleController::getNoModel');
+    $routes->post('schedule/saveSchedule', 'ScheduleController::saveSchedule');
+    $routes->get('schedule/editSchedule', 'ScheduleController::editSchedule');
+    $routes->post('schedule/updateSchedule', 'ScheduleController::updateSchedule');
+    $routes->post('schedule/updateTglSchedule', 'ScheduleController::updateTglSchedule');
+    $routes->post('schedule/deleteSchedule', 'ScheduleController::deleteSchedule');
+
+    $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
+    $routes->post('mesin/saveDataMesin', 'MesinCelupController::saveDataMesin');
+    $routes->get('mesin/getMesinDetails/(:num)', 'MesinCelupController::getMesinDetails/$1');
+    $routes->post('mesin/cekNoMesin', 'MesinCelupController::cekNoMesin');
+    $routes->post('mesin/updateDataMesin', 'MesinCelupController::updateDataMesin');
+    $routes->get('mesin/deleteDataMesin/(:num)', 'MesinCelupController::deleteDataMesin/$1');
+
     $routes->get('poDetail/(:any)', 'CoveringController::poDetail/$1');
     $routes->get('getDetailByNoModel/(:any)/(:any)', 'CoveringController::getDetailByNoModel/$1/$2');
     $routes->post('po/simpanKeSession', 'CoveringController::simpanKeSession');
     $routes->post('po/savePOCovering', 'CoveringController::savePOCovering');
     $routes->get('po/deletePOCovering/(:any)', 'CoveringController::unsetSession/$1');
+    $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
 });
 
 

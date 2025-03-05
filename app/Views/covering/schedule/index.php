@@ -40,7 +40,7 @@
             });
         </script>
     <?php endif; ?>
-    <h1 class="display-5 mb-4 text-center" style="color:rgb(0, 85, 124); font-weight: 600;">Schedule Mesin Celup Benang</h1>
+    <h1 class="display-5 mb-4 text-center" style="color:rgb(0, 85, 124); font-weight: 600;">Schedule Mesin Celup</h1>
 
     <div class="card mb-4">
         <div class="card-body">
@@ -249,7 +249,7 @@
 </div>
 
 <div class="modal fade" id="modalSchedule" tabindex="-1" aria-labelledby="modalScheduleLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalScheduleLabel">Jadwal Mesin</h5>
@@ -257,15 +257,12 @@
             </div>
             <div class="modal-body" id="modalScheduleBody">
                 <!-- Isi modal dengan JS -->
-
-
             </div>
-
-
-
         </div>
     </div>
 </div>
+
+
 
 
 <script>
@@ -408,7 +405,7 @@
                     modalBody.innerHTML = `
                 <div class="text-center text-danger">${error.message}</div>
                 <div class="modal-footer">
-                    
+                    <button type="button" class="btn btn-info" id="addSchedule">Tambah Jadwal</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                 </div>`;
 
