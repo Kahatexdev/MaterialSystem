@@ -74,6 +74,7 @@
     </style>
 </head>
 
+
 <body class="g-sidenav-show  bg-gray-100">
     <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " data-color="info" id="sidenav-main">
         <div class="sidenav-header">
@@ -91,7 +92,7 @@
                 <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Dashboard</h6>
 
                 <li class="nav-item ">
-                    <a class="nav-link <?= set_active($active . '/') ?>" href="<?= base_url($role . '/') ?>">
+                    <a class="nav-link <?= set_active($active) ?>" href="<?= base_url($role . '/') ?>">
                         <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                             <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                                 <title>shop </title>

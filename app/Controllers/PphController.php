@@ -147,6 +147,7 @@ class PphController extends BaseController
 
         // View untuk halaman awal
         return view($this->role . '/pph/pphPerStyle', [
+            'active' => $this->active,
             'title' => 'PPH: Per Style',
             'role' => $this->role,
         ]);
@@ -227,6 +228,7 @@ class PphController extends BaseController
 
         // View untuk halaman awal
         return view($this->role . '/pph/pphPerDays', [
+            'active' => $this->active,
             'title' => 'PPH: Per Days',
             'role' => $this->role,
         ]);
@@ -321,6 +323,7 @@ class PphController extends BaseController
 
         // View untuk halaman awal
         return view($this->role . '/pph/pphPerModel', [
+            'active' => $this->active,
             'title' => 'PPH: Per Model',
             'role' => $this->role,
         ]);
