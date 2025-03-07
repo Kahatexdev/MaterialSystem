@@ -151,4 +151,23 @@ class MaterialModel extends Model
             ->orderBy('master_material.jenis, material.item_type', 'ASC')
             ->findAll();
     }
+
+    public function getMaterialForPPHByNoModel($area, $searchNoModel = null)
+    {
+        return $this->select('material.id_order, master_order.no_model, material.area, master_order.delivery_awal, material.style_size, material.item_type,material.color, material.kode_warna, material.composition, material.gw,material.qty_pcs, material.loss, SUM(material.kgs) AS ttl_kebutuhan')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('material.area', $area)
+            ->like('master_order.no_model', $searchNoModel)
+            ->groupBy('material.style_size, material.item_type, material.kode_warna')
+            ->findAll();
+    }
+
+    public function getMaterialForPPH($area)
+    {
+        return $this->select('material.id_order, master_order.no_model, material.area, master_order.delivery_awal, material.style_size, material.item_type,material.color, material.kode_warna, material.composition, material.gw,material.qty_pcs, material.loss, SUM(material.kgs) AS ttl_kebutuhan')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('material.area', $area)
+            ->groupBy('material.style_size, material.item_type, material.kode_warna')
+            ->findAll();
+    }
 }

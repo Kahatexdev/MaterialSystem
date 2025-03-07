@@ -23,34 +23,36 @@
         </div>
     </div>
     <div class="row mt-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table id="example" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Jarum</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">No Model</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Area</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Delivery</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Jenis</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Warna</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Kode Warna</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Los</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Komposisi (%)</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">GW</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Qty PO</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Total Produksi</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Sisa</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Total Kebutuhan</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Total Pemakaian</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">% Pemakaian</th>
+        <div class="col-xl-12 col-sm-12 mb-xl-0 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="example" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Jarum</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">No Model</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Area</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Delivery</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Jenis</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Warna</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Kode Warna</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Los</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Komposisi (%)</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">GW</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Qty PO</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Total Produksi</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Sisa</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Total Kebutuhan</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Total Pemakaian</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">% Pemakaian</th>
 
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
