@@ -1,12 +1,12 @@
 <?php $this->extend($role . '/pph/header'); ?>
 <?php $this->section('content'); ?>
 <div class="container-fluid py-4">
-    <!-- Filter Data -->
+    <!-- Filter Data / Form Pencarian -->
     <div class="row my-4">
         <div class="col-xl-12 col-sm-12 mb-xl-0 mb-4">
             <div class="card">
                 <div class="card-body p-3">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-capitalize font-weight-bold">Material System</p>
@@ -14,68 +14,88 @@
                             </div>
                         </div>
                         <div>
-                            <!-- Ruang tambahan bila diperlukan -->
+                            <!-- Form Pencarian -->
+                            <form action="<?= base_url($role . '/tampilPerModel/' . $area) ?>" method="get" class="form-inline">
+                                <div class="d-flex align-items-center">
+                                    <input type="text" name="no_model" id="no_model" class="form-control mr-2" placeholder="Masukkan No Model" value="<?= isset($_GET['no_model']) ? esc($_GET['no_model']) : '' ?>">
+                                    <button type="submit" class="btn btn-info">Cari</button>
+                                </div>
+                            </form>
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="row mt-3">
-        <div class="col-xl-12 col-sm-12 mb-xl-0 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="display text-center text-uppercase text-xs font-bolder" id="dataTable" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jenis</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Loss</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Komposisi (%)</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">GW</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty PO</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Produksi</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Sisa</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Kebutuhan</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Pemakaian</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">% Pemakaian</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableBody">
-                                <?php $no = 1;
-                                foreach ($models as $item) : ?>
+
+    <!-- Tampilkan Tabel Hanya Jika Data Tersedia -->
+    <?php if (!empty($mergedData)) : ?>
+        <div class="row mt-3">
+            <div class="col-xl-12 col-sm-12 mb-xl-0 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="display text-center text-uppercase text-xs font-bolder" id="dataTable" style="width:100%">
+                                <thead>
                                     <tr>
-                                        <td><?= $no++ ?></td>
-                                        <td><?= $item['no_model'] ?></td>
-                                        <td><?= $item['area'] ?></td>
-                                        <td><?= $item['delivery_awal'] ?></td>
-                                        <td><?= $item['item_type'] ?></td>
-                                        <td><?= $item['color'] ?></td>
-                                        <td><?= $item['kode_warna'] ?></td>
-                                        <td><?= $item['loss'] ?></td>
-                                        <td><?= $item['composition'] ?></td>
-                                        <td><?= $item['gw'] ?></td>
-                                        <td><?= $item['qty_pcs'] ?></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td><?= number_format($item['ttl_kebutuhan'], 2) ?></td>
-                                        <td>rumus</td>
-                                        <td></td>
+                                        <th>No</th>
+                                        <th>No Model</th>
+                                        <th>Area</th>
+                                        <th>Delivery</th>
+                                        <th>Jenis</th>
+                                        <th>Warna</th>
+                                        <th>Kode Warna</th>
+                                        <th>Loss</th>
+                                        <th>Komposisi (%)</th>
+                                        <th>GW</th>
+                                        <th>Qty PO</th>
+                                        <th>Total Produksi</th>
+                                        <th>Sisa</th>
+                                        <th>Total Kebutuhan</th>
+                                        <th>Total Pemakaian</th>
+                                        <th>% Pemakaian</th>
                                     </tr>
-                                <?php endforeach ?>
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody id="tableBody">
+                                    <?php $no = 1;
+                                    foreach ($mergedData as $item): ?>
+                                        <tr>
+                                            <td><?= $no++ ?></td>
+                                            <td><?= esc($item['no_model']) ?></td>
+                                            <td><?= esc($item['area']) ?></td>
+                                            <td><?= esc($item['delivery_awal']) ?></td>
+                                            <td><?= esc($item['item_type']) ?></td>
+                                            <td><?= esc($item['color']) ?></td>
+                                            <td><?= esc($item['kode_warna']) ?></td>
+                                            <td><?= esc($item['loss']) ?></td>
+                                            <td><?= esc($item['composition']) ?></td>
+                                            <td><?= esc($item['gw']) ?></td>
+                                            <td><?= esc($item['qty_pcs']) ?></td>
+                                            <td><?= isset($item['bruto']) ? esc($item['bruto']) : '-' ?></td>
+                                            <td><?= isset($item['sisa']) ? esc($item['sisa']) : '-' ?></td>
+                                            <td><?= esc(number_format($item['ttl_kebutuhan'], 2)) ?></td>
+                                            <td>RUMUS</td>
+                                            <td>RUMUS</td>
+                                        <?php endforeach ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    <?php else : ?>
+        <!-- Pesan Informasi Jika Data Belum Ada -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="alert alert-info text-center text-white" role="alert">
+                    Silakan masukkan No Model untuk mencari data.
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <!-- Notifikasi Flashdata -->
     <?php if (session()->getFlashdata('success')) : ?>
         <script>
@@ -101,13 +121,11 @@
         </script>
     <?php endif; ?>
 
-    <!-- Script AJAX untuk Filter -->
+    <!-- Script untuk inisialisasi DataTable dan Chart.js -->
     <script src="<?= base_url('assets/js/plugins/chartjs.min.js') ?>"></script>
     <script type="text/javascript">
         $(document).ready(function() {
-            // Inisialisasi DataTable pada Tabel yang memiliki id dataTable
             $('#dataTable').DataTable();
-
         });
     </script>
 </div>
