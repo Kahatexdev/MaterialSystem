@@ -18,7 +18,9 @@
                             <form action="<?= base_url($role . '/tampilPerModel/' . $area) ?>" method="get" class="form-inline">
                                 <div class="d-flex align-items-center">
                                     <input type="text" name="no_model" id="no_model" class="form-control mr-2" placeholder="Masukkan No Model" value="<?= isset($_GET['no_model']) ? esc($_GET['no_model']) : '' ?>">
-                                    <button type="submit" class="btn btn-info">Cari</button>
+                                    <button type="submit" class="btn bg-gradient-info text-white ms-2">
+                                        <i class="fas fa-search"></i> Filter
+                                    </button>
                                 </div>
                             </form>
 
@@ -75,8 +77,18 @@
                                             <td><?= isset($item['bruto']) ? esc($item['bruto']) : '-' ?></td>
                                             <td><?= isset($item['sisa']) ? esc($item['sisa']) : '-' ?></td>
                                             <td><?= esc(number_format($item['ttl_kebutuhan'], 2)) ?></td>
-                                            <td>RUMUS</td>
-                                            <td>RUMUS</td>
+                                            <td>
+                                                <?= isset($item['bruto'], $item['composition'], $item['gw'])
+                                                    ? esc(round(($item['bruto'] * 24 * ($item['composition'] / 100) * $item['gw']) / 1000, 2))
+                                                    : '-'
+                                                ?>
+                                            </td>
+                                            <td>
+                                                <?= isset($item['bruto'], $item['composition'], $item['gw'], $item['qty_pcs'])
+                                                    ? esc(round((($item['bruto'] * 24 * ($item['composition'] / 100) * $item['gw']) / 1000) / $item['qty_pcs'] * 100, 2))
+                                                    : '-'
+                                                ?>
+                                            </td>
                                         <?php endforeach ?>
                                 </tbody>
                             </table>
@@ -103,7 +115,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Success!',
-                    text: '<?= session()->getFlashdata('success') ?>',
+                    html: '<?= session()->getFlashdata('success') ?>',
                 });
             });
         </script>
@@ -115,7 +127,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error!',
-                    text: '<?= session()->getFlashdata('error') ?>',
+                    html: '<?= session()->getFlashdata('error') ?>',
                 });
             });
         </script>

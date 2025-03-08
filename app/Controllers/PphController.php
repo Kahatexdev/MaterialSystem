@@ -259,17 +259,44 @@ class PphController extends BaseController
             ]);
         }
         // Get data from the database model.
-        $models = $this->materialModel->getMaterialForPPH($area);
+        // $models = $this->materialModel->getMaterialForPPH($area);
+        $models = $this->materialModel->getMaterialForPPH($area, $searchNoModel);
+
 
         // Build API URL dynamically.
         $apiUrl = "http://172.23.44.14/CapacityApps/public/api/getDataForPPH/"
             . urlencode($area) . "/"
             . urlencode($searchNoModel);
 
-        // Use CodeIgniter's HTTP client instead of file_get_contents.
         $client = \Config\Services::curlrequest();
-        $response = $client->request('GET', $apiUrl);
-        $apiData = json_decode($response->getBody(), true);
+
+        try {
+            $response = $client->request('GET', $apiUrl);
+
+            // Pastikan response berhasil (status code 200)
+            if ($response->getStatusCode() !== 200) {
+                throw new \Exception("Server mengembalikan status " . $response->getStatusCode());
+            }
+
+            $apiData = json_decode($response->getBody(), true);
+
+            // Validasi jika response tidak valid atau kosong
+            if (empty($apiData) || !is_array($apiData)) {
+                session()->setFlashdata(
+                    'error',
+                    '<strong>Peringatan!</strong> Data dari CapacityApps tidak tersedia atau formatnya tidak valid. Silakan coba lagi nanti.'
+                );
+                $apiData = [];
+            }
+        } catch (\Exception $e) {
+            session()->setFlashdata(
+                'error',
+                '<strong>Kesalahan!</strong> Gagal mengambil data dari <strong>CapacityApps</strong>.<br>'
+                    . 'Silahkan Hubungi <strong>Monitoring</strong>' 
+            );
+            $apiData = [];
+        }
+
 
         // Initialize the array for merged data.
         $modelData = [];
@@ -348,6 +375,7 @@ class PphController extends BaseController
             }
             $mergedData[] = $mergedRow;
         }
+        // dd($models, $apiData, $mergedData);
 
         $data = [
             'active'    => $this->active,
