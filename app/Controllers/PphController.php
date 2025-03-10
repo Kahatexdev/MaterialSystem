@@ -44,7 +44,7 @@ class PphController extends BaseController
             'role' => $this->role,
             'area' => $area,
         ];
-       
+
         return view($this->role . '/pph/index', $data);
     }
 
@@ -58,97 +58,39 @@ class PphController extends BaseController
         ];
         return view($this->role . '/pph/pphPerArea', $data);
     }
-    public function tampilPerStyle()
+
+    public function tampilPerStyle($area)
     {
         if ($this->request->isAJAX()) {
-            $request = $this->request->getVar();
+            $nomodel = $this->request->getPost('nomodel');
 
-            // Data dummy (replace dengan database jika diperlukan)
-            $pph = [
-                [
-                    'jarum' => 'J-001',
-                    'no_model' => 'M-1001',
-                    'area' => 'Area A',
-                    'delivery' => '2025-01-10',
-                    'jenis' => 'Jenis 1',
-                    'warna' => 'Merah',
-                    'kode_warna' => 'KW-001',
-                    'los' => 10,
-                    'komposisi' => 50,
-                    'gw' => 100,
-                    'qty_po' => 200,
-                    'total_produksi' => 180,
-                    'sisa' => 20,
-                    'total_kebutuhan' => 200,
-                    'total_pemakaian' => 180,
-                    'persen_pemakaian' => 90,
-                ],
-                [
-                    'jarum' => 'J-002',
-                    'no_model' => 'M-1002',
-                    'area' => 'Area B',
-                    'delivery' => '2025-01-10',
-                    'jenis' => 'Jenis 2',
-                    'warna' => 'Biru',
-                    'kode_warna' => 'KW-002',
-                    'los' => 10,
-                    'komposisi' => 50,
-                    'gw' => 100,
-                    'qty_po' => 200,
-                    'total_produksi' => 180,
-                    'sisa' => 20,
-                    'total_kebutuhan' => 200,
-                    'total_pemakaian' => 180,
-                    'persen_pemakaian' => 90,
-                ]
-            ];
+            $dataPph = $this->materialModel->getDataPPHInisial($area, $nomodel);
 
-            // Total data tanpa filter
-            $totalData = count($pph);
+            // Panggil API eksternal
+            $apiUrl = "http://172.23.44.14/CapacitySystem/public/api/getDataForPPH/$area/$nomodel";
+            $response = file_get_contents($apiUrl);
 
-            // Filter berdasarkan pencarian
-            $search = $request['search']['value'] ?? '';
-            $filteredData = array_filter($pph, function ($row) use ($search) {
-                return stripos(implode(' ', $row), $search) !== false;
-            });
+            if ($response === FALSE) {
+                log_message('error', "API tidak bisa diakses: $apiUrl");
+                return $this->response->setJSON(["error" => "Gagal mengambil data dari API"]);
+            }
 
-            // Sorting
-            $sortColumnIndex = $request['order'][0]['column'];
-            $sortColumnName = $request['columns'][$sortColumnIndex]['data'];
-            $sortDirection = $request['order'][0]['dir'];
-            usort($filteredData, function ($a, $b) use ($sortColumnName, $sortDirection) {
-                if ($sortDirection == 'asc') {
-                    return $a[$sortColumnName] <=> $b[$sortColumnName];
-                }
-                return $b[$sortColumnName] <=> $a[$sortColumnName];
-            });
+            // Log response API ke file log (application/logs/)
+            log_message('debug', "Response API: " . print_r(json_decode($response, true), true));
 
-            // Pagination
-            $start = $request['start'];
-            $length = $request['length'];
-            $pagedData = array_slice($filteredData, $start, $length);
-
-            // Tambahkan kolom nomor
-            $pagedData = array_map(function ($item, $index) use ($start) {
-                $item['no'] = $start + $index + 1;
-                return $item;
-            }, $pagedData, array_keys($pagedData));
-
-            // Format respons JSON
-            $data = [
-                'draw' => $request['draw'],
-                'recordsTotal' => $totalData,
-                'recordsFiltered' => count($filteredData),
-                'data' => $pagedData,
-            ];
-
-            return $this->response->setJSON($data);
+            // Return hasil response API ke frontend
+            return $this->response->setJSON([
+                "data" => json_decode($response, true),
+                "data_pph" => $dataPph
+            ]);
         }
 
-        // View untuk halaman awal
         return view($this->role . '/pph/pphPerStyle', [
+            'active' => $this->active,
             'title' => 'PPH: Per Style',
             'role' => $this->role,
+            'area' => $area,
+            'dataPph' => []
         ]);
     }
 
@@ -227,6 +169,7 @@ class PphController extends BaseController
 
         // View untuk halaman awal
         return view($this->role . '/pph/pphPerDays', [
+            'active' => $this->active,
             'title' => 'PPH: Per Days',
             'role' => $this->role,
         ]);
@@ -321,11 +264,9 @@ class PphController extends BaseController
 
         // View untuk halaman awal
         return view($this->role . '/pph/pphPerModel', [
+            'active' => $this->active,
             'title' => 'PPH: Per Model',
             'role' => $this->role,
         ]);
     }
-
-
-
 }

@@ -1,6 +1,16 @@
 <?php $this->extend($role . '/layout'); ?>
 <?php $this->section('header'); ?>
+<style>
+    .btn-filter {
+        background: linear-gradient(135deg, #1e88e5, #64b5f6);
+        color: white;
+        border: none;
+    }
 
+    .btn-filter:hover {
+        background: linear-gradient(135deg, #1976d2, #42a5f5);
+    }
+</style>
 
 <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
     <!-- Navbar -->

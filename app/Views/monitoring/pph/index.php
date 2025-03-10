@@ -1,4 +1,4 @@
-<?php $this->extend($role . '/dashboard/header'); ?>
+<?php $this->extend($role . '/pph/header'); ?>
 <?php $this->section('content'); ?>
 <div class="container-fluid py-4">
     <div class="row my-4">
