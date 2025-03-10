@@ -151,6 +151,15 @@ class MaterialModel extends Model
             ->orderBy('master_material.jenis, material.item_type', 'ASC')
             ->findAll();
     }
+    public function getDataPPHInisial($area, $nomodel)
+    {
+        return $this->select('master_order.no_model, material.area, material.inisial, material.style_size, material.item_type, material.color, material.kode_warna, material.composition, material.gw, material.qty_pcs, material.loss, material.kgs')
+            ->join('master_order', 'master_order.id_order=material.id_order')
+            ->where('material.area', $area)
+            ->where('master_order.no_model', $nomodel)
+            ->orderBy('master_order.no_model, material.inisial, material.style_size, material.item_type, material.kode_warna', 'ASC')
+            ->findAll();
+    }
 
     public function getMaterialForPPHByNoModel($area, $searchNoModel = null)
     {
@@ -162,12 +171,38 @@ class MaterialModel extends Model
             ->findAll();
     }
 
-    public function getMaterialForPPH($area)
+    public function getMaterialForPPH($area, $no_model = null)
     {
-        return $this->select('material.id_order, master_order.no_model, material.area, master_order.delivery_awal, material.style_size, material.item_type,material.color, material.kode_warna, material.composition, material.gw,material.qty_pcs, material.loss, SUM(material.kgs) AS ttl_kebutuhan')
+        $builder = $this->select('
+            material.id_order, 
+            master_order.no_model, 
+            material.area, 
+            master_order.delivery_awal, 
+            material.style_size, 
+            material.item_type, 
+            material.color, 
+            material.kode_warna, 
+            material.composition, 
+            material.gw, 
+            material.qty_pcs, 
+            material.loss, 
+            SUM(material.kgs) AS ttl_kebutuhan
+        ')
             ->join('master_order', 'master_order.id_order = material.id_order')
-            ->where('material.area', $area)
-            ->groupBy('material.style_size, material.item_type, material.kode_warna')
-            ->findAll();
+            ->where('material.area', $area);
+
+        // Tambahkan filter untuk no_model jika ada
+        if (!empty($no_model)) {
+            $builder->where('master_order.no_model', $no_model);
+        }
+
+        // Pastikan semua kolom yang tidak menggunakan agregasi masuk dalam groupBy
+        $builder->groupBy('
+        material.style_size, 
+        material.item_type, 
+        material.kode_warna
+    ');
+
+        return $builder->findAll();
     }
 }

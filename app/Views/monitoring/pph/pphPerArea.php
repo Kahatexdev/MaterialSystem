@@ -10,7 +10,7 @@
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-capitalize font-weight-bold"><?= $title; ?></p>
                                 <h5 class="font-weight-bolder mb-0">
-                                    Data PPH Berdasarkan Area ABC
+                                    Data PPH Berdasarkan Area <?= $area ?>
                                 </h5>
                             </div>
                         </div>
@@ -50,7 +50,7 @@
             </a>
         </div>
         <div class="col-xl-6 col-sm-6 mb-xl-0 mb-4 mt-2">
-            <a href="<?= base_url($role .'/tampilPerStyle') ?>">
+            <a href="<?= base_url($role . '/tampilPerStyle/' . $area) ?>">
                 <div class="card">
                     <div class="card-body p-3">
                         <div class="row">

@@ -300,8 +300,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
 
     $routes->get('pph', 'PphController::index');
     $routes->get('pphPerArea/(:any)', 'PphController::pphPerArea/$1');
-    $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
-    $routes->post('tampilPerStyle', 'PphController::tampilPerStyle');
+    $routes->get('tampilPerStyle/(:any)', 'PphController::tampilPerStyle/$1');
+    $routes->post('tampilPerStyle/(:any)', 'PphController::tampilPerStyle/$1');
     $routes->get('tampilPerDays', 'PphController::tampilPerDays');
     $routes->post('tampilPerDays', 'PphController::tampilPerDays');
     $routes->get('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');

@@ -69,10 +69,14 @@ class PdfController extends BaseController
         $pdf = new FPDF('L', 'mm', 'A4');
         $pdf->AddPage();
 
-        // Tambahkan border margin
-        $pdf->SetDrawColor(0, 0, 0);
-        $pdf->SetLineWidth(0.2);
-        $pdf->Rect(10, 10, 277, 190);
+        // Garis margin luar (lebih tebal)
+        $pdf->SetDrawColor(0, 0, 0); // Warna hitam
+        $pdf->SetLineWidth(0.4); // Lebih tebal
+        $pdf->Rect(9, 9, 279, 192); // Sedikit lebih besar dari margin dalam
+
+        // Garis margin dalam (lebih tipis)
+        $pdf->SetLineWidth(0.2); // Lebih tipis
+        $pdf->Rect(10, 10, 277, 190); // Ukuran aslinya
 
         // Masukkan gambar di dalam kolom
         $x = $pdf->GetX(); // Simpan posisi X saat ini
@@ -114,7 +118,7 @@ class PdfController extends BaseController
         $pdf->Cell(43, 5, 'Tgl', 0, 0, 'L');
         // Check if the result array is not empty and display only the first delivery_awal
         if (!empty($result)) {
-            $pdf->Cell(234, 5, ': ' . $result[0]['delivery_awal'], 0, 1, 'L');
+            $pdf->Cell(234, 5, ': ' . $result[0]['tgl_po'], 0, 1, 'L');
         } else {
             $pdf->Cell(234, 5, ': No delivery date available', 0, 1, 'L');
         }
@@ -224,7 +228,7 @@ class PdfController extends BaseController
         $pdf->Cell(55, 5, '', 0, 0, 'C');
         $pdf->Cell(55, 5, '(                               )', 0, 0, 'C');
         if (!empty($result)) {
-            $pdf->Cell(55, 5, $result[0]['penanggung_jawab'], 0, 0, 'C');
+            $pdf->Cell(55, 5, '(       '.$result[0]['penanggung_jawab'].'      )', 0, 0, 'C');
         } else {
             $pdf->Cell(234, 5, ': No penanggung_jawab available', 0, 0, 'C');
         }
