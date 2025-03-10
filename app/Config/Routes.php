@@ -24,7 +24,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('updateOrder', 'MasterdataController::updateOrder');
     $routes->post('deleteOrder', 'MasterdataController::deleteOrder');
 
-    $routes->get('material', 'MasterdataController::material/$1');
+    $routes->get('material/(:num)', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');
     $routes->get('getMaterialDetails/(:num)', 'MasterdataController::getMaterialDetails/$1');
     $routes->post('tambahMaterial', 'MaterialController::tambahMaterial');
@@ -129,6 +129,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('tampilPerDays', 'PphController::tampilPerDays');
     $routes->get('pphPerArea/(:any)/tampilPerModel', 'PphController::tampilPerModel');
     $routes->post('tampilPerModel', 'PphController::tampilPerModel');
+    //PO Covering
+    $routes->get('poCovering', 'POCoveringController::index');
+    $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
 });
 
 // celup routes
