@@ -192,9 +192,8 @@ class OpenPoModel extends Model
 
     public function getPoForCelup($tgl_po)
     {
-        return $this->select('open_po.*, master_material.jenis, master_order.buyer, master_order.no_order, master_order.delivery_awal')
+        return $this->select('open_po.*, master_material.jenis')
             ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
-            ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
             ->where('open_po.id_induk IS NOT NULL')
             ->where('DATE(open_po.created_at)', $tgl_po)
             ->findAll();
@@ -218,5 +217,12 @@ class OpenPoModel extends Model
             ->where('open_po.item_type', $itemType)
             ->where('open_po.kode_warna', $kodeWarna)
             ->first();
+    }
+
+    public function getDeliveryAwalNoOrderBuyer(){
+        return $this->select('open_po.id_po, open_po.no_model, open_po.id_induk, master_order.buyer, master_order.no_order, master_order.delivery_awal')
+            ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
+            ->where('id_induk')
+        ->find();
     }
 }
