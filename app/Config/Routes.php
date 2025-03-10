@@ -24,7 +24,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('updateOrder', 'MasterdataController::updateOrder');
     $routes->post('deleteOrder', 'MasterdataController::deleteOrder');
 
-    $routes->get('material/(:any)', 'MasterdataController::material/$1');
+    $routes->get('material', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');
     $routes->get('getMaterialDetails/(:num)', 'MasterdataController::getMaterialDetails/$1');
     $routes->post('tambahMaterial', 'MaterialController::tambahMaterial');
@@ -301,8 +301,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('tampilPerStyle/(:any)', 'PphController::tampilPerStyle/$1');
     $routes->get('tampilPerDays', 'PphController::tampilPerDays');
     $routes->post('tampilPerDays', 'PphController::tampilPerDays');
-    $routes->get('tampilPerModel', 'PphController::tampilPerModel');
-    $routes->post('tampilPerModel', 'PphController::tampilPerModel');
+    $routes->get('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');
+    $routes->get('tampilPerModel/(:any)/(:any)', 'PphController::tampilPerModel/$1/$2');
+    // $routes->post('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');
     //Celup
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
@@ -331,11 +332,14 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
 
 // api routes
 $routes->group(
-    '/api',
+    'api',
     function ($routes) {
         $routes->get('statusbahanbaku/(:any)', 'ApiController::statusbahanbaku/$1');
         $routes->get('cekBahanBaku/(:any)', 'ApiController::cekBahanBaku/$1');
         $routes->get('cekStok/(:any)', 'ApiController::cekStok/$1');
         $routes->get('getMU/(:any)/(:any)', 'ApiController::getMU/$1/$2');
+        $routes->get('getMaterialForPPH/(:any)', 'ApiController::getMaterialForPPH/$1');
+        $routes->get('getMaterialForPPHByAreaAndNoModel/(:segment)/(:segment)', 'ApiController::getMaterialForPPHByAreaAndNoModel/$1/$2');
+        // $routes->get('getMaterialForPPH/(:any)/(:any)', 'ApiController::getMaterialForPPH/$1/$2');
     }
 );

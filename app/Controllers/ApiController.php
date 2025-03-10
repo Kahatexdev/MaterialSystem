@@ -164,4 +164,29 @@ class ApiController extends ResourceController
 
         return $this->respond($mu, 200);
     }
+
+    public function getMaterialForPPH($area)
+    {
+        $material = $this->materialModel->getMaterialForPPH($area);
+
+        if (empty($material)) {
+            return $this->failNotFound('Data tidak ditemukan');
+        } else {
+            return $this->respond($material, 200);
+        }
+    }
+
+    public function getMaterialForPPHByAreaAndNoModel($area, $noModel)
+    {
+        $material = $this->materialModel->getMaterialForPPHByNoModel($area, $noModel);
+
+        log_message('info', 'Material: ' . json_encode($material));
+        log_message('info', 'Area: ' . $area);
+        log_message('info', 'No Model: ' . $noModel);
+        if (empty($material)) {
+            return $this->failNotFound('Data tidak ditemukan');
+        }
+
+        return $this->respond($material, 200);
+    }
 }

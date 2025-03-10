@@ -160,4 +160,49 @@ class MaterialModel extends Model
             ->orderBy('master_order.no_model, material.inisial, material.style_size, material.item_type, material.kode_warna', 'ASC')
             ->findAll();
     }
+
+    public function getMaterialForPPHByNoModel($area, $searchNoModel = null)
+    {
+        return $this->select('material.id_order, master_order.no_model, material.area, master_order.delivery_awal, material.style_size, material.item_type,material.color, material.kode_warna, material.composition, material.gw,material.qty_pcs, material.loss, SUM(material.kgs) AS ttl_kebutuhan')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('material.area', $area)
+            ->like('master_order.no_model', $searchNoModel)
+            ->groupBy('material.style_size, material.item_type, material.kode_warna')
+            ->findAll();
+    }
+
+    public function getMaterialForPPH($area, $no_model = null)
+    {
+        $builder = $this->select('
+            material.id_order, 
+            master_order.no_model, 
+            material.area, 
+            master_order.delivery_awal, 
+            material.style_size, 
+            material.item_type, 
+            material.color, 
+            material.kode_warna, 
+            material.composition, 
+            material.gw, 
+            material.qty_pcs, 
+            material.loss, 
+            SUM(material.kgs) AS ttl_kebutuhan
+        ')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('material.area', $area);
+
+        // Tambahkan filter untuk no_model jika ada
+        if (!empty($no_model)) {
+            $builder->where('master_order.no_model', $no_model);
+        }
+
+        // Pastikan semua kolom yang tidak menggunakan agregasi masuk dalam groupBy
+        $builder->groupBy('
+        material.style_size, 
+        material.item_type, 
+        material.kode_warna
+    ');
+
+        return $builder->findAll();
+    }
 }
