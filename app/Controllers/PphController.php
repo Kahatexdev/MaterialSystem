@@ -65,37 +65,152 @@ class PphController extends BaseController
 
     public function tampilPerStyle($area)
     {
-        if ($this->request->isAJAX()) {
-            $nomodel = $this->request->getPost('nomodel');
+        // Ambil parameter pencarian no_model
+        $searchNoModel = $this->request->getGet('no_model');
 
-            $dataPph = $this->materialModel->getDataPPHInisial($area, $nomodel);
-
-            // Panggil API eksternal
-            $apiUrl = "http://172.23.44.14/CapacitySystem/public/api/getDataForPPH/$area/$nomodel";
-            $response = file_get_contents($apiUrl);
-
-            if ($response === FALSE) {
-                log_message('error', "API tidak bisa diakses: $apiUrl");
-                return $this->response->setJSON(["error" => "Gagal mengambil data dari API"]);
-            }
-
-            // Log response API ke file log (application/logs/)
-            log_message('debug', "Response API: " . print_r(json_decode($response, true), true));
-
-            // Return hasil response API ke frontend
-            return $this->response->setJSON([
-                "data" => json_decode($response, true),
-                "data_pph" => $dataPph
+        // Jika parameter belum diisi, kembalikan view dengan data kosong
+        if (empty($searchNoModel)) {
+            return view($this->role . '/pph/pphPerStyle', [
+                'active'     => $this->active,
+                'title'      => 'PPH',
+                'role'       => $this->role,
+                'area'       => $area,
+                'mergedData' => [] // Tidak ada data sampai search diisi
             ]);
         }
+        // Get data from the database model.
+        $dataPph = $this->materialModel->getDataPPHInisial($area, $searchNoModel);
+        
 
-        return view($this->role . '/pph/pphPerStyle', [
-            'active' => $this->active,
-            'title' => 'PPH: Per Style',
-            'role' => $this->role,
-            'area' => $area,
-            'dataPph' => []
-        ]);
+        // Build API URL dynamically.
+        $apiUrl = "http://172.23.44.14/CapacityApps/public/api/getDataForPPH/"
+            . urlencode($area) . "/"
+            . urlencode($searchNoModel);
+
+        $client = \Config\Services::curlrequest();
+
+        try {
+            $response = $client->request('GET', $apiUrl);
+
+            // Pastikan response berhasil (status code 200)
+            if ($response->getStatusCode() !== 200) {
+                throw new \Exception("Server mengembalikan status " . $response->getStatusCode());
+            }
+
+            $apiData = json_decode($response->getBody(), true);
+
+            // Validasi jika response tidak valid atau kosong
+            if (empty($apiData) || !is_array($apiData)) {
+                session()->setFlashdata(
+                    'error',
+                    '<strong>Peringatan!</strong> Data dari CapacityApps tidak tersedia atau formatnya tidak valid. Silakan coba lagi nanti.'
+                );
+                $apiData = [];
+            }
+        } catch (\Exception $e) {
+            session()->setFlashdata(
+                'error',
+                '<strong>Kesalahan!</strong> Gagal mengambil data dari <strong>CapacityApps</strong>.<br>'
+                    . 'Silahkan Hubungi <strong>Monitoring</strong>' 
+            );
+            $apiData = [];
+        }
+
+
+        // Initialize the array for merged data.
+        $modelData = [];
+
+        // Process API data.
+        if ($apiData && is_array($apiData)) {
+            foreach ($apiData as $key => $item) {
+                // Explode the key to get area, model, and style size.
+                $keyParts = explode('-', $key);
+                if (count($keyParts) >= 3) {
+                    $areaFromKey     = $keyParts[0];
+                    $noModelFromKey  = $keyParts[1];
+                    $styleSizeFromKey = implode('-', array_slice($keyParts, 2));
+
+                    // Only include if the area and model match.
+                    if ($areaFromKey === $area && $noModelFromKey === $searchNoModel) {
+                        $modelData[$key] = [
+                            'jarum'        => 'tes',
+                            'area'         => $item['area'] ?? null,
+                            'no_model'     => $item['no_model'] ?? null,
+                            'style_size'   => $styleSizeFromKey,
+                            'bruto'        => $item['bruto'] ?? 0,
+                            'netto'        => ($item['bruto'] - $item['bs_setting']) ?? 0,
+                            'item_type'     => $item['item_type'] ?? null,
+                            'color'         => $item['color'] ?? null,
+                            'kode_warna'    => $item['kode_warna'] ?? null,
+                            'composition'   => $item['composition'] ?? 0,
+                            'gw'            => $item['gw'] ?? null,
+                            'qty_pcs'       => $item['qty_pcs'] ?? 0,
+                            'bs_pcs'      => $item['bs_pcs'] ?? 0,
+                            'bs_setting'    => $item['bs_setting'] ?? 0,
+                            'loss'          => $item['loss'] ?? null,
+                            'ttl_kebutuhan' => $item['ttl_kebutuhan'] ?? null,
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Merge database data if not already included from API.
+        foreach ($dataPph as $model) {
+            $key = $model['area'] . '-' . $model['no_model'] . '-' . $model['style_size'];
+            if (!isset($modelData[$key])) {
+                $modelData[$key] = [
+                    'jarum'        => 'tes',
+                    'area'         => $model['area'],
+                    'no_model'     => $model['no_model'],
+                    'inisial'      => $model['inisial'],
+                    'style_size'   => $model['style_size'],
+                    'bruto'        => 0, // API might have bruto; otherwise, keep it null.
+                    'netto'        => 0, // API might have bruto; otherwise, keep it null.
+                    'item_type'    => $model['item_type'] ?? null,
+                    'color'        => $model['color'] ?? null,
+                    'kode_warna'   => $model['kode_warna'] ?? null,
+                    'composition'  => $model['composition'] ?? 0,
+                    'gw'           => $model['gw'] ?? 0,
+                    'qty_pcs'      => $model['qty_pcs'] ?? 0,
+                    'bs_pcs'     => 0,
+                    'bs_setting'   => 0,
+                    'loss'         => $model['loss'] ?? 0,
+                    'kgs'          => $model['kgs'] ?? 0,
+                ];
+            }
+        }
+        // Set flash message if no data found.
+        if (empty($dataPph)) {
+            session()->setFlashdata('error', 'Data tidak ditemukan untuk area: ' . $area);
+        }
+        
+        $mergedData = [];
+        // Loop untuk menggabungkan data
+        foreach ($dataPph as $row) {
+            // Buat key gabungan dari data database
+            $key = $row['area'] . '-' . $row['no_model'] . '-' . $row['style_size'];
+            
+            // Cek apakah ada data dari API dengan key yang sama
+            if (isset($apiData[$key])) {
+                // Gabungkan kedua array; kamu bisa mengatur prioritas data jika perlu
+                $mergedRow = array_merge($row, $apiData[$key]);
+            } else {
+                $mergedRow = $row;
+            }
+            $mergedData[] = $mergedRow;
+        }
+        // dd($dataPph, $apiData, $mergedData);
+
+        $data = [
+            'active'    => $this->active,
+            'title'     => 'PPH',
+            'role'      => $this->role,
+            'area'      => $area, // Passing the merged data to the view.
+            'mergedData' => $mergedData
+        ];
+        // dd($mergedData);
+        return view($this->role . '/pph/pphPerStyle', $data);
     }
 
     public function tampilPerDays()
@@ -197,8 +312,7 @@ class PphController extends BaseController
         // Get data from the database model.
         // $models = $this->materialModel->getMaterialForPPH($area);
         $models = $this->materialModel->getMaterialForPPH($area, $searchNoModel);
-
-
+        
         // Build API URL dynamically.
         $apiUrl = "http://172.23.44.14/CapacityApps/public/api/getDataForPPH/"
             . urlencode($area) . "/"
@@ -253,50 +367,60 @@ class PphController extends BaseController
                             'area'         => $item['area'] ?? null,
                             'no_model'     => $item['no_model'] ?? null,
                             'style_size'   => $styleSizeFromKey,
-                            'bruto'        => $item['bruto'] ?? null,
                             'delivery_awal' => $item['delivery_awal'] ?? null,
                             'item_type'    => $item['item_type'] ?? null,
                             'color'        => $item['color'] ?? null,
                             'kode_warna'   => $item['kode_warna'] ?? null,
-                            'composition'  => $item['composition'] ?? null,
-                            'gw'           => $item['gw'] ?? null,
-                            'qty_pcs'      => $item['qty_pcs'] ?? null,
-                            'loss'         => $item['loss'] ?? null,
-                            'ttl_kebutuhan' => $item['ttl_kebutuhan'] ?? null,
+                            'composition'  => $item['composition'] ?? 0,
+                            'gw'           => $item['gw'] ?? 0,
+                            'loss'         => $item['loss'] ?? 0,
+                            'ttl_kebutuhan' => $item['ttl_kebutuhan'] ?? 0,
+                            'qty_pcs'      => $item['qty_pcs'] ?? 0,
+                            'bruto'        => $item['bruto'] ?? 0,
+                            'bs_pcs'      => $item['bs_pcs'] ?? 0,
+                            'bs_setting'    => $item['bs_setting'] ?? 0,
+                            'ttl_pemakaian' =>  0,
                         ];
                     }
                 }
             }
         }
 
-        // Merge database data if not already included from API.
+       $minum = [];
+
+        // Gabungkan data dari API dan database
         foreach ($models as $model) {
-            $key = $model['area'] . '-' . $model['no_model'] . '-' . $model['style_size'];
-            if (!isset($modelData[$key])) {
-                $modelData[$key] = [
-                    'area'         => $model['area'],
-                    'no_model'     => $model['no_model'],
-                    'style_size'   => $model['style_size'],
-                    'bruto'        => null, // API might have bruto; otherwise, keep it null.
-                    'delivery_awal' => $model['delivery_awal'] ?? null,
-                    'item_type'    => $model['item_type'] ?? null,
-                    'color'        => $model['color'] ?? null,
-                    'kode_warna'   => $model['kode_warna'] ?? null,
-                    'composition'  => $model['composition'] ?? null,
-                    'gw'           => $model['gw'] ?? null,
-                    'qty_pcs'      => $model['qty_pcs'] ?? null,
-                    'loss'         => $model['loss'] ?? null,
-                    'ttl_kebutuhan' => $model['ttl_kebutuhan'] ?? null,
-                ];
-            }
-        }
+            $key = $model['area'] . '-' . $model['no_model'] . '-' . $model['style_size'] . '-' . $model['item_type'] . '-' . $model['kode_warna'];
 
-        // Set flash message if no data found.
-        if (empty($models)) {
-            session()->setFlashdata('error', 'Data tidak ditemukan untuk area: ' . $area);
-        }
+            $bruto = $model['bruto'] ?? 0;
+            $bs_pcs = $model['bs_pcs'] ?? 0;
+            $composition = $model['composition'] ?? 0;
+            $gw = $model['gw'] ?? 0;
 
-        $mergedData = [];
+            $ttl_pemakaian = (($bruto + $bs_pcs) * ($composition / 100) * $gw) / 1000;
+            
+            $minum[$key] = [
+                'area'         => $model['area'],
+                'no_model'     => $model['no_model'],
+                'style_size'   => $model['style_size'],
+                'bruto'        => $model['bruto'] ?? 0, 
+                'delivery_awal' => $model['delivery_awal'] ?? null,
+                'item_type'    => $model['item_type'] ?? null,
+                'color'        => $model['color'] ?? null,
+                'kode_warna'   => $model['kode_warna'] ?? null,
+                'composition'  => $model['composition'] ?? 0,
+                'gw'           => $model['gw'] ?? 0,
+                'loss'         => $model['loss'] ?? 0,
+                'qty_pcs'      => $model['qty_pcs'] ?? 0,
+                'bs_pcs'       => $model['bs_pcs'] ?? 0,
+                'bs_setting'   => $model['bs_setting'] ?? 0,
+                'ttl_kebutuhan' => $model['ttl_kebutuhan'] ?? 0,
+                // 'ttl_pemakaian' => (($model['bruto'] + $model['bs_pcs']) * $model['composition'] / 100 * $model['gw'] / 1000) ?? 0,
+            ];
+        }
+        // dd($minum);
+        // Bandingkan dengan data dari API
+        $gabungdData = [];
         // Loop untuk menggabungkan data
         foreach ($models as $row) {
             // Buat key gabungan dari data database
@@ -306,19 +430,101 @@ class PphController extends BaseController
             if (isset($apiData[$key])) {
                 // Gabungkan kedua array; kamu bisa mengatur prioritas data jika perlu
                 $mergedRow = array_merge($row, $apiData[$key]);
+                $bruto = $mergedRow['bruto'] ?? 0;
+                // dd($bruto);
+    
+                $bs_pcs = $mergedRow['bs_pcs'] ?? 0;
+                $composition = $mergedRow['composition'] ?? 0;
+                $gw = $mergedRow['gw'] ?? 0;
+    
+                $ttl_pemakaian = (($bruto + $bs_pcs) * ($composition / 100) * $gw) / 1000;
             } else {
                 $mergedRow = $row;
             }
-            $mergedData[] = $mergedRow;
+
+            // Tambahkan ttl_pemakaian ke dalam array hasil merge
+            $mergedRow['ttl_pemakaian'] = $ttl_pemakaian;
+            // $ttl_pemakaian += $ttl_pemakaian;
+            $gabungdData[] = $mergedRow;
         }
-        // dd($models, $apiData, $mergedData);
+
+        // dd($gabungdData);
+        // Set flash message if no data found.
+        if (empty($models)) {
+            session()->setFlashdata('error', 'Data tidak ditemukan untuk area: ' . $area);
+        }
+
+       $mergedData = [];
+        $sumData = [];
+
+        // Gabungkan data dari API dan hitung ttl_pemakaian
+        foreach ($gabungdData as $row) {
+            $key = ($row['area'] ?? '') . '-' . ($row['no_model'] ?? '') . '-' . ($row['style_size'] ?? '');
+
+            if (!isset($sumData[$key])) {
+                $sumData[$key] = [
+                    'qty' => $row['qty_pcs'] ?? 0,
+                    'bruto' => $row['bruto'] ?? 0,
+                    'sisa' => $row['sisa'] ?? 0,
+                    'bs_pcs' => $row['bs_pcs'] ?? 0,
+                    'bs_setting' => $row['bs_setting'] ?? 0,
+                    'ttl_pemakaian' => $row['ttl_pemakaian'] ?? 0
+                ];
+            } else {
+                // Menjumlahkan data jika key sudah ada
+                // $sumData[$key]['qty'] += $row['qty_pcs'] ?? 0;
+                // $sumData[$key]['bruto'] += $row['bruto'] ?? 0;
+                // $sumData[$key]['sisa'] += $row['sisa'] ?? 0;
+                // $sumData[$key]['bs_pcs'] += $row['bs_pcs'] ?? 0;
+                // $sumData[$key]['bs_setting'] += $row['bs_setting'] ?? 0;
+                $sumData[$key]['ttl_pemakaian'] += $row['ttl_pemakaian'] ?? 0;
+            }
+        }
+
+        // dd($sumData);
+        // Gabungkan data dari database
+        foreach ($models as $row) {
+            $key = ($row['area'] ?? '') . '-' . ($row['no_model'] ?? '') . '-' . ($row['style_size'] ?? '');
+
+            if (isset($sumData[$key])) {
+                // Gabungkan data dari database dan API
+                $mergedRow = array_merge($row, $sumData[$key]);
+            } else {
+                // Jika tidak ada di API, gunakan data dari database
+                $mergedRow = $row;
+            }
+
+            $mergedData[$key] = $mergedRow;
+        }
+        // dd($mergedData);
+        // Menjumlahkan bruto, bs_pcs, dan bs_setting
+        $makan = [
+            'total_qty_pcs' => 0,
+            'total_bruto' => 0,
+            'total_sisa' => 0,
+            'total_bs_pcs' => 0,
+            'total_bs_setting' => 0,
+            'total_pemakaian' => 0
+        ];
+
+        foreach ($mergedData as $row) {
+            $makan['total_qty_pcs'] += $row['qty'] ?? 0;
+            $makan['total_bruto'] += $row['bruto'] ?? 0;
+            $makan['total_sisa'] += $row['sisa'] ?? 0;
+            $makan['total_bs_pcs'] += $row['bs_pcs'] ?? 0;
+            $makan['total_bs_setting'] += $row['bs_setting'] ?? 0;
+            $makan['total_pemakaian'] += $row['ttl_pemakaian'] ?? 0;
+        }
+
+        // dd($models, $apiData, $gabungdData, $mergedData, $makan);
 
         $data = [
             'active'    => $this->active,
             'title'     => 'PPH',
             'role'      => $this->role,
             'area'      => $area, // Passing the merged data to the view.
-            'mergedData' => $mergedData
+            'mergedData' => $mergedData,
+            'makan'      => $makan // Totalan
         ];
         // dd($mergedData);
         return view($this->role . '/pph/pphPerModel', $data);

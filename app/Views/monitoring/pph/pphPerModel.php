@@ -61,35 +61,31 @@
                                 </thead>
                                 <tbody id="tableBody">
                                     <?php $no = 1;
-                                    foreach ($mergedData as $item): ?>
+                                        foreach ($mergedData  as $keb): ?> 
                                         <tr>
                                             <td><?= $no++ ?></td>
-                                            <td><?= esc($item['no_model']) ?></td>
-                                            <td><?= esc($item['area']) ?></td>
-                                            <td><?= esc($item['delivery_awal']) ?></td>
-                                            <td><?= esc($item['item_type']) ?></td>
-                                            <td><?= esc($item['color']) ?></td>
-                                            <td><?= esc($item['kode_warna']) ?></td>
-                                            <td><?= esc($item['loss']) ?></td>
-                                            <td><?= esc($item['composition']) ?></td>
-                                            <td><?= esc($item['gw']) ?></td>
-                                            <td><?= esc($item['qty_pcs']) ?></td>
-                                            <td><?= isset($item['bruto']) ? esc($item['bruto']) : '-' ?></td>
-                                            <td><?= isset($item['sisa']) ? esc($item['sisa']) : '-' ?></td>
-                                            <td><?= esc(number_format($item['ttl_kebutuhan'], 2)) ?></td>
-                                            <td>
-                                                <?= isset($item['bruto'], $item['composition'], $item['gw'])
-                                                    ? esc(round(($item['bruto'] * 24 * ($item['composition'] / 100) * $item['gw']) / 1000, 2))
-                                                    : '-'
-                                                ?>
-                                            </td>
-                                            <td>
-                                                <?= isset($item['bruto'], $item['composition'], $item['gw'], $item['qty_pcs'])
-                                                    ? esc(round((($item['bruto'] * 24 * ($item['composition'] / 100) * $item['gw']) / 1000) / $item['qty_pcs'] * 100, 2))
-                                                    : '-'
-                                                ?>
-                                            </td>
-                                        <?php endforeach ?>
+                                            <td><?= esc($keb['no_model']) ?></td>
+                                            <td><?= esc($keb['area']) ?></td>
+                                            <td><?= esc($keb['delivery_awal']) ?></td>
+                                            <td><?= esc($keb['item_type']) ?></td>
+                                            <td><?= esc($keb['color']) ?></td>
+                                            <td><?= esc($keb['kode_warna']) ?></td>
+                                            <td><?= esc($keb['loss']) ?></td>
+                                            <td><?= esc($keb['composition']) ?></td>
+                                            <td><?= esc($keb['gw']) ?></td>
+                                                <td><?= esc($makan['total_qty_pcs']) ?></td>
+                                                <td><?= esc($makan['total_bruto']); ?></td>
+                                                <td><?= esc($makan['total_sisa']); ?></td>
+                                                <td><?= esc(number_format($keb['ttl_kebutuhan'], 2)) ?></td>
+                                                <td>
+                                                    <?= esc(number_format($keb['ttl_pemakaian'], 2)) ?>
+                                                </td>
+                                                <td>
+                                                    <?= 
+                                                        round((($makan['total_bruto'] / $makan['total_qty_pcs']) * 100), 2)
+                                                    ?>
+                                                </td>
+                                                <?php endforeach ?>
                                 </tbody>
                             </table>
                         </div>
