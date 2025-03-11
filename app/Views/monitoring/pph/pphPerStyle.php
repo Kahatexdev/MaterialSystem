@@ -16,10 +16,15 @@
                             </div>
                         </div>
                         <div class="d-flex gap-2">
-                            <input type="text" class="form-control" name="nomodel" id="nomodel" placeholder="No Model">
-                            <button class="btn btn-filter" id="filter_date_range">
-                                <i class="bi bi-funnel me-2"></i>Filter
-                            </button>
+                            <!-- Form Pencarian -->
+                            <form action="<?= base_url($role . '/tampilPerStyle/' . $area) ?>" method="get" class="form-inline">
+                                <div class="d-flex align-items-center">
+                                    <input type="text" name="no_model" id="no_model" class="form-control mr-2" placeholder="Masukkan No Model" value="<?= isset($_GET['no_model']) ? esc($_GET['no_model']) : '' ?>">
+                                    <button type="submit" class="btn bg-gradient-info text-white ms-2">
+                                        <i class="fas fa-search"></i> Filter
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -30,7 +35,7 @@
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table id="example" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
+                    <table class="display text-center text-uppercase text-xs font-bolder" id="dataTable" style="width:100%">
                         <thead>
                             <tr>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
@@ -47,13 +52,51 @@
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">GW</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Qty PO (Pcs)</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Total Kebutuhan (Kg)</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Total Produksi (Pcs)</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Netto (Pcs)</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Bs Mc (Pcs)</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Bs Setting (Pcs)</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Sisa</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">Total Pemakaian</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2">% Pemakaian</th>
                             </tr>
                         </thead>
-                        <tbody></tbody>
+                        <tbody>
+                            <?php $no = 1;
+                                foreach ($mergedData as $item): ?>
+                                    <tr>
+                                        <td><?= $no++ ?></td>
+                                        <td></td>
+                                        <td><?= esc($item['no_model']) ?></td>
+                                        <td><?= esc($item['area']) ?></td>
+                                        <td><?= esc($item['inisial']) ?></td>
+                                        <td><?= esc($item['style_size']) ?></td>
+                                        <td><?= esc($item['item_type']) ?></td>
+                                        <td><?= esc($item['color']) ?></td>
+                                        <td><?= esc($item['kode_warna']) ?></td>
+                                        <td><?= esc($item['loss']) ?></td>
+                                        <td><?= esc($item['composition']) ?></td>
+                                        <td><?= esc($item['gw']) ?></td>
+                                        <td><?= esc($item['qty_pcs']) ?></td>
+                                        <td><?= esc(number_format($item['kgs'], 2)) ?></td>
+                                        <td><?= isset($item['bruto']) ? esc($item['bruto']-$item['bs_setting']) : '-' ?></td>
+                                        <td><?= isset($item['bs_pcs']) ? esc($item['bs_pcs']) : '-' ?></td>
+                                        <td><?= isset($item['bs_setting']) ? esc($item['bs_setting']) : '-' ?></td>
+                                        <td><?= isset($item['sisa']) ? esc($item['sisa']) : '-' ?></td>
+                                        <td>
+                                            <?= isset($item['bruto'], $item['bs_pcs'], $item['composition'], $item['gw'])
+                                                ? esc(round((($item['bruto'] + $item['bs_pcs']) * ($item['composition'] / 100) * $item['gw']) / 1000, 2))
+                                                : '-'
+                                            ?>
+                                        </td>
+                                        <td>
+                                            <?= isset($item['bruto'], $item['bs_pcs'], $item['composition'], $item['gw'], $item['qty_pcs'])
+                                                ? esc(round(((($item['bruto'] + $item['bs_pcs']) * ($item['composition'] / 100) * $item['gw']) / 1000) / $item['qty_pcs'] * 100, 2))
+                                                : '-'
+                                            ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach ?>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -85,86 +128,7 @@
     <script src="<?= base_url('assets/js/plugins/chartjs.min.js') ?>"></script>
     <script type="text/javascript">
         $(document).ready(function() {
-            var table = $('#example').DataTable({
-                processing: true,
-                serverSide: true,
-                searching: false, // Nonaktifkan pencarian bawaan
-                paging: true,
-                ordering: false,
-                info: true,
-                ajax: {
-                    url: "<?= base_url($role . '/tampilPerStyle/' . $area) ?>",
-                    type: "POST",
-                    data: function(d) {
-                        d.nomodel = $('#nomodel').val(); // Kirim data No Model saat tombol filter diklik
-                    },
-                    dataSrc: function(json) {
-                        return json.data; // Pastikan data diambil dari properti 'data'
-                    }
-                },
-                columns: [{
-                        data: null,
-                        render: function(data, type, row, meta) {
-                            return meta.row + 1; // Nomor urut
-                        }
-                    },
-                    {
-                        data: "machinetypeid" //machinetypeid
-                    },
-                    {
-                        data: "no_model"
-                    },
-                    {
-                        data: "area"
-                    },
-                    {
-                        data: "inisial"
-                    },
-                    {
-                        data: "style_size"
-                    },
-                    {
-                        data: "item_type"
-                    },
-                    {
-                        data: "color"
-                    },
-                    {
-                        data: "kode_warna"
-                    },
-                    {
-                        data: "loss"
-                    },
-                    {
-                        data: "composition"
-                    },
-                    {
-                        data: "gw"
-                    },
-                    {
-                        data: "qty_pcs"
-                    },
-                    {
-                        data: null //qty_produksi
-                    },
-                    {
-                        data: null //sisa
-                    },
-                    {
-                        data: "kgs"
-                    },
-                    {
-                        data: null
-                    },
-                    {
-                        data: null
-                    }
-                ]
-            });
-
-            $('#filter_date_range').click(function() {
-                table.ajax.reload(); // Refresh tabel saat tombol filter diklik
-            });
+            $('#dataTable').DataTable();
         });
     </script>
 
