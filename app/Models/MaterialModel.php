@@ -190,6 +190,7 @@ class MaterialModel extends Model
         ')
             ->join('master_order', 'master_order.id_order = material.id_order')
             ->where('material.area', $area);
+        // ->where('material.style_size', 'J401514-17 18X6');
 
         // Tambahkan filter untuk no_model jika ada
         if (!empty($no_model)) {

@@ -305,7 +305,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('tampilPerDays', 'PphController::tampilPerDays');
     $routes->post('tampilPerDays', 'PphController::tampilPerDays');
     $routes->get('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');
-    $routes->get('tampilPerModel/(:any)/(:any)', 'PphController::tampilPerModel/$1/$2');
+    $routes->get('getDataModel', 'PphController::getDataModel');
+    $routes->get('pphinisial', 'PphController::pphinisial');
     // $routes->post('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');
     //Celup
     $routes->get('schedule', 'ScheduleController::index');
