@@ -268,8 +268,9 @@ class PphController extends BaseController
             $gw = $items['gw'];
             $comp = $items['composition'];
             $gwpcs = ($gw * $comp) / 100;
-
+            $styleSize = urlencode($styleSize);
             $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
+
             $response = file_get_contents($apiUrl);
 
             if ($response === FALSE) {
@@ -285,23 +286,29 @@ class PphController extends BaseController
 
                 $bruto = $data['bruto'] ?? 0;
                 $bs_mesin = $data['bs_mesin'] ?? 0;
+                $pph = (($bruto * $gwpcs) + $bs_mesin) / 1000;
+
 
                 $pphInisial[] = [
                     'area'  => $items['area'],
                     'style_size'  => $items['style_size'],
-                    'inisial'  => $items['inisial'],
+                    'inisial'  => $data['inisial'],
                     'item_type'  => $items['item_type'],
+                    'kode_warna'  => $items['kode_warna'],
                     'color'      => $items['color'],
+                    'ttl_kebutuhan' => $items['ttl_kebutuhan'],
                     'gw'         => $items['gw'],
                     'composition' => $items['composition'],
                     'jarum'      => $data['machinetypeid'] ?? null,
                     'bruto'      => $bruto,
+                    'netto'      => $bruto - $data['bs_setting'] ?? 0,
                     'qty'        => $data['qty'] ?? 0,
                     'sisa'       => $data['sisa'] ?? 0,
                     'po_plus'    => $data['po_plus'] ?? 0,
                     'bs_setting' => $data['bs_setting'] ?? 0,
                     'bs_mesin'   => $bs_mesin,
-                    'pph'        => ($bruto * $gwpcs) + ($bs_mesin / 1000)
+                    'pph'        => $pph,
+                    'pph_persen' => ($pph / $items['ttl_kebutuhan'])*100,
                 ];
             }
         }
