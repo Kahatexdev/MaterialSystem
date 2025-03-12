@@ -92,6 +92,7 @@ class PphController extends BaseController
         $model = $this->request->getGet('model');
         $area = $this->request->getGet('area');
         $models = $this->materialModel->getMaterialForPPH($area, $model);
+        
         $pphInisial = [];
 
         foreach ($models as $items) {
@@ -148,7 +149,7 @@ class PphController extends BaseController
         ];
 
         foreach ($pphInisial as $item) {
-            $key = $item['item_type'] . '-' . $item['color'];
+            $key = $item['item_type'] . '-' . $item['kode_warna'];
 
             if (!isset($result[$key])) {
                 $result[$key] = [
@@ -176,6 +177,7 @@ class PphController extends BaseController
             $result[$key]['jarum'] = $item['jarum'];
             $result[$key]['area'] = $item['area'];
         }
+
         return $this->response->setJSON($result);
     }
 
@@ -235,6 +237,15 @@ class PphController extends BaseController
                 ];
             }
         }
-        return $this->response->setJSON($pphInisial);
+
+        $dataToSort = array_filter($pphInisial, 'is_array');
+
+        usort($dataToSort, function ($a, $b) {
+            return $a['inisial'] <=> $b['inisial']
+                ?: $a['item_type'] <=> $b['item_type']
+                ?: $a['kode_warna'] <=> $b['kode_warna'];
+        });
+        
+        return $this->response->setJSON($dataToSort);
     }
 }

@@ -127,6 +127,7 @@
 
             loading.style.display = 'block'; // T
             info.style.display = 'none'; // Sembunyikan loading setelah selesai
+            
 
             $.ajax({
                 url: "<?= base_url($role . '/pphinisial') ?>",
@@ -151,10 +152,12 @@
         function fethcData(data, model, area) {
             let header = document.getElementById('HeaderRow');
 
+            let baseUrl = "<?= base_url($role . '/excelPPHInisial/') ?>";
+
             header.innerHTML = `
             <div class="d-flex align-items-center justify-content-between">
                 <h3>${model} || ${area}</h3>
-                <a href="#" id="exportExcel" class="btn btn-success">
+                <a href="${baseUrl}${area}/${model}" id="exportExcel" class="btn btn-success">
                     <i class="fas fa-file-excel"></i> Export Excel
                 </a>
             </div>`;
@@ -179,7 +182,6 @@
         <td>${(parseFloat(item.netto || 0) / 24).toFixed(2)}</td>
         <td>${parseFloat(item.bs_mesin || 0)}</td>
         <td>${(parseFloat(item.bs_setting || 0) / 24).toFixed(2)}</td>
-        <td>${parseFloat(item.sisa || 0)}</td>
         <td>${parseFloat(item.pph || 0).toFixed(2)}</td>
         <td>${parseFloat(item.pph_persen || 0).toFixed(2)} %</td>
     </tr>
@@ -205,7 +207,6 @@ body.innerHTML = `
                     <th class="text-center">Netto (dz)</th>
                     <th class="text-center">Bs MC (gr)</th>
                     <th class="text-center">Bs Setting (dz)</th>
-                    <th class="text-center">Sisa (dz)</th>
                     <th class="text-center">PPH (kg)</th>
                     <th class="text-center">PPH (%)</th>
                 </tr>
