@@ -1045,16 +1045,9 @@ class PdfController extends BaseController
             }
         }
 
-
-        $poIndex = 0;
-        $totalPo = count($poMapping);
-
         foreach ($poCovering as $index => $row) {
             // Ambil data dari poMapping, kalau ada
             $poData = isset($poMapping[$index]) ? $poMapping[$index] : ['no_model' => '-', 'buyer' => '-', 'delivery_awal' => '-'];
-            $no_model = $poData['no_model'];
-            $buyer = $poData['buyer'];
-            $delivery_awal = $poData['delivery_awal'];
         
             if ($pdf->GetY() + $maxHeight > $yLimit) {
                 $pdf->AddPage(); // Tambah halaman baru
@@ -1088,7 +1081,6 @@ class PdfController extends BaseController
                 $poData = ['no_model' => '-', 'buyer' => '-', 'delivery_awal' => '-'];
             }
 
-
             // Lanjutkan dengan sel lainnya yang juga menyesuaikan tinggi
             $pdf->Cell(17, $maxHeight, '', 1, 0, 'C'); // Bentuk Celup
             $pdf->Cell(20, $maxHeight, $row['color'], 1, 0, 'C');
@@ -1096,9 +1088,6 @@ class PdfController extends BaseController
             $pdf->Cell(10, $maxHeight, $poData['buyer'], 1, 0, 'C');
             $pdf->Cell(25, $maxHeight, $poData['no_model'], 1, 0, 'C');
             $pdf->Cell(16, $maxHeight, $poData['delivery_awal'], 1, 0, 'C');
-            // $pdf->Cell(10, $maxHeight, $buyer, 1, 0, 'C');
-            // $pdf->Cell(25, $maxHeight, $no_model, 1, 0, 'C');
-            // $pdf->Cell(16, $maxHeight, $delivery_awal, 1, 0, 'C');
             $pdf->Cell(15, $maxHeight, $row['kg_po'], 1, 0, 'C');
             $pdf->Cell(13, $maxHeight, '', 1, 0, 'C');
             $pdf->Cell(13, $maxHeight, '', 1, 0, 'C');
@@ -1107,7 +1096,6 @@ class PdfController extends BaseController
             $pdf->Cell(18, $maxHeight, $row['jenis'], 1, 0, 'C');
             $pdf->Cell(18, $maxHeight, '', 1, 0, 'C');
             $pdf->Cell(23, $maxHeight, '', 1, 1, 'C'); 
-            // log_message('info', 'PO Covering: ' . json_encode($getMasterOrder));
         }
         //KETERANGAN
         $pdf->Cell(277, 5, '', 0, 1, 'C');
