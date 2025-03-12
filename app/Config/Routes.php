@@ -298,15 +298,19 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('warehouse/getNoModel', 'WarehouseController::getNoModel');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
 
-    $routes->get('pph', 'PphController::index');
-    $routes->get('pphPerArea/(:any)', 'PphController::pphPerArea/$1');
-    $routes->get('tampilPerStyle/(:any)', 'PphController::tampilPerStyle/$1');
-    $routes->post('tampilPerStyle/(:any)', 'PphController::tampilPerStyle/$1');
+    // $routes->get('pph', 'PphController::index');
+    $routes->get('pph', 'PphController::tampilPerModel');
+    $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
     $routes->get('tampilPerDays', 'PphController::tampilPerDays');
+    $routes->get('pphPerhari', 'PphController::pphPerhari');
     $routes->post('tampilPerDays', 'PphController::tampilPerDays');
     $routes->get('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');
-    $routes->get('tampilPerModel/(:any)/(:any)', 'PphController::tampilPerModel/$1/$2');
+    $routes->get('getDataModel', 'PphController::getDataModel');
+    $routes->get('pphinisial', 'PphController::pphinisial');
+    $routes->get('getDataPerhari', 'PphController::getDataPerhari');
     // $routes->post('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');
+    $routes->get('excelPPHNomodel/(:any)/(:any)', 'ExcelController::excelPPHNomodel/$1/$2');
+    $routes->get('excelPPHInisial/(:any)/(:any)', 'ExcelController::excelPPHInisial/$1/$2');
     //Celup
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
@@ -343,6 +347,8 @@ $routes->group(
         $routes->get('getMU/(:any)/(:any)', 'ApiController::getMU/$1/$2');
         $routes->get('getMaterialForPPH/(:any)', 'ApiController::getMaterialForPPH/$1');
         $routes->get('getMaterialForPPHByAreaAndNoModel/(:segment)/(:segment)', 'ApiController::getMaterialForPPHByAreaAndNoModel/$1/$2');
+        $routes->post('insertQtyCns', 'ApiController::insertQtyCns');
+        $routes->post('saveListPemesanan', 'ApiController::saveListPemesanan');
         // $routes->get('getMaterialForPPH/(:any)/(:any)', 'ApiController::getMaterialForPPH/$1/$2');
     }
 );

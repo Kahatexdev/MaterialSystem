@@ -28,7 +28,7 @@
     <div class="row">
         <?php foreach ($area as $ar) : ?>
             <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4 mt-2">
-                <a href="<?= base_url($role . '/pphPerArea/' . $ar) ?>">
+                <a href="<?= base_url($role . '/tampilPerModel/' . $ar) ?>">
                     <div class="card">
                         <div class="card-body p-3">
                             <div class="row">
