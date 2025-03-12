@@ -298,16 +298,16 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('warehouse/getNoModel', 'WarehouseController::getNoModel');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
 
-    $routes->get('pph', 'PphController::index');
-    $routes->get('pphPerArea/(:any)', 'PphController::pphPerArea/$1');
-    $routes->get('tampilPerStyle/(:any)', 'PphController::tampilPerStyle/$1');
-    $routes->post('tampilPerStyle/(:any)', 'PphController::tampilPerStyle/$1');
+    // $routes->get('pph', 'PphController::index');
+    $routes->get('pph', 'PphController::tampilPerModel');
+    $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
     $routes->get('tampilPerDays', 'PphController::tampilPerDays');
     $routes->post('tampilPerDays', 'PphController::tampilPerDays');
     $routes->get('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');
     $routes->get('getDataModel', 'PphController::getDataModel');
     $routes->get('pphinisial', 'PphController::pphinisial');
     // $routes->post('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');
+    $routes->get('excelPPHNomodel/(:any)/(:any)', 'ExcelController::excelPPHNomodel/$1/$2');
     //Celup
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');

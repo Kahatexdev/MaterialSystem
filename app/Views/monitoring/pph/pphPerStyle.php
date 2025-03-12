@@ -35,13 +35,20 @@
                         </div>
                         <div>
 
-                            <div class="d-flex align-items-center">
-                                <input type="text" name="no_model" id="no_model" class="form-control mr-2" placeholder="Masukkan No Model">
-                                <button type="button" id="searchModel" class="btn bg-gradient-info text-white ms-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <select name="area" id="area" class="form-control">
+                                    <option value="">Pilih Area</option>
+                                    <?php foreach ($area as $ar) : ?>
+                                        <option value="<?= $ar ?>"><?= $ar ?></option>
+                                    <?php endforeach ?>
+                                </select>
+
+                                <input type="text" name="no_model" id="no_model" class="form-control" placeholder="Masukkan No Model">
+
+                                <button type="button" id="searchModel" class="btn bg-gradient-info text-white">
                                     <i class="fas fa-search"></i> Filter
                                 </button>
                             </div>
-
 
                         </div>
                     </div>
@@ -72,7 +79,7 @@
     <div class="row mt-3">
         <div class="col-12">
             <div class="alert alert-info text-center text-white" id="info" role="alert">
-                Silakan masukkan No Model untuk mencari data.
+                Silakan masukkan Area & No Model untuk mencari data.
             </div>
         </div>
     </div>
@@ -112,8 +119,8 @@
         let btnSearch = document.getElementById('searchModel');
 
         btnSearch.onclick = function() {
+            let area = document.getElementById('area').value;
             let model = document.getElementById('no_model').value;
-            let area = <?= json_encode($area) ?>;
             let role = <?= json_encode($role) ?>;
             let loading = document.getElementById('loading');
             let info = document.getElementById('info');
@@ -144,8 +151,13 @@
         function fethcData(data, model, area) {
             let header = document.getElementById('HeaderRow');
 
-            header.innerHTML = ` 
-            <h3>${model} || ${area}</h3>`;
+            header.innerHTML = `
+            <div class="d-flex align-items-center justify-content-between">
+                <h3>${model} || ${area}</h3>
+                <a href="#" id="exportExcel" class="btn btn-success">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </a>
+            </div>`;
 
             let body = document.getElementById('bodyData')
             
