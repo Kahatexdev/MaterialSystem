@@ -302,10 +302,12 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('pph', 'PphController::tampilPerModel');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
     $routes->get('tampilPerDays', 'PphController::tampilPerDays');
+    $routes->get('pphPerhari', 'PphController::pphPerhari');
     $routes->post('tampilPerDays', 'PphController::tampilPerDays');
     $routes->get('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');
     $routes->get('getDataModel', 'PphController::getDataModel');
     $routes->get('pphinisial', 'PphController::pphinisial');
+    $routes->get('getDataPerhari', 'PphController::getDataPerhari');
     // $routes->post('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');
     $routes->get('excelPPHNomodel/(:any)/(:any)', 'ExcelController::excelPPHNomodel/$1/$2');
     //Celup
