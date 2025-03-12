@@ -292,7 +292,7 @@ class PphController extends BaseController
             session()->setFlashdata(
                 'error',
                 '<strong>Kesalahan!</strong> Gagal mengambil data dari <strong>CapacityApps</strong>.<br>'
-                    . 'Silahkan Hubungi <strong>Monitoring</strong>' 
+                    . 'Silahkan Hubungi <strong>Monitoring</strong>'
             );
             $apiData = [];
         }
@@ -348,6 +348,7 @@ class PphController extends BaseController
                     'kode_warna'   => $model['kode_warna'] ?? null,
                     'composition'  => $model['composition'] ?? null,
                     'gw'           => $model['gw'] ?? null,
+                    'grperpcs' => $model['gw'] * $model['composition'],
                     'qty_pcs'      => $model['qty_pcs'] ?? null,
                     'loss'         => $model['loss'] ?? null,
                     'ttl_kebutuhan' => $model['ttl_kebutuhan'] ?? null,

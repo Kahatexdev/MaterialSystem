@@ -79,7 +79,7 @@
                                             <td><?= esc(number_format($item['ttl_kebutuhan'], 2)) ?></td>
                                             <td>
                                                 <?= isset($item['bruto'], $item['composition'], $item['gw'])
-                                                    ? esc(round(($item['bruto'] * 24 * ($item['composition'] / 100) * $item['gw']) / 1000, 2))
+                                                    ? esc(round(($item['grperpcs'] * $item['bruto']) / 1000, 2))
                                                     : '-'
                                                 ?>
                                             </td>
