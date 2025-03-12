@@ -918,9 +918,7 @@ class PdfController extends BaseController
     public function generateOpenPOCovering($tgl_po)
     {
         $poCovering = $this->openPoModel->getPoForCelup($tgl_po);
-        // $getMasterOrder = $this->openPoModel->getDeliveryAwalNoOrderBuyer();
-        $idPO = $this->openPoModel->tes($tgl_po);
-        // dd($idPO);
+        $idPO = $this->openPoModel->getDeliveryAwalNoOrderBuyer($tgl_po);
         // Inisialisasi FPDF
         $pdf = new FPDF('L', 'mm', 'A4');
         $pdf->AddPage();

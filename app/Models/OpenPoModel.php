@@ -219,12 +219,7 @@ class OpenPoModel extends Model
             ->first();
     }
 
-    public function getDeliveryAwalNoOrderBuyer(){
-        return $this->select('open_po.id_po, open_po.no_model, open_po.id_induk, master_order.buyer, master_order.no_order, master_order.delivery_awal')
-            ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
-        ->findAll();
-    }
-    public function tes($tgl_po)
+    public function getDeliveryAwalNoOrderBuyer($tgl_po)
     {
         return $this->select('DISTINCT open_po.id_po, open_po.no_model, master_order.buyer, master_order.delivery_awal, master_order.no_order', false)
             ->join('master_order', 'master_order.no_model = open_po.no_model', 'left') // Join berdasarkan no_model
