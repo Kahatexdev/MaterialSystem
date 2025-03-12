@@ -35,13 +35,20 @@
                         </div>
                         <div>
 
-                            <div class="d-flex align-items-center">
-                                <input type="text" name="no_model" id="no_model" class="form-control mr-2" placeholder="Masukkan No Model">
-                                <button type="button" id="searchModel" class="btn bg-gradient-info text-white ms-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <select name="area" id="area" class="form-control">
+                                    <option value="">Pilih Area</option>
+                                    <?php foreach ($area as $ar) : ?>
+                                        <option value="<?= $ar ?>"><?= $ar ?></option>
+                                    <?php endforeach ?>
+                                </select>
+
+                                <input type="text" name="no_model" id="no_model" class="form-control" placeholder="Masukkan No Model">
+
+                                <button type="button" id="searchModel" class="btn bg-gradient-info text-white">
                                     <i class="fas fa-search"></i> Filter
                                 </button>
                             </div>
-
 
                         </div>
                     </div>
@@ -72,7 +79,7 @@
     <div class="row mt-3">
         <div class="col-12">
             <div class="alert alert-info text-center text-white" id="info" role="alert">
-                Silakan masukkan No Model untuk mencari data.
+                Silakan masukkan Area & No Model untuk mencari data.
             </div>
         </div>
     </div>
@@ -112,8 +119,8 @@
         let btnSearch = document.getElementById('searchModel');
 
         btnSearch.onclick = function() {
+            let area = document.getElementById('area').value;
             let model = document.getElementById('no_model').value;
-            let area = <?= json_encode($area) ?>;
             let role = <?= json_encode($role) ?>;
             let loading = document.getElementById('loading');
             let info = document.getElementById('info');
@@ -150,26 +157,32 @@
 
             let header = document.getElementById('HeaderRow');
 
-            header.innerHTML = ` 
-            <h3>${model}</h3>
-    <div class="col-lg-12">
-<table class="table table-bordered">
-    <tr>
-          <td><strong>Area:</strong> ${area}</td>
-        <td><strong>Produksi:</strong> ${bruto} dz</td>
-    </tr>
-    <tr>
-     <td><strong>Qty:</strong> ${qty} dz</td>
-        <td><strong>Bs Setting:</strong> ${bs_setting} dz</td>
-    </tr>
-    <tr>
-          <td><strong>Sisa:</strong> ${sisa} dz</td>
-        <td><strong>Bs Mesin:</strong> ${bs_mesin} gr</td>
-    </tr>
-  
-</table>
+            let baseUrl = "<?= base_url($role . '/excelPPHNomodel/') ?>";
 
-    </div>`;
+            header.innerHTML = ` 
+                <div class="d-flex align-items-center justify-content-between">
+                    <h3 class="mb-0">${model}</h3>
+                    <a href="${baseUrl}${area}/${model}" id="exportExcel" class="btn btn-success">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </a>
+                </div>
+                <div class="col-lg-12">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td><strong>Area:</strong> ${area}</td>
+                            <td><strong>Produksi:</strong> ${bruto} dz</td>
+                        </tr>
+                        <tr>
+                        <td><strong>Qty:</strong> ${qty} dz</td>
+                            <td><strong>Bs Setting:</strong> ${bs_setting} dz</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sisa:</strong> ${sisa} dz</td>
+                            <td><strong>Bs Mesin:</strong> ${bs_mesin} gr</td>
+                        </tr>
+                    
+                    </table>
+                </div>`;
 
             let body = document.getElementById('bodyData')
             // Ambil kunci utama dalam objek
@@ -178,34 +191,39 @@
             // Filter untuk mendapatkan bahan baku (exclude qty, sisa, dll.)
             let materials = keys.filter(key => !["qty", "sisa", "bruto", "bs_setting", "bs_mesin"].includes(key));
 
+            materials.sort((a, b) => {
+                return data[a].item_type.localeCompare(data[b].item_type) ||
+                    data[a].kode_warna.localeCompare(data[b].kode_warna);
+            });
+
             // Looping untuk buat baris tabel
             let rows = materials.map((material, index) => `
-    <tr>
-        <td>${index + 1}</td>
-        <td>${data[material].item_type}</td>
-        <td>${data[material].kode_warna}</td>
-        <td>${data[material].warna}</td>
-        <td>${data[material].pph.toFixed(2)} kg</td>
-    </tr>
-`).join('');
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${data[material].item_type}</td>
+                    <td>${data[material].kode_warna}</td>
+                    <td>${data[material].warna}</td>
+                    <td>${data[material].pph.toFixed(2)} kg</td>
+                </tr>
+            `).join('');
 
             body.innerHTML = `
-    <div class="table-responsive">
-        <table class="display text-center text-uppercase text-xs font-bolder" id="dataTable" style="width:100%">
-            <thead>
-                <tr>
-                    <th class="text-center">No</th>
-                    <th class="text-center">Jenis</th>
-                    <th class="text-center">Kode Warna</th>
-                    <th class="text-center">Warna</th>
-                    <th class="text-center">PPH</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${rows} <!-- Data bahan baku masuk sini -->
-            </tbody>
-        </table>
-    </div>`;
+                <div class="table-responsive">
+                    <table class="display text-center text-uppercase text-xs font-bolder" id="dataTable" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th class="text-center">No</th>
+                                <th class="text-center">Jenis</th>
+                                <th class="text-center">Kode Warna</th>
+                                <th class="text-center">Warna</th>
+                                <th class="text-center">PPH</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows} <!-- Data bahan baku masuk sini -->
+                        </tbody>
+                    </table>
+                </div>`;
 
             // Inisialisasi DataTables
             $(document).ready(function() {

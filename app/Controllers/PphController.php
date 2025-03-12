@@ -41,7 +41,11 @@ class PphController extends BaseController
 
     public function index()
     {
-        $area = $this->materialModel->getDataArea();
+        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $response = file_get_contents($apiUrl);
+
+        $area = json_decode($response, true);
+
         $data = [
             'active' => $this->active,
             'title' => 'PPH',
@@ -52,19 +56,12 @@ class PphController extends BaseController
         return view($this->role . '/pph/index', $data);
     }
 
-    public function pphPerArea($area)
+    public function tampilPerStyle()
     {
-        $data = [
-            'active' => $this->active,
-            'title' => 'PPH',
-            'role' => $this->role,
-            'area' => $area,
-        ];
-        return view($this->role . '/pph/pphPerArea', $data);
-    }
+        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $response = file_get_contents($apiUrl);
+        $area = json_decode($response, true);
 
-    public function tampilPerStyle($area)
-    {
         return view($this->role . '/pph/pphPerStyle', [
             'active' => $this->active,
             'title' => 'PPH: Per Style',
@@ -74,89 +71,13 @@ class PphController extends BaseController
         ]);
     }
 
-    public function tampilPerDays()
+    public function tampilPerModel()
     {
-        if ($this->request->isAJAX()) {
-            $request = $this->request->getVar();
+        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $response = file_get_contents($apiUrl);
 
-            // Data dummy (replace dengan data dari database jika diperlukan)
-            $pph = [
-                [
-                    'tgl_prod' => '2025-01-08',
-                    'no_model' => 'M-1001',
-                    'inisial' => 'AB',
-                    'jenis' => 'Jenis 1',
-                    'warna' => 'Merah',
-                    'kode_warna' => 'KW-001',
-                    'komposisi' => 50,
-                    'gw' => 100,
-                    'total_pph' => 500,
-                ],
-                [
-                    'tgl_prod' => '2025-01-09',
-                    'no_model' => 'M-1002',
-                    'inisial' => 'CD',
-                    'jenis' => 'Jenis 2',
-                    'warna' => 'Biru',
-                    'kode_warna' => 'KW-002',
-                    'komposisi' => 40,
-                    'gw' => 80,
-                    'total_pph' => 320,
-                ]
-            ];
+        $area = json_decode($response, true);
 
-            // Total data tanpa filter
-            $totalData = count($pph);
-
-            // Filter berdasarkan pencarian
-            $search = $request['search']['value'] ?? '';
-            $filteredData = array_filter($pph, function ($row) use ($search) {
-                return stripos(implode(' ', $row), $search) !== false;
-            });
-
-            // Sorting
-            $sortColumnIndex = $request['order'][0]['column'];
-            $sortColumnName = $request['columns'][$sortColumnIndex]['data'];
-            $sortDirection = $request['order'][0]['dir'];
-            usort($filteredData, function ($a, $b) use ($sortColumnName, $sortDirection) {
-                if ($sortDirection == 'asc') {
-                    return $a[$sortColumnName] <=> $b[$sortColumnName];
-                }
-                return $b[$sortColumnName] <=> $a[$sortColumnName];
-            });
-
-            // Pagination
-            $start = $request['start'];
-            $length = $request['length'];
-            $pagedData = array_slice($filteredData, $start, $length);
-
-            // Tambahkan kolom nomor
-            $pagedData = array_map(function ($item, $index) use ($start) {
-                $item['no'] = $start + $index + 1;
-                return $item;
-            }, $pagedData, array_keys($pagedData));
-
-            // Format respons JSON
-            $data = [
-                'draw' => $request['draw'],
-                'recordsTotal' => $totalData,
-                'recordsFiltered' => count($filteredData),
-                'data' => $pagedData,
-            ];
-
-            return $this->response->setJSON($data);
-        }
-
-        // View untuk halaman awal
-        return view($this->role . '/pph/pphPerDays', [
-            'active' => $this->active,
-            'title' => 'PPH: Per Days',
-            'role' => $this->role,
-        ]);
-    }
-
-    public function tampilPerModel($area)
-    {
         return view($this->role . '/pph/pphPerModel', [
             'active'     => $this->active,
             'title'      => 'PPH',
@@ -165,11 +86,28 @@ class PphController extends BaseController
             'mergedData' => [] // Tidak ada data sampai search diisi
         ]);
     }
+    public function pphPerhari()
+    {
+        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $response = file_get_contents($apiUrl);
+
+        $area = json_decode($response, true);
+
+        return view($this->role . '/pph/pphPerDays', [
+            'active'     => $this->active,
+            'title'      => 'PPH',
+            'role'       => $this->role,
+            'area'       => $area,
+            'mergedData' => [] // Tidak ada data sampai search diisi
+        ]);
+    }
+
     public function getDataModel()
     {
         $model = $this->request->getGet('model');
         $area = $this->request->getGet('area');
         $models = $this->materialModel->getMaterialForPPH($area, $model);
+        
         $pphInisial = [];
 
         foreach ($models as $items) {
@@ -226,7 +164,7 @@ class PphController extends BaseController
         ];
 
         foreach ($pphInisial as $item) {
-            $key = $item['item_type'] . '-' . $item['color'];
+            $key = $item['item_type'] . '-' . $item['kode_warna'];
 
             if (!isset($result[$key])) {
                 $result[$key] = [
@@ -254,8 +192,10 @@ class PphController extends BaseController
             $result[$key]['jarum'] = $item['jarum'];
             $result[$key]['area'] = $item['area'];
         }
+
         return $this->response->setJSON($result);
     }
+
     public function pphinisial()
     {
         $model = $this->request->getGet('model');
@@ -268,8 +208,9 @@ class PphController extends BaseController
             $gw = $items['gw'];
             $comp = $items['composition'];
             $gwpcs = ($gw * $comp) / 100;
-
+            $styleSize = urlencode($styleSize);
             $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
+
             $response = file_get_contents($apiUrl);
 
             if ($response === FALSE) {
@@ -285,26 +226,54 @@ class PphController extends BaseController
 
                 $bruto = $data['bruto'] ?? 0;
                 $bs_mesin = $data['bs_mesin'] ?? 0;
+                $pph = (($bruto * $gwpcs) + $bs_mesin) / 1000;
+
 
                 $pphInisial[] = [
                     'area'  => $items['area'],
                     'style_size'  => $items['style_size'],
-                    'inisial'  => $items['inisial'],
+                    'inisial'  => $data['inisial'],
                     'item_type'  => $items['item_type'],
+                    'kode_warna'  => $items['kode_warna'],
                     'color'      => $items['color'],
+                    'ttl_kebutuhan' => $items['ttl_kebutuhan'],
                     'gw'         => $items['gw'],
                     'composition' => $items['composition'],
                     'jarum'      => $data['machinetypeid'] ?? null,
                     'bruto'      => $bruto,
+                    'netto'      => $bruto - $data['bs_setting'] ?? 0,
                     'qty'        => $data['qty'] ?? 0,
                     'sisa'       => $data['sisa'] ?? 0,
                     'po_plus'    => $data['po_plus'] ?? 0,
                     'bs_setting' => $data['bs_setting'] ?? 0,
                     'bs_mesin'   => $bs_mesin,
-                    'pph'        => ($bruto * $gwpcs) + ($bs_mesin / 1000)
+                    'pph'        => $pph,
+                    'pph_persen' => ($pph / $items['ttl_kebutuhan']) * 100,
                 ];
             }
         }
-        return $this->response->setJSON($pphInisial);
+
+        $dataToSort = array_filter($pphInisial, 'is_array');
+
+        usort($dataToSort, function ($a, $b) {
+            return $a['inisial'] <=> $b['inisial']
+                ?: $a['item_type'] <=> $b['item_type']
+                ?: $a['kode_warna'] <=> $b['kode_warna'];
+        });
+        
+        return $this->response->setJSON($dataToSort);
+    }
+    public function getDataPerhari()
+    {
+        $tanggal = $this->request->getGet('tanggal');
+        $area = $this->request->getGet('area');
+        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getPPhPerhari/' . $area . '/' . $tanggal;
+        $response = file_get_contents($apiUrl);
+        if ($response === FALSE) {
+            log_message('error', "API tidak bisa diakses: $apiUrl");
+            return $this->response->setJSON(["error" => "Gagal mengambil data dari API"]);
+        } else {
+        }
+        return $this->response->setJSON($tanggal);
     }
 }
