@@ -420,10 +420,10 @@ class ExcelController extends BaseController
         $sheet->setCellValue('I' . $row_header, 'Komposisi (%)');
         $sheet->setCellValue('J' . $row_header, 'GW (gr)');
         $sheet->setCellValue('K' . $row_header, 'Qty PO (dz)');
-        $sheet->setCellValue('L' . $row_header, 'Total Kebutuhan (dz)');
+        $sheet->setCellValue('L' . $row_header, 'Total Kebutuhan (kg)');
         $sheet->setCellValue('M' . $row_header, 'Netto (dz)');
         $sheet->setCellValue('N' . $row_header, 'Bs MC (gr)');
-        $sheet->setCellValue('O' . $row_header, 'Bs Setting');
+        $sheet->setCellValue('O' . $row_header, 'Bs Setting (dz)');
         $sheet->setCellValue('P' . $row_header, 'PPH (kg)');
         $sheet->setCellValue('Q' . $row_header, 'PPH (%)');
 
