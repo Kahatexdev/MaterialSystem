@@ -918,8 +918,9 @@ class PdfController extends BaseController
     public function generateOpenPOCovering($tgl_po)
     {
         $poCovering = $this->openPoModel->getPoForCelup($tgl_po);
-        $getMasterOrder = $this->openPoModel->getDeliveryAwalNoOrderBuyer();
-
+        // $getMasterOrder = $this->openPoModel->getDeliveryAwalNoOrderBuyer();
+        $idPO = $this->openPoModel->tes($tgl_po);
+        // dd($idPO);
         // Inisialisasi FPDF
         $pdf = new FPDF('L', 'mm', 'A4');
         $pdf->AddPage();
@@ -1033,13 +1034,28 @@ class PdfController extends BaseController
         $maxHeight = 8; // Default tinggi baris
         $yLimit = 180;
 
-        foreach ($poCovering as $index => $row) {
-            $getMasterOrder = $this->openPoModel->getDeliveryAwalNoOrderBuyer();
-            $no_model = isset($getMasterOrder[$index]['no_model']) ? $getMasterOrder[$index]['no_model'] : '-';
-            $buyer = isset($getMasterOrder[$index]['buyer']) ? $getMasterOrder[$index]['buyer'] : '-';
-            $delivery_awal = isset($getMasterOrder[$index]['delivery_awal']) ? $getMasterOrder[$index]['delivery_awal'] : '-';
+        $poMapping = [];
+        foreach ($idPO as $po) {
+            if (empty($po['id_induk'])) { // Hanya ambil data yang tidak punya id_induk
+                $poMapping[$po['id_po']] = [
+                    'no_model' => $po['no_model'],
+                    'buyer' => $po['buyer'],
+                    'delivery_awal' => $po['delivery_awal']
+                ];
+            }
+        }
 
-            // Cek apakah masih cukup ruang dalam halaman, jika tidak, buat halaman baru
+
+        $poIndex = 0;
+        $totalPo = count($poMapping);
+
+        foreach ($poCovering as $index => $row) {
+            // Ambil data dari poMapping, kalau ada
+            $poData = isset($poMapping[$index]) ? $poMapping[$index] : ['no_model' => '-', 'buyer' => '-', 'delivery_awal' => '-'];
+            $no_model = $poData['no_model'];
+            $buyer = $poData['buyer'];
+            $delivery_awal = $poData['delivery_awal'];
+        
             if ($pdf->GetY() + $maxHeight > $yLimit) {
                 $pdf->AddPage(); // Tambah halaman baru
                 // Ulangi Header Formulir
@@ -1062,14 +1078,27 @@ class PdfController extends BaseController
                 $adjustedHeight = 8; // Tinggi standar jika cukup 1 baris
                 $pdf->Cell($itemTypeWidth, $adjustedHeight, $row['item_type'], 1, 0, 'C');
             }
-           
+
+            // Gunakan data dari id_po asli
+            $id_po_asli = empty($row['id_induk']) ? $row['id_po'] : $row['id_induk'];
+
+            if (isset($poMapping[$id_po_asli])) {
+                $poData = $poMapping[$id_po_asli];
+            } else {
+                $poData = ['no_model' => '-', 'buyer' => '-', 'delivery_awal' => '-'];
+            }
+
+
             // Lanjutkan dengan sel lainnya yang juga menyesuaikan tinggi
             $pdf->Cell(17, $maxHeight, '', 1, 0, 'C'); // Bentuk Celup
             $pdf->Cell(20, $maxHeight, $row['color'], 1, 0, 'C');
             $pdf->Cell(20, $maxHeight, $row['kode_warna'], 1, 0, 'C');
-            $pdf->Cell(10, $maxHeight, $buyer, 1, 0, 'C');
-            $pdf->Cell(25, $maxHeight, $no_model, 1, 0, 'C');
-            $pdf->Cell(16, $maxHeight, $delivery_awal, 1, 0, 'C');
+            $pdf->Cell(10, $maxHeight, $poData['buyer'], 1, 0, 'C');
+            $pdf->Cell(25, $maxHeight, $poData['no_model'], 1, 0, 'C');
+            $pdf->Cell(16, $maxHeight, $poData['delivery_awal'], 1, 0, 'C');
+            // $pdf->Cell(10, $maxHeight, $buyer, 1, 0, 'C');
+            // $pdf->Cell(25, $maxHeight, $no_model, 1, 0, 'C');
+            // $pdf->Cell(16, $maxHeight, $delivery_awal, 1, 0, 'C');
             $pdf->Cell(15, $maxHeight, $row['kg_po'], 1, 0, 'C');
             $pdf->Cell(13, $maxHeight, '', 1, 0, 'C');
             $pdf->Cell(13, $maxHeight, '', 1, 0, 'C');
@@ -1078,8 +1107,8 @@ class PdfController extends BaseController
             $pdf->Cell(18, $maxHeight, $row['jenis'], 1, 0, 'C');
             $pdf->Cell(18, $maxHeight, '', 1, 0, 'C');
             $pdf->Cell(23, $maxHeight, '', 1, 1, 'C'); 
+            // log_message('info', 'PO Covering: ' . json_encode($getMasterOrder));
         }
-
         //KETERANGAN
         $pdf->Cell(277, 5, '', 0, 1, 'C');
 
