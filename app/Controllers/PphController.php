@@ -86,6 +86,21 @@ class PphController extends BaseController
             'mergedData' => [] // Tidak ada data sampai search diisi
         ]);
     }
+    public function pphPerhari()
+    {
+        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $response = file_get_contents($apiUrl);
+
+        $area = json_decode($response, true);
+
+        return view($this->role . '/pph/pphPerDays', [
+            'active'     => $this->active,
+            'title'      => 'PPH',
+            'role'       => $this->role,
+            'area'       => $area,
+            'mergedData' => [] // Tidak ada data sampai search diisi
+        ]);
+    }
 
     public function getDataModel()
     {
@@ -233,7 +248,7 @@ class PphController extends BaseController
                     'bs_setting' => $data['bs_setting'] ?? 0,
                     'bs_mesin'   => $bs_mesin,
                     'pph'        => $pph,
-                    'pph_persen' => ($pph / $items['ttl_kebutuhan'])*100,
+                    'pph_persen' => ($pph / $items['ttl_kebutuhan']) * 100,
                 ];
             }
         }
@@ -247,5 +262,18 @@ class PphController extends BaseController
         });
         
         return $this->response->setJSON($dataToSort);
+    }
+    public function getDataPerhari()
+    {
+        $tanggal = $this->request->getGet('tanggal');
+        $area = $this->request->getGet('area');
+        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getPPhPerhari/' . $area . '/' . $tanggal;
+        $response = file_get_contents($apiUrl);
+        if ($response === FALSE) {
+            log_message('error', "API tidak bisa diakses: $apiUrl");
+            return $this->response->setJSON(["error" => "Gagal mengambil data dari API"]);
+        } else {
+        }
+        return $this->response->setJSON($tanggal);
     }
 }
