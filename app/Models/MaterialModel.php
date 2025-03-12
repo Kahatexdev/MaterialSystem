@@ -151,6 +151,15 @@ class MaterialModel extends Model
             ->orderBy('master_material.jenis, material.item_type', 'ASC')
             ->findAll();
     }
+    public function getDataPPHInisial($area, $nomodel)
+    {
+        return $this->select('master_order.no_model, material.area, material.inisial, material.style_size, material.item_type, material.color, material.kode_warna, material.composition, material.gw, material.qty_pcs, material.loss, material.kgs')
+            ->join('master_order', 'master_order.id_order=material.id_order')
+            ->where('material.area', $area)
+            ->where('master_order.no_model', $nomodel)
+            ->orderBy('master_order.no_model, material.inisial, material.style_size, material.item_type, material.kode_warna', 'ASC')
+            ->findAll();
+    }
 
     public function getMaterialForPPHByNoModel($area, $searchNoModel = null)
     {
@@ -181,6 +190,7 @@ class MaterialModel extends Model
         ')
             ->join('master_order', 'master_order.id_order = material.id_order')
             ->where('material.area', $area);
+        // ->where('material.style_size', 'J401514-17 18X6');
 
         // Tambahkan filter untuk no_model jika ada
         if (!empty($no_model)) {

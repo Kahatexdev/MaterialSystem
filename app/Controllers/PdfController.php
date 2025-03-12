@@ -69,10 +69,14 @@ class PdfController extends BaseController
         $pdf = new FPDF('L', 'mm', 'A4');
         $pdf->AddPage();
 
-        // Tambahkan border margin
-        $pdf->SetDrawColor(0, 0, 0);
-        $pdf->SetLineWidth(0.2);
-        $pdf->Rect(10, 10, 277, 190);
+        // Garis margin luar (lebih tebal)
+        $pdf->SetDrawColor(0, 0, 0); // Warna hitam
+        $pdf->SetLineWidth(0.4); // Lebih tebal
+        $pdf->Rect(9, 9, 279, 192); // Sedikit lebih besar dari margin dalam
+
+        // Garis margin dalam (lebih tipis)
+        $pdf->SetLineWidth(0.2); // Lebih tipis
+        $pdf->Rect(10, 10, 277, 190); // Ukuran aslinya
 
         // Masukkan gambar di dalam kolom
         $x = $pdf->GetX(); // Simpan posisi X saat ini
@@ -114,7 +118,7 @@ class PdfController extends BaseController
         $pdf->Cell(43, 5, 'Tgl', 0, 0, 'L');
         // Check if the result array is not empty and display only the first delivery_awal
         if (!empty($result)) {
-            $pdf->Cell(234, 5, ': ' . $result[0]['delivery_awal'], 0, 1, 'L');
+            $pdf->Cell(234, 5, ': ' . $result[0]['tgl_po'], 0, 1, 'L');
         } else {
             $pdf->Cell(234, 5, ': No delivery date available', 0, 1, 'L');
         }
@@ -224,7 +228,7 @@ class PdfController extends BaseController
         $pdf->Cell(55, 5, '', 0, 0, 'C');
         $pdf->Cell(55, 5, '(                               )', 0, 0, 'C');
         if (!empty($result)) {
-            $pdf->Cell(55, 5, $result[0]['penanggung_jawab'], 0, 0, 'C');
+            $pdf->Cell(55, 5, '(       '.$result[0]['penanggung_jawab'].'      )', 0, 0, 'C');
         } else {
             $pdf->Cell(234, 5, ': No penanggung_jawab available', 0, 0, 'C');
         }
@@ -827,6 +831,11 @@ class PdfController extends BaseController
         $pdf->SetLineWidth(0.2);
         $pdf->Rect(10, 10, 277, 190);
 
+        // Garis margin luar (lebih tebal)
+        $pdf->SetDrawColor(0, 0, 0); // Warna hitam
+        $pdf->SetLineWidth(0.4); // Lebih tebal
+        $pdf->Rect(9, 9, 279, 192); // Sedikit lebih besar dari margin dalam
+
         $pdf->Image('assets/img/logo-kahatex.png', 26, 11, 10, 8);
         $pdf->SetFont('Arial', 'B', 7);
         $pdf->Cell(43, 13, '', 1, 0, 'C');
@@ -909,6 +918,8 @@ class PdfController extends BaseController
     public function generateOpenPOCovering($tgl_po)
     {
         $poCovering = $this->openPoModel->getPoForCelup($tgl_po);
+        $getMasterOrder = $this->openPoModel->getDeliveryAwalNoOrderBuyer();
+
         // Inisialisasi FPDF
         $pdf = new FPDF('L', 'mm', 'A4');
         $pdf->AddPage();
@@ -917,6 +928,15 @@ class PdfController extends BaseController
         $pdf->SetDrawColor(0, 0, 0);
         $pdf->SetLineWidth(0.2);
         $pdf->Rect(10, 10, 277, 190);
+
+        // Garis margin luar (lebih tebal)
+        $pdf->SetDrawColor(0, 0, 0); // Warna hitam
+        $pdf->SetLineWidth(0.4); // Lebih tebal
+        $pdf->Rect(9, 9, 279, 192); // Sedikit lebih besar dari margin dalam
+
+        // Garis margin dalam (lebih tipis)
+        $pdf->SetLineWidth(0.2); // Lebih tipis
+        $pdf->Rect(10, 10, 277, 190); // Ukuran aslinya
 
         // Masukkan gambar di dalam kolom
         $x = $pdf->GetX(); // Simpan posisi X saat ini
@@ -950,8 +970,7 @@ class PdfController extends BaseController
 
         $pdf->SetFont('Arial', '', 7);
         $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
-        $pdf->Cell(234, 5, ': ', 0, 1, 'L');
-        // $pdf->Cell(234, 5, ': ' . $no_model, 0, 1, 'L');
+        $pdf->Cell(234, 5, ': ' . $poCovering[0]['no_model'], 0, 1, 'L');
 
         $pdf->Cell(43, 5, 'Pemesanan', 0, 0, 'L');
         $pdf->Cell(234, 5, ': COVERING', 0, 1, 'L');
@@ -959,7 +978,7 @@ class PdfController extends BaseController
         $pdf->Cell(43, 5, 'Tgl', 0, 0, 'L');
         // Check if the result array is not empty and display only the first delivery_awal
         if (!empty($poCovering)) {
-            $pdf->Cell(234, 5, ': ' . $poCovering[0]['delivery_awal'], 0, 1, 'L');
+            $pdf->Cell(234, 5, ': ' . date('Y-m-d', strtotime($poCovering[0]['created_at'])), 0, 1, 'L');
         } else {
             $pdf->Cell(234, 5, ': No delivery date available', 0, 1, 'L');
         }
@@ -1014,41 +1033,43 @@ class PdfController extends BaseController
         $maxHeight = 8; // Default tinggi baris
         $yLimit = 180;
 
-        foreach ($poCovering as $row) {
+        foreach ($poCovering as $index => $row) {
+            $getMasterOrder = $this->openPoModel->getDeliveryAwalNoOrderBuyer();
+            $no_model = isset($getMasterOrder[$index]['no_model']) ? $getMasterOrder[$index]['no_model'] : '-';
+            $buyer = isset($getMasterOrder[$index]['buyer']) ? $getMasterOrder[$index]['buyer'] : '-';
+            $delivery_awal = isset($getMasterOrder[$index]['delivery_awal']) ? $getMasterOrder[$index]['delivery_awal'] : '-';
+
             // Cek apakah masih cukup ruang dalam halaman, jika tidak, buat halaman baru
             if ($pdf->GetY() + $maxHeight > $yLimit) {
                 $pdf->AddPage(); // Tambah halaman baru
                 // Ulangi Header Formulir
                 $this->generateHeaderPOCovering($pdf, $tgl_po);
             }
-            // Simpan posisi awal sebelum MultiCell
-            $xBefore = $pdf->GetX();
-            $yBefore = $pdf->GetY();
 
-            // MultiCell untuk kolom item_type agar tinggi bisa menyesuaikan isi
-            $pdf->SetXY($xBefore + 18, $yBefore); // Pindah posisi ke kolom item_type
-            $pdf->MultiCell(25, 4, $row['item_type'], 1, 'C', false);
-            $yAfter = $pdf->GetY();
-            $heightItemType = $yAfter - $yBefore; // Hitung tinggi teks dalam MultiCell
-            $maxHeight = max($maxHeight, $heightItemType); // Simpan tinggi maksimum
+            $pdf->Cell(6, 8, $no++, 1, 0, 'C'); // Align center
+            $pdf->Cell(12, 8, $row['jenis'], 1, 0, 'C'); // Align center
 
-            $pdf->SetXY($xBefore, $yBefore); // Kembalikan posisi untuk cetak ulang
+            //Wrap text jika melebihi space
+            $itemTypeWidth = 25; // Lebar kolom item_type
+            $lineHeight = 4; // Tinggi per baris untuk MultiCell
+            $textWidth = $pdf->GetStringWidth($row['item_type']); // Panjang teks
 
-            // **Cetak kolom No dan Jenis dengan tinggi yang sama**
-            $pdf->SetXY($xBefore, $yBefore);
-            $pdf->Cell(6, $maxHeight, $no++, 1, 0, 'C'); // No
-            $pdf->Cell(12, $maxHeight, '', 1, 0, 'C'); // Jenis
-
-            // Pastikan posisi ke kanan setelah item_type
-            $pdf->SetXY($xBefore + 43, $yBefore);
-
+            if ($textWidth > $itemTypeWidth) {
+                $pdf->MultiCell($itemTypeWidth, $lineHeight, $row['item_type'], 1, 'C', false);
+                $pdf->SetXY($pdf->GetX(), $pdf->GetY() - 8);
+                $pdf->Cell(43, -8, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
+            } else {
+                $adjustedHeight = 8; // Tinggi standar jika cukup 1 baris
+                $pdf->Cell($itemTypeWidth, $adjustedHeight, $row['item_type'], 1, 0, 'C');
+            }
+           
             // Lanjutkan dengan sel lainnya yang juga menyesuaikan tinggi
             $pdf->Cell(17, $maxHeight, '', 1, 0, 'C'); // Bentuk Celup
             $pdf->Cell(20, $maxHeight, $row['color'], 1, 0, 'C');
             $pdf->Cell(20, $maxHeight, $row['kode_warna'], 1, 0, 'C');
-            $pdf->Cell(10, $maxHeight, $row['buyer'], 1, 0, 'C');
-            $pdf->Cell(25, $maxHeight, $row['no_model'], 1, 0, 'C');
-            $pdf->Cell(16, $maxHeight, $row['delivery_awal'], 1, 0, 'C');
+            $pdf->Cell(10, $maxHeight, $buyer, 1, 0, 'C');
+            $pdf->Cell(25, $maxHeight, $no_model, 1, 0, 'C');
+            $pdf->Cell(16, $maxHeight, $delivery_awal, 1, 0, 'C');
             $pdf->Cell(15, $maxHeight, $row['kg_po'], 1, 0, 'C');
             $pdf->Cell(13, $maxHeight, '', 1, 0, 'C');
             $pdf->Cell(13, $maxHeight, '', 1, 0, 'C');
@@ -1056,21 +1077,13 @@ class PdfController extends BaseController
             $pdf->Cell(13, $maxHeight, '', 1, 0, 'C');
             $pdf->Cell(18, $maxHeight, $row['jenis'], 1, 0, 'C');
             $pdf->Cell(18, $maxHeight, '', 1, 0, 'C');
-            $pdf->Cell(23, $maxHeight, '', 1, 1, 'C'); // Pindah ke baris berikutnya
+            $pdf->Cell(23, $maxHeight, '', 1, 1, 'C'); 
         }
 
         //KETERANGAN
         $pdf->Cell(277, 5, '', 0, 1, 'C');
-        // $pdf->Cell(85, 5, 'KET', 0, 0, 'R');
-        // Check if the result array is not empty and display only the first delivery_awal
-        // if (!empty($poCovering)) {
-        //     $pdf->Cell(117, 5, ': ' . $poCovering[0]['keterangan'], 0, 1, 'L');
-        // } else {
-        //     $pdf->Cell(117, 5, ': ', 0, 1, 'L');
-        // }
 
         $pdf->Cell(277, 5, '', 0, 1, 'C');
-        // $pdf->Cell(170, 5, 'UNTUK DEPARTMEN ' . $tujuan, 0, 1, 'C');
 
         $pdf->Cell(55, 5, '', 0, 0, 'C');
         $pdf->Cell(55, 5, 'Pemesan', 0, 0, 'C');
