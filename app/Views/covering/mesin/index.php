@@ -47,7 +47,7 @@
     <div class="card card-frame">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 font-weight-bolder">Data Mesin Celup</h5>
+                <h5 class="mb-0 font-weight-bolder">Data Mesin Covering</h5>
                 <button type="button" class="btn btn-outline-info mb-0" data-bs-toggle="modal" data-bs-target="#tambahModal">
                     <i class="fas fa-plus me-2"></i>Tambah Mesin
                 </button>
@@ -118,22 +118,50 @@
                     <h5 class="modal-title" id="addModalLabel">Tambah Data Mesin</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="addForm" action="<?= base_url($role . '/mesin/addDataMesin') ?>" method="POST">
+                <form id="addForm" action="<?= base_url($role . '/mesinCov/saveDataMesin') ?>" method="POST">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="no_mesin" class="form-label">No Mesin</label>
-                            <input type="text" class="form-control" id="no_mesin" name="no_mesin" required>
+                            <input type="text" class="form-control" id="no_mesinAdd" name="no_mesinAdd" required>
                             <small id="no_mesin_feedback" class="form-text"></small>
                         </div>
                         <div class="mb-3">
                             <label for="nama" class="form-label">Nama</label>
-                            <input type="text" class="form-control" id="nama" name="nama" required>
+                            <input type="text" class="form-control" id="namaAdd" name="namaAdd" required>
                         </div>
-                        <!-- Tambahkan input lainnya sesuai kebutuhan -->
+                        <div class="mb-3">
+                            <label for="jenis" class="form-label">Jenis</label>
+                            <input type="text" class="form-control" id="jenisAdd" name="jenisAdd" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="buatan" class="form-label">Buatan</label>
+                            <input type="text" class="form-control" id="buatanAdd" name="buatanAdd" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="merk" class="form-label">Merk</label>
+                            <input type="text" class="form-control" id="merkAdd" name="merkAdd" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="type" class="form-label">Type</label>
+                            <input type="text" class="form-control" id="typeAdd" name="typeAdd" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="jmlSpindle" class="form-label">Jumlah Spindle</label>
+                            <input type="number" class="form-control" id="jmlSpindleAdd" name="jmlSpindleAdd" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tahun" class="form-label">Tahun</label>
+                            <input type="text" class="form-control" id="tahunAdd" name="tahunAdd" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="jmlUnit" class="form-label">Jumlah Unit</label>
+                            <input type="number" class="form-control" id="jmlUnitAdd" name="jmlUnitAdd" required>
+                        </div>
+
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary add-btn">Tambah</button>
+                        <button type="submit" class="btn btn-info add-btn w-100">Tambah</button>
+                        <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Batal</button>
                     </div>
                 </form>
             </div>
@@ -148,50 +176,50 @@
                     <h5 class="modal-title" id="updateModalLabel">Edit Data Mesin</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="updateForm" action="<?= base_url($role . '/mesin/updateDataMesin') ?>" method="POST">
+                <form id="updateForm" action="<?= base_url($role . '/mesinCov/updateDataMesin') ?>" method="POST">
                     <div class="modal-body">
                         <input type="hidden" id="id_mesin" name="id_mesin">
                         <div class="mb-3">
                             <label for="no_mesinE" class="form-label">No Mesin</label>
-                            <input type="text" class="form-control" id="no_mesinE" name="no_mesin" required>
+                            <input type="text" class="form-control" id="no_mesinE" name="no_mesinE" required>
                         </div>
                         <div class="mb-3">
                             <label for="namaCov" class="form-label">Nama</label>
-                            <input type="text" class="form-control" id="namaCov" name="nama" required>
+                            <input type="text" class="form-control" id="namaCov" name="namaCov" required>
                         </div>
                         <div class="mb-3">
                             <label for="jenis" class="form-label">Jenis</label>
-                            <input type="text" class="form-control" id="jenis" name="nama" required>
+                            <input type="text" class="form-control" id="jenis" name="jenis" required>
                         </div>
                         <div class="mb-3">
                             <label for="buatan" class="form-label">Buatan</label>
-                            <input type="text" class="form-control" id="buatan" name="nama" required>
+                            <input type="text" class="form-control" id="buatan" name="buatan" required>
                         </div>
                         <div class="mb-3">
                             <label for="merk" class="form-label">Merk</label>
-                            <input type="text" class="form-control" id="merk" name="nama" required>
+                            <input type="text" class="form-control" id="merk" name="merk" required>
                         </div>
                         <div class="mb-3">
                             <label for="type" class="form-label">Type</label>
-                            <input type="text" class="form-control" id="type" name="nama" required>
+                            <input type="text" class="form-control" id="type" name="type" required>
                         </div>
                         <div class="mb-3">
                             <label for="jmlSpindle" class="form-label">Jumlah Spindle</label>
-                            <input type="text" class="form-control" id="jmlSpindle" name="nama" required>
+                            <input type="text" class="form-control" id="jmlSpindle" name="jmlSpindle" required>
                         </div>
                         <div class="mb-3">
                             <label for="tahun" class="form-label">Tahun</label>
-                            <input type="text" class="form-control" id="tahun" name="nama" required>
+                            <input type="text" class="form-control" id="tahun" name="tahun" required>
                         </div>
                         <div class="mb-3">
                             <label for="jmlUnit" class="form-label">Jumlah Unit</label>
-                            <input type="text" class="form-control" id="jmlUnit" name="nama" required>
+                            <input type="text" class="form-control" id="jmlUnit" name="jmlUnit" required>
                         </div>
                         <!-- Tambahkan input lainnya sesuai kebutuhan -->
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                        <button type="submit" class="btn btn-info w-100">Simpan Perubahan</button>
+                        <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Batal</button>
                     </div>
                 </form>
             </div>
@@ -251,37 +279,37 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location = `${baseUrl}/deleteDataMesin/${id}`;
+                        window.location = `${baseUrl}/deleteDataMesinCov/${id}`;
                     }
                 });
             });
 
             // Validate No Mesin Input
-            $('#no_mesin').on('input', function() {
-                const noMesinInput = $(this).val();
-                const noMesinFeedback = $('#no_mesin_feedback');
-                const addButton = $('.add-btn');
+            // $('#no_mesin').on('input', function() {
+            //     const noMesinInput = $(this).val();
+            //     const noMesinFeedback = $('#no_mesin_feedback');
+            //     const addButton = $('.add-btn');
 
-                $.ajax({
-                    url: `${baseUrl}/cekNoMesin`,
-                    type: 'POST',
-                    data: {
-                        no_mesin: noMesinInput
-                    },
-                    success: function(response) {
-                        if (response.error) {
-                            noMesinFeedback.text('Nomor Mesin Bisa Digunakan').addClass('feedback-success').removeClass('feedback-error');
-                            addButton.prop('disabled', false);
-                        } else {
-                            noMesinFeedback.text('Nomor Mesin Sudah Ada Di Database').addClass('feedback-error').removeClass('feedback-success');
-                            addButton.prop('disabled', true);
-                        }
-                    },
-                    error: function(xhr) {
-                        console.error(xhr.responseText);
-                    }
-                });
-            });
+            //     $.ajax({
+            //         url: `${baseUrl}/cekNoMesin`,
+            //         type: 'POST',
+            //         data: {
+            //             no_mesin: noMesinInput
+            //         },
+            //         success: function(response) {
+            //             if (response.error) {
+            //                 noMesinFeedback.text('Nomor Mesin Bisa Digunakan').addClass('feedback-success').removeClass('feedback-error');
+            //                 addButton.prop('disabled', false);
+            //             } else {
+            //                 noMesinFeedback.text('Nomor Mesin Sudah Ada Di Database').addClass('feedback-error').removeClass('feedback-success');
+            //                 addButton.prop('disabled', true);
+            //             }
+            //         },
+            //         error: function(xhr) {
+            //             console.error(xhr.responseText);
+            //         }
+            //     });
+            // });
         });
     </script>
 

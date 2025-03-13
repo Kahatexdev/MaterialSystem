@@ -172,7 +172,11 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('', 'CoveringController::index');
     $routes->get('memo', 'CoveringController::memo');
     $routes->get('mesinCov', 'MesinCoveringController::mesinCovering');
+    $routes->post('mesinCov/saveDataMesin', 'MesinCoveringController::saveDataMesin');
     $routes->get('mesinCov/getMesinCovDetails/(:any)', 'MesinCoveringController::getMesinCovDetails/$1');
+    $routes->post('mesinCov/updateDataMesin', 'MesinCoveringController::updateDataMesin');
+    $routes->get('deleteDataMesinCov/(:num)', 'MesinCoveringController::deleteDataMesin/$1');
+
     $routes->get('po', 'CoveringController::po');
     $routes->get('schedule', 'CoveringController::schedule');
     $routes->get('schedule/getScheduleDetails/(:any)/(:any)/(:any)', 'ScheduleController::getScheduleDetails/$1/$2/$3');

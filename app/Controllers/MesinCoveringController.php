@@ -71,8 +71,71 @@ class MesinCoveringController extends BaseController
 
         throw new \CodeIgniter\Exceptions\PageNotFoundException();
     }
-    public function index()
+
+    public function saveDataMesin()
     {
-        //
+        $data = $this->request->getPost();
+        // dd($data);
+
+        $saveData = [
+            'no_mesin' => $data['no_mesinAdd'],
+            'nama' => $data['namaAdd'],
+            'jenis' => $data['jenisAdd'],
+            'buatan' => $data['buatanAdd'],
+            'merk' => $data['merkAdd'],
+            'type' => $data['typeAdd'],
+            'jml_spindle' => $data['jmlSpindleAdd'],
+            'tahun' => $data['tahunAdd'],
+            'jml_unit' => $data['jmlUnitAdd'],
+        ];
+
+        if ($this->mesinCoveringModel->save($saveData)) {
+            return redirect()->to(base_url($this->role . '/mesinCov'))->with('success', 'Data berhasil disimpan.');
+        } else {
+            return redirect()->to(base_url($this->role . '/mesinCov'))->with('error', 'Data gagal disimpan.');
+        }
+    }
+
+    public function updateDataMesin()
+    {
+        $data = $this->request->getPost();
+        $id_mesin = $data['id_mesin'];
+        $no_mesin = $data['no_mesinE'];
+        $cekNoMesin = $this->mesinCoveringModel
+            ->where('no_mesin', $no_mesin)
+            ->where('id_mesin !=', $id_mesin) // Pastikan tidak mengecek diri sendiri
+            ->first();
+
+        if ($cekNoMesin) {
+            // Jika duplikat ditemukan, kembalikan pesan error
+            return redirect()->to(base_url($this->role . '/mesinCov'))->with('error', 'Nomor mesin sudah digunakan.');
+        }
+        
+        $saveData = [
+            'no_mesin' => $data['no_mesinE'],
+            'nama' => $data['namaCov'],
+            'jenis' => $data['jenis'],
+            'buatan' => $data['buatan'],
+            'merk' => $data['merk'],
+            'type' => $data['type'],
+            'jml_spindle' => $data['jmlSpindle'],
+            'tahun' => $data['tahun'],
+            'jml_unit' => $data['jmlUnit'],
+        ];
+        // dd($data, $saveData);
+        if ($this->mesinCoveringModel->update($id_mesin, $saveData)) {
+            return redirect()->to(base_url($this->role . '/mesinCov'))->with('success', 'Data berhasil diubah.');
+        } else {
+            return redirect()->to(base_url($this->role . '/mesinCov'))->with('error', 'Data gagal diubah.');
+        }
+    }
+
+    public function deleteDataMesin($id)
+    {
+        if ($this->mesinCoveringModel->delete($id)) {
+            return redirect()->to(base_url($this->role . '/mesinCov'))->with('success', 'Data berhasil dihapus.');
+        } else {
+            return redirect()->to(base_url($this->role . '/mesinCov'))->with('error', 'Data gagal dihapus.');
+        }
     }
 }
