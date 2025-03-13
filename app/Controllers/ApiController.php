@@ -262,10 +262,64 @@ class ApiController extends ResourceController
             ], 400);
         }
     }
-    public function saveListPemesanan() {
+    // public function saveListPemesanan() {
+    //     // Ambil data dari request POST
+    //     $data = $this->request->getPost();        
+        
+    //     if (empty($data)) {
+    //         return $this->respond([
+    //             'status'  => 'error',
+    //             'message' => "Tidak ada data list pemesanan",
+    //         ], 400);
+    //     }
+
+    //     // Asumsikan semua key memiliki panjang array yang sama
+    //     $length = count($data['id_material']); // Ambil panjang dari salah satu key
+    //     $result = [];
+    //     // Proses setiap data berdasarkan indeks
+    //     for ($i = 0; $i < $length; $i++) {
+    //         $result[$i] = [
+    //             'id_material'     => $data['id_material'][$i],
+    //             'tgl_list'        => date('Y-m-d'),
+    //             'tgl_pakai'       => $data['tgl_pakai'][$i],
+    //             'jl_mc'           => $data['jalan_mc'][$i],
+    //             'ttl_qty_cones'   => $data['ttl_cns'][$i],
+    //             'ttl_berat_cones' => $data['ttl_berat_cns'][$i],
+    //             'admin'           => $data['area'][$i],
+    //             'created_at'      => date('Y-m-d H:i:s'),
+    //         ];
+    //     }
+    //     // Lakukan penyisipan data menggunakan insertBatch
+    //     try {
+    //         $insert = $this->pemesananModel->insertBatch($result);
+    //         if ($insert) {
+    //             return $this->respond([
+    //                 'status'  => 'success',
+    //                 'message' => count($result) . " data berhasil disimpan",
+    //                 'debug'   => $result, // Tambahkan data untuk debugging
+    //             ], 200);
+    //         } else{
+    //             return $this->respond([
+    //                 'status'  => 'error',
+    //                 'message' => "Tidak ada data yang berhasil disimpan",
+    //                 'debug'   => $result, // Tambahkan data untuk debugging
+    //             ], 400);
+    //         }
+    //     } catch (\Exception $e) {
+    //         log_message('critical', 'Exception during batch insert: ' . $e->getMessage());
+    //         return $this->respond([
+    //             'status'  => 'error',
+    //             'message' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage(),
+    //             'debug'   => $result, // Tambahkan data untuk debugging
+    //         ], 500);
+    //     }
+    // }
+
+    public function saveListPemesanan()
+    {
         // Ambil data dari request POST
         $data = $this->request->getPost();        
-        
+
         if (empty($data)) {
             return $this->respond([
                 'status'  => 'error',
@@ -273,22 +327,37 @@ class ApiController extends ResourceController
             ], 400);
         }
 
-        // Asumsikan semua key memiliki panjang array yang sama
-        $length = count($data['id_material']); // Ambil panjang dari salah satu key
+        // Pastikan key array memiliki "[]" dan diubah menjadi array yang bisa digunakan
+        $id_material = $this->request->getPost('id_material');
+        $area = $this->request->getPost('area');
+        $tgl_pakai = $this->request->getPost('tgl_pakai');
+        $jalan_mc = $this->request->getPost('jalan_mc');
+        $ttl_cns = $this->request->getPost('ttl_cns');
+        $ttl_berat_cns = $this->request->getPost('ttl_berat_cns');
+
+        // Validasi panjang array
+        $length = count($id_material);
+        if (!$length || $length !== count($area)) {
+            return $this->respond([
+                'status'  => 'error',
+                'message' => "Data tidak valid atau tidak konsisten",
+            ], 400);
+        }
+
         $result = [];
-        // Proses setiap data berdasarkan indeks
         for ($i = 0; $i < $length; $i++) {
-            $result[$i] = [
-                'id_material'     => $data['id_material'][$i],
+            $result[] = [
+                'id_material'     => $id_material[$i],
                 'tgl_list'        => date('Y-m-d'),
-                'tgl_pakai'       => $data['tgl_pakai'][$i],
-                'jl_mc'           => $data['jalan_mc'][$i],
-                'ttl_qty_cones'   => $data['ttl_cns'][$i],
-                'ttl_berat_cones' => $data['ttl_berat_cns'][$i],
-                'admin'           => $data['area'][$i],
+                'tgl_pakai'       => $tgl_pakai[$i],
+                'jl_mc'           => $jalan_mc[$i],
+                'ttl_qty_cones'   => $ttl_cns[$i],
+                'ttl_berat_cones' => $ttl_berat_cns[$i],
+                'admin'           => $area[$i],
                 'created_at'      => date('Y-m-d H:i:s'),
             ];
         }
+
         // Lakukan penyisipan data menggunakan insertBatch
         try {
             $insert = $this->pemesananModel->insertBatch($result);
@@ -298,7 +367,7 @@ class ApiController extends ResourceController
                     'message' => count($result) . " data berhasil disimpan",
                     'debug'   => $result, // Tambahkan data untuk debugging
                 ], 200);
-            } else{
+            } else {
                 return $this->respond([
                     'status'  => 'error',
                     'message' => "Tidak ada data yang berhasil disimpan",
@@ -314,4 +383,5 @@ class ApiController extends ResourceController
             ], 500);
         }
     }
+
 }
