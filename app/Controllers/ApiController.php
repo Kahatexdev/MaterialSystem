@@ -339,7 +339,6 @@ class ApiController extends ResourceController
         $length = count($data['id_material']);
         $result = [];
 
-        // Proses setiap data berdasarkan indeks
         for ($i = 0; $i < $length; $i++) {
             $result[] = [
                 'id_material'     => $data['id_material'][$i],
@@ -358,10 +357,21 @@ class ApiController extends ResourceController
             ];
         }
 
-        // Lakukan penyisipan data menggunakan insertBatch
         try {
             $insert = $this->pemesananModel->insertBatch($result);
             if ($insert) {
+                // Misalnya, data login sudah tersedia dari session sebelumnya atau request,
+                // dan kita ingin memastikan bahwa session login tetap tersimpan atau diperbarui.
+                $session = session();
+                // Contoh: jika data login sudah ada dalam session, misalnya:
+                // $session->get('user') atau jika ingin menyimpan data login baru:
+                $userLoginData = [
+                    'id'       => $data['user_id'] ?? 0,          // Sesuaikan dengan key yang ada
+                    'username' => $data['username'] ?? 'default', // Sesuaikan dengan key yang ada
+                    'logged_in'=> true,
+                ];
+                $session->set('user', $userLoginData);
+
                 return $this->respond([
                     'status'  => 'success',
                     'message' => count($result) . " data berhasil disimpan",
@@ -383,6 +393,7 @@ class ApiController extends ResourceController
             ], 500);
         }
     }
+
 
 
 }
