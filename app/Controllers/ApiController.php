@@ -14,6 +14,7 @@ use App\Models\OutCelupModel;
 use App\Models\BonCelupModel;
 use App\Models\ClusterModel;
 use App\Models\PemasukanModel;
+use App\Models\PemesananModel;
 use App\Models\StockModel;
 use App\Models\HistoryPindahPalet;
 use App\Models\HistoryPindahOrder;
@@ -264,7 +265,8 @@ class ApiController extends ResourceController
     public function saveListPemesanan() {
         // Ambil data dari request POST
         $data = $this->request->getPost();
-
+        dd($data);
+        
         if (empty($data)) {
             return $this->respond([
                 'status'  => 'error',
