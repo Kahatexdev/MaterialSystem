@@ -73,6 +73,8 @@ class CoveringController extends BaseController
             'role' => $this->role,
             'poCovering' => $poCovering,
         ];
+
+        dd($data);
         return view($this->role . '/po/index', $data);
     }
 

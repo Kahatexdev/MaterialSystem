@@ -120,7 +120,7 @@ class OpenPoModel extends Model
     public function getQtyPO($kodeWarna, $warna, $itemTypeEncoded, $idInduk)
     {
         $this->select('kg_po')
-        ->where('kode_warna', $kodeWarna)
+            ->where('kode_warna', $kodeWarna)
             ->where('color', $warna)
             ->where('item_type', $itemTypeEncoded);
 
@@ -162,7 +162,7 @@ class OpenPoModel extends Model
 
     public function getPOCovering()
     {
-        return $this->select('DATE(open_po.created_at) tgl_po')
+        return $this->select('DATE(open_po.created_at) tgl_po, id_induk')
             ->where('penerima', 'Paryanti')
             ->orderBy('tgl_po', 'DESC')
             ->groupBy('tgl_po')
@@ -219,10 +219,11 @@ class OpenPoModel extends Model
             ->first();
     }
 
-    public function getDeliveryAwalNoOrderBuyer(){
+    public function getDeliveryAwalNoOrderBuyer()
+    {
         return $this->select('open_po.id_po, open_po.no_model, open_po.id_induk, master_order.buyer, master_order.no_order, master_order.delivery_awal')
             ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
             ->where('id_induk')
-        ->find();
+            ->find();
     }
 }

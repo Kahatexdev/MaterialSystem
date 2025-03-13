@@ -7,6 +7,8 @@ use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 
+use function PHPUnit\Framework\isEmpty;
+use function PHPUnit\Framework\isNull;
 
 class PphController extends BaseController
 {
@@ -256,13 +258,84 @@ class PphController extends BaseController
     {
         $tanggal = $this->request->getGet('tanggal');
         $area = $this->request->getGet('area');
-        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getPPhPerhari/' . $area . '/' . $tanggal;
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getPPhPerhari/' . $area . '/' . $tanggal;
+
         $response = file_get_contents($apiUrl);
-        if ($response === FALSE) {
+        if ($response === false) {
             log_message('error', "API tidak bisa diakses: $apiUrl");
             return $this->response->setJSON(["error" => "Gagal mengambil data dari API"]);
-        } else {
         }
-        return $this->response->setJSON($tanggal);
+
+        $data = json_decode($response, true);
+        $result = [];
+        $pphInisial = [];
+
+        foreach ($data as $prod) {
+            $key = $prod['mastermodel'] . '-' . $prod['size'];
+
+            $material = $this->materialModel->getMU($prod['mastermodel'], $prod['size']);
+
+            if (isEmpty($material)) {
+                $result[$key] = [
+                    'mastermodel' => $prod['mastermodel'],
+                    'produksi' => $prod['prod'],
+                    'bs_mesin' => $prod['bs_mesin'],
+                    'item_type' => null,
+                    'kode_warna' => null,
+                    'warna' => null,
+                    'pph' => 0,
+                ];
+            } else {
+                $gw = $material['gw'];
+                $comp = $material['composition'];
+                $gwpcs = ($gw * $comp) / 100;
+
+                $bruto = $prod['prod'] ?? 0;
+                $bs_mesin = $prod['bs_mesin'] ?? 0;
+                $pph = (($bruto * $gwpcs) + $bs_mesin) / 1000;
+
+                $pphInisial[] = [
+                    'mastermodel'    => $prod['mastermodel'],
+                    'style_size'  => $prod['size'],
+                    'item_type'   => $material['item_type'] ?? null,
+                    'kode_warna'  => $material['kode_warna'] ?? null,
+                    'color'       => $material['color'] ?? null,
+                    'gw'          => $gw,
+                    'composition' => $comp,
+                    'bruto'       => $bruto,
+                    'qty'         => $prod['qty'] ?? 0,
+                    'sisa'        => $prod['sisa'] ?? 0,
+                    'bs_mesin'    => $bs_mesin,
+                    'pph'         => $pph
+                ];
+            }
+        }
+
+        // Grouping & Summing Data
+        foreach ($pphInisial as $item) {
+            $key = $item['item_type'] . '-' . $item['kode_warna'];
+
+            if (!isset($result[$key])) {
+                $result[$key] = [
+                    'item_type'   => $item['item_type'],
+                    'kode_warna'  => $item['kode_warna'],
+                    'warna'       => $item['color'],
+                    'pph'         => 0,
+                    'qty'         => 0,
+                    'sisa'        => 0,
+                    'bruto'       => 0,
+                    'bs_mesin'    => 0,
+                ];
+            }
+
+            // Accumulate values correctly
+            $result[$key]['qty'] += $item['qty'];
+            $result[$key]['sisa'] += $item['sisa'];
+            $result[$key]['bruto'] += $item['bruto'];
+            $result[$key]['bs_mesin'] += $item['bs_mesin'];
+            $result[$key]['pph'] += $item['pph'];
+        }
+
+        return $this->response->setJSON($result);
     }
 }
