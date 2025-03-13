@@ -266,4 +266,26 @@ class CoveringController extends BaseController
         $poDetail = $this->openPoModel->getPoForCelup($tgl_po);
         dd($poDetail);
     }
+
+    public function memo()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Memo',
+            'role' => $this->role,
+        ];
+
+        return view($this->role . '/memo/index', $data);
+    }
+
+    public function mesinCov()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Mesin Covering',
+            'role' => $this->role,
+        ];
+
+        return view($this->role . '/mesin/index', $data);
+    }
 }
