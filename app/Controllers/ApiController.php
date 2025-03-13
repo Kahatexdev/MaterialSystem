@@ -34,6 +34,7 @@ class ApiController extends ResourceController
     protected $clusterModel;
     protected $pemasukanModel;
     protected $stockModel;
+    protected $pemesananModel;
     protected $historyPindahPalet;
     protected $historyPindahOrder;
 
@@ -50,6 +51,7 @@ class ApiController extends ResourceController
         $this->clusterModel = new ClusterModel();
         $this->pemasukanModel = new PemasukanModel();
         $this->stockModel = new StockModel();
+        $this->pemesananModel = new PemesananModel();
         $this->historyPindahPalet = new HistoryPindahPalet();
         $this->historyPindahOrder = new HistoryPindahOrder();
 
@@ -198,7 +200,7 @@ class ApiController extends ResourceController
         log_message('debug', 'Data received: ' . json_encode($data));
 
         // Inisialisasi variabel untuk menghitung jumlah data yang berhasil diperbarui
-        $insertedCount = 0;
+        $updateCount = 0;
 
         // Validasi data utama
         if (!isset($data['items']) || !is_array($data['items'])) {
@@ -232,7 +234,7 @@ class ApiController extends ResourceController
                 try {
                     $update = $this->materialModel->update($row['id_material'], $updateData);
                     if ($update) {
-                        $insertedCount++;
+                        $updateCount++;
                     } else {
                         log_message('error', 'Update failed for id_material: ' . $row['id_material']);
                     }
@@ -247,6 +249,58 @@ class ApiController extends ResourceController
         }
 
         // Kirimkan respons berdasarkan jumlah data yang diperbarui
+        if ($updateCount > 0) {
+            return $this->respond([
+                'status'  => 'success',
+                'message' => "$updateCount data berhasil diperbarui",
+            ], 200);
+        } else {
+            return $this->respond([
+                'status'  => 'error',
+                'message' => "Tidak ada data yang berhasil diperbarui",
+            ], 400);
+        }
+    }
+    public function saveListPemesanan() {
+        // Ambil data dari request POST
+        $data = $this->request->getPost();
+
+        if (empty($data)) {
+            return $this->respond([
+                'status'  => 'error',
+                'message' => "Tidak ada data list pemesanan",
+            ], 400);
+        }
+        // Inisialisasi variabel untuk menghitung jumlah data yang berhasil diperbarui
+        $insertedCount = 0;
+        foreach ($data as $key => $id) {
+            $insertData = [
+                'id_material' => $id['id_material'],
+                'tgl_list' => date('Y-m-d'),
+                'tgl_pakai' => $id['tgl_pakai'],
+                'jl_mc' => $id['jalan_mc'],
+                'ttl_qty_cones' => $id['ttl_cns'],
+                'ttl_berat_cones' => $id['ttl_berat_cns'],
+                'admin' => $id['area'],
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
+            // Lakukan pembaruan pada database
+            try {
+                $insert = $this->pemesananModel->insert($insertData);
+                if ($insert) {
+                    $insertedCount++;
+                } else {
+                    log_message('error', 'Update failed for id_material: ' . $id['id_material']);
+                }
+            } catch (\Exception $e) {
+                log_message('critical', 'Exception during update: ' . $e->getMessage());
+                return $this->respond([
+                    'status'  => 'error',
+                    'message' => 'Terjadi kesalahan saat memperbarui data',
+                ], 500);
+            }
+        }
+        // Kirimkan respons berdasarkan jumlah data yang diperbarui
         if ($insertedCount > 0) {
             return $this->respond([
                 'status'  => 'success',
@@ -257,27 +311,6 @@ class ApiController extends ResourceController
                 'status'  => 'error',
                 'message' => "Tidak ada data yang berhasil diperbarui",
             ], 400);
-        }
-    }
-    public function saveListPemesanan() {
-        $admin = session()->get('username');
-
-        $pemesananBb = session()->get('pemesananBb') ?? [];
-        dd($pemesananBb);
-        if (empty($pemesananBb)) {
-            return redirect()->back()->with('error', 'Tidak ada data list pemesanan');
-        }
-        foreach ($pemesananBb as $key => $data) {
-            $insertData = [
-                'id_material' => $data['id_material'],
-                'tgl_list' => '',
-                'tgl_pakai' => $data['tgl_pakai'],
-                'jl_mc' => $data['jalan_mc'],
-                'ttl_qty_cones' => $data['ttl_cns'],
-                'ttl_berat_cones' => $data['ttl_berat_cns'],
-                'admin' => $admin,
-                'created_at' => '',
-            ];
         }
     }
 }
