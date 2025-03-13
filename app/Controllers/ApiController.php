@@ -317,8 +317,8 @@ class ApiController extends ResourceController
 
     public function saveListPemesanan()
     {
-        // Ambil data dari request POST
-        $data = $this->request->getPost();        
+        // Ambil data JSON dari request
+        $data = $this->request->getJSON(true);
 
         if (empty($data)) {
             return $this->respond([
@@ -327,33 +327,33 @@ class ApiController extends ResourceController
             ], 400);
         }
 
-        // Pastikan key array memiliki "[]" dan diubah menjadi array yang bisa digunakan
-        $id_material = $this->request->getPost('id_material');
-        $area = $this->request->getPost('area');
-        $tgl_pakai = $this->request->getPost('tgl_pakai');
-        $jalan_mc = $this->request->getPost('jalan_mc');
-        $ttl_cns = $this->request->getPost('ttl_cns');
-        $ttl_berat_cns = $this->request->getPost('ttl_berat_cns');
-
-        // Validasi panjang array
-        $length = count($id_material);
-        if (!$length || $length !== count($area)) {
+        // Pastikan data yang diperlukan ada dan merupakan array
+        if (!isset($data['id_material']) || !is_array($data['id_material'])) {
             return $this->respond([
                 'status'  => 'error',
-                'message' => "Data tidak valid atau tidak konsisten",
+                'message' => "Data id_material tidak valid",
             ], 400);
         }
 
+        // Asumsikan semua key memiliki panjang array yang sama
+        $length = count($data['id_material']);
         $result = [];
+
+        // Proses setiap data berdasarkan indeks
         for ($i = 0; $i < $length; $i++) {
             $result[] = [
-                'id_material'     => $id_material[$i],
+                'id_material'     => $data['id_material'][$i],
                 'tgl_list'        => date('Y-m-d'),
-                'tgl_pakai'       => $tgl_pakai[$i],
-                'jl_mc'           => $jalan_mc[$i],
-                'ttl_qty_cones'   => $ttl_cns[$i],
-                'ttl_berat_cones' => $ttl_berat_cns[$i],
-                'admin'           => $area[$i],
+                'tgl_pakai'       => $data['tgl_pakai'][$i],
+                'jl_mc'           => $data['jalan_mc'][$i],
+                'ttl_qty_cones'   => $data['ttl_cns'][$i],
+                'ttl_berat_cones' => $data['ttl_berat_cns'][$i],
+                'admin'           => $data['area'][$i],
+                'no_model'        => $data['no_model'][$i],
+                'style_size'      => $data['style_size'][$i],
+                'item_type'       => $data['item_type'][$i],
+                'kode_warna'      => $data['kode_warna'][$i],
+                'warna'           => $data['warna'][$i],
                 'created_at'      => date('Y-m-d H:i:s'),
             ];
         }
@@ -365,13 +365,13 @@ class ApiController extends ResourceController
                 return $this->respond([
                     'status'  => 'success',
                     'message' => count($result) . " data berhasil disimpan",
-                    'debug'   => $result, // Tambahkan data untuk debugging
+                    'debug'   => $result,
                 ], 200);
             } else {
                 return $this->respond([
                     'status'  => 'error',
                     'message' => "Tidak ada data yang berhasil disimpan",
-                    'debug'   => $result, // Tambahkan data untuk debugging
+                    'debug'   => $result,
                 ], 400);
             }
         } catch (\Exception $e) {
@@ -379,9 +379,10 @@ class ApiController extends ResourceController
             return $this->respond([
                 'status'  => 'error',
                 'message' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage(),
-                'debug'   => $result, // Tambahkan data untuk debugging
+                'debug'   => $result,
             ], 500);
         }
     }
+
 
 }
