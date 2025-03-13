@@ -282,13 +282,11 @@ class ApiController extends ResourceController
                 'id_material'     => $data['id_material'][$i],
                 'tgl_list'        => date('Y-m-d'),
                 'tgl_pakai'       => $data['tgl_pakai'][$i],
-                'style_size'      => $data['style_size'][$i],
-                'item_type'       => $data['item_type'][$i],
-                'kode_warna'      => $data['kode_warna'][$i],
-                'warna'           => $data['warna'][$i],
-                'jalan_mc'        => $data['jalan_mc'][$i],
-                'ttl_cns'         => $data['ttl_cns'][$i],
-                'ttl_berat_cns'   => $data['ttl_berat_cns'][$i],
+                'jl_mc'           => $data['jalan_mc'][$i],
+                'ttl_qty_cones'   => $data['ttl_cns'][$i],
+                'ttl_berat_cones' => $data['ttl_berat_cns'][$i],
+                'admin'           => $data['area'][$i],
+                'created_at'      => date('Y-m-d H:i:s'),
             ];
         }
         // Lakukan penyisipan data menggunakan insertBatch
