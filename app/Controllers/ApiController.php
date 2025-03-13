@@ -366,8 +366,9 @@ class ApiController extends ResourceController
                 // Contoh: jika data login sudah ada dalam session, misalnya:
                 // $session->get('user') atau jika ingin menyimpan data login baru:
                 $userLoginData = [
-                    'id'       => $data['user_id'] ?? 0,          // Sesuaikan dengan key yang ada
+                    'id_user'       => $data['id_user'] ?? 0,          // Sesuaikan dengan key yang ada
                     'username' => $data['username'] ?? 'default', // Sesuaikan dengan key yang ada
+                    'role'  => $data['role'] ?? '',
                     'logged_in'=> true,
                 ];
                 $session->set('user', $userLoginData);
