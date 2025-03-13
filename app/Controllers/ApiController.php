@@ -161,9 +161,9 @@ class ApiController extends ResourceController
         }
         return $this->respond($res, 200);
     }
-    public function getMU($model, $styleSize)
+    public function getMU($model, $styleSize, $area)
     {
-        $mu = $this->materialModel->getMU($model, $styleSize);
+        $mu = $this->materialModel->getMU($model, $styleSize, $area);
 
         return $this->respond($mu, 200);
     }
@@ -264,8 +264,7 @@ class ApiController extends ResourceController
     }
     public function saveListPemesanan() {
         // Ambil data dari request POST
-        $data = $this->request->getPost();
-        dd($data);
+        $data = $this->request->getPost();        
         
         if (empty($data)) {
             return $this->respond([
@@ -273,46 +272,48 @@ class ApiController extends ResourceController
                 'message' => "Tidak ada data list pemesanan",
             ], 400);
         }
-        // Inisialisasi variabel untuk menghitung jumlah data yang berhasil diperbarui
-        $insertedCount = 0;
-        foreach ($data as $key => $id) {
-            $insertData = [
-                'id_material' => $id['id_material'],
-                'tgl_list' => date('Y-m-d'),
-                'tgl_pakai' => $id['tgl_pakai'],
-                'jl_mc' => $id['jalan_mc'],
-                'ttl_qty_cones' => $id['ttl_cns'],
-                'ttl_berat_cones' => $id['ttl_berat_cns'],
-                'admin' => $id['area'],
-                'created_at' => date('Y-m-d H:i:s'),
+
+        // Asumsikan semua key memiliki panjang array yang sama
+        $length = count($data['id_material']); // Ambil panjang dari salah satu key
+        $result = [];
+        // Proses setiap data berdasarkan indeks
+        for ($i = 0; $i < $length; $i++) {
+            $result[$i] = [
+                'id_material'     => $data['id_material'][$i],
+                'tgl_list'        => date('Y-m-d'),
+                'tgl_pakai'       => $data['tgl_pakai'][$i],
+                'style_size'      => $data['style_size'][$i],
+                'item_type'       => $data['item_type'][$i],
+                'kode_warna'      => $data['kode_warna'][$i],
+                'warna'           => $data['warna'][$i],
+                'jalan_mc'        => $data['jalan_mc'][$i],
+                'ttl_cns'         => $data['ttl_cns'][$i],
+                'ttl_berat_cns'   => $data['ttl_berat_cns'][$i],
             ];
-            // Lakukan pembaruan pada database
-            try {
-                $insert = $this->pemesananModel->insert($insertData);
-                if ($insert) {
-                    $insertedCount++;
-                } else {
-                    log_message('error', 'Update failed for id_material: ' . $id['id_material']);
-                }
-            } catch (\Exception $e) {
-                log_message('critical', 'Exception during update: ' . $e->getMessage());
+        }
+        // Lakukan penyisipan data menggunakan insertBatch
+        try {
+            $insert = $this->pemesananModel->insertBatch($result);
+            if ($insert) {
+                return $this->respond([
+                    'status'  => 'success',
+                    'message' => count($result) . " data berhasil disimpan",
+                    'debug'   => $result, // Tambahkan data untuk debugging
+                ], 200);
+            } else{
                 return $this->respond([
                     'status'  => 'error',
-                    'message' => 'Terjadi kesalahan saat memperbarui data',
-                ], 500);
+                    'message' => "Tidak ada data yang berhasil disimpan",
+                    'debug'   => $result, // Tambahkan data untuk debugging
+                ], 400);
             }
-        }
-        // Kirimkan respons berdasarkan jumlah data yang diperbarui
-        if ($insertedCount > 0) {
-            return $this->respond([
-                'status'  => 'success',
-                'message' => "$insertedCount data berhasil diperbarui",
-            ], 200);
-        } else {
+        } catch (\Exception $e) {
+            log_message('critical', 'Exception during batch insert: ' . $e->getMessage());
             return $this->respond([
                 'status'  => 'error',
-                'message' => "Tidak ada data yang berhasil diperbarui",
-            ], 400);
+                'message' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage(),
+                'debug'   => $result, // Tambahkan data untuk debugging
+            ], 500);
         }
     }
 }
