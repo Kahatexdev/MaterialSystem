@@ -329,7 +329,7 @@ class PphController extends BaseController
 
             if (!isset($result[$key])) {
                 $result[$key] = [
-                    'mastermodel' => $prod['mastermodel'],
+                    'mastermodel' => $item['mastermodel'],
                     'item_type'   => $item['item_type'],
                     'kode_warna'  => $item['kode_warna'],
                     'warna'       => $item['color'],
