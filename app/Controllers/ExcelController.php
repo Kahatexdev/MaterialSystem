@@ -55,6 +55,7 @@ class ExcelController extends BaseController
     public function excelPPHNomodel($area, $model)
     {
         $models = $this->materialModel->getMaterialForPPH($area, $model);
+
         $pphInisial = [];
 
         foreach ($models as $items) {
@@ -91,6 +92,7 @@ class ExcelController extends BaseController
                     'color'      => $items['color'],
                     'gw'         => $items['gw'],
                     'composition' => $items['composition'],
+                    'kgs'  => $items['kgs'],
                     'jarum'      => $data['machinetypeid'] ?? null,
                     'bruto'      => $bruto,
                     'qty'        => $data['qty'] ?? 0,
@@ -111,18 +113,20 @@ class ExcelController extends BaseController
         ];
 
         foreach ($pphInisial as $item) {
-            $key = $item['item_type'] . '-' . $item['color'];
+            $key = $item['item_type'] . '-' . $item['kode_warna'];
 
             if (!isset($result[$key])) {
                 $result[$key] = [
                     'item_type' => null,
                     'kode_warna' => null,
                     'warna' => null,
+                    'kgs' => 0,
                     'pph' => 0,
                     'jarum' => null,
                     'area' => null
                 ];
             }
+
 
             // Akumulasi total qty, sisa, bruto, bs_setting, dan bs_mesin
             $result['qty'] += $item['qty'];
@@ -135,6 +139,7 @@ class ExcelController extends BaseController
             $result[$key]['item_type'] = $item['item_type'];
             $result[$key]['kode_warna'] = $item['kode_warna'];
             $result[$key]['warna'] = $item['color'];
+            $result[$key]['kgs'] += $item['kgs'];
             $result[$key]['pph'] += $item['pph'];
             $result[$key]['jarum'] = $item['jarum'];
             $result[$key]['area'] = $item['area'];
@@ -239,13 +244,15 @@ class ExcelController extends BaseController
         $sheet->setCellValue('B' . $row_header, 'Jenis');
         $sheet->setCellValue('C' . $row_header, 'Kode Warna');
         $sheet->setCellValue('D' . $row_header, 'Warna');
-        $sheet->setCellValue('E' . $row_header, 'PPH');
+        $sheet->setCellValue('E' . $row_header, 'PO (kg)');
+        $sheet->setCellValue('F' . $row_header, 'PPH (kg)');
 
         $sheet->getStyle('A' . $row_header)->applyFromArray($styleHeader);
         $sheet->getStyle('B' . $row_header)->applyFromArray($styleHeader);
         $sheet->getStyle('C' . $row_header)->applyFromArray($styleHeader);
         $sheet->getStyle('D' . $row_header)->applyFromArray($styleHeader);
         $sheet->getStyle('E' . $row_header)->applyFromArray($styleHeader);
+        $sheet->getStyle('F' . $row_header)->applyFromArray($styleHeader);
 
         // Isi data
         $row = 6;
@@ -260,10 +267,11 @@ class ExcelController extends BaseController
             $sheet->setCellValue('B' . $row, $data['item_type']);
             $sheet->setCellValue('C' . $row, $data['kode_warna']);
             $sheet->setCellValue('D' . $row, $data['warna']);
-            $sheet->setCellValue('E' . $row, number_format($data['pph'], 2));
+            $sheet->setCellValue('E' . $row, number_format($data['kgs'], 2));
+            $sheet->setCellValue('F' . $row, number_format($data['pph'], 2));
 
             // style body
-            $columns = ['A', 'B', 'C', 'D', 'E'];
+            $columns = ['A', 'B', 'C', 'D', 'E', 'F'];
 
             foreach ($columns as $column) {
                 $sheet->getStyle($column . $row)->applyFromArray($styleBody);
@@ -272,7 +280,7 @@ class ExcelController extends BaseController
             $row++;
         }
 
-        foreach (['A', 'B', 'C', 'D', 'E'] as $column) {
+        foreach (['A', 'B', 'C', 'D', 'E', 'F'] as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
