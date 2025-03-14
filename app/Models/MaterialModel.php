@@ -12,7 +12,7 @@ class MaterialModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id_material', 'id_order', 'style_size', 'area', 'inisial', 'color', 'item_type', 'kode_warna', 'composition', 'gw', 'qty_pcs', 'loss', 'kgs', 'admin', 'created_at', 'updated_at'];
+    protected $allowedFields    = ['id_material', 'id_order', 'style_size', 'area', 'inisial', 'color', 'item_type', 'kode_warna', 'composition', 'gw', 'qty_pcs', 'loss', 'kgs', 'admin', 'qty_cns', 'qty_berat_cns', 'created_at', 'updated_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -185,6 +185,7 @@ class MaterialModel extends Model
             material.composition, 
             material.gw, 
             material.qty_pcs, 
+            material.kgs, 
             material.loss, 
             SUM(material.kgs) AS ttl_kebutuhan
         ')
@@ -201,20 +202,10 @@ class MaterialModel extends Model
         $builder->groupBy('
         material.style_size, 
         material.item_type, 
-        material.kode_warna
+        material.kode_warna,
+        material.composition
     ');
 
         return $builder->findAll();
-    }
-    public function getMaterialForPemesanan($model, $styleSize, $area)
-    {
-        return $this->select('master_material.jenis, material.*')
-            ->join('master_order', 'master_order.id_order=material.id_order')
-            ->join('master_material', 'master_material.item_type=material.item_type')
-            ->where('master_order.no_model', $model)
-            ->where('material.style_size', $styleSize)
-            ->where('material.area', $area)
-            ->orderBy('master_material.jenis, material.item_type', 'ASC')
-            ->findAll();
     }
 }

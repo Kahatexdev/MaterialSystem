@@ -150,10 +150,15 @@
 
         function fethcData(data, tanggal, area) {
             console.log(data)
-            let bruto = parseFloat(data.bruto / 24).toFixed(2);
-            let bs_setting = parseFloat(data.bs_setting / 24).toFixed(2);
-            let bs_mesin = parseInt(data.bs_mesin).toLocaleString();
+            // Pastikan 'bruto' ada dan angka
+            let brutoValue = parseFloat(data.bruto) || 0;
+            let bsSettingValue = parseFloat(data.bs_setting) || 0;
+            let bsMesinValue = parseInt(data.bs_mesin) || 0;
 
+            // Bagi dengan 24 hanya jika datanya valid
+            let bruto = (brutoValue).toFixed(2);
+            let bs_setting = (bsSettingValue / 24).toFixed(2);
+            let bs_mesin = bsMesinValue.toLocaleString(); // Format ribuan
             let header = document.getElementById('HeaderRow');
 
             let baseUrl = "<?= base_url($role . '/excelPPHDays/') ?>";
@@ -183,9 +188,9 @@
             <td>${item.item_type || '-'}</td>
             <td>${item.kode_warna || '-'}</td>
             <td>${item.warna || '-'}</td>
-            <td>${(parseFloat(item.bruto) || 0).toFixed(2)} dz</td>
-            <td>${(parseFloat(item.bs_mesin) || 0).toFixed(2)} dz</td>
-            <td>${(parseFloat(item.pph) || 0).toFixed(2)} kg</td>
+            <td>${(parseFloat(item.bruto/24) || 0).toFixed(2)} dz</td>
+            <td>${(parseFloat(item.bs_mesin) || 0).toFixed(2)} gr</td>
+            <td>${(parseFloat(item.pph) || 0).toFixed(2)} gr</td>
         </tr>
     `).join('');
 
