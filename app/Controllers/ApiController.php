@@ -204,7 +204,7 @@ class ApiController extends ResourceController
         $updateCount = 0;
 
         // Validasi data utama
-        if (!isset($data['items']) || !is_array($data['items'])) {
+        if (empty($data['items']) || !is_array($data['items'])) {
             return $this->respond([
                 'status'  => 'error',
                 'message' => 'Data items tidak ditemukan atau tidak valid',
@@ -220,7 +220,7 @@ class ApiController extends ResourceController
 
             foreach ($item as $row) {
                 // Validasi setiap row
-                if (!isset($row['id_material'], $row['qty_cns'], $row['qty_berat_cns'])) {
+                if (empty($row['id_material'], $row['qty_cns'], $row['qty_berat_cns'])) {
                     log_message('error', 'Invalid row data: ' . json_encode($row));
                     continue; // Lewati jika data tidak lengkap
                 }
@@ -262,59 +262,6 @@ class ApiController extends ResourceController
             ], 400);
         }
     }
-    // public function saveListPemesanan() {
-    //     // Ambil data dari request POST
-    //     $data = $this->request->getPost();        
-        
-    //     if (empty($data)) {
-    //         return $this->respond([
-    //             'status'  => 'error',
-    //             'message' => "Tidak ada data list pemesanan",
-    //         ], 400);
-    //     }
-
-    //     // Asumsikan semua key memiliki panjang array yang sama
-    //     $length = count($data['id_material']); // Ambil panjang dari salah satu key
-    //     $result = [];
-    //     // Proses setiap data berdasarkan indeks
-    //     for ($i = 0; $i < $length; $i++) {
-    //         $result[$i] = [
-    //             'id_material'     => $data['id_material'][$i],
-    //             'tgl_list'        => date('Y-m-d'),
-    //             'tgl_pakai'       => $data['tgl_pakai'][$i],
-    //             'jl_mc'           => $data['jalan_mc'][$i],
-    //             'ttl_qty_cones'   => $data['ttl_cns'][$i],
-    //             'ttl_berat_cones' => $data['ttl_berat_cns'][$i],
-    //             'admin'           => $data['area'][$i],
-    //             'created_at'      => date('Y-m-d H:i:s'),
-    //         ];
-    //     }
-    //     // Lakukan penyisipan data menggunakan insertBatch
-    //     try {
-    //         $insert = $this->pemesananModel->insertBatch($result);
-    //         if ($insert) {
-    //             return $this->respond([
-    //                 'status'  => 'success',
-    //                 'message' => count($result) . " data berhasil disimpan",
-    //                 'debug'   => $result, // Tambahkan data untuk debugging
-    //             ], 200);
-    //         } else{
-    //             return $this->respond([
-    //                 'status'  => 'error',
-    //                 'message' => "Tidak ada data yang berhasil disimpan",
-    //                 'debug'   => $result, // Tambahkan data untuk debugging
-    //             ], 400);
-    //         }
-    //     } catch (\Exception $e) {
-    //         log_message('critical', 'Exception during batch insert: ' . $e->getMessage());
-    //         return $this->respond([
-    //             'status'  => 'error',
-    //             'message' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage(),
-    //             'debug'   => $result, // Tambahkan data untuk debugging
-    //         ], 500);
-    //     }
-    // }
-
     public function saveListPemesanan()
     {
         // Ambil data JSON dari request
@@ -358,6 +305,20 @@ class ApiController extends ResourceController
         }
 
         try {
+            // Cek apakah data sudah ada
+            $existingData = $this->pemesananModel
+            ->where('id_material', $data['id_material'])
+            ->where('tgl_pakai', $data['tgl_pakai'])
+            ->where('admin', $data['area'])
+            ->first();
+
+            if ($existingData) {
+                return $this->respond([
+                    'status'  => 'error',
+                    'message' => "Data dengan id_material '{$data['id_material']}', tgl_pakai '{$data['tgl_pakai']}', dan admin '{$data['admin']}' sudah ada.",
+                    'debug'   => $existingData,
+                ], 400);
+            }
             $insert = $this->pemesananModel->insertBatch($result);
             if ($insert) {
                 // Misalnya, data login sudah tersedia dari session sebelumnya atau request,
@@ -372,6 +333,10 @@ class ApiController extends ResourceController
                     'logged_in'=> true,
                 ];
                 $session->set('user', $userLoginData);
+                // Hapus session 'pemesananBb' setelah menetapkan ulang session pengguna
+                if ($session->has('pemesananBb')) {
+                    $session->remove('pemesananBb');
+                }
 
                 return $this->respond([
                     'status'  => 'success',
