@@ -189,7 +189,7 @@
             <td>${item.kode_warna || '-'}</td>
             <td>${item.warna || '-'}</td>
             <td>${(parseFloat(item.bruto/24) || 0).toFixed(2)} dz</td>
-            <td>${(parseFloat(item.bs_mesin/24) || 0).toFixed(2)} gr</td>
+            <td>${(parseFloat(item.bs_mesin) || 0).toFixed(2)} gr</td>
             <td>${(parseFloat(item.pph) || 0).toFixed(2)} gr</td>
         </tr>
     `).join('');

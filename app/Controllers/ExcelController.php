@@ -554,11 +554,11 @@ class ExcelController extends BaseController
 
         // Grouping & Summing Data
         foreach ($pphInisial as $item) {
-            $key = $item['item_type'] . '-' . $item['kode_warna'];
+            $key = $item['mastermodel'] . '-' . $item['item_type'] . '-' . $item['kode_warna'];
 
             if (!isset($result[$key])) {
                 $result[$key] = [
-                    'mastermodel' => $prod['mastermodel'],
+                    'mastermodel' => $item['mastermodel'],
                     'item_type'   => $item['item_type'],
                     'kode_warna'  => $item['kode_warna'],
                     'warna'       => $item['color'],
