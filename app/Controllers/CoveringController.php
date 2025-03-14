@@ -290,4 +290,14 @@ class CoveringController extends BaseController
 
         return view($this->role . '/mesin/index', $data);
     }
+    public function warehouse()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Warehouse',
+            'role' => $this->role,
+        ];
+
+        return view($this->role . '/warehouse/index', $data);
+    }
 }
