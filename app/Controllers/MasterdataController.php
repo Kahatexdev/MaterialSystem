@@ -295,6 +295,12 @@ class MasterdataController extends BaseController
         }
         $itemType = $this->masterMaterialModel->getItemType();
         $orderData = $this->materialModel->getMaterial($id_order);
+
+        if (empty($orderData)) {
+            session()->setFlashdata('error', 'Data Material tidak ditemukan! Silakan impor ulang data.');
+            return redirect()->to(base_url($this->role . '/masterdata'));
+        }
+
         $areaData = array_column($orderData, 'area');
         $model = $orderData[0]['no_model'];
         if (!$orderData) {

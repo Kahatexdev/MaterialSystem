@@ -149,7 +149,79 @@
         };
 
         function fethcData(data, tanggal, area) {
+            console.log(data)
+            let bruto = parseFloat(data.bruto / 24).toFixed(2);
+            let bs_setting = parseFloat(data.bs_setting / 24).toFixed(2);
+            let bs_mesin = parseInt(data.bs_mesin).toLocaleString();
 
+            let header = document.getElementById('HeaderRow');
+
+            let baseUrl = "<?= base_url($role . '/excelPPHDays/') ?>";
+
+            header.innerHTML = ` 
+                <div class="d-flex align-items-center justify-content-between">
+                    <h3 class="mb-0">PPH Area ${area} Tanggal ${tanggal}</h3>
+                    <a href="${baseUrl}${area}/${tanggal}" id="exportExcel" class="btn btn-success">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </a>
+                </div>
+                `;
+            let body = document.getElementById('bodyData');
+
+            // Ubah object menjadi array
+            let dataArray = Object.values(data);
+
+            if (!Array.isArray(dataArray) || dataArray.length === 0) {
+                console.error("Data is not an array or empty:", data);
+                body.innerHTML = "<tr><td colspan='8' class='text-center'>No data available</td></tr>";
+            } else {
+                // Looping untuk membuat baris tabel
+                let rows = dataArray.map((item, index) => `
+        <tr>
+            <td>${index + 1}</td>
+            <td>${item.mastermodel || '-'}</td>
+            <td>${item.item_type || '-'}</td>
+            <td>${item.kode_warna || '-'}</td>
+            <td>${item.warna || '-'}</td>
+            <td>${(parseFloat(item.bruto) || 0).toFixed(2)} dz</td>
+            <td>${(parseFloat(item.bs_mesin) || 0).toFixed(2)} dz</td>
+            <td>${(parseFloat(item.pph) || 0).toFixed(2)} kg</td>
+        </tr>
+    `).join('');
+
+                body.innerHTML = `
+        <div class="table-responsive">
+            <table class="display text-center text-uppercase text-xs font-bolder" id="dataTable" style="width:100%">
+                <thead>
+                    <tr>
+                        <th class="text-center">No</th>
+                        <th class="text-center"> Model</th>
+                        <th class="text-center">Item Type</th>
+                        <th class="text-center">Kode Warna</th>
+                        <th class="text-center">Warna</th>
+                        <th class="text-center">Bruto</th>
+                        <th class="text-center">BS Mesin</th>
+                        <th class="text-center">PPH</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows}
+                </tbody>
+            </table>
+        </div>`;
+
+                // Inisialisasi DataTables setelah table dirender
+                $(document).ready(function() {
+                    $('#dataTable').DataTable({
+                        "paging": true,
+                        "searching": true,
+                        "ordering": true,
+                        "info": true,
+                        "autoWidth": false,
+                        "responsive": true
+                    });
+                });
+            }
         }
     </script>
 </div>

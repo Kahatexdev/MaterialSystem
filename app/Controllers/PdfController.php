@@ -228,7 +228,7 @@ class PdfController extends BaseController
         $pdf->Cell(55, 5, '', 0, 0, 'C');
         $pdf->Cell(55, 5, '(                               )', 0, 0, 'C');
         if (!empty($result)) {
-            $pdf->Cell(55, 5, '(       '.$result[0]['penanggung_jawab'].'      )', 0, 0, 'C');
+            $pdf->Cell(55, 5, '(       ' . $result[0]['penanggung_jawab'] . '      )', 0, 0, 'C');
         } else {
             $pdf->Cell(234, 5, ': No penanggung_jawab available', 0, 0, 'C');
         }
@@ -1046,7 +1046,7 @@ class PdfController extends BaseController
         foreach ($poCovering as $index => $row) {
             // Ambil data dari poMapping, kalau ada
             $poData = isset($poMapping[$index]) ? $poMapping[$index] : ['no_model' => '-', 'buyer' => '-', 'delivery_awal' => '-'];
-        
+
             if ($pdf->GetY() + $maxHeight > $yLimit) {
                 $pdf->AddPage(); // Tambah halaman baru
                 // Ulangi Header Formulir
@@ -1093,7 +1093,7 @@ class PdfController extends BaseController
             $pdf->Cell(13, $maxHeight, '', 1, 0, 'C');
             $pdf->Cell(18, $maxHeight, $row['jenis'], 1, 0, 'C');
             $pdf->Cell(18, $maxHeight, '', 1, 0, 'C');
-            $pdf->Cell(23, $maxHeight, '', 1, 1, 'C'); 
+            $pdf->Cell(23, $maxHeight, '', 1, 1, 'C');
         }
         //KETERANGAN
         $pdf->Cell(277, 5, '', 0, 1, 'C');
