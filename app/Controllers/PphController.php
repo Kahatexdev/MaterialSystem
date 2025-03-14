@@ -146,6 +146,7 @@ class PphController extends BaseController
                     'color'      => $items['color'],
                     'gw'         => $items['gw'],
                     'composition' => $items['composition'],
+                    'kgs'  => $items['kgs'],
                     'jarum'      => $data['machinetypeid'] ?? null,
                     'bruto'      => $bruto,
                     'qty'        => $data['qty'] ?? 0,
@@ -173,11 +174,13 @@ class PphController extends BaseController
                     'item_type' => null,
                     'kode_warna' => null,
                     'warna' => null,
+                    'kgs' => 0,
                     'pph' => 0,
                     'jarum' => null,
                     'area' => null
                 ];
             }
+
 
             // Akumulasi total qty, sisa, bruto, bs_setting, dan bs_mesin
             $result['qty'] += $item['qty'];
@@ -190,6 +193,7 @@ class PphController extends BaseController
             $result[$key]['item_type'] = $item['item_type'];
             $result[$key]['kode_warna'] = $item['kode_warna'];
             $result[$key]['warna'] = $item['color'];
+            $result[$key]['kgs'] += $item['kgs'];
             $result[$key]['pph'] += $item['pph'];
             $result[$key]['jarum'] = $item['jarum'];
             $result[$key]['area'] = $item['area'];
@@ -325,11 +329,11 @@ class PphController extends BaseController
 
         // Grouping & Summing Data
         foreach ($pphInisial as $item) {
-            $key = $item['item_type'] . '-' . $item['kode_warna'];
+            $key = $item['mastermodel'] . '-' . $item['item_type'] . '-' . $item['kode_warna'];
 
             if (!isset($result[$key])) {
                 $result[$key] = [
-                    'mastermodel' => $prod['mastermodel'],
+                    'mastermodel' => $item['mastermodel'],
                     'item_type'   => $item['item_type'],
                     'kode_warna'  => $item['kode_warna'],
                     'warna'       => $item['color'],
