@@ -244,6 +244,7 @@ class PphController extends BaseController
                     'color'      => $items['color'],
                     'ttl_kebutuhan' => $items['ttl_kebutuhan'],
                     'gw'         => $items['gw'],
+                    'loss' => $items['loss'],
                     'composition' => $items['composition'],
                     'jarum'      => $data['machinetypeid'] ?? null,
                     'bruto'      => $bruto,
