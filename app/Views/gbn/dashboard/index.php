@@ -32,11 +32,9 @@
                     <div class="row">
                         <div class="col-8">
                             <div class="numbers">
-                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Permintaan </p>
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">PDK</p>
                                 <h5 class="font-weight-bolder mb-0">
-                                    <span class=" text-sm font-weight-bolder"></span>
-
-
+                                    <?= $pdk['total_pdk'] ?>
                                 </h5>
                             </div>
                         </div>
@@ -55,10 +53,10 @@
                     <div class="row">
                         <div class="col-8">
                             <div class="numbers">
-                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Scheduled </p>
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Sch Completed</p>
                                 <h5 class="font-weight-bolder mb-0">
-
-                                </h5> order
+                                    <?= $schedule['total_done'] ?>
+                                </h5>
                             </div>
                         </div>
                         <div class="col-4 text-end">
@@ -76,10 +74,9 @@
                     <div class="row">
                         <div class="col-8">
                             <div class="numbers">
-                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Machine Running</p>
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Pemasukan/Hari</p>
                                 <h5 class="font-weight-bolder mb-0">
-
-
+                                    <?= $pemasukan['total_karung']?> Karung
                                 </h5>
                             </div>
                         </div>
@@ -98,10 +95,9 @@
                     <div class="row">
                         <div class="col-8">
                             <div class="numbers">
-                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Order Finished</p>
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Pengeluaran/Hari</p>
                                 <h5 class="font-weight-bolder mb-0">
                                     8
-                                    <span class=" text-sm font-weight-bolder">This Month</span>
                                 </h5>
                             </div>
                         </div>
@@ -119,7 +115,7 @@
         <div class="col-lg-12">
             <div class="card z-index-2">
                 <div class="card-header pb-0">
-                    <h6>Daily Placed Order</h6>
+                    <h6>Layout Stock Order</h6>
 
                 </div>
                 <div class="card-body p-3">

@@ -17,7 +17,7 @@ $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJat
 // $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
 
 $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
-    $routes->get('', 'MaterialController::index');
+    $routes->get('', 'DashboardGbnController::index');
     $routes->get('masterdata', 'MasterdataController::index');
     $routes->post('tampilMasterOrder', 'MasterdataController::tampilMasterOrder');
     $routes->get('getOrderDetails/(:num)', 'MasterdataController::getOrderDetails/$1');

@@ -164,4 +164,12 @@ class PemasukanModel extends Model
 
         return $inout ?? ['masuk' => 0, 'keluar' => 0]; // Jika NULL, default ke array kosong
     }
+
+    public function getTotalKarungMasuk()
+    {
+        return $this->select('SUM(out_celup.no_karung) as total_karung')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
+            ->where('pemasukan.tgl_masuk', date('Y-m-d')) // Hanya untuk tanggal hari ini
+            ->first();
+    }
 }

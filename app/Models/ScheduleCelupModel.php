@@ -388,4 +388,12 @@ class ScheduleCelupModel extends Model
             ->groupBy('schedule_celup.lot_urut')
             ->findAll();
     }
+    
+    public function countScheduleDone()
+    {
+        return $this->select('COUNT(id_celup) as total_done')
+            ->where('last_status', 'done')
+            ->groupBy('id_celup')
+            ->first();
+    }
 }
