@@ -135,6 +135,7 @@ class PphController extends BaseController
 
                 $bruto = $data['bruto'] ?? 0;
                 $bs_mesin = $data['bs_mesin'] ?? 0;
+                $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
 
 
                 $pphInisial[] = [
@@ -154,7 +155,7 @@ class PphController extends BaseController
                     'po_plus'    => $data['po_plus'] ?? 0,
                     'bs_setting' => $data['bs_setting'] ?? 0,
                     'bs_mesin'   => $bs_mesin,
-                    'pph'        => (($bruto * $gwpcs) + $bs_mesin) / 1000,
+                    'pph'        => $pph
                 ];
             }
         }
@@ -232,7 +233,7 @@ class PphController extends BaseController
 
                 $bruto = $data['bruto'] ?? 0;
                 $bs_mesin = $data['bs_mesin'] ?? 0;
-                $pph = (($bruto * $gwpcs) + $bs_mesin) / 1000;
+                $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
 
 
                 $pphInisial[] = [
@@ -308,7 +309,8 @@ class PphController extends BaseController
 
                     $bruto = $prod['prod'] ?? 0;
                     $bs_mesin = $prod['bs_mesin'] ?? 0;
-                    $pph = (($bruto * $gwpcs) + $bs_mesin) / 1000;
+                    $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
+
 
                     $pphInisial[] = [
                         'mastermodel'    => $prod['mastermodel'],
