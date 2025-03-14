@@ -9,6 +9,7 @@ use App\Models\MasterMaterialModel;
 use App\Models\MasterOrderModel;
 use App\Models\ScheduleCelupModel;
 use App\Models\PemasukanModel;
+use App\Models\ClusterModel;
 
 class DashboardGbnController extends BaseController
 {
@@ -20,6 +21,7 @@ class DashboardGbnController extends BaseController
     protected $masterOrderModel;
     protected $scheduleCelupModel;
     protected $pemasukanModel;
+    protected $clusterModel;
 
     public function __construct()
     {
@@ -28,6 +30,7 @@ class DashboardGbnController extends BaseController
         $this->masterOrderModel = new MasterOrderModel();
         $this->scheduleCelupModel = new ScheduleCelupModel();
         $this->pemasukanModel = new PemasukanModel();
+        $this->clusterModel = new ClusterModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -45,15 +48,17 @@ class DashboardGbnController extends BaseController
     public function index()
     {
         $pdk = $this->masterOrderModel->getPdk();
-        $schedule = $this->scheduleCelupModel->countScheduleDone();
+        $schedule = $this->scheduleCelupModel->countStatusDone();
         $pemasukan = $this->pemasukanModel->getTotalKarungMasuk();
+        $pengeluaran = $this->pemasukanModel->getTotalKarungKeluar();
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
             'pdk' => $pdk,
             'schedule' => $schedule,
-            'pemasukan' => $pemasukan
+            'pemasukan' => $pemasukan,
+            'pengeluaran' => $pengeluaran,
         ];
         return view($this->role . '/dashboard/index', $data);
     }

@@ -136,7 +136,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
 
 // celup routes
 $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
-    $routes->get('', 'CelupController::index');
+    $routes->get('', 'DashboardCelupController::index');
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
     $routes->get('schedule/nylon', 'ScheduleController::nylon');
