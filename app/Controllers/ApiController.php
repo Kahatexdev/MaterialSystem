@@ -196,12 +196,9 @@ class ApiController extends ResourceController
     {
         // Ambil data dari request
         $data = $this->request->getPost();
+        log_message('debug', 'Data received: ' . json_encode($data)); // Logging untuk debugging awal        
 
-        // Logging untuk debugging awal
-        log_message('debug', 'Data received: ' . json_encode($data));
-
-        // Inisialisasi variabel untuk menghitung jumlah data yang berhasil diperbarui
-        $updateCount = 0;
+        $updateCount = 0; // Inisialisasi variabel untuk menghitung jumlah data yang berhasil diperbarui
 
         // Validasi data utama
         if (empty($data['items']) || !is_array($data['items'])) {
@@ -224,6 +221,9 @@ class ApiController extends ResourceController
                     log_message('error', 'Invalid row data: ' . json_encode($row));
                     continue; // Lewati jika data tidak lengkap
                 }
+                // Ambil data berdasarkan id_material
+                $existingData = $this->materialModel->find($row['id_material']);
+                log_message('debug', 'Existing data: ' . json_encode($existingData));
 
                 // Siapkan data untuk pembaruan
                 $updateData = [
@@ -231,20 +231,33 @@ class ApiController extends ResourceController
                     'qty_berat_cns' => $row['qty_berat_cns'],
                 ];
 
-                // Lakukan pembaruan pada database
-                try {
-                    $update = $this->materialModel->update($row['id_material'], $updateData);
-                    if ($update) {
-                        $updateCount++;
-                    } else {
-                        log_message('error', 'Update failed for id_material: ' . $row['id_material']);
+                // Periksa jika ada perubahan sebelum melakukan update
+                if (
+                    $existingData['qty_cns'] != $updateData['qty_cns'] ||
+                    $existingData['qty_berat_cns'] != $updateData['qty_berat_cns']
+                ) {
+                    try {
+                        // Gunakan model untuk melakukan update
+                        $update = $this->materialModel->update($row['id_material'], [
+                            'qty_cns'       => $updateData['qty_cns'],
+                            'qty_berat_cns' => $updateData['qty_berat_cns'],
+                        ]);
+
+                        if ($update) {
+                            $updateCount++;
+                            log_message('error', 'Update successful for id_material: ' . $row['id_material']);
+                        } else {
+                            return $this->respond([
+                                'status'  => 'error',
+                                'message' => $row['id_material'] . " data gagal diperbarui",
+                            ], 500);
+                            log_message('error', 'Update failed for id_material: ' . $row['id_material']);
+                        }
+                    } catch (\Exception $e) {
+                        log_message('critical', 'Exception during update: ' . $e->getMessage());
                     }
-                } catch (\Exception $e) {
-                    log_message('critical', 'Exception during update: ' . $e->getMessage());
-                    return $this->respond([
-                        'status'  => 'error',
-                        'message' => 'Terjadi kesalahan saat memperbarui data',
-                    ], 500);
+                } else {
+                    log_message('error', 'No changes needed for id_material: ' . $row['id_material']);
                 }
             }
         }
