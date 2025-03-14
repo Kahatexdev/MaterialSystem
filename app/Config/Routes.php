@@ -344,6 +344,14 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('printBon/(:num)', 'PdfController::printBon/$1');
 });
 
+$routes->options('(:any)', function() {
+    return $this->response
+                ->setHeader('Access-Control-Allow-Origin', '*')
+                ->setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
+                ->setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+                ->setStatusCode(200);
+});
+
 // api routes
 $routes->group(
     'api',
@@ -351,7 +359,7 @@ $routes->group(
         $routes->get('statusbahanbaku/(:any)', 'ApiController::statusbahanbaku/$1');
         $routes->get('cekBahanBaku/(:any)', 'ApiController::cekBahanBaku/$1');
         $routes->get('cekStok/(:any)', 'ApiController::cekStok/$1');
-        $routes->get('getMU/(:any)/(:any)', 'ApiController::getMU/$1/$2');
+        $routes->get('getMU/(:any)/(:any)/(:any)', 'ApiController::getMU/$1/$2/$3');
         $routes->get('getMaterialForPPH/(:any)', 'ApiController::getMaterialForPPH/$1');
         $routes->get('getMaterialForPPHByAreaAndNoModel/(:segment)/(:segment)', 'ApiController::getMaterialForPPHByAreaAndNoModel/$1/$2');
         $routes->post('insertQtyCns', 'ApiController::insertQtyCns');

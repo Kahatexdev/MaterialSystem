@@ -30,10 +30,11 @@ class Filters extends BaseFilters
         'honeypot'      => Honeypot::class,
         'invalidchars'  => InvalidChars::class,
         'secureheaders' => SecureHeaders::class,
-        'cors'          => Cors::class,
+        // 'cors'          => Cors::class,
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
+        'cors' => \App\Filters\Cors::class, // Tambahkan ini
         'gbn' => \App\Filters\GbnAuth::class,
         'celup' => \App\Filters\CelupAuth::class,
         'covering' => \App\Filters\CoverAuth::class,
@@ -77,10 +78,12 @@ class Filters extends BaseFilters
             // 'honeypot',
             // 'csrf',
             // 'invalidchars',
+            'cors', // Tambahkan ini
         ],
         'after' => [
             // 'honeypot',
             // 'secureheaders',
+            'toolbar',
         ],
     ];
 
