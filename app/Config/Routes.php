@@ -318,6 +318,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     // $routes->post('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');
     $routes->get('excelPPHNomodel/(:any)/(:any)', 'ExcelController::excelPPHNomodel/$1/$2');
     $routes->get('excelPPHInisial/(:any)/(:any)', 'ExcelController::excelPPHInisial/$1/$2');
+    $routes->get('excelPPHDays/(:any)/(:any)', 'ExcelController::excelPPHDays/$1/$2');
     //Celup
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
