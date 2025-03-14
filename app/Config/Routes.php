@@ -98,9 +98,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('hapus_pengeluaran', 'WarehouseController::hapusListPengeluaran');
     $routes->post('proses_pengeluaran_jalur', 'WarehouseController::prosesPengeluaranJalur');
     $routes->get('getItemTypeForOut/(:any)', 'WarehouseController::getItemTypeForOut/$1');
-    $routes->get('getKodeWarnaForOut/(:any)/(:any)', 'WarehouseController::getKodeWarnaForOut/$1/$2');
-    $routes->get('getWarnaDanLotForOut/(:any)/(:any)/(:any)', 'WarehouseController::getWarnaDanLotForOut/$1/$2/$3');
-    $routes->get('getKgsCnsClusterForOut/(:any)/(:any)/(:any)/(:any)', 'WarehouseController::getKgsCnsClusterForOut/$1/$2/$3/$4');
+    $routes->get('getKodeWarnaForOut', 'WarehouseController::getKodeWarnaForOut');
+    $routes->get('getWarnaDanLotForOut', 'WarehouseController::getWarnaDanLotForOut');
+    $routes->get('getKgsCnsClusterForOut', 'WarehouseController::getKgsCnsClusterForOut');
     $routes->post('proses_pengeluaran_manual', 'WarehouseController::prosesPengeluaranJalurManual');
 
     $routes->post('komplain_pemasukan', 'WarehouseController::prosesComplain');

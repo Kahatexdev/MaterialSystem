@@ -200,7 +200,7 @@
 
                                 <div class="col-md-4 sm-12">
                                     <label for="cluster" class="form-label">Pilih Cluster:</label>
-                                    <select class="form-control" name=" cluster" id="cluster">
+                                    <select class="form-control" name="cluster" id="cluster">
                                         <option value=""></option>
                                     </select>
                                 </div>
@@ -260,7 +260,7 @@
                             <div class="col-6">
                                 <div class="form-group">
                                     <label for="">Kode Benang:</label>
-                                    <select class="form-select item-type" id="item_type" name="item_type" required>
+                                    <select class="form-control item-type" id="item_type" name="item_type" required>
                                         <option value="">Pilih Item Type</option>
                                     </select>
                                 </div>
@@ -270,7 +270,7 @@
                             <div class="col-6">
                                 <div class="form-group">
                                     <label for="">Kode Warna:</label>
-                                    <select class="form-select kode-warna" name="kode_warna" required>
+                                    <select class="form-control kode-warna" name="kode_warna" required>
                                         <option value="">Pilih Kode Warna</option>
                                     </select>
                                 </div>
@@ -287,7 +287,7 @@
                             <div class="col-6">
                                 <div class="form-group">
                                     <label for=""> Lot:</label>
-                                    <select class="form-select lot-kirim" id="lot_kirim" name="lot_kirim" required>
+                                    <select class="form-control lot-kirim" id="lot_kirim" name="lot_kirim" required>
                                         <option value="">Pilih Lot</option>
                                     </select>
                                 </div>
@@ -318,7 +318,7 @@
                             <div class="col-6">
                                 <div class="form-group">
                                     <label for="">Cluster</label>
-                                    <select class="form-select cluster" id="cluster" name="cluster">
+                                    <select class="form-control cluster" id="cluster" name="cluster">
                                         <option value="">Pilih Cluster</option>
                                     </select>
                                 </div>
