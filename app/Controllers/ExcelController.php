@@ -81,7 +81,8 @@ class ExcelController extends BaseController
 
                 $bruto = $data['bruto'] ?? 0;
                 $bs_mesin = $data['bs_mesin'] ?? 0;
-                $pph = (($bruto + ($bs_mesin / $gw) * $comp * $gw) / 100) / 1000;
+                $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
+
 
                 $pphInisial[] = [
                     'area'  => $items['area'],
@@ -323,7 +324,8 @@ class ExcelController extends BaseController
 
                 $bruto = $data['bruto'] ?? 0;
                 $bs_mesin = $data['bs_mesin'] ?? 0;
-                $pph = (($bruto + ($bs_mesin / $gw) * $comp * $gw) / 100) / 1000;
+                $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
+
 
 
                 $pphInisial[] = [
@@ -540,7 +542,8 @@ class ExcelController extends BaseController
 
                     $bruto = $prod['prod'] ?? 0;
                     $bs_mesin = $prod['bs_mesin'] ?? 0;
-                    $pph = (($bruto + ($bs_mesin / $gw) * $comp * $gw) / 100) / 1000;
+                    $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
+
 
                     $pphInisial[] = [
                         'mastermodel'    => $prod['mastermodel'],

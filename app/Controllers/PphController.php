@@ -135,7 +135,8 @@ class PphController extends BaseController
 
                 $bruto = $data['bruto'] ?? 0;
                 $bs_mesin = $data['bs_mesin'] ?? 0;
-                $pph = (($bruto + ($bs_mesin / $gw) * $comp * $gw) / 100) / 1000;
+                $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
+
 
                 $pphInisial[] = [
                     'area'  => $items['area'],
@@ -232,7 +233,7 @@ class PphController extends BaseController
 
                 $bruto = $data['bruto'] ?? 0;
                 $bs_mesin = $data['bs_mesin'] ?? 0;
-                $pph = (($bruto + ($bs_mesin / $gw) * $comp * $gw) / 100) / 1000;
+                $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
 
 
                 $pphInisial[] = [
@@ -308,7 +309,8 @@ class PphController extends BaseController
 
                     $bruto = $prod['prod'] ?? 0;
                     $bs_mesin = $prod['bs_mesin'] ?? 0;
-                    $pph = (($bruto + ($bs_mesin / $gw) * $comp * $gw) / 100) / 1000;
+                    $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
+
 
                     $pphInisial[] = [
                         'mastermodel'    => $prod['mastermodel'],
