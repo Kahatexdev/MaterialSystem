@@ -14,6 +14,7 @@ use App\Models\OutCelupModel;
 use App\Models\BonCelupModel;
 use App\Models\ClusterModel;
 use App\Models\PemasukanModel;
+use App\Models\PemesananModel;
 use App\Models\StockModel;
 use App\Models\HistoryPindahPalet;
 use App\Models\HistoryPindahOrder;
@@ -34,6 +35,7 @@ class ApiController extends ResourceController
     protected $clusterModel;
     protected $pemasukanModel;
     protected $stockModel;
+    protected $pemesananModel;
     protected $historyPindahPalet;
     protected $historyPindahOrder;
 
@@ -50,6 +52,7 @@ class ApiController extends ResourceController
         $this->clusterModel = new ClusterModel();
         $this->pemasukanModel = new PemasukanModel();
         $this->stockModel = new StockModel();
+        $this->pemesananModel = new PemesananModel();
         $this->historyPindahPalet = new HistoryPindahPalet();
         $this->historyPindahOrder = new HistoryPindahOrder();
 
@@ -188,5 +191,128 @@ class ApiController extends ResourceController
         }
 
         return $this->respond($material, 200);
+    }
+    public function insertQtyCns() 
+    {
+        // Ambil data dari request
+        $data = $this->request->getPost();
+
+        // Logging untuk debugging awal
+        log_message('debug', 'Data received: ' . json_encode($data));
+
+        // Inisialisasi variabel untuk menghitung jumlah data yang berhasil diperbarui
+        $updateCount = 0;
+
+        // Validasi data utama
+        if (!isset($data['items']) || !is_array($data['items'])) {
+            return $this->respond([
+                'status'  => 'error',
+                'message' => 'Data items tidak ditemukan atau tidak valid',
+            ], 400);
+        }
+
+        // Loop melalui data untuk pembaruan
+        foreach ($data['items'] as $item) {
+            if (!is_array($item)) {
+                log_message('error', 'Invalid item structure: ' . json_encode($item));
+                continue; // Lewati jika struktur tidak sesuai
+            }
+
+            foreach ($item as $row) {
+                // Validasi setiap row
+                if (!isset($row['id_material'], $row['qty_cns'], $row['qty_berat_cns'])) {
+                    log_message('error', 'Invalid row data: ' . json_encode($row));
+                    continue; // Lewati jika data tidak lengkap
+                }
+
+                // Siapkan data untuk pembaruan
+                $updateData = [
+                    'qty_cns'       => $row['qty_cns'],
+                    'qty_berat_cns' => $row['qty_berat_cns'],
+                ];
+
+                // Lakukan pembaruan pada database
+                try {
+                    $update = $this->materialModel->update($row['id_material'], $updateData);
+                    if ($update) {
+                        $updateCount++;
+                    } else {
+                        log_message('error', 'Update failed for id_material: ' . $row['id_material']);
+                    }
+                } catch (\Exception $e) {
+                    log_message('critical', 'Exception during update: ' . $e->getMessage());
+                    return $this->respond([
+                        'status'  => 'error',
+                        'message' => 'Terjadi kesalahan saat memperbarui data',
+                    ], 500);
+                }
+            }
+        }
+
+        // Kirimkan respons berdasarkan jumlah data yang diperbarui
+        if ($updateCount > 0) {
+            return $this->respond([
+                'status'  => 'success',
+                'message' => "$updateCount data berhasil diperbarui",
+            ], 200);
+        } else {
+            return $this->respond([
+                'status'  => 'error',
+                'message' => "Tidak ada data yang berhasil diperbarui",
+            ], 400);
+        }
+    }
+    public function saveListPemesanan() {
+        // Ambil data dari request POST
+        $data = $this->request->getPost();
+        dd($data);
+        
+        if (empty($data)) {
+            return $this->respond([
+                'status'  => 'error',
+                'message' => "Tidak ada data list pemesanan",
+            ], 400);
+        }
+        // Inisialisasi variabel untuk menghitung jumlah data yang berhasil diperbarui
+        $insertedCount = 0;
+        foreach ($data as $key => $id) {
+            $insertData = [
+                'id_material' => $id['id_material'],
+                'tgl_list' => date('Y-m-d'),
+                'tgl_pakai' => $id['tgl_pakai'],
+                'jl_mc' => $id['jalan_mc'],
+                'ttl_qty_cones' => $id['ttl_cns'],
+                'ttl_berat_cones' => $id['ttl_berat_cns'],
+                'admin' => $id['area'],
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
+            // Lakukan pembaruan pada database
+            try {
+                $insert = $this->pemesananModel->insert($insertData);
+                if ($insert) {
+                    $insertedCount++;
+                } else {
+                    log_message('error', 'Update failed for id_material: ' . $id['id_material']);
+                }
+            } catch (\Exception $e) {
+                log_message('critical', 'Exception during update: ' . $e->getMessage());
+                return $this->respond([
+                    'status'  => 'error',
+                    'message' => 'Terjadi kesalahan saat memperbarui data',
+                ], 500);
+            }
+        }
+        // Kirimkan respons berdasarkan jumlah data yang diperbarui
+        if ($insertedCount > 0) {
+            return $this->respond([
+                'status'  => 'success',
+                'message' => "$insertedCount data berhasil diperbarui",
+            ], 200);
+        } else {
+            return $this->respond([
+                'status'  => 'error',
+                'message' => "Tidak ada data yang berhasil diperbarui",
+            ], 400);
+        }
     }
 }

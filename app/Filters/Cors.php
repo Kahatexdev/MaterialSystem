@@ -6,7 +6,7 @@ use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 
-class MonitoringAuth implements FilterInterface
+class Cors implements FilterInterface
 {
     /**
      * Do whatever processing this filter needs to do.
@@ -25,10 +25,15 @@ class MonitoringAuth implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        if (!session('role') || session('role') !== 'monitoring') {
-            return redirect()->to(base_url('/login'))->with('error', 'Unauthorized access');
+        header('Access-Control-Allow-Origin: *');
+        header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization");
+        header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+        $method = $_SERVER['REQUEST_METHOD'];
+        if ($method == "OPTIONS") {
+            die();
         }
     }
+
     /**
      * Allows After filters to inspect and modify the response
      * object as needed. This method does not allow any way

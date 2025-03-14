@@ -109,6 +109,7 @@ class PphController extends BaseController
         $model = $this->request->getGet('model');
         $area = $this->request->getGet('area');
         $models = $this->materialModel->getMaterialForPPH($area, $model);
+
         $pphInisial = [];
 
         foreach ($models as $items) {
@@ -193,6 +194,7 @@ class PphController extends BaseController
             $result[$key]['jarum'] = $item['jarum'];
             $result[$key]['area'] = $item['area'];
         }
+
         return $this->response->setJSON($result);
     }
 
@@ -252,7 +254,16 @@ class PphController extends BaseController
                 ];
             }
         }
-        return $this->response->setJSON($pphInisial);
+
+        $dataToSort = array_filter($pphInisial, 'is_array');
+
+        usort($dataToSort, function ($a, $b) {
+            return $a['inisial'] <=> $b['inisial']
+                ?: $a['item_type'] <=> $b['item_type']
+                ?: $a['kode_warna'] <=> $b['kode_warna'];
+        });
+
+        return $this->response->setJSON($dataToSort);
     }
     public function getDataPerhari()
     {
@@ -274,40 +285,41 @@ class PphController extends BaseController
             $key = $prod['mastermodel'] . '-' . $prod['size'];
 
             $material = $this->materialModel->getMU($prod['mastermodel'], $prod['size']);
-
-            if (isEmpty($material)) {
-                $result[$key] = [
+            if (empty($material)) {
+                $result[$prod['mastermodel']] = [
                     'mastermodel' => $prod['mastermodel'],
-                    'produksi' => $prod['prod'],
-                    'bs_mesin' => $prod['bs_mesin'],
                     'item_type' => null,
                     'kode_warna' => null,
                     'warna' => null,
                     'pph' => 0,
+                    'bruto' => $prod['prod'],
+                    'bs_mesin' => $prod['bs_mesin'],
                 ];
             } else {
-                $gw = $material['gw'];
-                $comp = $material['composition'];
-                $gwpcs = ($gw * $comp) / 100;
+                foreach ($material as $mtr) {
+                    $gw = $mtr['gw'];
+                    $comp = $mtr['composition'];
+                    $gwpcs = ($gw * $comp) / 100;
 
-                $bruto = $prod['prod'] ?? 0;
-                $bs_mesin = $prod['bs_mesin'] ?? 0;
-                $pph = (($bruto * $gwpcs) + $bs_mesin) / 1000;
+                    $bruto = $prod['prod'] ?? 0;
+                    $bs_mesin = $prod['bs_mesin'] ?? 0;
+                    $pph = (($bruto * $gwpcs) + $bs_mesin) / 1000;
 
-                $pphInisial[] = [
-                    'mastermodel'    => $prod['mastermodel'],
-                    'style_size'  => $prod['size'],
-                    'item_type'   => $material['item_type'] ?? null,
-                    'kode_warna'  => $material['kode_warna'] ?? null,
-                    'color'       => $material['color'] ?? null,
-                    'gw'          => $gw,
-                    'composition' => $comp,
-                    'bruto'       => $bruto,
-                    'qty'         => $prod['qty'] ?? 0,
-                    'sisa'        => $prod['sisa'] ?? 0,
-                    'bs_mesin'    => $bs_mesin,
-                    'pph'         => $pph
-                ];
+                    $pphInisial[] = [
+                        'mastermodel'    => $prod['mastermodel'],
+                        'style_size'  => $prod['size'],
+                        'item_type'   => $mtr['item_type'] ?? null,
+                        'kode_warna'  => $mtr['kode_warna'] ?? null,
+                        'color'       => $mtr['color'] ?? null,
+                        'gw'          => $gw,
+                        'composition' => $comp,
+                        'bruto'       => $bruto,
+                        'qty'         => $prod['qty'] ?? 0,
+                        'sisa'        => $prod['sisa'] ?? 0,
+                        'bs_mesin'    => $bs_mesin,
+                        'pph'         => $pph
+                    ];
+                }
             }
         }
 
@@ -317,25 +329,22 @@ class PphController extends BaseController
 
             if (!isset($result[$key])) {
                 $result[$key] = [
+                    'mastermodel' => $prod['mastermodel'],
                     'item_type'   => $item['item_type'],
                     'kode_warna'  => $item['kode_warna'],
                     'warna'       => $item['color'],
                     'pph'         => 0,
-                    'qty'         => 0,
-                    'sisa'        => 0,
                     'bruto'       => 0,
                     'bs_mesin'    => 0,
                 ];
             }
 
             // Accumulate values correctly
-            $result[$key]['qty'] += $item['qty'];
-            $result[$key]['sisa'] += $item['sisa'];
+
             $result[$key]['bruto'] += $item['bruto'];
             $result[$key]['bs_mesin'] += $item['bs_mesin'];
             $result[$key]['pph'] += $item['pph'];
         }
-
         return $this->response->setJSON($result);
     }
 }

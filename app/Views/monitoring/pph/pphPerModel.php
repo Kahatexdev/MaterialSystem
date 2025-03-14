@@ -191,6 +191,11 @@
             // Filter untuk mendapatkan bahan baku (exclude qty, sisa, dll.)
             let materials = keys.filter(key => !["qty", "sisa", "bruto", "bs_setting", "bs_mesin"].includes(key));
 
+            materials.sort((a, b) => {
+                return data[a].item_type.localeCompare(data[b].item_type) ||
+                    data[a].kode_warna.localeCompare(data[b].kode_warna);
+            });
+
             // Looping untuk buat baris tabel
             let rows = materials.map((material, index) => `
                 <tr>
