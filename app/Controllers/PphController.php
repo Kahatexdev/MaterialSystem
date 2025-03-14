@@ -325,7 +325,7 @@ class PphController extends BaseController
 
         // Grouping & Summing Data
         foreach ($pphInisial as $item) {
-            $key = $item['item_type'] . '-' . $item['kode_warna'];
+            $key = $item['mastermodel'] . '-' . $item['item_type'] . '-' . $item['kode_warna'];
 
             if (!isset($result[$key])) {
                 $result[$key] = [
