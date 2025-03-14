@@ -81,7 +81,7 @@ class ExcelController extends BaseController
 
                 $bruto = $data['bruto'] ?? 0;
                 $bs_mesin = $data['bs_mesin'] ?? 0;
-
+                $pph = (($bruto + ($bs_mesin / $gw) * $comp * $gw) / 100) / 1000;
 
                 $pphInisial[] = [
                     'area'  => $items['area'],
@@ -100,7 +100,7 @@ class ExcelController extends BaseController
                     'po_plus'    => $data['po_plus'] ?? 0,
                     'bs_setting' => $data['bs_setting'] ?? 0,
                     'bs_mesin'   => $bs_mesin,
-                    'pph'        => (($bruto * $gwpcs) + $bs_mesin) / 1000,
+                    'pph'        => $pph,
                 ];
             }
         }
@@ -193,7 +193,7 @@ class ExcelController extends BaseController
         $sheet->setCellValue('A2', 'Area');
         $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(12);
         $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        
+
         $sheet->setCellValue('A3', 'Qty');
         $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(12);
         $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
@@ -237,7 +237,7 @@ class ExcelController extends BaseController
         $sheet->setCellValue('E4', ': ' . number_format($result['bs_mesin'], 2));
         $sheet->getStyle('E4')->getFont()->setSize(12);
         $sheet->getStyle('E4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        
+
         $row_header = 5;
 
         $sheet->setCellValue('A' . $row_header, 'No');
@@ -257,7 +257,7 @@ class ExcelController extends BaseController
         // Isi data
         $row = 6;
         $no = 1;
-        
+
         foreach ($dataToSort as $key => $data) {
             if (!is_array($data)) {
                 continue; // Lewati nilai akumulasi di $result
@@ -276,7 +276,7 @@ class ExcelController extends BaseController
             foreach ($columns as $column) {
                 $sheet->getStyle($column . $row)->applyFromArray($styleBody);
             }
-            
+
             $row++;
         }
 
@@ -323,7 +323,7 @@ class ExcelController extends BaseController
 
                 $bruto = $data['bruto'] ?? 0;
                 $bs_mesin = $data['bs_mesin'] ?? 0;
-                $pph = (($bruto * $gwpcs) + $bs_mesin) / 1000;
+                $pph = (($bruto + ($bs_mesin / $gw) * $comp * $gw) / 100) / 1000;
 
 
                 $pphInisial[] = [
@@ -346,7 +346,7 @@ class ExcelController extends BaseController
                     'bs_setting' => $data['bs_setting'] ?? 0,
                     'bs_mesin'   => $bs_mesin,
                     'pph'        => $pph,
-                    'pph_persen' => ($pph / $items['ttl_kebutuhan'])*100,
+                    'pph_persen' => ($pph / $items['ttl_kebutuhan']) * 100,
                 ];
             }
         }
@@ -400,7 +400,7 @@ class ExcelController extends BaseController
         // Data Header
         $sheet->setCellValue('A2', 'Area');
         $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(12);
-        $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT); 
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
         $sheet->setCellValue('B2', ': ' . $area);
         $sheet->getStyle('B2')->getFont()->setSize(12);
@@ -413,7 +413,7 @@ class ExcelController extends BaseController
         $sheet->setCellValue('B3', ': ' . $model);
         $sheet->getStyle('B3')->getFont()->setSize(12);
         $sheet->getStyle('B3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        
+
         $row_header = 4;
 
         $sheet->setCellValue('A' . $row_header, 'No');
@@ -455,7 +455,7 @@ class ExcelController extends BaseController
         // Isi data
         $row = 5;
         $no = 1;
-        
+
         foreach ($dataToSort as $key => $data) {
             if (!is_array($data)) {
                 continue; // Lewati nilai akumulasi di $result
@@ -485,7 +485,7 @@ class ExcelController extends BaseController
             foreach ($columns as $column) {
                 $sheet->getStyle($column . $row)->applyFromArray($styleBody);
             }
-            
+
             $row++;
         }
 
@@ -540,7 +540,7 @@ class ExcelController extends BaseController
 
                     $bruto = $prod['prod'] ?? 0;
                     $bs_mesin = $prod['bs_mesin'] ?? 0;
-                    $pph = (($bruto * $gwpcs) + $bs_mesin) / 1000;
+                    $pph = (($bruto + ($bs_mesin / $gw) * $comp * $gw) / 100) / 1000;
 
                     $pphInisial[] = [
                         'mastermodel'    => $prod['mastermodel'],
@@ -656,7 +656,7 @@ class ExcelController extends BaseController
         // Isi data
         $row = 4;
         $no = 1;
-        
+
         foreach ($dataToSort as $key => $data) {
             if (!is_array($data)) {
                 continue; // Lewati nilai akumulasi di $result
@@ -677,7 +677,7 @@ class ExcelController extends BaseController
             foreach ($columns as $column) {
                 $sheet->getStyle($column . $row)->applyFromArray($styleBody);
             }
-            
+
             $row++;
         }
 
