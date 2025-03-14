@@ -161,7 +161,7 @@ class ApiController extends ResourceController
         }
         return $this->respond($res, 200);
     }
-    public function getMU($model, $styleSize, $area)
+    public function getMaterialForPemesanan($model, $styleSize, $area)
     {
         $mu = $this->materialModel->getMU($model, $styleSize, $area);
 
@@ -192,7 +192,7 @@ class ApiController extends ResourceController
 
         return $this->respond($material, 200);
     }
-    public function insertQtyCns() 
+    public function insertQtyCns()
     {
         // Ambil data dari request
         $data = $this->request->getPost();
@@ -307,10 +307,10 @@ class ApiController extends ResourceController
         try {
             // Cek apakah data sudah ada
             $existingData = $this->pemesananModel
-            ->where('id_material', $data['id_material'])
-            ->where('tgl_pakai', $data['tgl_pakai'])
-            ->where('admin', $data['area'])
-            ->first();
+                ->where('id_material', $data['id_material'])
+                ->where('tgl_pakai', $data['tgl_pakai'])
+                ->where('admin', $data['area'])
+                ->first();
 
             if ($existingData) {
                 return $this->respond([
@@ -330,7 +330,7 @@ class ApiController extends ResourceController
                     'id_user'       => $data['id_user'] ?? 0,          // Sesuaikan dengan key yang ada
                     'username' => $data['username'] ?? 'default', // Sesuaikan dengan key yang ada
                     'role'  => $data['role'] ?? '',
-                    'logged_in'=> true,
+                    'logged_in' => true,
                 ];
                 $session->set('user', $userLoginData);
                 // Hapus session 'pemesananBb' setelah menetapkan ulang session pengguna
@@ -359,7 +359,4 @@ class ApiController extends ResourceController
             ], 500);
         }
     }
-
-
-
 }
