@@ -98,9 +98,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('hapus_pengeluaran', 'WarehouseController::hapusListPengeluaran');
     $routes->post('proses_pengeluaran_jalur', 'WarehouseController::prosesPengeluaranJalur');
     $routes->get('getItemTypeForOut/(:any)', 'WarehouseController::getItemTypeForOut/$1');
-    $routes->get('getKodeWarnaForOut/(:any)/(:any)', 'WarehouseController::getKodeWarnaForOut/$1/$2');
-    $routes->get('getWarnaDanLotForOut/(:any)/(:any)/(:any)', 'WarehouseController::getWarnaDanLotForOut/$1/$2/$3');
-    $routes->get('getKgsCnsClusterForOut/(:any)/(:any)/(:any)/(:any)', 'WarehouseController::getKgsCnsClusterForOut/$1/$2/$3/$4');
+    $routes->get('getKodeWarnaForOut', 'WarehouseController::getKodeWarnaForOut');
+    $routes->get('getWarnaDanLotForOut', 'WarehouseController::getWarnaDanLotForOut');
+    $routes->get('getKgsCnsClusterForOut', 'WarehouseController::getKgsCnsClusterForOut');
     $routes->post('proses_pengeluaran_manual', 'WarehouseController::prosesPengeluaranJalurManual');
 
     $routes->post('komplain_pemasukan', 'WarehouseController::prosesComplain');
@@ -318,6 +318,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     // $routes->post('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');
     $routes->get('excelPPHNomodel/(:any)/(:any)', 'ExcelController::excelPPHNomodel/$1/$2');
     $routes->get('excelPPHInisial/(:any)/(:any)', 'ExcelController::excelPPHInisial/$1/$2');
+    $routes->get('excelPPHDays/(:any)/(:any)', 'ExcelController::excelPPHDays/$1/$2');
     //Celup
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
@@ -359,7 +360,7 @@ $routes->group(
         $routes->get('statusbahanbaku/(:any)', 'ApiController::statusbahanbaku/$1');
         $routes->get('cekBahanBaku/(:any)', 'ApiController::cekBahanBaku/$1');
         $routes->get('cekStok/(:any)', 'ApiController::cekStok/$1');
-        $routes->get('getMU/(:any)/(:any)/(:any)', 'ApiController::getMU/$1/$2/$3');
+        $routes->get('getMU/(:any)/(:any)/(:any)', 'ApiController::getMaterialForPemesanan/$1/$2/$3');
         $routes->get('getMaterialForPPH/(:any)', 'ApiController::getMaterialForPPH/$1');
         $routes->get('getMaterialForPPHByAreaAndNoModel/(:segment)/(:segment)', 'ApiController::getMaterialForPPHByAreaAndNoModel/$1/$2');
         $routes->post('insertQtyCns', 'ApiController::insertQtyCns');

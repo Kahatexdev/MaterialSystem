@@ -161,7 +161,7 @@
             let bs_mesin = bsMesinValue.toLocaleString(); // Format ribuan
             let header = document.getElementById('HeaderRow');
 
-            let baseUrl = "<?= base_url($role . '/excelPPHNomodel/') ?>";
+            let baseUrl = "<?= base_url($role . '/excelPPHDays/') ?>";
 
             header.innerHTML = ` 
                 <div class="d-flex align-items-center justify-content-between">
