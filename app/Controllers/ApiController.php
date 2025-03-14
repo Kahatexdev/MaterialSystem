@@ -220,7 +220,7 @@ class ApiController extends ResourceController
 
             foreach ($item as $row) {
                 // Validasi setiap row
-                if (empty($row['id_material'], $row['qty_cns'], $row['qty_berat_cns'])) {
+                if (empty($row['id_material']) || empty($row['qty_cns']) || empty($row['qty_berat_cns']))) {
                     log_message('error', 'Invalid row data: ' . json_encode($row));
                     continue; // Lewati jika data tidak lengkap
                 }
