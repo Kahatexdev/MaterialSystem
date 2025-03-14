@@ -73,6 +73,8 @@ class CoveringController extends BaseController
             'role' => $this->role,
             'poCovering' => $poCovering,
         ];
+
+        // dd($data);
         return view($this->role . '/po/index', $data);
     }
 
@@ -265,5 +267,27 @@ class CoveringController extends BaseController
         $tgl_po = date('Y-m-d', strtotime($tgl_po));
         $poDetail = $this->openPoModel->getPoForCelup($tgl_po);
         dd($poDetail);
+    }
+
+    public function memo()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Memo',
+            'role' => $this->role,
+        ];
+
+        return view($this->role . '/memo/index', $data);
+    }
+
+    public function mesinCov()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Mesin Covering',
+            'role' => $this->role,
+        ];
+
+        return view($this->role . '/mesin/index', $data);
     }
 }
