@@ -163,7 +163,7 @@ class OpenPoModel extends Model
 
     public function getPOCovering()
     {
-        return $this->select('DATE(open_po.created_at) tgl_po')
+        return $this->select('id_po,DATE(open_po.created_at) tgl_po, id_induk')
             ->where('penerima', 'Paryanti')
             ->orderBy('tgl_po', 'DESC')
             ->groupBy('tgl_po')

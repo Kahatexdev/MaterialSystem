@@ -25,9 +25,10 @@ class MonitoringAuth implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        //
+        if (!session('role') || session('role') !== 'monitoring') {
+            return redirect()->to(base_url('/login'))->with('error', 'Unauthorized access');
+        }
     }
-
     /**
      * Allows After filters to inspect and modify the response
      * object as needed. This method does not allow any way
