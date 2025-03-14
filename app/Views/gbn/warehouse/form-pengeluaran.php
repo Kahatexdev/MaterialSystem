@@ -195,7 +195,7 @@
                             <div class="col-6">
                                 <div class="form-group">
                                     <label for="">Kode Benang:</label>
-                                    <select class="form-select item-type" id="item_type" name="item_type" required>
+                                    <select class="form-control item-type" id="item_type" name="item_type" required>
                                         <option value="">Pilih Item Type</option>
                                     </select>
                                 </div>
@@ -205,7 +205,7 @@
                             <div class="col-6">
                                 <div class="form-group">
                                     <label for="">Kode Warna:</label>
-                                    <select class="form-select kode-warna" name="kode_warna" required>
+                                    <select class="form-control kode-warna" name="kode_warna" required>
                                         <option value="">Pilih Kode Warna</option>
                                     </select>
                                 </div>
@@ -222,7 +222,7 @@
                             <div class="col-6">
                                 <div class="form-group">
                                     <label for=""> Lot:</label>
-                                    <select class="form-select lot-kirim" id="lot_kirim" name="lot_kirim" required>
+                                    <select class="form-control lot-kirim" id="lot_kirim" name="lot_kirim" required>
                                         <option value="">Pilih Lot</option>
                                     </select>
                                 </div>
@@ -354,8 +354,11 @@
             var noModel = $('#no_model').val().trim();
             var itemType = $('#item_type').val().trim(); // Dapatkan itemType dengan benar
 
+            console.log(noModel);
+            console.log(itemType);
+
             if (noModel && itemType) {
-                var url = '<?= base_url($role . "/getKodeWarnaForOut") ?>/' + encodeURIComponent(noModel) + '/' + encodeURIComponent(itemType);
+                var url = `<?= base_url($role . "/getKodeWarnaForOut") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}`;
 
                 $.ajax({
                     url: url,
@@ -395,7 +398,7 @@
                     return;
                 }
 
-                var url = '<?= base_url($role . "/getWarnaDanLotForOut") ?>/' + encodeURIComponent(noModel) + '/' + encodeURIComponent(itemType) + '/' + encodeURIComponent(kodeWarna);
+                var url = `<?= base_url($role . "/getWarnaDanLotForOut") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}&kodeWarna=${kodeWarna}`;
 
                 console.log("URL request:", url);
 
@@ -448,7 +451,7 @@
 
                 if (lotKirim) {
                     $.ajax({
-                        url: '<?= base_url($role . "/getKgsCnsClusterForOut") ?>/' + encodeURIComponent(noModel) + '/' + encodeURIComponent(itemType) + '/' + encodeURIComponent(kodeWarna) + '/' + encodeURIComponent(lotKirim) + '/' + encodeURIComponent(noKarung),
+                        url: `<?= base_url($role . "/getKgsCnsClusterForOut") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}&kodeWarna=${kodeWarna}&lotKirim=${lotKirim}&noKarung=${noKarung}`,
                         type: 'GET',
                         dataType: 'json',
                         success: function(response) {
