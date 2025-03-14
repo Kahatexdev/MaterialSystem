@@ -202,7 +202,8 @@ class MaterialModel extends Model
         $builder->groupBy('
         material.style_size, 
         material.item_type, 
-        material.kode_warna
+        material.kode_warna,
+        material.composition
     ');
 
         return $builder->findAll();

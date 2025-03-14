@@ -210,6 +210,9 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('po/savePOCovering', 'CoveringController::savePOCovering');
     $routes->get('po/deletePOCovering/(:any)', 'CoveringController::unsetSession/$1');
     $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
+
+    // warehouse
+    $routes->get('warehouse', 'CoveringController::warehouse');
 });
 
 
@@ -345,12 +348,12 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('printBon/(:num)', 'PdfController::printBon/$1');
 });
 
-$routes->options('(:any)', function() {
+$routes->options('(:any)', function () {
     return $this->response
-                ->setHeader('Access-Control-Allow-Origin', '*')
-                ->setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
-                ->setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
-                ->setStatusCode(200);
+        ->setHeader('Access-Control-Allow-Origin', '*')
+        ->setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
+        ->setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+        ->setStatusCode(200);
 });
 
 // api routes
