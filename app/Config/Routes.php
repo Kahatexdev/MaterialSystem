@@ -18,6 +18,8 @@ $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJat
 
 $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('', 'DashboardGbnController::index');
+    // $routes->get('getGroupData', 'DashboardGbnController::getGroupData');
+    $routes->post('getGroupData', 'DashboardGbnController::getGroupData');
     $routes->get('masterdata', 'MasterdataController::index');
     $routes->post('tampilMasterOrder', 'MasterdataController::tampilMasterOrder');
     $routes->get('getOrderDetails/(:num)', 'MasterdataController::getOrderDetails/$1');

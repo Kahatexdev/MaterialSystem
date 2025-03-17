@@ -67,4 +67,76 @@ class ClusterModel extends Model
             ->get()
             ->getResultArray();
     }
+
+    public function getClusterGroupI()
+    {
+        return $this->select('cluster.kapasitas, 
+                      COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0) AS total_qty, 
+                      cluster.nama_cluster, 
+                      RIGHT(cluster.nama_cluster, 3) AS simbol_cluster')
+            ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
+            ->groupStart()
+            ->groupStart()
+            ->like('cluster.nama_cluster', 'I.%.09.%', 'after')
+            ->where('cluster.nama_cluster >=', 'I.A.09.a')
+            ->where('cluster.nama_cluster <=', 'I.B.09.b')
+            ->groupEnd()
+            ->orGroupStart()
+            ->like('cluster.nama_cluster', 'I.%.01.%', 'after')
+            ->orLike('cluster.nama_cluster', 'I.%.02.%', 'after')
+            ->orLike('cluster.nama_cluster', 'I.%.03.%', 'after')
+            ->orLike('cluster.nama_cluster', 'I.%.04.%', 'after')
+            ->orLike('cluster.nama_cluster', 'I.%.05.%', 'after')
+            ->orLike('cluster.nama_cluster', 'I.%.06.%', 'after')
+            ->orLike('cluster.nama_cluster', 'I.%.07.%', 'after')
+            ->orLike('cluster.nama_cluster', 'I.%.08.%', 'after')
+            ->groupEnd()
+            ->groupEnd()
+            ->groupBy('cluster.nama_cluster')
+            ->findAll();
+    }
+
+    public function getClusterGroupII()
+    {
+        return $this->select('cluster.kapasitas, 
+                      COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0) AS total_qty, 
+                      cluster.nama_cluster, 
+                      RIGHT(cluster.nama_cluster, 3) AS simbol_cluster')
+            ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
+            ->GroupStart()
+            ->like('cluster.nama_cluster', 'II.%.01.%', 'after')
+            ->orLike('cluster.nama_cluster', 'II.%.02.%', 'after')
+            ->orLike('cluster.nama_cluster', 'II.%.03.%', 'after')
+            ->orLike('cluster.nama_cluster', 'II.%.04.%', 'after')
+            ->orLike('cluster.nama_cluster', 'II.%.05.%', 'after')
+            ->orLike('cluster.nama_cluster', 'II.%.06.%', 'after')
+            ->orLike('cluster.nama_cluster', 'II.%.07.%', 'after')
+            ->orLike('cluster.nama_cluster', 'II.%.08.%', 'after')
+            ->orLike('cluster.nama_cluster', 'II.%.09.%', 'after')
+            ->groupEnd()
+            ->groupBy('cluster.nama_cluster')
+            ->findAll();
+    }
+
+    public function getClusterGroupIII()
+    {
+        return $this->select('cluster.kapasitas, 
+                      COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0) AS total_qty, 
+                      cluster.nama_cluster, 
+                      RIGHT(cluster.nama_cluster, 3) AS simbol_cluster')
+            ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
+            ->GroupStart()
+            ->like('cluster.nama_cluster', 'III.%.01.%', 'after')
+            ->orLike('cluster.nama_cluster', 'III.%.02.%', 'after')
+            ->orLike('cluster.nama_cluster', 'III.%.03.%', 'after')
+            ->orLike('cluster.nama_cluster', 'III.%.04.%', 'after')
+            ->orLike('cluster.nama_cluster', 'III.%.05.%', 'after')
+            ->orLike('cluster.nama_cluster', 'III.%.06.%', 'after')
+            ->orLike('cluster.nama_cluster', 'III.%.07.%', 'after')
+            ->orLike('cluster.nama_cluster', 'III.%.08.%', 'after')
+            ->orLike('cluster.nama_cluster', 'III.%.09.%', 'after')
+            ->groupEnd()
+            ->groupBy('cluster.nama_cluster')
+            ->findAll();
+    }
 }
