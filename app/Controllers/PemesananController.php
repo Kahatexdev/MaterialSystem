@@ -100,7 +100,7 @@ class PemesananController extends BaseController
     }
     public function detailPemesanan($area, $jenis)
     {
-        dd($area, $jenis);
+        // dd($area, $jenis);
         $dataPemesanan = $this->pemesananModel->getDataPemesanan($area, $jenis);
 
         if (!is_array($dataPemesanan)) {
