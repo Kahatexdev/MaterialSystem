@@ -17,7 +17,7 @@ $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJat
 // $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
 
 $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
-    $routes->get('', 'MaterialController::index');
+    $routes->get('', 'DashboardGbnController::index');
     $routes->get('masterdata', 'MasterdataController::index');
     $routes->post('tampilMasterOrder', 'MasterdataController::tampilMasterOrder');
     $routes->get('getOrderDetails/(:num)', 'MasterdataController::getOrderDetails/$1');
@@ -136,7 +136,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
 
 // celup routes
 $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
-    $routes->get('', 'CelupController::index');
+    $routes->get('', 'DashboardCelupController::index');
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
     $routes->get('schedule/nylon', 'ScheduleController::nylon');
@@ -213,6 +213,9 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
 
     // warehouse
     $routes->get('warehouse', 'CoveringController::warehouse');
+    $routes->get('warehouse/pemasukan', 'CoveringController::pemasukan');
+    $routes->get('warehouse/pengeluaran_jalur', 'CoveringController::pengeluaranJalur');
+    $routes->get('warehouse/pengiriman_area', 'CoveringController::pengirimanArea');
 });
 
 

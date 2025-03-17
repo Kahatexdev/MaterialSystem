@@ -73,8 +73,10 @@ class PemesananController extends BaseController
     }
     public function index()
     {
-        $area = $this->materialModel->getDataArea();
+        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $response = file_get_contents($apiUrl);
 
+        $area = json_decode($response, true);
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
@@ -98,7 +100,7 @@ class PemesananController extends BaseController
     }
     public function detailPemesanan($area, $jenis)
     {
-        dd($area, $jenis);
+        // dd($area, $jenis);
         $dataPemesanan = $this->pemesananModel->getDataPemesanan($area, $jenis);
 
         if (!is_array($dataPemesanan)) {
