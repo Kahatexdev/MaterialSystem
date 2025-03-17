@@ -88,4 +88,34 @@ class PemesananModel extends Model
 
         return $query->getResultArray();
     }
+    public function getListPemesananByArea($area)
+    {
+        $query = $this->db->table('pemesanan')
+            ->select("
+                pemesanan.admin,
+                pemesanan.tgl_pakai,
+                master_order.no_model,
+                material.item_type,
+                material.kode_warna,
+                material.color,
+                SUM(material.kgs) AS kg_keb,
+                SUM(pemesanan.jl_mc) AS jl_mc,
+                SUM(pemesanan.ttl_qty_cones) AS cns_pesan,
+                SUM(pemesanan.ttl_berat_cones) AS qty_pesan,
+                AVG(pemesanan.sisa_kgs_mc) AS qty_sisa,
+                AVG(pemesanan.sisa_cones_mc) AS cns_sisa,
+                pemesanan.lot,
+                pemesanan.keterangan,
+                (SUM(material.kgs) - SUM(DISTINCT COALESCE(pengeluaran.id_pengeluaran, 0) * COALESCE(pengeluaran.kgs_out, 0) / NULLIF(COALESCE(pengeluaran.id_pengeluaran, 1), 0))) AS sisa_jatah
+            ")
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->join('pengeluaran', 'pengeluaran.id_pengeluaran = pemesanan.id_pengeluaran', 'left')
+            ->where('pemesanan.admin', $area)
+            ->where('pemesanan.status_kirim', '')
+            ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai')
+            ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC')
+            ->orderBy('pemesanan.tgl_pakai', 'DESC');
+        return $query->get()->getResultArray();
+    }
 }

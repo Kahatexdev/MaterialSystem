@@ -365,102 +365,11 @@ class ApiController extends ResourceController
                 'message' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage(),
             ], 500);
         }
-        // // Ambil data JSON dari request
-        // $data = $this->request->getJSON(true);
-        // log_message('debug', 'Data received: ' . json_encode($data));
+    }
+    public function listPemesanan($area)
+    {
+        $dataList = $this->pemesananModel->getListPemesananByArea($area);
 
-        // if (empty($data)) {
-        //     return $this->respond([
-        //         'status'  => 'error',
-        //         'message' => "Tidak ada data list pemesanan",
-        //     ], 400);
-        // }
-
-        // // Pastikan data yang diperlukan ada dan merupakan array
-        // if (!isset($data['id_material']) || !is_array($data['id_material'])) {
-        //     return $this->respond([
-        //         'status'  => 'error',
-        //         'message' => "Data id_material tidak valid",
-        //     ], 400);
-        // }
-
-        // // Asumsikan semua key memiliki panjang array yang sama
-        // $length = count($data['id_material']);
-        // $result = [];
-
-        // for ($i = 0; $i < $length; $i++) {
-        //     $resultItem[] = [
-        //         'id_material'     => $data['id_material'][$i],
-        //         'tgl_list'        => date('Y-m-d'),
-        //         'tgl_pakai'       => $data['tgl_pakai'][$i],
-        //         'jl_mc'           => $data['jalan_mc'][$i],
-        //         'ttl_qty_cones'   => $data['ttl_cns'][$i],
-        //         'ttl_berat_cones' => $data['ttl_berat_cns'][$i],
-        //         'admin'           => $data['area'][$i],
-        //         'no_model'        => $data['no_model'][$i],
-        //         'style_size'      => $data['style_size'][$i],
-        //         'item_type'       => $data['item_type'][$i],
-        //         'kode_warna'      => $data['kode_warna'][$i],
-        //         'warna'           => $data['warna'][$i],
-        //         'created_at'      => date('Y-m-d H:i:s'),
-        //     ];
-        //     // Cek apakah data dengan kombinasi id_material, tgl_pakai, dan admin sudah ada
-        //     $existingData = $this->pemesananModel
-        //         ->where('id_material', $resultItem['id_material'])
-        //         ->where('tgl_pakai', $resultItem['tgl_pakai'])
-        //         ->where('admin', $resultItem['admin'])
-        //         ->first();
-        //     if ($existingData) {
-        //         return $this->respond([
-        //             'status'  => 'error',
-        //             'message' => "Data dengan id_material '{$resultItem['id_material']}', tgl_pakai '{$resultItem['tgl_pakai']}', dan admin '{$resultItem['admin']}' sudah ada.",
-        //             'debug'   => $existingData,
-        //         ], 400);
-        //     }
-
-        //     $result[] = $resultItem;
-        // }
-        // log_message('debug', 'data ini :' . json_encode($result));
-
-        // try {
-        //     $insert = $this->pemesananModel->insertBatch($result);
-        //     if ($insert) {
-        //         // Misalnya, data login sudah tersedia dari session sebelumnya atau request,
-        //         // dan kita ingin memastikan bahwa session login tetap tersimpan atau diperbarui.
-        //         $session = session();
-        //         // Contoh: jika data login sudah ada dalam session, misalnya:
-        //         // $session->get('user') atau jika ingin menyimpan data login baru:
-        //         $userLoginData = [
-        //             'id_user'       => $data['id_user'] ?? 0,          // Sesuaikan dengan key yang ada
-        //             'username' => $data['username'] ?? 'default', // Sesuaikan dengan key yang ada
-        //             'role'  => $data['role'] ?? '',
-        //             'logged_in' => true,
-        //         ];
-        //         $session->set('user', $userLoginData);
-        //         // Hapus session 'pemesananBb' setelah menetapkan ulang session pengguna
-        //         if ($session->has('pemesananBb')) {
-        //             $session->remove('pemesananBb');
-        //         }
-
-        //         return $this->respond([
-        //             'status'  => 'success',
-        //             'message' => count($result) . " data berhasil disimpan",
-        //             'debug'   => $result,
-        //         ], 200);
-        //     } else {
-        //         return $this->respond([
-        //             'status'  => 'error',
-        //             'message' => "Tidak ada data yang berhasil disimpan",
-        //             'debug'   => $result,
-        //         ], 400);
-        //     }
-        // } catch (\Exception $e) {
-        //     log_message('critical', 'Exception during batch insert: ' . $e->getMessage());
-        //     return $this->respond([
-        //         'status'  => 'error',
-        //         'message' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage(),
-        //         'debug'   => $result,
-        //     ], 500);
-        // }
+        return $this->respond($dataList, 200);
     }
 }

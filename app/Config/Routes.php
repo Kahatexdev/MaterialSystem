@@ -368,6 +368,7 @@ $routes->group(
         $routes->get('getMaterialForPPHByAreaAndNoModel/(:segment)/(:segment)', 'ApiController::getMaterialForPPHByAreaAndNoModel/$1/$2');
         $routes->post('insertQtyCns', 'ApiController::insertQtyCns');
         $routes->post('saveListPemesanan', 'ApiController::saveListPemesanan');
+        $routes->get('listPemesanan/(:any)', 'ApiController::listPemesanan/$1');
         // $routes->get('getMaterialForPPH/(:any)/(:any)', 'ApiController::getMaterialForPPH/$1/$2');
     }
 );
