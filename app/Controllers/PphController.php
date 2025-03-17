@@ -135,28 +135,54 @@ class PphController extends BaseController
 
                 $bruto = $data['bruto'] ?? 0;
                 $bs_mesin = $data['bs_mesin'] ?? 0;
-                $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
+
+                if ($gw = 0) {
+                    $pphInisial[] = [
+                        'area'  => $items['area'],
+                        'style_size'  => $items['style_size'],
+                        'inisial'  => $data['inisial'],
+                        'item_type'  => $items['item_type'],
+                        'kode_warna'  => $items['kode_warna'],
+                        'color'      => $items['color'],
+                        'ttl_kebutuhan' => $items['ttl_kebutuhan'],
+                        'gw'         => $items['gw'],
+                        'loss' => $items['loss'],
+                        'composition' => $items['composition'],
+                        'jarum'      => $data['machinetypeid'] ?? null,
+                        'bruto'      => $bruto,
+                        'netto'      => $bruto - $data['bs_setting'] ?? 0,
+                        'qty'        => $data['qty'] ?? 0,
+                        'sisa'       => $data['sisa'] ?? 0,
+                        'po_plus'    => $data['po_plus'] ?? 0,
+                        'bs_setting' => $data['bs_setting'] ?? 0,
+                        'bs_mesin'   => $bs_mesin,
+                        'pph'        => 0,
+                        'pph_persen' => 0
+                    ];
+                } else {
+                    $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
 
 
-                $pphInisial[] = [
-                    'area'  => $items['area'],
-                    'style_size'  => $items['style_size'],
-                    'inisial'  => $data['inisial'],
-                    'item_type'  => $items['item_type'],
-                    'kode_warna'      => $items['kode_warna'],
-                    'color'      => $items['color'],
-                    'gw'         => $items['gw'],
-                    'composition' => $items['composition'],
-                    'kgs'  => $items['kgs'],
-                    'jarum'      => $data['machinetypeid'] ?? null,
-                    'bruto'      => $bruto,
-                    'qty'        => $data['qty'] ?? 0,
-                    'sisa'       => $data['sisa'] ?? 0,
-                    'po_plus'    => $data['po_plus'] ?? 0,
-                    'bs_setting' => $data['bs_setting'] ?? 0,
-                    'bs_mesin'   => $bs_mesin,
-                    'pph'        => $pph
-                ];
+                    $pphInisial[] = [
+                        'area'  => $items['area'],
+                        'style_size'  => $items['style_size'],
+                        'inisial'  => $data['inisial'],
+                        'item_type'  => $items['item_type'],
+                        'kode_warna'      => $items['kode_warna'],
+                        'color'      => $items['color'],
+                        'gw'         => $items['gw'],
+                        'composition' => $items['composition'],
+                        'kgs'  => $items['kgs'],
+                        'jarum'      => $data['machinetypeid'] ?? null,
+                        'bruto'      => $bruto,
+                        'qty'        => $data['qty'] ?? 0,
+                        'sisa'       => $data['sisa'] ?? 0,
+                        'po_plus'    => $data['po_plus'] ?? 0,
+                        'bs_setting' => $data['bs_setting'] ?? 0,
+                        'bs_mesin'   => $bs_mesin,
+                        'pph'        => $pph
+                    ];
+                }
             }
         }
         $result = [
@@ -233,31 +259,57 @@ class PphController extends BaseController
 
                 $bruto = $data['bruto'] ?? 0;
                 $bs_mesin = $data['bs_mesin'] ?? 0;
-                $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
+
+                if ($gw = 0) {
+                    $pphInisial[] = [
+                        'area'  => $items['area'],
+                        'style_size'  => $items['style_size'],
+                        'inisial'  => $data['inisial'],
+                        'item_type'  => $items['item_type'],
+                        'kode_warna'  => $items['kode_warna'],
+                        'color'      => $items['color'],
+                        'ttl_kebutuhan' => $items['ttl_kebutuhan'],
+                        'gw'         => $items['gw'],
+                        'loss' => $items['loss'],
+                        'composition' => $items['composition'],
+                        'jarum'      => $data['machinetypeid'] ?? null,
+                        'bruto'      => $bruto,
+                        'netto'      => $bruto - $data['bs_setting'] ?? 0,
+                        'qty'        => $data['qty'] ?? 0,
+                        'sisa'       => $data['sisa'] ?? 0,
+                        'po_plus'    => $data['po_plus'] ?? 0,
+                        'bs_setting' => $data['bs_setting'] ?? 0,
+                        'bs_mesin'   => $bs_mesin,
+                        'pph'        => 0,
+                        'pph_persen' => 0
+                    ];
+                } else {
+                    $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
 
 
-                $pphInisial[] = [
-                    'area'  => $items['area'],
-                    'style_size'  => $items['style_size'],
-                    'inisial'  => $data['inisial'],
-                    'item_type'  => $items['item_type'],
-                    'kode_warna'  => $items['kode_warna'],
-                    'color'      => $items['color'],
-                    'ttl_kebutuhan' => $items['ttl_kebutuhan'],
-                    'gw'         => $items['gw'],
-                    'loss' => $items['loss'],
-                    'composition' => $items['composition'],
-                    'jarum'      => $data['machinetypeid'] ?? null,
-                    'bruto'      => $bruto,
-                    'netto'      => $bruto - $data['bs_setting'] ?? 0,
-                    'qty'        => $data['qty'] ?? 0,
-                    'sisa'       => $data['sisa'] ?? 0,
-                    'po_plus'    => $data['po_plus'] ?? 0,
-                    'bs_setting' => $data['bs_setting'] ?? 0,
-                    'bs_mesin'   => $bs_mesin,
-                    'pph'        => $pph,
-                    'pph_persen' => ($pph / $items['ttl_kebutuhan']) * 100,
-                ];
+                    $pphInisial[] = [
+                        'area'  => $items['area'],
+                        'style_size'  => $items['style_size'],
+                        'inisial'  => $data['inisial'],
+                        'item_type'  => $items['item_type'],
+                        'kode_warna'  => $items['kode_warna'],
+                        'color'      => $items['color'],
+                        'ttl_kebutuhan' => $items['ttl_kebutuhan'],
+                        'gw'         => $items['gw'],
+                        'loss' => $items['loss'],
+                        'composition' => $items['composition'],
+                        'jarum'      => $data['machinetypeid'] ?? null,
+                        'bruto'      => $bruto,
+                        'netto'      => $bruto - $data['bs_setting'] ?? 0,
+                        'qty'        => $data['qty'] ?? 0,
+                        'sisa'       => $data['sisa'] ?? 0,
+                        'po_plus'    => $data['po_plus'] ?? 0,
+                        'bs_setting' => $data['bs_setting'] ?? 0,
+                        'bs_mesin'   => $bs_mesin,
+                        'pph'        => $pph,
+                        'pph_persen' => ($pph / $items['ttl_kebutuhan']) * 100,
+                    ];
+                }
             }
         }
 
@@ -309,23 +361,40 @@ class PphController extends BaseController
 
                     $bruto = $prod['prod'] ?? 0;
                     $bs_mesin = $prod['bs_mesin'] ?? 0;
-                    $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
+                    if ($gw = 0) {
+                        $pphInisial[] = [
+                            'mastermodel'    => $prod['mastermodel'],
+                            'style_size'  => $prod['size'],
+                            'item_type'   => $mtr['item_type'] ?? null,
+                            'kode_warna'  => $mtr['kode_warna'] ?? null,
+                            'color'       => $mtr['color'] ?? null,
+                            'gw'          => $gw,
+                            'composition' => $comp,
+                            'bruto'       => $bruto,
+                            'qty'         => $prod['qty'] ?? 0,
+                            'sisa'        => $prod['sisa'] ?? 0,
+                            'bs_mesin'    => $bs_mesin,
+                            'pph'         => 'rev'
+                        ];
+                    } else {
+                        $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
 
 
-                    $pphInisial[] = [
-                        'mastermodel'    => $prod['mastermodel'],
-                        'style_size'  => $prod['size'],
-                        'item_type'   => $mtr['item_type'] ?? null,
-                        'kode_warna'  => $mtr['kode_warna'] ?? null,
-                        'color'       => $mtr['color'] ?? null,
-                        'gw'          => $gw,
-                        'composition' => $comp,
-                        'bruto'       => $bruto,
-                        'qty'         => $prod['qty'] ?? 0,
-                        'sisa'        => $prod['sisa'] ?? 0,
-                        'bs_mesin'    => $bs_mesin,
-                        'pph'         => $pph
-                    ];
+                        $pphInisial[] = [
+                            'mastermodel'    => $prod['mastermodel'],
+                            'style_size'  => $prod['size'],
+                            'item_type'   => $mtr['item_type'] ?? null,
+                            'kode_warna'  => $mtr['kode_warna'] ?? null,
+                            'color'       => $mtr['color'] ?? null,
+                            'gw'          => $gw,
+                            'composition' => $comp,
+                            'bruto'       => $bruto,
+                            'qty'         => $prod['qty'] ?? 0,
+                            'sisa'        => $prod['sisa'] ?? 0,
+                            'bs_mesin'    => $bs_mesin,
+                            'pph'         => $pph
+                        ];
+                    }
                 }
             }
         }

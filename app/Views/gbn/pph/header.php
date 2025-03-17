@@ -1,6 +1,16 @@
 <?php $this->extend($role . '/layout'); ?>
 <?php $this->section('header'); ?>
+<style>
+    .btn-filter {
+        background: linear-gradient(135deg, #1e88e5, #64b5f6);
+        color: white;
+        border: none;
+    }
 
+    .btn-filter:hover {
+        background: linear-gradient(135deg, #1976d2, #42a5f5);
+    }
+</style>
 
 <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
     <!-- Navbar -->
@@ -21,12 +31,12 @@
                         <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownReports" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-file-alt"></i>
-                                <span class="d-lg-inline-block d-none ms-1">Dropdown</span>
+                                <span class="d-lg-inline-block d-none ms-1">PPH</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownReports">
-                                <li><a class="dropdown-item" href="#">Dropdown 1</a></li>
-                                <li><a class="dropdown-item" href="#">Dropdown 2</a></li>
-                                <li><a class="dropdown-item" href="#">Dropdown 3</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/pph') ?>">PPH Per Model</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/tampilPerStyle') ?>">PPH Per Style</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/pphPerhari') ?>">PPH Perhari </a></li>
                             </ul>
                         </li>
                         <li class="nav-item d-flex align-items-center">

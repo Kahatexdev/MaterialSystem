@@ -121,14 +121,19 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('hapus_pengiriman', 'PemesananController::hapusListPengiriman');
     $routes->post('proses_pengiriman', 'PemesananController::prosesPengirimanArea');
 
-    $routes->get('pph', 'PphController::index');
-    $routes->get('pphPerArea/(:any)', 'PphController::pphPerArea/$1');
+    $routes->get('pph', 'PphController::tampilPerModel');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
-    $routes->post('tampilPerStyle', 'PphController::tampilPerStyle');
     $routes->get('tampilPerDays', 'PphController::tampilPerDays');
+    $routes->get('pphPerhari', 'PphController::pphPerhari');
     $routes->post('tampilPerDays', 'PphController::tampilPerDays');
-    $routes->get('pphPerArea/(:any)/tampilPerModel', 'PphController::tampilPerModel');
-    $routes->post('tampilPerModel', 'PphController::tampilPerModel');
+    $routes->get('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');
+    $routes->get('getDataModel', 'PphController::getDataModel');
+    $routes->get('pphinisial', 'PphController::pphinisial');
+    $routes->get('getDataPerhari', 'PphController::getDataPerhari');
+    // $routes->post('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');
+    $routes->get('excelPPHNomodel/(:any)/(:any)', 'ExcelController::excelPPHNomodel/$1/$2');
+    $routes->get('excelPPHInisial/(:any)/(:any)', 'ExcelController::excelPPHInisial/$1/$2');
+    $routes->get('excelPPHDays/(:any)/(:any)', 'ExcelController::excelPPHDays/$1/$2');
     //PO Covering
     $routes->get('poCovering', 'POCoveringController::index');
     $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
