@@ -140,6 +140,7 @@
                                 <i class="fas fa-minus"></i>
                             </button>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -156,11 +157,19 @@
                 </div>
                 <div class="modal-body">
                     <form id="stockForm">
-                        <input type="hidden" id="stockItemId">
+                        <input type="hidden" id="stockItemId" name="stockItemId">
                         <input type="hidden" id="stockAction">
                         <div class="mb-3">
-                            <label for="stockAmount" class="form-label">Jumlah</label>
-                            <input type="number" class="form-control" id="stockAmount" min="1" required>
+                            <label for="no_model" class="form-label">No Model</label>
+                            <input type="text" class="form-control" id="no_model" name="no_model" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="stockAmount" class="form-label">Jumlah KG</label>
+                            <input type="number" class="form-control" id="stockAmount" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="amountcones" class="form-label">Jumlah Cones</label>
+                            <input type="number" class="form-control" id="amountcones" name="amountcones" required>
                         </div>
                         <div class="mb-3">
                             <label for="stockNote" class="form-label">Catatan</label>
@@ -178,36 +187,108 @@
 
     <!-- Modal Tambah Data -->
     <div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg"> <!-- Lebih lebar agar lebih nyaman -->
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header text-white">
                     <h5 class="modal-title" id="addItemModalLabel">Tambah Data Barang</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="addItemForm">
-                        <div class="mb-3">
-                            <label for="jenis" class="form-label">Jenis Barang</label>
-                            <input type="text" class="form-control" id="jenis" required>
+                    <form class="" method="POST" enctype="multipart/form-data" action="<?= base_url('covering/warehouse/tambahStock') ?>">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="jenis" class="form-label">Jenis Barang</label>
+                                    <input type="text" class="form-control" id="jenis" name="jenis" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="color" class="form-label">Warna</label>
+                                    <input type="text" class="form-control" id="color" name="color" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="code" class="form-label">Kode</label>
+                                    <input type="text" class="form-control" id="code" name="code" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="box" class="form-label">Box</label>
+                                    <input type="text" class="form-control" id="box" name="box" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">LMD</label><br>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="lmd1" name="lmd[]" value="L">
+                                        <label class="form-check-label" for="lmd1">L</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="lmd2" name="lmd[]" value="M">
+                                        <label class="form-check-label" for="lmd2">M</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="lmd3" name="lmd[]" value="D">
+                                        <label class="form-check-label" for="lmd3">D</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="ttl_kg" class="form-label">Jumlah Stok (Kg)</label>
+                                    <input type="number" class="form-control" id="ttl_kg" name="ttl_kg" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ttl_cns" class="form-label">Jumlah Cones</label>
+                                    <input type="number" class="form-control" id="ttl_cns" name="ttl_cns" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="no_palet" class="form-label">No Palet</label>
+                                    <input type="text" class="form-control" id="no_palet" name="no_palet" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="no_rak" class="form-label">Nomor Rak</label>
+                                    <select name="no_rak" id="no_rak" class="form-select" required>
+                                        <option value="" disabled selected>Pilih Nomor Rak</option>
+                                        <option value="1">Rak 1</option>
+                                        <option value="2">Rak 2</option>
+                                        <option value="3">Rak 3</option>
+                                        <option value="4">Rak 4</option>
+                                        <option value="5">Rak 5</option>
+                                        <option value="6">Rak 6</option>
+                                        <option value="7">Rak 7</option>
+                                        <option value="8">Rak 8</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Posisi Rak</label><br>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="posisiRak1" name="posisi_rak[]" value="Kiri">
+                                        <label class="form-check-label" for="posisiRak1">Kiri</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="posisiRak2" name="posisi_rak[]" value="Kanan">
+                                        <label class="form-check-label" for="posisiRak2">Kanan</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="posisiRak3" name="posisi_rak[]" value="Atas">
+                                        <label class="form-check-label" for="posisiRak3">Atas</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="posisiRak4" name="posisi_rak[]" value="Bawah">
+                                        <label class="form-check-label" for="posisiRak4">Bawah</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="color" class="form-label">Warna</label>
-                            <input type="text" class="form-control" id="color" required>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-info">Simpan</button>
                         </div>
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Kode</label>
-                            <input type="text" class="form-control" id="code" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="stock" class="form-label">Jumlah Stok (Kg)</label>
-                            <input type="number" class="form-control" id="stock" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Simpan</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
 
     <!-- Modal Edit Data -->
     <div class="modal fade" id="editItemModal" tabindex="-1" aria-labelledby="editItemModalLabel" aria-hidden="true">
@@ -236,7 +317,7 @@
                             <label for="editStock" class="form-label">Jumlah Stok (Kg)</label>
                             <input type="number" class="form-control" id="editStock" required>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Update</button>
+                        <button type="submit" class="btn btn-info w-100">Update</button>
                     </form>
                 </div>
             </div>
@@ -321,22 +402,6 @@
             updateCounts();
         });
 
-        // Tambah Barang Baru
-        document.getElementById('saveItemBtn').addEventListener('click', function() {
-            const form = document.getElementById('addItemForm');
-            if (form.checkValidity()) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: 'Barang covering baru telah ditambahkan.',
-                }).then(() => {
-                    $('#addItemModal').modal('hide');
-                    form.reset();
-                });
-            } else {
-                form.reportValidity();
-            }
-        });
 
         // Fungsi Edit Barang
         function editItem(id) {
@@ -356,78 +421,91 @@
         }
 
         // Fungsi Tambah Stok
-        function addStock(id) {
-            document.getElementById('stockItemId').value = id;
-            document.getElementById('stockAction').value = 'add';
-            document.getElementById('stockModalLabel').textContent = 'Tambah Stok';
-            document.getElementById('stockForm').reset();
-            new bootstrap.Modal(document.getElementById('stockModal')).show();
+        function addStock(stockId) {
+            document.getElementById("stockItemId").value = stockId; // Set ID stok
+            document.getElementById("stockAction").value = "add"; // Set aksi tambah
+            document.getElementById("stockModalLabel").innerText = "Tambah Stok"; // Ubah judul modal
+            document.getElementById("saveStockBtn").classList.remove("btn-danger"); // Hapus kelas merah
+            document.getElementById("saveStockBtn").classList.add("btn-success"); // Tambah kelas hijau
+            document.getElementById("saveStockBtn").innerText = "Tambah Stok"; // Ubah teks tombol
+            $("#stockModal").modal("show"); // Tampilkan modal
         }
 
-        // Fungsi Kurangi Stok
-        function removeStock(id) {
-            document.getElementById('stockItemId').value = id;
-            document.getElementById('stockAction').value = 'remove';
-            document.getElementById('stockModalLabel').textContent = 'Kurangi Stok';
-            document.getElementById('stockForm').reset();
-            new bootstrap.Modal(document.getElementById('stockModal')).show();
+        function removeStock(stockId) {
+            document.getElementById("stockItemId").value = stockId; // Set ID stok
+            document.getElementById("stockAction").value = "remove"; // Set aksi hapus
+            document.getElementById("stockModalLabel").innerText = "Kurangi Stok"; // Ubah judul modal
+            document.getElementById("saveStockBtn").classList.remove("btn-success"); // Hapus kelas hijau
+            document.getElementById("saveStockBtn").classList.add("btn-danger"); // Tambah kelas merah
+            document.getElementById("saveStockBtn").innerText = "Kurangi Stok"; // Ubah teks tombol
+            $("#stockModal").modal("show"); // Tampilkan modal
         }
+
+        // Event listener tombol "Simpan"
+        document.getElementById("saveStockBtn").addEventListener("click", function() {
+            const stockId = document.getElementById("stockItemId").value;
+            const action = document.getElementById("stockAction").value;
+            const noModel = document.getElementById("no_model").value;
+            const amount = document.getElementById("stockAmount").value;
+            const cones = document.getElementById("amountcones").value;
+            const note = document.getElementById("stockNote").value;
+            const BASE_URL = "<?= base_url(); ?>";
+            console.log("BASE_URL:", BASE_URL); // Cek apakah BASE_URL sudah benar
+
+            if (!amount || !cones) {
+                alert("Jumlah KG dan Cones harus diisi!");
+                return;
+            }
+
+            // Kirim data melalui AJAX (bisa diganti dengan form submit)
+            fetch(`${BASE_URL}covering/warehouse/updateStock`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        stockItemId: stockId,
+                        action: action,
+                        no_model: noModel,
+                        stockAmount: amount,
+                        amountcones: cones,
+                        stockNote: note
+                    })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert("Berhasil memperbarui stok!");
+                        location.reload(); // Refresh halaman setelah update
+                    } else {
+                        alert("Gagal memperbarui stok: " + result.message);
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+
+            $("#stockModal").modal("hide"); // Tutup modal setelah submit
+        });
+
 
         // Simpan Transaksi Stok
-        document.getElementById('saveStockBtn').addEventListener('click', function() {
-            const form = document.getElementById('stockForm');
-            if (form.checkValidity()) {
-                const itemId = document.getElementById('stockItemId').value;
-                const action = document.getElementById('stockAction').value;
-                const amount = document.getElementById('stockAmount').value;
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: `Stok telah ${action === 'add' ? 'ditambahkan' : 'dikurangi'} sebanyak ${amount} unit.`,
-                }).then(() => {
-                    $('#stockModal').modal('hide');
-                    form.reset();
-                });
-            } else {
-                form.reportValidity();
-            }
-        });
-    </script>
-
-    <script>
-        // Menampilkan modal Edit Data dengan data yang sesuai
-        function editItem(id) {
-            // Contoh: Fetch data dari database berdasarkan ID (simulasi)
-            let data = {
-                id: id,
-                jenis: "Nylon 70D/24F",
-                color: "Red",
-                code: "RD-001",
-                stock: 250.5
-            };
-
-            document.getElementById('editItemId').value = data.id;
-            document.getElementById('editJenis').value = data.jenis;
-            document.getElementById('editColor').value = data.color;
-            document.getElementById('editCode').value = data.code;
-            document.getElementById('editStock').value = data.stock;
-
-            new bootstrap.Modal(document.getElementById('editItemModal')).show();
-        }
-
-        // Menangani submit form Tambah Data
-        document.getElementById('addItemForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            Swal.fire("Sukses!", "Data berhasil ditambahkan!", "success");
-            $('#addItemModal').modal('hide');
-        });
-
-        // Menangani submit form Edit Data
-        document.getElementById('editItemForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            Swal.fire("Sukses!", "Data berhasil diperbarui!", "success");
-            $('#editItemModal').modal('hide');
-        });
+        // document.getElementById('saveStockBtn').addEventListener('click', function() {
+        //     const form = document.getElementById('stockForm');
+        //     if (form.checkValidity()) {
+        //         const itemId = document.getElementById('stockItemId').value;
+        //         const action = document.getElementById('stockAction').value;
+        //         const amount = document.getElementById('stockAmount').value;
+        //         Swal.fire({
+        //             icon: 'success',
+        //             title: 'Berhasil!',
+        //             text: `Stok telah ${action === 'add' ? 'ditambahkan' : 'dikurangi'} sebanyak ${amount} unit.`,
+        //         }).then(() => {
+        //             $('#stockModal').modal('hide');
+        //             form.reset();
+        //         });
+        //     } else {
+        //         form.reportValidity();
+        //     }
+        // });
     </script>
 
     <?php $this->endSection(); ?>
