@@ -10,6 +10,7 @@ use App\Models\MasterOrderModel;
 use App\Models\ScheduleCelupModel;
 use App\Models\PemasukanModel;
 use App\Models\ClusterModel;
+use App\Models\StockModel;
 
 class DashboardGbnController extends BaseController
 {
@@ -22,6 +23,7 @@ class DashboardGbnController extends BaseController
     protected $scheduleCelupModel;
     protected $pemasukanModel;
     protected $clusterModel;
+    protected $stockModel;
 
     public function __construct()
     {
@@ -31,6 +33,7 @@ class DashboardGbnController extends BaseController
         $this->scheduleCelupModel = new ScheduleCelupModel();
         $this->pemasukanModel = new PemasukanModel();
         $this->clusterModel = new ClusterModel();
+        $this->stockModel = new StockModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -54,7 +57,6 @@ class DashboardGbnController extends BaseController
         $groupI = $this->clusterModel->getClusterGroupI();
         $groupII = $this->clusterModel->getClusterGroupII();
         $groupIII = $this->clusterModel->getClusterGroupIII();
-        // dd($groupII);
 
         $data = [
             'active' => $this->active,

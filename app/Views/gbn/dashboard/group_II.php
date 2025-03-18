@@ -72,7 +72,7 @@
                             }
                         }
                         ?>
-                        
+
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
@@ -90,39 +90,41 @@
                                                     <?php
                                                     // Jika kolom B, gunakan format berbeda
                                                     if ($col == 'B') {
+                                                        $rowFormatted = str_pad($row, 2, '0', STR_PAD_LEFT); // Buat 01-09 tetap dua digit
                                                         $subClusters = [
-                                                            "$group.B.0$row.a",
-                                                            "$group.B.0$row.b",
-                                                            "$group.B.0$row.b.01",
-                                                            "$group.B.0$row.b.02",
-                                                            "$group.B.0$row.b.03",
-                                                            "$group.B.0$row.b.04"
+                                                            "$group.B.$rowFormatted.A",
+                                                            "$group.B.$rowFormatted.B",
+                                                            "$group.B.$rowFormatted.B.01",
+                                                            "$group.B.$rowFormatted.B.02",
+                                                            "$group.B.$rowFormatted.B.03",
+                                                            "$group.B.$rowFormatted.B.04"
                                                         ];
 
+
+                                                        // Ambil semua nama_cluster dari $groupData
+                                                        $clusterNames = array_column($groupData, 'nama_cluster');
+
                                                         foreach ($subClusters as $namaCluster) {
-                                                            // Cari data yang sesuai
-                                                            $cluster = null;
-                                                            foreach ($groupData as $c) {
-                                                                if ($c['nama_cluster'] == $namaCluster) {
-                                                                    $cluster = $c;
-                                                                    break;
-                                                                }
-                                                            }
+                                                            // Cari index dalam array
+                                                            $index = array_search($namaCluster, $clusterNames);
+                                                            $cluster = ($index !== false) ? $groupData[$index] : null;
 
                                                             $color = getButtonColor($cluster);
                                                     ?>
                                                             <button class="cell <?= $color ?>" data-bs-toggle="modal" data-bs-target="#modalDetail"
                                                                 data-kapasitas="<?= $cluster['kapasitas'] ?? '' ?>"
                                                                 data-total_qty="<?= $cluster['total_qty'] ?? '' ?>"
-                                                                data-nama_cluster="<?= $cluster['nama_cluster'] ?? '' ?>">
+                                                                data-nama_cluster="<?= $cluster['nama_cluster'] ?? '' ?>"
+                                                                data-detail='[<?= $cluster['detail_data'] ?? '' ?>]'>
                                                                 <?= $cluster ? $cluster['simbol_cluster'] : '-' ?>
                                                             </button>
                                                         <?php
                                                         }
                                                     } else {
-                                                        // Format untuk kolom selain B
-                                                        $namaA = "$group.$col.0$row.A";
-                                                        $namaB = "$group.$col.0$row.B";
+
+                                                        $rowFormatted = ($row < 10) ? '0' . $row : $row; // Tetap '01-09', tapi '10-16' tanpa nol
+                                                        $namaA = "$group.$col.$rowFormatted.A";
+                                                        $namaB = "$group.$col.$rowFormatted.B";
 
                                                         // Cari data di $groupData
                                                         $clusterA = null;
@@ -143,7 +145,8 @@
                                                         <button class="cell <?= $colorA ?>" data-bs-toggle="modal" data-bs-target="#modalDetail"
                                                             data-kapasitas="<?= $clusterA['kapasitas'] ?? '' ?>"
                                                             data-total_qty="<?= $clusterA['total_qty'] ?? '' ?>"
-                                                            data-nama_cluster="<?= $clusterA['nama_cluster'] ?? '' ?>">
+                                                            data-nama_cluster="<?= $clusterA['nama_cluster'] ?? '' ?>"
+                                                            data-detail='[<?= $clusterA['detail_data'] ?? '' ?>]'>
                                                             <?= $clusterA ? $clusterA['simbol_cluster'] : '-' ?>
                                                         </button>
 
@@ -151,9 +154,11 @@
                                                         <button class="cell <?= $colorB ?>" data-bs-toggle="modal" data-bs-target="#modalDetail"
                                                             data-kapasitas="<?= $clusterB['kapasitas'] ?? '' ?>"
                                                             data-total_qty="<?= $clusterB['total_qty'] ?? '' ?>"
-                                                            data-nama_cluster="<?= $clusterB['nama_cluster'] ?? '' ?>">
+                                                            data-nama_cluster="<?= $clusterB['nama_cluster'] ?? '' ?>"
+                                                            data-detail='[<?= $clusterB['detail_data'] ?? '' ?>]'>
                                                             <?= $clusterB ? $clusterB['simbol_cluster'] : '-' ?>
                                                         </button>
+
                                                     <?php
                                                     }
                                                     ?>
