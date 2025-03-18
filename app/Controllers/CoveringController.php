@@ -292,6 +292,7 @@ class CoveringController extends BaseController
     }
     public function warehouse()
     {
+
         $data = [
             'active' => $this->active,
             'title' => 'Warehouse',

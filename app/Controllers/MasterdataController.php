@@ -110,10 +110,13 @@ class MasterdataController extends BaseController
     {
         // Ambil file yang diupload
         $file = $this->request->getFile('file');
-        if (!$file || !$file->isValid()) {
-            return redirect()->back()->with('error', 'No file uploaded or file is invalid.');
-        }
+        // if (!$file || !$file->isValid()) {
+        //     return redirect()->back()->with('error', 'No file uploaded or file is invalid.');
+        // }
 
+        if ($file->getMimeType() !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+            return redirect()->back()->with('error', 'Only XLSX files are allowed.');
+        }
         // Inisialisasi model-model
         $masterOrderModel    = new MasterOrderModel();
         $materialModel       = new MaterialModel();
