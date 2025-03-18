@@ -51,6 +51,11 @@ class DashboardGbnController extends BaseController
         $schedule = $this->scheduleCelupModel->countStatusDone();
         $pemasukan = $this->pemasukanModel->getTotalKarungMasuk();
         $pengeluaran = $this->pemasukanModel->getTotalKarungKeluar();
+        $groupI = $this->clusterModel->getClusterGroupI();
+        $groupII = $this->clusterModel->getClusterGroupII();
+        $groupIII = $this->clusterModel->getClusterGroupIII();
+        // dd($groupII);
+
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
@@ -59,7 +64,30 @@ class DashboardGbnController extends BaseController
             'schedule' => $schedule,
             'pemasukan' => $pemasukan,
             'pengeluaran' => $pengeluaran,
+            'groupI' => $groupI,
+            'groupII' => $groupII,
+            'groupIII' => $groupIII
         ];
         return view($this->role . '/dashboard/index', $data);
+    }
+
+    public function getGroupData()
+    {
+        $group = $this->request->getPost('group');
+
+        // Tentukan function model berdasarkan group
+        switch ($group) {
+            case 'I':
+                $groupData = $this->clusterModel->getClusterGroupI();
+                return view($this->role . '/dashboard/group_I', ['groupData' => $groupData, 'group' => $group]);
+            case 'II':
+                $groupData = $this->clusterModel->getClusterGroupII();
+                return view($this->role . '/dashboard/group_II', ['groupData' => $groupData, 'group' => $group]);
+            case 'III':
+                $groupData = $this->clusterModel->getClusterGroupIII();
+                return view($this->role . '/dashboard/group_III', ['groupData' => $groupData, 'group' => $group]);
+            default:
+                return "<p class='text-center text-danger'>Tidak ada data untuk Group $group.</p>";
+        }
     }
 }

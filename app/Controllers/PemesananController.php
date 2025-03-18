@@ -79,7 +79,7 @@ class PemesananController extends BaseController
         $area = json_decode($response, true);
         $data = [
             'active' => $this->active,
-            'title' => 'Material System',
+            'title' => 'Pemesanan',
             'role' => $this->role,
             'area' => $area,
         ];

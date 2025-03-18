@@ -18,6 +18,8 @@ $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJat
 
 $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('', 'DashboardGbnController::index');
+    // $routes->get('getGroupData', 'DashboardGbnController::getGroupData');
+    $routes->post('getGroupData', 'DashboardGbnController::getGroupData');
     $routes->get('masterdata', 'MasterdataController::index');
     $routes->post('tampilMasterOrder', 'MasterdataController::tampilMasterOrder');
     $routes->get('getOrderDetails/(:num)', 'MasterdataController::getOrderDetails/$1');
@@ -217,7 +219,7 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
 
     // warehouse
-    $routes->get('warehouse', 'CoveringController::warehouse');
+    $routes->get('warehouse', 'CoveringWarehouseController::index');
     $routes->get('warehouse/pemasukan', 'CoveringController::pemasukan');
     $routes->get('warehouse/pengeluaran_jalur', 'CoveringController::pengeluaranJalur');
     $routes->get('warehouse/pengiriman_area', 'CoveringController::pengirimanArea');

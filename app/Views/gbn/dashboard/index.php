@@ -124,7 +124,7 @@
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-capitalize font-weight-bold">Pemasukan/Hari</p>
                                 <h5 class="font-weight-bolder mb-0">
-                                    <?= $pemasukan['total_karung_masuk'] ?> Karung
+                                    <?= $pemasukan['total_karung_masuk'] ?? 0 ?> Karung
                                 </h5>
                             </div>
                         </div>
@@ -145,7 +145,7 @@
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-capitalize font-weight-bold">Pengeluaran/Hari</p>
                                 <h5 class="font-weight-bolder mb-0">
-                                    <?= $pengeluaran['total_karung_keluar'] ?> Karung
+                                    <?= $pengeluaran['total_karung_keluar'] ?? 0 ?> Karung
                                 </h5>
                             </div>
                         </div>
@@ -174,61 +174,40 @@
                         <button class="btn text-white" style="background-color: #ff851b;">71-99% (Orange)</button>
                         <button class="btn text-white" style="background-color: #dc3545;">100% (Red)</button>
                     </div>
-                    <form>
+                    <form id="groupForm">
                         <div class="mb-3">
                             <label for="groupSelect" class="form-label">Select Group</label>
-                            <select class="form-select" id="groupSelect">
-                                <option selected>Group I</option>
-                                <option>Group II</option>
-                                <option>Group III</option>
+                            <select class="form-select" id="groupSelect" name="group">
+                                <option value="I" selected>Group I</option>
+                                <option value="II">Group II</option>
+                                <option value="III">Group III</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-info w-100">Apply</button>
                     </form>
+                    <!-- Tempat untuk Menampilkan Tabel -->
+                    <div id="groupTable"></div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="row mb-4 mt-3">
-        <div class="col">
-            <div class="card">
-                <div class="card-header bg-dark text-white">
-                    <h3 style="color:rgb(255, 255, 255);" class="mb-0 text-center">GROUP I</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <?php for ($i = 'A'; $i <= 'L'; $i++): ?>
-                                        <th class="header-cell"><?= $i ?></th>
-                                    <?php endfor; ?>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php for ($row = 9; $row >= 1; $row--): ?>
-                                    <tr>
-                                        <?php for ($col = 'A'; $col <= 'L'; $col++): ?>
-                                            <td class="p-1">
-                                                <div class="d-flex justify-content-center">
-                                                    <?php
-                                                    // Menentukan warna cell secara acak termasuk merah
-                                                    $colors = ['gray-cell', 'blue-cell', 'orange-cell'];
-                                                    $aClass = $colors[rand(0, 2)];
-                                                    $bClass = $colors[rand(0, 2)];
-                                                    ?>
-                                                    <button class="cell <?= $aClass ?>"><?= $row ?>a</button>
-                                                    <button class="cell <?= $bClass ?>"><?= $row ?>b</button>
-                                                </div>
-                                            </td>
-                                        <?php endfor; ?>
-                                    </tr>
-                                <?php endfor; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+<!-- Modal Detail -->
+<div class="modal fade" id="modalDetail" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailModalLabel">Detail Cluster</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Nama Cluster:</strong> <span id="modalNamaCluster"></span></p>
+                <p><strong>Kapasitas:</strong> <span id="modalKapasitas"></span> kg</p>
+                <p><strong>Total Qty:</strong> <span id="modalTotalQty"></span> kg</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
@@ -237,6 +216,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     // Initialize chart
     document.addEventListener('DOMContentLoaded', function() {
@@ -267,5 +247,50 @@
             }
         });
     });
+</script>
+<script>
+    // Script untuk menangani klik button dan menampilkan modal
+    document.addEventListener("DOMContentLoaded", function() {
+        let modalDetail = document.getElementById("modalDetail");
+        modalDetail.addEventListener("show.bs.modal", function(event) {
+            let button = event.relatedTarget; // Button yang diklik
+            let kapasitas = button.getAttribute("data-kapasitas");
+            let total_qty = button.getAttribute("data-total_qty");
+            let nama_cluster = button.getAttribute("data-nama_cluster");
+
+            // Set data ke dalam modal
+            document.getElementById("modalKapasitas").textContent = kapasitas;
+            document.getElementById("modalTotalQty").textContent = total_qty;
+            document.getElementById("modalNamaCluster").textContent = nama_cluster;
+        });
+    });
+</script>
+<script>
+$(document).ready(function () {
+    // Fungsi untuk memuat data berdasarkan grup yang dipilih
+    function loadGroupData(group) {
+        $.ajax({
+            url: "<?= base_url($role . '/getGroupData') ?>",
+            type: "POST",
+            data: { group: group },
+            success: function (response) {
+                $("#groupTable").html(response); // Masukkan data ke dalam div
+            },
+            error: function () {
+                $("#groupTable").html("<p class='text-center text-danger'>Gagal memuat data. Silakan coba lagi.</p>");
+            }
+        });
+    }
+
+    // Event listener ketika form dikirim
+    $("#groupForm").submit(function (e) {
+        e.preventDefault(); // Mencegah reload halaman
+        var selectedGroup = $("#groupSelect").val(); // Ambil nilai yang dipilih
+        loadGroupData(selectedGroup); // Panggil fungsi AJAX
+    });
+
+    // Load data default untuk Group I saat halaman pertama kali dibuka
+    loadGroupData("I");
+});
 </script>
 <?php $this->endSection(); ?>
