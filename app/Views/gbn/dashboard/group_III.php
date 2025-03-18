@@ -58,21 +58,22 @@
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
-                                    <?php for ($i = 'A'; $i <= 'L'; $i++): ?>
+                                    <?php for ($i = 'A'; $i <= 'N'; $i++): ?>
                                         <th class="header-cell"><?= $group . '.' . $i ?></th>
                                     <?php endfor; ?>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php for ($row = 9; $row >= 1; $row--): ?>
+                                <?php for ($row = 16; $row >= 1; $row--): ?>
                                     <tr>
-                                        <?php for ($col = 'A'; $col <= 'L'; $col++): ?>
+                                        <?php for ($col = 'A'; $col <= 'N'; $col++): ?>
                                             <td class="p-1">
                                                 <div class="d-flex justify-content-center">
                                                     <?php
-                                                    // Nama cluster yang benar sesuai baris
-                                                    $namaA = "$group.$col.0$row.A";
-                                                    $namaB = "$group.$col.0$row.B";
+
+                                                    $rowFormatted = ($row < 10) ? '0' . $row : $row; // Tetap '01-09', tapi '10-16' tanpa nol
+                                                    $namaA = "$group.$col.$rowFormatted.A";
+                                                    $namaB = "$group.$col.$rowFormatted.B";
 
                                                     // Cari data di $groupData yang sesuai
                                                     $clusterA = null;
@@ -121,7 +122,6 @@
                                                         data-detail='[<?= $clusterB['detail_data'] ?? '' ?>]'>
                                                         <?= $clusterB ? $clusterB['simbol_cluster'] : '-' ?>
                                                     </button>
-
                                                 </div>
                                             </td>
                                         <?php endfor; ?>

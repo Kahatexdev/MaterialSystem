@@ -195,7 +195,7 @@
 
 <!-- Modal Detail -->
 <div class="modal fade" id="modalDetail" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="detailModalLabel">Detail Cluster</h5>
@@ -205,6 +205,19 @@
                 <p><strong>Nama Cluster:</strong> <span id="modalNamaCluster"></span></p>
                 <p><strong>Kapasitas:</strong> <span id="modalKapasitas"></span> kg</p>
                 <p><strong>Total Qty:</strong> <span id="modalTotalQty"></span> kg</p>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>No Model</th>
+                                <th>Kode Warna</th>
+                                <th>Foll Up</th>
+                                <th>Delivery</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalDetailTableBody"></tbody>
+                    </table>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -253,44 +266,59 @@
     document.addEventListener("DOMContentLoaded", function() {
         let modalDetail = document.getElementById("modalDetail");
         modalDetail.addEventListener("show.bs.modal", function(event) {
-            let button = event.relatedTarget; // Button yang diklik
+            let button = event.relatedTarget;
             let kapasitas = button.getAttribute("data-kapasitas");
             let total_qty = button.getAttribute("data-total_qty");
             let nama_cluster = button.getAttribute("data-nama_cluster");
+            let detailData = JSON.parse(button.getAttribute("data-detail"));
 
-            // Set data ke dalam modal
             document.getElementById("modalKapasitas").textContent = kapasitas;
             document.getElementById("modalTotalQty").textContent = total_qty;
             document.getElementById("modalNamaCluster").textContent = nama_cluster;
+
+            let tableBody = document.getElementById("modalDetailTableBody");
+            tableBody.innerHTML = "";
+
+            detailData.forEach((item) => {
+                let row = `<tr>
+                <td>${item.no_model}</td>
+                <td>${item.kode_warna}</td>
+                <td>${item.foll_up || '-'}</td>
+                <td>${item.delivery || '-'}</td>
+            </tr>`;
+                tableBody.innerHTML += row;
+            });
         });
     });
 </script>
 <script>
-$(document).ready(function () {
-    // Fungsi untuk memuat data berdasarkan grup yang dipilih
-    function loadGroupData(group) {
-        $.ajax({
-            url: "<?= base_url($role . '/getGroupData') ?>",
-            type: "POST",
-            data: { group: group },
-            success: function (response) {
-                $("#groupTable").html(response); // Masukkan data ke dalam div
-            },
-            error: function () {
-                $("#groupTable").html("<p class='text-center text-danger'>Gagal memuat data. Silakan coba lagi.</p>");
-            }
+    $(document).ready(function() {
+        // Fungsi untuk memuat data berdasarkan grup yang dipilih
+        function loadGroupData(group) {
+            $.ajax({
+                url: "<?= base_url($role . '/getGroupData') ?>",
+                type: "POST",
+                data: {
+                    group: group
+                },
+                success: function(response) {
+                    $("#groupTable").html(response); // Masukkan data ke dalam div
+                },
+                error: function() {
+                    $("#groupTable").html("<p class='text-center text-danger'>Gagal memuat data. Silakan coba lagi.</p>");
+                }
+            });
+        }
+
+        // Event listener ketika form dikirim
+        $("#groupForm").submit(function(e) {
+            e.preventDefault(); // Mencegah reload halaman
+            var selectedGroup = $("#groupSelect").val(); // Ambil nilai yang dipilih
+            loadGroupData(selectedGroup); // Panggil fungsi AJAX
         });
-    }
 
-    // Event listener ketika form dikirim
-    $("#groupForm").submit(function (e) {
-        e.preventDefault(); // Mencegah reload halaman
-        var selectedGroup = $("#groupSelect").val(); // Ambil nilai yang dipilih
-        loadGroupData(selectedGroup); // Panggil fungsi AJAX
+        // Load data default untuk Group I saat halaman pertama kali dibuka
+        loadGroupData("I");
     });
-
-    // Load data default untuk Group I saat halaman pertama kali dibuka
-    loadGroupData("I");
-});
 </script>
 <?php $this->endSection(); ?>

@@ -71,10 +71,19 @@ class ClusterModel extends Model
     public function getClusterGroupI()
     {
         return $this->select('cluster.kapasitas, 
-                      COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0) AS total_qty, 
-                      cluster.nama_cluster, 
-                      RIGHT(cluster.nama_cluster, 3) AS simbol_cluster')
+                          COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0) AS total_qty, 
+                          cluster.nama_cluster, 
+                          RIGHT(cluster.nama_cluster, 3) AS simbol_cluster,
+                          GROUP_CONCAT(DISTINCT 
+                              JSON_OBJECT(
+                                  "no_model", stock.no_model,
+                                  "kode_warna", stock.kode_warna,
+                                  "foll_up", master_order.foll_up,
+                                  "delivery", master_order.delivery_awal
+                              ) ORDER BY stock.no_model SEPARATOR ","
+                          ) AS detail_data')
             ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
+            ->join('master_order', 'master_order.no_model = stock.no_model', 'left')
             ->groupStart()
             ->groupStart()
             ->like('cluster.nama_cluster', 'I.%.09.%', 'after')
@@ -90,6 +99,7 @@ class ClusterModel extends Model
             ->orLike('cluster.nama_cluster', 'I.%.06.%', 'after')
             ->orLike('cluster.nama_cluster', 'I.%.07.%', 'after')
             ->orLike('cluster.nama_cluster', 'I.%.08.%', 'after')
+            ->orLike('cluster.nama_cluster', 'I.%.09.%', 'after')
             ->groupEnd()
             ->groupEnd()
             ->groupBy('cluster.nama_cluster')
@@ -98,11 +108,35 @@ class ClusterModel extends Model
 
     public function getClusterGroupII()
     {
-        return $this->select('cluster.kapasitas, 
-                      COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0) AS total_qty, 
-                      cluster.nama_cluster, 
-                      RIGHT(cluster.nama_cluster, 3) AS simbol_cluster')
+        return $this->select('
+        cluster.kapasitas, 
+        COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0) AS total_qty, 
+        cluster.nama_cluster,
+
+        CASE 
+            -- Format untuk cluster dengan angka 10-16 dan huruf A atau B
+            WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11|12|13|14|15|16)\\.[AB]$" 
+            THEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2)
+
+            -- Format untuk cluster dengan format II.B.10.B.XX sampai II.B.16.B.XX → b.XX
+            WHEN cluster.nama_cluster REGEXP "^II\\.B\\.(10|11|12|13|14|15|16)\\.B\\.[0-9]{2}$" 
+            THEN CONCAT("b.", SUBSTRING_INDEX(cluster.nama_cluster, ".", -1))
+
+            -- Format default, ambil 3 karakter terakhir
+            ELSE RIGHT(cluster.nama_cluster, 3) 
+        END AS simbol_cluster,
+
+        -- Menggabungkan detail data menjadi JSON
+        GROUP_CONCAT(DISTINCT 
+            JSON_OBJECT(
+                "no_model", stock.no_model,
+                "kode_warna", stock.kode_warna,
+                "foll_up", master_order.foll_up,
+                "delivery", master_order.delivery_awal
+            ) ORDER BY stock.no_model SEPARATOR ","
+        ) AS detail_data')
             ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
+            ->join('master_order', 'master_order.no_model = stock.no_model', 'left')
             ->GroupStart()
             ->like('cluster.nama_cluster', 'II.%.01.%', 'after')
             ->orLike('cluster.nama_cluster', 'II.%.02.%', 'after')
@@ -113,6 +147,13 @@ class ClusterModel extends Model
             ->orLike('cluster.nama_cluster', 'II.%.07.%', 'after')
             ->orLike('cluster.nama_cluster', 'II.%.08.%', 'after')
             ->orLike('cluster.nama_cluster', 'II.%.09.%', 'after')
+            ->orLike('cluster.nama_cluster', 'II.%.10.%', 'after')
+            ->orLike('cluster.nama_cluster', 'II.%.11.%', 'after')
+            ->orLike('cluster.nama_cluster', 'II.%.12.%', 'after')
+            ->orLike('cluster.nama_cluster', 'II.%.13.%', 'after')
+            ->orLike('cluster.nama_cluster', 'II.%.14.%', 'after')
+            ->orLike('cluster.nama_cluster', 'II.%.15.%', 'after')
+            ->orLike('cluster.nama_cluster', 'II.%.16.%', 'after')
             ->groupEnd()
             ->groupBy('cluster.nama_cluster')
             ->findAll();
@@ -120,11 +161,26 @@ class ClusterModel extends Model
 
     public function getClusterGroupIII()
     {
-        return $this->select('cluster.kapasitas, 
+        return $this->select(
+            'cluster.kapasitas, 
                       COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0) AS total_qty, 
                       cluster.nama_cluster, 
-                      RIGHT(cluster.nama_cluster, 3) AS simbol_cluster')
+                      CASE
+                      WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11|12|13|14|15|16)\\.[AB]$" 
+                      THEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2)
+                      ELSE RIGHT(cluster.nama_cluster, 3)
+                      END AS simbol_cluster,
+                      GROUP_CONCAT(DISTINCT 
+            JSON_OBJECT(
+                "no_model", stock.no_model,
+                "kode_warna", stock.kode_warna,
+                "foll_up", master_order.foll_up,
+                "delivery", master_order.delivery_awal
+            ) ORDER BY stock.no_model SEPARATOR ","
+        ) AS detail_data'
+        )
             ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
+            ->join('master_order', 'master_order.no_model = stock.no_model', 'left')
             ->GroupStart()
             ->like('cluster.nama_cluster', 'III.%.01.%', 'after')
             ->orLike('cluster.nama_cluster', 'III.%.02.%', 'after')
@@ -135,6 +191,13 @@ class ClusterModel extends Model
             ->orLike('cluster.nama_cluster', 'III.%.07.%', 'after')
             ->orLike('cluster.nama_cluster', 'III.%.08.%', 'after')
             ->orLike('cluster.nama_cluster', 'III.%.09.%', 'after')
+            ->orLike('cluster.nama_cluster', 'III.%.10.%', 'after')
+            ->orLike('cluster.nama_cluster', 'III.%.11.%', 'after')
+            ->orLike('cluster.nama_cluster', 'III.%.12.%', 'after')
+            ->orLike('cluster.nama_cluster', 'III.%.13.%', 'after')
+            ->orLike('cluster.nama_cluster', 'III.%.14.%', 'after')
+            ->orLike('cluster.nama_cluster', 'III.%.15.%', 'after')
+            ->orLike('cluster.nama_cluster', 'III.%.16.%', 'after')
             ->groupEnd()
             ->groupBy('cluster.nama_cluster')
             ->findAll();
