@@ -77,7 +77,7 @@ class PemesananController extends BaseController
 
         $data = [
             'active' => $this->active,
-            'title' => 'Material System',
+            'title' => 'Pemesanan',
             'role' => $this->role,
             'area' => $area,
         ];
