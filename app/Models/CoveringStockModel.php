@@ -55,4 +55,12 @@ class CoveringStockModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    public function stokCovering()
+    {
+        return $this->db->table('stock_covering cs')
+            ->select('cs.*, IF(cs.ttl_kg > 0, "ada", "tidak ada") AS status')
+            ->get()
+            ->getResultArray();
+    }
 }

@@ -97,64 +97,10 @@
             </div>
         </div>
     </div>
-    <?php
-    $warehouseData = [
-        [
-            'id' => 1,
-            'jenis' => 'Nylon 70D/24F',
-            'color' => 'Red',
-            'code' => 'RD-001',
-            'lmd' => 'LMD-123',
-            'ttl_cns' => 500,
-            'ttl_kg' => 250.5,
-            'box' => 10,
-            'no_rak' => 3,
-            'posisi_rak' => 'A3',
-            'no_palet' => 12,
-            'status' => 'ada',
-            'admin' => 'John Doe',
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => null,
-        ],
-        [
-            'id' => 2,
-            'jenis' => 'Polyester 150D/48F',
-            'color' => 'Blue',
-            'code' => 'BL-002',
-            'lmd' => 'LMD-456',
-            'ttl_cns' => 400,
-            'ttl_kg' => 200.8,
-            'box' => 8,
-            'no_rak' => 5,
-            'posisi_rak' => 'B1',
-            'no_palet' => 9,
-            'status' => 'ada',
-            'admin' => 'Jane Smith',
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => null,
-        ],
-        [
-            'id' => 3,
-            'jenis' => 'Cotton 40s',
-            'color' => 'White',
-            'code' => 'WH-003',
-            'lmd' => 'LMD-789',
-            'ttl_cns' => 600,
-            'ttl_kg' => 300.2,
-            'box' => 12,
-            'no_rak' => 7,
-            'posisi_rak' => 'C2',
-            'no_palet' => 15,
-            'status' => 'ada',
-            'admin' => 'Michael Johnson',
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => null,
-        ],
-    ];
-    ?>
+
     <!-- Grid View -->
     <div class="row g-3" id="warehouseGrid">
-        <?php foreach ($warehouseData as $item) : ?>
+        <?php foreach ($stok as $item) : ?>
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 warehouse-card" data-status="<?= $item['status'] ?>" data-location="<?= $item['no_rak'] ?>" data-name="<?= $item['jenis'] ?>" data-category="<?= $item['color'] ?>">
                 <div class="card h-100 border">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
@@ -183,14 +129,14 @@
                         <?php endforeach; ?>
                     </div>
                     <div class="card-footer bg-white d-flex justify-content-between">
-                        <button class="btn btn-sm btn-outline-info action-btn" onclick="editItem(<?= $item['id'] ?>)">
+                        <button class="btn btn-sm btn-outline-info action-btn" onclick="editItem(<?= $item['id_covering_stock'] ?>)">
                             <i class="fas fa-edit"></i> Edit
                         </button>
                         <div>
-                            <button class="btn btn-sm btn-outline-success action-btn me-1" onclick="addStock(<?= $item['id'] ?>)">
+                            <button class="btn btn-sm btn-outline-success action-btn me-1" onclick="addStock(<?= $item['id_covering_stock'] ?>)">
                                 <i class="fas fa-plus"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-danger action-btn" onclick="removeStock(<?= $item['id'] ?>)" <?= $item['ttl_kg'] <= 0 ? 'disabled' : '' ?>>
+                            <button class="btn btn-sm btn-outline-danger action-btn" onclick="removeStock(<?= $item['id_covering_stock'] ?>)" <?= $item['ttl_kg'] <= 0 ? 'disabled' : '' ?>>
                                 <i class="fas fa-minus"></i>
                             </button>
                         </div>
