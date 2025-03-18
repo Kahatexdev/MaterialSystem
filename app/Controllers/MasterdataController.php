@@ -34,7 +34,7 @@ class MasterdataController extends BaseController
         $this->materialModel = new MaterialModel();
         $this->masterMaterialModel = new MasterMaterialModel();
         $this->estimasiStokModel = new EstimasiStokModel();
-        $this->openPOModel = new OpenPoModel();
+        $this->openPoModel = new OpenPoModel();
         $this->stockModel = new StockModel();
 
         $this->role = session()->get('role');
@@ -435,7 +435,7 @@ class MasterdataController extends BaseController
                 'admin'            => session()->get('username'),
             ];
             // Simpan data ke database
-            $this->openPOModel->insert($itemData);
+            $this->openPoModel->insert($itemData);
         }
 
         return redirect()->to(base_url($this->role . '/material/' . $id_order))->with('success', 'Data PO Berhasil Di Tambahkan.');
