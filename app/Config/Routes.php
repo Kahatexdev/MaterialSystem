@@ -384,5 +384,7 @@ $routes->group(
         $routes->post('saveListPemesanan', 'ApiController::saveListPemesanan');
         $routes->get('listPemesanan/(:any)', 'ApiController::listPemesanan/$1');
         // $routes->get('getMaterialForPPH/(:any)/(:any)', 'ApiController::getMaterialForPPH/$1/$2');
+        $routes->get('stockbahanbaku/(:any)', 'ApiController::stockbahanbaku/$1');
+
     }
 );

@@ -185,7 +185,6 @@ class MaterialModel extends Model
             material.composition, 
             material.gw, 
             material.qty_pcs, 
-            material.kgs, 
             material.loss, 
             SUM(material.kgs) AS ttl_kebutuhan
         ')
@@ -207,5 +206,16 @@ class MaterialModel extends Model
     ');
 
         return $builder->findAll();
+    }
+    public function getMaterialForPemesanan($model, $styleSize, $area)
+    {
+        return $this->select('master_material.jenis, material.*')
+            ->join('master_order', 'master_order.id_order=material.id_order')
+            ->join('master_material', 'master_material.item_type=material.item_type')
+            ->where('master_order.no_model', $model)
+            ->where('material.style_size', $styleSize)
+            ->where('material.area', $area)
+            ->orderBy('master_material.jenis, material.item_type', 'ASC')
+            ->findAll();
     }
 }
