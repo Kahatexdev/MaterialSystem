@@ -366,5 +366,7 @@ $routes->group(
         $routes->post('insertQtyCns', 'ApiController::insertQtyCns');
         $routes->post('saveListPemesanan', 'ApiController::saveListPemesanan');
         // $routes->get('getMaterialForPPH/(:any)/(:any)', 'ApiController::getMaterialForPPH/$1/$2');
+        $routes->get('stockbahanbaku/(:any)', 'ApiController::stockbahanbaku/$1');
+
     }
 );
