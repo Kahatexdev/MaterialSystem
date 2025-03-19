@@ -65,6 +65,7 @@
                                     name="no_po"
                                     value=""
                                     required>
+                                <input type="hidden" name="tgl_po" value="<?= $tgl_po ?>">
                             </div>
                             <table class="table table-flush" id="datatable-basic">
                                 <thead class="thead-light">
@@ -81,6 +82,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+
                                     <?php
                                     foreach ($coveringData as $index => $item) {
                                         echo "<tr>";
