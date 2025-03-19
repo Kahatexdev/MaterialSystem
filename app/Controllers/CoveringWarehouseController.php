@@ -126,11 +126,8 @@ class CoveringWarehouseController extends BaseController
             'jenis'      => 'required',
             'color'      => 'required',
             'code'       => 'required',
-            'lmd'        => 'required',
-            'box'        => 'required|numeric',
             'ttl_kg'     => 'required|numeric',
             'ttl_cns'    => 'required|numeric',
-            'no_palet'   => 'required',
             'no_rak'     => 'required|numeric',
             'posisi_rak' => 'required'
         ];
@@ -140,9 +137,9 @@ class CoveringWarehouseController extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        // Mengolah array menjadi string jika perlu
         $lmdInput = $this->request->getPost('lmd');
-        $lmdValue = is_array($lmdInput) ? implode('', $lmdInput) : $lmdInput;
+        $lmdValue = !empty($lmdInput) && is_array($lmdInput) ? implode(', ', $lmdInput) : ($lmdInput ?? null);
+
 
         $posisiRakInput = $this->request->getPost('posisi_rak');
         $posisiRakValue = is_array($posisiRakInput) ? implode(',', $posisiRakInput) : $posisiRakInput;

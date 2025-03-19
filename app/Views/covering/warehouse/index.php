@@ -216,7 +216,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="box" class="form-label">Box</label>
-                                    <input type="text" class="form-control" id="box" name="box" required>
+                                    <input type="text" class="form-control" id="box" name="box">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">LMD</label><br>
@@ -246,7 +246,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="no_palet" class="form-label">No Palet</label>
-                                    <input type="text" class="form-control" id="no_palet" name="no_palet" required>
+                                    <input type="text" class="form-control" id="no_palet" name="no_palet">
                                 </div>
                                 <div class="mb-3">
                                     <label for="no_rak" class="form-label">Nomor Rak</label>
@@ -584,8 +584,9 @@
 
                         // Cek dan tandai checkbox LMD
                         ["L", "M", "D"].forEach((val, index) => {
-                            document.getElementById(`editLmd${index + 1}`).checked = stock.lmd.includes(val);
+                            document.getElementById(`editLmd${index + 1}`).checked = stock.lmd?.includes(val) || false;
                         });
+
 
                         // Cek dan tandai checkbox Posisi Rak
                         ["Kiri", "Kanan", "Atas", "Bawah"].forEach((val, index) => {
