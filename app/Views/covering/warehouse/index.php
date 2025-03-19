@@ -170,7 +170,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="stockAmount" class="form-label">Jumlah KG</label>
-                            <input type="number" class="form-control" id="stockAmount" required>
+                            <input type="number" class="form-control" id="stockAmount" step="0.1" required inputmode="decimal">
                         </div>
                         <div class="mb-3">
                             <label for="amountcones" class="form-label">Jumlah Cones</label>
@@ -238,7 +238,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="ttl_kg" class="form-label">Jumlah Stok (Kg)</label>
-                                    <input type="number" class="form-control" id="ttl_kg" name="ttl_kg" required>
+                                    <input type="number" class="form-control" id="ttl_kg" name="ttl_kg" step="0.1" required inputmode="decimal">
                                 </div>
                                 <div class="mb-3">
                                     <label for="ttl_cns" class="form-label">Jumlah Cones</label>
@@ -346,7 +346,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="editTtlKg" class="form-label">Jumlah Stok (Kg)</label>
-                                    <input type="number" class="form-control" id="editTtlKg" name="ttl_kg" required>
+                                    <input type="number" class="form-control" id="editTtlKg" name="ttl_kg" step="0.1" required inputmode="decimal">
                                 </div>
                                 <div class="mb-3">
                                     <label for="editTtlCns" class="form-label">Jumlah Cones</label>
