@@ -135,6 +135,12 @@ class PphController extends BaseController
 
                 $bruto = $data['bruto'] ?? 0;
                 $bs_mesin = $data['bs_mesin'] ?? 0;
+                if ($gw == 0) {
+                    $pph = 0;
+                } else {
+
+                    $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
+                }
 
 
                 $pphInisial[] = [
@@ -154,7 +160,7 @@ class PphController extends BaseController
                     'po_plus'    => $data['po_plus'] ?? 0,
                     'bs_setting' => $data['bs_setting'] ?? 0,
                     'bs_mesin'   => $bs_mesin,
-                    'pph'        => (($bruto * $gwpcs) + $bs_mesin) / 1000,
+                    'pph'        => $pph
                 ];
             }
         }
@@ -232,8 +238,12 @@ class PphController extends BaseController
 
                 $bruto = $data['bruto'] ?? 0;
                 $bs_mesin = $data['bs_mesin'] ?? 0;
-                $pph = (($bruto * $gwpcs) + $bs_mesin) / 1000;
+                if ($gw == 0) {
+                    $pph = 0;
+                } else {
 
+                    $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
+                }
 
                 $pphInisial[] = [
                     'area'  => $items['area'],
@@ -244,7 +254,7 @@ class PphController extends BaseController
                     'color'      => $items['color'],
                     'ttl_kebutuhan' => $items['ttl_kebutuhan'],
                     'gw'         => $items['gw'],
-                    'loss'        => $items['loss'],
+                    'loss' => $items['loss'],
                     'composition' => $items['composition'],
                     'jarum'      => $data['machinetypeid'] ?? null,
                     'bruto'      => $bruto,
@@ -308,7 +318,13 @@ class PphController extends BaseController
 
                     $bruto = $prod['prod'] ?? 0;
                     $bs_mesin = $prod['bs_mesin'] ?? 0;
-                    $pph = (($bruto * $gwpcs) + $bs_mesin) / 1000;
+                    if ($gw == 0) {
+                        $pph = 0;
+                    } else {
+
+                        $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
+                    }
+
 
                     $pphInisial[] = [
                         'mastermodel'    => $prod['mastermodel'],

@@ -388,4 +388,33 @@ class ScheduleCelupModel extends Model
             ->groupBy('schedule_celup.lot_urut')
             ->findAll();
     }
+    
+    public function countStatusScheduled()
+    {
+        return $this->select('COUNT(id_celup) as total_scheduled')
+            ->where('last_status', 'scheduled') // Sesuaikan last status jika perlu
+            ->groupBy('id_celup')
+            ->first();
+    }
+    public function countStatusReschedule()
+    {
+        return $this->select('COUNT(id_celup) as total_reschedule')
+            ->where('last_status', 'reschedule') // Sesuaikan last status jika perlu
+            ->groupBy('id_celup')
+            ->first();
+    }
+    public function countStatusDone()
+    {
+        return $this->select('COUNT(id_celup) as total_done')
+            ->where('last_status', 'done') // Sesuaikan last status jika perlu
+            ->groupBy('id_celup')
+            ->first();
+    }
+    public function countStatusRetur()
+    {
+        return $this->select('COUNT(id_celup) as total_retur')
+            ->where('last_status', 'retur') // Sesuaikan last status jika perlu
+            ->groupBy('id_celup')
+            ->first();
+    }
 }

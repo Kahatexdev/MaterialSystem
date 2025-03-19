@@ -1,16 +1,6 @@
 <?php $this->extend($role . '/layout'); ?>
 <?php $this->section('header'); ?>
-<style>
-    .btn-filter {
-        background: linear-gradient(135deg, #1e88e5, #64b5f6);
-        color: white;
-        border: none;
-    }
 
-    .btn-filter:hover {
-        background: linear-gradient(135deg, #1976d2, #42a5f5);
-    }
-</style>
 
 <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
     <!-- Navbar -->
@@ -22,23 +12,28 @@
                 </nav>
                 <div class="d-flex align-items-center">
                     <ul class="navbar-nav justify-content-end">
-                        <li class="nav-item d-flex align-items-center">
-                            <a href="" class="nav-link text-body font-weight-bold px-2">
+                        <!-- <li class="nav-item d-flex align-items-center">
+                            <a href="<?= base_url($role . '/mesinCov') ?>" class="nav-link text-body font-weight-bold px-2">
                                 <i class="fas fa-database"></i>
-                                <span class="d-lg-inline-block d-none ms-1">Submenu 1</span>
+                                <span class="d-lg-inline-block d-none ms-1">Data Mesin Covering</span>
+                            </a>
+                        </li>
+                        <li class="nav-item d-flex align-items-center">
+                            <a href="<?= base_url($role . '/warehouse/pemasukan') ?>" class="nav-link text-body font-weight-bold px-2" title="Pemasukan" data-bs-toggle="tooltip" data-bs-placement="bottom">
+                                <i class="fas fa-arrow-down"></i>
+                                <span class="d-lg-inline-block d-none ms-1">Pemasukan</span>
                             </a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownReports" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-file-alt"></i>
-                                <span class="d-lg-inline-block d-none ms-1">PPH</span>
+                            <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-arrow-up"></i>
+                                <span class="d-lg-inline-block d-none ms-1">Pengeluaran</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownReports">
-                                <li><a class="dropdown-item" href="<?= base_url($role . '/pph') ?>">PPH Per Model</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url($role . '/tampilPerStyle') ?>">PPH Per Style</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url($role . '/pphPerhari') ?>">PPH Perhari </a></li>
+                            <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownMenuLink">
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/pengeluaran_jalur') ?>">Pengeluaran Jalur</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/pengiriman_area') ?>">Pengiriman Area</a></li>
                             </ul>
-                        </li>
+                        </li> -->
                         <li class="nav-item d-flex align-items-center">
                             <a href="" data-bs-toggle="modal" data-bs-target="#LogoutModal" class="nav-link text-body font-weight-bold px-2">
                                 <i class="fa fa-user"></i>

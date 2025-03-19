@@ -290,4 +290,45 @@ class CoveringController extends BaseController
 
         return view($this->role . '/mesin/index', $data);
     }
+    public function warehouse()
+    {
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Warehouse',
+            'role' => $this->role,
+        ];
+
+        return view($this->role . '/warehouse/index', $data);
+    }
+    public function pemasukan()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Pemasukan',
+            'role' => $this->role,
+        ];
+
+        return view($this->role . '/warehouse/pemasukan', $data);
+    }
+    public function pengeluaranJalur()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Pengeluaran Jalur',
+            'role' => $this->role,
+        ];
+
+        return view($this->role . '/warehouse/pengeluaran_jalur', $data);
+    }
+    public function pengirimanArea()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Pengiriman Area',
+            'role' => $this->role,
+        ];
+
+        return view($this->role . '/warehouse/pengiriman_area', $data);
+    }
 }

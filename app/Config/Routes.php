@@ -17,7 +17,9 @@ $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJat
 // $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
 
 $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
-    $routes->get('', 'MaterialController::index');
+    $routes->get('', 'DashboardGbnController::index');
+    // $routes->get('getGroupData', 'DashboardGbnController::getGroupData');
+    $routes->post('getGroupData', 'DashboardGbnController::getGroupData');
     $routes->get('masterdata', 'MasterdataController::index');
     $routes->post('tampilMasterOrder', 'MasterdataController::tampilMasterOrder');
     $routes->get('getOrderDetails/(:num)', 'MasterdataController::getOrderDetails/$1');
@@ -121,14 +123,19 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('hapus_pengiriman', 'PemesananController::hapusListPengiriman');
     $routes->post('proses_pengiriman', 'PemesananController::prosesPengirimanArea');
 
-    $routes->get('pph', 'PphController::index');
-    $routes->get('pphPerArea/(:any)', 'PphController::pphPerArea/$1');
+    $routes->get('pph', 'PphController::tampilPerModel');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
-    $routes->post('tampilPerStyle', 'PphController::tampilPerStyle');
     $routes->get('tampilPerDays', 'PphController::tampilPerDays');
+    $routes->get('pphPerhari', 'PphController::pphPerhari');
     $routes->post('tampilPerDays', 'PphController::tampilPerDays');
-    $routes->get('pphPerArea/(:any)/tampilPerModel', 'PphController::tampilPerModel');
-    $routes->post('tampilPerModel', 'PphController::tampilPerModel');
+    $routes->get('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');
+    $routes->get('getDataModel', 'PphController::getDataModel');
+    $routes->get('pphinisial', 'PphController::pphinisial');
+    $routes->get('getDataPerhari', 'PphController::getDataPerhari');
+    // $routes->post('tampilPerModel/(:any)', 'PphController::tampilPerModel/$1');
+    $routes->get('excelPPHNomodel/(:any)/(:any)', 'ExcelController::excelPPHNomodel/$1/$2');
+    $routes->get('excelPPHInisial/(:any)/(:any)', 'ExcelController::excelPPHInisial/$1/$2');
+    $routes->get('excelPPHDays/(:any)/(:any)', 'ExcelController::excelPPHDays/$1/$2');
     //PO Covering
     $routes->get('poCovering', 'POCoveringController::index');
     $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
@@ -136,7 +143,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
 
 // celup routes
 $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
-    $routes->get('', 'CelupController::index');
+    $routes->get('', 'DashboardCelupController::index');
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
     $routes->get('schedule/nylon', 'ScheduleController::nylon');
@@ -210,6 +217,16 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('po/savePOCovering', 'CoveringController::savePOCovering');
     $routes->get('po/deletePOCovering/(:any)', 'CoveringController::unsetSession/$1');
     $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
+
+    // warehouse
+    $routes->get('warehouse', 'CoveringWarehouseController::index');
+    $routes->post('warehouse/tambahStock', 'CoveringWarehouseController::create');
+    $routes->post('warehouse/updateStock', 'CoveringWarehouseController::updateStock');
+    $routes->post('warehouse/updateEditStock', 'CoveringWarehouseController::updateEditStock');
+    $routes->get('warehouse/getStock/(:any)', 'CoveringWarehouseController::getStock/$1');
+    $routes->get('warehouse/pemasukan', 'CoveringController::pemasukan');
+    $routes->get('warehouse/pengeluaran_jalur', 'CoveringController::pengeluaranJalur');
+    $routes->get('warehouse/pengiriman_area', 'CoveringController::pengirimanArea');
 });
 
 
@@ -345,12 +362,12 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('printBon/(:num)', 'PdfController::printBon/$1');
 });
 
-$routes->options('(:any)', function() {
+$routes->options('(:any)', function () {
     return $this->response
-                ->setHeader('Access-Control-Allow-Origin', '*')
-                ->setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
-                ->setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
-                ->setStatusCode(200);
+        ->setHeader('Access-Control-Allow-Origin', '*')
+        ->setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
+        ->setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+        ->setStatusCode(200);
 });
 
 // api routes
@@ -365,6 +382,7 @@ $routes->group(
         $routes->get('getMaterialForPPHByAreaAndNoModel/(:segment)/(:segment)', 'ApiController::getMaterialForPPHByAreaAndNoModel/$1/$2');
         $routes->post('insertQtyCns', 'ApiController::insertQtyCns');
         $routes->post('saveListPemesanan', 'ApiController::saveListPemesanan');
+        $routes->get('listPemesanan/(:any)', 'ApiController::listPemesanan/$1');
         // $routes->get('getMaterialForPPH/(:any)/(:any)', 'ApiController::getMaterialForPPH/$1/$2');
         $routes->get('stockbahanbaku/(:any)', 'ApiController::stockbahanbaku/$1');
 

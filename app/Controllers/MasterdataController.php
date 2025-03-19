@@ -34,7 +34,7 @@ class MasterdataController extends BaseController
         $this->materialModel = new MaterialModel();
         $this->masterMaterialModel = new MasterMaterialModel();
         $this->estimasiStokModel = new EstimasiStokModel();
-        $this->openPOModel = new OpenPoModel();
+        $this->openPoModel = new OpenPoModel();
         $this->stockModel = new StockModel();
 
         $this->role = session()->get('role');
@@ -114,6 +114,9 @@ class MasterdataController extends BaseController
             return redirect()->back()->with('error', 'No file uploaded or file is invalid.');
         }
 
+        // if ($file->getMimeType() !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+        //     return redirect()->back()->with('error', 'Only XLSX files are allowed.');
+        // }
         // Inisialisasi model-model
         $masterOrderModel    = new MasterOrderModel();
         $materialModel       = new MaterialModel();
@@ -237,6 +240,10 @@ class MasterdataController extends BaseController
                     return redirect()->back()->with('error', $item_type . ' tidak ada di database pada baris ' . $rowIndex);
                 }
 
+                // Ambil nilai qty_pcs dan bersihkan dari pemisah ribuan
+                $qty_raw = $sheet->getCell($headerMap['Qty/pcs'] . $rowIndex)->getValue();
+                $qty_pcs = intval(str_replace([',', '.'], '', $qty_raw));
+
                 // Siapkan data material
                 $validDataMaterial[] = [
                     'id_order'   => $id_order,
@@ -248,7 +255,7 @@ class MasterdataController extends BaseController
                     'kode_warna' => $sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue(),
                     'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(),
                     'gw'         => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
-                    'qty_pcs'    => $sheet->getCell($headerMap['Qty/pcs'] . $rowIndex)->getValue(),
+                    'qty_pcs'    => $qty_pcs, // Menggunakan variabel yang telah diproses
                     'loss'       => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue(),
                     'kgs'        => $sheet->getCell($headerMap['Kgs'] . $rowIndex)->getValue(),
                     'admin'      => $admin,
@@ -435,7 +442,7 @@ class MasterdataController extends BaseController
                 'admin'            => session()->get('username'),
             ];
             // Simpan data ke database
-            $this->openPOModel->insert($itemData);
+            $this->openPoModel->insert($itemData);
         }
 
         return redirect()->to(base_url($this->role . '/material/' . $id_order))->with('success', 'Data PO Berhasil Di Tambahkan.');
