@@ -222,6 +222,8 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('warehouse', 'CoveringWarehouseController::index');
     $routes->post('warehouse/tambahStock', 'CoveringWarehouseController::create');
     $routes->post('warehouse/updateStock', 'CoveringWarehouseController::updateStock');
+    $routes->post('warehouse/updateEditStock', 'CoveringWarehouseController::updateEditStock');
+    $routes->get('warehouse/getStock/(:any)', 'CoveringWarehouseController::getStock/$1');
     $routes->get('warehouse/pemasukan', 'CoveringController::pemasukan');
     $routes->get('warehouse/pengeluaran_jalur', 'CoveringController::pengeluaranJalur');
     $routes->get('warehouse/pengiriman_area', 'CoveringController::pengirimanArea');
@@ -382,5 +384,7 @@ $routes->group(
         $routes->post('saveListPemesanan', 'ApiController::saveListPemesanan');
         $routes->get('listPemesanan/(:any)', 'ApiController::listPemesanan/$1');
         // $routes->get('getMaterialForPPH/(:any)/(:any)', 'ApiController::getMaterialForPPH/$1/$2');
+        $routes->get('stockbahanbaku/(:any)', 'ApiController::stockbahanbaku/$1');
+
     }
 );

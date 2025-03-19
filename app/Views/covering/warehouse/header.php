@@ -12,7 +12,7 @@
                 </nav>
                 <div class="d-flex align-items-center">
                     <ul class="navbar-nav justify-content-end">
-                        <li class="nav-item d-flex align-items-center">
+                        <!-- <li class="nav-item d-flex align-items-center">
                             <a href="<?= base_url($role . '/mesinCov') ?>" class="nav-link text-body font-weight-bold px-2">
                                 <i class="fas fa-database"></i>
                                 <span class="d-lg-inline-block d-none ms-1">Data Mesin Covering</span>
@@ -33,7 +33,7 @@
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/pengeluaran_jalur') ?>">Pengeluaran Jalur</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/pengiriman_area') ?>">Pengiriman Area</a></li>
                             </ul>
-                        </li>
+                        </li> -->
                         <li class="nav-item d-flex align-items-center">
                             <a href="" data-bs-toggle="modal" data-bs-target="#LogoutModal" class="nav-link text-body font-weight-bold px-2">
                                 <i class="fa fa-user"></i>
