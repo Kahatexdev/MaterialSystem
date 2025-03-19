@@ -213,6 +213,7 @@
                                 <th>Kode Warna</th>
                                 <th>Foll Up</th>
                                 <th>Delivery</th>
+                                <th>Kapasitas Pemakaian</th>
                             </tr>
                         </thead>
                         <tbody id="modalDetailTableBody"></tbody>
@@ -285,6 +286,7 @@
                 <td>${item.kode_warna}</td>
                 <td>${item.foll_up || '-'}</td>
                 <td>${item.delivery || '-'}</td>
+                <td>${item.qty || '-'}</td>
             </tr>`;
                 tableBody.innerHTML += row;
             });

@@ -79,7 +79,8 @@ class ClusterModel extends Model
                                   "no_model", stock.no_model,
                                   "kode_warna", stock.kode_warna,
                                   "foll_up", master_order.foll_up,
-                                  "delivery", master_order.delivery_awal
+                                  "delivery", master_order.delivery_awal,
+                                  "qty", ROUND(stock.kgs_stock_awal + stock.kgs_in_out, 2)
                               ) ORDER BY stock.no_model SEPARATOR ","
                           ) AS detail_data')
             ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
@@ -132,7 +133,8 @@ class ClusterModel extends Model
                 "no_model", stock.no_model,
                 "kode_warna", stock.kode_warna,
                 "foll_up", master_order.foll_up,
-                "delivery", master_order.delivery_awal
+                "delivery", master_order.delivery_awal,
+                "qty", ROUND(stock.kgs_stock_awal + stock.kgs_in_out, 2)
             ) ORDER BY stock.no_model SEPARATOR ","
         ) AS detail_data')
             ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
@@ -175,7 +177,8 @@ class ClusterModel extends Model
                 "no_model", stock.no_model,
                 "kode_warna", stock.kode_warna,
                 "foll_up", master_order.foll_up,
-                "delivery", master_order.delivery_awal
+                "delivery", master_order.delivery_awal,
+                "qty", ROUND(stock.kgs_stock_awal + stock.kgs_in_out, 2)
             ) ORDER BY stock.no_model SEPARATOR ","
         ) AS detail_data'
         )
