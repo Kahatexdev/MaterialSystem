@@ -70,8 +70,8 @@ class ClusterModel extends Model
 
     public function getClusterGroupI()
     {
-        return $this->select('cluster.kapasitas, 
-                          COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0) AS total_qty, 
+        return $this->select('cluster.kapasitas,         
+                          ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, 
                           cluster.nama_cluster, 
                           RIGHT(cluster.nama_cluster, 3) AS simbol_cluster,
                           GROUP_CONCAT(DISTINCT 
@@ -109,9 +109,8 @@ class ClusterModel extends Model
 
     public function getClusterGroupII()
     {
-        return $this->select('
-        cluster.kapasitas, 
-        COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0) AS total_qty, 
+        return $this->select('cluster.kapasitas, 
+        ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, 
         cluster.nama_cluster,
 
         CASE 
@@ -165,7 +164,7 @@ class ClusterModel extends Model
     {
         return $this->select(
             'cluster.kapasitas, 
-                      COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0) AS total_qty, 
+                      ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, 
                       cluster.nama_cluster, 
                       CASE
                       WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11|12|13|14|15|16)\\.[AB]$" 
