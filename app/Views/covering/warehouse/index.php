@@ -68,7 +68,7 @@
             <div class="row g-3">
                 <?php $filters = [
                     ['id' => 'searchInput', 'icon' => 'search', 'type' => 'text', 'placeholder' => 'Cari jenis...'],
-                    ['id' => 'filterStatus', 'options' => ['' => 'Semua Status', 'ada' => 'Tersedia', 'tidak ada' => 'Tidak Tersedia']],
+                    ['id' => 'filterStatus', 'options' => ['' => 'Semua Status', 'ada' => 'Tersedia', 'habis' => 'Tidak Tersedia']],
                     ['id' => 'filterLocation', 'options' => ['' => 'Semua Rak', '1' => 'Rak 1', '2' => 'Rak 2', '3' => 'Rak 3', '4' => 'Rak 4', '5' => 'Rak 5', '6' => 'Rak 6', '7' => 'Rak 7', '8' => 'Rak 8']],
                 ]; ?>
 
