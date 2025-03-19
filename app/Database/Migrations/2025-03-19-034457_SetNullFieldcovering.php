@@ -12,6 +12,7 @@ class SetNullFieldcovering extends Migration
             'lmd' => [
                 'name' => 'lmd',
                 'type' => 'VARCHAR',
+                'constraint' => 5,
                 'null' => true,
             ],
             'box' => [
@@ -30,6 +31,7 @@ class SetNullFieldcovering extends Migration
             'lmd' => [
                 'name' => 'lmd',
                 'type' => 'VARCHAR',
+                'constraint' => 5,
                 'null' => true,
             ],
             'box' => [
