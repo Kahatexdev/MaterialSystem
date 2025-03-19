@@ -222,6 +222,8 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('warehouse', 'CoveringWarehouseController::index');
     $routes->post('warehouse/tambahStock', 'CoveringWarehouseController::create');
     $routes->post('warehouse/updateStock', 'CoveringWarehouseController::updateStock');
+    $routes->post('warehouse/updateEditStock', 'CoveringWarehouseController::updateEditStock');
+    $routes->get('warehouse/getStock/(:any)', 'CoveringWarehouseController::getStock/$1');
     $routes->get('warehouse/pemasukan', 'CoveringController::pemasukan');
     $routes->get('warehouse/pengeluaran_jalur', 'CoveringController::pengeluaranJalur');
     $routes->get('warehouse/pengiriman_area', 'CoveringController::pengirimanArea');

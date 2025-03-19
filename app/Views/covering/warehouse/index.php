@@ -68,8 +68,8 @@
             <div class="row g-3">
                 <?php $filters = [
                     ['id' => 'searchInput', 'icon' => 'search', 'type' => 'text', 'placeholder' => 'Cari jenis...'],
-                    ['id' => 'filterStatus', 'options' => ['' => 'Semua Status', 'ada' => 'Tersedia', 'out' => 'Tidak Tersedia']],
-                    ['id' => 'filterLocation', 'options' => ['' => 'Semua Rak', '1' => 'Rak 1', '2' => 'Rak 2', '3' => 'Rak 3', '4' => 'Rak 4']],
+                    ['id' => 'filterStatus', 'options' => ['' => 'Semua Status', 'ada' => 'Tersedia', 'tidak ada' => 'Tidak Tersedia']],
+                    ['id' => 'filterLocation', 'options' => ['' => 'Semua Rak', '1' => 'Rak 1', '2' => 'Rak 2', '3' => 'Rak 3', '4' => 'Rak 4', '5' => 'Rak 5', '6' => 'Rak 6', '7' => 'Rak 7', '8' => 'Rak 8']],
                 ]; ?>
 
                 <?php foreach ($filters as $filter) : ?>
@@ -128,20 +128,25 @@
                             </div>
                         <?php endforeach; ?>
                     </div>
-                    <div class="card-footer bg-white d-flex justify-content-between">
-                        <button class="btn btn-sm btn-outline-info action-btn" onclick="editItem(<?= $item['id_covering_stock'] ?>)">
+                    <div class="card-footer bg-white align-items-center">
+                        <button class="btn  btn-info action-btn w-100" onclick="editItem(<?= $item['id_covering_stock'] ?>)">
                             <i class="fas fa-edit"></i> Edit
                         </button>
-                        <div>
-                            <button class="btn btn-sm btn-outline-success action-btn me-1" onclick="addStock(<?= $item['id_covering_stock'] ?>)">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger action-btn" onclick="removeStock(<?= $item['id_covering_stock'] ?>)" <?= $item['ttl_kg'] <= 0 ? 'disabled' : '' ?>>
-                                <i class="fas fa-minus"></i>
-                            </button>
-                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <button class="btn  btn-success action-btn w-100" onclick="addStock(<?= $item['id_covering_stock'] ?>)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <div class="col-6">
 
+                                <button class="btn  btn-danger action-btn w-100" onclick="removeStock(<?= $item['id_covering_stock'] ?>)" <?= $item['ttl_kg'] <= 0 ? 'disabled' : '' ?>>
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </div>
         <?php endforeach; ?>
@@ -291,38 +296,112 @@
 
 
     <!-- Modal Edit Data -->
-    <div class="modal fade" id="editItemModal" tabindex="-1" aria-labelledby="editItemModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+    <!-- Modal Edit Data -->
+    <div class="modal fade" id="editStockModal" tabindex="-1" aria-labelledby="editStockModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editItemModalLabel">Edit Data Barang</h5>
+                <div class="modal-header text-white">
+                    <h5 class="modal-title" id="editStockModalLabel">Edit Data Barang</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="editItemForm">
-                        <input type="hidden" id="editItemId">
-                        <div class="mb-3">
-                            <label for="editJenis" class="form-label">Jenis Barang</label>
-                            <input type="text" class="form-control" id="editJenis" required>
+                    <form id="editStockForm" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" id="editStockItemId" name="stockItemId">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editJenis" class="form-label">Jenis Barang</label>
+                                    <input type="text" class="form-control" id="editJenis" name="jenis" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editColor" class="form-label">Warna</label>
+                                    <input type="text" class="form-control" id="editColor" name="color" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editCode" class="form-label">Kode</label>
+                                    <input type="text" class="form-control" id="editCode" name="code" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editBox" class="form-label">Box</label>
+                                    <input type="text" class="form-control" id="editBox" name="box" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">LMD</label><br>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="editLmd1" name="lmd[]" value="L">
+                                        <label class="form-check-label" for="editLmd1">L</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="editLmd2" name="lmd[]" value="M">
+                                        <label class="form-check-label" for="editLmd2">M</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="editLmd3" name="lmd[]" value="D">
+                                        <label class="form-check-label" for="editLmd3">D</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editTtlKg" class="form-label">Jumlah Stok (Kg)</label>
+                                    <input type="number" class="form-control" id="editTtlKg" name="ttl_kg" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editTtlCns" class="form-label">Jumlah Cones</label>
+                                    <input type="number" class="form-control" id="editTtlCns" name="ttl_cns" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editNoPalet" class="form-label">No Palet</label>
+                                    <input type="text" class="form-control" id="editNoPalet" name="no_palet" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editNoRak" class="form-label">Nomor Rak</label>
+                                    <select name="no_rak" id="editNoRak" class="form-select" required>
+                                        <option value="" disabled selected>Pilih Nomor Rak</option>
+                                        <option value="1">Rak 1</option>
+                                        <option value="2">Rak 2</option>
+                                        <option value="3">Rak 3</option>
+                                        <option value="4">Rak 4</option>
+                                        <option value="5">Rak 5</option>
+                                        <option value="6">Rak 6</option>
+                                        <option value="7">Rak 7</option>
+                                        <option value="8">Rak 8</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Posisi Rak</label><br>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="editPosisiRak1" name="posisi_rak[]" value="Kiri">
+                                        <label class="form-check-label" for="editPosisiRak1">Kiri</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="editPosisiRak2" name="posisi_rak[]" value="Kanan">
+                                        <label class="form-check-label" for="editPosisiRak2">Kanan</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="editPosisiRak3" name="posisi_rak[]" value="Atas">
+                                        <label class="form-check-label" for="editPosisiRak3">Atas</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" class="form-check-input" id="editPosisiRak4" name="posisi_rak[]" value="Bawah">
+                                        <label class="form-check-label" for="editPosisiRak4">Bawah</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="editColor" class="form-label">Warna</label>
-                            <input type="text" class="form-control" id="editColor" required>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-info">Simpan Perubahan</button>
                         </div>
-                        <div class="mb-3">
-                            <label for="editCode" class="form-label">Kode</label>
-                            <input type="text" class="form-control" id="editCode" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editStock" class="form-label">Jumlah Stok (Kg)</label>
-                            <input type="number" class="form-control" id="editStock" required>
-                        </div>
-                        <button type="submit" class="btn btn-info w-100">Update</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
 
 
     <!-- Script Section -->
@@ -345,14 +424,14 @@
             document.getElementById('viewGrid').addEventListener('click', function() {
                 document.getElementById('warehouseGrid').style.display = '';
                 document.getElementById('warehouseTable').style.display = 'none';
-                this.classList.replace('btn-outline-info', 'btn-info');
-                document.getElementById('viewTable').classList.replace('btn-info', 'btn-outline-info');
+                this.classList.replace('btn-info', 'btn-info');
+                document.getElementById('viewTable').classList.replace('btn-info', 'btn-info');
             });
             document.getElementById('viewTable').addEventListener('click', function() {
                 document.getElementById('warehouseGrid').style.display = 'none';
                 document.getElementById('warehouseTable').style.display = '';
-                this.classList.replace('btn-outline-info', 'btn-info');
-                document.getElementById('viewGrid').classList.replace('btn-info', 'btn-outline-info');
+                this.classList.replace('btn-info', 'btn-info');
+                document.getElementById('viewGrid').classList.replace('btn-info', 'btn-info');
             });
             // Set tampilan default
             document.getElementById('viewGrid').click();
@@ -403,22 +482,138 @@
         });
 
 
+        document.getElementById("editStockForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Mencegah reload halaman
+
+            const stockId = document.getElementById("editStockItemId").value;
+            const jenis = document.getElementById("editJenis").value;
+            const color = document.getElementById("editColor").value;
+            const code = document.getElementById("editCode").value;
+            const box = document.getElementById("editBox").value;
+            const ttlKg = document.getElementById("editTtlKg").value;
+            const ttlCns = document.getElementById("editTtlCns").value;
+            const noPalet = document.getElementById("editNoPalet").value;
+            const noRak = document.getElementById("editNoRak").value;
+
+            // Ambil data checkbox LMD
+            let lmdValues = [];
+            document.querySelectorAll("input[name='lmd[]']:checked").forEach((checkbox) => {
+                lmdValues.push(checkbox.value);
+            });
+
+            // Ambil data checkbox Posisi Rak
+            let posisiRakValues = [];
+            document.querySelectorAll("input[name='posisi_rak[]']:checked").forEach((checkbox) => {
+                posisiRakValues.push(checkbox.value);
+            });
+
+            const BASE_URL = "<?= base_url(); ?>";
+
+            // Kirim data ke backend menggunakan fetch
+            fetch(`${BASE_URL}covering/warehouse/updateEditStock`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        id_covering_stock: stockId,
+                        jenis: jenis,
+                        color: color,
+                        code: code,
+                        box: box,
+                        ttl_kg: ttlKg,
+                        ttl_cns: ttlCns,
+                        no_palet: noPalet,
+                        no_rak: noRak,
+                        lmd: lmdValues,
+                        posisi_rak: posisiRakValues
+                    })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Berhasil!",
+                            text: "Stok berhasil diperbarui!",
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            location.reload(); // Reload halaman setelah update berhasil
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Gagal!",
+                            text: "Gagal memperbarui stok: " + result.message
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error!",
+                        text: "Terjadi kesalahan saat mengupdate stok"
+                    });
+                });
+
+            // Tutup modal setelah submit
+            $("#editStockModal").modal("hide");
+        });
+
+
         // Fungsi Edit Barang
         function editItem(id) {
-            Swal.fire({
-                title: 'Edit Barang',
-                text: `Anda akan mengedit barang dengan ID: ${id}`,
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, Edit',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Di sini biasanya modal edit akan ditampilkan dengan data item
-                    Swal.fire('Info', 'Fitur edit akan segera tersedia', 'info');
-                }
-            });
+            fetch(`<?= base_url(); ?>covering/warehouse/getStock/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const stock = data.stock;
+
+                        // Isi modal dengan data stok yang diterima
+                        document.getElementById("editStockItemId").value = stock.id_covering_stock;
+                        document.getElementById("editJenis").value = stock.jenis;
+                        document.getElementById("editColor").value = stock.color;
+                        document.getElementById("editCode").value = stock.code;
+                        document.getElementById("editBox").value = stock.box;
+                        document.getElementById("editTtlKg").value = stock.ttl_kg;
+                        document.getElementById("editTtlCns").value = stock.ttl_cns;
+                        document.getElementById("editNoPalet").value = stock.no_palet;
+                        document.getElementById("editNoRak").value = stock.no_rak;
+
+                        // Cek dan tandai checkbox LMD
+                        ["L", "M", "D"].forEach((val, index) => {
+                            document.getElementById(`editLmd${index + 1}`).checked = stock.lmd.includes(val);
+                        });
+
+                        // Cek dan tandai checkbox Posisi Rak
+                        ["Kiri", "Kanan", "Atas", "Bawah"].forEach((val, index) => {
+                            document.getElementById(`editPosisiRak${index + 1}`).checked = stock.posisi_rak.includes(val);
+                        });
+
+                        // Tampilkan modal edit
+                        $("#editStockModal").modal("show");
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Gagal!",
+                            text: "Data barang tidak ditemukan"
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error!",
+                        text: "Terjadi kesalahan saat mengambil data"
+                    });
+                });
         }
+
+
+
 
         // Fungsi Tambah Stok
         function addStock(stockId) {
@@ -450,41 +645,75 @@
             const cones = document.getElementById("amountcones").value;
             const note = document.getElementById("stockNote").value;
             const BASE_URL = "<?= base_url(); ?>";
-            console.log("BASE_URL:", BASE_URL); // Cek apakah BASE_URL sudah benar
 
-            if (!amount || !cones) {
-                alert("Jumlah KG dan Cones harus diisi!");
+            // Validasi input
+            if (!stockId || !stockAmount || !amountcones || !action) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Oops...",
+                    text: "Semua data harus diisi!"
+                });
                 return;
             }
 
-            // Kirim data melalui AJAX (bisa diganti dengan form submit)
-            fetch(`${BASE_URL}covering/warehouse/updateStock`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        stockItemId: stockId,
-                        action: action,
-                        no_model: noModel,
-                        stockAmount: amount,
-                        amountcones: cones,
-                        stockNote: note
-                    })
-                })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        alert("Berhasil memperbarui stok!");
-                        location.reload(); // Refresh halaman setelah update
-                    } else {
-                        alert("Gagal memperbarui stok: " + result.message);
-                    }
-                })
-                .catch(error => console.error("Error:", error));
-
-            $("#stockModal").modal("hide"); // Tutup modal setelah submit
+            Swal.fire({
+                title: "Konfirmasi",
+                text: `Anda yakin ingin ${action === "remove" ? "mengurangi" : "menambah"} stok ini?`,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Ya, Lanjutkan",
+                cancelButtonText: "Batal"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`${BASE_URL}covering/warehouse/updateStock`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                stockItemId: stockId,
+                                action: action,
+                                no_model: noModel,
+                                stockAmount: amount,
+                                amountcones: cones,
+                                stockNote: note
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                Swal.fire({
+                                    icon: "success",
+                                    title: "Berhasil!",
+                                    text: "Stok berhasil diperbarui.",
+                                    showConfirmButton: true
+                                }).then(() => {
+                                    $("#stockModal").modal("hide"); // Tutup modal
+                                    setTimeout(() => {
+                                        location.reload(); // Refresh halaman
+                                    }, 500);
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Gagal!",
+                                    text: "Gagal memperbarui stok: " + result.message
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Error!",
+                                text: "Terjadi kesalahan pada server."
+                            });
+                            console.error("Error:", error);
+                        });
+                }
+            });
+            // }
         });
+
 
 
         // Simpan Transaksi Stok
