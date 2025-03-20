@@ -10,6 +10,8 @@ use App\Models\MasterOrderModel;
 use App\Models\ScheduleCelupModel;
 use App\Models\PemasukanModel;
 use App\Models\ClusterModel;
+use App\Models\StockModel;
+use App\Models\PemesananModel;
 
 class DashboardGbnController extends BaseController
 {
@@ -22,6 +24,8 @@ class DashboardGbnController extends BaseController
     protected $scheduleCelupModel;
     protected $pemasukanModel;
     protected $clusterModel;
+    protected $stockModel;
+    protected $pemesananModel;
 
     public function __construct()
     {
@@ -31,6 +35,8 @@ class DashboardGbnController extends BaseController
         $this->scheduleCelupModel = new ScheduleCelupModel();
         $this->pemasukanModel = new PemasukanModel();
         $this->clusterModel = new ClusterModel();
+        $this->stockModel = new StockModel();
+        $this->pemesananModel = new PemesananModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -47,19 +53,46 @@ class DashboardGbnController extends BaseController
     }
     public function index()
     {
-        $pdk = $this->masterOrderModel->getPdk();
+        $pemesanan = $this->pemesananModel->totalPemesananPerHari();
         $schedule = $this->scheduleCelupModel->countStatusDone();
         $pemasukan = $this->pemasukanModel->getTotalKarungMasuk();
         $pengeluaran = $this->pemasukanModel->getTotalKarungKeluar();
+        $groupI = $this->clusterModel->getClusterGroupI();
+        $groupII = $this->clusterModel->getClusterGroupII();
+        $groupIII = $this->clusterModel->getClusterGroupIII();
+        // dd($pemesanan);
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
-            'pdk' => $pdk,
+            'pemesanan' => $pemesanan,
             'schedule' => $schedule,
             'pemasukan' => $pemasukan,
             'pengeluaran' => $pengeluaran,
+            'groupI' => $groupI,
+            'groupII' => $groupII,
+            'groupIII' => $groupIII
         ];
         return view($this->role . '/dashboard/index', $data);
+    }
+
+    public function getGroupData()
+    {
+        $group = $this->request->getPost('group');
+
+        // Tentukan function model berdasarkan group
+        switch ($group) {
+            case 'I':
+                $groupData = $this->clusterModel->getClusterGroupI();
+                return view($this->role . '/dashboard/group_I', ['groupData' => $groupData, 'group' => $group]);
+            case 'II':
+                $groupData = $this->clusterModel->getClusterGroupII();
+                return view($this->role . '/dashboard/group_II', ['groupData' => $groupData, 'group' => $group]);
+            case 'III':
+                $groupData = $this->clusterModel->getClusterGroupIII();
+                return view($this->role . '/dashboard/group_III', ['groupData' => $groupData, 'group' => $group]);
+            default:
+                return "<p class='text-center text-danger'>Tidak ada data untuk Group $group.</p>";
+        }
     }
 }
