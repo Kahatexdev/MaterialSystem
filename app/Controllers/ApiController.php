@@ -368,8 +368,8 @@ class ApiController extends ResourceController
     }
     public function stockbahanbaku($area)
     {
-        $noModel = $this->request->getPost('noModel');
-        $warna = $this->request->getPost('warna');
+        $noModel = $this->request->getPost('noModel') ?? '';
+        $warna = $this->request->getPost('warna') ?? '';
 
         $results = $this->stockModel->searchStock($noModel, $warna);
 
