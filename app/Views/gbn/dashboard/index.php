@@ -81,7 +81,7 @@
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-capitalize font-weight-bold">PDK</p>
                                 <h5 class="font-weight-bolder mb-0">
-                                    <?= $pdk['total_pdk'] ?>
+                                    <?= $pdk['total_pdk'] ?? 0 ?>
                                 </h5>
                             </div>
                         </div>
@@ -102,7 +102,7 @@
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-capitalize font-weight-bold">Sch Completed</p>
                                 <h5 class="font-weight-bolder mb-0">
-                                    <?= $schedule['total_done'] ?>
+                                    <?= $schedule['total_done'] ?? 0 ?>
                                     <!-- Sesuaikan dengan last status sent dll. -->
                                 </h5>
                             </div>
