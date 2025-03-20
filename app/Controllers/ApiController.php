@@ -163,7 +163,7 @@ class ApiController extends ResourceController
     }
     public function getMaterialForPemesanan($model, $styleSize, $area)
     {
-        $mu = $this->materialModel->getMU($model, $styleSize, $area);
+        $mu = $this->materialModel->getMaterialForPemesanan($model, $styleSize, $area);
 
         return $this->respond($mu, 200);
     }
@@ -375,7 +375,7 @@ class ApiController extends ResourceController
 
         // Konversi stdClass menjadi array
         $resultsArray = json_decode(json_encode($results), true);
-       
+
         // Hitung total kgs_in_out untuk seluruh data
         $totalKgsByCluster = []; // Array untuk menyimpan total Kgs per cluster
         $capacityByCluster = []; // Array untuk menyimpan kapasitas per cluster
@@ -408,9 +408,8 @@ class ApiController extends ResourceController
             $sisa_space = $kapasitasCluster - $totalKgsInCluster - $totalKgsStockAwalInCluster;
             $item['sisa_space'] = max(0, $sisa_space); // Pastikan sisa_space tidak negatif
         }
-        
-        return $this->respond($resultsArray, 200);
 
+        return $this->respond($resultsArray, 200);
     }
     public function listPemesanan($area)
     {
