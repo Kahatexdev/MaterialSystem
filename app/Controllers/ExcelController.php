@@ -55,6 +55,7 @@ class ExcelController extends BaseController
     public function excelPPHNomodel($area, $model)
     {
         $models = $this->materialModel->getMaterialForPPH($area, $model);
+
         $pphInisial = [];
 
         foreach ($models as $items) {
@@ -80,6 +81,7 @@ class ExcelController extends BaseController
 
                 $bruto = $data['bruto'] ?? 0;
                 $bs_mesin = $data['bs_mesin'] ?? 0;
+                $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
 
 
                 $pphInisial[] = [
@@ -91,6 +93,7 @@ class ExcelController extends BaseController
                     'color'      => $items['color'],
                     'gw'         => $items['gw'],
                     'composition' => $items['composition'],
+                    'kgs'  => $items['kgs'],
                     'jarum'      => $data['machinetypeid'] ?? null,
                     'bruto'      => $bruto,
                     'qty'        => $data['qty'] ?? 0,
@@ -98,7 +101,7 @@ class ExcelController extends BaseController
                     'po_plus'    => $data['po_plus'] ?? 0,
                     'bs_setting' => $data['bs_setting'] ?? 0,
                     'bs_mesin'   => $bs_mesin,
-                    'pph'        => (($bruto * $gwpcs) + $bs_mesin) / 1000,
+                    'pph'        => $pph,
                 ];
             }
         }
@@ -111,18 +114,20 @@ class ExcelController extends BaseController
         ];
 
         foreach ($pphInisial as $item) {
-            $key = $item['item_type'] . '-' . $item['color'];
+            $key = $item['item_type'] . '-' . $item['kode_warna'];
 
             if (!isset($result[$key])) {
                 $result[$key] = [
                     'item_type' => null,
                     'kode_warna' => null,
                     'warna' => null,
+                    'kgs' => 0,
                     'pph' => 0,
                     'jarum' => null,
                     'area' => null
                 ];
             }
+
 
             // Akumulasi total qty, sisa, bruto, bs_setting, dan bs_mesin
             $result['qty'] += $item['qty'];
@@ -135,6 +140,7 @@ class ExcelController extends BaseController
             $result[$key]['item_type'] = $item['item_type'];
             $result[$key]['kode_warna'] = $item['kode_warna'];
             $result[$key]['warna'] = $item['color'];
+            $result[$key]['kgs'] += $item['kgs'];
             $result[$key]['pph'] += $item['pph'];
             $result[$key]['jarum'] = $item['jarum'];
             $result[$key]['area'] = $item['area'];
@@ -188,7 +194,7 @@ class ExcelController extends BaseController
         $sheet->setCellValue('A2', 'Area');
         $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(12);
         $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        
+
         $sheet->setCellValue('A3', 'Qty');
         $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(12);
         $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
@@ -232,25 +238,27 @@ class ExcelController extends BaseController
         $sheet->setCellValue('E4', ': ' . number_format($result['bs_mesin'], 2));
         $sheet->getStyle('E4')->getFont()->setSize(12);
         $sheet->getStyle('E4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        
+
         $row_header = 5;
 
         $sheet->setCellValue('A' . $row_header, 'No');
         $sheet->setCellValue('B' . $row_header, 'Jenis');
         $sheet->setCellValue('C' . $row_header, 'Kode Warna');
         $sheet->setCellValue('D' . $row_header, 'Warna');
-        $sheet->setCellValue('E' . $row_header, 'PPH');
+        $sheet->setCellValue('E' . $row_header, 'PO (kg)');
+        $sheet->setCellValue('F' . $row_header, 'PPH (kg)');
 
         $sheet->getStyle('A' . $row_header)->applyFromArray($styleHeader);
         $sheet->getStyle('B' . $row_header)->applyFromArray($styleHeader);
         $sheet->getStyle('C' . $row_header)->applyFromArray($styleHeader);
         $sheet->getStyle('D' . $row_header)->applyFromArray($styleHeader);
         $sheet->getStyle('E' . $row_header)->applyFromArray($styleHeader);
+        $sheet->getStyle('F' . $row_header)->applyFromArray($styleHeader);
 
         // Isi data
         $row = 6;
         $no = 1;
-        
+
         foreach ($dataToSort as $key => $data) {
             if (!is_array($data)) {
                 continue; // Lewati nilai akumulasi di $result
@@ -260,19 +268,20 @@ class ExcelController extends BaseController
             $sheet->setCellValue('B' . $row, $data['item_type']);
             $sheet->setCellValue('C' . $row, $data['kode_warna']);
             $sheet->setCellValue('D' . $row, $data['warna']);
-            $sheet->setCellValue('E' . $row, number_format($data['pph'], 2));
+            $sheet->setCellValue('E' . $row, number_format($data['kgs'], 2));
+            $sheet->setCellValue('F' . $row, number_format($data['pph'], 2));
 
             // style body
-            $columns = ['A', 'B', 'C', 'D', 'E'];
+            $columns = ['A', 'B', 'C', 'D', 'E', 'F'];
 
             foreach ($columns as $column) {
                 $sheet->getStyle($column . $row)->applyFromArray($styleBody);
             }
-            
+
             $row++;
         }
 
-        foreach (['A', 'B', 'C', 'D', 'E'] as $column) {
+        foreach (['A', 'B', 'C', 'D', 'E', 'F'] as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
@@ -287,7 +296,6 @@ class ExcelController extends BaseController
         $writer->save('php://output');
         exit;
     }
-
     public function excelPPHInisial($area, $model)
     {
         $models = $this->materialModel->getMaterialForPPH($area, $model);
@@ -316,7 +324,8 @@ class ExcelController extends BaseController
 
                 $bruto = $data['bruto'] ?? 0;
                 $bs_mesin = $data['bs_mesin'] ?? 0;
-                $pph = (($bruto * $gwpcs) + $bs_mesin) / 1000;
+                $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
+
 
 
                 $pphInisial[] = [
@@ -339,7 +348,7 @@ class ExcelController extends BaseController
                     'bs_setting' => $data['bs_setting'] ?? 0,
                     'bs_mesin'   => $bs_mesin,
                     'pph'        => $pph,
-                    'pph_persen' => ($pph / $items['ttl_kebutuhan'])*100,
+                    'pph_persen' => ($pph / $items['ttl_kebutuhan']) * 100,
                 ];
             }
         }
@@ -393,7 +402,7 @@ class ExcelController extends BaseController
         // Data Header
         $sheet->setCellValue('A2', 'Area');
         $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(12);
-        $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT); 
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
         $sheet->setCellValue('B2', ': ' . $area);
         $sheet->getStyle('B2')->getFont()->setSize(12);
@@ -406,7 +415,7 @@ class ExcelController extends BaseController
         $sheet->setCellValue('B3', ': ' . $model);
         $sheet->getStyle('B3')->getFont()->setSize(12);
         $sheet->getStyle('B3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        
+
         $row_header = 4;
 
         $sheet->setCellValue('A' . $row_header, 'No');
@@ -448,7 +457,7 @@ class ExcelController extends BaseController
         // Isi data
         $row = 5;
         $no = 1;
-        
+
         foreach ($dataToSort as $key => $data) {
             if (!is_array($data)) {
                 continue; // Lewati nilai akumulasi di $result
@@ -478,7 +487,7 @@ class ExcelController extends BaseController
             foreach ($columns as $column) {
                 $sheet->getStyle($column . $row)->applyFromArray($styleBody);
             }
-            
+
             $row++;
         }
 
@@ -488,6 +497,199 @@ class ExcelController extends BaseController
 
         // Set judul file dan header untuk download
         $filename = 'PPH PER MODEL ' . $model . ' Area ' . $area . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        // Tulis file excel ke output
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+    public function excelPPHDays($area, $tanggal)
+    {
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getPPhPerhari/' . $area . '/' . $tanggal;
+
+        $response = file_get_contents($apiUrl);
+        if ($response === false) {
+            log_message('error', "API tidak bisa diakses: $apiUrl");
+            return $this->response->setJSON(["error" => "Gagal mengambil data dari API"]);
+        }
+
+        $data = json_decode($response, true);
+        $result = [];
+        $pphInisial = [];
+
+        foreach ($data as $prod) {
+            $key = $prod['mastermodel'] . '-' . $prod['size'];
+
+            $material = $this->materialModel->getMU($prod['mastermodel'], $prod['size']);
+            if (empty($material)) {
+                $result[$prod['mastermodel']] = [
+                    'mastermodel' => $prod['mastermodel'],
+                    'item_type' => null,
+                    'kode_warna' => null,
+                    'warna' => null,
+                    'pph' => 0,
+                    'bruto' => $prod['prod'],
+                    'bs_mesin' => $prod['bs_mesin'],
+                ];
+            } else {
+                foreach ($material as $mtr) {
+                    $gw = $mtr['gw'];
+                    $comp = $mtr['composition'];
+                    $gwpcs = ($gw * $comp) / 100;
+
+                    $bruto = $prod['prod'] ?? 0;
+                    $bs_mesin = $prod['bs_mesin'] ?? 0;
+                    $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
+
+
+                    $pphInisial[] = [
+                        'mastermodel'    => $prod['mastermodel'],
+                        'style_size'  => $prod['size'],
+                        'item_type'   => $mtr['item_type'] ?? null,
+                        'kode_warna'  => $mtr['kode_warna'] ?? null,
+                        'color'       => $mtr['color'] ?? null,
+                        'gw'          => $gw,
+                        'composition' => $comp,
+                        'bruto'       => $bruto,
+                        'qty'         => $prod['qty'] ?? 0,
+                        'sisa'        => $prod['sisa'] ?? 0,
+                        'bs_mesin'    => $bs_mesin,
+                        'pph'         => $pph
+                    ];
+                }
+            }
+        }
+
+        // Grouping & Summing Data
+        foreach ($pphInisial as $item) {
+            $key = $item['mastermodel'] . '-' . $item['item_type'] . '-' . $item['kode_warna'];
+
+            if (!isset($result[$key])) {
+                $result[$key] = [
+                    'mastermodel' => $item['mastermodel'],
+                    'item_type'   => $item['item_type'],
+                    'kode_warna'  => $item['kode_warna'],
+                    'warna'       => $item['color'],
+                    'pph'         => 0,
+                    'bruto'       => 0,
+                    'bs_mesin'    => 0,
+                ];
+            }
+
+            // Accumulate values correctly
+
+            $result[$key]['bruto'] += $item['bruto'];
+            $result[$key]['bs_mesin'] += $item['bs_mesin'];
+            $result[$key]['pph'] += $item['pph'];
+        }
+
+        $dataToSort = array_filter($result, 'is_array');
+
+        usort($dataToSort, function ($a, $b) {
+            if ($a['mastermodel'] !== $b['mastermodel']) {
+                return $a['mastermodel'] <=> $b['mastermodel'];
+            }
+            if ($a['item_type'] !== $b['item_type']) {
+                return $a['item_type'] <=> $b['item_type'];
+            }
+            return $a['kode_warna'] <=> $b['kode_warna'];
+        });
+
+        // Buat spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // border
+        $styleHeader = [
+            'font' => [
+                'bold' => true, // Tebalkan teks
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER, // Alignment rata tengah
+            ],
+            'borders' => [
+                'outline' => [
+                    'borderStyle' => Border::BORDER_THIN, // Gaya garis tipis
+                    'color' => ['argb' => 'FF000000'],    // Warna garis hitam
+                ],
+            ],
+        ];
+        $styleBody = [
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER, // Alignment rata tengah
+            ],
+            'borders' => [
+                'outline' => [
+                    'borderStyle' => Border::BORDER_THIN, // Gaya garis tipis
+                    'color' => ['argb' => 'FF000000'],    // Warna garis hitam
+                ],
+            ],
+        ];
+
+        // Judul
+        $sheet->setCellValue('A1', 'PPH Area ' . $area . ' Tanggal ' . $tanggal);
+        $sheet->mergeCells('A1:H1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Tabel
+        $row_header = 3;
+
+        $sheet->setCellValue('A' . $row_header, 'No');
+        $sheet->setCellValue('B' . $row_header, 'No Model');
+        $sheet->setCellValue('C' . $row_header, 'Item Type');
+        $sheet->setCellValue('D' . $row_header, 'Kode Warna');
+        $sheet->setCellValue('E' . $row_header, 'Warna');
+        $sheet->setCellValue('F' . $row_header, 'Bruto (Dz)');
+        $sheet->setCellValue('G' . $row_header, 'Bs Mesin (Gram)');
+        $sheet->setCellValue('H' . $row_header, 'PPH (Kg)');
+
+        $sheet->getStyle('A' . $row_header)->applyFromArray($styleHeader);
+        $sheet->getStyle('B' . $row_header)->applyFromArray($styleHeader);
+        $sheet->getStyle('C' . $row_header)->applyFromArray($styleHeader);
+        $sheet->getStyle('D' . $row_header)->applyFromArray($styleHeader);
+        $sheet->getStyle('E' . $row_header)->applyFromArray($styleHeader);
+        $sheet->getStyle('F' . $row_header)->applyFromArray($styleHeader);
+        $sheet->getStyle('G' . $row_header)->applyFromArray($styleHeader);
+        $sheet->getStyle('H' . $row_header)->applyFromArray($styleHeader);
+
+        // Isi data
+        $row = 4;
+        $no = 1;
+
+        foreach ($dataToSort as $key => $data) {
+            if (!is_array($data)) {
+                continue; // Lewati nilai akumulasi di $result
+            }
+
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $data['mastermodel']);
+            $sheet->setCellValue('C' . $row, $data['item_type']);
+            $sheet->setCellValue('D' . $row, $data['kode_warna']);
+            $sheet->setCellValue('E' . $row, $data['warna']);
+            $sheet->setCellValue('F' . $row, number_format($data['bruto'] / 24, 2));
+            $sheet->setCellValue('G' . $row, number_format($data['bs_mesin'], 2));
+            $sheet->setCellValue('H' . $row, number_format($data['pph'], 2));
+
+            // style body
+            $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
+            foreach ($columns as $column) {
+                $sheet->getStyle($column . $row)->applyFromArray($styleBody);
+            }
+
+            $row++;
+        }
+
+        foreach (['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set judul file dan header untuk download
+        $filename = 'PPH Area ' . $area . ' Tanggal ' . $tanggal . '.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Cache-Control: max-age=0');

@@ -203,6 +203,7 @@
                     <td>${data[material].item_type}</td>
                     <td>${data[material].kode_warna}</td>
                     <td>${data[material].warna}</td>
+                    <td>${data[material].kgs.toFixed(2)} kg</td>
                     <td>${data[material].pph.toFixed(2)} kg</td>
                 </tr>
             `).join('');
@@ -216,6 +217,7 @@
                                 <th class="text-center">Jenis</th>
                                 <th class="text-center">Kode Warna</th>
                                 <th class="text-center">Warna</th>
+                                <th class="text-center">PO (KGS)</th>
                                 <th class="text-center">PPH</th>
                             </tr>
                         </thead>

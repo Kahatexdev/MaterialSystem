@@ -66,7 +66,7 @@ class CoveringController extends BaseController
     public function po()
     {
         $poCovering = $this->openPoModel->getPOCovering();
-        // dd ($poCovering);
+        // dd($poCovering);
         $data = [
             'active' => $this->active,
             'title' => 'PO Celup',
@@ -188,8 +188,7 @@ class CoveringController extends BaseController
     public function savePOCovering()
     {
         $data = $this->request->getPost();
-        // $no_po = $data['no_po'];
-        // dd ($data);
+        $tgl_po = $data['tgl_po'];
         $coveringData = session()->get('covering_data') ?? [];
         $data['covering_data'] = $coveringData;
         // dd ($data);
@@ -225,7 +224,7 @@ class CoveringController extends BaseController
                         'penerima' => 'Retno', // Sesuaikan dengan pengguna yang login
                         'penanggung_jawab' => 'Paryanti', // Sesuaikan dengan pengguna yang login
                         'admin' => session()->get('username') ?? '', // Ambil admin dari session
-                        'created_at' => date('Y-m-d H:i:s'),
+                        'created_at' => $tgl_po . ' ' . date('H:i:s'),
                         'updated_at' => date('Y-m-d H:i:s'),
                         'id_induk' => $selectedItem['id_po'] // Sesuaikan jika ada ID induk
                     ];
@@ -289,5 +288,46 @@ class CoveringController extends BaseController
         ];
 
         return view($this->role . '/mesin/index', $data);
+    }
+    public function warehouse()
+    {
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Warehouse',
+            'role' => $this->role,
+        ];
+
+        return view($this->role . '/warehouse/index', $data);
+    }
+    public function pemasukan()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Pemasukan',
+            'role' => $this->role,
+        ];
+
+        return view($this->role . '/warehouse/pemasukan', $data);
+    }
+    public function pengeluaranJalur()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Pengeluaran Jalur',
+            'role' => $this->role,
+        ];
+
+        return view($this->role . '/warehouse/pengeluaran_jalur', $data);
+    }
+    public function pengirimanArea()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Pengiriman Area',
+            'role' => $this->role,
+        ];
+
+        return view($this->role . '/warehouse/pengiriman_area', $data);
     }
 }

@@ -161,7 +161,7 @@ class ApiController extends ResourceController
         }
         return $this->respond($res, 200);
     }
-    public function getMU($model, $styleSize, $area)
+    public function getMaterialForPemesanan($model, $styleSize, $area)
     {
         $mu = $this->materialModel->getMU($model, $styleSize, $area);
 
@@ -192,19 +192,16 @@ class ApiController extends ResourceController
 
         return $this->respond($material, 200);
     }
-    public function insertQtyCns() 
+    public function insertQtyCns()
     {
         // Ambil data dari request
         $data = $this->request->getPost();
+        log_message('debug', 'Data received: ' . json_encode($data)); // Logging untuk debugging awal        
 
-        // Logging untuk debugging awal
-        log_message('debug', 'Data received: ' . json_encode($data));
-
-        // Inisialisasi variabel untuk menghitung jumlah data yang berhasil diperbarui
-        $updateCount = 0;
+        $updateCount = 0; // Inisialisasi variabel untuk menghitung jumlah data yang berhasil diperbarui
 
         // Validasi data utama
-        if (!isset($data['items']) || !is_array($data['items'])) {
+        if (empty($data['items']) || !is_array($data['items'])) {
             return $this->respond([
                 'status'  => 'error',
                 'message' => 'Data items tidak ditemukan atau tidak valid',
@@ -220,10 +217,13 @@ class ApiController extends ResourceController
 
             foreach ($item as $row) {
                 // Validasi setiap row
-                if (!isset($row['id_material'], $row['qty_cns'], $row['qty_berat_cns'])) {
+                if (empty($row['id_material']) || empty($row['qty_cns']) || empty($row['qty_berat_cns'])) {
                     log_message('error', 'Invalid row data: ' . json_encode($row));
                     continue; // Lewati jika data tidak lengkap
                 }
+                // Ambil data berdasarkan id_material
+                $existingData = $this->materialModel->find($row['id_material']);
+                log_message('debug', 'Existing data: ' . json_encode($existingData));
 
                 // Siapkan data untuk pembaruan
                 $updateData = [
@@ -231,94 +231,47 @@ class ApiController extends ResourceController
                     'qty_berat_cns' => $row['qty_berat_cns'],
                 ];
 
-                // Lakukan pembaruan pada database
-                try {
-                    $update = $this->materialModel->update($row['id_material'], $updateData);
-                    if ($update) {
-                        $updateCount++;
-                    } else {
-                        log_message('error', 'Update failed for id_material: ' . $row['id_material']);
+                // Periksa jika ada perubahan sebelum melakukan update
+                if (
+                    $existingData['qty_cns'] != $updateData['qty_cns'] ||
+                    $existingData['qty_berat_cns'] != $updateData['qty_berat_cns']
+                ) {
+                    try {
+                        // Gunakan model untuk melakukan update
+                        $update = $this->materialModel->update($row['id_material'], [
+                            'qty_cns'       => $updateData['qty_cns'],
+                            'qty_berat_cns' => $updateData['qty_berat_cns'],
+                        ]);
+
+                        if ($update) {
+                            $updateCount++;
+                            log_message('error', 'Update successful for id_material: ' . $row['id_material']);
+                        } else {
+                            return $this->respond([
+                                'status'  => 'error',
+                                'message' => $row['id_material'] . " data gagal diperbarui",
+                            ], 500);
+                            log_message('error', 'Update failed for id_material: ' . $row['id_material']);
+                        }
+                    } catch (\Exception $e) {
+                        log_message('critical', 'Exception during update: ' . $e->getMessage());
                     }
-                } catch (\Exception $e) {
-                    log_message('critical', 'Exception during update: ' . $e->getMessage());
-                    return $this->respond([
-                        'status'  => 'error',
-                        'message' => 'Terjadi kesalahan saat memperbarui data',
-                    ], 500);
+                } else {
+                    log_message('error', 'No changes needed for id_material: ' . $row['id_material']);
                 }
             }
         }
-
-        // Kirimkan respons berdasarkan jumlah data yang diperbarui
-        if ($updateCount > 0) {
-            return $this->respond([
-                'status'  => 'success',
-                'message' => "$updateCount data berhasil diperbarui",
-            ], 200);
-        } else {
-            return $this->respond([
-                'status'  => 'error',
-                'message' => "Tidak ada data yang berhasil diperbarui",
-            ], 400);
-        }
+        // Kembalikan respon setelah seluruh loop selesai
+        return $this->respond([
+            'status'  => 'success',
+            'message' => "$updateCount data berhasil diperbarui",
+        ], 200);
     }
-    // public function saveListPemesanan() {
-    //     // Ambil data dari request POST
-    //     $data = $this->request->getPost();        
-        
-    //     if (empty($data)) {
-    //         return $this->respond([
-    //             'status'  => 'error',
-    //             'message' => "Tidak ada data list pemesanan",
-    //         ], 400);
-    //     }
-
-    //     // Asumsikan semua key memiliki panjang array yang sama
-    //     $length = count($data['id_material']); // Ambil panjang dari salah satu key
-    //     $result = [];
-    //     // Proses setiap data berdasarkan indeks
-    //     for ($i = 0; $i < $length; $i++) {
-    //         $result[$i] = [
-    //             'id_material'     => $data['id_material'][$i],
-    //             'tgl_list'        => date('Y-m-d'),
-    //             'tgl_pakai'       => $data['tgl_pakai'][$i],
-    //             'jl_mc'           => $data['jalan_mc'][$i],
-    //             'ttl_qty_cones'   => $data['ttl_cns'][$i],
-    //             'ttl_berat_cones' => $data['ttl_berat_cns'][$i],
-    //             'admin'           => $data['area'][$i],
-    //             'created_at'      => date('Y-m-d H:i:s'),
-    //         ];
-    //     }
-    //     // Lakukan penyisipan data menggunakan insertBatch
-    //     try {
-    //         $insert = $this->pemesananModel->insertBatch($result);
-    //         if ($insert) {
-    //             return $this->respond([
-    //                 'status'  => 'success',
-    //                 'message' => count($result) . " data berhasil disimpan",
-    //                 'debug'   => $result, // Tambahkan data untuk debugging
-    //             ], 200);
-    //         } else{
-    //             return $this->respond([
-    //                 'status'  => 'error',
-    //                 'message' => "Tidak ada data yang berhasil disimpan",
-    //                 'debug'   => $result, // Tambahkan data untuk debugging
-    //             ], 400);
-    //         }
-    //     } catch (\Exception $e) {
-    //         log_message('critical', 'Exception during batch insert: ' . $e->getMessage());
-    //         return $this->respond([
-    //             'status'  => 'error',
-    //             'message' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage(),
-    //             'debug'   => $result, // Tambahkan data untuk debugging
-    //         ], 500);
-    //     }
-    // }
-
     public function saveListPemesanan()
     {
         // Ambil data JSON dari request
         $data = $this->request->getJSON(true);
+        log_message('debug', 'Data received: ' . json_encode($data));
 
         if (empty($data)) {
             return $this->respond([
@@ -327,62 +280,82 @@ class ApiController extends ResourceController
             ], 400);
         }
 
-        // Pastikan data yang diperlukan ada dan merupakan array
+        // Validasi awal: pastikan key `id_material` ada dan valid
         if (!isset($data['id_material']) || !is_array($data['id_material'])) {
             return $this->respond([
                 'status'  => 'error',
-                'message' => "Data id_material tidak valid",
+                'message' => "Data id_material tidak valid atau tidak ditemukan",
             ], 400);
         }
 
-        // Asumsikan semua key memiliki panjang array yang sama
-        $length = count($data['id_material']);
+        $length = count($data['id_material']); // Ambil panjang array
         $result = [];
 
         for ($i = 0; $i < $length; $i++) {
-            $result[] = [
-                'id_material'     => $data['id_material'][$i],
+            $resultItem = [
+                'id_material'     => $data['id_material'][$i] ?? null,
                 'tgl_list'        => date('Y-m-d'),
-                'tgl_pakai'       => $data['tgl_pakai'][$i],
-                'jl_mc'           => $data['jalan_mc'][$i],
-                'ttl_qty_cones'   => $data['ttl_cns'][$i],
-                'ttl_berat_cones' => $data['ttl_berat_cns'][$i],
-                'admin'           => $data['area'][$i],
-                'no_model'        => $data['no_model'][$i],
-                'style_size'      => $data['style_size'][$i],
-                'item_type'       => $data['item_type'][$i],
-                'kode_warna'      => $data['kode_warna'][$i],
-                'warna'           => $data['warna'][$i],
+                'tgl_pakai'       => $data['tgl_pakai'][$i] ?? null,
+                'jl_mc'           => $data['jalan_mc'][$i] ?? null,
+                'ttl_qty_cones'   => $data['ttl_cns'][$i] ?? null,
+                'ttl_berat_cones' => $data['ttl_berat_cns'][$i] ?? null,
+                'admin'           => $data['area'][$i] ?? null,
+                'no_model'        => $data['no_model'][$i] ?? null,
+                'style_size'      => $data['style_size'][$i] ?? null,
+                'item_type'       => $data['item_type'][$i] ?? null,
+                'kode_warna'      => $data['kode_warna'][$i] ?? null,
+                'warna'           => $data['warna'][$i] ?? null,
                 'created_at'      => date('Y-m-d H:i:s'),
             ];
+
+            // Validasi data untuk setiap elemen
+            if (empty($resultItem['id_material']) || empty($resultItem['tgl_pakai']) || empty($resultItem['admin'])) {
+                return $this->respond([
+                    'status'  => 'error',
+                    'message' => "Data tidak valid pada baris ke-$i",
+                    'debug'   => $resultItem,
+                ], 400);
+            }
+
+            // Cek apakah data dengan kombinasi unik sudah ada di database
+            $existingData = $this->pemesananModel
+                ->where('id_material', $resultItem['id_material'])
+                ->where('tgl_pakai', $resultItem['tgl_pakai'])
+                ->where('admin', $resultItem['admin'])
+                ->first();
+
+            if ($existingData) {
+                return $this->respond([
+                    'status'  => 'error',
+                    'message' => "Data pemesanan sudah ada.",
+                    'debug'   => $existingData,
+                ], 400);
+            }
+
+            $result[] = $resultItem;
         }
 
+        log_message('debug', 'Data prepared for batch insert: ' . json_encode($result));
+
         try {
+            // Lakukan insert batch ke database
             $insert = $this->pemesananModel->insertBatch($result);
+
             if ($insert) {
-                // Misalnya, data login sudah tersedia dari session sebelumnya atau request,
-                // dan kita ingin memastikan bahwa session login tetap tersimpan atau diperbarui.
+                // Hapus session `pemesananBb` jika ada
                 $session = session();
-                // Contoh: jika data login sudah ada dalam session, misalnya:
-                // $session->get('user') atau jika ingin menyimpan data login baru:
-                $userLoginData = [
-                    'id_user'       => $data['id_user'] ?? 0,          // Sesuaikan dengan key yang ada
-                    'username' => $data['username'] ?? 'default', // Sesuaikan dengan key yang ada
-                    'role'  => $data['role'] ?? '',
-                    'logged_in'=> true,
-                ];
-                $session->set('user', $userLoginData);
+                if ($session->has('pemesananBb')) {
+                    $session->remove('pemesananBb');
+                }
 
                 return $this->respond([
                     'status'  => 'success',
                     'message' => count($result) . " data berhasil disimpan",
-                    'debug'   => $result,
                 ], 200);
             } else {
                 return $this->respond([
                     'status'  => 'error',
                     'message' => "Tidak ada data yang berhasil disimpan",
-                    'debug'   => $result,
                 ], 400);
             }
         } catch (\Exception $e) {
@@ -390,11 +363,59 @@ class ApiController extends ResourceController
             return $this->respond([
                 'status'  => 'error',
                 'message' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage(),
-                'debug'   => $result,
             ], 500);
         }
     }
+    public function stockbahanbaku($area)
+    {
+        $noModel = $this->request->getPost('noModel');
+        $warna = $this->request->getPost('warna');
 
+        $results = $this->stockModel->searchStock($noModel, $warna);
 
+        // Konversi stdClass menjadi array
+        $resultsArray = json_decode(json_encode($results), true);
+       
+        // Hitung total kgs_in_out untuk seluruh data
+        $totalKgsByCluster = []; // Array untuk menyimpan total Kgs per cluster
+        $capacityByCluster = []; // Array untuk menyimpan kapasitas per cluster
 
+        foreach ($resultsArray as $item) {
+            $namaCluster = $item['nama_cluster'];
+            $kgs = (float)$item['Kgs'];
+            $kgsStockAwal = (float)$item['KgsStockAwal'];
+            $kapasitas = (float)$item['kapasitas'];
+
+            // Inisialisasi total Kgs dan kapasitas untuk cluster jika belum ada
+            if (!isset($totalKgsByCluster[$namaCluster])) {
+                $totalKgsByCluster[$namaCluster] = 0;
+                $totalKgsStockAwalByCluster[$namaCluster] = 0;
+                $capacityByCluster[$namaCluster] = $kapasitas;
+            }
+
+            // Tambahkan Kgs ke total untuk nama_cluster tersebut
+            $totalKgsByCluster[$namaCluster] += $kgs;
+            $totalKgsStockAwalByCluster[$namaCluster] += $kgsStockAwal;
+        }
+
+        // Iterasi melalui data dan hitung sisa kapasitas
+        foreach ($resultsArray as &$item) { // Gunakan reference '&' agar perubahan berlaku pada item
+            $namaCluster = $item['nama_cluster'];
+            $totalKgsInCluster = $totalKgsByCluster[$namaCluster];
+            $totalKgsStockAwalInCluster = $totalKgsStockAwalByCluster[$namaCluster];
+            $kapasitasCluster = $capacityByCluster[$namaCluster];
+
+            $sisa_space = $kapasitasCluster - $totalKgsInCluster - $totalKgsStockAwalInCluster;
+            $item['sisa_space'] = max(0, $sisa_space); // Pastikan sisa_space tidak negatif
+        }
+        
+        return $this->respond($resultsArray, 200);
+
+    }
+    public function listPemesanan($area)
+    {
+        $dataList = $this->pemesananModel->getListPemesananByArea($area);
+
+        return $this->respond($dataList, 200);
+    }
 }

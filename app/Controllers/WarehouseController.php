@@ -1084,28 +1084,40 @@ class WarehouseController extends BaseController
         // Return data dalam bentuk JSON
         return $this->response->setJSON($itemTypes);
     }
-    public function getKodeWarnaForOut($no_model, $item_type)
+    public function getKodeWarnaForOut()
     {
-        // log_message('debug', "Fetching kode warna for no_model: $no_model, item_type: $item_type");
+        $noModel = $this->request->getGet('noModel');
+        $itemType = urldecode($this->request->getGet('itemType'));
 
-        $kodeWarna = $this->pemasukanModel->getKodeWarnaByItemType($no_model, $item_type);
+        // log_message('debug', "Fetching kode warna for noModel: $noModel, itemType: $itemType");
+
+        $kodeWarna = $this->pemasukanModel->getKodeWarnaByItemType($noModel, $itemType);
 
         return $this->response->setJSON($kodeWarna);
     }
-    public function getWarnaDanLotForOut($no_model, $item_type, $kode_warna)
+    public function getWarnaDanLotForOut()
     {
+        $noModel = $this->request->getGet('noModel');
+        $itemType = urldecode($this->request->getGet('itemType'));
+        $kodeWarna = $this->request->getGet('kodeWarna');
+
         // log_message('debug', "Fetching warna & lot for no_model: $no_model, item_type: $item_type, kode_warna: $kode_warna");
 
-        $warna = $this->pemasukanModel->getWarnaByKodeWarna($no_model, $item_type, $kode_warna);
-        $lotList = $this->pemasukanModel->getLotByKodeWarna($no_model, $item_type, $kode_warna);
+        $warna = $this->pemasukanModel->getWarnaByKodeWarna($noModel, $itemType, $kodeWarna);
+        $lotList = $this->pemasukanModel->getLotByKodeWarna($noModel, $itemType, $kodeWarna);
 
         return $this->response->setJSON([
             'warna' => $warna ?? '',
             'lot' => $lotList
         ]);
     }
-    public function getKgsCnsClusterForOut($no_model, $item_type, $kode_warna, $lot_kirim, $no_karung)
+    public function getKgsCnsClusterForOut()
     {
+        $no_model = $this->request->getGet('noModel');
+        $item_type = $this->request->getGet('itemType');
+        $kode_warna = $this->request->getGet('kodeWarna');
+        $lot_kirim = $this->request->getGet('lotKirim');
+        $no_karung = $this->request->getGet('noKarung');
         try {
             $data = $this->pemasukanModel->getKgsConesClusterForOut($no_model, $item_type, $kode_warna, $lot_kirim, $no_karung);
 

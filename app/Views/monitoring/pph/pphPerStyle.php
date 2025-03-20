@@ -127,7 +127,7 @@
 
             loading.style.display = 'block'; // T
             info.style.display = 'none'; // Sembunyikan loading setelah selesai
-            
+
 
             $.ajax({
                 url: "<?= base_url($role . '/pphinisial') ?>",
@@ -163,9 +163,9 @@
             </div>`;
 
             let body = document.getElementById('bodyData')
-            
+
             // Looping untuk buat baris tabel
-        let rows = data.map((item, index) => `
+            let rows = data.map((item, index) => `
     <tr>
         <td>${index + 1}</td>
         <td>${item.jarum}</td>
@@ -187,7 +187,7 @@
     </tr>
 `).join('');
 
-body.innerHTML = `
+            body.innerHTML = `
     <div class="table-responsive">
         <table class="display text-center text-uppercase text-xs font-bolder" id="dataTable" style="width:100%">
             <thead>
