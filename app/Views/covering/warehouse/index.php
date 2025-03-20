@@ -68,7 +68,7 @@
             <div class="row g-3">
                 <?php $filters = [
                     ['id' => 'searchInput', 'icon' => 'search', 'type' => 'text', 'placeholder' => 'Cari jenis...'],
-                    ['id' => 'filterStatus', 'options' => ['' => 'Semua Status', 'ada' => 'Tersedia', 'tidak ada' => 'Tidak Tersedia']],
+                    ['id' => 'filterStatus', 'options' => ['' => 'Semua Status', 'ada' => 'Tersedia', 'habis' => 'Tidak Tersedia']],
                     ['id' => 'filterLocation', 'options' => ['' => 'Semua Rak', '1' => 'Rak 1', '2' => 'Rak 2', '3' => 'Rak 3', '4' => 'Rak 4', '5' => 'Rak 5', '6' => 'Rak 6', '7' => 'Rak 7', '8' => 'Rak 8']],
                 ]; ?>
 
@@ -170,7 +170,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="stockAmount" class="form-label">Jumlah KG</label>
-                            <input type="number" class="form-control" id="stockAmount" required>
+                            <input type="number" class="form-control" id="stockAmount" step="0.1" required inputmode="decimal">
                         </div>
                         <div class="mb-3">
                             <label for="amountcones" class="form-label">Jumlah Cones</label>
@@ -238,7 +238,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="ttl_kg" class="form-label">Jumlah Stok (Kg)</label>
-                                    <input type="number" class="form-control" id="ttl_kg" name="ttl_kg" required>
+                                    <input type="number" class="form-control" id="ttl_kg" name="ttl_kg" step="0.1" required inputmode="decimal">
                                 </div>
                                 <div class="mb-3">
                                     <label for="ttl_cns" class="form-label">Jumlah Cones</label>
@@ -346,7 +346,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="editTtlKg" class="form-label">Jumlah Stok (Kg)</label>
-                                    <input type="number" class="form-control" id="editTtlKg" name="ttl_kg" required>
+                                    <input type="number" class="form-control" id="editTtlKg" name="ttl_kg" step="0.1" required inputmode="decimal">
                                 </div>
                                 <div class="mb-3">
                                     <label for="editTtlCns" class="form-label">Jumlah Cones</label>
@@ -408,30 +408,17 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.all.min.js"></script>
     <script>
         // Fungsi untuk menghitung jumlah item sesuai status dan filter
-        function updateCounts() {
-            const totalItems = document.querySelectorAll('.warehouse-card:not([style*="display: none"])').length;
-            const adaItems = document.querySelectorAll('.warehouse-card[data-status="ada"]:not([style*="display: none"])').length;
-            const outItems = document.querySelectorAll('.warehouse-card[data-status="out"]:not([style*="display: none"])').length;
-            document.getElementById('totalCount').textContent = totalItems;
-            document.getElementById('adaCount').textContent = adaItems;
-            document.getElementById('outCount').textContent = outItems;
-        }
+       
 
         // Inisialisasi tampilan dan event listener
         document.addEventListener('DOMContentLoaded', function() {
-            updateCounts();
+          
             // Toggle antara Grid & Table view
             document.getElementById('viewGrid').addEventListener('click', function() {
                 document.getElementById('warehouseGrid').style.display = '';
                 document.getElementById('warehouseTable').style.display = 'none';
                 this.classList.replace('btn-info', 'btn-info');
                 document.getElementById('viewTable').classList.replace('btn-info', 'btn-info');
-            });
-            document.getElementById('viewTable').addEventListener('click', function() {
-                document.getElementById('warehouseGrid').style.display = 'none';
-                document.getElementById('warehouseTable').style.display = '';
-                this.classList.replace('btn-info', 'btn-info');
-                document.getElementById('viewGrid').classList.replace('btn-info', 'btn-info');
             });
             // Set tampilan default
             document.getElementById('viewGrid').click();
@@ -445,12 +432,6 @@
                 const itemName = card.getAttribute('data-name').toLowerCase();
                 card.style.display = itemName.includes(query) ? '' : 'none';
             });
-            // Filter untuk baris tabel
-            document.querySelectorAll('.warehouse-row').forEach(row => {
-                const itemName = row.getAttribute('data-name').toLowerCase();
-                row.style.display = itemName.includes(query) ? '' : 'none';
-            });
-            updateCounts();
         });
 
         // Filter berdasarkan status
@@ -460,11 +441,6 @@
                 const itemStatus = card.getAttribute('data-status');
                 card.style.display = (status === '' || itemStatus === status) ? '' : 'none';
             });
-            document.querySelectorAll('.warehouse-row').forEach(row => {
-                const itemStatus = row.getAttribute('data-status');
-                row.style.display = (status === '' || itemStatus === status) ? '' : 'none';
-            });
-            updateCounts();
         });
 
         // Filter berdasarkan lokasi
@@ -474,11 +450,6 @@
                 const itemLocation = card.getAttribute('data-location');
                 card.style.display = (location === '' || itemLocation === location) ? '' : 'none';
             });
-            document.querySelectorAll('.warehouse-row').forEach(row => {
-                const itemLocation = row.getAttribute('data-location');
-                row.style.display = (location === '' || itemLocation === location) ? '' : 'none';
-            });
-            updateCounts();
         });
 
 
@@ -714,28 +685,6 @@
             });
             // }
         });
-
-
-
-        // Simpan Transaksi Stok
-        // document.getElementById('saveStockBtn').addEventListener('click', function() {
-        //     const form = document.getElementById('stockForm');
-        //     if (form.checkValidity()) {
-        //         const itemId = document.getElementById('stockItemId').value;
-        //         const action = document.getElementById('stockAction').value;
-        //         const amount = document.getElementById('stockAmount').value;
-        //         Swal.fire({
-        //             icon: 'success',
-        //             title: 'Berhasil!',
-        //             text: `Stok telah ${action === 'add' ? 'ditambahkan' : 'dikurangi'} sebanyak ${amount} unit.`,
-        //         }).then(() => {
-        //             $('#stockModal').modal('hide');
-        //             form.reset();
-        //         });
-        //     } else {
-        //         form.reportValidity();
-        //     }
-        // });
     </script>
 
     <?php $this->endSection(); ?>

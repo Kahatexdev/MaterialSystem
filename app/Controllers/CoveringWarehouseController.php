@@ -74,51 +74,6 @@ class CoveringWarehouseController extends BaseController
         return view($this->role . '/warehouse/index', $data);
     }
 
-    // public function create()
-    // {
-    //     if ($this->request->isAJAX()) {
-    //         $validation = \Config\Services::validation();
-    //         $validation->setRules([
-    //             'jenis'       => 'required',
-    //             'color'       => 'required',
-    //             'code'        => 'required',
-    //             'lmd'         => 'required',
-    //             'ttl_kg'      => 'required|numeric',
-    //             'ttl_cns'     => 'required|numeric',
-    //             'no_rak'      => 'required',
-    //             'posisi_rak'  => 'required'
-    //         ]);
-
-    //         if (!$validation->withRequest($this->request)->run()) {
-    //             return $this->response->setJSON([
-    //                 'success' => false,
-    //                 'message' => $validation->getErrors()
-    //             ]);
-    //         }
-
-    //         $data = [
-    //             'jenis'      => $this->request->getPost('jenis'),
-    //             'color'      => $this->request->getPost('color'),
-    //             'code'       => $this->request->getPost('code'),
-    //             'lmd'        => $this->request->getPost('lmd'),
-    //             'ttl_kg'     => $this->request->getPost('ttl_kg'),
-    //             'ttl_cns'    => $this->request->getPost('ttl_cns'),
-    //             'no_rak'     => $this->request->getPost('no_rak'),
-    //             'posisi_rak' => $this->request->getPost('posisi_rak')
-    //         ];
-
-    //         $stockModel = new \App\Models\StockModel();
-    //         $stockModel->insert($data);
-
-    //         return $this->response->setJSON([
-    //             'success' => true,
-    //             'message' => 'Data berhasil disimpan.'
-    //         ]);
-    //     }
-
-    //     return $this->response->setStatusCode(403);
-    // }
-
     public function create()
     {
         // Aturan validasi
@@ -145,6 +100,13 @@ class CoveringWarehouseController extends BaseController
         $posisiRakValue = is_array($posisiRakInput) ? implode(',', $posisiRakInput) : $posisiRakInput;
 
         $admin = session()->get('role');
+        $jenis = $this->request->getPost('jenis');
+        $color = $this->request->getPost('color');
+        $code = $this->request->getPost('code');
+        $existingStock = $this->coveringStockModel->getStockByJenisColorCode($jenis, $color, $code);
+        if ($existingStock) {
+            return redirect()->back()->withInput()->with('error', 'Data stok sudah ada! </br> Silahkan update stok yang sudah ada.');
+        }
 
         $data = [
             'jenis'      => $this->request->getPost('jenis'),
@@ -160,6 +122,8 @@ class CoveringWarehouseController extends BaseController
             'admin'      => $admin
         ];
 
+        $this->historyCoveringStockModel->insert($data);
+
         // Simpan ke database dan redirect dengan pesan sukses atau error
         if ($this->coveringStockModel->insert($data)) {
             return redirect()->to(base_url($this->role . '/warehouse'))->with('success', 'Data berhasil disimpan!');
@@ -167,56 +131,6 @@ class CoveringWarehouseController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data ke database.');
         }
     }
-
-    // public function updateStock()
-    // {
-    //     $json = $this->request->getJSON();
-    //     log_message('debug', 'DATANYAAAA:::: ' . json_encode($json));
-    //     if (!$json) {
-    //         return $this->response->setJSON(['success' => false, 'message' => 'Invalid Request'])->setStatusCode(400);
-    //     }
-
-    //     // Ambil data dari request
-    //     $stockItemId = $json->stockItemId;
-    //     // Ambil data dari JSON request
-    //     $action = $json->action;
-    //     $noModel = $json->no_model;
-    //     $stockAmount = (float) $json->stockAmount; // Pastikan jadi float untuk perhitungan
-    //     $amountCns = (int) $json->amountcones; // Ubah ke integer
-    //     $stockNote = $json->stockNote;
-
-    //     // Ambil data dari database berdasarkan stockItemId
-    //     $data = $this->coveringStockModel->find($stockItemId);
-    //     log_message('debug', 'data asli: ' . $data);
-    //     // Pastikan $data tidak null sebelum mengolahnya
-    //     if (!$data) {
-    //         return $this->response->setJSON(['success' => false, 'message' => 'Data stok tidak ditemukan!']);
-    //     }
-
-    //     // Jika action = "remove", kurangi ttl_kg dan ttl_cns
-    //     if ($action === "remove") {
-    //         $data['ttl_kg'] = max(0, $data['ttl_kg'] - $stockAmount); // Pastikan tidak negatif
-    //         $data['ttl_cns'] = max(0, $data['ttl_cns'] - $amountCns);
-    //     }
-
-    //     // $update = $this->coveringStockModel->update($stockItemId, $data);
-    //     // dd($update);
-    //     // Gabungkan data dengan request JSON
-    //     $mergedData = array_merge($data, [
-    //         'stockItemId' => $stockItemId,
-    //         'action'      => $action,
-    //         'no_model'    => $noModel,
-    //         'stockAmount' => $stockAmount,
-    //         'amountcones'  => $amountCns,
-    //         'stockNote'   => $stockNote,
-    //     ]);
-
-    //     // Debug hasil gabungan
-    //     log_message('debug', 'DATA GABUNGAN:::: ' . json_encode($mergedData));
-
-    //     // Kembalikan response
-    //     return $this->response->setJSON(['success' => true, 'data' => $mergedData]);
-    // }
 
     public function updateStock()
     {
@@ -357,5 +271,46 @@ class CoveringWarehouseController extends BaseController
                 'message' => "Gagal memperbarui stok!"
             ])->setStatusCode(500);
         }
+    }
+
+    public function reportPemasukan()
+    {
+        $selectedDate = $this->request->getGet('date'); // Ambil tanggal dari parameter GET
+        $pemasukan = [];
+
+        if ($selectedDate) {
+            $pemasukan = $this->historyCoveringStockModel->getPemasukanByDate($selectedDate);
+        }
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Warehouse',
+            'role' => $this->role,
+            'pemasukan' => $pemasukan,
+            'selectedDate' => $selectedDate // Kirim ke view untuk referensi
+        ];
+
+        return view($this->role . '/warehouse/report-pemasukan', $data);
+    }
+
+
+    public function reportPengeluaran()
+    {
+        $selectedDate = $this->request->getGet('date'); // Ambil tanggal dari parameter GET
+        $pengeluaran = [];
+
+        if ($selectedDate) {
+            $pengeluaran = $this->historyCoveringStockModel->getPengeluaranByDate($selectedDate);
+        }
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Warehouse',
+            'role' => $this->role,
+            'pengeluaran' => $pengeluaran,
+            'selectedDate' => $selectedDate // Kirim ke view untuk referensi
+        ];
+
+        return view($this->role . '/warehouse/report-pengeluaran', $data);
     }
 }

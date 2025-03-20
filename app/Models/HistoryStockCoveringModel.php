@@ -35,7 +35,7 @@ class HistoryStockCoveringModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -57,4 +57,27 @@ class HistoryStockCoveringModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    public function getPemasukanByDate($date)
+    {
+        return $this->db->table('history_stock_covering')
+            ->select('*')
+            ->where('DATE(created_at)', $date) // Filter berdasarkan tanggal
+            ->where('ttl_kg >=', 0)
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
+
+    public function getPengeluaranByDate($date)
+    {
+        return $this->db->table('history_stock_covering')
+            ->select('*')
+            ->where('DATE(created_at)', $date) // Filter berdasarkan tanggal
+            ->where('ttl_kg <=', 0)
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
 }
