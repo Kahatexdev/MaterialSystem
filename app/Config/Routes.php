@@ -228,6 +228,11 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('warehouse/reportPengeluaran', 'CoveringWarehouseController::reportPengeluaran');
     $routes->get('warehouse/pengeluaran_jalur', 'CoveringController::pengeluaranJalur');
     $routes->get('warehouse/pengiriman_area', 'CoveringController::pengirimanArea');
+
+    //Pemesanan
+    $routes->get('pemesanan', 'CoveringPemesananController::index');
+    $routes->get('pemesanan/(:any)', 'CoveringPemesananController::pemesanan/$1');
+    $routes->get('detailPemesanan/(:any)', 'CoveringPemesananController::detailPemesanan/$1');
 });
 
 

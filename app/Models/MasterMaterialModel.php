@@ -86,4 +86,16 @@ class MasterMaterialModel extends Model
         $uniqueArea = array_column($query, 'jenis');
         return $uniqueArea;
     }
+
+    public function getJenisSpandexKaret()
+    {
+        $query = $this->distinct()
+            ->select('jenis')
+            ->whereIn('jenis', ['Spandex', 'Karet']) // Hanya mengambil jenis yang sesuai
+            ->orderBy('jenis', 'ASC')
+            ->findAll();
+
+        $uniqueArea = array_column($query, 'jenis');
+        return $uniqueArea;
+    }
 }
