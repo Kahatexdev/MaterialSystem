@@ -173,22 +173,23 @@ class PphController extends BaseController
             'bs_mesin' => 0
         ];
 
-        $processedStyleSizes = []; // Menyimpan style_size yang sudah ada
+        $processedStyleSizes = []; // Untuk memastikan style_size tidak dihitung lebih dari sekali
+        $temporaryData = []; // Untuk menyimpan data sementara dari style_size
 
         foreach ($pphInisial as $item) {
             $key = $item['item_type'] . '-' . $item['kode_warna'];
             $styleSizeKey = $item['style_size'];
 
             // Jika style_size sudah ada, jangan tambahkan lagi
-            if (!in_array($styleSizeKey, $processedStyleSizes)) {
-                $result[$styleSizeKey] = [
+            if (!isset($processedStyleSizes[$styleSizeKey])) {
+                $temporaryData[] = [
                     'qty' => $item['qty'],
                     'sisa' => $item['sisa'],
                     'bruto' => $item['bruto'],
                     'bs_setting' => $item['bs_setting'],
                     'bs_mesin' => $item['bs_mesin']
                 ];
-                $processedStyleSizes[] = $styleSizeKey;
+                $processedStyleSizes[$styleSizeKey] = true;
             }
 
             if (!isset($result[$key])) {
@@ -203,19 +204,24 @@ class PphController extends BaseController
                 ];
             }
 
-            // Akumulasi detail per item_type-kode_warna
+            // Akumulasi data berdasarkan item_type-kode_warna
             $result[$key]['kgs'] += $item['kgs'];
             $result[$key]['pph'] += $item['pph'];
         }
 
-        // Menghitung total keseluruhan dari style_size yang unik
-        foreach ($result as $styleSizeKey => $res) {
-            if (is_array($res) && isset($res['qty']) && !in_array($styleSizeKey, ['qty', 'sisa', 'bruto', 'bs_setting', 'bs_mesin'])) {
-                $result['qty'] += $res['qty'];
-                $result['sisa'] += $res['sisa'];
-                $result['bruto'] += $res['bruto'];
-                $result['bs_setting'] += $res['bs_setting'];
-                $result['bs_mesin'] += $res['bs_mesin'];
+        // Menambahkan total dari style_size yang unik ke dalam result
+        foreach ($temporaryData as $res) {
+            $result['qty'] += $res['qty'];
+            $result['sisa'] += $res['sisa'];
+            $result['bruto'] += $res['bruto'];
+            $result['bs_setting'] += $res['bs_setting'];
+            $result['bs_mesin'] += $res['bs_mesin'];
+        }
+
+        // Hapus semua elemen dengan format style_size dari $result
+        foreach (array_keys($result) as $key) {
+            if (preg_match('/^\w+\s*\d+[Xx]\d+$/', $key)) {
+                unset($result[$key]);
             }
         }
         return $this->response->setJSON($result);
