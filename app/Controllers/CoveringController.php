@@ -123,6 +123,21 @@ class CoveringController extends BaseController
         return view($data['role'] . '/dashboard/index', $data);
     }
 
+    public function po()
+    {
+        $poCovering = $this->openPoModel->getPOCovering();
+        // dd($poCovering);
+        $data = [
+            'active' => $this->active,
+            'title' => 'PO Celup',
+            'role' => $this->role,
+            'poCovering' => $poCovering,
+        ];
+
+        // dd($data);
+        return view($this->role . '/po/index', $data);
+    }
+
     public function schedule()
     {
         // Ambil parameter filter dari query string

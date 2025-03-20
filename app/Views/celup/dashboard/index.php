@@ -1,6 +1,36 @@
 <?php $this->extend($role . '/dashboard/header'); ?>
 <?php $this->section('content'); ?>
 
+<style>
+    .progress {
+        height: 20px;
+        border-radius: 10px;
+        background-color: #f1f1f1;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        border-radius: 10px;
+        transition: width 1s ease-in-out;
+        font-weight: bold;
+        text-align: center;
+        line-height: 20px;
+    }
+
+    /* Warna progress bar */
+    .bg-danger {
+        background: linear-gradient(90deg, #ff4d4d, #ff0000);
+    }
+
+    .bg-warning {
+        background: linear-gradient(90deg, #ffcc00, #ff9900);
+    }
+
+    .bg-info {
+        background: linear-gradient(90deg, #17a2b8, #007bff);
+    }
+</style>
 <div class="container-fluid py-4">
     <div class="row my-4">
         <div class="col-xl-12 col-sm-12 mb-xl-0 mb-4">
@@ -112,19 +142,33 @@
             </div>
         </div>
     </div>
-    <div class="row my-3">
-        <div class="col-lg-12">
-            <div class="card z-index-2">
-                <div class="card-header pb-0">
-                    <h6>Layout Stock Order</h6>
-                </div>
-                <div class="card-body p-3">
-                    <div class="chart">
-                        <canvas id="mixed-chart" class="chart-canvas" height="300"></canvas>
+
+    <!-- Kapasitas Mesin dalam Card -->
+    <div class="row">
+        <h4 class="mb-3">Kapasitas Mesin</h4>
+        <?php foreach ($mesin as $m) :
+            $persentase = ($m['kapasitas_terpakai'] / $m['max_caps']) * 100;
+            $warna = $persentase > 80 ? 'bg-gradient-danger' : ($persentase > 50 ? 'bg-gradient-warning' : 'bg-gradient-info');
+        ?>
+            <div class="col-lg-2 col-md-4 col-sm-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <h6 class="font-weight-bold">Mesin <?= $m['no_mesin'] ?></h6>
+                        <div class="icon icon-shape <?= $warna ?> shadow text-center border-radius-md mb-2">
+                            <i class="fas fa-cogs text-lg opacity-10"></i>
+                        </div>
+                        <p class="text-muted mb-1">Kapasitas: <?= round($persentase, 2) ?>%</p>
+                        <div class="progress">
+                            <div class="progress-bar <?= $warna ?>" role="progressbar"
+                                style="width: <?= $persentase ?>%; height:100%;"
+                                aria-valuenow="<?= $persentase ?>" aria-valuemin="0" aria-valuemax="100">
+                                <?= round($persentase, 2) ?>%
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        <?php endforeach; ?>
     </div>
 </div>
 
