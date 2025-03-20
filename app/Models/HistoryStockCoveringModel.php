@@ -58,20 +58,23 @@ class HistoryStockCoveringModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
-    public function getPemasukan()
+    public function getPemasukanByDate($date)
     {
         return $this->db->table('history_stock_covering')
             ->select('*')
+            ->where('DATE(created_at)', $date) // Filter berdasarkan tanggal
             ->where('ttl_kg >=', 0)
             ->orderBy('created_at', 'DESC')
             ->get()
             ->getResultArray();
     }
 
-    public function getPengeluaran()
+
+    public function getPengeluaranByDate($date)
     {
         return $this->db->table('history_stock_covering')
             ->select('*')
+            ->where('DATE(created_at)', $date) // Filter berdasarkan tanggal
             ->where('ttl_kg <=', 0)
             ->orderBy('created_at', 'DESC')
             ->get()
