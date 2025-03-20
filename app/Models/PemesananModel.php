@@ -118,4 +118,34 @@ class PemesananModel extends Model
             ->orderBy('pemesanan.tgl_pakai', 'DESC');
         return $query->get()->getResultArray();
     }
+
+    public function getJenisPemesananCovering($jenis)
+    {
+        return $this->select('pemesanan.tgl_pakai, master_material.jenis')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->where('master_material.jenis', $jenis)
+            ->orderBy('pemesanan.tgl_pakai', 'DESC')
+            ->groupBy('pemesanan.tgl_pakai')
+            ->findAll();
+    }
+
+    public function getListPemesananCovering($jenis, $tgl_pakai)
+    {
+        return $this->select('pemesanan.tgl_pakai, master_material.jenis, material.item_type, material.color, material.kode_warna, master_order.no_model, SUM(pemesanan.jl_mc) AS jl_mc, SUM(pemesanan.ttl_berat_cones) AS total_pesan, SUM(pemesanan.ttl_qty_cones) AS total_cones, pemesanan.admin')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->where('master_material.jenis', $jenis)
+            ->where('pemesanan.tgl_pakai', $tgl_pakai)
+            ->groupBy('pemesanan.tgl_pakai, master_material.jenis, material.item_type, material.color, material.kode_warna, master_order.no_model, pemesanan.admin')
+            ->findAll();
+    }
+
+    public function totalPemesananPerHari()
+    {
+        return $this->select('COUNT(pemesanan.tgl_pesan) as pemesanan_per_hari')
+            ->where('pemesanan.tgl_pesan', date('Y-m-d'))
+            ->first();
+    }
 }
