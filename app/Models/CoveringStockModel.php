@@ -59,7 +59,7 @@ class CoveringStockModel extends Model
     public function stokCovering()
     {
         return $this->db->table('stock_covering cs')
-            ->select('cs.*, IF(cs.ttl_kg > 0, "ada", "tidak ada") AS status')
+            ->select('cs.*, IF(cs.ttl_kg > 0, "ada", "habis") AS status')
             ->get()
             ->getResultArray();
     }

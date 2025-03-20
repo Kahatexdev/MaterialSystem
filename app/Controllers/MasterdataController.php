@@ -256,7 +256,7 @@ class MasterdataController extends BaseController
                     'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(),
                     'gw'         => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
                     'qty_pcs'    => $qty_pcs, // Menggunakan variabel yang telah diproses
-                    'loss'       => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue(),
+                    'loss'       => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue() ?? 0,
                     'kgs'        => $sheet->getCell($headerMap['Kgs'] . $rowIndex)->getValue(),
                     'admin'      => $admin,
                     'created_at' => date('Y-m-d H:i:s'),

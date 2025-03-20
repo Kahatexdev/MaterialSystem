@@ -169,10 +169,10 @@
                 <div class="card-body">
                     <!-- Keterangan kapasitas -->
                     <div class="mb-2 text-center">
-                        <button class="btn text-white" style="background-color: #b0b0b0;">0% (Gray)</button>
-                        <button class="btn text-white" style="background-color: #007bff;">1-70% (Blue)</button>
-                        <button class="btn text-white" style="background-color: #ff851b;">71-99% (Orange)</button>
-                        <button class="btn text-white" style="background-color: #dc3545;">100% (Red)</button>
+                        <button class="btn text-white w-10" style="background-color: #b0b0b0;" data-bs-toggle="tooltip" data-bs-placement="top" title="Stok Kosong">0%</button>
+                        <button class="btn text-white w-10" style="background-color: #007bff;" data-bs-toggle="tooltip" data-bs-placement="top" title="Stok Rendah">1-70%</button>
+                        <button class="btn text-white w-10" style="background-color: #ff851b;" data-bs-toggle="tooltip" data-bs-placement="top" title="Stok Sedang">71-99%</button>
+                        <button class="btn text-white w-10" style="background-color: #dc3545;" data-bs-toggle="tooltip" data-bs-placement="top" title="Stok Penuh">100%</button>
                     </div>
                     <form id="groupForm">
                         <div class="mb-3">
@@ -204,7 +204,7 @@
             <div class="modal-body">
                 <p><strong>Nama Cluster:</strong> <span id="modalNamaCluster"></span></p>
                 <p><strong>Kapasitas:</strong> <span id="modalKapasitas"></span> kg</p>
-                <p><strong>Total Qty:</strong> <span id="modalTotalQty"></span> kg</p>
+                <p><strong>Total Terisi:</strong> <span id="modalTotalQty"></span> kg</p>
                 <div class="table-responsive">
                     <table class="table table-bordered">
                         <thead>
@@ -213,7 +213,7 @@
                                 <th>Kode Warna</th>
                                 <th>Foll Up</th>
                                 <th>Delivery</th>
-                                <th>Kapasitas Pemakaian</th>
+                                <th>Kapasitas Terpakai</th>
                             </tr>
                         </thead>
                         <tbody id="modalDetailTableBody"></tbody>
@@ -286,7 +286,7 @@
                 <td>${item.kode_warna}</td>
                 <td>${item.foll_up || '-'}</td>
                 <td>${item.delivery || '-'}</td>
-                <td>${item.qty || '-'}</td>
+                <td>${item.qty || '-'} kg</td>
             </tr>`;
                 tableBody.innerHTML += row;
             });

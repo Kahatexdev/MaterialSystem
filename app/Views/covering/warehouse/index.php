@@ -68,7 +68,7 @@
             <div class="row g-3">
                 <?php $filters = [
                     ['id' => 'searchInput', 'icon' => 'search', 'type' => 'text', 'placeholder' => 'Cari jenis...'],
-                    ['id' => 'filterStatus', 'options' => ['' => 'Semua Status', 'ada' => 'Tersedia', 'tidak ada' => 'Tidak Tersedia']],
+                    ['id' => 'filterStatus', 'options' => ['' => 'Semua Status', 'ada' => 'Tersedia', 'habis' => 'Tidak Tersedia']],
                     ['id' => 'filterLocation', 'options' => ['' => 'Semua Rak', '1' => 'Rak 1', '2' => 'Rak 2', '3' => 'Rak 3', '4' => 'Rak 4', '5' => 'Rak 5', '6' => 'Rak 6', '7' => 'Rak 7', '8' => 'Rak 8']],
                 ]; ?>
 
@@ -170,7 +170,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="stockAmount" class="form-label">Jumlah KG</label>
-                            <input type="number" class="form-control" id="stockAmount" required>
+                            <input type="number" class="form-control" id="stockAmount" step="0.1" required inputmode="decimal">
                         </div>
                         <div class="mb-3">
                             <label for="amountcones" class="form-label">Jumlah Cones</label>
@@ -216,7 +216,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="box" class="form-label">Box</label>
-                                    <input type="text" class="form-control" id="box" name="box" required>
+                                    <input type="text" class="form-control" id="box" name="box">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">LMD</label><br>
@@ -238,7 +238,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="ttl_kg" class="form-label">Jumlah Stok (Kg)</label>
-                                    <input type="number" class="form-control" id="ttl_kg" name="ttl_kg" required>
+                                    <input type="number" class="form-control" id="ttl_kg" name="ttl_kg" step="0.1" required inputmode="decimal">
                                 </div>
                                 <div class="mb-3">
                                     <label for="ttl_cns" class="form-label">Jumlah Cones</label>
@@ -246,7 +246,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="no_palet" class="form-label">No Palet</label>
-                                    <input type="text" class="form-control" id="no_palet" name="no_palet" required>
+                                    <input type="text" class="form-control" id="no_palet" name="no_palet">
                                 </div>
                                 <div class="mb-3">
                                     <label for="no_rak" class="form-label">Nomor Rak</label>
@@ -346,7 +346,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="editTtlKg" class="form-label">Jumlah Stok (Kg)</label>
-                                    <input type="number" class="form-control" id="editTtlKg" name="ttl_kg" required>
+                                    <input type="number" class="form-control" id="editTtlKg" name="ttl_kg" step="0.1" required inputmode="decimal">
                                 </div>
                                 <div class="mb-3">
                                     <label for="editTtlCns" class="form-label">Jumlah Cones</label>
@@ -584,8 +584,9 @@
 
                         // Cek dan tandai checkbox LMD
                         ["L", "M", "D"].forEach((val, index) => {
-                            document.getElementById(`editLmd${index + 1}`).checked = stock.lmd.includes(val);
+                            document.getElementById(`editLmd${index + 1}`).checked = stock.lmd?.includes(val) || false;
                         });
+
 
                         // Cek dan tandai checkbox Posisi Rak
                         ["Kiri", "Kanan", "Atas", "Bawah"].forEach((val, index) => {
