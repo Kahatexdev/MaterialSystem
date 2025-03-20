@@ -58,6 +58,28 @@ class HistoryStockCoveringModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
+    public function getPemasukan()
+    {
+        return $this->db->table('history_stock_covering')
+            ->select('*')
+            ->where('ttl_kg >=', 0)
+            ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-7 days'))) // Filter 7 hari terakhir
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
+    public function getPengeluaran()
+    {
+        return $this->db->table('history_stock_covering')
+            ->select('*')
+            ->where('ttl_kg <=', 0)
+            ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-7 days'))) // Filter 7 hari terakhir
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
     public function getPemasukanByDate($date)
     {
         return $this->db->table('history_stock_covering')
@@ -79,5 +101,26 @@ class HistoryStockCoveringModel extends Model
             ->orderBy('created_at', 'DESC')
             ->get()
             ->getResultArray();
+    }
+
+    // Mengambil pemasukan hari ini
+    public function getIncomeToday()
+    {
+        return $this->selectSum('ttl_kg')
+            ->where('DATE(created_at)', date('Y-m-d'))
+            ->where('ttl_kg >=', 0)
+            ->get()
+            ->getRow()
+            ->ttl_kg ?? 0;
+    }
+
+    public function getExpenseToday()
+    {
+        return $this->selectSum('ttl_kg')
+            ->where('DATE(created_at)', date('Y-m-d'))
+            ->where('ttl_kg <=', 0)
+            ->get()
+            ->getRow()
+            ->ttl_kg ?? 0;
     }
 }
