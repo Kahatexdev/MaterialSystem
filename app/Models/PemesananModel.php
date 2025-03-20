@@ -96,6 +96,7 @@ class PemesananModel extends Model
                 pemesanan.tgl_pakai,
                 master_order.no_model,
                 material.item_type,
+                master_material.jenis,
                 material.kode_warna,
                 material.color,
                 SUM(material.kgs) AS kg_keb,
@@ -109,6 +110,7 @@ class PemesananModel extends Model
                 (SUM(material.kgs) - SUM(DISTINCT COALESCE(pengeluaran.id_pengeluaran, 0) * COALESCE(pengeluaran.kgs_out, 0) / NULLIF(COALESCE(pengeluaran.id_pengeluaran, 1), 0))) AS sisa_jatah
             ")
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->join('pengeluaran', 'pengeluaran.id_pengeluaran = pemesanan.id_pengeluaran', 'left')
             ->where('pemesanan.admin', $area)
@@ -147,5 +149,92 @@ class PemesananModel extends Model
         return $this->select('COUNT(pemesanan.tgl_pesan) as pemesanan_per_hari')
             ->where('pemesanan.tgl_pesan', date('Y-m-d'))
             ->first();
+    }
+    public function getListPemesananByUpdate($data)
+    {
+        $data = $this->db->table('pemesanan')
+            ->select('
+                master_order.no_model,
+                material.id_material,
+                material.item_type,
+                material.kode_warna,
+                material.color,
+                material.style_size,
+                material.qty_cns,
+                material.qty_berat_cns,
+                pemesanan.*
+                ')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('pemesanan.admin', $data['area'])
+            ->where('pemesanan.tgl_pakai', $data['tgl_pakai'])
+            ->where('master_order.no_model', $data['no_model'])
+            ->where('material.item_type', $data['item_type'])
+            ->where('material.kode_warna', $data['kode_warna'])
+            ->where('material.color', $data['color'])
+            ->groupBy('pemesanan.id_pemesanan')
+            ->orderBy('pemesanan.id_pemesanan');
+        return $data->get()->getResultArray();
+    }
+    public function kirimPemesanan($data)
+    {
+        // Langkah 1: Ambil semua data yang relevan dengan JOIN
+        $data = $this->db->table('pemesanan')
+            ->select('pemesanan.id_pemesanan')
+            ->join('material', 'pemesanan.id_material = material.id_material')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('master_order.no_model', $data['no_model'])
+            ->where('material.item_type', $data['item_type'])
+            ->where('material.kode_warna', $data['kode_warna'])
+            ->where('material.color', $data['color'])
+            ->where('pemesanan.tgl_pakai', $data['tgl_pakai'])
+            ->get()
+            ->getResultArray(); // Ambil semua baris sebagai array
+
+        if (empty($data)) {
+            return [
+                'status'  => 'error',
+                'message' => 'Data tidak ditemukan untuk parameter yang diberikan',
+            ];
+        }
+
+        // Ubah hasil menjadi array ID saja
+        $idList = array_column($data, 'id_pemesanan');
+
+        $success = 0;
+        $failure = 0;
+
+        foreach ($data as $row) {
+            $update = $this->db->table('pemesanan')
+                ->where('id_pemesanan', $row['id_pemesanan'])
+                ->update([
+                    'tgl_pesan' => date('Y-m-d H:i:s'),
+                    'status_kirim' => 'YA',
+                ]);
+
+            if ($this->db->affectedRows() > 0) {
+                $success++;
+            } else {
+                $failure++;
+            }
+        }
+
+        // Jika ada pembaruan yang berhasil
+        if ($success > 0) {
+            return [
+                'status' => 'success',
+                'message' => "$success baris berhasil diperbarui, $failure gagal",
+                'success_count' => $success,
+                'failure_count' => $failure,
+            ];
+        }
+
+        // Jika semua pembaruan gagal
+        return [
+            'status'  => 'error',
+            'message' => 'Tidak ada data yang berhasil diperbarui',
+            'success_count' => $success,
+            'failure_count' => $failure,
+        ];
     }
 }
