@@ -141,4 +141,11 @@ class PemesananModel extends Model
             ->groupBy('pemesanan.tgl_pakai, master_material.jenis, material.item_type, material.color, material.kode_warna, master_order.no_model, pemesanan.admin')
             ->findAll();
     }
+
+    public function totalPemesananPerHari()
+    {
+        return $this->select('COUNT(pemesanan.tgl_pesan) as pemesanan_per_hari')
+            ->where('pemesanan.tgl_pesan', date('Y-m-d'))
+            ->first();
+    }
 }

@@ -139,10 +139,4 @@ class MasterOrderModel extends Model
             ->where('no_model', $noModel)
             ->first();
     }
-
-    public function getPdk() 
-    {
-        return $this->select('COUNT(id_order) as total_pdk')
-        ->first();    
-    }
 }

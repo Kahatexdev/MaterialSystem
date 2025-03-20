@@ -76,6 +76,7 @@
                             <th class="sticky text-center">Jalan MC</th>
                             <th class="sticky text-center">Total Pesan (Kg)</th>
                             <th class="sticky text-center">Cones</th>
+                            <th class="sticky text-center">Area</th>
                             <th class="sticky text-center">Action</th>
                         </tr>
                     </thead>
@@ -92,7 +93,7 @@
                                 <td class="text-center"><?= $list['jl_mc']; ?></td>
                                 <td class="text-center"><?= $list['total_pesan']; ?> Kg</td>
                                 <td class="text-center"><?= $list['total_cones']; ?></td>
-                                
+                                <td class="text-center"><?= $list['admin']; ?></td>
                                 <td class="text-center">
                                     <a href="" class="btn btn-sm btn-info">Kirim</a>
                                 </td>

@@ -79,15 +79,15 @@
                     <div class="row">
                         <div class="col-8">
                             <div class="numbers">
-                                <p class="text-sm mb-0 text-capitalize font-weight-bold">PDK</p>
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Pemesanan/Hari</p>
                                 <h5 class="font-weight-bolder mb-0">
-                                    <?= $pdk['total_pdk'] ?? 0 ?>
+                                    <?= $pemesanan['pemesanan_per_hari'] ?? 0 ?>
                                 </h5>
                             </div>
                         </div>
                         <div class="col-4 text-end">
                             <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
-                                <i class="fas fa-book text-lg opacity-10" aria-hidden="true"></i>
+                                <i class="ni ni-single-copy-04 text-lg opacity-10" aria-hidden="true"></i>
                             </div>
                         </div>
                     </div>
@@ -130,7 +130,7 @@
                         </div>
                         <div class="col-4 text-end">
                             <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
-                                <i class="ni ni-settings text-lg opacity-10" aria-hidden="true"></i>
+                                <i class="ni ni-bold-down text-lg opacity-10" aria-hidden="true"></i>
                             </div>
                         </div>
                     </div>
@@ -151,7 +151,7 @@
                         </div>
                         <div class="col-4 text-end">
                             <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
-                                <i class="ni ni-check-bold text-lg opacity-10" aria-hidden="true"></i>
+                                <i class="ni ni-bold-up text-lg opacity-10" aria-hidden="true"></i>
                             </div>
                         </div>
                     </div>
