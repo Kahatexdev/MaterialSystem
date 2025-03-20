@@ -143,6 +143,7 @@ class PphController extends BaseController
                 }
 
 
+
                 $pphInisial[] = [
                     'area'  => $items['area'],
                     'style_size'  => $items['style_size'],
@@ -172,39 +173,51 @@ class PphController extends BaseController
             'bs_mesin' => 0
         ];
 
+        $processedStyleSizes = []; // Menyimpan style_size yang sudah ada
+
         foreach ($pphInisial as $item) {
             $key = $item['item_type'] . '-' . $item['kode_warna'];
+            $styleSizeKey = $item['style_size'];
+
+            // Jika style_size sudah ada, jangan tambahkan lagi
+            if (!in_array($styleSizeKey, $processedStyleSizes)) {
+                $result[$styleSizeKey] = [
+                    'qty' => $item['qty'],
+                    'sisa' => $item['sisa'],
+                    'bruto' => $item['bruto'],
+                    'bs_setting' => $item['bs_setting'],
+                    'bs_mesin' => $item['bs_mesin']
+                ];
+                $processedStyleSizes[] = $styleSizeKey;
+            }
 
             if (!isset($result[$key])) {
                 $result[$key] = [
-                    'item_type' => null,
-                    'kode_warna' => null,
-                    'warna' => null,
+                    'item_type' => $item['item_type'],
+                    'kode_warna' => $item['kode_warna'],
+                    'warna' => $item['color'],
                     'kgs' => 0,
                     'pph' => 0,
-                    'jarum' => null,
-                    'area' => null
+                    'jarum' => $item['jarum'],
+                    'area' => $item['area']
                 ];
             }
 
-
-            // Akumulasi total qty, sisa, bruto, bs_setting, dan bs_mesin
-            $result['qty'] += $item['qty'];
-            $result['sisa'] += $item['sisa'];
-            $result['bruto'] += $item['bruto'];
-            $result['bs_setting'] += $item['bs_setting'];
-            $result['bs_mesin'] += $item['bs_mesin'];
-
-            // Simpan detail per type-color
-            $result[$key]['item_type'] = $item['item_type'];
-            $result[$key]['kode_warna'] = $item['kode_warna'];
-            $result[$key]['warna'] = $item['color'];
+            // Akumulasi detail per item_type-kode_warna
             $result[$key]['kgs'] += $item['kgs'];
             $result[$key]['pph'] += $item['pph'];
-            $result[$key]['jarum'] = $item['jarum'];
-            $result[$key]['area'] = $item['area'];
         }
 
+        // Menghitung total keseluruhan dari style_size yang unik
+        foreach ($result as $styleSizeKey => $res) {
+            if (is_array($res) && isset($res['qty']) && !in_array($styleSizeKey, ['qty', 'sisa', 'bruto', 'bs_setting', 'bs_mesin'])) {
+                $result['qty'] += $res['qty'];
+                $result['sisa'] += $res['sisa'];
+                $result['bruto'] += $res['bruto'];
+                $result['bs_setting'] += $res['bs_setting'];
+                $result['bs_mesin'] += $res['bs_mesin'];
+            }
+        }
         return $this->response->setJSON($result);
     }
 
