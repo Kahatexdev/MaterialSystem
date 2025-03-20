@@ -12,6 +12,7 @@ use App\Models\ScheduleCelupModel;
 use App\Models\OutCelupModel;
 use App\Models\BonCelupModel;
 use App\Models\MesinCelupModel;
+use App\Models\HistoryStockCoveringModel;
 
 class CoveringController extends BaseController
 {
@@ -27,6 +28,7 @@ class CoveringController extends BaseController
     protected $scheduleCelupModel;
     protected $outCelupModel;
     protected $bonCelupModel;
+    protected $HistoryStockCoveringModel;
 
     public function __construct()
     {
@@ -38,6 +40,7 @@ class CoveringController extends BaseController
         $this->scheduleCelupModel = new ScheduleCelupModel();
         $this->outCelupModel = new OutCelupModel();
         $this->bonCelupModel = new BonCelupModel();
+        $this->HistoryStockCoveringModel = new HistoryStockCoveringModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -55,27 +58,69 @@ class CoveringController extends BaseController
     public function index()
     {
 
-        $data = [
-            'active' => $this->active,
-            'title' => 'Covering',
-            'role' => $this->role,
-        ];
-        return view($this->role . '/dashboard/index', $data);
-    }
+        // Ambil data dari model
+        $poCount = $this->openPoModel->poCoveringCount();
+        $ttlQtyPO = $this->openPoModel->poCoveringQty();
+        $incomeToday = $this->HistoryStockCoveringModel->getIncomeToday();
+        $expenseToday = $this->HistoryStockCoveringModel->getExpenseToday();
 
-    public function po()
-    {
-        $poCovering = $this->openPoModel->getPOCovering();
-        // dd($poCovering);
+        // Ambil data pemasukan dan pengeluaran
+        $incomeRaw = $this->HistoryStockCoveringModel->getPemasukan();
+        $expenseRaw = $this->HistoryStockCoveringModel->getPengeluaran();
+
+        // Ambil tanggal unik dari pemasukan dan pengeluaran
+        $dateLabels = [];
+        foreach (array_merge($incomeRaw, $expenseRaw) as $row) {
+            $dateLabels[] = date('Y-m-d', strtotime($row['created_at']));
+        }
+        $dateLabels = array_values(array_unique($dateLabels));
+        sort($dateLabels);
+
+        // Format data pemasukan & pengeluaran berdasarkan tanggal
+        $incomeData = [];
+        $expenseData = [];
+
+
+        foreach ($incomeRaw as $row) {
+            $date = date('Y-m-d', strtotime($row['created_at']));
+            if (!isset($incomeData[$date])) {
+                $incomeData[$date] = 0;
+            }
+            $incomeData[$date] += $row['ttl_kg'];
+        }
+
+        foreach ($expenseRaw as $row) {
+            $date = date('Y-m-d', strtotime($row['created_at']));
+            if (!isset($expenseData[$date])) {
+                $expenseData[$date] = 0;
+            }
+            $expenseData[$date] += $row['ttl_kg'];
+        }
+
+        $incomeDataFinal = [];
+        $expenseDataFinal = [];
+
+        foreach ($dateLabels as $date) {
+            $incomeDataFinal[] = isset($incomeData[$date]) ? $incomeData[$date] : 0;
+            $expenseDataFinal[] = isset($expenseData[$date]) ? $expenseData[$date] : 0;
+        }
+
+
         $data = [
-            'active' => $this->active,
-            'title' => 'PO Celup',
+            'active' =>  $this->active,
+            'title' => 'Covering Dashboard',
             'role' => $this->role,
-            'poCovering' => $poCovering,
+            'poCount' => $poCount,
+            'ttlQtyPO' => $ttlQtyPO,
+            'incomeToday' => $incomeToday,
+            'expenseToday' => $expenseToday,
+            'dateLabels' => $dateLabels,
+            'incomeData' => $incomeDataFinal, // Data yang sudah sesuai urutan tanggal
+            'expenseData' => $expenseDataFinal, // Data yang sudah sesuai urutan tanggal
         ];
 
-        // dd($data);
-        return view($this->role . '/po/index', $data);
+
+        return view($data['role'] . '/dashboard/index', $data);
     }
 
     public function schedule()
