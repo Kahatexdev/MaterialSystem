@@ -45,21 +45,55 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Upload</button>
+                        <button type="submit" class="btn btn-info">Upload</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- Modal untuk Revise MU -->
+    <div class="modal fade" id="reviseModal" tabindex="-1" aria-labelledby="reviseModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reviseModalLabel">Revise MU</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="revise/mu" method="post" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <!-- Input File -->
+                        <div class="mb-3">
+                            <label for="reviseFile" class="form-label">Pilih File Revisi MU</label>
+                            <input type="file" class="form-control" id="reviseFile" name="file" accept=".xlsx, .xls, .csv" required>
+                            <small class="text-muted">Hanya file dengan format .xlsx, .xls, atau .csv yang didukung.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-info">Upload Revisi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Button Import -->
     <div class="card card-frame">
         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 font-weight-bolder">Data Order</h5>
-                <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#importModal">
-                    <i class="fas fa-file-import me-2"></i>Import MU
-                </button>
+            <div class="row">
+                <div class="col-6">
+                    <h5 class="mb-0 font-weight-bolder">Data Order</h5>
+                </div>
+                <div class="col-6 text-end">
+                    <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#importModal">
+                        <i class="fas fa-file-import me-2"></i>Import MU
+                    </button>
+                    <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#reviseModal">
+                        <i class="fas fa-sync-alt me-2"></i>Revise MU
+                    </button>
+                </div>
             </div>
         </div>
     </div>

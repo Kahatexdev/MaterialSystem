@@ -145,6 +145,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
 // celup routes
 $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('', 'DashboardCelupController::index');
+    $routes->get('getStackedChartData', 'DashboardCelupController::getStackedChartData');
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
     $routes->get('schedule/nylon', 'ScheduleController::nylon');
@@ -266,6 +267,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
 
     $routes->post('import/mu', 'MasterdataController::importMU');
+    $routes->post('revise/mu', 'MasterdataController::reviseMU');
 
     $routes->get('masterMaterial', 'MastermaterialController::index');
     $routes->post('tampilMasterMaterial', 'MastermaterialController::tampilMasterMaterial');
@@ -390,6 +392,9 @@ $routes->group(
         $routes->post('insertQtyCns', 'ApiController::insertQtyCns');
         $routes->post('saveListPemesanan', 'ApiController::saveListPemesanan');
         $routes->get('listPemesanan/(:any)', 'ApiController::listPemesanan/$1');
+        $routes->post('getUpdateListPemesanan', 'ApiController::getUpdateListPemesanan');
+        $routes->post('updateListPemesanan', 'ApiController::updateListPemesanan');
+        $routes->post('kirimPemesanan', 'ApiController::kirimPemesanan');
         // $routes->get('getMaterialForPPH/(:any)/(:any)', 'ApiController::getMaterialForPPH/$1/$2');
         $routes->get('stockbahanbaku/(:any)', 'ApiController::stockbahanbaku/$1');
     }

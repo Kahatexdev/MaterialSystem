@@ -244,4 +244,18 @@ class OpenPoModel extends Model
     //         ->where('open_po.id_induk IS NULL') // Ambil hanya data tanpa id_induk
     //         ->findAll();
     // }
+
+    public function poCoveringCount()
+    {
+        return $this->where('penerima', 'Paryanti')->countAllResults();
+    }
+
+    public function poCoveringQty()
+    {
+        return $this->selectSum('kg_po')
+            ->where('penerima', 'Paryanti')
+            ->get()
+            ->getRow()
+            ->kg_po ?? 0;
+    }
 }

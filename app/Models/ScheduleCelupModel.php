@@ -388,7 +388,7 @@ class ScheduleCelupModel extends Model
             ->groupBy('schedule_celup.lot_urut')
             ->findAll();
     }
-    
+
     public function countStatusScheduled()
     {
         return $this->select('COUNT(id_celup) as total_scheduled')
@@ -414,5 +414,14 @@ class ScheduleCelupModel extends Model
         return $this->select('COUNT(id_celup) as total_retur')
             ->where('last_status', 'retur') // Sesuaikan last status jika perlu
             ->first();
+    }
+
+    public function getMesinKapasitasHariIni()
+    {
+        return $this->db->table('mesin_celup')
+            ->select('mesin_celup.no_mesin, mesin_celup.max_caps, COALESCE(SUM(schedule_celup.kg_celup), 0) as kapasitas_terpakai')
+            ->join('schedule_celup', 'schedule_celup.id_mesin = mesin_celup.id_mesin AND schedule_celup.tanggal_schedule = CURDATE()', 'left')
+            ->groupBy('mesin_celup.no_mesin, mesin_celup.max_caps')
+            ->get()->getResultArray();
     }
 }
