@@ -60,7 +60,7 @@ class DashboardGbnController extends BaseController
         $groupI = $this->clusterModel->getClusterGroupI();
         $groupII = $this->clusterModel->getClusterGroupII();
         $groupIII = $this->clusterModel->getClusterGroupIII();
-        // dd($pemesanan);
+
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
