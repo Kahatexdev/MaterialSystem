@@ -39,6 +39,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
 
     $routes->post('import/mu', 'MasterdataController::importMU');
+    $routes->post('revise/mu', 'MasterdataController::reviseMU');
+
 
     $routes->get('masterMaterial', 'MastermaterialController::index');
     $routes->post('tampilMasterMaterial', 'MastermaterialController::tampilMasterMaterial');
