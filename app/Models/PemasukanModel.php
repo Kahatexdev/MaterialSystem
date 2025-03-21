@@ -169,14 +169,14 @@ class PemasukanModel extends Model
     {
         return $this->select('SUM(out_celup.no_karung) as total_karung_masuk')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
-            ->where('pemasukan.tgl_masuk', date('Y-m-d')) // Hanya untuk tanggal hari ini
+            ->where('DATE(pemasukan.tgl_masuk)', date('Y-m-d')) // Hanya untuk tanggal hari ini
             ->first();
     }
     public function getTotalKarungKeluar()
     {
         return $this->select('SUM(out_celup.no_karung) as total_karung_keluar')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
-            ->where('pemasukan.tgl_masuk', date('Y-m-d')) // Hanya untuk tanggal hari ini
+            ->where('DATE(pemasukan.tgl_masuk)', date('Y-m-d')) // Hanya untuk tanggal hari ini
             ->where('pemasukan.out_jalur', '1') // Hanya yang sudah keluar
             ->first();
     }
