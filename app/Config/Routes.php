@@ -40,6 +40,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('splitMaterial', 'MaterialController::splitMaterial');
 
     $routes->post('import/mu', 'MasterdataController::importMU');
+    $routes->post('revise/mu', 'MasterdataController::reviseMU');
+
 
     $routes->get('masterMaterial', 'MastermaterialController::index');
     $routes->post('tampilMasterMaterial', 'MastermaterialController::tampilMasterMaterial');
