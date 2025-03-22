@@ -114,7 +114,7 @@
                                 <span class="d-lg-inline-block d-none ms-1">Report</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownMenuLink">
-                                <li><a class="dropdown-item" href="#">Report 1</a></li>
+                                <li><a href="<?= base_url($role . '/warehouse/reportDatangBenang') ?>" class="dropdown-item" href="#">Datang Benang</a></li>
                                 <li><a class="dropdown-item" href="#">Report 2</a></li>
                                 <li><a class="dropdown-item" href="#">Report 3</a></li>
                             </ul>

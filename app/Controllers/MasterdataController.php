@@ -240,6 +240,8 @@ class MasterdataController extends BaseController
                 // Ambil nilai qty_pcs dan bersihkan dari pemisah ribuan
                 $qty_raw = $sheet->getCell($headerMap['Qty/pcs'] . $rowIndex)->getValue();
                 $qty_pcs = intval(str_replace([',', '.'], '', $qty_raw));
+                $kgs_raw = $sheet->getCell($headerMap['Kgs'] . $rowIndex)->getValue();
+                $kgs = floatval(str_replace([','], '', $kgs_raw));
 
                 // Siapkan data material
                 $validDataMaterial[] = [
@@ -254,7 +256,7 @@ class MasterdataController extends BaseController
                     'gw'         => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
                     'qty_pcs'    => $qty_pcs, // Menggunakan variabel yang telah diproses
                     'loss'       => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue() ?? 0,
-                    'kgs'        => $sheet->getCell($headerMap['Kgs'] . $rowIndex)->getValue(),
+                    'kgs'        => number_format($kgs, 2, '.', ''),
                     'admin'      => $admin,
                     'created_at' => date('Y-m-d H:i:s'),
                 ];

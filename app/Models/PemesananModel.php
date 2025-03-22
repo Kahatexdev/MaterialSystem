@@ -167,8 +167,8 @@ class PemesananModel extends Model
             ->where('pemesanan.admin', $area)
             ->where('pemesanan.status_kirim', '')
             ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai')
-            ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC')
-            ->orderBy('pemesanan.tgl_pakai', 'DESC');
+            ->orderBy('pemesanan.tgl_pakai,', 'DESC')
+            ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
         return $query->get()->getResultArray();
     }
 

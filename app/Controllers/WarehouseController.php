@@ -1198,4 +1198,14 @@ class WarehouseController extends BaseController
         }
         return redirect()->back();
     }
+
+    public function reportDatangBenang()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Report Datang Benang',
+            'active' => $this->active
+        ];
+        return view($this->role . '/warehouse/report-datang-benang', $data);
+    }
 }
