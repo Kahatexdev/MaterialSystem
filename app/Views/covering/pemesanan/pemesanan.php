@@ -38,7 +38,7 @@
     <div class="card mt-4">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table display compact" id="dataTable">
+                <table class="table display" id="dataTable">
                     <thead>
                         <tr>
                             <th class="text-center">No</th>

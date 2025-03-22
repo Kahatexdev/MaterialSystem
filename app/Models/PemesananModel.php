@@ -147,7 +147,7 @@ class PemesananModel extends Model
     public function totalPemesananPerHari()
     {
         return $this->select('COUNT(pemesanan.tgl_pesan) as pemesanan_per_hari')
-            ->where('pemesanan.tgl_pesan', date('Y-m-d'))
+            ->where('DATE(pemesanan.tgl_pesan)', date('Y-m-d'))
             ->first();
     }
     public function getListPemesananByUpdate($data)

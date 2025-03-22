@@ -37,8 +37,11 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('updateArea/(:num)', 'MaterialController::updateArea/$1');
     // $routes->post('exportOpenPO/(:any)/(:any)', 'MasterdataController::exportOpenPO/$1/$2');
     $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
+    $routes->post('splitMaterial', 'MaterialController::splitMaterial');
 
     $routes->post('import/mu', 'MasterdataController::importMU');
+    $routes->post('revise/mu', 'MasterdataController::reviseMU');
+
 
     $routes->get('masterMaterial', 'MastermaterialController::index');
     $routes->post('tampilMasterMaterial', 'MastermaterialController::tampilMasterMaterial');
@@ -113,6 +116,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('warehouse/updateCluster', 'WarehouseController::updateCluster');
     $routes->post('warehouse/getNoModel', 'WarehouseController::getNoModel');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
+    $routes->get('warehouse/reportDatangBenang', 'WarehouseController::reportDatangBenang');
     //
     $routes->get('pemesanan', 'PemesananController::index');
     $routes->get('pemesananperarea/(:any)', 'PemesananController::pemesananPerArea/$1');
