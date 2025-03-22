@@ -117,6 +117,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('warehouse/getNoModel', 'WarehouseController::getNoModel');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
     $routes->get('warehouse/reportDatangBenang', 'WarehouseController::reportDatangBenang');
+    $routes->get('warehouse/filterDatangBenang', 'WarehouseController::filterDatangBenang');
+    $routes->get('warehouse/exportDatangBenang', 'WarehouseController::exportDatangBenang');
     //
     $routes->get('pemesanan', 'PemesananController::index');
     $routes->get('pemesananperarea/(:any)', 'PemesananController::pemesananPerArea/$1');
