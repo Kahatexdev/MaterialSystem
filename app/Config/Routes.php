@@ -120,7 +120,10 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/filterDatangBenang', 'WarehouseController::filterDatangBenang');
     $routes->get('warehouse/exportDatangBenang', 'WarehouseController::exportDatangBenang');
     //
+    $routes->post('getStockByParams', 'PemesananController::getStockByParams');
     $routes->get('pemesanan', 'PemesananController::index');
+    $routes->get('pemesanan/(:any)/(:any)', 'PemesananController::pemesanan/$1/$2');
+    $routes->post('pemesanan/filter', 'PemesananController::filterPemesanan');
     $routes->get('pemesananperarea/(:any)', 'PemesananController::pemesananPerArea/$1');
     $routes->get('detailpemesanan/(:any)/(:any)', 'PemesananController::detailPemesanan/$1/$2');
     $routes->get('pengiriman_area', 'PemesananController::pengirimanArea');

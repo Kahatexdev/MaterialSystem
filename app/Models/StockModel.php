@@ -158,4 +158,15 @@ class StockModel extends Model
             ->groupBy('kode_warna')
             ->first();
     }
+
+    public function getStock($no_model, $item_type, $kode_warna, $warna)
+    {
+        return $this->select('sum(kgs_stock_awal) as kgs_stock_awal, sum(cns_stock_awal) as cns_stock_awal, sum(krg_stock_awal) as krg_stock_awal, sum(kgs_in_out) as kgs_in_out, sum(cns_in_out) as cns_in_out, sum(krg_in_out) as krg_in_out, sum(lot_stock) as lot_stock')
+            ->where('no_model', $no_model)
+            ->where('item_type', $item_type)
+            ->where('kode_warna', $kode_warna)
+            ->where('warna', $warna)
+            ->groupBy('kode_warna')
+            ->first();
+    }
 }
