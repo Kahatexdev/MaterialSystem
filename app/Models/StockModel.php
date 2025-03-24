@@ -210,7 +210,7 @@ class StockModel extends Model
     public function searchStockArea($area, $noModel = null, $warna = null)
     {
         $builder = $this->db->table('stock')
-            ->select('stock.* SUM(kgs_in_out) Kgs, SUM(kgs_stock_awal) KgsStockAwal, cluster.nama_cluster, cluster.kapasitas, material.area')
+            ->select('stock.*, SUM(kgs_in_out) Kgs, SUM(kgs_stock_awal) KgsStockAwal, cluster.nama_cluster, cluster.kapasitas, material.area')
             ->join('cluster', 'stock.nama_cluster = cluster.nama_cluster', 'left')
             ->join('master_order', 'master_order.no_model = stock.no_model', 'left')
             ->join('material', 'material.id_order = master_order.id_order', 'left')
