@@ -163,7 +163,7 @@ class ApiController extends ResourceController
     }
     public function getMaterialForPemesanan($model, $styleSize, $area)
     {
-        $mu = $this->materialModel->getMU($model, $styleSize, $area);
+        $mu = $this->materialModel->getMaterialForPemesanan($model, $styleSize, $area);
 
         return $this->respond($mu, 200);
     }
@@ -418,5 +418,138 @@ class ApiController extends ResourceController
         $dataList = $this->pemesananModel->getListPemesananByArea($area);
 
         return $this->respond($dataList, 200);
+    }
+    public function getUpdateListPemesanan()
+    {
+        $data = $this->request->getPost([
+            'area',
+            'tgl_pakai',
+            'no_model',
+            'item_type',
+            'kode_warna',
+            'color'
+        ]);
+
+        $dataList = $this->pemesananModel->getListPemesananByUpdate($data);
+
+        return $this->respond([
+            'status'  => 'success',
+            'data' => $dataList,
+        ], 200);
+    }
+    public function updateListPemesanan()
+    {
+        // Ambil data JSON dari request
+        $data = $this->request->getJSON(true);
+
+        // Fungsi untuk parsing key nested menjadi array multidimensi
+        function parseNestedKeys($data)
+        {
+            $result = [];
+            foreach ($data as $key => $value) {
+                if (preg_match('/^(.*)\[(\d+)\]\[(.*)\]$/', $key, $matches)) {
+                    $mainKey = $matches[1]; // "items"
+                    $index = $matches[2];  // "0", "1", dll.
+                    $subKey = $matches[3]; // "id_material", dll.
+                    $result[$mainKey][$index][$subKey] = is_array($value) ? $value[0] : $value;
+                } else {
+                    $result[$key] = is_array($value) ? $value[0] : $value;
+                }
+            }
+            return $result;
+        }
+
+        $data = parseNestedKeys($data); // Parsing data
+
+        // Validasi data
+        if (empty($data) || !isset($data['items'])) {
+            return $this->respond([
+                'status'  => 'error',
+                'message' => "Tidak ada data list pemesanan",
+            ], 400);
+        }
+        // Log data yang diterima
+        log_message('debug', 'Data received: ' . json_encode($data['items']));
+
+        // Looping data 'items'
+        foreach ($data['items'] as $index => $item) {
+            log_message('debug', "Processing item {$index}: " . json_encode($item));
+
+            // Contoh akses data
+            $idMaterial = $item['id_material'];
+            $idPemesanan = $item['id_pemesanan'];
+            $jalanMc = $item['jalan_mc'];
+            $qtyCns = $item['qty_cns'];
+            $ttlQtyCns = $item['ttl_qty_cns'];
+            $qtyBeratCns = $item['qty_berat_cns'];
+            $ttlBeratCns = $item['ttl_berat_cns'];
+
+            // Lakukan operasi sesuai kebutuhan, contoh update data
+            $materialUpdate = [
+                'qty_cns'       => $qtyCns,
+                'qty_berat_cns' => $qtyBeratCns,
+            ];
+
+            $updateMaterial = $this->materialModel->update($idMaterial, $materialUpdate);
+
+            if (!$updateMaterial) {
+                log_message('error', "Gagal update material untuk id_material: {$idMaterial}");
+                return $this->respond([
+                    'status'  => 'error',
+                    'message' => "Gagal update material untuk id_material: {$idMaterial}",
+                ], 400);
+            }
+
+            $pemesananUpdate = [
+                'jl_mc'             => $jalanMc,
+                'ttl_qty_cones'     => $ttlQtyCns,
+                'ttl_berat_cones'   => $ttlBeratCns,
+                'sisa_kgs_mc'       => $data['sisa_kg'],
+                'sisa_cones_mc'     => $data['sisa_cns'],
+                'lot'               => $data['lot'],
+                'keterangan'        => $data['keterangan'],
+                'updated_at'        => date('Y-m-d H:i:s'),
+            ];
+
+            $updatePemesanan = $this->pemesananModel->update($idPemesanan, $pemesananUpdate);
+
+            if (!$updatePemesanan) {
+                log_message('error', "Gagal update pemesanan untuk id_pemesanan: {$idPemesanan}");
+                return $this->respond([
+                    'status'  => 'error',
+                    'message' => "Gagal update pemesanan untuk id_pemesanan: {$idPemesanan}",
+                ], 400);
+            }
+        }
+
+        // Jika semua data berhasil diperbarui
+        return $this->respond([
+            'status'  => 'success',
+            'message' => "Semua data berhasil diperbarui",
+        ], 200);
+    }
+    public function kirimPemesanan()
+    {
+        // Ambil data JSON dari request
+        $data = $this->request->getJSON(true);
+        log_message('debug', 'Data received: ' . json_encode($data));
+
+        $updatePemesanan = $this->pemesananModel->kirimPemesanan($data);
+
+        if ($updatePemesanan['status'] === 'error') {
+            log_message('error', $updatePemesanan['message']);
+            return $this->respond([
+                'status'  => 'error',
+                'message' => $updatePemesanan['message'],
+            ], 400);
+        }
+
+        // Jika semua data berhasil diperbarui
+        return $this->respond([
+            'status'  => 'success',
+            'message' => $updatePemesanan['message'],
+            'success_count' => $updatePemesanan['success_count'],
+            'failure_count' => $updatePemesanan['failure_count'],
+        ], 200);
     }
 }

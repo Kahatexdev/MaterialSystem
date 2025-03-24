@@ -37,8 +37,11 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('updateArea/(:num)', 'MaterialController::updateArea/$1');
     // $routes->post('exportOpenPO/(:any)/(:any)', 'MasterdataController::exportOpenPO/$1/$2');
     $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
+    $routes->post('splitMaterial', 'MaterialController::splitMaterial');
 
     $routes->post('import/mu', 'MasterdataController::importMU');
+    $routes->post('revise/mu', 'MasterdataController::reviseMU');
+
 
     $routes->get('masterMaterial', 'MastermaterialController::index');
     $routes->post('tampilMasterMaterial', 'MastermaterialController::tampilMasterMaterial');
@@ -113,10 +116,17 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('warehouse/updateCluster', 'WarehouseController::updateCluster');
     $routes->post('warehouse/getNoModel', 'WarehouseController::getNoModel');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
+    $routes->get('warehouse/reportDatangBenang', 'WarehouseController::reportDatangBenang');
+    $routes->get('warehouse/filterDatangBenang', 'WarehouseController::filterDatangBenang');
+    $routes->get('warehouse/exportDatangBenang', 'WarehouseController::exportDatangBenang');
     //
+    $routes->post('getStockByParams', 'PemesananController::getStockByParams');
     $routes->get('pemesanan', 'PemesananController::index');
+    $routes->get('pemesanan/(:any)/(:any)', 'PemesananController::pemesanan/$1/$2');
+    $routes->post('pemesanan/filter', 'PemesananController::filterPemesanan');
     $routes->get('pemesananperarea/(:any)', 'PemesananController::pemesananPerArea/$1');
     $routes->get('detailpemesanan/(:any)/(:any)', 'PemesananController::detailPemesanan/$1/$2');
+    $routes->get('selectClusterWarehouse/(:any)', 'PemesananController::selectClusterWarehouse/$1');
     $routes->get('pengiriman_area', 'PemesananController::pengirimanArea');
     $routes->post('pengiriman_area', 'PemesananController::pengirimanArea');
     $routes->post('reset_pengiriman/(:any)/(:any)', 'PemesananController::resetPengirimanArea/$1/$2');
@@ -144,6 +154,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
 // celup routes
 $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('', 'DashboardCelupController::index');
+    $routes->get('getStackedChartData', 'DashboardCelupController::getStackedChartData');
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
     $routes->get('schedule/nylon', 'ScheduleController::nylon');
@@ -228,6 +239,11 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('warehouse/reportPengeluaran', 'CoveringWarehouseController::reportPengeluaran');
     $routes->get('warehouse/pengeluaran_jalur', 'CoveringController::pengeluaranJalur');
     $routes->get('warehouse/pengiriman_area', 'CoveringController::pengirimanArea');
+
+    //Pemesanan
+    $routes->get('pemesanan', 'CoveringPemesananController::index');
+    $routes->get('pemesanan/(:any)', 'CoveringPemesananController::pemesanan/$1');
+    $routes->get('detailPemesanan/(:any)', 'CoveringPemesananController::detailPemesanan/$1');
 });
 
 
@@ -260,6 +276,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
 
     $routes->post('import/mu', 'MasterdataController::importMU');
+    $routes->post('revise/mu', 'MasterdataController::reviseMU');
 
     $routes->get('masterMaterial', 'MastermaterialController::index');
     $routes->post('tampilMasterMaterial', 'MastermaterialController::tampilMasterMaterial');
@@ -384,6 +401,9 @@ $routes->group(
         $routes->post('insertQtyCns', 'ApiController::insertQtyCns');
         $routes->post('saveListPemesanan', 'ApiController::saveListPemesanan');
         $routes->get('listPemesanan/(:any)', 'ApiController::listPemesanan/$1');
+        $routes->post('getUpdateListPemesanan', 'ApiController::getUpdateListPemesanan');
+        $routes->post('updateListPemesanan', 'ApiController::updateListPemesanan');
+        $routes->post('kirimPemesanan', 'ApiController::kirimPemesanan');
         // $routes->get('getMaterialForPPH/(:any)/(:any)', 'ApiController::getMaterialForPPH/$1/$2');
         $routes->get('stockbahanbaku/(:any)', 'ApiController::stockbahanbaku/$1');
     }

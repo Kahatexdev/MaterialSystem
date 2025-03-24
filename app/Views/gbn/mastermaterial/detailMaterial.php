@@ -41,7 +41,7 @@
                     <button type="button" class="btn btn-outline-info me-2" data-bs-toggle="modal" data-bs-target="#tambahModal">
                         <i class="fas fa-plus me-2"></i>Material
                     </button>
-                    <a href="<?= base_url($role . '/openPO/' . $id_order) ?>" class="btn btn-outline-info">
+                    <a href="<?= base_url($role . '/openPO/' . $id_order) ?>" class="btn btn-outline-info me-2">
                         <i class="fas fa-file-import me-2"></i>Buka PO
                     </a>
                     <button type="submit" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#ExportModal">
@@ -56,7 +56,7 @@
     <div class="card mt-4">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
+                <table id="dataTable" class="display text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>
                         <tr>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Style Size</th>
@@ -70,7 +70,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty(pcs)</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Loss</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -89,10 +89,13 @@
                                 <td><?= $data['kgs'] ?></td>
                                 <td>
                                     <button class="btn btn-sm btn-warning btn-edit" data-id="<?= $data['id_material'] ?>">
-                                        Update
+                                        <i class="fas fa-edit text-lg"></i>
                                     </button>
                                     <button class="btn btn-danger btn-sm btn-delete" data-id="<?= $data['id_material'] ?>">
-                                        Delete
+                                        <i class="fas fa-trash text-lg"></i>
+                                    </button>
+                                    <button class="btn btn-info btn-sm btn-split" data-id="<?= $data['id_material'] ?>" id="btn-split">
+                                        <i class="fas fa-table text-lg"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -210,7 +213,6 @@
         </div>
 
         <!-- Modal Edit Data Material -->
-        <!-- Modal Edit Data Material -->
         <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -286,6 +288,7 @@
                 </div>
             </div>
         </div>
+
         <!-- Modal Export PO -->
         <div class="modal fade" id="ExportModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -362,6 +365,157 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Split Qty -->
+    <div class="modal fade" id="modalSplitMaterial" tabindex="-1" aria-labelledby="modalSplitLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="splitQtyModalLabel">Split Area</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                    <form id="splitForm" action="<?= base_url($role . '/splitMaterial') ?>" method="post">
+                        <input type="hidden" name="id_material" id="id_material_split">
+                        <input type="hidden" name="id_order" id="id_order_split">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="style_size" class="form-label">Style Size</label>
+                                    <input type="text" class="form-control" id="style_size_split" name="style_size" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="inisial" class="form-label">Inisial</label>
+                                    <input type="text" class="form-control" id="inisial_split" name="inisial" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="item_type" class="form-label">Item Type</label>
+                                    <input type="text" class="form-control" id="item_type_split" name="item_type" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="item_type" class="form-label">Kode Warna</label>
+                                    <input type="text" class="form-control" id="kode_warna_split" name="kode_warna" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="gw" class="form-label">GW</label>
+                                    <input type="text" class="form-control" id="gw_split" name="gw" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="composition" class="form-label">Composition</label>
+                                    <input type="text" class="form-control" id="composition_split" name="composition" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="loss" class="form-label">Loss</label>
+                                    <input type="number" class="form-control" id="loss_split" name="loss" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="area" class="form-label">Kgs Awal</label>
+                                    <input type="number" class="form-control" id="kgs_split" name="kgs_awal" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="item_type" class="form-label">Qty Awal</label>
+                                    <input type="number" class="form-control" id="qty_pcs_split" name="qty_pcs" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="area" class="form-label">Area 1</label>
+                                    <select name="split_area_1" id="split_area_1" class="form-control" required>
+                                        <option value="">Pilih Area</option>
+                                        <option value="KK1A">KK1A</option>
+                                        <option value="KK1B">KK1B</option>
+                                        <option value="KK2A">KK2A</option>
+                                        <option value="KK2C">KK2C</option>
+                                        <option value="KK5G">KK5G</option>
+                                        <option value="KK7K">KK7K</option>
+                                        <option value="KK8D">KK8D</option>
+                                        <option value="KK8F">KK8F</option>
+                                        <option value="KK9D">KK9D</option>
+                                        <option value="KK10">KK10</option>
+                                        <option value="KK11M">KK11M</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="inisial" class="form-label">Qty Area 1</label>
+                                    <input type="number" step="0.01" class="form-control" id="qty1" name="qty_pcs_2" required>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="color" class="form-label">Area 2</label>
+                                    <select name="split_area_2" id="split_area_2" class="form-control" required>
+                                        <option value="">Pilih Area</option>
+                                        <option value="KK1A">KK1A</option>
+                                        <option value="KK1B">KK1B</option>
+                                        <option value="KK2A">KK2A</option>
+                                        <option value="KK2C">KK2C</option>
+                                        <option value="KK5G">KK5G</option>
+                                        <option value="KK7K">KK7K</option>
+                                        <option value="KK8D">KK8D</option>
+                                        <option value="KK8F">KK8F</option>
+                                        <option value="KK9D">KK9D</option>
+                                        <option value="KK10">KK10</option>
+                                        <option value="KK11M">KK11M</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="item_type" class="form-label">Qty Area 2</label>
+                                    <input type="number" step="0.01" class="form-control" id="qty2" name="qty_pcs_2" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="kgs1" class="form-label">Kgs Area 1</label>
+                                    <input type="number" step="0.01" class="form-control" id="kgs1" name="kgs_1" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="kgs2" class="form-label">Kgs Area 2</label>
+                                    <input type="number" step="0.01" class="form-control" id="kgs2" name="kgs_2" readonly>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-info">Split</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -411,9 +565,6 @@
             });
         });
 
-        // Event listener untuk submit form update
-
-
         // Event listener tombol Delete
         $('#dataTable').on('click', '.btn-delete', function() {
             const id = $(this).data('id');
@@ -452,5 +603,109 @@
         }
     });
 </script>
+<script>
+    $(document).ready(function() {
+        function hitungKgsSplit() {
+            let gw = parseFloat($('#gw_split').val()) || 0;
+            let comp = parseFloat($('#composition_split').val()) || 0; // Misal 85.95
+            let loss = parseFloat($('#loss_split').val()) || 0; // Misal 5
+            let qtyPcs = parseFloat($('#qty_pcs_split').val()) || 0;
+            let qty1 = parseFloat($('#qty1').val()) || 0;
+            let qty2 = parseFloat($('#qty2').val()) || 0;
 
+            // Hitung total Komposisi + Loss dengan konsep persen yang benar
+            let totalCompLoss = comp / 100 * (1 + loss / 100); // Menambahkan loss sebagai persen dari comp
+            let totalKgs = ((gw * totalCompLoss) * qtyPcs) / 1000;
+
+            // Bagi sesuai Qty Area 1 dan Area 2
+            let kgsArea1 = (totalKgs * qty1) / qtyPcs;
+            let kgsArea2 = (totalKgs * qty2) / qtyPcs;
+
+            $('#kgs1').val(kgsArea1.toFixed(2)); // Menampilkan hasil dengan 2 angka desimal
+            $('#kgs2').val(kgsArea2.toFixed(2)); // Menampilkan hasil dengan 2 angka desimal
+        }
+
+        // Panggil fungsi hitung otomatis saat modal dibuka
+        $(document).on('click', '.btn-split', function() {
+            let materialId = $(this).data('id');
+
+            $.ajax({
+                url: '<?= base_url($role . '/getMaterialDetails') ?>/' + materialId,
+                type: 'GET',
+                success: function(response) {
+                    $('#id_material_split').val(response.id_material);
+                    $('#id_order_split').val(response.id_order);
+                    $('#style_size_split').val(response.style_size);
+                    $('#inisial_split').val(response.inisial);
+                    $('#gw_split').val(response.gw);
+                    $('#loss_split').val(response.loss);
+                    $('#item_type_split').val(response.item_type);
+                    $('#qty_pcs_split').val(response.qty_pcs);
+                    $('#composition_split').val(response.composition);
+                    $('#kode_warna_split').val(response.kode_warna);
+                    $('#kgs_split').val(response.kgs);
+
+                    hitungKgsSplit(); // Hitung otomatis setelah nilai dimasukkan
+
+                    // **Tambahkan kode ini untuk menampilkan modal**
+                    $('#modalSplitMaterial').modal('show');
+                },
+                error: function(xhr) {
+                    alert('Gagal mengambil data material.');
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+
+        // Hitung ulang saat qty area diubah
+        $('#qty1, #qty2').on('input', hitungKgsSplit);
+
+        // Validasi & Kirim Data Saat Split
+        $('#splitForm').on('submit', function(e) {
+            let qtyAwal = parseFloat($('#qty_pcs_split').val()) || 0;
+            let qty1 = parseFloat($('#qty1').val()) || 0;
+            let qty2 = parseFloat($('#qty2').val()) || 0;
+            let totalQty = qty1 + qty2;
+
+            if (totalQty !== qtyAwal) {
+                alert('Jumlah Qty Area 1 dan Area 2 harus sama dengan Qty Awal!');
+                e.preventDefault();
+                return;
+            }
+
+            // Kirim data ke backend untuk buat ID baru
+            $.ajax({
+                url: '<?= base_url($role . '/splitMaterial') ?>',
+                type: 'POST',
+                data: {
+                    id_material_old: $('#id_material_split').val(),
+                    id_order: $('#id_order_split').val(),
+                    style_size: $('#style_size_split').val(),
+                    inisial: $('#inisial_split').val(),
+                    gw: $('#gw_split').val(),
+                    loss: $('#loss_split').val(),
+                    item_type: $('#item_type_split').val(),
+                    composition: $('#composition_split').val(),
+                    kode_warna: $('#kode_warna_split').val(),
+                    qty_pcs_1: qty1,
+                    qty_pcs_2: qty2,
+                    kgs_1: $('#kgs1').val(),
+                    kgs_2: $('#kgs2').val(),
+                    split_area_1: $('#split_area_1').val(),
+                    split_area_2: $('#split_area_2').val()
+                },
+                success: function(response) {
+                    alert('Material berhasil di-split!');
+                    location.reload();
+                },
+                error: function(xhr) {
+                    alert('Terjadi kesalahan saat split data.');
+                    console.error(xhr.responseText);
+                }
+            });
+
+            e.preventDefault(); // Stop form dari submit default
+        });
+    });
+</script>
 <?php $this->endSection(); ?>

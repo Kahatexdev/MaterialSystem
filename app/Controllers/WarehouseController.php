@@ -19,6 +19,8 @@ use App\Models\HistoryPindahPalet;
 use App\Models\HistoryPindahOrder;
 use App\Models\PengeluaranModel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class WarehouseController extends BaseController
 {
@@ -1197,5 +1199,71 @@ class WarehouseController extends BaseController
             session()->setFlashdata('error', 'Gagal mengkomplain data.');
         }
         return redirect()->back();
+    }
+
+    public function reportDatangBenang()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Report Datang Benang',
+            'active' => $this->active
+        ];
+        return view($this->role . '/warehouse/report-datang-benang', $data);
+    }
+
+    public function filterDatangBenang()
+    {
+        $key = $this->request->getGet('key');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemasukanModel->getFilterDatangBenang($key, $tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
+    }
+
+    public function exportDatangBenang()
+    {
+        $key = $this->request->getGet('key');
+        $tanggal_awal = $this->request->getGet('tanggal_awal');
+        $tanggal_akhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemasukanModel->getFilterDatangBenang($key, $tanggal_awal, $tanggal_akhir);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Header
+        $header = ["No", "No Model", "Item Type", "Kode Warna", "Warna", "Kgs Masuk", "Cones Masuk", "Tanggal Masuk", "Nama Cluster"];
+        $sheet->fromArray([$header], NULL, 'A1');
+
+        // Data
+        $row = 2;
+        foreach ($data as $index => $item) {
+            $sheet->fromArray([
+                [
+                    $index + 1,
+                    $item['no_model'],
+                    $item['item_type'],
+                    $item['kode_warna'],
+                    $item['warna'],
+                    $item['kgs_masuk'],
+                    $item['cns_masuk'],
+                    $item['tgl_masuk'],
+                    $item['nama_cluster']
+                ]
+            ], NULL, 'A' . $row);
+            $row++;
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Report_Datang_Benang_' . date('Y-m-d') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
     }
 }

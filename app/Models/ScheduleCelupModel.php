@@ -388,33 +388,40 @@ class ScheduleCelupModel extends Model
             ->groupBy('schedule_celup.lot_urut')
             ->findAll();
     }
-    
+
     public function countStatusScheduled()
     {
         return $this->select('COUNT(id_celup) as total_scheduled')
             ->where('last_status', 'scheduled') // Sesuaikan last status jika perlu
-            ->groupBy('id_celup')
+            ->where('DATE(tanggal_schedule)', date('Y-m-d'))
             ->first();
     }
     public function countStatusReschedule()
     {
         return $this->select('COUNT(id_celup) as total_reschedule')
             ->where('last_status', 'reschedule') // Sesuaikan last status jika perlu
-            ->groupBy('id_celup')
             ->first();
     }
     public function countStatusDone()
     {
         return $this->select('COUNT(id_celup) as total_done')
-            ->where('last_status', 'done') // Sesuaikan last status jika perlu
-            ->groupBy('id_celup')
+            ->where('last_status', 'done')
+            ->where('DATE(tanggal_kelos)', date('Y-m-d'))
             ->first();
     }
     public function countStatusRetur()
     {
         return $this->select('COUNT(id_celup) as total_retur')
             ->where('last_status', 'retur') // Sesuaikan last status jika perlu
-            ->groupBy('id_celup')
             ->first();
+    }
+
+    public function getMesinKapasitasHariIni()
+    {
+        return $this->db->table('mesin_celup')
+            ->select('mesin_celup.no_mesin, mesin_celup.max_caps, COALESCE(SUM(schedule_celup.kg_celup), 0) as kapasitas_terpakai')
+            ->join('schedule_celup', 'schedule_celup.id_mesin = mesin_celup.id_mesin AND schedule_celup.tanggal_schedule = CURDATE()', 'left')
+            ->groupBy('mesin_celup.no_mesin, mesin_celup.max_caps')
+            ->get()->getResultArray();
     }
 }

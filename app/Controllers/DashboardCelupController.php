@@ -37,6 +37,8 @@ class DashboardCelupController extends BaseController
         $reschedule = $this->scheduleCelupModel->countStatusReschedule();
         $done = $this->scheduleCelupModel->countStatusDone();
         $retur = $this->scheduleCelupModel->countStatusRetur();
+        $mesin = $this->scheduleCelupModel->getMesinKapasitasHariIni();
+
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
@@ -44,7 +46,8 @@ class DashboardCelupController extends BaseController
             'scheduled' => $scheduled,
             'reschedule' => $reschedule,
             'done' => $done,
-            'retur' => $retur
+            'retur' => $retur,
+            'mesin' => $mesin
         ];
         return view($this->role . '/dashboard/index', $data);
     }

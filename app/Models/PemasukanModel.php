@@ -169,15 +169,31 @@ class PemasukanModel extends Model
     {
         return $this->select('SUM(out_celup.no_karung) as total_karung_masuk')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
-            ->where('pemasukan.tgl_masuk', date('Y-m-d')) // Hanya untuk tanggal hari ini
+            ->where('DATE(pemasukan.tgl_masuk)', date('Y-m-d')) // Hanya untuk tanggal hari ini
             ->first();
     }
     public function getTotalKarungKeluar()
     {
         return $this->select('SUM(out_celup.no_karung) as total_karung_keluar')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
-            ->where('pemasukan.tgl_masuk', date('Y-m-d')) // Hanya untuk tanggal hari ini
+            ->where('DATE(pemasukan.tgl_masuk)', date('Y-m-d')) // Hanya untuk tanggal hari ini
             ->where('pemasukan.out_jalur', '1') // Hanya yang sudah keluar
             ->first();
+    }
+
+    public function getFilterDatangBenang($key, $tanggal_awal, $tanggal_akhir)
+    {
+        $this->select('*')
+            ->like('no_model', $key)
+            ->orLike('item_type', $key)
+            ->orLike('kode_warna', $key)
+            ->orLike('warna', $key);
+
+        if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
+            $this->where('tgl_masuk >=', $tanggal_awal)
+                ->where('tgl_masuk <=', $tanggal_akhir);
+        }
+
+        return $this->findAll();
     }
 }

@@ -11,6 +11,7 @@ use App\Models\ScheduleCelupModel;
 use App\Models\PemasukanModel;
 use App\Models\ClusterModel;
 use App\Models\StockModel;
+use App\Models\PemesananModel;
 
 class DashboardGbnController extends BaseController
 {
@@ -24,6 +25,7 @@ class DashboardGbnController extends BaseController
     protected $pemasukanModel;
     protected $clusterModel;
     protected $stockModel;
+    protected $pemesananModel;
 
     public function __construct()
     {
@@ -34,6 +36,7 @@ class DashboardGbnController extends BaseController
         $this->pemasukanModel = new PemasukanModel();
         $this->clusterModel = new ClusterModel();
         $this->stockModel = new StockModel();
+        $this->pemesananModel = new PemesananModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -50,19 +53,19 @@ class DashboardGbnController extends BaseController
     }
     public function index()
     {
-        $pdk = $this->masterOrderModel->getPdk();
+        $pemesanan = $this->pemesananModel->totalPemesananPerHari();
         $schedule = $this->scheduleCelupModel->countStatusDone();
         $pemasukan = $this->pemasukanModel->getTotalKarungMasuk();
         $pengeluaran = $this->pemasukanModel->getTotalKarungKeluar();
         $groupI = $this->clusterModel->getClusterGroupI();
         $groupII = $this->clusterModel->getClusterGroupII();
         $groupIII = $this->clusterModel->getClusterGroupIII();
-        // dd($groupI);
+
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
-            'pdk' => $pdk,
+            'pemesanan' => $pemesanan,
             'schedule' => $schedule,
             'pemasukan' => $pemasukan,
             'pengeluaran' => $pengeluaran,

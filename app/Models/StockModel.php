@@ -227,4 +227,27 @@ class StockModel extends Model
 
         return $builder->get()->getResultArray();
     }
+
+    public function getStock($no_model, $item_type, $kode_warna, $warna)
+    {
+        return $this->select('sum(kgs_stock_awal) as kgs_stock_awal, sum(cns_stock_awal) as cns_stock_awal, sum(krg_stock_awal) as krg_stock_awal, sum(kgs_in_out) as kgs_in_out, sum(cns_in_out) as cns_in_out, sum(krg_in_out) as krg_in_out, sum(lot_stock) as lot_stock')
+            ->where('no_model', $no_model)
+            ->where('item_type', $item_type)
+            ->where('kode_warna', $kode_warna)
+            ->where('warna', $warna)
+            ->groupBy('kode_warna')
+            ->first();
+    }
+
+    public function getDataCluster($noModel, $itemType, $kodeWarna, $warna)
+    {
+        return $this->select('nama_cluster, kgs_stock_awal, cns_stock_awal, krg_stock_awal, lot_awal, kgs_in_out, cns_in_out, krg_in_out, lot_stock')
+            ->where('no_model', $noModel)
+            ->where('item_type', $itemType)
+            ->where('kode_warna', $kodeWarna)
+            ->where('warna', $warna)
+            ->groupBy('nama_cluster')
+            ->get()
+            ->getResultArray();
+    }
 }
