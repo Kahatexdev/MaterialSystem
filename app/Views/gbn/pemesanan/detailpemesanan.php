@@ -26,121 +26,158 @@
         </script>
     <?php endif; ?>
 
-    <!-- Modal untuk Upload File Excel -->
-    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+    <!-- Modal Detail Stok -->
+    <div class="modal fade" id="modalStock" tabindex="-1" aria-labelledby="modalStockLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="importModalLabel">Upload File Excel</h5>
+                    <h5 class="modal-title" id="modalStockLabel">Detail Stok</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="import/mu" method="post" enctype="multipart/form-data">
-                    <div class="modal-body">
-                        <!-- Input File -->
-                        <div class="mb-3">
-                            <label for="excelFile" class="form-label">Pilih File Excel</label>
-                            <input type="file" class="form-control" id="excelFile" name="file" accept=".xlsx, .xls, .csv" required>
-                            <small class="text-muted">Hanya file dengan format .xlsx, .xls, atau .csv yang didukung.</small>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Upload</button>
-                    </div>
-                </form>
+                <div class="modal-body">
+                    <form id="stockForm">
+                        <div id="stockData" class="row g-3"></div>
+                        <button type="submit" class="btn bg-gradient-info mt-3 text-end">Pilih Stok</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
+
 
     <!-- Button Import -->
     <div class="card card-frame">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 font-weight-bolder">Data Pemesanan <?= $jenis; ?> <?= $area; ?></h5>
-                <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#importModal">
-                    <i class="fas fa-file-import me-2"></i>Import MU
-                </button>
+                <h5 class="mb-0 font-weight-bolder">Data Pemesanan <?= $jenis; ?> <?= $area; ?> <?= $tglPakai; ?></h5>
             </div>
         </div>
-    </div>
 
 
-    <!-- Tabel Data -->
-    <div class="card mt-4">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Pakai Area</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jalan Mc</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Kgs Pesan</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Cns Pesan</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Po Tambahan</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (!empty($dataPemesanan)): ?>
-                            <?php
-                            $no = 1;
-                            foreach ($dataPemesanan as $data): ?>
-                                <tr>
-                                    <td><?= $no++; ?></td>
-                                    <td><?= $data['tgl_pakai'] ?></td>
-                                    <td><?= $data['area'] ?></td>
-                                    <td><?= $data['no_model'] ?></td>
-                                    <td><?= $data['item_type'] ?></td>
-                                    <td><?= $data['kode_warna'] ?></td>
-                                    <td><?= $data['color'] ?></td>
-                                    <td><?= $data['jl_mc'] ?></td>
-                                    <td><?= $data['kgs_pesan'] ?></td>
-                                    <td><?= $data['cns_pesan'] ?></td>
-                                    <td><?= $data['po_tambahan'] ?></td>
-                                    <td>
-                                        <form action="<?= base_url($role . '/pengiriman_area') ?>" method="post">
-                                            <input type="hidden" name="tgl_pakai" value="<?= $data['tgl_pakai'] ?>">
-                                            <input type="hidden" name="area" value="<?= $data['area'] ?>">
-                                            <input type="hidden" name="no_model" value="<?= $data['no_model'] ?>">
-                                            <input type="hidden" name="item_type" value="<?= $data['item_type'] ?>">
-                                            <input type="hidden" name="kode_warna" value="<?= $data['kode_warna'] ?>">
-                                            <input type="hidden" name="warna" value="<?= $data['color'] ?>">
-                                            <input type="hidden" name="kgs_pesan" value="<?= $data['kgs_pesan'] ?>">
-                                            <input type="hidden" name="cns_pesan" value="<?= $data['cns_pesan'] ?>">
-                                            <button type="submit" class="btn bg-gradient-info btn-sm">
-                                                Kirim
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-            <?php if (empty($dataPemesanan)) : ?>
-                <div class="card-footer">
-                    <div class="row">
-                        <div class="col-lg-12 text-center">
-                            <p>No data available in the table.</p>
+        <!-- Tabel Data -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Pakai Area</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jalan Mc</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Kgs Pesan</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Cns Pesan</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Po Tambahan</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cluster</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($dataPemesanan)): ?>
+                                <?php
+                                $no = 1;
+                                foreach ($dataPemesanan as $data): ?>
+                                    <tr>
+                                        <td><?= $no++; ?></td>
+                                        <td><?= $data['tgl_pakai'] ?></td>
+                                        <td><?= $data['area'] ?></td>
+                                        <td><?= $data['no_model'] ?></td>
+                                        <td><?= $data['item_type'] ?></td>
+                                        <td><?= $data['kode_warna'] ?></td>
+                                        <td><?= $data['color'] ?></td>
+                                        <td><?= $data['jl_mc'] ?></td>
+                                        <td><?= round($data['kgs_pesan']) ?></td>
+                                        <td><?= $data['cns_pesan'] ?></td>
+                                        <td><?= $data['po_tambahan'] ?></td>
+                                        <td>
+                                            <a href="<?= base_url($role . '/selectClusterWarehouse/' . $data['id_pemesanan']) ?>" 
+                                               class="btn bg-gradient-info">
+                                                <i class="fas fa-layer-group"></i>Pilih
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php if (empty($dataPemesanan)) : ?>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-lg-12 text-center">
+                                <p>No data available in the table.</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            <?php endif; ?>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="text/javascript">
-        $('#dataTable').DataTable({
-            "pageLength": 35,
-            "order": []
-        });
-    </script>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script type="text/javascript">
+    $('#dataTable').DataTable({
+        "pageLength": 35,
+        "order": []
+    });
+</script>
 
-    <?php $this->endSection(); ?>
+<script>
+    // $(document).ready(function() {
+    //     $(".btn-detail").click(function() {
+    //         let no_model = $(this).data("no_model");
+    //         let item_type = $(this).data("item_type");
+    //         let kode_warna = $(this).data("kode_warna");
+    //         let warna = $(this).data("warna");
+
+    //         $.ajax({
+    //             url: "<?= base_url($role . '/getStockByParams') ?>",
+    //             type: "POST",
+    //             data: {
+    //                 no_model: no_model,
+    //                 item_type: item_type,
+    //                 kode_warna: kode_warna,
+    //                 warna: warna
+    //             },
+    //             dataType: "json",
+    //             success: function(response) {
+    //                 let stockContainer = $("#stockData");
+    //                 stockContainer.empty();
+
+    //                 if (response.length > 0) {
+    //                     $.each(response, function(index, stock) {
+    //                         stockContainer.append(`
+    //                                 <div class="col-6 border p-3">
+    //                                     <div class="form-check">
+    //                                         <input class="form-check-input" type="checkbox" name="selectedStock[]" value="${stock.id_stock}">
+    //                                         <label class="form-check-label">
+    //                                             <strong>No:</strong> ${index + 1} <br>
+    //                                             <strong>No Model:</strong> ${stock.no_model} <br>
+    //                                             <strong>Item Type:</strong> ${stock.item_type} <br>
+    //                                             <strong>Kode Warna:</strong> ${stock.kode_warna} <br>
+    //                                             <strong>Warna:</strong> ${stock.warna} <br>
+    //                                             <strong>Stok Kgs:</strong> ${stock.kgs_stock_awal} <br>
+    //                                             <strong>Stok Cns:</strong> ${stock.cns_stock_awal}
+    //                                         </label>
+    //                                     </div>
+    //                                 </div>
+    //                             `);
+    //                     });
+    //                 } else {
+    //                     stockContainer.append('<div class="col-12 text-center">Data stok tidak ditemukan</div>');
+    //                 }
+    //                 $("#modalStock").modal("show");
+    //             },
+    //             error: function() {
+    //                 alert("Gagal mengambil data stok");
+    //             }
+    //         });
+    //     });
+    // });
+</script>
+
+
+<?php $this->endSection(); ?>

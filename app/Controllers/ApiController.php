@@ -368,11 +368,12 @@ class ApiController extends ResourceController
     }
     public function stockbahanbaku($area)
     {
-        $noModel = $this->request->getPost('noModel') ?? '';
-        $warna = $this->request->getPost('warna') ?? '';
+        $noModel = $this->request->getGet('noModel') ?? '';
+        $warna = $this->request->getGet('warna') ?? '';
 
-        $results = $this->stockModel->searchStock($noModel, $warna);
+        $results = $this->stockModel->searchStockArea($area, $noModel, $warna);
 
+        dd($noModel, $warna, $results);
         // Konversi stdClass menjadi array
         $resultsArray = json_decode(json_encode($results), true);
 

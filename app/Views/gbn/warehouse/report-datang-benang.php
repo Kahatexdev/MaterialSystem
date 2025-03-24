@@ -2,29 +2,6 @@
 <?php $this->section('content'); ?>
 
 <div class="container-fluid py-4">
-    <?php if (session()->getFlashdata('success')) : ?>
-        <script>
-            $(document).ready(function() {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    html: '<?= session()->getFlashdata('success') ?>',
-                });
-            });
-        </script>
-    <?php endif; ?>
-
-    <?php if (session()->getFlashdata('error')) : ?>
-        <script>
-            $(document).ready(function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    html: '<?= session()->getFlashdata('error') ?>',
-                });
-            });
-        </script>
-    <?php endif; ?>
 
     <!-- Button Filter -->
     <div class="card card-frame">
@@ -33,7 +10,7 @@
                 <h5 class="mb-0 font-weight-bolder">Filter Datang Benang</h5>
             </div>
             <div class="row mt-2">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="">Key</label>
                     <input type="text" class="form-control">
                 </div>
@@ -45,9 +22,11 @@
                     <label for="">Tanggal Akhir (Tanggal Datang)</label>
                     <input type="date" class="form-control">
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label for="">Aksi</label><br>
-                    <button class="btn btn-info">Search</button>
+                    <button class="btn btn-info btn-block" id="btnSearch"><i class="fas fa-search"></i></button>
+                    <button class="btn btn-danger" id="btnReset"><i class="fas fa-redo-alt"></i></button>
+                    <button class="btn btn-success d-none" id="btnExport"><i class="fas fa-file-excel"></i></button>
                 </div>
             </div>
         </div>
@@ -78,7 +57,96 @@
             </div>
         </div>
     </div>
-
 </div>
+
+<script>
+    $(document).ready(function() {
+        let dataTable = $('#dataTable').DataTable({
+            "paging": true,
+            "searching": false,
+            "ordering": true,
+            "info": true,
+            "responsive": true,
+            "processing": true,
+            "serverSide": false
+        });
+
+        function loadData() {
+            let key = $('input[type="text"]').val().trim();
+            let tanggal_awal = $('input[type="date"]').eq(0).val().trim();
+            let tanggal_akhir = $('input[type="date"]').eq(1).val().trim();
+
+            // Validasi: Jika semua input kosong, tampilkan alert dan hentikan pencarian
+            if (key === '' && tanggal_awal === '' && tanggal_akhir === '') {
+                alert('Harap isi minimal salah satu kolom sebelum melakukan pencarian!');
+                return;
+            }
+
+            $.ajax({
+                url: "<?= base_url($role . '/warehouse/filterDatangBenang') ?>",
+                type: "GET",
+                data: {
+                    key: key,
+                    tanggal_awal: tanggal_awal,
+                    tanggal_akhir: tanggal_akhir
+                },
+                dataType: "json",
+                success: function(response) {
+                    dataTable.clear().draw();
+
+                    if (response.length > 0) {
+                        $.each(response, function(index, item) {
+                            dataTable.row.add([
+                                index + 1,
+                                item.no_model,
+                                item.item_type,
+                                item.kode_warna,
+                                item.warna,
+                                item.kgs_masuk,
+                                item.cns_masuk,
+                                item.tgl_masuk,
+                                item.nama_cluster
+                            ]).draw(false);
+                        });
+
+                        $('#btnExport').removeClass('d-none'); // Munculkan tombol Export Excel
+                    } else {
+                        $('#btnExport').addClass('d-none'); // Sembunyikan jika tidak ada data
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", error);
+                }
+            });
+        }
+
+        $('#btnSearch').click(function() {
+            loadData();
+        });
+
+        $('#btnExport').click(function() {
+            let key = $('input[type="text"]').val();
+            let tanggal_awal = $('input[type="date"]').eq(0).val();
+            let tanggal_akhir = $('input[type="date"]').eq(1).val();
+            window.location.href = "<?= base_url($role . '/warehouse/exportDatangBenang') ?>?key=" + key + "&tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
+        });
+
+        dataTable.clear().draw();
+    });
+
+    // Fitur Reset
+    $('#btnReset').click(function() {
+        // Kosongkan input
+        $('input[type="text"]').val('');
+        $('input[type="date"]').val('');
+
+        // Kosongkan tabel hasil pencarian
+        $('#dataTable tbody').html('');
+
+        // Sembunyikan tombol Export Excel
+        $('#btnExport').addClass('d-none');
+    });
+</script>
+
 
 <?php $this->endSection(); ?>

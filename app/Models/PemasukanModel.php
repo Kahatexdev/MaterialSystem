@@ -180,4 +180,20 @@ class PemasukanModel extends Model
             ->where('pemasukan.out_jalur', '1') // Hanya yang sudah keluar
             ->first();
     }
+
+    public function getFilterDatangBenang($key, $tanggal_awal, $tanggal_akhir)
+    {
+        $this->select('*')
+            ->like('no_model', $key)
+            ->orLike('item_type', $key)
+            ->orLike('kode_warna', $key)
+            ->orLike('warna', $key);
+
+        if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
+            $this->where('tgl_masuk >=', $tanggal_awal)
+                ->where('tgl_masuk <=', $tanggal_akhir);
+        }
+
+        return $this->findAll();
+    }
 }

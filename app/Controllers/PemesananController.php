@@ -98,10 +98,28 @@ class PemesananController extends BaseController
         ];
         return view($this->role . '/pemesanan/pemesanan', $data);
     }
-    public function detailPemesanan($area, $jenis)
+    
+    public function pemesanan($area, $jenis)
     {
-        // dd($area, $jenis);
-        $dataPemesanan = $this->pemesananModel->getDataPemesanan($area, $jenis);
+        $pemesananPertgl = $this->pemesananModel->getDataPemesananperTgl($area, $jenis);
+        // dd ($pemesananPertgl);
+        if (!is_array($pemesananPertgl)) {
+            $pemesananPertgl = []; // Pastikan selalu array
+        }
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'area' => $area,
+            'jenis' => $jenis,
+            'pemesananPertgl' => $pemesananPertgl,
+        ];
+        return view($this->role . '/pemesanan/pemesananpertgl', $data);
+    }
+    
+    public function detailPemesanan($area, $jenis, $tglPakai)
+    {
+        $dataPemesanan = $this->pemesananModel->getDataPemesanan($area, $jenis, $tglPakai);
 
         if (!is_array($dataPemesanan)) {
             $dataPemesanan = []; // Pastikan selalu array
@@ -114,9 +132,50 @@ class PemesananController extends BaseController
             'dataPemesanan' => $dataPemesanan,
             'area' => $area,
             'jenis' => $jenis,
+            'tglPakai' => $tglPakai,
         ];
         return view($this->role . '/pemesanan/detailpemesanan', $data);
     }
+
+
+    public function getStockByParams()
+    {
+        if ($this->request->isAJAX()) {
+            $no_model = $this->request->getPost('no_model');
+            $item_type = $this->request->getPost('item_type');
+            $kode_warna = $this->request->getPost('kode_warna');
+            $warna = $this->request->getPost('warna');
+
+            $stockModel = new StockModel();
+            $stocks = $stockModel->where([
+                'no_model' => $no_model,
+                'item_type' => $item_type,
+                'kode_warna' => $kode_warna,
+                'warna' => $warna
+            ])->findAll(); // Ambil semua data yang cocok
+
+            return $this->response->setJSON($stocks);
+        }
+    }
+
+    
+    public function filterPemesanan()
+    {
+        $area = $this->request->getPost('area');
+        $jenis = $this->request->getPost('jenis');
+        $filterDate = $this->request->getPost('filter_date');
+
+        // log_message('debug', "Filter params: Area=$area, Jenis=$jenis, Tanggal=$filterDate");
+
+        $dataPemesanan = $this->pemesananModel->getDataPemesananfiltered($area, $jenis, $filterDate);
+
+        // log_message('debug', 'Data retrieved: ' . json_encode($dataPemesanan));
+
+        return $this->response->setJSON($dataPemesanan);
+    }
+
+
+
     public function pengirimanArea()
     {
         // session()->remove('dataPengiriman');
@@ -356,5 +415,20 @@ class PemesananController extends BaseController
             session()->setFlashdata('error', 'Gagal, Data pemasukan sudah ada.');
         }
         return redirect()->to($this->role . '/pengiriman_area/' . $area . '/' . $tglPakai);
+    }
+
+    public function selectClusterWarehouse($id)
+    {
+        $getPemesanan = $this->pemesananModel->getDataPemesananbyId($id);
+        $cluster = $this->stockModel->getDataCluster($getPemesanan['no_model'], $getPemesanan['item_type'], $getPemesanan['kode_warna'], $getPemesanan['color']);
+        // dd ($getPemesanan, $cluster);
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'cluster' => $cluster,
+            'id' => $id,
+        ];
+        return view($this->role . '/pemesanan/select-cluster', $data);
     }
 }
