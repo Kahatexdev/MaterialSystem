@@ -431,4 +431,11 @@ class PemesananController extends BaseController
         ];
         return view($this->role . '/pemesanan/select-cluster', $data);
     }
+
+    public function getDataByIdStok($id)
+    {
+        $data = $this->stockModel->getDataByIdStok($id);
+        // var_dump($id, $data);
+        return $this->response->setJSON($data);
+    }
 }
