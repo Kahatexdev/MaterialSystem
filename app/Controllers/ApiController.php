@@ -372,12 +372,9 @@ class ApiController extends ResourceController
         $warna = $this->request->getGet('warna') ?? '';
 
         $results = $this->stockModel->searchStockArea($area, $noModel, $warna);
-
-        dd($noModel, $warna, $results);
+        
         // Konversi stdClass menjadi array
         $resultsArray = json_decode(json_encode($results), true);
-
-
 
         return $this->respond($resultsArray, 200);
     }
