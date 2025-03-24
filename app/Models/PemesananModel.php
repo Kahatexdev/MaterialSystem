@@ -116,7 +116,7 @@ class PemesananModel extends Model
             ->where('pemesanan.admin', $area)
             ->where('pemesanan.status_kirim', '')
             ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai')
-            ->orderBy('pemesanan.tgl_pakai,', 'DESC')
+            ->orderBy('pemesanan.tgl_pakai', 'DESC')
             ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
         return $query->get()->getResultArray();
     }
@@ -236,5 +236,22 @@ class PemesananModel extends Model
             'success_count' => $success,
             'failure_count' => $failure,
         ];
+    }
+    public function deleteListPemesananOtomatis($data)
+    {
+        // Pastikan parameter data memiliki 'tgl_pakai' dan 'admin'
+        if (!isset($data['tgl_pakai']) || !isset($data['admin'])) {
+            return false; // Tidak dapat melanjutkan jika parameter tidak lengkap
+        }
+
+        // Jalankan query untuk menghapus data
+        $this->db
+            ->table('pemesanan') // Ganti dengan nama tabel Anda
+            ->where('tgl_pakai <', $data['tgl_pakai'])
+            ->where('admin', $data['admin'])
+            ->delete();
+
+        // Kembalikan jumlah baris yang terhapus
+        return $this->db->affectedRows(); // Mengembalikan jumlah baris yang dihapus
     }
 }

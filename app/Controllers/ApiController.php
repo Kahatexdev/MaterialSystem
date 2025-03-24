@@ -550,4 +550,36 @@ class ApiController extends ResourceController
             'failure_count' => $updatePemesanan['failure_count'],
         ], 200);
     }
+    public function hapusOldPemesanan()
+    {
+        // Ambil data JSON dari request
+        $data = $this->request->getJSON(true);
+
+        // Validasi data input
+        if (empty($data['tgl_pakai']) || empty($data['area'])) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Tanggal pakai atau area tidak valid.',
+            ], 400); // HTTP 400 Bad Request
+        }
+
+        // Panggil model untuk menghapus data
+        $deletedCount = $this->pemesananModel->deleteListPemesananOtomatis([
+            'tgl_pakai' => $data['tgl_pakai'],
+            'admin' => $data['area'],
+        ]);;
+        // log_message('debug', 'Data received: ' . $deletedCount);
+        if ($deletedCount) {
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => "$deletedCount data berhasil dihapus.",
+                'data' => $data
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => "$deletedCount Tidak ada data yang dihapus.",
+            ], 404); // HTTP 404 Not Found
+        }
+    }
 }

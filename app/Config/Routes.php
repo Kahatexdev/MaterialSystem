@@ -400,5 +400,6 @@ $routes->group(
         $routes->post('kirimPemesanan', 'ApiController::kirimPemesanan');
         // $routes->get('getMaterialForPPH/(:any)/(:any)', 'ApiController::getMaterialForPPH/$1/$2');
         $routes->get('stockbahanbaku/(:any)', 'ApiController::stockbahanbaku/$1');
+        $routes->post('hapusOldPemesanan', 'ApiController::hapusOldPemesanan');
     }
 );
