@@ -158,4 +158,73 @@ class StockModel extends Model
             ->groupBy('kode_warna')
             ->first();
     }
+    // public function searchStockArea($area, $noModel = null, $warna = null)
+    // {
+    //     $query = $this->select('
+    //         stock.no_model, 
+    //         stock.item_type, 
+    //         stock.kode_warna,
+    //         stock.warna,
+    //         COALESCE(SUM(stock.kgs_in_out), 0) AS Kgs, 
+    //         COALESCE(SUM(stock.kgs_stock_awal), 0) AS KgsStockAwal, 
+    //         COALESCE(SUM(stock.krg_in_out), 0) AS Krg, 
+    //         COALESCE(SUM(stock.krg_stock_awal), 0) AS KrgStockAwal,
+    //         COALESCE(SUM(stock.cns_in_out), 0) AS Cns, 
+    //         COALESCE(SUM(stock.cns_stock_awal), 0) AS CnsStockAwal,
+    //         cluster.*,
+    //         material.area
+    //     ')
+    //     ->join('cluster', 'cluster.nama_cluster = stock.nama_cluster', 'left')
+    //     ->join('master_order', 'master_order.no_model = stock.no_model', 'left')
+    //     ->join('material', 
+    //         'material.id_order = master_order.id_order 
+    //         AND material.item_type = stock.item_type 
+    //         AND material.kode_warna = stock.kode_warna 
+    //         AND material.color = stock.warna', 
+    //         'left'
+    //     )
+    //     ->where('material.area', $area);
+
+    //     if (!empty($noModel)) {
+    //         $query->where('stock.no_model', $noModel);
+    //     }
+
+    //     if (!empty($warna)) {
+    //         $query->where('stock.kode_warna', $warna);
+    //     }
+
+    //     return $query->groupBy([
+    //         'stock.no_model',
+    //         'stock.kode_warna',
+    //         'stock.warna',
+    //         'stock.item_type',
+    //         'stock.lot_stock',
+    //         'stock.nama_cluster',
+    //         'cluster.kapasitas'
+    //     ])
+    //     ->orderBy('stock.nama_cluster', 'ASC')
+    //     ->limit(10)
+    //     ->findAll(); // Tambahkan findAll() agar hasilnya berupa array, bukan model
+    // }
+
+    public function searchStockArea($area, $noModel = null, $warna = null)
+    {
+        $builder = $this->db->table('stock')
+            ->select('stock.*, cluster.nama_cluster, cluster.kapasitas, material.area')
+            ->join('cluster', 'stock.nama_cluster = cluster.nama_cluster', 'left')
+            ->join('master_order', 'master_order.no_model = stock.no_model', 'left')
+            ->join('material', 'material.id_order = master_order.id_order', 'left')
+            ->where('material.area', $area) // Menyesuaikan dengan area yang dicari
+            ->groupBy('stock.no_model, stock.item_type, stock.kode_warna, stock.lot_stock, cluster.nama_cluster')
+            ->orderBy('stock.no_model, stock.item_type, stock.kode_warna, stock.lot_stock, cluster.nama_cluster', 'ASC');
+
+        if (!empty($noModel)) {
+            $builder->where('stock.no_model', $noModel);
+        } 
+        if (!empty($warna)) {
+            $builder->orWhere('stock.kode_warna', $warna);
+        }
+
+        return $builder->get()->getResultArray();
+    }
 }

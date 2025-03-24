@@ -371,45 +371,46 @@ class ApiController extends ResourceController
         $noModel = $this->request->getPost('noModel') ?? '';
         $warna = $this->request->getPost('warna') ?? '';
 
-        $results = $this->stockModel->searchStock($noModel, $warna);
-
-        // Konversi stdClass menjadi array
-        $resultsArray = json_decode(json_encode($results), true);
-       
-        // Hitung total kgs_in_out untuk seluruh data
-        $totalKgsByCluster = []; // Array untuk menyimpan total Kgs per cluster
-        $capacityByCluster = []; // Array untuk menyimpan kapasitas per cluster
-
-        foreach ($resultsArray as $item) {
-            $namaCluster = $item['nama_cluster'];
-            $kgs = (float)$item['Kgs'];
-            $kgsStockAwal = (float)$item['KgsStockAwal'];
-            $kapasitas = (float)$item['kapasitas'];
-
-            // Inisialisasi total Kgs dan kapasitas untuk cluster jika belum ada
-            if (!isset($totalKgsByCluster[$namaCluster])) {
-                $totalKgsByCluster[$namaCluster] = 0;
-                $totalKgsStockAwalByCluster[$namaCluster] = 0;
-                $capacityByCluster[$namaCluster] = $kapasitas;
-            }
-
-            // Tambahkan Kgs ke total untuk nama_cluster tersebut
-            $totalKgsByCluster[$namaCluster] += $kgs;
-            $totalKgsStockAwalByCluster[$namaCluster] += $kgsStockAwal;
-        }
-
-        // Iterasi melalui data dan hitung sisa kapasitas
-        foreach ($resultsArray as &$item) { // Gunakan reference '&' agar perubahan berlaku pada item
-            $namaCluster = $item['nama_cluster'];
-            $totalKgsInCluster = $totalKgsByCluster[$namaCluster];
-            $totalKgsStockAwalInCluster = $totalKgsStockAwalByCluster[$namaCluster];
-            $kapasitasCluster = $capacityByCluster[$namaCluster];
-
-            $sisa_space = $kapasitasCluster - $totalKgsInCluster - $totalKgsStockAwalInCluster;
-            $item['sisa_space'] = max(0, $sisa_space); // Pastikan sisa_space tidak negatif
-        }
+        $results = $this->stockModel->searchStockArea($area, $noModel, $warna);
         
-        return $this->respond($resultsArray, 200);
+        dd($noModel, $warna, $results);
+        // // Konversi stdClass menjadi array
+        // $resultsArray = json_decode(json_encode($results), true);
+       
+        // // Hitung total kgs_in_out untuk seluruh data
+        // $totalKgsByCluster = []; // Array untuk menyimpan total Kgs per cluster
+        // $capacityByCluster = []; // Array untuk menyimpan kapasitas per cluster
+
+        // foreach ($resultsArray as $item) {
+        //     $namaCluster = $item['nama_cluster'];
+        //     $kgs = (float)$item['Kgs'];
+        //     $kgsStockAwal = (float)$item['KgsStockAwal'];
+        //     $kapasitas = (float)$item['kapasitas'];
+
+        //     // Inisialisasi total Kgs dan kapasitas untuk cluster jika belum ada
+        //     if (!isset($totalKgsByCluster[$namaCluster])) {
+        //         $totalKgsByCluster[$namaCluster] = 0;
+        //         $totalKgsStockAwalByCluster[$namaCluster] = 0;
+        //         $capacityByCluster[$namaCluster] = $kapasitas;
+        //     }
+
+        //     // Tambahkan Kgs ke total untuk nama_cluster tersebut
+        //     $totalKgsByCluster[$namaCluster] += $kgs;
+        //     $totalKgsStockAwalByCluster[$namaCluster] += $kgsStockAwal;
+        // }
+
+        // // Iterasi melalui data dan hitung sisa kapasitas
+        // foreach ($resultsArray as &$item) { // Gunakan reference '&' agar perubahan berlaku pada item
+        //     $namaCluster = $item['nama_cluster'];
+        //     $totalKgsInCluster = $totalKgsByCluster[$namaCluster];
+        //     $totalKgsStockAwalInCluster = $totalKgsStockAwalByCluster[$namaCluster];
+        //     $kapasitasCluster = $capacityByCluster[$namaCluster];
+
+        //     $sisa_space = $kapasitasCluster - $totalKgsInCluster - $totalKgsStockAwalInCluster;
+        //     $item['sisa_space'] = max(0, $sisa_space); // Pastikan sisa_space tidak negatif
+        // }
+        
+        // return $this->respond($resultsArray, 200);
 
     }
     public function listPemesanan($area)
