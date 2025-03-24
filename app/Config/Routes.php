@@ -88,6 +88,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse', 'WarehouseController::index');
     $routes->get('pemasukan', 'WarehouseController::pemasukan');
     $routes->post('pemasukan', 'WarehouseController::pemasukan');
+    $routes->get('pemasukan/getDataByIdStok/(:any)', 'PemesananController::getDataByIdStok/$1');
     $routes->post('reset_pemasukan', 'WarehouseController::reset_pemasukan');
     $routes->post('hapus_pemasukan', 'WarehouseController::hapusListPemasukan');
     $routes->post('proses_pemasukan', 'WarehouseController::prosesPemasukan');
