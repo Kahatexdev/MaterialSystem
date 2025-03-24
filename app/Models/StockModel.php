@@ -157,6 +157,35 @@ class StockModel extends Model
             ->where('kode_Warna', $kodeWarna)
             ->groupBy('kode_warna')
             ->first();
+    }    
+    public function searchStockArea($area, $noModel = null, $warna = null)
+    {
+        $builder = $this->db->table('stock s')
+            ->select('
+                s.*, 
+                (SELECT COALESCE(SUM(kgs_in_out), 0) FROM stock WHERE no_model = s.no_model) AS Kgs,
+                (SELECT COALESCE(SUM(kgs_stock_awal), 0) FROM stock WHERE no_model = s.no_model) AS KgsStockAwal,
+                (SELECT COALESCE(SUM(krg_in_out), 0) FROM stock WHERE no_model = s.no_model) AS Krg,
+                (SELECT COALESCE(SUM(krg_stock_awal), 0) FROM stock WHERE no_model = s.no_model) AS KrgStockAwal,
+                (SELECT COALESCE(SUM(cns_in_out), 0) FROM stock WHERE no_model = s.no_model) AS Cns,
+                (SELECT COALESCE(SUM(cns_stock_awal), 0) FROM stock WHERE no_model = s.no_model) AS CnsStockAwal,
+                c.nama_cluster, c.kapasitas, m.area
+            ')
+            ->join('cluster c', 's.nama_cluster = c.nama_cluster', 'left')
+            ->join('master_order mo', 'mo.no_model = s.no_model', 'left')
+            ->join('material m', 'm.id_order = mo.id_order', 'left')
+            ->where('m.area', $area)
+            ->groupBy('s.no_model, s.item_type, s.kode_warna, s.lot_stock, c.nama_cluster')
+            ->orderBy('s.no_model, s.item_type, s.kode_warna, s.lot_stock, c.nama_cluster', 'ASC');
+
+        if (!empty($noModel)) {
+            $builder->where('s.no_model', $noModel);
+        }
+        if (!empty($warna)) {
+            $builder->where('s.kode_warna', $warna);
+        }
+
+        return $builder->get()->getResultArray();
     }
 
     public function getStock($no_model, $item_type, $kode_warna, $warna)
