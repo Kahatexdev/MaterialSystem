@@ -126,6 +126,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('pemesanan/filter', 'PemesananController::filterPemesanan');
     $routes->get('pemesananperarea/(:any)', 'PemesananController::pemesananPerArea/$1');
     $routes->get('detailpemesanan/(:any)/(:any)', 'PemesananController::detailPemesanan/$1/$2');
+    $routes->get('selectClusterWarehouse/(:any)', 'PemesananController::selectClusterWarehouse/$1');
     $routes->get('pengiriman_area', 'PemesananController::pengirimanArea');
     $routes->post('pengiriman_area', 'PemesananController::pengirimanArea');
     $routes->post('reset_pengiriman/(:any)/(:any)', 'PemesananController::resetPengirimanArea/$1/$2');

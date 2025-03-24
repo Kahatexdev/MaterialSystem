@@ -169,4 +169,16 @@ class StockModel extends Model
             ->groupBy('kode_warna')
             ->first();
     }
+
+    public function getDataCluster($noModel, $itemType, $kodeWarna, $warna)
+    {
+        return $this->select('nama_cluster, kgs_stock_awal, cns_stock_awal, krg_stock_awal, lot_awal, kgs_in_out, cns_in_out, krg_in_out, lot_stock')
+            ->where('no_model', $noModel)
+            ->where('item_type', $itemType)
+            ->where('kode_warna', $kodeWarna)
+            ->where('warna', $warna)
+            ->groupBy('nama_cluster')
+            ->get()
+            ->getResultArray();
+    }
 }

@@ -416,4 +416,19 @@ class PemesananController extends BaseController
         }
         return redirect()->to($this->role . '/pengiriman_area/' . $area . '/' . $tglPakai);
     }
+
+    public function selectClusterWarehouse($id)
+    {
+        $getPemesanan = $this->pemesananModel->getDataPemesananbyId($id);
+        $cluster = $this->stockModel->getDataCluster($getPemesanan['no_model'], $getPemesanan['item_type'], $getPemesanan['kode_warna'], $getPemesanan['color']);
+        // dd ($getPemesanan, $cluster);
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'cluster' => $cluster,
+            'id' => $id,
+        ];
+        return view($this->role . '/pemesanan/select-cluster', $data);
+    }
 }

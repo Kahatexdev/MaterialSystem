@@ -288,4 +288,36 @@ class PemesananModel extends Model
             'failure_count' => $failure,
         ];
     }
+
+    public function getDataPemesananbyId($id)
+    {
+        return $this->select('
+            pemesanan.id_pemesanan,
+            pemesanan.tgl_pakai,
+            pemesanan.jl_mc,
+            pemesanan.ttl_qty_cones,
+            pemesanan.ttl_berat_cones,
+            pemesanan.sisa_kgs_mc,
+            pemesanan.sisa_cones_mc,
+            pemesanan.lot,
+            pemesanan.keterangan,
+            pemesanan.po_tambahan,
+            pemesanan.id_pengeluaran,
+            pemesanan.id_retur,
+            pemesanan.status_kirim,
+            pemesanan.admin,
+            material.id_material,
+            material.item_type,
+            material.kode_warna,
+            material.color,
+            material.style_size,
+            material.qty_cns,
+            material.qty_berat_cns,
+            master_order.no_model
+        ')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('pemesanan.id_pemesanan', $id)
+            ->first();
+    }
 }
