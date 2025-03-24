@@ -219,8 +219,8 @@ class StockModel extends Model
             ->orderBy('stock.no_model, stock.item_type, stock.kode_warna, stock.lot_stock, cluster.nama_cluster', 'ASC');
 
         if (!empty($noModel)) {
-            $builder->where('stock.no_model', $noModel);
-        } 
+            $builder->orWhere('stock.no_model', $noModel);
+        }
         if (!empty($warna)) {
             $builder->orWhere('stock.kode_warna', $warna);
         }
