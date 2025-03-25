@@ -440,8 +440,12 @@ class PemesananController extends BaseController
     public function getDataByIdStok($id)
     {
         $data = $this->stockModel->getDataByIdStok($id);
+
+        // Debugging
+        // var_dump($data);
         return $this->response->setJSON($data);
     }
+
 
     public function saveUsage()
     {

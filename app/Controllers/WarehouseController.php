@@ -1270,7 +1270,9 @@ class WarehouseController extends BaseController
     public function savePengeluaranJalur()
     {
         $data = $this->request->getJSON();
-        $data = [
+
+        // Data yang akan dimasukkan ke dalam database
+        $insertData = [
             'id_out_celup' => $data->idOutCelup,
             'area_out' => $data->area,
             'tgl_out' => date('Y-m-d H:i:s'),
@@ -1284,13 +1286,74 @@ class WarehouseController extends BaseController
             'created_at' => date('Y-m-d H:i:s')
         ];
 
-        $outJalur = $this->pengeluaranModel->insert($data);
+        // Ambil data stok berdasarkan id_out_celup
+        $stok = $this->stockModel->getDataByIdStok($data->idStok);
+        // var_dump($stok[0]['kgs_stock_awal']); 
+        // Data stok yang digunakan
+        $stokData = [
+            'kgs' => [
+                'in_out' => !empty($stok[0]['kgs_in_out']) ? (int)$stok[0]['kgs_in_out'] : 0,
+                'awal' => !empty($stok[0]['kgs_stock_awal']) ? (int)$stok[0]['kgs_stock_awal'] : 0,
+                'input' => (int)$insertData['kgs_out']
+            ],
+            'cns' => [
+                'in_out' => !empty($stok[0]['cns_in_out']) ? (int)$stok[0]['cns_in_out'] : 0,
+                'awal' => !empty($stok[0]['cns_stock_awal']) ? (int)$stok[0]['cns_stock_awal'] : 0,
+                'input' => (int)$insertData['cns_out']
+            ],
+            'krg' => [
+                'in_out' => !empty($stok[0]['krg_in_out']) ? (int)$stok[0]['krg_in_out'] : 0,
+                'awal' => !empty($stok[0]['krg_stock_awal']) ? (int)$stok[0]['krg_stock_awal'] : 0,
+                'input' => (int)$insertData['krg_out']
+            ]
+        ];
+        // var_dump($stokData);
+        // **Cek apakah stok cukup**
+        foreach ($stokData as $key => $item) {
+            $stokTersedia = $item['in_out'] > 0 ? $item['in_out'] : $item['awal'];
 
-        if ($outJalur) {
-            return $this->response->setJSON(['success' => true, 'message' => 'Data berhasil disimpan']);
-        } else {
-            return $this->response->setJSON(['success' => false, 'message' => 'Gagal menyimpan data']);
+            if ($stokTersedia < $item['input']) {
+                return $this->response->setJSON([
+                    'error' => false,
+                    'message' => "Jumlah " . strtoupper($key) . " melebihi stok yang tersedia"
+                ]);
+            }
         }
-        // var_dump ($data);
+
+        // **Kurangi stok setelah validasi**
+        foreach ($stokData as $key => &$item) {
+            if ($item['in_out'] > 0) {
+                $item['in_out'] = max(0, $item['in_out'] - $item['input']);
+            } else {
+                $item['awal'] = max(0, $item['awal'] - $item['input']);
+            }
+        }
+
+        // Menentukan lot yang digunakan
+        $insertData['lot_out'] = !empty($stok[0]['lot_stock']) ? $stok[0]['lot_stock'] : $stok[0]['lot_awal'];
+
+        // Simpan data pengeluaran
+        if ($this->pengeluaranModel->insert($insertData)) {
+            // **Update stok setelah pengeluaran**
+            $this->stockModel->updateStock(
+                $data->idStok,
+                $stokData['kgs']['in_out'],
+                $stokData['kgs']['awal'],
+                $stokData['cns']['in_out'],
+                $stokData['cns']['awal'],
+                $stokData['krg']['in_out'],
+                $stokData['krg']['awal']
+            );
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Data berhasil disimpan & stok diperbarui'
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'error' => false,
+                'message' => 'Gagal menyimpan data'
+            ]);
+        }
     }
 }

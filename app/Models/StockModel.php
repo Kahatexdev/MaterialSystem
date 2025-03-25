@@ -223,11 +223,28 @@ class StockModel extends Model
     {
         // tampilkan data tabel pemasukan yang di join ke stock yang memiliki id_stok sama dengan idStok
         return $this->db->table('pemasukan')
-            ->select('pemasukan.*, stock.*')
+            ->select('pemasukan.*, stock.*, SUM(kgs_stock_awal + kgs_in_out) AS total_kgs, 
+        SUM(cns_stock_awal + cns_in_out) AS total_cns, 
+        SUM(krg_stock_awal + krg_in_out) AS total_krg, 
+        COALESCE(lot_awal, lot_stock) AS lot_final')
             ->join('stock', 'stock.id_stock = pemasukan.id_stock')
             ->where('pemasukan.id_stock', $idStok)
             ->groupBy('pemasukan.id_pemasukan')
             ->get()
             ->getResultArray();
+    }
+
+    public function updateStock($id, $kgsInOut, $kgsStockAwal, $cnsInOut, $cnsStockAwal, $krgInOut, $krgStockAwal)
+    {
+        return $this->db->table('stock')
+            ->where('id_stock', $id)
+            ->update([
+                'kgs_in_out' => $kgsInOut,
+                'kgs_stock_awal' => $kgsStockAwal,
+                'cns_in_out' => $cnsInOut,
+                'cns_stock_awal' => $cnsStockAwal,
+                'krg_in_out' => $krgInOut,
+                'krg_stock_awal' => $krgStockAwal
+            ]);
     }
 }
