@@ -201,7 +201,14 @@ class StockModel extends Model
 
     public function getDataCluster($noModel, $itemType, $kodeWarna, $warna)
     {
-        return $this->select('id_stock,nama_cluster, kgs_stock_awal, cns_stock_awal, krg_stock_awal, lot_awal, kgs_in_out, cns_in_out, krg_in_out, lot_stock')
+        return $this->select("
+        id_stock,
+        nama_cluster, 
+        SUM(kgs_stock_awal + kgs_in_out) AS total_kgs, 
+        SUM(cns_stock_awal + cns_in_out) AS total_cns, 
+        SUM(krg_stock_awal + krg_in_out) AS total_krg, 
+        COALESCE(lot_awal, lot_stock) AS lot_final
+    ")
             ->where('no_model', $noModel)
             ->where('item_type', $itemType)
             ->where('kode_warna', $kodeWarna)
@@ -211,6 +218,7 @@ class StockModel extends Model
             ->getResultArray();
     }
 
+
     public function getDataByIdStok($idStok)
     {
         // tampilkan data tabel pemasukan yang di join ke stock yang memiliki id_stok sama dengan idStok
@@ -218,6 +226,7 @@ class StockModel extends Model
             ->select('pemasukan.*, stock.*')
             ->join('stock', 'stock.id_stock = pemasukan.id_stock')
             ->where('pemasukan.id_stock', $idStok)
+            ->groupBy('pemasukan.id_pemasukan')
             ->get()
             ->getResultArray();
     }
