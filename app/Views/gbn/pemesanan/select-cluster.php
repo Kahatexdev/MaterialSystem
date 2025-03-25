@@ -314,7 +314,7 @@
                 document.getElementById('usageForm').reset();
 
                 // Fetch data
-                fetch(`/gbn/pemasukan/getDataByIdStok/${idStok}`)
+                fetch(`<?= base_url(/gbn/pemasukan/getDataByIdStok/${idStok})?>`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
