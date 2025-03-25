@@ -72,7 +72,7 @@
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Kgs Pesan</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Cns Pesan</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Po Tambahan</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cluster</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -93,15 +93,10 @@
                                         <td><?= $data['cns_pesan'] ?></td>
                                         <td><?= $data['po_tambahan'] ?></td>
                                         <td>
-                                            <button type="button" class="btn btn-sm bg-gradient-info btn-detail"
-                                                data-no_model="<?= $data['no_model'] ?>"
-                                                data-item_type="<?= $data['item_type'] ?>"
-                                                data-kode_warna="<?= $data['kode_warna'] ?>"
-                                                data-warna="<?= $data['color'] ?>">
-                                                Detail
-                                            </button>
-
-
+                                            <a href="<?= base_url($role . '/selectClusterWarehouse/' . $data['id_pemesanan']) ?>" 
+                                               class="btn bg-gradient-info">
+                                                <i class="fas fa-layer-group"></i>Pilih
+                                            </a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -131,57 +126,57 @@
 </script>
 
 <script>
-    $(document).ready(function() {
-        $(".btn-detail").click(function() {
-            let no_model = $(this).data("no_model");
-            let item_type = $(this).data("item_type");
-            let kode_warna = $(this).data("kode_warna");
-            let warna = $(this).data("warna");
+    // $(document).ready(function() {
+    //     $(".btn-detail").click(function() {
+    //         let no_model = $(this).data("no_model");
+    //         let item_type = $(this).data("item_type");
+    //         let kode_warna = $(this).data("kode_warna");
+    //         let warna = $(this).data("warna");
 
-            $.ajax({
-                url: "<?= base_url($role . '/getStockByParams') ?>",
-                type: "POST",
-                data: {
-                    no_model: no_model,
-                    item_type: item_type,
-                    kode_warna: kode_warna,
-                    warna: warna
-                },
-                dataType: "json",
-                success: function(response) {
-                    let stockContainer = $("#stockData");
-                    stockContainer.empty();
+    //         $.ajax({
+    //             url: "<?= base_url($role . '/getStockByParams') ?>",
+    //             type: "POST",
+    //             data: {
+    //                 no_model: no_model,
+    //                 item_type: item_type,
+    //                 kode_warna: kode_warna,
+    //                 warna: warna
+    //             },
+    //             dataType: "json",
+    //             success: function(response) {
+    //                 let stockContainer = $("#stockData");
+    //                 stockContainer.empty();
 
-                    if (response.length > 0) {
-                        $.each(response, function(index, stock) {
-                            stockContainer.append(`
-                                    <div class="col-6 border p-3">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="selectedStock[]" value="${stock.id_stock}">
-                                            <label class="form-check-label">
-                                                <strong>No:</strong> ${index + 1} <br>
-                                                <strong>No Model:</strong> ${stock.no_model} <br>
-                                                <strong>Item Type:</strong> ${stock.item_type} <br>
-                                                <strong>Kode Warna:</strong> ${stock.kode_warna} <br>
-                                                <strong>Warna:</strong> ${stock.warna} <br>
-                                                <strong>Stok Kgs:</strong> ${stock.kgs_stock_awal} <br>
-                                                <strong>Stok Cns:</strong> ${stock.cns_stock_awal}
-                                            </label>
-                                        </div>
-                                    </div>
-                                `);
-                        });
-                    } else {
-                        stockContainer.append('<div class="col-12 text-center">Data stok tidak ditemukan</div>');
-                    }
-                    $("#modalStock").modal("show");
-                },
-                error: function() {
-                    alert("Gagal mengambil data stok");
-                }
-            });
-        });
-    });
+    //                 if (response.length > 0) {
+    //                     $.each(response, function(index, stock) {
+    //                         stockContainer.append(`
+    //                                 <div class="col-6 border p-3">
+    //                                     <div class="form-check">
+    //                                         <input class="form-check-input" type="checkbox" name="selectedStock[]" value="${stock.id_stock}">
+    //                                         <label class="form-check-label">
+    //                                             <strong>No:</strong> ${index + 1} <br>
+    //                                             <strong>No Model:</strong> ${stock.no_model} <br>
+    //                                             <strong>Item Type:</strong> ${stock.item_type} <br>
+    //                                             <strong>Kode Warna:</strong> ${stock.kode_warna} <br>
+    //                                             <strong>Warna:</strong> ${stock.warna} <br>
+    //                                             <strong>Stok Kgs:</strong> ${stock.kgs_stock_awal} <br>
+    //                                             <strong>Stok Cns:</strong> ${stock.cns_stock_awal}
+    //                                         </label>
+    //                                     </div>
+    //                                 </div>
+    //                             `);
+    //                     });
+    //                 } else {
+    //                     stockContainer.append('<div class="col-12 text-center">Data stok tidak ditemukan</div>');
+    //                 }
+    //                 $("#modalStock").modal("show");
+    //             },
+    //             error: function() {
+    //                 alert("Gagal mengambil data stok");
+    //             }
+    //         });
+    //     });
+    // });
 </script>
 
 

@@ -368,46 +368,13 @@ class ApiController extends ResourceController
     }
     public function stockbahanbaku($area)
     {
-        $noModel = $this->request->getPost('noModel') ?? '';
-        $warna = $this->request->getPost('warna') ?? '';
+        $noModel = $this->request->getGet('noModel') ?? '';
+        $warna = $this->request->getGet('warna') ?? '';
 
-        $results = $this->stockModel->searchStock($noModel, $warna);
-
+        $results = $this->stockModel->searchStockArea($area, $noModel, $warna);
+        
         // Konversi stdClass menjadi array
         $resultsArray = json_decode(json_encode($results), true);
-
-        // Hitung total kgs_in_out untuk seluruh data
-        $totalKgsByCluster = []; // Array untuk menyimpan total Kgs per cluster
-        $capacityByCluster = []; // Array untuk menyimpan kapasitas per cluster
-
-        foreach ($resultsArray as $item) {
-            $namaCluster = $item['nama_cluster'];
-            $kgs = (float)$item['Kgs'];
-            $kgsStockAwal = (float)$item['KgsStockAwal'];
-            $kapasitas = (float)$item['kapasitas'];
-
-            // Inisialisasi total Kgs dan kapasitas untuk cluster jika belum ada
-            if (!isset($totalKgsByCluster[$namaCluster])) {
-                $totalKgsByCluster[$namaCluster] = 0;
-                $totalKgsStockAwalByCluster[$namaCluster] = 0;
-                $capacityByCluster[$namaCluster] = $kapasitas;
-            }
-
-            // Tambahkan Kgs ke total untuk nama_cluster tersebut
-            $totalKgsByCluster[$namaCluster] += $kgs;
-            $totalKgsStockAwalByCluster[$namaCluster] += $kgsStockAwal;
-        }
-
-        // Iterasi melalui data dan hitung sisa kapasitas
-        foreach ($resultsArray as &$item) { // Gunakan reference '&' agar perubahan berlaku pada item
-            $namaCluster = $item['nama_cluster'];
-            $totalKgsInCluster = $totalKgsByCluster[$namaCluster];
-            $totalKgsStockAwalInCluster = $totalKgsStockAwalByCluster[$namaCluster];
-            $kapasitasCluster = $capacityByCluster[$namaCluster];
-
-            $sisa_space = $kapasitasCluster - $totalKgsInCluster - $totalKgsStockAwalInCluster;
-            $item['sisa_space'] = max(0, $sisa_space); // Pastikan sisa_space tidak negatif
-        }
 
         return $this->respond($resultsArray, 200);
     }
@@ -549,5 +516,37 @@ class ApiController extends ResourceController
             'success_count' => $updatePemesanan['success_count'],
             'failure_count' => $updatePemesanan['failure_count'],
         ], 200);
+    }
+    public function hapusOldPemesanan()
+    {
+        // Ambil data JSON dari request
+        $data = $this->request->getJSON(true);
+
+        // Validasi data input
+        if (empty($data['tgl_pakai']) || empty($data['area'])) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Tanggal pakai atau area tidak valid.',
+            ], 400); // HTTP 400 Bad Request
+        }
+
+        // Panggil model untuk menghapus data
+        $deletedCount = $this->pemesananModel->deleteListPemesananOtomatis([
+            'tgl_pakai' => $data['tgl_pakai'],
+            'admin' => $data['area'],
+        ]);;
+        // log_message('debug', 'Data received: ' . $deletedCount);
+        if ($deletedCount) {
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => "$deletedCount data berhasil dihapus.",
+                'data' => $data
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => "$deletedCount Tidak ada data yang dihapus.",
+            ], 404); // HTTP 404 Not Found
+        }
     }
 }

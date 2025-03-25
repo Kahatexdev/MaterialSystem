@@ -167,7 +167,7 @@ class PemesananModel extends Model
             ->where('pemesanan.admin', $area)
             ->where('pemesanan.status_kirim', '')
             ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai')
-            ->orderBy('pemesanan.tgl_pakai,', 'DESC')
+            ->orderBy('pemesanan.tgl_pakai', 'DESC')
             ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
         return $query->get()->getResultArray();
     }
@@ -287,5 +287,55 @@ class PemesananModel extends Model
             'success_count' => $success,
             'failure_count' => $failure,
         ];
+    }
+
+    public function getDataPemesananbyId($id)
+    {
+        return $this->select('
+            pemesanan.id_pemesanan,
+            pemesanan.tgl_pakai,
+            pemesanan.jl_mc,
+            pemesanan.ttl_qty_cones,
+            pemesanan.ttl_berat_cones,
+            pemesanan.sisa_kgs_mc,
+            pemesanan.sisa_cones_mc,
+            pemesanan.lot,
+            pemesanan.keterangan,
+            pemesanan.po_tambahan,
+            pemesanan.id_pengeluaran,
+            pemesanan.id_retur,
+            pemesanan.status_kirim,
+            pemesanan.admin,
+            material.id_material,
+            material.item_type,
+            material.kode_warna,
+            material.color,
+            material.style_size,
+            material.qty_cns,
+            material.qty_berat_cns,
+            master_order.no_model
+        ')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('pemesanan.id_pemesanan', $id)
+            ->first();
+    }
+    public function deleteListPemesananOtomatis($data)
+    {
+        // Pastikan parameter data memiliki 'tgl_pakai' dan 'admin'
+        if (!isset($data['tgl_pakai']) || !isset($data['admin'])) {
+            return false; // Tidak dapat melanjutkan jika parameter tidak lengkap
+        }
+
+        // Jalankan query untuk menghapus data
+        $this->db
+            ->table('pemesanan') // Ganti dengan nama tabel Anda
+            ->where('tgl_pakai <', $data['tgl_pakai'])
+            ->where('admin', $data['admin'])
+            ->where('status_kirim', '')
+            ->delete();
+
+        // Kembalikan jumlah baris yang terhapus
+        return $this->db->affectedRows(); // Mengembalikan jumlah baris yang dihapus
     }
 }
