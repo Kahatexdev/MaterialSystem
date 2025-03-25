@@ -157,7 +157,7 @@ class StockModel extends Model
             ->where('kode_Warna', $kodeWarna)
             ->groupBy('kode_warna')
             ->first();
-    }    
+    }
     public function searchStockArea($area, $noModel = null, $warna = null)
     {
         $builder = $this->db->table('stock s')
