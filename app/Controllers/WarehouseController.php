@@ -1229,12 +1229,12 @@ class WarehouseController extends BaseController
         $tanggal_akhir = $this->request->getGet('tanggal_akhir');
 
         $data = $this->pemasukanModel->getFilterDatangBenang($key, $tanggal_awal, $tanggal_akhir);
-
+        dd($data);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
         // Header
-        $header = ["No", "No Model", "Item Type", "Kode Warna", "Warna", "Kgs Masuk", "Cones Masuk", "Tanggal Masuk", "Nama Cluster"];
+        $header = ["No", "Foll Up", "No Model", "No Order", "Area", "Buyer", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "KG Pesan", "Tanggal Datang", "Kgs Datang", "Cones Datang", "LOT Datang", "No Surat Jalan", "LMD", "GW", "Harga", "Nama Cluster"];
         $sheet->fromArray([$header], NULL, 'A1');
 
         // Data

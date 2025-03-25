@@ -26,7 +26,7 @@
                     <label for="">Aksi</label><br>
                     <button class="btn btn-info btn-block" id="btnSearch"><i class="fas fa-search"></i></button>
                     <button class="btn btn-danger" id="btnReset"><i class="fas fa-redo-alt"></i></button>
-                    <button class="btn btn-success d-none" id="btnExport"><i class="fas fa-file-excel"></i></button>
+                    <button class="btn btn-primary d-none" id="btnExport"><i class="fas fa-file-excel"></i></button>
                 </div>
             </div>
         </div>
@@ -40,13 +40,26 @@
                     <thead>
                         <tr>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Foll Up</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Order</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Buyer</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Order Type</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs Masuk</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones Masuk</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Masuk</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">KG Pesan</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Datang</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs Datang</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones Datang</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LOT Datang</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Surat Jalan</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LMD</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">GW</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Harga</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Nama Cluster</th>
                         </tr>
                     </thead>
@@ -105,7 +118,7 @@
                                 item.kgs_masuk,
                                 item.cns_masuk,
                                 item.tgl_masuk,
-                                item.nama_cluster
+                                item.nama_cluster,
                             ]).draw(false);
                         });
 
