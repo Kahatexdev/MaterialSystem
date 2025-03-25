@@ -165,6 +165,25 @@
         color: #6c757d;
         font-weight: 500;
     }
+
+    /* Responsive Layout */
+    @media (min-width: 768px) {
+        .card-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (min-width: 992px) {
+        .card-container {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (min-width: 1200px) {
+        .card-container {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
 </style>
 
 <div class="container-fluid">
@@ -197,7 +216,7 @@
     <div class="card shadow-sm mb-4">
         <div class="card-body d-flex justify-content-between align-items-center">
             <h3 class="mb-0">Data Stock <?= $noModel; ?></h3>
-            <span class="badge bg-info"><?= date('d F Y'); ?></span>
+            <span class="badge bg-gradient-info"><?= date('d F Y'); ?></span>
         </div>
     </div>
 
@@ -205,43 +224,22 @@
         <?php if (!empty($cluster)): ?>
             <?php foreach ($cluster as $item): ?>
                 <div class="stock-card" data-id-stok="<?= esc($item['id_stock']); ?>">
-                    <div class="card-header">
-                        <?= esc($item['nama_cluster']); ?>
-                    </div>
-                    <div class="card-body">
-                        <div class="stock-info">
-                            <span class="label">KGS Stock:</span>
-                            <span class="value"><?= esc($item['total_kgs']); ?></span>
-                        </div>
-                        <div class="stock-info">
-                            <span class="label">CNS Stock:</span>
-                            <span class="value"><?= esc($item['total_cns']); ?></span>
-                        </div>
-                        <div class="stock-info">
-                            <span class="label">KRg Stock:</span>
-                            <span class="value"><?= esc($item['total_krg']); ?></span>
-                        </div>
-
-                        <div class="divider"></div>
-
-                        <div class="stock-info">
-                            <span class="label">Lot:</span>
-                            <span class="value"><?= esc($item['lot_final']); ?></span>
-                        </div>
-
-                        <div class="divider"></div>
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <span class="d-flex align-items-center">
+                            <i class="fas fa-warehouse me-2 text-white"></i>
+                            Cluster <?= esc($item['nama_cluster']); ?>
+                        </span>
                     </div>
                 </div>
             <?php endforeach; ?>
         <?php else: ?>
             <div class="empty-state">
                 <div class="empty-state-icon">
-                    <i class="bi bi-inbox"></i>
+                    Cluster <i class="fas fa-inbox text-white"></i>
                 </div>
                 <p class="empty-state-text">Data pemasukan tidak ditemukan.</p>
             </div>
         <?php endif; ?>
-
     </div>
 </div>
 
@@ -255,14 +253,14 @@
             </div>
             <div class="modal-body">
                 <div class="info-section">
-                    <h6 class="info-section-title">Informasi Produk</h6>
+                    <h6 class="info-section-title">Informasi Stock</h6>
                     <div class="row" id="modalContent">
                         <!-- Detail data will be loaded here -->
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <h6 class="form-section-title">Input Penggunaan Stock</h6>
+                    <h6 class="form-section-title">Input Pengeluaran Stock</h6>
                     <form id="usageForm" method="post">
                         <input type="hidden" id="idStok" name="idStok">
                         <input type="hidden" id="noModel" name="noModel" value="<?= $noModel; ?>">
@@ -311,11 +309,12 @@
                 const idStok = this.getAttribute('data-id-stok');
                 document.getElementById('idStok').value = idStok;
 
+
                 // Reset form
                 document.getElementById('usageForm').reset();
 
                 // Fetch data
-                fetch(`/gbn/pemasukan/getDataByIdStok/${idStok}`)
+                fetch(`<?= base_url('/gbn/pemasukan/getDataByIdStok') ?>/${encodeURIComponent(idStok)}`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
@@ -352,44 +351,52 @@
         });
 
         // Function to render modal content
+        // Function to render modal content
         function renderModalContent(item) {
+            // Ambil nilai dari URL parameter
+            const KgsPesan = new URLSearchParams(window.location.search).get('KgsPesan') || '-';
+            const CnsPesan = new URLSearchParams(window.location.search).get('CnsPesan') || '-';
+
             const content = `
-                <div class="col-md-4 mb-3">
-                    <div class="info-badge">
-                        <span>PDK: ${item.no_model || '-'}</span>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="info-badge">
-                        <span>Item Type: ${item.item_type || '-'}</span>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="info-badge">
-                        <span>Kode: ${item.kode_warna || '-'}</span>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="info-badge">
-                        <span>Warna: ${item.warna || '-'}</span>
-                    </div>
-                </div>
-                
-                <div class="col-md-4 mb-3">
-                    <div class="info-badge">
-                        <span>Total Kgs: ${item.kgs_masuk || '-'} KG</span>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="info-badge">
-                        <span>Total Cones: ${item.cns_masuk || '-'} Cns</span>
-                    </div>
-                </div>
-                <input type="hidden" id="idOutCelup" value="${item.id_out_celup}">
-            `;
+        <div class="col-md-4 mb-3">
+            <div class="info-badge">
+                <span>PDK: <strong>${item.no_model || '-'}</strong></span>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="info-badge">
+                <span>Item Type: <strong>${item.item_type || '-'}</strong></span>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="info-badge">
+                <span>Kode: <strong>${item.kode_warna || '-'}</strong></span>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="info-badge">
+                <span>Warna: <strong>${item.warna || '-'}</strong></span>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="info-badge">
+                <span>Stock: <strong>${item.total_kgs || '-'} KG </strong><br>
+                <small>KG Pesan: <strong>${KgsPesan} KG</strong></small></span>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="info-badge">
+                <span>Stock Cones: <strong>${item.total_cns || '-'} Cns </strong><br>
+                <small>Cones Pesan: <strong>${CnsPesan} Cns</strong></small></span>
+            </div>
+        </div>
+        <input type="hidden" id="idOutCelup" value="${item.id_out_celup}">
+    `;
 
             document.getElementById('modalContent').innerHTML = content;
         }
+
 
         // Form submission
         document.getElementById('usageForm').addEventListener('submit', function(e) {
@@ -402,10 +409,12 @@
             const noModel = document.getElementById('noModel').value;
             const namaCluster = document.getElementById('namaCluster').value;
             const idOutCelup = document.getElementById('idOutCelup').value;
-            // get from url ?area=
-            const area = new URLSearchParams(window.location.search).get('Area');
-            // console.log(area);
             const lotFinal = document.getElementById('lotFinal').value;
+            // get from url ?area=
+            // console.log(area);
+            const area = new URLSearchParams(window.location.search).get('Area');
+            const KgsPesan = new URLSearchParams(window.location.search).get('KgsPesan');
+            const CnsPesan = new URLSearchParams(window.location.search).get('CnsPesan');
 
             // Show loading state
             const submitBtn = this.querySelector('button[type="submit"]');
@@ -428,8 +437,10 @@
                         noModel: noModel,
                         namaCluster: namaCluster,
                         idOutCelup: idOutCelup,
+                        lotFinal: lotFinal,
                         area: area,
-                        lotFinal: lotFinal
+                        KgsPesan: KgsPesan,
+                        CnsPesan: CnsPesan
                     })
                 })
                 .then(response => {
@@ -446,13 +457,25 @@
                     // Close modal
                     bootstrap.Modal.getInstance(document.getElementById('dataModal')).hide();
 
-                    // Tampilkan pesan sukses
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil',
-                        text: data.message,
-                        confirmButtonColor: '#082653'
-                    });
+                    // Tampilkan pesan sesuai dengan session flash data dari controller
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: data.message,
+                            confirmButtonColor: '#082653'
+                        }).then(() => {
+                            // Opsional: reload halaman atau redirect jika perlu
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message,
+                            confirmButtonColor: '#082653'
+                        });
+                    }
                 })
                 .catch(error => {
                     console.error('Error:', error);
