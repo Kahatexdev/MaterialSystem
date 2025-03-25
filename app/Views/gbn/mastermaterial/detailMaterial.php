@@ -95,7 +95,7 @@
                                         <i class="fas fa-trash text-lg"></i>
                                     </button>
                                     <button class="btn btn-info btn-sm btn-split" data-id="<?= $data['id_material'] ?>" id="btn-split">
-                                        <i class="fas fa-table text-lg"></i>
+                                        <i class="fas fa-grip-lines-vertical text-lg"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -378,6 +378,7 @@
                     <form id="splitForm" action="<?= base_url($role . '/splitMaterial') ?>" method="post">
                         <input type="hidden" name="id_material" id="id_material_split">
                         <input type="hidden" name="id_order" id="id_order_split">
+                        <input type="hidden" class="form-control" id="color_split" name="color" readonly>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="mb-3">
@@ -643,6 +644,7 @@
                     $('#qty_pcs_split').val(response.qty_pcs);
                     $('#composition_split').val(response.composition);
                     $('#kode_warna_split').val(response.kode_warna);
+                    $('#color_split').val(response.color);
                     $('#kgs_split').val(response.kgs);
 
                     hitungKgsSplit(); // Hitung otomatis setelah nilai dimasukkan
@@ -687,6 +689,7 @@
                     item_type: $('#item_type_split').val(),
                     composition: $('#composition_split').val(),
                     kode_warna: $('#kode_warna_split').val(),
+                    color: $('#color_split').val(),
                     qty_pcs_1: qty1,
                     qty_pcs_2: qty2,
                     kgs_1: $('#kgs1').val(),

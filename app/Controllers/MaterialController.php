@@ -93,6 +93,7 @@ class MaterialController extends BaseController
         $item_type = $this->request->getPost('item_type');
         $composition = $this->request->getPost('composition');
         $kode_warna = $this->request->getPost('kode_warna');
+        $color = $this->request->getPost('color');
 
         $qty_pcs_1 = $this->request->getPost('qty_pcs_1');
         $qty_pcs_2 = $this->request->getPost('qty_pcs_2');
@@ -111,6 +112,7 @@ class MaterialController extends BaseController
             'loss' => $loss,
             'item_type' => $item_type,
             'composition' => $composition,
+            'color' => $color,
             'kode_warna' => $kode_warna,
             'qty_pcs' => $qty_pcs_2,
             'kgs' => $kgs_2,
