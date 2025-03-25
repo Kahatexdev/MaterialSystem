@@ -184,7 +184,7 @@ class MasterdataController extends BaseController
                     'updated_at'     => NULL,
                 ];
                 $masterOrderModel->insert($masterData);
-            }else{
+            } else {
                 return redirect()->back()->with('error', 'Data dengan No Model ' . $orderExists['no_model'] . ' sudah ada di database.');
             }
 
@@ -212,35 +212,56 @@ class MasterdataController extends BaseController
             $invalidRows       = [];
 
             // Iterasi baris data material (misalnya mulai dari baris kedua)
-            foreach ($sheet->getRowIterator(2) as $row) { // **Cek apakah data sudah ada di tabel material**
-                $existingMaterial = $materialModel->where([
+            foreach ($sheet->getRowIterator(2) as $row) {
+                $rowIndex  = $row->getRowIndex();
+                $style_size = $sheet->getCell('D' . $rowIndex)->getValue();
+                if (empty($no_model) || empty($style_size)) {
+                    $invalidRows[] = $rowIndex;
+                    continue;
+                }
+
+                $validate = $this->validateWithAPI($no_model, $style_size);
+                if (!$validate) {
+                    $invalidRows[] = $rowIndex;
+                    continue;
+                }
+
+                // Ambil dan sanitasi item type
+                $item_type = trim($sheet->getCell($headerMap['Item Type'] . $rowIndex)->getValue());
+                if (empty($item_type)) {
+                    return redirect()->back()->with('error', 'Item Type tidak boleh kosong pada baris ' . $rowIndex);
+                }
+                $item_type = htmlspecialchars($item_type, ENT_QUOTES, 'UTF-8');
+
+                // Cek apakah item type ada di database
+                $checkItemType = $masterMaterialModel->checkItemType($item_type);
+                if (!$checkItemType) {
+                    return redirect()->back()->with('error', $item_type . ' tidak ada di database pada baris ' . $rowIndex);
+                }
+
+                // Ambil nilai qty_pcs dan bersihkan dari pemisah ribuan
+                $qty_raw = $sheet->getCell($headerMap['Qty/pcs'] . $rowIndex)->getValue();
+                $qty_pcs = intval(str_replace([',', '.'], '', $qty_raw));
+                $kgs_raw = $sheet->getCell($headerMap['Kgs'] . $rowIndex)->getValue();
+                $kgs = floatval(str_replace([','], '', $kgs_raw));
+
+                // Siapkan data material
+                $validDataMaterial[] = [
                     'id_order'   => $id_order,
                     'style_size' => $validate['size'],
+                    'area'       => $validate['area'],
+                    'inisial'    => $validate['inisial'],
+                    'color'      => $sheet->getCell($headerMap['Color'] . $rowIndex)->getValue(),
                     'item_type'  => htmlspecialchars_decode($item_type),
                     'kode_warna' => $sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue(),
-                    'qty_pcs'    => $qty_pcs,
-                    'kgs'        => number_format($kgs, 2, '.', '')
-                ])->first();
-
-                if (!$existingMaterial) {
-                    // Jika data belum ada, tambahkan ke array untuk insert
-                    $validDataMaterial[] = [
-                        'id_order'   => $id_order,
-                        'style_size' => $validate['size'],
-                        'area'       => $validate['area'],
-                        'inisial'    => $validate['inisial'],
-                        'color'      => $sheet->getCell($headerMap['Color'] . $rowIndex)->getValue(),
-                        'item_type'  => htmlspecialchars_decode($item_type),
-                        'kode_warna' => $sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue(),
-                        'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(),
-                        'gw'         => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
-                        'qty_pcs'    => $qty_pcs,
-                        'loss'       => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue() ?? 0,
-                        'kgs'        => number_format($kgs, 2, '.', ''),
-                        'admin'      => $admin,
-                        'created_at' => date('Y-m-d H:i:s'),
-                    ];
-                }
+                    'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(),
+                    'gw'         => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
+                    'qty_pcs'    => $qty_pcs, // Menggunakan variabel yang telah diproses
+                    'loss'       => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue() ?? 0,
+                    'kgs'        => number_format($kgs, 2, '.', ''),
+                    'admin'      => $admin,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ];
             }
 
             // Simpan data material jika ada data yang valid
