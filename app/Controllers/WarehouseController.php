@@ -1266,4 +1266,31 @@ class WarehouseController extends BaseController
         $writer->save('php://output');
         exit;
     }
+
+    public function savePengeluaranJalur()
+    {
+        $data = $this->request->getJSON();
+        $data = [
+            'id_out_celup' => $data->idOutCelup,
+            'area_out' => $data->area,
+            'tgl_out' => date('Y-m-d H:i:s'),
+            'kgs_out' => $data->qtyKGS,
+            'cns_out' => $data->qtyCNS,
+            'krg_out' => $data->qtyKarung,
+            'nama_cluster' => $data->namaCluster,
+            'lot_out' => $data->lotFinal,
+            'status' => 'Pengeuaran Jalur',
+            'admin' => $this->role,
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+
+        $outJalur = $this->pengeluaranModel->insert($data);
+
+        if ($outJalur) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Data berhasil disimpan']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Gagal menyimpan data']);
+        }
+        // var_dump ($data);
+    }
 }

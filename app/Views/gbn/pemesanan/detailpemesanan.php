@@ -93,7 +93,7 @@
                                         <td><?= $data['cns_pesan'] ?></td>
                                         <td><?= $data['po_tambahan'] ?></td>
                                         <td>
-                                            <a href="<?= base_url($role . '/selectClusterWarehouse/' . $data['id_pemesanan']) ?>" 
+                                            <a href="<?= base_url($role . '/selectClusterWarehouse/' . $data['id_pemesanan']) . '?Area='. $area ?>" 
                                                class="btn bg-gradient-info">
                                                 <i class="fas fa-layer-group"></i>Pilih
                                             </a>
