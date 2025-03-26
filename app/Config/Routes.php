@@ -109,6 +109,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('getKgsCnsClusterForOut', 'WarehouseController::getKgsCnsClusterForOut');
     $routes->post('proses_pengeluaran_manual', 'WarehouseController::prosesPengeluaranJalurManual');
     $routes->post('savePengeluaranJalur', 'WarehouseController::savePengeluaranJalur');
+    $routes->post('simpanPengeluaranJalur', 'WarehouseController::simpanPengeluaranJalur');
 
     $routes->post('komplain_pemasukan', 'WarehouseController::prosesComplain');
     //

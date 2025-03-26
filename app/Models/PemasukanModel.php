@@ -211,4 +211,14 @@ class PemasukanModel extends Model
 
         return $this->findAll();
     }
+
+    public function getDataByIdOutCelup($idOutCelup)
+    {
+        return $this->select('pemasukan.*, out_celup.lot_kirim')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
+            ->where('pemasukan.id_out_celup', $idOutCelup)
+            ->groupBy('pemasukan.id_pemasukan')
+            ->get()
+            ->getResultArray();
+    }
 }

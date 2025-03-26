@@ -229,7 +229,9 @@ class StockModel extends Model
         COALESCE(lot_awal, lot_stock) AS lot_final')
             ->join('stock', 'stock.id_stock = pemasukan.id_stock')
             ->where('pemasukan.id_stock', $idStok)
+            ->groupBy('stock.id_stock')
             ->groupBy('pemasukan.id_pemasukan')
+            // ->groupBy('pemasukan.id_stock'))
             ->get()
             ->getResultArray();
     }
