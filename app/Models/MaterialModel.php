@@ -221,7 +221,7 @@ class MaterialModel extends Model
     public function assignAreal($idOrder, $area)
     {
         return $this->set('area',$area)
-        where('id_order', $idOrder)
+       -> where('id_order', $idOrder)
         ->update()
     }
 }
