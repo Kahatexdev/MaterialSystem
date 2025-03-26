@@ -148,12 +148,12 @@ class MaterialController extends BaseController
             return $this->response->setJSON(['message' => 'Material berhasil di-split!']);
         }
     }
-    public function assignArea($model, $area)
+    public function assignArea()
     {
         $model = $this->request->getPost('model'); // Gunakan POST
         $area = $this->request->getPost('area');
 
-        $idOrder = $this->MasterOrderModel
+        $idOrder = $this->masterOrderModel
             ->where('no_model', $model)
             ->first();
 
