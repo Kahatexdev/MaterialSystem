@@ -234,4 +234,12 @@ class PemasukanModel extends Model
             ->get()
             ->getResultArray();
     }
+    public function getDataInput($idPemasukan)
+    {
+        return $this->select('pemasukan.*, out_celup.no_karung, out_celup.lot_kirim')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->where('id_pemasukan', $idPemasukan)
+            ->get()
+            ->getResultArray();
+    }
 }

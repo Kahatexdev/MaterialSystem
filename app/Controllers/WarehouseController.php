@@ -1263,11 +1263,12 @@ class WarehouseController extends BaseController
         $krg = 0;
 
         // cek data tabel out_celup
-        $outCelup = $this->outCelupModel->find($pemasukanData[0]['id_out_celup']);
         // Lakukan looping untuk setiap data pemasukan
         foreach ($pemasukanData as $pemasukan) {
+            $outCelup = $this->outCelupModel->find($pemasukan['id_out_celup']);
+
             // Update field out_jalur pada tabel pemasukan
-            $this->pemasukanModel->update($pemasukan['id_pemasukan'], ['out_jalur' => 1]);
+            $this->pemasukanModel->update($pemasukan['id_pemasukan'], ['out_jalur' => "1"]);
 
             // Insert data pengeluaran sesuai masing-masing pemasukan
             $insertData = [
@@ -1276,7 +1277,7 @@ class WarehouseController extends BaseController
                 'tgl_out'       => date('Y-m-d H:i:s'),
                 'kgs_out'       => $pemasukan['kgs_masuk'],
                 'cns_out'       => $pemasukan['cns_masuk'],
-                'krg_out'       =>  $pemasukan['no_karung'],
+                'krg_out'       =>  $outCelup['no_karung'],
                 'nama_cluster'  => $pemasukan['nama_cluster'],
                 'lot_out'       => $outCelup['lot_kirim'], // pastikan field ini ada di data pemasukan
                 'status'        => 'Pengeluaran Jalur',
