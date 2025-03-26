@@ -372,7 +372,7 @@ class ApiController extends ResourceController
         $warna = $this->request->getGet('warna') ?? '';
 
         $results = $this->stockModel->searchStockArea($area, $noModel, $warna);
-        
+
         // Konversi stdClass menjadi array
         $resultsArray = json_decode(json_encode($results), true);
 
@@ -548,5 +548,16 @@ class ApiController extends ResourceController
                 'message' => "$deletedCount Tidak ada data yang dihapus.",
             ], 404); // HTTP 404 Not Found
         }
+    }
+    public function pph($area)
+    {
+        $noModel = $this->request->getGet('noModel') ?? '';
+
+        $results = $this->materialModel->getMaterialForPPH($area, $noModel);
+        
+        // Konversi stdClass menjadi array
+        $resultsArray = json_decode(json_encode($results), true);
+
+        return $this->respond($resultsArray, 200);
     }
 }
