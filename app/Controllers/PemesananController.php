@@ -98,7 +98,7 @@ class PemesananController extends BaseController
         ];
         return view($this->role . '/pemesanan/pemesanan', $data);
     }
-    
+
     public function pemesanan($area, $jenis)
     {
         $pemesananPertgl = $this->pemesananModel->getDataPemesananperTgl($area, $jenis);
@@ -116,7 +116,7 @@ class PemesananController extends BaseController
         ];
         return view($this->role . '/pemesanan/pemesananpertgl', $data);
     }
-    
+
     public function detailPemesanan($area, $jenis, $tglPakai)
     {
         $dataPemesanan = $this->pemesananModel->getDataPemesanan($area, $jenis, $tglPakai);
@@ -158,7 +158,7 @@ class PemesananController extends BaseController
         }
     }
 
-    
+
     public function filterPemesanan()
     {
         $area = $this->request->getPost('area');
@@ -446,7 +446,8 @@ class PemesananController extends BaseController
 
     public function getDataByIdStok($id)
     {
-        $data = $this->stockModel->getDataByIdStok($id);
+        // $data = $this->stockModel->getDataByIdStok($id);
+        $data = $this->pemasukanModel->getDataByIdStok($id);
         // Debugging
         // var_dump($data);
         return $this->response->setJSON($data);

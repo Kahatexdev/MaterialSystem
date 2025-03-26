@@ -418,14 +418,16 @@
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="id_pemasukan[]" value="${item.id_pemasukan}" id="pemasukan_${item.id_pemasukan}">
                     <label class="form-check-label" for="pemasukan_${item.id_pemasukan}">
+                    <strong>No Karung:</strong> ${item.no_karung}<br>
+                    <strong>Tanggal Masuk:</strong> ${item.tgl_masuk}<br>
                         <strong>Cluster:</strong> ${item.nama_cluster}<br>
                         <strong>PDK:</strong> ${item.no_model}<br>
                         <strong>Item Type:</strong> ${item.item_type}<br>
                         <strong>Kode Warna:</strong> ${item.kode_warna}<br>
                         <strong>Warna:</strong> ${item.warna}<br>
-                        <strong>Lot Celup:</strong> ${item.lot_final}<br>
-                        <strong>Total Stock:</strong> ${item.total_kgs} KG<br>
-                        <strong>Total Cones:</strong> ${item.total_cns} CNS
+                        <strong>Lot Celup:</strong> ${item.lot_kirim}<br>
+                        <strong>Total Kg:</strong> ${item.kgs_masuk} KG<br>
+                        <strong>Total Cones:</strong> ${item.cns_masuk} CNS
                     </label>
                 </div>
             </div>
@@ -446,7 +448,7 @@
             const idStok = document.getElementById('idStok').value;
             const qtyKGS = document.getElementById('qtyKGS').value;
             const qtyCNS = document.getElementById('qtyCNS').value;
-            const qtyKarung = document.getElementById('qtyKarung').value;
+            const qtyKarung = document.getElementById('no_karung').value;
             const noModel = document.getElementById('noModel').value;
             const namaCluster = document.getElementById('namaCluster').value;
             const idOutCelup = document.getElementById('idOutCelup').value;

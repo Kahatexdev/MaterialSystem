@@ -225,4 +225,13 @@ class PemasukanModel extends Model
             ->get()
             ->getResultArray();
     }
+    public function getDataByIdStok($idStok)
+    {
+        return $this->select('pemasukan.*, out_celup.no_karung, out_celup.lot_kirim')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->where('id_stock', $idStok)
+            ->where('out_jalur', 0)
+            ->get()
+            ->getResultArray();
+    }
 }

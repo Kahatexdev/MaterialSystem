@@ -1276,7 +1276,7 @@ class WarehouseController extends BaseController
                 'tgl_out'       => date('Y-m-d H:i:s'),
                 'kgs_out'       => $pemasukan['kgs_masuk'],
                 'cns_out'       => $pemasukan['cns_masuk'],
-                'krg_out'       => $krg,
+                'krg_out'       =>  $pemasukan['no_karung'],
                 'nama_cluster'  => $pemasukan['nama_cluster'],
                 'lot_out'       => $outCelup['lot_kirim'], // pastikan field ini ada di data pemasukan
                 'status'        => 'Pengeluaran Jalur',
@@ -1288,7 +1288,7 @@ class WarehouseController extends BaseController
             $fields = $this->db->getFieldNames('stock');
             $dataUpdate = [];
             foreach ($fields as $field) {
-                if (!in_array($field, ['id_stock','no_model','nama_cluster', 'item_type', 'kode_warna', 'warna', 'lot_awal', 'lot_stock', 'admin', 'created_at'])) {
+                if (!in_array($field, ['id_stock', 'no_model', 'nama_cluster', 'item_type', 'kode_warna', 'warna', 'lot_awal', 'lot_stock', 'admin', 'created_at'])) {
                     $dataUpdate[$field] = 0;
                 }
             }
