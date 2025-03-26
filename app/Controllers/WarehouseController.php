@@ -267,6 +267,10 @@ class WarehouseController extends BaseController
                         $this->stockModel->insert($stock);
                     }
                 }
+                // get id_stock yang baru di insert
+                $idPemasukan = $this->pemasukanModel->getInsertID();
+                $idStock = $this->stockModel->getInsertID();
+                $this->pemasukanModel->update($idPemasukan, $idStock);
 
                 session()->setFlashdata('success', 'Data berhasil dimasukkan.');
             }

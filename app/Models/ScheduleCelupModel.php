@@ -424,4 +424,39 @@ class ScheduleCelupModel extends Model
             ->groupBy('mesin_celup.no_mesin, mesin_celup.max_caps')
             ->get()->getResultArray();
     }
+
+    public function getFilterSchBenang($key, $tanggal_schedule, $tanggal_awal, $tanggal_akhir)
+    {
+        $this->select('schedule_celup.*, master_order.delivery_awal, master_order.delivery_akhir, mesin_celup.no_mesin, mesin_celup.ket_mesin')
+            ->join('master_order', 'master_order.no_model = schedule_celup.no_model')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin');
+
+        // Cek apakah ada input key untuk pencarian
+        if (!empty($key)) {
+            $this->groupStart()
+                ->like('schedule_celup.no_model', $key)
+                ->orLike('schedule_celup.kode_warna', $key)
+                ->groupEnd();
+        }
+
+        if (!empty($tanggal_schedule)) {
+            $this->where('schedule_celup.tanggal_schedule', $tanggal_schedule);
+        }
+
+        // Filter berdasarkan tanggal
+        if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
+            $this->groupStart();
+            if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
+                $this->where('schedule_celup.start_mc >=', $tanggal_awal)
+                    ->where('schedule_celup.start_mc <=', $tanggal_akhir);
+            } elseif (!empty($tanggal_awal)) {
+                $this->where('schedule_celup.start_mc >=', $tanggal_awal);
+            } elseif (!empty($tanggal_akhir)) {
+                $this->where('schedule_celup.start_mc <=', $tanggal_akhir);
+            }
+            $this->groupEnd();
+        }
+
+        return $this->findAll();
+    }
 }
