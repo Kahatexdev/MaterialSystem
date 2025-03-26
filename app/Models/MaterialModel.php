@@ -218,4 +218,10 @@ class MaterialModel extends Model
             ->orderBy('master_material.jenis, material.item_type', 'ASC')
             ->findAll();
     }
+    public function assignAreal($idOrder, $area)
+    {
+        return $this->set('area', $area)
+            ->where('id_order', $idOrder)
+            ->update();
+    }
 }

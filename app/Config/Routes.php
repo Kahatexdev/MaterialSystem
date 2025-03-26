@@ -119,9 +119,12 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('warehouse/updateCluster', 'WarehouseController::updateCluster');
     $routes->post('warehouse/getNoModel', 'WarehouseController::getNoModel');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
+    $routes->get('warehouse/reportPoBenang', 'WarehouseController::reportPoBenang');
+    $routes->get('warehouse/filterPoBenang', 'WarehouseController::filterPoBenang');
+    $routes->get('warehouse/exportPoBenang', 'ExcelController::exportPoBenang');
     $routes->get('warehouse/reportDatangBenang', 'WarehouseController::reportDatangBenang');
     $routes->get('warehouse/filterDatangBenang', 'WarehouseController::filterDatangBenang');
-    $routes->get('warehouse/exportDatangBenang', 'WarehouseController::exportDatangBenang');
+    $routes->get('warehouse/exportDatangBenang', 'ExcelController::exportDatangBenang');
     //
     $routes->post('getStockByParams', 'PemesananController::getStockByParams');
     $routes->get('pemesanan', 'PemesananController::index');
@@ -411,5 +414,7 @@ $routes->group(
         // $routes->get('getMaterialForPPH/(:any)/(:any)', 'ApiController::getMaterialForPPH/$1/$2');
         $routes->get('stockbahanbaku/(:any)', 'ApiController::stockbahanbaku/$1');
         $routes->post('hapusOldPemesanan', 'ApiController::hapusOldPemesanan');
+        $routes->get('pph/(:any)', 'ApiController::pph/$1');
+        $routes->post('assignArea', 'MaterialController::assignArea');
     }
 );

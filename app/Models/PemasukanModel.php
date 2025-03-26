@@ -183,30 +183,34 @@ class PemasukanModel extends Model
 
     public function getFilterDatangBenang($key, $tanggal_awal, $tanggal_akhir)
     {
-        $this->select('pemasukan.no_model, pemasukan.item_type, pemasukan.kode_warna, pemasukan.warna, pemasukan.kgs_masuk, pemasukan.cns_masuk, pemasukan.tgl_masuk, pemasukan.nama_cluster, master_order.foll_up, master_order.no_order, master_order.area, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, open_po.kg_po, out_celup.lot_kirim, bon_celup.no_surat_jalan, out_celup.l_m_d, out_celup.gw_kirim, out_celup.harga')
-        ->join('master_order', 'master_order.no_model = pemasukan.no_model')
-        ->join('open_po', 'open_po.no_model = pemasukan.no_model')
-        ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
-        ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon');
+        $this->select('pemasukan.no_model, pemasukan.item_type, pemasukan.kode_warna, pemasukan.warna, pemasukan.kgs_masuk, pemasukan.cns_masuk, pemasukan.tgl_masuk, pemasukan.nama_cluster, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, open_po.kg_po, out_celup.lot_kirim, bon_celup.no_surat_jalan, out_celup.l_m_d, out_celup.gw_kirim, out_celup.harga')
+            ->join('master_order', 'master_order.no_model = pemasukan.no_model')
+            ->join('open_po', 'open_po.no_model = pemasukan.no_model')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
+            ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon');
 
         // Cek apakah ada input key untuk pencarian
         if (!empty($key)) {
-            $this->groupStart() // Mulai grup kondisi OR
-                ->like('no_model', $key)
-                ->orLike('item_type', $key)
-                ->orLike('kode_warna', $key)
-                ->orLike('warna', $key)
-                ->groupEnd(); // Akhiri grup kondisi OR
+            $this->groupStart()
+                ->like('pemasukan.no_model', $key)
+                ->orLike('pemasukan.item_type', $key)
+                ->orLike('pemasukan.kode_warna', $key)
+                ->orLike('pemasukan.warna', $key)
+                ->groupEnd();
         }
 
         // Filter berdasarkan tanggal
-        if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
-            $this->where('tgl_masuk >=', $tanggal_awal)
-                ->where('tgl_masuk <=', $tanggal_akhir);
-        } elseif (!empty($tanggal_awal)) {
-            $this->where('tgl_masuk >=', $tanggal_awal);
-        } elseif (!empty($tanggal_akhir)) {
-            $this->where('tgl_masuk <=', $tanggal_akhir);
+        if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
+            $this->groupStart();
+            if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
+                $this->where('pemasukan.tgl_masuk >=', $tanggal_awal)
+                    ->where('pemasukan.tgl_masuk <=', $tanggal_akhir);
+            } elseif (!empty($tanggal_awal)) {
+                $this->where('pemasukan.tgl_masuk >=', $tanggal_awal);
+            } elseif (!empty($tanggal_akhir)) {
+                $this->where('pemasukan.tgl_masuk <=', $tanggal_akhir);
+            }
+            $this->groupEnd();
         }
 
         return $this->findAll();
