@@ -332,6 +332,7 @@ class PemesananModel extends Model
             ->table('pemesanan') // Ganti dengan nama tabel Anda
             ->where('tgl_pakai <', $data['tgl_pakai'])
             ->where('admin', $data['admin'])
+            ->where('status_kirim', '')
             ->delete();
 
         // Kembalikan jumlah baris yang terhapus

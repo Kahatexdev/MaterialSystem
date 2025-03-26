@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
+use App\Models\MasterOrderModel;
 
 class MaterialController extends BaseController
 {
@@ -13,12 +14,14 @@ class MaterialController extends BaseController
     protected $active;
     protected $filters;
     protected $materialModel;
+    protected $masterOrderModel;
     protected $masterMaterialModel;
 
     public function __construct()
     {
         $this->materialModel = new MaterialModel();
         $this->masterMaterialModel = new MasterMaterialModel();
+        $this->masterOrderModel = new MasterOrderModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -93,6 +96,7 @@ class MaterialController extends BaseController
         $item_type = $this->request->getPost('item_type');
         $composition = $this->request->getPost('composition');
         $kode_warna = $this->request->getPost('kode_warna');
+        $color = $this->request->getPost('color');
 
         $qty_pcs_1 = $this->request->getPost('qty_pcs_1');
         $qty_pcs_2 = $this->request->getPost('qty_pcs_2');
@@ -111,6 +115,7 @@ class MaterialController extends BaseController
             'loss' => $loss,
             'item_type' => $item_type,
             'composition' => $composition,
+            'color' => $color,
             'kode_warna' => $kode_warna,
             'qty_pcs' => $qty_pcs_2,
             'kgs' => $kgs_2,
@@ -138,9 +143,30 @@ class MaterialController extends BaseController
         $db->transComplete();
 
         if ($db->transStatus() === false) {
-            return $this->response->setStatusCode(500)->setJSON(['error' => 'Gagal split material']);
+            return $this->response->setStatusCode(404)->setJSON(['error' => 'Gagal split material']);
         } else {
             return $this->response->setJSON(['message' => 'Material berhasil di-split!']);
+        }
+    }
+    public function assignArea()
+    {
+        $model = $this->request->getPost('model'); // Gunakan POST
+        $area = $this->request->getPost('area');
+
+        $idOrder = $this->masterOrderModel
+            ->where('no_model', $model)
+            ->first();
+
+        if (!$idOrder) {
+            return $this->response->setStatusCode(404)->setJSON(['error' => 'Material belum ada']);
+        }
+
+        $update = $this->materialModel->assignAreal($idOrder['id_order'], $area);
+
+        if ($update) {
+            return $this->response->setStatusCode(200)->setJSON(['success' => 'Berhasil Assign Area']);
+        } else {
+            return $this->response->setStatusCode(500)->setJSON(['error' => 'Gagal Assign Area di Material']);
         }
     }
 }

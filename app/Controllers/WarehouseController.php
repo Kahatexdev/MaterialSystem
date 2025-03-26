@@ -1201,6 +1201,26 @@ class WarehouseController extends BaseController
         return redirect()->back();
     }
 
+    public function reportPoBenang()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Report PO Benang',
+            'active' => $this->active
+        ];
+
+        return view($this->role . '/warehouse/report-po-benang', $data);
+    }
+
+    public function filterPoBenang()
+    {
+        $key = $this->request->getGet('key');
+
+        $data = $this->openPoModel->getFilterPoBenang($key);
+
+        return $this->response->setJSON($data);
+    }
+
     public function reportDatangBenang()
     {
         $data = [
@@ -1222,48 +1242,93 @@ class WarehouseController extends BaseController
         return $this->response->setJSON($data);
     }
 
-    public function exportDatangBenang()
+    public function savePengeluaranJalur()
     {
-        $key = $this->request->getGet('key');
-        $tanggal_awal = $this->request->getGet('tanggal_awal');
-        $tanggal_akhir = $this->request->getGet('tanggal_akhir');
+        $data = $this->request->getJSON();
 
-        $data = $this->pemasukanModel->getFilterDatangBenang($key, $tanggal_awal, $tanggal_akhir);
+        // Data yang akan dimasukkan ke dalam database
+        $insertData = [
+            'id_out_celup' => $data->idOutCelup,
+            'area_out' => $data->area,
+            'tgl_out' => date('Y-m-d H:i:s'),
+            'kgs_out' => $data->qtyKGS,
+            'cns_out' => $data->qtyCNS,
+            'krg_out' => $data->qtyKarung,
+            'nama_cluster' => $data->namaCluster,
+            'lot_out' => $data->lotFinal,
+            'status' => 'Pengeuaran Jalur',
+            'admin' => $this->role,
+            'created_at' => date('Y-m-d H:i:s')
+        ];
 
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
+        // Ambil data stok berdasarkan id_out_celup
+        $stok = $this->stockModel->getDataByIdStok($data->idStok);
+        // var_dump($stok[0]['kgs_stock_awal']); 
+        // Data stok yang digunakan
+        $stokData = [
+            'kgs' => [
+                'in_out' => !empty($stok[0]['kgs_in_out']) ? (int)$stok[0]['kgs_in_out'] : 0,
+                'awal' => !empty($stok[0]['kgs_stock_awal']) ? (int)$stok[0]['kgs_stock_awal'] : 0,
+                'input' => (int)$insertData['kgs_out']
+            ],
+            'cns' => [
+                'in_out' => !empty($stok[0]['cns_in_out']) ? (int)$stok[0]['cns_in_out'] : 0,
+                'awal' => !empty($stok[0]['cns_stock_awal']) ? (int)$stok[0]['cns_stock_awal'] : 0,
+                'input' => (int)$insertData['cns_out']
+            ],
+            'krg' => [
+                'in_out' => !empty($stok[0]['krg_in_out']) ? (int)$stok[0]['krg_in_out'] : 0,
+                'awal' => !empty($stok[0]['krg_stock_awal']) ? (int)$stok[0]['krg_stock_awal'] : 0,
+                'input' => (int)$insertData['krg_out']
+            ]
+        ];
+        // var_dump($stokData);
+        // **Cek apakah stok cukup**
+        foreach ($stokData as $key => $item) {
+            $stokTersedia = $item['in_out'] > 0 ? $item['in_out'] : $item['awal'];
 
-        // Header
-        $header = ["No", "No Model", "Item Type", "Kode Warna", "Warna", "Kgs Masuk", "Cones Masuk", "Tanggal Masuk", "Nama Cluster"];
-        $sheet->fromArray([$header], NULL, 'A1');
-
-        // Data
-        $row = 2;
-        foreach ($data as $index => $item) {
-            $sheet->fromArray([
-                [
-                    $index + 1,
-                    $item['no_model'],
-                    $item['item_type'],
-                    $item['kode_warna'],
-                    $item['warna'],
-                    $item['kgs_masuk'],
-                    $item['cns_masuk'],
-                    $item['tgl_masuk'],
-                    $item['nama_cluster']
-                ]
-            ], NULL, 'A' . $row);
-            $row++;
+            if ($stokTersedia < $item['input']) {
+                return $this->response->setJSON([
+                    'error' => false,
+                    'message' => "Jumlah " . strtoupper($key) . " melebihi stok yang tersedia"
+                ]);
+            }
         }
 
-        $writer = new Xlsx($spreadsheet);
-        $fileName = 'Report_Datang_Benang_' . date('Y-m-d') . '.xlsx';
+        // **Kurangi stok setelah validasi**
+        foreach ($stokData as $key => &$item) {
+            if ($item['in_out'] > 0) {
+                $item['in_out'] = max(0, $item['in_out'] - $item['input']);
+            } else {
+                $item['awal'] = max(0, $item['awal'] - $item['input']);
+            }
+        }
 
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $fileName . '"');
-        header('Cache-Control: max-age=0');
+        // Menentukan lot yang digunakan
+        $insertData['lot_out'] = !empty($stok[0]['lot_stock']) ? $stok[0]['lot_stock'] : $stok[0]['lot_awal'];
 
-        $writer->save('php://output');
-        exit;
+        // Simpan data pengeluaran
+        if ($this->pengeluaranModel->insert($insertData)) {
+            // **Update stok setelah pengeluaran**
+            $this->stockModel->updateStock(
+                $data->idStok,
+                $stokData['kgs']['in_out'],
+                $stokData['kgs']['awal'],
+                $stokData['cns']['in_out'],
+                $stokData['cns']['awal'],
+                $stokData['krg']['in_out'],
+                $stokData['krg']['awal']
+            );
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Data berhasil disimpan & stok diperbarui'
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'error' => false,
+                'message' => 'Gagal menyimpan data'
+            ]);
+        }
     }
 }

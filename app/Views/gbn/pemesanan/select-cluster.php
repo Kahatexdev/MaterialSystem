@@ -1,55 +1,200 @@
 <?php $this->extend($role . '/pemesanan/header'); ?>
 <?php $this->section('content'); ?>
 <style>
-    .table {
-        border-radius: 15px;
-        /* overflow: hidden; */
-        border-collapse: separate;
-        /* Ganti dari collapse ke separate */
-        border-spacing: 0;
-        /* Pastikan jarak antar sel tetap rapat */
-        overflow: auto;
-        position: relative;
+    /* Main container styling */
+    .container-fluid {
+        padding: 1.5rem;
     }
 
-    .table th {
-
-        background-color: rgb(8, 38, 83);
-        border: none;
-        font-size: 0.9rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: rgb(255, 255, 255);
+    /* Card grid styling */
+    .card-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.25rem;
+        margin-top: 1.5rem;
     }
 
-    .table td {
-        border: none;
-        vertical-align: middle;
-        font-size: 0.9rem;
-        padding: 1rem 0.75rem;
-    }
-
-    .btn {
-        border-radius: 12px;
-        padding: 0.6rem 1.2rem;
-        font-weight: 500;
+    /* Individual card styling */
+    .stock-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        height: 100%;
     }
 
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(33, 150, 243, 0.2);
+    .stock-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        border-color: #c9d1d9;
+    }
+
+    .stock-card .card-header {
+        background-color: #082653;
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1rem;
+        border-bottom: none;
+    }
+
+    .stock-card .card-body {
+        padding: 1.25rem;
+    }
+
+    /* Stock info styling */
+    .stock-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .stock-info .label {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .stock-info .value {
+        font-weight: 600;
+        color: #212529;
+    }
+
+    /* Divider styling */
+    .divider {
+        height: 1px;
+        background-color: #e9ecef;
+        margin: 0.75rem 0;
+    }
+
+    /* Modal styling */
+    .modal-header {
+        background-color: #082653;
+        color: white;
+        border-bottom: none;
+    }
+
+    .modal-header .btn-close {
+        color: white;
+        filter: brightness(0) invert(1);
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .info-badge {
+        font-size: 0.85rem;
+        padding: 0.5rem;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        font-weight: 500;
+        background-color: #e9f3ff;
+        color: #0d6efd;
+        border: 1px solid #c9deff;
+    }
+
+    .info-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .info-section-title {
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #082653;
+        border-bottom: 2px solid #082653;
+        padding-bottom: 0.5rem;
+        display: inline-block;
+    }
+
+    /* Form styling */
+    .form-section {
+        background-color: #f8f9fa;
+        padding: 1.25rem;
+        border-radius: 8px;
+        margin-top: 1.5rem;
+    }
+
+    .form-section-title {
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #082653;
+    }
+
+    .form-control {
+        border-radius: 6px;
+        padding: 0.6rem 0.75rem;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 0 0.25rem rgba(8, 38, 83, 0.25);
+        border-color: #082653;
+    }
+
+    .btn-submit {
+        background-color: #082653;
+        border-color: #082653;
+        padding: 0.6rem 1.5rem;
+        font-weight: 500;
+    }
+
+    .btn-submit:hover {
+        background-color: #061c3e;
+        border-color: #061c3e;
+    }
+
+    /* Empty state styling */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        grid-column: 1 / -1;
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        color: #adb5bd;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state-text {
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    /* Responsive Layout */
+    @media (min-width: 768px) {
+        .card-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (min-width: 992px) {
+        .card-container {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (min-width: 1200px) {
+        .card-container {
+            grid-template-columns: repeat(4, 1fr);
+        }
     }
 </style>
-<div class="container my-4">
+
+<div class="container-fluid">
     <?php if (session()->getFlashdata('success')): ?>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
                     icon: 'success',
                     title: 'Success!',
-                    html: '<?= session()->getFlashdata('success') ?>'
+                    html: '<?= session()->getFlashdata('success') ?>',
+                    confirmButtonColor: '#082653'
                 });
             });
         </script>
@@ -61,214 +206,288 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error!',
-                    html: '<?= session()->getFlashdata('error') ?>'
+                    html: '<?= session()->getFlashdata('error') ?>',
+                    confirmButtonColor: '#082653'
                 });
             });
         </script>
     <?php endif; ?>
 
-    <div class="card shadow-sm">
-        <div class="card-header">
-            <h2 class="mb-0">Pilih Cluster</h2>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Data Stock <?= $noModel; ?></h3>
+            <span class="badge bg-gradient-info"><?= date('d F Y'); ?></span>
         </div>
-        <div class="card-body">
-            <div class="row align-items-center mb-3">
-                <div class="col-md-6">
-                    <input type="text" id="searchCluster" class="form-control" placeholder="Cari Cluster...">
-                </div>
-                <div class="col-md-6 text-end">
-                    <button id="viewSelectedStocks" class="btn bg-gradient-info" disabled>
-                        <i class="fas fa-eye"></i> Lihat Stock Terpilih
-                    </button>
-                </div>
-            </div>
+    </div>
 
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead class="table-info">
-                        <tr>
-                            <th style="width: 5%;">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="selectAll">
-                                </div>
-                            </th>
-                            <th>Nama Cluster</th>
-                            <th>KGS Stock Awal</th>
-                            <th>CNS Stock Awal</th>
-                            <th>KRg Stock Awal</th>
-                            <th>Lot Awal</th>
-                            <th>KGS In/Out</th>
-                            <th>CNS In/Out</th>
-                            <th>KRg In/Out</th>
-                            <th>Lot Stock</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (!empty($cluster)): ?>
-                            <?php foreach ($cluster as $c): ?>
-                                <tr>
-                                    <td>
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input cluster-checkbox"
-                                                data-cluster="<?= esc($c['nama_cluster']); ?>"
-                                                data-kgs="<?= esc($c['kgs_stock_awal']); ?>"
-                                                data-cns="<?= esc($c['cns_stock_awal']); ?>"
-                                                data-krg="<?= esc($c['krg_stock_awal']); ?>"
-                                                data-lot="<?= esc($c['lot_awal']); ?>"
-                                                data-kgs-io="<?= esc($c['kgs_in_out']); ?>"
-                                                data-cns-io="<?= esc($c['cns_in_out']); ?>"
-                                                data-krg-io="<?= esc($c['krg_in_out']); ?>"
-                                                data-lot-stock="<?= esc($c['lot_stock']); ?>">
-                                        </div>
-                                    </td>
-                                    <td><?= esc($c['nama_cluster']); ?></td>
-                                    <td><?= esc($c['kgs_stock_awal']); ?></td>
-                                    <td><?= esc($c['cns_stock_awal']); ?></td>
-                                    <td><?= esc($c['krg_stock_awal']); ?></td>
-                                    <td><?= esc($c['lot_awal']); ?></td>
-                                    <td><?= esc($c['kgs_in_out']); ?></td>
-                                    <td><?= esc($c['cns_in_out']); ?></td>
-                                    <td><?= esc($c['krg_in_out']); ?></td>
-                                    <td><?= esc($c['lot_stock']); ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="10" class="text-center">Data cluster tidak ditemukan.</td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+    <div class="card-container">
+        <?php if (!empty($cluster)): ?>
+            <?php foreach ($cluster as $item): ?>
+                <div class="stock-card" data-id-stok="<?= esc($item['id_stock']); ?>">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <span class="d-flex align-items-center">
+                            <i class="fas fa-warehouse me-2 text-white"></i>
+                            Cluster <?= esc($item['nama_cluster']); ?>
+                        </span>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    Cluster <i class="fas fa-inbox text-white"></i>
+                </div>
+                <p class="empty-state-text">Data pemasukan tidak ditemukan.</p>
             </div>
-        </div>
+        <?php endif; ?>
     </div>
 </div>
 
-<!-- Modal untuk Mengurangi Stock Cluster -->
-<div class="modal fade" id="stockModal" tabindex="-1" aria-labelledby="stockModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
+<!-- Improved Modal -->
+<div class="modal fade" id="dataModal" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header text-white">
-                <h5 class="modal-title" id="stockModalLabel">Kurangi Stock Cluster Terpilih</h5>
+            <div class="modal-header">
+                <h5 class="modal-title text-white" id="dataModalLabel">Detail Data Stock</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Nama Cluster</th>
-                                <th>Stock Actual (KGS)</th>
-                                <th>Stock Actual (CNS)</th>
-                                <th>Stock Actual (KRg)</th>
-                                <th>Kurangi (KGS)</th>
-                                <th>Kurangi (CNS)</th>
-                                <th>Kurangi (KRg)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="modalStockBody">
-                            <!-- Data akan diisi oleh JavaScript -->
-                        </tbody>
-                    </table>
+                <div class="info-section">
+                    <h6 class="info-section-title">Informasi Stock</h6>
+                    <div class="row" id="modalContent">
+                        <!-- Detail data will be loaded here -->
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
-                <button type="button" class="btn btn-danger" id="reduceSelectedStocks">Kurangi Stock</button>
+
+                <div class="form-section">
+                    <h6 class="form-section-title">Input Pengeluaran Stock</h6>
+                    <form id="usageForm" method="post">
+                        <input type="hidden" id="idStok" name="idStok">
+                        <input type="hidden" id="noModel" name="noModel" value="<?= $noModel; ?>">
+                        <input type="hidden" id="namaCluster" name="namaCluster" value="<?= $item['nama_cluster']; ?>">
+                        <input type="hidden" id="lotFinal" name="lotFinal" value="<?= $item['lot_final']; ?>">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="qtyKGS" class="form-label">Qty KGS</label>
+                                <div class="input-group">
+                                    <input type="number" step=0.1 class="form-control" id="qtyKGS" name="qtyKGS" placeholder="0" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="qtyCNS" class="form-label">Qty CNS</label>
+                                <div class="input-group">
+                                    <input type="number" step=0.1 class="form-control" id="qtyCNS" name="qtyCNS" placeholder="0" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="qtyKarung" class="form-label">Qty Karung</label>
+                                <div class="input-group">
+                                    <input type="number" step=0.1 class="form-control" id="qtyKarung" name="qtyKarung" placeholder="0" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary btn-submit">
+                                <i class="bi bi-check-circle me-1"></i> Submit
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Fitur pencarian cluster
-        const searchCluster = document.getElementById("searchCluster");
-        searchCluster.addEventListener("keyup", function() {
-            let value = this.value.toLowerCase();
-            document.querySelectorAll("table tbody tr").forEach(function(row) {
-                row.style.display = row.textContent.toLowerCase().includes(value) ? "" : "none";
+    document.addEventListener('DOMContentLoaded', function() {
+        // Card click event
+        const cards = document.querySelectorAll('.stock-card');
+        cards.forEach(card => {
+            card.addEventListener('click', function() {
+                const idStok = this.getAttribute('data-id-stok');
+                document.getElementById('idStok').value = idStok;
+
+
+                // Reset form
+                document.getElementById('usageForm').reset();
+
+                // Fetch data
+                fetch(`<?= base_url('/gbn/pemasukan/getDataByIdStok') ?>/${encodeURIComponent(idStok)}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        let content = '';
+
+                        if (Array.isArray(data) && data.length > 0) {
+                            let item = data[0]; // Get first item if in array
+                            renderModalContent(item);
+                        } else if (typeof data === 'object' && data !== null) {
+                            renderModalContent(data);
+                        } else {
+                            document.getElementById('modalContent').innerHTML =
+                                '<div class="col-12"><div class="alert alert-warning">Data tidak ditemukan.</div></div>';
+                        }
+
+                        // Show modal
+                        const modal = new bootstrap.Modal(document.getElementById('dataModal'));
+                        modal.show();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Gagal memuat data. Silakan coba lagi.',
+                            confirmButtonColor: '#082653'
+                        });
+                    });
             });
         });
 
-        // Checkbox "Select All"
-        const selectAllCheckbox = document.getElementById("selectAll");
-        selectAllCheckbox.addEventListener("change", function() {
-            document.querySelectorAll(".cluster-checkbox").forEach(function(checkbox) {
-                checkbox.checked = selectAllCheckbox.checked;
-            });
-            updateViewButtonState();
-        });
+        // Function to render modal content
+        // Function to render modal content
+        function renderModalContent(item) {
+            // Ambil nilai dari URL parameter
+            const KgsPesan = new URLSearchParams(window.location.search).get('KgsPesan') || '-';
+            const CnsPesan = new URLSearchParams(window.location.search).get('CnsPesan') || '-';
 
-        // Perubahan checkbox individu
-        document.querySelectorAll(".cluster-checkbox").forEach(function(checkbox) {
-            checkbox.addEventListener("change", function() {
-                updateViewButtonState();
-                if (!this.checked) {
-                    selectAllCheckbox.checked = false;
-                } else if (document.querySelectorAll(".cluster-checkbox:checked").length === document.querySelectorAll(".cluster-checkbox").length) {
-                    selectAllCheckbox.checked = true;
-                }
-            });
-        });
+            const content = `
+        <div class="col-md-4 mb-3">
+            <div class="info-badge">
+                <span>PDK: <strong>${item.no_model || '-'}</strong></span>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="info-badge">
+                <span>Item Type: <strong>${item.item_type || '-'}</strong></span>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="info-badge">
+                <span>Kode: <strong>${item.kode_warna || '-'}</strong></span>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="info-badge">
+                <span>Warna: <strong>${item.warna || '-'}</strong></span>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="info-badge">
+                <span>Stock: <strong>${item.total_kgs || '-'} KG </strong><br>
+                <small>KG Pesan: <strong>${KgsPesan} KG</strong></small></span>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="info-badge">
+                <span>Stock Cones: <strong>${item.total_cns || '-'} Cns </strong><br>
+                <small>Cones Pesan: <strong>${CnsPesan} Cns</strong></small></span>
+            </div>
+        </div>
+        <input type="hidden" id="idOutCelup" value="${item.id_out_celup}">
+    `;
 
-        function updateViewButtonState() {
-            document.getElementById("viewSelectedStocks").disabled = document.querySelectorAll(".cluster-checkbox:checked").length === 0;
+            document.getElementById('modalContent').innerHTML = content;
         }
 
-        // Tombol "Lihat Stock Terpilih"
-        document.getElementById("viewSelectedStocks").addEventListener("click", function() {
-            let selectedClusters = Array.from(document.querySelectorAll(".cluster-checkbox:checked")).map(function(checkbox) {
-                return {
-                    nama_cluster: checkbox.dataset.cluster,
-                    kgs_stock_awal: checkbox.dataset.kgs,
-                    cns_stock_awal: checkbox.dataset.cns,
-                    krg_stock_awal: checkbox.dataset.krg,
-                    lot_awal: checkbox.dataset.lot,
-                    kgs_in_out: checkbox.dataset.kgsIo,
-                    cns_in_out: checkbox.dataset.cnsIo,
-                    krg_in_out: checkbox.dataset.krgIo,
-                    lot_stock: checkbox.dataset.lotStock
-                };
-            });
-            populateStockModal(selectedClusters);
-            new bootstrap.Modal(document.getElementById("stockModal")).show();
-        });
 
-        function populateStockModal(clusters) {
-            const modalBody = document.getElementById("modalStockBody");
-            modalBody.innerHTML = "";
-            clusters.forEach(function(cluster) {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                <td>${cluster.nama_cluster}</td>
-                <td>${cluster.kgs_stock_awal}</td>
-                <td>${cluster.cns_stock_awal}</td>
-                <td>${cluster.krg_stock_awal}</td>
-                <td><input type="number" class="form-control" name="reduce_kgs[]" min="0" max="${cluster.kgs_stock_awal}" data-cluster="${cluster.nama_cluster}"></td>
-                <td><input type="number" class="form-control" name="reduce_cns[]" min="0" max="${cluster.cns_stock_awal}" data-cluster="${cluster.nama_cluster}"></td>
-                <td><input type="number" class="form-control" name="reduce_krg[]" min="0" max="${cluster.krg_stock_awal}" data-cluster="${cluster.nama_cluster}"></td>
-            `;
-                modalBody.appendChild(row);
-            });
-        }
+        // Form submission
+        document.getElementById('usageForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Mencegah submission tradisional
 
-        document.getElementById("reduceSelectedStocks").addEventListener("click", function() {
-            const reducedStocks = [];
-            document.querySelectorAll("#modalStockBody tr").forEach(function(row) {
-                const clusterName = row.querySelector("input[name='reduce_kgs[]']").dataset.cluster;
-                const reduceKGS = row.querySelector("input[name='reduce_kgs[]']").value;
-                const reduceCNS = row.querySelector("input[name='reduce_cns[]']").value;
-                const reduceKRg = row.querySelector("input[name='reduce_krg[]']").value;
-                reducedStocks.push({
-                    cluster: clusterName,
-                    reduce_kgs: reduceKGS,
-                    reduce_cns: reduceCNS,
-                    reduce_krg: reduceKRg
+            const idStok = document.getElementById('idStok').value;
+            const qtyKGS = document.getElementById('qtyKGS').value;
+            const qtyCNS = document.getElementById('qtyCNS').value;
+            const qtyKarung = document.getElementById('qtyKarung').value;
+            const noModel = document.getElementById('noModel').value;
+            const namaCluster = document.getElementById('namaCluster').value;
+            const idOutCelup = document.getElementById('idOutCelup').value;
+            const lotFinal = document.getElementById('lotFinal').value;
+            // get from url ?area=
+            // console.log(area);
+            const area = new URLSearchParams(window.location.search).get('Area');
+            const KgsPesan = new URLSearchParams(window.location.search).get('KgsPesan');
+            const CnsPesan = new URLSearchParams(window.location.search).get('CnsPesan');
+
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
+
+            // Kirim data menggunakan fetch ke controller saveUsage
+            fetch('<?= base_url('gbn/savePengeluaranJalur') ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        idStok: idStok,
+                        qtyKGS: qtyKGS,
+                        qtyCNS: qtyCNS,
+                        qtyKarung: qtyKarung,
+                        noModel: noModel,
+                        namaCluster: namaCluster,
+                        idOutCelup: idOutCelup,
+                        lotFinal: lotFinal,
+                        area: area,
+                        KgsPesan: KgsPesan,
+                        CnsPesan: CnsPesan
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Reset button state
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+
+                    // Close modal
+                    bootstrap.Modal.getInstance(document.getElementById('dataModal')).hide();
+
+                    // Tampilkan pesan sesuai dengan session flash data dari controller
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: data.message,
+                            confirmButtonColor: '#082653'
+                        }).then(() => {
+                            // Opsional: reload halaman atau redirect jika perlu
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message,
+                            confirmButtonColor: '#082653'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Gagal menyimpan data. Silakan coba lagi.',
+                        confirmButtonColor: '#082653'
+                    });
                 });
-            });
-            console.log(reducedStocks);
-            // Implementasikan logika untuk mengirim data reducedStocks ke backend
         });
     });
 </script>

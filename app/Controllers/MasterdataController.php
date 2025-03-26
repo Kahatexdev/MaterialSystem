@@ -147,7 +147,7 @@ class MasterdataController extends BaseController
 
             // Cek apakah master order sudah ada di database
             $orderExists = $masterOrderModel->checkDatabase($no_order, $no_model, $buyer, $lco_date, $foll_up);
-
+            // dd($orderExists);
             // Jika master order belum ada, lakukan validasi dengan mencari baris material yang memiliki style_size valid
             if (!$orderExists) {
                 $validate = null;
@@ -184,6 +184,8 @@ class MasterdataController extends BaseController
                     'updated_at'     => NULL,
                 ];
                 $masterOrderModel->insert($masterData);
+            } else {
+                return redirect()->back()->with('error', 'Data dengan No Model ' . $orderExists['no_model'] . ' sudah ada di database.');
             }
 
             // Dapatkan id_order untuk digunakan pada tabel material
@@ -581,6 +583,7 @@ class MasterdataController extends BaseController
                 'admin'          => $admin,
                 'updated_at'     => date('Y-m-d H:i:s'),
             ];
+
             $masterOrderModel->update($id_order, $masterDataUpdate);
             // --- End update master_order ---
 
@@ -613,9 +616,22 @@ class MasterdataController extends BaseController
 
                 $qty_raw = str_replace([',', '.'], '', $sheet->getCell('G' . $rowIndex)->getValue());
                 $qty_pcs = is_numeric($qty_raw) ? intval($qty_raw) : 0;
+                $kgs_raw = floatval(str_replace([','], '', $sheet->getCell('I' . $rowIndex)->getValue()));
 
                 $key = $style_size . '_' . $item_type . '_' . $kode_warna . '_' . $color;
                 $newMaterialKeys[] = $key;
+
+                // Ambil dan sanitasi item type
+                if (empty($item_type)) {
+                    return redirect()->back()->with('error', 'Item Type tidak boleh kosong pada baris ' . $rowIndex);
+                }
+                $item_type = htmlspecialchars($item_type, ENT_QUOTES, 'UTF-8');
+
+                // Cek apakah item type ada di database
+                $checkItemType = $masterMaterialModel->checkItemType($item_type);
+                if (!$checkItemType) {
+                    return redirect()->back()->with('error', $item_type . ' tidak ada di database pada baris ' . $rowIndex);
+                }
 
                 $materialData = [
                     'id_order'    => $id_order,
@@ -629,7 +645,7 @@ class MasterdataController extends BaseController
                     'gw'          => $sheet->getCell('F' . $rowIndex)->getValue(),
                     'qty_pcs'     => $qty_pcs,
                     'loss'        => $sheet->getCell('H' . $rowIndex)->getValue() ?? 0,
-                    'kgs'         => $sheet->getCell('I' . $rowIndex)->getValue(),
+                    'kgs'         => $kgs_raw,
                     'admin'       => $admin,
                     'updated_at'  => date('Y-m-d H:i:s'),
                 ];

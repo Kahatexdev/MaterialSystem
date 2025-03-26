@@ -427,8 +427,76 @@ class PemesananController extends BaseController
             'title' => 'Material System',
             'role' => $this->role,
             'cluster' => $cluster,
+            'noModel' => $getPemesanan['no_model'],
+            // 'namaCluster' => $getPemesanan['nama_cluster'],
+            // 'id_out_celup' => $getPemesanan['id_out_celup'],
             'id' => $id,
         ];
+
+        // dd ($data);
         return view($this->role . '/pemesanan/select-cluster', $data);
+    }
+
+    public function getDataByIdStok($id)
+    {
+        $data = $this->stockModel->getDataByIdStok($id);
+
+        // Debugging
+        // var_dump($data);
+        return $this->response->setJSON($data);
+    }
+
+
+    public function saveUsage()
+    {
+        $session = session();
+        // $session->remove('usage_data'); // Hapus hanya data penggunaan
+        // $session->destroy(); // Hapus semua session
+
+        // Ambil data dari JSON request
+        $data = $this->request->getJSON(true);
+
+        $idStok = $data['idStok'] ?? null;
+        $qtyKGS = $data['qtyKGS'] ?? null;
+        $qtyCNS = $data['qtyCNS'] ?? null;
+        $qtyKarung = $data['qtyKarung'] ?? null;
+        $noModel = $data['noModel'] ?? null;
+        $namaCluster = $data['namaCluster'] ?? null;
+        $idOutCelup = $data['idOutCelup'] ?? null;
+        $area = $data['area'] ?? null;
+
+        // Validasi jika ada nilai yang kosong
+        if (empty($idStok) || empty($qtyKGS) || empty($qtyCNS) || empty($qtyKarung) || empty($noModel) || empty($namaCluster) || empty($idOutCelup)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Semua field harus diisi'
+            ]);
+        }
+
+        $newData = [
+            'id_stok' => $idStok,
+            'qty_kgs' => $qtyKGS,
+            'qty_cns' => $qtyCNS,
+            'qty_karung' => $qtyKarung,
+            'no_model' => $noModel,
+            'nama_cluster' => $namaCluster,
+            'id_out_celup' => $idOutCelup,
+            'area' => $area
+        ];
+
+        // Cek apakah sudah ada data sebelumnya di session
+        $usageData = $session->get('usage_data') ?? [];
+
+        // Tambahkan data baru ke array yang sudah ada
+        $usageData[] = $newData;
+
+        // Simpan kembali ke session
+        $session->set('usage_data', $usageData);
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Data penggunaan stock berhasil disimpan ke session',
+            'data' => $usageData
+        ]);
     }
 }
