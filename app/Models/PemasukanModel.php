@@ -215,4 +215,31 @@ class PemasukanModel extends Model
 
         return $this->findAll();
     }
+
+    public function getDataByIdOutCelup($idOutCelup)
+    {
+        return $this->select('pemasukan.*, out_celup.lot_kirim')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
+            ->where('pemasukan.id_out_celup', $idOutCelup)
+            ->groupBy('pemasukan.id_pemasukan')
+            ->get()
+            ->getResultArray();
+    }
+    public function getDataByIdStok($idStok)
+    {
+        return $this->select('pemasukan.*, out_celup.no_karung, out_celup.lot_kirim')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->where('id_stock', $idStok)
+            ->where('out_jalur', "0")
+            ->get()
+            ->getResultArray();
+    }
+    public function getDataInput($idPemasukan)
+    {
+        return $this->select('pemasukan.*, out_celup.no_karung, out_celup.lot_kirim')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->where('id_pemasukan', $idPemasukan)
+            ->get()
+            ->getResultArray();
+    }
 }

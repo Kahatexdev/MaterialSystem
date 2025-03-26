@@ -253,12 +253,27 @@
             </div>
             <div class="modal-body">
                 <div class="info-section">
-                    <h6 class="info-section-title">Informasi Stock</h6>
+                    <h6 class="info-section-title">Informasi Pemesanan</h6>
                     <div class="row" id="modalContent">
                         <!-- Detail data will be loaded here -->
                     </div>
                 </div>
 
+                <div class="divider"></div>
+                <div class="form-section">
+                    <h6 class="form-section-title">Pengeluaran Stock</h6>
+                    <form id="pengeluaran" method="post" action="<?= base_url('gbn/simpanPengeluaranJalur?Area=' . $area); ?>">
+                        <div class="row" id="formPengeluaran">
+                            <!-- Form input pengeluaran stock will be loaded here -->
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary btn-submit">
+                                <i class="bi bi-check-circle me-1"></i> Submit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="divider"></div>
                 <div class="form-section">
                     <h6 class="form-section-title">Input Pengeluaran Stock</h6>
                     <form id="usageForm" method="post">
@@ -323,10 +338,12 @@
                     })
                     .then(data => {
                         let content = '';
-
+                        // Reset konten modal agar tidak terjadi penumpukan data
+                        document.getElementById('formPengeluaran').innerHTML = '';
                         if (Array.isArray(data) && data.length > 0) {
-                            let item = data[0]; // Get first item if in array
-                            renderModalContent(item);
+                            data.forEach(item => {
+                                renderModalContent(item);
+                            });
                         } else if (typeof data === 'object' && data !== null) {
                             renderModalContent(data);
                         } else {
@@ -381,18 +398,44 @@
         
         <div class="col-md-4 mb-3">
             <div class="info-badge">
-                <span>Stock: <strong>${item.total_kgs || '-'} KG </strong><br>
-                <small>KG Pesan: <strong>${KgsPesan} KG</strong></small></span>
+                <span>KG Pesan: <strong>${KgsPesan} KG</strong></span>
             </div>
         </div>
         <div class="col-md-4 mb-3">
             <div class="info-badge">
-                <span>Stock Cones: <strong>${item.total_cns || '-'} Cns </strong><br>
-                <small>Cones Pesan: <strong>${CnsPesan} Cns</strong></small></span>
+                <span>Cones Pesan: <strong>${CnsPesan} Cns</strong></span>
             </div>
         </div>
         <input type="hidden" id="idOutCelup" value="${item.id_out_celup}">
+
+        
     `;
+
+            // Buat konten untuk satu item
+            const formPengeluaran = `
+        <div class="card mb-2">
+            <div class="card-body">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="id_pemasukan[]" value="${item.id_pemasukan}" id="pemasukan_${item.id_pemasukan}">
+                    <label class="form-check-label" for="pemasukan_${item.id_pemasukan}">
+                    <strong>No Karung:</strong> ${item.no_karung}<br>
+                    <strong>Tanggal Masuk:</strong> ${item.tgl_masuk}<br>
+                        <strong>Cluster:</strong> ${item.nama_cluster}<br>
+                        <strong>PDK:</strong> ${item.no_model}<br>
+                        <strong>Item Type:</strong> ${item.item_type}<br>
+                        <strong>Kode Warna:</strong> ${item.kode_warna}<br>
+                        <strong>Warna:</strong> ${item.warna}<br>
+                        <strong>Lot Celup:</strong> ${item.lot_kirim}<br>
+                        <strong>Total Kg:</strong> ${item.kgs_masuk} KG<br>
+                        <strong>Total Cones:</strong> ${item.cns_masuk} CNS
+                    </label>
+                </div>
+            </div>
+        </div>
+    `;
+
+            // Tambahkan konten item ke dalam container
+            document.getElementById('formPengeluaran').innerHTML += formPengeluaran;
 
             document.getElementById('modalContent').innerHTML = content;
         }
@@ -405,7 +448,7 @@
             const idStok = document.getElementById('idStok').value;
             const qtyKGS = document.getElementById('qtyKGS').value;
             const qtyCNS = document.getElementById('qtyCNS').value;
-            const qtyKarung = document.getElementById('qtyKarung').value;
+            const qtyKarung = document.getElementById('no_karung').value;
             const noModel = document.getElementById('noModel').value;
             const namaCluster = document.getElementById('namaCluster').value;
             const idOutCelup = document.getElementById('idOutCelup').value;

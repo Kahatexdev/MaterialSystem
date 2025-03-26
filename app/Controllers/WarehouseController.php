@@ -28,6 +28,7 @@ class WarehouseController extends BaseController
     protected $active;
     protected $filters;
     protected $request;
+    protected $db;
     protected $masterOrderModel;
     protected $materialModel;
     protected $masterMaterialModel;
@@ -57,6 +58,7 @@ class WarehouseController extends BaseController
         $this->historyPindahPalet = new HistoryPindahPalet();
         $this->historyPindahOrder = new HistoryPindahOrder();
         $this->pengeluaranModel = new PengeluaranModel();
+        $this->db = \Config\Database::connect(); // Menghubungkan ke database
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -1244,6 +1246,66 @@ class WarehouseController extends BaseController
         $data = $this->pemasukanModel->getFilterDatangBenang($key, $tanggalAwal, $tanggalAkhir);
 
         return $this->response->setJSON($data);
+    }
+
+    public function simpanPengeluaranJalur()
+    {
+        $data = $this->request->getPost();
+        // get from url ?Area=
+        $area = $this->request->getGet('Area');
+
+        // Pastikan id_pemasukan berupa array
+        $idPemasukanArray = (array)$data['id_pemasukan'];
+
+        // Ambil data pemasukan untuk semua id yang dipilih
+        $pemasukanData = $this->pemasukanModel->find($idPemasukanArray);
+
+        if (!$pemasukanData) {
+            return redirect()->back()->with('error', 'Data pemasukan tidak ditemukan.');
+        }
+
+        $krg = 0;
+
+        // cek data tabel out_celup
+        // Lakukan looping untuk setiap data pemasukan
+        foreach ($pemasukanData as $pemasukan) {
+            $outCelup = $this->outCelupModel->find($pemasukan['id_out_celup']);
+
+            // Update field out_jalur pada tabel pemasukan
+            $this->pemasukanModel->update($pemasukan['id_pemasukan'], ['out_jalur' => "1"]);
+
+            // Insert data pengeluaran sesuai masing-masing pemasukan
+            $insertData = [
+                'id_out_celup'  => $pemasukan['id_out_celup'],
+                'area_out'      => $area,
+                'tgl_out'       => date('Y-m-d H:i:s'),
+                'kgs_out'       => $pemasukan['kgs_masuk'],
+                'cns_out'       => $pemasukan['cns_masuk'],
+                'krg_out'       =>  $outCelup['no_karung'],
+                'nama_cluster'  => $pemasukan['nama_cluster'],
+                'lot_out'       => $outCelup['lot_kirim'], // pastikan field ini ada di data pemasukan
+                'status'        => 'Pengeluaran Jalur',
+                'admin'         => $this->role,
+                'created_at'    => date('Y-m-d H:i:s')
+            ];
+            $this->pengeluaranModel->insert($insertData);
+            // --- UPDATE TABEL STOCK BERDASARKAN id_stock ---
+            $fields = $this->db->getFieldNames('stock');
+            $dataUpdate = [];
+            foreach ($fields as $field) {
+                if (!in_array($field, ['id_stock', 'no_model', 'nama_cluster', 'item_type', 'kode_warna', 'warna', 'lot_awal', 'lot_stock', 'admin', 'created_at'])) {
+                    $dataUpdate[$field] = 0;
+                }
+            }
+
+            $this->db->table('stock')
+                ->where('id_stock', $pemasukan['id_stock'])
+                ->update($dataUpdate);
+            // --- END UPDATE TABEL STOCK ---
+        }
+
+        // Jika perlu, debugging atau kembalikan response sukses
+        return redirect()->back()->with('success', 'Data pengeluaran berhasil disimpan.');
     }
 
     public function savePengeluaranJalur()

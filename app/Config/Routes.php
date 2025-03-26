@@ -112,6 +112,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('getKgsCnsClusterForOut', 'WarehouseController::getKgsCnsClusterForOut');
     $routes->post('proses_pengeluaran_manual', 'WarehouseController::prosesPengeluaranJalurManual');
     $routes->post('savePengeluaranJalur', 'WarehouseController::savePengeluaranJalur');
+    $routes->post('simpanPengeluaranJalur', 'WarehouseController::simpanPengeluaranJalur');
 
     $routes->post('komplain_pemasukan', 'WarehouseController::prosesComplain');
     //
@@ -416,5 +417,7 @@ $routes->group(
         // $routes->get('getMaterialForPPH/(:any)/(:any)', 'ApiController::getMaterialForPPH/$1/$2');
         $routes->get('stockbahanbaku/(:any)', 'ApiController::stockbahanbaku/$1');
         $routes->post('hapusOldPemesanan', 'ApiController::hapusOldPemesanan');
+        $routes->get('pph/(:any)', 'ApiController::pph/$1');
+        $routes->post('assignArea', 'MaterialController::assignArea');
     }
 );

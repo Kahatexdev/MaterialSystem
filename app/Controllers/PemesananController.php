@@ -98,7 +98,7 @@ class PemesananController extends BaseController
         ];
         return view($this->role . '/pemesanan/pemesanan', $data);
     }
-    
+
     public function pemesanan($area, $jenis)
     {
         $pemesananPertgl = $this->pemesananModel->getDataPemesananperTgl($area, $jenis);
@@ -116,7 +116,7 @@ class PemesananController extends BaseController
         ];
         return view($this->role . '/pemesanan/pemesananpertgl', $data);
     }
-    
+
     public function detailPemesanan($area, $jenis, $tglPakai)
     {
         $dataPemesanan = $this->pemesananModel->getDataPemesanan($area, $jenis, $tglPakai);
@@ -158,7 +158,7 @@ class PemesananController extends BaseController
         }
     }
 
-    
+
     public function filterPemesanan()
     {
         $area = $this->request->getPost('area');
@@ -422,12 +422,19 @@ class PemesananController extends BaseController
         $getPemesanan = $this->pemesananModel->getDataPemesananbyId($id);
         $cluster = $this->stockModel->getDataCluster($getPemesanan['no_model'], $getPemesanan['item_type'], $getPemesanan['kode_warna'], $getPemesanan['color']);
         // dd ($getPemesanan, $cluster);
+
+        // if (!$cluster) {
+        //     session()->setFlashdata('error', 'Cluster tidak ditemukan');
+        //     // redirect back
+        //     return redirect()->back();
+        // } 
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
             'cluster' => $cluster,
             'noModel' => $getPemesanan['no_model'],
+            'area' => $getPemesanan['admin'],
             // 'namaCluster' => $getPemesanan['nama_cluster'],
             // 'id_out_celup' => $getPemesanan['id_out_celup'],
             'id' => $id,
@@ -439,8 +446,8 @@ class PemesananController extends BaseController
 
     public function getDataByIdStok($id)
     {
-        $data = $this->stockModel->getDataByIdStok($id);
-
+        // $data = $this->stockModel->getDataByIdStok($id);
+        $data = $this->pemasukanModel->getDataByIdStok($id);
         // Debugging
         // var_dump($data);
         return $this->response->setJSON($data);
