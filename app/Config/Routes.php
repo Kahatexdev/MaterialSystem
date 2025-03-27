@@ -191,6 +191,7 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('editretur/(:num)', 'CelupController::editRetur/$1');
     $routes->post('proseseditretur/(:num)', 'CelupController::prosesEditRetur/$1');
     $routes->get('printBon/(:num)', 'PdfController::printBon/$1');
+    $routes->get('generate/(:num)', 'CelupController::generateBarcode/$1');
 });
 
 
