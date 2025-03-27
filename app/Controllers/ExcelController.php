@@ -99,7 +99,7 @@ class ExcelController extends BaseController
                     'color'      => $items['color'],
                     'gw'         => $items['gw'],
                     'composition' => $items['composition'],
-                    'kgs'  => $items['kgs'],
+                    'kgs'  => $items['ttl_kebutuhan'],
                     'jarum'      => $data['machinetypeid'] ?? null,
                     'bruto'      => $bruto,
                     'qty'        => $data['qty'] ?? 0,
