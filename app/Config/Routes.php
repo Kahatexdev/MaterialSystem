@@ -75,6 +75,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/reqschedule', 'ScheduleController::reqschedule');
     $routes->post('schedule/reqschedule', 'ScheduleController::reqschedule');
     $routes->get('schedule/reqschedule/show/(:num)', 'ScheduleController::showschedule/$1');
+    $routes->get('schedule/reportSchBenang', 'ScheduleController::reportSchBenang');
+    $routes->get('schedule/filterSchBenang', 'ScheduleController::filterSchBenang');
+    $routes->get('schedule/exportScheduleBenang', 'ExcelController::exportScheduleBenang');
 
     // $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJatah');
 
@@ -188,6 +191,7 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('editretur/(:num)', 'CelupController::editRetur/$1');
     $routes->post('proseseditretur/(:num)', 'CelupController::prosesEditRetur/$1');
     $routes->get('printBon/(:num)', 'PdfController::printBon/$1');
+    $routes->get('generate/(:num)', 'CelupController::generateBarcode/$1');
 });
 
 

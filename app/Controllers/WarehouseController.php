@@ -61,6 +61,7 @@ class WarehouseController extends BaseController
         $this->db = \Config\Database::connect(); // Menghubungkan ke database
 
         $this->role = session()->get('role');
+        $this->username = session()->get('username');
         $this->active = '/index.php/' . session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
             return redirect()->to(base_url('/login'));
@@ -156,16 +157,16 @@ class WarehouseController extends BaseController
             return redirect()->to($this->role . '/pemasukan');
         }
 
-        $idOutCelup = $this->request->getPost('id_out_celup');
-        $noModels = $this->request->getPost('no_model');
-        $itemTypes = $this->request->getPost('item_type');
-        $kodeWarnas = $this->request->getPost('kode_warna');
-        $warnas = $this->request->getPost('warna');
-        $kgsMasuks = $this->request->getPost('kgs_kirim');
-        $cnsMasuks = $this->request->getPost('cns_kirim');
-        $tglMasuks = $this->request->getPost('tgl_masuk');
+        $idOutCelup  = $this->request->getPost('id_out_celup');
+        $noModels    = $this->request->getPost('no_model');
+        $itemTypes   = $this->request->getPost('item_type');
+        $kodeWarnas  = $this->request->getPost('kode_warna');
+        $warnas      = $this->request->getPost('warna');
+        $kgsMasuks   = $this->request->getPost('kgs_kirim');
+        $cnsMasuks   = $this->request->getPost('cns_kirim');
+        $tglMasuks   = $this->request->getPost('tgl_masuk');
         $namaClusters = $this->request->getPost('cluster');
-        $lotKirim = $this->request->getPost('lot_kirim');
+        $lotKirim    = $this->request->getPost('lot_kirim');
 
         // Pastikan data tidak kosong
         if (empty($idOutCelup) || !is_array($idOutCelup)) {
@@ -173,101 +174,107 @@ class WarehouseController extends BaseController
             return redirect()->to($this->role . '/pemasukan');
         }
 
-        // Pastikan nama_cluster ada di dalam tabel cluster
+        // Validasi cluster
         $clusterExists = $this->clusterModel->where('nama_cluster', $namaClusters)->countAllResults();
-
         if ($clusterExists === 0) {
             session()->setFlashdata('error', 'Cluster yang dipilih tidak valid.');
             return redirect()->to($this->role . '/pemasukan');
         }
 
         $dataPemasukan = [];
-
         foreach ($checkedIds as $key => $idOut) {
             $dataPemasukan[] = [
-                'id_out_celup' => $idOutCelup[$key] ?? null,
-                'no_model' => $noModels[$key] ?? null,
-                'item_type' => $itemTypes[$key] ?? null,
-                'kode_warna' => $kodeWarnas[$key] ?? null,
-                'warna' => $warnas[$key] ?? null,
-                'kgs_masuk' => $kgsMasuks[$key] ?? null,
-                'cns_masuk' => $cnsMasuks[$key] ?? null,
-                'tgl_masuk' => $tglMasuks[$key] ?? null,
-                'nama_cluster' => $namaClusters,
-                'admin' => session()->get('username')
+                'id_out_celup'  => $idOutCelup[$key] ?? null,
+                'no_model'      => $noModels[$key] ?? null,
+                'item_type'     => $itemTypes[$key] ?? null,
+                'kode_warna'    => $kodeWarnas[$key] ?? null,
+                'warna'         => $warnas[$key] ?? null,
+                'kgs_masuk'     => $kgsMasuks[$key] ?? null,
+                'cns_masuk'     => $cnsMasuks[$key] ?? null,
+                'tgl_masuk'     => $tglMasuks[$key] ?? null,
+                'nama_cluster'  => $namaClusters,
+                'admin'         => session()->get('username')
             ];
         }
 
-        // Debugging: cek apakah data tidak kosong sebelum insert
+        // Pastikan data pemasukan ada sebelum insert
         if (empty($dataPemasukan)) {
             session()->setFlashdata('error', 'Tidak ada data yang dimasukkan.');
             return redirect()->to($this->role . '/pemasukan');
         }
 
-        // Ambil data session
+        // Update session dataOut jika perlu
         $checked = session()->get('dataOut');
-
-        // Jika session tidak kosong
         if (!empty($checked)) {
-            // Ambil daftar ID yang ingin dihapus
             $idToRemove = array_column($dataPemasukan, 'id_out_celup');
-
-            // Filter session agar hanya menyisakan data yang tidak ada di $dataPemasukan
             $filteredChecked = array_filter($checked, function ($tes) use ($idToRemove) {
                 return !in_array($tes['id_out_celup'], $idToRemove);
             });
-
-            // Jika hasil filtering masih ada data, simpan kembali ke session
             if (!empty($filteredChecked)) {
                 session()->set('dataOut', array_values($filteredChecked));
             } else {
-                // Hapus session jika tidak ada data tersisa
                 session()->remove('dataOut');
             }
         }
 
+        // Cek duplikat pemasukan
         $cekDuplikat = $this->pemasukanModel
             ->whereIn('id_out_celup', array_column($dataPemasukan, 'id_out_celup'))
             ->countAllResults();
 
         if ($cekDuplikat == 0) {
-            //insert tabel pemasukan
+            // Insert batch ke tabel pemasukan
             if ($this->pemasukanModel->insertBatch($dataPemasukan)) {
+
+                // Persiapkan data stock untuk masing-masing record
                 $dataStock = [];
                 foreach ($checkedIds as $key => $idOut) {
                     $dataStock[] = [
-                        'no_model' => $noModels[$key] ?? null,
-                        'item_type' => $itemTypes[$key] ?? null,
-                        'kode_warna' => $kodeWarnas[$key] ?? null,
-                        'warna' => $warnas[$key] ?? null,
-                        'kgs_in_out' => $kgsMasuks[$key] ?? null,
-                        'cns_in_out' => $cnsMasuks[$key] ?? null,
-                        'krg_in_out' => 1, // Asumsikan setiap pemasukan hanya 1 kali
-                        'lot_stock' => $lotKirim[$key] ?? null,
+                        'no_model'    => $noModels[$key] ?? null,
+                        'item_type'   => $itemTypes[$key] ?? null,
+                        'kode_warna'  => $kodeWarnas[$key] ?? null,
+                        'warna'       => $warnas[$key] ?? null,
+                        'kgs_in_out'  => $kgsMasuks[$key] ?? null,
+                        'cns_in_out'  => $cnsMasuks[$key] ?? null,
+                        'krg_in_out'  => 1, // Asumsikan setiap pemasukan hanya 1 kali
+                        'lot_stock'   => $lotKirim[$key] ?? null,
                         'nama_cluster' => $namaClusters,
-                        'admin' => session()->get('username')
+                        'admin'       => session()->get('username')
                     ];
                 }
 
+                // Looping untuk update/insert stock dan update id_stok di pemasukan
                 foreach ($dataStock as $stock) {
+                    // Cek apakah data stock sudah ada berdasarkan kombinasi unik
                     $existingStock = $this->stockModel
                         ->where('no_model', $stock['no_model'])
                         ->where('item_type', $stock['item_type'])
                         ->where('kode_warna', $stock['kode_warna'])
                         ->where('lot_stock', $stock['lot_stock'])
-                        ->first(); // Ambil satu record yang sesuai
+                        ->first();
 
                     if ($existingStock) {
-                        // Jika sudah ada, update jumlahnya
+                        // Update data stock yang sudah ada
                         $this->stockModel->update($existingStock['id_stock'], [
                             'kgs_in_out' => $existingStock['kgs_in_out'] + $stock['kgs_in_out'],
                             'cns_in_out' => $existingStock['cns_in_out'] + $stock['cns_in_out'],
                             'krg_in_out' => $existingStock['krg_in_out'] + 1
                         ]);
+                        $idStok = $existingStock['id_stock'];
                     } else {
-                        // Jika belum ada, insert data baru
+                        // Insert data stock baru
                         $this->stockModel->insert($stock);
+                        $idStok = $this->stockModel->getInsertID();
                     }
+
+                    // Update field id_stok pada record pemasukan yang sesuai
+                    $this->pemasukanModel
+                        ->where('no_model', $stock['no_model'])
+                        ->where('item_type', $stock['item_type'])
+                        ->where('kode_warna', $stock['kode_warna'])
+                        ->where('nama_cluster', $stock['nama_cluster'])
+                        ->set(['id_stock' => $idStok])
+                        ->update();
                 }
 
                 session()->setFlashdata('success', 'Data berhasil dimasukkan.');
@@ -277,6 +284,7 @@ class WarehouseController extends BaseController
         }
         return redirect()->to($this->role . '/pemasukan');
     }
+
     private function prosesKomplain()
     {
         $checkedIds = $this->request->getPost('checked_id');
@@ -1281,7 +1289,7 @@ class WarehouseController extends BaseController
                 'nama_cluster'  => $pemasukan['nama_cluster'],
                 'lot_out'       => $outCelup['lot_kirim'], // pastikan field ini ada di data pemasukan
                 'status'        => 'Pengeluaran Jalur',
-                'admin'         => $this->role,
+                'admin'         => $this->username,
                 'created_at'    => date('Y-m-d H:i:s')
             ];
             $this->pengeluaranModel->insert($insertData);
@@ -1319,7 +1327,7 @@ class WarehouseController extends BaseController
             'nama_cluster' => $data->namaCluster,
             'lot_out' => $data->lotFinal,
             'status' => 'Pengeuaran Jalur',
-            'admin' => $this->role,
+            'admin' => $this->username,
             'created_at' => date('Y-m-d H:i:s')
         ];
 
