@@ -365,7 +365,7 @@ class PemesananController extends BaseController
             }
         }
 
-        $cekDuplikat = $this->pengeluranModel
+        $cekDuplikat = $this->pengeluaranModel
             ->whereIn('id_out_celup', array_column($dataKirim, 'id_out_celup'))
             ->countAllResults();
 

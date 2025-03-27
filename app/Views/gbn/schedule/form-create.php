@@ -583,18 +583,34 @@
                 alert("⚠️ Total Qty Celup melebihi Max Caps!");
                 totalQtyCelupElement.classList.add("is-invalid");
                 totalQtyCelupElement.focus();
+                // set input qty celup 0
+                totalQtyCelupElement.value = "0.00";
+                totalQtyCelup = 0; // Reset totalQtyCelup jika diperlukan
+                // Reset setiap input Qty Celup menjadi 0.00
+                qtyCelupInputs.forEach(input => {
+                    input.value = "0.00";
+                    input.classList.add("is-invalid");
+                });
+            } else {
+                totalQtyCelupElement.value = totalQtyCelup.toFixed(2);
+                totalQtyCelupElement.classList.remove("is-invalid");
             }
             const rows = poTable.querySelectorAll("tbody tr");
             rows.forEach(row => {
-                const qtyCelup = parseFloat(row.querySelector("input[name='qty_celup[]']").value) || 0;
+                const inputCelup = row.querySelector("input[name='qty_celup[]']");
+                const qtyCelup = parseFloat(inputCelup.value) || 0;
                 const tagihanSCH = parseFloat(row.querySelector(".sisa_jatah").textContent) || 0;
                 if (qtyCelup > tagihanSCH) {
                     alert(`⚠️ Qty Celup di baris ini melebihi Tagihan SCH! (Tagihan SCH: ${tagihanSCH.toFixed(2)})`);
-                    row.querySelector("input[name='qty_celup[]']").classList.add("is-invalid");
-                    row.querySelector("input[name='qty_celup[]']").focus();
-                    row.querySelector("input[name='qty_celup[]']").value = '';
+                    inputCelup.classList.add("is-invalid");
+                    inputCelup.focus();
+                    // Reset input qty celup di baris tersebut menjadi 0.00
+                    inputCelup.value = "0.00";
+                } else {
+                    inputCelup.classList.remove("is-invalid");
                 }
             });
+            // Hitung dan set sisa kapasitas
             const sisaKapasitasElement = document.getElementById("sisa_kapasitas");
             if (sisaKapasitasElement) {
                 const sisaKapasitas = maxCaps - totalQtyCelup;

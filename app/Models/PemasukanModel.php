@@ -30,6 +30,7 @@ class PemasukanModel extends Model
         'admin',
         'created_at',
         'updated_at',
+        'id_stock'
     ];
 
     protected bool $allowEmptyInserts = false;
@@ -39,7 +40,7 @@ class PemasukanModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
