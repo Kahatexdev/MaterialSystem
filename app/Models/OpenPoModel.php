@@ -278,4 +278,21 @@ class OpenPoModel extends Model
 
         return $this->findAll();
     }
+
+    public function listOpenPo($no_model, $jenis, $jenis2, $penerima)
+    {
+        return $this->select('open_po.id_po, open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, master_material.jenis, master_order.buyer, master_order.no_order, master_order.delivery_awal, material.kgs, stock.kgs_stock_awal')
+            ->where(['open_po.no_model' => $no_model])
+            ->where('open_po.penerima', $penerima)
+            ->groupStart() // Mulai grup untuk kondisi OR
+            ->where('master_material.jenis', $jenis)
+            ->orWhere('master_material.jenis', $jenis2)
+            ->groupEnd() // Akhiri grup
+            ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
+            ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
+            ->join('material', 'material.item_type=open_po.item_type', 'left')
+            ->join('stock', 'stock.no_model=open_po.no_model', 'left')
+            ->groupBy('open_po.item_type')
+            ->findAll();
+    }
 }

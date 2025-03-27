@@ -184,6 +184,8 @@ class MasterdataController extends BaseController
                     'updated_at'     => NULL,
                 ];
                 $masterOrderModel->insert($masterData);
+            } else {
+                return redirect()->back()->with('error', 'Data dengan No Model ' . $orderExists['no_model'] . ' sudah ada di database.');
             }
 
             // Dapatkan id_order untuk digunakan pada tabel material
@@ -243,16 +245,6 @@ class MasterdataController extends BaseController
                 $kgs_raw = $sheet->getCell($headerMap['Kgs'] . $rowIndex)->getValue();
                 $kgs = floatval(str_replace([','], '', $kgs_raw));
 
-                // Cek apakah material sudah ada untuk order ini
-                $existingMaterial = $materialModel->where('id_order', $id_order)->findAll();
-                // dd($existingMaterial);
-                if (!empty($existingMaterial)) {
-                    // session()->setFlashdata('existing_material', $existingMaterial);
-                    // // dd(session()->getFlashdata('existing_material'));
-                    // session()->keepFlashdata('existing_material'); // Menjaga flashdata agar tidak hilang setelah redirect
-                    return redirect()->back()->with('error', 'Data Material sudah ada untuk PDK <strong>' . $no_model . '</strong> ini.');
-                }
-
                 // Siapkan data material
                 $validDataMaterial[] = [
                     'id_order'   => $id_order,
@@ -271,11 +263,13 @@ class MasterdataController extends BaseController
                     'created_at' => date('Y-m-d H:i:s'),
                 ];
             }
+
+            // Simpan data material jika ada data yang valid
             if (!empty($validDataMaterial)) {
                 $materialModel->insertBatch($validDataMaterial);
-                return redirect()->back()->with('success', 'Data berhasil diimport.');
             }
-            return redirect()->back()->with('error', 'Tidak ada data yang valid untuk diimport.');
+
+            return redirect()->back()->with('success', 'Data berhasil diimport.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan saat mengimport data: ' . $e->getMessage());
         }

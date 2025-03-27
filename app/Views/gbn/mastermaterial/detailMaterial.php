@@ -44,8 +44,8 @@
                     <a href="<?= base_url($role . '/openPO/' . $id_order) ?>" class="btn btn-outline-info me-2">
                         <i class="fas fa-file-import me-2"></i>Buka PO
                     </a>
-                    <button type="submit" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#ExportModal">
-                        <i class="fas fa-file-export me-2"></i>EXPORT PO
+                    <button type="submit" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#ListPoModal">
+                        <i class="ni ni-single-copy-04 me-2"></i>List PO
                     </button>
                 </div>
             </div>
@@ -289,16 +289,15 @@
             </div>
         </div>
 
-        <!-- Modal Export PO -->
-        <div class="modal fade" id="ExportModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+        <div class="modal fade" id="ListPoModal" tabindex="-1" aria-labelledby="ListPoModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="updateModalLabel">Update Data</h5>
+                        <h5 class="modal-title" id="ListPoModalLabel">List Buka PO</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
                     </div>
                     <div class="modal-body">
-                        <form action="<?= base_url($role . '/exportOpenPO/' . $no_model) ?>" method="get" target="_blank">
+                        <form action="<?= base_url($role . '/listOpenPO/' . $no_model) ?>" method="get" target="_blank">
                             <div class="mb-3">
                                 <label for="style_size" class="form-label">Tujuan</label>
                                 <select class="form-control tujuan" name="tujuan" required>
@@ -320,7 +319,7 @@
                             <!-- Button update dan batal di sebelah kanan -->
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                <button type="submit" class="btn btn-info">Generate</button>
+                                <button type="submit" class="btn btn-info">Submit</button>
                             </div>
 
                         </form>

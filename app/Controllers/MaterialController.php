@@ -7,6 +7,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
 use App\Models\MasterOrderModel;
+use App\Models\OpenPoModel;
 
 class MaterialController extends BaseController
 {
@@ -16,12 +17,14 @@ class MaterialController extends BaseController
     protected $materialModel;
     protected $masterOrderModel;
     protected $masterMaterialModel;
+    protected $openPoModel;
 
     public function __construct()
     {
         $this->materialModel = new MaterialModel();
         $this->masterMaterialModel = new MasterMaterialModel();
         $this->masterOrderModel = new MasterOrderModel();
+        $this->openPoModel = new OpenPoModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -167,6 +170,88 @@ class MaterialController extends BaseController
             return $this->response->setStatusCode(200)->setJSON(['success' => 'Berhasil Assign Area']);
         } else {
             return $this->response->setStatusCode(500)->setJSON(['error' => 'Gagal Assign Area di Material']);
+        }
+    }
+
+    public function listOpenPO($no_model)
+    {
+        $tujuan = $this->request->getGet('tujuan');
+        $jenis = $this->request->getGet('jenis');
+        $jenis2 = $this->request->getGet('jenis2');
+        // Tentukan penerima berdasarkan tujuan
+        if ($tujuan == 'CELUP') {
+            $penerima = 'Retno';
+        } elseif ($tujuan == 'COVERING') {
+            $penerima = 'Paryanti';
+        } else {
+            return redirect()->back()->with('error', 'Tujuan tidak valid.');
+        }
+
+        $itemType = $this->masterMaterialModel->getItemType();
+        $openPo = $this->openPoModel->listOpenPo($no_model, $jenis, $jenis2, $penerima);
+        // dd($openPo);
+        $data =
+            [
+                'active' => $this->active,
+                'title' => 'Material System',
+                'role' => $this->role,
+                'itemType' => $itemType,
+                'openPo' => $openPo,
+                'tujuan' => $tujuan,
+                'no_model' => $no_model,
+                'penerima' => $penerima,
+                'jenis' => $jenis,
+                'jenis2' => $jenis2
+            ];
+        // dd($tujuan, $jenis, $jenis2);
+        return view($this->role . '/mastermaterial/list-open-po', $data);
+    }
+
+    public function getPoDetails($id)
+    {
+        if ($this->request->isAJAX()) {
+            $data = $this->openPoModel->find($id);
+
+            if ($data) {
+                return $this->response->setJSON($data);
+            } else {
+                return $this->response->setJSON(['error' => 'Data tidak ditemukan.'], 404);
+            }
+        }
+
+        throw new \CodeIgniter\Exceptions\PageNotFoundException();
+    }
+
+    public function updatePo()
+    {
+        $idPo = $this->request->getPost('id_po');
+        $data = [
+            'item_type'  => $this->request->getPost('item_type'),
+            'kode_warna' => $this->request->getPost('kode_warna'),
+            'color'      => $this->request->getPost('color'),
+            'kg_po'      => $this->request->getPost('kg_po')
+        ];
+
+        if ($this->openPoModel->update($idPo, $data)) {
+            return redirect()->back()->with('success', 'Berhasil memperbarui data.');
+        } else {
+            return redirect()->back()->with('error', 'Gagal memperbarui data.');
+        }
+    }
+
+    public function deletePo($id)
+    {
+        // Cek apakah data ada
+        $po = $this->openPoModel->find($id);
+        if (!$po) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        }
+
+        // Hapus data dari database
+        if ($this->openPoModel->delete($id)) {
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Data berhasil dihapus']);
+        } else {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menghapus data']);
         }
     }
 }
