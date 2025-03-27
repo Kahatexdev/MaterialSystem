@@ -1138,4 +1138,27 @@ class ScheduleController extends BaseController
         ];
         return view($this->role . '/schedule/form-show', $data);
     }
+
+    public function reportSchBenang()
+    {
+        $data =
+            [
+                'active' => $this->active,
+                'title' => 'Material System',
+                'role' => $this->role,
+            ];
+        return view($this->role . '/schedule/report-schedule-benang', $data);
+    }
+
+    public function filterSchBenang()
+    {
+        $key = $this->request->getGet('key');
+        $tanggalSch = $this->request->getGet('tanggal_schedule');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->scheduleCelupModel->getFilterSchBenang($key, $tanggalSch, $tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
+    }
 }

@@ -14,6 +14,7 @@ use App\Models\OpenPoModel;
 use App\Models\BonCelupModel;
 use App\Models\OutCelupModel;
 use App\Models\PemasukanModel;
+use App\Models\ScheduleCelupModel;
 use PhpOffice\PhpSpreadsheet\Style\{Border, Alignment, Fill};
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
@@ -31,6 +32,7 @@ class ExcelController extends BaseController
     protected $bonCelupModel;
     protected $outCelupModel;
     protected $pemasukanModel;
+    protected $scheduleCelupModel;
 
     public function __construct()
     {
@@ -41,6 +43,7 @@ class ExcelController extends BaseController
         $this->bonCelupModel = new BonCelupModel();
         $this->outCelupModel = new OutCelupModel();
         $this->pemasukanModel = new PemasukanModel();
+        $this->scheduleCelupModel = new ScheduleCelupModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -781,6 +784,168 @@ class ExcelController extends BaseController
 
         $writer = new Xlsx($spreadsheet);
         $fileName = 'Report_Datang_Benang_' . date('Y-m-d') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function exportPoBenang()
+    {
+        $key = $this->request->getGet('key');
+
+        $data = $this->openPoModel->getFilterPoBenang($key);
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Judul
+        $sheet->setCellValue('A1', 'Report PO Benang');
+        $sheet->mergeCells('A1:P1'); // Menggabungkan sel untuk judul
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Header
+        $header = ["No", "Waktu Input", "Tanggal PO", "Foll Up", "No Model", "No Order", "Keterangan", "Buyer", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Jenis", "Kode Warna", "Warna", "KG Pesan"];
+        $sheet->fromArray([$header], NULL, 'A3');
+
+        // Styling Header
+        $sheet->getStyle('A3:P3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:P3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:P3')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        // Data
+        $row = 4;
+        foreach ($data as $index => $item) {
+            $sheet->fromArray([
+                [
+                    $index + 1,
+                    $item['created_at'],
+                    $item['tgl_po'],
+                    $item['foll_up'],
+                    $item['no_model'],
+                    $item['no_order'],
+                    $item['keterangan'],
+                    $item['buyer'],
+                    $item['delivery_awal'],
+                    $item['delivery_akhir'],
+                    $item['unit'],
+                    $item['item_type'],
+                    $item['jenis'],
+                    $item['kode_warna'],
+                    $item['color'],
+                    $item['kg_po'],
+                ]
+            ], NULL, 'A' . $row);
+            $row++;
+        }
+
+        // Atur border untuk seluruh tabel
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle('A3:P' . ($row - 1))->applyFromArray($styleArray);
+
+        // Set auto width untuk setiap kolom
+        foreach (range('A', 'P') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set isi tabel agar rata tengah
+        $sheet->getStyle('A4:P' . ($row - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:P' . ($row - 1))->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Report_Po_Benang_' . date('Y-m-d') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function exportScheduleBenang()
+    {
+        $key = $this->request->getGet('key');
+        $tanggal_schedule = $this->request->getGet('tanggal_schedule');
+        $tanggal_awal = $this->request->getGet('tanggal_awal');
+        $tanggal_akhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->scheduleCelupModel->getFilterSchBenang($key, $tanggal_schedule, $tanggal_awal, $tanggal_akhir);
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Judul
+        $sheet->setCellValue('A1', 'Report Schedule Benang');
+        $sheet->mergeCells('A1:O1'); // Menggabungkan sel untuk judul
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Header
+        $header = ["No", "No Mesin", "Ket Mesin", "Lot Urut", "No Model", "Item Type", "Kode Warna", "Warna", "Start Mc", "Delivery Awal", "Delivery Akhir", "Tgl Schedule", "Qty PO", "LOT Sch", "Tgl Celup"];
+        $sheet->fromArray([$header], NULL, 'A3');
+
+        // Styling Header
+        $sheet->getStyle('A3:O3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:O3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:O3')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        // Data
+        $row = 4;
+        foreach ($data as $index => $item) {
+            $sheet->fromArray([
+                [
+                    $index + 1,
+                    $item['no_mesin'],
+                    $item['ket_mesin'],
+                    $item['lot_urut'],
+                    $item['no_model'],
+                    $item['item_type'],
+                    $item['kode_warna'],
+                    $item['warna'],
+                    $item['start_mc'],
+                    $item['delivery_awal'],
+                    $item['delivery_akhir'],
+                    $item['tanggal_schedule'],
+                    $item['kg_celup'],
+                    $item['lot_celup'],
+                    $item['tanggal_celup'],
+                ]
+            ], NULL, 'A' . $row);
+            $row++;
+        }
+
+        // Atur border untuk seluruh tabel
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle('A3:O' . ($row - 1))->applyFromArray($styleArray);
+
+        // Set auto width untuk setiap kolom
+        foreach (range('A', 'O') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set isi tabel agar rata tengah
+        $sheet->getStyle('A4:O' . ($row - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:O' . ($row - 1))->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Report_Schedule_Benang' . '.xlsx';
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $fileName . '"');

@@ -75,6 +75,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/reqschedule', 'ScheduleController::reqschedule');
     $routes->post('schedule/reqschedule', 'ScheduleController::reqschedule');
     $routes->get('schedule/reqschedule/show/(:num)', 'ScheduleController::showschedule/$1');
+    $routes->get('schedule/reportSchBenang', 'ScheduleController::reportSchBenang');
+    $routes->get('schedule/filterSchBenang', 'ScheduleController::filterSchBenang');
+    $routes->get('schedule/exportScheduleBenang', 'ExcelController::exportScheduleBenang');
 
     // $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJatah');
 
