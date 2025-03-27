@@ -61,6 +61,7 @@ class WarehouseController extends BaseController
         $this->db = \Config\Database::connect(); // Menghubungkan ke database
 
         $this->role = session()->get('role');
+        $this->username = session()->get('username');
         $this->active = '/index.php/' . session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
             return redirect()->to(base_url('/login'));
@@ -269,6 +270,10 @@ class WarehouseController extends BaseController
                         $this->stockModel->insert($stock);
                     }
                 }
+                // get id_stock yang baru di insert
+                $idPemasukan = $this->pemasukanModel->getInsertID();
+                $idStock = $this->stockModel->getInsertID();
+                $this->pemasukanModel->update($idPemasukan, $idStock);
 
                 session()->setFlashdata('success', 'Data berhasil dimasukkan.');
             }
@@ -1281,7 +1286,7 @@ class WarehouseController extends BaseController
                 'nama_cluster'  => $pemasukan['nama_cluster'],
                 'lot_out'       => $outCelup['lot_kirim'], // pastikan field ini ada di data pemasukan
                 'status'        => 'Pengeluaran Jalur',
-                'admin'         => $this->role,
+                'admin'         => $this->username,
                 'created_at'    => date('Y-m-d H:i:s')
             ];
             $this->pengeluaranModel->insert($insertData);
@@ -1319,7 +1324,7 @@ class WarehouseController extends BaseController
             'nama_cluster' => $data->namaCluster,
             'lot_out' => $data->lotFinal,
             'status' => 'Pengeuaran Jalur',
-            'admin' => $this->role,
+            'admin' => $this->username,
             'created_at' => date('Y-m-d H:i:s')
         ];
 
