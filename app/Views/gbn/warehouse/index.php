@@ -171,12 +171,12 @@
                                 <div class="col-md-4">
                                     <p><strong>Lot Jalur:</strong> ${item.lot_stock || item.lot_awal}</p>
                                     <p><strong>Space:</strong> ${item.kapasitas || 0} KG</p>
-                                    <p><strong>Sisa Space:</strong> ${item.sisa_space || 0} KG</p>
+                                    <p><strong>Sisa Space:</strong> ${(item.sisa_space || 0).toFixed(2)} KG</p>
                                 </div>
                                 <div class="col-md-4">
                                     <p><strong>Kode Warna:</strong> ${item.kode_warna}</p>
                                     <p><strong>Warna:</strong> ${item.warna}</p>
-                                    <p><strong>Total KGs:</strong> ${totalKgs} KG | ${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out} Cones | ${totalKrg} KRG </p>
+                                    <p><strong>Total Kgs:</strong> ${(parseFloat(totalKgs) || 0).toFixed(2)} KG | ${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out} Cones | ${totalKrg} KRG </p>
                                 </div>
                                 <div class="col-md-4 d-flex flex-column gap-2">
                                     <button class="btn btn-outline-info btn-sm">In/Out</button>
@@ -238,13 +238,13 @@
                             ${clusterOptions}
                         </select>
 
-                        <label for="kgs" class="font-weight-bold">KGs Pindah</label>
-                        <input type="number" id="kgs" name="kgs" min="1" max="${kgs}" value="${kgs}" class="form-control mb-2" placeholder="Jumlah (KG)">
+                        <label for="kgs" class="font-weight-bold">Kgs Pindah</label>
+                        <input type="number" id="kgs" name="kgs" min="1" max="${kgs}" value="${(parseFloat(kgs) || 0).toFixed(2)}" class="form-control mb-2" placeholder="Jumlah (KG)">
 
                         <label for="cones" class="font-weight-bold">Cones Pindah</label>
                         <input type="number" id="cones" name="cones" min="1" max="${cones}" value="${cones}" class="form-control mb-2" placeholder="Jumlah (Cones)">
 
-                        <label for="krg" class="font-weight-bold">KRG Pindah</label>
+                        <label for="krg" class="font-weight-bold">Krg Pindah</label>
                         <input type="number" id="krg" name="krg" min="1" max="${krg}" value="${krg}" class="form-control mb-3" placeholder="Jumlah (KRG)">
                     `,
                             showCancelButton: true,
@@ -349,13 +349,13 @@
                                     ${noModelOptions}
                                 </select>
 
-                                <label for="kgs" class="font-weight-bold">KGs Pindah</label>
-                                <input type="number" id="kgs" name="kgs" min="1" max="${kgs}" value="${kgs}" class="form-control mb-2" placeholder="Jumlah (KG)">
+                                <label for="kgs" class="font-weight-bold">Kgs Pindah</label>
+                                <input type="number" id="kgs" name="kgs" min="1" max="${kgs}" value="${(parseFloat(kgs) || 0).toFixed(2)}" class="form-control mb-2" placeholder="Jumlah (KG)">
 
                                 <label for="cones" class="font-weight-bold">Cones Pindah</label>
                                 <input type="number" id="cones" name="cones" min="1" max="${cones}" value="${cones}" class="form-control mb-2" placeholder="Jumlah (Cones)">
 
-                                <label for="krg" class="font-weight-bold">KRG Pindah</label>
+                                <label for="krg" class="font-weight-bold">Krg Pindah</label>
                                 <input type="number" id="krg" name="krg" min="1" max="${krg}" value="${krg}" class="form-control mb-3" placeholder="Jumlah (KRG)">
                             `,
                             showCancelButton: true,
