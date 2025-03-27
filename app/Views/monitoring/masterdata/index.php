@@ -25,7 +25,33 @@
             });
         </script>
     <?php endif; ?>
-
+    <!-- <?php if (session()->getFlashdata('existing_material')): ?>
+        <div class="alert alert-warning">
+            <strong>Data material sudah ada untuk order ini:</strong>
+            <table class="table table-bordered mt-2">
+                <thead>
+                    <tr>
+                        <th>Style Size</th>
+                        <th>Color</th>
+                        <th>Item Type</th>
+                        <th>Kode Warna</th>
+                        <th>Qty Pcs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach (session()->getFlashdata('existing_material') as $material): ?>
+                        <tr>
+                            <td><?= esc($material['style_size']) ?></td>
+                            <td><?= esc($material['color']) ?></td>
+                            <td><?= esc($material['item_type']) ?></td>
+                            <td><?= esc($material['kode_warna']) ?></td>
+                            <td><?= esc($material['qty_pcs']) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?> -->
     <!-- Modal untuk Upload File Excel -->
     <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
         <div class="modal-dialog">
