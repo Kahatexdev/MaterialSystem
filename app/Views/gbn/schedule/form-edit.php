@@ -610,7 +610,7 @@
                         tr.querySelector("input[name='tgl_start_mc[]']").value = data.start_mesin || '';
                         tr.querySelector("input[name='delivery_awal[]']").value = data.delivery_awal || '';
                         tr.querySelector("input[name='delivery_akhir[]']").value = data.delivery_akhir || '';
-                        // tr.querySelector("input[name='qty_po[]']").value = parseFloat(data.kg_po).toFixed(2);
+                        tr.querySelector("input[name='qty_po[]']").value = parseFloat(data.kg_po).toFixed(2);
                     } else {
                         console.error('Error fetching PO details:', data.error || 'No data found');
                     }
@@ -624,7 +624,7 @@
         function fetchQtyAndKebutuhanPO(kodeWarna, tr, warna, itemType, idInduk) {
             const itemTypeEncoded = encodeURIComponent(itemType);
             idInduk = idInduk || 0;
-            const url = `<?= base_url(session('role') . "/schedule/getQtyPO") ?>?kode_warna=${kodeWarna}&warna=${warna}&item_type=${itemTypeEncoded}&id_induk=${idInduk}`;
+            const url = `<?= base_url(session('role') . "/schedule/getQtyPO") ?>?kode_warna=${kodeWarna}&color=${warna}&item_type=${itemTypeEncoded}&id_induk=${idInduk}`;
             console.log("Request URL:", url);
             fetch(url)
                 .then(response => {
@@ -763,19 +763,45 @@
       </td>
     `;
             tbody.appendChild(newRow);
+            // Isi opsi item_type di baris baru
             const itemTypeSelect = newRow.querySelector(".item-type");
-            fetchItemType(kodeWarna.value, warnaInput.value, itemTypeSelect);
+            fetchItemTypeRow(kodeWarna.value, warnaInput.value, itemTypeSelect);
 
-            itemTypeSelect.addEventListener("change", function() {
-                const itemTypeValue = this.value;
-                const idInduk = this.selectedOptions[0]?.getAttribute("data-id-induk") || 0;
+            $(itemTypeSelect).on('change', function() {
+                const itemTypeValue = $(this).val();
                 const poSelect = newRow.querySelector(".po-select");
-                if (itemTypeValue) {
-                    fetchPOByKodeWarna(kodeWarna.value, warnaInput.value, itemTypeValue, idInduk, poSelect);
-                }
+                const idIndukValue = $(this).find(':selected').data('id-induk') || 0;
+                // kodeWarna.value, warnaInput.value, itemTypeValue, idInduk, poSelect
+                fetchPOByKodeWarna(kodeWarna.value, warnaInput.value, itemTypeValue, idIndukValue, poSelect);
+                // fetchQtyAndKebutuhanPO(kodeWarna.value, newRow, warnaInput.value, itemTypeValue, idIndukValue);
+            });
+
+            newRow.querySelector("input[name='qty_celup[]']").addEventListener("input", function() {
+                calculateTotalAndRemainingCapacity();
             });
         });
 
+        function fetchItemTypeRow(kodeWarna, warna, itemTypeSelect) {
+            fetch(`<?= base_url(session('role') . "/schedule/getItemType") ?>?kode_warna=${kodeWarna}&warna=${warna}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        itemTypeSelect.innerHTML = '<option value="">Pilih Item Type</option>';
+                        data.forEach(item => {
+                            const option = document.createElement('option');
+                            option.value = item.item_type;
+                            option.textContent = item.item_type;
+                            option.setAttribute("data-id-induk", item.id_induk);
+                            itemTypeSelect.appendChild(option);
+                        });
+                    } else {
+                        itemTypeSelect.innerHTML = '<option value="">Tidak ada Item Type</option>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching item type data:', error);
+                });
+        }
         // Event delegation untuk menghapus baris
         poTable.addEventListener("click", function(event) {
             const removeBtn = event.target.closest(".removeRow");
