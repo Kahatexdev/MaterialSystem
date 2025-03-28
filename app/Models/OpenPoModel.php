@@ -117,19 +117,29 @@ class OpenPoModel extends Model
             ->first();
     }
 
+    // public function getQtyPO($kodeWarna, $warna, $itemTypeEncoded, $idInduk)
+    // {
+    //     $this->select('kg_po')
+    //         ->where('kode_warna', $kodeWarna)
+    //         ->where('color', $warna)
+    //         ->where('item_type', $itemTypeEncoded);
+
+    //     // Jika $idInduk null, kita ingin menganggapnya sebagai 0
+    //     $nilai = is_null($idInduk) ? 0 : $idInduk;
+    //     // Menggunakan COALESCE untuk membandingkan id_induk, sehingga NULL dianggap 0
+    //     $this->where("COALESCE(id_induk, 0) = {$nilai}", null, false);
+
+    //     return $this->first();
+    // }
+
     public function getQtyPO($kodeWarna, $warna, $itemTypeEncoded, $idInduk)
     {
-        $this->select('kg_po')
+        return $this->select('kg_po')
             ->where('kode_warna', $kodeWarna)
             ->where('color', $warna)
-            ->where('item_type', $itemTypeEncoded);
-
-        // Jika $idInduk null, kita ingin menganggapnya sebagai 0
-        $nilai = is_null($idInduk) ? 0 : $idInduk;
-        // Menggunakan COALESCE untuk membandingkan id_induk, sehingga NULL dianggap 0
-        $this->where("COALESCE(id_induk, 0) = {$nilai}", null, false);
-
-        return $this->first();
+            ->where('item_type', $itemTypeEncoded)
+            ->orWhere('COALESCE(id_induk, 0)', $idInduk ?? 0, false) // Menggunakan COALESCE di Query Builder
+            ->first();
     }
 
 

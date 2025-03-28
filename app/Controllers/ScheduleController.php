@@ -360,7 +360,7 @@ class ScheduleController extends BaseController
     public function getQtyPO()
     {
         $kodeWarna = $this->request->getGet('kode_warna');
-        $color = $this->request->getGet('warna');
+        $color = $this->request->getGet('color');
         $itemTypeEncoded = urldecode($this->request->getGet('item_type'));
         $idInduk = $this->request->getGet('id_induk');
         $qtyPO = $this->openPoModel->getQtyPO($kodeWarna, $color, $itemTypeEncoded, $idInduk);
@@ -489,7 +489,7 @@ class ScheduleController extends BaseController
             'kode_warna' => $kodeWarna,
             'warna' => $warna,
         ];
-
+        // dd ($data);
         return view($this->role . '/schedule/form-edit', $data);
     }
 
