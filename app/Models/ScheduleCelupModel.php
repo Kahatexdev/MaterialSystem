@@ -427,9 +427,48 @@ class ScheduleCelupModel extends Model
 
     public function getFilterSchBenang($key, $tanggal_schedule, $tanggal_awal, $tanggal_akhir)
     {
-        $this->select('schedule_celup.*, master_order.delivery_awal, master_order.delivery_akhir, mesin_celup.no_mesin, mesin_celup.ket_mesin')
+        $this->select('schedule_celup.*, master_order.delivery_awal, master_order.delivery_akhir, mesin_celup.no_mesin, mesin_celup.ket_mesin, master_material.jenis')
             ->join('master_order', 'master_order.no_model = schedule_celup.no_model')
-            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin');
+            ->join('master_material', 'master_material.item_type = schedule_celup.item_type')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->where('master_material.jenis', 'BENANG');
+
+        // Cek apakah ada input key untuk pencarian
+        if (!empty($key)) {
+            $this->groupStart()
+                ->like('schedule_celup.no_model', $key)
+                ->orLike('schedule_celup.kode_warna', $key)
+                ->groupEnd();
+        }
+
+        if (!empty($tanggal_schedule)) {
+            $this->where('schedule_celup.tanggal_schedule', $tanggal_schedule);
+        }
+
+        // Filter berdasarkan tanggal
+        if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
+            $this->groupStart();
+            if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
+                $this->where('schedule_celup.start_mc >=', $tanggal_awal)
+                    ->where('schedule_celup.start_mc <=', $tanggal_akhir);
+            } elseif (!empty($tanggal_awal)) {
+                $this->where('schedule_celup.start_mc >=', $tanggal_awal);
+            } elseif (!empty($tanggal_akhir)) {
+                $this->where('schedule_celup.start_mc <=', $tanggal_akhir);
+            }
+            $this->groupEnd();
+        }
+
+        return $this->findAll();
+    }
+
+    public function getFilterSchNylon($key, $tanggal_schedule, $tanggal_awal, $tanggal_akhir)
+    {
+        $this->select('schedule_celup.*, master_order.delivery_awal, master_order.delivery_akhir, mesin_celup.no_mesin, mesin_celup.ket_mesin, master_material.jenis')
+            ->join('master_order', 'master_order.no_model = schedule_celup.no_model')
+            ->join('master_material', 'master_material.item_type = schedule_celup.item_type')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->where('master_material.jenis', 'NYLON');
 
         // Cek apakah ada input key untuk pencarian
         if (!empty($key)) {
