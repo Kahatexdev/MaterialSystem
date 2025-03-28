@@ -25,6 +25,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class WarehouseController extends BaseController
 {
     protected $role;
+    protected $username;
     protected $active;
     protected $filters;
     protected $request;
