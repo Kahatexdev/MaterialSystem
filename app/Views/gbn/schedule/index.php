@@ -408,11 +408,17 @@
                     // Tambahkan event listener untuk tombol "Tambah Jadwal"
                     document.getElementById("addSchedule").addEventListener("click", function() {
                         if (isSunday(date)) {
-                            alert("⚠️ Tidak dapat menambahkan jadwal pada hari Minggu.");
+                            Swal.fire({
+                                icon: "warning",
+                                title: "Peringatan!",
+                                text: "Tidak dapat menambahkan jadwal pada hari Minggu.",
+                                confirmButtonColor: "#d33"
+                            });
                             return; // Hentikan proses jika hari Minggu
                         }
                         redirectToAddSchedule(machine, date, lotUrut);
                     });
+
                 });
         }
 
@@ -486,7 +492,6 @@
             const url = `<?= base_url($role . '/schedule') ?>?start_date=${startDate}&end_date=${endDate}`;
             window.location.href = url;
         });
-
 
 
     });

@@ -360,7 +360,7 @@ class ScheduleController extends BaseController
     public function getQtyPO()
     {
         $kodeWarna = $this->request->getGet('kode_warna');
-        $color = $this->request->getGet('warna');
+        $color = $this->request->getGet('color');
         $itemTypeEncoded = urldecode($this->request->getGet('item_type'));
         $idInduk = $this->request->getGet('id_induk');
         $qtyPO = $this->openPoModel->getQtyPO($kodeWarna, $color, $itemTypeEncoded, $idInduk);
@@ -489,7 +489,7 @@ class ScheduleController extends BaseController
             'kode_warna' => $kodeWarna,
             'warna' => $warna,
         ];
-
+        // dd ($data);
         return view($this->role . '/schedule/form-edit', $data);
     }
 
@@ -1158,6 +1158,29 @@ class ScheduleController extends BaseController
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
         $data = $this->scheduleCelupModel->getFilterSchBenang($key, $tanggalSch, $tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
+    }
+
+    public function reportSchNylon()
+    {
+        $data =
+            [
+                'active' => $this->active,
+                'title' => 'Material System',
+                'role' => $this->role,
+            ];
+        return view($this->role . '/schedule/report-schedule-nylon', $data);
+    }
+
+    public function filterSchNylon()
+    {
+        $key = $this->request->getGet('key');
+        $tanggalSch = $this->request->getGet('tanggal_schedule');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->scheduleCelupModel->getFilterSchNylon($key, $tanggalSch, $tanggalAwal, $tanggalAkhir);
 
         return $this->response->setJSON($data);
     }

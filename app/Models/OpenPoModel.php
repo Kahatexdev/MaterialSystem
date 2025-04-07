@@ -117,19 +117,29 @@ class OpenPoModel extends Model
             ->first();
     }
 
+    // public function getQtyPO($kodeWarna, $warna, $itemTypeEncoded, $idInduk)
+    // {
+    //     $this->select('kg_po')
+    //         ->where('kode_warna', $kodeWarna)
+    //         ->where('color', $warna)
+    //         ->where('item_type', $itemTypeEncoded);
+
+    //     // Jika $idInduk null, kita ingin menganggapnya sebagai 0
+    //     $nilai = is_null($idInduk) ? 0 : $idInduk;
+    //     // Menggunakan COALESCE untuk membandingkan id_induk, sehingga NULL dianggap 0
+    //     $this->where("COALESCE(id_induk, 0) = {$nilai}", null, false);
+
+    //     return $this->first();
+    // }
+
     public function getQtyPO($kodeWarna, $warna, $itemTypeEncoded, $idInduk)
     {
-        $this->select('kg_po')
+        return $this->select('kg_po')
             ->where('kode_warna', $kodeWarna)
             ->where('color', $warna)
-            ->where('item_type', $itemTypeEncoded);
-
-        // Jika $idInduk null, kita ingin menganggapnya sebagai 0
-        $nilai = is_null($idInduk) ? 0 : $idInduk;
-        // Menggunakan COALESCE untuk membandingkan id_induk, sehingga NULL dianggap 0
-        $this->where("COALESCE(id_induk, 0) = {$nilai}", null, false);
-
-        return $this->first();
+            ->where('item_type', $itemTypeEncoded)
+            ->orWhere('COALESCE(id_induk, 0)', $idInduk ?? 0, false) // Menggunakan COALESCE di Query Builder
+            ->first();
     }
 
 
@@ -279,20 +289,36 @@ class OpenPoModel extends Model
         return $this->findAll();
     }
 
+    // public function listOpenPo($no_model, $jenis, $jenis2, $penerima)
+    // {
+    //     return $this->select('open_po.id_po, open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, master_material.jenis, master_order.buyer, master_order.no_order, master_order.delivery_awal, material.kgs, stock.kgs_stock_awal')
+    //         ->where(['open_po.no_model' => $no_model])
+    //         ->where('open_po.penerima', $penerima)
+    //         ->groupStart() // Mulai grup untuk kondisi OR
+    //         ->where('master_material.jenis', $jenis)
+    //         ->orWhere('master_material.jenis', $jenis2)
+    //         ->groupEnd() // Akhiri grup
+    //         ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
+    //         ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
+    //         ->join('material', 'material.item_type=open_po.item_type', 'left')
+    //         ->join('stock', 'stock.no_model=open_po.no_model', 'left')
+    //         ->groupBy('open_po.item_type, open_po.color, open_po.kode_warna')
+    //         ->findAll();
+    // } 
     public function listOpenPo($no_model, $jenis, $jenis2, $penerima)
     {
-        return $this->select('open_po.id_po, open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, master_material.jenis, master_order.buyer, master_order.no_order, master_order.delivery_awal, material.kgs, stock.kgs_stock_awal')
+        return $this->select('DISTINCT open_po.id_po, open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, master_material.jenis, master_order.buyer, master_order.no_order, master_order.delivery_awal, material.kgs, stock.kgs_stock_awal', false)
             ->where(['open_po.no_model' => $no_model])
             ->where('open_po.penerima', $penerima)
-            ->groupStart() // Mulai grup untuk kondisi OR
+            ->groupStart()
             ->where('master_material.jenis', $jenis)
             ->orWhere('master_material.jenis', $jenis2)
-            ->groupEnd() // Akhiri grup
+            ->groupEnd()
             ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
             ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
             ->join('material', 'material.item_type=open_po.item_type', 'left')
             ->join('stock', 'stock.no_model=open_po.no_model', 'left')
-            ->groupBy('open_po.item_type')
+            ->groupBy('open_po.id_po, open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color')
             ->findAll();
     }
 }

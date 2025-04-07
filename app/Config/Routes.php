@@ -82,6 +82,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/reportSchBenang', 'ScheduleController::reportSchBenang');
     $routes->get('schedule/filterSchBenang', 'ScheduleController::filterSchBenang');
     $routes->get('schedule/exportScheduleBenang', 'ExcelController::exportScheduleBenang');
+    $routes->get('schedule/reportSchNylon', 'ScheduleController::reportSchNylon');
+    $routes->get('schedule/filterSchNylon', 'ScheduleController::filterSchNylon');
+    $routes->get('schedule/exportScheduleNylon', 'ExcelController::exportScheduleNylon');
 
     // $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJatah');
 

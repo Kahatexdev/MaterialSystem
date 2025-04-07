@@ -620,23 +620,21 @@ class CelupController extends BaseController
         $lot_kirim_list = $this->request->getPost('lot_kirim');
 
         foreach ($id_out_celup_list as $index => $karungIds) {
-            // Loop setiap karung dalam satu celup
             foreach ($karungIds as $karungIndex => $id_out_celup) {
-
                 $dataKarung = [
-                    'no_karung'    => $no_karung_list[$index][$karungIndex],
-                    'l_m_d'        => $l_m_d_list[$index][$karungIndex],
-                    'harga'        => floatval(str_replace(',', '.', $harga_list[$index] ?? 0)),
-                    'ganti_retur'  => $ganti_retur_list[$index][$karungIndex],
-                    'gw_kirim'     => $gw_kirim_list[$index][$karungIndex],
-                    'kgs_kirim'    => $kgs_kirim_list[$index][$karungIndex],
-                    'cones_kirim'  => $cones_kirim_list[$index][$karungIndex],
-                    'lot_kirim'    => $lot_kirim_list[$index][$karungIndex],
+                    'no_karung'    => $no_karung_list[$index][$karungIndex] ?? null,
+                    'l_m_d'        => $l_m_d_list[$index] ?? null, // Diperbaiki
+                    'harga'        => floatval(str_replace(',', '.', $harga_list[$index] ?? 0)), // Diperbaiki
+                    'ganti_retur'  => $ganti_retur_list[$index] ?? 0, // Diperbaiki
+                    'gw_kirim'     => $gw_kirim_list[$index][$karungIndex] ?? null,
+                    'kgs_kirim'    => $kgs_kirim_list[$index][$karungIndex] ?? null,
+                    'cones_kirim'  => $cones_kirim_list[$index][$karungIndex] ?? null,
+                    'lot_kirim'    => $lot_kirim_list[$index][$karungIndex] ?? null,
                 ];
-                // dd($dataKarung);
                 $this->outCelupModel->update($id_out_celup, $dataKarung);
             }
         }
+
         // Redirect kembali dengan pesan sukses
         return redirect()->to(base_url($this->role . '/outCelup'))->with('success', 'Data berhasil diperbarui');
     }

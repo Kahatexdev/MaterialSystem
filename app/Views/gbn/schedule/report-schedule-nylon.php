@@ -19,10 +19,11 @@
     <div class="card border-0 rounded-top-4 shadow-lg">
         <div class="card-body p-4 rounded-top-4" style="background-color: rgb(0, 85, 124);">
             <div class="d-flex align-items-center mb-3">
-                <i class="fas fa-filter text-white me-3 fs-4"></i>
-                <h4 class="mb-0 fw-bold" style="color: white;">Filter Schedule Benang</h4>
+                <i class="fas fa-filter text-white me-3 fs-4 text-white"></i>
+                <h4 class="mb-0 fw-bold text-white">Filter Schedule Nylon</h4>
             </div>
         </div>
+
         <div class="card-body bg-white rounded-bottom-0 p-4">
             <div class="row gy-4">
                 <div class="col-md-6 col-lg-3">
@@ -123,7 +124,7 @@
 
 
             $.ajax({
-                url: "<?= base_url($role . '/schedule/filterSchBenang') ?>",
+                url: "<?= base_url($role . '/schedule/filterSchNylon') ?>",
                 type: "GET",
                 data: {
                     key: key,
@@ -176,7 +177,7 @@
             let tanggal_schedule = $('#scheduleDate').val().trim();
             let tanggal_awal = $('#startMcFrom').val().trim();
             let tanggal_akhir = $('#startMcTo').val().trim();
-            window.location.href = "<?= base_url($role . '/schedule/exportScheduleBenang') ?>?key=" + key + "&tanggal_schedule=" + tanggal_schedule + "&tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
+            window.location.href = "<?= base_url($role . '/schedule/exportScheduleNylon') ?>?key=" + key + "&tanggal_schedule=" + tanggal_schedule + "&tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
         });
 
         dataTable.clear().draw();

@@ -511,7 +511,7 @@
         function fetchQtyAndKebutuhanPO(kodeWarna, tr, warna, itemType, idInduk) {
             const itemTypeEncoded = encodeURIComponent(itemType);
             idInduk = idInduk || 0;
-            const url = `<?= base_url(session('role') . "/schedule/getQtyPO") ?>?kode_warna=${kodeWarna}&warna=${warna}&item_type=${itemTypeEncoded}&id_induk=${idInduk}`;
+            const url = `<?= base_url(session('role') . "/schedule/getQtyPO") ?>?kode_warna=${kodeWarna}&color=${warna}&item_type=${itemTypeEncoded}&id_induk=${idInduk}`;
             console.log("Request URL:", url);
             fetch(url)
                 .then(response => {
@@ -519,7 +519,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log("Qty Data:", data);
+                    // console.log("Qty Data:", data);
                     if (data && !data.error) {
                         // Hanya update field tambahan (qty_po_plus, KG Kebutuhan dan Sisa Jatah)
                         const qtyPO = tr.querySelector("input[name='qty_po[]']");
@@ -571,54 +571,79 @@
         function calculateTotalAndRemainingCapacity() {
             const qtyCelupInputs = document.querySelectorAll("input[name='qty_celup[]']");
             let totalQtyCelup = 0;
+
             qtyCelupInputs.forEach(input => {
                 totalQtyCelup += parseFloat(input.value) || 0;
             });
+
             const totalQtyCelupElement = document.getElementById("total_qty_celup");
             if (totalQtyCelupElement) {
                 totalQtyCelupElement.value = totalQtyCelup.toFixed(2);
             }
+
             const maxCaps = parseFloat(document.getElementById("max_caps").value) || 0;
+
             if (totalQtyCelup > maxCaps) {
-                alert("⚠️ Total Qty Celup melebihi Max Caps!");
-                totalQtyCelupElement.classList.add("is-invalid");
-                totalQtyCelupElement.focus();
-                // set input qty celup 0
-                totalQtyCelupElement.value = "0.00";
-                totalQtyCelup = 0; // Reset totalQtyCelup jika diperlukan
-                // Reset setiap input Qty Celup menjadi 0.00
-                qtyCelupInputs.forEach(input => {
-                    input.value = "0.00";
-                    input.classList.add("is-invalid");
+                Swal.fire({
+                    icon: "warning",
+                    title: "Peringatan!",
+                    text: "Total Qty Celup melebihi Max Caps!",
+                    confirmButtonColor: "#d33"
+                }).then(() => {
+                    totalQtyCelupElement.classList.add("is-invalid");
+                    totalQtyCelupElement.focus();
+                    totalQtyCelupElement.value = "0.00";
+                    totalQtyCelup = 0; // Reset totalQtyCelup jika diperlukan
+
+                    qtyCelupInputs.forEach(input => {
+                        input.value = "0.00";
+                        input.classList.add("is-invalid");
+                    });
                 });
             } else {
                 totalQtyCelupElement.value = totalQtyCelup.toFixed(2);
                 totalQtyCelupElement.classList.remove("is-invalid");
             }
+
             const rows = poTable.querySelectorAll("tbody tr");
+
             rows.forEach(row => {
                 const inputCelup = row.querySelector("input[name='qty_celup[]']");
                 const qtyCelup = parseFloat(inputCelup.value) || 0;
                 const tagihanSCH = parseFloat(row.querySelector(".sisa_jatah").textContent) || 0;
+
                 if (qtyCelup > tagihanSCH) {
-                    alert(`⚠️ Qty Celup di baris ini melebihi Tagihan SCH! (Tagihan SCH: ${tagihanSCH.toFixed(2)})`);
-                    inputCelup.classList.add("is-invalid");
-                    inputCelup.focus();
-                    // Reset input qty celup di baris tersebut menjadi 0.00
-                    inputCelup.value = "0.00";
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Peringatan!",
+                        text: `Qty Celup di baris ini melebihi Tagihan SCH! (Tagihan SCH: ${tagihanSCH.toFixed(2)})`,
+                        confirmButtonColor: "#d33"
+                    }).then(() => {
+                        inputCelup.classList.add("is-invalid");
+                        inputCelup.focus();
+                        inputCelup.value = "0.00"; // Reset input qty celup di baris tersebut
+                    });
                 } else {
                     inputCelup.classList.remove("is-invalid");
                 }
             });
+
             // Hitung dan set sisa kapasitas
             const sisaKapasitasElement = document.getElementById("sisa_kapasitas");
             if (sisaKapasitasElement) {
                 const sisaKapasitas = maxCaps - totalQtyCelup;
                 sisaKapasitasElement.value = sisaKapasitas.toFixed(2);
+
                 if (sisaKapasitas < 0) {
-                    alert("⚠️ Sisa Kapasitas negatif!");
-                    sisaKapasitasElement.classList.add("is-invalid");
-                    sisaKapasitasElement.focus();
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Peringatan!",
+                        text: "Sisa Kapasitas negatif!",
+                        confirmButtonColor: "#d33"
+                    }).then(() => {
+                        sisaKapasitasElement.classList.add("is-invalid");
+                        sisaKapasitasElement.focus();
+                    });
                 } else {
                     sisaKapasitasElement.classList.remove("is-invalid");
                 }
@@ -654,7 +679,7 @@
                 }
                 if (selectedOption.value) {
                     fetchQtyAndKebutuhanPO(kodeWarnaValue, tr, warna, itemTypeValue, idIndukValue);
-                    fetchPODetails(selectedOption.value, tr, itemTypeValue, kodeWarnaValue);
+                    // fetchPODetails(selectedOption.value, tr, itemTypeValue, kodeWarnaValue);
                 } else {
                     // Reset schedule jika PO kosong
                     const tglStartMC = tr.querySelector("input[name='tgl_start_mc[]']");
@@ -775,7 +800,7 @@
                 const poSelect = newRow.querySelector(".po-select");
                 const idIndukValue = $(this).find(':selected').data('id-induk') || 0;
                 fetchPOByKodeWarna(kodeWarna.value, newRow, warnaInput.value, itemTypeValue, idIndukValue, poSelect);
-                fetchQtyAndKebutuhanPO(kodeWarna.value, newRow, warnaInput.value, itemTypeValue, idIndukValue);
+                // fetchQtyAndKebutuhanPO(kodeWarna.value, newRow, warnaInput.value, itemTypeValue, idIndukValue);
             });
 
             newRow.querySelector("input[name='qty_celup[]']").addEventListener("input", function() {

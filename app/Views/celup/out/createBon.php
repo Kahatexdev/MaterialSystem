@@ -95,16 +95,16 @@
                                                 <div class="col-md-4">
                                                     <label>No Model</label>
                                                     <input type="text" class="form-control" name="items[0][id_celup]" id="id_celup" required placeholder="Pilih No Model" readonly hidden>
-                                                    <input type="text" class="form-control" name="items[0][no_model]" id="no_model" required placeholder="Pilih No Model" readonly>
+                                                    <input type="text" class="form-control" name="items[0][no_model]" id="no_model" required placeholder="No Model" readonly>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label>Item Type</label>
-                                                    <input type="text" class="form-control" name="items[0][item_type]" id="item_type" required placeholder="Pilih No Model" readonly>
+                                                    <input type="text" class="form-control" name="items[0][item_type]" id="item_type" required placeholder="Item Type" readonly>
 
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label>Kode Warna</label>
-                                                    <input type="text" class="form-control" name="items[0][kode_warna]" id="kode_warna" required placeholder="Pilih No Model" readonly>
+                                                    <input type="text" class="form-control" name="items[0][kode_warna]" id="kode_warna" required placeholder="Kode Warna" readonly>
                                                 </div>
 
                                             </div>
@@ -113,7 +113,7 @@
                                             <div class="row g-3 mt-3">
                                                 <div class="col-md-4">
                                                     <label>Warna</label>
-                                                    <input type="text" class="form-control" name="items[0][warna]" id="warna" required>
+                                                    <input type="text" class="form-control" name="items[0][warna]" id="warna" required placeholder="Warna">
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label>LMD</label>
@@ -719,7 +719,9 @@
             // Hitung total berdasarkan input di dalam poTable
             poTable.querySelectorAll("tbody tr").forEach(row => {
                 totalGW += parseFloat(row.querySelector("input[name^='gw_kirim']")?.value || 0);
+                totalGW = parseFloat(totalGW.toFixed(2));
                 totalKgs += parseFloat(row.querySelector("input[name^='kgs_kirim']")?.value || 0);
+                totalKgs = parseFloat(totalKgs.toFixed(2));
                 totalCones += parseFloat(row.querySelector("input[name^='cones_kirim']")?.value || 0);
                 totalLot += parseFloat(row.querySelector("input[name^='lot_kirim']")?.value || 0);
             });
