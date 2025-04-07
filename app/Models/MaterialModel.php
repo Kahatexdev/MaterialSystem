@@ -171,7 +171,7 @@ class MaterialModel extends Model
             ->findAll();
     }
 
-    public function getMaterialForPPH($area, $no_model = null)
+    public function getMaterialForPPH($no_model = null)
     {
         $builder = $this->select('
             material.id_order, 
@@ -188,9 +188,7 @@ class MaterialModel extends Model
             material.loss, 
             SUM(material.kgs) AS ttl_kebutuhan
         ')
-            ->join('master_order', 'master_order.id_order = material.id_order')
-            ->where('material.area', $area);
-        // ->where('material.style_size', 'J401514-17 18X6');
+            ->join('master_order', 'master_order.id_order = material.id_order');
 
         // Tambahkan filter untuk no_model jika ada
         if (!empty($no_model)) {

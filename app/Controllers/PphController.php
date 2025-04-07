@@ -108,7 +108,7 @@ class PphController extends BaseController
     {
         $model = $this->request->getGet('model');
         $area = $this->request->getGet('area');
-        $models = $this->materialModel->getMaterialForPPH($area, $model);
+        $models = $this->materialModel->getMaterialForPPH($model);
 
         $pphInisial = [];
 
@@ -116,6 +116,7 @@ class PphController extends BaseController
             $styleSize = $items['style_size'];
             $gw = $items['gw'];
             $comp = $items['composition'];
+            $loss = $items['loss'];
             $gwpcs = ($gw * $comp) / 100;
             $styleSize = urlencode($styleSize);
             $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
@@ -138,9 +139,9 @@ class PphController extends BaseController
                 if ($gw == 0) {
                     $pph = 0;
                 } else {
-
                     $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
                 }
+                $ttl_kebutuhan = ($data['qty'] * $comp * $gw /100 / 1000) + ($loss / 100 * ($data['qty'] * $comp * $gw /100 / 1000));
 
 
 
@@ -153,7 +154,7 @@ class PphController extends BaseController
                     'color'      => $items['color'],
                     'gw'         => $items['gw'],
                     'composition' => $items['composition'],
-                    'kgs'  => $items['ttl_kebutuhan'],
+                    'kgs'  => $ttl_kebutuhan,
                     'jarum'      => $data['machinetypeid'] ?? null,
                     'bruto'      => $bruto,
                     'qty'        => $data['qty'] ?? 0,
@@ -231,13 +232,14 @@ class PphController extends BaseController
     {
         $model = $this->request->getGet('model');
         $area = $this->request->getGet('area');
-        $models = $this->materialModel->getMaterialForPPH($area, $model);
+        $models = $this->materialModel->getMaterialForPPH($model);
         $pphInisial = [];
 
         foreach ($models as $items) {
             $styleSize = $items['style_size'];
             $gw = $items['gw'];
             $comp = $items['composition'];
+            $loss = $items['loss'];
             $gwpcs = ($gw * $comp) / 100;
             $styleSize = urlencode($styleSize);
             $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
@@ -263,6 +265,7 @@ class PphController extends BaseController
 
                     $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
                 }
+                $ttl_kebutuhan = ($data['qty'] * $comp * $gw /100 / 1000) + ($loss / 100 * ($data['qty'] * $comp * $gw /100 / 1000));
 
                 $pphInisial[] = [
                     'area'  => $items['area'],
@@ -271,7 +274,7 @@ class PphController extends BaseController
                     'item_type'  => $items['item_type'],
                     'kode_warna'  => $items['kode_warna'],
                     'color'      => $items['color'],
-                    'ttl_kebutuhan' => $items['ttl_kebutuhan'],
+                    'ttl_kebutuhan' => $ttl_kebutuhan,
                     'gw'         => $items['gw'],
                     'loss' => $items['loss'],
                     'composition' => $items['composition'],
@@ -343,7 +346,6 @@ class PphController extends BaseController
 
                         $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
                     }
-
 
                     $pphInisial[] = [
                         'mastermodel'    => $prod['mastermodel'],
