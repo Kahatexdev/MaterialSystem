@@ -551,7 +551,7 @@ class ApiController extends ResourceController
     }
     public function pph()
     {
-        $noModel = $this->request->getGet('noModel') ?? '';
+        $noModel = $this->request->getGet('model') ?? '';
 
         $results = $this->materialModel->getMaterialForPPH($noModel);
         
