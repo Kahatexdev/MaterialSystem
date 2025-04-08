@@ -69,52 +69,12 @@
                         <h5 class="mb-0">
                             Pengiriman Area
                         </h5>
-                        <div class="d-flex gap-2">
-                            <button class="btn bg-gradient-info" data-bs-toggle="modal" data-bs-target="#inputManual">Input</button>
-                            <form action="<?= base_url($role . '/reset_pengiriman') ?>" method="post">
-                                <button type="submit" class="btn bg-gradient-secondary"><i class="fas fa-redo"></i> Reset Data</button>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <!-- <?= session()->get('pengirimanForm') ? 'Form data exists' : 'Form data does not exist'; ?> -->
-                        <div class="col-lg-4 col-sm-6">
-                            <div class="form-group">
-                                <label class="badge bg-secondary text-white" for="">No Model: <?= $no_model ?></label>
-                            </div>
-                            <div class="form-group">
-                                <label class="badge bg-secondary text-white" for="">Item Type: <?= $item_type ?></label>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-sm-6">
-                            <div class="form-group">
-                                <label class="badge bg-secondary text-white" for="">Kode Warna: <?= $kode_warna ?></label>
-                            </div>
-                            <div class="form-group">
-                                <label class="badge bg-secondary text-white" for="">Warna: <?= $warna ?></label>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-sm-6">
-                            <div class="form-group">
-                                <label class="badge bg-secondary text-white" for="">Kgs Pesan: <?= $kgs_pesan ?> Kg</label>
-                            </div>
-                            <div class="form-group">
-                                <label class="badge bg-secondary text-white" for="">Cns Pesan: <?= $cns_pesan ?> Cns</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-3 col-sm-12">
-                            <form action="<?= base_url($role . '/pengiriman_area') ?>" method="post">
-                                <input type="text" name="area" value="<?= $area ?>">
-                                <input type="date" name="tgl_pakai" value="<?= $tgl_pakai ?>">
-                                <input type="text" name="no_model" value="<?= $no_model ?>">
-                                <input type="text" name="item_type" value="<?= $item_type ?>">
-                                <input type="text" name="kode_warna" value="<?= $kode_warna ?>">
-                                <input type="text" name="warna" value="<?= $warna ?>">
-                                <input type="text" name="kgs_pesan" value="<?= $kgs_pesan ?>">
-                                <input type="text" name="cns_pesan" value="<?= $cns_pesan ?>">
 
+                    </div>
+                    <hr class="horizontal dark my-3">
+                    <div class="row">
+                        <div class="col-lg-12 col-sm-12">
+                            <form action="<?= base_url($role . '/pengiriman_area') ?>" method="post">
                                 <div class="form-group">
                                     <label for="barcode" class="form-control-label">Scan Barcode</label>
                                     <input class="form-control" type="text" name="barcode" id="barcode" autofocus>
@@ -122,6 +82,8 @@
                             </form>
                         </div>
                     </div>
+                    <hr class="horizontal dark my-3">
+
                 </div>
             </div>
             <div class="card my-1">
@@ -160,10 +122,21 @@
                                                             <label for="tgl">Tanggal Kirim : <?= $today ?></label>
                                                             <input type="date" class="form-control" name="tgl_kirim[]" value="<?= $formated ?>" hidden>
                                                             <input type="text" class="form-control" name="nama_cluster[]" value="<?= $data['nama_cluster'] ?>" hidden>
+                                                            <input type="text" class="form-control" name="idPengeluaran[]" value="<?= $data['id_pengeluaran'] ?>" hidden>
                                                         </div>
-                                                        <div class="form-group">
-                                                            <label for="tgl">Model : </label>
-                                                            <input type="text" class="form-control" name="no_model[]" value="<?= $data['no_model'] ?>" readonly>
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <div class="form-group">
+                                                                    <label for="tgl">Model : </label>
+                                                                    <input type="text" class="form-control" name="no_model[]" value="<?= $data['no_model'] ?>" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="form-group">
+                                                                    <label for="tgl">Area : </label>
+                                                                    <input type="text" class="form-control" name="area[]" value="<?= $data['area_out'] ?>" readonly>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                         <div class="row">
                                                             <div class="col-6">
@@ -198,13 +171,13 @@
                                                             <div class="col-6">
                                                                 <div class="form-group">
                                                                     <label for=""> Kgs Kirim:</label>
-                                                                    <input type="number" class="form-control kgs_kirim" name="kgs_kirim[]" value="<?= $data['kgs_masuk'] ?>" readonly>
+                                                                    <input type="number" class="form-control kgs_kirim" name="kgs_kirim[]" value="<?= $data['kgs_out'] ?>" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="col-6">
                                                                 <div class="form-group">
                                                                     <label for="">Cones Kirim:</label>
-                                                                    <input type="number" class="form-control" name="cns_kirim[]" value="<?= $data['cns_masuk'] ?>" readonly>
+                                                                    <input type="number" class="form-control" name="cns_kirim[]" value="<?= $data['cns_out'] ?>" readonly>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -268,19 +241,42 @@
         $(document).ready(function() {
             // Event listener untuk tombol "Hapus"
             $('button.btn-hapus').on('click', function() {
-                var id = $(this).data('id'); // Ambil ID yang ingin dihapus
-                var row = $(this).closest('tr'); // Ambil baris tabel yang akan dihapus
+            var id = $(this).data('id'); // Ambil ID yang ingin dihapus
+            var row = $(this).closest('tr'); // Ambil baris tabel yang akan dihapus
 
+            // Tampilkan alert konfirmasi menggunakan Swal
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data yang dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
                 // Kirim ID ke controller untuk dihapus dari session
                 $.post("<?= base_url($role . '/hapus_pengiriman') ?>", {
                     id: id
                 }, function(response) {
                     if (response.success) {
-                        row.remove(); // Hapus baris dari tabel
+                    row.remove(); // Hapus baris dari tabel
+                    Swal.fire(
+                        'Terhapus!',
+                        'Data berhasil dihapus.',
+                        'success'
+                    );
                     } else {
-                        alert('Terjadi kesalahan saat menghapus data.');
+                    Swal.fire(
+                        'Gagal!',
+                        'Terjadi kesalahan saat menghapus data.',
+                        'error'
+                    );
                     }
                 }, 'json');
+                }
+            });
             });
         });
 
