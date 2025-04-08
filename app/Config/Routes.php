@@ -427,5 +427,6 @@ $routes->group(
         $routes->post('hapusOldPemesanan', 'ApiController::hapusOldPemesanan');
         $routes->get('pph', 'ApiController::pph');
         $routes->post('assignArea', 'MaterialController::assignArea');
+        $routes->get('pphperhari', 'ApiController::getMU');
     }
 );

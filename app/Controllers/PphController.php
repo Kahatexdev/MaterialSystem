@@ -287,7 +287,7 @@ class PphController extends BaseController
                     'bs_setting' => $data['bs_setting'] ?? 0,
                     'bs_mesin'   => $bs_mesin,
                     'pph'        => $pph,
-                    'pph_persen' => ($pph / $items['ttl_kebutuhan']) * 100,
+                    'pph_persen' => ($ttl_kebutuhan != 0) ? ($pph / $ttl_kebutuhan) * 100 : 0,
                 ];
             }
         }

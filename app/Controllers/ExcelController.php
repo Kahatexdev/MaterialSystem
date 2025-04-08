@@ -369,7 +369,7 @@ class ExcelController extends BaseController
                     'bs_setting' => $data['bs_setting'] ?? 0,
                     'bs_mesin'   => $bs_mesin,
                     'pph'        => $pph,
-                    'pph_persen' => ($pph / $items['ttl_kebutuhan']) * 100,
+                    'pph_persen' => ($ttl_kebutuhan != 0) ? ($pph / $ttl_kebutuhan) * 100 : 0,
                 ];
             }
         }
@@ -500,7 +500,7 @@ class ExcelController extends BaseController
             $sheet->setCellValue('N' . $row, number_format($data['bs_mesin'], 2));
             $sheet->setCellValue('O' . $row, number_format($data['bs_setting'] / 24, 2));
             $sheet->setCellValue('P' . $row, number_format($data['pph'], 2));
-            $sheet->setCellValue('Q' . $row, number_format($data['pph_persen'], 2));
+            $sheet->setCellValue('Q' . $row, number_format($data['pph_persen'], 2) . '%');
 
             // style body
             $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'];
