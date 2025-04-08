@@ -549,11 +549,11 @@ class ApiController extends ResourceController
             ], 404); // HTTP 404 Not Found
         }
     }
-    public function pph($area)
+    public function pph()
     {
         $noModel = $this->request->getGet('noModel') ?? '';
 
-        $results = $this->materialModel->getMaterialForPPH($area, $noModel);
+        $results = $this->materialModel->getMaterialForPPH($noModel);
         
         // Konversi stdClass menjadi array
         $resultsArray = json_decode(json_encode($results), true);
