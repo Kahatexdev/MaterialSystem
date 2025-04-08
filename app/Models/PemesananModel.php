@@ -338,4 +338,35 @@ class PemesananModel extends Model
         // Kembalikan jumlah baris yang terhapus
         return $this->db->affectedRows(); // Mengembalikan jumlah baris yang dihapus
     }
+
+    public function getFilterPemesananArea($key, $tanggal_awal, $tanggal_akhir)
+    {
+        $this->select('pemesanan.*, master_order.foll_up, master_order.no_model, master_order.no_order, material.area, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, material.item_type, material.kode_warna, material.color')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('pemesanan.status_kirim', '');
+
+        // Cek apakah ada input key untuk pencarian
+        if (!empty($key)) {
+            $this->groupStart()
+                ->like('pemesanan.admin', $key)
+                ->groupEnd();
+        }
+
+        // Filter berdasarkan tanggal
+        if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
+            $this->groupStart();
+            if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
+                $this->where('pemesanan.tgl_pakai >=', $tanggal_awal)
+                    ->where('pemesanan.tgl_pakai <=', $tanggal_akhir);
+            } elseif (!empty($tanggal_awal)) {
+                $this->where('pemesanan.tgl_pakai >=', $tanggal_awal);
+            } elseif (!empty($tanggal_akhir)) {
+                $this->where('pemesanan.tgl_pakai <=', $tanggal_akhir);
+            }
+            $this->groupEnd();
+        }
+
+        return $this->findAll();
+    }
 }

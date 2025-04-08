@@ -506,4 +506,25 @@ class PemesananController extends BaseController
             'data' => $usageData
         ]);
     }
+
+    public function reportPemesananArea()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Report Pemesanan',
+            'active' => $this->active
+        ];
+        return view($this->role . '/pemesanan/report-pemesanan', $data);
+    }
+
+    public function filterPemesananArea()
+    {
+        $key = $this->request->getGet('key');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemesananModel->getFilterPemesananArea($key, $tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
+    }
 }

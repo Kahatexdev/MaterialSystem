@@ -15,6 +15,7 @@ use App\Models\BonCelupModel;
 use App\Models\OutCelupModel;
 use App\Models\PemasukanModel;
 use App\Models\ScheduleCelupModel;
+use App\Models\StockModel;
 use PhpOffice\PhpSpreadsheet\Style\{Border, Alignment, Fill};
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
@@ -33,6 +34,7 @@ class ExcelController extends BaseController
     protected $outCelupModel;
     protected $pemasukanModel;
     protected $scheduleCelupModel;
+    protected $stockModel;
 
     public function __construct()
     {
@@ -44,6 +46,7 @@ class ExcelController extends BaseController
         $this->outCelupModel = new OutCelupModel();
         $this->pemasukanModel = new PemasukanModel();
         $this->scheduleCelupModel = new ScheduleCelupModel();
+        $this->stockModel = new StockModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -1033,6 +1036,90 @@ class ExcelController extends BaseController
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
         header('Cache-Control: max-age=0');
 
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function excelStockMaterial()
+    {
+        // Ambil filter dari query string
+        $noModel = $this->request->getGet('no_model');
+        $warna = $this->request->getGet('warna');
+        // Ambil data hasil filter dari model
+        $filteredData = $this->stockModel->searchStock($noModel, $warna);
+        // dd($filteredData);
+        // Buat Spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // === Tambahkan Judul Header di Tengah === //
+        $title = 'DATA STOCK MATERIAL';
+        $sheet->mergeCells('A1:M1'); // Gabungkan dari kolom A sampai M
+        $sheet->setCellValue('A1', $title);
+
+        // Format judul (bold + center)
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // === Header Kolom di Baris 2 === //
+        $sheet->setCellValue('A3', 'No Model');
+        $sheet->setCellValue('B3', 'Kode Warna');
+        $sheet->setCellValue('C3', 'Warna');
+        $sheet->setCellValue('D3', 'Item Type');
+        $sheet->setCellValue('E3', 'Lot Stock');
+        $sheet->setCellValue('F3', 'Nama Cluster');
+        $sheet->setCellValue('G3', 'Kapasitas');
+        $sheet->setCellValue('H3', 'Kgs');
+        $sheet->setCellValue('I3', 'Krg');
+        $sheet->setCellValue('J3', 'Cns');
+        $sheet->setCellValue('K3', 'Kgs Stock Awal');
+        $sheet->setCellValue('L3', 'Krg Stock Awal');
+        $sheet->setCellValue('M3', 'Cns Stock Awal');
+
+        // === Isi Data mulai dari baris ke-3 === //
+        $row = 4;
+        foreach ($filteredData as $data) {
+            $sheet->setCellValue('A' . $row, $data->no_model);
+            $sheet->setCellValue('B' . $row, $data->kode_warna);
+            $sheet->setCellValue('C' . $row, $data->warna);
+            $sheet->setCellValue('D' . $row, $data->item_type);
+            $sheet->setCellValue('E' . $row, $data->lot_stock);
+            $sheet->setCellValue('F' . $row, $data->nama_cluster);
+            $sheet->setCellValue('G' . $row, $data->kapasitas);
+            $sheet->setCellValue('H' . $row, $data->Kgs);
+            $sheet->setCellValue('I' . $row, $data->Krg);
+            $sheet->setCellValue('J' . $row, $data->Cns);
+            $sheet->setCellValue('K' . $row, $data->KgsStockAwal);
+            $sheet->setCellValue('L' . $row, $data->KrgStockAwal);
+            $sheet->setCellValue('M' . $row, $data->CnsStockAwal);
+            $row++;
+        }
+
+        // === Auto Size Kolom A - M === //
+        foreach (range('A', 'M') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // === Tambahkan Border (A2:M[row - 1]) === //
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => 'FF000000'],
+                ],
+            ],
+        ];
+
+        $lastDataRow = $row - 1; // baris terakhir data
+        $sheet->getStyle("A3:M{$lastDataRow}")->applyFromArray($styleArray);
+
+        // === Export File Excel === //
+        $filename = 'Data_Stock_' . date('YmdHis') . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+
+        $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
     }
