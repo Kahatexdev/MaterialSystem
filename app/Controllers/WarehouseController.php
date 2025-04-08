@@ -1327,7 +1327,7 @@ class WarehouseController extends BaseController
             'krg_out' => $data->qtyKarung,
             'nama_cluster' => $data->namaCluster,
             'lot_out' => $data->lotFinal,
-            'status' => 'Pengeuaran Jalur',
+            'status' => 'Pengeluaran Jalur',
             'admin' => $this->username,
             'created_at' => date('Y-m-d H:i:s')
         ];
