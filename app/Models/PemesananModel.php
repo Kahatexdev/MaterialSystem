@@ -26,7 +26,7 @@ class PemesananModel extends Model
         'lot',
         'keterangan',
         'po_tambahan',
-        'id_pengeluaran',
+        'id_total_pemesanan',
         'id_retur',
         'status_kirim',
         'admin',
@@ -160,10 +160,11 @@ class PemesananModel extends Model
                 pemesanan.keterangan,
                 (SUM(material.kgs) - SUM(DISTINCT COALESCE(pengeluaran.id_pengeluaran, 0) * COALESCE(pengeluaran.kgs_out, 0) / NULLIF(COALESCE(pengeluaran.id_pengeluaran, 1), 0))) AS sisa_jatah
             ")
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->join('pengeluaran', 'pengeluaran.id_pengeluaran = pemesanan.id_pengeluaran', 'left')
+            ->join('pengeluaran', 'pengeluaran.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->where('pemesanan.admin', $area)
             ->where('pemesanan.status_kirim!=', 'YA')
             ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai')
@@ -227,18 +228,18 @@ class PemesananModel extends Model
             ->orderBy('pemesanan.id_pemesanan');
         return $data->get()->getResultArray();
     }
-    public function kirimPemesanan($data)
+    public function kirimPemesanan($id)
     {
         // Langkah 1: Ambil semua data yang relevan dengan JOIN
         $data = $this->db->table('pemesanan')
-            ->select('pemesanan.id_pemesanan')
+            ->select('pemesanan.id_pemesanan, pemesanan.jl_mc, pemesanan.ttl_berat_cones, pemesanan.ttl_qty_cones')
             ->join('material', 'pemesanan.id_material = material.id_material')
             ->join('master_order', 'master_order.id_order = material.id_order')
-            ->where('master_order.no_model', $data['no_model'])
-            ->where('material.item_type', $data['item_type'])
-            ->where('material.kode_warna', $data['kode_warna'])
-            ->where('material.color', $data['color'])
-            ->where('pemesanan.tgl_pakai', $data['tgl_pakai'])
+            ->where('master_order.no_model', $id['no_model'])
+            ->where('material.item_type', $id['item_type'])
+            ->where('material.kode_warna', $id['kode_warna'])
+            ->where('material.color', $id['color'])
+            ->where('pemesanan.tgl_pakai', $id['tgl_pakai'])
             ->get()
             ->getResultArray(); // Ambil semua baris sebagai array
 
@@ -247,11 +248,30 @@ class PemesananModel extends Model
                 'status'  => 'error',
                 'message' => 'Data tidak ditemukan untuk parameter yang diberikan',
             ];
+        } else {
+            log_message('info', 'Data ditemukan: ' . json_encode($data));
         }
 
-        // Ubah hasil menjadi array ID saja
-        $idList = array_column($data, 'id_pemesanan');
+        // Langkah 2: Totalkan data
+        $totalData = [
+            'ttl_jl_mc' => array_sum(array_column($data, 'jl_mc')),
+            'ttl_kg'    => array_sum(array_column($data, 'ttl_berat_cones')),
+            'ttl_cns'   => array_sum(array_column($data, 'ttl_qty_cones')),
+        ];
 
+        // Langkah 3: Insert ke tabel baru
+        $insert = $this->db->table('total_pemesanan')->insert($totalData);
+
+        if (!$insert) {
+            return [
+                'status'  => 'error',
+                'message' => 'Gagal menyimpan data total',
+            ];
+        }
+        // Ambil ID total pemesanan yang baru saja diinsert
+        $idTotalPemesanan = $this->db->insertID();
+
+        // Langkah 4: Update data di tabel pemesanan
         $success = 0;
         $failure = 0;
 
@@ -259,8 +279,9 @@ class PemesananModel extends Model
             $update = $this->db->table('pemesanan')
                 ->where('id_pemesanan', $row['id_pemesanan'])
                 ->update([
-                    'tgl_pesan' => date('Y-m-d H:i:s'),
-                    'status_kirim' => 'YA',
+                    'tgl_pesan'       => date('Y-m-d H:i:s'),
+                    'status_kirim'    => 'YA',
+                    'id_total_pemesanan' => $idTotalPemesanan, // Update ID total pemesanan
                 ]);
 
             if ($this->db->affectedRows() > 0) {
@@ -274,7 +295,7 @@ class PemesananModel extends Model
         if ($success > 0) {
             return [
                 'status' => 'success',
-                'message' => "$success baris berhasil diperbarui, $failure gagal",
+                'message' => "$success pemesanan berhasil dikirim, $failure gagal",
                 'success_count' => $success,
                 'failure_count' => $failure,
             ];
@@ -302,7 +323,7 @@ class PemesananModel extends Model
             pemesanan.lot,
             pemesanan.keterangan,
             pemesanan.po_tambahan,
-            pemesanan.id_pengeluaran,
+            pemesanan.id_total_pemesanan,
             pemesanan.id_retur,
             pemesanan.status_kirim,
             pemesanan.admin,
