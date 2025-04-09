@@ -1161,4 +1161,27 @@ class ScheduleController extends BaseController
 
         return $this->response->setJSON($data);
     }
+
+    public function reportSchNylon()
+    {
+        $data =
+            [
+                'active' => $this->active,
+                'title' => 'Material System',
+                'role' => $this->role,
+            ];
+        return view($this->role . '/schedule/report-schedule-nylon', $data);
+    }
+
+    public function filterSchNylon()
+    {
+        $key = $this->request->getGet('key');
+        $tanggalSch = $this->request->getGet('tanggal_schedule');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->scheduleCelupModel->getFilterSchNylon($key, $tanggalSch, $tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
+    }
 }

@@ -123,6 +123,10 @@
                 <div class="col-lg-3 col-sm-12 d-flex gap-2">
                     <button class="btn btn-info flex-grow-1" id="filter_data"><i class="fas fa-search"></i> Cari</button>
                     <button class="btn btn-secondary flex-grow-1" id="reset_data"><i class="fas fa-redo"></i> Reset</button>
+                    <button type="button" class="btn btn-success flex-grow-1" id="export_excel">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </button>
+
                 </div>
             </div>
         </form>
@@ -141,50 +145,45 @@
             $.ajax({
                 url: "<?= base_url(session()->get('role') . '/warehouse/search') ?>",
                 method: "POST",
-                dataType: "json", // Pastikan menerima data dalam format JSON
+                dataType: "json",
                 data: {
                     noModel,
                     warna
                 },
                 success: function(response) {
                     let output = "";
-
                     if (response.length === 0) {
                         output = `<div class="alert alert-warning text-center">Data tidak ditemukan</div>`;
                     } else {
                         response.forEach(item => {
                             let totalKgs = item.Kgs && item.Kgs > 0 ? item.Kgs : item.KgsStockAwal;
                             let totalKrg = item.Krg && item.Krg > 0 ? item.Krg : item.KrgStockAwal;
-
-                            // Cek jika totalKgs, totalKrg, dan totalCones semuanya 0, lewati iterasi
-                            if (totalKgs == 0 && totalKrg == 0) {
-                                return;
-                            }
+                            if (totalKgs == 0 && totalKrg == 0) return;
 
                             output += `
-                        <div class="result-card">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="badge bg-info">Cluster: ${item.nama_cluster} | No Model: ${item.no_model}</h5>
-                                <span class="badge bg-secondary">Jenis: ${item.item_type}</span>
-                            </div>
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <p><strong>Lot Jalur:</strong> ${item.lot_stock || item.lot_awal}</p>
-                                    <p><strong>Space:</strong> ${item.kapasitas || 0} KG</p>
-                                    <p><strong>Sisa Space:</strong> ${(item.sisa_space || 0).toFixed(2)} KG</p>
+                            <div class="result-card">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="badge bg-info">Cluster: ${item.nama_cluster} | No Model: ${item.no_model}</h5>
+                                    <span class="badge bg-secondary">Jenis: ${item.item_type}</span>
                                 </div>
-                                <div class="col-md-4">
-                                    <p><strong>Kode Warna:</strong> ${item.kode_warna}</p>
-                                    <p><strong>Warna:</strong> ${item.warna}</p>
-                                    <p><strong>Total Kgs:</strong> ${(parseFloat(totalKgs) || 0).toFixed(2)} KG | ${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out} Cones | ${totalKrg} KRG </p>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <p><strong>Lot Jalur:</strong> ${item.lot_stock || item.lot_awal}</p>
+                                        <p><strong>Space:</strong> ${item.kapasitas || 0} KG</p>
+                                        <p><strong>Sisa Space:</strong> ${(item.sisa_space || 0).toFixed(2)} KG</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p><strong>Kode Warna:</strong> ${item.kode_warna}</p>
+                                        <p><strong>Warna:</strong> ${item.warna}</p>
+                                        <p><strong>Total Kgs:</strong> ${(parseFloat(totalKgs) || 0).toFixed(2)} KG | ${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out} Cones | ${totalKrg} KRG</p>
+                                    </div>
+                                    <div class="col-md-4 d-flex flex-column gap-2">
+                                        <button class="btn btn-outline-info btn-sm">In/Out</button>
+                                        <button class="btn btn-outline-info btn-sm pindahPalet" data-id="${item.id_stock}" data-cluster="${item.nama_cluster}" data-lot="${item.lot_stock}" data-kgs="${totalKgs}" data-cones="${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out}" data-krg="${totalKrg}">Pindah Palet</button>
+                                        <button class="btn btn-outline-info btn-sm pindahOrder" data-id="${item.id_stock}" data-noModel="${item.no_model}" data-cluster="${item.nama_cluster}" data-lot="${item.lot_stock}" data-kgs="${totalKgs}" data-cones="${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out}" data-krg="${totalKrg}">Pindah Order</button>
+                                    </div>
                                 </div>
-                                <div class="col-md-4 d-flex flex-column gap-2">
-                                    <button class="btn btn-outline-info btn-sm">In/Out</button>
-                                    <button class="btn btn-outline-info btn-sm pindahPalet" data-id="${item.id_stock}" data-cluster="${item.nama_cluster}" data-lot="${item.lot_stock}" data-kgs="${totalKgs}" data-cones="${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out}" data-krg="${totalKrg}">Pindah Palet</button>
-                                    <button class="btn btn-outline-info btn-sm pindahOrder" data-id="${item.id_stock}" data-noModel="${item.no_model}" data-cluster="${item.nama_cluster}" data-lot="${item.lot_stock}" data-kgs="${totalKgs}" data-cones="${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out}" data-krg="${totalKrg}">Pindah Order</button>
-                                </div>
-                            </div>
-                        </div>`;
+                            </div>`;
                         });
                     }
 
@@ -194,13 +193,23 @@
                     $('#result').html(`<div class="alert alert-danger text-center">Terjadi kesalahan: ${error}</div>`);
                 }
             });
+        });
 
-            $('#reset_data').click(function(e) {
-                e.preventDefault();
-                $('input[name="noModel"]').val('');
-                $('input[name="warna"]').val('');
-                $('#result').html('');
-            });
+        // Reset filter
+        $('#reset_data').click(function(e) {
+            e.preventDefault();
+            $('input[name="noModel"]').val('');
+            $('input[name="warna"]').val('');
+            $('#result').html('');
+        });
+
+        // Export Excel
+        $('#export_excel').on('click', function() {
+            const noModel = $('input[name="noModel"]').val();
+            const warna = $('input[name="warna"]').val();
+
+            const query = `?no_model=${encodeURIComponent(noModel)}&warna=${encodeURIComponent(warna)}`;
+            window.location.href = "<?= base_url(session()->get('role') . '/warehouse/exportExcel') ?>" + query;
         });
 
 

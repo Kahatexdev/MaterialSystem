@@ -82,6 +82,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/reportSchBenang', 'ScheduleController::reportSchBenang');
     $routes->get('schedule/filterSchBenang', 'ScheduleController::filterSchBenang');
     $routes->get('schedule/exportScheduleBenang', 'ExcelController::exportScheduleBenang');
+    $routes->get('schedule/reportSchNylon', 'ScheduleController::reportSchNylon');
+    $routes->get('schedule/filterSchNylon', 'ScheduleController::filterSchNylon');
+    $routes->get('schedule/exportScheduleNylon', 'ExcelController::exportScheduleNylon');
 
     // $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJatah');
 
@@ -132,6 +135,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportDatangBenang', 'WarehouseController::reportDatangBenang');
     $routes->get('warehouse/filterDatangBenang', 'WarehouseController::filterDatangBenang');
     $routes->get('warehouse/exportDatangBenang', 'ExcelController::exportDatangBenang');
+    $routes->get('warehouse/exportExcel', 'ExcelController::excelStockMaterial');
     //
     $routes->post('getStockByParams', 'PemesananController::getStockByParams');
     $routes->get('pemesanan', 'PemesananController::index');
@@ -146,6 +150,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('reset_pengiriman/(:any)/(:any)', 'PemesananController::resetPengirimanArea/$1/$2');
     $routes->post('hapus_pengiriman', 'PemesananController::hapusListPengiriman');
     $routes->post('proses_pengiriman', 'PemesananController::prosesPengirimanArea');
+    $routes->get('pemesanan/reportPemesananArea', 'PemesananController::reportPemesananArea');
+    $routes->get('pemesanan/filterPemesananArea', 'PemesananController::filterPemesananArea');
+    $routes->get('pemesanan/exportPemesananArea', 'ExcelController::excelPemesananArea');
 
     $routes->get('pph', 'PphController::tampilPerModel');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
@@ -422,8 +429,9 @@ $routes->group(
         // $routes->get('getMaterialForPPH/(:any)/(:any)', 'ApiController::getMaterialForPPH/$1/$2');
         $routes->get('stockbahanbaku/(:any)', 'ApiController::stockbahanbaku/$1');
         $routes->post('hapusOldPemesanan', 'ApiController::hapusOldPemesanan');
-        $routes->get('pph/(:any)', 'ApiController::pph/$1');
+        $routes->get('pph', 'ApiController::pph');
         $routes->post('assignArea', 'MaterialController::assignArea');
+        $routes->get('pphperhari', 'ApiController::getMU');
         $routes->get('requestAdditionalTime/(:any)', 'ApiController::requestAdditionalTime/$1');
     }
 );

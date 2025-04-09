@@ -179,26 +179,18 @@ class PemesananController extends BaseController
     public function pengirimanArea()
     {
         // session()->remove('dataPengiriman');
-        $area = $this->request->getPost('area');
-        $tglPakai = $this->request->getPost('tgl_pakai');
-        $noModel = $this->request->getPost('no_model');
-        $itemType = $this->request->getPost('item_type');
-        $kodeWarna = $this->request->getPost('kode_warna');
-        $warna = $this->request->getPost('warna');
-        $kgsPesan = $this->request->getPost('kgs_pesan');
-        $cnsPesan = $this->request->getPost('cns_pesan');
+        // $area = $this->request->getPost('area');
+        // $tglPakai = $this->request->getPost('tgl_pakai');
+        // // $noModel = $this->request->getPost('no_model');
+        // $noModel = 'tes';
+        // $itemType = $this->request->getPost('item_type');
+        // $kodeWarna = $this->request->getPost('kode_warna');
+        // $warna = $this->request->getPost('warna');
+        // $kgsPesan = $this->request->getPost('kgs_pesan');
+        // $cnsPesan = $this->request->getPost('cns_pesan');
 
         // Simpan data form ke session
-        $formData = [
-            'area' => $area,
-            'tgl_pakai' => $tglPakai,
-            'no_model' => $noModel,
-            'item_type' => $itemType,
-            'kode_warna' => $kodeWarna,
-            'warna' => $warna,
-            'kgs_pesan' => $kgsPesan,
-            'cns_pesan' => $cnsPesan,
-        ];
+        $formData = [];
 
         // Simpan ke session
         session()->set('pengirimanForm', $formData);
@@ -222,8 +214,8 @@ class PemesananController extends BaseController
             }
 
             // Ambil data dari database berdasarkan barcode yang dimasukkan
-            $outJalur = $this->pemasukanModel->getDataForPengiriman($id);
-
+            $outJalur = $this->pengeluaranModel->getDataForOut($id);
+            // dd ($outJalur);
             if (empty($outJalur)) {
                 session()->set('pengirimanForm', $formData);
                 session()->setFlashdata('error', 'Barcode tidak ditemukan di database!');
@@ -236,14 +228,13 @@ class PemesananController extends BaseController
             // Simpan kembali ke session
             session()->set('dataPengiriman', $existingData);
             session()->set('pengirimanForm', $formData);
-
+            // var_dump(session()->get('dataPengiriman'));
             // Redirect agar form tidak resubmit saat refresh
             return redirect()->to(base_url($this->role . '/pengiriman_area'));
         }
 
         // Ambil kembali data form dari session
         $formData = session()->get('pengirimanForm') ?? [];
-
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
@@ -260,7 +251,8 @@ class PemesananController extends BaseController
             'kgs_pesan' => $formData['kgs_pesan'] ?? '',
             'cns_pesan' => $formData['cns_pesan'] ?? '',
         ];
-
+        // dd ($data);
+        
         return view($this->role . '/warehouse/form-pengiriman', $data);
     }
     public function resetPengirimanArea()
@@ -289,15 +281,16 @@ class PemesananController extends BaseController
 
         return $this->response->setJSON(['success' => false, 'message' => 'Data tidak ditemukan']);
     }
-    public function prosesPengirimanArea($area, $tglPakai)
+    public function prosesPengirimanArea()
     {
         $checkedIds = $this->request->getPost('checked_id'); // Ambil index yang dicentang
-
+        
         if (empty($checkedIds)) {
             session()->setFlashdata('error', 'Tidak ada data yang dipilih.');
-            return redirect()->to($this->role . '/pengiriman_area/' . $area . '/' . $tglPakai);
+            return redirect()->to($this->role . '/pengiriman_area');
         }
-
+        $area = $this->request->getPost('area');
+        $idPengeluaran = $this->request->getPost('idPengeluaran');
         $idOutCelup = $this->request->getPost('id_out_celup');
         $itemTypes = $this->request->getPost('item_type');
         $kodeWarnas = $this->request->getPost('kode_warna');
@@ -306,46 +299,40 @@ class PemesananController extends BaseController
         $cnsOuts = $this->request->getPost('cns_kirim');
         $namaClusters = $this->request->getPost('nama_cluster');
         $lotKirims = $this->request->getPost('lot_kirim');
-
+        // dd ($checkedIds,$idOutCelup, $itemTypes, $kodeWarnas, $tglOuts, $kgsOuts, $cnsOuts, $namaClusters, $lotKirims, $area, $idPengeluaran);
         // Pastikan data tidak kosong
         if (empty($idOutCelup) || !is_array($idOutCelup)) {
             session()->setFlashdata('error', 'Data yang dikirim kosong atau tidak valid.');
-            return redirect()->to($this->role . '/pengiriman_area/' . $area . '/' . $tglPakai);
+            return redirect()->to($this->role . '/pengiriman_area');
         }
 
         // Pastikan nama_cluster ada di dalam tabel cluster
-        $clusterExists = $this->clusterModel->where('nama_cluster', $namaClusters)->countAllResults();
-
-        if ($clusterExists === 0) {
-            session()->setFlashdata('error', 'Cluster yang dipilih tidak valid.');
-            return redirect()->to($this->role . '/pengiriman_area/' . $area . '/' . $tglPakai);
-        }
-
+        
         $dataKirim = [];
 
         foreach ($checkedIds as $key => $idOut) {
             $dataKirim[] = [
                 'id_out_celup' => $idOutCelup[$key] ?? null,
-                'area_out' => $area ?? null,
+                'area_out' => $area[$key] ?? null,
                 'tgl_out' => $tglOuts[$key] ?? null,
                 'kgs_out' => $kgsOuts[$key] ?? null,
                 'cns_out' => $cnsOuts[$key] ?? null,
                 'krg_out' => 1, // Asumsikan setiap pemasukan hanya 1 kali
                 'lot_out' => $lotKirims[$key] ?? null,
-                'nama_cluster' => $namaClusters,
+                'nama_cluster' => $namaClusters[$key] ?? null,
                 'admin' => session()->get('username')
             ];
         }
-
+        // dd ($dataKirim);
         // Debugging: cek apakah data tidak kosong sebelum insert
         if (empty($dataKirim)) {
             session()->setFlashdata('error', 'Tidak ada data yang dimasukkan.');
-            return redirect()->to($this->role . '/pengiriman_area/' . $area . '/' . $tglPakai);
+            return redirect()->to($this->role . '/pengiriman_area');
         }
 
         // Ambil data session
         $checked = session()->get('dataPengiriman');
-
+        // dd ($checked);
         // Jika session tidak kosong
         if (!empty($checked)) {
             // Ambil daftar ID yang ingin dihapus
@@ -364,57 +351,36 @@ class PemesananController extends BaseController
                 session()->remove('dataPengiriman');
             }
         }
-
-        $cekDuplikat = $this->pengeluaranModel
+        // Ambil semua id_out_celup yang sudah ada dengan status 'Pengiriman Area'
+        $existingIds = $this->pengeluaranModel
+            ->select('id_out_celup')
             ->whereIn('id_out_celup', array_column($dataKirim, 'id_out_celup'))
-            ->countAllResults();
-
-        if ($cekDuplikat == 0) {
-            //insert tabel pemasukan
-            if ($this->pengeluaranModel->insertBatch($dataKirim)) {
-                $dataStock = [];
-                foreach ($checkedIds as $key => $idOut) {
-                    $dataStock[] = [
-                        'no_model' => $noModels[$key] ?? null,
-                        'item_type' => $itemTypes[$key] ?? null,
-                        'kode_warna' => $kodeWarnas[$key] ?? null,
-                        'warna' => $warnas[$key] ?? null,
-                        'kgs_in_out' => $kgsMasuks[$key] ?? null,
-                        'cns_in_out' => $cnsMasuks[$key] ?? null,
-                        'krg_in_out' => 1, // Asumsikan setiap pemasukan hanya 1 kali
-                        'lot_stock' => $lotKirim[$key] ?? null,
-                        'nama_cluster' => $namaClusters,
-                        'admin' => session()->get('username')
-                    ];
-                }
-
-                foreach ($dataStock as $stock) {
-                    $existingStock = $this->stockModel
-                        ->where('no_model', $stock['no_model'])
-                        ->where('item_type', $stock['item_type'])
-                        ->where('kode_warna', $stock['kode_warna'])
-                        ->where('lot_stock', $stock['lot_stock'])
-                        ->first(); // Ambil satu record yang sesuai
-
-                    if ($existingStock) {
-                        // Jika sudah ada, update jumlahnya
-                        $this->stockModel->update($existingStock['id_stock'], [
-                            'kgs_in_out' => $existingStock['kgs_in_out'] + $stock['kgs_in_out'],
-                            'cns_in_out' => $existingStock['cns_in_out'] + $stock['cns_in_out'],
-                            'krg_in_out' => $existingStock['krg_in_out'] + 1
-                        ]);
-                    } else {
-                        // Jika belum ada, insert data baru
-                        $this->stockModel->insert($stock);
-                    }
-                }
-
-                session()->setFlashdata('success', 'Data berhasil dimasukkan.');
+            ->where('status', 'Pengiriman Area')
+            ->findAll();
+        // dd ($existingIds);
+        $existingIds = array_column($existingIds, 'id_out_celup');
+        // dd ($existingIds);
+        // Filter data yang belum ada duplikat
+        $dataToUpdate = array_filter($dataKirim, function ($item) use ($existingIds) {
+            return !in_array($item['id_out_celup'], $existingIds);
+        });
+        // dd ($dataToUpdate);
+        // Lakukan update hanya untuk data yang tidak duplikat
+        if (!empty($dataToUpdate)) {
+            foreach ($dataToUpdate as $item) {
+                $this->pengeluaranModel
+                    ->where('id_out_celup', $item['id_out_celup'])
+                    ->set(['status' => 'Pengiriman Area'])
+                    ->update();
             }
+            // dd ($dataToUpdate);
+            $jumlahUpdate = count($dataToUpdate);
+            session()->setFlashdata('success', "$jumlahUpdate data berhasil diperbarui menjadi Pengiriman Area.");
         } else {
-            session()->setFlashdata('error', 'Gagal, Data pemasukan sudah ada.');
+            session()->setFlashdata('error', 'Semua data sudah dikirim sebelumnya (duplikat).');
         }
-        return redirect()->to($this->role . '/pengiriman_area/' . $area . '/' . $tglPakai);
+
+        return redirect()->to($this->role . '/pengiriman_area');
     }
 
     public function selectClusterWarehouse($id)
@@ -505,5 +471,26 @@ class PemesananController extends BaseController
             'message' => 'Data penggunaan stock berhasil disimpan ke session',
             'data' => $usageData
         ]);
+    }
+
+    public function reportPemesananArea()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Report Pemesanan',
+            'active' => $this->active
+        ];
+        return view($this->role . '/pemesanan/report-pemesanan', $data);
+    }
+
+    public function filterPemesananArea()
+    {
+        $key = $this->request->getGet('key');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemesananModel->getFilterPemesananArea($key, $tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
     }
 }

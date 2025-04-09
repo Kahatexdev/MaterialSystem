@@ -104,7 +104,6 @@
                                 <span class="d-lg-inline-block d-none ms-1">Pengeluaran</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownMenuLink">
-                                <li><a class="dropdown-item" href="<?= base_url($role . '/pengeluaran_jalur') ?>">Pengeluaran Jalur</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/pengiriman_area') ?>">Pengiriman Area</a></li>
                             </ul>
                         </li>
