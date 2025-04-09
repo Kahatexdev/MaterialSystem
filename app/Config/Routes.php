@@ -152,6 +152,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('proses_pengiriman', 'PemesananController::prosesPengirimanArea');
     $routes->get('pemesanan/reportPemesananArea', 'PemesananController::reportPemesananArea');
     $routes->get('pemesanan/filterPemesananArea', 'PemesananController::filterPemesananArea');
+    $routes->get('pemesanan/exportPemesananArea', 'ExcelController::excelPemesananArea');
 
     $routes->get('pph', 'PphController::tampilPerModel');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
