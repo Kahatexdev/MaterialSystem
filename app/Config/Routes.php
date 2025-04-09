@@ -424,5 +424,6 @@ $routes->group(
         $routes->post('hapusOldPemesanan', 'ApiController::hapusOldPemesanan');
         $routes->get('pph/(:any)', 'ApiController::pph/$1');
         $routes->post('assignArea', 'MaterialController::assignArea');
+        $routes->get('requestAdditionalTime/(:any)', 'ApiController::requestAdditionalTime/$1');
     }
 );

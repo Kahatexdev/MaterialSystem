@@ -165,7 +165,7 @@ class PemesananModel extends Model
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->join('pengeluaran', 'pengeluaran.id_pengeluaran = pemesanan.id_pengeluaran', 'left')
             ->where('pemesanan.admin', $area)
-            ->where('pemesanan.status_kirim', '')
+            ->where('pemesanan.status_kirim!=', 'YA')
             ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai')
             ->orderBy('pemesanan.tgl_pakai', 'DESC')
             ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
@@ -337,5 +337,21 @@ class PemesananModel extends Model
 
         // Kembalikan jumlah baris yang terhapus
         return $this->db->affectedRows(); // Mengembalikan jumlah baris yang dihapus
+    }
+    public function reqAdditionalTime($data)
+    {
+        $sql = "UPDATE pemesanan 
+            JOIN material ON material.id_material = pemesanan.id_material 
+            JOIN master_material ON material.item_type = master_material.item_type 
+            SET pemesanan.status_kirim = 'request' 
+            WHERE pemesanan.admin = ? 
+              AND pemesanan.status_kirim = '' 
+              AND master_material.jenis = ? 
+              AND pemesanan.tgl_pakai = ?";
+
+        $result = $this->db->query($sql, [$data['area'], $data['jenis'], $data['tanggal_pakai']]);
+
+        log_message('debug', "Rows affected: " . $this->db->affectedRows());
+        return $result ? $this->db->affectedRows() : false; // Kembalikan jumlah baris yang terpengaruh atau false jika gagal
     }
 }
