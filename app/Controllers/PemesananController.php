@@ -19,6 +19,7 @@ use App\Models\HistoryPindahPalet;
 use App\Models\HistoryPindahOrder;
 use App\Models\PengeluaranModel;
 use App\Models\PemesananModel;
+use App\Models\TotalPemesananModel;
 
 class PemesananController extends BaseController
 {
@@ -40,6 +41,7 @@ class PemesananController extends BaseController
     protected $historyPindahOrder;
     protected $pengeluaranModel;
     protected $pemesananModel;
+    protected $totalPemesananModel;
 
     public function __construct()
     {
@@ -57,6 +59,7 @@ class PemesananController extends BaseController
         $this->historyPindahOrder = new HistoryPindahOrder();
         $this->pengeluaranModel = new PengeluaranModel();
         $this->pemesananModel = new PemesananModel();
+        $this->totalPemesananModel = new TotalPemesananModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -119,8 +122,8 @@ class PemesananController extends BaseController
 
     public function detailPemesanan($area, $jenis, $tglPakai)
     {
-        $dataPemesanan = $this->pemesananModel->getDataPemesanan($area, $jenis, $tglPakai);
-
+        $dataPemesanan = $this->totalPemesananModel->getDataPemesanan($area, $jenis, $tglPakai);
+        // dd ($dataPemesanan);
         if (!is_array($dataPemesanan)) {
             $dataPemesanan = []; // Pastikan selalu array
         }
@@ -385,7 +388,8 @@ class PemesananController extends BaseController
 
     public function selectClusterWarehouse($id)
     {
-        $getPemesanan = $this->pemesananModel->getDataPemesananbyId($id);
+        $getPemesanan = $this->totalPemesananModel->getDataPemesananbyId($id);
+        // dd($getPemesanan);
         $cluster = $this->stockModel->getDataCluster($getPemesanan['no_model'], $getPemesanan['item_type'], $getPemesanan['kode_warna'], $getPemesanan['color']);
         // dd ($getPemesanan, $cluster);
 
@@ -401,6 +405,7 @@ class PemesananController extends BaseController
             'cluster' => $cluster,
             'noModel' => $getPemesanan['no_model'],
             'area' => $getPemesanan['admin'],
+            // 'id_total_pemesanan' => $getPemesanan['id_total_pemesanan'],
             // 'namaCluster' => $getPemesanan['nama_cluster'],
             // 'id_out_celup' => $getPemesanan['id_out_celup'],
             'id' => $id,

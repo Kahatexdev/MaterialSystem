@@ -23,6 +23,7 @@ class PengeluaranModel extends Model
         'lot_out',
         'nama_cluster',
         'status',
+        'id_total_pemesanan',
         'admin',
         'created_at',
         'updated_at',
