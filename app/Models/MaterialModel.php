@@ -146,8 +146,8 @@ class MaterialModel extends Model
         return $this->select('master_material.jenis, material.*')
             ->join('master_order', 'master_order.id_order=material.id_order')
             ->join('master_material', 'master_material.item_type=material.item_type')
-            ->where('master_order.no_model', $model)
-            ->where('material.style_size', $styleSize)
+            ->whereIn('master_order.no_model', $model)
+            ->whereIn('material.style_size', $styleSize)
             ->orderBy('master_material.jenis, material.item_type', 'ASC')
             ->findAll();
     }
