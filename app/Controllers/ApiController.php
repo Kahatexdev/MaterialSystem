@@ -554,7 +554,7 @@ class ApiController extends ResourceController
         $noModel = $this->request->getGet('model') ?? '';
 
         $results = $this->materialModel->getMaterialForPPH($noModel);
-        
+
         // Konversi stdClass menjadi array
         $resultsArray = json_decode(json_encode($results), true);
 
@@ -566,10 +566,33 @@ class ApiController extends ResourceController
         $size = $this->request->getGet('size') ?? '';
 
         $results = $this->materialModel->getMU($noModel, $size);
-        
+
         // Konversi stdClass menjadi array
         $resultsArray = json_decode(json_encode($results), true);
 
         return $this->respond($resultsArray, 200);
+    }
+
+    public function requestAdditionalTime($area)
+    {
+        $jenis = $this->request->getGet('jenis') ?? '';
+        $tanggal_pakai = $this->request->getGet('tanggal_pakai') ?? '';
+
+        $data = [
+            'area' => $area,
+            'jenis' => $jenis,
+            'tanggal_pakai' => $tanggal_pakai,
+        ];
+
+        $update = $this->pemesananModel->reqAdditionalTime($data);
+
+        // Siapkan respons JSON berdasarkan hasil update
+        $response = [
+            'status' => (bool) $update,
+            'message' => $update ? 'Pengajuan tambahan waktu berhasil dikirim.' : 'Update gagal. Periksa tanggal pakai pemesanan',
+            'affectedRows' => $update ?: 0, // Jumlah baris yang terpengaruh (default 0 jika gagal)
+        ];
+
+        return $this->respond($response, 200);
     }
 }

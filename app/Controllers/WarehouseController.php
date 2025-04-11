@@ -1253,9 +1253,10 @@ class WarehouseController extends BaseController
         return $this->response->setJSON($data);
     }
 
-    public function simpanPengeluaranJalur()
+    public function simpanPengeluaranJalur($idTtlPemesanan)
     {
         $data = $this->request->getPost();
+        // dd($idTtlPemesanan);
         // get from url ?Area=
         $area = $this->request->getGet('Area');
 
@@ -1289,10 +1290,12 @@ class WarehouseController extends BaseController
                 'krg_out'       =>  $outCelup['no_karung'],
                 'nama_cluster'  => $pemasukan['nama_cluster'],
                 'lot_out'       => $outCelup['lot_kirim'], // pastikan field ini ada di data pemasukan
+                'id_total_pemesanan' => $idTtlPemesanan,
                 'status'        => 'Pengeluaran Jalur',
                 'admin'         => $this->username,
                 'created_at'    => date('Y-m-d H:i:s')
             ];
+            // dd ($insertData);
             $this->pengeluaranModel->insert($insertData);
             // --- UPDATE TABEL STOCK BERDASARKAN id_stock ---
             $fields = $this->db->getFieldNames('stock');
