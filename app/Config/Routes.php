@@ -170,6 +170,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     //PO Covering
     $routes->get('poCovering', 'POCoveringController::index');
     $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
+
+    $routes->get('retur', 'ReturController::index');            
 });
 
 // celup routes
