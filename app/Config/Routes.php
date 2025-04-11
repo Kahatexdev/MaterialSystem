@@ -258,7 +258,9 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('warehouse/updateEditStock', 'CoveringWarehouseController::updateEditStock');
     $routes->get('warehouse/getStock/(:any)', 'CoveringWarehouseController::getStock/$1');
     $routes->get('warehouse/reportPemasukan', 'CoveringWarehouseController::reportPemasukan');
+    $routes->get('warehouse/excelPemasukanCovering', 'ExcelController::excelPemasukanCovering');
     $routes->get('warehouse/reportPengeluaran', 'CoveringWarehouseController::reportPengeluaran');
+    $routes->get('warehouse/excelPengeluaranCovering', 'ExcelController::excelPengeluaranCovering');
     $routes->get('warehouse/pengeluaran_jalur', 'CoveringController::pengeluaranJalur');
     $routes->get('warehouse/pengiriman_area', 'CoveringController::pengirimanArea');
 
