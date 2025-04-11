@@ -21,12 +21,11 @@
                         <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownReports" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-file-alt"></i>
-                                <span class="d-lg-inline-block d-none ms-1">Dropdown</span>
+                                <span class="d-lg-inline-block d-none ms-1">Report</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownReports">
-                                <li><a class="dropdown-item" href="#">Dropdown 1</a></li>
-                                <li><a class="dropdown-item" href="#">Dropdown 2</a></li>
-                                <li><a class="dropdown-item" href="#">Dropdown 3</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/reportPemesananKaretCovering') ?>">Pemesanan Karet</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/reportPemesananSpandexCovering') ?>">Pemesanan Spandex</a></li>
                             </ul>
                         </li>
                         <li class="nav-item d-flex align-items-center">

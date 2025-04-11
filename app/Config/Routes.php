@@ -25,6 +25,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('getOrderDetails/(:num)', 'MasterdataController::getOrderDetails/$1');
     $routes->post('updateOrder', 'MasterdataController::updateOrder');
     $routes->post('deleteOrder', 'MasterdataController::deleteOrder');
+    $routes->get('masterdata/reportMasterOrder', 'MasterdataController::reportMasterOrder');
+    $routes->get('masterdata/filterMasterOrder', 'MasterdataController::filterMasterOrder');
+    $routes->get('masterdata/excelMasterOrder', 'ExcelController::excelMasterOrder');
 
     $routes->get('material/(:num)', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');
@@ -268,6 +271,12 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('pemesanan', 'CoveringPemesananController::index');
     $routes->get('pemesanan/(:any)', 'CoveringPemesananController::pemesanan/$1');
     $routes->get('detailPemesanan/(:any)', 'CoveringPemesananController::detailPemesanan/$1');
+    $routes->get('reportPemesananKaretCovering', 'CoveringPemesananController::reportPemesananKaretCovering');
+    $routes->get('filterPemesananKaretCovering', 'CoveringPemesananController::filterPemesananKaretCovering');
+    $routes->get('excelPemesananKaretCovering', 'ExcelController::excelPemesananKaretCovering');
+    $routes->get('reportPemesananSpandexCovering', 'CoveringPemesananController::reportPemesananSpandexCovering');
+    $routes->get('filterPemesananSpandexCovering', 'CoveringPemesananController::filterPemesananSpandexCovering');
+    $routes->get('excelPemesananSpandexCovering', 'ExcelController::excelPemesananSpandexCovering');
 });
 
 
