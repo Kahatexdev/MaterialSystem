@@ -10,11 +10,11 @@
                 <h5 class="mb-0 font-weight-bolder">Filter PO Benang</h5>
             </div>
             <div class="row mt-2">
-                <div class="col-md-6">
+                <div class="col-md-9">
                     <label for="">Key</label>
                     <input type="text" class="form-control">
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-3">
                     <label for="">Aksi</label><br>
                     <button class="btn btn-info btn-block" id="btnSearch"><i class="fas fa-search"></i></button>
                     <button class="btn btn-danger" id="btnReset"><i class="fas fa-redo-alt"></i></button>

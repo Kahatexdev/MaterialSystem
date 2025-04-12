@@ -25,6 +25,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('getOrderDetails/(:num)', 'MasterdataController::getOrderDetails/$1');
     $routes->post('updateOrder', 'MasterdataController::updateOrder');
     $routes->post('deleteOrder', 'MasterdataController::deleteOrder');
+    $routes->get('masterdata/reportMasterOrder', 'MasterdataController::reportMasterOrder');
+    $routes->get('masterdata/filterMasterOrder', 'MasterdataController::filterMasterOrder');
+    $routes->get('masterdata/excelMasterOrder', 'ExcelController::excelMasterOrder');
 
     $routes->get('material/(:num)', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');
@@ -260,7 +263,9 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('warehouse/updateEditStock', 'CoveringWarehouseController::updateEditStock');
     $routes->get('warehouse/getStock/(:any)', 'CoveringWarehouseController::getStock/$1');
     $routes->get('warehouse/reportPemasukan', 'CoveringWarehouseController::reportPemasukan');
+    $routes->get('warehouse/excelPemasukanCovering', 'ExcelController::excelPemasukanCovering');
     $routes->get('warehouse/reportPengeluaran', 'CoveringWarehouseController::reportPengeluaran');
+    $routes->get('warehouse/excelPengeluaranCovering', 'ExcelController::excelPengeluaranCovering');
     $routes->get('warehouse/pengeluaran_jalur', 'CoveringController::pengeluaranJalur');
     $routes->get('warehouse/pengiriman_area', 'CoveringController::pengirimanArea');
 
@@ -268,6 +273,12 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('pemesanan', 'CoveringPemesananController::index');
     $routes->get('pemesanan/(:any)', 'CoveringPemesananController::pemesanan/$1');
     $routes->get('detailPemesanan/(:any)', 'CoveringPemesananController::detailPemesanan/$1');
+    $routes->get('reportPemesananKaretCovering', 'CoveringPemesananController::reportPemesananKaretCovering');
+    $routes->get('filterPemesananKaretCovering', 'CoveringPemesananController::filterPemesananKaretCovering');
+    $routes->get('excelPemesananKaretCovering', 'ExcelController::excelPemesananKaretCovering');
+    $routes->get('reportPemesananSpandexCovering', 'CoveringPemesananController::reportPemesananSpandexCovering');
+    $routes->get('filterPemesananSpandexCovering', 'CoveringPemesananController::filterPemesananSpandexCovering');
+    $routes->get('excelPemesananSpandexCovering', 'ExcelController::excelPemesananSpandexCovering');
 });
 
 

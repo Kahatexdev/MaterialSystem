@@ -144,4 +144,33 @@ class MasterOrderModel extends Model
             ->where('no_model', $noModel)
             ->first();
     }
+
+    public function getFilterMasterOrder($key, $tanggal_awal, $tanggal_akhir)
+    {
+        $this->select('master_order.*');
+
+        // Cek apakah ada input key untuk pencarian
+        if (!empty($key)) {
+            $this->groupStart()
+                ->like('master_order.buyer', $key)
+                ->orLike('master_order.foll_up', $key)
+                ->groupEnd();
+        }
+
+        // Filter berdasarkan tanggal
+        if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
+            $this->groupStart();
+            if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
+                $this->where('master_order.delivery_awal >=', $tanggal_awal)
+                    ->where('master_order.delivery_awal <=', $tanggal_akhir);
+            } elseif (!empty($tanggal_awal)) {
+                $this->where('master_order.delivery_awal >=', $tanggal_awal);
+            } elseif (!empty($tanggal_akhir)) {
+                $this->where('master_order.delivery_awal <=', $tanggal_akhir);
+            }
+            $this->groupEnd();
+        }
+
+        return $this->findAll();
+    }
 }

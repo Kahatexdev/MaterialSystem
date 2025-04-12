@@ -63,7 +63,7 @@ class CoveringPemesananController extends BaseController
     public function detailPemesanan($jenis, $tgl_pakai)
     {
         $listPemesanan = $this->pemesananModel->getListPemesananCovering($jenis, $tgl_pakai);
-        // dd($listPemesanan);
+
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
@@ -71,5 +71,45 @@ class CoveringPemesananController extends BaseController
             'listPemesanan' => $listPemesanan,
         ];
         return view($this->role . '/pemesanan/detail-pemesanan', $data);
+    }
+
+    public function reportPemesananKaretCovering()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/pemesanan/report-pemesanan-karet', $data);
+    }
+
+    public function filterPemesananKaretCovering()
+    {
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemesananModel->getFilterPemesananKaret($tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
+    }
+
+    public function reportPemesananSpandexCovering()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/pemesanan/report-pemesanan-spandex', $data);
+    }
+
+    public function filterPemesananSpandexCovering()
+    {
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemesananModel->getFilterPemesananSpandex($tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
     }
 }

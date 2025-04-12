@@ -17,6 +17,7 @@ use App\Models\PemasukanModel;
 use App\Models\ScheduleCelupModel;
 use App\Models\StockModel;
 use App\Models\PemesananModel;
+use App\Models\HistoryStockCoveringModel;
 use PhpOffice\PhpSpreadsheet\Style\{Border, Alignment, Fill};
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
@@ -37,6 +38,7 @@ class ExcelController extends BaseController
     protected $scheduleCelupModel;
     protected $stockModel;
     protected $pemesananModel;
+    protected $historyCoveringStockModel;
 
     public function __construct()
     {
@@ -50,6 +52,7 @@ class ExcelController extends BaseController
         $this->scheduleCelupModel = new ScheduleCelupModel();
         $this->stockModel = new StockModel();
         $this->pemesananModel = new PemesananModel();
+        $this->historyCoveringStockModel = new HistoryStockCoveringModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -1241,6 +1244,354 @@ class ExcelController extends BaseController
         header('Cache-Control: max-age=0');
 
         $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function excelPemasukanCovering()
+    {
+        $date = $this->request->getGet('date');
+        $data = $this->historyCoveringStockModel->getPemasukanByDate($date);
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Judul
+        $sheet->mergeCells('A1:K1');
+        $sheet->setCellValue('A1', 'REPORT PEMASUKAN COVERING');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Header
+        $headers = ['Jenis', 'Warna', 'Kode', 'LMD', 'Total Cones', 'Total Kg', 'Box', 'No Rak', 'Posisi Rak', 'No Palet', 'Keterangan'];
+        $col = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($col . '3', $header);
+            $sheet->getStyle($col . '3')->getFont()->setBold(true);
+            $col++;
+        }
+
+        // Data
+        $row = 4;
+        foreach ($data as $item) {
+            $sheet->setCellValue('A' . $row, $item['jenis']);
+            $sheet->setCellValue('B' . $row, $item['color']);
+            $sheet->setCellValue('C' . $row, $item['code']);
+            $sheet->setCellValue('D' . $row, $item['lmd']);
+            $sheet->setCellValue('E' . $row, $item['ttl_cns']);
+            $sheet->setCellValue('F' . $row, $item['ttl_kg']);
+            $sheet->setCellValue('G' . $row, $item['box']);
+            $sheet->setCellValue('H' . $row, $item['no_rak']);
+            $sheet->setCellValue('I' . $row, $item['posisi_rak']);
+            $sheet->setCellValue('J' . $row, $item['no_palet']);
+            $sheet->setCellValue('K' . $row, $item['keterangan']);
+            $row++;
+        }
+
+        // Border
+        $lastRow = $row - 1;
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => 'FF000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle("A3:K{$lastRow}")->applyFromArray($styleArray);
+
+        // Auto-size
+        foreach (range('A', 'K') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Download
+        $filename = 'Report_Pemasukan_Covering_' . $date . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function excelPengeluaranCovering()
+    {
+        $date = $this->request->getGet('date');
+        $data = $this->historyCoveringStockModel->getPengeluaranByDate($date);
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Judul
+        $sheet->mergeCells('A1:L1');
+        $sheet->setCellValue('A1', 'REPORT PENGELUARAN COVERING');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Header
+        $headers = ['No Model', 'Jenis', 'Warna', 'Kode', 'LMD', 'Total Cones', 'Total Kg', 'Box', 'No Rak', 'Posisi Rak', 'No Palet', 'Keterangan'];
+        $col = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($col . '3', $header);
+            $sheet->getStyle($col . '3')->getFont()->setBold(true);
+            $col++;
+        }
+
+        // Data
+        $row = 4;
+        foreach ($data as $item) {
+            $sheet->setCellValue('A' . $row, $item['no_model']);
+            $sheet->setCellValue('B' . $row, $item['jenis']);
+            $sheet->setCellValue('C' . $row, $item['color']);
+            $sheet->setCellValue('D' . $row, $item['code']);
+            $sheet->setCellValue('E' . $row, $item['lmd']);
+            $sheet->setCellValue('F' . $row, $item['ttl_cns']);
+            $sheet->setCellValue('G' . $row, $item['ttl_kg']);
+            $sheet->setCellValue('H' . $row, $item['box']);
+            $sheet->setCellValue('I' . $row, $item['no_rak']);
+            $sheet->setCellValue('J' . $row, $item['posisi_rak']);
+            $sheet->setCellValue('K' . $row, $item['no_palet']);
+            $sheet->setCellValue('L' . $row, $item['keterangan']);
+            $row++;
+        }
+
+        // Border
+        $lastRow = $row - 1;
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => 'FF000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle("A3:L{$lastRow}")->applyFromArray($styleArray);
+
+        // Auto-size
+        foreach (range('A', 'L') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Download
+        $filename = 'Report_Pengeluaran_Covering_' . $date . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function excelPemesananKaretCovering()
+    {
+        $tanggal_awal = $this->request->getGet('tanggal_awal');
+        $tanggal_akhir = $this->request->getGet('tanggal_akhir');
+        $data = $this->pemesananModel->getFilterPemesananKaret($tanggal_awal, $tanggal_akhir);
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        // Judul
+        $sheet->mergeCells('A1:K1');
+        $sheet->setCellValue('A1', 'REPORT PEMESANAN KARET COVERING');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Header
+        $headers = ['No', 'Tanggal Pakai', 'Item Type', 'Warna', 'Kode Warna', 'No Model', 'Jalan MC', 'Total Pesan (Kg)', 'Cones', 'Area', 'Keterangan'];
+        $col = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($col . '3', $header);
+            $sheet->getStyle($col . '3')->getFont()->setBold(true);
+            $col++;
+        }
+
+        // Data
+        $row = 4;
+        $no = 1;
+        foreach ($data as $item) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $item['tgl_pakai']);
+            $sheet->setCellValue('C' . $row, $item['item_type']);
+            $sheet->setCellValue('D' . $row, $item['color']);
+            $sheet->setCellValue('E' . $row, $item['kode_warna']);
+            $sheet->setCellValue('F' . $row, $item['no_model']);
+            $sheet->setCellValue('G' . $row, $item['jl_mc']);
+            $sheet->setCellValue('H' . $row, $item['ttl_berat_cones']);
+            $sheet->setCellValue('I' . $row, $item['ttl_qty_cones']);
+            $sheet->setCellValue('J' . $row, $item['admin']);
+            $sheet->setCellValue('K' . $row, $item['keterangan']);
+            $row++;
+        }
+
+        // Border
+        $lastRow = $row - 1;
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => 'FF000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle("A3:K{$lastRow}")->applyFromArray($styleArray);
+
+        // Auto-size
+        foreach (range('A', 'K') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Download
+        $filename = 'Report_Pemesanan_Karet' . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function excelPemesananSpandexCovering()
+    {
+        $tanggal_awal = $this->request->getGet('tanggal_awal');
+        $tanggal_akhir = $this->request->getGet('tanggal_akhir');
+        $data = $this->pemesananModel->getFilterPemesananSpandex($tanggal_awal, $tanggal_akhir);
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        // Judul
+        $sheet->mergeCells('A1:K1');
+        $sheet->setCellValue('A1', 'REPORT PEMESANAN SPANDEX COVERING');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Header
+        $headers = ['No', 'Tanggal Pakai', 'Item Type', 'Warna', 'Kode Warna', 'No Model', 'Jalan MC', 'Total Pesan (Kg)', 'Cones', 'Area', 'Keterangan'];
+        $col = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($col . '3', $header);
+            $sheet->getStyle($col . '3')->getFont()->setBold(true);
+            $col++;
+        }
+
+        // Data
+        $row = 4;
+        $no = 1;
+        foreach ($data as $item) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $item['tgl_pakai']);
+            $sheet->setCellValue('C' . $row, $item['item_type']);
+            $sheet->setCellValue('D' . $row, $item['color']);
+            $sheet->setCellValue('E' . $row, $item['kode_warna']);
+            $sheet->setCellValue('F' . $row, $item['no_model']);
+            $sheet->setCellValue('G' . $row, $item['jl_mc']);
+            $sheet->setCellValue('H' . $row, $item['ttl_berat_cones']);
+            $sheet->setCellValue('I' . $row, $item['ttl_qty_cones']);
+            $sheet->setCellValue('J' . $row, $item['admin']);
+            $sheet->setCellValue('K' . $row, $item['keterangan']);
+            $row++;
+        }
+
+        // Border
+        $lastRow = $row - 1;
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => 'FF000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle("A3:K{$lastRow}")->applyFromArray($styleArray);
+
+        // Auto-size
+        foreach (range('A', 'K') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Download
+        $filename = 'Report_Pemesanan_Spandex' . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function excelMasterOrder()
+    {
+        $key = $this->request->getGet('key');
+        $tanggal_awal = $this->request->getGet('tanggal_awal');
+        $tanggal_akhir = $this->request->getGet('tanggal_akhir');
+        $data = $this->masterOrderModel->getFilterMasterOrder($key, $tanggal_awal, $tanggal_akhir);
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Judul
+        $sheet->mergeCells('A1:N1');
+        $sheet->setCellValue('A1', 'REPORT MASTER ORDER');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Header
+        $headers = ['No', 'No Order', 'No Model', 'Buyer', 'Foll Up', 'LCO Date', 'Memo', 'Delivery Awal', 'Delivery Akhir', 'Unit', 'Admin', 'Created At', 'Created By', 'Updated At'];
+        $col = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($col . '3', $header);
+            $sheet->getStyle($col . '3')->getFont()->setBold(true);
+            $col++;
+        }
+
+        // Data
+        $row = 4;
+        $no = 1;
+        foreach ($data as $item) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $item['no_order']);
+            $sheet->setCellValue('C' . $row, $item['no_model']);
+            $sheet->setCellValue('D' . $row, $item['buyer']);
+            $sheet->setCellValue('E' . $row, $item['foll_up']);
+            $sheet->setCellValue('F' . $row, $item['lco_date']);
+            $sheet->setCellValue('G' . $row, $item['memo']);
+            $sheet->setCellValue('H' . $row, $item['delivery_awal']);
+            $sheet->setCellValue('I' . $row, $item['delivery_akhir']);
+            $sheet->setCellValue('J' . $row, $item['unit']);
+            $sheet->setCellValue('K' . $row, $item['admin']);
+            $sheet->setCellValue('L' . $row, $item['created_at']);
+            $sheet->setCellValue('M' . $row, $item['updated_at']);
+            $row++;
+        }
+
+        // Border
+        $lastRow = $row - 1;
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => 'FF000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle("A3:N{$lastRow}")->applyFromArray($styleArray);
+
+        // Auto-size
+        foreach (range('A', 'N') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Download
+        $filename = 'Report_Master_Order' . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
     }
