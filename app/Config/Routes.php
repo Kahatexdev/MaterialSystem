@@ -431,5 +431,6 @@ $routes->group(
         $routes->get('pph', 'ApiController::pph');
         $routes->post('assignArea', 'MaterialController::assignArea');
         $routes->get('pphperhari', 'ApiController::getMU');
+        $routes->get('getGw/(:any)/(:any)', 'ApiController::getGw/$1/$2');
     }
 );

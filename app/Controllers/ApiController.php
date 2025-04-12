@@ -554,7 +554,7 @@ class ApiController extends ResourceController
         $noModel = $this->request->getGet('model') ?? '';
 
         $results = $this->materialModel->getMaterialForPPH($noModel);
-        
+
         // Konversi stdClass menjadi array
         $resultsArray = json_decode(json_encode($results), true);
 
@@ -566,10 +566,15 @@ class ApiController extends ResourceController
         $size = $this->request->getGet('size') ?? '';
 
         $results = $this->materialModel->getMU($noModel, $size);
-        
+
         // Konversi stdClass menjadi array
         $resultsArray = json_decode(json_encode($results), true);
 
         return $this->respond($resultsArray, 200);
+    }
+    public function getGw($model, $style)
+    {
+        $results = $this->materialModel->getGw($model, $style);
+        return $this->response->setJSON($results);
     }
 }
