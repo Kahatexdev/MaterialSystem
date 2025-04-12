@@ -19,6 +19,15 @@
                                     Master Material</span>
                             </a>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-file-alt"></i>
+                                <span class="d-lg-inline-block d-none ms-1">Reports</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownMenuLink">
+                                <li><a href="<?= base_url($role . '/masterdata/reportMasterOrder') ?>" class="dropdown-item">Master Order</a></li>
+                            </ul>
+                        </li>
                         <li class="nav-item d-flex align-items-center">
                             <a href="" data-bs-toggle="modal" data-bs-target="#LogoutModal" class="nav-link text-body font-weight-bold px-2">
                                 <i class="fa fa-user"></i>

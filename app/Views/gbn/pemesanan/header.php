@@ -1,5 +1,6 @@
 <?php $this->extend($role . '/layout'); ?>
 <?php $this->section('header'); ?>
+
 <style>
     .btn-filter {
         background: linear-gradient(135deg, #1e88e5, #64b5f6);
@@ -29,9 +30,9 @@
                             </a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownReports" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a href="#" class="nav-link text-body font-weight-bold px-2" id="navbarDropdownReports" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-file-alt"></i>
-                                <span class="d-lg-inline-block d-none ms-1">Report</span>
+                                <span class="d-lg-inline-block d-none ms-1">Report <i class="bi bi-caret-down-fill"></i></span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownReports">
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/reportPemesananArea') ?>">Pemesanan Area</a></li>

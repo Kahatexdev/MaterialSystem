@@ -31,6 +31,7 @@
     <link href="<?= base_url('assets/css/select2.min.css') ?>" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="<?= base_url('assets/calendar/fonts/icomoon/style.css') ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <link href='<?= base_url('assets/calendar/fullcalendar/packages/core/main.css') ?>' rel='stylesheet' />
     <link href='<?= base_url('assets/calendar/fullcalendar/packages/daygrid/main.css') ?>' rel='stylesheet' />

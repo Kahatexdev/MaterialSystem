@@ -390,4 +390,10 @@ class CoveringController extends BaseController
 
         return view($this->role . '/warehouse/pengiriman_area', $data);
     }
+
+    public function reportPemasukan()
+    {
+        $getPemasukan = $this->HistoryStockCoveringModel->getPemasukan();
+        dd($getPemasukan);
+    }
 }

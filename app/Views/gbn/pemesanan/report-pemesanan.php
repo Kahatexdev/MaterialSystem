@@ -3,12 +3,12 @@
 
 <style>
     .custom-outline {
-        color: rgb(0, 85, 124);
-        border-color: rgb(0, 85, 124);
+        color: #344767;
+        border-color: #344767;
     }
 
     .custom-outline:hover {
-        background-color: rgb(0, 85, 124);
+        background-color: #344767;
         color: white;
     }
 </style>
@@ -17,7 +17,7 @@
 
     <!-- Button Filter -->
     <div class="card border-0 rounded-top-4 shadow-lg">
-        <div class="card-body p-4 rounded-top-4" style="background-color: rgb(0, 85, 124);">
+        <div class="card-body p-4 rounded-top-4" style="background-color: #344767;">
             <div class="d-flex align-items-center mb-3">
                 <i class="fas fa-filter text-white me-3 fs-4"></i>
                 <h4 class="mb-0 fw-bold" style="color: white;">Filter Pemesanan</h4>
@@ -40,7 +40,7 @@
                 <div class="col-12">
                     <div class="d-flex justify-content-between align-items-center mt-3">
                         <div class="btn-group" role="group">
-                            <button class="btn text-white px-4" id="btnSearch" style="background-color: rgb(0, 85, 124);">
+                            <button class="btn text-white px-4" id="btnSearch" style="background-color: #344767;">
                                 <i class="fas fa-search me-2"></i>Cari
                             </button>
                             <button class="btn btn-outline custom-outline" id="btnReset">
