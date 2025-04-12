@@ -435,5 +435,6 @@ $routes->group(
         $routes->post('assignArea', 'MaterialController::assignArea');
         $routes->get('pphperhari', 'ApiController::getMU');
         $routes->get('requestAdditionalTime/(:any)', 'ApiController::requestAdditionalTime/$1');
+        $routes->get('getPengirimanArea', 'ApiController::getPengirimanArea');
     }
 );
