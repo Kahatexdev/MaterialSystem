@@ -186,12 +186,12 @@ class WarehouseController extends BaseController
         foreach ($checkedIds as $key => $idOut) {
             $dataPemasukan[] = [
                 'id_out_celup'  => $idOutCelup[$key] ?? null,
-                'no_model'      => $noModels[$key] ?? null,
-                'item_type'     => $itemTypes[$key] ?? null,
-                'kode_warna'    => $kodeWarnas[$key] ?? null,
-                'warna'         => $warnas[$key] ?? null,
-                'kgs_masuk'     => $kgsMasuks[$key] ?? null,
-                'cns_masuk'     => $cnsMasuks[$key] ?? null,
+                // 'no_model'      => $noModels[$key] ?? null,
+                // 'item_type'     => $itemTypes[$key] ?? null,
+                // 'kode_warna'    => $kodeWarnas[$key] ?? null,
+                // 'warna'         => $warnas[$key] ?? null,
+                // 'kgs_masuk'     => $kgsMasuks[$key] ?? null,
+                // 'cns_masuk'     => $cnsMasuks[$key] ?? null,
                 'tgl_masuk'     => $tglMasuks[$key] ?? null,
                 'nama_cluster'  => $namaClusters,
                 'admin'         => session()->get('username')
@@ -268,14 +268,35 @@ class WarehouseController extends BaseController
                         $idStok = $this->stockModel->getInsertID();
                     }
 
-                    // Update field id_stok pada record pemasukan yang sesuai
-                    $this->pemasukanModel
-                        ->where('no_model', $stock['no_model'])
-                        ->where('item_type', $stock['item_type'])
-                        ->where('kode_warna', $stock['kode_warna'])
-                        ->where('nama_cluster', $stock['nama_cluster'])
-                        ->set(['id_stock' => $idStok])
-                        ->update();
+                    $sql = "
+                    UPDATE pemasukan
+                    JOIN out_celup ON out_celup.id_out_celup = pemasukan.id_out_celup
+                    JOIN bon_celup ON bon_celup.id_bon = out_celup.id_bon
+                    JOIN schedule_celup ON schedule_celup.id_celup = out_celup.id_celup
+                    SET pemasukan.id_stock = ?
+                    WHERE schedule_celup.no_model = ?
+                    AND schedule_celup.item_type = ?
+                    AND schedule_celup.kode_warna = ?
+                    AND pemasukan.nama_cluster = ?
+                ";
+
+                    // Eksekusi query dengan binding parameter untuk keamanan
+                    $this->db->query($sql, [
+                        $idStok,
+                        $stock['no_model'],
+                        $stock['item_type'],
+                        $stock['kode_warna'],
+                        $stock['nama_cluster']
+                    ]);
+
+                    // // Update field id_stok pada record pemasukan yang sesuai
+                    // $this->pemasukanModel
+                    //     ->where('no_model', $stock['no_model'])
+                    //     ->where('item_type', $stock['item_type'])
+                    //     ->where('kode_warna', $stock['kode_warna'])
+                    //     ->where('nama_cluster', $stock['nama_cluster'])
+                    //     ->set(['id_stock' => $idStok])
+                    //     ->update();
                 }
 
                 session()->setFlashdata('success', 'Data berhasil dimasukkan.');
@@ -547,7 +568,29 @@ class WarehouseController extends BaseController
                         } else {
                             // Jika belum ada, insert data baru
                             $this->stockModel->insert($stock);
+                            $idStok = $this->stockModel->getInsertID();
                         }
+
+                        $sql = "
+                            UPDATE pemasukan
+                            JOIN out_celup ON out_celup.id_out_celup = pemasukan.id_out_celup
+                            JOIN bon_celup ON bon_celup.id_bon = out_celup.id_bon
+                            JOIN schedule_celup ON schedule_celup.id_celup = out_celup.id_celup
+                            SET pemasukan.id_stock = ?
+                            WHERE schedule_celup.no_model = ?
+                            AND schedule_celup.item_type = ?
+                            AND schedule_celup.kode_warna = ?
+                            AND pemasukan.nama_cluster = ?
+                        ";
+
+                        // Eksekusi query dengan binding parameter untuk keamanan
+                        $this->db->query($sql, [
+                            $idStok,
+                            $stock['no_model'],
+                            $stock['item_type'],
+                            $stock['kode_warna'],
+                            $stock['nama_cluster']
+                        ]);
                     }
                 }
                 session()->setFlashdata('success', 'Data berhasil dimasukkan.');
