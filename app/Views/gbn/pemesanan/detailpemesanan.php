@@ -88,12 +88,12 @@
                                         <td><?= $data['item_type'] ?></td>
                                         <td><?= $data['kode_warna'] ?></td>
                                         <td><?= $data['color'] ?></td>
-                                        <td><?= $data['jl_mc'] ?></td>
-                                        <td><?= round($data['kgs_pesan']) ?></td>
-                                        <td><?= $data['cns_pesan'] ?></td>
+                                        <td><?= $data['ttl_jl_mc'] ?></td>
+                                        <td><?= $data['ttl_kg'] ?></td>
+                                        <td><?= $data['ttl_cns'] ?></td>
                                         <td><?= $data['po_tambahan'] ?></td>
                                         <td>
-                                            <a href="<?= base_url($role . '/selectClusterWarehouse/' . $data['id_pemesanan']) . '?Area='. $area .'&KgsPesan='. round($data['kgs_pesan']). '&CnsPesan='. $data['cns_pesan'] ?>" 
+                                            <a href="<?= base_url($role . '/selectClusterWarehouse/' . $data['id_total_pemesanan']) . '?Area='. $area .'&KgsPesan='. $data['ttl_kg']. '&CnsPesan='. $data['ttl_cns'] ?>" 
                                                class="btn bg-gradient-info">
                                                 <i class="fas fa-layer-group"></i>Pilih
                                             </a>

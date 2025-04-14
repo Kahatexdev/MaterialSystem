@@ -17,20 +17,28 @@
         <div class="card-body">
             <!-- Filter Tanggal -->
             <div class="row mb-3">
-                <div class="col-md-12">
+                <!-- Kolom Input Tanggal -->
+                <div class="col-md-8">
                     <label for="filterDate" class="form-label fw-bold text-dark">Pilih Tanggal:</label>
-                    <div class="input-group">
-                        <input type="date" id="filterDate" class="form-control shadow-sm" value="<?= esc($selectedDate) ?>">
-                        <button id="filterButton" class="btn bg-gradient-info text-white fw-bold shadow-sm ms-2">
+                    <input type="date" id="filterDate" class="form-control shadow-sm" value="<?= esc($selectedDate) ?>">
+                </div>
+
+                <!-- Kolom Aksi -->
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-dark">Aksi:</label>
+                    <div class="d-flex gap-2">
+                        <button id="filterButton" class="btn bg-gradient-info text-white fw-bold shadow-sm">
                             <i class="fas fa-filter me-2"></i> Filter
                         </button>
                         <button id="resetButton" class="btn bg-gradient-danger text-white fw-bold shadow-sm">
                             <i class="fas fa-sync-alt me-2"></i> Reset
                         </button>
+                        <button id="exportButton" class="btn bg-gradient-success text-white fw-bold shadow-sm d-none">
+                            <i class="fas fa-file-excel me-2"></i> Excel
+                        </button>
                     </div>
                 </div>
             </div>
-
 
             <!-- Tabel -->
             <div class="table-responsive" id="tableContainer" style="display: none;">
@@ -80,7 +88,7 @@
             </div>
 
             <!-- Pesan Jika Tidak Ada Data -->
-            <?php if (empty($pemasukan)) : ?>
+            <?php if (empty($pengeluaran)) : ?>
                 <div class="alert alert-info text-center text-white mt-3">
                     <i class="fas fa-exclamation-triangle"></i> Silakan pilih tanggal terlebih dahulu untuk melihat data.
                 </div>
@@ -112,10 +120,21 @@
             window.location.href = "<?= base_url($role . '/warehouse/reportPengeluaran') ?>"; // Refresh ke halaman awal
         });
 
-        // Tampilkan tabel hanya jika ada data
+        // Cek apakah ada data, jika ya, tampilkan tabel
         <?php if (!empty($pengeluaran)) : ?>
             $('#tableContainer').show();
+            $('#exportButton').removeClass('d-none'); // Tampilkan tombol export jika sudah filter dan data ada
         <?php endif; ?>
+
+        // Tombol export (aksi bisa diarahkan ke controller yang handle export)
+        $('#exportButton').click(function() {
+            let selectedDate = $('#filterDate').val();
+            if (selectedDate) {
+                window.location.href = "<?= base_url($role . '/warehouse/excelPengeluaranCovering') ?>?date=" + selectedDate;
+            } else {
+                alert('Silakan pilih tanggal terlebih dahulu.');
+            }
+        });
     });
 </script>
 

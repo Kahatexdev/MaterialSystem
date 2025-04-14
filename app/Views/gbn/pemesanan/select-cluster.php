@@ -262,7 +262,7 @@
                 <div class="divider"></div>
                 <div class="form-section">
                     <h6 class="form-section-title">Pengeluaran Stock</h6>
-                    <form id="pengeluaran" method="post" action="<?= base_url('gbn/simpanPengeluaranJalur?Area=' . $area); ?>">
+                    <form id="pengeluaran" method="post" action="<?= base_url('gbn/simpanPengeluaranJalur/'.$id.'?Area=' . $area); ?>">
                         <div class="row" id="formPengeluaran">
                             <!-- Form input pengeluaran stock will be loaded here -->
                         </div>
@@ -412,7 +412,7 @@
     `;
 
             // Buat konten untuk satu item
-            const formPengeluaran = `
+            const formPengeluaran = `    
         <div class="card mb-2">
             <div class="card-body">
                 <div class="form-check">

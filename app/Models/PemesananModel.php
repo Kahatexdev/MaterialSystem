@@ -408,4 +408,56 @@ class PemesananModel extends Model
         log_message('debug', "Rows affected: " . $this->db->affectedRows());
         return $result ? $this->db->affectedRows() : false; // Kembalikan jumlah baris yang terpengaruh atau false jika gagal
     }
+
+    public function getFilterPemesananKaret($tanggal_awal, $tanggal_akhir)
+    {
+        $this->select('pemesanan.*, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('pemesanan.status_kirim', '')
+            ->where('master_material.jenis', 'Karet');
+
+        // Filter berdasarkan tanggal
+        if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
+            $this->groupStart();
+            if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
+                $this->where('pemesanan.tgl_pakai >=', $tanggal_awal)
+                    ->where('pemesanan.tgl_pakai <=', $tanggal_akhir);
+            } elseif (!empty($tanggal_awal)) {
+                $this->where('pemesanan.tgl_pakai >=', $tanggal_awal);
+            } elseif (!empty($tanggal_akhir)) {
+                $this->where('pemesanan.tgl_pakai <=', $tanggal_akhir);
+            }
+            $this->groupEnd();
+        }
+
+        return $this->findAll();
+    }
+
+    public function getFilterPemesananSpandex($tanggal_awal, $tanggal_akhir)
+    {
+        $this->select('pemesanan.*, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('pemesanan.status_kirim', '')
+            ->where('master_material.jenis', 'Spandex');
+
+        // Filter berdasarkan tanggal
+        if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
+            $this->groupStart();
+            if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
+                $this->where('pemesanan.tgl_pakai >=', $tanggal_awal)
+                    ->where('pemesanan.tgl_pakai <=', $tanggal_akhir);
+            } elseif (!empty($tanggal_awal)) {
+                $this->where('pemesanan.tgl_pakai >=', $tanggal_awal);
+            } elseif (!empty($tanggal_akhir)) {
+                $this->where('pemesanan.tgl_pakai <=', $tanggal_akhir);
+            }
+            $this->groupEnd();
+        }
+
+        return $this->findAll();
+    }
 }

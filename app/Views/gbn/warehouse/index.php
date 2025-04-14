@@ -114,13 +114,13 @@
         <h3 class="mb-4">Stock Material Search</h3>
         <form method="post" action="">
             <div class="row g-3">
-                <div class="col-lg-5 col-sm-12">
+                <div class="col-lg-4 col-sm-12">
                     <input class="form-control" type="text" name="noModel" placeholder="Masukkan No Model / Cluster">
                 </div>
                 <div class="col-lg-4 col-sm-12">
                     <input class="form-control" type="text" name="warna" placeholder="Masukkan Kode Warna">
                 </div>
-                <div class="col-lg-3 col-sm-12 d-flex gap-2">
+                <div class="col-lg-4 col-sm-12 d-flex gap-2">
                     <button class="btn btn-info flex-grow-1" id="filter_data"><i class="fas fa-search"></i> Cari</button>
                     <button class="btn btn-secondary flex-grow-1" id="reset_data"><i class="fas fa-redo"></i> Reset</button>
                     <button type="button" class="btn btn-success flex-grow-1" id="export_excel">

@@ -39,7 +39,7 @@ class StockModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -100,8 +100,8 @@ class StockModel extends Model
                 'stock.nama_cluster',
                 'cluster.kapasitas'
             ])
-            ->orderBy('stock.nama_cluster', 'ASC')
-            ->limit(10);
+            ->orderBy('stock.nama_cluster', 'ASC');
+            // ->limit(10);
 
         return $builder->get()->getResult();
     }

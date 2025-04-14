@@ -23,6 +23,7 @@ class PengeluaranModel extends Model
         'lot_out',
         'nama_cluster',
         'status',
+        'id_total_pemesanan',
         'admin',
         'created_at',
         'updated_at',
@@ -66,6 +67,20 @@ class PengeluaranModel extends Model
             ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon')
             ->join('schedule_celup', 'schedule_celup.id_bon = bon_celup.id_bon')
             ->where('pengeluaran.id_out_celup', $id)
+            ->distinct()
+            ->get()
+            ->getResultArray();
+    }
+
+    public function searchPengiriman($noModel)
+    {
+        return $this->db->table('pengeluaran')
+            ->select('pengeluaran.*, out_celup.lot_kirim, schedule_celup.no_model, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.item_type')
+            ->join('out_celup', 'out_celup.id_out_celup = pengeluaran.id_out_celup')
+            ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon')
+            ->join('schedule_celup', 'schedule_celup.id_bon = bon_celup.id_bon')
+            ->where('schedule_celup.no_model', $noModel)
+            ->where('pengeluaran.status', 'Pengiriman Area')
             ->distinct()
             ->get()
             ->getResultArray();

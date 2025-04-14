@@ -18,6 +18,7 @@ use App\Models\PemesananModel;
 use App\Models\StockModel;
 use App\Models\HistoryPindahPalet;
 use App\Models\HistoryPindahOrder;
+use App\Models\PengeluaranModel;
 
 class ApiController extends ResourceController
 {
@@ -38,6 +39,7 @@ class ApiController extends ResourceController
     protected $pemesananModel;
     protected $historyPindahPalet;
     protected $historyPindahOrder;
+    protected $pengeluaranModel;
 
 
     public function __construct()
@@ -55,6 +57,7 @@ class ApiController extends ResourceController
         $this->pemesananModel = new PemesananModel();
         $this->historyPindahPalet = new HistoryPindahPalet();
         $this->historyPindahOrder = new HistoryPindahOrder();
+        $this->pengeluaranModel = new PengeluaranModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -605,5 +608,37 @@ class ApiController extends ResourceController
         log_message('info', $noModel . ' /' . $itemType . ' /' .  $kodeWarna);
 
         return $this->respond($data, 200);
+    }
+
+    // get data pengiriman
+    public function getPengirimanArea()
+    {
+        $noModel = $this->request->getGet('noModel') ?? '';
+        // $noModel = 'DB2501';
+        $results = $this->pengeluaranModel->searchPengiriman($noModel);
+
+        // Konversi stdClass menjadi array
+        $resultsArray = json_decode(json_encode($results), true);
+
+        return $this->respond($resultsArray, 200);
+    }
+    public function getGwBulk()
+    {
+        $input = $this->request->getJSON(true);
+        $result = [];
+
+        foreach ($input as $item) {
+            $model = $item['model'];
+            $size = $item['size'];
+
+            $gw = $this->materialModel->getGw($model, $size); // fungsi ambil dari DB
+            $result[] = [
+                'model' => $model,
+                'size'  => $size,
+                'gw'    => $gw
+            ];
+        }
+
+        return $this->response->setJSON($result);
     }
 }
