@@ -150,7 +150,6 @@ class PemesananModel extends Model
                 master_material.jenis,
                 material.kode_warna,
                 material.color,
-                SUM(material.kgs) AS kg_keb,
                 SUM(pemesanan.jl_mc) AS jl_mc,
                 SUM(pemesanan.ttl_qty_cones) AS cns_pesan,
                 SUM(pemesanan.ttl_berat_cones) AS qty_pesan,
@@ -158,13 +157,12 @@ class PemesananModel extends Model
                 AVG(pemesanan.sisa_cones_mc) AS cns_sisa,
                 pemesanan.lot,
                 pemesanan.keterangan,
-                (SUM(material.kgs) - SUM(DISTINCT COALESCE(pengeluaran.id_pengeluaran, 0) * COALESCE(pengeluaran.kgs_out, 0) / NULLIF(COALESCE(pengeluaran.id_pengeluaran, 1), 0))) AS sisa_jatah
+                pemesanan.status_kirim
             ")
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->join('pengeluaran', 'pengeluaran.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->where('pemesanan.admin', $area)
             ->where('pemesanan.status_kirim!=', 'YA')
             ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai')
@@ -232,7 +230,7 @@ class PemesananModel extends Model
     {
         // Langkah 1: Ambil semua data yang relevan dengan JOIN
         $data = $this->db->table('pemesanan')
-            ->select('pemesanan.id_pemesanan, pemesanan.jl_mc, pemesanan.ttl_berat_cones, pemesanan.ttl_qty_cones')
+            ->select('pemesanan.id_pemesanan, pemesanan.jl_mc, pemesanan.ttl_berat_cones, pemesanan.ttl_qty_cones, pemesanan.sisa_kgs_mc, pemesanan.sisa_cones_mc')
             ->join('material', 'pemesanan.id_material = material.id_material')
             ->join('master_order', 'master_order.id_order = material.id_order')
             ->where('master_order.no_model', $id['no_model'])
@@ -252,11 +250,15 @@ class PemesananModel extends Model
             log_message('info', 'Data ditemukan: ' . json_encode($data));
         }
 
-        // Langkah 2: Totalkan data
+        $totalBeratCones = array_sum(array_column($data, 'ttl_berat_cones'));
+        $totalQtyCones = array_sum(array_column($data, 'ttl_qty_cones'));
+        $avgSisaKgsMc = array_sum(array_column($data, 'sisa_kgs_mc')) / count(array_column($data, 'sisa_kgs_mc'));
+        $avgSisaConesMc = array_sum(array_column($data, 'sisa_cones_mc')) / count(array_column($data, 'sisa_cones_mc'));
+
         $totalData = [
             'ttl_jl_mc' => array_sum(array_column($data, 'jl_mc')),
-            'ttl_kg'    => array_sum(array_column($data, 'ttl_berat_cones')),
-            'ttl_cns'   => array_sum(array_column($data, 'ttl_qty_cones')),
+            'ttl_kg'    => $totalBeratCones - $avgSisaKgsMc,
+            'ttl_cns'   => $totalQtyCones - $avgSisaConesMc,
         ];
 
         // Langkah 3: Insert ke tabel baru

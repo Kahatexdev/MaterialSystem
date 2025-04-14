@@ -595,4 +595,15 @@ class ApiController extends ResourceController
 
         return $this->respond($response, 200);
     }
+    public function getStyleSizeByBb()
+    {
+        $noModel = $this->request->getGet('no_model') ?? '';
+        $itemType = $this->request->getGet('item_type') ?? '';
+        $kodeWarna = $this->request->getGet('kode_warna') ?? '';
+
+        $data = $this->materialModel->getStyleSizeByBb($noModel, $itemType, $kodeWarna);
+        log_message('info', $noModel . ' /' . $itemType . ' /' .  $kodeWarna);
+
+        return $this->respond($data, 200);
+    }
 }
