@@ -157,7 +157,7 @@ class MaterialModel extends Model
             ->join('master_order', 'master_order.id_order=material.id_order')
             ->where('master_order.no_model', $model)
             ->where('material.style_size', $styleSize)
-            ->orderBy('master_material.jenis, material.item_type', 'ASC')
+            ->orderBy('material.item_type', 'ASC')
             ->first();
     }
     public function getDataPPHInisial($area, $nomodel)
