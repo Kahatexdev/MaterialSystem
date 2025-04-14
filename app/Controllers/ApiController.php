@@ -611,9 +611,23 @@ class ApiController extends ResourceController
 
         return $this->respond($resultsArray, 200);
     }
-    public function getGw($model, $style)
+    public function getGwBulk()
     {
-        $results = $this->materialModel->getGw($model, $style);
-        return $this->response->setJSON($results);
+        $input = $this->request->getJSON(true);
+        $result = [];
+
+        foreach ($input as $item) {
+            $model = $item['model'];
+            $size = $item['size'];
+
+            $gw = $this->materialModel->getGw($model, $size); // fungsi ambil dari DB
+            $result[] = [
+                'model' => $model,
+                'size'  => $size,
+                'gw'    => $gw
+            ];
+        }
+
+        return $this->response->setJSON($result);
     }
 }

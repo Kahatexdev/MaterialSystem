@@ -447,6 +447,6 @@ $routes->group(
         $routes->get('pphperhari', 'ApiController::getMU');
         $routes->get('requestAdditionalTime/(:any)', 'ApiController::requestAdditionalTime/$1');
         $routes->get('getPengirimanArea', 'ApiController::getPengirimanArea');
-        $routes->get('getGw/(:any)/(:any)', 'ApiController::getGw/$1/$2');
+        $routes->post('getGwBulk', 'ApiController::getGwBulk');
     }
 );
