@@ -4,33 +4,15 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class ReturModel extends Model
+class KategoriReturModel extends Model
 {
-    protected $table            = 'retur';
-    protected $primaryKey       = 'id_retur';
+    protected $table            = 'kategori_retur';
+    protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [
-        'no_model',
-        'item_type',
-        'kode_warna',
-        'warna',
-        'area_retur',
-        'tgl_retur',
-        'kgs_retur',
-        'cns_retur',
-        'krg_retur',
-        'lot_retur',
-        'kategori',
-        'keterangan_area',
-        'keterangan_gbn',
-        'waktu_acc_retur',
-        'admin',
-        'created_at',
-        'updated_at'
-    ];
+    protected $allowedFields    = [];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -61,4 +43,9 @@ class ReturModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    public function getKategoriRetur()
+    {
+        return $this->findAll();
+    }
 }

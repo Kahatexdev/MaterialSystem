@@ -19,6 +19,8 @@ use App\Models\StockModel;
 use App\Models\HistoryPindahPalet;
 use App\Models\HistoryPindahOrder;
 use App\Models\PengeluaranModel;
+use App\Models\ReturModel;
+use App\Models\KategoriReturModel;
 
 class ApiController extends ResourceController
 {
@@ -40,6 +42,8 @@ class ApiController extends ResourceController
     protected $historyPindahPalet;
     protected $historyPindahOrder;
     protected $pengeluaranModel;
+    protected $returModel;
+    protected $kategoriReturModel;
 
 
     public function __construct()
@@ -58,6 +62,8 @@ class ApiController extends ResourceController
         $this->historyPindahPalet = new HistoryPindahPalet();
         $this->historyPindahOrder = new HistoryPindahOrder();
         $this->pengeluaranModel = new PengeluaranModel();
+        $this->returModel = new ReturModel();
+        $this->kategoriReturModel = new KategoriReturModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -640,5 +646,43 @@ class ApiController extends ResourceController
         }
 
         return $this->response->setJSON($result);
+    }
+
+    public function getKategoriRetur()
+    {
+        $kategoriRetur = $this->kategoriReturModel->getKategoriRetur();
+
+        if (empty($kategoriRetur)) {
+            return $this->failNotFound('Data tidak ditemukan');
+        } else {
+            return $this->respond($kategoriRetur, 200);
+        }
+    }
+
+    public function saveRetur()
+    {
+        helper(['form']);
+        $data = $this->request->getJSON(true);
+
+        if (empty($data)) {
+            return $this->fail('Data tidak ditemukan', ResponseInterface::HTTP_BAD_REQUEST);
+        }
+
+        // Validasi sederhana
+        if (!isset($data['no_model'], $data['item_type'], $data['kode_warna'])) {
+            return $this->fail('Data tidak lengkap', ResponseInterface::HTTP_BAD_REQUEST);
+        }
+
+        $result = $this->returModel->insert($data);
+
+        if (!$result) {
+            return $this->fail('Gagal menyimpan data', ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return $this->respondCreated([
+            'status' => 'success',
+            'message' => 'Data berhasil disimpan',
+            'insert_id' => $this->returModel->getInsertID()
+        ]);
     }
 }

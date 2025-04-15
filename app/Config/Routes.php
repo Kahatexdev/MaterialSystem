@@ -449,5 +449,7 @@ $routes->group(
         $routes->get('getStyleSizeByBb', 'ApiController::getStyleSizeByBb');
         $routes->get('getPengirimanArea', 'ApiController::getPengirimanArea');
         $routes->post('getGwBulk', 'ApiController::getGwBulk');
+        $routes->get('getKategoriRetur', 'ApiController::getKategoriRetur');
+        $routes->post('saveRetur', 'ApiController::saveRetur');
     }
 );
