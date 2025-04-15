@@ -255,7 +255,7 @@ class PemesananController extends BaseController
             'cns_pesan' => $formData['cns_pesan'] ?? '',
         ];
         // dd ($data);
-        
+
         return view($this->role . '/warehouse/form-pengiriman', $data);
     }
     public function resetPengirimanArea()
@@ -287,7 +287,7 @@ class PemesananController extends BaseController
     public function prosesPengirimanArea()
     {
         $checkedIds = $this->request->getPost('checked_id'); // Ambil index yang dicentang
-        
+
         if (empty($checkedIds)) {
             session()->setFlashdata('error', 'Tidak ada data yang dipilih.');
             return redirect()->to($this->role . '/pengiriman_area');
@@ -310,7 +310,7 @@ class PemesananController extends BaseController
         }
 
         // Pastikan nama_cluster ada di dalam tabel cluster
-        
+
         $dataKirim = [];
 
         foreach ($checkedIds as $key => $idOut) {
@@ -391,7 +391,7 @@ class PemesananController extends BaseController
         $getPemesanan = $this->totalPemesananModel->getDataPemesananbyId($id);
         // dd($getPemesanan);
         $cluster = $this->stockModel->getDataCluster($getPemesanan['no_model'], $getPemesanan['item_type'], $getPemesanan['kode_warna'], $getPemesanan['color']);
-        // dd ($getPemesanan, $cluster);
+        // dd($getPemesanan, $cluster);
 
         // if (!$cluster) {
         //     session()->setFlashdata('error', 'Cluster tidak ditemukan');
