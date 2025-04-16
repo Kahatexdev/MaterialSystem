@@ -175,6 +175,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
 
     $routes->get('retur', 'ReturController::index');
+    $routes->post('retur/approve', 'ReturController::approve');
+    $routes->post('retur/reject', 'ReturController::reject');
+
 });
 
 // celup routes
