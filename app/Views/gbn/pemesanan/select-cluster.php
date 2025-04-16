@@ -262,7 +262,7 @@
                 <div class="divider"></div>
                 <div class="form-section">
                     <h6 class="form-section-title">Pengeluaran Stock</h6>
-                    <form id="pengeluaran" method="post" action="<?= base_url('gbn/simpanPengeluaranJalur/'.$id.'?Area=' . $area); ?>">
+                    <form id="pengeluaran" method="post" action="<?= base_url('gbn/simpanPengeluaranJalur/' . $id . '?Area=' . $area . '&KgsPesan=' . $KgsPesan . '&CnsPesan=' . $CnsPesan); ?>">
                         <div class="row" id="formPengeluaran">
                             <!-- Form input pengeluaran stock will be loaded here -->
                         </div>
@@ -426,8 +426,8 @@
                         <strong>Kode Warna:</strong> ${item.kode_warna}<br>
                         <strong>Warna:</strong> ${item.warna}<br>
                         <strong>Lot Celup:</strong> ${item.lot_kirim}<br>
-                        <strong>Total Kg:</strong> ${item.kgs_masuk} KG<br>
-                        <strong>Total Cones:</strong> ${item.cns_masuk} CNS
+                        <strong>Total Kg:</strong> ${item.kgs_kirim} KG<br>
+                        <strong>Total Cones:</strong> ${item.cones_kirim} CNS
                     </label>
                 </div>
             </div>

@@ -202,4 +202,11 @@ class OutCelupModel extends Model
             ->whereIn('id_out_celup', $idOut)
             ->findAll();
     }
+    public function findOutCelup($idPemasukan)
+    {
+        return $this->select('pemasukan.id_pemasukan, pemasukan.id_stock, out_celup.id_out_celup, out_celup.kgs_kirim, out_celup.cones_kirim, out_celup.no_karung, pemasukan.nama_cluster, out_celup.lot_kirim')
+            ->join('pemasukan', 'pemasukan.id_out_celup = out_celup.id_out_celup', 'left')
+            ->where('pemasukan.id_pemasukan', $idPemasukan)
+            ->findAll();
+    }
 }

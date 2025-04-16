@@ -220,7 +220,7 @@ class PemasukanModel extends Model
     }
     public function getDataByIdStok($idStok)
     {
-        return $this->select('schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, pemasukan.*, out_celup.no_karung, out_celup.lot_kirim')
+        return $this->select('schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, pemasukan.*, out_celup.no_karung, out_celup.lot_kirim, out_celup.kgs_kirim, out_celup.cones_kirim')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
             ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
             ->where('id_stock', $idStok)

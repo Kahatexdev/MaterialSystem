@@ -388,6 +388,8 @@ class PemesananController extends BaseController
 
     public function selectClusterWarehouse($id)
     {
+        $KgsPesan = $this->request->getGet('KgsPesan');
+        $CnsPesan = $this->request->getGet('CnsPesan');
         $getPemesanan = $this->totalPemesananModel->getDataPemesananbyId($id);
         // dd($getPemesanan);
         $cluster = $this->stockModel->getDataCluster($getPemesanan['no_model'], $getPemesanan['item_type'], $getPemesanan['kode_warna'], $getPemesanan['color']);
@@ -409,6 +411,8 @@ class PemesananController extends BaseController
             // 'namaCluster' => $getPemesanan['nama_cluster'],
             // 'id_out_celup' => $getPemesanan['id_out_celup'],
             'id' => $id,
+            'KgsPesan' => $KgsPesan,
+            'CnsPesan' => $CnsPesan
         ];
 
         // dd ($data);

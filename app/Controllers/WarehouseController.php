@@ -1298,66 +1298,102 @@ class WarehouseController extends BaseController
 
     public function simpanPengeluaranJalur($idTtlPemesanan)
     {
-        $data = $this->request->getPost();
-        // dd($idTtlPemesanan);
-        // get from url ?Area=
         $area = $this->request->getGet('Area');
+        $KgsPesan = $this->request->getGet('KgsPesan');
+        $CnsPesan = $this->request->getGet('CnsPesan');
+        $data = $this->request->getPost();
+
+        // Validasi dasar: pastikan id_pemasukan ada
+        if (empty($data['id_pemasukan'])) {
+            session()->setFlashdata('error', 'Data pemasukan tidak valid.');
+            return redirect()->back();
+        }
+
+        // Ambil area dari parameter GET, bisa juga divalidasi jika wajib
+        $area = $this->request->getGet('Area');
+        if (empty($area)) {
+            session()->setFlashdata('error', 'Area tidak boleh kosong.');
+            return redirect()->back();
+        }
 
         // Pastikan id_pemasukan berupa array
         $idPemasukanArray = (array)$data['id_pemasukan'];
 
         // Ambil data pemasukan untuk semua id yang dipilih
-        $pemasukanData = $this->pemasukanModel->find($idPemasukanArray);
+        $pemasukanData = $this->outCelupModel->findOutCelup($idPemasukanArray);
 
         if (!$pemasukanData) {
-            return redirect()->back()->with('error', 'Data pemasukan tidak ditemukan.');
+            session()->setFlashdata('error', 'Data pemasukan tidak ditemukan.');
+            return redirect()->back();
         }
 
-        $krg = 0;
-
-        // cek data tabel out_celup
-        // Lakukan looping untuk setiap data pemasukan
+        // Proses setiap data pemasukan
         foreach ($pemasukanData as $pemasukan) {
+            // Ambil data tabel out_celup terkait
             $outCelup = $this->outCelupModel->find($pemasukan['id_out_celup']);
 
             // Update field out_jalur pada tabel pemasukan
             $this->pemasukanModel->update($pemasukan['id_pemasukan'], ['out_jalur' => "1"]);
 
-            // Insert data pengeluaran sesuai masing-masing pemasukan
+            // Siapkan data pengeluaran sesuai masing-masing pemasukan
             $insertData = [
-                'id_out_celup'  => $pemasukan['id_out_celup'],
-                'area_out'      => $area,
-                'tgl_out'       => date('Y-m-d H:i:s'),
-                'kgs_out'       => $pemasukan['kgs_masuk'],
-                'cns_out'       => $pemasukan['cns_masuk'],
-                'krg_out'       =>  $outCelup['no_karung'],
-                'nama_cluster'  => $pemasukan['nama_cluster'],
-                'lot_out'       => $outCelup['lot_kirim'], // pastikan field ini ada di data pemasukan
+                'id_out_celup'       => $pemasukan['id_out_celup'],
+                'area_out'           => $area,
+                'tgl_out'            => date('Y-m-d H:i:s'),
+                'kgs_out'            => $pemasukan['kgs_kirim'],
+                'cns_out'            => $pemasukan['cones_kirim'],
+                'krg_out'            => $outCelup['no_karung'],
+                'nama_cluster'       => $pemasukan['nama_cluster'],
+                'lot_out'            => $outCelup['lot_kirim'], // pastikan field ini ada di data pemasukan
                 'id_total_pemesanan' => $idTtlPemesanan,
-                'status'        => 'Pengeluaran Jalur',
-                'admin'         => $this->username,
-                'created_at'    => date('Y-m-d H:i:s')
+                'status'             => 'Pengeluaran Jalur',
+                'admin'              => $this->username,
+                'created_at'         => date('Y-m-d H:i:s')
             ];
-            // dd ($insertData);
-            $this->pengeluaranModel->insert($insertData);
-            // --- UPDATE TABEL STOCK BERDASARKAN id_stock ---
-            $fields = $this->db->getFieldNames('stock');
-            $dataUpdate = [];
-            foreach ($fields as $field) {
-                if (!in_array($field, ['id_stock', 'no_model', 'nama_cluster', 'item_type', 'kode_warna', 'warna', 'lot_awal', 'lot_stock', 'admin', 'created_at'])) {
-                    $dataUpdate[$field] = 0;
-                }
-            }
 
-            $this->db->table('stock')
+            // Insert data pengeluaran
+            $this->pengeluaranModel->insert($insertData);
+
+            // --- UPDATE TABEL STOCK BERDASARKAN id_stock ---
+            // Ambil data stok berdasarkan id_stock yang terkait
+            $stok = $this->db->table('stock')
                 ->where('id_stock', $pemasukan['id_stock'])
-                ->update($dataUpdate);
+                ->get()->getResultArray();
+
+            if (!empty($stok)) {
+                // Siapkan field yang akan diproses
+                $fields = ['kgs', 'cns', 'krg'];
+                $newStock = [];
+
+                foreach ($fields as $field) {
+                    // Ambil nilai dari database atau 0 jika kosong, gunakan casting ke float
+                    $inOut = !empty($stok[0][$field . '_in_out']) ? (float)$stok[0][$field . '_in_out'] : 0;
+                    $awal  = !empty($stok[0][$field . '_stock_awal']) ? (float)$stok[0][$field . '_stock_awal'] : 0;
+
+                    // Nilai yang akan dikurangkan berdasarkan nilai output yang diterima
+                    $input = (float)$insertData[$field . '_out'];
+
+                    // Jika field in_out memiliki nilai, update in_out; jika tidak, update stock_awal
+                    if ($inOut > 0) {
+                        $newStock[$field . '_in_out'] = $inOut - $input;
+                    } else {
+                        $newStock[$field . '_stock_awal'] = $awal - $input;
+                    }
+                }
+
+                // Update data stock di database berdasarkan id_stock
+                $this->db->table('stock')
+                    ->where('id_stock', $pemasukan['id_stock'])
+                    ->update($newStock);
+            }
             // --- END UPDATE TABEL STOCK ---
         }
 
-        // Jika perlu, debugging atau kembalikan response sukses
-        return redirect()->back()->with('success', 'Data pengeluaran berhasil disimpan.');
+        // Setelah semua data selesai di proses, set flash alert success
+        session()->setFlashdata('success', 'Data pengeluaran jalur berhasil disimpan.');
+        return redirect()->to('gbn/selectClusterWarehouse/' . $idTtlPemesanan . '?Area=' . $area . '&KgsPesan' . $KgsPesan . '&CnsPesan' . $CnsPesan);
     }
+
 
     public function savePengeluaranJalur()
     {
