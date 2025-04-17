@@ -49,7 +49,8 @@ class ReturController extends BaseController
         $dataRetur = $this->returModel->findAll();
         // dd ($dataRetur);
         $getJenisBb = $this->masterMaterial->getJenisBahanBaku();
-        $urlApi = 'http://172.23.39.117/CapacityApps/public/api/getDataArea';
+        // $urlApi = 'http://172.23.39.117/CapacityApps/public/api/getDataArea';
+        $urlApi = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
         $getArea = json_decode(file_get_contents($urlApi), true);
         // dd ($getArea);
         $jenis = $this->request->getGet('jenis');
