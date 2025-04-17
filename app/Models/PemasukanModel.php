@@ -105,9 +105,10 @@ class PemasukanModel extends Model
     {
         return $this->select('out_celup.lot_kirim')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
-            ->where('pemasukan.no_model', $no_model)
-            ->where('pemasukan.item_type', $item_type)
-            ->where('pemasukan.kode_warna', $kode_warna)
+            ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup')
+            ->where('schedule_celup.no_model', $no_model)
+            ->where('schedule_celup.item_type', $item_type)
+            ->where('schedule_celup.kode_warna', $kode_warna)
             ->groupBy('out_celup.lot_kirim')
             ->distinct()
             ->get()
@@ -117,11 +118,12 @@ class PemasukanModel extends Model
     public function getKgsConesClusterForOut($no_model, $item_type, $kode_warna, $lot_kirim, $no_karung)
     {
         $query = $this->db->table('pemasukan p')
-            ->select('oc.id_out_celup, p.kgs_masuk, p.cns_masuk, p.nama_cluster')
+            ->select('oc.id_out_celup, oc.kgs_kirim, oc.cones_kirim, p.nama_cluster')
             ->join('out_celup oc', 'oc.id_out_celup = p.id_out_celup')
-            ->where('p.no_model', $no_model)
-            ->where('p.item_type', $item_type)
-            ->where('p.kode_warna', $kode_warna)
+            ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup')
+            ->where('sc.no_model', $no_model)
+            ->where('sc.item_type', $item_type)
+            ->where('sc.kode_warna', $kode_warna)
             ->where('oc.lot_kirim', $lot_kirim)
             ->where('oc.no_karung', $no_karung)
             ->get();
@@ -146,9 +148,11 @@ class PemasukanModel extends Model
     public function stockInOut($no_model, $item_type, $kode_warna)
     {
         $inout = $this->select('no_model, item_type, kode_warna, 
-        SUM(kgs_masuk) AS masuk, 
+        SUM(out_celup.kgs_kirim) AS masuk, 
         SUM(pengeluaran.kgs_out) AS keluar')
             ->join('pengeluaran', 'pengeluaran.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
             ->where('no_model', $no_model)
             ->where('item_type', $item_type)
             ->where('kode_warna', $kode_warna)
@@ -176,19 +180,22 @@ class PemasukanModel extends Model
 
     public function getFilterDatangBenang($key, $tanggal_awal, $tanggal_akhir)
     {
-        $this->select('pemasukan.no_model, pemasukan.item_type, pemasukan.kode_warna, pemasukan.warna, pemasukan.kgs_masuk, pemasukan.cns_masuk, pemasukan.tgl_masuk, pemasukan.nama_cluster, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, open_po.kg_po, out_celup.lot_kirim, bon_celup.no_surat_jalan, out_celup.l_m_d, out_celup.gw_kirim, out_celup.harga')
-            ->join('master_order', 'master_order.no_model = pemasukan.no_model')
-            ->join('open_po', 'open_po.no_model = pemasukan.no_model')
+        $this->select('schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, out_celup.kgs_kirim, out_celup.cones_kirim, pemasukan.tgl_masuk, pemasukan.nama_cluster, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, open_po.kg_po, out_celup.lot_kirim, bon_celup.no_surat_jalan, out_celup.l_m_d, out_celup.gw_kirim, out_celup.harga')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup')
+            ->join('master_order', 'master_order.no_model = schedule_celup.no_model')
+            ->join('open_po', 'open_po.no_model = schedule_celup.no_model')
             ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon');
+
 
         // Cek apakah ada input key untuk pencarian
         if (!empty($key)) {
             $this->groupStart()
-                ->like('pemasukan.no_model', $key)
-                ->orLike('pemasukan.item_type', $key)
-                ->orLike('pemasukan.kode_warna', $key)
-                ->orLike('pemasukan.warna', $key)
+
+                ->like('schedule_celup.no_model', $key)
+                ->orLike('schedule_celup.item_type', $key)
+                ->orLike('schedule_celup.kode_warna', $key)
+                ->orLike('schedule_celup.warna', $key)
                 ->groupEnd();
         }
 
@@ -205,6 +212,7 @@ class PemasukanModel extends Model
             }
             $this->groupEnd();
         }
+        
 
         return $this->findAll();
     }

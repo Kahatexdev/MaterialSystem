@@ -515,8 +515,8 @@ class WarehouseController extends BaseController
                 'item_type' => $itemTypes,
                 'kode_warna' => $kodeWarnas,
                 'warna' => $warnas,
-                'kgs_masuk' => $kgsMasuks,
-                'cns_masuk' => $cnsMasuks,
+                'kgs_kirim' => $kgsMasuks,
+                'cones_kirim' => $cnsMasuks,
                 'tgl_masuk' => $tglMasuks,
                 'nama_cluster' => $namaClusters,
                 'admin' => session()->get('username')
@@ -1180,8 +1180,8 @@ class WarehouseController extends BaseController
             if ($data) {
                 return $this->response->setJSON([
                     'success' => true,
-                    'kgs_kirim' => $data['kgs_masuk'],
-                    'cones_kirim' => $data['cns_masuk'],
+                    'kgs_kirim' => $data['kgs_kirim'],
+                    'cones_kirim' => $data['cones_kirim'],
                     'id_out_celup' => $data['id_out_celup'],
                     'nama_cluster' => $data['nama_cluster']
                 ]);
