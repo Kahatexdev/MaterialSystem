@@ -611,7 +611,6 @@ class ApiController extends ResourceController
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
 
         $data = $this->materialModel->getStyleSizeByBb($noModel, $itemType, $kodeWarna);
-        log_message('info', $noModel . ' /' . $itemType . ' /' .  $kodeWarna);
 
         return $this->respond($data, 200);
     }
@@ -684,5 +683,22 @@ class ApiController extends ResourceController
             'message' => 'Data berhasil disimpan',
             'insert_id' => $this->returModel->getInsertID()
         ]);
+    }
+    public function getTotalPengiriman()
+    {
+        $area = $this->request->getGet('area') ?? '';
+        $no_model = $this->request->getGet('no_model') ?? '';
+        $item_type = $this->request->getGet('item_type') ?? '';
+        $kode_warna = $this->request->getGet('kode_warna') ?? '';
+        $data = [
+            'area' => $area,
+            'no_model' => $no_model,
+            'item_type' => $item_type,
+            'kode_warna' => $kode_warna,
+        ];
+
+        $totalPengiriman = $this->pengeluaranModel->getTotalPengiriman($data);
+
+        return $this->respond($totalPengiriman, 200);
     }
 }

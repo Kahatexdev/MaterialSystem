@@ -454,5 +454,6 @@ $routes->group(
         $routes->post('getGwBulk', 'ApiController::getGwBulk');
         $routes->get('getKategoriRetur', 'ApiController::getKategoriRetur');
         $routes->post('saveRetur', 'ApiController::saveRetur');
+        $routes->get('getTotalPengiriman', 'ApiController::getTotalPengiriman');
     }
 );
