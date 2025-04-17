@@ -183,9 +183,12 @@ class PemasukanModel extends Model
         $this->select('schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, out_celup.kgs_kirim, out_celup.cones_kirim, pemasukan.tgl_masuk, pemasukan.nama_cluster, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, open_po.kg_po, out_celup.lot_kirim, bon_celup.no_surat_jalan, out_celup.l_m_d, out_celup.gw_kirim, out_celup.harga')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
             ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup')
-            ->join('master_order', 'master_order.no_model = schedule_celup.no_model')
-            ->join('open_po', 'open_po.no_model = schedule_celup.no_model')
-            ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon');
+            ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
+            ->join('open_po', 'open_po.no_model = master_order.no_model AND open_po.kode_warna = schedule_celup.kode_warna AND open_po.item_type = schedule_celup.item_type', 'left')
+            ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
+            ->where('pemasukan.out_jalur', "0")
+            ->groupBy('pemasukan.id_pemasukan')
+            ->orderBy('pemasukan.tgl_masuk', 'DESC');
 
 
         // Cek apakah ada input key untuk pencarian
