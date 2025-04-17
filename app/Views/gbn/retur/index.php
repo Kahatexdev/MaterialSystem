@@ -1,201 +1,143 @@
 <?php $this->extend($role . '/retur/header'); ?>
 <?php $this->section('content'); ?>
 
-<style>
-    .btn-filter {
-        background: linear-gradient(135deg, #1e88e5, #64b5f6);
-        color: white;
-        border: none;
-    }
-
-    .btn-filter:hover {
-        background: linear-gradient(135deg, #1976d2, #42a5f5);
-    }
-
-    .card {
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        margin-bottom: 20px;
-    }
-
-    .card-header {
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #e9ecef;
-        padding: 15px 20px;
-    }
-
-    .action-buttons .btn {
-        margin-right: 5px;
-    }
-
-    .badge-status {
-        padding: 5px 10px;
-        border-radius: 4px;
-        font-weight: 500;
-    }
-
-    .table th {
-        background-color: #f8f9fa;
-        font-weight: 600;
-    }
-</style>
 
 <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
-
+    <?php if (session()->getFlashdata('success')) : ?>
+        <script>
+            $(document).ready(function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: '<?= session()->getFlashdata('success') ?>',
+                });
+            });
+        </script>
+    <?php endif; ?>
     <!-- Content utama -->
     <div class="container-fluid py-4">
-        <div class="row">
-            <div class="col-12">
+        <div class="row my-4">
+
+            <div class="col-xl-12 col-sm-12 mb-xl-0 mb-4">
+
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0"><?= $title ?></h4>
-                        <a href="<?= base_url('retur/create'); ?>" class="btn btn-primary">
-                            <i class="fas fa-plus-circle me-2"></i>Tambah Data
-                        </a>
-                    </div>
-
-                    <?php if (session()->getFlashdata('success')): ?>
-                        <div class="alert alert-success mx-3 mt-3">
-                            <i class="fas fa-check-circle me-2"></i>
-                            <?= session()->getFlashdata('success') ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if (session()->getFlashdata('error')): ?>
-                        <div class="alert alert-danger mx-3 mt-3">
-                            <i class="fas fa-exclamation-circle me-2"></i>
-                            <?= session()->getFlashdata('error') ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <div class="card-body">
-                        <!-- Filter Section -->
-                        <div class="row mb-4">
-                            <div class="col-md-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="mb-0">Filter Data</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <form action="<?= base_url('retur') ?>" method="get">
-                                            <div class="row">
-                                                <div class="col-md-3 mb-3">
-                                                    <label for="no_model" class="form-label">No Model</label>
-                                                    <input type="text" class="form-control" id="no_model" name="no_model" value="<?= $filters['no_model'] ?? '' ?>">
-                                                </div>
-                                                <div class="col-md-3 mb-3">
-                                                    <label for="item_type" class="form-label">Item Type</label>
-                                                    <select class="form-select" id="item_type" name="item_type">
-                                                        
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-3 mb-3">
-                                                    <label for="area_retur" class="form-label">Area Retur</label>
-                                                    <select class="form-select" id="area_retur" name="area_retur">
-                                                        
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-3 mb-3">
-                                                    <label for="tgl_retur" class="form-label">Tanggal Retur</label>
-                                                    <input type="date" class="form-control" id="tgl_retur" name="tgl_retur" value="<?= $filters['tgl_retur'] ?? '' ?>">
-                                                </div>
-                                            </div>
-                                            <div class="d-flex justify-content-end">
-                                                <button type="submit" class="btn btn-filter me-2">
-                                                    <i class="fas fa-filter me-2"></i>Filter
-                                                </button>
-                                                <a href="<?= base_url('retur') ?>" class="btn btn-outline-secondary">
-                                                    <i class="fas fa-redo me-2"></i>Reset
-                                                </a>
-                                            </div>
-                                        </form>
-                                    </div>
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="numbers">
+                                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Material System</p>
+                                    <h5 class="font-weight-bolder mb-0">Data <?= $title ?></h5>
                                 </div>
+                            </div>
+                            <div>
+
+                                <form method="get" action="<?= base_url($role . '/retur') ?>">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <select name="jenis" id="jenis" class="form-control">
+                                            <option value="">Jenis Bahan Baku</option>
+                                            <?php foreach ($jenis as $row): ?>
+                                                <option value="<?= $row['jenis'] ?>">
+                                                    <?= $row['jenis'] ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+
+                                        <select name="area" id="area" class="form-control">
+                                            <option value="">Area</option>
+                                            <?php foreach ($area as $row): ?>
+                                                <option value="<?= $row ?>">
+                                                    <?= $row ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+
+                                        <input type="date" name="tgl_retur" id="tgl_retur" class="form-control"
+                                            value="" placeholder="Tanggal Retur" />
+                                        <input type="text" name="no_model" id="no_model" class="form-control"
+                                            value="" placeholder="No Model" />
+                                        <input type="text" name="kode_warna" id="kode_warna" class="form-control"
+                                            value="" placeholder="Kode Warna" />
+                                        <button type="submit" class="btn btn-info">
+                                            <i class="fas fa-filter"></i>
+                                        </button>
+                                        <a href="<?= base_url($role . '/retur') ?>" class="btn btn-secondary ms-2">
+                                            <i class="fas fa-undo"></i>
+                                        </a>
+                                    </div>
+                                </form>
+
+
                             </div>
                         </div>
 
-                        <!-- Table Section -->
-                        <div class="table-responsive">
-                            <table class="table table-hover table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>No Model</th>
-                                        <th>Item Type</th>
-                                        <th>Kode Warna</th>
-                                        <th>Warna</th>
-                                        <th>Area Retur</th>
-                                        <th>Tgl Retur</th>
-                                        <th>Status</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (empty($retur)): ?>
-                                        <tr>
-                                            <td colspan="9" class="text-center py-4">Tidak ada data yang ditemukan</td>
-                                        </tr>
-                                    <?php else: ?>
-                                        <?php foreach ($retur as $row): ?>
-                                            <tr>
-                                                <td><?= $row['id_retur'] ?></td>
-                                                <td><?= $row['no_model'] ?></td>
-                                                <td><?= $row['item_type'] ?></td>
-                                                <td><?= $row['kode_warna'] ?></td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <div style="width: 20px; height: 20px; background-color: <?= $row['kode_warna'] ?>; border-radius: 4px; margin-right: 8px;"></div>
-                                                        <?= $row['warna'] ?>
-                                                    </div>
-                                                </td>
-                                                <td><?= $row['area_retur'] ?></td>
-                                                <td><?= date('d-m-Y', strtotime($row['tgl_retur'])) ?></td>
-                                                <td>
-                                                    <?php
-                                                    $statusClass = '';
-                                                    switch ($row['status'] ?? 'pending') {
-                                                        case 'approved':
-                                                            $statusClass = 'bg-success';
-                                                            break;
-                                                        case 'rejected':
-                                                            $statusClass = 'bg-danger';
-                                                            break;
-                                                        case 'processing':
-                                                            $statusClass = 'bg-warning';
-                                                            break;
-                                                        default:
-                                                            $statusClass = 'bg-info';
-                                                    }
-                                                    ?>
-                                                    <span class="badge <?= $statusClass ?> badge-status">
-                                                        <?= ucfirst($row['status'] ?? 'Pending') ?>
-                                                    </span>
-                                                </td>
-                                                <td class="action-buttons">
-                                                    <a href="<?= base_url('retur/view/' . $row['id_retur']) ?>" class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="Lihat Detail">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    <a href="<?= base_url('retur/edit/' . $row['id_retur']) ?>" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" title="Edit">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <button type="button" class="btn btn-sm btn-danger btn-delete" data-id="<?= $row['id_retur'] ?>" data-bs-toggle="tooltip" title="Hapus">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                    <a href="<?= base_url('retur/print/' . $row['id_retur']) ?>" class="btn btn-sm btn-secondary" data-bs-toggle="tooltip" title="Cetak">
-                                                        <i class="fas fa-print"></i>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                    </div>
+                </div>
 
-                        <!-- Pagination -->
-                        <?php if (isset($pager)): ?>
-                            <div class="d-flex justify-content-center mt-4">
-                                <?= $pager->links() ?>
+            </div>
+        </div>
+
+        <div class="row my-4">
+            <div class="col-xl-12 col-sm-12 mb-xl-0 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Filter Section -->
+
+                        <!-- Table Section -->
+                        <?php if (!$isFiltered): ?>
+                            <div class="alert alert-warning text-center">
+                                <i class="fas fa-exclamation-triangle me-2"></i> Silakan pilih minimal satu filter untuk menampilkan data retur.
+                            </div>
+                        <?php else: ?>
+                            <div class="table-responsive">
+                                <table id="returTable" class="table table-hover table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>No Model</th>
+                                            <th>Item Type</th>
+                                            <th>Kode Warna</th>
+                                            <th>Warna</th>
+                                            <th>Area Retur</th>
+                                            <th>Tgl Retur</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (empty($retur)): ?>
+                                            <tr>
+                                                <td colspan="9" class="text-center py-4">Tidak ada data yang ditemukan</td>
+                                            </tr>
+                                        <?php else: ?>
+                                            <?php $i = 1; ?>
+                                            <?php foreach ($retur as $row): ?>
+                                                <tr>
+                                                    <td><?= $i ?></td>
+                                                    <td><?= $row['no_model'] ?></td>
+                                                    <td><?= $row['item_type'] ?></td>
+                                                    <td><?= $row['kode_warna'] ?></td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div style="width: 20px; height: 20px; background-color: <?= $row['kode_warna'] ?>; border-radius: 4px; margin-right: 8px;"></div>
+                                                            <?= $row['warna'] ?>
+                                                        </div>
+                                                    </td>
+                                                    <td><?= $row['area_retur'] ?></td>
+                                                    <td><?= date('d-m-Y', strtotime($row['tgl_retur'])) ?></td>
+                                                    <td>
+                                                        <!-- Modal buttons -->
+                                                        <button type="button" class="btn btn-info " data-bs-toggle="modal" data-bs-target="#acceptModal<?= $row['id_retur'] ?>">
+                                                            <i class="fas fa-check"></i> Accept
+                                                        </button>
+                                                        <button type="button" class="btn btn-danger " data-bs-toggle="modal" data-bs-target="#rejectModal<?= $row['id_retur'] ?>">
+                                                            <i class="fas fa-times"></i> Reject
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                <?php $i++; ?>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -205,49 +147,79 @@
     </div>
 </main>
 
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Apakah Anda yakin ingin menghapus data ini?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <form id="deleteForm" action="" method="post">
-                    <input type="hidden" name="_method" value="DELETE">
-                    <button type="submit" class="btn btn-danger">Hapus</button>
-                </form>
-            </div>
+<!-- Modal Accept -->
+<?php foreach ($retur as $row): ?>
+    <div class="modal fade" id="acceptModal<?= $row['id_retur'] ?>" tabindex="-1" aria-labelledby="acceptModalLabel<?= $row['id_retur'] ?>" aria-hidden="true">
+        <div class="modal-dialog">
+            <form action="<?= base_url($role . '/retur/approve') ?>" method="post">
+                <?= csrf_field() ?>
+                <input type="hidden" name="id_retur" value="<?= $row['id_retur'] ?>">
+                <div class="modal-content">
+                    <div class="modal-header text-white">
+                        <h5 class="modal-title" id="acceptModalLabel<?= $row['id_retur'] ?>">Konfirmasi Approve</h5>
+                        <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Apakah kamu yakin ingin <strong>menerima</strong> retur ini?
+                        <div class="form-group mt-3">
+                            <label for="catatan_accept<?= $row['id_retur'] ?>">Keterangan</label>
+                            <textarea name="catatan" id="catatan_accept<?= $row['id_retur'] ?>" class="form-control" rows="3" placeholder="Tulis keterangan jika diperlukan..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-info text-white">Ya, Approve</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
-</div>
+<?php endforeach; ?>
 
+
+<!-- Modal Reject -->
+<?php foreach ($retur as $row): ?>
+    <div class="modal fade" id="rejectModal<?= $row['id_retur'] ?>" tabindex="-1" aria-labelledby="rejectModalLabel<?= $row['id_retur'] ?>" aria-hidden="true">
+        <div class="modal-dialog">
+            <form action="<?= base_url($role . '/retur/reject') ?>" method="post">
+                <?= csrf_field() ?>
+                <input type="hidden" name="id_retur" value="<?= $row['id_retur'] ?>">
+                <div class="modal-content">
+                    <div class="modal-header text-white">
+                        <h5 class="modal-title" id="rejectModalLabel<?= $row['id_retur'] ?>">Konfirmasi Reject</h5>
+                        <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Apakah kamu yakin ingin <strong>menolak</strong> retur ini?
+                        <div class="form-group mt-3">
+                            <label for="catatan_reject<?= $row['id_retur'] ?>">Catatan Penolakan</label>
+                            <textarea name="catatan" id="catatan_reject<?= $row['id_retur'] ?>" class="form-control" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger">Ya, Tolak</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+<?php endforeach; ?>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        });
-
-        // Handle delete button clicks
-        const deleteButtons = document.querySelectorAll('.btn-delete');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                const deleteForm = document.getElementById('deleteForm');
-                deleteForm.action = '<?= base_url('retur/delete/') ?>' + id;
-
-                const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-                deleteModal.show();
-            });
+    $(document).ready(function() {
+        $('#returTable').DataTable({
+            "ordering": true,
+            "paging": true,
+            "searching": true,
+            "info": true,
+            "language": {
+                "search": "Cari:",
+                "zeroRecords": "Data tidak ditemukan",
+            }
         });
     });
 </script>
+
+
 
 <?php $this->endSection(); ?>

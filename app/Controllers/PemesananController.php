@@ -177,28 +177,11 @@ class PemesananController extends BaseController
         return $this->response->setJSON($dataPemesanan);
     }
 
-
-
     public function pengirimanArea()
     {
-        // session()->remove('dataPengiriman');
-        // $area = $this->request->getPost('area');
-        // $tglPakai = $this->request->getPost('tgl_pakai');
-        // // $noModel = $this->request->getPost('no_model');
-        // $noModel = 'tes';
-        // $itemType = $this->request->getPost('item_type');
-        // $kodeWarna = $this->request->getPost('kode_warna');
-        // $warna = $this->request->getPost('warna');
-        // $kgsPesan = $this->request->getPost('kgs_pesan');
-        // $cnsPesan = $this->request->getPost('cns_pesan');
-
-        // Simpan data form ke session
+        // Simpan data form ke session (jika diperlukan)
         $formData = [];
-
-        // Simpan ke session
         session()->set('pengirimanForm', $formData);
-        // var_dump(session()->get('pengirimanForm'));
-        // exit;
 
         $id = $this->request->getPost('barcode');
         $cluster = $this->clusterModel->getDataCluster();
@@ -207,23 +190,22 @@ class PemesananController extends BaseController
         $existingData = session()->get('dataPengiriman') ?? [];
 
         if (!empty($id)) {
+
             // Cek apakah barcode sudah ada di data yang tersimpan
             foreach ($existingData as $item) {
                 if ($item['id_out_celup'] == $id) {
-                    session()->set('pengirimanForm', $formData);
                     session()->setFlashdata('error', 'Barcode sudah ada di tabel!');
-                    // return redirect()->to(base_url($this->role . '/pengiriman_area'));
+                    return redirect()->to(base_url($this->role . '/pengiriman_area'));
                 }
             }
 
             // Ambil data dari database berdasarkan barcode yang dimasukkan
             $outJalur = $this->pengeluaranModel->getDataForOut($id);
-            // dd ($outJalur);
+
             if (empty($outJalur)) {
-                session()->set('pengirimanForm', $formData);
                 session()->setFlashdata('error', 'Barcode tidak ditemukan di database!');
-                // return redirect()->to(base_url($this->role . '/pengiriman_area'));
-            } elseif (!empty($outJalur)) {
+                return redirect()->to(base_url($this->role . '/pengiriman_area'));
+            } else {
                 // Tambahkan data baru ke dalam array
                 $existingData = array_merge($existingData, $outJalur);
             }
@@ -231,33 +213,103 @@ class PemesananController extends BaseController
             // Simpan kembali ke session
             session()->set('dataPengiriman', $existingData);
             session()->set('pengirimanForm', $formData);
-            // var_dump(session()->get('dataPengiriman'));
+
             // Redirect agar form tidak resubmit saat refresh
             return redirect()->to(base_url($this->role . '/pengiriman_area'));
         }
 
-        // Ambil kembali data form dari session
+        // Persiapkan data untuk dikirim ke view
         $formData = session()->get('pengirimanForm') ?? [];
         $data = [
-            'active' => $this->active,
-            'title' => 'Material System',
-            'role' => $this->role,
-            'dataOut' => $existingData, // Tampilkan data dari session
-            'cluster' => $cluster,
-            'error' => session()->getFlashdata('error'),
-            'area' => $formData['area'] ?? '',
+            'active'    => $this->active,
+            'title'     => 'Material System',
+            'role'      => $this->role,
+            'dataOut'   => $existingData, // Tampilkan data dari session
+            'cluster'   => $cluster,
+            'error'     => session()->getFlashdata('error'),
+            'area'      => $formData['area'] ?? '',
             'tgl_pakai' => $formData['tgl_pakai'] ?? '',
-            'no_model' => $formData['no_model'] ?? '',
+            'no_model'  => $formData['no_model'] ?? '',
             'item_type' => $formData['item_type'] ?? '',
             'kode_warna' => $formData['kode_warna'] ?? '',
-            'warna' => $formData['warna'] ?? '',
+            'warna'     => $formData['warna'] ?? '',
             'kgs_pesan' => $formData['kgs_pesan'] ?? '',
             'cns_pesan' => $formData['cns_pesan'] ?? '',
         ];
-        // dd ($data);
 
         return view($this->role . '/warehouse/form-pengiriman', $data);
     }
+
+
+    // public function pengirimanArea()
+    // {
+
+    //     // Simpan data form ke session
+    //     $formData = [];
+
+    //     // Simpan ke session
+    //     session()->set('pengirimanForm', $formData);
+    //     // var_dump(session()->get('pengirimanForm'));
+    //     // exit;
+
+    //     $id = $this->request->getPost('barcode');
+    //     $cluster = $this->clusterModel->getDataCluster();
+
+    //     // Ambil data dari session (jika ada)
+    //     $existingData = session()->get('dataPengiriman') ?? [];
+
+    //     if (!empty($id)) {
+    //         // Cek apakah barcode sudah ada di data yang tersimpan
+    //         foreach ($existingData as $item) {
+    //             if ($item['id_out_celup'] == $id) {
+    //                 session()->set('pengirimanForm', $formData);
+    //                 session()->setFlashdata('error', 'Barcode sudah ada di tabel!');
+    //                 // return redirect()->to(base_url($this->role . '/pengiriman_area'));
+    //             }
+    //         }
+
+    //         // Ambil data dari database berdasarkan barcode yang dimasukkan
+    //         $outJalur = $this->pengeluaranModel->getDataForOut($id);    
+    //         // dd ($outJalur);
+    //         if (empty($outJalur)) {
+    //             session()->set('pengirimanForm', $formData);
+    //             session()->setFlashdata('error', 'Barcode tidak ditemukan di database!');
+    //             // return redirect()->to(base_url($this->role . '/pengiriman_area'));
+    //         } elseif (!empty($outJalur)) {
+    //             // Tambahkan data baru ke dalam array
+    //             $existingData = array_merge($existingData, $outJalur);
+    //         }
+
+    //         // Simpan kembali ke session
+    //         session()->set('dataPengiriman', $existingData);
+    //         session()->set('pengirimanForm', $formData);
+    //         // var_dump(session()->get('dataPengiriman'));
+    //         // Redirect agar form tidak resubmit saat refresh
+    //         return redirect()->to(base_url($this->role . '/pengiriman_area'));
+    //     }
+
+    //     // Ambil kembali data form dari session
+    //     $formData = session()->get('pengirimanForm') ?? [];
+    //     $data = [
+    //         'active' => $this->active,
+    //         'title' => 'Material System',
+    //         'role' => $this->role,
+    //         'dataOut' => $existingData, // Tampilkan data dari session
+    //         'cluster' => $cluster,
+    //         'error' => session()->getFlashdata('error'),
+    //         'area' => $formData['area'] ?? '',
+    //         'tgl_pakai' => $formData['tgl_pakai'] ?? '',
+    //         'no_model' => $formData['no_model'] ?? '',
+    //         'item_type' => $formData['item_type'] ?? '',
+    //         'kode_warna' => $formData['kode_warna'] ?? '',
+    //         'warna' => $formData['warna'] ?? '',
+    //         'kgs_pesan' => $formData['kgs_pesan'] ?? '',
+    //         'cns_pesan' => $formData['cns_pesan'] ?? '',
+    //     ];
+    //     // dd ($data);
+
+    //     return view($this->role . '/warehouse/form-pengiriman', $data);
+    // }
     public function resetPengirimanArea()
     {
         session()->remove('dataPengiriman');

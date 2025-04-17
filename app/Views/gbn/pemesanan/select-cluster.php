@@ -274,14 +274,14 @@
                     </form>
                 </div>
                 <div class="divider"></div>
-                <div class="form-section">
-                    <h6 class="form-section-title">Input Pengeluaran Stock</h6>
+                <div class="">
+                    <!-- <h6 class="form-section-title">Input Pengeluaran Stock</h6> -->
                     <form id="usageForm" method="post">
                         <input type="hidden" id="idStok" name="idStok">
                         <input type="hidden" id="noModel" name="noModel" value="<?= $noModel; ?>">
                         <input type="hidden" id="namaCluster" name="namaCluster" value="<?= $item['nama_cluster']; ?>">
                         <input type="hidden" id="lotFinal" name="lotFinal" value="<?= $item['lot_final']; ?>">
-                        <div class="row">
+                        <!-- <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label for="qtyKGS" class="form-label">Qty KGS</label>
                                 <div class="input-group">
@@ -307,7 +307,7 @@
                             <button type="submit" class="btn btn-primary btn-submit">
                                 <i class="bi bi-check-circle me-1"></i> Submit
                             </button>
-                        </div>
+                        </div> -->
                     </form>
                 </div>
             </div>
@@ -326,7 +326,7 @@
 
 
                 // Reset form
-                document.getElementById('usageForm').reset();
+                // document.getElementById('usageForm').reset();
 
                 // Fetch data
                 fetch(`<?= base_url('/gbn/pemasukan/getDataByIdStok') ?>/${encodeURIComponent(idStok)}`)
@@ -344,11 +344,18 @@
                             data.forEach(item => {
                                 renderModalContent(item);
                             });
-                        } else if (typeof data === 'object' && data !== null) {
+                        } // Jika data berupa objek dan tidak kosong
+                        else if (typeof data === 'object' && data !== null && Object.keys(data).length > 0) {
                             renderModalContent(data);
-                        } else {
-                            document.getElementById('modalContent').innerHTML =
-                                '<div class="col-12"><div class="alert alert-warning">Data tidak ditemukan.</div></div>';
+                        }
+                        // Jika data kosong
+                        else {
+                            document.getElementById('formPengeluaran').innerHTML = '';
+                            document.getElementById('modalContent').innerHTML = `
+                                <div class="col-12">
+                                    <div class="alert alert-warning">Data tidak ditemukan.</div>
+                                </div>
+                            `;
                         }
 
                         // Show modal
