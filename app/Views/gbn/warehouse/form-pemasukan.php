@@ -130,6 +130,7 @@
                                                         <div class="form-group">
                                                             <label for="tgl">Model : </label>
                                                             <input type="text" class="form-control" name="no_model[]" value="<?= $data['no_model'] ?>" readonly>
+                                                            <input type="hidden" name="id_retur[]" value="<?= $data['id_retur'] ?>">
                                                         </div>
                                                         <div class="row">
                                                             <div class="col-6">
@@ -156,7 +157,7 @@
                                                             <div class="col-6">
                                                                 <div class="form-group">
                                                                     <label for=""> Lot:</label>
-                                                                    <input type="text" class="form-control" name="lot_kirim[]" value="<?= $data['lot_kirim'] ?>" readonly>
+                                                                    <input type="text" class="form-control" name="lot_kirim[]" value="<?= $data['lot_kirim'] ?? $data['lot_retur'] ?>" readonly>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -164,13 +165,13 @@
                                                             <div class="col-6">
                                                                 <div class="form-group">
                                                                     <label for=""> Kgs Kirim:</label>
-                                                                    <input type="number" class="form-control kgs_kirim" name="kgs_kirim[]" value="<?= $data['kgs_kirim'] ?>" readonly>
+                                                                    <input type="number" class="form-control kgs_kirim" name="kgs_kirim[]" value="<?= $data['kgs_kirim'] ?? $data['kgs_retur'] ?>" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="col-6">
                                                                 <div class="form-group">
                                                                     <label for="">Cones:</label>
-                                                                    <input type="number" class="form-control" name="cns_kirim[]" value="<?= $data['cones_kirim'] ?>" readonly>
+                                                                    <input type="number" class="form-control" name="cns_kirim[]" value="<?= $data['cones_kirim'] ?? $data['cns_retur'] ?>" readonly>
                                                                 </div>
                                                             </div>
                                                         </div>

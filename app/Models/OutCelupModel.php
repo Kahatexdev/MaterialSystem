@@ -18,6 +18,7 @@ class OutCelupModel extends Model
         'id_out_celup',
         'id_bon',
         'id_celup',
+        'id_retur',
         'l_m_d',
         'harga',
         'no_karung',
@@ -209,4 +210,6 @@ class OutCelupModel extends Model
             ->whereIn('pemasukan.id_pemasukan', $idPemasukan)
             ->findAll();
     }
+
+    
 }

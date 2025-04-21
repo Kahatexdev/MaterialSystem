@@ -247,4 +247,16 @@ class PemasukanModel extends Model
             ->get()
             ->getResultArray();
     }
+
+    public function getIdPemasukanByRetur($noModel, $itemType, $kodeWarna)
+    {
+        return $this->select('pemasukan.id_pemasukan')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup')
+            ->where('schedule_celup.no_model', $noModel)
+            ->where('schedule_celup.item_type', $itemType)
+            ->where('schedule_celup.kode_warna', $kodeWarna)
+            ->get()
+            ->getRowArray(); // Ambil satu baris saja
+    }
 }
