@@ -177,7 +177,6 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('retur', 'ReturController::index');
     $routes->post('retur/approve', 'ReturController::approve');
     $routes->post('retur/reject', 'ReturController::reject');
-
 });
 
 // celup routes
@@ -455,5 +454,6 @@ $routes->group(
         $routes->get('getKategoriRetur', 'ApiController::getKategoriRetur');
         $routes->post('saveRetur', 'ApiController::saveRetur');
         $routes->get('getTotalPengiriman', 'ApiController::getTotalPengiriman');
+        $routes->post('warehouse/search', 'WarehouseController::search');
     }
 );
