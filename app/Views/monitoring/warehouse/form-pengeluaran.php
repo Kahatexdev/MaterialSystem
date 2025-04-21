@@ -128,13 +128,13 @@
                                                             <div class="col-6">
                                                                 <div class="form-group">
                                                                     <label for=""> Kgs Keluar:</label>
-                                                                    <input type="number" class="form-control" name="kgs_keluar[]" value="<?= $data['kgs_masuk'] ?>" readonly>
+                                                                    <input type="number" class="form-control" name="kgs_keluar[]" value="<?= $data['kgs_kirim'] ?>" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="col-6">
                                                                 <div class="form-group">
                                                                     <label for="">Cones:</label>
-                                                                    <input type="number" class="form-control" name="cns_keluar[]" value="<?= $data['cns_masuk'] ?>" readonly>
+                                                                    <input type="number" class="form-control" name="cns_keluar[]" value="<?= $data['cones_kirim'] ?>" readonly>
                                                                 </div>
                                                             </div>
                                                         </div>
