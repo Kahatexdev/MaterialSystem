@@ -130,7 +130,7 @@
                                                         <div class="form-group">
                                                             <label for="tgl">Model : </label>
                                                             <input type="text" class="form-control" name="no_model[]" value="<?= $data['no_model'] ?>" readonly>
-                                                            <input type="hidden" name="id_retur[]" value="<?= $data['id_retur'] ?>">
+                                                            <input type="hidden" name="id_retur[]" value="<?= $data['id_retur'] ?? NULL ?>">
                                                         </div>
                                                         <div class="row">
                                                             <div class="col-6">

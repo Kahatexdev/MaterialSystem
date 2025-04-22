@@ -1757,4 +1757,18 @@ class WarehouseController extends BaseController
             ]);
         }
     }
+    public function getNamaCluster()
+    {
+        $cluster = $this->request->getVar('namaCluster');
+        $kgsPindah = $this->request->getVar('kgsPindah');
+
+        $results = $this->clusterModel->getCluster($cluster, $kgsPindah);
+
+        $resultsArray = json_decode(json_encode($results), true);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $resultsArray
+        ]);
+    }
 }
