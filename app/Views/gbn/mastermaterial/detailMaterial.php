@@ -1,6 +1,14 @@
 <?php $this->extend($role . '/mastermaterial/header'); ?>
 <?php $this->section('content'); ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
+<style>
+    .btn-xs {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+        line-height: 1.2;
+        border-radius: 0.5rem;
+    }
+</style>
 <div class="container-fluid py-4">
     <?php if (session()->getFlashdata('success')) : ?>
         <script>
@@ -87,15 +95,15 @@
                                 <td><?= $data['qty_pcs'] ?></td>
                                 <td><?= $data['loss'] ?></td>
                                 <td><?= $data['kgs'] ?></td>
-                                <td>
-                                    <button class="btn btn-sm btn-warning btn-edit" data-id="<?= $data['id_material'] ?>">
-                                        <i class="fas fa-edit text-lg"></i>
+                                <td class="d-flex justify-content-start align-items-center gap-1">
+                                    <button class="btn btn-warning btn-xs btn-edit" data-id="<?= $data['id_material'] ?>">
+                                        <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-danger btn-sm btn-delete" data-id="<?= $data['id_material'] ?>">
-                                        <i class="fas fa-trash text-lg"></i>
+                                    <button class="btn btn-danger btn-xs btn-delete" data-id="<?= $data['id_material'] ?>">
+                                        <i class="fas fa-trash"></i>
                                     </button>
-                                    <button class="btn btn-info btn-sm btn-split" data-id="<?= $data['id_material'] ?>" id="btn-split">
-                                        <i class="fas fa-grip-lines-vertical text-lg"></i>
+                                    <button class="btn btn-info btn-xs btn-split" data-id="<?= $data['id_material'] ?>" id="btn-split">
+                                        <i class="fas fa-grip-lines-vertical"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -159,7 +167,7 @@
 
                             <div class="mb-3">
                                 <label for="itemType">Item Type</label>
-                                <select class="form-control" id="add_item_type" name="item_type">
+                                <select class="" id="add_item_type" name="item_type">
                                     <option value="">Pilih Item Type</option>
                                     <?php foreach ($itemType as $item): ?>
                                         <option value="<?= $item['item_type'] ?>"><?= $item['item_type'] ?></option>
@@ -378,6 +386,7 @@
                         <input type="hidden" name="id_material" id="id_material_split">
                         <input type="hidden" name="id_order" id="id_order_split">
                         <input type="hidden" class="form-control" id="color_split" name="color" readonly>
+                        <input type="hidden" class="form-control" id="area_split" name="area" readonly>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="mb-3">
@@ -442,70 +451,60 @@
                         <div class="row">
                             <div class="col-md-3">
                                 <div class="mb-3">
-                                    <label for="area" class="form-label">Area 1</label>
-                                    <select name="split_area_1" id="split_area_1" class="form-control" required>
-                                        <option value="">Pilih Area</option>
-                                        <option value="KK1A">KK1A</option>
-                                        <option value="KK1B">KK1B</option>
-                                        <option value="KK2A">KK2A</option>
-                                        <option value="KK2C">KK2C</option>
-                                        <option value="KK5G">KK5G</option>
-                                        <option value="KK7K">KK7K</option>
-                                        <option value="KK8D">KK8D</option>
-                                        <option value="KK8F">KK8F</option>
-                                        <option value="KK9D">KK9D</option>
-                                        <option value="KK10">KK10</option>
-                                        <option value="KK11M">KK11M</option>
+                                    <label for="area" class="form-label">Item Type 1</label>
+                                    <input type="text" class="form-control" id="item_type_split1" name="item_type" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="inisial" class="form-label">Percentage 1</label>
+                                    <input type="number" step="0.01" class="form-control" id="percentage1" name="percentage1" required>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="color" class="form-label">Item Type 2</label>
+                                    <select name="item_type_split_2" id="item_type_split_2" class="" required>
+                                        <option value="">Pilih Item Type</option>
+                                        <?php foreach ($itemType as $item): ?>
+                                            <option value="<?= $item['item_type'] ?>"><?= $item['item_type'] ?></option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="mb-3">
-                                    <label for="inisial" class="form-label">Qty Area 1</label>
-                                    <input type="number" step="0.01" class="form-control" id="qty1" name="qty_pcs_2" required>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="color" class="form-label">Area 2</label>
-                                    <select name="split_area_2" id="split_area_2" class="form-control" required>
-                                        <option value="">Pilih Area</option>
-                                        <option value="KK1A">KK1A</option>
-                                        <option value="KK1B">KK1B</option>
-                                        <option value="KK2A">KK2A</option>
-                                        <option value="KK2C">KK2C</option>
-                                        <option value="KK5G">KK5G</option>
-                                        <option value="KK7K">KK7K</option>
-                                        <option value="KK8D">KK8D</option>
-                                        <option value="KK8F">KK8F</option>
-                                        <option value="KK9D">KK9D</option>
-                                        <option value="KK10">KK10</option>
-                                        <option value="KK11M">KK11M</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="item_type" class="form-label">Qty Area 2</label>
-                                    <input type="number" step="0.01" class="form-control" id="qty2" name="qty_pcs_2" required>
+                                    <label for="item_type" class="form-label">Percentage 2</label>
+                                    <input type="number" step="0.01" class="form-control" id="percentage2" name="percentage2" required>
                                 </div>
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <div class="mb-3">
-                                    <label for="kgs1" class="form-label">Kgs Area 1</label>
+                                    <label for="kgs1" class="form-label">Kgs Item Type 1</label>
                                     <input type="number" step="0.01" class="form-control" id="kgs1" name="kgs_1" readonly>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <div class="mb-3">
-                                    <label for="kgs2" class="form-label">Kgs Area 2</label>
+                                    <label for="kgs1" class="form-label">Composition 1</label>
+                                    <input type="number" step="0.01" class="form-control" id="comp1" name="comp1" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="kgs2" class="form-label">Kgs Item Type 2</label>
                                     <input type="number" step="0.01" class="form-control" id="kgs2" name="kgs_2" readonly>
                                 </div>
                             </div>
-
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="kgs1" class="form-label">Composition 2</label>
+                                    <input type="number" step="0.01" class="form-control" id="comp2" name="comp2" readonly>
+                                </div>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -524,6 +523,7 @@
         $('#tambahModal').on('shown.bs.modal', function() {
             $('#add_item_type').select2({
                 dropdownParent: $('#tambahModal'),
+                width: '100%',
             });
         });
     });
@@ -605,6 +605,153 @@
 </script>
 <script>
     $(document).ready(function() {
+
+        // Fungsi hitung otomatis Kgs berdasarkan persentase dan Kgs Awal
+        function hitungKgsSplit() {
+            const kgsAwal = parseFloat($('#kgs_split').val()) || 0;
+            const compAwal = parseFloat($('#composition_split').val()) || 0;
+            const perc1 = parseFloat($('#percentage1').val()) || 0;
+            const perc2 = parseFloat($('#percentage2').val()) || 0;
+
+            // Validasi total persentase
+            if (perc1 + perc2 > 100) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Oops...',
+                    text: 'Total persentase tidak boleh lebih dari 100%',
+                });
+                // reset hasil
+                $('#kgs1, #kgs2, #comp1, #comp2').val('');
+                return;
+            }
+
+            // Hitung langsung dari Kgs Awal
+            const kgs1 = kgsAwal * (perc1 / 100);
+            const kgs2 = kgsAwal * (perc2 / 100);
+
+            //Hitung komposisi baru
+            const newComp1 = compAwal * (perc1 / 100);
+            const newComp2 = compAwal * (perc2 / 100);
+
+            // Tampilkan hasil
+            $('#kgs1').val(kgs1.toFixed(2));
+            $('#kgs2').val(kgs2.toFixed(2));
+            $('#comp1').val(newComp1.toFixed(2));
+            $('#comp2').val(newComp2.toFixed(2));
+        }
+
+        // Saat tombol split diklik: fetch data + tampilkan modal
+        $(document).on('click', '.btn-split', function() {
+            $('#modalSplitMaterial').on('shown.bs.modal', function() {
+                $('#item_type_split_2').select2({
+                    dropdownParent: $('#modalSplitMaterial'),
+                    // theme: 'bootstrap-5',
+                    width: '100%',
+                    placeholder: 'Pilih Item Type',
+                    allowClear: true
+                });
+            });
+
+            const materialId = $(this).data('id');
+            $('#percentage1, #percentage2, #kgs1, #kgs2, #comp1, #comp2').val('');
+
+            $.ajax({
+                url: '<?= base_url($role . '/getMaterialDetails') ?>/' + materialId,
+                type: 'GET',
+                success: function(res) {
+                    // isi semua field seperti sebelumnya...
+                    $('#id_material_split').val(res.id_material);
+                    $('#id_order_split').val(res.id_order);
+                    $('#style_size_split').val(res.style_size);
+                    $('#inisial_split').val(res.inisial);
+                    $('#gw_split').val(res.gw);
+                    $('#loss_split').val(res.loss);
+                    $('#item_type_split').val(res.item_type);
+                    $('#item_type_split1').val(res.item_type);
+                    $('#qty_pcs_split').val(res.qty_pcs);
+                    $('#area_split').val(res.area);
+                    $('#composition_split').val(res.composition);
+                    $('#kode_warna_split').val(res.kode_warna);
+                    $('#color_split').val(res.color);
+                    $('#kgs_split').val(res.kgs);
+
+                    // reset persentase & hasil
+                    $('#percentage1, #percentage2').val('');
+                    $('#kgs1, #kgs2').val('');
+
+                    // buka modal
+                    $('#modalSplitMaterial').modal('show');
+                },
+                error: function() {
+                    alert('Gagal mengambil data material.');
+                }
+            });
+        });
+
+        // Re-hitung setiap user ubah percentage
+        $('#percentage1, #percentage2').on('input', hitungKgsSplit);
+
+        // Validasi & kirim data via AJAX
+        $('#splitForm').on('submit', function(e) {
+            e.preventDefault();
+
+            const perc1 = parseFloat($('#percentage1').val()) || 0;
+            const perc2 = parseFloat($('#percentage2').val()) || 0;
+            const comp1 = parseFloat($('#comp1').val()) || 0;
+            const comp2 = parseFloat($('#comp2').val()) || 0;
+
+            if (perc1 + perc2 !== 100) {
+                alert('Total persentase harus 100%');
+                return;
+            }
+
+            $.ajax({
+                url: '<?= base_url($role . '/splitMaterial') ?>',
+                type: 'POST',
+                data: {
+                    id_material_old: $('#id_material_split').val(),
+                    id_order: $('#id_order_split').val(),
+                    style_size: $('#style_size_split').val(),
+                    inisial: $('#inisial_split').val(),
+                    gw: $('#gw_split').val(),
+                    loss: $('#loss_split').val(),
+                    item_type_1: $('#item_type_split1').val(),
+                    item_type_2: $('#item_type_split_2').val(),
+                    composition: $('#composition_split').val(),
+                    kode_warna: $('#kode_warna_split').val(),
+                    color: $('#color_split').val(),
+                    area: $('#area_split').val(),
+                    qty_pcs: $('#qty_pcs_split').val(),
+                    percentage1: perc1,
+                    percentage2: perc2,
+                    comp1: comp1,
+                    comp2: comp2,
+                    kgs_1: $('#kgs1').val(),
+                    kgs_2: $('#kgs2').val()
+                },
+                success() {
+                    Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: 'Material berhasil di‑split!'
+                        })
+                        .then(() => location.reload());
+                },
+                error() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: 'Terjadi kesalahan saat split data.'
+                    });
+                }
+            });
+        });
+
+    });
+</script>
+
+<!-- <script>
+    $(document).ready(function() {
         function hitungKgsSplit() {
             let gw = parseFloat($('#gw_split').val()) || 0;
             let comp = parseFloat($('#composition_split').val()) || 0; // Misal 85.95
@@ -640,6 +787,7 @@
                     $('#gw_split').val(response.gw);
                     $('#loss_split').val(response.loss);
                     $('#item_type_split').val(response.item_type);
+                    $('#item_type_split1').val(response.item_type);
                     $('#qty_pcs_split').val(response.qty_pcs);
                     $('#composition_split').val(response.composition);
                     $('#kode_warna_split').val(response.kode_warna);
@@ -709,5 +857,5 @@
             e.preventDefault(); // Stop form dari submit default
         });
     });
-</script>
+</script> -->
 <?php $this->endSection(); ?>
