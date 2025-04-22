@@ -44,7 +44,7 @@ class WarehouseController extends BaseController
     protected $historyPindahPalet;
     protected $historyPindahOrder;
     protected $pengeluaranModel;
-    protected $returModel;  
+    protected $returModel;
 
     public function __construct()
     {
@@ -161,7 +161,7 @@ class WarehouseController extends BaseController
             foreach ($existingData as $item) {
                 if ($item['id_out_celup'] == $id) {
                     session()->setFlashdata('error', "Barcode sudah ada di tabel! ({$id})");
-                    return redirect()->to(base_url($this->role."/pemasukan"));
+                    return redirect()->to(base_url($this->role . "/pemasukan"));
                 }
             }
 
@@ -175,7 +175,7 @@ class WarehouseController extends BaseController
                 $findId = $this->outCelupModel->find($id);
                 if (empty($findId)) {
                     session()->setFlashdata('error', "Data tidak ditemukan! ({$id})");
-                    return redirect()->to(base_url($this->role."/pemasukan"));
+                    return redirect()->to(base_url($this->role . "/pemasukan"));
                 }
                 $dataRetur = $this->returModel->getDataRetur($id, $findId['id_retur']);
                 // log_message('debug', 'Data retur: ' . json_encode($dataRetur)); // Debugging
@@ -184,14 +184,14 @@ class WarehouseController extends BaseController
                 } else {
                     // 4. Keduanya kosong → error
                     session()->setFlashdata('error', "Data tidak ditemukan! ({$id})");
-                    return redirect()->to(base_url($this->role."/pemasukan"));
+                    return redirect()->to(base_url($this->role . "/pemasukan"));
                 }
             }
 
             // 5. Merge & simpan session, lalu redirect
             $existingData = array_merge($existingData, $newData);
             session()->set('dataOut', $existingData);
-            return redirect()->to(base_url($this->role."/pemasukan"));
+            return redirect()->to(base_url($this->role . "/pemasukan"));
         }
 
         // Tampilkan form jika bukan POST atau barcode kosong
@@ -204,9 +204,9 @@ class WarehouseController extends BaseController
             'error'    => session()->getFlashdata('error'),
         ];
 
-        return view($this->role."/warehouse/form-pemasukan", $data);
+        return view($this->role . "/warehouse/form-pemasukan", $data);
     }
-    
+
     public function prosesPemasukan()
     {
         $action = $this->request->getPost('action'); // Ambil tombol yang diklik
@@ -1011,7 +1011,7 @@ class WarehouseController extends BaseController
         }
 
         return $this->response->setJSON($dataArray);
-    }   
+    }
 
     public function getNoModel()
     {
@@ -1093,7 +1093,7 @@ class WarehouseController extends BaseController
             if ($idRetur) {
                 $this->outCelupModel->insert([
                     'id_retur' => $idRetur['id_retur'],
-                    'no_karung' => $data['no_karung'],  
+                    'no_karung' => $data['no_karung'],
                     'kgs_kirim' => $data['kgs_kirim'],
                     'cones_kirim' => $data['cones_kirim'],
                     'lot_kirim' => $lotStock,
@@ -1747,5 +1747,19 @@ class WarehouseController extends BaseController
                 'message' => 'Gagal menyimpan data'
             ]);
         }
+    }
+    public function getNamaCluster()
+    {
+        $cluster = $this->request->getVar('namaCluster');
+        $kgsPindah = $this->request->getVar('kgsPindah');
+
+        $results = $this->clusterModel->getCluster($cluster, $kgsPindah);
+
+        $resultsArray = json_decode(json_encode($results), true);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $resultsArray
+        ]);
     }
 }

@@ -134,7 +134,7 @@
     </div>
 
     <div id="result"></div>
-    <!-- Modal -->
+    <!-- Modal pindah order -->
     <div class="modal fade" id="modalPindahOrder" tabindex="-1" aria-labelledby="modalPindahOrderLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <form id="formPindahOrder" class="needs-validation" novalidate>
@@ -151,6 +151,7 @@
                             <label for="ModelSelect" class="form-label">Pilih No Model</label>
                             <select id="ModelSelect" class="form-select" style="width: 100%"></select>
                         </div>
+
                         <div class="row g-3" id="pindahOrderContainer">
                             <!-- Isi kartu akan di‑inject via JS -->
                         </div>
@@ -164,6 +165,43 @@
             </form>
         </div>
     </div>
+    <!-- modal pindah order end -->
+    <!-- modal pindah palet -->
+    <div class="modal fade" id="modalPindahPalet" tabindex="-1" aria-labelledby="modalPindahPaletLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <form id="formPindahPalet" class="needs-validation" novalidate>
+                <div class="modal-content">
+                    <!-- Header -->
+                    <div class="modal-header bg-info text-white border-0">
+                        <h5 class="modal-title text-white" id="modalPindahOrderLabel">Pindah Palet</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <!-- Body -->
+                    <div class="modal-body">
+                        <div class="row g-3" id="pindahPaletContainer">
+                            <!-- Isi kartu akan di‑inject via JS -->
+                        </div>
+                        <div class="mb-3 d-flex justify-content-between">
+                            <input type="text" class="form-control me-2" name="ttl_kgs_pindah" readonly placeholder="Total Kgs">
+                            <input type="text" class="form-control mx-2" name="ttl_cns_pindah" readonly placeholder="Total Cns">
+                            <input type="text" class="form-control ms-2" name="ttl_krg_pindah" readonly placeholder="Total Krg">
+                        </div>
+                        <!-- SELECT2 FILTER -->
+                        <div class="mb-3">
+                            <label for="ClusterSelect" class="form-label">Pilih Cluster</label>
+                            <select id="ClusterSelect" class="form-select" style="width: 100%"></select>
+                        </div>
+                    </div>
+                    <!-- Footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-info">Pindah</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- modal pindah palet end -->
 
 </div>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
@@ -210,7 +248,12 @@
                                         <p><strong>Total Kgs:</strong> ${(parseFloat(totalKgs) || 0).toFixed(2)} KG | ${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out} Cones | ${totalKrg} KRG</p>
                                     </div>
                                     <div class="col-md-4 d-flex flex-column gap-2">
-                                        <button class="btn btn-outline-info btn-sm pindahPalet" data-id="${item.id_stock}" data-cluster="${item.nama_cluster}" data-lot="${item.lot_stock}" data-kgs="${totalKgs}" data-cones="${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out}" data-krg="${totalKrg}">Pindah Palet</button>
+                                        <button class="btn btn-outline-info btn-sm pindahPalet" 
+                                            data-id="${item.id_stock}"
+                                            data-nama-cluster="${item.nama_cluster}"
+                                            >
+                                        Pindah Palet
+                                        </button>
                                         <button 
                                             class="btn btn-outline-info btn-sm pindahOrder"
                                             data-id="${item.id_stock}"
@@ -369,6 +412,103 @@
             Swal.fire({
                 icon: 'error',
                 text: `Error: ${err}`
+            });
+        });
+    });
+
+    // modal pindah palet
+    // ketika tombol “Pindah Palet diklik
+    $(document).on('click', '.pindahPalet', function() {
+        const idStock = $(this).data('id');
+        const base = '<?= base_url() ?>';
+        const role = '<?= session()->get('role') ?>';
+        const namaCluster = $(this).data('nama-cluster-old');
+
+        $('#modalPindahPalet').modal('show');
+        const $select = $('#ClusterSelect').prop('disabled', true).empty().append('<option>Loading…</option>');
+        const $container = $('#pindahPaletContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i></div>');
+
+        // Fetch detail palet
+        $.post(`${base}/${role}/warehouse/getPindahPalet`, {
+            id_stock: idStock
+        }, res => {
+            $container.empty();
+            if (!res.success || !res.data.length) {
+                return $container.html('<div class="alert alert-warning text-center">Data tidak ditemukan</div>');
+            }
+
+            res.data.forEach(d => {
+                const lot = d.lot_stock || d.lot_awal;
+                $container.append(`
+                <div class="col-md-12">
+                    <div class="card result-card h-100">
+                        <div class="form-check">
+                            <input class="form-check-input row-check" type="checkbox" 
+                                   name="pindah[]" 
+                                   value="${d.id_out_celup}" 
+                                   data-kgs="${parseFloat(d.kgs_kirim || 0).toFixed(2)}" 
+                                   data-cns="${d.cones_kirim}" 
+                                   data-krg="1" 
+                                   id="chk${d.id_out_celup}">
+                            <label class="form-check-label fw-bold" for="chk${d.id_out_celup}">
+                                ${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.warna}
+                            </label>
+                            <input type="hidden" name="id_stock[]" value="${d.id_stock}">
+                        </div>
+                        <div class="card-body row">
+                            <div class="col-md-6">
+                                <p><strong>Kode Warna:</strong> ${d.kode_warna}</p>
+                                <p><strong>Warna:</strong> ${d.warna}</p>
+                                <p><strong>Lot Jalur:</strong> ${lot}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>No Karung:</strong> ${d.no_karung}</p>
+                                <p><strong>Total Kgs:</strong> ${parseFloat(d.kgs_kirim || 0).toFixed(2)} KG</p>
+                                <p><strong>Cones:</strong> ${d.cones_kirim} Cns</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+            });
+
+            // Recalculate totals when checkboxes change
+            $container.on('change', '.row-check', function() {
+                let totalKgs = 0,
+                    totalCns = 0,
+                    totalKrg = 0;
+                $container.find('.row-check:checked').each(function() {
+                    totalKgs += parseFloat($(this).data('kgs'));
+                    totalCns += parseInt($(this).data('cns'), 10);
+                    totalKrg += parseInt($(this).data('krg'), 10);
+                });
+                $('input[name="ttl_kgs_pindah"]').val(totalKgs.toFixed(2));
+                $('input[name="ttl_cns_pindah"]').val(totalCns);
+                $('input[name="ttl_krg_pindah"]').val(totalKrg);
+            });
+        }).fail((_, __, err) => {
+            $container.html(`<div class="alert alert-danger text-center">Error: ${err}</div>`);
+        });
+
+        // Fetch model tujuan
+        $.getJSON(`${base}/${role}/warehouse/getCluster`, {
+            namaCluster,
+            totalKgs
+        }, res => {
+            $select.empty();
+            if (res.success && res.data.length) {
+                $select.append('<option></option>');
+                res.data.forEach(d => {
+                    $select.append(`<option value="${d.nama_cluster}">${d.nama_cluster}</option>`);
+                });
+            } else {
+                $select.append('<option>Tidak ada model</option>');
+            }
+            $select.prop('disabled', false).select2({
+                placeholder: 'Pilih Model Tujuan',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('#modalPindahPalet')
             });
         });
     });
