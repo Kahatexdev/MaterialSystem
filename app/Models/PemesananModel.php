@@ -157,7 +157,8 @@ class PemesananModel extends Model
                 AVG(pemesanan.sisa_cones_mc) AS cns_sisa,
                 pemesanan.lot,
                 pemesanan.keterangan,
-                pemesanan.status_kirim
+                pemesanan.status_kirim,
+                pemesanan.additional_time
             ")
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
