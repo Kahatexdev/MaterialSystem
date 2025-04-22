@@ -167,7 +167,7 @@ class WarehouseController extends BaseController
 
             // 2. Coba ambil dari outCelup
             $outCelup = $this->outCelupModel->getDataOut($id);
-            log_message('debug', 'Data outCelup: ' . json_encode($outCelup)); // Debugging
+            // log_message('debug', 'Data outCelup: ' . json_encode($outCelup)); // Debugging
             if (!empty($outCelup)) {
                 $newData = $outCelup;
             } else {
@@ -178,7 +178,7 @@ class WarehouseController extends BaseController
                     return redirect()->to(base_url($this->role."/pemasukan"));
                 }
                 $dataRetur = $this->returModel->getDataRetur($id, $findId['id_retur']);
-                log_message('debug', 'Data retur: ' . json_encode($dataRetur)); // Debugging
+                // log_message('debug', 'Data retur: ' . json_encode($dataRetur)); // Debugging
                 if (!empty($dataRetur)) {
                     $newData = $dataRetur;
                 } else {
@@ -1078,16 +1078,39 @@ class WarehouseController extends BaseController
         $db = \Config\Database::connect();
         $db->transStart();
 
+        $idOutCelupBaru = [];
         $idPemasukanBaru = [];
         $idStockBaru = [];
 
         foreach ($dataOutCelup as $index => $data) {
             $cluster = $idStockData[$index]['nama_cluster'];
             $lotStock = $idStockData[$index]['lot_stock'];
+            $idOutCelup = $data['id_out_celup'];
+            // log_message('debug', 'ID Out Celup: ' . $idOutCelup);
+            $idRetur = $this->outCelupModel->select('id_retur')
+                ->where('id_out_celup', $idOutCelup)
+                ->first();
+            if ($idRetur) {
+                $this->outCelupModel->insert([
+                    'id_retur' => $idRetur['id_retur'],
+                    'no_karung' => $data['no_karung'],  
+                    'kgs_kirim' => $data['kgs_kirim'],
+                    'cones_kirim' => $data['cones_kirim'],
+                    'lot_kirim' => $lotStock,
+                    'ganti_retur' => '0',
+                    'admin' => session()->get('username')
+                ]);
+                $idOutCelupBaru[] = $this->outCelupModel->getInsertID();
+            }
+
+            // update out_jalur id_pemasukan
+            $this->pemasukanModel->set('out_jalur', '1')
+                ->where('id_out_celup', $idOutCelup)
+                ->update();
 
             // Insert ke pemasukan
             $this->pemasukanModel->insert([
-                'id_out_celup' => $data['id_out_celup'],
+                'id_out_celup' => $idOutCelupBaru[$index],
                 'tgl_masuk' => date('Y-m-d'),
                 'nama_cluster' => $cluster,
                 'out_jalur' => '0',
@@ -1142,8 +1165,9 @@ class WarehouseController extends BaseController
             ]);
         }
 
-        log_message('debug', 'ID Pemasukan Baru: ' . print_r($idPemasukanBaru, true));
-        log_message('debug', 'ID Stock Baru: ' . print_r($idStockBaru, true));
+        // log_message('debug', 'ID Out Celup Baru: ' . print_r($idOutCelupBaru, true));
+        // log_message('debug', 'ID Pemasukan Baru: ' . print_r($idPemasukanBaru, true));
+        // log_message('debug', 'ID Stock Baru: ' . print_r($idStockBaru, true));
 
         return $this->response->setJSON([
             'success' => true,
