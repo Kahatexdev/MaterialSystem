@@ -202,12 +202,12 @@ class StockModel extends Model
     public function getDataCluster($noModel, $itemType, $kodeWarna, $warna)
     {
         return $this->select("
-        id_stock,
-        nama_cluster, 
-        SUM(kgs_stock_awal + kgs_in_out) AS total_kgs, 
-        SUM(cns_stock_awal + cns_in_out) AS total_cns, 
-        SUM(krg_stock_awal + krg_in_out) AS total_krg, 
-        COALESCE(lot_awal, lot_stock) AS lot_final
+        nama_cluster,
+        MAX(id_stock) AS id_stock,
+        SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS total_kgs,
+        SUM(COALESCE(cns_stock_awal, 0) + COALESCE(cns_in_out, 0)) AS total_cns,
+        SUM(COALESCE(krg_stock_awal, 0) + COALESCE(krg_in_out, 0)) AS total_krg,
+        COALESCE(NULLIF(lot_awal, ''), NULLIF(lot_stock, '')) AS lot_final
     ")
             ->where('no_model', $noModel)
             ->where('item_type', $itemType)
@@ -217,6 +217,7 @@ class StockModel extends Model
             ->get()
             ->getResultArray();
     }
+
 
 
     public function getDataByIdStok($idStok)
@@ -248,5 +249,21 @@ class StockModel extends Model
                 'krg_in_out' => $krgInOut,
                 'krg_stock_awal' => $krgStockAwal
             ]);
+    }
+
+    public function getStockInPemasukanById($idStok)
+    {
+        return $this->db->table('pemasukan')
+            ->select('pemasukan.id_pemasukan, stock.nama_cluster, stock.id_stock, stock.no_model, stock.item_type, stock.kode_warna, stock.warna, stock.lot_awal, stock.lot_stock,out_celup.*')
+            ->join('stock', 'stock.id_stock = pemasukan.id_stock', 'left')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->where('pemasukan.id_stock', $idStok)
+            ->where('pemasukan.out_jalur =', '0')
+            ->groupBy('pemasukan.id_pemasukan')
+            ->groupBy('stock.id_stock')
+            ->groupBy('out_celup.id_out_celup')
+            ->orderBy('pemasukan.id_pemasukan', 'DESC')
+            ->get()
+            ->getResultArray();
     }
 }
