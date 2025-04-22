@@ -160,4 +160,27 @@ class ReturModel extends Model
 
         return $query->getRowArray(); // Pastikan return berbentuk array
     }
+
+    public function getDataRetur($id, $idRetur)
+    {
+        return $this->db->table('out_celup')
+            ->select('retur.*, out_celup.id_out_celup')
+            ->join('retur', 'retur.id_retur = retur.id_retur', 'left')
+            ->where('out_celup.id_out_celup', $id)
+            ->where('retur.id_retur', $idRetur)
+            ->distinct()
+            ->get()
+            ->getResultArray();
+    }
+
+    // public function getDataOut($id)
+    // {
+    //     return $this->db->table('out_celup')
+    //         ->select('out_celup.*, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna')
+    //         ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup')
+    //         ->where('out_celup.id_out_celup', $id)
+    //         ->distinct()
+    //         ->get()
+    //         ->getResultArray();
+    // }
 }

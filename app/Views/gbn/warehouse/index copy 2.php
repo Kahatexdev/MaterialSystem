@@ -1,6 +1,5 @@
 <?php $this->extend($role . '/warehouse/header'); ?>
 <?php $this->section('content'); ?>
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
 
 <style>
     :root {
@@ -135,30 +134,20 @@
 
     <div id="result"></div>
     <!-- Modal -->
-    <div class="modal fade" id="modalPindahOrder" tabindex="-1" aria-labelledby="modalPindahOrderLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <form id="formPindahOrder" class="needs-validation" novalidate>
+    <div class="modal fade" id="modalPindahOrder" tabindex="-1" role="dialog" aria-labelledby="modalPindahOrderLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <form id="formPindahOrder">
                 <div class="modal-content">
-                    <!-- Header -->
-                    <div class="modal-header bg-info text-white border-0">
-                        <h5 class="modal-title text-white" id="modalPindahOrderLabel">Pindah Order</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalPindahOrderLabel">Pindah Order</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <!-- Body -->
                     <div class="modal-body">
-                        <!-- SELECT2 FILTER -->
-                        <div class="mb-3">
-                            <label for="ModelSelect" class="form-label">Pilih No Model</label>
-                            <select id="ModelSelect" class="form-select" style="width: 100%"></select>
-                        </div>
-                        <div class="row g-3" id="pindahOrderContainer">
-                            <!-- Isi kartu akan di‑inject via JS -->
-                        </div>
+                        <!-- Cards akan diisi via JS -->
                     </div>
-                    <!-- Footer -->
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                        <button type="submit" class="btn btn-info">Simpan Perubahan</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="savePindahOrder">Save changes</button>
                     </div>
                 </div>
             </form>
@@ -166,7 +155,7 @@
     </div>
 
 </div>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
+
 <script>
     $(document).ready(function() {
         $('#filter_data').click(function(e) {
@@ -211,14 +200,7 @@
                                     </div>
                                     <div class="col-md-4 d-flex flex-column gap-2">
                                         <button class="btn btn-outline-info btn-sm pindahPalet" data-id="${item.id_stock}" data-cluster="${item.nama_cluster}" data-lot="${item.lot_stock}" data-kgs="${totalKgs}" data-cones="${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out}" data-krg="${totalKrg}">Pindah Palet</button>
-                                        <button 
-                                            class="btn btn-outline-info btn-sm pindahOrder"
-                                            data-id="${item.id_stock}"
-                                            data-no-model-old="${item.no_model}"
-                                            data-kode-warna="${item.kode_warna}"
-                                            >
-                                            Pindah Order
-                                        </button>
+                                        <button class="btn btn-outline-info btn-sm pindahOrder" data-id="${item.id_stock}" data-noModel="${item.no_model}" data-cluster="${item.nama_cluster}" data-lot="${item.lot_stock}" data-kgs="${totalKgs}" data-cones="${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out}" data-krg="${totalKrg}" data-itemType="${item.item_type}" data-kodeWarna="${item.kode_warna}">Pindah Order</button>
                                     </div>
                                 </div>
                             </div>`;
@@ -253,124 +235,75 @@
     });
 
     // modal pindah order
-    // ketika tombol “Pindah Order” diklik
     $(document).on('click', '.pindahOrder', function() {
         const idStock = $(this).data('id');
-        const base = '<?= base_url() ?>';
-        const role = '<?= session()->get('role') ?>';
-        const noModelOld = $(this).data('no-model-old');
-        const kodeWarna = $(this).data('kode-warna');
+        const $modal = $('#modalPindahOrder');
+        const $body = $modal.find('.modal-body');
+        $body.html('<p>Loading...</p>');
+        $modal.modal('show');
 
-        $('#modalPindahOrder').modal('show');
-        const $select = $('#ModelSelect').prop('disabled', true).empty().append('<option>Loading…</option>');
-        const $container = $('#pindahOrderContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i></div>');
+        $.ajax({
+                url: `<?= base_url(session()->get('role') . '/warehouse/getPindahOrder') ?>`,
+                method: 'POST',
+                data: {
+                    id_stock: idStock
+                },
+                dataType: 'json'
+            })
+            .done(function(res) {
+                if (!res.success || !res.data.length) {
+                    return $body.html(`<div class="alert alert-warning">${res.message || 'Data tidak ditemukan'}</div>`);
+                }
 
-        // Fetch model tujuan
-        $.getJSON(`${base}/${role}/warehouse/getNoModel`, {
-            noModelOld,
-            kodeWarna
-        }, res => {
-            $select.empty();
-            if (res.success && res.data.length) {
-                $select.append('<option></option>');
+                let html = '<div class="row g-3">';
                 res.data.forEach(d => {
-                    $select.append(`<option value="${d.no_model}|${d.item_type}|${d.kode_warna}|${d.color}">${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.color}</option>`);
-                });
-            } else {
-                $select.append('<option>Tidak ada model</option>');
-            }
-            $select.prop('disabled', false).select2({
-                placeholder: 'Pilih Model Tujuan',
-                allowClear: true,
-                width: '100%',
-                dropdownParent: $('#modalPindahOrder')
-            });
-        });
-
-        // Fetch detail order
-        $.post(`${base}/${role}/warehouse/getPindahOrder`, {
-            id_stock: idStock
-        }, res => {
-            $container.empty();
-            if (!res.success || !res.data.length) {
-                return $container.html('<div class="alert alert-warning text-center">Data tidak ditemukan</div>');
-            }
-
-            res.data.forEach(d => {
-                const lot = d.lot_stock || d.lot_awal;
-                $container.append(`
-                <div class="col-md-12">
-                    <div class="card result-card h-100">
-                        <div class="form-check">
-                            <input class="form-check-input row-check" type="checkbox" name="pindah[]" value="${d.id_out_celup}" id="chk${d.id_out_celup}">
-                            <label class="form-check-label fw-bold" for="chk${d.id_out_celup}">
-                                ${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.warna}
-                            </label>
-                            <input type="hidden" name="id_stock[]" value="${d.id_stock}">
-                        </div>
-                        <div class="card-body row">
-                            <div class="col-md-6">
-                                <p><strong>Kode Warna:</strong> ${d.kode_warna}</p>
-                                <p><strong>Warna:</strong> ${d.warna}</p>
-                                <p><strong>Lot Jalur:</strong> ${lot}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <p><strong>No Karung:</strong> ${d.no_karung}</p>
-                                <p><strong>Total Kgs:</strong> ${parseFloat(d.kgs_kirim || 0).toFixed(2)} KG</p>
-                                <p><strong>Cones:</strong> ${d.cones_kirim} Cns</p>
-                            </div>
-                        </div>
-                    </div>
+                    html += `
+              <div class="col-sm-6">
+                <div class="card h-100">
+                  <div class="card-header d-flex align-items-center">
+                    <input type="checkbox" class="form-check-input me-2 row-check" 
+                           name="pindah[]" value="${d.id_pemasukan}">
+                    <strong><h5 class="card-title">${d.nama_cluster} | ${d.no_model}</h5></strong>
+                  </div>
+                  <div class="card-body">
+                    <p class="card-text"><strong>Lot Jalur:</strong> ${d.lot_stock || d.lot_awal}</p>
+                    <p class="card-text"><strong>Kode Warna:</strong> ${d.kode_warna}</p>
+                    <p class="card-text"><strong>Warna:</strong> ${d.warna}</p>
+                    <p class="card-text"><strong>Total Kgs:</strong> ${(parseFloat(d.kgs_kirim) || 0).toFixed(2)} KG | ${d.cones_kirim} Cones | ${d.no_karung} KRG</p>
+                  </div>
                 </div>
-            `);
+              </div>
+            `;
+                });
+                html += '</div>';
+                $body.html(html);
+            })
+            .fail(function(xhr, status, err) {
+                $body.html(`<div class="alert alert-danger">Error: ${err}</div>`);
             });
-        }).fail((_, __, err) => {
-            $container.html(`<div class="alert alert-danger text-center">Error: ${err}</div>`);
-        });
     });
 
-    $('#formPindahOrder').on('submit', function(e) {
-        e.preventDefault();
-        const role = '<?= session()->get('role') ?>';
-        const base = '<?= base_url() ?>';
-        const model = $('#ModelSelect').val();
-        const orders = $("input[name='pindah[]']:checked").map((_, el) => el.value).get();
-        const stock = $("input[name='id_stock[]']").map((_, el) => el.value).get();
-
-        if (!model) return Swal.fire({
-            icon: 'warning',
-            text: 'Pilih model tujuan terlebih dahulu!'
-        });
-        if (!orders.length) return Swal.fire({
-            icon: 'warning',
-            text: 'Pilih minimal satu order!'
-        });
-
-        $.post(`${base}/${role}/warehouse/savePindahOrder`, {
-            no_model_tujuan: model,
-            idOutCelup: orders,
-            id_stock: stock
-        }, res => {
-            if (res.success) {
-                Swal.fire({
-                    icon: 'success',
-                    text: `Berhasil memindahkan ${orders.length} order.`
-                }).then(() => {
+    // Save handler tetap sama
+    $(document).on('click', '#savePindahOrder', function() {
+        const selected = $("#formPindahOrder")
+            .find("input[name='pindah[]']:checked")
+            .map((_, c) => c.value).get();
+        if (!selected.length) {
+            return alert('Pilih minimal satu kartu!');
+        }
+        $.post('/stock/save-pindah-order', {
+                id_pemasukan: selected
+            }, function(res) {
+                if (res.success) {
+                    alert('Berhasil memindahkan ' + selected.length + ' order.');
                     $('#modalPindahOrder').modal('hide');
-                    $('#filter_data').click(); // reload
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    text: res.message || 'Terjadi kesalahan saat memindahkan order.'
-                });
-            }
-        }, 'json').fail((_, __, err) => {
-            Swal.fire({
-                icon: 'error',
-                text: `Error: ${err}`
-            });
-        });
+                    // reload data utama...
+                } else {
+                    alert('Gagal: ' + res.message);
+                }
+            }, 'json')
+            .fail((_, __, err) => alert('Error: ' + err));
     });
 </script>
+
 <?php $this->endSection(); ?>

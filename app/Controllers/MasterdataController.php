@@ -592,9 +592,9 @@ class MasterdataController extends BaseController
 
 
         if ($this->materialModel->delete($id)) {
-            return redirect()->to(base_url($this->role . '/material/' . $idorder))->with('success', 'Data Berhsil.');
+            return redirect()->to(base_url($this->role . '/material/' . $idorder))->with('success', 'Data Berhasil dihapus.');
         } else {
-            return redirect()->to(base_url($this->role . '/material/' . $idorder))->with('error', 'Data gagal.');
+            return redirect()->to(base_url($this->role . '/material/' . $idorder))->with('error', 'Data gagal dihapus.');
         }
     }
 

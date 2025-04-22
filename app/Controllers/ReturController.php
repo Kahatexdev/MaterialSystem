@@ -8,7 +8,8 @@ use App\Models\MasterOrderModel;
 use App\Models\MasterMaterialModel;
 use App\Models\MaterialModel;
 use App\Models\ReturModel;
-
+use App\Models\PemasukanModel;
+use App\Models\OutCelupModel;
 class ReturController extends BaseController
 {
     protected $role;
@@ -19,6 +20,8 @@ class ReturController extends BaseController
     protected $masterMaterial;
     protected $materialModel;
     protected $returModel;
+    protected $pemasukanModel;
+    protected $outCelupModel;
 
     public function __construct()
     {
@@ -26,7 +29,8 @@ class ReturController extends BaseController
         $this->masterMaterial = new MasterMaterialModel();
         $this->masterOrderModel = new MasterOrderModel();
         $this->returModel = new ReturModel();
-
+        $this->pemasukanModel = new PemasukanModel();
+        $this->outCelupModel = new OutCelupModel();
 
         $this->role = session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
@@ -44,7 +48,7 @@ class ReturController extends BaseController
 
 
     public function index()
-    {
+    {   
         // Ambil data retur
         $dataRetur = $this->returModel->findAll();
         // dd ($dataRetur);
@@ -89,6 +93,24 @@ class ReturController extends BaseController
             'admin' => session()->get('username')
         ];
         $this->returModel->update($id, $data);
+        // log_message('info', 'Data update retur: ' . json_encode($data));
+        $dataRetur = $this->returModel->find($id);
+        // dd ($dataRetur);
+        // update id_retur di tabel pemasukan
+        $barcodeNew = [
+            'id_retur'       => $dataRetur['id_retur'],
+            'no_karung'     => (int)$dataRetur['krg_retur'] ?? 0,
+            'kgs_kirim'          => (float)$dataRetur['kgs_retur'],
+            'cones_kirim'      => (int)$dataRetur['cns_retur'],
+            'lot_kirim'      => $dataRetur['lot_retur'],
+            'admin'      => session()->get('username')
+        ];
+
+        // log_message('info', 'Data barcodeNew: ' . json_encode($barcodeNew));
+        // dd ($barcodeNew);
+        $this->outCelupModel->insert($barcodeNew);
+
+        // dd ($dataPemasukan);
         // flashdata
         session()->setFlashdata('success', 'Data berhasil di update.');
         return redirect()->to(base_url(session()->get('role') . '/retur'));

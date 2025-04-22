@@ -130,7 +130,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('warehouse/sisaKapasitas', 'WarehouseController::getSisaKapasitas');
     $routes->post('warehouse/getCluster', 'WarehouseController::getClusterbyId');
     $routes->post('warehouse/updateCluster', 'WarehouseController::updateCluster');
-    $routes->post('warehouse/getNoModel', 'WarehouseController::getNoModel');
+    $routes->get('warehouse/getNoModel', 'WarehouseController::getNoModel');
+    $routes->post('warehouse/savePindahOrder', 'WarehouseController::savePindahOrder');
+    $routes->post('warehouse/getPindahOrder', 'WarehouseController::getPindahOrder');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
     $routes->get('warehouse/reportPoBenang', 'WarehouseController::reportPoBenang');
     $routes->get('warehouse/filterPoBenang', 'WarehouseController::filterPoBenang');
@@ -177,7 +179,11 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('retur', 'ReturController::index');
     $routes->post('retur/approve', 'ReturController::approve');
     $routes->post('retur/reject', 'ReturController::reject');
-
+    // tambahan waktu
+    $routes->get('pemesanan/requestAdditionalTime', 'PemesananController::requestAdditionalTime');
+    $routes->get('pemesanan/getCountStatusRequest', 'PemesananController::getCountStatusRequest');
+    $routes->post('pemesanan/additional-time/accept', 'PemesananController::additionalTimeAccept');
+    $routes->post('pemesanan/additional-time/reject', 'PemesananController::additionalTimeReject');
 });
 
 // celup routes
@@ -375,7 +381,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('warehouse/sisaKapasitas', 'WarehouseController::getSisaKapasitas');
     $routes->post('warehouse/getCluster', 'WarehouseController::getClusterbyId');
     $routes->post('warehouse/updateCluster', 'WarehouseController::updateCluster');
-    $routes->post('warehouse/getNoModel', 'WarehouseController::getNoModel');
+    $routes->post('warehouse/getNoModel/(:any)', 'WarehouseController::getNoModel/$1');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
 
     // $routes->get('pph', 'PphController::index');
@@ -455,5 +461,7 @@ $routes->group(
         $routes->get('getKategoriRetur', 'ApiController::getKategoriRetur');
         $routes->post('saveRetur', 'ApiController::saveRetur');
         $routes->get('getTotalPengiriman', 'ApiController::getTotalPengiriman');
+        $routes->post('warehouse/search', 'WarehouseController::search');
+        $routes->get('warehouse/exportExcel', 'ExcelController::excelStockMaterial');
     }
 );

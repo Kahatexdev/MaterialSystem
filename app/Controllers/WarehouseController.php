@@ -80,7 +80,6 @@ class WarehouseController extends BaseController
     }
     public function index()
     {
-
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
@@ -88,55 +87,126 @@ class WarehouseController extends BaseController
         ];
         return view($this->role . '/warehouse/index', $data);
     }
+    // public function pemasukan()
+    // {
+    //     $id = $this->request->getPost('barcode');
+
+    //     // $id = base64_decode($id);
+    //     // dd($id);
+    //     $cluster = $this->clusterModel->getDataCluster();
+
+    //     // Ambil data dari session (jika ada)
+    //     $existingData = session()->get('dataOut') ?? [];
+
+    //     if (!empty($id)) {
+    //         // Cek apakah barcode sudah ada di data yang tersimpan
+    //         foreach ($existingData as $item) {
+    //             if ($item['id_out_celup'] == $id) {
+    //                 session()->setFlashdata('error', 'Barcode sudah ada di tabel!' . $id);
+    //                 return redirect()->to(base_url($this->role . '/pemasukan'));
+    //             }
+    //         }
+
+    //         // Ambil data dari database berdasarkan barcode yang dimasukkan
+    //         $outCelup = $this->outCelupModel->getDataOut($id);
+    //         if (empty($outCelup)) {
+    //             $dataRetur = $this->returModel->getDataRetur($id);
+
+    //             if (empty($dataRetur)) {
+    //                 session()->setFlashdata('error', 'Data tidak ditemukan!');
+    //                 return redirect()->to(base_url($this->role . '/pemasukan'));
+    //             }
+
+    //         }
+
+    //         session()->setFlashdata('error', 'Barcode tidak ditemukan di database!' . $id);
+    //             return redirect()->to(base_url($this->role . '/pemasukan'));
+    //         } elseif (!empty($outCelup)) {
+    //             // Tambahkan data baru ke dalam array
+    //             $existingData = array_merge($existingData, $outCelup);
+    //         }
+
+    //         // Simpan kembali ke session
+    //         session()->set('dataOut', $existingData);
+
+    //         // Redirect agar form tidak resubmit saat refresh
+    //         return redirect()->to(base_url($this->role . '/pemasukan'));
+    //     }
+
+    //     $data = [
+    //         'active' => $this->active,
+    //         'title' => 'Material System',
+    //         'role' => $this->role,
+    //         'dataOut' => $existingData, // Tampilkan data dari session
+    //         'cluster' => $cluster,
+    //         'error' => session()->getFlashdata('error'),
+    //     ];
+
+    //     return view($this->role . '/warehouse/form-pemasukan', $data);
+
+    // }
+
+
     public function pemasukan()
     {
         $id = $this->request->getPost('barcode');
-
-        // $id = base64_decode($id);
-        // dd($id);
         $cluster = $this->clusterModel->getDataCluster();
-
+        // dd(session()->get('dataOut'));
         // Ambil data dari session (jika ada)
         $existingData = session()->get('dataOut') ?? [];
+        // dd ($existingData);
 
         if (!empty($id)) {
-            // Cek apakah barcode sudah ada di data yang tersimpan
+            // 1. Cek duplikasi
             foreach ($existingData as $item) {
                 if ($item['id_out_celup'] == $id) {
-                    session()->setFlashdata('error', 'Barcode sudah ada di tabel!' . $id);
-                    return redirect()->to(base_url($this->role . '/pemasukan'));
+                    session()->setFlashdata('error', "Barcode sudah ada di tabel! ({$id})");
+                    return redirect()->to(base_url($this->role . "/pemasukan"));
                 }
             }
 
-            // Ambil data dari database berdasarkan barcode yang dimasukkan
+            // 2. Coba ambil dari outCelup
             $outCelup = $this->outCelupModel->getDataOut($id);
-
-            if (empty($outCelup)) {
-                session()->setFlashdata('error', 'Barcode tidak ditemukan di database!' . $id);
-                return redirect()->to(base_url($this->role . '/pemasukan'));
-            } elseif (!empty($outCelup)) {
-                // Tambahkan data baru ke dalam array
-                $existingData = array_merge($existingData, $outCelup);
+            // log_message('debug', 'Data outCelup: ' . json_encode($outCelup)); // Debugging
+            if (!empty($outCelup)) {
+                $newData = $outCelup;
+            } else {
+                // 3. Jika kosong, coba ambil dari retur
+                $findId = $this->outCelupModel->find($id);
+                if (empty($findId)) {
+                    session()->setFlashdata('error', "Data tidak ditemukan! ({$id})");
+                    return redirect()->to(base_url($this->role . "/pemasukan"));
+                }
+                $dataRetur = $this->returModel->getDataRetur($id, $findId['id_retur']);
+                // log_message('debug', 'Data retur: ' . json_encode($dataRetur)); // Debugging
+                if (!empty($dataRetur)) {
+                    $newData = $dataRetur;
+                } else {
+                    // 4. Keduanya kosong → error
+                    session()->setFlashdata('error', "Data tidak ditemukan! ({$id})");
+                    return redirect()->to(base_url($this->role . "/pemasukan"));
+                }
             }
 
-            // Simpan kembali ke session
+            // 5. Merge & simpan session, lalu redirect
+            $existingData = array_merge($existingData, $newData);
             session()->set('dataOut', $existingData);
-
-            // Redirect agar form tidak resubmit saat refresh
-            return redirect()->to(base_url($this->role . '/pemasukan'));
+            return redirect()->to(base_url($this->role . "/pemasukan"));
         }
 
+        // Tampilkan form jika bukan POST atau barcode kosong
         $data = [
-            'active' => $this->active,
-            'title' => 'Material System',
-            'role' => $this->role,
-            'dataOut' => $existingData, // Tampilkan data dari session
-            'cluster' => $cluster,
-            'error' => session()->getFlashdata('error'),
+            'active'   => $this->active,
+            'title'    => 'Material System',
+            'role'     => $this->role,
+            'dataOut'  => $existingData,
+            'cluster'  => $cluster,
+            'error'    => session()->getFlashdata('error'),
         ];
 
-        return view($this->role . '/warehouse/form-pemasukan', $data);
+        return view($this->role . "/warehouse/form-pemasukan", $data);
     }
+
     public function prosesPemasukan()
     {
         $action = $this->request->getPost('action'); // Ambil tombol yang diklik
@@ -155,7 +225,7 @@ class WarehouseController extends BaseController
     public function prosesSimpanPemasukan()
     {
         $checkedIds = $this->request->getPost('checked_id'); // Ambil index yang dicentang
-
+        // dd ($checkedIds);
         if (empty($checkedIds)) {
             session()->setFlashdata('error', 'Tidak ada data yang dipilih.');
             return redirect()->to($this->role . '/pemasukan');
@@ -166,12 +236,13 @@ class WarehouseController extends BaseController
         $itemTypes   = $this->request->getPost('item_type');
         $kodeWarnas  = $this->request->getPost('kode_warna');
         $warnas      = $this->request->getPost('warna');
-        $kgsMasuks   = $this->request->getPost('kgs_kirim');
-        $cnsMasuks   = $this->request->getPost('cns_kirim');
+        $kgsMasuks   = $this->request->getPost('kgs_kirim') ?? $this->request->getPost('kgs_retur');
+        $cnsMasuks   = $this->request->getPost('cns_kirim') ?? $this->request->getPost('cns_retur');
         $tglMasuks   = $this->request->getPost('tgl_masuk');
         $namaClusters = $this->request->getPost('cluster');
-        $lotKirim    = $this->request->getPost('lot_kirim');
-
+        $lotKirim    = $this->request->getPost('lot_kirim') ?? $this->request->getPost('lot_retur');
+        $idRetur    = $this->request->getPost('id_retur') ?? null;
+        // dd ($idOutCelup, $noModels, $itemTypes, $kodeWarnas, $warnas, $kgsMasuks, $cnsMasuks, $tglMasuks, $namaClusters, $lotKirim , $idRetur);
         // Pastikan data tidak kosong
         if (empty($idOutCelup) || !is_array($idOutCelup)) {
             session()->setFlashdata('error', 'Data yang dikirim kosong atau tidak valid.');
@@ -248,8 +319,11 @@ class WarehouseController extends BaseController
                 }
 
                 // Looping untuk update/insert stock dan update id_stok di pemasukan
-                foreach ($dataStock as $stock) {
-                    // Cek apakah data stock sudah ada berdasarkan kombinasi unik
+                foreach ($dataStock as $key => $stock) {
+                    $idOut = $checkedIds[$key] ?? null;
+                    $idRetur = $this->request->getPost('id_retur')[$key] ?? null;
+
+                    // Cek stok lama/bikin stok baru (sudah OK di kode Agan)
                     $existingStock = $this->stockModel
                         ->where('no_model', $stock['no_model'])
                         ->where('item_type', $stock['item_type'])
@@ -258,7 +332,6 @@ class WarehouseController extends BaseController
                         ->first();
 
                     if ($existingStock) {
-                        // Update data stock yang sudah ada
                         $this->stockModel->update($existingStock['id_stock'], [
                             'kgs_in_out' => $existingStock['kgs_in_out'] + $stock['kgs_in_out'],
                             'cns_in_out' => $existingStock['cns_in_out'] + $stock['cns_in_out'],
@@ -266,40 +339,57 @@ class WarehouseController extends BaseController
                         ]);
                         $idStok = $existingStock['id_stock'];
                     } else {
-                        // Insert data stock baru
                         $this->stockModel->insert($stock);
                         $idStok = $this->stockModel->getInsertID();
+                        // log_message('debug', 'ID Stok baru: ' . $idStok); // Debugging
                     }
 
-                    $sql = "
-                    UPDATE pemasukan
-                    JOIN out_celup ON out_celup.id_out_celup = pemasukan.id_out_celup
-                    JOIN bon_celup ON bon_celup.id_bon = out_celup.id_bon
-                    JOIN schedule_celup ON schedule_celup.id_celup = out_celup.id_celup
-                    SET pemasukan.id_stock = ?
-                    WHERE schedule_celup.no_model = ?
-                    AND schedule_celup.item_type = ?
-                    AND schedule_celup.kode_warna = ?
-                    AND pemasukan.nama_cluster = ?
-                ";
-
-                    // Eksekusi query dengan binding parameter untuk keamanan
-                    $this->db->query($sql, [
-                        $idStok,
-                        $stock['no_model'],
-                        $stock['item_type'],
-                        $stock['kode_warna'],
-                        $stock['nama_cluster']
-                    ]);
-
-                    // // Update field id_stok pada record pemasukan yang sesuai
-                    // $this->pemasukanModel
-                    //     ->where('no_model', $stock['no_model'])
-                    //     ->where('item_type', $stock['item_type'])
-                    //     ->where('kode_warna', $stock['kode_warna'])
-                    //     ->where('nama_cluster', $stock['nama_cluster'])
-                    //     ->set(['id_stock' => $idStok])
-                    //     ->update();
+                    // === UPDATE PEMASUKAN BERDASARKAN SUMBERNYA ===
+                    if ($idRetur) {
+                        // Jika berasal dari RETUR
+                        $sql = "
+                            UPDATE pemasukan
+                            JOIN out_celup ON out_celup.id_out_celup = pemasukan.id_out_celup
+                            JOIN retur ON retur.id_retur = out_celup.id_retur
+                            SET pemasukan.id_stock = ?
+                            WHERE retur.no_model = ?
+                            AND retur.item_type = ?
+                            AND retur.kode_warna = ?
+                            AND pemasukan.nama_cluster = ?
+                            AND out_celup.id_retur = ?
+                        ";
+                        $this->db->query($sql, [
+                            $idStok,
+                            $stock['no_model'],
+                            $stock['item_type'],
+                            $stock['kode_warna'],
+                            $stock['nama_cluster'],
+                            $idRetur
+                        ]);
+                        // log_message('debug', 'Update pemasukan dari retur: ' . $this->db->getLastQuery()); // Debugging
+                    } else {
+                        // Jika berasal dari OUT_CELUP
+                        $sql = "
+                            UPDATE pemasukan
+                            JOIN out_celup ON out_celup.id_out_celup = pemasukan.id_out_celup
+                            JOIN schedule_celup ON schedule_celup.id_celup = out_celup.id_celup
+                            SET pemasukan.id_stock = ?
+                            WHERE schedule_celup.no_model = ?
+                            AND schedule_celup.item_type = ?
+                            AND schedule_celup.kode_warna = ?
+                            AND pemasukan.nama_cluster = ?
+                            AND pemasukan.id_out_celup = ?
+                        ";
+                        $this->db->query($sql, [
+                            $idStok,
+                            $stock['no_model'],
+                            $stock['item_type'],
+                            $stock['kode_warna'],
+                            $stock['nama_cluster'],
+                            $idOut
+                        ]);
+                        // log_message('debug', 'Update pemasukan dari out_celup: ' . $this->db->getLastQuery()); // Debugging
+                    }
                 }
 
                 session()->setFlashdata('success', 'Data berhasil dimasukkan.');
@@ -913,10 +1003,34 @@ class WarehouseController extends BaseController
         }
     }
 
+    public function getPindahOrder()
+    {
+        $idStock = $this->request->getPost('id_stock');
+        $data = $this->stockModel->getStockInPemasukanById($idStock);
+        $dataArray = json_decode(json_encode($data), true);
+        // var_dump($dataArray);
+        // log_message('debug', 'Data Stock: ' . print_r($dataArray, true));
+        if (empty($dataArray)) {
+            return $this->response->setJSON(['error' => false, 'message' => 'Data tidak ditemukan']);
+        } else {
+            return $this->response->setJSON([
+                'success' => true,
+                'data' => $dataArray
+            ]);
+        }
+
+        return $this->response->setJSON($dataArray);
+    }
+
     public function getNoModel()
     {
-        $results = $this->stockModel->getNoModel();
-
+        $noModelOld = $this->request->getVar('noModelOld');
+        $kodeWarna = $this->request->getVar('kodeWarna');
+        // var_dump($kodeWarna);
+        // log_message('debug', 'Fetching no_model for kode_warna: ' . $kodeWarna);
+        $results = $this->materialModel->getNoModel($noModelOld, $kodeWarna);
+        // last query
+        // log_message('debug', 'Last Query: ' . $this->db->getLastQuery());
         $resultsArray = json_decode(json_encode($results), true);
 
         return $this->response->setJSON([
@@ -924,6 +1038,153 @@ class WarehouseController extends BaseController
             'data' => $resultsArray
         ]);
     }
+
+    public function savePindahOrder()
+    {
+        $reqData = $this->request->getPost();
+
+        // Validasi model tujuan
+        if (empty($reqData['no_model_tujuan']) || count(explode('|', $reqData['no_model_tujuan'])) < 4) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Data model tujuan tidak lengkap atau tidak valid.'
+            ]);
+        }
+
+        // Pecah data model tujuan
+        [$noModel, $itemType, $kodeWarna, $warna] = explode('|', $reqData['no_model_tujuan']);
+
+        $idOutCelup = $reqData['idOutCelup'] ?? [];
+        $idStock = $reqData['id_stock'] ?? [];
+
+        // Validasi jumlah data
+        // if (count($idOutCelup) !== count($idStock)) {
+        //     return $this->response->setJSON([
+        //         'success' => false,
+        //         'message' => 'Jumlah data out celup dan stock tidak sesuai.'
+        //     ]);
+        // }
+
+        $dataOutCelup = [];
+        foreach ($idOutCelup as $id) {
+            $data = $this->outCelupModel->find($id);
+            if ($data) $dataOutCelup[] = $data;
+        }
+
+        $idStockData = [];
+        foreach ($idStock as $id) {
+            $data = $this->stockModel->find($id);
+            if ($data) $idStockData[] = $data;
+        }
+
+        if (count($dataOutCelup) !== count($idOutCelup) || count($idStockData) !== count($idStock)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Beberapa data tidak ditemukan di database.'
+            ]);
+        }
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $idOutCelupBaru = [];
+        $idPemasukanBaru = [];
+        $idStockBaru = [];
+
+        foreach ($dataOutCelup as $index => $data) {
+            $cluster = $idStockData[$index]['nama_cluster'];
+            $lotStock = $idStockData[$index]['lot_stock'];
+            $idOutCelup = $data['id_out_celup'];
+            // log_message('debug', 'ID Out Celup: ' . $idOutCelup);
+            $idRetur = $this->outCelupModel->select('id_retur')
+                ->where('id_out_celup', $idOutCelup)
+                ->first();
+            if ($idRetur) {
+                $this->outCelupModel->insert([
+                    'id_retur' => $idRetur['id_retur'],
+                    'no_karung' => $data['no_karung'],
+                    'kgs_kirim' => $data['kgs_kirim'],
+                    'cones_kirim' => $data['cones_kirim'],
+                    'lot_kirim' => $lotStock,
+                    'ganti_retur' => '0',
+                    'admin' => session()->get('username')
+                ]);
+                $idOutCelupBaru[] = $this->outCelupModel->getInsertID();
+            }
+
+            // update out_jalur id_pemasukan
+            $this->pemasukanModel->set('out_jalur', '1')
+                ->where('id_out_celup', $idOutCelup)
+                ->update();
+
+            // Insert ke pemasukan
+            $this->pemasukanModel->insert([
+                'id_out_celup' => $idOutCelupBaru[$index],
+                'tgl_masuk' => date('Y-m-d'),
+                'nama_cluster' => $cluster,
+                'out_jalur' => '0',
+                'admin' => session()->get('username')
+            ]);
+            $idPemasukan = $this->pemasukanModel->getInsertID();
+            $idPemasukanBaru[] = $idPemasukan;
+
+            // Insert ke stock
+            $this->stockModel->insert([
+                'no_model' => $noModel,
+                'item_type' => $itemType,
+                'kode_warna' => $kodeWarna,
+                'warna' => $warna,
+                'kgs_stock_awal' => $data['kgs_kirim'],
+                'cns_stock_awal' => $data['cones_kirim'],
+                'krg_stock_awal' => $data['krg_kirim'] ?? 0,
+                'lot_awal' => $lotStock,
+                'nama_cluster' => $cluster,
+                'admin' => session()->get('username'),
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+            $idStockBaruInsert = $this->stockModel->getInsertID();
+            $idStockBaru[] = $idStockBaruInsert;
+
+            // Update ID stock ke pemasukan
+            $this->pemasukanModel->update($idPemasukan, [
+                'id_stock' => $idStockBaruInsert
+            ]);
+
+            // Update stok lama
+            $newKgs = max(0, $idStockData[$index]['kgs_in_out'] - $data['kgs_kirim']);
+            $newCns = max(0, $idStockData[$index]['cns_in_out'] - $data['cones_kirim']);
+            $newKrg = max(0, $idStockData[$index]['krg_in_out'] - ($data['krg_kirim'] ?? 0));
+
+            $this->stockModel->update($idStock[$index], [
+                'kgs_in_out' => $newKgs,
+                'cns_in_out' => $newCns,
+                'krg_in_out' => $newKrg,
+                'lot_stock' => $lotStock,
+                'lot_awal' => $idStockData[$index]['lot_awal'],
+                'nama_cluster' => $cluster
+            ]);
+        }
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Gagal memproses pemindahan order. Transaksi dibatalkan.'
+            ]);
+        }
+
+        // log_message('debug', 'ID Out Celup Baru: ' . print_r($idOutCelupBaru, true));
+        // log_message('debug', 'ID Pemasukan Baru: ' . print_r($idPemasukanBaru, true));
+        // log_message('debug', 'ID Stock Baru: ' . print_r($idStockBaru, true));
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Data berhasil dipindahkan.'
+        ]);
+    }
+
+
 
     public function updateNoModel()
     {

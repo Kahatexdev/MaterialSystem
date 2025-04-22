@@ -87,70 +87,130 @@ class MaterialController extends BaseController
             return redirect()->to(base_url($this->role . '/material/' . $id_order))->with('error', 'Data gagal diupdate.');
         }
     }
-
     public function splitMaterial()
     {
-        $id_material_old = $this->request->getPost('id_material_old');
-        $id_order = $this->request->getPost('id_order');
-        $style_size = $this->request->getPost('style_size');
-        $inisial = $this->request->getPost('inisial');
-        $gw = $this->request->getPost('gw');
-        $loss = $this->request->getPost('loss');
-        $item_type = $this->request->getPost('item_type');
-        $composition = $this->request->getPost('composition');
-        $kode_warna = $this->request->getPost('kode_warna');
-        $color = $this->request->getPost('color');
+        $post = $this->request->getPost();
+        $oldId      = $post['id_material_old'];
+        $idOrder    = $post['id_order'];
+        $styleSize  = $post['style_size'];
+        $inisial    = $post['inisial'];
+        $gw         = $post['gw'];
+        $loss       = $post['loss'];
+        $qtyPcs     = $post['qty_pcs'];
+        $area       = $post['area'];
+        $it1        = $post['item_type_1'];
+        $it2        = $post['item_type_2'];
+        $comp1      = $post['comp1'];
+        $comp2      = $post['comp2'];
+        $kgs1       = $post['kgs_1'];
+        $kgs2       = $post['kgs_2'];
 
-        $qty_pcs_1 = $this->request->getPost('qty_pcs_1');
-        $qty_pcs_2 = $this->request->getPost('qty_pcs_2');
-        $kgs_1 = $this->request->getPost('kgs_1');
-        $kgs_2 = $this->request->getPost('kgs_2');
-
-        $split_area_1 = $this->request->getPost('split_area_1');
-        $split_area_2 = $this->request->getPost('split_area_2');
-
-        // Data untuk id_material baru (Area 2)
+        // Data untuk record baru
         $dataNew = [
-            'id_order' => $id_order,
-            'style_size' => $style_size,
-            'inisial' => $inisial,
-            'gw' => $gw,
-            'loss' => $loss,
-            'item_type' => $item_type,
-            'composition' => $composition,
-            'color' => $color,
-            'kode_warna' => $kode_warna,
-            'qty_pcs' => $qty_pcs_2,
-            'kgs' => $kgs_2,
-            'area' => $split_area_2
+            'id_order'     => $idOrder,
+            'style_size'   => $styleSize,
+            'inisial'      => $inisial,
+            'gw'           => $gw,
+            'loss'         => $loss,
+            'item_type'    => $it2,
+            'composition'  => $comp2,
+            'color'        => $post['color']       ?? null,
+            'kode_warna'   => $post['kode_warna']  ?? null,
+            'qty_pcs'      => $qtyPcs,
+            'kgs'          => $kgs2,
+            'area'         => $area
         ];
 
-        // Update id_material lama dengan qty dan kgs baru (Area 1)
+        // Data untuk update record lama 
         $dataOld = [
-            'qty_pcs' => $qty_pcs_1,
-            'kgs' => $kgs_1,
-            'area' => $split_area_1
+            'item_type'   => $it1,
+            'composition' => $comp1,
+            'qty_pcs'     => $qtyPcs,
+            'kgs'         => $kgs1,
+            'area'         => $area
         ];
 
-        // Mulai transaksi database
         $db = \Config\Database::connect();
         $db->transStart();
 
-        // Update id_material lama
-        $this->materialModel->update($id_material_old, $dataOld);
-
-        // Insert id_material baru
+        // update lama
+        $this->materialModel->update($oldId, $dataOld);
+        // insert baru
         $this->materialModel->insert($dataNew);
 
-        // Selesaikan transaksi
         $db->transComplete();
 
-        if ($db->transStatus() === false) {
-            return $this->response->setStatusCode(404)->setJSON(['error' => 'Gagal split material']);
-        } else {
-            return $this->response->setJSON(['message' => 'Material berhasil di-split!']);
+        if (! $db->transStatus()) {
+            return $this->response
+                ->setStatusCode(500)
+                ->setJSON(['error' => 'Gagal split material']);
         }
+        return $this->response->setJSON(['message' => 'Material berhasil di‑split!']);
     }
+
+    // public function splitMaterial()
+    // {
+    //     $id_material_old = $this->request->getPost('id_material_old');
+    //     $id_order = $this->request->getPost('id_order');
+    //     $style_size = $this->request->getPost('style_size');
+    //     $inisial = $this->request->getPost('inisial');
+    //     $gw = $this->request->getPost('gw');
+    //     $loss = $this->request->getPost('loss');
+    //     $item_type = $this->request->getPost('item_type');
+    //     $composition = $this->request->getPost('composition');
+    //     $kode_warna = $this->request->getPost('kode_warna');
+    //     $color = $this->request->getPost('color');
+
+    //     $qty_pcs_1 = $this->request->getPost('qty_pcs_1');
+    //     $qty_pcs_2 = $this->request->getPost('qty_pcs_2');
+    //     $kgs_1 = $this->request->getPost('kgs_1');
+    //     $kgs_2 = $this->request->getPost('kgs_2');
+
+    //     $split_area_1 = $this->request->getPost('split_area_1');
+    //     $split_area_2 = $this->request->getPost('split_area_2');
+
+    //     // Data untuk id_material baru (Area 2)
+    //     $dataNew = [
+    //         'id_order' => $id_order,
+    //         'style_size' => $style_size,
+    //         'inisial' => $inisial,
+    //         'gw' => $gw,
+    //         'loss' => $loss,
+    //         'item_type' => $item_type,
+    //         'composition' => $composition,
+    //         'color' => $color,
+    //         'kode_warna' => $kode_warna,
+    //         'qty_pcs' => $qty_pcs_2,
+    //         'kgs' => $kgs_2,
+    //         'area' => $split_area_2
+    //     ];
+
+    //     // Update id_material lama dengan qty dan kgs baru (Area 1)
+    //     $dataOld = [
+    //         'qty_pcs' => $qty_pcs_1,
+    //         'kgs' => $kgs_1,
+    //         'area' => $split_area_1
+    //     ];
+
+    //     // Mulai transaksi database
+    //     $db = \Config\Database::connect();
+    //     $db->transStart();
+
+    //     // Update id_material lama
+    //     $this->materialModel->update($id_material_old, $dataOld);
+
+    //     // Insert id_material baru
+    //     $this->materialModel->insert($dataNew);
+
+    //     // Selesaikan transaksi
+    //     $db->transComplete();
+
+    //     if ($db->transStatus() === false) {
+    //         return $this->response->setStatusCode(404)->setJSON(['error' => 'Gagal split material']);
+    //     } else {
+    //         return $this->response->setJSON(['message' => 'Material berhasil di-split!']);
+    //     }
+    // }
     public function assignArea()
     {
         $model = $this->request->getPost('model'); // Gunakan POST

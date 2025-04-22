@@ -109,6 +109,7 @@ class PemesananController extends BaseController
         if (!is_array($pemesananPertgl)) {
             $pemesananPertgl = []; // Pastikan selalu array
         }
+
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
@@ -464,7 +465,7 @@ class PemesananController extends BaseController
             // 'id_out_celup' => $getPemesanan['id_out_celup'],
             'id' => $id,
             'KgsPesan' => $KgsPesan,
-            'CnsPesan' => $CnsPesan
+            'CnsPesan' => $CnsPesan,
         ];
 
         // dd ($data);
@@ -539,7 +540,7 @@ class PemesananController extends BaseController
         $data = [
             'role' => $this->role,
             'title' => 'Report Pemesanan',
-            'active' => $this->active
+            'active' => $this->active,
         ];
         return view($this->role . '/pemesanan/report-pemesanan', $data);
     }
@@ -553,5 +554,67 @@ class PemesananController extends BaseController
         $data = $this->pemesananModel->getFilterPemesananArea($key, $tanggalAwal, $tanggalAkhir);
 
         return $this->response->setJSON($data);
+    }
+    public function getCountStatusRequest()
+    {
+        $countWt = $this->pemesananModel->countStatusRequest();
+
+        return $this->response->setJSON(['count' => $countWt]);
+    }
+    public function requestAdditionalTime()
+    {
+        $dataRequest = $this->pemesananModel->getStatusRequest();
+        $data = [
+            'role' => $this->role,
+            'title' => 'Additional Time',
+            'active' => $this->active,
+            'dataRequest' => $dataRequest,
+        ];
+        return view($this->role . '/pemesanan/additional-time', $data);
+    }
+    public function additionalTimeAccept()
+    {
+        $area      = $this->request->getPost('admin');
+        $tglPakai  = $this->request->getPost('tgl_pakai');
+        $jenis     = $this->request->getPost('jenis');
+        $maxTime   = $this->request->getPost('max_time');
+        $maxTime   = $maxTime . ':00';
+
+        // Validasi input (opsional, tambahkan sesuai kebutuhan)
+        if (empty($area) || empty($tglPakai) || empty($jenis) || empty($maxTime)) {
+            return redirect()->to(base_url($this->role . '/pemesanan/requestAdditionalTime'))
+                ->with('error', 'Input tidak valid');
+        }
+        $data = [
+            'area' => $area,
+            'tgl_pakai' => $tglPakai,
+            'jenis' => $jenis,
+            'max_time' => $maxTime,
+            'username' => session()->get('role'),
+        ];
+
+        $success = $this->pemesananModel->additionalTimeAccept($data);
+
+        return redirect()->to(base_url($this->role . '/pemesanan/requestAdditionalTime'))
+            ->with(
+                $success ? 'success' : 'error',
+                $success ? 'Request berhasil disetujui'
+                    : 'Request gagal diproses'
+            );
+    }
+    public function additionalTimeReject()
+    {
+        $area      = $this->request->getPost('admin');
+        $tglPakai  = $this->request->getPost('tgl_pakai');
+        $jenis     = $this->request->getPost('jenis');
+
+        $success = $this->pemesananModel->additionalTimeReject($area, $tglPakai, $jenis);
+
+        return redirect()->to(base_url($this->role . '/pemesanan/requestAdditionalTime'))
+            ->with(
+                $success ? 'success' : 'error',
+                $success ? 'Request berhasil ditolak'
+                    : 'Request gagal diproses'
+            );
     }
 }
