@@ -130,7 +130,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('warehouse/sisaKapasitas', 'WarehouseController::getSisaKapasitas');
     $routes->post('warehouse/getCluster', 'WarehouseController::getClusterbyId');
     $routes->post('warehouse/updateCluster', 'WarehouseController::updateCluster');
-    $routes->post('warehouse/getNoModel', 'WarehouseController::getNoModel');
+    $routes->get('warehouse/getNoModel', 'WarehouseController::getNoModel');
+    $routes->post('warehouse/savePindahOrder', 'WarehouseController::savePindahOrder');
+    $routes->post('warehouse/getPindahOrder', 'WarehouseController::getPindahOrder');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
     $routes->get('warehouse/reportPoBenang', 'WarehouseController::reportPoBenang');
     $routes->get('warehouse/filterPoBenang', 'WarehouseController::filterPoBenang');
@@ -379,7 +381,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('warehouse/sisaKapasitas', 'WarehouseController::getSisaKapasitas');
     $routes->post('warehouse/getCluster', 'WarehouseController::getClusterbyId');
     $routes->post('warehouse/updateCluster', 'WarehouseController::updateCluster');
-    $routes->post('warehouse/getNoModel', 'WarehouseController::getNoModel');
+    $routes->post('warehouse/getNoModel/(:any)', 'WarehouseController::getNoModel/$1');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
 
     // $routes->get('pph', 'PphController::index');

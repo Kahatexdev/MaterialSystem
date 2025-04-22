@@ -80,7 +80,6 @@ class WarehouseController extends BaseController
     }
     public function index()
     {
-
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
@@ -168,7 +167,7 @@ class WarehouseController extends BaseController
 
             // 2. Coba ambil dari outCelup
             $outCelup = $this->outCelupModel->getDataOut($id);
-            log_message('debug', 'Data outCelup: ' . json_encode($outCelup)); // Debugging
+            // log_message('debug', 'Data outCelup: ' . json_encode($outCelup)); // Debugging
             if (!empty($outCelup)) {
                 $newData = $outCelup;
             } else {
@@ -179,7 +178,7 @@ class WarehouseController extends BaseController
                     return redirect()->to(base_url($this->role."/pemasukan"));
                 }
                 $dataRetur = $this->returModel->getDataRetur($id, $findId['id_retur']);
-                log_message('debug', 'Data retur: ' . json_encode($dataRetur)); // Debugging
+                // log_message('debug', 'Data retur: ' . json_encode($dataRetur)); // Debugging
                 if (!empty($dataRetur)) {
                     $newData = $dataRetur;
                 } else {
@@ -995,10 +994,34 @@ class WarehouseController extends BaseController
         }
     }
 
+    public function getPindahOrder()
+    {
+        $idStock = $this->request->getPost('id_stock');
+        $data = $this->stockModel->getStockInPemasukanById($idStock);
+        $dataArray = json_decode(json_encode($data), true);
+        // var_dump($dataArray);
+        // log_message('debug', 'Data Stock: ' . print_r($dataArray, true));
+        if (empty($dataArray)) {
+            return $this->response->setJSON(['error' => false, 'message' => 'Data tidak ditemukan']);
+        } else {
+            return $this->response->setJSON([
+                'success' => true,
+                'data' => $dataArray
+            ]);
+        }
+
+        return $this->response->setJSON($dataArray);
+    }   
+
     public function getNoModel()
     {
-        $results = $this->stockModel->getNoModel();
-
+        $noModelOld = $this->request->getVar('noModelOld');
+        $kodeWarna = $this->request->getVar('kodeWarna');
+        // var_dump($kodeWarna);
+        // log_message('debug', 'Fetching no_model for kode_warna: ' . $kodeWarna);
+        $results = $this->materialModel->getNoModel($noModelOld, $kodeWarna);
+        // last query
+        // log_message('debug', 'Last Query: ' . $this->db->getLastQuery());
         $resultsArray = json_decode(json_encode($results), true);
 
         return $this->response->setJSON([
@@ -1006,6 +1029,153 @@ class WarehouseController extends BaseController
             'data' => $resultsArray
         ]);
     }
+
+    public function savePindahOrder()
+    {
+        $reqData = $this->request->getPost();
+
+        // Validasi model tujuan
+        if (empty($reqData['no_model_tujuan']) || count(explode('|', $reqData['no_model_tujuan'])) < 4) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Data model tujuan tidak lengkap atau tidak valid.'
+            ]);
+        }
+
+        // Pecah data model tujuan
+        [$noModel, $itemType, $kodeWarna, $warna] = explode('|', $reqData['no_model_tujuan']);
+
+        $idOutCelup = $reqData['idOutCelup'] ?? [];
+        $idStock = $reqData['id_stock'] ?? [];
+
+        // Validasi jumlah data
+        // if (count($idOutCelup) !== count($idStock)) {
+        //     return $this->response->setJSON([
+        //         'success' => false,
+        //         'message' => 'Jumlah data out celup dan stock tidak sesuai.'
+        //     ]);
+        // }
+
+        $dataOutCelup = [];
+        foreach ($idOutCelup as $id) {
+            $data = $this->outCelupModel->find($id);
+            if ($data) $dataOutCelup[] = $data;
+        }
+
+        $idStockData = [];
+        foreach ($idStock as $id) {
+            $data = $this->stockModel->find($id);
+            if ($data) $idStockData[] = $data;
+        }
+
+        if (count($dataOutCelup) !== count($idOutCelup) || count($idStockData) !== count($idStock)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Beberapa data tidak ditemukan di database.'
+            ]);
+        }
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $idOutCelupBaru = [];
+        $idPemasukanBaru = [];
+        $idStockBaru = [];
+
+        foreach ($dataOutCelup as $index => $data) {
+            $cluster = $idStockData[$index]['nama_cluster'];
+            $lotStock = $idStockData[$index]['lot_stock'];
+            $idOutCelup = $data['id_out_celup'];
+            // log_message('debug', 'ID Out Celup: ' . $idOutCelup);
+            $idRetur = $this->outCelupModel->select('id_retur')
+                ->where('id_out_celup', $idOutCelup)
+                ->first();
+            if ($idRetur) {
+                $this->outCelupModel->insert([
+                    'id_retur' => $idRetur['id_retur'],
+                    'no_karung' => $data['no_karung'],  
+                    'kgs_kirim' => $data['kgs_kirim'],
+                    'cones_kirim' => $data['cones_kirim'],
+                    'lot_kirim' => $lotStock,
+                    'ganti_retur' => '0',
+                    'admin' => session()->get('username')
+                ]);
+                $idOutCelupBaru[] = $this->outCelupModel->getInsertID();
+            }
+
+            // update out_jalur id_pemasukan
+            $this->pemasukanModel->set('out_jalur', '1')
+                ->where('id_out_celup', $idOutCelup)
+                ->update();
+
+            // Insert ke pemasukan
+            $this->pemasukanModel->insert([
+                'id_out_celup' => $idOutCelupBaru[$index],
+                'tgl_masuk' => date('Y-m-d'),
+                'nama_cluster' => $cluster,
+                'out_jalur' => '0',
+                'admin' => session()->get('username')
+            ]);
+            $idPemasukan = $this->pemasukanModel->getInsertID();
+            $idPemasukanBaru[] = $idPemasukan;
+
+            // Insert ke stock
+            $this->stockModel->insert([
+                'no_model' => $noModel,
+                'item_type' => $itemType,
+                'kode_warna' => $kodeWarna,
+                'warna' => $warna,
+                'kgs_stock_awal' => $data['kgs_kirim'],
+                'cns_stock_awal' => $data['cones_kirim'],
+                'krg_stock_awal' => $data['krg_kirim'] ?? 0,
+                'lot_awal' => $lotStock,
+                'nama_cluster' => $cluster,
+                'admin' => session()->get('username'),
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+            $idStockBaruInsert = $this->stockModel->getInsertID();
+            $idStockBaru[] = $idStockBaruInsert;
+
+            // Update ID stock ke pemasukan
+            $this->pemasukanModel->update($idPemasukan, [
+                'id_stock' => $idStockBaruInsert
+            ]);
+
+            // Update stok lama
+            $newKgs = max(0, $idStockData[$index]['kgs_in_out'] - $data['kgs_kirim']);
+            $newCns = max(0, $idStockData[$index]['cns_in_out'] - $data['cones_kirim']);
+            $newKrg = max(0, $idStockData[$index]['krg_in_out'] - ($data['krg_kirim'] ?? 0));
+
+            $this->stockModel->update($idStock[$index], [
+                'kgs_in_out' => $newKgs,
+                'cns_in_out' => $newCns,
+                'krg_in_out' => $newKrg,
+                'lot_stock' => $lotStock,
+                'lot_awal' => $idStockData[$index]['lot_awal'],
+                'nama_cluster' => $cluster
+            ]);
+        }
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Gagal memproses pemindahan order. Transaksi dibatalkan.'
+            ]);
+        }
+
+        // log_message('debug', 'ID Out Celup Baru: ' . print_r($idOutCelupBaru, true));
+        // log_message('debug', 'ID Pemasukan Baru: ' . print_r($idPemasukanBaru, true));
+        // log_message('debug', 'ID Stock Baru: ' . print_r($idStockBaru, true));
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Data berhasil dipindahkan.'
+        ]);
+    }
+
+
 
     public function updateNoModel()
     {
