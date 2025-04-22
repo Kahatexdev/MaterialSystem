@@ -460,5 +460,6 @@ $routes->group(
         $routes->post('saveRetur', 'ApiController::saveRetur');
         $routes->get('getTotalPengiriman', 'ApiController::getTotalPengiriman');
         $routes->post('warehouse/search', 'WarehouseController::search');
+        $routes->get('warehouse/exportExcel', 'ExcelController::excelStockMaterial');
     }
 );
