@@ -93,15 +93,15 @@ class PemesananModel extends Model
     public function getDataPemesananperTgl($area, $jenis)
     {
         $query = $this->db->table('pemesanan p')
-            ->select("p.id_pemesanan, p.tgl_pakai, m.area, mo.no_model, m.item_type, m.kode_warna, m.color, SUM(p.jl_mc) AS jl_mc, (SUM(COALESCE(p.ttl_berat_cones, 0)) - SUM(COALESCE(p.sisa_kgs_mc, 0))) AS kgs_pesan, (SUM(COALESCE(p.ttl_qty_cones, 0)) - SUM(COALESCE(p.sisa_cones_mc, 0))) AS cns_pesan, CASE WHEN p.po_tambahan = '1' THEN 'YA' ELSE '' END AS po_tambahan")
+            ->select("p.id_pemesanan, p.tgl_pakai, m.area, mo.no_model, m.item_type, m.kode_warna, m.color,  tp.ttl_jl_mc, tp.ttl_kg , tp.ttl_cns, CASE WHEN p.po_tambahan = '1' THEN 'YA' ELSE '' END AS po_tambahan")
+            ->join('total_pemesanan tp', 'tp.id_total_pemesanan = p.id_total_pemesanan', 'left')
             ->join('material m', 'm.id_material = p.id_material', 'left')
             ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
             ->join('master_material mm', 'mm.item_type = m.item_type', 'left')
             ->where('m.area', $area)
             ->where('mm.jenis', $jenis)
+            ->where('p.status_kirim', 'YA')
             ->groupBy('p.tgl_pakai')
-            ->groupBy('m.area')
-            ->groupBy('m.item_type')
             ->get();
         if (!$query) {
             // Cek error pada query
@@ -157,7 +157,8 @@ class PemesananModel extends Model
                 AVG(pemesanan.sisa_cones_mc) AS cns_sisa,
                 pemesanan.lot,
                 pemesanan.keterangan,
-                pemesanan.status_kirim
+                pemesanan.status_kirim,
+                pemesanan.additional_time
             ")
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
@@ -459,5 +460,65 @@ class PemesananModel extends Model
         }
 
         return $this->findAll();
+    }
+    public function countStatusRequest()
+    {
+        // Buat subquery
+        $subquery = $this->db->table('pemesanan')
+            ->select('pemesanan.status_kirim, pemesanan.admin, pemesanan.tgl_pakai, master_material.jenis')
+            ->join('material', 'pemesanan.id_material = material.id_material')
+            ->join('master_material', 'master_material.item_type = material.item_type')
+            ->where('pemesanan.status_kirim', 'request')
+            ->groupBy(['pemesanan.admin', 'pemesanan.tgl_pakai', 'master_material.jenis'])
+            ->getCompiledSelect();
+
+        // Gunakan subquery dalam query utama
+        $builder = $this->db->table("($subquery) AS grouped_data");
+        $result = $builder->select('COUNT(*) AS total')->get()->getRow();
+        // / Pastikan hasil diubah menjadi integer
+        $total = $result ? intval($result->total) : 0;
+        // dd($total);
+        return $total;
+    }
+    public function getStatusRequest()
+    {
+        return $this->select('pemesanan.status_kirim, pemesanan.admin, pemesanan.tgl_pakai, master_material.jenis')
+            ->join('material', 'pemesanan.id_material = material.id_material')
+            ->join('master_material', 'master_material.item_type = material.item_type')
+            ->like('pemesanan.status_kirim', 'request')
+            ->groupBy('pemesanan.admin, pemesanan.tgl_pakai, master_material.jenis')
+            ->orderBy('pemesanan.tgl_pakai, master_material.jenis')
+            ->findAll();
+    }
+    public function additionalTimeAccept($data)
+    {
+        $query = "
+            UPDATE pemesanan
+            JOIN material ON material.id_material = pemesanan.id_material
+            JOIN master_material ON master_material.item_type = material.item_type
+            SET pemesanan.status_kirim = 'request accept', pemesanan.additional_time = ?, pemesanan.hak_akses = ?
+            WHERE pemesanan.admin = ?
+            AND pemesanan.tgl_pakai = ?
+            AND master_material.jenis = ?
+        ";
+
+        $this->db->query($query, [$data['max_time'], $data['username'], $data['area'], $data['tgl_pakai'], $data['jenis']]);
+        return $this->db->affectedRows() > 0;
+    }
+    public function additionalTimeReject($area, $tgl_pakai, $jenis)
+    {
+
+        $query = "
+            UPDATE pemesanan
+            JOIN material ON material.id_material = pemesanan.id_material
+            JOIN master_material ON master_material.item_type = material.item_type
+            SET pemesanan.status_kirim = 'request reject'
+            WHERE pemesanan.admin = ?
+            AND pemesanan.tgl_pakai = ?
+            AND master_material.jenis = ?
+        ";
+
+        $this->db->query($query, [$area, $tgl_pakai, $jenis]);
+        return $this->db->affectedRows() > 0;
     }
 }
