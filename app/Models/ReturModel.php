@@ -93,4 +93,71 @@ class ReturModel extends Model
 
         return $builder->get()->getResultArray();
     }
+
+    public function getItemTypeByModel($pdk)
+    {
+        return $this->select('item_type')
+            ->join('out_celup', 'out_celup.id_retur=retur.id_retur')
+            ->where('no_model', $pdk)
+            ->groupBy('no_model')
+            ->groupBy('item_type')
+            ->distinct()
+            ->get()
+            ->getResultArray();
+    }
+
+    public function getKodeWarnaByModelAndItemType($no_model, $item_type)
+    {
+        return $this->select('kode_warna')
+            ->join('out_celup', 'out_celup.id_retur=retur.id_retur')
+            ->where('no_model', $no_model)
+            ->where('item_type', $item_type)
+            ->groupBy('kode_warna')
+            ->distinct()
+            ->get()
+            ->getResultArray();
+    }
+
+    public function getWarnaByKodeWarna($no_model, $item_type, $kode_warna)
+    {
+        return $this->select('warna')
+            ->join('out_celup', 'out_celup.id_retur=retur.id_retur')
+            ->where('no_model', $no_model)
+            ->where('item_type', $item_type)
+            ->where('kode_warna', $kode_warna)
+            ->groupBy('warna')
+            ->distinct()
+            ->get()
+            ->getRowArray();
+    }
+
+    public function getLotByKodeWarna($no_model, $item_type, $kode_warna)
+    {
+        return $this->select('lot_retur AS lot_kirim')
+            ->join('out_celup', 'out_celup.id_retur=retur.id_retur')
+            ->where('no_model', $no_model)
+            ->where('item_type', $item_type)
+            ->where('kode_warna', $kode_warna)
+            ->groupBy('lot_retur')
+            ->distinct()
+            ->get()
+            ->getResultArray();
+    }
+
+    public function getKgsDanCones($no_model, $item_type, $kode_warna, $lot_kirim, $no_karung)
+    {
+        $query = $this->select('out_celup.id_out_celup, retur.kgs_retur as kgs_kirim, retur.cns_retur as cones_kirim')
+            ->join('out_celup', 'out_celup.id_retur = retur.id_retur')
+            ->where('retur.no_model', $no_model)
+            ->where('retur.item_type', $item_type)
+            ->where('retur.kode_warna', $kode_warna)
+            ->where('retur.lot_retur', $lot_kirim)
+            ->where('out_celup.no_karung', $no_karung)
+            ->get();
+
+        $sql = $this->db->getLastQuery(); // Debugging query
+        log_message('error', 'Query getKgsDanCones: ' . $sql); // Log ke CI4 logs
+
+        return $query->getRowArray(); // Pastikan return berbentuk array
+    }
 }
