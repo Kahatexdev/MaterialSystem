@@ -320,7 +320,8 @@ class WarehouseController extends BaseController
 
                 // Looping untuk update/insert stock dan update id_stok di pemasukan
                 foreach ($dataStock as $key => $stock) {
-                    $idOut = $checkedIds[$key] ?? null;
+                    // $idOut = $checkedIds[$key] ?? null;
+                    $idOut = $idOutCelup[$key] ?? null;
                     $idRetur = $this->request->getPost('id_retur')[$key] ?? null;
 
                     // Cek stok lama/bikin stok baru (sudah OK di kode Agan)
@@ -344,52 +345,44 @@ class WarehouseController extends BaseController
                         // log_message('debug', 'ID Stok baru: ' . $idStok); // Debugging
                     }
 
-                    // === UPDATE PEMASUKAN BERDASARKAN SUMBERNYA ===
-                    if ($idRetur) {
-                        // Jika berasal dari RETUR
-                        $sql = "
-                            UPDATE pemasukan
-                            JOIN out_celup ON out_celup.id_out_celup = pemasukan.id_out_celup
-                            JOIN retur ON retur.id_retur = out_celup.id_retur
-                            SET pemasukan.id_stock = ?
-                            WHERE retur.no_model = ?
-                            AND retur.item_type = ?
-                            AND retur.kode_warna = ?
-                            AND pemasukan.nama_cluster = ?
-                            AND out_celup.id_retur = ?
+                    // === UPDATE PEMASUKAN BERDASARKAN SUMBERNYA (gabungan RETUR & OUT_CELUP) ===
+                    $sql = "
+                            UPDATE pemasukan p
+                            INNER JOIN out_celup oc 
+                                ON oc.id_out_celup = p.id_out_celup
+                            LEFT  JOIN retur r 
+                                ON r.id_retur      = oc.id_retur
+                            LEFT  JOIN schedule_celup sc 
+                                ON sc.id_celup     = oc.id_celup
+                            SET p.id_stock = ?
+                            WHERE
+                            -- Pilih baris RETUR jika ada, else baris SCHEDULE
+                            (
+                                r.id_retur IS NOT NULL 
+                                AND r.id_retur = ?
+                            )
+                            OR
+                            (
+                                r.id_retur IS     NULL 
+                                AND oc.id_out_celup = ?
+                            )
+                            -- Kemudian cocokkan atribut model/item/warna secara dinamis:
+                            AND COALESCE(r.no_model,      sc.no_model)      = ?
+                            AND COALESCE(r.item_type,     sc.item_type)     = ?
+                            AND COALESCE(r.kode_warna,    sc.kode_warna)    = ?
+                            AND p.nama_cluster                           = ?
                         ";
-                        $this->db->query($sql, [
-                            $idStok,
-                            $stock['no_model'],
-                            $stock['item_type'],
-                            $stock['kode_warna'],
-                            $stock['nama_cluster'],
-                            $idRetur
-                        ]);
-                        // log_message('debug', 'Update pemasukan dari retur: ' . $this->db->getLastQuery()); // Debugging
-                    } else {
-                        // Jika berasal dari OUT_CELUP
-                        $sql = "
-                            UPDATE pemasukan
-                            JOIN out_celup ON out_celup.id_out_celup = pemasukan.id_out_celup
-                            JOIN schedule_celup ON schedule_celup.id_celup = out_celup.id_celup
-                            SET pemasukan.id_stock = ?
-                            WHERE schedule_celup.no_model = ?
-                            AND schedule_celup.item_type = ?
-                            AND schedule_celup.kode_warna = ?
-                            AND pemasukan.nama_cluster = ?
-                            AND pemasukan.id_out_celup = ?
-                        ";
-                        $this->db->query($sql, [
-                            $idStok,
-                            $stock['no_model'],
-                            $stock['item_type'],
-                            $stock['kode_warna'],
-                            $stock['nama_cluster'],
-                            $idOut
-                        ]);
-                        // log_message('debug', 'Update pemasukan dari out_celup: ' . $this->db->getLastQuery()); // Debugging
-                    }
+                    $params = [
+                        $idStok,              // untuk SET p.id_stock
+                        $idRetur,             // untuk kondisi r.id_retur = ?
+                        $idOut,               // untuk kondisi sc.id_celup  = ?
+                        $stock['no_model'],   // untuk membandingkan no_model
+                        $stock['item_type'],  // untuk membandingkan item_type
+                        $stock['kode_warna'], // untuk membandingkan kode_warna
+                        $stock['nama_cluster']
+                    ];
+                    $this->db->query($sql, $params);
+                    // dd($params);      
                 }
 
                 session()->setFlashdata('success', 'Data berhasil dimasukkan.');
@@ -399,6 +392,7 @@ class WarehouseController extends BaseController
         }
         return redirect()->to($this->role . '/pemasukan');
     }
+
 
     private function prosesKomplain()
     {
