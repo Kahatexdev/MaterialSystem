@@ -204,4 +204,16 @@ class ClusterModel extends Model
             ->groupBy('cluster.nama_cluster')
             ->findAll();
     }
+    public function getNamaCluster($cluster, $kgs)
+    {
+        return $this->db->table('cluster') // Gunakan nama tabel langsung
+            ->select('cluster.nama_cluster, (cluster.kapasitas - IFNULL(SUM(stock.kgs_stock_awal), 0) - IFNULL(SUM(stock.kgs_in_out), 0)) AS sisa_kapasitas', false)
+            ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
+            ->where('cluster.nama_cluster !=', $cluster)
+            ->groupBy('cluster.nama_cluster')
+            ->having('sisa_kapasitas >=', $kgs, false) // Filter kapasitas lebih dari $kgs
+            ->orderBy('cluster.nama_cluster', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
 }

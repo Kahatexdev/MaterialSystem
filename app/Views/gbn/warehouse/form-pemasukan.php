@@ -130,7 +130,7 @@
                                                         <div class="form-group">
                                                             <label for="tgl">Model : </label>
                                                             <input type="text" class="form-control" name="no_model[]" value="<?= $data['no_model'] ?>" readonly>
-                                                            <input type="hidden" name="id_retur[]" value="<?= $data['id_retur'] ?>">
+                                                            <input type="hidden" name="id_retur[]" value="<?= $data['id_retur'] ?? NULL ?>">
                                                         </div>
                                                         <div class="row">
                                                             <div class="col-6">
@@ -247,9 +247,15 @@
                         $today = date('d-M-Y');
                         $formated = trim(date('Y-m-d'));
                         ?>
-                        <div class="form-group d-flex justify-content-end">
-                            <label for="tgl">Tanggal Masuk : <?= $today ?></label>
-                            <input type="date" class="form-control" name="tgl_kirim" value="<?= $formated ?>" hidden>
+                        <div class="form-group d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <label for="tgl" class="mb-0">Tanggal Masuk : <?= $today ?></label>
+                                <input type="date" class="form-control" name="tgl_kirim" value="<?= $formated ?>" hidden>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="retur" id="retur">
+                                <label class="form-check-label" for="retur">Dari Retur</label>
+                            </div>
                         </div>
                         <div class="row">
                             <div class="col-6">
@@ -531,9 +537,10 @@
         // Fungsi untuk load Item Types
         function loadItemTypes() {
             var noModel = $('#no_model').val().trim();
+            var retur = $('#retur').is(':checked') ? 1 : 0; // karena checkbox
             if (noModel) {
                 $.ajax({
-                    url: '<?= base_url($role . "/getItemTypeByModel") ?>/' + encodeURIComponent(noModel),
+                    url: '<?= base_url($role . "/getItemTypeByModel") ?>/' + encodeURIComponent(noModel) + '?retur=' + retur,
                     type: 'GET',
                     dataType: 'json',
                     success: function(data) {
@@ -558,9 +565,10 @@
             var $row = $(".row");
             var noModel = $('#no_model').val().trim();
             var itemType = $('#item_type').val().trim(); // Dapatkan itemType dengan benar
+            var retur = $('#retur').is(':checked') ? 1 : 0; // karena checkbox
 
             if (noModel && itemType) {
-                var url = `<?= base_url($role . "/getKodeWarnaByModelAndItemType") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}`;
+                var url = `<?= base_url($role . "/getKodeWarnaByModelAndItemType") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}&retur=${retur}`;
 
                 $.ajax({
                     url: url,
@@ -592,6 +600,7 @@
                 var kodeWarna = $(this).val().trim();
                 var $warnaInput = $form.find('input[name="warna"]'); // Cari input warna di dalam form terkait
                 var $lotSelect = $form.find(".lot-kirim");
+                var retur = $('#retur').is(':checked') ? 1 : 0; // karena checkbox
 
                 console.log("No Model:", noModel);
                 console.log("Item Type:", itemType);
@@ -604,7 +613,7 @@
 
                 if (noModel && itemType && kodeWarna) {
 
-                    var url = `<?= base_url($role . "/getWarnaDanLot") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}&kodeWarna=${kodeWarna}`;
+                    var url = `<?= base_url($role . "/getWarnaDanLot") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}&kodeWarna=${kodeWarna}&retur=${retur}`;
                     console.log("URL request:", url);
 
                     $.ajax({
@@ -649,6 +658,7 @@
                 var kodeWarna = $('.kode-warna').val();
                 var lotKirim = $('#lot_kirim').val();
                 var noKarung = $(this).val();
+                var retur = $('#retur').is(':checked') ? 1 : 0; // karena checkbox
 
                 console.log("No Model:", noModel);
                 console.log("Item Type:", itemType);
@@ -659,7 +669,7 @@
                 if (lotKirim) {
                     $.ajax({
 
-                        url: `<?= base_url($role . "/getKgsDanCones") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}&kodeWarna=${kodeWarna}&lotKirim=${lotKirim}&noKarung=${noKarung}`,
+                        url: `<?= base_url($role . "/getKgsDanCones") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}&kodeWarna=${kodeWarna}&lotKirim=${lotKirim}&noKarung=${noKarung}&retur=${retur}`,
                         type: 'GET',
                         dataType: 'json',
                         success: function(response) {
@@ -669,6 +679,10 @@
                                 $('input[name="kgs_kirim"]').val(response.kgs_kirim).trigger('change');
                                 $('input[name="cns_kirim"]').val(response.cones_kirim);
                             } else {
+                                $('input[name="id_out_celup"]').val('');
+                                $('input[name="kgs_kirim"]').val(0).trigger('change');
+                                $('input[name="cns_kirim"]').val(0);
+                                alert("Data untuk nomor karung tersebut tidak ditemukan. Nilai Kgs dan CNS di-reset ke 0.");
                                 console.log("Data tidak ditemukan");
                             }
                         },

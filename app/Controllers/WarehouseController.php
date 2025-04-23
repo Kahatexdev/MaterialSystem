@@ -44,7 +44,7 @@ class WarehouseController extends BaseController
     protected $historyPindahPalet;
     protected $historyPindahOrder;
     protected $pengeluaranModel;
-    protected $returModel;  
+    protected $returModel;
 
     public function __construct()
     {
@@ -161,7 +161,7 @@ class WarehouseController extends BaseController
             foreach ($existingData as $item) {
                 if ($item['id_out_celup'] == $id) {
                     session()->setFlashdata('error', "Barcode sudah ada di tabel! ({$id})");
-                    return redirect()->to(base_url($this->role."/pemasukan"));
+                    return redirect()->to(base_url($this->role . "/pemasukan"));
                 }
             }
 
@@ -175,7 +175,7 @@ class WarehouseController extends BaseController
                 $findId = $this->outCelupModel->find($id);
                 if (empty($findId)) {
                     session()->setFlashdata('error', "Data tidak ditemukan! ({$id})");
-                    return redirect()->to(base_url($this->role."/pemasukan"));
+                    return redirect()->to(base_url($this->role . "/pemasukan"));
                 }
                 $dataRetur = $this->returModel->getDataRetur($id, $findId['id_retur']);
                 // log_message('debug', 'Data retur: ' . json_encode($dataRetur)); // Debugging
@@ -184,14 +184,14 @@ class WarehouseController extends BaseController
                 } else {
                     // 4. Keduanya kosong → error
                     session()->setFlashdata('error', "Data tidak ditemukan! ({$id})");
-                    return redirect()->to(base_url($this->role."/pemasukan"));
+                    return redirect()->to(base_url($this->role . "/pemasukan"));
                 }
             }
 
             // 5. Merge & simpan session, lalu redirect
             $existingData = array_merge($existingData, $newData);
             session()->set('dataOut', $existingData);
-            return redirect()->to(base_url($this->role."/pemasukan"));
+            return redirect()->to(base_url($this->role . "/pemasukan"));
         }
 
         // Tampilkan form jika bukan POST atau barcode kosong
@@ -204,9 +204,9 @@ class WarehouseController extends BaseController
             'error'    => session()->getFlashdata('error'),
         ];
 
-        return view($this->role."/warehouse/form-pemasukan", $data);
+        return view($this->role . "/warehouse/form-pemasukan", $data);
     }
-    
+
     public function prosesPemasukan()
     {
         $action = $this->request->getPost('action'); // Ambil tombol yang diklik
@@ -393,7 +393,6 @@ class WarehouseController extends BaseController
         return redirect()->to($this->role . '/pemasukan');
     }
 
-
     private function prosesKomplain()
     {
         $checkedIds = $this->request->getPost('checked_id');
@@ -482,8 +481,16 @@ class WarehouseController extends BaseController
     }
     public function getItemTypeByModel($no_model)
     {
-        // Ambil data berdasarkan no_model yang dipilih
-        $itemTypes = $this->outCelupModel->getItemTypeByModel($no_model);  // Gantilah dengan query sesuai kebutuhan
+        $retur = $this->request->getGet('retur');
+        // Debug dulu isi yang diterima
+        log_message('debug', 'No Model: ' . $no_model . ', Retur: ' . $retur);
+
+        // Ambil da ta berdasarkan no_model yang dipilih
+        if ($retur == 0) {
+            $itemTypes = $this->outCelupModel->getItemTypeByModel($no_model);  // Gantilah dengan query sesuai kebutuhan
+        } else {
+            $itemTypes = $this->returModel->getItemTypeByModel($no_model);
+        }
 
         // Return data dalam bentuk JSON
         return $this->response->setJSON($itemTypes);
@@ -492,12 +499,17 @@ class WarehouseController extends BaseController
     {
         $noModel = $this->request->getGet('noModel');
         $itemType = urldecode($this->request->getGet('itemType'));
+        $retur = $this->request->getGet('retur');
 
         // $coba = 'Y24046';
         // $coba2 = 'ACRYLIC TEXLAN 1/36';
 
         // log_message('debug', "$coba Fetching kode warna for no_model: $no_model, item_type: $item_type");
-        $kodeWarna = $this->outCelupModel->getKodeWarnaByModelAndItemType($noModel, $itemType);
+        if ($retur == 0) {
+            $kodeWarna = $this->outCelupModel->getKodeWarnaByModelAndItemType($noModel, $itemType);
+        } else {
+            $kodeWarna = $this->returModel->getKodeWarnaByModelAndItemType($noModel, $itemType);
+        }
 
         return $this->response->setJSON($kodeWarna);
     }
@@ -506,14 +518,19 @@ class WarehouseController extends BaseController
         $noModel = $this->request->getGet('noModel');
         $itemType = urldecode($this->request->getGet('itemType'));
         $kodeWarna = $this->request->getGet('kodeWarna');
+        $retur = $this->request->getGet('retur');
 
         // log_message('debug', "Fetching warna & lot for no_model: $no_model, item_type: $item_type, kode_warna: $kode_warna");
-
-        $warna = $this->outCelupModel->getWarnaByKodeWarna($noModel, $itemType, $kodeWarna);
-        $lotList = $this->outCelupModel->getLotByKodeWarna($noModel, $itemType, $kodeWarna);
+        if ($retur == 0) {
+            $warna = $this->outCelupModel->getWarnaByKodeWarna($noModel, $itemType, $kodeWarna);
+            $lotList = $this->outCelupModel->getLotByKodeWarna($noModel, $itemType, $kodeWarna);
+        } else {
+            $warna = $this->returModel->getWarnaByKodeWarna($noModel, $itemType, $kodeWarna);
+            $lotList = $this->returModel->getLotByKodeWarna($noModel, $itemType, $kodeWarna);
+        }
 
         return $this->response->setJSON([
-            'warna' => $warna ?? '',
+            'warna' => is_array($warna) ? ($warna['warna'] ?? '') : $warna,
             'lot' => $lotList
         ]);
     }
@@ -524,8 +541,16 @@ class WarehouseController extends BaseController
         $kode_warna = $this->request->getGet('kodeWarna');
         $lot_kirim = $this->request->getGet('lotKirim');
         $no_karung = $this->request->getGet('noKarung');
+        $retur = $this->request->getGet('retur');
+
         try {
-            $data = $this->outCelupModel->getKgsDanCones($no_model, $item_type, $kode_warna, $lot_kirim, $no_karung);
+            if ($retur == 0) {
+                $data = $this->outCelupModel->getKgsDanCones($no_model, $item_type, $kode_warna, $lot_kirim, $no_karung);
+            } else {
+                $data = $this->returModel->getKgsDanCones($no_model, $item_type, $kode_warna, $lot_kirim, $no_karung);
+            }
+            log_message('error', "PARAM: retur=$retur, no_model=$no_model, item_type=$item_type, kode_warna=$kode_warna, lot_kirim=$lot_kirim, no_karung=$no_karung");
+            log_message('error', "DATA: " . json_encode($data));
 
             if ($data) {
                 return $this->response->setJSON([
@@ -545,6 +570,7 @@ class WarehouseController extends BaseController
     public function prosesPemasukanManual()
     {
         $action = $this->request->getPost('action'); // Ambil nilai tombol yang diklik
+        $retur = $this->request->getPost('retur') === 'on' ? 1 : 0;
 
         if ($action === 'komplain') {
             $idOutCelup = $this->request->getPost('id_out_celup');
@@ -594,9 +620,7 @@ class WarehouseController extends BaseController
                 return redirect()->to($this->role . '/pemasukan');
             }
 
-            $dataPemasukan = [];
-
-            $dataPemasukan[] = [
+            $dataPemasukan = [
                 'id_out_celup' => $idOutCelup,
                 'no_model' => $noModels,
                 'item_type' => $itemTypes,
@@ -616,68 +640,53 @@ class WarehouseController extends BaseController
             }
 
             $cekDuplikat = $this->pemasukanModel
-                ->whereIn('id_out_celup', array_column($dataPemasukan, 'id_out_celup'))
+                ->where('id_out_celup', $idOutCelup)
                 ->countAllResults();
 
             if ($cekDuplikat == 0) {
                 //insert tabel pemasukan
-                if ($this->pemasukanModel->insertBatch($dataPemasukan)) {
+                if ($this->pemasukanModel->insert($dataPemasukan)) {
+                    $idPemasukan = $this->pemasukanModel->getInsertID();
+                    if ($idPemasukan) {
 
-                    $dataStock = [];
-                    $dataStock[] = [
-                        'no_model' => $noModels,
-                        'item_type' => $itemTypes,
-                        'kode_warna' => $kodeWarnas,
-                        'warna' => $warnas,
-                        'kgs_in_out' => $kgsMasuks,
-                        'cns_in_out' => $cnsMasuks,
-                        'krg_in_out' => 1, // Asumsikan setiap pemasukan hanya 1 kali
-                        'lot_stock' => $lotKirim,
-                        'nama_cluster' => $namaClusters,
-                        'admin' => session()->get('username')
-                    ];
+                        $dataStock = [
+                            'no_model' => $noModels,
+                            'item_type' => $itemTypes,
+                            'kode_warna' => $kodeWarnas,
+                            'warna' => $warnas,
+                            'kgs_in_out' => $kgsMasuks,
+                            'cns_in_out' => $cnsMasuks,
+                            'krg_in_out' => 1, // Asumsikan setiap pemasukan hanya 1 kali
+                            'lot_stock' => $lotKirim,
+                            'nama_cluster' => $namaClusters,
+                            'admin' => session()->get('username')
+                        ];
 
-                    foreach ($dataStock as $stock) {
+
                         $existingStock = $this->stockModel
-                            ->where('no_model', $stock['no_model'])
-                            ->where('item_type', $stock['item_type'])
-                            ->where('kode_warna', $stock['kode_warna'])
-                            ->where('lot_stock', $stock['lot_stock'])
-                            ->first(); // Ambil satu record yang sesuai
+                            ->where('no_model', $dataStock['no_model'])
+                            ->where('item_type', $dataStock['item_type'])
+                            ->where('kode_warna', $dataStock['kode_warna'])
+                            ->where('lot_stock', $dataStock['lot_stock'])
+                            ->where('nama_cluster', $dataStock['nama_cluster'])
+                            ->first();
 
                         if ($existingStock) {
-                            // Jika sudah ada, update jumlahnya
                             $this->stockModel->update($existingStock['id_stock'], [
-                                'kgs_in_out' => $existingStock['kgs_in_out'] + $stock['kgs_in_out'],
-                                'cns_in_out' => $existingStock['cns_in_out'] + $stock['cns_in_out'],
+                                'kgs_in_out' => $existingStock['kgs_in_out'] + $dataStock['kgs_in_out'],
+                                'cns_in_out' => $existingStock['cns_in_out'] + $dataStock['cns_in_out'],
                                 'krg_in_out' => $existingStock['krg_in_out'] + 1
                             ]);
+                            $idStok = $existingStock['id_stock'];
                         } else {
-                            // Jika belum ada, insert data baru
-                            $this->stockModel->insert($stock);
+                            $this->stockModel->insert($dataStock);
                             $idStok = $this->stockModel->getInsertID();
                         }
 
-                        $sql = "
-                            UPDATE pemasukan
-                            JOIN out_celup ON out_celup.id_out_celup = pemasukan.id_out_celup
-                            JOIN bon_celup ON bon_celup.id_bon = out_celup.id_bon
-                            JOIN schedule_celup ON schedule_celup.id_celup = out_celup.id_celup
-                            SET pemasukan.id_stock = ?
-                            WHERE schedule_celup.no_model = ?
-                            AND schedule_celup.item_type = ?
-                            AND schedule_celup.kode_warna = ?
-                            AND pemasukan.nama_cluster = ?
-                        ";
-
-                        // Eksekusi query dengan binding parameter untuk keamanan
-                        $this->db->query($sql, [
-                            $idStok,
-                            $stock['no_model'],
-                            $stock['item_type'],
-                            $stock['kode_warna'],
-                            $stock['nama_cluster']
-                        ]);
+                        $this->pemasukanModel
+                            ->set('id_stock', $idStok)
+                            ->where('id_pemasukan', $idPemasukan)
+                            ->update();
                     }
                 }
                 session()->setFlashdata('success', 'Data berhasil dimasukkan.');
@@ -1005,7 +1014,7 @@ class WarehouseController extends BaseController
         }
 
         return $this->response->setJSON($dataArray);
-    }   
+    }
 
     public function getNoModel()
     {
@@ -1087,7 +1096,7 @@ class WarehouseController extends BaseController
             if ($idRetur) {
                 $this->outCelupModel->insert([
                     'id_retur' => $idRetur['id_retur'],
-                    'no_karung' => $data['no_karung'],  
+                    'no_karung' => $data['no_karung'],
                     'kgs_kirim' => $data['kgs_kirim'],
                     'cones_kirim' => $data['cones_kirim'],
                     'lot_kirim' => $lotStock,
@@ -1741,5 +1750,19 @@ class WarehouseController extends BaseController
                 'message' => 'Gagal menyimpan data'
             ]);
         }
+    }
+    public function getNamaCluster()
+    {
+        $cluster = $this->request->getVar('namaCluster');
+        $kgsPindah = $this->request->getVar('kgsPindah');
+
+        $results = $this->clusterModel->getCluster($cluster, $kgsPindah);
+
+        $resultsArray = json_decode(json_encode($results), true);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $resultsArray
+        ]);
     }
 }
