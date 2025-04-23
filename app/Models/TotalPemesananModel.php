@@ -90,7 +90,6 @@ class TotalPemesananModel extends Model
             pemesanan.keterangan,
             pemesanan.po_tambahan,
             pemesanan.id_total_pemesanan,
-            pemesanan.id_retur,
             pemesanan.status_kirim,
             pemesanan.admin,
             material.id_material,
