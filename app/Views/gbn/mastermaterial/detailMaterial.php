@@ -3,10 +3,19 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
 <style>
     .btn-xs {
-        padding: 0.5rem 1rem;
+        padding: 0.25rem 0.5rem;
         font-size: 0.75rem;
         line-height: 1.2;
         border-radius: 0.5rem;
+        width: 40px;
+        height: 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .btn-xs i {
+        font-size: 0.8rem;
     }
 </style>
 <div class="container-fluid py-4">
