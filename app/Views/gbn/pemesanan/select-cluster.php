@@ -233,8 +233,8 @@
                 </div>
             <?php endforeach; ?>
         <?php else: ?>
-            <div class="empty-state">
-                <p class="empty-state-text">Stock Kosong <?= $noModel; ?>.</p>
+            <div class="bg-gradient-danger w-100 empty-state">
+                <h6 class="text-white">Stock Kosong <?= $noModel; ?>.</h6>
             </div>
         <?php endif; ?>
     </div>
