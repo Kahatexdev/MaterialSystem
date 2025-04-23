@@ -234,10 +234,7 @@
             <?php endforeach; ?>
         <?php else: ?>
             <div class="empty-state">
-                <div class="empty-state-icon">
-                    Cluster <i class="fas fa-inbox text-white"></i>
-                </div>
-                <p class="empty-state-text">Data pemasukan tidak ditemukan.</p>
+                <p class="empty-state-text">Stock Kosong <?= $noModel; ?>.</p>
             </div>
         <?php endif; ?>
     </div>
@@ -279,8 +276,8 @@
                     <form id="usageForm" method="post">
                         <input type="hidden" id="idStok" name="idStok">
                         <input type="hidden" id="noModel" name="noModel" value="<?= $noModel; ?>">
-                        <input type="hidden" id="namaCluster" name="namaCluster" value="<?= $item['nama_cluster']; ?>">
-                        <input type="hidden" id="lotFinal" name="lotFinal" value="<?= $item['lot_final']; ?>">
+                        <input type="hidden" id="namaCluster" name="namaCluster" value="<?= $item['nama_cluster'] ?? NULL ?>">
+                        <input type="hidden" id="lotFinal" name="lotFinal" value="<?= $item['lot_final'] ?? NULL ?>">
                         <!-- <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label for="qtyKGS" class="form-label">Qty KGS</label>
