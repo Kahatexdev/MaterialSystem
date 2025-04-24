@@ -241,6 +241,7 @@ class CelupController extends BaseController
         $tglKelos = $this->request->getPost('tgl_kelos');
         $tglReject = $this->request->getPost('tgl_reject');
         $tglPB = $this->request->getPost('tgl_pb');
+        $user  = $this->session->get('username');
 
         // Array untuk menyimpan nama variabel dan nilai tanggal
         $dates = [
@@ -290,6 +291,7 @@ class CelupController extends BaseController
         if ($tglKelos) $dataUpdate['tanggal_kelos'] = $tglKelos;
         if ($tglReject) $dataUpdate['tanggal_reject'] = $tglReject;
         if ($tglPB) $dataUpdate['tanggal_perbaikan'] = $tglPB;
+        if ($user) $dataUpdate['user_cek_status'] = $user;
         if ($ketDailyCek) $dataUpdate['ket_daily_cek'] = $ketDailyCek;
 
         // Jika tgl_bon diisi, update last_status menjadi 'bon'
