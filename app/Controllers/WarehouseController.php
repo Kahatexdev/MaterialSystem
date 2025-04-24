@@ -1131,9 +1131,9 @@ class WarehouseController extends BaseController
             $idPemasukanBaru[] = $this->pemasukanModel->getInsertID();
 
             // — update stok LAMA (kurangi sesuai tiap item)
-            $newKgs = max(0, $idStockData[$i]['kgs_in_out']   - $data['kgs_kirim']);
-            $newCns = max(0, $idStockData[$i]['cns_in_out']   - $data['cones_kirim']);
-            $newKrg = max(0, $idStockData[$i]['krg_in_out']   - 1);
+            $newKgs = max(0, $idStockData[$i]['kgs_in_out']   -= $data['kgs_kirim']);
+            $newCns = max(0, $idStockData[$i]['cns_in_out']   -= $data['cones_kirim']);
+            $newKrg = max(0, $idStockData[$i]['krg_in_out']   -= 1);
             $this->stockModel->update($idStock[$i], [
                 'kgs_in_out'  => $newKgs,
                 'cns_in_out'  => $newCns,
