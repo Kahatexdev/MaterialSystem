@@ -241,7 +241,7 @@ class CelupController extends BaseController
         $tglKelos = $this->request->getPost('tgl_kelos');
         $tglReject = $this->request->getPost('tgl_reject');
         $tglPB = $this->request->getPost('tgl_pb');
-        $user  = $this->session->get('username');
+        $user  = session()->get('username');
 
         // Array untuk menyimpan nama variabel dan nilai tanggal
         $dates = [
