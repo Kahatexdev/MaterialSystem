@@ -122,9 +122,9 @@ class PoGabunganController extends BaseController
         $groupedItems = array_values($grouped);
         // 🚨 Validasi: pastikan hanya ada satu kombinasi unik
         if (count($groupedItems) > 1) {
-            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan: Kombinasi item_type, kode warna, dan warna tidak sama semua.');
+            return redirect()->to(base_url($this->role . '/masterdata'))->with('error', 'Gagal menyimpan: Kombinasi item_type, kode warna, dan warna tidak sama semua.');
         }
-        
+
         // 3. Simpan header PO gabungan (hanya ambil item pertama sebagai "sample")
         $headerData = [
             'no_model'         => 'POGABUNGAN ' . implode(',', $modelIds),
