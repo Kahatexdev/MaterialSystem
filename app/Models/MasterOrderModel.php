@@ -188,4 +188,11 @@ class MasterOrderModel extends Model
             ->orderBy('material.item_type')
             ->findAll();
     }
+
+    public function getUnit($no_model)
+    {
+        return $this->select('unit')
+            ->where('no_model', $no_model)
+            ->first();
+    }
 }

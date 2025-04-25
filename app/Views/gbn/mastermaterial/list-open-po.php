@@ -34,10 +34,21 @@
                     <h4 class="mb-0 font-weight-bolder">List Buka PO <?= $no_model ?></h5>
                 </div>
                 <div class="group">
-                    <a href="<?= base_url($role . '/exportOpenPO/' . $no_model . '?tujuan=' . $tujuan . '&jenis=' . $jenis . '&jenis2=' . $jenis2) ?>"
-                        class="btn btn-outline-info" target="_blank">
+                    <!-- <a href="<?= base_url($role . '/exportOpenPO/' . $no_model . '?tujuan=' . $tujuan . '&jenis=' . $jenis . '&jenis2=' . $jenis2) ?>"
+                        class="btn btn-outline-danger" target="_blank">
                         <i class="ni ni-single-copy-04 me-2"></i>Export PO
-                    </a>
+                    </a> -->
+                    <!-- <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <i class="ni ni-single-copy-04 me-2"></i>Export PO
+                    </button> -->
+                    <button
+                        class="btn btn-outline-info"
+                        id="btnOpenModal"
+                        data-bs-toggle="modal"
+                        data-bs-target="#exportModal"
+                        data-base-url="<?= base_url("$role/exportOpenPO/$no_model") ?>">
+                        <i class="ni ni-single-copy-04 me-2"></i>Export PO
+                    </button>
 
                 </div>
             </div>
@@ -137,6 +148,52 @@
     </div>
 </div>
 
+<!-- Modal Export Data PO -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exportModalLabel">Export Data PO</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body ">
+                <form id="exportForm" action="#" method="get" target="_blank">
+                    <div class="mb-3">
+                        <label for="tujuan" class="form-label">Season</label>
+                        <input type="text" class="form-control" id="season" name="season">
+                    </div>
+                    <div class="mb-3">
+                        <label for="jenis" class="form-label">Material Type</label>
+                        <select name="material_type" id="material_type" class="form-control">
+                            <option value="">Pilih Material Type</option>
+                            <option value="OCS BLENDED">OCS BLENDED</option>
+                            <option value="GOTS">GOTS</option>
+                            <option value="RCS BLENDED POST-CONSUMER">RCS BLENDED POST-CONSUMER</option>
+                            <option value="BCI">BCI</option>
+                            <option value="BCI-7">BCI-7</option>
+                            <option value="BCI, ALOEVERA">BCI, ALOEVERA</option>
+                            <option value="OCS BLENDED, ALOEVERA">OCS BLENDED, ALOEVERA</option>
+                            <option value="GRS BLENDED POST-CONSUMER">GRS BLENDED POST-CONSUMER</option>
+                            <option value="ORGANIC IC2">ORGANIC IC2</option>
+                            <option value="RCS BLENDED PRE-CONSUMER">RCS BLENDED PRE-CONSUMER</option>
+                            <option value="GRS BLENDED PRE-CONSUMER">GRS BLENDED PRE-CONSUMER</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="button"
+                            class="btn btn-info"
+                            id="btnSubmitExport">
+                            Export
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
 <script>
     $(document).ready(function() {
         $('#updateModal').on('shown.bs.modal', function() {
@@ -224,4 +281,64 @@
         });
     });
 </script>
+<script>
+    document
+        .getElementById('btnSubmitExport')
+        .addEventListener('click', function() {
+            // 1) Ambil URL dasar dari tombol trigger
+            const base = document
+                .getElementById('btnOpenModal')
+                .getAttribute('data-base-url');
+
+            // 2) Buat URLSearchParams dengan default params
+            const params = new URLSearchParams({
+                tujuan: "<?= $tujuan ?>",
+                jenis: "<?= $jenis ?>",
+                jenis2: "<?= $jenis2 ?>"
+            });
+
+            // 3) Ambil nilai modal
+            const season = document.getElementById('season').value.trim();
+            const materialType = document.getElementById('material_type').value;
+
+            // 4) Tambahkan kalau user mengisi
+            if (season) params.set('season', season);
+            if (materialType) params.set('material_type', materialType);
+
+            // 5) Bentuk URL akhir & buka di tab baru
+            const finalUrl = base + '?' + params.toString();
+            window.open(finalUrl, '_blank');
+        });
+</script>
+
+
+<!-- <script>
+    document.getElementById('btnSubmitExport')
+        .addEventListener('click', function() {
+            // 1) Ambil URL penuh saat ini (path + query)
+            let currentUrl = window.location.href.split('#')[0];
+            // (buang fragment jika ada)
+
+            // 2) Pisahkan base + existing search
+            let [base, search = ''] = currentUrl.split('?');
+            let params = new URLSearchParams(search);
+
+            // 3) Ambil nilai modal
+            const season = document.getElementById('season').value.trim();
+            const materialType = document.getElementById('material_type').value;
+
+            // 4) Jika terisi, tambahkan ke params
+            if (season) params.set('season', season);
+            if (materialType) params.set('material_type', materialType);
+
+            // 5) Rekonstuksi URL baru
+            let newUrl = base +
+                (params.toString() ? '?' + params.toString() : '');
+
+            // 6) Buka di tab baru
+            window.open(newUrl, '_blank');
+        });
+</script> -->
+
+
 <?php $this->endSection(); ?>
