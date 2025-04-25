@@ -173,4 +173,19 @@ class MasterOrderModel extends Model
 
         return $this->findAll();
     }
+
+    public function getMaterialPoGabungan()
+    {
+        $data = $this->select('no_model,buyer, delivery_awal, delivery_akhir, material.item_type, material.color, material.kode_warna, sum(material.kgs) as total_kg')
+            ->join('material', 'material.id_order=master_order.id_order')
+            ->where('master_order.id_order')
+            ->where('material.composition !=', 0)
+            ->where('material.gw !=', 0)
+            ->where('material.qty_pcs !=', 0)
+            ->where('material.loss !=', 0)
+            ->where('material.kgs >', 0)
+            ->groupBy(['material.item_type', 'material.kode_warna'])
+            ->orderBy('material.item_type')
+            ->findAll();
+    }
 }

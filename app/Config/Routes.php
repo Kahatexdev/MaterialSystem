@@ -28,6 +28,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('masterdata/reportMasterOrder', 'MasterdataController::reportMasterOrder');
     $routes->get('masterdata/filterMasterOrder', 'MasterdataController::filterMasterOrder');
     $routes->get('masterdata/excelMasterOrder', 'ExcelController::excelMasterOrder');
+    $routes->get('masterdata/poGabungan', 'PoGabunganController::index');
+    $routes->get('masterdata/poGabungan/NYLON', 'PoGabunganController::poGabunganNylon');
 
     $routes->get('material/(:num)', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');

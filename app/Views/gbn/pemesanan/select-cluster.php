@@ -233,11 +233,8 @@
                 </div>
             <?php endforeach; ?>
         <?php else: ?>
-            <div class="empty-state">
-                <div class="empty-state-icon">
-                    Cluster <i class="fas fa-inbox text-white"></i>
-                </div>
-                <p class="empty-state-text">Data pemasukan tidak ditemukan.</p>
+            <div class="bg-gradient-danger w-100 empty-state">
+                <h6 class="text-white">Stock Kosong <?= $noModel; ?>.</h6>
             </div>
         <?php endif; ?>
     </div>
@@ -279,8 +276,8 @@
                     <form id="usageForm" method="post">
                         <input type="hidden" id="idStok" name="idStok">
                         <input type="hidden" id="noModel" name="noModel" value="<?= $noModel; ?>">
-                        <input type="hidden" id="namaCluster" name="namaCluster" value="<?= $item['nama_cluster']; ?>">
-                        <input type="hidden" id="lotFinal" name="lotFinal" value="<?= $item['lot_final']; ?>">
+                        <input type="hidden" id="namaCluster" name="namaCluster" value="<?= $item['nama_cluster'] ?? NULL ?>">
+                        <input type="hidden" id="lotFinal" name="lotFinal" value="<?= $item['lot_final'] ?? NULL ?>">
                         <!-- <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label for="qtyKGS" class="form-label">Qty KGS</label>
@@ -455,7 +452,7 @@
             const idStok = document.getElementById('idStok').value;
             const qtyKGS = document.getElementById('qtyKGS').value;
             const qtyCNS = document.getElementById('qtyCNS').value;
-            const qtyKarung = document.getElementById('no_karung').value;
+            const qtyKarung = document.querySelectorAll('input[name="id_pemasukan[]"]:checked').length;
             const noModel = document.getElementById('noModel').value;
             const namaCluster = document.getElementById('namaCluster').value;
             const idOutCelup = document.getElementById('idOutCelup').value;
