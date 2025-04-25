@@ -8,6 +8,7 @@ use App\Models\MasterMaterialModel;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\StockModel;
+use App\Models\OpenPoModel;
 
 class PoGabunganController extends BaseController
 {
@@ -19,6 +20,7 @@ class PoGabunganController extends BaseController
     protected $materialModel;
     protected $stockModel;
     protected $masterMaterialModel;
+    protected $openPoModel;
 
     public function __construct()
     {
@@ -26,6 +28,7 @@ class PoGabunganController extends BaseController
         $this->materialModel = new MaterialModel();
         $this->stockModel = new StockModel();
         $this->masterMaterialModel = new MasterMaterialModel();
+        $this->openPoModel = new OpenPoModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
