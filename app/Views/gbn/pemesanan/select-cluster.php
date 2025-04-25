@@ -452,7 +452,7 @@
             const idStok = document.getElementById('idStok').value;
             const qtyKGS = document.getElementById('qtyKGS').value;
             const qtyCNS = document.getElementById('qtyCNS').value;
-            const qtyKarung = document.getElementById('no_karung').value;
+            const qtyKarung = document.querySelectorAll('input[name="id_pemasukan[]"]:checked').length;
             const noModel = document.getElementById('noModel').value;
             const namaCluster = document.getElementById('namaCluster').value;
             const idOutCelup = document.getElementById('idOutCelup').value;

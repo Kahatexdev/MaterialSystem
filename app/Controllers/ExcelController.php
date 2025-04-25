@@ -1117,6 +1117,7 @@ class ExcelController extends BaseController
         $sheet->setCellValue('K3', 'Kgs Stock Awal');
         $sheet->setCellValue('L3', 'Krg Stock Awal');
         $sheet->setCellValue('M3', 'Cns Stock Awal');
+        $sheet->setCellValue('N3', 'Lot Awal');
 
         // === Isi Data mulai dari baris ke-3 === //
         $row = 4;
@@ -1134,11 +1135,12 @@ class ExcelController extends BaseController
             $sheet->setCellValue('K' . $row, $data->KgsStockAwal);
             $sheet->setCellValue('L' . $row, $data->KrgStockAwal);
             $sheet->setCellValue('M' . $row, $data->CnsStockAwal);
+            $sheet->setCellValue('N' . $row, $data->lot_awal);
             $row++;
         }
 
         // === Auto Size Kolom A - M === //
-        foreach (range('A', 'M') as $col) {
+        foreach (range('A', 'N') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
@@ -1153,7 +1155,7 @@ class ExcelController extends BaseController
         ];
 
         $lastDataRow = $row - 1; // baris terakhir data
-        $sheet->getStyle("A3:M{$lastDataRow}")->applyFromArray($styleArray);
+        $sheet->getStyle("A3:N{$lastDataRow}")->applyFromArray($styleArray);
 
         // === Export File Excel === //
         $filename = 'Data_Stock_' . date('YmdHis') . '.xlsx';

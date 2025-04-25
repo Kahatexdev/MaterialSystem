@@ -11,10 +11,17 @@
                     <h6 class="font-weight-bolder mb-0"><?= $title ?></h6>
                 </nav>
                 <div class="d-flex align-items-center">
+                    <li class="nav-item d-flex align-items-center px-1">
+                        <a href="<?= base_url(session()->get('role')) . '/masterdata/poGabungan' ?>" class="nav-link text-body font-weight-bold px-2">
+                            <i class="fas fa-file-import"></i>
+                            <span class="d-lg-inline-block d-none ms-1">
+                                PO Gabungan</span>
+                        </a>
+                    </li>
                     <ul class="navbar-nav justify-content-end">
                         <li class="nav-item d-flex align-items-center px-1">
                             <a href="<?= base_url(session()->get('role')) . '/masterMaterial' ?>" class="nav-link text-body font-weight-bold px-2">
-                                <i class="fas fa-database me-sm-1"></i>
+                                <i class="fas fa-database"></i>
                                 <span class="d-lg-inline-block d-none ms-1">
                                     Master Material</span>
                             </a>
