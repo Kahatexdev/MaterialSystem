@@ -638,9 +638,12 @@ class MasterdataController extends BaseController
         return view($this->role . '/mastermaterial/openPO', $data);
     }
 
+
+
     public function saveOpenPO($id)
     {
         $data = $this->request->getPost();
+        // dd($data);
         $id_order = $id;
         // dd($id_order);
 

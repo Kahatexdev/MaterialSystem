@@ -266,4 +266,14 @@ class StockModel extends Model
             ->get()
             ->getResultArray();
     }
+
+    public function cekStockOrder($no_model, $item_type, $kode_warna)
+    {
+        return $this->select('COALESCE(SUM(kgs_stock_awal), 0) as kgs_stock')
+            ->where('no_model', $no_model)
+            ->where('item_type', $item_type)
+            ->where('kode_warna', $kode_warna)
+            ->groupBy('kode_warna')
+            ->first();
+    }
 }
