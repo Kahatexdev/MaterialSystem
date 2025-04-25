@@ -242,13 +242,22 @@ class MaterialModel extends Model
             ->findAll();
     }
 
-    public function getNoModel($noModelOld,$kodeWarna)
+    public function getNoModel($noModelOld, $kodeWarna)
     {
         return $this->select('material.item_type, material.kode_warna, master_order.no_model, material.color')
             ->join('master_order', 'master_order.id_order = material.id_order')
             ->where('master_order.no_model !=', $noModelOld)
             ->where('material.kode_warna', $kodeWarna)
             ->groupBy('material.item_type, material.kode_warna, master_order.no_model')
+            ->findAll();
+    }
+    public function MaterialPerStyle($model, $style)
+    {
+        return $this->select('master_order.no_model, area, kode_warna, item_type, color, sum(kgs) as qty_po')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('master_order.no_model', $model)
+            ->where('material.style_size', $style)
+            ->groupBy('no_model,item_type,kode_warna,color')
             ->findAll();
     }
 }
