@@ -101,7 +101,7 @@ class StockModel extends Model
                 'cluster.kapasitas'
             ])
             ->orderBy('stock.nama_cluster', 'ASC');
-            // ->limit(10);
+        // ->limit(10);
 
         return $builder->get()->getResult();
     }
@@ -265,5 +265,23 @@ class StockModel extends Model
             ->orderBy('pemasukan.id_pemasukan', 'DESC')
             ->get()
             ->getResultArray();
+    }
+    public function getDataClusterPindah($data)
+    {
+
+        $lotColumn = $data['stock_awal'] == "" ? 'lot_stock' : 'lot_awal';
+
+        return $this->select('stock.*')
+            ->where([
+                'no_model'     => $data['no_model'],
+                'item_type'    => $data['item_type'],
+                'kode_warna'   => $data['kode_warna'],
+                'warna'        => $data['warna'],
+                'nama_cluster' => $data['nama_cluster'],
+            ])
+            ->where($lotColumn, $data['lot'])
+            ->first();
+
+        return $data;
     }
 }

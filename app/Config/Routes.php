@@ -129,10 +129,13 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('warehouse/search', 'WarehouseController::search');
     $routes->post('warehouse/sisaKapasitas', 'WarehouseController::getSisaKapasitas');
     $routes->post('warehouse/getCluster', 'WarehouseController::getClusterbyId');
+    $routes->get('warehouse/getNamaCluster', 'WarehouseController::getNamaCluster');
     $routes->post('warehouse/updateCluster', 'WarehouseController::updateCluster');
     $routes->get('warehouse/getNoModel', 'WarehouseController::getNoModel');
     $routes->post('warehouse/savePindahOrder', 'WarehouseController::savePindahOrder');
     $routes->post('warehouse/getPindahOrder', 'WarehouseController::getPindahOrder');
+    $routes->post('warehouse/savePindahCluster', 'WarehouseController::savePindahCluster');
+    $routes->post('warehouse/getPindahCluster', 'WarehouseController::getPindahCluster');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
     $routes->get('warehouse/reportPoBenang', 'WarehouseController::reportPoBenang');
     $routes->get('warehouse/filterPoBenang', 'WarehouseController::filterPoBenang');
