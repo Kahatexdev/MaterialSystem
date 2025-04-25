@@ -38,7 +38,7 @@
     <!-- Form -->
     <div class="card mt-4">
         <div class="card-body">
-            <form action="<?= base_url($role . '/openPO/saveOpenPOGabungan/') ?>" method="post">
+            <form action="<?= base_url($role . '/openPO/saveOpenPOGabungan') ?>" method="post">
                 <div class="form-group">
                     <label>Tujuan</label>
                     <select class="form-control" name="tujuan_po" id="selectTujuan" onchange="tujuan()" required>
