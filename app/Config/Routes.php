@@ -29,7 +29,11 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('masterdata/filterMasterOrder', 'MasterdataController::filterMasterOrder');
     $routes->get('masterdata/excelMasterOrder', 'ExcelController::excelMasterOrder');
     $routes->get('masterdata/poGabungan', 'PoGabunganController::index');
-    $routes->get('masterdata/poGabungan/NYLON', 'PoGabunganController::poGabunganNylon');
+    $routes->get('masterdata/poGabungan/(:any)', 'PoGabunganController::poGabungan/$1');
+    $routes->get('masterdata/poGabunganDetail/(:any)', 'PoGabunganController::poGabunganDetail/$1');
+    $routes->get('masterdata/cekStockOrder/(:any)/(:any)/(:any)', 'PoGabunganController::cekStockOrder/$1/$2/$3');
+    $routes->post('openPO/saveOpenPOGabungan', 'PoGabunganController::saveOpenPOGabungan');
+
 
     $routes->get('material/(:num)', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');
@@ -146,6 +150,13 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/filterDatangBenang', 'WarehouseController::filterDatangBenang');
     $routes->get('warehouse/exportDatangBenang', 'ExcelController::exportDatangBenang');
     $routes->get('warehouse/exportExcel', 'ExcelController::excelStockMaterial');
+    $routes->get('warehouse/reportPengiriman', 'WarehouseController::reportPengiriman');
+    $routes->get('warehouse/filterPengiriman', 'WarehouseController::filterPengiriman');
+    $routes->get('warehouse/exportPengiriman', 'ExcelController::exportPengiriman');
+    $routes->get('warehouse/reportGlobal', 'WarehouseController::reportGlobal');
+    $routes->get('warehouse/filterReportGlobal', 'WarehouseController::filterReportGlobal');
+    $routes->get('warehouse/exportGlobalReport', 'ExcelController::exportGlobalReport');
+
     //
     $routes->post('getStockByParams', 'PemesananController::getStockByParams');
     $routes->get('pemesanan', 'PemesananController::index');
