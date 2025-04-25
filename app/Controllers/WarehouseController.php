@@ -1994,4 +1994,50 @@ class WarehouseController extends BaseController
             'details' => $cekStock,
         ]);
     }
+    public function reportPengiriman()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Report Pengirirman Area',
+            'active' => $this->active
+        ];
+        return view($this->role . '/warehouse/report-pengiriman', $data);
+    }
+    public function filterPengiriman()
+    {
+        $key = $this->request->getGet('key');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pengeluaranModel->getFilterPengiriman($key, $tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
+    }
+    public function reportGlobal()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Report Global',
+            'active' => $this->active
+        ];
+        return view($this->role . '/warehouse/report-global', $data);
+    }
+    public function filterReportGlobal()
+    {
+        $key = $this->request->getGet('key');
+        log_message('debug', 'Received key: ' . $key);  // Log key yang diterima
+        if (empty($key)) {
+            return $this->response->setJSON(['error' => 'Key is missing']);
+        }
+
+        $data = $this->masterOrderModel->getFilterReportGlobal($key);
+        // Log data yang diterima dari model
+        log_message('debug', 'Query result: ' . print_r($data, true));
+
+        if (empty($data)) {
+            return $this->response->setJSON(['error' => 'No data found']);
+        }
+
+        return $this->response->setJSON($data);
+    }
 }
