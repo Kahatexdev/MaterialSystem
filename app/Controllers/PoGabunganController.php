@@ -229,7 +229,7 @@ class PoGabunganController extends BaseController
         }
         // 3. Persist header PO gabungan
         $headerData = [
-            'no_model'         => 'POGABUNGAN_' . implode('_', $noModelMap),
+            'no_model'         => 'POGABUNGAN ' . implode(',', $modelIds),
             'item_type'        => $details[0]['item_type'],
             'kode_warna'       => $details[0]['kode_warna'],
             'color'            => $details[0]['color'],
