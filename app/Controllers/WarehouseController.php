@@ -1131,9 +1131,9 @@ class WarehouseController extends BaseController
             $idPemasukanBaru[] = $this->pemasukanModel->getInsertID();
 
             // — update stok LAMA (kurangi sesuai tiap item)
-            $newKgs = max(0, $idStockData[$i]['kgs_in_out']   - $data['kgs_kirim']);
-            $newCns = max(0, $idStockData[$i]['cns_in_out']   - $data['cones_kirim']);
-            $newKrg = max(0, $idStockData[$i]['krg_in_out']   - ($data['krg_kirim'] ?? 0));
+            $newKgs = max(0, $idStockData[$i]['kgs_in_out']   -= $data['kgs_kirim']);
+            $newCns = max(0, $idStockData[$i]['cns_in_out']   -= $data['cones_kirim']);
+            $newKrg = max(0, $idStockData[$i]['krg_in_out']   -= 1);
             $this->stockModel->update($idStock[$i], [
                 'kgs_in_out'  => $newKgs,
                 'cns_in_out'  => $newCns,
@@ -1144,21 +1144,43 @@ class WarehouseController extends BaseController
             ]);
         }
 
-        // 5) Sekali saja: insert KE STOCK baru dengan total semua
-        $this->stockModel->insert([
-            'no_model'       => $noModel,
-            'item_type'      => $itemType,
-            'kode_warna'     => $kodeWarna,
-            'warna'          => $warna,
-            'kgs_stock_awal' => $totalKgs,
-            'cns_stock_awal' => $totalCns,
-            'krg_stock_awal' => $totalKrg,
-            'lot_awal'       => $lotStock,
-            'nama_cluster'   => $cluster,
-            'admin'          => session()->get('username'),
-            'created_at'     => date('Y-m-d H:i:s'),
-        ]);
-        $newStockId = $this->stockModel->getInsertID();
+        // 5) Sekali saja: cek stock ada atau tidak
+        // Ambil record stock yang matching model, type, warna dan cluster
+        $existingStock = $this->stockModel
+            ->where('no_model',   $noModel)
+            ->where('item_type',  $itemType)
+            ->where('kode_warna', $kodeWarna)
+            ->where('warna',      $warna)
+            ->where('nama_cluster', $cluster)
+            ->first();
+
+        if ($existingStock) {
+            // — jika sudah ada, update stok lama (tambah total dari pemindahan)
+            $this->stockModel->update($existingStock['id_stock'], [
+                'kgs_stock_awal' => $existingStock['kgs_stock_awal'] + $totalKgs,
+                'cns_stock_awal' => $existingStock['cns_stock_awal'] + $totalCns,
+                'krg_stock_awal' => $existingStock['krg_stock_awal'] + $totalKrg,
+                'lot_awal'      => $lotStock,          // perbarui lot terakhir
+                'updated_at'     => date('Y-m-d H:i:s'),
+            ]);
+            $newStockId = $existingStock['id_stock'];
+        } else {
+            // — jika belum ada, insert stock baru
+            $this->stockModel->insert([
+                'no_model'       => $noModel,
+                'item_type'      => $itemType,
+                'kode_warna'     => $kodeWarna,
+                'warna'          => $warna,
+                'kgs_stock_awal' => $totalKgs,
+                'cns_stock_awal' => $totalCns,
+                'krg_stock_awal' => $totalKrg,
+                'lot_awal'       => $lotStock,
+                'nama_cluster'   => $cluster,
+                'admin'          => session()->get('username'),
+                'created_at'     => date('Y-m-d H:i:s'),
+            ]);
+            $newStockId = $this->stockModel->getInsertID();
+        }
 
         // 6) Update semua pemasukan baru agar pakai stock yang sama
         foreach ($idPemasukanBaru as $pid) {
