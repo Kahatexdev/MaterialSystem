@@ -56,6 +56,8 @@ class PdfController extends BaseController
         $tujuan = $this->request->getGet('tujuan');
         $jenis = $this->request->getGet('jenis');
         $jenis2 = $this->request->getGet('jenis2');
+        $season = $this->request->getGet('season');
+        $materialType = $this->request->getGet('material_type');
 
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';
@@ -64,6 +66,7 @@ class PdfController extends BaseController
         }
 
         $result = $this->openPoModel->getData($no_model, $jenis, $jenis2);
+        $unit = $this->masterOrderModel->getUnit($no_model);
 
         // Inisialisasi FPDF
         $pdf = new FPDF('L', 'mm', 'A4');
@@ -100,7 +103,6 @@ class PdfController extends BaseController
         $pdf->Cell(43, 4, 'PT KAHATEX', 0, 0, 'C'); // Tetap di baris yang sama
         $pdf->Cell(234, 4, 'FORMULIR PO', 0, 1, 'C'); // Pindah ke baris berikutnya setelah ini
 
-
         // Tabel Header Atas
         $pdf->SetFont('Arial', '', 5);
         $pdf->Cell(43, 4, 'No. Dokumen', 1, 0, 'L');
@@ -108,15 +110,62 @@ class PdfController extends BaseController
         $pdf->Cell(31, 4, 'Tanggal Revisi', 1, 0, 'L');
         $pdf->Cell(41, 4, '04 Desember 2019', 1, 1, 'L');
 
-        $pdf->SetFont('Arial', '', 7);
-        $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
-        $pdf->Cell(234, 5, ': ' . $no_model, 0, 1, 'L');
+        $pdf->Cell(205, 4, '', 1, 0, 'L');
+        $pdf->Cell(31, 4, 'Klasifikasi', 1, 0, 'L');
+        $pdf->Cell(41, 4, 'Internal', 1, 1, 'L');
 
-        $pdf->Cell(43, 5, 'Pemesanan', 0, 0, 'L');
-        $pdf->Cell(234, 5, ': KAOS KAKI', 0, 1, 'L');
+        $pdf->SetFont('Arial', '', 7);
+
+        $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
+        $pdf->Cell(30, 5, ': ' . $no_model, 0, 1, 'L');
+
+        $cellW1 = 20;  // lebar season
+        $cellW2 = 30;  // lebar materialType
+        $lineH  = 4;   // tinggi tiap baris wrap
+
+        $seasonText = $season ?? '';
+        $mtText     = $materialType ?? '';
+
+        // Hitung tinggi masing-masing
+        $nb1   = ceil($pdf->GetStringWidth($seasonText) / $cellW1);
+        $nb1   = max(1, $nb1);
+        $rowH1 = $nb1 * $lineH;
+
+        $nb2   = ceil($pdf->GetStringWidth($mtText) / $cellW2);
+        $nb2   = max(1, $nb2);
+        $rowH2 = $nb2 * $lineH;
+
+        $rowH = max($rowH1, $rowH2);
+
+        $startX = $pdf->GetX();
+        $startY = $pdf->GetY();
+
+        $rawUnit = $unit['unit'];
+        $rawUnit = strtoupper(trim($rawUnit));
+
+        $pemesanan = 'KAOS KAKI';
+        if ($rawUnit === 'MAJALAYA') {
+            $pemesanan .= ' / ' . $rawUnit;
+        }
+
+        $pdf->Cell(43, $rowH, 'Pemesanan', 0, 0, 'L');
+        $pdf->Cell(50, $rowH, ': ' . $pemesanan, 0, 0, 'L');
+
+        //Simpan posisi awal Season & MaterialType
+        $x = $pdf->GetX();
+        $y = $pdf->GetY();
+
+        //Season
+        $pdf->MultiCell($cellW1, $lineH, $seasonText, 0, 'C');
+        $pdf->SetXY($x + $cellW1, $y);
+
+        //Material Type
+        $pdf->SetFont('Arial', 'U', 7);
+        $pdf->MultiCell($cellW2, $lineH, $mtText, 0, 'C');
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->SetXY($startX, $startY + $rowH);
 
         $pdf->Cell(43, 5, 'Tgl', 0, 0, 'L');
-        // Check if the result array is not empty and display only the first delivery_awal
         if (!empty($result)) {
             $pdf->Cell(234, 5, ': ' . $result[0]['tgl_po'], 0, 1, 'L');
         } else {
@@ -168,64 +217,97 @@ class PdfController extends BaseController
         $pdf->Cell(87, -8, '', 0, 2, 'C'); // Kosong untuk menyesuaikan posisi
         $pdf->Cell(87, 8, '', 0, 1, 'C'); // Kosong untuk menyesuaikan posisi
 
-        $lineHeight = 4;
+        $rowHeight = 16;
+        $lineHeight = 3;
         $itemTypeWidth = 25;
-        $defaultRowHeight = 8;
         $pdf->SetFont('Arial', '', 7);
         $no = 1;
         $yLimit = 180;
 
         foreach ($result as $row) {
-            // Hitung jumlah baris yang dibutuhkan oleh item_type
-            $text = $row['item_type'];
-            $nbLines = ceil($pdf->GetStringWidth($text) / $itemTypeWidth);
-            // Tentukan tinggi baris berdasarkan jumlah line
-            $isWrapped = $nbLines > 1;
-            $rowHeight = $isWrapped ? $nbLines * $lineHeight + $lineHeight : $defaultRowHeight;
-
-            // Cek batas bawah halaman
             if ($pdf->GetY() + $rowHeight > $yLimit) {
                 $pdf->AddPage();
                 $this->generateHeaderOpenPO($pdf, $no_model);
             }
+            $yStart = $pdf->GetY(); // posisi awal Y
+            $xStart = $pdf->GetX(); // posisi awal X
 
-            $x = $pdf->GetX();
-            $y = $pdf->GetY();
-
-            // Kolom nomor
+            // Kolom No
+            $pdf->SetXY($xStart, $yStart);
             $pdf->Cell(6, $rowHeight, $no++, 1, 0, 'C');
+            $xStart += 6;
+
+            // Kolom Jenis
+            $pdf->SetXY($xStart, $yStart);
             $pdf->Cell(12, $rowHeight, $row['jenis'], 1, 0, 'C');
+            $xStart += 12;
 
-            // Kolom item_type
-            if ($isWrapped) {
-                $pdf->MultiCell($itemTypeWidth, $lineHeight, $text, 1, 'C');
-            } else {
-                $pdf->Cell($itemTypeWidth, $rowHeight, $text, 1, 0, 'C');
-            }
+            // Kolom item_type dengan center vertikal dan horizontal
+            $itemType = $row['item_type'];
+            $nbLines = ceil($pdf->GetStringWidth($itemType) / ($itemTypeWidth - 1));
+            $textHeight = $nbLines * $lineHeight;
 
-            // Atur posisi X jika pakai MultiCell (karena dia pindah ke bawah)
-            if ($isWrapped) {
-                $pdf->SetXY($x + 6 + 12 + $itemTypeWidth, $y);
-            }
+            $yCentered = $yStart + ($rowHeight - $textHeight) / 3;
 
-            // Kolom lainnya dengan Cell biasa
+            $pdf->SetXY($xStart, $yCentered);
+            $pdf->MultiCell($itemTypeWidth, $lineHeight, $itemType, 0, 'C');
+
+            // Gambar border manual untuk item_type
+            $pdf->Rect($xStart, $yStart, $itemTypeWidth, $rowHeight);
+            // Set posisi setelah kolom item_type
+            $xStart += $itemTypeWidth;
+
+            $pdf->SetXY($xStart, $yStart);
             $pdf->Cell(17, $rowHeight, '', 1, 0, 'C');
-            $pdf->Cell(20, $rowHeight, $row['color'], 1, 0, 'C');
-            $pdf->Cell(20, $rowHeight, $row['kode_warna'], 1, 0, 'C');
-            $pdf->Cell(10, $rowHeight, $row['buyer'], 1, 0, 'C');
-            $pdf->Cell(25, $rowHeight, $row['no_order'], 1, 0, 'C');
-            $pdf->Cell(16, $rowHeight, $row['delivery_awal'], 1, 0, 'C');
-            $pdf->Cell(15, $rowHeight, $row['kg_po'], 1, 0, 'C');
-            $pdf->Cell(13, $rowHeight, '', 1, 0, 'C');
-            $pdf->Cell(13, $rowHeight, '', 1, 0, 'C');
-            $pdf->Cell(13, $rowHeight, '', 1, 0, 'C');
-            $pdf->Cell(13, $rowHeight, '', 1, 0, 'C');
-            $pdf->Cell(18, $rowHeight, '', 1, 0, 'C');
-            $pdf->Cell(18, $rowHeight, '', 1, 0, 'C');
-            $pdf->Cell(23, $rowHeight, '', 1, 0, 'C');
-            $pdf->Ln();
-        }
+            $xStart += 17;
 
+            $pdf->SetXY($xStart, $yStart);
+            $pdf->Cell(20, $rowHeight, $row['color'], 1, 0, 'C');
+            $xStart += 20;
+
+            $pdf->SetXY($xStart, $yStart);
+            $pdf->Cell(20, $rowHeight, $row['kode_warna'], 1, 0, 'C');
+            $xStart += 20;
+
+            $pdf->SetXY($xStart, $yStart);
+            $pdf->Cell(10, $rowHeight, $row['buyer'], 1, 0, 'C');
+            $xStart += 10;
+
+            $pdf->SetXY($xStart, $yStart);
+            $pdf->Cell(25, $rowHeight, $row['no_order'], 1, 0, 'C');
+            $xStart += 25;
+
+            $pdf->SetXY($xStart, $yStart);
+            $pdf->Cell(16, $rowHeight, $row['delivery_awal'], 1, 0, 'C');
+            $xStart += 16;
+
+            $pdf->SetXY($xStart, $yStart);
+            $pdf->Cell(15, $rowHeight, $row['kg_po'], 1, 0, 'C');
+            $xStart += 15;
+
+            $pdf->SetXY($xStart, $yStart);
+            $pdf->Cell(13, $rowHeight, '', 1, 0, 'C');
+            $xStart += 13;
+            $pdf->SetXY($xStart, $yStart);
+            $pdf->Cell(13, $rowHeight, '', 1, 0, 'C');
+            $xStart += 13;
+            $pdf->SetXY($xStart, $yStart);
+            $pdf->Cell(13, $rowHeight, '', 1, 0, 'C');
+            $xStart += 13;
+            $pdf->SetXY($xStart, $yStart);
+            $pdf->Cell(13, $rowHeight, '', 1, 0, 'C');
+            $xStart += 13;
+            $pdf->SetXY($xStart, $yStart);
+            $pdf->Cell(18, $rowHeight, '', 1, 0, 'C');
+            $xStart += 18;
+            $pdf->SetXY($xStart, $yStart);
+            $pdf->Cell(18, $rowHeight, '', 1, 0, 'C');
+            $xStart += 18;
+            $pdf->SetXY($xStart, $yStart);
+            $pdf->Cell(23, $rowHeight, '', 1, 0, 'C');
+            $xStart += 23;
+            $pdf->SetY($yStart + $rowHeight);
+        }
 
         //KETERANGAN
         $pdf->Cell(277, 5, '', 0, 1, 'C');
@@ -260,6 +342,7 @@ class PdfController extends BaseController
         return $this->response->setHeader('Content-Type', 'application/pdf')
             ->setBody($pdf->Output('S'));
     }
+
     public function generateHeaderOpenPO($pdf, $no_model)
     {
         // Garis margin luar (lebih tebal)

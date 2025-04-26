@@ -95,4 +95,45 @@ class PengeluaranModel extends Model
             ->where('schedule_celup.kode_warna', $data['kode_warna'])
             ->first();
     }
+    public function getFilterPengiriman($key, $tanggal_awal, $tanggal_akhir)
+    {
+        $this->select('DATE(open_po.created_at) AS tgl_po, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, pengeluaran.tgl_out, pengeluaran.nama_cluster, pengeluaran.area_out, pengeluaran.kgs_out, pengeluaran.cns_out, pengeluaran.krg_out, pengeluaran.lot_out, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.unit, master_order.delivery_awal, master_order.delivery_akhir, total_pemesanan.ttl_kg, total_pemesanan.ttl_cns')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left')
+            ->join('out_celup', 'out_celup.id_out_celup = pengeluaran.id_out_celup')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup')
+            ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
+            ->join('open_po', 'open_po.no_model = master_order.no_model AND open_po.kode_warna = schedule_celup.kode_warna AND open_po.item_type = schedule_celup.item_type', 'left')
+            ->where('pengeluaran.status', "Pengiriman Area")
+            ->groupBy('total_pemesanan.id_total_pemesanan')
+            ->orderBy('pengeluaran.tgl_out', 'DESC');
+
+
+        // Cek apakah ada input key untuk pencarian
+        if (!empty($key)) {
+            $this->groupStart()
+
+                ->like('schedule_celup.no_model', $key)
+                ->orLike('schedule_celup.item_type', $key)
+                ->orLike('schedule_celup.kode_warna', $key)
+                ->orLike('schedule_celup.warna', $key)
+                ->groupEnd();
+        }
+
+        // Filter berdasarkan tanggal
+        if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
+            $this->groupStart();
+            if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
+                $this->where('pengeluaran.tgl_out >=', $tanggal_awal)
+                    ->where('pengeluaran.tgl_out <=', $tanggal_akhir);
+            } elseif (!empty($tanggal_awal)) {
+                $this->where('pengeluaran.tgl_out >=', $tanggal_awal);
+            } elseif (!empty($tanggal_akhir)) {
+                $this->where('pengeluaran.tgl_out <=', $tanggal_akhir);
+            }
+            $this->groupEnd();
+        }
+
+
+        return $this->findAll();
+    }
 }

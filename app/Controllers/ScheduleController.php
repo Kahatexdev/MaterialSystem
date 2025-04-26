@@ -248,11 +248,6 @@ class ScheduleController extends BaseController
             if (!empty($id_po)) {
                 $deliv = $this->openPoModel->getFilteredPO($id_po['kode_warna'], $id_po['color'], $id_po['item_type']);
                 $po = $this->openPoModel->getFilteredCovering($kode_warna, $warna, $item_type);
-                foreach ($po as &$dt) {
-                    $dt['id_order'] = $deliv[0]['id_order'];
-                    $dt['delivery_awal']  = $deliv[0]['delivery_awal'];
-                    $dt['delivery_akhir'] = $deliv[0]['delivery_akhir'];
-                }
                 // var_dump($po);
             } else {
                 // Jika id_induk tidak valid, gunakan parameter yang dikirim
@@ -450,8 +445,8 @@ class ScheduleController extends BaseController
                     // dd ($kodeWarnaCovering, $warnaCovering, $itemTypeCovering); 
                     $deliv = $this->openPoModel->getFilteredPO($kodeWarnaCovering, $warnaCovering, $itemTypeCovering);
                     $Order = $this->openPoModel->getQtyPOForCvr($noModel, $itemType, $kodeWarna);
-                    $Order['delivery_awal'] = $deliv[0]['delivery_awal'];
-                    $Order['delivery_akhir'] = $deliv[0]['delivery_akhir'];
+                    // $Order['delivery_awal'] = $deliv[0]['delivery_awal'];
+                    // $Order['delivery_akhir'] = $deliv[0]['delivery_akhir'];
                 } else {
                     // Tangani kondisi saat id_po tidak memiliki key yang diharapkan.
                     // Misalnya, log error atau set nilai default
