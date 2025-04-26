@@ -69,10 +69,9 @@ class PoGabunganController extends BaseController
             'role' => $this->role,
             'order' => $masterOrder
         ];
-        // return view($this->role . '/mastermaterial/openPO', $data);
         return view($this->role . '/masterdata/po-gabungan-form', $data);
     }
-    
+
     public function poGabunganDetail($id_order)
     {
         $material = $this->masterOrderModel->getMaterialOrder($id_order);
@@ -277,5 +276,41 @@ class PoGabunganController extends BaseController
 
         return redirect()->to(base_url($this->role . '/masterdata'))
             ->with('success', 'Data PO Gabungan berhasil disimpan.');
+    }
+
+    public function listPoGabungan($no_model)
+    {
+        $tujuan = $this->request->getGet('tujuan');
+        $jenis = $this->request->getGet('jenis');
+        $jenis2 = $this->request->getGet('jenis2');
+        dd($tujuan, $jenis, $jenis2);
+        // Tentukan penerima berdasarkan tujuan
+        if ($tujuan == 'CELUP') {
+            $penerima = 'Retno';
+        } elseif ($tujuan == 'COVERING') {
+            $penerima = 'Paryanti';
+        } else {
+            return redirect()->back()->with('error', 'Tujuan tidak valid.');
+        }
+
+        $itemType = $this->masterMaterialModel->getItemType();
+        $openPo = $this->openPoModel->listOpenPo($no_model, $jenis, $jenis2, $penerima);
+
+        // dd($openPo);
+        $data =
+            [
+                'active' => $this->active,
+                'title' => 'Material System',
+                'role' => $this->role,
+                'itemType' => $itemType,
+                'openPo' => $openPo,
+                'tujuan' => $tujuan,
+                'no_model' => $no_model,
+                'penerima' => $penerima,
+                'jenis' => $jenis,
+                'jenis2' => $jenis2
+            ];
+        // dd($tujuan, $jenis, $jenis2);
+        return view($this->role . '/mastermaterial/list-open-po', $data);
     }
 }

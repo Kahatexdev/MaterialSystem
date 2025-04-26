@@ -16,9 +16,9 @@
                             </div>
                         </div>
                         <div class="col-4 text-end">
-                            <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
-                                <i class="ni ni-chart-bar-32 text-lg opacity-10" aria-hidden="true"></i>
-                            </div>
+                            <button type="submit" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#ListPoModal">
+                                <i class="ni ni-single-copy-04 me-2"></i>List PO
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -53,4 +53,58 @@
         <?php endforeach ?>
     </div>
 </div>
+
+<div class="modal fade" id="ListPoModal" tabindex="-1" aria-labelledby="ListPoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ListPoModalLabel">List Buka PO</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form action="<?= base_url($role . '/listPoGabungan/') ?>" method="get" target="_blank">
+                    <div class="mb-3">
+                        <label for="style_size" class="form-label">Tujuan</label>
+                        <select class="form-control tujuan" name="tujuan" required>
+                            <option value="-">Pilih Tujuan</option>
+                            <option value="CELUP">CELUP</option>
+                            <option value="COVERING">COVERING</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="style_size" class="form-label">Jenis Bahan Baku</label>
+                        <select class="form-control jenis" name="jenis" id="jenis" required>
+                            <option value="-">Pilih Jenis</option>
+                            <option value="BENANG">BENANG</option>
+                            <option value="NYLON">NYLON</option>
+                            <option value="SPANDEX">SPANDEX & KARET</option>
+                        </select>
+                        <input type="hidden" class="form-control" id="jenis2" name="jenis2">
+                    </div>
+                    <!-- Button update dan batal di sebelah kanan -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-info">Submit</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Ambil elemen select dan input Karet
+    const jenisSelect = document.getElementById('jenis');
+    const jenis2Input = document.getElementById('jenis2');
+
+    // Tambahkan event listener untuk perubahan pada elemen select
+    jenisSelect.addEventListener('change', function() {
+        if (jenisSelect.value === 'SPANDEX') {
+            jenis2Input.value = 'KARET'; // Jika SPANDEX, isi dengan 'KARET'
+        } else {
+            jenis2Input.value = ''; // Jika bukan SPANDEX, kosongkan input
+        }
+    });
+</script>
 <?php $this->endSection(); ?>
