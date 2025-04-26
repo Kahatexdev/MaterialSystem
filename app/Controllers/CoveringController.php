@@ -223,7 +223,17 @@ class CoveringController extends BaseController
         $tgl_po = urldecode($tgl_po);
         $tgl_po = date('Y-m-d', strtotime($tgl_po));
         $noModel = urldecode($noModel);
-        $detail = $this->openPoModel->getDetailByNoModel($tgl_po, $noModel);
+
+        // Parse noModel into an array
+        $noModelArray = explode('_', $noModel);
+        // $idInduk = $this->request->getGet('id_induk');
+
+        $data = $this->openPoModel->getDetailByNoModel($tgl_po, $noModelArray);
+        // $detail = $this->openPoModel->getDetailByNoModelAndIdInduk($tgl_po, $noModelArray, $idInduk);
+        $id_induk = $data[0]['id_induk'];
+        // var_dump($id_induk);
+        $detail = $this->openPoModel->getDetailByNoModelAndIdInduk($tgl_po, $id_induk);
+        // var_dump($detail);
         return $this->response->setJSON($detail);
     }
 
