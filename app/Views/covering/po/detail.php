@@ -117,10 +117,19 @@
         $('#noModelSelect').change(function() {
             var tglPO = "<?= $tgl_po ?>";
             var noModel = $(this).val();
-
-            if (noModel) {
+            if (noModel.startsWith("POGABUNGAN")) {
+                noModel = noModel.replace("POGABUNGAN", "").replace(/_/g, "").trim();
+            }
+            var noModelArray = noModel.match(/.{1,6}/g); // Split into chunks of 7 characters
+            
+            if (noModelArray) {
+                noModelArray = noModelArray.join("_"); // Join array elements with _
+            }
+            
+            console.log(noModelArray);
+            if (noModelArray) {
                 $.ajax({
-                    url: "<?= base_url($role . '/getDetailByNoModel') ?>/" + tglPO + "/" + noModel,
+                    url: "<?= base_url($role . '/getDetailByNoModel') ?>/" + tglPO + "/" + noModelArray,
                     method: "GET",
                     dataType: "json",
                     success: function(response) {

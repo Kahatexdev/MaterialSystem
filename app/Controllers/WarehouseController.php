@@ -1148,13 +1148,14 @@ class WarehouseController extends BaseController
         }
 
         // 5) Sekali saja: cek stock ada atau tidak
-        // Ambil record stock yang matching model, type, warna dan cluster
+        // Ambil record stock yang matching model, type, warna, cluster dan lot
         $existingStock = $this->stockModel
             ->where('no_model',   $noModel)
             ->where('item_type',  $itemType)
             ->where('kode_warna', $kodeWarna)
             ->where('warna',      $warna)
             ->where('nama_cluster', $cluster)
+            ->where('lot_awal', $lotStock)
             ->first();
 
         if ($existingStock) {
@@ -1163,7 +1164,7 @@ class WarehouseController extends BaseController
                 'kgs_stock_awal' => $existingStock['kgs_stock_awal'] + $totalKgs,
                 'cns_stock_awal' => $existingStock['cns_stock_awal'] + $totalCns,
                 'krg_stock_awal' => $existingStock['krg_stock_awal'] + $totalKrg,
-                'lot_awal'      => $lotStock,          // perbarui lot terakhir
+                'lot_awal'       => $lotStock,          // perbarui lot terakhir
                 'updated_at'     => date('Y-m-d H:i:s'),
             ]);
             $newStockId = $existingStock['id_stock'];
@@ -1190,6 +1191,22 @@ class WarehouseController extends BaseController
             $this->pemasukanModel->update($pid, ['id_stock' => $newStockId]);
         }
 
+        // insert data history
+        $this->historyStock->insert([
+            'id_stock_old'  => $idStockData[0]['id_stock'], // ID stok lama
+            'id_stock_new'  => $newStockId, // ID stok baru
+            'cluster_old'   => $idStockData[0]['nama_cluster'], // Cluster lama
+            'cluster_new'   => $cluster, // Cluster baru
+            'kgs'           => $totalKgs, // Total kgs
+            'cns'           => $totalCns, // Total cns
+            'krg'           => $totalKrg, // Total krg
+            'lot'           => $idStockData[0]['lot_stock'], // Lot stok lama
+            'keterangan'    => "Pindah Order", // Keterangan pemindahan
+            'admin'         => session()->role, // Admin yang melakukan
+            'created_at'    => date('Y-m-d H:i:s'), // Waktu pemindahan
+            'updated_at'    => null, // Kolom updated_at bisa null karena belum ada perubahan
+        ]);
+
         $db->transComplete();
 
         if ($db->transStatus() === false) {
@@ -1204,10 +1221,6 @@ class WarehouseController extends BaseController
             'message' => 'Data berhasil dipindahkan.'
         ]);
     }
-
-
-
-
     public function updateNoModel()
     {
         if ($this->request->isAJAX()) {
@@ -1852,9 +1865,9 @@ class WarehouseController extends BaseController
                         'krg_in_out' => $cekStockBaru['krg_in_out'] + $data['krg'],
                     ] :
                     [
-                        'kgs_stock_awal' => $cekStockBaru['kgs_in_out'] + $data['kgs'],
-                        'cns_stock_awal' => $cekStockBaru['cns_in_out'] + $data['cns'],
-                        'krg_stock_awal' => $cekStockBaru['krg_in_out'] + $data['krg'],
+                        'kgs_stock_awal' => $cekStockBaru['kgs_stock_awal'] + $data['kgs'],
+                        'cns_stock_awal' => $cekStockBaru['cns_stock_awal'] + $data['cns'],
+                        'krg_stock_awal' => $cekStockBaru['krg_stock_awal'] + $data['krg'],
                     ];
 
                 $this->stockModel->update($cekStockBaru['id_stock'], $updateDataIn);
@@ -1901,7 +1914,7 @@ class WarehouseController extends BaseController
                     'lot_stock'         => $stock_awal == '' ? $data['lot'] : '',
                     'admin'             => session()->role,
                     'created_at'        => date('Y-m-d H:i:s'),
-                    'updated_at'        => '',
+                    'updated_at'        => NULL,
                 ];
 
                 if ($this->stockModel->insert($insertData)) {
@@ -1951,9 +1964,9 @@ class WarehouseController extends BaseController
                     'krg_in_out' => $cekStock['krg_in_out'] - $data['krg'],
                 ] :
                 [
-                    'kgs_stock_awal' => $cekStock['kgs_in_out'] - $data['kgs'],
-                    'cns_stock_awal' => $cekStock['cns_in_out'] - $data['cns'],
-                    'krg_stock_awal' => $cekStock['krg_in_out'] - $data['krg'],
+                    'kgs_stock_awal' => $cekStock['kgs_stock_awal'] - $data['kgs'],
+                    'cns_stock_awal' => $cekStock['cns_stock_awal'] - $data['cns'],
+                    'krg_stock_awal' => $cekStock['krg_stock_awal'] - $data['krg'],
                 ];
 
             $kurangiStock = $this->stockModel->update($cekStock['id_stock'], $updateDataOut);
@@ -1965,7 +1978,6 @@ class WarehouseController extends BaseController
                 ];
             }
         }
-        log_message('debug', ' baru: ' . json_encode($details));
         // insert data history
         $insertHistory = [
             'id_stock_old'  => $details[0]['id_stock'],
@@ -1976,10 +1988,10 @@ class WarehouseController extends BaseController
             'cns'           => $totalCns, // Total cns
             'krg'           => $totalKrg, // Total krg
             'lot'           => $details[0]['lot'],
-            'keterangan'    => "Pindah Order",
+            'keterangan'    => "Pindah Cluster",
             'admin'         => session()->role,
             'created_at'    => date('Y-m-d H:i:s'),
-            'updated_at'    => '',
+            'updated_at'    => NULL,
         ];
         $history = $this->historyStock->insert($insertHistory);
         if (!$history) {

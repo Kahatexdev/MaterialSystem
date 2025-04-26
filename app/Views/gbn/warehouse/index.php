@@ -155,6 +155,11 @@
                         <div class="row g-3" id="pindahOrderContainer">
                             <!-- Isi kartu akan di‑inject via JS -->
                         </div>
+                        <div class="mb-3 d-flex justify-content-between">
+                            <input type="text" class="form-control me-2" name="ttl_kgs" readonly placeholder="Total Kgs">
+                            <input type="text" class="form-control mx-2" name="ttl_cns" readonly placeholder="Total Cns">
+                            <input type="text" class="form-control ms-2" name="ttl_krg" readonly placeholder="Total Krg">
+                        </div>
                     </div>
                     <!-- Footer -->
                     <div class="modal-footer">
@@ -350,34 +355,78 @@
             res.data.forEach(d => {
                 const lot = d.lot_stock || d.lot_awal;
                 $container.append(`
-                <div class="col-md-12">
-                    <div class="card result-card h-100">
-                        <div class="form-check">
-                            <input class="form-check-input row-check" type="checkbox" name="pindah[]" value="${d.id_out_celup}" id="chk${d.id_out_celup}">
-                            <label class="form-check-label fw-bold" for="chk${d.id_out_celup}">
-                                ${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.warna}
-                            </label>
-                            <input type="hidden" name="id_stock[]" value="${d.id_stock}">
-                        </div>
-                        <div class="card-body row">
-                            <div class="col-md-6">
-                                <p><strong>Kode Warna:</strong> ${d.kode_warna}</p>
-                                <p><strong>Warna:</strong> ${d.warna}</p>
-                                <p><strong>Lot Jalur:</strong> ${lot}</p>
+                    <div class="col-md-12">
+                        <div class="card result-card h-100">
+                            <div class="form-check">
+                                <input class="form-check-input row-check" type="checkbox" name="pindah[]" value="${d.id_out_celup}" id="chk${d.id_out_celup}">
+                                <label class="form-check-label fw-bold" for="chk${d.id_out_celup}">
+                                    ${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.warna}
+                                </label>
+                                <input type="hidden" name="id_stock[]" value="${d.id_stock}">
                             </div>
-                            <div class="col-md-6">
-                                <p><strong>No Karung:</strong> ${d.no_karung}</p>
-                                <p><strong>Total Kgs:</strong> ${parseFloat(d.kgs_kirim || 0).toFixed(2)} KG</p>
-                                <p><strong>Cones:</strong> ${d.cones_kirim} Cns</p>
+                            <div class="card-body row">
+                                <div class="col-md-6">
+                                    <p><strong>Kode Warna:</strong> ${d.kode_warna}</p>
+                                    <p><strong>Warna:</strong> ${d.warna}</p>
+                                    <p><strong>Lot Jalur:</strong> ${lot}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>No Karung:</strong> ${d.no_karung}</p>
+                                    <p><strong>Total Kgs:</strong> ${parseFloat(d.kgs_kirim || 0).toFixed(2)} KG</p>
+                                    <p><strong>Cones:</strong> ${d.cones_kirim} Cns</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `);
+                `);
             });
+
+            $container.on('change', '.row-check', function() {
+                let totalKgs = 0,
+                    totalCns = 0,
+                    totalKrg = 0;
+
+                // Hitung total Kgs, Cns, dan Krg untuk yang dipilih
+                $container.find('.row-check:checked').each(function() {
+                    const id = $(this).val(); // Dapatkan id_out_celup dari checkbox yang dipilih
+                    const selectedData = res.data.find(d => d.id_out_celup == id); // Temukan data berdasarkan id_out_celup
+
+                    if (selectedData) {
+                        totalKgs += parseFloat(selectedData.kgs_kirim || 0);
+                        totalCns += parseInt(selectedData.cones_kirim || 0); // Pastikan cones_kirim adalah integer
+                        totalKrg += parseInt(selectedData.kgs_kirim || 0); // Anda bisa mengganti dengan data yang sesuai untuk Krg
+                    }
+                });
+
+                // Perbarui nilai total Kgs, Cns, dan Krg di input
+                $('input[name="ttl_kgs"]').val(totalKgs.toFixed(2));
+                $('input[name="ttl_cns"]').val(totalCns);
+                $('input[name="ttl_krg"]').val(totalKrg);
+
+                // Simpan cluster yang saat ini dipilih
+                const selectedClusterValue = $select.val();
+
+                // Aktifkan atau nonaktifkan dropdown berdasarkan total
+                if (totalKgs > 0) {
+                    fetchClusters(totalKgs, selectedClusterValue); // Ambil cluster sesuai totalKgs
+                    $select.prop('disabled', false);
+                } else {
+                    $select.prop('disabled', true).empty();
+                    $('#SisaKapasitas').val('');
+                }
+            });
+
         }).fail((_, __, err) => {
             $container.html(`<div class="alert alert-danger text-center">Error: ${err}</div>`);
         });
+    });
+
+    // Reset total fields when modal is closed
+    $('#modalPindahOrder').on('hidden.bs.modal', function() {
+        $('input[name="ttl_kgs"]').val('');
+        $('input[name="ttl_cns"]').val('');
+        $('input[name="ttl_krg"]').val('');
+        $('#SisaKapasitas').val('');
     });
 
     $('#formPindahOrder').on('submit', function(e) {
@@ -405,15 +454,25 @@
             if (res.success) {
                 Swal.fire({
                     icon: 'success',
-                    text: `Berhasil memindahkan ${orders.length} order.`
+                    text: `Berhasil memindahkan ${orders.length} order.`,
+                    confirmButtonText: 'OK',
+                    willClose: () => {
+                        // Reload halaman setelah modal ditutup
+                        location.reload();
+                    }
                 }).then(() => {
                     $('#modalPindahOrder').modal('hide');
-                    $('#filter_data').click(); // reload
+                    $('#filter_data').click(); // Reload data filter
                 });
             } else {
                 Swal.fire({
                     icon: 'error',
-                    text: res.message || 'Terjadi kesalahan saat memindahkan order.'
+                    text: res.message || 'Terjadi kesalahan saat memindahkan order.',
+                    confirmButtonText: 'OK',
+                    willClose: () => {
+                        // Reload halaman setelah modal ditutup
+                        location.reload();
+                    }
                 });
             }
         }, 'json').fail((_, __, err) => {
@@ -581,12 +640,18 @@
 
         // Jika tidak ada yang dipilih, abort
         if (!$checked.length) {
-            return alert('Pilih setidaknya satu palet untuk dipindah');
+            return Swal.fire({
+                icon: 'warning',
+                text: 'Pilih setidaknya satu karung untuk dipindah!'
+            });
         }
 
         // Jika tidak ada yang dipilih, abort
         if (!cluster) {
-            return alert('Pilih cluster terlebih dahulu');
+            return Swal.fire({
+                icon: 'warning',
+                text: 'Pilih cluster terlebih dahulu!'
+            });
         }
 
         // Bangun array detail lengkap

@@ -455,6 +455,7 @@ $routes->group(
         $routes->get('statusbahanbaku/(:any)', 'ApiController::statusbahanbaku/$1');
         $routes->get('cekBahanBaku/(:any)', 'ApiController::cekBahanBaku/$1');
         $routes->get('cekStok/(:any)', 'ApiController::cekStok/$1');
+        $routes->get('cekStokPerstyle/(:any)/(:any)', 'ApiController::cekStokPerstyle/$1/$2');
         $routes->get('getMU/(:any)/(:any)/(:any)', 'ApiController::getMaterialForPemesanan/$1/$2/$3');
         $routes->get('getMaterialForPPH/(:any)', 'ApiController::getMaterialForPPH/$1');
         $routes->get('getMaterialForPPHByAreaAndNoModel/(:segment)/(:segment)', 'ApiController::getMaterialForPPHByAreaAndNoModel/$1/$2');

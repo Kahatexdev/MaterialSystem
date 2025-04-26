@@ -88,8 +88,9 @@ class OpenPoModel extends Model
 
     public function getFilteredPO($kodeWarna, $warna, $item_type)
     {
-        return $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, master_order.delivery_awal, master_order.delivery_akhir, master_order.id_order')
-            ->join('master_order', 'master_order.no_model = open_po.no_model')
+        return $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po')
+        // , master_order.delivery_awal, master_order.delivery_akhir, master_order.id_order')
+            // ->join('master_order', 'master_order.no_model = open_po.no_model')
             ->where('open_po.kode_warna', $kodeWarna)  // Ganti like dengan where
             ->where('open_po.color', $warna)
             ->where('open_po.item_type', $item_type) // Ganti like dengan where
@@ -138,7 +139,6 @@ class OpenPoModel extends Model
             ->where('kode_warna', $kodeWarna)
             ->where('color', $warna)
             ->where('item_type', $itemTypeEncoded)
-            ->orWhere('COALESCE(id_induk, 0)', $idInduk ?? 0, false) // Menggunakan COALESCE di Query Builder
             ->first();
     }
 
@@ -184,6 +184,7 @@ class OpenPoModel extends Model
     {
         return $this->select('open_po.id_po,open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan,open_po.penerima, open_po.penanggung_jawab,open_po.admin, open_po.created_at,open_po.updated_at')
             ->where('penerima', 'Paryanti')
+            ->where('id_induk IS NULL')
             ->where('DATE(open_po.created_at)', $tgl_po)
             ->groupBy('open_po.no_model')
             ->findAll();
@@ -191,9 +192,22 @@ class OpenPoModel extends Model
 
     public function getDetailByNoModel($tgl_po, $noModel)
     {
+        return $this->select('open_po.id_po,open_po.id_induk, open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.penerima, open_po.penanggung_jawab, open_po.admin, open_po.created_at, open_po.updated_at')
+            ->where('DATE(open_po.created_at)', $tgl_po)
+            ->whereIn('open_po.no_model', $noModel)
+            ->where('penerima', 'Paryanti')
+            ->groupBy('open_po.no_model')
+            ->groupBy('open_po.item_type')
+            ->groupBy('open_po.kode_warna')
+            ->findAll();
+    }
+
+    public function getDetailByNoModelAndIdInduk($tgl_po, $idInduk)
+    {
         return $this->select('open_po.id_po, open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.penerima, open_po.penanggung_jawab, open_po.admin, open_po.created_at, open_po.updated_at')
             ->where('DATE(open_po.created_at)', $tgl_po)
-            ->where('open_po.no_model', $noModel)
+            // ->whereIn('open_po.no_model', $noModel)
+            ->where('id_po', $idInduk)
             ->where('penerima', 'Paryanti')
             ->groupBy('open_po.no_model')
             ->groupBy('open_po.item_type')

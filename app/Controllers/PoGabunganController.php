@@ -228,7 +228,7 @@ class PoGabunganController extends BaseController
         }
         // 3. Persist header PO gabungan
         $headerData = [
-            'no_model'         => 'POGABUNGAN ' . implode(',', $modelIds),
+            'no_model'         => 'POGABUNGAN ' . implode('_', $noModelMap),
             'item_type'        => $details[0]['item_type'],
             'kode_warna'       => $details[0]['kode_warna'],
             'color'            => $details[0]['color'],
@@ -253,9 +253,9 @@ class PoGabunganController extends BaseController
         foreach ($details as $d) {
             $batch[] = [
                 'no_model'         => $noModelMap[$d['model_id']] ?? '-',
-                'item_type'        => $d['item_type'],
-                'kode_warna'       => $d['kode_warna'],
-                'color'            => $d['color'],
+                'item_type'        => NULL,
+                'kode_warna'       => NULL,
+                'color'            => NULL,
                 'kg_po'            => $d['kg_po'],
                 'keterangan'       => $data['keterangan'] ?? '',
                 'penerima'         => $data['penerima'],
