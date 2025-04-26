@@ -189,6 +189,13 @@ class MasterOrderModel extends Model
             ->findAll();
     }
 
+    public function getUnit($no_model)
+    {
+        return $this->select('unit')
+            ->where('no_model', $no_model)
+            ->first();
+    }
+
     public function getFilterReportGlobal($noModel)
     {
         return $this->select('master_order.no_model, material.item_type, material.kode_warna, material.color, material.loss, material.kgs, COALESCE(stock.kgs_stock_awal, 0) AS kgs_stock_awal, COALESCE(stock.kgs_in_out, 0) AS kgs_in_out, COALESCE(out_celup.kgs_kirim, 0) AS kgs_kirim, COALESCE(retur.kgs_retur, 0) AS kgs_retur, COALESCE(pengeluaran.kgs_out, 0) AS kgs_out, COALESCE(pengeluaran.lot_out, 0) AS lot_out')
