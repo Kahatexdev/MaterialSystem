@@ -104,7 +104,7 @@ class PengeluaranModel extends Model
             ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
             ->join('open_po', 'open_po.no_model = master_order.no_model AND open_po.kode_warna = schedule_celup.kode_warna AND open_po.item_type = schedule_celup.item_type', 'left')
             ->where('pengeluaran.status', "Pengiriman Area")
-            ->groupBy('total_pemesanan.id_total_pemesanan')
+            ->groupBy('pengeluaran.id_pengeluaran')
             ->orderBy('pengeluaran.tgl_out', 'DESC');
 
 
