@@ -214,6 +214,87 @@
             </form>
         </div>
     </div>
+    <!-- Modal Pengeluaran Selain Order -->
+    <div class="modal fade" id="pengeluaranSelainOrder" tabindex="-1" aria-labelledby="pengeluaranSelainOrderLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <form id="formpengeluaranSelainOrder" class="needs-validation" novalidate>
+                <div class="modal-content">
+                    <!-- Header -->
+                    <div class="modal-header bg-secondary text-white border-0">
+                        <h5 class="modal-title" id="modalPindahOrderLabel">Pengeluaran Selain Order</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="modal-body">
+                        <!-- Select Kategori -->
+                        <div class="mb-3">
+                            <label for="kategori" class="form-label">Pilih Kategori</label>
+                            <select id="kategori" class="form-select" style="width: 100%">
+                                <option value="">Pilih Kategori</option>
+                                <option value="MAJALAYA">BENANG UNTUK MAJALAYA</option>
+                                <option value="COVER_LUREX">BENANG UNTUK COVER LUREX</option>
+                                <option value="COVER_LUREX_MAJALAYA">BENANG UNTUK COVER LUREX MAJALAYA</option>
+                                <option value="LOKAL">BENANG UNTUK LOKAL</option>
+                                <option value="TWIST">BENANG UNTUK TWIST</option>
+                                <option value="ROSSO">BENANG UNTUK ROSSO</option>
+                                <option value="COVER_SPANDEX">BENANG UNTUK COVER SPANDEX</option>
+                                <option value="SAMPLE">BENANG UNTUK SAMPLE</option>
+                                <option value="ACRYLIC_KINCIR_CIJERAH">BENANG ACRYLIC KINCIR CIJERAH</option>
+                                <option value="TALI_UKUR_ELASTIK">BENANG UNTUK TALI UKUR ELASTIK</option>
+                                <option value="PERBAIKAN_DATA_ACRYLIC">BENANG PERBAIKAN DATA ACRYLIC</option>
+                                <option value="ORDER_PROGRAM">BENANG ORDER PROGRAM</option>
+                                <option value="PERBAIKAN_DATA_MENUMPUK">BENANG PERBAIKAN DATA MENUMPUK</option>
+                                <option value="ROMBAK_CYLINDER">BENANG ROMBAK CYLINDER MC AREA</option>
+                                <option value="KELOS_WARNA">BENANG UNTUK KELOS WARNA</option>
+                            </select>
+                        </div>
+
+                        <!-- Container Data -->
+                        <div class="row g-3" id="pengeluaranSelainOrderContainer">
+                            <!-- Data akan di-inject JS -->
+                        </div>
+
+                        <!-- Display Total dari Checkbox -->
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="ttl_kgs" readonly placeholder="Total Kgs Terpilih" disabled>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="ttl_cns" readonly placeholder="Total Cns Terpilih" disabled>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="ttl_krg" readonly placeholder="Total Krg Terpilih" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Input Total -->
+                        <div class="row mt-4">
+                            <div class="col-md-4">
+                                <label for="inputKgs" class="form-label">Total Kgs</label>
+                                <input type="number" step="0.01" class="form-control" id="inputKgs" name="input_kgs" placeholder="Masukkan Kgs" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="inputCns" class="form-label">Total Cns</label>
+                                <input type="number" class="form-control" id="inputCns" name="input_cns" placeholder="Masukkan Cns" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="inputKrg" class="form-label">Total Krg</label>
+                                <input type="number" class="form-control" id="inputKrg" name="input_krg" placeholder="Masukkan Krg" required>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-info">Simpan</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
     <!-- modal Pindah Cluster end -->
 
 </div>
@@ -274,6 +355,15 @@
                                             data-kode-warna="${item.kode_warna}"
                                             >
                                             Pindah Order
+                                        </button>
+                                        <button 
+                                            class="btn btn-outline-info btn-sm pengeluaranSelainOrder"
+                                            data-id="${item.id_stock}"
+                                            data-no-model-old="${item.no_model}"
+                                            data-kode-warna="${item.kode_warna}"
+                                            data-nama-cluster-old="${item.nama_cluster}"
+                                            >
+                                            Pengeluaran Selain Order
                                         </button>
                                     </div>
                                 </div>
@@ -394,7 +484,7 @@
                     if (selectedData) {
                         totalKgs += parseFloat(selectedData.kgs_kirim || 0);
                         totalCns += parseInt(selectedData.cones_kirim || 0); // Pastikan cones_kirim adalah integer
-                        totalKrg += parseInt(selectedData.kgs_kirim || 0); // Anda bisa mengganti dengan data yang sesuai untuk Krg
+                        totalKrg += 1; // Anda bisa mengganti dengan data yang sesuai untuk Krg
                     }
                 });
 
@@ -702,6 +792,109 @@
                     }
                 });
             });
+    });
+
+    // modal Pengeluaran Selain Order
+    $(document).ready(function() {
+        let selectedData = [];
+
+        $(document).on('click', '.pengeluaranSelainOrder', function() {
+            const idStock = $(this).data('id');
+            const base = '<?= base_url() ?>';
+            const role = '<?= session()->get('role') ?>';
+            const $container = $('#pengeluaranSelainOrderContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i></div>');
+
+            $('#pengeluaranSelainOrder').modal('show');
+
+            $.post(`${base}/${role}/warehouse/getPindahOrder`, {
+                id_stock: idStock
+            }, res => {
+                $container.empty();
+                selectedData = res.data || [];
+
+                if (!res.success || !selectedData.length) {
+                    return $container.html('<div class="alert alert-warning text-center">Data tidak ditemukan</div>');
+                }
+
+                selectedData.forEach(d => {
+                    const lot = d.lot_stock || d.lot_awal;
+                    $container.append(`
+          <div class="col-md-12">
+            <div class="card result-card h-100">
+              <div class="form-check">
+                <input class="form-check-input row-check" type="checkbox" value="${d.id_out_celup}" id="chk${d.id_out_celup}">
+                <label class="form-check-label fw-bold" for="chk${d.id_out_celup}">
+                  ${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.warna}
+                </label>
+              </div>
+              <div class="card-body row">
+                <div class="col-md-4">
+                  <p><strong>Kode Warna:</strong> ${d.kode_warna}</p>
+                  <p><strong>Warna:</strong> ${d.warna}</p>
+                </div>
+                <div class="col-md-4">
+                  <p><strong>Lot Jalur:</strong> ${lot}</p>
+                  <p><strong>No Karung:</strong> ${d.no_karung}</p>
+                </div>
+                <div class="col-md-4">
+                  <p><strong>Total Kgs:</strong> ${parseFloat(d.kgs_kirim || 0).toFixed(2)} KG</p>
+                  <p><strong>Cones:</strong> ${d.cones_kirim} Cns</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `);
+                });
+
+                calculateTotals();
+            });
+
+            $container.on('change', '.row-check', calculateTotals);
+        });
+
+        function calculateTotals() {
+            let totalKgs = 0,
+                totalCns = 0,
+                totalKrg = 0;
+
+            $('#pengeluaranSelainOrderContainer .row-check:checked').each(function() {
+                const id = $(this).val();
+                const item = selectedData.find(d => d.id_out_celup == id);
+                if (item) {
+                    totalKgs += parseFloat(item.kgs_kirim || 0);
+                    totalCns += parseInt(item.cones_kirim || 0);
+                    totalKrg += 1;
+                }
+            });
+
+            $('input[name="ttl_kgs"]').val(totalKgs.toFixed(2));
+            $('input[name="ttl_cns"]').val(totalCns);
+            $('input[name="ttl_krg"]').val(totalKrg);
+        }
+
+        // Validasi Input Manual
+        $('#inputKgs, #inputCns, #inputKrg').on('input', function() {
+            const maxKgs = parseFloat($('input[name="ttl_kgs"]').val()) || 0;
+            const maxCns = parseInt($('input[name="ttl_cns"]').val()) || 0;
+            const maxKrg = parseInt($('input[name="ttl_krg"]').val()) || 0;
+
+            const inputKgs = parseFloat($('#inputKgs').val()) || 0;
+            const inputCns = parseInt($('#inputCns').val()) || 0;
+            const inputKrg = parseInt($('#inputKrg').val()) || 0;
+
+            if (inputKgs > maxKgs) {
+                alert(`Total Kgs tidak boleh melebihi ${maxKgs}`);
+                $('#inputKgs').val(maxKgs);
+            }
+            if (inputCns > maxCns) {
+                alert(`Total Cns tidak boleh melebihi ${maxCns}`);
+                $('#inputCns').val(maxCns);
+            }
+            if (inputKrg > maxKrg) {
+                alert(`Total Krg tidak boleh melebihi ${maxKrg}`);
+                $('#inputKrg').val(maxKrg);
+            }
+        });
     });
 </script>
 <?php $this->endSection(); ?>
