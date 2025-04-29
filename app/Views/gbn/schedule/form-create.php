@@ -566,6 +566,68 @@
                     console.error('Error fetching PO details:', error);
                 });
         }
+        // Fungsi untuk menghitung sisa kapasitas
+        function calculateRemainingCapacity() {
+            const maxCaps = parseFloat(document.getElementById("max_caps").value) || 0;
+            let totalQtyCelup = 0;
+
+            document.querySelectorAll("input[name='qty_celup[]']").forEach(input => {
+                totalQtyCelup += parseFloat(input.value) || 0;
+            });
+
+            const sisaKapasitas = maxCaps - totalQtyCelup;
+            document.getElementById("sisa_kapasitas").value = sisaKapasitas.toFixed(2);
+
+            // Update tampilan berdasarkan kondisi
+            const sisaInput = document.getElementById("sisa_kapasitas");
+            if (sisaKapasitas < 0) {
+                sisaInput.classList.add("is-invalid");
+            } else {
+                sisaInput.classList.remove("is-invalid");
+            }
+        }
+
+        // Fungsi untuk validasi input qty_celup
+        function validateQtyCelup(input) {
+            const maxCaps = parseFloat(document.getElementById("max_caps").value);
+            const currentValue = parseFloat(input.value) || 0;
+
+            if (currentValue < 0.01) {
+                input.setCustomValidity("Qty Celup minimal 0.01");
+            } else if (currentValue > maxCaps) {
+                input.setCustomValidity("Qty Celup melebihi kapasitas maksimal");
+            } else {
+                input.setCustomValidity("");
+            }
+        }
+
+        // Event listener untuk input qty_celup
+        document.addEventListener("input", function(e) {
+            if (e.target.name === "qty_celup[]") {
+                validateQtyCelup(e.target);
+                calculateRemainingCapacity();
+            }
+        });
+
+        // Event listener untuk perubahan struktur tabel
+        document.addEventListener("DOMNodeInserted", function(e) {
+            if (e.target.classList.contains("removeRow")) {
+                calculateRemainingCapacity();
+            }
+        });
+
+        // Inisialisasi awal saat halaman dimuat
+        document.addEventListener("DOMContentLoaded", function() {
+            calculateRemainingCapacity();
+
+            // Tambahkan event listener untuk semua input yang ada
+            document.querySelectorAll("input[name='qty_celup[]']").forEach(input => {
+                input.addEventListener("input", function() {
+                    validateQtyCelup(this);
+                    calculateRemainingCapacity();
+                });
+            });
+        });
 
         // === Fungsi untuk menghitung total Qty Celup dan sisa kapasitas ===
         function calculateTotalAndRemainingCapacity() {
