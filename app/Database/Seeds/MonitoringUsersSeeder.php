@@ -57,6 +57,12 @@ class MonitoringUsersSeeder extends Seeder
                 'role'     => 'monitoring',
                 'area'     => NULL,
             ], // password: mtrlkaha3
+            [
+                'username' => 'LAURA',
+                'password' =>  password_hash('monmtrl124', PASSWORD_BCRYPT),
+                'role'     => 'monitoring',
+                'area'     => NULL,
+            ], // password: mtrlkaha3
 
         ];
         $this->db->table('user')->insertBatch($data);
