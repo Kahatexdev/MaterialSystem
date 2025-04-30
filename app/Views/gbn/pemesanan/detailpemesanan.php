@@ -72,6 +72,9 @@
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Kgs Pesan</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Cns Pesan</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Po Tambahan</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kg/Krg Kirim</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Lot Kirim</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cluster Out</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cluster</th>
                             </tr>
                         </thead>
@@ -92,9 +95,12 @@
                                         <td><?= $data['ttl_kg'] ?></td>
                                         <td><?= $data['ttl_cns'] ?></td>
                                         <td><?= $data['po_tambahan'] ?></td>
+                                        <td><?= !empty($data['kg_kirim']) ? number_format($data['kg_kirim'], 2) . ' / ' . $data['krg_kirim'] : '' ?></td>
+                                        <td><?= $data['lot_kirim'] ?></td>
+                                        <td><?= $data['cluster_kirim'] ?></td>
                                         <td>
-                                            <a href="<?= base_url($role . '/selectClusterWarehouse/' . $data['id_total_pemesanan']) . '?Area='. $area .'&KgsPesan='. $data['ttl_kg']. '&CnsPesan='. $data['ttl_cns'] ?>" 
-                                               class="btn bg-gradient-info">
+                                            <a href="<?= base_url($role . '/selectClusterWarehouse/' . $data['id_total_pemesanan']) . '?Area=' . $area . '&KgsPesan=' . $data['ttl_kg'] . '&CnsPesan=' . $data['ttl_cns'] ?>"
+                                                class="btn bg-gradient-info">
                                                 <i class="fas fa-layer-group"></i>Pilih
                                             </a>
                                         </td>
