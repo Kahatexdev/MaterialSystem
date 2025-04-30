@@ -20,6 +20,7 @@ use App\Models\HistoryPindahOrder;
 use App\Models\HistoryStock;
 use App\Models\PengeluaranModel;
 use App\Models\ReturModel;
+use App\Models\OtherOutModel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -47,6 +48,7 @@ class WarehouseController extends BaseController
     protected $historyStock;
     protected $pengeluaranModel;
     protected $returModel;
+    protected $otherOutModel;
 
     public function __construct()
     {
@@ -65,6 +67,7 @@ class WarehouseController extends BaseController
         $this->historyStock = new HistoryStock();
         $this->pengeluaranModel = new PengeluaranModel();
         $this->returModel = new ReturModel();
+        $this->otherOutModel = new OtherOutModel();
         $this->db = \Config\Database::connect(); // Menghubungkan ke database
 
         $this->role = session()->get('role');
@@ -2051,5 +2054,80 @@ class WarehouseController extends BaseController
         }
 
         return $this->response->setJSON($data);
+    }
+    public function savePengeluaranSelainOrder()
+    {
+        // Pastikan ini adalah request AJAX / POST
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Invalid request.'
+            ]);
+        }
+
+        // Ambil input dari request
+        $idOutCelup    = $this->request->getPost('id_out_celup');
+        $kategori      = $this->request->getPost('kategori');
+        $kgsOtherOut   = $this->request->getPost('kgs_other_out');
+        $cnsOtherOut   = $this->request->getPost('cns_other_out');
+        $krgOtherOut   = $this->request->getPost('krg_other_out');
+        $lot           = $this->request->getPost('lot');
+        $idStock       = $this->request->getPost('id_stock');
+        $namaCluster   = $this->request->getPost('nama_cluster');
+
+        log_message('debug', 'idStock: ' . print_r($idStock, true));
+
+        // Validasi awal
+        if (!$idOutCelup || !$kategori) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'ID celup atau kategori tidak boleh kosong.'
+            ]);
+        }
+
+        // Simulasi simpan data, ganti dengan logika sebenarnya
+        $model = $this->otherOutModel; // Sesuaikan dengan model kamu
+        $save = $model->insert([
+            'id_out_celup' => $idOutCelup,
+            'kategori' => $kategori,
+            'tgl_other_out' => date('Y-m-d'),
+            'kgs_other_out' => $kgsOtherOut,
+            'cns_other_out' => $cnsOtherOut,
+            'krg_other_out' => $krgOtherOut,
+            'lot_other_out' => $lot,
+            'admin' => session()->get('username'),
+            'created_at' => date('Y-m-d H:i:s'),
+            'nama_cluster' => $namaCluster,
+        ]);
+
+        if ($save) {
+            // Mengambil data stok yang ada berdasarkan id_stock
+            $selectStock = $this->stockModel->where('id_stock', $idStock)->first();
+
+            // Pastikan stok ditemukan
+            if ($selectStock) {
+                $kgsNew = $selectStock['kgs_in_out'] - $kgsOtherOut;
+                $cnsNew = $selectStock['cns_in_out'] - $cnsOtherOut;
+                $krgNew = $selectStock['krg_in_out'] - $krgOtherOut;
+
+                // Update data stok
+                $this->stockModel->set('kgs_in_out', $kgsNew)
+                    ->set('cns_in_out', $cnsNew)
+                    ->set('krg_in_out', $krgNew)
+                    ->where('id_stock', $idStock)
+                    ->update();
+            }
+
+            // Mengirim response JSON ke frontend
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Data berhasil disimpan.'
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Gagal menyimpan data.'
+            ]);
+        }
     }
 }
