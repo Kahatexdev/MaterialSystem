@@ -11,142 +11,137 @@ class GbnUsersSeeder extends Seeder
         $data = [
             [
                 'username' => 'MEGAH',
-                'password' => 'KHGBSOCKS4',
+                'password' =>  password_hash('sock807', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: sock807
             [
                 'username' => 'ASTRI',
-                'password' => 'GBKHSOCKS7',
+                'password' =>  password_hash('mtrl775', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: mtrl775
             [
                 'username' => 'YANI YOLANDA',
-                'password' => 'SOCKSKGHB8',
+                'password' =>  password_hash('gbnmtrl225', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: gbnmtrl225
             [
                 'username' => 'NIA KURNIA',
-                'password' => 'KGSOCKSHB12',
+                'password' =>  password_hash('kaoskakigb', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: kaoskakigb
             [
                 'username' => 'NOPI TALUPI',
-                'password' => 'KBSOCKSHG15',
+                'password' =>  password_hash('kahatex917', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: kahatex917
             [
                 'username' => 'RENI ANGGRAENI',
-                'password' => 'RENI543',
+                'password' =>  password_hash('kahagbnt87', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
-            [
-                'username' => 'rpl_team',
-                'password' => 'rpl1234',
-                'role'     => 'gbn',
-                'area'     => NULL,
-            ],
+            ], // password: kahagbnt87
             [
                 'username' => 'Ardtharia Pertiwi',
-                'password' => 'ARDTHARIA34',
+                'password' =>  password_hash('mtrlkaos6', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: mtrlkaos6
             [
                 'username' => 'AYU',
-                'password' => 'SOCKSGBKH4',
+                'password' =>  password_hash('gbn7321', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: gbn7321
             [
                 'username' => 'DEDAH',
-                'password' => 'KBSOCKHG16',
+                'password' =>  password_hash('sockmtrl4', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: sockmtrl4
             [
                 'username' => 'RIA',
-                'password' => 'KBSOCKHG18',
+                'password' =>  password_hash('kahatex23', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: kahatex23
             [
                 'username' => 'SITI NUR KHASANAH',
-                'password' => 'GBN223',
+                'password' =>  password_hash('kaha9182', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: kaha9182
             [
                 'username' => 'TINA MARTIANA',
-                'password' => 'TINA654',
+                'password' =>  password_hash('sockmtrl7', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: sockmtrl7
             [
                 'username' => 'ALIKA',
-                'password' => 'ALI789',
+                'password' =>  password_hash('gbnkaha53', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: gbnkaha53
             [
                 'username' => 'SITI ATIKAH',
-                'password' => 'ST1234',
+                'password' =>  password_hash('mtrlkaha1', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: mtrlkaha1
             [
                 'username' => 'RIA APRILIANI',
-                'password' => 'RIA566',
+                'password' =>  password_hash('gbnmtrl20', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: gbnmtrl20
             [
                 'username' => 'NADYA NURUL',
-                'password' => 'NAD222',
+                'password' =>  password_hash('kaha4312', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: kaha4312
             [
                 'username' => 'NENG SRI',
-                'password' => 'NS212',
+                'password' =>  password_hash('mtrlgbn93', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: mtrlgbn93
             [
                 'username' => 'PUPU SF',
-                'password' => 'NENENG',
+                'password' =>  password_hash('sockkaha4', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: sockkaha4
             [
                 'username' => 'MIRA',
-                'password' => 'MR248',
+                'password' =>  password_hash('kahatex10', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: kahatex10
             [
                 'username' => 'NENG ROSITA',
-                'password' => 'NR123',
+                'password' =>  password_hash('gbnmtrl1', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: gbnmtrl1
             [
                 'username' => 'WULANIA ROSMAYA',
-                'password' => 'WR85246',
+                'password' =>  password_hash('sock972', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: sock972
             [
                 'username' => 'NADELA VIRGA',
-                'password' => 'NADELA4568',
+                'password' =>  password_hash('gbn2463', PASSWORD_BCRYPT),
                 'role'     => 'gbn',
                 'area'     => NULL,
-            ],
+            ], // password: gbn2463
+
 
         ];
         $this->db->table('user')->insertBatch($data);
