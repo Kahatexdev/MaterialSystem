@@ -110,6 +110,14 @@ class MaterialModel extends Model
             ->groupBy('no_model,material.item_type,material.kode_warna,material.color')
             ->findAll();
     }
+    public function MaterialPDK($model)
+    {
+        return $this->select('master_order.no_model, area, material.kode_warna, material.item_type, material.color, sum(kgs) as qty_po')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('master_order.no_model', $model)
+            ->groupBy('no_model,material.item_type,material.kode_warna,material.color')
+            ->findAll();
+    }
     public function getArea()
     {
         return $this->select('area')

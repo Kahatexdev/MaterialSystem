@@ -73,10 +73,10 @@ class ApiController extends ResourceController
     {
         //
     }
-    public function statusbahanbaku($area)
+    public function statusbahanbaku($model)
     {
         $search = $this->request->getGet('search');
-        $model = $this->materialModel->orderPerArea($area);
+        $model = $this->materialModel->MaterialPDK($model);
 
         $res = [];
         foreach ($model as &$row) {
