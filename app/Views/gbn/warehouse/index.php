@@ -229,24 +229,26 @@
                     <div class="modal-body">
                         <!-- Select Kategori -->
                         <div class="mb-3">
-                            <label for="kategori" class="form-label">Pilih Kategori</label>
-                            <select id="kategori" class="form-select" style="width: 100%">
+                            <input type="text" name="nama_cluster" id="inputNamaCluster" hidden>
+                            <input type="text" id="id_stock" hidden>
+                            <label for="kategoriSelect" class="form-label">Pilih Kategori</label>
+                            <select id="kategoriSelect" class="form-select" style="width: 100%">
                                 <option value="">Pilih Kategori</option>
-                                <option value="MAJALAYA">BENANG UNTUK MAJALAYA</option>
-                                <option value="COVER_LUREX">BENANG UNTUK COVER LUREX</option>
-                                <option value="COVER_LUREX_MAJALAYA">BENANG UNTUK COVER LUREX MAJALAYA</option>
-                                <option value="LOKAL">BENANG UNTUK LOKAL</option>
-                                <option value="TWIST">BENANG UNTUK TWIST</option>
-                                <option value="ROSSO">BENANG UNTUK ROSSO</option>
-                                <option value="COVER_SPANDEX">BENANG UNTUK COVER SPANDEX</option>
-                                <option value="SAMPLE">BENANG UNTUK SAMPLE</option>
-                                <option value="ACRYLIC_KINCIR_CIJERAH">BENANG ACRYLIC KINCIR CIJERAH</option>
-                                <option value="TALI_UKUR_ELASTIK">BENANG UNTUK TALI UKUR ELASTIK</option>
-                                <option value="PERBAIKAN_DATA_ACRYLIC">BENANG PERBAIKAN DATA ACRYLIC</option>
-                                <option value="ORDER_PROGRAM">BENANG ORDER PROGRAM</option>
-                                <option value="PERBAIKAN_DATA_MENUMPUK">BENANG PERBAIKAN DATA MENUMPUK</option>
-                                <option value="ROMBAK_CYLINDER">BENANG ROMBAK CYLINDER MC AREA</option>
-                                <option value="KELOS_WARNA">BENANG UNTUK KELOS WARNA</option>
+                                <option value="Untuk Majalaya">Untuk Majalaya</option>
+                                <option value="Untuk Cover Lurex">Untuk Cover Lurex</option>
+                                <option value="Untuk Cover Lurex Majalaya">Untuk Cover Lurex Majalaya</option>
+                                <option value="Untuk Lokal">Untuk Lokal</option>
+                                <option value="Untuk Twist">Untuk Twist</option>
+                                <option value="Untuk Rosso">Untuk Rosso</option>
+                                <option value="Untuk Cover Spandex">Untuk Cover Spandex</option>
+                                <option value="Untuk Sample">Untuk Sample</option>
+                                <option value="Acrylic Kincir Cijerah">Acrylic Kincir Cijerah</option>
+                                <option value="Untuk Tali Ukur Elastik">Untuk Tali Ukur Elastik</option>
+                                <option value="Perbaikan Data Acrylic">Perbaikan Data Acrylic</option>
+                                <option value="Order Program">Order Program</option>
+                                <option value="Perbaikan Data Menumpuk">Perbaikan Data Menumpuk</option>
+                                <option value="Rombak Cylinder">Rombak Cylinder MC Area</option>
+                                <option value="Untuk Kelos Warna">Untuk Kelos Warna</option>
                             </select>
                         </div>
 
@@ -295,7 +297,7 @@
             </form>
         </div>
     </div>
-    <!-- modal Pindah Cluster end -->
+    <!-- modal Pengeluaran Selain Order end -->
 
 </div>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
@@ -359,9 +361,9 @@
                                         <button 
                                             class="btn btn-outline-info btn-sm pengeluaranSelainOrder"
                                             data-id="${item.id_stock}"
-                                            data-no-model-old="${item.no_model}"
+                                            data-no-model="${item.no_model}"
                                             data-kode-warna="${item.kode_warna}"
-                                            data-nama-cluster-old="${item.nama_cluster}"
+                                            data-nama-cluster="${item.nama_cluster}"
                                             >
                                             Pengeluaran Selain Order
                                         </button>
@@ -802,6 +804,7 @@
             const idStock = $(this).data('id');
             const base = '<?= base_url() ?>';
             const role = '<?= session()->get('role') ?>';
+            const namaCluster = $(this).data('nama-cluster');
             const $container = $('#pengeluaranSelainOrderContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i></div>');
 
             $('#pengeluaranSelainOrder').modal('show');
@@ -819,36 +822,37 @@
                 selectedData.forEach(d => {
                     const lot = d.lot_stock || d.lot_awal;
                     $container.append(`
-          <div class="col-md-12">
-            <div class="card result-card h-100">
-              <div class="form-check">
-                <input class="form-check-input row-check" type="checkbox" value="${d.id_out_celup}" id="chk${d.id_out_celup}">
-                <label class="form-check-label fw-bold" for="chk${d.id_out_celup}">
-                  ${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.warna}
-                </label>
-              </div>
-              <div class="card-body row">
-                <div class="col-md-4">
-                  <p><strong>Kode Warna:</strong> ${d.kode_warna}</p>
-                  <p><strong>Warna:</strong> ${d.warna}</p>
-                </div>
-                <div class="col-md-4">
-                  <p><strong>Lot Jalur:</strong> ${lot}</p>
-                  <p><strong>No Karung:</strong> ${d.no_karung}</p>
-                </div>
-                <div class="col-md-4">
-                  <p><strong>Total Kgs:</strong> ${parseFloat(d.kgs_kirim || 0).toFixed(2)} KG</p>
-                  <p><strong>Cones:</strong> ${d.cones_kirim} Cns</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        `);
+                    <div class="col-md-12">
+                        <div class="card result-card h-100">
+                        <div class="form-check">
+                            <input class="form-check-input row-check" type="radio" name="pilih_item" value="${d.id_out_celup}" id="radio${d.id_out_celup}" data-lot="${lot}">
+                            <label class="form-check-label fw-bold" for="chk${d.id_out_celup}">
+                            ${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.warna}
+                            </label>
+                        </div>
+                        <div class="card-body row">
+                            <div class="col-md-4">
+                            <p><strong>Kode Warna:</strong> ${d.kode_warna}</p>
+                            <p><strong>Warna:</strong> ${d.warna}</p>
+                            </div>
+                            <div class="col-md-4">
+                            <p><strong>Lot Jalur:</strong> ${lot}</p>
+                            <p><strong>No Karung:</strong> ${d.no_karung}</p>
+                            </div>
+                            <div class="col-md-4">
+                            <p><strong>Total Kgs:</strong> ${parseFloat(d.kgs_kirim || 0).toFixed(2)} KG</p>
+                            <p><strong>Cones:</strong> ${d.cones_kirim} Cns</p>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    `);
                 });
 
                 calculateTotals();
             });
-
+            $('#inputNamaCluster').val(namaCluster);
+            $('#id_stock').val(idStock);
             $container.on('change', '.row-check', calculateTotals);
         });
 
@@ -857,15 +861,14 @@
                 totalCns = 0,
                 totalKrg = 0;
 
-            $('#pengeluaranSelainOrderContainer .row-check:checked').each(function() {
-                const id = $(this).val();
-                const item = selectedData.find(d => d.id_out_celup == id);
-                if (item) {
-                    totalKgs += parseFloat(item.kgs_kirim || 0);
-                    totalCns += parseInt(item.cones_kirim || 0);
-                    totalKrg += 1;
-                }
-            });
+            const selected = $('#pengeluaranSelainOrderContainer .row-check:checked').val();
+            const item = selectedData.find(d => d.id_out_celup == selected);
+
+            if (item) {
+                totalKgs = parseFloat(item.kgs_kirim || 0);
+                totalCns = parseInt(item.cones_kirim || 0);
+                totalKrg = 1;
+            }
 
             $('input[name="ttl_kgs"]').val(totalKgs.toFixed(2));
             $('input[name="ttl_cns"]').val(totalCns);
@@ -893,6 +896,69 @@
             if (inputKrg > maxKrg) {
                 alert(`Total Krg tidak boleh melebihi ${maxKrg}`);
                 $('#inputKrg').val(maxKrg);
+            }
+        });
+    });
+    // Simpan data dari modal Pengeluaran Selain Order
+    $('#formpengeluaranSelainOrder').on('submit', function(e) {
+        e.preventDefault(); // penting agar tidak reload halaman
+
+        const idOutCelup = $('input[name="pilih_item"]:checked').val();
+        const kategori = $('#kategoriSelect').val();
+        const kgsOtherOut = $('#inputKgs').val();
+        const cnsOtherOut = $('#inputCns').val();
+        const krgOtherOut = $('#inputKrg').val();
+        const namaCluster = $('#inputNamaCluster').val();
+        const lot = $('input[name="pilih_item"]:checked').data('lot');
+        const idStock = $('#id_stock').val(); // atau sesuaikan jika beda
+
+        if (!idOutCelup || !kategori) {
+            return alert('Silakan pilih item dan kategori terlebih dahulu.');
+        }
+
+        $.ajax({
+            url: '<?= base_url(session()->get("role") . "/warehouse/savePengeluaranSelainOrder") ?>',
+            method: 'POST',
+            data: {
+                id_out_celup: idOutCelup,
+                kategori: kategori,
+                kgs_other_out: kgsOtherOut,
+                cns_other_out: cnsOtherOut,
+                krg_other_out: krgOtherOut,
+                lot: lot,
+                nama_cluster: namaCluster,
+                id_stock: idStock // sesuaikan dengan controller kamu yang menerima array
+            },
+            success: function(res) {
+                if (res.success) {
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: res.message || 'Data berhasil disimpan!',
+                        icon: 'success',
+                        confirmButtonColor: '#4a90e2',
+                        willClose: () => {
+                            // Menutup modal dan reset form jika diperlukan
+                            $('#pengeluaranSelainOrder').modal('hide');
+                            $('#formpengeluaranSelainOrder')[0].reset();
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Gagal!',
+                        text: 'Gagal menyimpan data: ' + res.message,
+                        icon: 'error',
+                        confirmButtonColor: '#e74c3c'
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error(error);
+                Swal.fire({
+                    title: 'Terjadi Kesalahan!',
+                    text: 'Ada masalah dengan server.',
+                    icon: 'error',
+                    confirmButtonColor: '#e74c3c'
+                });
             }
         });
     });
