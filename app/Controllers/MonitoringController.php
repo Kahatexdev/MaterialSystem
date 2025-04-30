@@ -65,12 +65,14 @@ class MonitoringController extends BaseController
     {
         $getData = $this->request->getPost();
 
+        // Hash password sebelum menyimpan
         $data = [
             'username' => $getData['username'],
-            'password' => $getData['password'],
+            'password' => password_hash($getData['password'], PASSWORD_BCRYPT), // Hash password dengan BCRYPT
             'role' => $getData['role'],
             'area' => $getData['area'],
         ];
+
 
         $this->userModel->save($data);
 
