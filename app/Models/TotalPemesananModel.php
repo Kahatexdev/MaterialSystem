@@ -53,7 +53,8 @@ class TotalPemesananModel extends Model
     public function getDataPemesanan($area, $jenis, $tgl_pakai)
     {
         $query = $this->db->table('total_pemesanan tp')
-            ->select("tp.id_total_pemesanan, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, p.id_pemesanan, p.tgl_pakai, m.area, mo.no_model, m.item_type, m.kode_warna, m.color, CASE WHEN p.po_tambahan = '1' THEN 'YA' ELSE '' END AS po_tambahan")
+            ->select("tp.id_total_pemesanan, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, p.id_pemesanan, p.tgl_pakai, m.area, mo.no_model, m.item_type, m.kode_warna, m.color, SUM(pp.kgs_out) AS kg_kirim, COUNT(pp.id_pengeluaran) AS krg_kirim, GROUP_CONCAT(DISTINCT pp.lot_out) AS lot_kirim, GROUP_CONCAT(DISTINCT pp.nama_cluster) AS cluster_kirim, CASE WHEN p.po_tambahan = '1' THEN 'YA' ELSE '' END AS po_tambahan")
+            ->join('pengeluaran pp', 'pp.id_total_pemesanan = tp.id_total_pemesanan', 'left')
             ->join('pemesanan p', 'p.id_total_pemesanan = tp.id_total_pemesanan', 'left')
             ->join('material m', 'm.id_material = p.id_material', 'left')
             ->join('master_order mo', 'mo.id_order = m.id_order', 'left')

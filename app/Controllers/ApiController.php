@@ -73,10 +73,10 @@ class ApiController extends ResourceController
     {
         //
     }
-    public function statusbahanbaku($area)
+    public function statusbahanbaku($model)
     {
         $search = $this->request->getGet('search');
-        $model = $this->materialModel->orderPerArea($area);
+        $model = $this->materialModel->MaterialPDK($model);
 
         $res = [];
         foreach ($model as &$row) {
@@ -435,6 +435,9 @@ class ApiController extends ResourceController
 
         $data = parseNestedKeys($data); // Parsing data
 
+        log_message('debug', 'Parsed data: ' . json_encode($data, JSON_PRETTY_PRINT));
+
+
         // Validasi data
         if (empty($data) || !isset($data['items'])) {
             return $this->respond([
@@ -443,7 +446,7 @@ class ApiController extends ResourceController
             ], 400);
         }
         // Log data yang diterima
-        log_message('debug', 'Data received: ' . json_encode($data['items']));
+        // log_message('debug', 'Data received: ' . json_encode($data['items']));
 
         // Looping data 'items'
         foreach ($data['items'] as $index => $item) {
@@ -474,16 +477,30 @@ class ApiController extends ResourceController
                 ], 400);
             }
 
-            $pemesananUpdate = [
-                'jl_mc'             => $jalanMc,
-                'ttl_qty_cones'     => $ttlQtyCns,
-                'ttl_berat_cones'   => $ttlBeratCns,
-                'sisa_kgs_mc'       => $data['sisa_kg'],
-                'sisa_cones_mc'     => $data['sisa_cns'],
-                'lot'               => $data['lot'],
-                'keterangan'        => $data['keterangan'],
-                'updated_at'        => date('Y-m-d H:i:s'),
-            ];
+            log_message('debug', 'ini' . $index);
+            // Kondisi untuk data pertama saja
+            if ($index === 0) {
+                $pemesananUpdate = [
+                    'jl_mc'             => $jalanMc,
+                    'ttl_qty_cones'     => $ttlQtyCns,
+                    'ttl_berat_cones'   => $ttlBeratCns,
+                    'sisa_kgs_mc'       => $data['sisa_kg'],  // Isi hanya untuk data pertama
+                    'sisa_cones_mc'     => $data['sisa_cns'], // Isi hanya untuk data pertama
+                    'lot'               => $data['lot'],
+                    'keterangan'        => $data['keterangan'],
+                    'updated_at'        => date('Y-m-d H:i:s'),
+                ];
+            } else {
+                $pemesananUpdate = [
+                    'jl_mc'             => $jalanMc,
+                    'ttl_qty_cones'     => $ttlQtyCns,
+                    'ttl_berat_cones'   => $ttlBeratCns,
+                    'lot'               => $data['lot'],
+                    'keterangan'        => $data['keterangan'],
+                    'updated_at'        => date('Y-m-d H:i:s'),
+                ];
+            }
+
 
             $updatePemesanan = $this->pemesananModel->update($idPemesanan, $pemesananUpdate);
 
