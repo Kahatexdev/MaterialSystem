@@ -253,13 +253,13 @@ class PemesananModel extends Model
 
         $totalBeratCones = array_sum(array_column($data, 'ttl_berat_cones'));
         $totalQtyCones = array_sum(array_column($data, 'ttl_qty_cones'));
-        $avgSisaKgsMc = array_sum(array_column($data, 'sisa_kgs_mc')) / count(array_column($data, 'sisa_kgs_mc'));
-        $avgSisaConesMc = array_sum(array_column($data, 'sisa_cones_mc')) / count(array_column($data, 'sisa_cones_mc'));
+        $sisaKgsMc = array_sum(array_column($data, 'sisa_kgs_mc'));
+        $sisaConesMc = array_sum(array_column($data, 'sisa_cones_mc'));
 
         $totalData = [
             'ttl_jl_mc' => array_sum(array_column($data, 'jl_mc')),
-            'ttl_kg'    => $totalBeratCones - $avgSisaKgsMc,
-            'ttl_cns'   => $totalQtyCones - $avgSisaConesMc,
+            'ttl_kg'    => $totalBeratCones - $sisaKgsMc,
+            'ttl_cns'   => $totalQtyCones - $sisaConesMc,
         ];
 
         // Langkah 3: Insert ke tabel baru
