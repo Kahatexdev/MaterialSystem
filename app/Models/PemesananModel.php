@@ -521,4 +521,13 @@ class PemesananModel extends Model
         $this->db->query($query, [$area, $tgl_pakai, $jenis]);
         return $this->db->affectedRows() > 0;
     }
+
+    public function pemesananBelumDikirim()
+    {
+        $date = date('Y-m-d');
+        return $this->select('COUNT(id_pemesanan)')
+            ->where('tgl_pakai', $date)
+            ->where('status_kirim', '')
+            ->findAll();
+    }
 }

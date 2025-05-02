@@ -278,12 +278,13 @@ class PoGabunganController extends BaseController
             ->with('success', 'Data PO Gabungan berhasil disimpan.');
     }
 
-    public function listPoGabungan($no_model)
+    public function listPoGabungan()
     {
         $tujuan = $this->request->getGet('tujuan');
         $jenis = $this->request->getGet('jenis');
         $jenis2 = $this->request->getGet('jenis2');
-        dd($tujuan, $jenis, $jenis2);
+        // dd($tujuan, $jenis, $jenis2);
+
         // Tentukan penerima berdasarkan tujuan
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';
@@ -294,23 +295,22 @@ class PoGabunganController extends BaseController
         }
 
         $itemType = $this->masterMaterialModel->getItemType();
-        $openPo = $this->openPoModel->listOpenPo($no_model, $jenis, $jenis2, $penerima);
+        $openPoGabung = $this->openPoModel->listOpenPoGabung($jenis, $jenis2, $penerima);
 
-        // dd($openPo);
+        // dd($openPoGabung);
         $data =
             [
                 'active' => $this->active,
                 'title' => 'Material System',
                 'role' => $this->role,
                 'itemType' => $itemType,
-                'openPo' => $openPo,
+                'openPoGabung' => $openPoGabung,
                 'tujuan' => $tujuan,
-                'no_model' => $no_model,
                 'penerima' => $penerima,
                 'jenis' => $jenis,
                 'jenis2' => $jenis2
             ];
         // dd($tujuan, $jenis, $jenis2);
-        return view($this->role . '/mastermaterial/list-open-po', $data);
+        return view($this->role . '/mastermaterial/list-open-pogabung', $data);
     }
 }
