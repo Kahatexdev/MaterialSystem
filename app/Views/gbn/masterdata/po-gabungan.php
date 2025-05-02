@@ -62,7 +62,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
-                <form action="<?= base_url($role . '/listPoGabungan/') ?>" method="get" target="_blank">
+                <form action="<?= base_url($role . '/listPoGabungan') ?>" method="get" target="_blank">
                     <div class="mb-3">
                         <label for="style_size" class="form-label">Tujuan</label>
                         <select class="form-control tujuan" name="tujuan" required>
