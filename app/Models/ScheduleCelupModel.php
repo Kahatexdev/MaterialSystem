@@ -498,4 +498,19 @@ class ScheduleCelupModel extends Model
 
         return $this->findAll();
     }
+
+    public function schTerdekat()
+    {
+        $today = date('Y-m-d');
+        $fiveDaysLater = date('Y-m-d', strtotime('+5 days'));
+
+        return $this->select('no_model, item_type, kode_warna, warna, tanggal_schedule, mesin_celup.no_mesin')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->where('last_status', 'scheduled')
+            ->where('tanggal_schedule >=', $today)
+            ->where('tanggal_schedule <=', $fiveDaysLater)
+            ->orderBy('tanggal_schedule', 'ASC')
+            ->limit(5)
+            ->findAll();
+    }
 }

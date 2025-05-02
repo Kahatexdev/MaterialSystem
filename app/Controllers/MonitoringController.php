@@ -7,6 +7,8 @@ use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\UserModel;
 use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
+use App\Models\ScheduleCelupModel;
+use App\Models\PemesananModel;
 
 class MonitoringController extends BaseController
 {
@@ -16,12 +18,16 @@ class MonitoringController extends BaseController
     protected $userModel;
     protected $materialModel;
     protected $masterMaterialModel;
+    protected $scheduleCelupModel;
+    protected $pemesananModel;
 
     public function __construct()
     {
         $this->userModel = new UserModel();
         $this->materialModel = new MaterialModel();
         $this->masterMaterialModel = new MasterMaterialModel();
+        $this->scheduleCelupModel = new ScheduleCelupModel();
+        $this->pemesananModel = new PemesananModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -40,10 +46,15 @@ class MonitoringController extends BaseController
 
     public function index()
     {
+        $schTerdekat = $this->scheduleCelupModel->schTerdekat();
+        $pemesanan = $this->pemesananModel->pemesananBelumDikirim();
+        // dd($tes);
         $data = [
             'active' => $this->active,
             'title' => 'Monitoring',
             'role' => $this->role,
+            'schTerdekat' => $schTerdekat,
+            'pemesanan' => $pemesanan
         ];
         return view($this->role . '/dashboard/index', $data);
     }
