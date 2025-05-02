@@ -103,11 +103,11 @@ class MonitoringController extends BaseController
     public function updateUser()
     {
         $id = $this->request->getPost('id_user');
-
+        $pw = $this->request->getPost('password');
         $data = [
             'id_user' => $this->request->getPost('id_user'),
             'username' => $this->request->getPost('username'),
-            'password' => $this->request->getPost('password'),
+            'password' => password_hash($pw, PASSWORD_BCRYPT),
             'role' => $this->request->getPost('role'),
             'area' => $this->request->getPost('area')
         ];
