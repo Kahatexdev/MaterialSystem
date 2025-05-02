@@ -276,6 +276,7 @@
                                                                         <span class="badge bg-<?= $badgeColor ?>"><?= htmlspecialchars($status) ?></span>
                                                                         <input type="hidden" class="form-control last_status" name="last_status[]" value="<?= htmlspecialchars($status) ?>">
                                                                     </div>
+
                                                                 </div>
 
                                                                 <div class="col-3 d-flex align-items-center">
@@ -292,6 +293,11 @@
                                                                         </fieldset>
                                                                     </div>
                                                                 </div>
+                                                                <div class="col-12">
+                                                                    <div class="text-muted small fst-italic">
+                                                                        Last updated: <?= $detail['last_update'] ?> at <?= $detail['jam_update'] ?> by <?= $detail['admin'] ?>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </td>
                                                         <td class="text-center">
@@ -302,6 +308,9 @@
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
                                                         </td>
+                                                    </tr>
+                                                    <tr>
+
                                                     </tr>
                                                 <?php endforeach; ?>
                                             </tbody>
@@ -314,6 +323,8 @@
                                                         <input type="number" class="form-control" id="total_qty_celup" name="total_qty_celup" value="" readonly>
                                                     </td>
                                                 </tr>
+
+
                                             </tfoot>
                                         </table>
                                     </div>
