@@ -351,4 +351,8 @@ class OpenPoModel extends Model
             ->groupBy('open_po.id_po, open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color')
             ->findAll();
     }
+    public function getPoDetailsGabungan($id_po){
+        return $this->where('id_induk', $id_po)
+            ->findAll();
+    }
 }

@@ -313,4 +313,10 @@ class PoGabunganController extends BaseController
         // dd($tujuan, $jenis, $jenis2);
         return view($this->role . '/mastermaterial/list-open-pogabung', $data);
     }
+    public function getPoDetailsGabungan($id_po)
+    {
+        $poDetails = $this->openPoModel->getPoDetailsGabungan($id_po);
+        // dd($poDetails);
+        return response()->setJSON($poDetails);
+    }
 }

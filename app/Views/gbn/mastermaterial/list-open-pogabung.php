@@ -46,7 +46,7 @@
                         id="btnOpenModal"
                         data-bs-toggle="modal"
                         data-bs-target="#exportModal"
-                        data-base-url="<?= base_url("$role/exportOpenPO/$no_model") ?>">
+                        data-base-url="<?= base_url("$role/exportOpenPO") ?>">
                         <i class="ni ni-single-copy-04 me-2"></i>Export PO
                     </button>
 
@@ -101,42 +101,16 @@
 
 <!-- Modal Edit Data Material -->
 <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="updateModalLabel">Update Data PO</h5>
+                <h5 class="modal-title" id="updateModalLabel">Update Data PO Gabungan</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <form id="updateForm" action="<?= base_url($role . '/updatePo') ?>" method="post">
-                    <input type="hidden" name="id_po" id="id_po">
-
-                    <div class="mb-3">
-                        <label for="itemType">Item Type</label>
-                        <select class="form-control" id="add_item_type" name="item_type" required>
-                            <option value=""><?= $openPo['item_type'] ?? 'Pilih Item Type' ?></option>
-
-                            <?php foreach ($itemType as $item): ?>
-                                <option value="<?= $item['item_type'] ?>"><?= $item['item_type'] ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                    <div id="detailsPoGabung">
                     </div>
-
-                    <div class="mb-3">
-                        <label for="kode_warna" class="form-label">Kode Warna</label>
-                        <input type="text" class="form-control" id="kode_warna" name="kode_warna" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="color" class="form-label">Color</label>
-                        <input type="text" class="form-control" id="color" name="color" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="kg_po" class="form-label">Kg Kebutuhan</label>
-                        <input type="text" class="form-control" id="kg_po" name="kg_po" required>
-                    </div>
-
                     <!-- Button update dan batal di sebelah kanan -->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -153,7 +127,7 @@
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exportModalLabel">Export Data PO</h5>
+                <h5 class="modal-title" id="exportModalLabel">Export Data PO Gabungan</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body ">
@@ -211,20 +185,46 @@
         // Event listener tombol Update
         $('#dataTable').on('click', '.btn-edit', function() {
             const id = $(this).data('id');
+            const itemTypeList = <?= json_encode($itemType); ?>;
+            const poGabung = <?= json_encode($openPoGabung); ?>;
 
             // Lakukan AJAX request untuk mendapatkan data
             $.ajax({
                 url: '<?= base_url($role . '/getPoDetails') ?>/' + id,
                 type: 'GET',
                 success: function(response) {
-                    // Isi data ke dalam form modal
-                    $('#id_po').val(response.id_po);
-                    $('#add_item_type').val(response.item_type);
-                    $('#kode_warna').val(response.kode_warna);
-                    $('#color').val(response.color);
-                    $('#kg_po').val(response.kg_po);
-                    // Show modal dialog
-                    $('#updateModal').modal('show');
+                    let dataDetails = '';
+                    dataDetails += `<input type="text" class="form-control" id="id_po_gabungan" name="id_po_gabungan" value="${response.id_po}" readonly>`;
+                    $('#detailsPoGabung').html(dataDetails);
+
+
+                    $.ajax({
+                        url: '<?= base_url($role . '/getPoDetailsGabungan') ?>/' + id,
+                        type: 'GET',
+                        success: function(response) {
+                            response.data.forEach(function(item, index) {
+                                dataDetails +=
+                                    `<div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="itemType">Item Type</label>
+                                            <select class="form-control" id="item_type" name="item_type[]" required>
+                                               <option value="">Pilih Item Type</option>
+                                                ${itemTypeList.map(type =>
+                                                    `<option value="${type.item_type}" ${type.item_type === poGabung.item_type ? 'selected' : ''}>
+                                                        ${type.item_type}
+                                                    </option>`
+                                                ).join('')}
+                                            </select>
+                                        </div>
+                                    </div>`;
+                            });
+                            $('#detailsPoGabung').html(dataDetails);
+                            console.log(response);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr.responseText);
+                        }
+                    });
                 },
                 error: function(xhr, status, error) {
                     console.error(xhr.responseText);
