@@ -647,28 +647,185 @@ class MasterdataController extends BaseController
     {
         $data = $this->request->getPost();
         // dd($data);
+        $noModels  = $data['no_model'] ?? null;  // sekarang tetap string
         $id_order = $id;
         // dd($id_order);
 
         $items = $data['items'] ?? [];
-        foreach ($items as $item) {
-            $itemData = [
-                'role'             => $this->role,
-                'no_model'         => $data['no_model'],
-                'item_type'        => $item['item_type'],
-                'kode_warna'       => $item['kode_warna'],
-                'color'            => $item['color'],
-                'kg_po'            => $item['kg_po'],
-                'keterangan'       => $data['keterangan'],
+        if (($data['penerima'] ?? '') === 'Paryanti') {
+            // dd($totalKg, $details);
+            $headerData = [];
+            foreach ($items as $item) {
+                $headerData[] = [
+                    'no_model'         => 'POCOVERING ' . $noModels,
+                    'item_type'        => $item['item_type'],
+                    'kode_warna'       => $item['kode_warna'],
+                    'color'            => $item['color'],
+                    'kg_po'            => $item['kg_po'],
+                    'keterangan'       => $data['keterangan'] ?? '',
+                    'penerima'         => $data['penerima'],
+                    'penanggung_jawab' => $data['penanggung_jawab'],
+                    'admin'            => session()->get('username'),
+                    'created_at'       => date('Y-m-d H:i:s'),
+                    'updated_at'       => date('Y-m-d H:i:s'),
+                    'id_induk'         => null,
+                ];
+            }
+            // dd ($headerData, $items);
+            $db = \Config\Database::connect();
+            $db->transStart();
+
+            // 1. Insert semua header
+            $this->openPoModel->insertBatch($headerData);
+
+            // 2. Ambil ID pertama
+            $firstInsertId = $db->insertID();
+            $count = count($headerData);
+            $insertedIds = range($firstInsertId, $firstInsertId + $count - 1);
+
+            // 3. Siapkan detail per header (1-to-1)
+            $batch = [];
+            foreach ($items as $i => $d) {
+                $batch[] = [
+                    'no_model'         => $noModels ?? '-',
+                    'item_type'        => $d['item_type'],
+                    'kode_warna'       => $d['kode_warna'],
+                    'color'            => $d['color'],
+                    'kg_po'            => $d['kg_po'],
+                    'keterangan'       => $data['keterangan'] ?? '',
+                    'penerima'         => $data['penerima'],
+                    'penanggung_jawab' => $data['penanggung_jawab'],
+                    'admin'            => session()->get('username'),
+                    'created_at'       => date('Y-m-d H:i:s'),
+                    'updated_at'       => date('Y-m-d H:i:s'),
+                    'id_induk'         => $insertedIds[$i], // id header ke-i
+                ];
+            }
+            // dd ($batch);
+            $this->openPoModel->insertBatch($batch);
+
+            $db->transComplete();
+            if (! $db->transStatus()) {
+                return redirect()->back()->with('error', 'Gagal menyimpan PO Covering.');
+            }
+
+            return redirect()->to(base_url($this->role . '/masterdata'))
+                ->with('success', 'Data PO Covering berhasil disimpan.');
+        }else{
+            foreach ($items as $item) {
+                $itemData = [
+                    'role'             => $this->role,
+                    'no_model'         => $data['no_model'],
+                    'item_type'        => $item['item_type'],
+                    'kode_warna'       => $item['kode_warna'],
+                    'color'            => $item['color'],
+                    'kg_po'            => $item['kg_po'],
+                    'keterangan'       => $data['keterangan'],
+                    'penerima'         => $data['penerima'],
+                    'penanggung_jawab' => $data['penanggung_jawab'],
+                    'admin'            => session()->get('username'),
+                ];
+                // Simpan data ke database
+                $this->openPoModel->insert($itemData);
+            }
+        }
+        
+
+        return redirect()->to(base_url($this->role . '/material/' . $id_order))->with('success', 'Data PO Berhasil Di Tambahkan.');
+    }
+
+    private function saveOpenPOGabungan()
+    {
+        // 1. Ambil input dan korelasi model IDs dengan nomor model
+        $data = $this->request->getPost();
+        // dd($data);
+        $modelIds = array_column($data['no_model'], 'no_model');      // ['12','10']
+        $modelList = $this->masterOrderModel
+            ->select('id_order, no_model')
+            ->whereIn('id_order', $modelIds)
+            ->findAll();
+
+        // Map id_order => no_model
+        $noModelMap = [];
+        foreach ($modelList as $m) {
+            $noModelMap[$m['id_order']] = $m['no_model'];
+        }
+        // dd($noModelMap);
+        // 2. Hitung total untuk header dan siapkan detail original
+        $totalKg = 0;
+        $details = [];
+        foreach ($data['items'] as $idx => $it) {
+            // Asumsi: $data['items'] mengikuti urutan $modelIds jika kolom per model
+            $modelId = $modelIds[$idx] ?? null;
+            $totalKg += (float) $it['kg_po'];
+            $details[] = [
+                'model_id'   => $modelId,
+                'item_type'  => $it['item_type'],
+                'kode_warna' => $it['kode_warna'],
+                'color'      => $it['color'],
+                'kg_po'      => (float) $it['kg_po'],
+            ];
+        }
+        // dd(        $totalKg, $details);
+        $keys = array_map(function ($d) {
+            return $d['item_type'] . '|' . $d['kode_warna'] . '|' . $d['color'];
+        }, $details);
+        $uniqueKeys = array_unique($keys);
+        if (count($uniqueKeys) > 1) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Data tidak disimpan: kombinasi item_type, kode warna, dan color harus sama.');
+        }
+        // 3. Persist header PO gabungan
+        $headerData = [
+            'no_model'         => 'POGABUNGAN ' . implode('_', $noModelMap),
+            'item_type'        => $details[0]['item_type'],
+            'kode_warna'       => $details[0]['kode_warna'],
+            'color'            => $details[0]['color'],
+            'kg_po'            => $totalKg,
+            'keterangan'       => $data['keterangan'] ?? '',
+            'penerima'         => $data['penerima'],
+            'penanggung_jawab' => $data['penanggung_jawab'],
+            'admin'            => session()->get('username'),
+            'created_at'       => date('Y-m-d H:i:s'),
+            'updated_at'       => date('Y-m-d H:i:s'),
+            'id_induk'         => null,
+        ];
+        // dd ($headerData, $details);
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $this->openPoModel->insert($headerData);
+        $parentId = $this->openPoModel->insertID();
+        // dd($parentId);
+        // 4. Siapkan dan insert detail per model sesuai data original
+        $batch = [];
+        foreach ($details as $d) {
+            $batch[] = [
+                'no_model'         => $noModelMap[$d['model_id']] ?? '-',
+                'item_type'        => '',
+                'kode_warna'       => '',
+                'color'            => '',
+                'kg_po'            => $d['kg_po'],
+                'keterangan'       => $data['keterangan'] ?? '',
                 'penerima'         => $data['penerima'],
                 'penanggung_jawab' => $data['penanggung_jawab'],
                 'admin'            => session()->get('username'),
+                'created_at'       => date('Y-m-d H:i:s'),
+                'updated_at'       => date('Y-m-d H:i:s'),
+                'id_induk'         => $parentId,
             ];
-            // Simpan data ke database
-            $this->openPoModel->insert($itemData);
+        }
+        // dd ($batch);
+        $this->openPoModel->insertBatch($batch);
+
+        $db->transComplete();
+        if (! $db->transStatus()) {
+            return redirect()->back()->with('error', 'Gagal menyimpan PO gabungan.');
         }
 
-        return redirect()->to(base_url($this->role . '/material/' . $id_order))->with('success', 'Data PO Berhasil Di Tambahkan.');
+        return redirect()->to(base_url($this->role . '/masterdata'))
+            ->with('success', 'Data PO Gabungan berhasil disimpan.');
     }
 
     public function reportMasterOrder()

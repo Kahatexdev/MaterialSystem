@@ -222,17 +222,25 @@ class CoveringController extends BaseController
     {
         $tgl_po = urldecode($tgl_po);
         $tgl_po = date('Y-m-d', strtotime($tgl_po));
-        $noModel = urldecode($noModel);
-
+        $noModel = $noModel;
+        
         // Parse noModel into an array
-        $noModelArray = explode('_', $noModel);
+        // $noModel = str_replace(' ', '', $noModel); // Remove spaces
+        $noModelArray = str_replace('','',$noModel);
+        // dd ($noModelArray);
         // $idInduk = $this->request->getGet('id_induk');
 
         $data = $this->openPoModel->getDetailByNoModel($tgl_po, $noModelArray);
-        // $detail = $this->openPoModel->getDetailByNoModelAndIdInduk($tgl_po, $noModelArray, $idInduk);
-        $id_induk = $data[0]['id_induk'];
+        log_message('debug', 'Data from getDetailByNoModel: ' . json_encode($data));
+
+        $detail = [];
+        foreach ($data as $item) {
+            $id_induk = $item['id_induk'];
+            $noModelPO = 'POCOVERING ' . $item['no_model'];
+            $detail[] = $this->openPoModel->getDetailByNoModelAndIdInduk($tgl_po, $noModelPO, $id_induk);
+        }
         // var_dump($id_induk);
-        $detail = $this->openPoModel->getDetailByNoModelAndIdInduk($tgl_po, $id_induk);
+        // $detail = $this->openPoModel->getDetailByNoModelAndIdInduk($tgl_po, $id_induk);
         // var_dump($detail);
         return $this->response->setJSON($detail);
     }

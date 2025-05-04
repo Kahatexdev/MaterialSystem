@@ -189,6 +189,7 @@ class PoGabunganController extends BaseController
     {
         // 1. Ambil input dan korelasi model IDs dengan nomor model
         $data = $this->request->getPost();
+        // dd($data);
         $modelIds = array_column($data['no_model'], 'no_model');      // ['12','10']
         $modelList = $this->masterOrderModel
             ->select('id_order, no_model')
@@ -253,9 +254,9 @@ class PoGabunganController extends BaseController
         foreach ($details as $d) {
             $batch[] = [
                 'no_model'         => $noModelMap[$d['model_id']] ?? '-',
-                'item_type'        => NULL,
-                'kode_warna'       => NULL,
-                'color'            => NULL,
+                'item_type'        => '',
+                'kode_warna'       => '',
+                'color'            => '',
                 'kg_po'            => $d['kg_po'],
                 'keterangan'       => $data['keterangan'] ?? '',
                 'penerima'         => $data['penerima'],
