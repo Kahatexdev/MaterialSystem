@@ -47,18 +47,18 @@ class UserModel extends Model
 
     public function login($username, $password)
     {
-        $user = $this->where(['username' => $username, 'password' => $password])->first();
-
-        if (!$user) {
-            return null;
+        $user = $this->where('username', $username)->first();
+        if (!$user || !password_verify($password, $user['password'])) {
+            return false;
         }
 
         return [
-            'id' => $user['id_user'],
-            'role' => $user['role'],
+            'id'       => $user['id_user'],
+            'role'     => $user['role'],
             'username' => $user['username']
         ];
     }
+
     public function getData()
     {
         $sql = "

@@ -103,7 +103,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="area" class="form-label">Area</label>
-                        <input type="text" class="form-control" id="add_area" name="area" required>
+                        <input type="text" class="form-control" id="add_area" name="area">
                     </div>
                 </div>
                 <div class="modal-footer">

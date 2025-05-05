@@ -117,87 +117,73 @@
         $('#noModelSelect').change(function() {
             var tglPO = "<?= $tgl_po ?>";
             var noModel = $(this).val();
-            if (noModel.startsWith("POGABUNGAN")) {
-                noModel = noModel.replace("POGABUNGAN", "").replace(/_/g, "").trim();
+            if (noModel.startsWith("POCOVERING")) {
+                noModel = noModel.replace("POCOVERING", "").replace(/_/g, "").trim();
             }
-            var noModelArray = noModel.match(/.{1,6}/g); // Split into chunks of 7 characters
-            
-            if (noModelArray) {
-                noModelArray = noModelArray.join("_"); // Join array elements with _
-            }
-            
-            console.log(noModelArray);
-            if (noModelArray) {
+
+            console.log(noModel);
+            if (noModel) {
                 $.ajax({
-                    url: "<?= base_url($role . '/getDetailByNoModel') ?>/" + tglPO + "/" + noModelArray,
+                    url: "<?= base_url($role . '/getDetailByNoModel') ?>/" + tglPO + "/" + noModel,
                     method: "GET",
                     dataType: "json",
                     success: function(response) {
+                        // flatten 1 level
+                        const items = response.flat();
+
                         $('#detailContainer').empty();
                         $('#itemCardsContainer').empty();
                         $('#coveringFormContainer').show();
                         $('#CelupcoveringFormContainer').show();
 
-                        // Buat card untuk setiap item
-                        response.forEach(function(item, index) {
-                            var cardHtml = `
-                                <div class="col-md-6 mb-4">
-                                    <div class="card h-100">
-                                        <div class="card-header bg-gradient-info text-white">
-                                            <h6 class="card-title">Item Type PO : ${item.item_type}</h6>
-                                            <h6 class="card-title">Kode Warna : ${item.kode_warna}</h6>
-                                            <h6 class="card-title">Kg PO : ${item.kg_po}</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-12">
-                                                    <input type="hidden" name="items[${index}][id_po]" value="${item.id_po}">
-                                                    <input type="hidden" name="items[${index}][no_model]" value="${item.no_model}">
-                                                    
-                                                    <div class="form-group">
-                                                        <label>Item Type Covering</label>
-                                                        <input type="text" class="form-control" 
-                                                            name="items[${index}][itemTypeCovering]" 
-                                                            value=""
-                                                            required>
-                                                    </div>
-
-                                                    <div class="form-group">
-                                                        <label>Kode Warna</label>
-                                                        <input type="text" class="form-control" 
-                                                            name="items[${index}][kodeWarnaCovering]" 
-                                                            value="${item.kode_warna}" 
-                                                            required>
-                                                    </div>
-                                                    
-                                                    <div class="form-group">
-                                                        <label>Warna</label>
-                                                        <input type="text" class="form-control" 
-                                                            name="items[${index}][warnaCovering]"
-                                                            value="${item.color}"
-                                                            required>
-                                                    </div>
-
-                                                    <div class="form-group">
-                                                        <label>Qty Covering</label>
-                                                        <input type="number" class="form-control" 
-                                                            name="items[${index}][qty_covering]" 
-                                                            step="0.01" 
-                                                            required>
-                                                    </div>
-
-                                                    <div class="form-group">
-                                                        <label>Keterangan</label>
-                                                        <textarea class="form-control" 
-                                                            name="items[${index}][keterangan]">
-                                                            ${item.keterangan}</textarea>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
+                        items.forEach(function(item, index) {
+                            const cardHtml = `
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-gradient-info text-white">
+                        <h6 class="card-title">Item Type PO: ${item.item_type}</h6>
+                        <h6 class="card-title">Kode Warna: ${item.kode_warna}</h6>
+                        <h6 class="card-title">Kg PO: ${item.kg_po}</h6>
+                    </div>
+                    <div class="card-body">
+                        <input type="hidden" name="items[${index}][id_po]" value="${item.id_po}">
+                        <input type="hidden" name="items[${index}][no_model]" value="${item.no_model}">
+                        <div class="form-group">
+                            <label>Item Type Covering</label>
+                            <input type="text" class="form-control"
+                                name="items[${index}][itemTypeCovering]"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label>Kode Warna</label>
+                            <input type="text" class="form-control"
+                                name="items[${index}][kodeWarnaCovering]"
+                                value="${item.kode_warna}"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label>Warna</label>
+                            <input type="text" class="form-control"
+                                name="items[${index}][warnaCovering]"
+                                value="${item.color}"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label>Qty Covering</label>
+                            <input type="number" class="form-control"
+                                name="items[${index}][qty_covering]"
+                                step="0.01"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label>Keterangan</label>
+                            <textarea class="form-control"
+                                name="items[${index}][keterangan]">${item.keterangan}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
                             $('#itemCardsContainer').append(cardHtml);
                         });
                     },
