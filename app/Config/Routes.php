@@ -85,6 +85,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('schedule/updateSchedule', 'ScheduleController::updateSchedule');
     $routes->post('schedule/updateTglSchedule', 'ScheduleController::updateTglSchedule');
     $routes->post('schedule/deleteSchedule', 'ScheduleController::deleteSchedule');
+    $routes->get('schedule/getStock', 'ScheduleController::getStock');
+    $routes->get('schedule/getKeterangan', 'ScheduleController::getKeterangan');
 
     $routes->get('schedule/reqschedule', 'ScheduleController::reqschedule');
     $routes->post('schedule/reqschedule', 'ScheduleController::reqschedule');

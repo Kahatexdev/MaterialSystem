@@ -286,7 +286,16 @@
                                                             </div>
                                                         </div>
                                                         <div class="row">
-                                                            <div class="col-8">
+                                                            <div class="col-4">
+                                                                <div class="form-group">
+                                                                    <label for="qty_celup">Stock</label>
+                                                                    <br />
+                                                                    <span class="badge bg-info">
+                                                                        <span class="stock">0.00</span> KG <!-- Ganti id dengan class -->
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-4">
                                                                 <div class="form-group">
                                                                     <label for="qty_celup">KG Kebutuhan :</label>
                                                                     <br />
@@ -316,6 +325,16 @@
                                                                             <label for="tidak">Tidak</label>
                                                                         </div>
                                                                     </fieldset>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <div class="form-group">
+                                                                    <label for="">Keterangan</label>
+                                                                    <br />
+                                                                    <textarea class="form-control keterangan" name="keterangan" id="keterangan" disabled>
+                                                                    </textarea>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -489,6 +508,7 @@
                             const idInduk = selectedOption.getAttribute("data-id-induk") || 0;
                             if (selectedOption.value) {
                                 fetchPOByKodeWarna(kodeWarnaVal, tr, warnaVal, selectedOption.value, idInduk, tr.querySelector("select[name='po[]']"));
+                                fetchStock(kodeWarnaVal, tr, warnaVal, selectedOption.value);
                             }
                         });
                     } else {
@@ -599,6 +619,64 @@
                     console.error('Error fetching PO details:', error);
                 });
         }
+
+        //Cek Stok
+        function fetchStock(kodeWarna, tr, warna, itemType) {
+            const kodeWarnaEnc = encodeURIComponent(kodeWarna);
+            const warnaEnc = encodeURIComponent(warna);
+            const itemTypeEncoded = encodeURIComponent(itemType);
+            const url = `<?= base_url(session('role') . "/schedule/getStock") ?>?kode_warna=${kodeWarnaEnc}&color=${warnaEnc}&item_type=${itemTypeEncoded}`;
+            console.log("Request URL:", url);
+            fetch(url)
+                .then(response => {
+                    console.log("Status:", response.status, response.statusText);
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Stock Data:", data);
+                    if (data && !data.error) {
+
+                        const stock = tr.querySelector(".stock");
+                        stock.textContent = parseFloat(data.kg_stok).toFixed(2) || '0.00';
+                    } else {
+                        console.error('Error fetching Stock:', data.error || 'No data found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching Stock:', error);
+                });
+        }
+
+        //Keterangan dari Open PO
+        function fetchKeterangan(kodeWarna, tr, warna, itemType, noModel) {
+            const kodeWarnaEnc = encodeURIComponent(kodeWarna);
+            const warnaEnc = encodeURIComponent(warna);
+            const itemTypeEncoded = encodeURIComponent(itemType);
+            const noModelEncoded = encodeURIComponent(noModel);
+            const url = `<?= base_url(session('role') . "/schedule/getKeterangan") ?>?kode_warna=${kodeWarnaEnc}&color=${warnaEnc}&item_type=${itemTypeEncoded}&no_model=${noModelEncoded}`;
+            console.log("Request URL:", url);
+            fetch(url)
+                .then(response => {
+                    console.log("Status:", response.status, response.statusText);
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Keterangan Data:", data);
+                    if (data && !data.error) {
+
+                        const ketEl = tr.querySelector("textarea.keterangan");
+                        if (ketEl) ketEl.value = data.keterangan || '';
+                    } else {
+                        console.error('Error fetching Keterangan:', data.error || 'No data found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching Keterangan:', error);
+                });
+        }
+
         // Fungsi untuk menghitung sisa kapasitas
         function calculateRemainingCapacity() {
             const maxCaps = parseFloat(document.getElementById("max_caps").value) || 0;
@@ -761,6 +839,7 @@
                 const kodeWarnaValue = document.querySelector("input[name='kode_warna']").value;
                 const warna = document.querySelector("select[name^='warna']").value;
                 const idIndukValue = tr.querySelector("select[name^='item_type']").selectedOptions[0].getAttribute("data-id-induk") || 0;
+                const noModelValue = selectedOption.value;
 
                 // Reset qty_po dan KG Kebutuhan ke 0.00 saat terjadi perubahan PO
                 const qtyPO = tr.querySelector("input[name='qty_po[]']");
@@ -774,6 +853,7 @@
                 }
                 if (selectedOption.value) {
                     fetchQtyAndKebutuhanPO(kodeWarnaValue, tr, warna, itemTypeValue, idIndukValue);
+                    fetchKeterangan(kodeWarnaValue, tr, warna, itemTypeValue, noModelValue);
                     // fetchPODetails(selectedOption.value, tr, itemTypeValue, kodeWarnaValue);
                 } else {
                     // Reset schedule jika PO kosong
@@ -854,9 +934,19 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-8">
+                <div class="col-4">
+                    <div class="form-group">
+                        <label for="qty_celup">Stock</label>
+                        <br />
+                            <span class="badge bg-info">
+                            <span class="stock">0.00</span> KG <!-- Ganti id dengan class -->
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-4">
                         <div class="form-group">
                             <label for="qty_celup">KG Kebutuhan :</label>
+                            <br />
                             <span class="badge bg-info">
                                 <span class="kg_kebutuhan">0.00</span> KG
                             </span>
@@ -877,6 +967,16 @@
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="">Keterangan</label>
+                            <br />
+                            <textarea class="form-control keterangan" name="keterangan" id="keterangan">
+                            </textarea>
+                        </div>
+                    </div>
+                </div>
             </td>
             <td class="text-center">
                 <button type="button" class="btn btn-danger removeRow">
@@ -894,7 +994,16 @@
                 const itemTypeValue = $(this).val();
                 const poSelect = newRow.querySelector(".po-select");
                 const idIndukValue = $(this).find(':selected').data('id-induk') || 0;
+
+                // const selectedOption = itemType.options[itemType.selectedIndex];
+                // const tr = itemType.closest("tr");
+                // const kodeWarnaVal = document.querySelector("input[name='kode_warna']").value;
+                // const warnaVal = document.querySelector("select[name^='warna']").value;
+                // const idInduk = selectedOption.getAttribute("data-id-induk") || 0;
+
                 fetchPOByKodeWarna(kodeWarna.value, newRow, warnaSelect.value, itemTypeValue, idIndukValue, poSelect);
+                fetchStock(kodeWarna.value, newRow, warnaSelect.value, itemTypeValue);
+                fetchKeterangan(kodeWarna.value, newRow, warnaSelect.value, itemTypeValue, poSelect);
                 // fetchQtyAndKebutuhanPO(kodeWarna.value, newRow, warnaSelect.value, itemTypeValue, idIndukValue);
             });
 
