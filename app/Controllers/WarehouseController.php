@@ -1686,9 +1686,11 @@ class WarehouseController extends BaseController
 
                     // Jika field in_out memiliki nilai, update in_out; jika tidak, update stock_awal
                     if ($inOut > 0) {
-                        $newStock[$field . '_in_out'] = $inOut - $input;
+                        $result = $inOut - $input;
+                        $newStock[$field . '_in_out'] = abs($result) < 0.0001 ? 0 : $result;
                     } else {
-                        $newStock[$field . '_stock_awal'] = $awal - $input;
+                        $result = $awal - $input;
+                        $newStock[$field . '_stock_awal'] = abs($result) < 0.0001 ? 0 : $result;
                     }
                 }
 
@@ -1705,12 +1707,10 @@ class WarehouseController extends BaseController
         return redirect()->to('gbn/selectClusterWarehouse/' . $idTtlPemesanan . '?Area=' . $area . '&KgsPesan' . $KgsPesan . '&CnsPesan' . $CnsPesan);
     }
 
-
     public function savePengeluaranJalur()
     {
         $data = $this->request->getJSON();
 
-        // Data yang akan dimasukkan ke dalam database
         $insertData = [
             'id_out_celup' => $data->idOutCelup,
             'area_out' => $data->area,
@@ -1725,29 +1725,26 @@ class WarehouseController extends BaseController
             'created_at' => date('Y-m-d H:i:s')
         ];
 
-        // Ambil data stok berdasarkan id_out_celup
         $stok = $this->stockModel->getDataByIdStok($data->idStok);
-        // var_dump($stok[0]['kgs_stock_awal']); 
-        // Data stok yang digunakan
+
         $stokData = [
             'kgs' => [
-                'in_out' => !empty($stok[0]['kgs_in_out']) ? (int)$stok[0]['kgs_in_out'] : 0,
-                'awal' => !empty($stok[0]['kgs_stock_awal']) ? (int)$stok[0]['kgs_stock_awal'] : 0,
-                'input' => (int)$insertData['kgs_out']
+                'in_out' => !empty($stok[0]['kgs_in_out']) ? (float)$stok[0]['kgs_in_out'] : 0,
+                'awal' => !empty($stok[0]['kgs_stock_awal']) ? (float)$stok[0]['kgs_stock_awal'] : 0,
+                'input' => (float)$insertData['kgs_out']
             ],
             'cns' => [
-                'in_out' => !empty($stok[0]['cns_in_out']) ? (int)$stok[0]['cns_in_out'] : 0,
-                'awal' => !empty($stok[0]['cns_stock_awal']) ? (int)$stok[0]['cns_stock_awal'] : 0,
-                'input' => (int)$insertData['cns_out']
+                'in_out' => !empty($stok[0]['cns_in_out']) ? (float)$stok[0]['cns_in_out'] : 0,
+                'awal' => !empty($stok[0]['cns_stock_awal']) ? (float)$stok[0]['cns_stock_awal'] : 0,
+                'input' => (float)$insertData['cns_out']
             ],
             'krg' => [
-                'in_out' => !empty($stok[0]['krg_in_out']) ? (int)$stok[0]['krg_in_out'] : 0,
-                'awal' => !empty($stok[0]['krg_stock_awal']) ? (int)$stok[0]['krg_stock_awal'] : 0,
-                'input' => (int)$insertData['krg_out']
+                'in_out' => !empty($stok[0]['krg_in_out']) ? (float)$stok[0]['krg_in_out'] : 0,
+                'awal' => !empty($stok[0]['krg_stock_awal']) ? (float)$stok[0]['krg_stock_awal'] : 0,
+                'input' => (float)$insertData['krg_out']
             ]
         ];
-        // var_dump($stokData);
-        // **Cek apakah stok cukup**
+
         foreach ($stokData as $key => $item) {
             $stokTersedia = $item['in_out'] > 0 ? $item['in_out'] : $item['awal'];
 
@@ -1759,25 +1756,21 @@ class WarehouseController extends BaseController
             }
         }
 
-        // **Kurangi stok setelah validasi**
         foreach ($stokData as $key => &$item) {
             if ($item['in_out'] > 0) {
-                $item['in_out'] = max(0, $item['in_out'] - $item['input']);
+                $item['in_out'] = $this->roundSafe($item['in_out'] - $item['input'], 2);
             } else {
-                $item['awal'] = max(0, $item['awal'] - $item['input']);
+                $item['awal'] = $this->roundSafe($item['awal'] - $item['input'], 2);
             }
         }
 
-        // Menentukan lot yang digunakan
         $insertData['lot_out'] = !empty($stok[0]['lot_stock']) ? $stok[0]['lot_stock'] : $stok[0]['lot_awal'];
 
-        // Simpan data pengeluaran
         if ($this->pengeluaranModel->insert($insertData)) {
-            // **Update stok setelah pengeluaran**
             $this->stockModel->updateStock(
                 $data->idStok,
-                $stokData['kgs']['in_out'],
-                $stokData['kgs']['awal'],
+                (float)$stokData['kgs']['in_out'],
+                (float)$stokData['kgs']['awal'],
                 $stokData['cns']['in_out'],
                 $stokData['cns']['awal'],
                 $stokData['krg']['in_out'],

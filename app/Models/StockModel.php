@@ -220,15 +220,33 @@ class StockModel extends Model
 
 
 
+    // public function getDataByIdStok($idStok)
+    // {
+    //     // tampilkan data tabel pemasukan yang di join ke stock yang memiliki id_stok sama dengan idStok
+    //     return $this->db->table('pemasukan')
+    //         ->select('pemasukan.*, stock.*, SUM(kgs_stock_awal + kgs_in_out) AS total_kgs, 
+    //     SUM(cns_stock_awal + cns_in_out) AS total_cns, 
+    //     SUM(krg_stock_awal + krg_in_out) AS total_krg, 
+    //     COALESCE(lot_awal, lot_stock) AS lot_final')
+    //         ->join('stock', 'stock.id_stock = pemasukan.id_stock')
+    //         ->where('pemasukan.id_stock', $idStok)
+    //         ->groupBy('stock.id_stock')
+    //         ->groupBy('pemasukan.id_pemasukan')
+    //         // ->groupBy('pemasukan.id_stock'))
+    //         ->get()
+    //         ->getResultArray();
+    // }
+
     public function getDataByIdStok($idStok)
     {
         // tampilkan data tabel pemasukan yang di join ke stock yang memiliki id_stok sama dengan idStok
         return $this->db->table('pemasukan')
-            ->select('pemasukan.*, stock.*, SUM(kgs_stock_awal + kgs_in_out) AS total_kgs, 
-        SUM(cns_stock_awal + cns_in_out) AS total_cns, 
-        SUM(krg_stock_awal + krg_in_out) AS total_krg, 
+            ->select('pemasukan.*, stock.*, SUM(kgs_stock_awal + kgs_in_out - COALESCE(other_out.kgs_other_out, 0)) AS total_kgs, 
+        SUM(cns_stock_awal + cns_in_out - COALESCE(other_out.cns_other_out, 0)) AS total_cns, 
+        SUM(krg_stock_awal + krg_in_out - COALESCE(other_out.krg_other_out, 0)) AS total_krg, 
         COALESCE(lot_awal, lot_stock) AS lot_final')
             ->join('stock', 'stock.id_stock = pemasukan.id_stock')
+            ->join('other_out', 'other_out.id_out_celup = pemasukan.id_out_celup', 'left')
             ->where('pemasukan.id_stock', $idStok)
             ->groupBy('stock.id_stock')
             ->groupBy('pemasukan.id_pemasukan')
