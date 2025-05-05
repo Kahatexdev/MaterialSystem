@@ -203,13 +203,19 @@ class OutCelupModel extends Model
             ->whereIn('id_out_celup', $idOut)
             ->findAll();
     }
+    // public function findOutCelup($idPemasukan)
+    // {
+    //     return $this->select('pemasukan.id_pemasukan, pemasukan.id_stock, out_celup.id_out_celup, out_celup.kgs_kirim, out_celup.cones_kirim, out_celup.no_karung, pemasukan.nama_cluster, out_celup.lot_kirim')
+    //         ->join('pemasukan', 'pemasukan.id_out_celup = out_celup.id_out_celup', 'left')
+    //         ->whereIn('pemasukan.id_pemasukan', $idPemasukan)
+    //         ->findAll();
+    // }
     public function findOutCelup($idPemasukan)
     {
-        return $this->select('pemasukan.id_pemasukan, pemasukan.id_stock, out_celup.id_out_celup, out_celup.kgs_kirim, out_celup.cones_kirim, out_celup.no_karung, pemasukan.nama_cluster, out_celup.lot_kirim')
+        return $this->select('pemasukan.id_pemasukan, pemasukan.id_stock, out_celup.id_out_celup, (out_celup.kgs_kirim - COALESCE(other_out.kgs_other_out, 0)) AS kgs_kirim, (out_celup.cones_kirim - COALESCE(other_out.cns_other_out, 0)) AS cones_kirim, out_celup.no_karung, pemasukan.nama_cluster, out_celup.lot_kirim')
             ->join('pemasukan', 'pemasukan.id_out_celup = out_celup.id_out_celup', 'left')
+            ->join('other_out', 'other_out.id_out_celup = out_celup.id_out_celup AND pemasukan.nama_cluster = other_out.nama_cluster', 'left')
             ->whereIn('pemasukan.id_pemasukan', $idPemasukan)
             ->findAll();
     }
-
-    
 }

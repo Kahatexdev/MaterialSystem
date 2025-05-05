@@ -221,7 +221,8 @@
                 <div class="modal-content">
                     <!-- Header -->
                     <div class="modal-header bg-secondary text-white border-0">
-                        <h5 class="modal-title" id="modalPindahOrderLabel">Pengeluaran Selain Order</h5>
+                        <h5 class="modal-title text-white" id="modalPengeluaranSelainOrderLabel"></h5>
+                        <!-- <h5 class="modal-title" id="modalPindahOrderLabel">Pengeluaran Selain Order </h5> -->
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
@@ -808,6 +809,9 @@
             const $container = $('#pengeluaranSelainOrderContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i></div>');
 
             $('#pengeluaranSelainOrder').modal('show');
+
+            // Perbarui judul modal dengan nama cluster
+            $('#modalPengeluaranSelainOrderLabel').text(`Pengeluaran Selain Order - ${namaCluster}`);
 
             $.post(`${base}/${role}/warehouse/getPindahOrder`, {
                 id_stock: idStock

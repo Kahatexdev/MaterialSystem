@@ -20,6 +20,7 @@ use App\Models\HistoryPindahOrder;
 use App\Models\PengeluaranModel;
 use App\Models\PemesananModel;
 use App\Models\TotalPemesananModel;
+use App\Models\OtherOutModel;
 
 class PemesananController extends BaseController
 {
@@ -42,6 +43,7 @@ class PemesananController extends BaseController
     protected $pengeluaranModel;
     protected $pemesananModel;
     protected $totalPemesananModel;
+    protected $otherOutModel;
 
     public function __construct()
     {
@@ -60,6 +62,7 @@ class PemesananController extends BaseController
         $this->pengeluaranModel = new PengeluaranModel();
         $this->pemesananModel = new PemesananModel();
         $this->totalPemesananModel = new TotalPemesananModel();
+        $this->otherOutModel = new OtherOutModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -185,7 +188,6 @@ class PemesananController extends BaseController
         session()->set('pengirimanForm', $formData);
 
         $id = $this->request->getPost('barcode');
-        $cluster = $this->clusterModel->getDataCluster();
 
         // Ambil data dari session (jika ada)
         $existingData = session()->get('dataPengiriman') ?? [];
@@ -226,7 +228,6 @@ class PemesananController extends BaseController
             'title'     => 'Material System',
             'role'      => $this->role,
             'dataOut'   => $existingData, // Tampilkan data dari session
-            'cluster'   => $cluster,
             'error'     => session()->getFlashdata('error'),
             'area'      => $formData['area'] ?? '',
             'tgl_pakai' => $formData['tgl_pakai'] ?? '',
@@ -475,12 +476,30 @@ class PemesananController extends BaseController
     public function getDataByIdStok($id)
     {
         // $data = $this->stockModel->getDataByIdStok($id);
-        $data = $this->pemasukanModel->getDataByIdStok($id);
+        $stock = $this->pemasukanModel->getDataByIdStok($id);
+        $data = [];
+        foreach ($stock as $dt) {
+            $other = $this->otherOutModel->getQty($dt['id_out_celup'], $dt['nama_cluster']);
+
+            $data[] = [
+                'id_pemasukan' => $dt['id_pemasukan'],
+                'no_karung' => $dt['no_karung'],
+                'tgl_masuk' => $dt['tgl_masuk'],
+                'nama_cluster' => $dt['nama_cluster'],
+                'no_model' => $dt['no_model'],
+                'item_type' => $dt['item_type'],
+                'kode_warna' => $dt['kode_warna'],
+                'warna' => $dt['warna'],
+                'lot_kirim' => $dt['lot_kirim'],
+                'kgs_kirim' => round($dt['kgs_kirim'] - ($other[0]['kgs_other_out'] ?? 0), 2),
+                'cones_kirim' => $dt['cones_kirim'] - ($other[0]['cns_other_out'] ?? 0),
+                'id_out_celup' => $dt['id_out_celup']
+            ];
+        }
         // Debugging
         // var_dump($data);
         return $this->response->setJSON($data);
     }
-
 
     public function saveUsage()
     {
