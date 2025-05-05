@@ -604,7 +604,6 @@ class MasterdataController extends BaseController
     public function openPO($id)
     {
         $masterOrder = $this->masterOrderModel->getMaterialOrder($id);
-        dd($masterOrder);
 
         $orderData = $this->masterOrderModel->find($id);
         foreach ($masterOrder as &$order) { // Note: pass by reference to modify the original array

@@ -995,12 +995,6 @@
                 const poSelect = newRow.querySelector(".po-select");
                 const idIndukValue = $(this).find(':selected').data('id-induk') || 0;
 
-                // const selectedOption = itemType.options[itemType.selectedIndex];
-                // const tr = itemType.closest("tr");
-                // const kodeWarnaVal = document.querySelector("input[name='kode_warna']").value;
-                // const warnaVal = document.querySelector("select[name^='warna']").value;
-                // const idInduk = selectedOption.getAttribute("data-id-induk") || 0;
-
                 fetchPOByKodeWarna(kodeWarna.value, newRow, warnaSelect.value, itemTypeValue, idIndukValue, poSelect);
                 fetchStock(kodeWarna.value, newRow, warnaSelect.value, itemTypeValue);
                 fetchKeterangan(kodeWarna.value, newRow, warnaSelect.value, itemTypeValue, poSelect);
