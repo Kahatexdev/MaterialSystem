@@ -222,6 +222,8 @@ class OpenPoModel extends Model
         return $this->select('open_po.*, master_material.jenis')
             ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
             ->where('open_po.id_induk IS NOT NULL')
+            ->where('open_po.penerima', 'Retno')
+            ->where('open_po.penanggung_jawab', 'Paryanti')
             ->where('DATE(open_po.created_at)', $tgl_po)
             ->findAll();
     }
