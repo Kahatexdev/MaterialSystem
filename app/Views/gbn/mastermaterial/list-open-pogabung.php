@@ -302,6 +302,62 @@
 </script>
 
 <script>
+    $(document).ready(function() {
+        // Handler tombol delete
+        $('.btn-delete').on('click', function() {
+            const id = $(this).data('id');
+
+            Swal.fire({
+                title: 'Yakin ingin dihapus?',
+                text: "Data PO GABUNGAN akan dihapus!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Jika user confirm, panggil AJAX delete
+                    $.ajax({
+                        url: '<?= base_url("$role/deletePoGabungan") ?>/' + id,
+                        method: 'post',
+                        data: {
+                            id_po: id
+                        },
+                        success: function(res) {
+                            if (res.status === 'ok') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Terhapus!',
+                                    text: 'Data berhasil dihapus.',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    // refresh halaman atau reload DataTable
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal',
+                                    text: res.message || 'Terjadi kesalahan saat menghapus.',
+                                });
+                            }
+                        },
+                        error: function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: 'Tidak dapat terhubung ke server.',
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+
+<script>
     document
         .getElementById('btnSubmitExport')
         .addEventListener('click', function() {

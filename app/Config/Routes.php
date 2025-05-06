@@ -36,6 +36,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('listPoGabungan', 'PoGabunganController::listPoGabungan');
     $routes->get('getPoGabungan/(:any)', 'PoGabunganController::getPoGabungan/$1');
     $routes->post('updatePoGabungan', 'PoGabunganController::updatePoGabungan');
+    $routes->post('deletePoGabungan/(:num)', 'PoGabunganController::deletePoGabungan/$1');
     $routes->get('exportOpenPOGabung', 'PdfController::exportOpenPOGabung');
 
     $routes->get('material/(:num)', 'MasterdataController::material/$1');

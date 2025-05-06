@@ -432,4 +432,14 @@ class PoGabunganController extends BaseController
 
         return $this->response->setJSON(['status' => 'ok']);
     }
+
+    public function deletePoGabungan($id_po)
+    {
+        // Hapus semua anak dulu
+        $this->openPoModel->where('id_induk', $id_po)->delete();
+        // Hapus parent
+        $this->openPoModel->delete($id_po);
+
+        return $this->response->setJSON(['status' => 'ok']);
+    }
 }
