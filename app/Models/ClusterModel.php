@@ -56,13 +56,39 @@ class ClusterModel extends Model
         return $this->findAll();
     }
 
+    // public function getCluster($kgs)
+    // {
+    //     return $this->db->table('cluster') // Gunakan nama tabel langsung
+    //         ->select('cluster.nama_cluster, (cluster.kapasitas - IFNULL(SUM(stock.kgs_stock_awal), 0) - IFNULL(SUM(stock.kgs_in_out), 0)) AS sisa_kapasitas', false)
+    //         ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
+    //         ->groupBy('cluster.nama_cluster')
+    //         ->having('sisa_kapasitas >=', $kgs, false) // Filter kapasitas lebih dari $kgs
+    //         ->orderBy('cluster.nama_cluster', 'ASC')
+    //         ->get()
+    //         ->getResultArray();
+    // }
+
     public function getCluster($kgs)
     {
-        return $this->db->table('cluster') // Gunakan nama tabel langsung
-            ->select('cluster.nama_cluster, (cluster.kapasitas - IFNULL(SUM(stock.kgs_stock_awal), 0) - IFNULL(SUM(stock.kgs_in_out), 0)) AS sisa_kapasitas', false)
+        // Buat subquery manual sebagai string
+        $subquery = '(SELECT pemasukan.id_stock, SUM(COALESCE(other_out.kgs_other_out, 0)) as total_other_out 
+                  FROM pemasukan 
+                  LEFT JOIN other_out ON other_out.id_out_celup = pemasukan.id_out_celup 
+                  GROUP BY pemasukan.id_stock) AS sub_other_out';
+
+        return $this->db->table('cluster')
+            ->select('
+            cluster.nama_cluster,
+            (
+                cluster.kapasitas 
+                - IFNULL(SUM(stock.kgs_stock_awal), 0)
+                + IFNULL(SUM(sub_other_out.total_other_out), 0)
+                - IFNULL(SUM(stock.kgs_in_out), 0)
+            ) AS sisa_kapasitas', false)
             ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
+            ->join($subquery, 'sub_other_out.id_stock = stock.id_stock', 'left') // Subquery join manual
             ->groupBy('cluster.nama_cluster')
-            ->having('sisa_kapasitas >=', $kgs, false) // Filter kapasitas lebih dari $kgs
+            ->having('sisa_kapasitas >=', $kgs, false)
             ->orderBy('cluster.nama_cluster', 'ASC')
             ->get()
             ->getResultArray();

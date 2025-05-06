@@ -215,7 +215,7 @@ class PemasukanModel extends Model
             }
             $this->groupEnd();
         }
-        
+
 
         return $this->findAll();
     }

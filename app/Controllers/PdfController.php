@@ -1125,6 +1125,18 @@ class PdfController extends BaseController
     {
         $poCovering = $this->openPoModel->getPoForCelup($tgl_po);
         $idPO = $this->openPoModel->getDeliveryAwalNoOrderBuyer($tgl_po);
+
+        //Cek PO
+        if (empty($poCovering) || empty($poCovering[0]['no_model'])) {
+            session()->setFlashdata('error', 'PO Tidak Ditemukan. Open PO Terlebih Dahulu');
+            return redirect()->back();
+        }
+
+        //Hapus Kata POCOVERING
+        foreach ($idPO as $key => $row) {
+            $idPO[$key]['no_model'] = preg_replace('/POCOVERING\s*/i', '', $row['no_model']);
+        }
+
         // Inisialisasi FPDF
         $pdf = new FPDF('L', 'mm', 'A4');
         $pdf->AddPage();
