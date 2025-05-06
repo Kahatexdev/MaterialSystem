@@ -204,6 +204,7 @@ class PoGabunganController extends BaseController
         // 2. Hitung total untuk header dan siapkan detail original
         $totalKg = 0;
         $details = [];
+        $ket = '';
         foreach ($data['items'] as $idx => $it) {
             // Asumsi: $data['items'] mengikuti urutan $modelIds jika kolom per model
             $modelId = $modelIds[$idx] ?? null;
@@ -215,8 +216,23 @@ class PoGabunganController extends BaseController
                 'color'      => $it['color'],
                 'kg_po'      => (float) $it['kg_po'],
             ];
+
+            $kgPo = (float) $it['kg_po']; // Konversi kg_po menjadi float untuk penghitungan
+            $noModel = $noModelMap[$modelId] ?? ''; // Cari no_model berdasarkan modelId
+            $ket .= "$noModel = $kgPo";
+            // Tambahkan '/' kecuali untuk data terakhir
+            if ($idx < count($data['items']) - 1) {
+                $ket .= ' / ';
+            }
         }
-        // dd(        $totalKg, $details);
+        // Hitung sisa
+        $sisa = $data['ttl_keb'] - $totalKg;
+
+        // Tambahkan " / STOCK $sisa" jika sisa lebih dari 0
+        if ($sisa > 0) {
+            $ket .= " / STOCK = $sisa";
+        }
+
         $keys = array_map(function ($d) {
             return $d['item_type'] . '|' . $d['kode_warna'] . '|' . $d['color'];
         }, $details);
@@ -232,10 +248,14 @@ class PoGabunganController extends BaseController
             'item_type'        => $details[0]['item_type'],
             'kode_warna'       => $details[0]['kode_warna'],
             'color'            => $details[0]['color'],
-            'kg_po'            => $totalKg,
-            'keterangan'       => $data['keterangan'] ?? '',
+            'kg_po'            => $data['ttl_keb'],
+            'keterangan'       => $ket . (!empty($data['keterangan']) ? ' / ' . $data['keterangan'] : ''),
             'penerima'         => $data['penerima'],
             'penanggung_jawab' => $data['penanggung_jawab'],
+            'bentuk_celup'     => $data['bentuk_celup'],
+            'kg_percones'      => $data['kg_percones'],
+            'jumlah_cones'     => $data['jumlah_cones'],
+            'jenis_produksi'   => $data['jenis_produksi'],
             'admin'            => session()->get('username'),
             'created_at'       => date('Y-m-d H:i:s'),
             'updated_at'       => date('Y-m-d H:i:s'),
@@ -294,8 +314,35 @@ class PoGabunganController extends BaseController
             return redirect()->back()->with('error', 'Tujuan tidak valid.');
         }
 
-        $itemType = $this->masterMaterialModel->getItemType();
+        $buyer = [];
         $openPoGabung = $this->openPoModel->listOpenPoGabung($jenis, $jenis2, $penerima);
+        foreach ($openPoGabung as &$po) {
+            $buyersData = $this->openPoModel->getBuyer($po['id_po']); // Ambil semua data buyer terkait
+            if (is_array($buyersData) && count($buyersData) > 0) {
+                // Ambil semua buyer, no_order, dan delivery_awal
+                $buyers = array_column($buyersData, 'buyer');
+                $noOrders = array_column($buyersData, 'no_order');
+                $deliveries = array_column($buyersData, 'delivery_awal');
+
+                // Tentukan buyer: kosong jika lebih dari satu jenis
+                $po['buyer'] = count(array_unique($buyers)) === 1 ? $buyers[0] : null;
+
+                // Tentukan delivery_awal paling awal
+                $earliestDeliveryIndex = array_keys($deliveries, min($deliveries))[0];
+                $po['delivery_awal'] = $deliveries[$earliestDeliveryIndex];
+
+                // Tentukan no_order yang berhubungan dengan delivery_awal paling awal
+                $po['no_order'] = $noOrders[$earliestDeliveryIndex];
+            } else {
+                // Jika tidak ada data buyersData
+                $po['buyer'] = null;
+                $po['no_order'] = null;
+                $po['delivery_awal'] = null;
+            }
+        }
+        // Pastikan untuk tidak menggunakan referensi lagi setelah loop selesai
+        unset($po);
+        $masterOrder = $this->masterOrderModel->select('master_order.id_order,master_order.no_model')->findAll();
 
         // dd($openPoGabung);
         $data =
@@ -303,7 +350,7 @@ class PoGabunganController extends BaseController
                 'active' => $this->active,
                 'title' => 'Material System',
                 'role' => $this->role,
-                'itemType' => $itemType,
+                'masterOrder' => $masterOrder,
                 'openPoGabung' => $openPoGabung,
                 'tujuan' => $tujuan,
                 'penerima' => $penerima,
@@ -315,8 +362,50 @@ class PoGabunganController extends BaseController
     }
     public function getPoDetailsGabungan($id_po)
     {
-        $poDetails = $this->openPoModel->getPoDetailsGabungan($id_po);
-        // dd($poDetails);
-        return response()->setJSON($poDetails);
+        // Ambil metadata utama
+        $dataInduk = $this->openPoModel->find($id_po);;
+
+        // Ambil daftar item terkait
+        $poDetails = $this->openPoModel->where('id_induk', $id_po)->findAll();
+
+        // Ambil dan gabungkan item type untuk setiap no_model
+        foreach ($poDetails as &$detail) {
+            // ambil daftar item type dulu (Anda sudah punya)
+            $detail['item_type_list'] = $this->materialModel
+                ->select('material.item_type, material.id_order')
+                ->join('master_order', 'master_order.id_order = material.id_order')
+                ->where('no_model', $detail['no_model'])
+                ->groupBy('item_type')
+                ->findAll();
+            // dapatkan daftar kode warna untuk setiap item_type
+            // untuk setiap item_type, ambil kode warna
+            $allKode = [];
+            foreach ($detail['item_type_list'] as $it) {
+                $allKode[$it['item_type']] = $this->materialModel
+                    ->select('kode_warna')
+                    ->where('id_order',   $it['id_order'])
+                    ->where('item_type',  $it['item_type'])
+                    ->groupBy('kode_warna')
+                    ->findAll();              // <-- panggil findAll()
+            }
+            $detail['kode_warna_list'] = $allKode;
+
+            // jika ingin juga attach warna default/terpilih 
+            // // (misal detail sudah punya kode_warna terpilih)
+            // if (!empty($detail['kode_warna'])) {
+            //     $w = $this->materialModel
+            //         ->getWarnaByAll($detail['no_model'], $detail['item_type'], $detail['kode_warna']);
+            //     $detail['warna_detail'] = $w ? $w['color'] : null;
+            // }
+        }
+
+        // Gabungkan data ke dalam satu array
+        $response = [
+            'dataInduk' => $dataInduk,
+            'details' => $poDetails
+        ];
+
+        // Kembalikan respons sebagai JSON
+        return $this->response->setJSON($response);
     }
 }

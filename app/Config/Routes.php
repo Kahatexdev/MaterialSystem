@@ -35,6 +35,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('openPO/saveOpenPOGabungan', 'PoGabunganController::saveOpenPOGabungan');
     $routes->get('listPoGabungan', 'PoGabunganController::listPoGabungan');
     $routes->get('getPoDetailsGabungan/(:any)', 'PoGabunganController::getPoDetailsGabungan/$1');
+    $routes->get('exportOpenPOGabung', 'PdfController::exportOpenPOGabung');
 
     $routes->get('material/(:num)', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');

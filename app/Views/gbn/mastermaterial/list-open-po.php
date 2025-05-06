@@ -113,7 +113,7 @@
 
                     <div class="mb-3">
                         <label for="itemType">Item Type</label>
-                        <select class="form-control" id="add_item_type" name="item_type" required>
+                        <select id="add_item_type" name="item_type" required>
                             <option value=""><?= $openPo['item_type'] ?? 'Pilih Item Type' ?></option>
 
                             <?php foreach ($itemType as $item): ?>
