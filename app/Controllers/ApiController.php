@@ -733,4 +733,17 @@ class ApiController extends ResourceController
         }
         return $this->respond($res, 200);
     }
+    public function poTambahanDetail($noModel)
+    {
+        $idOrder = $this->masterOrderModel->getIdOrder($noModel);
+        $material = $this->masterOrderModel->getMaterialOrder($idOrder);
+        // dd($material);
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'material' => $material
+        ];
+        return response()->setJSON($data);
+    }
 }

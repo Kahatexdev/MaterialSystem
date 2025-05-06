@@ -85,7 +85,7 @@
                                 <td><?= $data['buyer'] ?></td>
                                 <td><?= $data['no_order'] ?></td>
                                 <td><?= $data['delivery_awal'] ?></td>
-                                <td><?= $data['keterangan'] ?></td>
+                                <td><?= $data['ket_celup'] ?></td>
                                 <td>
                                     <button class="btn btn-sm btn-warning btn-edit" data-id="<?= $data['id_po'] ?>">
                                         <i class="fas fa-edit text-lg"></i>
@@ -220,7 +220,7 @@
         $('.btn-edit').on('click', function() {
             const id = $(this).data('id');
             $.ajax({
-                url: '<?= base_url("$role/getPoGabunganWithChildren") ?>/' + id,
+                url: '<?= base_url("$role/getPoGabungan") ?>/' + id,
                 dataType: 'json',
                 success: function(res) {
                     console.log(res);
@@ -301,59 +301,6 @@
     });
 </script>
 
-<!-- <script>
-    $(document).ready(function() {
-        // ketika tombol edit diklik
-        $('.btn-edit').on('click', function() {
-            const id = $(this).data('id');
-            $.ajax({
-                url: '<?= base_url("$role/getPoGabungan") ?>/' + id,
-                dataType: 'json',
-                success: function(data) {
-                    $('#edit_id_po').val(data.id_po);
-                    $('#edit_id_induk').val(data.id_induk);
-
-                    if (data.id_induk === null || data.id_induk === "0") {
-                        // Data induk (POGABUNGAN)
-                        $('.parent-fields').show().find('input, select').prop('disabled', false);
-                        $('#editModalLabel').text("Edit POGABUNGAN (Induk)");
-                    } else {
-                        // Data anak
-                        $('.parent-fields').hide().find('input, select').prop('disabled', true);
-                        $('#editModalLabel').text("Edit KG_PO (Anak dari POGABUNGAN)");
-                    }
-
-                    // Set value field
-                    $('#edit_item_type').val(data.item_type);
-                    $('#edit_kode_warna').val(data.kode_warna);
-                    $('#edit_color').val(data.color);
-                    $('#edit_bentuk_celup').val(data.bentuk_celup);
-                    $('#edit_kg_percones').val(data.kg_percones);
-                    $('#edit_jumlah_cones').val(data.jumlah_cones);
-                    $('#edit_jenis_produksi').val(data.jenis_produksi);
-                    $('#edit_kg_po').val(data.kg_po);
-
-                    $('#editModal').modal('show');
-                }
-            });
-        });
-
-
-        // submit form edit
-        $('#formEditPoGabung').on('submit', function(e) {
-            e.preventDefault();
-            $.ajax({
-                url: '<?= base_url("$role/mastermaterial/updatePoGabungan") ?>',
-                method: 'post',
-                data: $(this).serialize(),
-                success: function(res) {
-                    // reload halaman atau tabel
-                    location.reload();
-                }
-            });
-        });
-    });
-</script> -->
 <script>
     document
         .getElementById('btnSubmitExport')

@@ -34,9 +34,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('masterdata/cekStockOrder/(:any)/(:any)/(:any)', 'PoGabunganController::cekStockOrder/$1/$2/$3');
     $routes->post('openPO/saveOpenPOGabungan', 'PoGabunganController::saveOpenPOGabungan');
     $routes->get('listPoGabungan', 'PoGabunganController::listPoGabungan');
-    // $routes->get('getPoDetailsGabungan/(:any)', 'PoGabunganController::getPoDetailsGabungan/$1');
-    // $routes->get('getPoGabungan/(:any)', 'PoGabunganController::getPoGabungan/$1');
-    $routes->get('getPoGabunganWithChildren/(:any)', 'PoGabunganController::getPoGabunganWithChildren/$1');
+    $routes->get('getPoGabungan/(:any)', 'PoGabunganController::getPoGabungan/$1');
     $routes->post('updatePoGabungan', 'PoGabunganController::updatePoGabungan');
     $routes->get('exportOpenPOGabung', 'PdfController::exportOpenPOGabung');
 
@@ -489,5 +487,6 @@ $routes->group(
         $routes->get('getTotalPengiriman', 'ApiController::getTotalPengiriman');
         $routes->post('warehouse/search', 'WarehouseController::search');
         $routes->get('warehouse/exportExcel', 'ExcelController::excelStockMaterial');
+        $routes->get('poTambahanDetail/(:any)', 'ApiController::poTambahanDetail/$1');
     }
 );
