@@ -250,7 +250,8 @@ class PoGabunganController extends BaseController
             'kode_warna'       => $details[0]['kode_warna'],
             'color'            => $details[0]['color'],
             'kg_po'            => $data['ttl_keb'],
-            'keterangan'       => $ket . (!empty($data['keterangan']) ? ' / ' . $data['keterangan'] : ''),
+            'keterangan'       => $data['keterangan'],
+            'ket_celup'        => $ket,
             'penerima'         => $data['penerima'],
             'penanggung_jawab' => $data['penanggung_jawab'],
             'bentuk_celup'     => $data['bentuk_celup'],
@@ -390,14 +391,6 @@ class PoGabunganController extends BaseController
                     ->findAll();              // <-- panggil findAll()
             }
             $detail['kode_warna_list'] = $allKode;
-
-            // jika ingin juga attach warna default/terpilih 
-            // // (misal detail sudah punya kode_warna terpilih)
-            // if (!empty($detail['kode_warna'])) {
-            //     $w = $this->materialModel
-            //         ->getWarnaByAll($detail['no_model'], $detail['item_type'], $detail['kode_warna']);
-            //     $detail['warna_detail'] = $w ? $w['color'] : null;
-            // }
         }
 
         // Gabungkan data ke dalam satu array
