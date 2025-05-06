@@ -11,6 +11,7 @@ use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
 use App\Models\OpenPoModel;
 use App\Models\MasterOrderModel;
+use App\Models\StockModel;
 use CodeIgniter\CLI\Console;
 use DateTime;
 
@@ -26,6 +27,7 @@ class ScheduleController extends BaseController
     protected $masterMaterialModel;
     protected $openPoModel;
     protected $masterOrderModel;
+    protected $stockModel;
 
     public function __construct()
     {
@@ -36,7 +38,7 @@ class ScheduleController extends BaseController
         $this->masterMaterialModel = new MasterMaterialModel();
         $this->openPoModel = new OpenPoModel();
         $this->masterOrderModel = new MasterOrderModel();
-
+        $this->stockModel = new StockModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -129,7 +131,7 @@ class ScheduleController extends BaseController
         $min = $this->mesinCelupModel->getMinCaps($no_mesin);
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
         $po = $this->openPoModel->getNomorModel();
-        // dd ($jenis_bahan_baku, $item_type, $min_caps, $max_caps);
+        // dd($jenis_bahan_baku, $item_type);
         // Jika data tidak ditemukan, kembalikan ke halaman sebelumnya
         if (!$no_mesin || !$tanggal_schedule || !$lot_urut) {
             return redirect()->back();
@@ -367,6 +369,34 @@ class ScheduleController extends BaseController
         }
     }
 
+    public function getStock()
+    {
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $color = $this->request->getGet('color');
+        $itemTypeEncoded = urldecode($this->request->getGet('item_type'));
+        $cekStok = $this->stockModel->getStockForSchedule($kodeWarna, $color, $itemTypeEncoded);
+
+        if ($cekStok) {
+            return $this->response->setJSON($cekStok);
+        } else {
+            return $this->response->setJSON(['error' => 'No data found']);
+        }
+    }
+
+    public function getKeterangan()
+    {
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $color = $this->request->getGet('color');
+        $itemTypeEncoded = urldecode($this->request->getGet('item_type'));
+        $noModel = $this->request->getGet('no_model');
+        $cekPO = $this->openPoModel->getKeteranganForSchedule($kodeWarna, $color, $itemTypeEncoded, $noModel);
+
+        if ($cekPO) {
+            return $this->response->setJSON($cekPO);
+        } else {
+            return $this->response->setJSON(['error' => 'No data found']);
+        }
+    }
     public function saveSchedule()
     {
         $scheduleData = $this->request->getPost();

@@ -34,7 +34,7 @@
                     <h4 class="mb-0 font-weight-bolder">List Buka PO Gabungan</h5>
                 </div>
                 <div class="group">
-                    <!-- <a href="<?= base_url($role . '/exportOpenPO?tujuan=' . $tujuan . '&jenis=' . $jenis . '&jenis2=' . $jenis2) ?>"
+                    <!-- <a href="<?= base_url($role . '/exportOpenPOGabung?tujuan=' . $tujuan . '&jenis=' . $jenis . '&jenis2=' . $jenis2) ?>"
                         class="btn btn-outline-danger" target="_blank">
                         <i class="ni ni-single-copy-04 me-2"></i>Export PO
                     </a> -->
@@ -46,7 +46,7 @@
                         id="btnOpenModal"
                         data-bs-toggle="modal"
                         data-bs-target="#exportModal"
-                        data-base-url="<?= base_url("$role/exportOpenPO") ?>">
+                        data-base-url="<?= base_url("$role/exportOpenPOGabung") ?>">
                         <i class="ni ni-single-copy-04 me-2"></i>Export PO
                     </button>
 
@@ -62,6 +62,7 @@
                 <table id="dataTable" class="display text-uppercase text-xs font-bolder text-center" style="width:100%">
                     <thead>
                         <tr>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Color</th>
@@ -69,12 +70,14 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Buyer</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Order</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($openPoGabung as $data): ?>
                             <tr>
+                                <td><?= $data['no_model'] ?></td>
                                 <td><?= $data['item_type'] ?></td>
                                 <td><?= $data['kode_warna'] ?></td>
                                 <td><?= $data['color'] ?></td>
@@ -82,6 +85,7 @@
                                 <td><?= $data['buyer'] ?></td>
                                 <td><?= $data['no_order'] ?></td>
                                 <td><?= $data['delivery_awal'] ?></td>
+                                <td><?= $data['keterangan'] ?></td>
                                 <td>
                                     <button class="btn btn-sm btn-warning btn-edit" data-id="<?= $data['id_po'] ?>">
                                         <i class="fas fa-edit text-lg"></i>
@@ -185,100 +189,126 @@
         // Event listener tombol Update
         $('#dataTable').on('click', '.btn-edit', function() {
             const id = $(this).data('id');
-            const itemTypeList = <?= json_encode($itemType); ?>;
+            const masterOrderList = <?= json_encode($masterOrder); ?>;
             const poGabung = <?= json_encode($openPoGabung); ?>;
 
             // Lakukan AJAX request untuk mendapatkan data
             $.ajax({
-                url: '<?= base_url($role . '/getPoDetails') ?>/' + id,
+                url: '<?= base_url($role . '/getPoDetailsGabungan') ?>/' + id,
                 type: 'GET',
                 success: function(response) {
-                    let dataDetails = '';
-                    dataDetails += `<input type="text" class="form-control" id="id_po_gabungan" name="id_po_gabungan" value="${response.id_po}" readonly>`;
+                    console.log(response); // Debug respons API
+
+                    // Tangani dataInduk utama
+                    let dataInduk = response.dataInduk;
+                    let dataDetails = `
+                        <input type="hidden" class="form-control" id="id_po_gabungan" name="id_po_gabungan" value="${dataInduk.id_po}" readonly>
+                    `;
+
+                    // Tangani daftar item terkait
+                    if (response.details && Array.isArray(response.details)) {
+                        response.details.forEach(function(item, index) {
+                            console.log(item);
+                            dataDetails += `
+                                <div class="row">
+                                    <input type="hidden" class="form-control" id="id_po" name="id_po[]" value="${item.id_po}" readonly>
+                                    <div class="col-md-4">
+                                        <label for="itemType">No Model</label>
+                                        <select class="form-control" id="no_model" name="no_model[]" required>
+                                            <option value="">Pilih No Model</option>
+                                            ${masterOrderList.map(data => `
+                                                <option value="${data.no_model}" ${data.no_model === item.no_model ? 'selected' : ''}>
+                                                    ${data.no_model}
+                                                </option>
+                                            `).join('')}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="itemType">Jenis Item</label>
+                                        <select class="form-control" id="item_type" name="item_type[]" required>
+                                            <option value="">Pilih Jenis Item</option>
+                                            ${item.item_type_list.map(type => `
+                                                <option value="${type.item_type}" ${type.item_type === dataInduk.item_type ? 'selected' : ''}>
+                                                    ${type.item_type}
+                                                </option>
+                                            `).join('')}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="itemType">Kode Warna</label>
+                                        <select class="form-control" id="kode_warna" name="kode_warna[]" required>
+                                            <option value="">Pilih Jenis Item</option>
+                                            ${item.kode_warna_list.map(kode => `
+                                                <option value="${kode.kode_warna}" ${kode.kode_warna === dataInduk.kode_warna ? 'selected' : ''}>
+                                                    ${kode.kode_warna}
+                                                </option>
+                                            `).join('')}
+                                        </select>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    // Render hasil ke dalam DOM
                     $('#detailsPoGabung').html(dataDetails);
-
-
-                    $.ajax({
-                        url: '<?= base_url($role . '/getPoDetailsGabungan') ?>/' + id,
-                        type: 'GET',
-                        success: function(response) {
-                            response.data.forEach(function(item, index) {
-                                dataDetails +=
-                                    `<div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="itemType">Item Type</label>
-                                            <select class="form-control" id="item_type" name="item_type[]" required>
-                                               <option value="">Pilih Item Type</option>
-                                                ${itemTypeList.map(type =>
-                                                    `<option value="${type.item_type}" ${type.item_type === poGabung.item_type ? 'selected' : ''}>
-                                                        ${type.item_type}
-                                                    </option>`
-                                                ).join('')}
-                                            </select>
-                                        </div>
-                                    </div>`;
-                            });
-                            $('#detailsPoGabung').html(dataDetails);
-                            console.log(response);
-                        },
-                        error: function(xhr, status, error) {
-                            console.error(xhr.responseText);
-                        }
-                    });
+                    // Tampilkan modal setelah data dimuat
+                    $('#updateModal').modal('show');
                 },
                 error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
+                    console.error(`Error: ${error}, Status: ${status}`);
+                    console.error(`Response Text: ${xhr.responseText}`);
                 }
             });
         });
 
-        $('#dataTable').on('click', '.btn-delete', function() {
-            let id = $(this).data('id');
+        // $('#dataTable').on('click', '.btn-delete', function() {
+        //     let id = $(this).data('id');
 
-            Swal.fire({
-                title: "Apakah Anda yakin?",
-                text: "Data yang dihapus tidak dapat dikembalikan!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#3085d6",
-                confirmButtonText: "Ya, Hapus!",
-                cancelButtonText: "Batal"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: '<?= base_url($role . '/deletePo') ?>/' + id,
-                        type: 'DELETE',
-                        success: function(response) {
-                            if (response.status === 'success') {
-                                Swal.fire({
-                                    title: "Deleted!",
-                                    text: response.message,
-                                    icon: "success",
-                                    timer: 1500,
-                                    showConfirmButton: false
-                                }).then(() => {
-                                    location.reload(); // Refresh halaman
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: "Gagal!",
-                                    text: response.message,
-                                    icon: "error"
-                                });
-                            }
-                        },
-                        error: function() {
-                            Swal.fire({
-                                title: "Error!",
-                                text: "Terjadi kesalahan saat menghapus data.",
-                                icon: "error"
-                            });
-                        }
-                    });
-                }
-            });
-        });
+        //     Swal.fire({
+        //         title: "Apakah Anda yakin?",
+        //         text: "Data yang dihapus tidak dapat dikembalikan!",
+        //         icon: "warning",
+        //         showCancelButton: true,
+        //         confirmButtonColor: "#d33",
+        //         cancelButtonColor: "#3085d6",
+        //         confirmButtonText: "Ya, Hapus!",
+        //         cancelButtonText: "Batal"
+        //     }).then((result) => {
+        //         if (result.isConfirmed) {
+        //             $.ajax({
+        //                 url: '<?= base_url($role . '/deletePo') ?>/' + id,
+        //                 type: 'DELETE',
+        //                 success: function(response) {
+        //                     if (response.status === 'success') {
+        //                         Swal.fire({
+        //                             title: "Deleted!",
+        //                             text: response.message,
+        //                             icon: "success",
+        //                             timer: 1500,
+        //                             showConfirmButton: false
+        //                         }).then(() => {
+        //                             location.reload(); // Refresh halaman
+        //                         });
+        //                     } else {
+        //                         Swal.fire({
+        //                             title: "Gagal!",
+        //                             text: response.message,
+        //                             icon: "error"
+        //                         });
+        //                     }
+        //                 },
+        //                 error: function() {
+        //                     Swal.fire({
+        //                         title: "Error!",
+        //                         text: "Terjadi kesalahan saat menghapus data.",
+        //                         icon: "error"
+        //                     });
+        //                 }
+        //             });
+        //         }
+        //     });
+        // });
     });
 </script>
 <script>

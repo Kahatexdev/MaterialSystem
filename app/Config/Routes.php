@@ -35,6 +35,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('openPO/saveOpenPOGabungan', 'PoGabunganController::saveOpenPOGabungan');
     $routes->get('listPoGabungan', 'PoGabunganController::listPoGabungan');
     $routes->get('getPoDetailsGabungan/(:any)', 'PoGabunganController::getPoDetailsGabungan/$1');
+    $routes->get('exportOpenPOGabung', 'PdfController::exportOpenPOGabung');
 
     $routes->get('material/(:num)', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');
@@ -85,6 +86,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('schedule/updateSchedule', 'ScheduleController::updateSchedule');
     $routes->post('schedule/updateTglSchedule', 'ScheduleController::updateTglSchedule');
     $routes->post('schedule/deleteSchedule', 'ScheduleController::deleteSchedule');
+    $routes->get('schedule/getStock', 'ScheduleController::getStock');
+    $routes->get('schedule/getKeterangan', 'ScheduleController::getKeterangan');
 
     $routes->get('schedule/reqschedule', 'ScheduleController::reqschedule');
     $routes->post('schedule/reqschedule', 'ScheduleController::reqschedule');

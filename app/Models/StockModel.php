@@ -312,4 +312,13 @@ class StockModel extends Model
 
         return $data;
     }
+
+    public function getStockForSchedule($kodeWarna, $warna, $itemTypeEncoded)
+    {
+        return $this->select('sum(kgs_stock_awal) as kg_stok')
+            ->where('kode_warna', $kodeWarna)
+            ->where('warna', $warna)
+            ->where('item_type', $itemTypeEncoded)
+            ->first();
+    }
 }

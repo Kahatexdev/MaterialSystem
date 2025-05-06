@@ -604,13 +604,13 @@ class MasterdataController extends BaseController
     public function openPO($id)
     {
         $masterOrder = $this->masterOrderModel->getMaterialOrder($id);
+
         $orderData = $this->masterOrderModel->find($id);
         foreach ($masterOrder as &$order) { // Note: pass by reference to modify the original array
             foreach ($order['kode_warna'] as &$item) {
                 $model = $item['no_model'];
                 $itemType = $item['item_type'];
                 $kodeWarna = $item['kode_warna'];
-
                 $cek = [
                     'no_model' => $model,
                     'item_type' => $itemType,
@@ -711,7 +711,7 @@ class MasterdataController extends BaseController
 
             return redirect()->to(base_url($this->role . '/masterdata'))
                 ->with('success', 'Data PO Covering berhasil disimpan.');
-        }else{
+        } else {
             foreach ($items as $item) {
                 $itemData = [
                     'role'             => $this->role,
@@ -729,7 +729,7 @@ class MasterdataController extends BaseController
                 $this->openPoModel->insert($itemData);
             }
         }
-        
+
 
         return redirect()->to(base_url($this->role . '/material/' . $id_order))->with('success', 'Data PO Berhasil Di Tambahkan.');
     }

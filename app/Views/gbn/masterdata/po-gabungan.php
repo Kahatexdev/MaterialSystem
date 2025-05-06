@@ -68,7 +68,7 @@
                         <select class="form-control tujuan" name="tujuan" required>
                             <option value="-">Pilih Tujuan</option>
                             <option value="CELUP">CELUP</option>
-                            <option value="COVERING">COVERING</option>
+                            <!-- <option value="COVERING">COVERING</option> -->
                         </select>
                     </div>
                     <div class="mb-3">

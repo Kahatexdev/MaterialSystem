@@ -44,7 +44,7 @@
                     <select class="form-control" name="tujuan_po" id="selectTujuan" onchange="tujuan()" required>
                         <option value="">Pilih Tujuan</option>
                         <option value="Celup Cones">Celup Cones</option>
-                        <option value="Covering">Covering</option>
+                        <!-- <option value="Covering">Covering</option> -->
                     </select>
                 </div>
 
@@ -137,6 +137,46 @@
                         </div>
                     </div>
 
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="kg_stock">Kg Stock</label>
+                            <input type="text" class="form-control" name="kg_stock" id="kg_stock">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="ttl_keb">Total Kg Kebutuhan</label>
+                            <input type="text" class="form-control" name="ttl_keb" id="ttl_keb" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="kg_stock">Permintan Kelos (Kg)</label>
+                            <input type="text" class="form-control" name="kg_percones" id="kg_percones" placeholder="Kg">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="ttl_keb">Permintan Kelos (Total Cones)</label>
+                            <input type="text" class="form-control" name="jumlah_cones" id="jumlah_cones" placeholder="Cns">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="kg_stock">Bentuk Celup</label>
+                            <select class="form-control" name="bentuk_celup" id="bentuk_celup">
+                                <option value="">Pilih Bentuk Celup</option>
+                                <option value="Cones">Cones</option>
+                                <option value="Hank">Hank</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="ttl_keb">Untuk Produksi</label>
+                            <input type="text" class="form-control" name="jenis_produksi" id="jenis_produksi">
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="exampleFormControlInput1">Keterangan</label>
@@ -261,6 +301,9 @@
             // tunjukkan tab baru
             new bootstrap.Tab($btn[0]).show();
 
+            // Attach event listener for the new inputs
+            $(`#nav-content-${tabIndex} .kg-po`).on('input', calculateTotal);
+
             tabIndex++;
         }
 
@@ -274,6 +317,23 @@
             // setelah hapus, selalu aktifkan tab pertama
             new bootstrap.Tab($navTab.find('button').first()[0]).show();
         }
+
+        // kalkulasi kg kebutuhan
+        function calculateTotal() {
+            let kgStock = parseFloat($('#kg_stock').val()) || 0; // Nilai Kg Stock
+            let totalKebutuhan = 0;
+
+            // Loop semua input dengan class .kg-po, termasuk dari pane lain
+            $('.kg-po').each(function() {
+                totalKebutuhan += parseFloat($(this).val()) || 0;
+            });
+
+            // Update nilai Total Kg Kebutuhan
+            $('#ttl_keb').val(kgStock + totalKebutuhan);
+        }
+
+        // Trigger calculation on input changes
+        $('#kg_stock, .kg-po').on('input', calculateTotal);
 
         // -----------------------
         // Binding awal
@@ -377,18 +437,18 @@
             $row.find('.kg-po').val('');
 
             if (idOrder && itemType && kodeWarna) {
-            const url = `${base}/${role}/masterdata/cekStockOrder/${idOrder}/${itemType}/${kodeWarna}`;
-            fetch(url)
-                .then(res => res.ok ? res.json() : Promise.reject('Error response'))
-                .then(json => {
-                $row.find('.kg-stok').val(parseFloat(json.kgs_stock || 0).toFixed(2));
-                })
-                .catch(err => {
-                console.error('Fetch error:', err);
-                $row.find('.kg-stok').val('0.00');
-                });
+                const url = `${base}/${role}/masterdata/cekStockOrder/${idOrder}/${itemType}/${kodeWarna}`;
+                fetch(url)
+                    .then(res => res.ok ? res.json() : Promise.reject('Error response'))
+                    .then(json => {
+                        $row.find('.kg-stok').val(parseFloat(json.kgs_stock || 0).toFixed(2));
+                    })
+                    .catch(err => {
+                        console.error('Fetch error:', err);
+                        $row.find('.kg-stok').val('0.00');
+                    });
             } else {
-            $row.find('.kg-stok').val('0.00');
+                $row.find('.kg-stok').val('0.00');
             }
         });
 
