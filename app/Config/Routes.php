@@ -34,7 +34,10 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('masterdata/cekStockOrder/(:any)/(:any)/(:any)', 'PoGabunganController::cekStockOrder/$1/$2/$3');
     $routes->post('openPO/saveOpenPOGabungan', 'PoGabunganController::saveOpenPOGabungan');
     $routes->get('listPoGabungan', 'PoGabunganController::listPoGabungan');
-    $routes->get('getPoDetailsGabungan/(:any)', 'PoGabunganController::getPoDetailsGabungan/$1');
+    // $routes->get('getPoDetailsGabungan/(:any)', 'PoGabunganController::getPoDetailsGabungan/$1');
+    // $routes->get('getPoGabungan/(:any)', 'PoGabunganController::getPoGabungan/$1');
+    $routes->get('getPoGabunganWithChildren/(:any)', 'PoGabunganController::getPoGabunganWithChildren/$1');
+    $routes->post('updatePoGabungan', 'PoGabunganController::updatePoGabungan');
     $routes->get('exportOpenPOGabung', 'PdfController::exportOpenPOGabung');
 
     $routes->get('material/(:num)', 'MasterdataController::material/$1');

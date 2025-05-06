@@ -361,52 +361,170 @@ class PoGabunganController extends BaseController
         // dd($tujuan, $jenis, $jenis2);
         return view($this->role . '/mastermaterial/list-open-pogabung', $data);
     }
-    public function getPoDetailsGabungan($id_po)
+    // public function getPoDetailsGabungan($id_po)
+    // {
+    //     // Ambil metadata utama
+    //     $dataInduk = $this->openPoModel->find($id_po);
+
+    //     // Ambil daftar item terkait
+    //     $poDetails = $this->openPoModel->where('id_induk', $id_po)->findAll();
+
+    //     // Ambil dan gabungkan item type untuk setiap no_model
+    //     foreach ($poDetails as &$detail) {
+    //         // ambil daftar item type dulu (Anda sudah punya)
+    //         $detail['item_type_list'] = $this->materialModel
+    //             ->select('material.item_type, material.id_order')
+    //             ->join('master_order', 'master_order.id_order = material.id_order')
+    //             ->where('no_model', $detail['no_model'])
+    //             ->groupBy('item_type')
+    //             ->findAll();
+    //         // dapatkan daftar kode warna untuk setiap item_type
+    //         // untuk setiap item_type, ambil kode warna
+    //         $allKode = [];
+    //         foreach ($detail['item_type_list'] as $it) {
+    //             $allKode[$it['item_type']] = $this->materialModel
+    //                 ->select('kode_warna')
+    //                 ->where('id_order',   $it['id_order'])
+    //                 ->where('item_type',  $it['item_type'])
+    //                 ->groupBy('kode_warna')
+    //                 ->findAll();              // <-- panggil findAll()
+    //         }
+    //         $detail['kode_warna_list'] = $allKode;
+
+    //         // jika ingin juga attach warna default/terpilih 
+    //         // // (misal detail sudah punya kode_warna terpilih)
+    //         // if (!empty($detail['kode_warna'])) {
+    //         //     $w = $this->materialModel
+    //         //         ->getWarnaByAll($detail['no_model'], $detail['item_type'], $detail['kode_warna']);
+    //         //     $detail['warna_detail'] = $w ? $w['color'] : null;
+    //         // }
+    //     }
+
+    //     // Gabungkan data ke dalam satu array
+    //     $response = [
+    //         'dataInduk' => $dataInduk,
+    //         'details' => $poDetails
+    //     ];
+
+    //     // Kembalikan respons sebagai JSON
+    //     return $this->response->setJSON($response);
+    // }
+
+    // public function getPoGabungan($id_po)
+    // {
+    //     $data = $this->openPoModel
+    //         ->where('id_po', $id_po)
+    //         ->first();
+    //     return $this->response->setJSON($data);
+    // }
+
+    // public function updatePoGabungan()
+    // {
+    //     $post = $this->request->getPost();
+    //     $id    = $post['id_po'];
+    //     $isChild = ! empty($post['id_induk']);
+    //     $update = [
+    //         'kg_po' => $post['kg_po'],
+    //     ];
+
+    //     if (! $isChild) {
+    //         // parent: tambahkan field lain
+    //         $update = array_merge($update, [
+    //             'item_type'      => $post['item_type'],
+    //             'kode_warna'     => $post['kode_warna'],
+    //             'color'          => $post['color'],
+    //             'bentuk_celup'   => $post['bentuk_celup'],
+    //             'kg_percones'    => $post['kg_percones'],
+    //             'jumlah_cones'   => $post['jumlah_cones'],
+    //             'jenis_produksi' => $post['jenis_produksi'],
+    //         ]);
+    //     }
+
+    //     $this->openPoModel->update($id, $update);
+
+    //     return $this->response->setJSON(['status' => 'ok']);
+    // }
+
+    public function getPoGabunganWithChildren($id_po)
     {
-        // Ambil metadata utama
-        $dataInduk = $this->openPoModel->find($id_po);;
+        // data induk
+        $parent = $this->openPoModel
+            ->where('id_po', $id_po)
+            ->where('id_induk IS NULL', null, false)
+            ->first();
 
-        // Ambil daftar item terkait
-        $poDetails = $this->openPoModel->where('id_induk', $id_po)->findAll();
+        // data anak
+        $children = $this->openPoModel
+            ->where('id_induk', $id_po)
+            ->findAll();
 
-        // Ambil dan gabungkan item type untuk setiap no_model
-        foreach ($poDetails as &$detail) {
-            // ambil daftar item type dulu (Anda sudah punya)
-            $detail['item_type_list'] = $this->materialModel
-                ->select('material.item_type, material.id_order')
-                ->join('master_order', 'master_order.id_order = material.id_order')
-                ->where('no_model', $detail['no_model'])
-                ->groupBy('item_type')
-                ->findAll();
-            // dapatkan daftar kode warna untuk setiap item_type
-            // untuk setiap item_type, ambil kode warna
-            $allKode = [];
-            foreach ($detail['item_type_list'] as $it) {
-                $allKode[$it['item_type']] = $this->materialModel
-                    ->select('kode_warna')
-                    ->where('id_order',   $it['id_order'])
-                    ->where('item_type',  $it['item_type'])
-                    ->groupBy('kode_warna')
-                    ->findAll();              // <-- panggil findAll()
+        return $this->response->setJSON([
+            'parent'   => $parent,
+            'children' => $children
+        ]);
+    }
+
+    public function updatePoGabungan()
+    {
+        $post = $this->request->getPost();
+        $parentId = $post['id_po'];
+
+        // 1) Update Parent
+        // $parentId = $post['id_po'];
+        // $updateParent = [
+        //     'item_type'      => $post['item_type'],
+        //     'kode_warna'     => $post['kode_warna'],
+        //     'color'          => $post['color'],
+        //     'bentuk_celup'   => $post['bentuk_celup'],
+        //     'kg_percones'    => $post['kg_percones'],
+        //     'jumlah_cones'   => $post['jumlah_cones'],
+        //     'jenis_produksi' => $post['jenis_produksi'],
+        // ];
+        // $this->openPoModel->update($parentId, $updateParent);
+
+        // 2) Update tiap Child
+        if (! empty($post['children']) && is_array($post['children'])) {
+            foreach ($post['children'] as $child) {
+                $this->openPoModel->update($child['id_po'], [
+                    'kg_po' => $child['kg_po']
+                ]);
             }
-            $detail['kode_warna_list'] = $allKode;
-
-            // jika ingin juga attach warna default/terpilih 
-            // // (misal detail sudah punya kode_warna terpilih)
-            // if (!empty($detail['kode_warna'])) {
-            //     $w = $this->materialModel
-            //         ->getWarnaByAll($detail['no_model'], $detail['item_type'], $detail['kode_warna']);
-            //     $detail['warna_detail'] = $w ? $w['color'] : null;
-            // }
         }
 
-        // Gabungkan data ke dalam satu array
-        $response = [
-            'dataInduk' => $dataInduk,
-            'details' => $poDetails
-        ];
+        // 2) Hitung total kg_po anak
+        $childrenKgTotal = $this->openPoModel
+            ->selectSum('kg_po', 'total')
+            ->where('id_induk', $post['id_po'])
+            ->first()['total'] ?? 0;
 
-        // Kembalikan respons sebagai JSON
-        return $this->response->setJSON($response);
+        // 3) Ambil kg_stock (bisa null/0 jika tidak diisi)
+        $kgStock = isset($post['kg_stock']) ? floatval($post['kg_stock']) : 0;
+        $kgPo = $childrenKgTotal + $kgStock;
+        $children = $this->openPoModel
+            ->select(['no_model', 'kg_po'])
+            ->where('id_induk', $parentId)
+            ->findAll();
+
+        $parts = [];
+        foreach ($children as $c) {
+            $parts[] = "{$c['no_model']} = {$c['kg_po']}";
+        }
+        $stock = ($childrenKgTotal + $kgStock) - $kgStock;  // sesuai rumus
+        $keterangan = implode(' / ', $parts) . " STOCK / {$stock} KG";
+
+        $updateParent = [
+            'item_type'      => $post['item_type'],
+            'kode_warna'     => $post['kode_warna'],
+            'color'          => $post['color'],
+            'bentuk_celup'   => $post['bentuk_celup'],
+            'kg_percones'    => $post['kg_percones'],
+            'jumlah_cones'   => $post['jumlah_cones'],
+            'jenis_produksi' => $post['jenis_produksi'],
+            'kg_po'          => $kgPo,
+            'keterangan'     => $keterangan,
+        ];
+        $this->openPoModel->update($parentId, $updateParent);
+
+        return $this->response->setJSON(['status' => 'ok']);
     }
 }
