@@ -85,7 +85,7 @@
                                 <td><?= $data['buyer'] ?></td>
                                 <td><?= $data['no_order'] ?></td>
                                 <td><?= $data['delivery_awal'] ?></td>
-                                <td><?= $data['keterangan'] ?></td>
+                                <td><?= $data['ket_celup'] ?></td>
                                 <td>
                                     <button class="btn btn-sm btn-warning btn-edit" data-id="<?= $data['id_po'] ?>">
                                         <i class="fas fa-edit text-lg"></i>
@@ -104,25 +104,68 @@
 </div>
 
 <!-- Modal Edit Data Material -->
-<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="updateModalLabel">Update Data PO Gabungan</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-body">
-                <form id="updateForm" action="<?= base_url($role . '/updatePo') ?>" method="post">
-                    <div id="detailsPoGabung">
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form id="formEditGabungan">
+            <input type="hidden" name="id_po" id="edit_id_po">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit POGABUNGAN + Anak</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- ===== Parent Fields ===== -->
+                    <h6>Data Induk No Model</h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-4">
+                            <label for="edit_item_type" class="form-label">Item Type</label>
+                            <input type="text" class="form-control" name="item_type" id="edit_item_type">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="edit_kode_warna" class="form-label">Kode Warna</label>
+                            <input type="text" class="form-control" name="kode_warna" id="edit_kode_warna">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="edit_color" class="form-label">Color</label>
+                            <input type="text" class="form-control" name="color" id="edit_color">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="edit_color" class="form-label">Kg Stock</label>
+                            <input type="text" class="form-control" name="kg_stock" id="edit_kg_stock">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="edit_kg_percones" class="form-label">Permintaan Kelos (Kg)</label>
+                            <input type="number" step="0.01" class="form-control" name="kg_percones" id="edit_kg_percones">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="edit_jumlah_cones" class="form-label">Permintaan Kelos (Total Cones)</label>
+                            <input type="number" class="form-control" name="jumlah_cones" id="edit_jumlah_cones">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_bentuk_celup" class="form-label">Bentuk Celup</label>
+                            <select class="form-select" name="bentuk_celup" id="edit_bentuk_celup">
+                                <option value="Cones">Cones</option>
+                                <option value="Hank">Hank</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_jenis_produksi" class="form-label">Jenis Produksi</label>
+                            <input type="text" class="form-control" name="jenis_produksi" id="edit_jenis_produksi">
+                        </div>
                     </div>
-                    <!-- Button update dan batal di sebelah kanan -->
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-info">Update</button>
+
+                    <!-- ===== Children Fields ===== -->
+                    <h6>Data Anak No Model</h6>
+                    <div id="childrenContainer">
+                        <!-- akan diisi via JS -->
                     </div>
-                </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Semua</button>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 
@@ -174,143 +217,146 @@
 
 <script>
     $(document).ready(function() {
-        $('#updateModal').on('shown.bs.modal', function() {
-            $('#add_item_type').select2({
-                dropdownParent: $('#updateModal'),
-            });
-        });
-    });
-
-    $(document).ready(function() {
-        $('#dataTable').DataTable({
-            "pageLength": 35,
-            "order": []
-        });
-        // Event listener tombol Update
-        $('#dataTable').on('click', '.btn-edit', function() {
+        $('.btn-edit').on('click', function() {
             const id = $(this).data('id');
-            const masterOrderList = <?= json_encode($masterOrder); ?>;
-            const poGabung = <?= json_encode($openPoGabung); ?>;
-
-            // Lakukan AJAX request untuk mendapatkan data
             $.ajax({
-                url: '<?= base_url($role . '/getPoDetailsGabungan') ?>/' + id,
-                type: 'GET',
-                success: function(response) {
-                    console.log(response); // Debug respons API
+                url: '<?= base_url("$role/getPoGabungan") ?>/' + id,
+                dataType: 'json',
+                success: function(res) {
+                    console.log(res);
+                    // --- Parent ---
+                    $('#edit_id_po').val(res.parent.id_po);
+                    $('#edit_item_type').val(res.parent.item_type);
+                    $('#edit_kode_warna').val(res.parent.kode_warna);
+                    $('#edit_color').val(res.parent.color);
+                    $('#edit_bentuk_celup').val(res.parent.bentuk_celup);
+                    $('#edit_kg_percones').val(res.parent.kg_percones);
+                    $('#edit_jumlah_cones').val(res.parent.jumlah_cones);
+                    $('#edit_jenis_produksi').val(res.parent.jenis_produksi);
 
-                    // Tangani dataInduk utama
-                    let dataInduk = response.dataInduk;
-                    let dataDetails = `
-                        <input type="hidden" class="form-control" id="id_po_gabungan" name="id_po_gabungan" value="${dataInduk.id_po}" readonly>
-                    `;
+                    // --- Children ---
+                    const $cont = $('#childrenContainer').empty();
+                    res.children.forEach(child => {
+                        const field = `
+            <div class="row g-2 mb-2 align-items-end child-row">
+              <input type="hidden" name="children[${child.id_po}][id_po]" value="${child.id_po}">
+              <div class="col-md-4">
+                <label class="form-label">No Model</label>
+                <input type="text" class="form-control" value="${child.no_model}" disabled>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">KG Kebutuhan</label>
+                <input type="number" step="0.01" class="form-control"
+                       name="children[${child.id_po}][kg_po]" value="${child.kg_po}">
+              </div>
+            </div>`;
+                        $cont.append(field);
+                    });
 
-                    // Tangani daftar item terkait
-                    if (response.details && Array.isArray(response.details)) {
-                        response.details.forEach(function(item, index) {
-                            console.log(item);
-                            dataDetails += `
-                                <div class="row">
-                                    <input type="hidden" class="form-control" id="id_po" name="id_po[]" value="${item.id_po}" readonly>
-                                    <div class="col-md-4">
-                                        <label for="itemType">No Model</label>
-                                        <select class="form-control" id="no_model" name="no_model[]" required>
-                                            <option value="">Pilih No Model</option>
-                                            ${masterOrderList.map(data => `
-                                                <option value="${data.no_model}" ${data.no_model === item.no_model ? 'selected' : ''}>
-                                                    ${data.no_model}
-                                                </option>
-                                            `).join('')}
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="itemType">Jenis Item</label>
-                                        <select class="form-control" id="item_type" name="item_type[]" required>
-                                            <option value="">Pilih Jenis Item</option>
-                                            ${item.item_type_list.map(type => `
-                                                <option value="${type.item_type}" ${type.item_type === dataInduk.item_type ? 'selected' : ''}>
-                                                    ${type.item_type}
-                                                </option>
-                                            `).join('')}
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="itemType">Kode Warna</label>
-                                        <select class="form-control" id="kode_warna" name="kode_warna[]" required>
-                                            <option value="">Pilih Jenis Item</option>
-                                            ${item.kode_warna_list.map(kode => `
-                                                <option value="${kode.kode_warna}" ${kode.kode_warna === dataInduk.kode_warna ? 'selected' : ''}>
-                                                    ${kode.kode_warna}
-                                                </option>
-                                            `).join('')}
-                                        </select>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                    }
-
-                    // Render hasil ke dalam DOM
-                    $('#detailsPoGabung').html(dataDetails);
-                    // Tampilkan modal setelah data dimuat
-                    $('#updateModal').modal('show');
-                },
-                error: function(xhr, status, error) {
-                    console.error(`Error: ${error}, Status: ${status}`);
-                    console.error(`Response Text: ${xhr.responseText}`);
+                    $('#editModal').modal('show');
                 }
             });
         });
 
-        // $('#dataTable').on('click', '.btn-delete', function() {
-        //     let id = $(this).data('id');
+        // Submit semua perubahan
+        $('#formEditGabungan').on('submit', function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: '<?= base_url("$role/updatePoGabungan") ?>',
+                method: 'post',
+                data: $(this).serialize(),
+                success: function(resp) {
+                    if (resp.status === 'ok') {
+                        // Tampilkan SweetAlert sukses
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Data POGABUNGAN berhasil diperbarui.',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            $('#editModal').modal('hide');
+                            // reload atau refresh datatable
+                            location.reload();
+                        });
+                    } else {
+                        // SweetAlert error jika ada kendala
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: resp.message || 'Terjadi kesalahan saat memperbarui data.',
+                        });
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: 'Tidak dapat terhubung ke server.',
+                    });
+                }
+            });
+        });
 
-        //     Swal.fire({
-        //         title: "Apakah Anda yakin?",
-        //         text: "Data yang dihapus tidak dapat dikembalikan!",
-        //         icon: "warning",
-        //         showCancelButton: true,
-        //         confirmButtonColor: "#d33",
-        //         cancelButtonColor: "#3085d6",
-        //         confirmButtonText: "Ya, Hapus!",
-        //         cancelButtonText: "Batal"
-        //     }).then((result) => {
-        //         if (result.isConfirmed) {
-        //             $.ajax({
-        //                 url: '<?= base_url($role . '/deletePo') ?>/' + id,
-        //                 type: 'DELETE',
-        //                 success: function(response) {
-        //                     if (response.status === 'success') {
-        //                         Swal.fire({
-        //                             title: "Deleted!",
-        //                             text: response.message,
-        //                             icon: "success",
-        //                             timer: 1500,
-        //                             showConfirmButton: false
-        //                         }).then(() => {
-        //                             location.reload(); // Refresh halaman
-        //                         });
-        //                     } else {
-        //                         Swal.fire({
-        //                             title: "Gagal!",
-        //                             text: response.message,
-        //                             icon: "error"
-        //                         });
-        //                     }
-        //                 },
-        //                 error: function() {
-        //                     Swal.fire({
-        //                         title: "Error!",
-        //                         text: "Terjadi kesalahan saat menghapus data.",
-        //                         icon: "error"
-        //                     });
-        //                 }
-        //             });
-        //         }
-        //     });
-        // });
     });
 </script>
+
+<script>
+    $(document).ready(function() {
+        // Handler tombol delete
+        $('.btn-delete').on('click', function() {
+            const id = $(this).data('id');
+
+            Swal.fire({
+                title: 'Yakin ingin dihapus?',
+                text: "Data PO GABUNGAN akan dihapus!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Jika user confirm, panggil AJAX delete
+                    $.ajax({
+                        url: '<?= base_url("$role/deletePoGabungan") ?>/' + id,
+                        method: 'post',
+                        data: {
+                            id_po: id
+                        },
+                        success: function(res) {
+                            if (res.status === 'ok') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Terhapus!',
+                                    text: 'Data berhasil dihapus.',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    // refresh halaman atau reload DataTable
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal',
+                                    text: res.message || 'Terjadi kesalahan saat menghapus.',
+                                });
+                            }
+                        },
+                        error: function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: 'Tidak dapat terhubung ke server.',
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+
 <script>
     document
         .getElementById('btnSubmitExport')
