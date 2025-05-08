@@ -177,10 +177,9 @@ class ApiController extends ResourceController
         return $this->respond($mu, 200);
     }
 
-    public function getMaterialForPPH($area)
+    public function getMaterialForPPH($model)
     {
-        $material = $this->materialModel->getMaterialForPPH($area);
-
+        $material = $this->materialModel->getMaterialForPPH($model);
         if (empty($material)) {
             return $this->failNotFound('Data tidak ditemukan');
         } else {
