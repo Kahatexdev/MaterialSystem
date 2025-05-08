@@ -90,6 +90,7 @@ class PengeluaranModel extends Model
             ->join('out_celup', 'out_celup.id_out_celup = pengeluaran.id_out_celup', 'left')
             ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup', 'left')
             ->where('pengeluaran.area_out', $data['area'])
+            ->where('pengeluaran.status', 'Pengiriman Area')
             ->where('schedule_celup.no_model', $data['no_model'])
             ->where('schedule_celup.item_type', $data['item_type'])
             ->where('schedule_celup.kode_warna', $data['kode_warna'])
