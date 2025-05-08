@@ -90,6 +90,7 @@ class PengeluaranModel extends Model
             ->join('out_celup', 'out_celup.id_out_celup = pengeluaran.id_out_celup', 'left')
             ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup', 'left')
             ->where('pengeluaran.area_out', $data['area'])
+            ->where('pengeluaran.status', 'Pengiriman Area')
             ->where('schedule_celup.no_model', $data['no_model'])
             ->where('schedule_celup.item_type', $data['item_type'])
             ->where('schedule_celup.kode_warna', $data['kode_warna'])
@@ -135,5 +136,38 @@ class PengeluaranModel extends Model
 
 
         return $this->findAll();
+    }
+    public function getDataPemesananExport($area, $jenis, $tglPakai)
+    {
+        return $this->select("
+            pemesanan.tgl_pakai,
+            pengeluaran.area_out,
+            master_order.no_model,
+            master_material.jenis,
+            material.item_type,
+            material.kode_warna,
+            material.color,
+            out_celup.no_karung,
+            pengeluaran.kgs_out,
+            pengeluaran.cns_out,
+            pengeluaran.lot_out,
+            pengeluaran.nama_cluster,
+            cluster.group
+        ")
+            ->join('out_celup', 'out_celup.id_out_celup = pengeluaran.id_out_celup', 'left')
+            ->join('cluster', 'cluster.nama_cluster=pengeluaran.nama_cluster')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left')
+            ->join('pemesanan', 'pemesanan.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('pengeluaran.area_out', $area)
+            ->where('master_material.jenis', $jenis)
+            ->where('pemesanan.tgl_pakai', $tglPakai)
+            ->where('pengeluaran.status', 'Pengeluaran Jalur')
+            ->groupBy('pengeluaran.id_pengeluaran')
+            ->orderBy('pengeluaran.nama_cluster', 'ASC')
+            ->get() // Dapatkan objek query
+            ->getResultArray(); // Konversi ke array hasil
     }
 }
