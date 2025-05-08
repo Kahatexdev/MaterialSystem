@@ -733,10 +733,10 @@ class ApiController extends ResourceController
         }
         return $this->respond($res, 200);
     }
-    public function poTambahanDetail($noModel)
+    public function poTambahanDetail($noModel, $styleSize)
     {
         $idOrder = $this->masterOrderModel->getIdOrder($noModel);
-        $material = $this->masterOrderModel->getMaterialOrder($idOrder);
+        $material = $this->masterOrderModel->getMaterial($idOrder, $styleSize);
         // dd($material);
         $data = [
             'active' => $this->active,
