@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class PoTambahanModel extends Model
 {
-    protected $table            = 'potambahan';
+    protected $table            = 'po_tambahan';
     protected $primaryKey       = 'id_po_tambahan';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
