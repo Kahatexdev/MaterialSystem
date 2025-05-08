@@ -21,6 +21,7 @@ use App\Models\HistoryPindahOrder;
 use App\Models\PengeluaranModel;
 use App\Models\ReturModel;
 use App\Models\KategoriReturModel;
+use App\Models\PoTambahanModel;
 
 class ApiController extends ResourceController
 {
@@ -44,6 +45,7 @@ class ApiController extends ResourceController
     protected $pengeluaranModel;
     protected $returModel;
     protected $kategoriReturModel;
+    protected $poTambahanModel;
 
 
     public function __construct()
@@ -64,6 +66,7 @@ class ApiController extends ResourceController
         $this->pengeluaranModel = new PengeluaranModel();
         $this->returModel = new ReturModel();
         $this->kategoriReturModel = new KategoriReturModel();
+        $this->poTambahanModel = new PoTambahanModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -745,5 +748,52 @@ class ApiController extends ResourceController
             'material' => $material
         ];
         return response()->setJSON($data);
+    }
+    public function savePoTambahan()
+    {
+        $request = $this->request->getJSON(true);
+        log_message('debug', 'Data received: ' . json_encode($request));
+
+        if (empty($request['items']) || !is_array($request['items'])) {
+            return $this->respond([
+                'status'  => 'error',
+                'message' => 'Data items tidak ditemukan atau bukan array.',
+            ], 400);
+        }
+
+        $sukses = 0;
+        $gagal = 0;
+
+        foreach ($request['items'] as $item) {
+            // Validasi field (minimal area dan item_type misalnya)
+            if (
+                !isset($item['area']) ||
+                !isset($item['no_model']) ||
+                !isset($item['style_size']) ||
+                !isset($item['item_type']) ||
+                !isset($item['kode_warna']) ||
+                !isset($item['color']) ||
+                !isset($item['pcs_po_tambahan']) ||
+                !isset($item['kg_po_tambahan']) ||
+                !isset($item['keterangan']) ||
+                !isset($item['admin']) ||
+                !isset($item['created_at'])
+            ) {
+                $gagal++;
+                continue;
+            }
+
+            // Insert ke DB
+            if ($this->poTambahanModel->insert($item)) {
+                $sukses++;
+            } else {
+                $gagal++;
+            }
+        }
+
+        return $this->respond([
+            'status'  => 'success',
+            'message' => "Sukses insert: $sukses, Gagal insert: $gagal",
+        ]);
     }
 }

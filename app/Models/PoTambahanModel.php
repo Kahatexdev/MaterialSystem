@@ -15,9 +15,11 @@ class PoTambahanModel extends Model
     protected $allowedFields    = [
         'area',
         'no_model',
+        'style_size',
         'item_type',
         'kode_warna',
         'color',
+        'pcs_po_tambahan',
         'kg_po_tambahan',
         'keterangan',
         'status',
