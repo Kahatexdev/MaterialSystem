@@ -793,6 +793,8 @@ class ApiController extends ResourceController
         return $this->respond([
             'status'  => 'success',
             'message' => "Sukses insert: $sukses, Gagal insert: $gagal",
+            'sukses'  => $sukses,
+            'gagal'   => $gagal,
         ]);
     }
 }
