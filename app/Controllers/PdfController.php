@@ -598,8 +598,8 @@ class PdfController extends BaseController
 
             $pdf->SetX(4); // Pastikan posisi X sejajar margin
             $pdf->Cell(40, 3, 'NAMA LANGGANAN', 0, 0, 'L');
-            $pdf->Cell(61, 3, 'KAOS KAKI', 1, 0, 'L');
-            $pdf->Cell(62, 3, 'NO SURAT JALAN : ' . $dataBon['no_surat_jalan'], 1, 0, 'L');
+            $pdf->Cell(61, 3, 'KAOS KAKI', 0, 0, 'L');
+            $pdf->Cell(62, 3, 'NO SURAT JALAN : ' . $dataBon['no_surat_jalan'], 0, 0, 'L');
             $pdf->Cell(36, 3, 'TANGGAL : ' . $dataBon['tgl_datang'], 0, 1, 'L');
 
             $pdf->SetX(4); // Pastikan posisi X sejajar margin
@@ -922,7 +922,7 @@ class PdfController extends BaseController
                 $startY_ = 14;
             }
         }
-
+        // $pdf->Ln();  // Fungsi PageNo() untuk mendapatkan nomor halaman
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->Cell(0, 8, 'BARCODE', 0, 1, 'C');
 
