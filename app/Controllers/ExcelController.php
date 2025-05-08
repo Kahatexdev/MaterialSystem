@@ -19,6 +19,7 @@ use App\Models\StockModel;
 use App\Models\PemesananModel;
 use App\Models\PengeluaranModel;
 use App\Models\HistoryStockCoveringModel;
+use App\Models\TotalPemesananModel;
 use PhpOffice\PhpSpreadsheet\Style\{Border, Alignment, Fill};
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
@@ -41,6 +42,7 @@ class ExcelController extends BaseController
     protected $pemesananModel;
     protected $pengeluaranModel;
     protected $historyCoveringStockModel;
+    protected $totalPemesananModel;
 
     public function __construct()
     {
@@ -56,6 +58,7 @@ class ExcelController extends BaseController
         $this->pemesananModel = new PemesananModel();
         $this->pengeluaranModel = new PengeluaranModel();
         $this->historyCoveringStockModel = new HistoryStockCoveringModel();
+        $this->totalPemesananModel = new TotalPemesananModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -1791,5 +1794,129 @@ class ExcelController extends BaseController
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
+    }
+    public function exportListBarangKeluar()
+    {
+        $area = $this->request->getGet('area');
+        $jenis = $this->request->getGet('jenis');
+        $tglPakai = $this->request->getGet('tglPakai');
+
+        $dataPemesanan = $this->pengeluaranModel->getDataPemesananExport($area, $jenis, $tglPakai);
+        // Kelompokkan data berdasarkan 'group'
+        $groupedData = [];
+        foreach ($dataPemesanan as $row) {
+            $groupedData[$row['group']][] = $row;
+        }
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Format header
+        $subHeaderStyle = [
+            'font' => [
+                'bold' => true,
+                'size' => 14,
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                ],
+            ],
+        ];
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'size' => 12,
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                ],
+            ],
+        ];
+
+        foreach ($groupedData as $group => $rows) {
+            // Buat sheet untuk setiap grup
+            $sheet = $spreadsheet->createSheet();
+            if ($group == "barang_jln") {
+                $group = "LAIN - LAIN";
+            } else {
+                $group;
+            }
+            $sheet->setTitle("Group $group");
+
+            $sheet->setCellValue('A1', 'CLUSTER GROUP ' . $group);
+            $sheet->setCellValue('A2', 'PAKAI ' . $tglPakai);
+
+            // Merge sel untuk teks di A1 dan A2
+            $sheet->mergeCells('A1:J1');
+            $sheet->mergeCells('A2:J2');
+            $sheet->getStyle('A1:J2')->applyFromArray($subHeaderStyle);
+
+
+            // Set header
+            $header = [
+                'Area',
+                'No Model',
+                'Item Type',
+                'Kode Warna',
+                'Color',
+                'No Karung',
+                'Kgs',
+                'Cns',
+                'Lot',
+                'Nama Cluster',
+            ];
+            $sheet->fromArray($header, null, 'A3');
+
+
+            $sheet->getStyle('A3:J3')->applyFromArray($headerStyle);
+
+            // Tambahkan data
+            $rowNumber = 4;
+            foreach ($rows as $row) {
+                // Hapus kolom yang tidak ingin dimasukkan
+                unset($row['tgl_pakai'], $row['group'], $row['jenis']);
+
+                $sheet->fromArray(array_values($row), null, "A$rowNumber");
+                $rowNumber++;
+            }
+            // Tambahkan border ke semua data
+            $dataEndRow = $rowNumber - 1;
+            $sheet->getStyle("A3:J$dataEndRow")->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                    ],
+                ],
+            ]);
+
+            // Atur lebar kolom otomatis
+            foreach (range('A', 'K') as $column) {
+                $sheet->getColumnDimension($column)->setAutoSize(true);
+            }
+        }
+
+        // Hapus sheet default (Sheet1)
+        $spreadsheet->removeSheetByIndex(0);
+
+        // Simpan file Excel
+        $filename = 'List Pengeluaran Barang ' . $tglPakai . '.xlsx';
+        $writer = new Xlsx($spreadsheet);
+        $filePath = WRITEPATH . "uploads/$filename";
+        $writer->save($filePath);
+
+        // Unduh file
+        return $this->response->download($filePath, null)->setFileName($filename);
+
+        // dd($dataPemesanan);
     }
 }
