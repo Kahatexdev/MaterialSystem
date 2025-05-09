@@ -795,7 +795,7 @@ class ApiController extends ResourceController
     }
     public function cekMaterial($id)
     {
-        $material = $this->materialModel->cekItemtypeandKodeWarna($id);
+        $material = $this->materialModel->material($id);
         return $this->respond($material, 200);
     }
 }
