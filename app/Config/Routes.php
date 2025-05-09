@@ -491,6 +491,6 @@ $routes->group(
         $routes->get('warehouse/exportExcel', 'ExcelController::excelStockMaterial');
         $routes->get('poTambahanDetail/(:any)/(:any)', 'ApiController::poTambahanDetail/$1/$2');
         $routes->post('savePoTambahan', 'ApiController::savePoTambahan');
-        $routes->post('cekMaterial(/:num)', 'ApiController::cekMaterial/$1');
+        $routes->get('cekMaterial(/:num)', 'ApiController::cekMaterial/$1');
     }
 );
