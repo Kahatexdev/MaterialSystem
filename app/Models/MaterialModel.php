@@ -132,7 +132,7 @@ class MaterialModel extends Model
     }
     public function MaterialPerOrder($model)
     {
-        return $this->select('master_order.no_model,id_material area, kode_warna, item_type, color, sum(kgs) as qty_po')
+        return $this->select('master_order.no_model,id_material, area, kode_warna, item_type, color, sum(kgs) as qty_po')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('master_order.no_model', $model)
             ->groupBy('no_model,item_type,kode_warna,color')
@@ -267,5 +267,12 @@ class MaterialModel extends Model
             ->where('material.style_size', $style)
             ->groupBy('no_model,item_type,kode_warna,color')
             ->findAll();
+    }
+    public function material($id)
+    {
+        return $this->select('master_order.no_model, area, kode_warna, item_type, color')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('material.id_material', $id)
+            ->first();
     }
 }
