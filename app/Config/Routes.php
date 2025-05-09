@@ -314,7 +314,7 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('reportPemesananSpandexCovering', 'CoveringPemesananController::reportPemesananSpandexCovering');
     $routes->get('filterPemesananSpandexCovering', 'CoveringPemesananController::filterPemesananSpandexCovering');
     $routes->get('excelPemesananSpandexCovering', 'ExcelController::excelPemesananSpandexCovering');
-    
+
     $routes->post('updatePemesanan/(:any)', 'CoveringPemesananController::updatePemesanan/$1');
 });
 
@@ -446,8 +446,11 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('createBon', 'CelupController::createBon');
     $routes->post('createBon/getItem/(:num)', 'CelupController::getItem/$1');
 
+    // retur
+    $routes->get('retur', 'ReturController::returArea');
+
+
     $routes->post('outCelup/saveBon/', 'CelupController::saveBon');
-    $routes->get('retur', 'CelupController::retur');
     $routes->get('generate/(:num)', 'CelupController::generateBarcode/$1');
     $routes->get('printBon/(:num)', 'PdfController::printBon/$1');
 });
