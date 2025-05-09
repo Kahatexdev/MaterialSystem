@@ -638,7 +638,7 @@
                     if (data && !data.error) {
 
                         const stock = tr.querySelector(".stock");
-                        stock.textContent = parseFloat(data.kg_stok).toFixed(2) || '0.00';
+                        stock.textContent = isNaN(stok) ? '0.00' : stok.toFixed(2);
                     } else {
                         console.error('Error fetching Stock:', data.error || 'No data found');
                     }
