@@ -517,9 +517,11 @@ class CelupController extends BaseController
                 $jmldatapertab = count($data['no_karung'][$h]); // Ambil jumlah data yang benar
 
                 for ($i = 0; $i < $jmldatapertab; $i++) {
+
                     $saveDataOutCelup[] = [
                         'id_bon' => $id_bon,
                         'id_celup' => $id_celup ?? null,
+                        'no_model' => $data['items'][$h]['no_model'],
                         'l_m_d' => $data['l_m_d'][$h] ?? null,
                         'harga' => $data['harga'][$h] ?? null,
                         'no_karung' => $data['no_karung'][$h][$i] ?? null, // Ambil dari indeks $i
