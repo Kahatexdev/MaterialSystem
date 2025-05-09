@@ -95,7 +95,7 @@
                                                 <div class="col-md-4">
                                                     <label>No Model</label>
                                                     <input type="text" class="form-control" name="items[0][id_celup]" id="id_celup" required placeholder="Pilih No Model" readonly hidden>
-                                                    <input type="text" class="form-control" name="items[0][no_model]" id="no_model" required placeholder="No Model" readonly>
+                                                    <input type="text" class="form-control" name="items[0][no_model]" id="no_model" required placeholder="No Model">
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label>Item Type</label>

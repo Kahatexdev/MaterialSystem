@@ -139,16 +139,9 @@
 
                 </div>
                 <div class="form-group">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label for="kg_stock">Kg Stock</label>
-                            <input type="text" class="form-control" name="kg_stock" id="kg_stock">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="ttl_keb">Total Kg Kebutuhan</label>
-                            <input type="text" class="form-control" name="ttl_keb" id="ttl_keb" readonly>
-                        </div>
-                    </div>
+                    <label for="ttl_keb">Total Kg Kebutuhan</label>
+                    <input type="text" class="form-control" name="ttl_keb" id="ttl_keb" readonly>
+
                 </div>
                 <div class="form-group">
                     <div class="row">
@@ -320,7 +313,6 @@
 
         // kalkulasi kg kebutuhan
         function calculateTotal() {
-            let kgStock = parseFloat($('#kg_stock').val()) || 0; // Nilai Kg Stock
             let totalKebutuhan = 0;
 
             // Loop semua input dengan class .kg-po, termasuk dari pane lain
@@ -329,7 +321,7 @@
             });
 
             // Update nilai Total Kg Kebutuhan
-            $('#ttl_keb').val(kgStock + totalKebutuhan);
+            $('#ttl_keb').val(totalKebutuhan);
         }
 
         // Trigger calculation on input changes

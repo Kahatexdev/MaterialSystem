@@ -183,4 +183,10 @@ class ReturModel extends Model
     //         ->get()
     //         ->getResultArray();
     // }
+    public function getListRetur($model, $area)
+    {
+        return $this->where('no_model', $model)
+            ->where('area_retur', $area)
+            ->findAll();
+    }
 }
