@@ -213,4 +213,43 @@ class MasterOrderModel extends Model
             ->orderBy('material.item_type, material.kode_warna', 'ASC')
             ->findAll();
     }
+    public function getMaterial($id, $styleSize)
+    {
+        $data = $this->select('no_model, buyer, delivery_awal, delivery_akhir, material.style_size, material.item_type, material.color, material.kode_warna, sum(material.kgs) as total_kg, material.composition, material.gw, material.loss')
+            ->join('material', 'material.id_order=master_order.id_order')
+            ->where('master_order.id_order', $id)
+            ->where('material.style_size', $styleSize)
+            ->where('material.composition !=', 0)
+            ->where('material.gw !=', 0)
+            ->where('material.qty_pcs !=', 0)
+            ->where('material.loss !=', 0)
+            ->where('material.kgs >', 0)
+            ->groupBy(['material.item_type', 'material.kode_warna'])
+            ->orderBy('material.item_type')
+            ->findAll();
+        // Susun data menjadi terstruktur
+        $result = [];
+        foreach ($data as $row) {
+            $itemType = $row['item_type'];
+            if (!isset($result[$itemType])) {
+                $result[$itemType] = [
+                    'no_model' => $row['no_model'],
+                    'style_size' => $row['style_size'],
+                    'item_type' => $itemType,
+                    'kode_warna' => [],
+                ];
+            }
+            $result[$itemType]['kode_warna'][] = [
+                'no_model' => $row['no_model'],
+                'item_type' => $itemType,
+                'kode_warna' => $row['kode_warna'],
+                'color' => $row['color'],
+                'total_kg' => $row['total_kg'],
+                'composition' => $row['composition'],
+                'gw' => $row['gw'],
+                'loss' => $row['loss'],
+            ];
+        }
+        return $result;
+    }
 }

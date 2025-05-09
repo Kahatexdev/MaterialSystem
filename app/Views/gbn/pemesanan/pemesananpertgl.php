@@ -45,7 +45,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Pakai</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">Action</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center" colspan="2">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="pemesananTable">
@@ -60,13 +60,18 @@
                                                 Detail
                                             </a>
                                         </td>
+                                        <td class="text-center">
+                                            <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar?area=' . $area . '&jenis=' . $jenis . '&tglPakai=' . $psn['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
+                                                <i class="fas fa-file-excel fa-2x"></i>
+                                            </a>
+                                        </td>
                                     </tr>
-                                    
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                            <input type="hidden" id="area" value="<?= $area ?>">
-                            <input type="hidden" id="jenis" value="<?= $jenis ?>">
+
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                        <input type="hidden" id="area" value="<?= $area ?>">
+                        <input type="hidden" id="jenis" value="<?= $jenis ?>">
                     </div>
                 </div>
             </div>

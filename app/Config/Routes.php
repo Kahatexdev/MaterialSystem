@@ -182,6 +182,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pemesanan/reportPemesananArea', 'PemesananController::reportPemesananArea');
     $routes->get('pemesanan/filterPemesananArea', 'PemesananController::filterPemesananArea');
     $routes->get('pemesanan/exportPemesananArea', 'ExcelController::excelPemesananArea');
+    $routes->get('pemesanan/exportListBarangKeluar', 'ExcelController::exportListBarangKeluar');
 
     $routes->get('pph', 'PphController::tampilPerModel');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
@@ -488,6 +489,7 @@ $routes->group(
         $routes->get('getTotalPengiriman', 'ApiController::getTotalPengiriman');
         $routes->post('warehouse/search', 'WarehouseController::search');
         $routes->get('warehouse/exportExcel', 'ExcelController::excelStockMaterial');
-        $routes->get('poTambahanDetail/(:any)', 'ApiController::poTambahanDetail/$1');
+        $routes->get('poTambahanDetail/(:any)/(:any)', 'ApiController::poTambahanDetail/$1/$2');
+        $routes->post('savePoTambahan', 'ApiController::savePoTambahan');
     }
 );
