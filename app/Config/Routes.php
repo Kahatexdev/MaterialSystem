@@ -314,8 +314,9 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('reportPemesananSpandexCovering', 'CoveringPemesananController::reportPemesananSpandexCovering');
     $routes->get('filterPemesananSpandexCovering', 'CoveringPemesananController::filterPemesananSpandexCovering');
     $routes->get('excelPemesananSpandexCovering', 'ExcelController::excelPemesananSpandexCovering');
-    
+
     $routes->post('updatePemesanan/(:any)', 'CoveringPemesananController::updatePemesanan/$1');
+    $routes->get('generatePemesananSpandexKaretCovering/(:any)/(:any)', 'PdfController::generatePemesananSpandexKaretCovering/$1/$2');
 });
 
 

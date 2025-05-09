@@ -65,4 +65,19 @@ class PemesananSpandexKaretModel extends Model
             ->groupBy('pemesanan.tgl_pakai, master_material.jenis, material.item_type, material.color, material.kode_warna, master_order.no_model, pemesanan.admin')
             ->findAll();
     }
+
+    public function getDataForPdf($jenis, $tgl_pakai)
+    {
+        return $this->select('pemesanan_spandex_karet.id_psk, pemesanan_spandex_karet.status,pemesanan.tgl_pakai, master_material.jenis, material.item_type, material.color, material.kode_warna, master_order.no_model, SUM(pemesanan.jl_mc) AS jl_mc, SUM(pemesanan.ttl_berat_cones) AS total_pesan, SUM(pemesanan.ttl_qty_cones) AS total_cones, pemesanan.admin')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan_spandex_karet.id_total_pemesanan', 'left')
+            ->join('pemesanan', 'pemesanan.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->where('master_material.jenis', $jenis)
+            ->where('pemesanan.tgl_pakai', $tgl_pakai)
+            ->whereIn('pemesanan_spandex_karet.status', ['DONE'])
+            ->groupBy('pemesanan.tgl_pakai, master_material.jenis, material.item_type, material.color, material.kode_warna, master_order.no_model, pemesanan.admin')
+            ->findAll();
+    }
 }
