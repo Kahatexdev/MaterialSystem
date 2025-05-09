@@ -10,6 +10,7 @@ use App\Models\MaterialModel;
 use App\Models\ReturModel;
 use App\Models\PemasukanModel;
 use App\Models\OutCelupModel;
+
 class ReturController extends BaseController
 {
     protected $role;
@@ -48,7 +49,7 @@ class ReturController extends BaseController
 
 
     public function index()
-    {   
+    {
         // Ambil data retur
         $dataRetur = $this->returModel->findAll();
         // dd ($dataRetur);
@@ -130,5 +131,19 @@ class ReturController extends BaseController
         // flashdata
         session()->setFlashdata('success', 'Data berhasil di update.');
         return redirect()->to(base_url(session()->get('role') . '/retur'));
+    }
+
+    public function listBarcodeRetur()
+    {
+        $listRetur = $this->returModel->listBarcodeRetur();
+
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "List Barcode Retur",
+            'listRetur' => $listRetur,
+        ];
+        // dd($data);
+        return view($this->role . '/retur/list-barcode-retur', $data);
     }
 }
