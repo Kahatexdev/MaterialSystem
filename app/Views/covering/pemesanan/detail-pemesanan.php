@@ -106,6 +106,7 @@
                         <th class="sticky text-center">Total Pesan (Kg)</th>
                         <th class="sticky text-center">Cones</th>
                         <th class="sticky text-center">Area</th>
+                        <th class="sticky text-center">Status</th>
                         <th class="sticky text-center">Action</th>
                     </tr>
                 </thead>
@@ -123,13 +124,12 @@
                             <td class="text-center"><?= number_format($list['total_pesan'], 2); ?></td>
                             <td class="text-center"><?= $list['total_cones']; ?></td>
                             <td class="text-center"><?= $list['admin']; ?></td>
+                            <td class="text-center"><span class="badge bg-gradient <?= $list['status'] == 'REQUEST' ? 'bg-warning' : ($list['status'] == 'SEDANG DISIAPKAN' ? 'bg-info' : 'bg-success') ?>"><?= $list['status']; ?></span></td>
                             <td class="text-center">
                                 <!-- button modal edit -->
                                 <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $list['id_psk'] ?>">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <!-- pdf icon -->
-                                <a href="<?= base_url('covering/exportBonPdf/' . $list['id_psk']) ?>" class="btn btn-danger"><i class="fas fa-file-pdf"></i></a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -177,7 +177,7 @@
                                 <select class="form-select" name="status" required>
                                     <option value="REQUEST" <?= $list['status'] == 'REQUEST' ? 'selected' : '' ?>>REQUEST</option>
                                     <option value="SEDANG DISIAPKAN" <?= $list['status'] == 'SEDANG DISIAPKAN' ? 'selected' : '' ?>>SEDANG DISIAPKAN</option>
-                                    <option value="DONE" <?= $list['status'] == 'DONE' ? 'selected' : '' ?>>SUDAH DIKIRIM</option>
+                                    <option value="DONE" <?= $list['status'] == 'DONE' ? 'selected' : '' ?>>SELESAI</option>
                                 </select>
                             </div>
                         </div>

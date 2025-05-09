@@ -15,6 +15,7 @@ use App\Models\BonCelupModel;
 use App\Models\OutCelupModel;
 use FPDF;
 use Picqer\Barcode\BarcodeGeneratorPNG;
+use App\Models\PemesananSpandexKaretModel;
 
 class PdfController extends BaseController
 {
@@ -28,6 +29,8 @@ class PdfController extends BaseController
     protected $openPoModel;
     protected $bonCelupModel;
     protected $outCelupModel;
+    protected $pemesananSpandexKaretModel;
+
     public function __construct()
     {
         $this->masterOrderModel = new MasterOrderModel();
@@ -36,6 +39,7 @@ class PdfController extends BaseController
         $this->openPoModel = new OpenPoModel();
         $this->bonCelupModel = new BonCelupModel();
         $this->outCelupModel = new OutCelupModel();
+        $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
 
 
         $this->role = session()->get('role');
@@ -1626,5 +1630,12 @@ class PdfController extends BaseController
         // Output PDF
         return $this->response->setHeader('Content-Type', 'application/pdf')
             ->setBody($pdf->Output('PO Gabungan.pdf', 'I'));
+    }
+
+    public function generatePemesananSpandexKaretCovering($jenis, $tgl_po)
+    {
+        // Ambil data dari model
+        $data = $this->pemesananSpandexKaretModel->getDataForPdf($jenis, $tgl_po);
+        dd ($data);
     }
 }

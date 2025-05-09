@@ -442,7 +442,7 @@ class PemesananModel extends Model
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->where('pemesanan.status_kirim', '')
+            ->where('pemesanan.status_kirim', 'YA')
             ->where('master_material.jenis', 'Spandex');
 
         // Filter berdasarkan tanggal
