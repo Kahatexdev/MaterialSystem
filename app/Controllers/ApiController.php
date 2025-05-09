@@ -686,7 +686,6 @@ class ApiController extends ResourceController
             return $this->fail('Data tidak ditemukan', ResponseInterface::HTTP_BAD_REQUEST);
         }
 
-        dd($data);
         $result = $this->returModel->insert($data);
 
         if (!$result) {
