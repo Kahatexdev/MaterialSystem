@@ -795,7 +795,7 @@ class ApiController extends ResourceController
     }
     public function cekMaterial($id)
     {
-        $material = $this->materialModel->material($id);
+        $material = $this->materialModel->materialCek($id);
         return $this->response->setJSON($material);
     }
 }

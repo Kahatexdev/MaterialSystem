@@ -268,7 +268,7 @@ class MaterialModel extends Model
             ->groupBy('no_model,item_type,kode_warna,color')
             ->findAll();
     }
-    public function material($id)
+    public function materialCek($id)
     {
         return $this->select('master_order.no_model, area, kode_warna, item_type, color')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
