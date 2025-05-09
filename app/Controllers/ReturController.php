@@ -10,6 +10,8 @@ use App\Models\MaterialModel;
 use App\Models\ReturModel;
 use App\Models\PemasukanModel;
 use App\Models\OutCelupModel;
+use App\Models\KategoriReturModel;
+
 
 class ReturController extends BaseController
 {
@@ -23,6 +25,8 @@ class ReturController extends BaseController
     protected $returModel;
     protected $pemasukanModel;
     protected $outCelupModel;
+    protected $kategoriReturModel;
+
 
     public function __construct()
     {
@@ -32,6 +36,7 @@ class ReturController extends BaseController
         $this->returModel = new ReturModel();
         $this->pemasukanModel = new PemasukanModel();
         $this->outCelupModel = new OutCelupModel();
+        $this->kategoriReturModel = new KategoriReturModel();
 
         $this->role = session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
@@ -131,6 +136,29 @@ class ReturController extends BaseController
         // flashdata
         session()->setFlashdata('success', 'Data berhasil di update.');
         return redirect()->to(base_url(session()->get('role') . '/retur'));
+    }
+    public function returArea()
+    {
+        $data = $this->kategoriReturModel->getKategoriRetur();
+        $kategoriRetur = [];
+        foreach ($data as $item) {
+            $kategoriRetur[] = [
+                'nama_kategori' => $item['nama_kategori'],
+                'tipe_kategori' => $item['tipe_kategori']
+            ];
+        }
+        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $response = file_get_contents($apiUrl);
+
+        $area = json_decode($response, true);
+
+        return view($this->role . '/retur/index', [
+            'active'     => $this->active,
+            'title'      => 'PPH',
+            'role'       => $this->role,
+            'area'       => $area,
+            'kategori' => $kategoriRetur,
+        ]);
     }
 
     public function listBarcodeRetur()
