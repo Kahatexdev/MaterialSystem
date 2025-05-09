@@ -107,6 +107,19 @@
                                                 class="btn bg-gradient-info">
                                                 <i class="fas fa-layer-group"></i>Pilih
                                             </a>
+                                            <!-- button pesan ke covering -->
+
+                                            <?php if ($data['jenis'] === 'SPANDEX' || $data['jenis'] === 'KARET'): ?>
+                                                <?php if (!$data['sudah_pesan_spandex']): ?>
+                                                    <a href="<?= base_url($role . '/pesanKeCovering/' . $data['id_total_pemesanan']) ?>"
+                                                        class="btn bg-gradient-info">
+                                                        <i class="fas fa-layer-group"></i> Pesan <?= ucfirst($data['jenis']) ?>
+                                                    </a>
+                                                <?php else: ?>
+                                                    <span class="badge bg-success">Sudah Dipesan</span>
+                                                <?php endif; ?>
+                                            <?php endif; ?>
+
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

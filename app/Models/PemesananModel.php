@@ -530,4 +530,9 @@ class PemesananModel extends Model
             ->where('status_kirim', '')
             ->findAll();
     }
+
+    public function getPemesananSpandex($id)
+    {
+        return $this->where('id_total_pemesanan', $id)->first();
+    }
 }

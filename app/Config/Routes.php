@@ -200,6 +200,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     //PO Covering
     $routes->get('poCovering', 'POCoveringController::index');
     $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
+    $routes->get('pesanKeCovering/(:any)', 'CoveringPemesananController::pesanKeCovering/$1');
 
     $routes->get('retur', 'ReturController::index');
     $routes->post('retur/approve', 'ReturController::approve');
@@ -313,6 +314,8 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('reportPemesananSpandexCovering', 'CoveringPemesananController::reportPemesananSpandexCovering');
     $routes->get('filterPemesananSpandexCovering', 'CoveringPemesananController::filterPemesananSpandexCovering');
     $routes->get('excelPemesananSpandexCovering', 'ExcelController::excelPemesananSpandexCovering');
+    
+    $routes->post('updatePemesanan/(:any)', 'CoveringPemesananController::updatePemesanan/$1');
 });
 
 
