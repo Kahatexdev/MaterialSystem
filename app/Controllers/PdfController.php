@@ -13,7 +13,6 @@ use App\Models\MasterMaterialModel;
 use App\Models\OpenPoModel;
 use App\Models\BonCelupModel;
 use App\Models\OutCelupModel;
-use App\Models\ReturModel;
 use FPDF;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use App\Models\PemesananSpandexKaretModel;
@@ -32,7 +31,6 @@ class PdfController extends BaseController
     protected $outCelupModel;
     protected $pemesananSpandexKaretModel;
 
-    protected $returModel;
     public function __construct()
     {
         $this->masterOrderModel = new MasterOrderModel();
@@ -1800,7 +1798,6 @@ class PdfController extends BaseController
         if (!$dataRetur) {
             return "Data tidak ditemukan.";
         }
-
         // Generate barcode (base64)
         $generator = new BarcodeGeneratorPNG();
         $id_out_celup = str_pad($dataRetur['id_out_celup'], 12, '0', STR_PAD_LEFT);
