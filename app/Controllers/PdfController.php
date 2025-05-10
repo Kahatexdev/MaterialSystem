@@ -1800,8 +1800,11 @@ class PdfController extends BaseController
         }
         // Generate barcode (base64)
         $generator = new BarcodeGeneratorPNG();
-        $id_out_celup = str_pad($dataRetur['id_out_celup'], 12, '0', STR_PAD_LEFT);
-        $barcodeData = $generator->getBarcode($id_out_celup, $generator::TYPE_EAN_13);
+        $id_out_celup = (string) $dataRetur['id_out_celup'];
+        $barcodeData = $generator->getBarcode(
+            $id_out_celup,
+            $generator::TYPE_CODE_128
+        );
         $barcodeBase64 = base64_encode($barcodeData);
 
         // Buat PDF
