@@ -1827,7 +1827,7 @@ class PdfController extends BaseController
         $pdf->Image($barcodeFile, $startX + 10, $barcodeY, 80, 20);
         unlink($barcodeFile);
 
-        // Tampilkan teks data
+        // Tampilkan teks data retur 
         $pdf->SetY($barcodeY + 25);
         $pdf->SetX($startX + 10);
         $pdf->Cell(0, 8, 'No Model       : ' . $dataRetur['no_model'], 0, 1);
