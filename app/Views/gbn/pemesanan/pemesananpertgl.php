@@ -60,11 +60,20 @@
                                                 Detail
                                             </a>
                                         </td>
-                                        <td class="text-center">
+                                        <?php if ($jenis === 'SPANDEX' || $jenis === 'KARET') : ?>
+                                            <!-- <td class="text-center">
+                                                <a href="<?= base_url($role . '/generatePemesananSpandexKaretCovering/' . $area . '/' . $jenis . '/' . $psn['tgl_pakai']) ?>" class="btn bg-gradient-success">
+                                                    <i class="fas fa-file-excel"></i>
+                                                    Export
+                                                </a>
+                                            </td> -->
+                                        <?php else : ?>
+                                            <td class="text-center">
                                             <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar?area=' . $area . '&jenis=' . $jenis . '&tglPakai=' . $psn['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
                                                 <i class="fas fa-file-excel fa-2x"></i>
                                             </a>
                                         </td>
+                                        <?php endif; ?>
                                     </tr>
 
                                 <?php endforeach; ?>
