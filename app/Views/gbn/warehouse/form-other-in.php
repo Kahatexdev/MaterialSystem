@@ -80,23 +80,28 @@
                                     <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
                                         <!-- Form Items -->
                                         <div class="kebutuhan-item">
-                                            <div class="row g-3 mb-2">
+                                            <!-- <div class="row g-3 mb-2">
                                                 <div class="col-md-12">
                                                     <label for="itemType">Done Celup</label>
-                                                    <select class="form-control" id="add_item" name="add_item" required>
-                                                        <option value="">Pilih Item </option>
+                                                    <select class="form-control" id="no_model" name="no_model" required>
+                                                        <option value="">Pilih No Model </option>
                                                         <?php foreach ($no_model as $item): ?>
-                                                            <option value="<?= $item['id_celup'] ?>"><?= $item['no_model'] ?> | <?= $item['item_type'] ?> |<?= $item['kode_warna'] ?> | <?= $item['warna'] ?></option>
+                                                            <option value="<?= $item['no_model'] ?>"><?= $item['no_model'] ?></option>
                                                         <?php endforeach; ?>
                                                     </select>
                                                 </div>
-                                            </div>
+                                            </div> -->
                                             <div class="row g-3">
 
                                                 <div class="col-md-4">
                                                     <label>No Model</label>
-                                                    <input type="text" class="form-control" name="items[0][id_celup]" id="id_celup" required placeholder="Pilih No Model" readonly hidden>
-                                                    <input type="text" class="form-control" name="items[0][no_model]" id="no_model" required placeholder="No Model">
+                                                    <select class="form-control" id="no_model" name="no_model" required>
+                                                        <option value="">Pilih No Model </option>
+                                                        <?php foreach ($no_model as $item): ?>
+                                                            <option value="<?= $item['no_model'] ?>"><?= $item['no_model'] ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                    <!-- <input type="text" class="form-control" name="items[0][no_model]" id="no_model" required placeholder="No Model"> -->
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label>Item Type</label>
@@ -241,8 +246,8 @@
     <script>
         $(document).ready(function() {
 
-            $('#add_item').select2();
-            $('#add_item').on("select2:select", function() {
+            $('#no_model').select2();
+            $('#no_model').on("select2:select", function() {
                 let idcelup = $(this).val(); // Ambil value yang dipilih di select2
 
                 $.ajax({
@@ -358,147 +363,145 @@
                 newTabPane.ariaLabelledby = `${newTabId}-button`;
 
                 // Tambahkan elemen `input-group` ke tab baru
-                newTabPane.innerHTML = `
-            <div class="kebutuhan-item">
-                                        <div class="row g-3 mb-2">
-                                                <div class="col-md-12">
-                                                    <label for="itemType">Done Celup</label>
-                                                    <select class="form-control slc2" id="add_item_${tabIndex}" name="add_item" required>
-                                                        <option value="">Pilih Item </option>
-                                                        <?php foreach ($no_model as $item): ?>
-                                                            <option value="<?= $item['id_celup'] ?>"><?= $item['no_model'] ?> | <?= $item['item_type'] ?> |<?= $item['kode_warna'] ?> | <?= $item['warna'] ?></option>
-                                                        <?php endforeach; ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                           <div class="row g-3">
-                                            <div class="col-md-4">
-                                                <label>No Model</label>
-                                                <input type="text" class="form-control no-model" name="items[${tabIndex - 1}][id_celup]" id="${id_celup}" required placeholder="Pilih No Model" hidden>
-                                                <input type="text" class="form-control no-model" name="items[${tabIndex - 1}][no_model]" id="${newInputId}" required placeholder="Pilih No Model">
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label>Item Type</label>
-                                                <select class="form-control item-type" name="items[${tabIndex - 1}][item_type]" id="${itemTypeId}" required>
-                                                    <option value="">Pilih Item Type</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label>Kode Warna</label>
-                                                <select class="form-control kode-warna" name="items[${tabIndex - 1}][kode_warna]" id="${kodeWarnaId}" required>
-                                                    <option value="">Pilih Kode Warna</option>
-                                                </select>
-                                            </div>
-                                        </div>
+                //     newTabPane.innerHTML = `
+                // <div class="kebutuhan-item">
+                //                             <div class="row g-3 mb-2">
+                //                                     <div class="col-md-12">
+                //                                         <label for="itemType">Done Celup</label>
+                //                                         <select class="form-control slc2" id="add_item_${tabIndex}" name="add_item" required>
+                //                                             <option value="">Pilih Item </option>
 
-                                        <!-- Surat Jalan Section -->
-                                        <div class="row g-3 mt-3">
-                                            <div class="col-md-4">
-                                                <label>Warna</label>
-                                                   <select class="form-control kode-warna" name="items[${tabIndex - 1}][kode_warna]" id="${warnaId}" required>
-                                                    <option value="">Pilih Kode Warna</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label>LMD</label>
-                                                <select class="form-control" name="l_m_d[${tabIndex - 1}]" id="l_m_d" required>
-                                                    <option value="">Pilih LMD</option>
-                                                    <option value="L">L</option>
-                                                    <option value="M">M</option>
-                                                    <option value="D">D</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label>Harga</label>
-                                                <input type="float" class="form-control" name="harga[${tabIndex - 1}]" id="harga" required>
-                                            </div>
-                                            <div class="col-md-1">
-                                                <label for="ganti-retur" class="text-center">Ganti Retur</label>
-                                                <div class="row">
-                                                    <div class="col-md-3">
-                                                        <label>
-                                                            <input type="hidden" name="ganti_retur[${tabIndex - 1}]" value="0">
-                                                            <input type="checkbox" name="ganti_retur[${tabIndex - 1}]" value="1">
-                                                        </label>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label for="">Ya</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="mt-5">
-                                            <h3>Form Input Data Karung</h3>
-                                        </div>
+                //                                         </select>
+                //                                     </div>
+                //                                 </div>
+                //                                <div class="row g-3">
+                //                                 <div class="col-md-4">
+                //                                     <label>No Model</label>
+                //                                     <input type="text" class="form-control no-model" name="items[${tabIndex - 1}][id_celup]" id="${id_celup}" required placeholder="Pilih No Model" hidden>
+                //                                     <input type="text" class="form-control no-model" name="items[${tabIndex - 1}][no_model]" id="${newInputId}" required placeholder="Pilih No Model">
+                //                                 </div>
+                //                                 <div class="col-md-4">
+                //                                     <label>Item Type</label>
+                //                                     <select class="form-control item-type" name="items[${tabIndex - 1}][item_type]" id="${itemTypeId}" required>
+                //                                         <option value="">Pilih Item Type</option>
+                //                                     </select>
+                //                                 </div>
+                //                                 <div class="col-md-4">
+                //                                     <label>Kode Warna</label>
+                //                                     <select class="form-control kode-warna" name="items[${tabIndex - 1}][kode_warna]" id="${kodeWarnaId}" required>
+                //                                         <option value="">Pilih Kode Warna</option>
+                //                                     </select>
+                //                                 </div>
+                //                             </div>
 
-                                        <!-- Out Celup Section -->
-                                        <div class="row g-3 mt-3">
-                                            <div class="table-responsive">
-                                                <table id="${newPoTableId}" class="table table-bordered table-striped">
-                                                    <thead>
-                                                        <tr>
-                                                            <th width=100 class="text-center">No</th>
-                                                            <th class="text-center">GW Kirim</th>
-                                                            <th class="text-center">Kgs Kirim</th>
-                                                            <th class="text-center">Cones Kirim</th>
-                                                            <th class="text-center">Lot Kirim</th>
-                                                            <th class="text-center">
-                                                                <button type="button" class="btn btn-info" id="addRow">
-                                                                    <i class="fas fa-plus"></i>
-                                                                </button>
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td><input type="text" class="form-control text-center" name="no_karung[${tabIndex - 1}][0]" value="1" readonly></td>
-                                                            <td><input type="float" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex - 1}][0]" required></td>
-                                                            <td><input type="float" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex - 1}][0]" required></td>
-                                                            <td><input type="float" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex - 1}][0]" required></td>
-                                                            <td><input type="text" class="form-control lot_celup_input" name="items[${tabIndex - 1}][lot_celup]" id="${lotCelupId}" required></td>
+                //                             <!-- Surat Jalan Section -->
+                //                             <div class="row g-3 mt-3">
+                //                                 <div class="col-md-4">
+                //                                     <label>Warna</label>
+                //                                        <select class="form-control kode-warna" name="items[${tabIndex - 1}][kode_warna]" id="${warnaId}" required>
+                //                                         <option value="">Pilih Kode Warna</option>
+                //                                     </select>
+                //                                 </div>
+                //                                 <div class="col-md-4">
+                //                                     <label>LMD</label>
+                //                                     <select class="form-control" name="l_m_d[${tabIndex - 1}]" id="l_m_d" required>
+                //                                         <option value="">Pilih LMD</option>
+                //                                         <option value="L">L</option>
+                //                                         <option value="M">M</option>
+                //                                         <option value="D">D</option>
+                //                                     </select>
+                //                                 </div>
+                //                                 <div class="col-md-3">
+                //                                     <label>Harga</label>
+                //                                     <input type="float" class="form-control" name="harga[${tabIndex - 1}]" id="harga" required>
+                //                                 </div>
+                //                                 <div class="col-md-1">
+                //                                     <label for="ganti-retur" class="text-center">Ganti Retur</label>
+                //                                     <div class="row">
+                //                                         <div class="col-md-3">
+                //                                             <label>
+                //                                                 <input type="hidden" name="ganti_retur[${tabIndex - 1}]" value="0">
+                //                                                 <input type="checkbox" name="ganti_retur[${tabIndex - 1}]" value="1">
+                //                                             </label>
+                //                                         </div>
+                //                                         <div class="col-md-4">
+                //                                             <label for="">Ya</label>
+                //                                         </div>
+                //                                     </div>
+                //                                 </div>
+                //                             </div>
+                //                             <div class="mt-5">
+                //                                 <h3>Form Input Data Karung</h3>
+                //                             </div>
 
-                                                            <td class="text-center">
-                                                                <!-- <button type="button" class="btn btn-danger removeRow">
-                                                                        <i class="fas fa-trash"></i>
-                                                                    </button> -->
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                    <!-- Baris Total -->
-                                                    <tfoot>
-                                                        <tr>
-                                                            <th class="text-center">Total Karung</th>
-                                                            <th class="text-center">Total GW</th>
-                                                            <th class="text-center">Total NW</th>
-                                                            <th class="text-center">Total Cones</th>
-                                                            <th class="text-center">Total Lot</th>
-                                                            <th></th>
-                                                        </tr>
-                                                         <tr>
-                                                            <td><input type="number" class="form-control" id="${totalKarungId}" readonly></td>
-                                                            <td><input type="float" class="form-control" id="${totalGwId}" readonly></td>
-                                                            <td><input type="float" class="form-control" id="${totalKgsId}" readonly></td>
-                                                            <td><input type="float" class="form-control" id="${totalConesId}" readonly></td>
-                                                            <td><input type="text" class="form-control" id="${totalLotId}" readonly></td>
-                                                            <td></td>
-                                                        </tr>
-                                                    </tfoot>
-                                                </table>
-                                            </div>
-                                        </div>
-                                        <!-- Buttons -->
-                                        <div class="row mt-3">
-                                            <div class="col-12 text-center mt-2">
-                                                <button class="btn btn-icon btn-3 btn-outline-info add-more" type="button">
-                                                    <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
-                                                </button>
-                                                <button class="btn btn-icon btn-3 btn-outline-danger remove-tab" type="button">
-                                                    <span class="btn-inner--icon"><i class="fas fa-trash"></i></span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-            `;
+                //                             <!-- Out Celup Section -->
+                //                             <div class="row g-3 mt-3">
+                //                                 <div class="table-responsive">
+                //                                     <table id="${newPoTableId}" class="table table-bordered table-striped">
+                //                                         <thead>
+                //                                             <tr>
+                //                                                 <th width=100 class="text-center">No</th>
+                //                                                 <th class="text-center">GW Kirim</th>
+                //                                                 <th class="text-center">Kgs Kirim</th>
+                //                                                 <th class="text-center">Cones Kirim</th>
+                //                                                 <th class="text-center">Lot Kirim</th>
+                //                                                 <th class="text-center">
+                //                                                     <button type="button" class="btn btn-info" id="addRow">
+                //                                                         <i class="fas fa-plus"></i>
+                //                                                     </button>
+                //                                                 </th>
+                //                                             </tr>
+                //                                         </thead>
+                //                                         <tbody>
+                //                                             <tr>
+                //                                                 <td><input type="text" class="form-control text-center" name="no_karung[${tabIndex - 1}][0]" value="1" readonly></td>
+                //                                                 <td><input type="float" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex - 1}][0]" required></td>
+                //                                                 <td><input type="float" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex - 1}][0]" required></td>
+                //                                                 <td><input type="float" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex - 1}][0]" required></td>
+                //                                                 <td><input type="text" class="form-control lot_celup_input" name="items[${tabIndex - 1}][lot_celup]" id="${lotCelupId}" required></td>
+
+                //                                                 <td class="text-center">
+                //                                                     <!-- <button type="button" class="btn btn-danger removeRow">
+                //                                                             <i class="fas fa-trash"></i>
+                //                                                         </button> -->
+                //                                                 </td>
+                //                                             </tr>
+                //                                         </tbody>
+                //                                         <!-- Baris Total -->
+                //                                         <tfoot>
+                //                                             <tr>
+                //                                                 <th class="text-center">Total Karung</th>
+                //                                                 <th class="text-center">Total GW</th>
+                //                                                 <th class="text-center">Total NW</th>
+                //                                                 <th class="text-center">Total Cones</th>
+                //                                                 <th class="text-center">Total Lot</th>
+                //                                                 <th></th>
+                //                                             </tr>
+                //                                              <tr>
+                //                                                 <td><input type="number" class="form-control" id="${totalKarungId}" readonly></td>
+                //                                                 <td><input type="float" class="form-control" id="${totalGwId}" readonly></td>
+                //                                                 <td><input type="float" class="form-control" id="${totalKgsId}" readonly></td>
+                //                                                 <td><input type="float" class="form-control" id="${totalConesId}" readonly></td>
+                //                                                 <td><input type="text" class="form-control" id="${totalLotId}" readonly></td>
+                //                                                 <td></td>
+                //                                             </tr>
+                //                                         </tfoot>
+                //                                     </table>
+                //                                 </div>
+                //                             </div>
+                //                             <!-- Buttons -->
+                //                             <div class="row mt-3">
+                //                                 <div class="col-12 text-center mt-2">
+                //                                     <button class="btn btn-icon btn-3 btn-outline-info add-more" type="button">
+                //                                         <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
+                //                                     </button>
+                //                                     <button class="btn btn-icon btn-3 btn-outline-danger remove-tab" type="button">
+                //                                         <span class="btn-inner--icon"><i class="fas fa-trash"></i></span>
+                //                                     </button>
+                //                                 </div>
+                //                             </div>
+                //                         </div>
+                // `;
 
                 navTabContent.appendChild(newTabPane);
                 document.getElementById(newContentId).querySelectorAll('.slc2').forEach(el => {

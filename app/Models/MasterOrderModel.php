@@ -252,4 +252,11 @@ class MasterOrderModel extends Model
         }
         return $result;
     }
+    public function getAllNoModel()
+    {
+        return $this->select('no_model')
+            ->distinct()
+            ->orderBy('no_model', 'ASC')
+            ->findAll();
+    }
 }
