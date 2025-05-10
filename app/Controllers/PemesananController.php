@@ -141,9 +141,11 @@ class PemesananController extends BaseController
             $cekSpandex = $this->pemesananSpandexKaretModel
                 ->where('id_total_pemesanan', $item['id_total_pemesanan'])
                 ->first();
-
             $item['sudah_pesan_spandex'] = $cekSpandex ? true : false;
+            $item['status'] = $cekSpandex ? $cekSpandex['status'] : 'BELUM PESAN';
         }
+        // dd ($dataPemesanan);
+        $listPemesanan = $this->pemesananSpandexKaretModel->getListPemesananSpandexKaret($area,$jenis, $tglPakai);
 
         $data = [
             'active' => $this->active,
@@ -650,5 +652,45 @@ class PemesananController extends BaseController
                 $success ? 'Request berhasil ditolak'
                     : 'Request gagal diproses'
             );
+    }
+
+    public function permintaanKaretCovering()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/pemesanan/report-permintaan-karet', $data);
+    }
+
+    public function permintaanSpandexCovering()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/pemesanan/report-permintaan-spandex', $data);
+    }
+
+    public function getFilterPemesananKaret()
+    {
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemesananModel->getFilterPemesananKaret($tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
+    }
+
+    public function getFilterPemesananSpandex()
+    {
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemesananModel->getFilterPemesananSpandex($tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
     }
 }

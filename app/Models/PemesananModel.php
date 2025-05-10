@@ -93,7 +93,7 @@ class PemesananModel extends Model
     public function getDataPemesananperTgl($area, $jenis)
     {
         $query = $this->db->table('pemesanan p')
-            ->select("p.id_pemesanan, p.tgl_pakai, m.area, mo.no_model, m.item_type, m.kode_warna, m.color,  tp.ttl_jl_mc, tp.ttl_kg , tp.ttl_cns, CASE WHEN p.po_tambahan = '1' THEN 'YA' ELSE '' END AS po_tambahan")
+            ->select("p.id_pemesanan,mm.jenis, p.tgl_pakai, m.area, mo.no_model, m.item_type, m.kode_warna, m.color,  tp.ttl_jl_mc, tp.ttl_kg , tp.ttl_cns, CASE WHEN p.po_tambahan = '1' THEN 'YA' ELSE '' END AS po_tambahan")
             ->join('total_pemesanan tp', 'tp.id_total_pemesanan = p.id_total_pemesanan', 'left')
             ->join('material m', 'm.id_material = p.id_material', 'left')
             ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
@@ -412,12 +412,14 @@ class PemesananModel extends Model
 
     public function getFilterPemesananKaret($tanggal_awal, $tanggal_akhir)
     {
-        $this->select('pemesanan.*, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
+        $this->select('pemesanan.*, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->where('pemesanan.status_kirim', '')
-            ->where('master_material.jenis', 'Karet');
+            ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
+            // ->where('tp.ttl_jl_mc >', 0)
+            ->where('pemesanan.status_kirim', 'YA')
+            ->where('master_material.jenis', 'KARET');
 
         // Filter berdasarkan tanggal
         if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
@@ -438,12 +440,14 @@ class PemesananModel extends Model
 
     public function getFilterPemesananSpandex($tanggal_awal, $tanggal_akhir)
     {
-        $this->select('pemesanan.*, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
+        $this->select('pemesanan.*, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
+            // ->where('tp.ttl_jl_mc >', 0)
             ->where('pemesanan.status_kirim', 'YA')
-            ->where('master_material.jenis', 'Spandex');
+            ->where('master_material.jenis', 'SPANDEX');
 
         // Filter berdasarkan tanggal
         if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {

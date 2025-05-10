@@ -214,6 +214,13 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pemesanan/getCountStatusRequest', 'PemesananController::getCountStatusRequest');
     $routes->post('pemesanan/additional-time/accept', 'PemesananController::additionalTimeAccept');
     $routes->post('pemesanan/additional-time/reject', 'PemesananController::additionalTimeReject');
+
+    $routes->get('pemesanan/permintaanKaretCovering', 'PemesananController::permintaanKaretCovering');
+    $routes->get('pemesanan/permintaanSpandexCovering', 'PemesananController::permintaanSpandexCovering');
+    $routes->get('pemesanan/getFilterPemesananKaret', 'PemesananController::getFilterPemesananKaret');
+    $routes->get('pemesanan/getFilterPemesananSpandex', 'PemesananController::getFilterPemesananSpandex');
+    $routes->get('pemesanan/exportPermintaanKaret', 'ExcelController::exportPermintaanKaret');
+    $routes->get('pemesanan/exportPermintaanSpandex', 'ExcelController::exportPermintaanSpandex');
 });
 
 // celup routes
