@@ -2130,5 +2130,6 @@ class WarehouseController extends BaseController
             'title' => 'Material System',
             'role' => $this->role,
         ];
+        return view($this->role . '/warehouse/form-other-in', $data);
     }
 }
