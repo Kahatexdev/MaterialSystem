@@ -117,6 +117,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('reset_pemasukan', 'WarehouseController::reset_pemasukan');
     $routes->post('hapus_pemasukan', 'WarehouseController::hapusListPemasukan');
     $routes->post('proses_pemasukan', 'WarehouseController::prosesPemasukan');
+    $routes->get('otherIn', 'WarehouseController::otherIn');
+
     $routes->get('getItemTypeByModel/(:any)', 'WarehouseController::getItemTypeByModel/$1');
     $routes->get('getKodeWarnaByModelAndItemType', 'WarehouseController::getKodeWarna');
     $routes->get('getWarnaDanLot', 'WarehouseController::getWarnaDanLot');

@@ -13,7 +13,6 @@ use App\Models\MasterMaterialModel;
 use App\Models\OpenPoModel;
 use App\Models\BonCelupModel;
 use App\Models\OutCelupModel;
-use App\Models\ReturModel;
 use FPDF;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use App\Models\PemesananSpandexKaretModel;
@@ -32,7 +31,6 @@ class PdfController extends BaseController
     protected $outCelupModel;
     protected $pemesananSpandexKaretModel;
 
-    protected $returModel;
     public function __construct()
     {
         $this->masterOrderModel = new MasterOrderModel();
@@ -1792,5 +1790,61 @@ class PdfController extends BaseController
         return $this->response
             ->setHeader('Content-Type', 'application/pdf')
             ->setBody($pdf->Output('S'));
+    }
+
+    public function generateBarcodeRetur($idRetur)
+    {
+        $dataRetur = $this->outCelupModel->getDataReturById($idRetur);
+        if (!$dataRetur) {
+            return "Data tidak ditemukan.";
+        }
+        // Generate barcode (base64)
+        $generator = new BarcodeGeneratorPNG();
+        $id_out_celup = str_pad($dataRetur['id_out_celup'], 12, '0', STR_PAD_LEFT);
+        $barcodeData = $generator->getBarcode($id_out_celup, $generator::TYPE_EAN_13);
+        $barcodeBase64 = base64_encode($barcodeData);
+
+        // Buat PDF
+        $pdf = new FPDF('P', 'mm', 'A4');
+        $pdf->AddPage();
+        $pdf->SetFont('Arial', 'B', 12);
+
+        // Kotak luar
+        $startX = 52.5;
+        $startY = 20;
+        $boxWidth = 100;
+        $boxHeight = 100;
+
+        $pdf->Rect($startX, $startY, $boxWidth, $boxHeight);
+
+        // Tampilkan barcode
+        $barcodeY = $startY + 5;
+        $barcodeFile = tempnam(sys_get_temp_dir(), 'barcode_') . '.png';
+        file_put_contents($barcodeFile, base64_decode($barcodeBase64));
+        $pdf->Image($barcodeFile, $startX + 10, $barcodeY, 80, 20);
+        unlink($barcodeFile);
+
+        // Tampilkan teks data retur 
+        $pdf->SetY($barcodeY + 25);
+        $pdf->SetX($startX + 10);
+        $pdf->Cell(0, 8, 'No Model       : ' . $dataRetur['no_model'], 0, 1);
+        $pdf->SetX($startX + 10);
+        $pdf->Cell(0, 8, 'Item Type       : ' . $dataRetur['item_type'], 0, 1);
+        $pdf->SetX($startX + 10);
+        $pdf->Cell(0, 8, 'Kode Warna   : ' . $dataRetur['kode_warna'], 0, 1);
+        $pdf->SetX($startX + 10);
+        $pdf->Cell(0, 8, 'Warna        : ' . $dataRetur['warna'], 0, 1);
+        $pdf->SetX($startX + 10);
+        $pdf->Cell(0, 8, 'Kgs Kirim    : ' . $dataRetur['kgs_kirim'], 0, 1);
+        $pdf->SetX($startX + 10);
+        $pdf->Cell(0, 8, 'Cones Kirim  : ' . $dataRetur['cones_kirim'], 0, 1);
+        $pdf->SetX($startX + 10);
+        $pdf->Cell(0, 8, 'Lot Kirim    : ' . $dataRetur['lot_kirim'], 0, 1);
+        $pdf->SetX($startX + 10);
+        $pdf->Cell(0, 8, 'No Karung    : ' . $dataRetur['no_karung'], 0, 1);
+
+        // Output PDF
+        return $this->response->setHeader('Content-Type', 'application/pdf')
+            ->setBody($pdf->Output('Bon Pengiriman.pdf', 'I'));
     }
 }

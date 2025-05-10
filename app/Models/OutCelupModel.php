@@ -19,8 +19,6 @@ class OutCelupModel extends Model
         'id_bon',
         'id_celup',
         'id_retur',
-        'id_other_bon',
-        'no_model',
         'l_m_d',
         'harga',
         'no_karung',
@@ -66,9 +64,9 @@ class OutCelupModel extends Model
 
     public function getDetailBonByIdBon($id)
     {
-        return $this->select('master_order.buyer, master_material.ukuran, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, out_celup.*')
+        return $this->select('master_order.buyer, master_material.ukuran, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, out_celup.*')
             ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'right')
-            ->join('master_order', 'master_order.no_model = out_celup.no_model', 'right')
+            ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'right')
             ->join('master_material', 'master_material.item_type = schedule_celup.item_type', 'right')
             ->where('out_celup.id_bon', $id)
             ->groupBy('id_out_celup')
@@ -223,19 +221,9 @@ class OutCelupModel extends Model
 
     public function getDataReturById($idRetur)
     {
-        return $this->select('retur.no_model, retur.item_type, retur.kode_warna, retur.warna, out_celup.*')
+        return $this->select('out_celup.*,retur.item_type, retur.kode_warna, retur.warna')
             ->join('retur', 'retur.id_retur = out_celup.id_retur')
             ->where('out_celup.id_retur', $idRetur)
             ->first();
     }
-    // public function getDataReturById($idRetur)
-    // {
-    //     return $this->select('master_order.buyer, master_material.ukuran, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, out_celup.*')
-    //         ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'right')
-    //         ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'right')
-    //         ->join('master_material', 'master_material.item_type = schedule_celup.item_type', 'right')
-    //         ->where('out_celup.id_retur', $idRetur)
-    //         ->groupBy('id_out_celup')
-    //         ->findAll();
-    // }
 }
