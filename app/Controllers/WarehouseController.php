@@ -2123,4 +2123,12 @@ class WarehouseController extends BaseController
             ]);
         }
     }
+    public function otherIn()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+    }
 }
