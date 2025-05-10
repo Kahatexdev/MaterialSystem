@@ -13,8 +13,10 @@ use App\Models\MasterMaterialModel;
 use App\Models\OpenPoModel;
 use App\Models\BonCelupModel;
 use App\Models\OutCelupModel;
+use App\Models\ReturModel;
 use FPDF;
 use Picqer\Barcode\BarcodeGeneratorPNG;
+use App\Models\PemesananSpandexKaretModel;
 
 class PdfController extends BaseController
 {
@@ -28,6 +30,9 @@ class PdfController extends BaseController
     protected $openPoModel;
     protected $bonCelupModel;
     protected $outCelupModel;
+    protected $pemesananSpandexKaretModel;
+
+    protected $returModel;
     public function __construct()
     {
         $this->masterOrderModel = new MasterOrderModel();
@@ -36,6 +41,7 @@ class PdfController extends BaseController
         $this->openPoModel = new OpenPoModel();
         $this->bonCelupModel = new BonCelupModel();
         $this->outCelupModel = new OutCelupModel();
+        $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
 
 
         $this->role = session()->get('role');
@@ -1626,5 +1632,222 @@ class PdfController extends BaseController
         // Output PDF
         return $this->response->setHeader('Content-Type', 'application/pdf')
             ->setBody($pdf->Output('PO Gabungan.pdf', 'I'));
+    }
+
+    public function generatePemesananSpandexKaretCovering($jenis, $tgl_po)
+    {
+        // Ambil data dari model
+        $data = $this->pemesananSpandexKaretModel->getDataForPdf($jenis, $tgl_po);
+        // dd ($data);
+        // Inisialisasi FPDF (portrait A4)
+        $pdf = new FPDF('P', 'mm', 'A4');
+        $pdf->AddPage();
+
+        // Garis tepi luar (margin 10mm → konten 190×277)
+        $pdf->SetDrawColor(0, 0, 0);
+        $pdf->SetLineWidth(0.4);
+        $pdf->Rect(9, 9, 192, 132);    // sedikit lebih besar untuk border luar
+        $pdf->SetLineWidth(0.2);
+        $pdf->Rect(10, 10, 190, 130);  // border dalam
+
+        // Logo
+        $x = $pdf->GetX();
+        $y = $pdf->GetY();
+        $pdf->Image('assets/img/logo-kahatex.png', $x + 16, $y + 1, 10, 8);
+
+        // Header
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->Cell(43, 13, '', 1, 0, 'C');
+        $pdf->SetFillColor(170, 255, 255);
+        $pdf->Cell(147, 4, 'FORMULIR', 1, 1, 'C', 1);
+
+        $pdf->SetFont('Arial', 'B', 6);
+        $pdf->Cell(43, 5, '', 0, 0, 'L');
+        $pdf->Cell(147, 5, 'DEPARTEMEN COVERING', 0, 1, 'C');
+
+        $pdf->SetFont('Arial', 'B', 6);
+        $pdf->Cell(43, 4, 'PT KAHATEX', 0, 0, 'C');
+        $pdf->Cell(147, 4, 'SURAT PENGELUARAN BARANG', 0, 1, 'C');
+
+        // Tabel Header Atas (total lebar 190)
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(43, 4, 'No. Dokumen', 1, 0, 'L');
+        $pdf->SetFont('Arial', 'B', 5);
+        $pdf->Cell(60, 4, 'FOR-COV-631', 1, 0, 'L');
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(24, 4, 'Halaman', 1, 0, 'L');
+        $pdf->Cell(63, 4, '1 dari 1', 1, 1, 'C');
+
+        // Tanggal
+        $pdf->Cell(43, 4, 'Tanggal Efektif', 1, 0, 'L');
+        $pdf->SetFont('Arial', 'B', 5);
+        $pdf->Cell(60, 4, '01 Mei 2017', 1, 0, 'L');
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(24, 4, 'Revisi', 1, 0, 'L');
+        $pdf->Cell(63, 4, '00', 1, 1, 'C');
+
+        // kosongkan sel
+        $pdf->Cell(103, 4, '', 1, 0, 'L');
+        $pdf->Cell(24, 4, 'Tanggal Revisi', 1, 0, 'L');
+        $pdf->Cell(63, 4, '', 1, 1, 'C');
+
+        // garis double
+        $pdf->SetLineWidth(0.2);
+        $pdf->SetDrawColor(0, 0, 0);
+        $pdf->Line(10, 36, 200, 36); // Garis horizontal
+        $pdf->Cell(0, 1, '', 0, 1); // Pindah ke baris berikutnya
+
+        // customer
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->Cell(103, 8, 'CUSTOMER: ', 0, 0, 'L', false); // Tinggi cell diatur menjadi 8 agar teks berada di tengah
+        $pdf->SetFont('Arial', '', 6);
+        $pdf->Cell(24, 4, 'NO: ', 0, 0, 'L', false); // Tinggi cell diatur menjadi 8 agar teks berada di tengah
+        $pdf->Cell(63, 4, '', 0, 1, 'C', false); // Tinggi cell diatur menjadi 8 agar teks berada di tengah
+        $pdf->Cell(103, 4, '', 0, 0, 'L', false); // Tinggi cell diatur menjadi 8 agar teks berada di tengah
+        $pdf->Cell(24, 4, 'TANGGAL: ', 0, 0, 'L', false); // Tinggi cell diatur menjadi 8 agar teks berada di tengah
+        $pdf->Cell(63, 4, '', 0, 1, 'L', false); // Tinggi cell diatur menjadi 8 agar teks berada di tengah
+
+        // Tabel Header Baris Pertama
+        $pdf->SetFont('Arial', '', 6);
+        $pdf->Cell(10, 8,  'No',           1, 0, 'C');
+        $pdf->Cell(55, 8,  'JENIS BARANG', 1, 0, 'C');
+        $pdf->Cell(15, 8,  'DR/TPM',       1, 0, 'C');
+        $pdf->Cell(30, 8,  'WARNA/CODE',   1, 0, 'C');
+        $pdf->Cell(20, 4,  'JUMLAH',       1, 0, 'C');
+        // Keterangan merge dua baris (8 + 4 mm = 12 mm)
+        $pdf->Cell(60, 8, 'KETERANGAN',   1, 1, 'C');
+
+        // Baris Kedua: hanya untuk sub‐kolom JUMLAH (KG + CONES)
+        $pdf->SetX(10 /* left margin */ + 10 + 55 + 15 + 30); // pos X setelah No+Jenis+DRTPM+Warna
+        $pdf->Cell(10, -4, 'KG',    1, 0, 'C');
+        $pdf->Cell(10, -4, 'CONES', 1, 0, 'C');
+        $pdf->Ln();  // turun ke baris data
+        $pdf->Cell(190, 4, '', 0, 1, 'C'); // Kosongkan sel untuk No
+        // foreach data.
+        $urut = 18; // untuk mengatur posisi Y dari baris ke 2
+        $no = 1;
+        if (count($data) > 0) {
+            foreach ($data as $row) {
+                $pdf->Cell(10, 4,  $no++,           1, 0, 'C');
+                $pdf->Cell(55, 4,  $row['item_type'], 1, 0, 'C');
+                $pdf->Cell(15, 4,  "",        1, 0, 'C');
+                $pdf->Cell(30, 4,  $row['color'],    1, 0, 'C');
+                $pdf->Cell(10, 4,  number_format($row['total_pesan'], 2),   1, 0, 'C');
+                $pdf->Cell(10, 4,  number_format($row['total_cones'], 2),   1, 0, 'C');
+                // Keterangan merge dua baris (8 + 4 mm = 12 mm)
+                $pdf->Cell(60, 4, '',   1, 1, 'C');
+            }
+            if ($no < $urut) {
+                // Jika tidak ada data yang ditemukan
+                for ($i = $no; $i < $urut; $i++) {
+                    $pdf->Cell(10, 4,  $no++, 1, 0, 'C');
+                    $pdf->Cell(55, 4,  '', 1, 0, 'C');
+                    $pdf->Cell(15, 4,  '',        1, 0, 'C');
+                    $pdf->Cell(30, 4,  '',    1, 0, 'C');
+                    $pdf->Cell(10, 4,  '',   1, 0, 'C');
+                    $pdf->Cell(10, 4,  '',   1, 0, 'C');
+                    // Keterangan merge dua baris (8 + 4 mm = 12 mm)
+                    $pdf->Cell(60, 4, '',   1, 1, 'C');
+                }
+            }
+        } else {
+            // Jika ada data yang ditemukan, tetapi kurang dari 5 baris
+            for ($i = 0; $i < $urut; $i++) {
+                $pdf->Cell(10, 4,  '',           1, 0, 'C');
+                $pdf->Cell(55, 4,  '', 1, 0, 'C');
+                $pdf->Cell(15, 4,  '',        1, 0, 'C');
+                $pdf->Cell(30, 4,  '',    1, 0, 'C');
+                $pdf->Cell(10, 4,  '',   1, 0, 'C');
+                $pdf->Cell(10, 4,  '',   1, 0, 'C');
+                // Keterangan merge dua baris (8 + 4 mm = 12 mm)
+                $pdf->Cell(60, 4, '',   1, 1, 'C');
+            }
+        }
+
+        // tanda tangan
+        // $pdf->Cell(277, 5, '', 0, 1, 'C');
+        $pdf->Cell(63, 5, 'YANG BUKA BON', 0, 0, 'C');
+        $pdf->Cell(64, 5, 'GUDANG ANGKUTAN', 0, 0, 'C');
+        $pdf->Cell(63, 5, 'PENERIMA', 0, 1, 'C');
+        $pdf->Cell(190, 5, '', 0, 1, 'C');
+        $pdf->Cell(190, 5, '', 0, 1, 'C');
+        $pdf->Cell(63, 5, '(       ' . 'PARYANTI' . '       )', 0, 0, 'C');
+        $pdf->Cell(64, 5, '(                               )', 0, 0, 'C');
+        $pdf->Cell(63, 5, '(       ' . 'HARTANTO' . '       )', 0, 1, 'C');
+        $pdf->Cell(55, 5, '', 0, 1, 'C');
+        $pdf->Cell(55, 5, '', 0, 0, 'C');
+        $pdf->Cell(55, 5, '', 0, 0, 'C');
+        $pdf->Cell(55, 5, '', 0, 0, 'C');
+        $pdf->Cell(55, 5, '', 0, 1, 'C');
+        $pdf->Cell(55, 5, '', 0, 0, 'C');
+
+
+
+
+
+
+        // … di sini loop $data dan tampilkan isi tabel sesuai style-mu …
+
+        // Output PDF
+        return $this->response
+            ->setHeader('Content-Type', 'application/pdf')
+            ->setBody($pdf->Output('S'));
+    }
+
+    public function generateBarcodeRetur($idRetur)
+    {
+        $dataRetur = $this->outCelupModel->getDataReturById($idRetur);
+        if (!$dataRetur) {
+            return "Data tidak ditemukan.";
+        }
+
+        // Generate barcode (base64)
+        $generator = new BarcodeGeneratorPNG();
+        $id_out_celup = str_pad($dataRetur['id_out_celup'], 12, '0', STR_PAD_LEFT);
+        $barcodeData = $generator->getBarcode($id_out_celup, $generator::TYPE_EAN_13);
+        $barcodeBase64 = base64_encode($barcodeData);
+
+        // Buat PDF
+        $pdf = new FPDF('P', 'mm', 'A4');
+        $pdf->AddPage();
+        $pdf->SetFont('Arial', 'B', 12);
+
+        // Kotak luar
+        $startX = 52.5;
+        $startY = 20;
+        $boxWidth = 100;
+        $boxHeight = 100;
+
+        $pdf->Rect($startX, $startY, $boxWidth, $boxHeight);
+
+        // Tampilkan barcode
+        $barcodeY = $startY + 5;
+        $barcodeFile = tempnam(sys_get_temp_dir(), 'barcode_') . '.png';
+        file_put_contents($barcodeFile, base64_decode($barcodeBase64));
+        $pdf->Image($barcodeFile, $startX + 10, $barcodeY, 80, 20);
+        unlink($barcodeFile);
+
+        // Tampilkan teks data retur 
+        $pdf->SetY($barcodeY + 25);
+        $pdf->SetX($startX + 10);
+        $pdf->Cell(0, 8, 'No Model       : ' . $dataRetur['no_model'], 0, 1);
+        $pdf->SetX($startX + 10);
+        $pdf->Cell(0, 8, 'Item Type       : ' . $dataRetur['item_type'], 0, 1);
+        $pdf->SetX($startX + 10);
+        $pdf->Cell(0, 8, 'Kode Warna   : ' . $dataRetur['kode_warna'], 0, 1);
+        $pdf->SetX($startX + 10);
+        $pdf->Cell(0, 8, 'Warna        : ' . $dataRetur['warna'], 0, 1);
+        $pdf->SetX($startX + 10);
+        $pdf->Cell(0, 8, 'Kgs Kirim    : ' . $dataRetur['kgs_kirim'], 0, 1);
+        $pdf->SetX($startX + 10);
+        $pdf->Cell(0, 8, 'Cones Kirim  : ' . $dataRetur['cones_kirim'], 0, 1);
+        $pdf->SetX($startX + 10);
+        $pdf->Cell(0, 8, 'Lot Kirim    : ' . $dataRetur['lot_kirim'], 0, 1);
+        $pdf->SetX($startX + 10);
+        $pdf->Cell(0, 8, 'No Karung    : ' . $dataRetur['no_karung'], 0, 1);
+
+        // Output PDF
+        return $this->response->setHeader('Content-Type', 'application/pdf')
+            ->setBody($pdf->Output('Bon Pengiriman.pdf', 'I'));
     }
 }
