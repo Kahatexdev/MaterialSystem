@@ -1731,7 +1731,7 @@ class PdfController extends BaseController
                 $pdf->Cell(15, 4,  "",        1, 0, 'C');
                 $pdf->Cell(30, 4,  $row['color'],    1, 0, 'C');
                 $pdf->Cell(10, 4,  number_format($row['total_pesan'], 2),   1, 0, 'C');
-                $pdf->Cell(10, 4,  number_format($row['total_cones'], 2),   1, 0, 'C');
+                $pdf->Cell(10, 4,  $row['total_cones'],   1, 0, 'C');
                 // Keterangan merge dua baris (8 + 4 mm = 12 mm)
                 $pdf->Cell(60, 4, '',   1, 1, 'C');
             }
