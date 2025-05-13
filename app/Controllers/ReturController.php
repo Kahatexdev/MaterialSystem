@@ -12,6 +12,7 @@ use App\Models\PemasukanModel;
 use App\Models\OutCelupModel;
 use App\Models\KategoriReturModel;
 
+
 class ReturController extends BaseController
 {
     protected $role;
@@ -158,5 +159,19 @@ class ReturController extends BaseController
             'area'       => $area,
             'kategori' => $kategoriRetur,
         ]);
+    }
+
+    public function listBarcodeRetur()
+    {
+        $listRetur = $this->returModel->listBarcodeRetur();
+
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "List Barcode Retur",
+            'listRetur' => $listRetur,
+        ];
+        // dd($data);
+        return view($this->role . '/retur/list-barcode-retur', $data);
     }
 }

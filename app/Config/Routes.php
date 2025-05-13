@@ -117,6 +117,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('reset_pemasukan', 'WarehouseController::reset_pemasukan');
     $routes->post('hapus_pemasukan', 'WarehouseController::hapusListPemasukan');
     $routes->post('proses_pemasukan', 'WarehouseController::prosesPemasukan');
+    $routes->get('otherIn', 'WarehouseController::otherIn');
+
     $routes->get('getItemTypeByModel/(:any)', 'WarehouseController::getItemTypeByModel/$1');
     $routes->get('getKodeWarnaByModelAndItemType', 'WarehouseController::getKodeWarna');
     $routes->get('getWarnaDanLot', 'WarehouseController::getWarnaDanLot');
@@ -205,11 +207,20 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('retur', 'ReturController::index');
     $routes->post('retur/approve', 'ReturController::approve');
     $routes->post('retur/reject', 'ReturController::reject');
+    $routes->get('retur/listBarcodeRetur', 'ReturController::listBarcodeRetur');
+    $routes->get('retur/generateBarcodeRetur/(:num)', 'PdfController::generateBarcodeRetur/$1');
     // tambahan waktu
     $routes->get('pemesanan/requestAdditionalTime', 'PemesananController::requestAdditionalTime');
     $routes->get('pemesanan/getCountStatusRequest', 'PemesananController::getCountStatusRequest');
     $routes->post('pemesanan/additional-time/accept', 'PemesananController::additionalTimeAccept');
     $routes->post('pemesanan/additional-time/reject', 'PemesananController::additionalTimeReject');
+
+    $routes->get('pemesanan/permintaanKaretCovering', 'PemesananController::permintaanKaretCovering');
+    $routes->get('pemesanan/permintaanSpandexCovering', 'PemesananController::permintaanSpandexCovering');
+    $routes->get('pemesanan/getFilterPemesananKaret', 'PemesananController::getFilterPemesananKaret');
+    $routes->get('pemesanan/getFilterPemesananSpandex', 'PemesananController::getFilterPemesananSpandex');
+    $routes->get('pemesanan/exportPermintaanKaret', 'ExcelController::exportPermintaanKaret');
+    $routes->get('pemesanan/exportPermintaanSpandex', 'ExcelController::exportPermintaanSpandex');
 });
 
 // celup routes
