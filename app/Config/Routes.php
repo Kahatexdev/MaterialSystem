@@ -301,6 +301,9 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('po/savePOCovering', 'CoveringController::savePOCovering');
     $routes->get('po/deletePOCovering/(:any)', 'CoveringController::unsetSession/$1');
     $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
+    $routes->get('po/listTrackingPo', 'TrackingPoCoveringController::listTrackingPo');
+    $routes->post('po/updateListTrackingPo/(:any)', 'TrackingPoCoveringController::updateListTrackingPo/$1');
+
 
     // warehouse
     $routes->get('warehouse', 'CoveringWarehouseController::index');
