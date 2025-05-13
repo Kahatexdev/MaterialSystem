@@ -90,10 +90,11 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('schedule/deleteSchedule', 'ScheduleController::deleteSchedule');
     $routes->get('schedule/getStock', 'ScheduleController::getStock');
     $routes->get('schedule/getKeterangan', 'ScheduleController::getKeterangan');
-
+    $routes->post('updateSchedule/(:num)', 'CelupController::updateSchedule/$1');
+    $routes->get('reqschedule', 'ScheduleController::reqschedule');
     $routes->get('schedule/reqschedule', 'ScheduleController::reqschedule');
     $routes->post('schedule/reqschedule', 'ScheduleController::reqschedule');
-    $routes->get('schedule/reqschedule/show/(:num)', 'ScheduleController::showschedule/$1');
+    $routes->get('schedule/reqschedule/show/(:num)', 'CelupController::editStatus/$1');
     $routes->get('schedule/reportSchBenang', 'ScheduleController::reportSchBenang');
     $routes->get('schedule/filterSchBenang', 'ScheduleController::filterSchBenang');
     $routes->get('schedule/exportScheduleBenang', 'ExcelController::exportScheduleBenang');
