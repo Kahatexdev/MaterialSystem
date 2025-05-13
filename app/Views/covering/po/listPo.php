@@ -49,6 +49,8 @@
                 <table id="poTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>
                         <tr>
+                            <th>Tanggal</th>
+                            <th>No Model</th>
                             <th>Item Type</th>
                             <th>Kode Warna</th>
                             <th>Warna</th>
@@ -62,6 +64,8 @@
                         <?php if (!empty($trackingPoCovering)) : ?>
                             <?php foreach ($trackingPoCovering as $po) : ?>
                                 <tr>
+                                    <td><?= date('d-m-Y', strtotime($po['created_at'])) ?></td>
+                                    <td><?= esc($po['no_model']) ?></td>
                                     <td><?= esc($po['item_type']) ?></td>
                                     <td><?= esc($po['kode_warna']) ?></td>
                                     <td><?= esc($po['color']) ?></td>

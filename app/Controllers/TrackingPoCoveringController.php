@@ -23,7 +23,7 @@ class TrackingPoCoveringController extends BaseController
     public function listTrackingPo()
     {
         $trackingData = $this->trackingPoCoveringModel->trackingData();
-        // dd ($trackingData);
+
         $data = [
             'title' => 'Tracking PO Covering',
             'role' => $this->role,
@@ -38,10 +38,19 @@ class TrackingPoCoveringController extends BaseController
     {
         $dataPost = $this->request->getPost();
         $date = date('Y-m-d H:i:s');
-        $keterangan = $dataPost['status'] . '(' . $date . ')';
+        // Ambil data lama
+        $find = $this->trackingPoCoveringModel->find($id);
+        $oldKeterangan = $find['keterangan'] ?? '';
+
+        // Tambahkan keterangan baru
+        $newKeterangan = $dataPost['status'] . ' (' . $date . ')';
+
+        // Gabungkan dengan keterangan lama (pakai baris baru biar rapi)
+        $keteranganGabung = trim($oldKeterangan . ",\n" . $newKeterangan);
+        // dd ($keteranganGabung);
         $data = [
             'status' => $dataPost['status'],
-            'keterangan' => $keterangan,
+            'keterangan' => $keteranganGabung,
             'admin' => session()->get('username'),
             'updated_at' => $date,
         ];
