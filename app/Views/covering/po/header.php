@@ -13,9 +13,9 @@
                 <div class="d-flex align-items-center">
                     <ul class="navbar-nav justify-content-end">
                         <li class="nav-item d-flex align-items-center">
-                            <a href="" class="nav-link text-body font-weight-bold px-2">
+                            <a href="<?= base_url($role . '/po/listTrackingPo') ?>" class="nav-link text-body font-weight-bold px-2">
                                 <i class="fas fa-database"></i>
-                                <span class="d-lg-inline-block d-none ms-1">Submenu 1</span>
+                                <span class="d-lg-inline-block d-none ms-1">Tracking Po</span>
                             </a>
                         </li>
                         <li class="nav-item dropdown">
