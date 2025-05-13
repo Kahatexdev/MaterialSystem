@@ -14,6 +14,7 @@ use App\Models\MasterMaterialModel;
 use App\Models\OpenPOModel;
 use App\Models\EstimasiStokModel;
 use App\Models\StockModel;
+use App\Models\TrackingPoCovering;
 
 class MasterdataController extends BaseController
 {
@@ -27,6 +28,7 @@ class MasterdataController extends BaseController
     protected $estimasiStokModel;
     protected $openPoModel;
     protected $stockModel;
+    protected $trackingPoCoveringModel;
 
     public function __construct()
     {
@@ -36,6 +38,7 @@ class MasterdataController extends BaseController
         $this->estimasiStokModel = new EstimasiStokModel();
         $this->openPoModel = new OpenPoModel();
         $this->stockModel = new StockModel();
+        $this->trackingPoCoveringModel = new TrackingPoCovering();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -703,6 +706,20 @@ class MasterdataController extends BaseController
             }
             // dd ($batch);
             $this->openPoModel->insertBatch($batch);
+
+            // 3. Tracking data
+            $trackingData = [];
+            foreach ($items as $i => $item) {
+                $trackingData[] = [
+                    'id_po_gbn'    => $insertedIds[$i],
+                    'status'       => '',
+                    'keterangan'   => $data['keterangan'] ?? '',
+                    'admin'        => 'covering'
+                ];
+            }
+
+            $this->trackingPoCoveringModel->insertBatch($trackingData);
+
 
             $db->transComplete();
             if (! $db->transStatus()) {
