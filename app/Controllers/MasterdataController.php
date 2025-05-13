@@ -707,17 +707,19 @@ class MasterdataController extends BaseController
             // dd ($batch);
             $this->openPoModel->insertBatch($batch);
 
+            // 3. Tracking data
             $trackingData = [];
-            foreach ($items as $item) {
+            foreach ($items as $i => $item) {
                 $trackingData[] = [
-                    'id_po_gbn' => $insertedIds[$i],
-                    'status' => '',
-                    'keterangan' => $data['keterangan'] ?? '',
-                    'admin' => 'covering'
+                    'id_po_gbn'    => $insertedIds[$i],
+                    'status'       => '',
+                    'keterangan'   => $data['keterangan'] ?? '',
+                    'admin'        => 'covering'
                 ];
             }
 
             $this->trackingPoCoveringModel->insertBatch($trackingData);
+
 
             $db->transComplete();
             if (! $db->transStatus()) {

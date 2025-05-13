@@ -54,8 +54,8 @@ class TrackingPoCovering extends Model
     public function trackingData()
     {
         return $this->db->table('tracking_po_covering')
+            ->select('tracking_po_covering.id_tpc,tracking_po_covering.status, tracking_po_covering.keterangan,tracking_po_covering.admin,open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.created_at')
             ->join('open_po', 'tracking_po_covering.id_po_gbn = open_po.id_po')
-            ->select('tracking_po_covering.id_tpc,tracking_po_covering.status, tracking_po_covering.keterangan,tracking_po_covering.admin,open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po')
             ->get()
             ->getResultArray();
     }
