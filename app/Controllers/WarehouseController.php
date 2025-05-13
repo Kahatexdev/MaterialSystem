@@ -21,6 +21,7 @@ use App\Models\HistoryStock;
 use App\Models\PengeluaranModel;
 use App\Models\ReturModel;
 use App\Models\OtherOutModel;
+use App\Models\OtherBonModel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -49,6 +50,7 @@ class WarehouseController extends BaseController
     protected $pengeluaranModel;
     protected $returModel;
     protected $otherOutModel;
+    protected $otherBonModel;
 
     public function __construct()
     {
@@ -68,6 +70,7 @@ class WarehouseController extends BaseController
         $this->pengeluaranModel = new PengeluaranModel();
         $this->returModel = new ReturModel();
         $this->otherOutModel = new OtherOutModel();
+        $this->otherBonModel = new OtherBonModel();
         $this->db = \Config\Database::connect(); // Menghubungkan ke database
 
         $this->role = session()->get('role');
@@ -2134,5 +2137,157 @@ class WarehouseController extends BaseController
             'no_model' => $no_model,
         ];
         return view($this->role . '/warehouse/form-other-in', $data);
+    }
+    public function getItemTypeForOtherIn($idOrder)
+    {
+        // Pastikan $idOrder diambil dengan benar
+        if (!$idOrder) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'ID Order tidak ditemukan.'
+            ]);
+        }
+
+        // Ambil data dari model
+        $itemTypes = $this->db->table('material') // Ganti 'nama_tabel' dengan nama tabel Anda
+            ->distinct()
+            ->select('item_type') // Pastikan 'id' dan 'item_type' adalah nama kolom yang valid
+            ->where('id_order', $idOrder)
+            ->get()
+            ->getResultArray();
+
+        // Jika data ditemukan, kembalikan sebagai JSON
+        if (!empty($itemTypes)) {
+            return $this->response->setJSON($itemTypes);
+        } else {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Data tidak ditemukan untuk ID Order ini.'
+            ]);
+        }
+    }
+    public function getKodeWarnaForOtherIn()
+    {
+        $idOrder = $this->request->getPost('id_order');
+        $itemType = $this->request->getPost('item_type');
+        // Pastikan $idOrder diambil dengan benar
+        if (!$idOrder && !$itemType) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'ID Order tidak ditemukan.'
+            ]);
+        }
+
+        // Ambil data dari model
+        $kodeWarna = $this->db->table('material') // Ganti 'nama_tabel' dengan nama tabel Anda
+            ->distinct()
+            ->select('kode_warna') // Pastikan 'id' dan 'item_type' adalah nama kolom yang valid
+            ->where('id_order', $idOrder)
+            ->where('item_type', $itemType)
+            ->get()
+            ->getResultArray();
+
+        // Jika data ditemukan, kembalikan sebagai JSON
+        if (!empty($kodeWarna)) {
+            return $this->response->setJSON($kodeWarna);
+        } else {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Data tidak ditemukan untuk ID Order ini.',
+                'data' => $kodeWarna
+            ]);
+        }
+    }
+    public function getWarnaForOtherIn()
+    {
+        $idOrder = $this->request->getPost('id_order');
+        $itemType = $this->request->getPost('item_type');
+        $kodeWarna = $this->request->getPost('kode_warna');
+        // Pastikan $idOrder diambil dengan benar
+        if (!$idOrder && !$itemType && !$kodeWarna) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'ID Order tidak ditemukan.'
+            ]);
+        }
+
+        // Ambil data dari model
+        $warna = $this->db->table('material') // Ganti 'nama_tabel' dengan nama tabel Anda
+            ->distinct()
+            ->select('color') // Pastikan 'id' dan 'item_type' adalah nama kolom yang valid
+            ->where('id_order', $idOrder)
+            ->where('item_type', $itemType)
+            ->where('kode_warna', $kodeWarna)
+            ->get() // Jalankan query
+            ->getRow(); // Ambil satu baris pertama
+
+        // Jika data ditemukan, kembalikan sebagai JSON
+        if (!empty($warna)) {
+            return $this->response->setJSON($warna);
+        } else {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Data tidak ditemukan untuk ID Order ini.',
+                'data' => $kodeWarna
+            ]);
+        }
+    }
+    public function saveOtherIn()
+    {
+        $data = $this->request->getPost();
+
+        $otherBon = $this->otherBonModel; // Sesuaikan dengan model kamu
+        $outCelup = $this->outCelupModel; // Sesuaikan dengan model kamu
+        $dataOtherBon = [
+            'no_model' => $data['no_model'],
+            'item_type' => $data['item_type'],
+            'kode_warna' => $data['kode_warna'],
+            'warna' => $data['warna'],
+            'tgl_datang' => $data['tgl_datang'],
+            'no_surat_jalan' => $data['no_surat_jalan'],
+            'detail_sj' => $data['detail_sj'],
+            'ganti_retur' => $data['ganti_retur'],
+            'admin' => session()->get('username'),
+            'created_at' => date('Y-m-d H:i:s'),
+        ];
+
+        $saveBon = $otherBon->insert($dataOtherBon); // Melakukan insert
+        if ($saveBon) {
+            $id_other_in = $otherBon->insertID(); // Mengambil ID yang baru saja diinsert
+            $allSaved = true; // Flag untuk mengecek apakah semua data berhasil disimpan
+
+            $jumlahKrg = count($data['no_karung']);
+
+            for ($i = 0; $i < $jumlahKrg; $i++) {
+                $dataKrg = [
+                    'id_other_bon' => $id_other_in,
+                    'no_model' => $data['no_model'],
+                    'l_m_d' => $data['l_m_d'],
+                    'harga' => $data['harga'],
+                    'no_karung' => $data['no_karung'][$i],
+                    'gw_kirim' => $data['gw'][$i],
+                    'kgs_kirim' => $data['kgs'][$i],
+                    'cones_kirim' => $data['cones'][$i],
+                    'lot_kirim' => $data['lot'],
+                    'ganti_retur' => $data['ganti_retur'],
+                    'ganti_retur' => session()->get('username'),
+                    'created_at' => date('Y-m-d H:i:s'),
+                ];
+                $saveKrg = $outCelup->insert($dataKrg); // Melakukan insert
+                if (!$saveKrg) {
+                    $allSaved = false; // Jika ada yang gagal, set flag ke false
+                    break; // Keluar dari loop jika ada kegagalan
+                }
+            }
+            if ($allSaved) {
+                session()->setFlashdata('success', "Data berhasil disimpan");
+            } else {
+                session()->setFlashdata('error', "Terjadi kesalahan saat menyimpan sebagian data");
+            }
+        } else {
+            session()->setFlashdata('error', "Gagal menyimpan data Bon");
+        }
+
+        return redirect()->to(base_url($this->role . "/otherIn"));
     }
 }
