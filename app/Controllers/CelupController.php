@@ -203,6 +203,7 @@ class CelupController extends BaseController
                     'tgl_press' => $id['tanggal_press'],
                     'tgl_oven' => $id['tanggal_oven'],
                     'tgl_tl' => $id['tanggal_tl'],
+                    'tgl_teslab' => $id['tanggal_teslab'],
                     'tgl_rajut_pagi' => $id['tanggal_rajut_pagi'],
                     'tgl_kelos' => $id['tanggal_kelos'],
                     'tgl_acc' => $id['tanggal_acc'],
@@ -215,7 +216,7 @@ class CelupController extends BaseController
                 ];
             }
         }
-        // dd($uniqueData);
+
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
@@ -236,6 +237,7 @@ class CelupController extends BaseController
         $tglPress = $this->request->getPost('tgl_press');
         $tglOven = $this->request->getPost('tgl_oven');
         $tglTL = $this->request->getPost('tgl_tl');
+        $tglTesLab = $this->request->getPost('tgl_teslab');
         $tglRajut = $this->request->getPost('tgl_rajut_pagi');
         $tglACC = $this->request->getPost('tgl_acc');
         $tglKelos = $this->request->getPost('tgl_kelos');
@@ -251,6 +253,7 @@ class CelupController extends BaseController
             'Press' => $tglPress,
             'Oven' => $tglOven,
             'TL' => $tglTL,
+            'TesLab' => $tglTesLab,
             'Rajut Pagi' => $tglRajut,
             'ACC' => $tglACC,
             'Kelos' => $tglKelos,
@@ -286,6 +289,7 @@ class CelupController extends BaseController
         if ($tglPress) $dataUpdate['tanggal_press'] = $tglPress;
         if ($tglOven) $dataUpdate['tanggal_oven'] = $tglOven;
         if ($tglTL) $dataUpdate['tanggal_tl'] = $tglTL;
+        if ($tglTesLab) $dataUpdate['tanggal_teslab'] = $tglTesLab;
         if ($tglRajut) $dataUpdate['tanggal_rajut_pagi'] = $tglRajut;
         if ($tglACC) $dataUpdate['tanggal_acc'] = $tglACC;
         if ($tglKelos) $dataUpdate['tanggal_kelos'] = $tglKelos;
@@ -321,6 +325,9 @@ class CelupController extends BaseController
         // Jika tgl_celup diisi, update last_status menjadi 'celup'
         if (!empty($tglTL)) {
             $dataUpdate['last_status'] = 'tl';
+        }
+        if (!empty($tglTesLab)) {
+            $dataUpdate['last_status'] = 'test Lab';
         }
 
         // Jika tgl_celup diisi, update last_status menjadi 'celup'

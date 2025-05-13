@@ -174,6 +174,13 @@
                                     </div>
                                 </div>
                                 <div class="col-md-3">
+                                    <!-- Tanggal TL -->
+                                    <div class="form-group" id="tglTLGroup">
+                                        <label for="tgl_tl">Tanggal Tes Lab</label>
+                                        <input type="datetime-local" class="form-control" name="tgl_teslab" id="tgl_teslab" value="<?= $data['tgl_teslab'] ?>">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
                                     <!-- Tanggal Rajut Pagi -->
                                     <div class="form-group" id="tglRajutGroup">
                                         <label for="tgl_rajut">Tanggal Rajut Pagi</label>
