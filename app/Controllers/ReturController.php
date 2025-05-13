@@ -11,6 +11,8 @@ use App\Models\ReturModel;
 use App\Models\PemasukanModel;
 use App\Models\OutCelupModel;
 use App\Models\KategoriReturModel;
+use App\Models\ScheduleCelupModel;
+
 
 
 class ReturController extends BaseController
@@ -26,6 +28,7 @@ class ReturController extends BaseController
     protected $pemasukanModel;
     protected $outCelupModel;
     protected $kategoriReturModel;
+    protected $scheduleCelupModel;
 
 
     public function __construct()
@@ -37,6 +40,7 @@ class ReturController extends BaseController
         $this->pemasukanModel = new PemasukanModel();
         $this->outCelupModel = new OutCelupModel();
         $this->kategoriReturModel = new KategoriReturModel();
+        $this->scheduleCelupModel = new ScheduleCelupModel();
 
         $this->role = session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
@@ -101,10 +105,11 @@ class ReturController extends BaseController
         $this->returModel->update($id, $data);
         // log_message('info', 'Data update retur: ' . json_encode($data));
         $dataRetur = $this->returModel->find($id);
-        // dd ($dataRetur);
-        // update id_retur di tabel pemasukan
+        $idCelup = $this->scheduleCelupModel->getIdCelups($dataRetur);
         $barcodeNew = [
             'id_retur'       => $dataRetur['id_retur'],
+            'id_celup'       => $idCelup,
+            'no_model'       => $dataRetur['no_model'],
             'no_karung'     => (int)$dataRetur['krg_retur'] ?? 0,
             'kgs_kirim'          => (float)$dataRetur['kgs_retur'],
             'cones_kirim'      => (int)$dataRetur['cns_retur'],

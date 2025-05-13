@@ -515,4 +515,14 @@ class ScheduleCelupModel extends Model
             ->limit(5)
             ->findAll();
     }
+    public function getIdCelups($data)
+    {
+        $row = $this->select('id_celup')
+            ->where('no_model', $data['no_model'])
+            ->where('item_type', $data['item_type'])
+            ->where('kode_warna', $data['kode_warna'])
+            ->where('lot_celup', $data['lot_retur'])
+            ->first();
+        return $row ? (int)$row['id_celup'] : null;
+    }
 }
