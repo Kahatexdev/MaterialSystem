@@ -180,6 +180,7 @@ class ReturModel extends Model
             ->join('retur', 'retur.id_retur = out_celup.id_retur')
             ->where('retur.waktu_acc_retur IS NOT NULL')
             ->like('retur.keterangan_gbn', 'Approve:')
+            ->groupBy('out_celup.id_retur')
             ->get()
             ->getResultArray();
     }
