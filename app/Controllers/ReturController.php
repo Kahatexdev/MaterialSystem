@@ -109,6 +109,7 @@ class ReturController extends BaseController
         $barcodeNew = [
             'id_retur'       => $dataRetur['id_retur'],
             'id_celup'       => $idCelup,
+            'no_model'       => $dataRetur['no_model'],
             'no_karung'     => (int)$dataRetur['krg_retur'] ?? 0,
             'kgs_kirim'          => (float)$dataRetur['kgs_retur'],
             'cones_kirim'      => (int)$dataRetur['cns_retur'],
