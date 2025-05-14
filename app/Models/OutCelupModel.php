@@ -18,6 +18,8 @@ class OutCelupModel extends Model
         'id_out_celup',
         'id_bon',
         'id_celup',
+        'id_other_bon',
+        'no_model',
         'id_retur',
         'l_m_d',
         'harga',
