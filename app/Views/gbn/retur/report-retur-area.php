@@ -105,8 +105,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones Kirim</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Karung Kirim</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LOT Kirim</th>
-
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs Retur</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty Retur</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones Retur</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Karung Retur</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LOT Retur</th>

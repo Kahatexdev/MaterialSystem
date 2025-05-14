@@ -217,7 +217,7 @@ class ReturModel extends Model
     {
         $this->select('
         retur.id_retur, retur.no_model, retur.item_type, retur.kode_warna, retur.warna,
-        SUM(retur.kgs_retur) AS kg, 
+        ROUND(SUM(retur.kgs_retur), 2) AS kg, 
         SUM(retur.cns_retur) AS cns, 
         SUM(retur.krg_retur) AS karung,
         retur.lot_retur, retur.keterangan_area, retur.keterangan_gbn,
@@ -228,7 +228,7 @@ class ReturModel extends Model
     ')
             ->join('master_material mm', 'mm.item_type = retur.item_type', 'inner')
             ->join(
-                '(SELECT item_type, kode_warna, SUM(kgs) as total_kgs, SUM(loss) as loss FROM material GROUP BY item_type, kode_warna) m',
+                '(SELECT item_type, kode_warna, ROUND(SUM(kgs), 2) as total_kgs, loss as loss FROM material GROUP BY item_type, kode_warna) m',
                 'm.item_type = retur.item_type AND m.kode_warna = retur.kode_warna',
                 'left'
             )
