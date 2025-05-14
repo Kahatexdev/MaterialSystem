@@ -513,8 +513,8 @@ class PdfController extends BaseController
         foreach ($groupedDetails as &$group) {
             foreach ($group['detailPengiriman'] as $outCelup => $id) {
                 // Hasilkan barcode dan encode sebagai base64
-                $id_out_celup = str_pad($id['id_out_celup'], 12, '0', STR_PAD_LEFT);
-                $barcode = $generator->getBarcode($id_out_celup, $generator::TYPE_EAN_13);
+                $id_out_celup = $id['id_out_celup'];
+                $barcode = $generator->getBarcode($id_out_celup, $generator::TYPE_CODE_128);
                 $group['barcodes'][] = [
                     'no_model' => $group['no_model'],
                     'item_type' => $group['item_type'],
@@ -921,7 +921,7 @@ class PdfController extends BaseController
             if ($pageNo >= 2) {
                 $startX_ = 2.5;
                 $startY_ = 157;
-            } else {
+            } else  {
                 $startX_ = 2.5;
                 $startY_ = 14;
             }
@@ -939,7 +939,7 @@ class PdfController extends BaseController
         foreach ($dataBon['groupedDetails'] as $groups) {
             foreach ($groups['barcodes'] as $barcode) {
                 // Menghitung posisi X dan Y untuk 6 barcode per halaman (3 kolom × 2 baris)
-                if ($pageNo == 1) {
+                if ($pageNo == 2) {
                     $mod = 6;
                     $baris = 2;
                 } else {
@@ -983,7 +983,7 @@ class PdfController extends BaseController
                 // Menambahkan detail teks di dalam kotak
                 $pdf->SetFont('Arial', 'B', 8);
                 // Teks detail
-                $pdf->SetXY($startX + 2, $startY + 10);
+                $pdf->SetXY($startX + 2, $startY + 20);
                 $pdf->Cell(20, 3, 'No Model', 0, 0, 'L');
                 $pdf->Cell(5, 3, ':', 0, 0, 'C');
                 $pdf->Cell(70, 3, $barcode['no_model'], 0, 1, 'L');
@@ -1828,23 +1828,40 @@ class PdfController extends BaseController
         unlink($barcodeFile);
 
         // Tampilkan teks data retur 
+        $labelWidth = 35;
         $pdf->SetY($barcodeY + 25);
         $pdf->SetX($startX + 10);
-        $pdf->Cell(0, 8, 'No Model       : ' . $dataRetur['no_model'], 0, 1);
+        $pdf->Cell($labelWidth, 8, 'No Model', 0, 0);
+        $pdf->Cell(0, 8, ': ' . $dataRetur['no_model'], 0, 1);
+
         $pdf->SetX($startX + 10);
-        $pdf->Cell(0, 8, 'Item Type       : ' . $dataRetur['item_type'], 0, 1);
+        $pdf->Cell($labelWidth, 8, 'Item Type', 0, 0);
+        $pdf->Cell(0, 8, ': ' . $dataRetur['item_type'], 0, 1);
+
         $pdf->SetX($startX + 10);
-        $pdf->Cell(0, 8, 'Kode Warna   : ' . $dataRetur['kode_warna'], 0, 1);
+        $pdf->Cell($labelWidth, 8, 'Kode Warna', 0, 0);
+        $pdf->Cell(0, 8, ': ' . $dataRetur['kode_warna'], 0, 1);
+
         $pdf->SetX($startX + 10);
-        $pdf->Cell(0, 8, 'Warna        : ' . $dataRetur['warna'], 0, 1);
+        $pdf->Cell($labelWidth, 8, 'Warna', 0, 0);
+        $pdf->Cell(0, 8, ': ' . $dataRetur['warna'], 0, 1);
+
         $pdf->SetX($startX + 10);
-        $pdf->Cell(0, 8, 'Kgs Kirim    : ' . $dataRetur['kgs_kirim'], 0, 1);
+        $pdf->Cell($labelWidth, 8, 'Kgs Kirim', 0, 0);
+        $pdf->Cell(0, 8, ': ' . $dataRetur['kgs_kirim'], 0, 1);
+
         $pdf->SetX($startX + 10);
-        $pdf->Cell(0, 8, 'Cones Kirim  : ' . $dataRetur['cones_kirim'], 0, 1);
+        $pdf->Cell($labelWidth, 8, 'Cones Kirim', 0, 0);
+        $pdf->Cell(0, 8, ': ' . $dataRetur['cones_kirim'], 0, 1);
+
         $pdf->SetX($startX + 10);
-        $pdf->Cell(0, 8, 'Lot Kirim    : ' . $dataRetur['lot_kirim'], 0, 1);
+        $pdf->Cell($labelWidth, 8, 'Lot Kirim', 0, 0);
+        $pdf->Cell(0, 8, ': ' . $dataRetur['lot_kirim'], 0, 1);
+
         $pdf->SetX($startX + 10);
-        $pdf->Cell(0, 8, 'No Karung    : ' . $dataRetur['no_karung'], 0, 1);
+        $pdf->Cell($labelWidth, 8, 'No Karung', 0, 0);
+        $pdf->Cell(0, 8, ': ' . $dataRetur['no_karung'], 0, 1);
+
 
         // Output PDF
         return $this->response->setHeader('Content-Type', 'application/pdf')

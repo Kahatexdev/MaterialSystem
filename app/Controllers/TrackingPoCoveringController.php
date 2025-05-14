@@ -33,6 +33,24 @@ class TrackingPoCoveringController extends BaseController
 
         return view($this->role . '/po/listPo', $data);
     }
+    public function TrackingPo($date)
+    {
+        $tgl_po = urldecode($date);
+        $tgl_po = date('Y-m-d', strtotime($tgl_po));
+        $trackingData = $this->trackingPoCoveringModel->trackingDataDaily($tgl_po);
+        $data = [
+            'title' => 'Tracking PO Covering',
+            'role' => $this->role,
+            'active' => 'trackingPoCovering',
+            'trackingPoCovering' => $trackingData,
+        ];
+        $role = $this->role;
+        if ($role == 'covering') {
+            return view($this->role . '/po/listPo', $data);
+        } else {
+            return view($this->role . '/pocovering/listPo', $data);
+        }
+    }
 
     public function updateListTrackingPo($id)
     {
