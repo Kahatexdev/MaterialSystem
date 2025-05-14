@@ -1828,23 +1828,40 @@ class PdfController extends BaseController
         unlink($barcodeFile);
 
         // Tampilkan teks data retur 
+        $labelWidth = 35;
         $pdf->SetY($barcodeY + 25);
         $pdf->SetX($startX + 10);
-        $pdf->Cell(0, 8, 'No Model       : ' . $dataRetur['no_model'], 0, 1);
+        $pdf->Cell($labelWidth, 8, 'No Model', 0, 0);
+        $pdf->Cell(0, 8, ': ' . $dataRetur['no_model'], 0, 1);
+
         $pdf->SetX($startX + 10);
-        $pdf->Cell(0, 8, 'Item Type       : ' . $dataRetur['item_type'], 0, 1);
+        $pdf->Cell($labelWidth, 8, 'Item Type', 0, 0);
+        $pdf->Cell(0, 8, ': ' . $dataRetur['item_type'], 0, 1);
+
         $pdf->SetX($startX + 10);
-        $pdf->Cell(0, 8, 'Kode Warna   : ' . $dataRetur['kode_warna'], 0, 1);
+        $pdf->Cell($labelWidth, 8, 'Kode Warna', 0, 0);
+        $pdf->Cell(0, 8, ': ' . $dataRetur['kode_warna'], 0, 1);
+
         $pdf->SetX($startX + 10);
-        $pdf->Cell(0, 8, 'Warna        : ' . $dataRetur['warna'], 0, 1);
+        $pdf->Cell($labelWidth, 8, 'Warna', 0, 0);
+        $pdf->Cell(0, 8, ': ' . $dataRetur['warna'], 0, 1);
+
         $pdf->SetX($startX + 10);
-        $pdf->Cell(0, 8, 'Kgs Kirim    : ' . $dataRetur['kgs_kirim'], 0, 1);
+        $pdf->Cell($labelWidth, 8, 'Kgs Kirim', 0, 0);
+        $pdf->Cell(0, 8, ': ' . $dataRetur['kgs_kirim'], 0, 1);
+
         $pdf->SetX($startX + 10);
-        $pdf->Cell(0, 8, 'Cones Kirim  : ' . $dataRetur['cones_kirim'], 0, 1);
+        $pdf->Cell($labelWidth, 8, 'Cones Kirim', 0, 0);
+        $pdf->Cell(0, 8, ': ' . $dataRetur['cones_kirim'], 0, 1);
+
         $pdf->SetX($startX + 10);
-        $pdf->Cell(0, 8, 'Lot Kirim    : ' . $dataRetur['lot_kirim'], 0, 1);
+        $pdf->Cell($labelWidth, 8, 'Lot Kirim', 0, 0);
+        $pdf->Cell(0, 8, ': ' . $dataRetur['lot_kirim'], 0, 1);
+
         $pdf->SetX($startX + 10);
-        $pdf->Cell(0, 8, 'No Karung    : ' . $dataRetur['no_karung'], 0, 1);
+        $pdf->Cell($labelWidth, 8, 'No Karung', 0, 0);
+        $pdf->Cell(0, 8, ': ' . $dataRetur['no_karung'], 0, 1);
+
 
         // Output PDF
         return $this->response->setHeader('Content-Type', 'application/pdf')

@@ -203,12 +203,14 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('poCovering', 'POCoveringController::index');
     $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
     $routes->get('pesanKeCovering/(:any)', 'CoveringPemesananController::pesanKeCovering/$1');
-
+    //Retur
     $routes->get('retur', 'ReturController::index');
     $routes->post('retur/approve', 'ReturController::approve');
     $routes->post('retur/reject', 'ReturController::reject');
     $routes->get('retur/listBarcodeRetur', 'ReturController::listBarcodeRetur');
     $routes->get('retur/generateBarcodeRetur/(:num)', 'PdfController::generateBarcodeRetur/$1');
+    $routes->get('retur/reportReturArea', 'ReturController::reportReturArea');
+    $routes->get('retur/filterReturArea', 'ReturController::filterReturArea');
     // tambahan waktu
     $routes->get('pemesanan/requestAdditionalTime', 'PemesananController::requestAdditionalTime');
     $routes->get('pemesanan/getCountStatusRequest', 'PemesananController::getCountStatusRequest');
