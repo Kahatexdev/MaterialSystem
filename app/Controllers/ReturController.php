@@ -179,4 +179,29 @@ class ReturController extends BaseController
         // dd($data);
         return view($this->role . '/retur/list-barcode-retur', $data);
     }
+
+    public function reportReturArea()
+    {
+        $getKategori = $this->kategoriReturModel->getKategoriRetur();
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "Report Retur Area",
+            'getKategori' => $getKategori
+        ];
+        return view($this->role . '/retur/report-retur-area', $data);
+    }
+
+    public function filterReturArea()
+    {
+        $area = $this->request->getGet('area');
+        $kategori = $this->request->getGet('kategori');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->returModel->getFilterReturArea($area, $kategori, $tanggalAwal, $tanggalAkhir);
+        echo json_encode($data, JSON_PRETTY_PRINT);
+        exit;
+        return $this->response->setJSON($data);
+    }
 }

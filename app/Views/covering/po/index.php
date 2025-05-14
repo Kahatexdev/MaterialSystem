@@ -236,6 +236,9 @@
                                         <a class="btn bg-gradient-success" href="<?= base_url($role . '/po/exportPO/' . $po['tgl_po']) ?>">
                                             <i class="bi bi-file-earmark-arrow-down me-2"></i>Export PO
                                         </a>
+                                        <a class="btn bg-gradient-warning" href="<?= base_url($role . '/po/listTrackingPo/' . $po['tgl_po']) ?>">
+                                            <i class="far fa-question-circle"></i> Status PO
+                                        </a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

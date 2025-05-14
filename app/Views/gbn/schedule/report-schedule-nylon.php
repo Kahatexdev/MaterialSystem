@@ -35,11 +35,11 @@
                     <input type="date" class="form-control" id="scheduleDate">
                 </div>
                 <div class="col-md-6 col-lg-3">
-                    <label for="startMcFrom">Mulai MC Dari</label>
+                    <label for="startMcFrom">Tgl Start MC Dari</label>
                     <input type="date" class="form-control" id="startMcFrom">
                 </div>
                 <div class="col-md-6 col-lg-3">
-                    <label for="startMcTo">Mulai MC Sampai</label>
+                    <label for="startMcTo">Tgl Start MC Sampai</label>
                     <input type="date" class="form-control" id="startMcTo">
                 </div>
                 <div class="col-12">
