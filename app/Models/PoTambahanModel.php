@@ -21,6 +21,7 @@ class PoTambahanModel extends Model
         'color',
         'pcs_po_tambahan',
         'kg_po_tambahan',
+        'cns_po_tambahan',
         'keterangan',
         'status',
         'admin',

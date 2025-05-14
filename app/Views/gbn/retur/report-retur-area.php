@@ -105,8 +105,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones Kirim</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Karung Kirim</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LOT Kirim</th>
-
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs Retur</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty Retur</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones Retur</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Karung Retur</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LOT Retur</th>
@@ -182,13 +181,13 @@
                                 item.loss,
                                 item.total_kgs,
                                 item.qty_po_plus !== undefined && item.qty_po_plus !== null ? item.qty_po_plus : 0,
-                                item.kgs_out,
-                                item.cns_out,
-                                item.krg_out,
+                                item.kg_kirim,
+                                item.cns_kirim,
+                                item.krg_kirim,
                                 item.lot_out,
-                                item.kgs_retur,
-                                item.cns_retur,
-                                item.krg_retur,
+                                item.kg,
+                                item.cns,
+                                item.karung,
                                 item.lot_retur,
                                 item.kategori,
                                 item.keterangan_area,

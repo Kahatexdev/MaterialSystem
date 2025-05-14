@@ -169,7 +169,6 @@ class ReturController extends BaseController
     public function listBarcodeRetur()
     {
         $listRetur = $this->returModel->listBarcodeRetur();
-
         $data = [
             'role' => $this->role,
             'active' => $this->active,
@@ -178,6 +177,19 @@ class ReturController extends BaseController
         ];
         // dd($data);
         return view($this->role . '/retur/list-barcode-retur', $data);
+    }
+
+    public function detailBarcodeRetur($tglRetur)
+    {
+        $detailRetur = $this->returModel->detailBarcodeRetur($tglRetur);
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "Detail Barcode Retur",
+            'detailRetur' => $detailRetur,
+            'tglRetur' => $tglRetur
+        ];
+        return view($this->role . '/retur/detail-barcode-retur', $data);
     }
 
     public function reportReturArea()
@@ -200,8 +212,17 @@ class ReturController extends BaseController
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
         $data = $this->returModel->getFilterReturArea($area, $kategori, $tanggalAwal, $tanggalAkhir);
-        echo json_encode($data, JSON_PRETTY_PRINT);
-        exit;
+
+        if (!empty($data)) {
+            foreach ($data as $key => $dt) {
+                $kirim = $this->outCelupModel->getDataKirim($dt['id_retur']);
+                $data[$key]['kg_kirim'] = $kirim['kg_kirim'] ?? 0;
+                $data[$key]['cns_kirim'] = $kirim['cns_kirim'] ?? 0;
+                $data[$key]['krg_kirim'] = $kirim['krg_kirim'] ?? 0;
+                $data[$key]['lot_out'] = $kirim['lot_out'] ?? '-';
+            }
+        }
+
         return $this->response->setJSON($data);
     }
 }

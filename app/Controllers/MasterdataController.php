@@ -189,10 +189,13 @@ class MasterdataController extends BaseController
                     'created_at'     => date('Y-m-d H:i:s'),
                     'updated_at'     => NULL,
                 ];
+
+                // dd ($masterData);
                 $masterOrderModel->insert($masterData);
-            } else {
-                return redirect()->back()->with('error', 'Data dengan No Model ' . $orderExists['no_model'] . ' sudah ada di database.');
-            }
+            } 
+            // else {
+            //     return redirect()->back()->with('error', 'Data dengan No Model ' . $orderExists['no_model'] . ' sudah ada di database.');
+            // }
 
             // Dapatkan id_order untuk digunakan pada tabel material
             $orderData = $masterOrderModel->findIdOrder($no_order);
@@ -269,11 +272,39 @@ class MasterdataController extends BaseController
                     'created_at' => date('Y-m-d H:i:s'),
                 ];
             }
+            // ================================================
+            // VALIDASI DI AKHIR SEBELUM INSERT MATERIAL
+            // ================================================
 
-            // Simpan data material jika ada data yang valid
-            if (!empty($validDataMaterial)) {
-                $materialModel->insertBatch($validDataMaterial);
+            // 1. Pastikan ada data material yang valid
+            if (empty($validDataMaterial)) {
+                return redirect()->back()->with('error', 'Tidak ada data material valid untuk di‐insert.');
             }
+
+            // 2. Cek duplikat material untuk order ini
+            $duplicateRows = [];
+            foreach ($validDataMaterial as $idx => $mat) {
+                $exists = $materialModel
+                    ->where('id_order', $mat['id_order'])
+                    ->where('style_size', $mat['style_size'])
+                    ->where('item_type', $mat['item_type'])
+                    ->where('kode_warna', $mat['kode_warna'])
+                    ->first();
+                if ($exists) {
+                    // catat index (baris ke‐berapa di array validDataMaterial)
+                    $duplicateRows[] = $idx + 1;
+                }
+            }
+            if (!empty($duplicateRows)) {
+                return redirect()->back()->with(
+                    'error',
+                    'Terdapat material yang sudah ada di DB untuk order ini (baris ke‐array: '
+                        . implode(', ', $duplicateRows) . ').'
+                );
+            }
+
+            // 3. Jika lolos validasi, insert batch
+            $materialModel->insertBatch($validDataMaterial);
 
             return redirect()->back()->with('success', 'Data berhasil diimport.');
         } catch (\Exception $e) {
