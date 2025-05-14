@@ -797,4 +797,13 @@ class ApiController extends ResourceController
             'gagal'   => $gagal,
         ]);
     }
+    public function filterPoTambahan()
+    {
+        $area = $this->request->getGet('area');
+        $noModel = $this->request->getGet('model');
+
+        $filterData = $this->poTambahanModel->filterData($area, $noModel);
+
+        return $this->respond($filterData);
+    }
 }
