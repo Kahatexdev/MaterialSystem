@@ -166,7 +166,10 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/filterReportGlobal', 'WarehouseController::filterReportGlobal');
     $routes->get('warehouse/exportGlobalReport', 'ExcelController::exportGlobalReport');
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
-
+    $routes->post('otherIn/saveOtherIn', 'WarehouseController::saveOtherIn');
+    $routes->get('otherIn/getItemTypeForOtherIn/(:any)', 'WarehouseController::getItemTypeForOtherIn/$1');
+    $routes->post('otherIn/getKodeWarnaForOtherIn', 'WarehouseController::getKodeWarnaForOtherIn');
+    $routes->post('otherIn/getWarnaForOtherIn', 'WarehouseController::getWarnaForOtherIn');
 
     //
     $routes->post('getStockByParams', 'PemesananController::getStockByParams');

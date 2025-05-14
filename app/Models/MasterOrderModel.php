@@ -254,7 +254,7 @@ class MasterOrderModel extends Model
     }
     public function getAllNoModel()
     {
-        return $this->select('no_model')
+        return $this->select('id_order, no_model')
             ->distinct()
             ->orderBy('no_model', 'ASC')
             ->findAll();

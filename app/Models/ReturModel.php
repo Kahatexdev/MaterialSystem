@@ -216,25 +216,25 @@ class ReturModel extends Model
     public function getFilterReturArea($area = null, $kategori = null, $tanggal_awal = null, $tanggal_akhir = null)
     {
         $this->select('
-        retur.*,
-        master_order.no_model,
-        material.item_type,
-        material.kode_warna,
-        material.loss,
-        SUM(material.kgs) AS total_kgs, 
-        master_material.jenis,
-        pengeluaran.kgs_out, 
-        pengeluaran.cns_out, 
-        pengeluaran.krg_out, 
-        pengeluaran.lot_out,
-        retur.area_retur
+        retur.id_retur, retur.no_model, retur.item_type, retur.kode_warna, retur.warna,
+        SUM(retur.kgs_retur) AS kg, 
+        SUM(retur.cns_retur) AS cns, 
+        SUM(retur.krg_retur) AS karung,
+        retur.lot_retur, retur.keterangan_area, retur.keterangan_gbn,
+        retur.admin, retur.area_retur, retur.tgl_retur, retur.kategori, retur.waktu_acc_retur,
+        mm.jenis,
+        m.total_kgs,
+        m.loss
     ')
-            ->join('out_celup', 'out_celup.id_retur = retur.id_retur AND out_celup.lot_kirim = retur.lot_retur', 'left')
-            ->join('pengeluaran', 'pengeluaran.area_out = retur.area_retur', 'left')
-            ->join('material', 'material.item_type = retur.item_type AND material.kode_warna = retur.kode_warna', 'left')
-            ->join('master_order', 'master_order.id_order = material.id_order AND master_order.no_model = retur.no_model', 'inner')
-            ->join('master_material', 'master_material.item_type = material.item_type AND master_material.item_type = retur.item_type', 'inner')
-            ->groupBy('retur.id_retur, retur.no_model, material.item_type, material.kode_warna');
+            ->join('master_material mm', 'mm.item_type = retur.item_type', 'inner')
+            ->join(
+                '(SELECT item_type, kode_warna, SUM(kgs) as total_kgs, SUM(loss) as loss FROM material GROUP BY item_type, kode_warna) m',
+                'm.item_type = retur.item_type AND m.kode_warna = retur.kode_warna',
+                'left'
+            )
+            ->where('retur.waktu_acc_retur IS NOT NULL')
+            ->like('retur.keterangan_gbn', 'Approve:')
+            ->groupBy('retur.no_model, retur.item_type, retur.kode_warna, retur.kategori');
 
         // Filter opsional
         if (!empty($area)) {
@@ -260,39 +260,4 @@ class ReturModel extends Model
 
         return $this->findAll();
     }
-
-
-    // public function getFilterReturArea($area = null, $kategori = null, $tanggal_awal = null, $tanggal_akhir = null)
-    // {
-    //     $this->select('retur.*, master_material.jenis, open_po.kg_po, material.loss, pengeluaran.kgs_out, pengeluaran.cns_out, pengeluaran.krg_out, pengeluaran.lot_out')
-    //         ->join('open_po', 'open_po.item_type = retur.item_type AND open_po.kode_warna = retur.kode_warna', 'left')
-    //         ->join('master_material', 'master_material.item_type = retur.item_type', 'left')
-    //         ->join('material', 'material.item_type = retur.item_type AND material.kode_warna = retur.kode_warna', 'left')
-    //         ->join('pengeluaran', 'pengeluaran.area_out = retur.area_retur', 'left')
-    //         ->groupBy('retur.tgl_retur, retur.id_retur, retur.no_model, retur.item_type, retur.kode_warna, retur.warna');
-
-    //     if (!empty($area)) {
-    //         $this->where('retur.area_retur', $area);
-    //     }
-
-    //     if (!empty($kategori)) {
-    //         $this->where('retur.kategori', $kategori);
-    //     }
-
-    //     if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
-    //         $this->groupStart();
-    //         if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
-    //             $this->where('retur.tgl_retur >=', $tanggal_awal)
-    //                 ->where('retur.tgl_retur <=', $tanggal_akhir);
-    //         } elseif (!empty($tanggal_awal)) {
-    //             $this->where('retur.tgl_retur >=', $tanggal_awal);
-    //         } elseif (!empty($tanggal_akhir)) {
-    //             $this->where('retur.tgl_retur <=', $tanggal_akhir);
-    //         }
-    //         $this->groupEnd();
-    //     }
-
-    //     // Tambahkan limit saat debug
-    //     return $this->limit(100)->findAll();
-    // }
 }
