@@ -51,11 +51,11 @@
 
                                         <label>Detail Surat Jalan</label>
                                         <select class="form-control" name="detail_sj" id="detail_sj" required>
-                                            <option value="">Pilih Surat Jalan</option>
+                                            <!-- <option value="">Pilih Surat Jalan</option>
                                             <option value="COVER MAJALAYA">COVER MAJALAYA</option>
                                             <option value="IMPORT DARI KOREA">IMPORT DARI KOREA</option>
                                             <option value="JS MISTY">JS MISTY</option>
-                                            <option value="JS SOLID">JS SOLID</option>
+                                            <option value="JS SOLID">JS SOLID</option> -->
                                             <option value="KHTEX">KHTEX</option>
                                             <option value="PO(+)">PO(+)</option>
                                         </select>
