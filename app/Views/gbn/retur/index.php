@@ -105,41 +105,38 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php if (empty($retur)): ?>
+
+
+                                        <?php $i = 1; ?>
+                                        <?php foreach ($retur as $row): ?>
                                             <tr>
-                                                <td colspan="9" class="text-center py-4">Tidak ada data yang ditemukan</td>
+                                                <td><?= $i ?></td>
+                                                <td><?= $row['no_model'] ?></td>
+                                                <td><?= $row['item_type'] ?></td>
+                                                <td><?= $row['kode_warna'] ?></td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div style="width: 20px; height: 20px; background-color: <?= $row['kode_warna'] ?>; border-radius: 4px; margin-right: 8px;"></div>
+                                                        <?= $row['warna'] ?>
+                                                    </div>
+                                                </td>
+                                                <td><?= $row['kgs_retur'] ?></td>
+                                                <td><?= $row['cns_retur'] ?></td>
+                                                <td><?= $row['area_retur'] ?></td>
+                                                <td><?= date('d-m-Y', strtotime($row['tgl_retur'])) ?></td>
+                                                <td>
+                                                    <!-- Modal buttons -->
+                                                    <button type="button" class="btn btn-info " data-bs-toggle="modal" data-bs-target="#acceptModal<?= $row['id_retur'] ?>">
+                                                        <i class="fas fa-check"></i> Accept
+                                                    </button>
+                                                    <button type="button" class="btn btn-danger " data-bs-toggle="modal" data-bs-target="#rejectModal<?= $row['id_retur'] ?>">
+                                                        <i class="fas fa-times"></i> Reject
+                                                    </button>
+                                                </td>
                                             </tr>
-                                        <?php else: ?>
-                                            <?php $i = 1; ?>
-                                            <?php foreach ($retur as $row): ?>
-                                                <tr>
-                                                    <td><?= $i ?></td>
-                                                    <td><?= $row['no_model'] ?></td>
-                                                    <td><?= $row['item_type'] ?></td>
-                                                    <td><?= $row['kode_warna'] ?></td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <div style="width: 20px; height: 20px; background-color: <?= $row['kode_warna'] ?>; border-radius: 4px; margin-right: 8px;"></div>
-                                                            <?= $row['warna'] ?>
-                                                        </div>
-                                                    </td>
-                                                    <td><?= $row['kgs_retur'] ?></td>
-                                                    <td><?= $row['cns_retur'] ?></td>
-                                                    <td><?= $row['area_retur'] ?></td>
-                                                    <td><?= date('d-m-Y', strtotime($row['tgl_retur'])) ?></td>
-                                                    <td>
-                                                        <!-- Modal buttons -->
-                                                        <button type="button" class="btn btn-info " data-bs-toggle="modal" data-bs-target="#acceptModal<?= $row['id_retur'] ?>">
-                                                            <i class="fas fa-check"></i> Accept
-                                                        </button>
-                                                        <button type="button" class="btn btn-danger " data-bs-toggle="modal" data-bs-target="#rejectModal<?= $row['id_retur'] ?>">
-                                                            <i class="fas fa-times"></i> Reject
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                                <?php $i++; ?>
-                                            <?php endforeach; ?>
-                                        <?php endif; ?>
+                                            <?php $i++; ?>
+                                        <?php endforeach; ?>
+
                                     </tbody>
                                 </table>
                             </div>

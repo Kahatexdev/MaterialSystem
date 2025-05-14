@@ -417,26 +417,26 @@
 
             // Buat konten untuk satu item
             const formPengeluaran = `    
-        <div class="card mb-2">
-            <div class="card-body">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="id_pemasukan[]" value="${item.id_pemasukan}" id="pemasukan_${item.id_pemasukan}">
-                    <label class="form-check-label" for="pemasukan_${item.id_pemasukan}">
-                    <strong>No Karung:</strong> ${item.no_karung}<br>
-                    <strong>Tanggal Masuk:</strong> ${item.tgl_masuk}<br>
-                        <strong>Cluster:</strong> ${item.nama_cluster}<br>
-                        <strong>PDK:</strong> ${item.no_model}<br>
-                        <strong>Item Type:</strong> ${item.item_type}<br>
-                        <strong>Kode Warna:</strong> ${item.kode_warna}<br>
-                        <strong>Warna:</strong> ${item.warna}<br>
-                        <strong>Lot Celup:</strong> ${item.lot_kirim}<br>
-                        <strong>Total Kg:</strong> ${item.kgs_kirim} KG<br>
-                        <strong>Total Cones:</strong> ${item.cones_kirim} CNS
-                    </label>
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="id_pemasukan[]" value="${item.id_pemasukan}" id="pemasukan_${item.id_pemasukan}">
+                            <label class="form-check-label" for="pemasukan_${item.id_pemasukan}">
+                            <strong>No Karung:</strong> ${item.no_karung}<br>
+                            <strong>Tanggal Masuk:</strong> ${item.tgl_masuk}<br>
+                                <strong>Cluster:</strong> ${item.nama_cluster}<br>
+                                <strong>PDK:</strong> ${item.no_model}<br>
+                                <strong>Item Type:</strong> ${item.item_type}<br>
+                                <strong>Kode Warna:</strong> ${item.kode_warna}<br>
+                                <strong>Warna:</strong> ${item.warna}<br>
+                                <strong>Lot Celup:</strong> ${item.lot_kirim}<br>
+                                <strong>Total Kg:</strong> ${item.kgs_kirim} KG<br>
+                                <strong>Total Cones:</strong> ${item.cones_kirim} CNS
+                            </label>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    `;
+            `;
 
             // Tambahkan konten item ke dalam container
             document.getElementById('formPengeluaran').innerHTML += formPengeluaran;

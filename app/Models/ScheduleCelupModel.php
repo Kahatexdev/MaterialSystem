@@ -36,6 +36,7 @@ class ScheduleCelupModel extends Model
         'tanggal_acc',
         'tanggal_reject',
         'tanggal_perbaikan',
+        'tanggal_teslab',
         'last_status',
         'ket_daily_cek',
         'po_plus',
@@ -357,6 +358,7 @@ class ScheduleCelupModel extends Model
                 'tanggal_acc',
                 'tanggal_reject',
                 'tanggal_perbaikan',
+                'tanggal_teslab',
                 'last_status',
                 'ket_daily_cek',
                 'po_plus',
@@ -512,5 +514,15 @@ class ScheduleCelupModel extends Model
             ->orderBy('tanggal_schedule', 'ASC')
             ->limit(5)
             ->findAll();
+    }
+    public function getIdCelups($data)
+    {
+        $row = $this->select('id_celup')
+            ->where('no_model', $data['no_model'])
+            ->where('item_type', $data['item_type'])
+            ->where('kode_warna', $data['kode_warna'])
+            ->where('lot_celup', $data['lot_retur'])
+            ->first();
+        return $row ? (int)$row['id_celup'] : null;
     }
 }

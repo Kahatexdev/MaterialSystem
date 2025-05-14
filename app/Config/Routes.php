@@ -90,10 +90,11 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('schedule/deleteSchedule', 'ScheduleController::deleteSchedule');
     $routes->get('schedule/getStock', 'ScheduleController::getStock');
     $routes->get('schedule/getKeterangan', 'ScheduleController::getKeterangan');
-
+    $routes->post('updateSchedule/(:num)', 'CelupController::updateSchedule/$1');
+    $routes->get('reqschedule', 'ScheduleController::reqschedule');
     $routes->get('schedule/reqschedule', 'ScheduleController::reqschedule');
     $routes->post('schedule/reqschedule', 'ScheduleController::reqschedule');
-    $routes->get('schedule/reqschedule/show/(:num)', 'ScheduleController::showschedule/$1');
+    $routes->get('schedule/reqschedule/show/(:num)', 'CelupController::editStatus/$1');
     $routes->get('schedule/reportSchBenang', 'ScheduleController::reportSchBenang');
     $routes->get('schedule/filterSchBenang', 'ScheduleController::filterSchBenang');
     $routes->get('schedule/exportScheduleBenang', 'ExcelController::exportScheduleBenang');
@@ -201,6 +202,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('excelPPHDays/(:any)/(:any)', 'ExcelController::excelPPHDays/$1/$2');
     //PO Covering
     $routes->get('poCovering', 'POCoveringController::index');
+    $routes->get('po/listTrackingPo/(:any)', 'TrackingPoCoveringController::TrackingPo/$1');
     $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
     $routes->get('pesanKeCovering/(:any)', 'CoveringPemesananController::pesanKeCovering/$1');
     //Retur
@@ -303,6 +305,10 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('po/savePOCovering', 'CoveringController::savePOCovering');
     $routes->get('po/deletePOCovering/(:any)', 'CoveringController::unsetSession/$1');
     $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
+    $routes->get('po/listTrackingPo', 'TrackingPoCoveringController::listTrackingPo');
+    $routes->get('po/listTrackingPo/(:any)', 'TrackingPoCoveringController::TrackingPo/$1');
+    $routes->post('po/updateListTrackingPo/(:any)', 'TrackingPoCoveringController::updateListTrackingPo/$1');
+
 
     // warehouse
     $routes->get('warehouse', 'CoveringWarehouseController::index');
@@ -511,6 +517,7 @@ $routes->group(
         $routes->get('warehouse/exportExcel', 'ExcelController::excelStockMaterial');
         $routes->get('poTambahanDetail/(:any)/(:any)', 'ApiController::poTambahanDetail/$1/$2');
         $routes->post('savePoTambahan', 'ApiController::savePoTambahan');
+        $routes->get('filterPoTambahan', 'ApiController::filterPoTambahan');
         $routes->get('cekMaterial/(:any)', 'ApiController::cekMaterial/$1');
         $routes->get('listRetur', 'ApiController::listRetur');
     }
