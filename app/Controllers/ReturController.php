@@ -200,8 +200,17 @@ class ReturController extends BaseController
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
         $data = $this->returModel->getFilterReturArea($area, $kategori, $tanggalAwal, $tanggalAkhir);
-        echo json_encode($data, JSON_PRETTY_PRINT);
-        exit;
+
+        if (!empty($data)) {
+            foreach ($data as $key => $dt) {
+                $kirim = $this->outCelupModel->getDataKirim($dt['id_retur']);
+                $data[$key]['kg_kirim'] = $kirim['kg_kirim'] ?? 0;
+                $data[$key]['cns_kirim'] = $kirim['cns_kirim'] ?? 0;
+                $data[$key]['krg_kirim'] = $kirim['krg_kirim'] ?? 0;
+                $data[$key]['lot_out'] = $kirim['lot_out'] ?? '-';
+            }
+        }
+
         return $this->response->setJSON($data);
     }
 }
