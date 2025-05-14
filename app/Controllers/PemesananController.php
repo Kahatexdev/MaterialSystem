@@ -21,6 +21,8 @@ use App\Models\PengeluaranModel;
 use App\Models\PemesananModel;
 use App\Models\TotalPemesananModel;
 use App\Models\OtherOutModel;
+use App\Models\PemesananSpandexKaretModel;
+
 
 class PemesananController extends BaseController
 {
@@ -44,6 +46,7 @@ class PemesananController extends BaseController
     protected $pemesananModel;
     protected $totalPemesananModel;
     protected $otherOutModel;
+    protected $pemesananSpandexKaretModel;
 
     public function __construct()
     {
@@ -63,6 +66,7 @@ class PemesananController extends BaseController
         $this->pemesananModel = new PemesananModel();
         $this->totalPemesananModel = new TotalPemesananModel();
         $this->otherOutModel = new OtherOutModel();
+        $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -129,8 +133,19 @@ class PemesananController extends BaseController
         $dataPemesanan = $this->totalPemesananModel->getDataPemesanan($area, $jenis, $tglPakai);
         // dd ($dataPemesanan);
         if (!is_array($dataPemesanan)) {
-            $dataPemesanan = []; // Pastikan selalu array
+            $dataPemesanan = [];
         }
+
+        // Cek apakah sudah ada di pemesanan spandex karet
+        foreach ($dataPemesanan as &$item) {
+            $cekSpandex = $this->pemesananSpandexKaretModel
+                ->where('id_total_pemesanan', $item['id_total_pemesanan'])
+                ->first();
+            $item['sudah_pesan_spandex'] = $cekSpandex ? true : false;
+            $item['status'] = $cekSpandex ? $cekSpandex['status'] : 'BELUM PESAN';
+        }
+        // dd ($dataPemesanan);
+        $listPemesanan = $this->pemesananSpandexKaretModel->getListPemesananSpandexKaret($area,$jenis, $tglPakai);
 
         $data = [
             'active' => $this->active,
@@ -141,8 +156,10 @@ class PemesananController extends BaseController
             'jenis' => $jenis,
             'tglPakai' => $tglPakai,
         ];
+
         return view($this->role . '/pemesanan/detailpemesanan', $data);
     }
+
 
 
     public function getStockByParams()
@@ -635,5 +652,45 @@ class PemesananController extends BaseController
                 $success ? 'Request berhasil ditolak'
                     : 'Request gagal diproses'
             );
+    }
+
+    public function permintaanKaretCovering()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/pemesanan/report-permintaan-karet', $data);
+    }
+
+    public function permintaanSpandexCovering()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/pemesanan/report-permintaan-spandex', $data);
+    }
+
+    public function getFilterPemesananKaret()
+    {
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemesananModel->getFilterPemesananKaret($tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
+    }
+
+    public function getFilterPemesananSpandex()
+    {
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemesananModel->getFilterPemesananSpandex($tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
     }
 }

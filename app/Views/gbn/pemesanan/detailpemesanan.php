@@ -103,10 +103,25 @@
                                         <td><?= $data['lot_kirim'] ?></td>
                                         <td><?= $data['cluster_kirim'] ?></td>
                                         <td>
-                                            <a href="<?= base_url($role . '/selectClusterWarehouse/' . $data['id_total_pemesanan']) . '?Area=' . $area . '&KgsPesan=' . $data['ttl_kg'] . '&CnsPesan=' . $data['ttl_cns'] ?>"
-                                                class="btn bg-gradient-info">
-                                                <i class="fas fa-layer-group"></i>Pilih
-                                            </a>
+
+                                            <!-- button pesan ke covering -->
+
+                                            <?php if ($data['jenis'] === 'SPANDEX' || $data['jenis'] === 'KARET'): ?>
+                                                <?php if (!$data['sudah_pesan_spandex']): ?>
+                                                    <a href="<?= base_url($role . '/pesanKeCovering/' . $data['id_total_pemesanan']) ?>"
+                                                        class="btn bg-gradient-info">
+                                                        <i class="fas fa-layer-group"></i> Pesan <?= ucfirst($data['jenis']) ?>
+                                                    </a>
+                                                <?php else: ?>
+                                                    <span class="badge bg-info"><?= $data['status'] ?></span>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <a href="<?= base_url($role . '/selectClusterWarehouse/' . $data['id_total_pemesanan']) . '?Area=' . $area . '&KgsPesan=' . $data['ttl_kg'] . '&CnsPesan=' . $data['ttl_cns'] ?>"
+                                                    class="btn bg-gradient-info">
+                                                    <i class="fas fa-layer-group"></i>Pilih
+                                                </a>
+                                            <?php endif; ?>
+
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

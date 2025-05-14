@@ -173,6 +173,18 @@ class ReturModel extends Model
             ->getResultArray();
     }
 
+    public function listBarcodeRetur()
+    {
+        return $this->db->table('out_celup')
+            ->select('out_celup.*, retur.no_model, retur.item_type, retur.kode_warna, retur.warna, retur.lot_retur, retur.kgs_retur, retur.cns_retur')
+            ->join('retur', 'retur.id_retur = out_celup.id_retur')
+            ->where('retur.waktu_acc_retur IS NOT NULL')
+            ->like('retur.keterangan_gbn', 'Approve:')
+            ->groupBy('out_celup.id_retur')
+            ->get()
+            ->getResultArray();
+    }
+
     // public function getDataOut($id)
     // {
     //     return $this->db->table('out_celup')
@@ -183,4 +195,10 @@ class ReturModel extends Model
     //         ->get()
     //         ->getResultArray();
     // }
+    public function getListRetur($model, $area)
+    {
+        return $this->where('no_model', $model)
+            ->where('area_retur', $area)
+            ->findAll();
+    }
 }

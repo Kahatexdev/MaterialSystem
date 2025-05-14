@@ -76,7 +76,7 @@ class OutCelupModel extends Model
     public function getDataOut($id)
     {
         return $this->db->table('out_celup')
-            ->select('out_celup.*, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna')
+            ->select('out_celup.*, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna')
             ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup')
             ->where('out_celup.id_out_celup', $id)
             ->distinct()
@@ -217,5 +217,13 @@ class OutCelupModel extends Model
             ->join('other_out', 'other_out.id_out_celup = out_celup.id_out_celup AND pemasukan.nama_cluster = other_out.nama_cluster', 'left')
             ->whereIn('pemasukan.id_pemasukan', $idPemasukan)
             ->findAll();
+    }
+
+    public function getDataReturById($idRetur)
+    {
+        return $this->select('out_celup.*,retur.item_type, retur.kode_warna, retur.warna')
+            ->join('retur', 'retur.id_retur = out_celup.id_retur')
+            ->where('out_celup.id_retur', $idRetur)
+            ->first();
     }
 }

@@ -686,11 +686,6 @@ class ApiController extends ResourceController
             return $this->fail('Data tidak ditemukan', ResponseInterface::HTTP_BAD_REQUEST);
         }
 
-        // Validasi sederhana
-        if (!isset($data['no_model'], $data['item_type'], $data['kode_warna'])) {
-            return $this->fail('Data tidak lengkap', ResponseInterface::HTTP_BAD_REQUEST);
-        }
-
         $result = $this->returModel->insert($data);
 
         if (!$result) {
@@ -805,5 +800,18 @@ class ApiController extends ResourceController
         $filterData = $this->poTambahanModel->filterData($area, $noModel);
 
         return $this->respond($filterData);
+    }
+    public function cekMaterial($id)
+    {
+        $material = $this->materialModel->materialCek($id);
+        return $this->response->setJSON($material);
+    }
+    public function listRetur()
+    {
+        $model = $this->request->getGet('model');
+        $area = $this->request->getGet('area');
+
+        $listRetur = $this->returModel->getListRetur($model, $area);
+        return $this->response->setJSON($listRetur);
     }
 }

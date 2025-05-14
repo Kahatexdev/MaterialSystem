@@ -10,6 +10,11 @@ use App\Models\MaterialModel;
 use App\Models\ReturModel;
 use App\Models\PemasukanModel;
 use App\Models\OutCelupModel;
+use App\Models\KategoriReturModel;
+use App\Models\ScheduleCelupModel;
+
+
+
 class ReturController extends BaseController
 {
     protected $role;
@@ -22,6 +27,9 @@ class ReturController extends BaseController
     protected $returModel;
     protected $pemasukanModel;
     protected $outCelupModel;
+    protected $kategoriReturModel;
+    protected $scheduleCelupModel;
+
 
     public function __construct()
     {
@@ -31,6 +39,8 @@ class ReturController extends BaseController
         $this->returModel = new ReturModel();
         $this->pemasukanModel = new PemasukanModel();
         $this->outCelupModel = new OutCelupModel();
+        $this->kategoriReturModel = new KategoriReturModel();
+        $this->scheduleCelupModel = new ScheduleCelupModel();
 
         $this->role = session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
@@ -48,7 +58,7 @@ class ReturController extends BaseController
 
 
     public function index()
-    {   
+    {
         // Ambil data retur
         $dataRetur = $this->returModel->findAll();
         // dd ($dataRetur);
@@ -95,10 +105,11 @@ class ReturController extends BaseController
         $this->returModel->update($id, $data);
         // log_message('info', 'Data update retur: ' . json_encode($data));
         $dataRetur = $this->returModel->find($id);
-        // dd ($dataRetur);
-        // update id_retur di tabel pemasukan
+        $idCelup = $this->scheduleCelupModel->getIdCelups($dataRetur);
         $barcodeNew = [
             'id_retur'       => $dataRetur['id_retur'],
+            'id_celup'       => $idCelup,
+            'no_model'       => $dataRetur['no_model'],
             'no_karung'     => (int)$dataRetur['krg_retur'] ?? 0,
             'kgs_kirim'          => (float)$dataRetur['kgs_retur'],
             'cones_kirim'      => (int)$dataRetur['cns_retur'],
@@ -130,5 +141,42 @@ class ReturController extends BaseController
         // flashdata
         session()->setFlashdata('success', 'Data berhasil di update.');
         return redirect()->to(base_url(session()->get('role') . '/retur'));
+    }
+    public function returArea()
+    {
+        $data = $this->kategoriReturModel->getKategoriRetur();
+        $kategoriRetur = [];
+        foreach ($data as $item) {
+            $kategoriRetur[] = [
+                'nama_kategori' => $item['nama_kategori'],
+                'tipe_kategori' => $item['tipe_kategori']
+            ];
+        }
+        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $response = file_get_contents($apiUrl);
+
+        $area = json_decode($response, true);
+
+        return view($this->role . '/retur/index', [
+            'active'     => $this->active,
+            'title'      => 'PPH',
+            'role'       => $this->role,
+            'area'       => $area,
+            'kategori' => $kategoriRetur,
+        ]);
+    }
+
+    public function listBarcodeRetur()
+    {
+        $listRetur = $this->returModel->listBarcodeRetur();
+
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "List Barcode Retur",
+            'listRetur' => $listRetur,
+        ];
+        // dd($data);
+        return view($this->role . '/retur/list-barcode-retur', $data);
     }
 }

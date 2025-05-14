@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\MasterMaterialModel;
 use App\Models\PemesananModel;
+use App\Models\PemesananSpandexKaretModel;
 
 class CoveringPemesananController extends BaseController
 {
@@ -15,11 +16,13 @@ class CoveringPemesananController extends BaseController
     protected $request;
     protected $masterMaterialModel;
     protected $pemesananModel;
+    protected $pemesananSpandexKaretModel;
 
     public function __construct()
     {
         $this->masterMaterialModel = new MasterMaterialModel();
         $this->pemesananModel = new PemesananModel();
+        $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -62,8 +65,8 @@ class CoveringPemesananController extends BaseController
 
     public function detailPemesanan($jenis, $tgl_pakai)
     {
-        $listPemesanan = $this->pemesananModel->getListPemesananCovering($jenis, $tgl_pakai);
-
+        $listPemesanan = $this->pemesananSpandexKaretModel->getListPemesananCovering($jenis, $tgl_pakai);
+        // dd ($listPemesanan);
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
@@ -111,5 +114,41 @@ class CoveringPemesananController extends BaseController
         $data = $this->pemesananModel->getFilterPemesananSpandex($tanggalAwal, $tanggalAkhir);
 
         return $this->response->setJSON($data);
+    }
+
+    public function pesanKeCovering($id)
+    {
+        try {
+            $dataPemesanan = $this->pemesananModel->getPemesananSpandex($id);
+
+            if (!$dataPemesanan) {
+                return redirect()->back()->with('error', 'Data pemesanan tidak ditemukan.');
+            }
+
+            $dataSpandexKaret = [
+                'id_total_pemesanan' => $dataPemesanan['id_total_pemesanan'],
+                'status' => 'REQUEST',
+                'admin' => session()->get('username'),
+            ];
+
+            if ($this->pemesananSpandexKaretModel->insert($dataSpandexKaret)) {
+                return redirect()->back()->with('success', 'Pemesanan berhasil dikirim ke Covering.');
+            } else {
+                return redirect()->back()->with('error', 'Gagal menyimpan data pemesanan.');
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function updatePemesanan($id_psk)
+    {
+        $status = $this->request->getPost('status');
+        // dd ($status);
+        $this->pemesananSpandexKaretModel->update($id_psk, [
+            'status' => $status
+        ]);
+
+        return redirect()->back()->with('success', 'Status pemesanan berhasil diperbarui.');
     }
 }

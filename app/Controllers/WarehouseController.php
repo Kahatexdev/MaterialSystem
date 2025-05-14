@@ -2123,4 +2123,16 @@ class WarehouseController extends BaseController
             ]);
         }
     }
+    public function otherIn()
+    {
+        $no_model = $this->masterOrderModel->getAllNoModel();
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'no_model' => $no_model,
+        ];
+        return view($this->role . '/warehouse/form-other-in', $data);
+    }
 }
