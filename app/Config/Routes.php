@@ -202,6 +202,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('excelPPHDays/(:any)/(:any)', 'ExcelController::excelPPHDays/$1/$2');
     //PO Covering
     $routes->get('poCovering', 'POCoveringController::index');
+    $routes->get('po/listTrackingPo/(:any)', 'TrackingPoCoveringController::TrackingPo/$1');
     $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
     $routes->get('pesanKeCovering/(:any)', 'CoveringPemesananController::pesanKeCovering/$1');
 
@@ -303,6 +304,7 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('po/deletePOCovering/(:any)', 'CoveringController::unsetSession/$1');
     $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
     $routes->get('po/listTrackingPo', 'TrackingPoCoveringController::listTrackingPo');
+    $routes->get('po/listTrackingPo/(:any)', 'TrackingPoCoveringController::TrackingPo/$1');
     $routes->post('po/updateListTrackingPo/(:any)', 'TrackingPoCoveringController::updateListTrackingPo/$1');
 
 
