@@ -1792,79 +1792,97 @@ class PdfController extends BaseController
             ->setBody($pdf->Output('S'));
     }
 
-    public function generateBarcodeRetur($idRetur)
+    public function generateBarcodeRetur($tglRetur)
     {
-        $dataRetur = $this->outCelupModel->getDataReturById($idRetur);
-        if (!$dataRetur) {
-            return "Data tidak ditemukan.";
+        // 1) Ambil data
+        $dataList = $this->outCelupModel->getDataReturByTgl($tglRetur);
+        if (empty($dataList)) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException("Tidak ada retur pada tanggal {$tglRetur}");
         }
-        // Generate barcode (base64)
-        $generator = new BarcodeGeneratorPNG();
-        $id_out_celup = (string) $dataRetur['id_out_celup'];
-        $barcodeData = $generator->getBarcode(
-            $id_out_celup,
-            $generator::TYPE_CODE_128
-        );
-        $barcodeBase64 = base64_encode($barcodeData);
 
-        // Buat PDF
-        $pdf = new FPDF('P', 'mm', 'A4');
+        // 2) Inisialisasi PDF
+        $pdf       = new FPDF('P', 'mm', 'A4');
+        $pdf->SetAutoPageBreak(false);
         $pdf->AddPage();
-        $pdf->SetFont('Arial', 'B', 12);
+        $generator = new BarcodeGeneratorPNG();
 
-        // Kotak luar
-        $startX = 52.5;
-        $startY = 20;
-        $boxWidth = 100;
-        $boxHeight = 100;
+        // 3) Konfigurasi grid
+        $cols    = 3;
+        $boxW    = 63;
+        $boxH    = 60;
+        $gapX    = 5;
+        $gapY    = 5;
+        $marginX = 10;
+        $marginY = 15;
+        $lineH   = 4;
 
-        $pdf->Rect($startX, $startY, $boxWidth, $boxHeight);
+        foreach ($dataList as $i => $dataRetur) {
+            // Hitung posisi kolom & baris
+            $col = $i % $cols;
+            $row = floor($i / $cols);
+            $x   = $marginX + $col * ($boxW + $gapX);
+            $y   = $marginY + $row * ($boxH + $gapY);
 
-        // Tampilkan barcode
-        $barcodeY = $startY + 5;
-        $barcodeFile = tempnam(sys_get_temp_dir(), 'barcode_') . '.png';
-        file_put_contents($barcodeFile, base64_decode($barcodeBase64));
-        $pdf->Image($barcodeFile, $startX + 10, $barcodeY, 80, 20);
-        unlink($barcodeFile);
+            // Gambar kotak putih + border
+            $pdf->SetFillColor(255);
+            $pdf->Rect($x, $y, $boxW, $boxH, 'F');
+            $pdf->Rect($x, $y, $boxW, $boxH);
 
-        // Tampilkan teks data retur 
-        $labelWidth = 35;
-        $pdf->SetY($barcodeY + 25);
-        $pdf->SetX($startX + 10);
-        $pdf->Cell($labelWidth, 8, 'No Model', 0, 0);
-        $pdf->Cell(0, 8, ': ' . $dataRetur['no_model'], 0, 1);
+            // 4) Generate barcode (tanpa padding, CODE-128)
+            $idOut       = (string)$dataRetur['id_out_celup'];
+            $barcodeData  = $generator->getBarcode($idOut, $generator::TYPE_CODE_128);
 
-        $pdf->SetX($startX + 10);
-        $pdf->Cell($labelWidth, 8, 'Item Type', 0, 0);
-        $pdf->Cell(0, 8, ': ' . $dataRetur['item_type'], 0, 1);
+            // Simpan & tampilkan PNG
+            $tmpFile = tempnam(sys_get_temp_dir(), 'bc_') . '.png';
+            file_put_contents($tmpFile, $barcodeData);
+            $pdf->Image($tmpFile, $x + 5, $y + 3, $boxW - 10, 12);
+            @unlink($tmpFile);
 
-        $pdf->SetX($startX + 10);
-        $pdf->Cell($labelWidth, 8, 'Kode Warna', 0, 0);
-        $pdf->Cell(0, 8, ': ' . $dataRetur['kode_warna'], 0, 1);
+            // (Opsional) Tampilkan kode asli di bawah barcode
+            $pdf->SetFont('Arial', '', 6);
+            $pdf->SetXY($x + 5, $y + 16);
+            // $pdf->Cell($boxW - 10, 4, $code, 0, 1, 'C'); // Menampilkan id out celup di barcode
 
-        $pdf->SetX($startX + 10);
-        $pdf->Cell($labelWidth, 8, 'Warna', 0, 0);
-        $pdf->Cell(0, 8, ': ' . $dataRetur['warna'], 0, 1);
+            // 5) Tampilkan teks dengan wrapping
+            $pdf->SetFont('Arial', '', 7);
+            $textX  = $x + 3;
+            $textY  = $y + 22;
+            $textW  = $boxW - 6;  // sisakan 3mm margin kiri & kanan
+            $pdf->SetXY($textX, $textY);
 
-        $pdf->SetX($startX + 10);
-        $pdf->Cell($labelWidth, 8, 'Kgs Kirim', 0, 0);
-        $pdf->Cell(0, 8, ': ' . $dataRetur['kgs_kirim'], 0, 1);
+            $fields = [
+                'Model'       => $dataRetur['no_model'],
+                'Item Type'   => $dataRetur['item_type'],
+                'Kode Warna'  => $dataRetur['kode_warna'],
+                'Warna'       => $dataRetur['warna'],
+                'Kgs Retur'   => $dataRetur['kgs_retur'],
+                'Cones Retur' => $dataRetur['cns_retur'],
+                'Lot Retur'   => $dataRetur['lot_retur'],
+                'No Karung'   => $dataRetur['no_karung'],
+            ];
 
-        $pdf->SetX($startX + 10);
-        $pdf->Cell($labelWidth, 8, 'Cones Kirim', 0, 0);
-        $pdf->Cell(0, 8, ': ' . $dataRetur['cones_kirim'], 0, 1);
+            $labelWidth = 20; // Lebar tetap untuk label
+            $valueWidth = $textW - $labelWidth;
 
-        $pdf->SetX($startX + 10);
-        $pdf->Cell($labelWidth, 8, 'Lot Kirim', 0, 0);
-        $pdf->Cell(0, 8, ': ' . $dataRetur['lot_kirim'], 0, 1);
+            foreach ($fields as $label => $value) {
+                $pdf->SetX($textX);
+                $pdf->Cell($labelWidth, $lineH, $label, 0, 0); // Kolom label
+                $pdf->MultiCell($valueWidth, $lineH, ': ' . $value, 0, 'L'); // Kolom isi
+            }
 
-        $pdf->SetX($startX + 10);
-        $pdf->Cell($labelWidth, 8, 'No Karung', 0, 0);
-        $pdf->Cell(0, 8, ': ' . $dataRetur['no_karung'], 0, 1);
+            // 6) Jika penuh ke bawah, tambahkan halaman
+            if (($y + $boxH + $gapY > 280) && ($col === $cols - 1)) {
+                $pdf->AddPage();
+            }
+        }
 
-
-        // Output PDF
-        return $this->response->setHeader('Content-Type', 'application/pdf')
-            ->setBody($pdf->Output('Bon Pengiriman.pdf', 'I'));
+        // 7) Output PDF
+        return $this->response
+            ->setHeader('Content-Type', 'application/pdf')
+            ->setHeader(
+                'Content-Disposition',
+                "inline; filename=\"Barcode_Retur_{$tglRetur}.pdf\""
+            )
+            ->setBody($pdf->Output('', 'S'));
     }
 }

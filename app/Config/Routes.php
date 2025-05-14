@@ -210,7 +210,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('retur/approve', 'ReturController::approve');
     $routes->post('retur/reject', 'ReturController::reject');
     $routes->get('retur/listBarcodeRetur', 'ReturController::listBarcodeRetur');
-    $routes->get('retur/generateBarcodeRetur/(:num)', 'PdfController::generateBarcodeRetur/$1');
+    $routes->get('retur/detailBarcodeRetur/(:any)', 'ReturController::detailBarcodeRetur/$1');
+    $routes->get('retur/generateBarcodeRetur/(:any)', 'PdfController::generateBarcodeRetur/$1');
     $routes->get('retur/reportReturArea', 'ReturController::reportReturArea');
     $routes->get('retur/filterReturArea', 'ReturController::filterReturArea');
     // tambahan waktu

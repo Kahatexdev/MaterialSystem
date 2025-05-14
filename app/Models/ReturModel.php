@@ -175,12 +175,23 @@ class ReturModel extends Model
 
     public function listBarcodeRetur()
     {
-        return $this->db->table('out_celup')
-            ->select('out_celup.*, retur.no_model, retur.item_type, retur.kode_warna, retur.warna, retur.lot_retur, retur.kgs_retur, retur.cns_retur')
-            ->join('retur', 'retur.id_retur = out_celup.id_retur')
+        return $this->db->table('retur')
+            ->select('tgl_retur')
             ->where('retur.waktu_acc_retur IS NOT NULL')
             ->like('retur.keterangan_gbn', 'Approve:')
-            ->groupBy('out_celup.id_retur')
+            ->groupBy('tgl_retur')
+            ->orderBy('tgl_retur', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
+    public function detailBarcodeRetur($tgl_retur)
+    {
+        return $this->db->table('retur')
+            ->select('retur.id_retur, retur.no_model, retur.item_type, retur.kode_warna, retur.warna, retur.lot_retur, retur.kgs_retur, retur.cns_retur, retur.tgl_retur')
+            ->where('retur.tgl_retur', $tgl_retur)
+            ->where('retur.waktu_acc_retur IS NOT NULL')
+            ->like('retur.keterangan_gbn', 'Approve:')
             ->get()
             ->getResultArray();
     }

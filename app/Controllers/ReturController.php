@@ -169,7 +169,6 @@ class ReturController extends BaseController
     public function listBarcodeRetur()
     {
         $listRetur = $this->returModel->listBarcodeRetur();
-
         $data = [
             'role' => $this->role,
             'active' => $this->active,
@@ -178,6 +177,19 @@ class ReturController extends BaseController
         ];
         // dd($data);
         return view($this->role . '/retur/list-barcode-retur', $data);
+    }
+
+    public function detailBarcodeRetur($tglRetur)
+    {
+        $detailRetur = $this->returModel->detailBarcodeRetur($tglRetur);
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "Detail Barcode Retur",
+            'detailRetur' => $detailRetur,
+            'tglRetur' => $tglRetur
+        ];
+        return view($this->role . '/retur/detail-barcode-retur', $data);
     }
 
     public function reportReturArea()
