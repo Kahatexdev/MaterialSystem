@@ -13,6 +13,7 @@ use App\Models\MasterMaterialModel;
 use App\Models\OpenPoModel;
 use App\Models\BonCelupModel;
 use App\Models\OutCelupModel;
+use App\Models\OtherBonModel;
 use FPDF;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use App\Models\PemesananSpandexKaretModel;
@@ -29,6 +30,7 @@ class PdfController extends BaseController
     protected $openPoModel;
     protected $bonCelupModel;
     protected $outCelupModel;
+    protected $otherBonModel;
     protected $pemesananSpandexKaretModel;
 
     public function __construct()
@@ -39,6 +41,7 @@ class PdfController extends BaseController
         $this->openPoModel = new OpenPoModel();
         $this->bonCelupModel = new BonCelupModel();
         $this->outCelupModel = new OutCelupModel();
+        $this->otherBonModel = new OtherBonModel();
         $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
 
 
@@ -921,7 +924,7 @@ class PdfController extends BaseController
             if ($pageNo >= 2) {
                 $startX_ = 2.5;
                 $startY_ = 157;
-            } else  {
+            } else {
                 $startX_ = 2.5;
                 $startY_ = 14;
             }
@@ -1798,76 +1801,217 @@ class PdfController extends BaseController
             ->setBody($pdf->Output('S'));
     }
 
-    public function generateBarcodeRetur($idRetur)
+    public function generateBarcodeRetur($tglRetur)
     {
-        $dataRetur = $this->outCelupModel->getDataReturById($idRetur);
-        if (!$dataRetur) {
-            return "Data tidak ditemukan.";
+        // 1) Ambil data
+        $dataList = $this->outCelupModel->getDataReturByTgl($tglRetur);
+        if (empty($dataList)) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException("Tidak ada retur pada tanggal {$tglRetur}");
         }
-        // Generate barcode (base64)
-        $generator = new BarcodeGeneratorPNG();
-        $id_out_celup = (string) $dataRetur['id_out_celup'];
-        $barcodeData = $generator->getBarcode(
-            $id_out_celup,
-            $generator::TYPE_CODE_128
-        );
-        $barcodeBase64 = base64_encode($barcodeData);
 
-        // Buat PDF
+        // 2) Inisialisasi PDF
+        $pdf       = new FPDF('P', 'mm', 'A4');
+        $pdf->SetAutoPageBreak(false);
+        $pdf->AddPage();
+        $generator = new BarcodeGeneratorPNG();
+
+        // 3) Konfigurasi grid
+        $cols    = 3;
+        $boxW    = 63;
+        $boxH    = 60;
+        $gapX    = 5;
+        $gapY    = 5;
+        $marginX = 10;
+        $marginY = 15;
+        $lineH   = 4;
+
+        foreach ($dataList as $i => $dataRetur) {
+            // Hitung posisi kolom & baris
+            $col = $i % $cols;
+            $row = floor($i / $cols);
+            $x   = $marginX + $col * ($boxW + $gapX);
+            $y   = $marginY + $row * ($boxH + $gapY);
+
+            // Gambar kotak putih + border
+            $pdf->SetFillColor(255);
+            $pdf->Rect($x, $y, $boxW, $boxH, 'F');
+            $pdf->Rect($x, $y, $boxW, $boxH);
+
+            // 4) Generate barcode (tanpa padding, CODE-128)
+            $idOut       = (string)$dataRetur['id_out_celup'];
+            $barcodeData  = $generator->getBarcode($idOut, $generator::TYPE_CODE_128);
+
+            // Simpan & tampilkan PNG
+            $tmpFile = tempnam(sys_get_temp_dir(), 'bc_') . '.png';
+            file_put_contents($tmpFile, $barcodeData);
+            $pdf->Image($tmpFile, $x + 5, $y + 3, $boxW - 10, 12);
+            @unlink($tmpFile);
+
+            // (Opsional) Tampilkan kode asli di bawah barcode
+            $pdf->SetFont('Arial', '', 6);
+            $pdf->SetXY($x + 5, $y + 16);
+            // $pdf->Cell($boxW - 10, 4, $code, 0, 1, 'C'); // Menampilkan id out celup di barcode
+
+            // 5) Tampilkan teks dengan wrapping
+            $pdf->SetFont('Arial', '', 7);
+            $textX  = $x + 3;
+            $textY  = $y + 22;
+            $textW  = $boxW - 6;  // sisakan 3mm margin kiri & kanan
+            $pdf->SetXY($textX, $textY);
+
+            $fields = [
+                'Model'       => $dataRetur['no_model'],
+                'Item Type'   => $dataRetur['item_type'],
+                'Kode Warna'  => $dataRetur['kode_warna'],
+                'Warna'       => $dataRetur['warna'],
+                'Kgs Retur'   => $dataRetur['kgs_retur'],
+                'Cones Retur' => $dataRetur['cns_retur'],
+                'Lot Retur'   => $dataRetur['lot_retur'],
+                'No Karung'   => $dataRetur['no_karung'],
+            ];
+
+            $labelWidth = 20; // Lebar tetap untuk label
+            $valueWidth = $textW - $labelWidth;
+
+            foreach ($fields as $label => $value) {
+                $pdf->SetX($textX);
+                $pdf->Cell($labelWidth, $lineH, $label, 0, 0); // Kolom label
+                $pdf->MultiCell($valueWidth, $lineH, ': ' . $value, 0, 'L'); // Kolom isi
+            }
+
+            // 6) Jika penuh ke bawah, tambahkan halaman
+            if (($y + $boxH + $gapY > 280) && ($col === $cols - 1)) {
+                $pdf->AddPage();
+            }
+        }
+
+        // 7) Output PDF
+        return $this->response
+            ->setHeader('Content-Type', 'application/pdf')
+            ->setHeader(
+                'Content-Disposition',
+                "inline; filename=\"Barcode_Retur_{$tglRetur}.pdf\""
+            )
+            ->setBody($pdf->Output('', 'S'));
+    }
+    public function printBarcodeOtherBon($idOtherBon)
+    {
+        $data = $this->otherBonModel->getDataById($idOtherBon);
+        $generator = new BarcodeGeneratorPNG();
+
         $pdf = new FPDF('P', 'mm', 'A4');
         $pdf->AddPage();
+        $pdf->SetFillColor(255, 255, 255); // Warna latar putih
+        $pdf->SetTextColor(0, 0, 0);      // Warna teks hitam
+        $pdf->SetDrawColor(0, 0, 0);      // Warna garis hitam
+        // $pdf->Ln();  // Fungsi PageNo() untuk mendapatkan nomor halaman
         $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(0, 0, 'BARCODE ' . $data[0]['no_model'], 0, 1, 'C');
 
-        // Kotak luar
-        $startX = 52.5;
-        $startY = 20;
-        $boxWidth = 100;
-        $boxHeight = 100;
+        $startX_ = 2.5;
+        $startY_ = 14;
+        $barcodeCount = 0; // Counter untuk jumlah barcode di halaman saat ini
+        $barcodeWidth = 67; // Lebar kotak barcode
+        $barcodeHeight = 67; // Tinggi kotak barcode
+        $jarakKolom = 2; // Jarak horizontal antar kolom
+        $jarakBaris = 2; // Jarak vertikal antar baris
 
-        $pdf->Rect($startX, $startY, $boxWidth, $boxHeight);
+        foreach ($data as $barcode) {
+            // Buat instance Barcode Generator
+            $generate = $generator->getBarcode($barcode['id_out_celup'], $generator::TYPE_CODE_128);
+            $generate = base64_encode($generate);
+            // Menghitung posisi X dan Y untuk 12 barcode per halaman (3 kolom × 2 baris)
+            $mod = 12;
+            $baris = 4;
+            // Jika sudah mencapai batas (6 barcode), tambah halaman baru
+            if ($barcodeCount > 0 && $barcodeCount % $mod === 0) {
+                $pdf->AddPage(); // Tambahkan halaman baru
+                $startX_ = 2.5; // Reset posisi X untuk halaman baru
+                $startY_ = 14; // Reset posisi Y untuk halaman baru
+                $pdf->SetFont('Arial', 'B', 12);
+                $pdf->Cell(0, 8, 'BARCODE', 0, 1, 'C');
+                $barcodeCount = 0; // Reset counter per halaman
+            }
+            $colIndex = $barcodeCount % 3; // 3 kolom per baris
+            $rowIndex = floor($barcodeCount / 3) % $baris; // 2 baris per halaman
 
-        // Tampilkan barcode
-        $barcodeY = $startY + 5;
-        $barcodeFile = tempnam(sys_get_temp_dir(), 'barcode_') . '.png';
-        file_put_contents($barcodeFile, base64_decode($barcodeBase64));
-        $pdf->Image($barcodeFile, $startX + 10, $barcodeY, 80, 20);
-        unlink($barcodeFile);
+            // Menghitung posisi untuk setiap barcode
+            $startX = $startX_ + ($colIndex * ($barcodeWidth + $jarakKolom)); // Posisi horizontal
+            $startY = $startY_ + ($rowIndex * ($barcodeHeight + $jarakBaris)); // Posisi vertikal
 
-        // Tampilkan teks data retur 
-        $labelWidth = 35;
-        $pdf->SetY($barcodeY + 25);
-        $pdf->SetX($startX + 10);
-        $pdf->Cell($labelWidth, 8, 'No Model', 0, 0);
-        $pdf->Cell(0, 8, ': ' . $dataRetur['no_model'], 0, 1);
+            // Menggambar kotak di sekitar detail
+            $pdf->Rect($startX, $startY, 67, 67); // Kotak barcode
 
-        $pdf->SetX($startX + 10);
-        $pdf->Cell($labelWidth, 8, 'Item Type', 0, 0);
-        $pdf->Cell(0, 8, ': ' . $dataRetur['item_type'], 0, 1);
+            // Menyimpan gambar barcode
+            $imageData = base64_decode($generate);
+            $tempImagePath = WRITEPATH . 'uploads/barcode_temp' . $barcodeCount . '.png'; // Path file sementara
+            file_put_contents($tempImagePath, $imageData);
 
-        $pdf->SetX($startX + 10);
-        $pdf->Cell($labelWidth, 8, 'Kode Warna', 0, 0);
-        $pdf->Cell(0, 8, ': ' . $dataRetur['kode_warna'], 0, 1);
+            // Menentukan posisi X agar gambar berada di tengah kotak secara horizontal
+            $imageWidth = 40; // Lebar gambar
+            $centerX = $startX + (67 - $imageWidth) / 2; // Menyesuaikan posisi
+            $pdf->Image($tempImagePath, $centerX, $startY + 3, $imageWidth); // Tambahkan gambar
 
-        $pdf->SetX($startX + 10);
-        $pdf->Cell($labelWidth, 8, 'Warna', 0, 0);
-        $pdf->Cell(0, 8, ': ' . $dataRetur['warna'], 0, 1);
+            unlink($tempImagePath); // Menghapus file gambar sementara
 
-        $pdf->SetX($startX + 10);
-        $pdf->Cell($labelWidth, 8, 'Kgs Kirim', 0, 0);
-        $pdf->Cell(0, 8, ': ' . $dataRetur['kgs_kirim'], 0, 1);
+            // Menghitung berapa banyak baris yang sudah tercetak di dalam MultiCell
 
-        $pdf->SetX($startX + 10);
-        $pdf->Cell($labelWidth, 8, 'Cones Kirim', 0, 0);
-        $pdf->Cell(0, 8, ': ' . $dataRetur['cones_kirim'], 0, 1);
+            // Menambahkan detail teks di dalam kotak
+            $pdf->SetFont('Arial', 'B', 8);
+            // Teks detail
+            $pdf->SetXY($startX + 2, $startY + 20);
+            $pdf->Cell(20, 3, 'No Model', 0, 0, 'L');
+            $pdf->Cell(5, 3, ':', 0, 0, 'C');
+            $pdf->Cell(70, 3, $barcode['no_model'], 0, 1, 'L');
 
-        $pdf->SetX($startX + 10);
-        $pdf->Cell($labelWidth, 8, 'Lot Kirim', 0, 0);
-        $pdf->Cell(0, 8, ': ' . $dataRetur['lot_kirim'], 0, 1);
+            $pdf->SetXY($startX + 2, $pdf->getY());
+            $pdf->Cell(20, 3, 'Item Type', 0, 0, 'L');
+            $pdf->Cell(5, 3, ':', 0, 0, 'C');
+            $pdf->MultiCell(39, 3, $barcode['item_type'], 0, 1, 'L');
+            // Menyimpan posisi Y setelah MultiCell
+            // dd($currentY, $nextY, $totalHeight, $lineCount);
+            $pdf->SetXY($startX + 2, $pdf->GetY()); // Menambah jarak berdasarkan jumlah baris yang tercetak
 
-        $pdf->SetX($startX + 10);
-        $pdf->Cell($labelWidth, 8, 'No Karung', 0, 0);
-        $pdf->Cell(0, 8, ': ' . $dataRetur['no_karung'], 0, 1);
+            $pdf->SetXY($startX + 2, $pdf->GetY()); // Menambah jarak berdasarkan jumlah baris yang tercetak
+            $pdf->Cell(20, 3, 'Kode Warna', 0, 0, 'L');
+            $pdf->Cell(5, 3, ':', 0, 0, 'C');
+            $pdf->MultiCell(39, 3, $barcode['kode_warna'], 0, 0, 'L');
+            $pdf->SetXY($startX + 2, $pdf->getY()); // Menambah jarak berdasarkan jumlah baris yang tercetak
 
+            $pdf->Cell(20, 3, 'Warna', 0, 0, 'L');
+            $pdf->Cell(5, 3, ':', 0, 0, 'C');
+            $pdf->MultiCell(39, 3, $barcode['warna'], 0, 0, 'L');
+            $pdf->SetXY($startX + 2, $pdf->getY()); // Menambah jarak berdasarkan jumlah baris yang tercetak
+
+            $currentY = $pdf->GetY();
+            $pdf->Cell(20, 3, 'GW', 0, 0, 'L');
+            $pdf->Cell(5, 3, ':', 0, 0, 'C');
+            $pdf->Cell(39, 3, $barcode['gw_kirim'], 0, 0, 'L');
+            $pdf->SetXY($startX + 2, $currentY + 3); // Menambah jarak berdasarkan jumlah baris yang tercetak
+
+            $pdf->Cell(20, 3, 'NW', 0, 0, 'L');
+            $pdf->Cell(5, 3, ':', 0, 0, 'C');
+            $pdf->Cell(39, 3, $barcode['kgs_kirim'], 0, 0, 'L');
+            $pdf->SetXY($startX + 2, $currentY + 6); // Menambah jarak berdasarkan jumlah baris yang tercetak
+
+            $pdf->Cell(20, 3, 'Cones', 0, 0, 'L');
+            $pdf->Cell(5, 3, ':', 0, 0, 'C');
+            $pdf->Cell(39, 3, $barcode['cones_kirim'], 0, 0, 'L');
+            $pdf->SetXY($startX + 2, $currentY + 9); // Menambah jarak berdasarkan jumlah baris yang tercetak
+
+            $pdf->Cell(20, 3, 'Lot', 0, 0, 'L');
+            $pdf->Cell(5, 3, ':', 0, 0, 'C');
+            $pdf->Cell(39, 3, $barcode['lot_kirim'], 0, 0, 'L');
+            $pdf->SetXY($startX + 2, $currentY + 12); // Menambah jarak berdasarkan jumlah baris yang tercetak
+
+            $pdf->Cell(20, 3, 'No Karung', 0, 0, 'L');
+            $pdf->Cell(5, 3, ':', 0, 0, 'C');
+            $pdf->Cell(39, 3, $barcode['no_karung'], 0, 1, 'L');
+            $pdf->SetXY($startX + 2, $currentY + 15); // Menambah jarak berdasarkan jumlah baris yang tercetak
+
+            // Counter untuk jumlah barcode
+            $barcodeCount++;
+        }
 
         // Output PDF
         return $this->response->setHeader('Content-Type', 'application/pdf')

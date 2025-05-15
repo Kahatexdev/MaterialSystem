@@ -221,11 +221,50 @@ class OutCelupModel extends Model
             ->findAll();
     }
 
-    public function getDataReturById($idRetur)
+    public function getDataReturByTgl($tglRetur)
     {
-        return $this->select('out_celup.*,retur.item_type, retur.kode_warna, retur.warna')
+        return $this->select('out_celup.*, retur.no_model, retur.item_type, retur.kode_warna, retur.warna, retur.kgs_retur, retur.cns_retur, retur.krg_retur, retur.lot_retur, retur.tgl_retur')
             ->join('retur', 'retur.id_retur = out_celup.id_retur')
-            ->where('out_celup.id_retur', $idRetur)
+            ->where('retur.tgl_retur', $tglRetur)
+            ->orderBy('out_celup.id_out_celup', 'ASC')
+            ->findAll();
+    }
+    public function getDataKirim($idRetur)
+    {
+        // Ambil id_celup dari id_retur
+        $idCelup = $this->select('id_celup')->where('id_retur', $idRetur)->first();
+
+        // Validasi jika data tidak ditemukan
+        if (!$idCelup) {
+            return null;
+        }
+
+        // Ambil semua id_out_celup yang terkait dengan id_celup
+        $idOutRows = $this->select('id_out_celup')
+            ->where('id_celup', $idCelup['id_celup'])
+            ->findAll();
+
+        // Ubah menjadi array datar
+        $idOut = array_column($idOutRows, 'id_out_celup');
+
+        // Jika tidak ada id_out_celup, return null atau default kosong
+        if (empty($idOut)) {
+            return [
+                'kg_kirim' => 0,
+                'cns_kirim' => 0,
+                'krg_kirim' => 0,
+            ];
+        }
+
+        // Join dengan tabel pengeluaran dan hitung total
+        $pengeluaran = $this->select(
+            'pengeluaran.lot_out,SUM(pengeluaran.kgs_out) as kg_kirim, 
+                                 SUM(pengeluaran.cns_out) as cns_kirim, 
+                                 SUM(pengeluaran.krg_out) as krg_kirim'
+        )
+            ->join('pengeluaran', 'pengeluaran.id_out_celup = out_celup.id_out_celup', 'left')
+            ->whereIn('pengeluaran.id_out_celup', $idOut)
             ->first();
+        return $pengeluaran;
     }
 }
