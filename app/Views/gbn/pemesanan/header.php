@@ -46,6 +46,7 @@
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/reportPemesananArea') ?>">Pemesanan Area</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/permintaanKaretCovering') ?>">Permintaan Karet</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/permintaanSpandexCovering') ?>">Permintaan Spandex</a></li>
+                                <li><a class="dropdown-item" href="#" id="showModalButton">Persiapan Benang & Nylon</a></li>
                             </ul>
                         </li>
                         <li class="nav-item d-flex align-items-center">
@@ -67,6 +68,33 @@
                 </div>
             </div>
         </div>
+        <!-- Modal persiapan barang -->
+        <div class="modal fade" id="threadModal1" tabindex="-1" aria-labelledby="threadModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="threadModalLabel">Pilih Jenis Benang</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="<?= base_url($role . '/pemesanan/listBarangKeluarPertgl') ?>" method="post">
+                            <div class="mb-3">
+                                <label for="threadType" class="form-label">Jenis Benang</label>
+                                <select class="form-select" id="jenis_report" name="jenis" required>
+                                    <option value="" selected disabled>Pilih Jenis Benang</option>
+                                    <option value="BENANG">BENANG</option>
+                                    <option value="NYLON">NYLON</option>
+                                </select>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-info">Lanjutkan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </nav>
     <script>
         function updateCount() {
@@ -86,6 +114,16 @@
 
         // Panggil fungsi pertama kali saat halaman dimuat
         updateCount();
+    </script>
+    <script>
+        $(document).ready(function() {
+            // Tampilkan modal saat "List Barcode" diklik
+            $('#showModalButton').on('click', function(e) {
+                e.preventDefault(); // Mencegah redirect langsung
+                $('#threadModal1').modal('show');
+            });
+
+        });
     </script>
     <?= $this->renderSection('content'); ?>
 

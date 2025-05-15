@@ -145,7 +145,7 @@ class PemesananController extends BaseController
             $item['status'] = $cekSpandex ? $cekSpandex['status'] : 'BELUM PESAN';
         }
         // dd ($dataPemesanan);
-        $listPemesanan = $this->pemesananSpandexKaretModel->getListPemesananSpandexKaret($area,$jenis, $tglPakai);
+        $listPemesanan = $this->pemesananSpandexKaretModel->getListPemesananSpandexKaret($area, $jenis, $tglPakai);
 
         $data = [
             'active' => $this->active,
@@ -692,5 +692,21 @@ class PemesananController extends BaseController
         $data = $this->pemesananModel->getFilterPemesananSpandex($tanggalAwal, $tanggalAkhir);
 
         return $this->response->setJSON($data);
+    }
+    public function listBarangKeluarPertgl()
+    {
+        $jenis = $this->request->getPost('jenis');
+
+        $tglPakai = $this->pemesananModel->getTglPemesananByJenis($jenis);
+        // dd($tglPakai);
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'jenis' => $jenis,
+            'tglPakai' => $tglPakai,
+        ];
+        return view($this->role . '/pemesanan/persiapanBarangPertgl', $data);
     }
 }
