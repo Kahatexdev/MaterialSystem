@@ -113,7 +113,7 @@
                                             <div class="row g-3 mt-3">
                                                 <div class="col-md-4">
                                                     <label>Warna</label>
-                                                    <input type="text" class="form-control" name="items[0][warna]" id="warna" required placeholder="Warna">
+                                                    <input type="text" class="form-control" name="items[0][warna]" id="warna" required placeholder="Warna" readonly>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label>LMD</label>
