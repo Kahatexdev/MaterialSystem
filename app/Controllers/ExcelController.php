@@ -937,18 +937,18 @@ class ExcelController extends BaseController
 
         // Judul
         $sheet->setCellValue('A1', 'Report Schedule Benang');
-        $sheet->mergeCells('A1:O1'); // Menggabungkan sel untuk judul
+        $sheet->mergeCells('A1:P1'); // Menggabungkan sel untuk judul
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["No", "No Mesin", "Ket Mesin", "Lot Urut", "No Model", "Item Type", "Kode Warna", "Warna", "Start Mc", "Delivery Awal", "Delivery Akhir", "Tgl Schedule", "Qty PO", "LOT Sch", "Tgl Celup"];
+        $header = ["No", "No Mesin", "Ket Mesin", "Lot Urut", "No Model", "Item Type", "Kode Warna", "Warna", "Start Mc", "Delivery Awal", "Delivery Akhir", "Tgl Schedule", "Qty PO", "Qty Celup", "LOT Sch", "Tgl Celup"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
-        $sheet->getStyle('A3:O3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:O3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A3:O3')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3:P3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:P3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:P3')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         // Data
         $row = 4;
@@ -956,22 +956,24 @@ class ExcelController extends BaseController
             $sheet->fromArray([
                 [
                     $index + 1,
-                    $item['no_mesin'],
-                    $item['ket_mesin'],
-                    $item['lot_urut'],
-                    $item['no_model'],
-                    $item['item_type'],
-                    $item['kode_warna'],
-                    $item['warna'],
-                    $item['start_mc'],
-                    $item['delivery_awal'],
-                    $item['delivery_akhir'],
-                    $item['tanggal_schedule'],
-                    $item['kg_celup'],
-                    $item['lot_celup'],
-                    $item['tanggal_celup'],
+                    $item->no_mesin,
+                    $item->ket_mesin,
+                    $item->lot_urut,
+                    $item->no_model,
+                    $item->item_type,
+                    $item->kode_warna,
+                    $item->warna,
+                    $item->start_mc,
+                    $item->delivery_awal,
+                    $item->delivery_akhir,
+                    $item->tanggal_schedule,
+                    $item->total_kgs,
+                    $item->kg_celup,
+                    $item->lot_celup,
+                    $item->tanggal_celup,
                 ]
             ], NULL, 'A' . $row);
+
             $row++;
         }
 
@@ -984,16 +986,16 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle('A3:O' . ($row - 1))->applyFromArray($styleArray);
+        $sheet->getStyle('A3:P' . ($row - 1))->applyFromArray($styleArray);
 
         // Set auto width untuk setiap kolom
-        foreach (range('A', 'O') as $column) {
+        foreach (range('A', 'P') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Set isi tabel agar rata tengah
-        $sheet->getStyle('A4:O' . ($row - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A4:O' . ($row - 1))->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A4:P' . ($row - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:P' . ($row - 1))->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
         $fileName = 'Report_Schedule_Benang' . '.xlsx';
