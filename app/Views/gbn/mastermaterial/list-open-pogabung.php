@@ -34,13 +34,6 @@
                     <h4 class="mb-0 font-weight-bolder">List Buka PO Gabungan</h5>
                 </div>
                 <div class="group">
-                    <!-- <a href="<?= base_url($role . '/exportOpenPOGabung?tujuan=' . $tujuan . '&jenis=' . $jenis . '&jenis2=' . $jenis2) ?>"
-                        class="btn btn-outline-danger" target="_blank">
-                        <i class="ni ni-single-copy-04 me-2"></i>Export PO
-                    </a> -->
-                    <!-- <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#exportModal">
-                        <i class="ni ni-single-copy-04 me-2"></i>Export PO
-                    </button> -->
                     <button
                         class="btn btn-outline-info"
                         id="btnOpenModal"
@@ -49,7 +42,6 @@
                         data-base-url="<?= base_url("$role/exportOpenPOGabung") ?>">
                         <i class="ni ni-single-copy-04 me-2"></i>Export PO
                     </button>
-
                 </div>
             </div>
         </div>
@@ -175,16 +167,41 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exportModalLabel">Export Data PO Gabungan</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="modal-body ">
-                <form id="exportForm" action="#" method="get" target="_blank">
+            <form id="exportForm" action="#" method="get" target="_blank">
+                <div class="modal-body">
                     <div class="mb-3">
-                        <label for="tujuan" class="form-label">Season</label>
-                        <input type="text" class="form-control" id="season" name="season">
+                        <label for="exportStartDate" class="form-label">Filter Tanggal (Awal)</label>
+                        <input
+                            type="date"
+                            class="form-control"
+                            id="exportStartDate"
+                            name="start_date"
+                            placeholder="Filter Tanggal Awal">
                     </div>
                     <div class="mb-3">
-                        <label for="jenis" class="form-label">Material Type</label>
+                        <label for="exportEndDate" class="form-label">Filter Tanggal (Akhir)</label>
+                        <input
+                            type="date"
+                            class="form-control"
+                            id="exportEndDate"
+                            name="end_date"
+                            placeholder="Filter Tanggal Akhir">
+                    </div>
+                    <div class="mb-3">
+                        <label for="season" class="form-label">Season</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="season"
+                            name="season"
+                            placeholder="Masukkan Season">
+                    </div>
+                    <div class="mb-3">
+                        <label for="material_type" class="form-label">Material Type</label>
                         <select name="material_type" id="material_type" class="form-control">
                             <option value="">Pilih Material Type</option>
                             <option value="OCS BLENDED">OCS BLENDED</option>
@@ -200,16 +217,17 @@
                             <option value="GRS BLENDED PRE-CONSUMER">GRS BLENDED PRE-CONSUMER</option>
                         </select>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="button"
-                            class="btn btn-info"
-                            id="btnSubmitExport">
-                            Export
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button
+                        type="submit"
+                        class="btn btn-info"
+                        id="btnSubmitExport">
+                        Export
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -376,10 +394,14 @@
             // 3) Ambil nilai modal
             const season = document.getElementById('season').value.trim();
             const materialType = document.getElementById('material_type').value;
+            const startDate = document.getElementById('exportStartDate').value;
+            const endDate = document.getElementById('exportEndDate').value;
 
             // 4) Tambahkan kalau user mengisi
             if (season) params.set('season', season);
             if (materialType) params.set('material_type', materialType);
+            if (startDate) params.set('start_date', startDate);
+            if (endDate) params.set('end_date', endDate);
 
             // 5) Bentuk URL akhir & buka di tab baru
             const finalUrl = base + '?' + params.toString();
