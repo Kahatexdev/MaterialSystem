@@ -68,4 +68,26 @@ class TrackingPoCovering extends Model
             ->get()
             ->getResultArray();
     }
+    public function statusBahanBaku($search = null)
+    {
+        $builder = $this->select([
+            'tracking_po_covering.id_po_gbn',
+            'tracking_po_covering.status',
+            'tracking_po_covering.keterangan',
+            'tracking_po_covering.admin',
+            'tracking_po_covering.created_at',
+            'tracking_po_covering.updated_at'
+        ])
+            ->join('open_po', 'open_po.id_po = tracking_po_covering.id_po_gbn', 'left');
+
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('open_po.no_model', $search)
+                ->orLike('open_po.item_type', $search)
+                ->orLike('open_po.kode_warna', $search)
+                ->groupEnd();
+        }
+
+        return $builder->findAll();
+    }
 }

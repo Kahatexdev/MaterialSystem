@@ -22,6 +22,7 @@ use App\Models\PengeluaranModel;
 use App\Models\ReturModel;
 use App\Models\KategoriReturModel;
 use App\Models\PoTambahanModel;
+use App\Models\TrackingPoCovering;
 
 class ApiController extends ResourceController
 {
@@ -46,6 +47,7 @@ class ApiController extends ResourceController
     protected $returModel;
     protected $kategoriReturModel;
     protected $poTambahanModel;
+    protected $trackingPoCovering;
 
 
     public function __construct()
@@ -67,6 +69,7 @@ class ApiController extends ResourceController
         $this->returModel = new ReturModel();
         $this->kategoriReturModel = new KategoriReturModel();
         $this->poTambahanModel = new PoTambahanModel();
+        $this->trackingPoCovering = new TrackingPoCovering();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -78,14 +81,32 @@ class ApiController extends ResourceController
     }
     public function statusbahanbaku($model)
     {
-        $search = $this->request->getGet('search');
+        // $search = $this->request->getGet('search');
+        $search = 'L25067';
         $model = $this->materialModel->MaterialPDK($model);
 
         $res = [];
         foreach ($model as &$row) {
-            $schedule = $this->scheduleCelupModel->schedulePerArea($row['no_model'], $row['item_type'], $row['kode_warna'], $search);
+            $scheduleData = [];
 
-            $scheduleData = !empty($schedule) ? $schedule[0] : [];
+            if (strtoupper($row['jenis']) == 'BENANG') {
+                $schedule = $this->scheduleCelupModel->schedulePerArea(
+                    $row['no_model'],
+                    $row['item_type'],
+                    $row['kode_warna'],
+                    $search
+                );
+                $scheduleData = !empty($schedule) ? $schedule[0] : [];
+            } else if (in_array(strtoupper($row['jenis']), ['KARET', 'NYLON', 'SPANDEX'])) {
+                // Untuk jenis lain seperti KARET, NYLON, SPANDEX, dll
+                $covering = $this->trackingPoCovering->statusBahanBaku(
+                    $row['no_model'],
+                    $row['item_type'],
+                    $row['kode_warna'],
+                    $search
+                );
+                $scheduleData = !empty($covering) ? $covering[0] : [];
+            }
 
             $fields = [
                 'start_mc',
@@ -106,7 +127,15 @@ class ApiController extends ResourceController
                 'tanggal_perbaikan',
                 'last_status',
                 'ket_daily_cek',
-                'po_plus'
+                'po_plus',
+                // Tambahan field dari trackingPoCovering
+                'id_po_gbn',
+                'status',
+                'keterangan',
+                'admin',
+                'created_at',
+                'updated_at'
+
             ];
 
             foreach ($fields as $field) {

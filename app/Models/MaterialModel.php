@@ -112,8 +112,9 @@ class MaterialModel extends Model
     }
     public function MaterialPDK($model)
     {
-        return $this->select('master_order.no_model, area, material.kode_warna, material.item_type, material.color, sum(kgs) as qty_po')
+        return $this->select('master_order.no_model, area, material.kode_warna, material.item_type, material.color, sum(kgs) as qty_po, master_material.jenis')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->where('master_order.no_model', $model)
             ->groupBy('no_model,material.item_type,material.kode_warna,material.color')
             ->findAll();
