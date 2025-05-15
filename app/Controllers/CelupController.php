@@ -517,7 +517,7 @@ class CelupController extends BaseController
             $id_celup = $data['items'][$h]['id_celup'] ?? null;
             $lot = $this->scheduleCelupModel->select('lot_celup')->where('id_celup', $id_celup)->first();
             // dd($lot, $id_celup, $id_bon);
-            $this->scheduleCelupModel->update($id_celup, ['id_bon' => $id_bon, 'last_status' => 'sent']);
+
             $gantiRetur = isset($data['ganti_retur'][$h]) ? $data['ganti_retur'][$h] : '0';
             // Pastikan no_karung tidak kosong dan merupakan array
             if (!empty($data['no_karung'][$h]) && is_array($data['no_karung'][$h])) {
@@ -543,7 +543,18 @@ class CelupController extends BaseController
                     ];
                 }
             }
+            // Perbarui total pengiriman dan status pada tabel schedule_celup
+            $totalPengiriman = $this->outCelupModel
+                ->select('SUM(out_celup.kgs_kirim) as total_kirim, schedule_celup.kg_celup')
+                ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
+                ->where('out_celup.id_celup', $id_celup)
+                ->first();
+
+            if ($totalPengiriman && $totalPengiriman['total_kirim'] >= $totalPengiriman['kg_celup']) {
+                $this->scheduleCelupModel->update($id_celup, ['id_bon' => $id_bon, 'last_status' => 'sent']);
+            }
         }
+
 
         // Debugging sebelum insert
         // dd($saveDataOutCelup);
