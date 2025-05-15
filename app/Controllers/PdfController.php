@@ -1357,7 +1357,9 @@ class PdfController extends BaseController
         $tujuan = $this->request->getGet('tujuan');
         $jenis = $this->request->getGet('jenis');
         $jenis2 = $this->request->getGet('jenis2');
-        // dd($tujuan, $jenis, $jenis2);
+        $startDate = $this->request->getGet('start_date');
+        $endDate = $this->request->getGet('end_date');
+        // dd($tujuan, $jenis, $jenis2, $startDate, $endDate);
 
         // Tentukan penerima berdasarkan tujuan
         if ($tujuan == 'CELUP') {
@@ -1369,7 +1371,8 @@ class PdfController extends BaseController
         }
 
         $buyer = [];
-        $openPoGabung = $this->openPoModel->listOpenPoGabung($jenis, $jenis2, $penerima);
+        $openPoGabung = $this->openPoModel->listOpenPoGabungbyDate($jenis, $jenis2, $penerima, $startDate, $endDate);
+        // dd ($openPoGabung);
         foreach ($openPoGabung as &$po) {
             $buyersData = $this->openPoModel->getBuyer($po['id_po']); // Ambil semua data buyer terkait
             if (is_array($buyersData) && count($buyersData) > 0) {
@@ -1555,12 +1558,15 @@ class PdfController extends BaseController
             $pdf->MultiCell(20, $rowHeight, $po['kode_warna'], 1, 'C'); // Kode Warna
             $pdf->SetXY($xNow + 20, $yStart);
 
+            $pdf->SetFont('Arial', '', 4);
             $pdf->Cell(10, $rowHeight, $po['buyer'], 1, 0, 'C'); // Buyer
 
+            $pdf->SetFont('Arial', '', 4);
             $xNow = $pdf->GetX();
             $pdf->MultiCell(25, $rowHeight, $po['no_order'], 1, 'C'); // Nomor Order
             $pdf->SetXY($xNow + 25, $yStart);
 
+            $pdf->SetFont('Arial', '', 6);
             $pdf->Cell(15, $rowHeight, $po['delivery_awal'], 1, 0, 'C'); // Delivery
             $pdf->Cell(15, $rowHeight, number_format($po['kg_po'], 2), 1, 0, 'C'); // Qty Pesanan (Kg)
             $pdf->Cell(8, $rowHeight, $po['kg_percones'], 1, 0, 'C'); // Kg Per Cones
