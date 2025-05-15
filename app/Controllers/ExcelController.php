@@ -20,6 +20,7 @@ use App\Models\PemesananModel;
 use App\Models\PengeluaranModel;
 use App\Models\HistoryStockCoveringModel;
 use App\Models\TotalPemesananModel;
+use App\Models\ReturModel;
 use PhpOffice\PhpSpreadsheet\Style\{Border, Alignment, Fill};
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
@@ -43,6 +44,7 @@ class ExcelController extends BaseController
     protected $pengeluaranModel;
     protected $historyCoveringStockModel;
     protected $totalPemesananModel;
+    protected $returModel;
 
     public function __construct()
     {
@@ -59,6 +61,7 @@ class ExcelController extends BaseController
         $this->pengeluaranModel = new PengeluaranModel();
         $this->historyCoveringStockModel = new HistoryStockCoveringModel();
         $this->totalPemesananModel = new TotalPemesananModel();
+        $this->returModel = new ReturModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -934,18 +937,18 @@ class ExcelController extends BaseController
 
         // Judul
         $sheet->setCellValue('A1', 'Report Schedule Benang');
-        $sheet->mergeCells('A1:O1'); // Menggabungkan sel untuk judul
+        $sheet->mergeCells('A1:P1'); // Menggabungkan sel untuk judul
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["No", "No Mesin", "Ket Mesin", "Lot Urut", "No Model", "Item Type", "Kode Warna", "Warna", "Start Mc", "Delivery Awal", "Delivery Akhir", "Tgl Schedule", "Qty PO", "LOT Sch", "Tgl Celup"];
+        $header = ["No", "No Mesin", "Ket Mesin", "Lot Urut", "No Model", "Item Type", "Kode Warna", "Warna", "Start Mc", "Delivery Awal", "Delivery Akhir", "Tgl Schedule", "Qty PO", "Qty Celup", "LOT Sch", "Tgl Celup"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
-        $sheet->getStyle('A3:O3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:O3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A3:O3')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3:P3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:P3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:P3')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         // Data
         $row = 4;
@@ -953,22 +956,24 @@ class ExcelController extends BaseController
             $sheet->fromArray([
                 [
                     $index + 1,
-                    $item['no_mesin'],
-                    $item['ket_mesin'],
-                    $item['lot_urut'],
-                    $item['no_model'],
-                    $item['item_type'],
-                    $item['kode_warna'],
-                    $item['warna'],
-                    $item['start_mc'],
-                    $item['delivery_awal'],
-                    $item['delivery_akhir'],
-                    $item['tanggal_schedule'],
-                    $item['kg_celup'],
-                    $item['lot_celup'],
-                    $item['tanggal_celup'],
+                    $item->no_mesin,
+                    $item->ket_mesin,
+                    $item->lot_urut,
+                    $item->no_model,
+                    $item->item_type,
+                    $item->kode_warna,
+                    $item->warna,
+                    $item->start_mc,
+                    $item->delivery_awal,
+                    $item->delivery_akhir,
+                    $item->tanggal_schedule,
+                    $item->total_kgs,
+                    $item->kg_celup,
+                    $item->lot_celup,
+                    $item->tanggal_celup,
                 ]
             ], NULL, 'A' . $row);
+
             $row++;
         }
 
@@ -981,16 +986,16 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle('A3:O' . ($row - 1))->applyFromArray($styleArray);
+        $sheet->getStyle('A3:P' . ($row - 1))->applyFromArray($styleArray);
 
         // Set auto width untuk setiap kolom
-        foreach (range('A', 'O') as $column) {
+        foreach (range('A', 'P') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Set isi tabel agar rata tengah
-        $sheet->getStyle('A4:O' . ($row - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A4:O' . ($row - 1))->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A4:P' . ($row - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:P' . ($row - 1))->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
         $fileName = 'Report_Schedule_Benang' . '.xlsx';
@@ -2230,6 +2235,109 @@ class ExcelController extends BaseController
         header('Cache-Control: max-age=0');
 
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function exportReturArea()
+    {
+        $area = $this->request->getGet('area');
+        $kategori = $this->request->getGet('kategori');
+        $tglAwal = $this->request->getGet('tanggal_awal');
+        $tglAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->returModel->getFilterReturArea($area, $kategori, $tglAwal, $tglAkhir);
+
+        if (!empty($data)) {
+            foreach ($data as $key => $dt) {
+                $kirim = $this->outCelupModel->getDataKirim($dt['id_retur']);
+                $data[$key]['kg_kirim'] = $kirim['kg_kirim'] ?? 0;
+                $data[$key]['cns_kirim'] = $kirim['cns_kirim'] ?? 0;
+                $data[$key]['krg_kirim'] = $kirim['krg_kirim'] ?? 0;
+                $data[$key]['lot_out'] = $kirim['lot_out'] ?? '-';
+            }
+        }
+        // dd($data);
+        // dd($area, $kategori, $tglAwal, $tglAkhir, $data);
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Judul
+        $sheet->setCellValue('A1', 'Report Retur Area');
+        $sheet->mergeCells('A1:X1'); // Menggabungkan sel untuk judul
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Header
+        $header = ["NO", "JENIS BAHAN BAKU", "TANGGAL RETUR", "AREA", "NO MODEL", "ITEM TYPE", "KODE WARNA", "WARNA", "LOSS", "QTY PO", "QTY PO(+)", "QTY KIRIM", "CONES KIRIM", "KARUNG KIRIM", "LOT KIRIM", "QTY RETUR", "CONES RETUR", "KARUNG RETUR", "LOT RETUR", "KATEGORI", "KET AREA", "KET GBN", "WAKTU ACC RETUR", "USER"];
+        $sheet->fromArray([$header], NULL, 'A3');
+
+        // Styling Header
+        $sheet->getStyle('A3:X3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:X3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:X3')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        // Data
+        $row = 4;
+        foreach ($data as $index => $item) {
+            $sheet->fromArray([
+                [
+                    $index + 1,
+                    $item['jenis'],
+                    $item['tgl_retur'],
+                    $item['area_retur'],
+                    $item['no_model'],
+                    $item['item_type'],
+                    $item['kode_warna'],
+                    $item['warna'],
+                    $item['loss'] . '%',
+                    $item['total_kgs'],
+                    $item['qty_po_plus'] ?? 0,
+                    $item['kg_kirim'],
+                    $item['cns_kirim'],
+                    $item['krg_kirim'],
+                    $item['lot_out'],
+                    $item['kg'],
+                    $item['cns'],
+                    $item['karung'],
+                    $item['lot_retur'],
+                    $item['kategori'],
+                    $item['keterangan_area'],
+                    $item['keterangan_gbn'],
+                    $item['waktu_acc_retur'],
+                    $item['admin'],
+                ]
+            ], NULL, 'A' . $row);
+            $row++;
+        }
+
+        // Atur border untuk seluruh tabel
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle('A3:X' . ($row - 1))->applyFromArray($styleArray);
+
+        // Set auto width untuk setiap kolom
+        foreach (range('A', 'X') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set isi tabel agar rata tengah
+        $sheet->getStyle('A4:X' . ($row - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:X' . ($row - 1))->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Report_Retur_Area' . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
         $writer->save('php://output');
         exit;
     }

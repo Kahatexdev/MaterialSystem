@@ -26,31 +26,19 @@
                     <div class="table-responsive">
                         <table id="listBarcodeRetur" class="table table-striped table-bordered table-hover" style="width:100%">
                             <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>No Model</th>
-                                    <th>Item Type</th>
-                                    <th>Kode Warna</th>
-                                    <th>Warna</th>
-                                    <th>Lot</th>
-                                    <th>Kgs Retur</th>
-                                    <th>Cones Retur</th>
-                                    <th>Barcode</th>
+                                <tr class="text-center">
+                                    <th class="text-center">No</th>
+                                    <th class="text-center">Tanggal Retur</th>
+                                    <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php $no = 1; ?>
                                 <?php foreach ($listRetur as $retur) : ?>
                                     <tr>
-                                        <td><?= $no++ ?></td>
-                                        <td><?= $retur['no_model'] ?></td>
-                                        <td><?= $retur['item_type'] ?></td>
-                                        <td><?= $retur['kode_warna'] ?></td>
-                                        <td><?= $retur['warna'] ?></td>
-                                        <td><?= $retur['lot_retur'] ?></td>
-                                        <td><?= $retur['kgs_retur'] ?></td>
-                                        <td><?= $retur['cns_retur'] ?></td>
-                                        <td><a href="<?= base_url($role . '/retur/generateBarcodeRetur/' . $retur['id_retur']) ?>" class="btn btn-info btn-sm">Generate</a></td>
+                                        <td class="text-center"><?= $no++ ?></td>
+                                        <td class="text-center"><?= $retur['tgl_retur'] ?></td>
+                                        <td class="text-center"><a href="<?= base_url($role . '/retur/detailBarcodeRetur/' . $retur['tgl_retur']) ?>" class="btn btn-info btn-sm">Detail</i></a></td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
