@@ -2290,4 +2290,40 @@ class WarehouseController extends BaseController
 
         return redirect()->to(base_url($this->role . "/otherIn"));
     }
+    public function listBarcode()
+    {
+        $tglOtherBon = $this->otherBonModel->getTglDataOtherBon();
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'tglDatang' => $tglOtherBon,
+        ];
+        return view($this->role . '/warehouse/otherBarcodePertgl', $data);
+    }
+    public function listBarcodeFilter()
+    {
+        $filterDate = $this->request->getJSON(true)['filter_date'] ?? null;
+
+        if (!$filterDate) {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'Tanggal filter tidak boleh kosong.']);
+        }
+
+        $tgl = $this->otherBonModel->filterTglDataOtherBon($filterDate);
+
+        return $this->response->setJSON($tgl);
+    }
+    public function detailListBarcode($tglDatang)
+    {
+        $dataOtherBon = $this->otherBonModel->getDataOtherBon($tglDatang);
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'dataBon' => $dataOtherBon,
+        ];
+        return view($this->role . '/warehouse/detailOtherBarcode', $data);
+    }
 }

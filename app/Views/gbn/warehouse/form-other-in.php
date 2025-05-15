@@ -57,7 +57,7 @@
                                             <option value="IMPORT DARI KOREA">IMPORT DARI KOREA</option>
                                             <option value="JS MISTY">JS MISTY</option>
                                             <option value="JS SOLID">JS SOLID</option>
-                                            <option value="KHTEX">KHTEX</option>
+                                            <!-- <option value="KHTEX">KHTEX</option> -->
                                             <option value="PO(+)">PO(+)</option>
                                         </select>
                                     </div>
@@ -83,12 +83,13 @@
                                             <div class="row g-3">
                                                 <div class="col-md-4">
                                                     <label>No Model</label>
-                                                    <select class="form-control" id="no_model" name="no_model" required>
+                                                    <select class="form-control" id="id_order" name="id_order" required>
                                                         <option value="">Pilih No Model </option>
                                                         <?php foreach ($no_model as $item): ?>
                                                             <option value="<?= $item['id_order'] ?>"><?= $item['no_model'] ?></option>
                                                         <?php endforeach; ?>
                                                     </select>
+                                                    <input type="text" class="form-control" id="no_model" name="no_model" hidden>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label>Item Type</label>
@@ -233,9 +234,13 @@
 
     <script>
         $(document).ready(function() {
-            $('#no_model').select2();
-            $('#no_model').on("select2:select", function() {
+            $('#id_order').select2();
+            $('#id_order').on("select2:select", function() {
                 let id_order = $(this).val(); // Ambil value yang dipilih di select2
+                let no_model = $('#id_order option:selected').text(); // Ambil teks (No Model) dari opsi yang dipilih
+
+                // Isi nilai No Model ke input
+                $('#no_model').val(no_model);
 
                 // Ambil item type berdasarkan id_order
                 $.ajax({
@@ -270,7 +275,7 @@
 
             // Event listener untuk mendapatkan kode warna saat item type dipilih
             $('#item_type').on("change", function() {
-                let id_order = $('#no_model').val(); // Pastikan id_order masih sama
+                let id_order = $('#id_order').val(); // Pastikan id_order masih sama
                 let item_type = $(this).val(); // Ambil nilai item type yang dipilih
 
                 // Ambil kode warna berdasarkan id_order dan item_type
@@ -316,7 +321,7 @@
             });
             // Event listener untuk mendapatkan kode warna saat item type dipilih
             $('#kode_warna').on("change", function() {
-                let id_order = $('#no_model').val(); // Pastikan id_order masih sama
+                let id_order = $('#id_order').val(); // Pastikan id_order masih sama
                 let item_type = $('#item_type').val(); // Pastikan id_order masih sama
                 let kode_warna = $(this).val(); // Ambil nilai item type yang dipilih
 
@@ -355,33 +360,6 @@
             poTable.querySelectorAll('tbody input').forEach(input => {
                 input.addEventListener('input', () => {
                     calculateTotals(poTable);
-                });
-            });
-
-            // Event listener untuk select2
-            $(document).ready(function() {
-                $('#add_item').select2();
-                $('#add_item').on("select2:select", function() {
-                    let idcelup = $(this).val(); // Ambil value yang dipilih di select2
-
-                    $.ajax({
-                        url: "<?= base_url($role . '/createBon/getItem/') ?>" + idcelup,
-                        type: "POST",
-                        data: {
-                            id: idcelup
-                        }, // Kirim dalam format object
-                        dataType: "json",
-                        success: function(data) {
-                            console.log(data);
-                            $('#no_model').val(data.no_model);
-                            $('#item_type').val(data.item_type);
-                            $('#kode_warna').val(data.kode_warna);
-                            $('#warna').val(data.warna);
-                            $('#id_celup').val(idcelup);
-                            $('#lot_celup').val(data.lot_celup);
-                            lotCelupValue = data.lot_celup; // Simpan nilai lot_celup
-                        }
-                    });
                 });
             });
 
