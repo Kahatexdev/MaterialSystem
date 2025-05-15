@@ -81,8 +81,8 @@ class ApiController extends ResourceController
     }
     public function statusbahanbaku($model)
     {
-        // $search = $this->request->getGet('search');
-        $search = 'L25067';
+        $search = $this->request->getGet('search');
+        // $search = 'L25067';
         $model = $this->materialModel->MaterialPDK($model);
 
         $res = [];
@@ -108,7 +108,10 @@ class ApiController extends ResourceController
                 $scheduleData = !empty($covering) ? $covering[0] : [];
             }
 
+            $scheduleData['jenis'] = $row['jenis'];
+
             $fields = [
+                'jenis',
                 'start_mc',
                 'kg_celup',
                 'lot_urut',
