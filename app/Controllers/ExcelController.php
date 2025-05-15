@@ -1802,11 +1802,11 @@ class ExcelController extends BaseController
     }
     public function exportListBarangKeluar()
     {
-        $area = $this->request->getGet('area');
+        // $area = $this->request->getGet('area');
         $jenis = $this->request->getGet('jenis');
         $tglPakai = $this->request->getGet('tglPakai');
 
-        $dataPemesanan = $this->pengeluaranModel->getDataPemesananExport($area, $jenis, $tglPakai);
+        $dataPemesanan = $this->pengeluaranModel->getDataPemesananExport($jenis, $tglPakai);
         // Kelompokkan data berdasarkan 'group'
         $groupedData = [];
         foreach ($dataPemesanan as $row) {
@@ -1914,7 +1914,7 @@ class ExcelController extends BaseController
         $spreadsheet->removeSheetByIndex(0);
 
         // Simpan file Excel
-        $filename = 'List Pengeluaran Barang ' . $tglPakai . '.xlsx';
+        $filename = 'Persiapan Barang ' . $jenis . ' ' . $tglPakai . '.xlsx';
         $writer = new Xlsx($spreadsheet);
         $filePath = WRITEPATH . "uploads/$filename";
         $writer->save($filePath);

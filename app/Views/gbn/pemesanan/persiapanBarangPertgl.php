@@ -1,4 +1,4 @@
-<?php $this->extend($role . '/warehouse/header'); ?>
+<?php $this->extend($role . '/pemesanan/header'); ?>
 <?php $this->section('content'); ?>
 <div class="container-fluid py-4">
     <div class="row my-4">
@@ -44,22 +44,36 @@
                         <table class="table  align-items-center">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Datang</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Pakai</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center" colspan="2">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="pemesananTable">
-                                <?php foreach ($tglDatang as $tgl) : ?>
+                                <?php foreach ($tglPakai as $tgl) : ?>
                                     <tr>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['tgl_datang'] ?></p>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['tgl_pakai'] ?></p>
                                         </td>
                                         <td class="text-center">
-                                            <a href="<?= base_url($role . '/otherIn/detailListBarcode/' . $tgl['tgl_datang']) ?>" class="btn bg-gradient-info">
-                                                <i class="fas fa-eye"></i>
-                                                Detail
+                                            <?php if ($jenis === 'SPANDEX' || $jenis === 'KARET') : ?>
+                                                <!-- <td class="text-center">
+                                                <a href="<?= base_url($role . '/generatePemesananSpandexKaretCovering/' . $area . '/' . $jenis . '/' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success">
+                                                    <i class="fas fa-file-excel"></i>
+                                                    Export
+                                                </a>
+                                            </td> -->
+                                            <?php else : ?>
+                                        <td class="text-center">
+                                            <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
+                                                <i class="fas fa-file-excel fa-2x"></i>
                                             </a>
                                         </td>
+                                    <?php endif; ?>
+                                    <!-- <td class="text-center">
+                                            <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar/' . $tgl['tgl_pakai'] . '/' . $jenis) ?>" class="btn btn-success btn-xs">
+                                                <i class="fa fa-file-excel fa-xl" style="font-size: 16px !important;"></i> Excel
+                                            </a>
+                                        </td> -->
                                     </tr>
 
                                 <?php endforeach; ?>
