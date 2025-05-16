@@ -133,7 +133,7 @@
 
         <!-- Modal Tambah Data -->
         <div class="modal fade" id="tambahModal" tabindex="-1" aria-labelledby="tambahModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-xl">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="tambahModalLabel">Tambah Data Material</h5>
@@ -142,9 +142,17 @@
                     <div class="modal-body">
                         <form action="<?= base_url($role . '/tambahMaterial') ?>" method="post" id="form-material">
                             <input type="hidden" name="id_order" value="<?= $id_order ?>">
-                            <div class="mb-3">
-                                <label for="style_size" class="form-label">Style Size</label>
-                                <input type="text" class="form-control" id="add_style_size" name="style_size" required>
+                            <label for="st" class="form-label">Style:</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                <?php foreach ($style as $st): ?>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="style_size[]" value="<?= $st['style_size'] ?>" id="style_<?= $st['style_size'] ?>">
+                                        <label class="form-check-label" for="style_<?= $st['style_size'] ?>">
+                                            <?= esc($st['style_size']) ?> | (<?= esc($st['inisial'] ?? '-') ?>)
+                                        </label>
+                                    </div>
+                                    <input type="hidden" name="insisal[]" id="" value="<?= $st['inisial'] ?>">
+                                <?php endforeach; ?>
                             </div>
 
                             <div class="mb-3">
@@ -170,11 +178,6 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="inisial" class="form-label">Inisial</label>
-                                <input type="text" class="form-control" id="add_inisial" name="inisial" required>
-                            </div>
-
-                            <div class="mb-3">
                                 <label for="itemType">Item Type</label>
                                 <select class="" id="add_item_type" name="item_type">
                                     <option value="">Pilih Item Type</option>
@@ -183,40 +186,48 @@
                                     <?php endforeach; ?>
                                 </select>
                             </div>
+                            <div class="row mb-3">
 
-                            <div class="mb-3">
-                                <label for="kode_warna" class="form-label">Kode Warna</label>
-                                <input type="text" class="form-control" id="add_kode_warna" name="kode_warna" required>
+                                <div class="col-6">
+                                    <label for="kode_warna" class="form-label">Kode Warna</label>
+                                    <input type="text" class="form-control" id="add_kode_warna" name="kode_warna" required>
+                                </div>
+
+                                <div class=" col-6">
+                                    <label for="color" class="form-label">Color</label>
+                                    <input type="text" class="form-control" id="add_color" name="color" required>
+                                </div>
                             </div>
-
-                            <div class="mb-3">
-                                <label for="color" class="form-label">Color</label>
-                                <input type="text" class="form-control" id="add_color" name="color" required>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" checked="">
+                                <label class="form-check-label" for="flexSwitchCheckDefault">Gabungan</label>
                             </div>
+                            <div class="row" id="prop">
 
-                            <div class="mb-3">
-                                <label for="composition" class="form-label">Composition (%)</label>
-                                <input type="number" step="0.01" class="form-control" id="add_composition" name="composition" required>
-                            </div>
+                                <div class="col-3">
+                                    <label for="composition" class="form-label">Composition (%)</label>
+                                    <input type="number" step="0.01" class="form-control" id="add_composition" name="composition" required>
+                                </div>
 
-                            <div class="mb-3">
-                                <label for="gw" class="form-label">GW</label>
-                                <input type="number" step="0.01" class="form-control" id="add_gw" name="gw" required>
-                            </div>
+                                <div class="col-3">
+                                    <label for="gw" class="form-label">GW</label>
+                                    <input type="number" step="0.01" class="form-control" id="add_gw" name="gw" required>
+                                </div>
 
-                            <div class="mb-3">
-                                <label for="qty_pcs" class="form-label">Qty(pcs)</label>
-                                <input type="number" step="0.01" class="form-control" id="add_qty_pcs" name="qty_pcs" required>
-                            </div>
+                                <div class="col-3">
+                                    <label for="qty_pcs" class="form-label">Qty(pcs)</label>
+                                    <input type="number" step="0.01" class="form-control" id="add_qty_pcs" name="qty_pcs" required>
+                                </div>
 
-                            <div class="mb-3">
-                                <label for="qty_pcs" class="form-label">Loss</label>
-                                <input type="number" step="0.01" class="form-control" id="add_loss" name="loss" required>
-                            </div>
+                                <div class="col-3">
+                                    <label for="qty_pcs" class="form-label">Loss</label>
+                                    <input type="number" step="0.01" class="form-control" id="add_loss" name="loss" required>
+                                </div>
 
-                            <div class="mb-3">
-                                <label for="qty_pcs" class="form-label">Kgs</label>
-                                <input type="number" step="0.01" class="form-control" id="add_kgs" name="kgs" required>
+                                <div class="col-3">
+                                    <label for="qty_pcs" class="form-label">Kgs</label>
+                                    <input type="number" step="0.01" class="form-control" id="add_kgs" name="kgs" required>
+                                </div>
                             </div>
 
                             <div class="modal-footer">

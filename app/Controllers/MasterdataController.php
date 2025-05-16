@@ -192,7 +192,7 @@ class MasterdataController extends BaseController
 
                 // dd ($masterData);
                 $masterOrderModel->insert($masterData);
-            } 
+            }
             // else {
             //     return redirect()->back()->with('error', 'Data dengan No Model ' . $orderExists['no_model'] . ' sudah ada di database.');
             // }
@@ -556,7 +556,7 @@ class MasterdataController extends BaseController
         }
         $itemType = $this->masterMaterialModel->getItemType();
         $orderData = $this->materialModel->getMaterial($id_order);
-
+        $styleSize = $this->materialModel->getStyle($id);
         if (empty($orderData)) {
             session()->setFlashdata('error', 'Data Material tidak ditemukan! Silakan impor ulang data.');
             return redirect()->to(base_url($this->role . '/masterdata'));
@@ -576,6 +576,7 @@ class MasterdataController extends BaseController
             'id_order' => $id_order,
             'itemType' => $itemType,
             'area' => $areaData,
+            'style' => $styleSize
         ];
 
         return view($this->role . '/mastermaterial/detailMaterial', $data);

@@ -276,4 +276,8 @@ class MaterialModel extends Model
             ->where('material.id_material', $id)
             ->first();
     }
+    public function getStyle($id)
+    {
+        return $this->select('style_size, inisial')->where('id_order', $id)->groupBy('style_size')->findAll();
+    }
 }
