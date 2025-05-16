@@ -68,9 +68,11 @@ class TrackingPoCovering extends Model
             ->get()
             ->getResultArray();
     }
-    public function statusBahanBaku($search = null)
+    public function statusBahanBaku($model, $itemType, $kodeWarna, $search = null)
     {
         $builder = $this->select([
+            'open_po.item_type',
+            'open_po.kode_warna',
             'tracking_po_covering.id_po_gbn',
             'tracking_po_covering.status',
             'tracking_po_covering.keterangan',
@@ -78,7 +80,10 @@ class TrackingPoCovering extends Model
             'tracking_po_covering.created_at',
             'tracking_po_covering.updated_at'
         ])
-            ->join('open_po', 'open_po.id_po = tracking_po_covering.id_po_gbn', 'left');
+            ->join('open_po', 'open_po.id_po = tracking_po_covering.id_po_gbn', 'left')
+            ->like('open_po.no_model',   $model)
+            ->where('open_po.item_type',  $itemType)
+            ->where('open_po.kode_warna', $kodeWarna);
 
         if (!empty($search)) {
             $builder->groupStart()

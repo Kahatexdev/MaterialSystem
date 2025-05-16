@@ -436,7 +436,6 @@ class ScheduleCelupModel extends Model
             ->select('id_order, item_type, kode_warna, color, SUM(kgs) AS total_kgs')
             ->groupBy(['id_order', 'item_type', 'kode_warna', 'color']);
 
-
         // Main builder
         $builder = $this->select('
         schedule_celup.*, 
@@ -493,39 +492,63 @@ class ScheduleCelupModel extends Model
 
     public function getFilterSchNylon($key, $tanggal_schedule, $tanggal_awal, $tanggal_akhir)
     {
-        $this->select('schedule_celup.*, master_order.delivery_awal, master_order.delivery_akhir, mesin_celup.no_mesin, mesin_celup.ket_mesin, master_material.jenis')
+        $db = \Config\Database::connect();
+
+        // Subquery: summary material per item_type + kode_warna + color
+        $materialSubquery = $db->table('material')
+            ->select('id_order, item_type, kode_warna, color, SUM(kgs) AS total_kgs')
+            ->groupBy(['id_order', 'item_type', 'kode_warna', 'color']);
+
+        // Main builder
+        $builder = $this->select('
+        schedule_celup.*, 
+        master_order.delivery_awal, 
+        master_order.delivery_akhir, 
+        mesin_celup.no_mesin, 
+        mesin_celup.ket_mesin, 
+        master_material.jenis,
+        material_summary.total_kgs
+    ')
             ->join('master_order', 'master_order.no_model = schedule_celup.no_model')
             ->join('master_material', 'master_material.item_type = schedule_celup.item_type')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->join(
+                '(' . $materialSubquery->getCompiledSelect(false) . ') AS material_summary',
+                'material_summary.item_type = schedule_celup.item_type 
+                AND material_summary.kode_warna = schedule_celup.kode_warna 
+                AND material_summary.color = schedule_celup.warna
+                AND material_summary.id_order = master_order.id_order',
+                'left'
+            )
             ->where('master_material.jenis', 'NYLON');
 
         // Cek apakah ada input key untuk pencarian
         if (!empty($key)) {
-            $this->groupStart()
+            $builder->groupStart()
                 ->like('schedule_celup.no_model', $key)
                 ->orLike('schedule_celup.kode_warna', $key)
                 ->groupEnd();
         }
 
         if (!empty($tanggal_schedule)) {
-            $this->where('schedule_celup.tanggal_schedule', $tanggal_schedule);
+            $builder->where('schedule_celup.tanggal_schedule', $tanggal_schedule);
         }
 
         // Filter berdasarkan tanggal
         if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
-            $this->groupStart();
+            $builder->groupStart();
             if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
-                $this->where('schedule_celup.start_mc >=', $tanggal_awal)
+                $builder->where('schedule_celup.start_mc >=', $tanggal_awal)
                     ->where('schedule_celup.start_mc <=', $tanggal_akhir);
             } elseif (!empty($tanggal_awal)) {
-                $this->where('schedule_celup.start_mc >=', $tanggal_awal);
+                $builder->where('schedule_celup.start_mc >=', $tanggal_awal);
             } elseif (!empty($tanggal_akhir)) {
-                $this->where('schedule_celup.start_mc <=', $tanggal_akhir);
+                $builder->where('schedule_celup.start_mc <=', $tanggal_akhir);
             }
-            $this->groupEnd();
+            $builder->groupEnd();
         }
 
-        return $this->findAll();
+        return $builder->get()->getResult();
     }
 
     public function schTerdekat()
@@ -551,5 +574,32 @@ class ScheduleCelupModel extends Model
             ->where('lot_celup', $data['lot_retur'])
             ->first();
         return $row ? (int)$row['id_celup'] : null;
+    }
+
+    public function getFilterSchBenangNylon($tglAwal, $tglAkhir)
+    {
+        $builder = $this->select('schedule_celup.*, mesin_celup.no_mesin, mesin_celup.min_caps, mesin_celup.max_caps, open_po.ket_celup, master_material.jenis, master_order.delivery_awal')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->join('open_po', 'open_po.no_model = schedule_celup.no_model')
+            ->join('master_material', 'master_material.item_type = schedule_celup.item_type')
+            ->join('master_order', 'master_order.no_model = schedule_celup.no_model')
+            ->whereIn('master_material.jenis', ['NYLON', 'BENANG']);
+
+        if (!empty($tglAwal) && !empty($tglAkhir)) {
+            $builder->where('schedule_celup.tanggal_schedule >=', $tglAwal)
+                ->where('schedule_celup.tanggal_schedule <=', $tglAkhir);
+        } elseif (!empty($tglAwal)) {
+            $builder->where('schedule_celup.tanggal_schedule >=', $tglAwal);
+        } elseif (!empty($tglAkhir)) {
+            $builder->where('schedule_celup.tanggal_schedule <=', $tglAkhir);
+        }
+
+        return $builder->findAll();
+    }
+
+    public function getSchBenangNylon()
+    {
+        return $this->select('schedule_celup.*')
+            ->findAll();
     }
 }

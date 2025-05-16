@@ -973,7 +973,6 @@ class ExcelController extends BaseController
                     $item->tanggal_celup,
                 ]
             ], NULL, 'A' . $row);
-
             $row++;
         }
 
@@ -1021,18 +1020,18 @@ class ExcelController extends BaseController
 
         // Judul
         $sheet->setCellValue('A1', 'Report Schedule Nylon');
-        $sheet->mergeCells('A1:O1'); // Menggabungkan sel untuk judul
+        $sheet->mergeCells('A1:P1'); // Menggabungkan sel untuk judul
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["No", "No Mesin", "Ket Mesin", "Lot Urut", "No Model", "Item Type", "Kode Warna", "Warna", "Start Mc", "Delivery Awal", "Delivery Akhir", "Tgl Schedule", "Qty PO", "LOT Sch", "Tgl Celup"];
+        $header = ["No", "No Mesin", "Ket Mesin", "Lot Urut", "No Model", "Item Type", "Kode Warna", "Warna", "Start Mc", "Delivery Awal", "Delivery Akhir", "Tgl Schedule", "Qty PO", "Qty Celup", "LOT Sch", "Tgl Celup"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
-        $sheet->getStyle('A3:O3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:O3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A3:O3')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3:P3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:P3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:P3')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         // Data
         $row = 4;
@@ -1040,20 +1039,21 @@ class ExcelController extends BaseController
             $sheet->fromArray([
                 [
                     $index + 1,
-                    $item['no_mesin'],
-                    $item['ket_mesin'],
-                    $item['lot_urut'],
-                    $item['no_model'],
-                    $item['item_type'],
-                    $item['kode_warna'],
-                    $item['warna'],
-                    $item['start_mc'],
-                    $item['delivery_awal'],
-                    $item['delivery_akhir'],
-                    $item['tanggal_schedule'],
-                    $item['kg_celup'],
-                    $item['lot_celup'],
-                    $item['tanggal_celup'],
+                    $item->no_mesin,
+                    $item->ket_mesin,
+                    $item->lot_urut,
+                    $item->no_model,
+                    $item->item_type,
+                    $item->kode_warna,
+                    $item->warna,
+                    $item->start_mc,
+                    $item->delivery_awal,
+                    $item->delivery_akhir,
+                    $item->tanggal_schedule,
+                    $item->total_kgs,
+                    $item->kg_celup,
+                    $item->lot_celup,
+                    $item->tanggal_celup,
                 ]
             ], NULL, 'A' . $row);
             $row++;
@@ -1068,19 +1068,19 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle('A3:O' . ($row - 1))->applyFromArray($styleArray);
+        $sheet->getStyle('A3:P' . ($row - 1))->applyFromArray($styleArray);
 
         // Set auto width untuk setiap kolom
-        foreach (range('A', 'O') as $column) {
+        foreach (range('A', 'P') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Set isi tabel agar rata tengah
-        $sheet->getStyle('A4:O' . ($row - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A4:O' . ($row - 1))->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A4:P' . ($row - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:P' . ($row - 1))->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
-        $fileName = 'Report_Schedule_Benang' . '.xlsx';
+        $fileName = 'Report_Schedule_Nylon' . '.xlsx';
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
@@ -1802,11 +1802,11 @@ class ExcelController extends BaseController
     }
     public function exportListBarangKeluar()
     {
-        $area = $this->request->getGet('area');
+        // $area = $this->request->getGet('area');
         $jenis = $this->request->getGet('jenis');
         $tglPakai = $this->request->getGet('tglPakai');
 
-        $dataPemesanan = $this->pengeluaranModel->getDataPemesananExport($area, $jenis, $tglPakai);
+        $dataPemesanan = $this->pengeluaranModel->getDataPemesananExport($jenis, $tglPakai);
         // Kelompokkan data berdasarkan 'group'
         $groupedData = [];
         foreach ($dataPemesanan as $row) {
@@ -1914,7 +1914,7 @@ class ExcelController extends BaseController
         $spreadsheet->removeSheetByIndex(0);
 
         // Simpan file Excel
-        $filename = 'List Pengeluaran Barang ' . $tglPakai . '.xlsx';
+        $filename = 'Persiapan Barang ' . $jenis . ' ' . $tglPakai . '.xlsx';
         $writer = new Xlsx($spreadsheet);
         $filePath = WRITEPATH . "uploads/$filename";
         $writer->save($filePath);
@@ -2338,6 +2338,131 @@ class ExcelController extends BaseController
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
         header('Cache-Control: max-age=0');
 
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function exportScheduleBenangNylon()
+    {
+        $tglAwal = $this->request->getGet('tanggal_awal');
+        $tglAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->scheduleCelupModel->getFilterSchBenangNylon($tglAwal, $tglAkhir);
+
+        $startDate = new \DateTime($tglAwal);
+        $endDate = new \DateTime($tglAkhir);
+        $tanggalFormatted = date('d/m/Y', strtotime($tglAwal));
+        // $tanggalFormatted = date('d F Y', strtotime($tglAwal));
+        // dd($startDate);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $spreadsheet->getDefaultStyle()->getFont()->setName('Arial');
+        // Header
+        // Merge A1:B4
+        $sheet->mergeCells('A1:B4');
+        $sheet->getColumnDimension('A')->setWidth(18);
+        $sheet->getColumnDimension('B')->setWidth(10);
+        $sheet->getColumnDimension('C')->setWidth(9);
+        $sheet->getColumnDimension('D')->setWidth(43);
+        $sheet->getColumnDimension('E')->setWidth(46);
+        $sheet->getColumnDimension('F')->setWidth(8);
+        $sheet->getColumnDimension('G')->setWidth(22);
+        $sheet->getColumnDimension('H')->setWidth(22);
+        $sheet->getColumnDimension('I')->setWidth(10);
+        $sheet->getColumnDimension('J')->setWidth(14);
+        $sheet->getColumnDimension('K')->setWidth(9);
+        $sheet->getColumnDimension('L')->setWidth(16);
+        $sheet->getColumnDimension('M')->setWidth(41);
+
+        // Tambahkan gambar/logo di kolom B, tengah-tengah baris 1-4
+        $drawing = new Drawing();
+        $drawing->setName('Logo');
+        $drawing->setDescription('Logo Perusahaan');
+        $drawing->setPath('assets/img/logo-kahatex.png'); // Ganti sesuai path logo
+        $drawing->setHeight(40); // Tinggi logo
+
+        // Letakkan di B1 (kolom kanan)
+        $drawing->setCoordinates('B1');
+
+        // Offset posisi agar logo berada di tengah (secara vertikal dan horizontal)
+        $drawing->setOffsetX(0); // Geser ke kanan sedikit dari tepi kiri kolom B
+        $drawing->setOffsetY(20); // Geser ke bawah agar terlihat lebih tengah secara vertikal
+
+        $drawing->setWorksheet($sheet);
+
+        $sheet->setCellValue('C1', 'FORMULIR');
+        $sheet->mergeCells('C1:M1');
+        $sheet->getStyle('C1:M1')->getAlignment()->setHorizontal('center')->setVertical('center');
+        $sheet->getStyle('C1:M1')->getFont()->setSize(14);
+
+        $sheet->setCellValue('C2', 'DEPARTEMEN CELUP CONES');
+        $sheet->mergeCells('C2:M2');
+        $sheet->getStyle('C2:M2')->getAlignment()->setHorizontal('center')->setVertical('center');
+        $sheet->getStyle('C2:M2')->getFont()->setSize(14);
+
+        $sheet->setCellValue('C3', 'REPORT SCHEDULE CELUP MINGGUAN');
+        $sheet->mergeCells('C3:M3');
+        $sheet->getStyle('C3:M3')->getAlignment()->setHorizontal('center')->setVertical('center');
+        $sheet->getStyle('C3:M3')->getFont()->setSize(14);
+
+        $sheet->setCellValue('C4', 'FOR-CC-151/REV_01/HAL_1/1');
+        $sheet->mergeCells('C4:F4');
+        $sheet->getStyle('C4:F4')->getAlignment()->setHorizontal('center')->setVertical('center');
+        $sheet->getStyle('C4:F4')->getFont()->setSize(14);
+
+        $sheet->setCellValue('G4', 'TANGGAL REVISI');
+        $sheet->mergeCells('G4:H4');
+        $sheet->getStyle('G4:H4')->getAlignment()->setHorizontal('center')->setVertical('center');
+        $sheet->getStyle('G4:H4')->getFont()->setSize(14);
+
+        $sheet->setCellValue('I4', '05 Oktober 2019');
+        $sheet->mergeCells('I4:M4');
+        $sheet->getStyle('I4:M4')->getAlignment()->setHorizontal('center')->setVertical('center');
+        $sheet->getStyle('I4:M4')->getFont()->setSize(14);
+
+        $sheet->setCellValue('A5', $tanggalFormatted);
+        $sheet->mergeCells('A5:M5');
+        $sheet->getStyle('A5:M5')->getAlignment()->setHorizontal('center')->setVertical('center');
+        $sheet->getStyle('A5:M5')->getFont()->setBold(true)->setSize(14);
+
+        // Header tabel
+        $sheet->setCellValue('A6', 'Kapasitas');
+        $sheet->setCellValue('B6', 'No Mesin');
+        $sheet->setCellValue('C6', 'Lot Urut');
+        $sheet->setCellValue('D6', 'PO');
+        $sheet->setCellValue('E6', 'Jenis Benang');
+        $sheet->setCellValue('F6', 'QTY');
+        $sheet->setCellValue('G6', 'Kode Warna');
+        $sheet->setCellValue('H6', 'Warna');
+        $sheet->setCellValue('I6', 'Lot Celup');
+        $sheet->setCellValue('J6', 'Actual Celup');
+        $sheet->setCellValue('K6', 'Start MC');
+        $sheet->setCellValue('L6', 'Del Exp');
+        $sheet->setCellValue('M6', 'Ket');
+        $sheet->getStyle('A6:M6')->getFont()->setSize(12);
+        $sheet->getRowDimension(6)->setRowHeight(35);
+        $sheet->getStyle('A6:M6')->getAlignment()->setHorizontal('center')->setVertical('center');
+        $sheet->getStyle('A6:M6')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('DCDCDC');
+
+
+        $lastColumn = $sheet->getHighestColumn();
+        $lastRow = $sheet->getHighestRow();
+        $sheet->getStyle("A1:{$lastColumn}{$lastRow}")
+            ->getBorders()
+            ->getAllBorders()
+            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        // Export
+        $filename = 'Schedule_Benang_Nylon_' . date('Ymd_His') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+
+        $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
     }

@@ -101,7 +101,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/reportSchNylon', 'ScheduleController::reportSchNylon');
     $routes->get('schedule/filterSchNylon', 'ScheduleController::filterSchNylon');
     $routes->get('schedule/exportScheduleNylon', 'ExcelController::exportScheduleNylon');
-
+    $routes->get('schedule/reportSchBenangNylon', 'ScheduleController::reportSchBenangNylon');
+    $routes->get('schedule/filterSchBenangNylon', 'ScheduleController::filterSchBenangNylon');
+    $routes->get('schedule/exportScheduleBenangNylon', 'ExcelController::exportScheduleBenangNylon');
     // $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJatah');
 
     $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
@@ -192,6 +194,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pemesanan/reportPemesananArea', 'PemesananController::reportPemesananArea');
     $routes->get('pemesanan/filterPemesananArea', 'PemesananController::filterPemesananArea');
     $routes->get('pemesanan/exportPemesananArea', 'ExcelController::excelPemesananArea');
+    $routes->post('pemesanan/listBarangKeluarPertgl', 'PemesananController::listBarangKeluarPertgl');
     $routes->get('pemesanan/exportListBarangKeluar', 'ExcelController::exportListBarangKeluar');
 
     $routes->get('pph', 'PphController::tampilPerModel');

@@ -97,7 +97,7 @@
                                         <td><?= $data['admin'] ?></td>
                                         <td>
                                             <a href="<?= base_url($role . '/otherIn/printBarcode/' . $data['id_other_bon']) ?>" class="btn btn-danger btn-xs">
-                                                <i class="fa fa-file-pdf fa-xl" style="font-size: 19px !important;"></i>
+                                                <i class="fa fa-file-pdf fa-xl" style="font-size: 19px !important;"></i> PDF
                                             </a>
                                         </td>
                                     </tr>

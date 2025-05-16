@@ -137,7 +137,7 @@ class PengeluaranModel extends Model
 
         return $this->findAll();
     }
-    public function getDataPemesananExport($area, $jenis, $tglPakai)
+    public function getDataPemesananExport($jenis, $tglPakai)
     {
         return $this->select("
             pemesanan.tgl_pakai,
@@ -161,12 +161,11 @@ class PengeluaranModel extends Model
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->where('pengeluaran.area_out', $area)
             ->where('master_material.jenis', $jenis)
             ->where('pemesanan.tgl_pakai', $tglPakai)
             ->where('pengeluaran.status', 'Pengeluaran Jalur')
             ->groupBy('pengeluaran.id_pengeluaran')
-            ->orderBy('pengeluaran.nama_cluster', 'ASC')
+            ->orderBy('pengeluaran.nama_cluster, pengeluaran.area_out', 'ASC')
             ->get() // Dapatkan objek query
             ->getResultArray(); // Konversi ke array hasil
     }
