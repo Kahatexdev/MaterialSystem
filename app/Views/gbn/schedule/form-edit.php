@@ -647,7 +647,7 @@
                         tr.querySelector("input[name='qty_po[]']").value = parseFloat(data.kg_po).toFixed(2);
                         tr.querySelector("input[name='qty_po_plus[]']").value = parseFloat(data.qty_po_plus).toFixed(2) || '';
                         tr.querySelector(".kg_kebutuhan").textContent = parseFloat(data.kg_po).toFixed(2);
-                        tr.querySelector(".sisa_jatah").textContent = parseFloat(data.sisa_jatah).toFixed(2) || '0.00';
+                        tr.querySelector(".tagihan").textContent = parseFloat(data.sisa_kg_po).toFixed(2) || '0.00';
                     } else {
                         console.error('Error fetching Qty PO details:', data.error || 'No data found');
                     }
@@ -740,6 +740,15 @@
               <br />
               <span class="badge bg-info">
                 <span class="kg_kebutuhan">0.00</span> KG
+              </span>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group">
+              <label for="tagihan">Tagihan :</label>
+              <br />
+              <span class="badge bg-info">
+                <span class="tagihan">0.00</span> KG
               </span>
             </div>
           </div>

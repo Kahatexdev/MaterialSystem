@@ -180,7 +180,8 @@
                             class="form-control"
                             id="exportStartDate"
                             name="start_date"
-                            placeholder="Filter Tanggal Awal">
+                            placeholder="Filter Tanggal Awal"
+                            required>
                     </div>
                     <div class="mb-3">
                         <label for="exportEndDate" class="form-label">Filter Tanggal (Akhir)</label>
@@ -189,7 +190,8 @@
                             class="form-control"
                             id="exportEndDate"
                             name="end_date"
-                            placeholder="Filter Tanggal Akhir">
+                            placeholder="Filter Tanggal Akhir"
+                            required>
                     </div>
                     <div class="mb-3">
                         <label for="season" class="form-label">Season</label>

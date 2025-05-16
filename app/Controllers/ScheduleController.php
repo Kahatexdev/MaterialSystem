@@ -492,8 +492,8 @@ class ScheduleController extends BaseController
             // Pastikan 'kg_po' ada di $kg_kebutuhan
             $kg_po = isset($kg_kebutuhan['kg_po']) ? (float) $kg_kebutuhan['kg_po'] : 0;
             $row['kg_kebutuhan'] = $kg_po;
-
-            $row['sisa_jatah'] = $kg_po - $qty_celup;
+            $tagihan = $this->openPoModel->getQtyPO($kodeWarna, $warna, $itemType);
+            $row['sisa_jatah'] = $tagihan['sisa_kg_po'] ?? 0;
         }
         unset($row);
         // dd ($scheduleData);
