@@ -138,14 +138,44 @@ class OpenPoModel extends Model
     //     return $this->first();
     // }
 
-    public function getQtyPO($kodeWarna, $warna, $itemTypeEncoded, $idInduk)
+    public function getQtyPO( $kodeWarna, $warna, $itemType)
     {
-        return $this->select('kg_po')
+        // 1) Hitung total celup
+        $row = $this->db
+            ->table('schedule_celup')
+            ->selectSum('kg_celup', 'total_kg_celup')
+            ->where('item_type',  $itemType)
             ->where('kode_warna', $kodeWarna)
-            ->where('color', $warna)
-            ->where('item_type', $itemTypeEncoded)
-            ->first();
+            ->where('warna',      $warna)
+            ->get()
+            ->getRowArray();
+
+        $total = (float) ($row['total_kg_celup'] ?? 0);
+
+        // 2) Ambil PO
+        $poRow = $this->db
+            ->table('open_po')
+            ->select('kg_po')
+            ->where('item_type',  $itemType)
+            ->where('kode_warna', $kodeWarna)
+            ->where('color',      $warna)
+            ->get()
+            ->getRowArray();
+
+        $kgPo = (float) ($poRow['kg_po'] ?? 0);
+
+        // 3) Return struktur yang sama
+        return [
+            'item_type'       => $itemType,
+            'kode_warna'      => $kodeWarna,
+            'warna'           => $warna,
+            'kg_po'           => $kgPo,
+            'total_kg_celup'  => $total,
+            'sisa_kg_po'      => $kgPo - $total,
+        ];
     }
+
+
 
 
 

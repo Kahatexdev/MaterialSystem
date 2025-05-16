@@ -286,16 +286,16 @@
                                                             </div>
                                                         </div>
                                                         <div class="row">
-                                                            <div class="col-4">
+                                                            <div class="col-3">
                                                                 <div class="form-group">
-                                                                    <label for="qty_celup">Stock</label>
+                                                                    <label for="qty_celup">Stock :</label>
                                                                     <br />
                                                                     <span class="badge bg-info">
                                                                         <span class="stock">0.00</span> KG <!-- Ganti id dengan class -->
                                                                     </span>
                                                                 </div>
                                                             </div>
-                                                            <div class="col-4">
+                                                            <div class="col-3">
                                                                 <div class="form-group">
                                                                     <label for="qty_celup">KG Kebutuhan :</label>
                                                                     <br />
@@ -304,16 +304,16 @@
                                                                     </span>
                                                                 </div>
                                                             </div>
-                                                            <!-- <div class="col-4">
+                                                            <div class="col-3">
                                                                 <div class="form-group">
-                                                                    <label for="qty_celup">Tagihan Sch :</label>
+                                                                    <label for="tagihan">Tagihan :</label>
                                                                     <br />
                                                                     <span class="badge bg-info">
-                                                                        <span class="sisa_jatah">0.00</span> KG
+                                                                        <span class="tagihan">0.00</span> KG
                                                                     </span>
                                                                 </div>
-                                                            </div> -->
-                                                            <div class="col-4 d-flex align-items-center">
+                                                            </div>
+                                                            <div class="col-3 d-flex align-items-center">
                                                                 <div class="form-group">
                                                                     <label for="qty_celup">PO + :</label>
                                                                     <fieldset>
@@ -561,10 +561,10 @@
         }
 
         // === Fungsi untuk mengambil data Qty dan Kebutuhan PO (selain qty_po) ===
-        function fetchQtyAndKebutuhanPO(kodeWarna, tr, warna, itemType, idInduk) {
+        function fetchQtyAndKebutuhanPO(kodeWarna, tr, warna, itemType) {
             const itemTypeEncoded = encodeURIComponent(itemType);
-            idInduk = idInduk || 0;
-            const url = `<?= base_url(session('role') . "/schedule/getQtyPO") ?>?kode_warna=${kodeWarna}&color=${warna}&item_type=${itemTypeEncoded}&id_induk=${idInduk}`;
+            // idInduk = idInduk || 0;
+            const url = `<?= base_url(session('role') . "/schedule/getQtyPO") ?>?kode_warna=${kodeWarna}&color=${warna}&item_type=${itemTypeEncoded}`;
             console.log("Request URL:", url);
             fetch(url)
                 .then(response => {
@@ -578,11 +578,11 @@
                         const qtyPO = tr.querySelector("input[name='qty_po[]']");
                         const qtyPOPlus = tr.querySelector("input[name='qty_po_plus[]']");
                         const kgKebutuhan = tr.querySelector(".kg_kebutuhan");
-                        const sisaJatah = tr.querySelector(".sisa_jatah");
+                        const tagihan = tr.querySelector(".tagihan");
                         qtyPO.value = parseFloat(data.kg_po).toFixed(2);
                         qtyPOPlus.value = parseFloat(data.qty_po_plus).toFixed(2) || '';
                         kgKebutuhan.textContent = parseFloat(data.kg_po).toFixed(2) || '0.00';
-                        sisaJatah.textContent = parseFloat(data.sisa_jatah).toFixed(2) || '0.00';
+                        tagihan.textContent = parseFloat(data.sisa_kg_po).toFixed(2) || '0.00';
                     } else {
                         console.error('Error fetching PO details:', data.error || 'No data found');
                     }
@@ -852,7 +852,7 @@
                     return;
                 }
                 if (selectedOption.value) {
-                    fetchQtyAndKebutuhanPO(kodeWarnaValue, tr, warna, itemTypeValue, idIndukValue);
+                    fetchQtyAndKebutuhanPO(kodeWarnaValue, tr, warna, itemTypeValue);
                     fetchKeterangan(kodeWarnaValue, tr, warna, itemTypeValue, noModelValue);
                     // fetchPODetails(selectedOption.value, tr, itemTypeValue, kodeWarnaValue);
                 } else {
@@ -934,7 +934,7 @@
                     </div>
                 </div>
                 <div class="row">
-                <div class="col-4">
+                <div class="col-3">
                     <div class="form-group">
                         <label for="qty_celup">Stock</label>
                         <br />
@@ -943,7 +943,7 @@
                             </span>
                         </div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <div class="form-group">
                             <label for="qty_celup">KG Kebutuhan :</label>
                             <br />
@@ -952,7 +952,16 @@
                             </span>
                         </div>
                     </div>
-                    <div class="col-4 d-flex align-items-center">
+                    <div class="col-3">
+                        <div class="form-group">
+                            <label for="tagihan">Tagihan :</label>
+                            <br />
+                            <span class="badge bg-info">
+                                <span class="tagihan">0.00</span> KG
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-3 d-flex align-items-center">
                         <div class="form-group">
                             <label for="qty_celup">PO + :</label>
                             <fieldset>
@@ -972,7 +981,7 @@
                         <div class="form-group">
                             <label for="">Keterangan</label>
                             <br />
-                            <textarea class="form-control keterangan" name="keterangan" id="keterangan">
+                            <textarea class="form-control keterangan" name="keterangan" id="keterangan" readonly>
                             </textarea>
                         </div>
                     </div>
