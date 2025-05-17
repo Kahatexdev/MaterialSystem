@@ -143,7 +143,7 @@
                     <input type="text" class="form-control" name="ttl_keb" id="ttl_keb" readonly>
 
                 </div>
-                <div class="form-group">
+                <div class=" form-group">
                     <div class="row">
                         <div class="col-md-6">
                             <label for="kg_stock">Permintan Kelos (Kg)</label>
@@ -324,8 +324,29 @@
             $('#ttl_keb').val(totalKebutuhan);
         }
 
+        // Fungsi untuk menghitung jumlah cones
+        function hitungCones() {
+            // Ambil nilai input
+            const ttl_keb = parseFloat(document.getElementById('ttl_keb').value);
+            const kg_percones = parseFloat(document.getElementById('kg_percones').value);
+
+            // Validasi nilai input
+            if (isNaN(ttl_keb) || isNaN(kg_percones) || kg_percones < 0) {
+                document.getElementById('jumlah_cones').innerText = '-';
+                alert('Pastikan TTL KEB dan KG PERCONES diisi dengan angka valid, dan KG PERCONES lebih besar dari nol!');
+                return;
+            }
+
+            // Hitung jumlah cones
+            const jumlah_cones = ttl_keb / kg_percones;
+
+            // Tampilkan hasil
+            document.getElementById('jumlah_cones').value = Math.ceil(jumlah_cones);
+        }
+
         // Trigger calculation on input changes
         $('#kg_stock, .kg-po').on('input', calculateTotal);
+        $('#kg_percones, #ttl_keb').on('input', hitungCones);
 
         // -----------------------
         // Binding awal
