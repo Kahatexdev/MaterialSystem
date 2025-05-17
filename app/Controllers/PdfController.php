@@ -1537,10 +1537,9 @@ class PdfController extends BaseController
                 'color'          => ceil($pdf->GetStringWidth($po['color']) / 20) * $rowHeight,
                 'kode_warna'     => ceil($pdf->GetStringWidth($po['kode_warna']) / 20) * $rowHeight,
                 'no_order'       => ceil($pdf->GetStringWidth($po['no_order']) / 25) * $rowHeight,
-                'jenis_produksi' => ceil($pdf->GetStringWidth($po['jenis_produksi']) / 13) * $rowHeight,
+                'jenis_produksi' => ceil($pdf->GetStringWidth($po['jenis_produksi']) / 15) * $rowHeight,
                 'ket_celup'      => ceil($pdf->GetStringWidth($po['ket_celup']) / 48) * $rowHeight,
             ];
-
 
             $rowHeight = max($heights);
 
@@ -1552,22 +1551,22 @@ class PdfController extends BaseController
             $pdf->SetXY($xNow + 26, $yStart);
 
             $xNow = $pdf->GetX();
-            $rowUkuran = $heights['ukuran'] % 4 > 1 ?  4 : $rowHeight;
+            $rowUkuran = $heights['ukuran'] / 4 > 1 ?  4 : $rowHeight;
             $pdf->MultiCell(12, $rowUkuran, $po['ukuran'], 1, 'C'); // Kode
             $pdf->SetXY($xNow + 12, $yStart);
 
             $xNow = $pdf->GetX();
-            $rowBc = $heights['bentuk_celup'] % 4 > 1 ?  4 : $rowHeight;
+            $rowBc = $heights['bentuk_celup'] / 4 > 1 ?  4 : $rowHeight;
             $pdf->MultiCell(12, $rowBc, $po['bentuk_celup'], 1, 'C'); // Bentuk Celup
             $pdf->SetXY($xNow + 12, $yStart);
 
             $xNow = $pdf->GetX();
-            $rowColor = $heights['color'] % 4 > 1 ?  4 : $rowHeight;
+            $rowColor = $heights['color'] / 4 > 1 ?  4 : $rowHeight;
             $pdf->MultiCell(20, $rowColor, $po['color'], 1, 'C'); // Warna
             $pdf->SetXY($xNow + 20, $yStart);
 
             $xNow = $pdf->GetX();
-            $rowKode = $heights['kode_warna'] % 4 > 1 ?  4 : $rowHeight;
+            $rowKode = $heights['kode_warna'] / 4 > 1 ?  4 : $rowHeight;
             $pdf->MultiCell(18, $rowKode, $po['kode_warna'], 1, 'C'); // Kode Warna
             $pdf->SetXY($xNow + 18, $yStart);
 
@@ -1575,7 +1574,7 @@ class PdfController extends BaseController
             $pdf->Cell(12, $rowHeight, $po['buyer'], 1, 0, 'C'); // Buyer
 
             $xNow = $pdf->GetX();
-            $rowNoOrder = $heights['no_order'] % 4 > 1 ?  4 : $rowHeight;
+            $rowNoOrder = $heights['no_order'] / 4 > 1 ?  4 : $rowHeight;
             $pdf->MultiCell(25, $rowNoOrder, $po['no_order'], 1, 'C'); // Nomor Order
             $pdf->SetXY($xNow + 25, $yStart);
 
@@ -1588,7 +1587,7 @@ class PdfController extends BaseController
             $pdf->Cell(13, $rowHeight, '', 1, 0, 'C'); // Cones Jenis
 
             $xNow = $pdf->GetX();
-            $rowJp = $heights['jenis_produksi'] % 4 > 1 ?  4 : $rowHeight;
+            $rowJp = $heights['jenis_produksi'] / 4 > 1 ?  4 : $rowHeight;
             $pdf->MultiCell(15, $rowJp, $po['jenis_produksi'], 1, 'C'); // Untuk Produksi
             $pdf->SetXY($xNow + 15, $yStart);
 
@@ -1597,7 +1596,7 @@ class PdfController extends BaseController
             $pdf->SetXY($xNow + 12, $yStart);
 
             $xNow = $pdf->GetX();
-            $rowKc = $heights['ket_celup'] % 4 > 1 ?  4 : $rowHeight;
+            $rowKc = $heights['ket_celup'] / 4 > 1 ?  4 : $rowHeight;
             $pdf->MultiCell(48, $rowKc, $po['ket_celup'], 1, 'C'); // Keterangan Celup
             $pdf->SetXY($xNow + 48, $yStart);
 
