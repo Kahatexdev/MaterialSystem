@@ -89,7 +89,10 @@ class ApiController extends ResourceController
         foreach ($model as &$row) {
             $scheduleData = [];
 
-            if (strtoupper($row['jenis']) == 'BENANG') {
+            $jenis = strtoupper($row['jenis']);
+
+            if (in_array($jenis, ['BENANG', 'NYLON'])) {
+                // Ambil data celup
                 $schedule = $this->scheduleCelupModel->schedulePerArea(
                     $row['no_model'],
                     $row['item_type'],
@@ -97,8 +100,8 @@ class ApiController extends ResourceController
                     $search
                 );
                 $scheduleData = !empty($schedule) ? $schedule[0] : [];
-            } else if (in_array(strtoupper($row['jenis']), ['KARET', 'NYLON', 'SPANDEX'])) {
-                // Untuk jenis lain seperti KARET, NYLON, SPANDEX, dll
+            } else if (in_array($jenis, ['KARET', 'SPANDEX'])) {
+                // Ambil data covering
                 $covering = $this->trackingPoCovering->statusBahanBaku(
                     $row['no_model'],
                     $row['item_type'],

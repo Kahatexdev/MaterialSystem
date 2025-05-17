@@ -150,7 +150,7 @@ class ScheduleController extends BaseController
             'max_caps' => $max['max_caps'],
             'po' => $po,
         ];
-        // var_dump($data);
+        // dd($data);
 
         return view($this->role . '/schedule/form-create', $data);
     }
@@ -259,7 +259,7 @@ class ScheduleController extends BaseController
             // Jika id_induk tidak tersedia, gunakan parameter yang dikirim
             $po = $this->openPoModel->getFilteredPO($kode_warna, $warna, $item_type);
         }
-
+        // var_dump($po);
         // Kembalikan data PO jika ditemukan, atau error jika tidak ada data
         if (!empty($po)) {
             return $this->response->setJSON($po);
@@ -359,8 +359,8 @@ class ScheduleController extends BaseController
         $kodeWarna = $this->request->getGet('kode_warna');
         $color = $this->request->getGet('color');
         $itemTypeEncoded = urldecode($this->request->getGet('item_type'));
-        $idInduk = $this->request->getGet('id_induk');
-        $qtyPO = $this->openPoModel->getQtyPO($kodeWarna, $color, $itemTypeEncoded, $idInduk);
+        // $idInduk = $this->request->getGet('id_induk');
+        $qtyPO = $this->openPoModel->getQtyPO($kodeWarna, $color, $itemTypeEncoded);
 
         if ($qtyPO) {
             return $this->response->setJSON($qtyPO);
@@ -492,8 +492,8 @@ class ScheduleController extends BaseController
             // Pastikan 'kg_po' ada di $kg_kebutuhan
             $kg_po = isset($kg_kebutuhan['kg_po']) ? (float) $kg_kebutuhan['kg_po'] : 0;
             $row['kg_kebutuhan'] = $kg_po;
-
-            $row['sisa_jatah'] = $kg_po - $qty_celup;
+            $tagihan = $this->openPoModel->getQtyPO($kodeWarna, $warna, $itemType);
+            $row['sisa_jatah'] = $tagihan['sisa_kg_po'] ?? 0;
         }
         unset($row);
         // dd ($scheduleData);

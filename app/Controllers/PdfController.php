@@ -1477,15 +1477,15 @@ class PdfController extends BaseController
         $pdf->SetXY($pdf->GetX(), $pdf->GetY() - 14);
         $pdf->Cell(56, -7, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
         $pdf->Cell(20, 14, 'Warna', 1, 0, 'C'); // Merge 2 baris
-        $pdf->Cell(20, 14, 'Kode Warna', 1, 0, 'C'); // Merge 2 baris
-        $pdf->Cell(10, 14, 'Buyer', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(18, 14, 'Kode Warna', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(12, 14, 'Buyer', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(25, 14, 'Nomor Order', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(15, 14, 'Delivery', 1, 0, 'C'); // Merge 2 baris
-        $pdf->MultiCell(15, 3.5, 'Qty Pesanan', 1, 'C', false); // Merge 2 baris
+        $pdf->MultiCell(13, 3.5, 'Qty Pesanan', 1, 'C', false); // Merge 2 baris
         $pdf->SetXY($pdf->GetX(), $pdf->GetY() - 7);
-        $pdf->Cell(161, -7, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(159, -7, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
         $pdf->Cell(43, 7, 'Permintaan Kelos', 1, 0, 'C'); // Merge 4 kolom
-        $pdf->MultiCell(13, 7, 'Untuk Produksi', 1, 'C', false); // Merge 2 baris
+        $pdf->MultiCell(15, 7, 'Untuk Produksi', 1, 'C', false); // Merge 2 baris
         $pdf->SetXY($pdf->GetX(), $pdf->GetY() - 14);
         $pdf->Cell(217, -7, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
         $pdf->MultiCell(12, 7, 'Contoh Warna', 1, 'C', false); // Merge 2 baris
@@ -1501,12 +1501,12 @@ class PdfController extends BaseController
         $pdf->Cell(26, -7, 'Jenis', 1, 0, 'C');
         $pdf->Cell(12, -7, 'Kode', 1, 0, 'C');
         $pdf->Cell(102, -7, '', 0, 0); // Kosong untuk menyesuaikan posisi
-        $pdf->Cell(15, -7, 'Kg', 1, 0, 'C'); // Merge 4 kolom untuk Permintaan Kelos
+        $pdf->Cell(13, -7, 'Kg', 1, 0, 'C'); // Merge 4 kolom untuk Permintaan Kelos
         $pdf->Cell(8, -7, 'Kg', 1, 0, 'C');
         $pdf->Cell(10, -7, 'Yard', 1, 0, 'C');
         $pdf->MultiCell(12, -3.5, 'Cones Total', 1, 'C', false);
         $pdf->SetXY($pdf->GetX(), $pdf->GetY() + 7);
-        $pdf->Cell(191, -7, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(189, -7, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
         $pdf->MultiCell(13, -3.5, 'Cones Jenis', 1, 'C', false);
         $pdf->SetXY($pdf->GetX(), $pdf->GetY() + 8);
         $pdf->Cell(218, -7, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
@@ -1525,68 +1525,79 @@ class PdfController extends BaseController
             $yStart = $pdf->GetY();
 
             // Hitung tinggi maksimum dalam satu baris
-            $rowHeight = 5; // Tinggi default
+            $rowHeight = 4; // Tinggi default
             $heights = [];
 
-            // Hitung tinggi teks untuk kolom yang membutuhkan wrap text
-            $heights[] = $pdf->GetStringWidth($po['item_type']) / 26 * $rowHeight;
-            $heights[] = $pdf->GetStringWidth($po['ukuran']) / 12 * $rowHeight;
-            $heights[] = $pdf->GetStringWidth($po['color']) / 20 * $rowHeight;
-            $heights[] = $pdf->GetStringWidth($po['kode_warna']) / 20 * $rowHeight;
-            $heights[] = $pdf->GetStringWidth($po['no_order']) / 25 * $rowHeight;
-            $heights[] = $pdf->GetStringWidth($po['jenis_produksi']) / 13 * $rowHeight;
-            $heights[] = $pdf->GetStringWidth($po['ket_celup']) / 48 * $rowHeight;
+            // hitung jumlah baris per kolom
+            $heights = [
+                'item_type'      => ceil($pdf->GetStringWidth($po['item_type']) / 26) * $rowHeight,
+                'ukuran'         => ceil($pdf->GetStringWidth($po['ukuran']) / 12) * $rowHeight,
+                'bentuk_celup'   => ceil($pdf->GetStringWidth($po['bentuk_celup']) / 12) * $rowHeight,
+                'buyer'          => ceil($pdf->GetStringWidth($po['buyer']) / 10) * $rowHeight,
+                'color'          => ceil($pdf->GetStringWidth($po['color']) / 20) * $rowHeight,
+                'kode_warna'     => ceil($pdf->GetStringWidth($po['kode_warna']) / 20) * $rowHeight,
+                'no_order'       => ceil($pdf->GetStringWidth($po['no_order']) / 25) * $rowHeight,
+                'jenis_produksi' => ceil($pdf->GetStringWidth($po['jenis_produksi']) / 15) * $rowHeight,
+                'ket_celup'      => ceil($pdf->GetStringWidth($po['ket_celup']) / 48) * $rowHeight,
+            ];
 
             $rowHeight = max($heights);
 
             // Tulis data dengan MultiCell untuk kolom yang membutuhkan wrap text
             $pdf->Cell(6, $rowHeight, $no++, 1, 0, 'C'); // No
             $xNow = $pdf->GetX();
-            $pdf->MultiCell(26, $rowHeight, $po['item_type'], 1, 'C'); // Jenis
+            $rowItem = $heights['item_type'] / 4 > 1 ? 4 : $rowHeight;
+            $pdf->MultiCell(26, $rowItem, $po['item_type'], 1, 'C'); // Jenis
             $pdf->SetXY($xNow + 26, $yStart);
 
             $xNow = $pdf->GetX();
-            $pdf->MultiCell(12, $rowHeight, $po['ukuran'], 1, 'C'); // Kode
+            $rowUkuran = $heights['ukuran'] / 4 > 1 ?  4 : $rowHeight;
+            $pdf->MultiCell(12, $rowUkuran, $po['ukuran'], 1, 'C'); // Kode
             $pdf->SetXY($xNow + 12, $yStart);
 
             $xNow = $pdf->GetX();
-            $pdf->MultiCell(12, $rowHeight, $po['bentuk_celup'], 1, 'C'); // Bentuk Celup
+            $rowBc = $heights['bentuk_celup'] / 4 > 1 ?  4 : $rowHeight;
+            $pdf->MultiCell(12, $rowBc, $po['bentuk_celup'], 1, 'C'); // Bentuk Celup
             $pdf->SetXY($xNow + 12, $yStart);
 
             $xNow = $pdf->GetX();
-            $pdf->MultiCell(20, $rowHeight, $po['color'], 1, 'C'); // Warna
+            $rowColor = $heights['color'] / 4 > 1 ?  4 : $rowHeight;
+            $pdf->MultiCell(20, $rowColor, $po['color'], 1, 'C'); // Warna
             $pdf->SetXY($xNow + 20, $yStart);
 
             $xNow = $pdf->GetX();
-            $pdf->MultiCell(20, $rowHeight, $po['kode_warna'], 1, 'C'); // Kode Warna
-            $pdf->SetXY($xNow + 20, $yStart);
+            $rowKode = $heights['kode_warna'] / 4 > 1 ?  4 : $rowHeight;
+            $pdf->MultiCell(18, $rowKode, $po['kode_warna'], 1, 'C'); // Kode Warna
+            $pdf->SetXY($xNow + 18, $yStart);
 
-            $pdf->SetFont('Arial', '', 4);
-            $pdf->Cell(10, $rowHeight, $po['buyer'], 1, 0, 'C'); // Buyer
+            $pdf->SetFont('Arial', '', 5);
+            $pdf->Cell(12, $rowHeight, $po['buyer'], 1, 0, 'C'); // Buyer
 
-            $pdf->SetFont('Arial', '', 4);
             $xNow = $pdf->GetX();
-            $pdf->MultiCell(25, $rowHeight, $po['no_order'], 1, 'C'); // Nomor Order
+            $rowNoOrder = $heights['no_order'] / 4 > 1 ?  4 : $rowHeight;
+            $pdf->MultiCell(25, $rowNoOrder, $po['no_order'], 1, 'C'); // Nomor Order
             $pdf->SetXY($xNow + 25, $yStart);
 
             $pdf->SetFont('Arial', '', 6);
             $pdf->Cell(15, $rowHeight, $po['delivery_awal'], 1, 0, 'C'); // Delivery
-            $pdf->Cell(15, $rowHeight, number_format($po['kg_po'], 2), 1, 0, 'C'); // Qty Pesanan (Kg)
+            $pdf->Cell(13, $rowHeight, number_format($po['kg_po'], 2), 1, 0, 'C'); // Qty Pesanan (Kg)
             $pdf->Cell(8, $rowHeight, $po['kg_percones'], 1, 0, 'C'); // Kg Per Cones
             $pdf->Cell(10, $rowHeight, '', 1, 0, 'C'); // Yard
             $pdf->Cell(12, $rowHeight, $po['jumlah_cones'], 1, 0, 'C'); // Cones Total
             $pdf->Cell(13, $rowHeight, '', 1, 0, 'C'); // Cones Jenis
 
             $xNow = $pdf->GetX();
-            $pdf->MultiCell(13, $rowHeight, $po['jenis_produksi'], 1, 'C'); // Untuk Produksi
-            $pdf->SetXY($xNow + 13, $yStart);
+            $rowJp = $heights['jenis_produksi'] / 4 > 1 ?  4 : $rowHeight;
+            $pdf->MultiCell(15, $rowJp, $po['jenis_produksi'], 1, 'C'); // Untuk Produksi
+            $pdf->SetXY($xNow + 15, $yStart);
 
             $xNow = $pdf->GetX();
-            $pdf->MultiCell(12, $rowHeight, '', 1, 'C'); // Bentuk Celup
+            $pdf->MultiCell(12, $rowHeight, '', 1, 'C'); // Contoh Warna
             $pdf->SetXY($xNow + 12, $yStart);
 
             $xNow = $pdf->GetX();
-            $pdf->MultiCell(48, $rowHeight, $po['ket_celup'], 1, 'C'); // Keterangan Celup
+            $rowKc = $heights['ket_celup'] / 4 > 1 ?  4 : $rowHeight;
+            $pdf->MultiCell(48, $rowKc, $po['ket_celup'], 1, 'C'); // Keterangan Celup
             $pdf->SetXY($xNow + 48, $yStart);
 
             $pdf->Ln($rowHeight); // Pindah ke baris berikutnya
@@ -1599,20 +1610,20 @@ class PdfController extends BaseController
         // Tambahkan baris total
         $pdf->SetFont('Arial', 'B', 6);
         $pdf->Cell(146, 5, 'Total', 1, 0, 'R'); // Gabungkan sel sebelum kolom "Qty Pemesanan"
-        $pdf->Cell(15, 5, number_format($totalKgPo, 2), 1, 0, 'C'); // Total Qty Pemesanan (kg)
+        $pdf->Cell(13, 5, number_format($totalKgPo, 2), 1, 0, 'C'); // Total Qty Pemesanan (kg)
         $pdf->Cell(18, 5, '', 1, 0, 'C'); // Kosong untuk "Kg Per Cones" dan lainnya
         $pdf->Cell(12, 5, $totalCones, 1, 0, 'C'); // Total Cones
-        $pdf->Cell(86, 5, '', 1, 0, 'C'); // Kosong untuk "Kg Per Cones" dan lainnya
+        $pdf->Cell(88, 5, '', 1, 0, 'C'); // Kosong untuk "Kg Per Cones" dan lainnya
 
-        //KETERANGAN
-        // $pdf->Cell(277, 5, '', 0, 1, 'C');
-        // $pdf->Cell(85, 5, 'KET', 0, 0, 'R');
-        // // Check if the result array is not empty and display only the first delivery_awal
-        // if (!empty($openPoGabung)) {
-        //     $pdf->Cell(117, 5, ': ' . $openPoGabung[0]['keterangan'], 0, 1, 'L');
-        // } else {
-        //     $pdf->Cell(117, 5, ': ', 0, 1, 'L');
-        // }
+        // KETERANGAN
+        $pdf->Cell(277, 5, '', 0, 1, 'C');
+        $pdf->Cell(85, 5, 'KET', 0, 0, 'R');
+        // Check if the result array is not empty and display only the first delivery_awal
+        if (!empty($openPoGabung)) {
+            $pdf->Cell(117, 5, ': ' . $openPoGabung[0]['keterangan'], 0, 1, 'L');
+        } else {
+            $pdf->Cell(117, 5, ': ', 0, 1, 'L');
+        }
 
         $pdf->Cell(277, 5, '', 0, 1, 'C');
         $pdf->Cell(277, 5, '', 0, 1, 'C');
