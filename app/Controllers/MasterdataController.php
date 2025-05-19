@@ -171,10 +171,13 @@ class MasterdataController extends BaseController
                     }
                 }
 
+                if ($validate['area'] == 'MJ') {
+                    $validate['area'] = 'MAJALAYA';
+                }
+
                 if (!$validate) {
                     return redirect()->back()->with('error', 'Validasi master order gagal, tidak ditemukan style size yang valid.');
                 }
-
                 // Siapkan data master order
                 $masterData = [
                     'no_order'       => $no_order,
@@ -185,12 +188,11 @@ class MasterdataController extends BaseController
                     'memo'           => NULL,
                     'delivery_awal'  => $validate['delivery_awal'],
                     'delivery_akhir' => $validate['delivery_akhir'],
+                    'unit'           => $validate['area'],
                     'admin'          => $admin,
                     'created_at'     => date('Y-m-d H:i:s'),
                     'updated_at'     => NULL,
                 ];
-
-                // dd ($masterData);
                 $masterOrderModel->insert($masterData);
             }
             // else {
