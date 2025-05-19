@@ -583,7 +583,35 @@ class ScheduleCelupModel extends Model
             ->join('open_po', 'open_po.no_model = schedule_celup.no_model')
             ->join('master_material', 'master_material.item_type = schedule_celup.item_type')
             ->join('master_order', 'master_order.no_model = schedule_celup.no_model')
-            ->whereIn('master_material.jenis', ['NYLON', 'BENANG']);
+            ->whereIn('master_material.jenis', ['NYLON', 'BENANG'])
+            ->whereIn('mesin_celup.ket_mesin', ['NYLON', 'BENANG'])
+            ->groupBy('schedule_celup.id_celup')
+            ->orderBy('schedule_celup.tanggal_schedule', 'ASC')
+            ->orderBy('mesin_celup.no_mesin', 'ASC');
+
+        if (!empty($tglAwal) && !empty($tglAkhir)) {
+            $builder->where('schedule_celup.tanggal_schedule >=', $tglAwal)
+                ->where('schedule_celup.tanggal_schedule <=', $tglAkhir);
+        } elseif (!empty($tglAwal)) {
+            $builder->where('schedule_celup.tanggal_schedule >=', $tglAwal);
+        } elseif (!empty($tglAkhir)) {
+            $builder->where('schedule_celup.tanggal_schedule <=', $tglAkhir);
+        }
+
+        return $builder->findAll();
+    }
+
+    public function getFilterSchWeekly($tglAwal, $tglAkhir)
+    {
+        $builder = $this->select('schedule_celup.*, mesin_celup.no_mesin, mesin_celup.min_caps, mesin_celup.max_caps, open_po.ket_celup, master_material.jenis, master_order.delivery_awal')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->join('open_po', 'open_po.no_model = schedule_celup.no_model')
+            ->join('master_material', 'master_material.item_type = schedule_celup.item_type')
+            ->join('master_order', 'master_order.no_model = schedule_celup.no_model')
+            ->where('mesin_celup.ket_mesin !=', 'ACRYLIC')
+            ->groupBy('schedule_celup.id_celup')
+            ->orderBy('schedule_celup.tanggal_schedule', 'ASC')
+            ->orderBy('mesin_celup.no_mesin', 'ASC');
 
         if (!empty($tglAwal) && !empty($tglAkhir)) {
             $builder->where('schedule_celup.tanggal_schedule >=', $tglAwal)
