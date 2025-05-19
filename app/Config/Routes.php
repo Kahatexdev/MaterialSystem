@@ -303,6 +303,11 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('schedule/updateSchedule', 'ScheduleController::updateSchedule');
     $routes->post('schedule/updateTglSchedule', 'ScheduleController::updateTglSchedule');
     $routes->post('schedule/deleteSchedule', 'ScheduleController::deleteSchedule');
+    $routes->get('schedule/reqschedule', 'CoveringWarehouseController::reqschedule');
+    $routes->get('schedule/reqschedule/show/(:num)', 'CelupController::editStatus/$1');
+    $routes->post('schedule/reqschedule', 'ScheduleController::reqschedule');
+
+
 
     $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
     $routes->post('mesin/saveDataMesin', 'MesinCelupController::saveDataMesin');

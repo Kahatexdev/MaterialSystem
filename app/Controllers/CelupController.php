@@ -156,20 +156,24 @@ class CelupController extends BaseController
 
             // Panggil fungsi model untuk mendapatkan qty_po dan warna
             $pdk = $this->materialModel->getQtyPOForCelup($nomodel, $itemtype, $kodewarna);
-
+            // dd ($pdk);
             if (!$pdk) {
                 $id_induk = $this->openPoModel->getIdInduk($nomodel, $itemtype, $kodewarna);
+                // dd ($id_induk);
                 if ($id_induk) {
-                    $id_po = $this->openPoModel->find($id_induk['id_induk']);
+                    $id_po = $this->openPoModel->select('id_po,no_model,kode_warna,color,item_type')->where('no_model', $nomodel)->where('item_type', $itemtype)->where('kode_warna', $kodewarna)->first();
+                    // dd ($id_po);
                     if (isset($id_po['kode_warna'], $id_po['color'], $id_po['item_type'])) {
+                        $noModelCovering = $id_po['no_model'];
                         $kodeWarnaCovering = $id_po['kode_warna'];
                         $warnaCovering     = $id_po['color'];
                         $itemTypeCovering  = $id_po['item_type'];
                         // dd ($kodeWarnaCovering, $warnaCovering, $itemTypeCovering); 
-                        $deliv = $this->openPoModel->getFilteredPO($kodeWarnaCovering, $warnaCovering, $itemTypeCovering);
+                        $deliv = $this->openPoModel->getFilteredPOCov($kodeWarnaCovering, $warnaCovering, $itemTypeCovering);
+                        // dd ($kodeWarnaCovering, $warnaCovering, $itemTypeCovering,$deliv);
                         $pdk = $this->openPoModel->getQtyPOForCvr($nomodel, $itemtype, $kodewarna);
-                        $pdk['delivery_awal'] = $deliv[0]['delivery_awal'];
-                        $pdk['delivery_akhir'] = $deliv[0]['delivery_akhir'];
+                        $pdk['delivery_awal'] = $deliv[0]['delivery_awal'] ?? null;
+                        $pdk['delivery_akhir'] = $deliv[0]['delivery_akhir'] ?? null;
                     } else {
 
                         log_message('error', 'Field kode_warna tidak ditemukan pada hasil openPoModel->find()');
@@ -177,7 +181,7 @@ class CelupController extends BaseController
                 }
             }
             $keys = $id['no_model'] . '-' . $id['item_type'] . '-' . $id['kode_warna'];
-
+            // dd($pdk);
             // Pastikan key belum ada, jika belum maka tambahkan data
             if (!isset($uniqueData[$key])) {
                 // Buat array data unik

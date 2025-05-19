@@ -65,7 +65,7 @@ class OpenPoModel extends Model
 
     public function getData($no_model, $jenis, $jenis2)
     {
-        return $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, master_material.jenis, master_order.buyer, master_order.no_order, master_order.delivery_awal')
+        return $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.ket_celup, open_po.bentuk_celup, open_po.kg_percones, open_po.jumlah_cones, open_po.jenis_produksi, open_po.contoh_warna, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, master_material.jenis, master_material.ukuran, master_order.buyer, master_order.no_order, master_order.delivery_awal')
             ->where(['open_po.no_model' => $no_model])
             ->groupStart() // Mulai grup untuk kondisi OR
             ->where('master_material.jenis', $jenis)
@@ -91,7 +91,18 @@ class OpenPoModel extends Model
             ->distinct()
             ->findAll();
     }
-
+    public function getFilteredPOCov($kodeWarna, $warna, $item_type)
+    {
+        return $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po
+        , master_order.delivery_awal, master_order.delivery_akhir, master_order.id_order')
+            ->join('master_order', 'master_order.no_model = open_po.no_model')
+            ->where('open_po.kode_warna', $kodeWarna)  // Ganti like dengan where
+            ->where('open_po.color', $warna)
+            ->where('open_po.item_type', $item_type) // Ganti like dengan where
+            ->distinct()
+            ->get()
+            ->getResultArray();
+    }
     public function getFilteredPO($kodeWarna, $warna, $item_type)
     {
         return $this->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po')
