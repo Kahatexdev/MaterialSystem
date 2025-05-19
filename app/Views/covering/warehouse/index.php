@@ -63,7 +63,7 @@
     <!-- Header Card & Filter Section -->
     <div class="card mb-4">
         <div class="card-body">
-            <h5 class="tittle-card">Warehouse Covering Management</h5>
+            <h5 class="tittle-card">STOK BARANG JADI COVERING</h5>
             <p class="text-muted">Material System</p>
             <div class="row g-3">
                 <?php $filters = [
