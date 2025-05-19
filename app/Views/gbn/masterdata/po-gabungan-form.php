@@ -138,18 +138,23 @@
                     </div>
 
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <label for="ttl_keb">Total Kg Kebutuhan</label>
                     <input type="text" class="form-control" name="ttl_keb" id="ttl_keb" readonly>
 
-                </div>
-                <div class="form-group">
+                </div> -->
+                <div class=" form-group">
                     <div class="row">
-                        <div class="col-md-6">
-                            <label for="kg_stock">Permintan Kelos (Kg)</label>
+                        <div class="col-md-4">
+                            <label for="ttl_keb">Total Kg Kebutuhan</label>
+                            <input type="text" class="form-control" name="ttl_keb" id="ttl_keb" readonly>
+
+                        </div>
+                        <div class="col-md-4">
+                            <label for="kg_stock">Permintan Kelos (Kg Cones)</label>
                             <input type="text" class="form-control" name="kg_percones" id="kg_percones" placeholder="Kg">
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="ttl_keb">Permintan Kelos (Total Cones)</label>
                             <input type="text" class="form-control" name="jumlah_cones" id="jumlah_cones" placeholder="Cns">
                         </div>
@@ -157,7 +162,7 @@
                 </div>
                 <div class="form-group">
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="kg_stock">Bentuk Celup</label>
                             <select class="form-control" name="bentuk_celup" id="bentuk_celup">
                                 <option value="">Pilih Bentuk Celup</option>
@@ -165,9 +170,13 @@
                                 <option value="Hank">Hank</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="ttl_keb">Untuk Produksi</label>
                             <input type="text" class="form-control" name="jenis_produksi" id="jenis_produksi">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="ttl_keb">Contoh Warna</label>
+                            <input type="text" class="form-control" name="contoh_warna" id="contoh_warna">
                         </div>
                     </div>
                 </div>
@@ -183,7 +192,7 @@
                     <label>Penanggung Jawab</label>
                     <select class="form-control" name="penanggung_jawab" required>
                         <option value="">Pilih</option>
-                        <option value="HARTANTO">Hartanto</option>
+                        <option value="Hartanto">Hartanto</option>
                         <option value="Megah">Megah</option>
                     </select>
                 </div>
@@ -324,8 +333,29 @@
             $('#ttl_keb').val(totalKebutuhan);
         }
 
+        // Fungsi untuk menghitung jumlah cones
+        function hitungCones() {
+            // Ambil nilai input
+            const ttl_keb = parseFloat(document.getElementById('ttl_keb').value);
+            const kg_percones = parseFloat(document.getElementById('kg_percones').value);
+
+            // Validasi nilai input
+            if (isNaN(ttl_keb) || isNaN(kg_percones) || kg_percones < 0) {
+                document.getElementById('jumlah_cones').innerText = '-';
+                alert('Pastikan TTL KEB dan KG PERCONES diisi dengan angka valid, dan KG PERCONES lebih besar dari nol!');
+                return;
+            }
+
+            // Hitung jumlah cones
+            const jumlah_cones = ttl_keb / kg_percones;
+
+            // Tampilkan hasil
+            document.getElementById('jumlah_cones').value = Math.ceil(jumlah_cones);
+        }
+
         // Trigger calculation on input changes
         $('#kg_stock, .kg-po').on('input', calculateTotal);
+        $('#kg_percones, #ttl_keb').on('input', hitungCones);
 
         // -----------------------
         // Binding awal

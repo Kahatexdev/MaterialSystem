@@ -1116,7 +1116,7 @@ class ScheduleController extends BaseController
         return $this->response->setJSON($data);
     }
 
-    public function reportSchBenangNylon()
+    public function reportSchWeekly()
     {
         $data =
             [
@@ -1124,15 +1124,15 @@ class ScheduleController extends BaseController
                 'title' => 'Material System',
                 'role' => $this->role,
             ];
-        return view($this->role . '/schedule/report-schedule-benang-nylon', $data);
+        return view($this->role . '/schedule/report-schedule-weekly', $data);
     }
 
-    public function filterSchBenangNylon()
+    public function filterSchWeekly()
     {
         $tglAwal = $this->request->getGet('tanggal_awal');
         $tglAkhir = $this->request->getGet('tanggal_akhir');
 
-        $data = $this->scheduleCelupModel->getFilterSchBenangNylon($tglAwal, $tglAkhir);
+        $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir);
         // dd($data);
 
         return $this->response->setJSON($data);

@@ -20,16 +20,16 @@
         <div class="card-body p-4 rounded-top-4" style="background-color: #344767">
             <div class="d-flex align-items-center mb-3">
                 <i class="fas fa-filter text-white me-3 fs-4"></i>
-                <h4 class="mb-0 fw-bold" style="color: white;">Filter Schedule Benang & Nylon</h4>
+                <h4 class="mb-0 fw-bold" style="color: white;">Filter Schedule Celup</h4>
             </div>
         </div>
         <div class="card-body bg-white rounded-bottom-0 p-4">
-            <div class="row gy-4">
-                <div class="col-md-6 col-lg-3">
+            <div class="row">
+                <div class="col-md-6">
                     <label for="">Tanggal Schedule Dari</label>
                     <input type="date" class="form-control" id="schDateStart">
                 </div>
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-6">
                     <label for="">Tanggal Schedule Sampai</label>
                     <input type="date" class="form-control" id="schDateEnd">
                 </div>
@@ -64,6 +64,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Mesin</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Lot Urut</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Schedule</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
@@ -71,7 +72,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Lot Celup</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Actual Celup</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Start Mc</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
                         </tr>
                     </thead>
@@ -112,7 +113,7 @@
 
 
             $.ajax({
-                url: "<?= base_url($role . '/schedule/filterSchBenangNylon') ?>",
+                url: "<?= base_url($role . '/schedule/filterSchWeekly') ?>",
                 type: "GET",
                 data: {
                     tanggal_awal: tanggal_awal,
@@ -130,6 +131,7 @@
                                 item.no_mesin,
                                 item.lot_urut,
                                 item.no_model,
+                                item.tanggal_schedule,
                                 item.kg_celup,
                                 item.item_type,
                                 item.kode_warna,
@@ -160,7 +162,7 @@
         $('#btnExport').click(function() {
             let tanggal_awal = $('#schDateStart').val().trim();
             let tanggal_akhir = $('#schDateEnd').val().trim();
-            window.location.href = "<?= base_url($role . '/schedule/exportScheduleBenangNylon') ?>?tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
+            window.location.href = "<?= base_url($role . '/schedule/exportScheduleWeekly') ?>?tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
         });
 
         dataTable.clear().draw();
@@ -179,6 +181,41 @@
         $('#btnExport').addClass('d-none');
     });
 </script>
+<!-- <script>
+    const startDateInput = document.getElementById('schDateStart');
+    const endDateInput = document.getElementById('schDateEnd');
+
+    function validateDateRange() {
+        const startValue = startDateInput.value;
+        const endValue = endDateInput.value;
+
+        if (startValue && endValue) {
+            const start = new Date(startValue);
+            const end = new Date(endValue);
+
+            const dayDiff = (end - start) / (1000 * 60 * 60 * 24);
+
+            if (dayDiff < 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Tanggal Tidak Valid',
+                    text: 'Tanggal akhir tidak boleh lebih awal dari tanggal awal.',
+                });
+                endDateInput.value = ''; // reset input
+            } else if (dayDiff > 3) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Range Melebihi Batas',
+                    text: 'Rentang tanggal maksimal hanya 4 hari.',
+                });
+                endDateInput.value = ''; // reset input
+            }
+        }
+    }
+
+    startDateInput.addEventListener('change', validateDateRange);
+    endDateInput.addEventListener('change', validateDateRange);
+</script> -->
 
 
 <?php $this->endSection(); ?>

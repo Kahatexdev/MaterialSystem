@@ -258,6 +258,7 @@ class PoGabunganController extends BaseController
             'kg_percones'      => $data['kg_percones'],
             'jumlah_cones'     => $data['jumlah_cones'],
             'jenis_produksi'   => $data['jenis_produksi'],
+            'contoh_warna'     => $data['contoh_warna'],
             'admin'            => session()->get('username'),
             'created_at'       => date('Y-m-d H:i:s'),
             'updated_at'       => date('Y-m-d H:i:s'),
