@@ -1095,22 +1095,18 @@ class ExcelController extends BaseController
 
     public function excelStockMaterial()
     {
-        // Ambil filter dari query string
         $noModel = $this->request->getGet('no_model');
         $warna = $this->request->getGet('warna');
-        // Ambil data hasil filter dari model
         $filteredData = $this->stockModel->searchStock($noModel, $warna);
-        // dd($filteredData);
+
         // Buat Spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // === Tambahkan Judul Header di Tengah === //
         $title = 'DATA STOCK MATERIAL';
-        $sheet->mergeCells('A1:M1'); // Gabungkan dari kolom A sampai M
+        $sheet->mergeCells('A1:M1');
         $sheet->setCellValue('A1', $title);
 
-        // Format judul (bold + center)
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
@@ -1133,21 +1129,23 @@ class ExcelController extends BaseController
         // === Isi Data mulai dari baris ke-3 === //
         $row = 4;
         foreach ($filteredData as $data) {
-            $sheet->setCellValue('A' . $row, $data->no_model);
-            $sheet->setCellValue('B' . $row, $data->kode_warna);
-            $sheet->setCellValue('C' . $row, $data->warna);
-            $sheet->setCellValue('D' . $row, $data->item_type);
-            $sheet->setCellValue('E' . $row, $data->lot_stock);
-            $sheet->setCellValue('F' . $row, $data->nama_cluster);
-            $sheet->setCellValue('G' . $row, $data->kapasitas);
-            $sheet->setCellValue('H' . $row, $data->Kgs);
-            $sheet->setCellValue('I' . $row, $data->Krg);
-            $sheet->setCellValue('J' . $row, $data->Cns);
-            $sheet->setCellValue('K' . $row, $data->KgsStockAwal);
-            $sheet->setCellValue('L' . $row, $data->KrgStockAwal);
-            $sheet->setCellValue('M' . $row, $data->CnsStockAwal);
-            $sheet->setCellValue('N' . $row, $data->lot_awal);
-            $row++;
+            if ($data->Kgs != 0 || $data->KgsStockAwal != 0) {
+                $sheet->setCellValue('A' . $row, $data->no_model);
+                $sheet->setCellValue('B' . $row, $data->kode_warna);
+                $sheet->setCellValue('C' . $row, $data->warna);
+                $sheet->setCellValue('D' . $row, $data->item_type);
+                $sheet->setCellValue('E' . $row, $data->lot_stock);
+                $sheet->setCellValue('F' . $row, $data->nama_cluster);
+                $sheet->setCellValue('G' . $row, $data->kapasitas);
+                $sheet->setCellValue('H' . $row, $data->Kgs);
+                $sheet->setCellValue('I' . $row, $data->Krg);
+                $sheet->setCellValue('J' . $row, $data->Cns);
+                $sheet->setCellValue('K' . $row, $data->KgsStockAwal);
+                $sheet->setCellValue('L' . $row, $data->KrgStockAwal);
+                $sheet->setCellValue('M' . $row, $data->CnsStockAwal);
+                $sheet->setCellValue('N' . $row, $data->lot_awal);
+                $row++;
+            }
         }
 
         // === Auto Size Kolom A - M === //
@@ -1165,10 +1163,9 @@ class ExcelController extends BaseController
             ],
         ];
 
-        $lastDataRow = $row - 1; // baris terakhir data
+        $lastDataRow = $row - 1;
         $sheet->getStyle("A3:N{$lastDataRow}")->applyFromArray($styleArray);
 
-        // === Export File Excel === //
         $filename = 'Data_Stock_' . date('YmdHis') . '.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"$filename\"");
