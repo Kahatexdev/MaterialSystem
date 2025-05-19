@@ -436,7 +436,7 @@ class OpenPoModel extends Model
     }
     public function getKeteranganForSchedule($kodeWarna, $warna, $itemTypeEncoded, $noModel)
     {
-        return $this->select('keterangan')
+        return $this->select('keterangan, ket_celup')
             ->where('no_model', $noModel)
             ->where('kode_warna', $kodeWarna)
             ->where('color', $warna)

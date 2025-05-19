@@ -272,14 +272,14 @@ class ScheduleController extends BaseController
     public function getPODetails()
     {
         // Ambil parameter dari request
-        $id_order = $this->request->getGet('id_order');
+        $no_model = $this->request->getGet('no_model');
         $itemType = urldecode($this->request->getGet('item_type'));
         $kodeWarna = $this->request->getGet('kode_warna');
 
         // \var_dump($id_order, $itemType, $kodeWarna);
         // Validasi parameter
-        if (empty($id_order)) {
-            return $this->response->setJSON(['error' => 'Invalid request id_order']);
+        if (empty($no_model)) {
+            return $this->response->setJSON(['error' => 'Invalid request no_model']);
         } elseif (empty($itemType)) {
             return $this->response->setJSON(['error' => 'Invalid request itemtype']);
         } elseif (empty($kodeWarna)) {
@@ -287,19 +287,19 @@ class ScheduleController extends BaseController
         }
 
         // Ambil detail PO dari model
-        $poDetails = $this->masterOrderModel->getDelivery($id_order);
+        $poDetails = $this->masterOrderModel->getDelivery($no_model);
         if (empty($poDetails)) {
             return $this->response->setJSON(['error' => 'Order not found']);
         }
 
         // Ambil nomor model dari detail PO
-        $model = $poDetails['no_model'];
+        // $model = $poDetails['no_model'];
 
         // Ambil data kg_kebutuhan dari model
-        $kg_kebutuhan = $this->openPoModel->getKgKebutuhan($model, $itemType, $kodeWarna);
+        $kg_kebutuhan = $this->openPoModel->getKgKebutuhan($no_model, $itemType, $kodeWarna);
 
         // Ambil data sisa jatah dari model (bisa berisi lebih dari 1 baris)
-        $cekSisaJatah = $this->scheduleCelupModel->cekSisaJatah($model, $itemType, $kodeWarna);
+        $cekSisaJatah = $this->scheduleCelupModel->cekSisaJatah($no_model, $itemType, $kodeWarna);
         // var_dump($cekSisaJatah);
         $total_qty_po = 0;
         $total_scheduled = 0;
@@ -316,7 +316,7 @@ class ScheduleController extends BaseController
             $total_qty_po = $sisa_jatah;
         }
         // URL API untuk mengambil data start mesin
-        $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $model;
+        $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $no_model;
 
         try {
             // Fetch data dari API

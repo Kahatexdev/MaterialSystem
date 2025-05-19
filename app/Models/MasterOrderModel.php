@@ -116,10 +116,10 @@ class MasterOrderModel extends Model
             ->findAll();
     }
 
-    public function getDelivery($id_order)
+    public function getDelivery($no_model)
     {
         return $this->select('no_model,delivery_awal, delivery_akhir')
-            ->where('id_order', $id_order)
+            ->where('no_model', $no_model)
             ->distinct()
             ->first();
     }
