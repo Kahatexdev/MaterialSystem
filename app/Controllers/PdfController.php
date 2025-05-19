@@ -1611,9 +1611,13 @@ class PdfController extends BaseController
         $pdf->SetFont('Arial', 'B', 6);
         $pdf->Cell(146, 5, 'Total', 1, 0, 'R'); // Gabungkan sel sebelum kolom "Qty Pemesanan"
         $pdf->Cell(13, 5, number_format($totalKgPo, 2), 1, 0, 'C'); // Total Qty Pemesanan (kg)
-        $pdf->Cell(18, 5, '', 1, 0, 'C'); // Kosong untuk "Kg Per Cones" dan lainnya
-        $pdf->Cell(12, 5, $totalCones, 1, 0, 'C'); // Total Cones
-        $pdf->Cell(88, 5, '', 1, 0, 'C'); // Kosong untuk "Kg Per Cones" dan lainnya
+        $pdf->Cell(8, 5, '', 1, 0, 'C'); // Kosong untuk "Kg Per Cones" dan lainnya
+        $pdf->Cell(10, 5, '', 1, 0, 'C'); // Kosong untuk "Kg Per Cones" dan lainnya
+        $pdf->Cell(12, 5, $totalCones == 0 ? '' : $totalCones, 1, 0, 'C'); // Total Cones
+        $pdf->Cell(13, 5, '', 1, 0, 'C'); // Kosong untuk "Kg Per Cones" dan lainnya
+        $pdf->Cell(15, 5, '', 1, 0, 'C'); // Kosong untuk "Kg Per Cones" dan lainnya
+        $pdf->Cell(12, 5, '', 1, 0, 'C'); // Kosong untuk "Kg Per Cones" dan lainnya
+        $pdf->Cell(48, 5, '', 1, 0, 'C'); // Kosong untuk "Kg Per Cones" dan lainnya
 
         // KETERANGAN
         $pdf->Cell(277, 5, '', 0, 1, 'C');
