@@ -63,7 +63,7 @@
     <!-- Header Card & Filter Section -->
     <div class="card mb-4">
         <div class="card-body">
-            <h5 class="tittle-card">Warehouse Covering Management</h5>
+            <h5 class="tittle-card">STOK BARANG JADI COVERING</h5>
             <p class="text-muted">Material System</p>
             <div class="row g-3">
                 <?php $filters = [
@@ -91,7 +91,7 @@
 
                 <div class="col-md-3 col-sm-6 action-container">
                     <button class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#addItemModal">
-                        <i class="fas fa-plus"></i> Tambah
+                        <i class="fas fa-plus"></i> Jenis Baru
                     </button>
                 </div>
             </div>
@@ -346,15 +346,15 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="editTtlKg" class="form-label">Jumlah Stok (Kg)</label>
-                                    <input type="number" class="form-control" id="editTtlKg" name="ttl_kg" step="0.1" required inputmode="decimal">
+                                    <input type="number" class="form-control" id="editTtlKg" name="ttl_kg" step="0.1" readonly inputmode="decimal">
                                 </div>
                                 <div class="mb-3">
                                     <label for="editTtlCns" class="form-label">Jumlah Cones</label>
-                                    <input type="number" class="form-control" id="editTtlCns" name="ttl_cns" required>
+                                    <input type="number" class="form-control" id="editTtlCns" name="ttl_cns" readonly>
                                 </div>
                                 <div class="mb-3">
                                     <label for="editNoPalet" class="form-label">No Palet</label>
-                                    <input type="text" class="form-control" id="editNoPalet" name="no_palet" required>
+                                    <input type="text" class="form-control" id="editNoPalet" name="no_palet" readonly>
                                 </div>
                                 <div class="mb-3">
                                     <label for="editNoRak" class="form-label">Nomor Rak</label>
@@ -408,11 +408,11 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.all.min.js"></script>
     <script>
         // Fungsi untuk menghitung jumlah item sesuai status dan filter
-       
+
 
         // Inisialisasi tampilan dan event listener
         document.addEventListener('DOMContentLoaded', function() {
-          
+
             // Toggle antara Grid & Table view
             document.getElementById('viewGrid').addEventListener('click', function() {
                 document.getElementById('warehouseGrid').style.display = '';
