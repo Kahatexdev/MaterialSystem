@@ -55,7 +55,7 @@ class MasterdataController extends BaseController
     }
     public function index()
     {
-        $masterOrder = $this->masterOrderModel->findAll();
+        $masterOrder = $this->masterOrderModel->orderBy('id_order', 'DESC')->findAll();
         $material = $this->materialModel->findAll();
         // Ambil semua id_order dari material
         $materialOrderIds = array_column($material, 'id_order');
@@ -698,6 +698,12 @@ class MasterdataController extends BaseController
                     'color'            => $item['color'],
                     'kg_po'            => $item['kg_po'],
                     'keterangan'       => $data['keterangan'] ?? '',
+                    'ket_celup'        => $item['ket_celup'],
+                    'bentuk_celup'     => $item['bentuk_celup'],
+                    'kg_percones'      => $item['kg_percones'],
+                    'jumlah_cones'     => $item['jumlah_cones'],
+                    'jenis_produksi'   => $item['jenis_produksi'],
+                    'contoh_warna'     => $item['contoh_warna'],
                     'penerima'         => $data['penerima'],
                     'penanggung_jawab' => $data['penanggung_jawab'],
                     'admin'            => session()->get('username'),
@@ -728,6 +734,12 @@ class MasterdataController extends BaseController
                     'color'            => $d['color'],
                     'kg_po'            => $d['kg_po'],
                     'keterangan'       => $data['keterangan'] ?? '',
+                    'ket_celup'        => $d['ket_celup'],
+                    'bentuk_celup'     => $d['bentuk_celup'],
+                    'kg_percones'      => $d['kg_percones'],
+                    'jumlah_cones'     => $d['jumlah_cones'],
+                    'jenis_produksi'   => $d['jenis_produksi'],
+                    'contoh_warna'     => $d['contoh_warna'],
                     'penerima'         => $data['penerima'],
                     'penanggung_jawab' => $data['penanggung_jawab'],
                     'admin'            => session()->get('username'),
@@ -770,6 +782,12 @@ class MasterdataController extends BaseController
                     'color'            => $item['color'],
                     'kg_po'            => $item['kg_po'],
                     'keterangan'       => $data['keterangan'],
+                    'ket_celup'        => $item['ket_celup'],
+                    'bentuk_celup'     => $item['bentuk_celup'],
+                    'kg_percones'      => $item['kg_percones'],
+                    'jumlah_cones'     => $item['jumlah_cones'],
+                    'jenis_produksi'   => $item['jenis_produksi'],
+                    'contoh_warna'     => $item['contoh_warna'],
                     'penerima'         => $data['penerima'],
                     'penanggung_jawab' => $data['penanggung_jawab'],
                     'admin'            => session()->get('username'),

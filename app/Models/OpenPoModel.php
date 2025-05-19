@@ -24,6 +24,7 @@ class OpenPoModel extends Model
         'kg_percones',
         'jumlah_cones',
         'jenis_produksi',
+        'contoh_warna',
         'penerima',
         'penanggung_jawab',
         'admin',
@@ -138,7 +139,7 @@ class OpenPoModel extends Model
     //     return $this->first();
     // }
 
-    public function getQtyPO( $kodeWarna, $warna, $itemType)
+    public function getQtyPO($kodeWarna, $warna, $itemType)
     {
         // 1) Hitung total celup
         $row = $this->db
