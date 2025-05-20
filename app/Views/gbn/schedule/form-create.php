@@ -329,12 +329,18 @@
                                                             </div>
                                                         </div>
                                                         <div class="row">
-                                                            <div class="col-12">
+                                                            <div class="col-6">
                                                                 <div class="form-group">
-                                                                    <label for="">Keterangan</label>
+                                                                    <label for="">Keterangan PO</label>
                                                                     <br />
-                                                                    <textarea class="form-control keterangan" name="keterangan" id="keterangan" disabled>
-                                                                    </textarea>
+                                                                    <textarea class="form-control keterangan" name="keterangan" id="keterangan" disabled></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="form-group">
+                                                                    <label for="">Keterangan Schedule</label>
+                                                                    <br />
+                                                                    <textarea class="form-control ket_schedule[]" name="ket_schedule[]" id="ket_schedule"></textarea>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -594,7 +600,7 @@
 
         // === Fungsi untuk mengambil detail PO (schedule & qty_po) ===
         function fetchPODetails(poNo, tr, itemType, kodeWarna) {
-            const url = `<?= base_url(session('role') . "/schedule/getPODetails") ?>?id_order=${poNo}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}`;
+            const url = `<?= base_url(session('role') . "/schedule/getPODetails") ?>?no_model=${poNo}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}`;
             fetch(url)
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
@@ -604,13 +610,15 @@
                     console.log("Data received from server:", data);
                     if (data && !data.error) {
                         const tglStartMC = tr.querySelector("input[name='tgl_start_mc[]']");
-                        // const deliveryAwal = tr.querySelector("input[name='delivery_awal[]']");
-                        // const deliveryAkhir = tr.querySelector("input[name='delivery_akhir[]']");
-                        // const qtyPO = tr.querySelector("input[name='qty_po[]']");
-                        // // Update data schedule dan qty_po tanpa cek kondisi (selalu gunakan data terbaru)
-                        tglStartMC.value = data.start_mesin || '';
-                        // deliveryAwal.value = data.delivery_awal || '';
-                        // deliveryAkhir.value = data.delivery_akhir || '';
+                        const deliveryAwal = tr.querySelector("input[name='delivery_awal[]']");
+                        if (deliveryAwal) {
+                            deliveryAwal.value = data.delivery_awal || '';
+                        } else {
+                            console.error("Input delivery_awal[] not found in row:", tr);
+                        }
+
+                        tr.querySelector("input[name='delivery_akhir[]']").value = data.delivery_akhir || '';
+                        console.log("Delivery Awal : " + data.delivery_awal);
                     } else {
                         console.error('Error fetching PO details:', data.error || 'No data found');
                     }
@@ -665,9 +673,10 @@
                 .then(data => {
                     console.log("Keterangan Data:", data);
                     if (data && !data.error) {
-
-                        const ketEl = tr.querySelector("textarea.keterangan");
-                        if (ketEl) ketEl.value = data.keterangan || '';
+                        const ketPo = tr.querySelector("textarea.keterangan");
+                        if (ketPo) {
+                            ketPo.value = data.keterangan || '';
+                        }
                     } else {
                         console.error('Error fetching Keterangan:', data.error || 'No data found');
                     }
@@ -854,7 +863,7 @@
                 if (selectedOption.value) {
                     fetchQtyAndKebutuhanPO(kodeWarnaValue, tr, warna, itemTypeValue);
                     fetchKeterangan(kodeWarnaValue, tr, warna, itemTypeValue, noModelValue);
-                    // fetchPODetails(selectedOption.value, tr, itemTypeValue, kodeWarnaValue);
+                    fetchPODetails(selectedOption.value, tr, itemTypeValue, kodeWarnaValue);
                 } else {
                     // Reset schedule jika PO kosong
                     const tglStartMC = tr.querySelector("input[name='tgl_start_mc[]']");
@@ -977,12 +986,18 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-6">
                         <div class="form-group">
                             <label for="">Keterangan</label>
                             <br />
-                            <textarea class="form-control keterangan" name="keterangan" id="keterangan" readonly>
-                            </textarea>
+                            <textarea class="form-control keterangan" name="keterangan" id="keterangan" readonly></textarea>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label for="">Keterangan Schedule</label>
+                            <br />
+                            <textarea class="form-control ket_schedule[]" name="ket_schedule[]" id="ket_schedule"></textarea>
                         </div>
                     </div>
                 </div>

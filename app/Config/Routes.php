@@ -101,9 +101,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/reportSchNylon', 'ScheduleController::reportSchNylon');
     $routes->get('schedule/filterSchNylon', 'ScheduleController::filterSchNylon');
     $routes->get('schedule/exportScheduleNylon', 'ExcelController::exportScheduleNylon');
-    $routes->get('schedule/reportSchBenangNylon', 'ScheduleController::reportSchBenangNylon');
-    $routes->get('schedule/filterSchBenangNylon', 'ScheduleController::filterSchBenangNylon');
-    $routes->get('schedule/exportScheduleBenangNylon', 'ExcelController::exportScheduleBenangNylon');
+    $routes->get('schedule/reportSchWeekly', 'ScheduleController::reportSchWeekly');
+    $routes->get('schedule/filterSchWeekly', 'ScheduleController::filterSchWeekly');
+    $routes->get('schedule/exportScheduleWeekly', 'ExcelController::exportScheduleWeekly');
     // $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJatah');
 
     $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
@@ -303,6 +303,11 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('schedule/updateSchedule', 'ScheduleController::updateSchedule');
     $routes->post('schedule/updateTglSchedule', 'ScheduleController::updateTglSchedule');
     $routes->post('schedule/deleteSchedule', 'ScheduleController::deleteSchedule');
+    $routes->get('schedule/reqschedule', 'CoveringWarehouseController::reqschedule');
+    $routes->get('schedule/reqschedule/show/(:num)', 'CelupController::editStatus/$1');
+    $routes->post('schedule/reqschedule', 'ScheduleController::reqschedule');
+
+
 
     $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
     $routes->post('mesin/saveDataMesin', 'MesinCelupController::saveDataMesin');

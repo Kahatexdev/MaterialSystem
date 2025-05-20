@@ -128,4 +128,13 @@ class MesinCelupModel extends Model
             ->orderBy('no_mesin', 'ASC')
             ->findAll();
     }
+
+    public function getMesinCelupBenangNylon()
+    {
+        return $this->table('mesin_celup')
+            ->select('*')
+            ->whereIn('ket_mesin', ['BENANG', 'NYLON'])
+            ->orderBy('no_mesin', 'ASC')
+            ->findAll();
+    }
 }

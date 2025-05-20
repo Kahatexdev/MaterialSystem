@@ -21,6 +21,7 @@ use App\Models\PengeluaranModel;
 use App\Models\HistoryStockCoveringModel;
 use App\Models\TotalPemesananModel;
 use App\Models\ReturModel;
+use App\Models\MesinCelupModel;
 use PhpOffice\PhpSpreadsheet\Style\{Border, Alignment, Fill};
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
@@ -45,6 +46,7 @@ class ExcelController extends BaseController
     protected $historyCoveringStockModel;
     protected $totalPemesananModel;
     protected $returModel;
+    protected $mesinCelupModel;
 
     public function __construct()
     {
@@ -62,6 +64,7 @@ class ExcelController extends BaseController
         $this->historyCoveringStockModel = new HistoryStockCoveringModel();
         $this->totalPemesananModel = new TotalPemesananModel();
         $this->returModel = new ReturModel();
+        $this->mesinCelupModel = new MesinCelupModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -1092,22 +1095,18 @@ class ExcelController extends BaseController
 
     public function excelStockMaterial()
     {
-        // Ambil filter dari query string
         $noModel = $this->request->getGet('no_model');
         $warna = $this->request->getGet('warna');
-        // Ambil data hasil filter dari model
         $filteredData = $this->stockModel->searchStock($noModel, $warna);
-        // dd($filteredData);
+
         // Buat Spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // === Tambahkan Judul Header di Tengah === //
         $title = 'DATA STOCK MATERIAL';
-        $sheet->mergeCells('A1:M1'); // Gabungkan dari kolom A sampai M
+        $sheet->mergeCells('A1:M1');
         $sheet->setCellValue('A1', $title);
 
-        // Format judul (bold + center)
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
@@ -1130,21 +1129,23 @@ class ExcelController extends BaseController
         // === Isi Data mulai dari baris ke-3 === //
         $row = 4;
         foreach ($filteredData as $data) {
-            $sheet->setCellValue('A' . $row, $data->no_model);
-            $sheet->setCellValue('B' . $row, $data->kode_warna);
-            $sheet->setCellValue('C' . $row, $data->warna);
-            $sheet->setCellValue('D' . $row, $data->item_type);
-            $sheet->setCellValue('E' . $row, $data->lot_stock);
-            $sheet->setCellValue('F' . $row, $data->nama_cluster);
-            $sheet->setCellValue('G' . $row, $data->kapasitas);
-            $sheet->setCellValue('H' . $row, $data->Kgs);
-            $sheet->setCellValue('I' . $row, $data->Krg);
-            $sheet->setCellValue('J' . $row, $data->Cns);
-            $sheet->setCellValue('K' . $row, $data->KgsStockAwal);
-            $sheet->setCellValue('L' . $row, $data->KrgStockAwal);
-            $sheet->setCellValue('M' . $row, $data->CnsStockAwal);
-            $sheet->setCellValue('N' . $row, $data->lot_awal);
-            $row++;
+            if ($data->Kgs != 0 || $data->KgsStockAwal != 0) {
+                $sheet->setCellValue('A' . $row, $data->no_model);
+                $sheet->setCellValue('B' . $row, $data->kode_warna);
+                $sheet->setCellValue('C' . $row, $data->warna);
+                $sheet->setCellValue('D' . $row, $data->item_type);
+                $sheet->setCellValue('E' . $row, $data->lot_stock);
+                $sheet->setCellValue('F' . $row, $data->nama_cluster);
+                $sheet->setCellValue('G' . $row, $data->kapasitas);
+                $sheet->setCellValue('H' . $row, $data->Kgs);
+                $sheet->setCellValue('I' . $row, $data->Krg);
+                $sheet->setCellValue('J' . $row, $data->Cns);
+                $sheet->setCellValue('K' . $row, $data->KgsStockAwal);
+                $sheet->setCellValue('L' . $row, $data->KrgStockAwal);
+                $sheet->setCellValue('M' . $row, $data->CnsStockAwal);
+                $sheet->setCellValue('N' . $row, $data->lot_awal);
+                $row++;
+            }
         }
 
         // === Auto Size Kolom A - M === //
@@ -1162,10 +1163,9 @@ class ExcelController extends BaseController
             ],
         ];
 
-        $lastDataRow = $row - 1; // baris terakhir data
+        $lastDataRow = $row - 1;
         $sheet->getStyle("A3:N{$lastDataRow}")->applyFromArray($styleArray);
 
-        // === Export File Excel === //
         $filename = 'Data_Stock_' . date('YmdHis') . '.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"$filename\"");
@@ -2342,128 +2342,242 @@ class ExcelController extends BaseController
         exit;
     }
 
-    public function exportScheduleBenangNylon()
+    public function exportScheduleWeekly()
     {
         $tglAwal = $this->request->getGet('tanggal_awal');
         $tglAkhir = $this->request->getGet('tanggal_akhir');
 
-        $data = $this->scheduleCelupModel->getFilterSchBenangNylon($tglAwal, $tglAkhir);
+        $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir);
+        $getMesin = $this->mesinCelupModel
+            ->orderBy('no_mesin', 'ASC')
+            ->findAll();
 
-        $startDate = new \DateTime($tglAwal);
-        $endDate = new \DateTime($tglAkhir);
-        $tanggalFormatted = date('d/m/Y', strtotime($tglAwal));
-        // $tanggalFormatted = date('d F Y', strtotime($tglAwal));
-        // dd($startDate);
+        // setelah $tglAwal, $tglAkhir ter-set
+        $period = new \DatePeriod(
+            new \DateTime($tglAwal),
+            new \DateInterval('P1D'),
+            (new \DateTime($tglAkhir))->add(new \DateInterval('P1D'))
+        );
+        $dates = [];
+        foreach ($period as $dt) {
+            $dates[] = $dt->format('d/m/Y'); // Format kunci array konsisten
+        }
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $spreadsheet->getDefaultStyle()->getFont()->setName('Arial');
-        // Header
-        // Merge A1:B4
-        $sheet->mergeCells('A1:B4');
-        $sheet->getColumnDimension('A')->setWidth(18);
-        $sheet->getColumnDimension('B')->setWidth(10);
-        $sheet->getColumnDimension('C')->setWidth(9);
-        $sheet->getColumnDimension('D')->setWidth(43);
-        $sheet->getColumnDimension('E')->setWidth(46);
-        $sheet->getColumnDimension('F')->setWidth(8);
-        $sheet->getColumnDimension('G')->setWidth(22);
-        $sheet->getColumnDimension('H')->setWidth(22);
-        $sheet->getColumnDimension('I')->setWidth(10);
-        $sheet->getColumnDimension('J')->setWidth(14);
-        $sheet->getColumnDimension('K')->setWidth(9);
-        $sheet->getColumnDimension('L')->setWidth(16);
-        $sheet->getColumnDimension('M')->setWidth(41);
 
-        // Tambahkan gambar/logo di kolom B, tengah-tengah baris 1-4
-        $drawing = new Drawing();
-        $drawing->setName('Logo');
-        $drawing->setDescription('Logo Perusahaan');
-        $drawing->setPath('assets/img/logo-kahatex.png'); // Ganti sesuai path logo
-        $drawing->setHeight(40); // Tinggi logo
+        $blockSize = 13; // Total blok: 2 logo + 13 kolom data
+        $dataOffsetFromBlock = 2; // Offset data dari awal blok
+        $widths = [18, 10, 9, 43, 46, 8, 22, 22, 10, 14, 9, 16, 41];
+        $headers = [
+            'Kapasitas',
+            'No Mesin',
+            'Lot Urut',
+            'PO',
+            'Jenis Benang',
+            'QTY',
+            'Kode Warna',
+            'Warna',
+            'Lot Celup',
+            'Actual Celup',
+            'Start MC',
+            'Del Exp',
+            'Ket'
+        ];
 
-        // Letakkan di B1 (kolom kanan)
-        $drawing->setCoordinates('B1');
+        foreach ($dates as $i => $tgl) {
+            $offset = $blockSize * $i;
+            $blockStartIndex = 1 + $offset;
 
-        // Offset posisi agar logo berada di tengah (secara vertikal dan horizontal)
-        $drawing->setOffsetX(0); // Geser ke kanan sedikit dari tepi kiri kolom B
-        $drawing->setOffsetY(20); // Geser ke bawah agar terlihat lebih tengah secara vertikal
+            $logoCol1Index = $blockStartIndex;
+            $logoCol2Index = $blockStartIndex + 1;
+            // Kolom data
+            $dataStartIndex = $blockStartIndex + $dataOffsetFromBlock; // C, P, AC, ...
+            $dataEndIndex = $dataStartIndex + 10; // 13 kolom
+            $logoCol1 = Coordinate::stringFromColumnIndex($logoCol1Index);
+            $logoCol2 = Coordinate::stringFromColumnIndex($logoCol2Index);
+            $dataColStart = Coordinate::stringFromColumnIndex($dataStartIndex);
+            $dataColEnd = Coordinate::stringFromColumnIndex($dataEndIndex);
+            $startColTanggal = Coordinate::stringFromColumnIndex($blockStartIndex);
 
-        $drawing->setWorksheet($sheet);
+            // Merge untuk area logo (misalnya C1:D4, P1:Q4, dst)
+            $sheet->mergeCells("{$logoCol1}1:{$logoCol2}4");
 
-        $sheet->setCellValue('C1', 'FORMULIR');
-        $sheet->mergeCells('C1:M1');
-        $sheet->getStyle('C1:M1')->getAlignment()->setHorizontal('center')->setVertical('center');
-        $sheet->getStyle('C1:M1')->getFont()->setSize(14);
+            $drawing = new Drawing();
+            $drawing->setName('Logo');
+            $drawing->setDescription('Logo Perusahaan');
+            $drawing->setPath('assets/img/logo-kahatex.png');
+            $sheet->getRowDimension('1')->setRowHeight(20);
+            $sheet->getRowDimension('2')->setRowHeight(20);
+            $sheet->getRowDimension('3')->setRowHeight(20);
+            $sheet->getRowDimension('4')->setRowHeight(20);
+            $drawing->setHeight(45);
+            $drawing->setCoordinates($logoCol2 . '1');
+            $drawing->setOffsetX(0);
+            $drawing->setOffsetY(40);
+            $drawing->setWorksheet($sheet);
 
-        $sheet->setCellValue('C2', 'DEPARTEMEN CELUP CONES');
-        $sheet->mergeCells('C2:M2');
-        $sheet->getStyle('C2:M2')->getAlignment()->setHorizontal('center')->setVertical('center');
-        $sheet->getStyle('C2:M2')->getFont()->setSize(14);
+            // Set Lebar Kolom
+            for ($j = 0; $j < count($widths); $j++) {
+                $colLetter = Coordinate::stringFromColumnIndex($logoCol1Index + $j);
+                $sheet->getColumnDimension($colLetter)->setWidth($widths[$j]);
+            }
 
-        $sheet->setCellValue('C3', 'REPORT SCHEDULE CELUP MINGGUAN');
-        $sheet->mergeCells('C3:M3');
-        $sheet->getStyle('C3:M3')->getAlignment()->setHorizontal('center')->setVertical('center');
-        $sheet->getStyle('C3:M3')->getFont()->setSize(14);
+            // Header Baris 1–4
+            $sheet->setCellValue("{$dataColStart}1", 'FORMULIR');
+            $sheet->mergeCells("{$dataColStart}1:{$dataColEnd}1");
 
-        $sheet->setCellValue('C4', 'FOR-CC-151/REV_01/HAL_1/1');
-        $sheet->mergeCells('C4:F4');
-        $sheet->getStyle('C4:F4')->getAlignment()->setHorizontal('center')->setVertical('center');
-        $sheet->getStyle('C4:F4')->getFont()->setSize(14);
+            $sheet->setCellValue("{$dataColStart}2", 'DEPARTEMEN CELUP CONES');
+            $sheet->mergeCells("{$dataColStart}2:{$dataColEnd}2");
 
-        $sheet->setCellValue('G4', 'TANGGAL REVISI');
-        $sheet->mergeCells('G4:H4');
-        $sheet->getStyle('G4:H4')->getAlignment()->setHorizontal('center')->setVertical('center');
-        $sheet->getStyle('G4:H4')->getFont()->setSize(14);
+            $sheet->setCellValue("{$dataColStart}3", 'REPORT SCHEDULE CELUP MINGGUAN');
+            $sheet->mergeCells("{$dataColStart}3:{$dataColEnd}3");
 
-        $sheet->setCellValue('I4', '05 Oktober 2019');
-        $sheet->mergeCells('I4:M4');
-        $sheet->getStyle('I4:M4')->getAlignment()->setHorizontal('center')->setVertical('center');
-        $sheet->getStyle('I4:M4')->getFont()->setSize(14);
+            $sheet->setCellValue("{$dataColStart}4", 'FOR-CC-151/REV_01/HAL_1/1');
+            $sheet->mergeCells("{$dataColStart}4:" . Coordinate::stringFromColumnIndex($dataStartIndex + 2) . "4");
 
-        $sheet->setCellValue('A5', $tanggalFormatted);
-        $sheet->mergeCells('A5:M5');
-        $sheet->getStyle('A5:M5')->getAlignment()->setHorizontal('center')->setVertical('center');
-        $sheet->getStyle('A5:M5')->getFont()->setBold(true)->setSize(14);
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex($dataStartIndex + 3) . '4', 'TANGGAL REVISI');
+            $sheet->mergeCells(Coordinate::stringFromColumnIndex($dataStartIndex + 3) . '4:' . Coordinate::stringFromColumnIndex($dataStartIndex + 4) . '4');
 
-        // Header tabel
-        $sheet->setCellValue('A6', 'Kapasitas');
-        $sheet->setCellValue('B6', 'No Mesin');
-        $sheet->setCellValue('C6', 'Lot Urut');
-        $sheet->setCellValue('D6', 'PO');
-        $sheet->setCellValue('E6', 'Jenis Benang');
-        $sheet->setCellValue('F6', 'QTY');
-        $sheet->setCellValue('G6', 'Kode Warna');
-        $sheet->setCellValue('H6', 'Warna');
-        $sheet->setCellValue('I6', 'Lot Celup');
-        $sheet->setCellValue('J6', 'Actual Celup');
-        $sheet->setCellValue('K6', 'Start MC');
-        $sheet->setCellValue('L6', 'Del Exp');
-        $sheet->setCellValue('M6', 'Ket');
-        $sheet->getStyle('A6:M6')->getFont()->setSize(12);
-        $sheet->getRowDimension(6)->setRowHeight(35);
-        $sheet->getStyle('A6:M6')->getAlignment()->setHorizontal('center')->setVertical('center');
-        $sheet->getStyle('A6:M6')->getFill()
-            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-            ->getStartColor()->setARGB('DCDCDC');
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex($dataStartIndex + 5) . '4', '05 Oktober 2019');
+            $sheet->mergeCells(Coordinate::stringFromColumnIndex($dataStartIndex + 5) . '4:' . $dataColEnd . '4');
 
+            $sheet->getStyle("{$dataColStart}1:{$dataColEnd}4")->getAlignment()->setHorizontal('center')->setVertical('center');
+            $sheet->getStyle("{$dataColStart}1:{$dataColEnd}4")->getFont()->setSize(14);
 
-        $lastColumn = $sheet->getHighestColumn();
-        $lastRow = $sheet->getHighestRow();
-        $sheet->getStyle("A1:{$lastColumn}{$lastRow}")
-            ->getBorders()
-            ->getAllBorders()
-            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            $sheet->mergeCells("{$startColTanggal}5:{$dataColEnd}5");
+            $sheet->setCellValue("{$startColTanggal}5", $tgl);
+            $sheet->getStyle("{$startColTanggal}5:{$dataColEnd}5")->getAlignment()->setHorizontal('center')->setVertical('center');
+            $sheet->getStyle("{$startColTanggal}5:{$dataColEnd}5")->getFont()->setBold(true)->setSize(14);
 
-        // Export
-        $filename = 'Schedule_Benang_Nylon_' . date('Ymd_His') . '.xlsx';
+            // Tambahkan border di seluruh area header tanggal (baris 1–5)
+            $sheet->getStyle("{$logoCol1}1:{$dataColEnd}5")->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['argb' => '000000'],
+                    ],
+                ],
+            ]);
 
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-        header('Cache-Control: max-age=0');
+            foreach ($headers as $j => $h) {
 
-        $writer = new Xlsx($spreadsheet);
-        $writer->save('php://output');
-        exit;
+                $colStartVal = $blockStartIndex + $j;
+                $col = Coordinate::stringFromColumnIndex($colStartVal);
+                $cell = "{$col}6";
+                $sheet->setCellValue($cell, $h);
+
+                $sheet->getStyle($cell)->applyFromArray([
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'DCDCDC']
+                    ],
+                    'font' => [
+                        'size' => 12,
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                        'wrapText' => true
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+                        ]
+                    ]
+                ]);
+            }
+        }
+
+        $groupedData = [];
+        foreach ($data as $d) {
+            $keyTgl = date('d/m/Y', strtotime($d['tanggal_schedule']));
+            $groupedData[$keyTgl][$d['id_mesin']][$d['lot_urut']] = $d;
+        }
+
+        // Hitung kolom awal per tanggal
+        $dateColStartIndexes = [];
+        foreach ($dates as $i => $tgl) {
+            $colStartIndex = 1 + ($i * count($headers));
+            $dateColStartIndexes[$tgl] = $colStartIndex;
+
+            $row = 7;
+
+            foreach ($getMesin as $m) {
+                $idMesin = $m['id_mesin'];
+                $noMesin = $m['no_mesin'];
+                $kapasitas = $m['min_caps'] . ' - ' . $m['max_caps'];
+
+                // Tampilkan 3 lot urut
+                for ($lot = 1; $lot <= 3; $lot++) {
+                    foreach ($dates as $i => $tgl) {
+                        $colStartIndex = 1 + ($i * count($headers));
+                        $dataRow = $groupedData[$tgl][$idMesin][$lot] ?? null;
+
+                        if ($dataRow) {
+
+                            //Ubah format tanggal start mc
+                            $startMc = (!empty($dataRow['start_mc']) && $dataRow['start_mc'] !== '0000-00-00 00:00:00')
+                                ? date('d-M', strtotime($dataRow['start_mc'])) : '';
+
+                            $values = [
+                                $lot === 1 ? $kapasitas : '',
+                                $lot === 1 ? $noMesin : '',
+                                $lot,
+                                $dataRow['no_model'] ?? '',
+                                $dataRow['item_type'] ?? '',
+                                $dataRow['kg_celup'] ?? '',
+                                $dataRow['kode_warna'] ?? '',
+                                $dataRow['warna'] ?? '',
+                                $dataRow['lot_celup'] ?? '',
+                                $dataRow['actual_celup'] ?? '',
+                                $startMc ?? '',
+                                date('d-M', strtotime($dataRow['delivery_awal'])) ?? '',
+                                $dataRow['ket_celup'] ?? ''
+                            ];
+                        } else {
+                            // Jika tidak ada data, tetap isi dengan placeholder jumlah kolom = count($headers)
+                            $values = [
+                                $lot === 1 ? $kapasitas : '',
+                                $lot === 1 ? $noMesin : '',
+                                $lot
+                            ];
+                            for ($k = 3; $k < count($headers); $k++) {
+                                $values[] = '';
+                            }
+                        }
+
+                        foreach ($values as $j => $val) {
+                            $col = Coordinate::stringFromColumnIndex($colStartIndex + $j);
+                            $cell = "{$col}{$row}";
+                            $sheet->setCellValue("{$col}{$row}", $val);
+                            // Set alignment ke tengah
+                            $sheet->getStyle($cell)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                            $sheet->getStyle($cell)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                        }
+
+                        // Tambahkan border per baris
+                        $colStart = Coordinate::stringFromColumnIndex($colStartIndex);
+                        $colEnd = Coordinate::stringFromColumnIndex($colStartIndex + count($headers) - 1);
+                        $sheet->getStyle("{$colStart}{$row}:{$colEnd}{$row}")
+                            ->getBorders()->getAllBorders()
+                            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+                    }
+                    $row++;
+                }
+            }
+
+            // Export
+            $filename = 'Schedule_Benang_Nylon_' . date('Ymd_His') . '.xlsx';
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header("Content-Disposition: attachment; filename=\"$filename\"");
+            header('Cache-Control: max-age=0');
+
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+            exit;
+        }
     }
 }

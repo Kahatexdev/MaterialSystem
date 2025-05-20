@@ -272,14 +272,14 @@ class ScheduleController extends BaseController
     public function getPODetails()
     {
         // Ambil parameter dari request
-        $id_order = $this->request->getGet('id_order');
+        $no_model = $this->request->getGet('no_model');
         $itemType = urldecode($this->request->getGet('item_type'));
         $kodeWarna = $this->request->getGet('kode_warna');
 
         // \var_dump($id_order, $itemType, $kodeWarna);
         // Validasi parameter
-        if (empty($id_order)) {
-            return $this->response->setJSON(['error' => 'Invalid request id_order']);
+        if (empty($no_model)) {
+            return $this->response->setJSON(['error' => 'Invalid request no_model']);
         } elseif (empty($itemType)) {
             return $this->response->setJSON(['error' => 'Invalid request itemtype']);
         } elseif (empty($kodeWarna)) {
@@ -287,19 +287,19 @@ class ScheduleController extends BaseController
         }
 
         // Ambil detail PO dari model
-        $poDetails = $this->masterOrderModel->getDelivery($id_order);
+        $poDetails = $this->masterOrderModel->getDelivery($no_model);
         if (empty($poDetails)) {
             return $this->response->setJSON(['error' => 'Order not found']);
         }
 
         // Ambil nomor model dari detail PO
-        $model = $poDetails['no_model'];
+        // $model = $poDetails['no_model'];
 
         // Ambil data kg_kebutuhan dari model
-        $kg_kebutuhan = $this->openPoModel->getKgKebutuhan($model, $itemType, $kodeWarna);
+        $kg_kebutuhan = $this->openPoModel->getKgKebutuhan($no_model, $itemType, $kodeWarna);
 
         // Ambil data sisa jatah dari model (bisa berisi lebih dari 1 baris)
-        $cekSisaJatah = $this->scheduleCelupModel->cekSisaJatah($model, $itemType, $kodeWarna);
+        $cekSisaJatah = $this->scheduleCelupModel->cekSisaJatah($no_model, $itemType, $kodeWarna);
         // var_dump($cekSisaJatah);
         $total_qty_po = 0;
         $total_scheduled = 0;
@@ -316,7 +316,7 @@ class ScheduleController extends BaseController
             $total_qty_po = $sisa_jatah;
         }
         // URL API untuk mengambil data start mesin
-        $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $model;
+        $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $no_model;
 
         try {
             // Fetch data dari API
@@ -421,6 +421,7 @@ class ScheduleController extends BaseController
                 'lot_celup' => $scheduleData['lot_celup'] ?? null,
                 'tanggal_schedule' => $scheduleData['tanggal_schedule'],
                 'last_status' => 'scheduled',
+                'ket_schedule' => $scheduleData['ket_schedule'][$index] ?? null,
                 'po_plus' => $scheduleData['po_plus'][$index] ?? 0,
                 'user_cek_status' => session()->get('username'),
                 'created_at' => date('Y-m-d H:i:s'),
@@ -919,24 +920,24 @@ class ScheduleController extends BaseController
         $filterTglSch = $this->request->getPost('filter_tglsch');
         $filterNoModel = $this->request->getPost('filter_nomodel');
 
-        $sch = $this->scheduleCelupModel->getSchedule();
-        if ($filterTglSch && $filterNoModel) {
-            $sch = array_filter($sch, function ($data) use ($filterTglSch, $filterNoModel) {
-                return $data['tanggal_schedule'] === $filterTglSch &&
-                    (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
-            });
-        } elseif ($filterTglSch) {
-            // Filter berdasarkan tanggal saja
-            $sch = array_filter($sch, function ($data) use ($filterTglSch) {
-                return $data['tanggal_schedule'] === $filterTglSch;
-            });
-        } elseif ($filterNoModel) {
-            // Filter berdasarkan nomor model atau kode warna saja
-            $sch = array_filter($sch, function ($data) use ($filterNoModel) {
-                return (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
-            });
-        }
-
+        $sch = $this->scheduleCelupModel->getSchedule($filterTglSch, $filterNoModel);
+        // if ($filterTglSch && $filterNoModel) {
+        //     $sch = array_filter($sch, function ($data) use ($filterTglSch, $filterNoModel) {
+        //         return $data['tanggal_schedule'] === $filterTglSch &&
+        //             (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
+        //     });
+        // } elseif ($filterTglSch) {
+        //     // Filter berdasarkan tanggal saja
+        //     $sch = array_filter($sch, function ($data) use ($filterTglSch) {
+        //         return $data['tanggal_schedule'] === $filterTglSch;
+        //     });
+        // } elseif ($filterNoModel) {
+        //     // Filter berdasarkan nomor model atau kode warna saja
+        //     $sch = array_filter($sch, function ($data) use ($filterNoModel) {
+        //         return (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
+        //     });
+        // }
+        // dd($sch);
 
         $uniqueData = [];
         foreach ($sch as $key => $id) {
@@ -1116,7 +1117,7 @@ class ScheduleController extends BaseController
         return $this->response->setJSON($data);
     }
 
-    public function reportSchBenangNylon()
+    public function reportSchWeekly()
     {
         $data =
             [
@@ -1124,15 +1125,15 @@ class ScheduleController extends BaseController
                 'title' => 'Material System',
                 'role' => $this->role,
             ];
-        return view($this->role . '/schedule/report-schedule-benang-nylon', $data);
+        return view($this->role . '/schedule/report-schedule-weekly', $data);
     }
 
-    public function filterSchBenangNylon()
+    public function filterSchWeekly()
     {
         $tglAwal = $this->request->getGet('tanggal_awal');
         $tglAkhir = $this->request->getGet('tanggal_akhir');
 
-        $data = $this->scheduleCelupModel->getFilterSchBenangNylon($tglAwal, $tglAkhir);
+        $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir);
         // dd($data);
 
         return $this->response->setJSON($data);
