@@ -322,6 +322,7 @@
                 .then((data) => {
                     // Insert the fetched HTML into the modal body
                     var tes = JSON.parse(data);
+                    console.log(tes);
                     var totalKg = parseFloat(tes[0].total_kg).toFixed(2);
                     var htmlContent = '';
                     tes.forEach(function(item, index) {
@@ -367,6 +368,12 @@
                                 <div class="mb-3">
                                     <label for="last_status" class="form-label">Last Status</label>
                                     <input type="text" class="form-control" id="last_status" value="${item.last_status}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="ket_celup" class="form-label">Keterangan Celup</label>
+                                    <textarea class="form-control" id="ket_celup" rows="3" readonly>${item.ket_celup}</textarea>
                                 </div>
                             </div> 
                         </div>

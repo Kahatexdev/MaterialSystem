@@ -171,8 +171,12 @@ class MasterdataController extends BaseController
                     }
                 }
 
-                if ($validate['area'] == 'MJ') {
-                    $validate['area'] = 'MAJALAYA';
+                if (!isset($validate['area']) || strpos($validate['area'], 'GEDUNG') !== false) {
+                    $unit = 'MAJALAYA';
+                } elseif (strpos($validate['area'], 'KK') !== false) {
+                    $unit = 'CIJERAH';
+                } else {
+                    $unit = 'Belum di assign';
                 }
 
                 if (!$validate) {
@@ -188,7 +192,7 @@ class MasterdataController extends BaseController
                     'memo'           => NULL,
                     'delivery_awal'  => $validate['delivery_awal'],
                     'delivery_akhir' => $validate['delivery_akhir'],
-                    'unit'           => $validate['area'],
+                    'unit'           => $unit,
                     'admin'          => $admin,
                     'created_at'     => date('Y-m-d H:i:s'),
                     'updated_at'     => NULL,
