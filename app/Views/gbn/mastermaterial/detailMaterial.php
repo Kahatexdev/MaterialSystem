@@ -373,7 +373,7 @@
                             <select class="form-control" name="edit_all_area" id="edit_all_area">
                                 <option value="">Pilih Area</option>
                                 <?php
-                                $areaList = ['KK1A', 'KK1B', 'KK2A', 'KK2B', 'KK2C', 'KK5G', 'KK7K', 'KK7L', 'KK8D', 'KK8F', 'KK8J', 'KK9', 'KK10', 'KK11M', 'MJ'];
+                                $areaList = ['KK1A', 'KK1B', 'KK2A', 'KK2B', 'KK2C', 'KK5G', 'KK7K', 'KK7L', 'KK8D', 'KK8F', 'KK8J', 'KK9', 'KK10', 'KK11M', 'Gedung 1', 'Gedung 2', 'MJ'];
 
                                 foreach ($areaList as $areaOption) {
                                     $selected = in_array($areaOption, $area) ? 'selected' : ''; // Cek apakah area ada di $areaData

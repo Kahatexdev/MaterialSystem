@@ -92,6 +92,11 @@ class MaterialController extends BaseController
     public function updateArea($id_order)
     {
         $getArea = $this->request->getPost('edit_all_area');
+        // dd($getArea);
+        if ($getArea == 'Gedung 1' || $getArea == 'Gedung 2' || $getArea == 'MJ') {
+            $mj = 'MAJALAYA';
+            $this->masterOrderModel->update($id_order, ['unit' => $mj]);
+        }
 
         if ($this->materialModel->updateAreaPerNoModel($id_order, $getArea)) {
             return redirect()->to(base_url($this->role . '/material/' . $id_order))->with('success', 'Data berhasil diupdate.');
