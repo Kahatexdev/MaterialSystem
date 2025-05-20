@@ -39,6 +39,7 @@ class ScheduleCelupModel extends Model
         'tanggal_teslab',
         'last_status',
         'ket_daily_cek',
+        'ket_schedule',
         'po_plus',
         'user_cek_status',
         'created_at',

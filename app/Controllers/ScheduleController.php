@@ -421,6 +421,7 @@ class ScheduleController extends BaseController
                 'lot_celup' => $scheduleData['lot_celup'] ?? null,
                 'tanggal_schedule' => $scheduleData['tanggal_schedule'],
                 'last_status' => 'scheduled',
+                'ket_schedule' => $scheduleData['ket_schedule'][$index] ?? null,
                 'po_plus' => $scheduleData['po_plus'][$index] ?? 0,
                 'user_cek_status' => session()->get('username'),
                 'created_at' => date('Y-m-d H:i:s'),

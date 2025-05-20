@@ -333,16 +333,14 @@
                                                                 <div class="form-group">
                                                                     <label for="">Keterangan PO</label>
                                                                     <br />
-                                                                    <textarea class="form-control keterangan" name="keterangan" id="keterangan" disabled>
-                                                                    </textarea>
+                                                                    <textarea class="form-control keterangan" name="keterangan" id="keterangan" disabled></textarea>
                                                                 </div>
                                                             </div>
                                                             <div class="col-6">
                                                                 <div class="form-group">
-                                                                    <label for="">Keterangan Celup</label>
+                                                                    <label for="">Keterangan Schedule</label>
                                                                     <br />
-                                                                    <textarea class="form-control ket_celup" name="ket_celup" id="ket_celup">
-                                                                    </textarea>
+                                                                    <textarea class="form-control ket_schedule[]" name="ket_schedule[]" id="ket_schedule"></textarea>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -675,12 +673,9 @@
                 .then(data => {
                     console.log("Keterangan Data:", data);
                     if (data && !data.error) {
-
                         const ketPo = tr.querySelector("textarea.keterangan");
-                        const ketCelup = tr.querySelector("textarea.ket_celup");
-                        if (ketPo || ketCelup) {
+                        if (ketPo) {
                             ketPo.value = data.keterangan || '';
-                            ketCelup.value = data.ket_celup || '';
                         }
                     } else {
                         console.error('Error fetching Keterangan:', data.error || 'No data found');
@@ -995,16 +990,14 @@
                         <div class="form-group">
                             <label for="">Keterangan</label>
                             <br />
-                            <textarea class="form-control keterangan" name="keterangan" id="keterangan" readonly>
-                            </textarea>
+                            <textarea class="form-control keterangan" name="keterangan" id="keterangan" readonly></textarea>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="form-group">
-                            <label for="">Keterangan</label>
+                            <label for="">Keterangan Schedule</label>
                             <br />
-                            <textarea class="form-control ket_celup" name="ket_celup" id="ket_celup" readonly>
-                            </textarea>
+                            <textarea class="form-control ket_schedule[]" name="ket_schedule[]" id="ket_schedule"></textarea>
                         </div>
                     </div>
                 </div>
