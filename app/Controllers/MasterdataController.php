@@ -171,7 +171,7 @@ class MasterdataController extends BaseController
                     }
                 }
 
-                if ($validate['area'] == 'MJ') {
+                if (!isset($validate['area']) || strpos($validate['area'], 'KK') === false) {
                     $validate['area'] = 'MAJALAYA';
                 }
 
