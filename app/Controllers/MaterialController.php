@@ -96,6 +96,9 @@ class MaterialController extends BaseController
         if ($getArea == 'Gedung 1' || $getArea == 'Gedung 2' || $getArea == 'MJ') {
             $mj = 'MAJALAYA';
             $this->masterOrderModel->update($id_order, ['unit' => $mj]);
+        } else {
+            $cj = 'CIJERAH';
+            $this->masterOrderModel->update($id_order, ['unit' => $cj]);
         }
 
         if ($this->materialModel->updateAreaPerNoModel($id_order, $getArea)) {
