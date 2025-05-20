@@ -451,7 +451,7 @@ class ScheduleController extends BaseController
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
 
         $scheduleData = $this->scheduleCelupModel->getScheduleDetailsData($id_mesin, $tanggal_schedule, $lot_urut);
-        // dd ($scheduleData);
+        // dd($scheduleData);
         // $jenis = [];
         $kodeWarna = '';
         $warna = '';
@@ -596,6 +596,7 @@ class ScheduleController extends BaseController
                 'po_plus'          => $scheduleData['po_plus'][$i] ?? 0,
                 'lot_urut'         => $scheduleData['lot_urut'] ?? null,
                 'tanggal_schedule' => $scheduleData['tanggal_schedule'] ?? null,
+                'ket_schedule'     => $scheduleData['ket_schedule'][$i] ?? null,
                 'last_status'      => $last_status,
                 'user_cek_status'  => session()->get('username'),
                 'created_at'       => date('Y-m-d H:i:s'),

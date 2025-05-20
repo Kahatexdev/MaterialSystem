@@ -129,7 +129,8 @@ class ScheduleCelupModel extends Model
 
     public function getScheduleDetailsData($machine, $date, $lot)
     {
-        return $this->select('schedule_celup.id_celup,sum(schedule_celup.kg_celup) as qty_celup,schedule_celup.item_type, schedule_celup.no_model, DATE(schedule_celup.start_mc) AS start_mc, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.last_status, schedule_celup.po_plus, DATE(schedule_celup.updated_at) as last_update,TIME(schedule_celup.updated_at) as jam_update,schedule_celup.user_cek_status as admin')
+        return $this->select('schedule_celup.id_celup,sum(schedule_celup.kg_celup) as qty_celup,schedule_celup.item_type, schedule_celup.no_model, DATE(schedule_celup.start_mc) AS start_mc, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.last_status, schedule_celup.po_plus, DATE(schedule_celup.updated_at) as last_update,TIME(schedule_celup.updated_at) as jam_update,schedule_celup.user_cek_status as admin, schedule_celup.ket_schedule, open_po.keterangan')
+            ->join('open_po', 'open_po.no_model = schedule_celup.no_model')
             ->where('tanggal_schedule', $date)
             ->where('id_mesin', $machine)
             ->where('lot_urut', $lot)

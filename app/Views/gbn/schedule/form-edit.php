@@ -293,6 +293,22 @@
                                                                         </fieldset>
                                                                     </div>
                                                                 </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-6">
+                                                                    <div class="form-group">
+                                                                        <label for="">Keterangan PO</label>
+                                                                        <br />
+                                                                        <textarea class="form-control" id="keterangan" disabled><?= $detail['keterangan'] ?></textarea>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <div class="form-group">
+                                                                        <label for="">Keterangan Schedule</label>
+                                                                        <br />
+                                                                        <textarea class="form-control ket_schedule[]" name="ket_schedule[]" id="ket_schedule"><?= $detail['ket_schedule'] ?></textarea>
+                                                                    </div>
+                                                                </div>
                                                                 <div class="col-12">
                                                                     <div class="text-muted small fst-italic">
                                                                         Last updated: <?= $detail['last_update'] ?> at <?= $detail['jam_update'] ?> by <?= $detail['admin'] ?>
@@ -774,6 +790,22 @@
               </fieldset>
             </div>
           </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <div class="form-group">
+                    <label for="">Keterangan PO</label>
+                    <br />
+                    <textarea class="form-control keterangan" name="keterangan" id="keterangan" disabled></textarea>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label for="">Keterangan Schedule</label>
+                    <br />
+                    <textarea class="form-control ket_schedule[]" name="ket_schedule[]" id="ket_schedule"></textarea>
+                </div>
+            </div>
         </div>
       </td>
       <td class="text-center">
