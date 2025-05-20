@@ -198,7 +198,7 @@ class MasterOrderModel extends Model
 
     public function getFilterReportGlobal($noModel)
     {
-        return $this->select('master_order.no_model, material.item_type, material.kode_warna, material.color, material.loss, material.kgs, COALESCE(stock.kgs_stock_awal, 0) AS kgs_stock_awal, COALESCE(stock.kgs_in_out, 0) AS kgs_in_out, COALESCE(out_celup.kgs_kirim, 0) AS kgs_kirim, COALESCE(retur.kgs_retur, 0) AS kgs_retur, COALESCE(pengeluaran.kgs_out, 0) AS kgs_out, COALESCE(pengeluaran.lot_out, 0) AS lot_out')
+        return $this->select('master_order.no_model, material.item_type, material.kode_warna, material.color, material.loss, material.kgs, SUM(COALESCE(stock.kgs_stock_awal, 0)) AS kgs_stock_awal, SUM(COALESCE(stock.kgs_in_out, 0)) AS kgs_in_out, SUM(COALESCE(out_celup.kgs_kirim, 0)) AS kgs_kirim, SUM(COALESCE(retur.kgs_retur, 0)) AS kgs_retur, SUM(COALESCE(pengeluaran.kgs_out, 0)) AS kgs_out, COALESCE(pengeluaran.lot_out, 0) AS lot_out')
             ->join('material', 'material.id_order = master_order.id_order', 'left')
             ->join('schedule_celup', 'schedule_celup.no_model = master_order.no_model AND schedule_celup.kode_warna = material.kode_warna AND schedule_celup.item_type = material.item_type', 'left')
             ->join('out_celup', 'out_celup.id_celup=schedule_celup.id_celup', 'left')
