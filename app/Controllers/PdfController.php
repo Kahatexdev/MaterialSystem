@@ -2033,6 +2033,6 @@ class PdfController extends BaseController
 
         // Output PDF
         return $this->response->setHeader('Content-Type', 'application/pdf')
-            ->setBody($pdf->Output('Bon Pengiriman.pdf', 'I'));
+            ->setBody($pdf->Output('Barcode Pemasukan Lain-lain.pdf', 'I'));
     }
 }

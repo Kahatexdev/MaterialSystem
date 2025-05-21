@@ -140,7 +140,8 @@ class ApiController extends ResourceController
                 'keterangan',
                 'admin',
                 'created_at',
-                'updated_at'
+                'updated_at',
+                'kg_stock'
 
             ];
 

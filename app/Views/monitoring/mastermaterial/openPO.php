@@ -64,7 +64,7 @@
                         <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
                             <div class="kebutuhan-item">
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="itemType">Item Type</label>
                                             <select class="form-control item-type" name="items[0][item_type]" required>
@@ -77,7 +77,32 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Jenis FIllament</label>
+                                            <select class="form-control fillamen" name="items[0][fillamen]" required>
+                                                <option value="">Pilih Texture</option>
+                                                <option value="-">-</option>
+                                                <option value="DTY">DTY</option>
+                                                <option value="FDY">FDY</option>
+                                                <option value="NFY">NFY</option>
+                                                <option value="POY">POY</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>jenis</label>
+                                            <select class="form-control fillamen" name="items[0][jenis]" required>
+                                                <option value="">Pilih Fillamen</option>
+                                                <option value="-">-</option>
+                                                <option value="sim">SIM DH</option>
+                                                <option value="nim">NIM DH</option>
+                                                <option value="lim">LIM DH</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Kode Warna</label>
                                             <select class="form-control kode-warna" name="items[0][kode_warna]" required>
