@@ -161,27 +161,41 @@
                         </div>
                     </div>
                 </div>
-                <div class=" form-group">
-
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Penerima</label>
+                            <input type="text" class="form-control" id="penerima" name="penerima" readonly required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Penanggung Jawab</label>
+                            <select class="form-control" name="penanggung_jawab" required>
+                                <option value="">Pilih</option>
+                                <option value="HARTANTO">Hartanto</option>
+                                <option value="Megah">Megah</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-
-                </div>
-                <div class="form-group">
-                    <label for="keterangan">Keterangan</label>
-                    <textarea class="form-control" name="keterangan" id="keterangan"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Penerima</label>
-                    <input type="text" class="form-control" id="penerima" name="penerima" readonly required>
-                </div>
-                <div class="form-group">
-                    <label>Penanggung Jawab</label>
-                    <select class="form-control" name="penanggung_jawab" required>
-                        <option value="">Pilih</option>
-                        <option value="HARTANTO">Hartanto</option>
-                        <option value="Megah">Megah</option>
-                    </select>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="">PO(+)</label>
+                            <select class="form-control" name="po_plus" id="po_plus">
+                                <option value="">Pilih</option>
+                                <option value="1">YA</option>
+                                <option value="0">TIDAK</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="keterangan">Keterangan</label>
+                            <textarea class="form-control" name="keterangan" id="keterangan" rows=""></textarea>
+                        </div>
+                    </div>
                 </div>
                 <button type="submit" class="btn btn-info w-100">Save</button>
         </div>

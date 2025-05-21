@@ -27,6 +27,7 @@ class OpenPoModel extends Model
         'contoh_warna',
         'penerima',
         'penanggung_jawab',
+        'po_plus',
         'admin',
         'created_at',
         'updated_at',

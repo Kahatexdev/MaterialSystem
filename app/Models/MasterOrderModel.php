@@ -198,14 +198,111 @@ class MasterOrderModel extends Model
 
     public function getFilterReportGlobal($noModel)
     {
-        return $this->select('master_order.no_model, material.item_type, material.kode_warna, material.color, material.loss, material.kgs, COALESCE(stock.kgs_stock_awal, 0) AS kgs_stock_awal, COALESCE(stock.kgs_in_out, 0) AS kgs_in_out, COALESCE(out_celup.kgs_kirim, 0) AS kgs_kirim, COALESCE(retur.kgs_retur, 0) AS kgs_retur, COALESCE(pengeluaran.kgs_out, 0) AS kgs_out, COALESCE(pengeluaran.lot_out, 0) AS lot_out')
+        return $this->select("
+            master_order.no_model,
+            material.item_type,
+            material.kode_warna,
+            material.color,
+            material.loss,
+
+            -- SUM material.kgs
+            (
+                SELECT SUM(COALESCE(m.kgs, 0))
+                FROM material m
+                WHERE m.id_order = master_order.id_order
+                AND m.item_type = material.item_type
+                AND m.kode_warna = material.kode_warna
+            ) AS kgs,
+
+            -- stock awal (tanpa duplikasi)
+            (
+                SELECT SUM(COALESCE(s.kgs_stock_awal, 0))
+                FROM stock s
+                WHERE s.id_stock IN (
+                    SELECT DISTINCT s2.id_stock
+                    FROM stock s2
+                    JOIN pemasukan p ON p.id_stock = s2.id_stock
+                    JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
+                    JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+                    WHERE sc.no_model = master_order.no_model
+                    AND sc.kode_warna = material.kode_warna
+                    AND sc.item_type = material.item_type
+                )
+            ) AS kgs_stock_awal,
+
+            -- kgs in-out
+            (
+                SELECT SUM(DISTINCT COALESCE(s.kgs_in_out, 0))
+                FROM stock s
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM pemasukan p
+                    LEFT JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
+                    LEFT JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+                    WHERE p.id_stock = s.id_stock
+                    AND sc.no_model = master_order.no_model
+                    AND sc.kode_warna = material.kode_warna
+                    AND sc.item_type = material.item_type
+                )
+            ) AS kgs_in_out,
+
+            -- kgs kirim
+            (
+                SELECT SUM(COALESCE(oc.kgs_kirim, 0))
+                FROM out_celup oc
+                JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+                WHERE sc.no_model = master_order.no_model
+                AND sc.kode_warna = material.kode_warna
+                AND sc.item_type = material.item_type
+            ) AS kgs_kirim,
+
+            -- kgs retur
+            (
+                SELECT SUM(COALESCE(r.kgs_retur, 0))
+                FROM retur r
+                JOIN out_celup oc ON oc.id_retur = r.id_retur
+                JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+                WHERE sc.no_model = master_order.no_model
+                AND sc.kode_warna = material.kode_warna
+                AND sc.item_type = material.item_type
+            ) AS kgs_retur,
+
+            -- kgs out
+            (
+                SELECT SUM(COALESCE(p.kgs_out, 0))
+                FROM pengeluaran p
+                JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
+                JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+                WHERE sc.no_model = master_order.no_model
+                AND sc.kode_warna = material.kode_warna
+                AND sc.item_type = material.item_type
+            ) AS kgs_out,
+
+            -- lot out
+            (
+                SELECT COALESCE(p.lot_out, 0)
+                FROM pengeluaran p
+                JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
+                JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+                WHERE sc.no_model = master_order.no_model
+                AND sc.kode_warna = material.kode_warna
+                AND sc.item_type = material.item_type
+                LIMIT 1
+            ) AS lot_out, 
+
+            -- kgs other out
+            (
+                SELECT SUM(COALESCE(oo.kgs_other_out, 0))
+                FROM other_out oo
+                JOIN out_celup oc ON oc.id_out_celup = oo.id_out_celup
+                JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+                WHERE sc.no_model = master_order.no_model
+                AND sc.kode_warna = material.kode_warna
+                AND sc.item_type = material.item_type
+            ) AS kgs_other_out,
+
+        ")
             ->join('material', 'material.id_order = master_order.id_order', 'left')
-            ->join('schedule_celup', 'schedule_celup.no_model = master_order.no_model AND schedule_celup.kode_warna = material.kode_warna AND schedule_celup.item_type = material.item_type', 'left')
-            ->join('out_celup', 'out_celup.id_celup=schedule_celup.id_celup', 'left')
-            ->join('pemasukan', 'out_celup.id_out_celup=pemasukan.id_out_celup', 'left')
-            ->join('stock', 'stock.id_stock=pemasukan.id_stock', 'left')
-            ->join('pengeluaran', 'out_celup.id_out_celup=pengeluaran.id_out_celup', 'left')
-            ->join('retur', 'out_celup.id_retur=retur.id_retur', 'left')
             ->where('master_order.no_model', $noModel)
             ->groupBy('master_order.no_model')
             ->groupBy('material.item_type')
@@ -213,6 +310,8 @@ class MasterOrderModel extends Model
             ->orderBy('material.item_type, material.kode_warna', 'ASC')
             ->findAll();
     }
+
+
     public function getMaterial($id, $styleSize)
     {
         $data = $this->select('no_model, buyer, delivery_awal, delivery_akhir, material.style_size, material.item_type, material.color, material.kode_warna, sum(material.kgs) as total_kg, material.composition, material.gw, material.loss')

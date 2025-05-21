@@ -559,4 +559,86 @@ class PemesananModel extends Model
 
         return $query->getResultArray();
     }
+    public function getTglPakai($area, $tgl_awal, $tgl_akhir)
+    {
+        return $this->select('tgl_pakai')
+            ->distinct()
+            ->where('admin', $area)
+            ->where('tgl_pakai >=', $tgl_awal)
+            ->where('tgl_pakai <=', $tgl_akhir)
+            ->findAll();
+    }
+    public function getreportPemesanan($area, $jenis, $tgl_pakai)
+    {
+        $subPemesanan = $this->db->table('pemesanan')
+            ->select("
+        tgl_pesan,
+        id_total_pemesanan,
+        master_order.no_model,
+        material.item_type,
+        master_material.jenis,
+        material.kode_warna,
+        material.color,
+        SUM(jl_mc)        AS jl_mc,
+        SUM(ttl_qty_cones) AS cns_pesan,
+        SUM(ttl_berat_cones) AS qty_pesan
+    ")
+            ->join('material',       'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->join('master_order',   'master_order.id_order    = material.id_order',  'left')
+            ->where('pemesanan.admin',     $area)
+            ->where('tgl_pakai', $tgl_pakai)
+            ->where('master_material.jenis', $jenis)
+            ->where('tgl_pesan IS NOT NULL', null, false)
+            ->groupBy('tgl_pesan, id_total_pemesanan, master_order.no_model, material.item_type, material.kode_warna, material.color')
+            ->getCompiledSelect();
+
+        $subPengeluaran = $this->db->table('pengeluaran')
+            ->select("
+                id_total_pemesanan,
+                SUM(kgs_out) AS kgs_out,
+                SUM(cns_out) AS cns_out,
+                SUM(krg_out) AS krg_out,
+                lot_out
+            ")
+            ->groupBy('id_total_pemesanan')
+            ->getCompiledSelect();
+
+        $query = $this->db->table("({$subPemesanan}) AS p")
+            // join keterangan/lot/status dari tabel pemesanan (ambil 1 saja)
+            ->join(
+                'pemesanan pem',
+                'pem.id_total_pemesanan = p.id_total_pemesanan AND pem.tgl_pesan = p.tgl_pesan',
+                'left'
+            )
+            // join sub‐query pengeluaran
+            ->join(
+                "({$subPengeluaran}) AS x",
+                'x.id_total_pemesanan = p.id_total_pemesanan',
+                'left'
+            )
+            ->select("
+                p.tgl_pesan,
+                p.no_model,
+                p.item_type,
+                p.jenis,
+                p.kode_warna,
+                p.color,
+                p.jl_mc,
+                p.cns_pesan,
+                p.qty_pesan,
+                MAX(pem.lot) AS lot_pesan,
+                MAX(pem.keterangan) AS ket_area,
+                MAX(pem.status_kirim) AS status_kirim,
+                MAX(pem.additional_time) AS additional_time,
+                COALESCE(x.kgs_out, 0) AS kgs_out,
+                COALESCE(x.cns_out, 0) AS cns_out,
+                COALESCE(x.krg_out, 0) AS krg_out,
+                x.lot_out
+            ")
+            ->orderBy('p.tgl_pesan', 'DESC')
+            ->orderBy('p.no_model, p.item_type, p.kode_warna, p.color', 'ASC');
+
+        return $query->get()->getResultArray();
+    }
 }
