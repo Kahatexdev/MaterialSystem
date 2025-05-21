@@ -859,9 +859,9 @@ class ApiController extends ResourceController
     }
     public function getDataPemesanan()
     {
-        $area = $this->request->getGet('awal');
-        $jenis = $this->request->getGet('akhir');
-        $tgl_pakai = $this->request->getGet('akhir');
+        $area = $this->request->getGet('area');
+        $jenis = $this->request->getGet('jenis');
+        $tgl_pakai = $this->request->getGet('tgl_pakai');
 
         $listTglPaki = $this->pemesananModel->getreportPemesanan($area, $jenis, $tgl_pakai);
         return $this->response->setJSON($listTglPaki);
