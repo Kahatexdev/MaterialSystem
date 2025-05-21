@@ -108,7 +108,7 @@
                             const loss = Number(item.loss) || 0;
 
                             // perhitungan
-                            const tagihanGbn = kgs - (kgsInOut + kgsStockAwal);
+                            const tagihanGbn = kgs - (kgsKirim + kgsStockAwal);
                             const jatahArea = kgs - kgsOut;
 
                             // fungsi bantu untuk format
