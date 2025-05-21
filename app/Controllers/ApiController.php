@@ -849,4 +849,25 @@ class ApiController extends ResourceController
         $listRetur = $this->returModel->getListRetur($model, $area);
         return $this->response->setJSON($listRetur);
     }
+    public function filterTglPakai($area)
+    {
+        $tgl_awal = $this->request->getGet('awal');
+        $tgl_akhir = $this->request->getGet('akhir');
+
+        $listTglPaki = $this->pemesananModel->getTglPakai($area, $tgl_awal, $tgl_akhir);
+        return $this->response->setJSON($listTglPaki);
+    }
+    public function getDataPemesanan()
+    {
+        // $area = $this->request->getGet('awal');
+        // $jenis = $this->request->getGet('akhir');
+        // $tgl_pakai = $this->request->getGet('akhir');
+
+        $area = 'KK2A';
+        $jenis = 'BENANG';
+        $tgl_pakai = '2025-04-25';
+
+        $listTglPaki = $this->pemesananModel->getreportPemesanan($area, $jenis, $tgl_pakai);
+        return $this->response->setJSON($listTglPaki);
+    }
 }

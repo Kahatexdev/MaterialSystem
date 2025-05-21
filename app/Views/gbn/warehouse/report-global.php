@@ -104,11 +104,12 @@
                             const kgsRetur = Number(item.kgs_retur) || 0;
                             const kgsOut = Number(item.kgs_out) || 0;
                             const kgsInOut = Number(item.kgs_in_out) || 0;
+                            const kgsOtherOut = Number(item.kgs_other_out) || 0;
                             const loss = Number(item.loss) || 0;
 
                             // perhitungan
-                            const tagihanGbn = kgs - kgsOut;
-                            const jatahArea = kgs - kgsKirim;
+                            const tagihanGbn = kgs - (kgsInOut + kgsStockAwal);
+                            const jatahArea = kgs - kgsOut;
 
                             // fungsi bantu untuk format
                             const fmt = v => v !== 0 ? v.toFixed(2) : '0';
@@ -127,7 +128,7 @@
                                 '-',
                                 fmt(kgsRetur),
                                 fmt(kgsOut),
-                                '-',
+                                fmt(kgsOtherOut),
                                 fmt(kgsInOut),
                                 fmt(tagihanGbn),
                                 fmt(jatahArea),
