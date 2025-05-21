@@ -711,6 +711,7 @@ class MasterdataController extends BaseController
                     'jenis_produksi'   => $item['jenis_produksi'],
                     'contoh_warna'     => $item['contoh_warna'],
                     'penerima'         => $data['penerima'],
+                    'po_plus'          => $data['po_plus'],
                     'penanggung_jawab' => $data['penanggung_jawab'],
                     'admin'            => session()->get('username'),
                     'created_at'       => date('Y-m-d H:i:s'),
@@ -747,6 +748,7 @@ class MasterdataController extends BaseController
                     'jenis_produksi'   => $d['jenis_produksi'],
                     'contoh_warna'     => $d['contoh_warna'],
                     'penerima'         => $data['penerima'],
+                    'po_plus'          => $data['po_plus'],
                     'penanggung_jawab' => $data['penanggung_jawab'],
                     'admin'            => session()->get('username'),
                     'created_at'       => date('Y-m-d H:i:s'),
@@ -776,7 +778,7 @@ class MasterdataController extends BaseController
                 return redirect()->back()->with('error', 'Gagal menyimpan PO Covering.');
             }
 
-            return redirect()->to(base_url($this->role . '/masterdata'))
+            return redirect()->to(base_url($this->role . '/material/' . $id_order))
                 ->with('success', 'Data PO Covering berhasil disimpan.');
         } else {
             foreach ($items as $item) {
@@ -795,6 +797,7 @@ class MasterdataController extends BaseController
                     'jenis_produksi'   => $item['jenis_produksi'],
                     'contoh_warna'     => $item['contoh_warna'],
                     'penerima'         => $data['penerima'],
+                    'po_plus'          => $data['po_plus'],
                     'penanggung_jawab' => $data['penanggung_jawab'],
                     'admin'            => session()->get('username'),
                 ];
