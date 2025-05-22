@@ -140,7 +140,8 @@ class ApiController extends ResourceController
                 'keterangan',
                 'admin',
                 'created_at',
-                'updated_at'
+                'updated_at',
+                'kg_stock'
 
             ];
 
@@ -859,13 +860,9 @@ class ApiController extends ResourceController
     }
     public function getDataPemesanan()
     {
-        // $area = $this->request->getGet('awal');
-        // $jenis = $this->request->getGet('akhir');
-        // $tgl_pakai = $this->request->getGet('akhir');
-
-        $area = 'KK2A';
-        $jenis = 'BENANG';
-        $tgl_pakai = '2025-04-25';
+        $area = $this->request->getGet('area');
+        $jenis = $this->request->getGet('jenis');
+        $tgl_pakai = $this->request->getGet('tgl_pakai');
 
         $listTglPaki = $this->pemesananModel->getreportPemesanan($area, $jenis, $tgl_pakai);
         return $this->response->setJSON($listTglPaki);

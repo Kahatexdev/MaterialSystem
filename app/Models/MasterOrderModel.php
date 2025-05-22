@@ -214,28 +214,36 @@ class MasterOrderModel extends Model
                 AND m.kode_warna = material.kode_warna
             ) AS kgs,
 
-            -- stock awal
+            -- stock awal (tanpa duplikasi)
             (
                 SELECT SUM(COALESCE(s.kgs_stock_awal, 0))
                 FROM stock s
-                JOIN pemasukan p ON p.id_stock = s.id_stock
-                JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
-                JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
-                WHERE sc.no_model = master_order.no_model
-                AND sc.kode_warna = material.kode_warna
-                AND sc.item_type = material.item_type
+                WHERE s.id_stock IN (
+                    SELECT DISTINCT s2.id_stock
+                    FROM stock s2
+                    JOIN pemasukan p ON p.id_stock = s2.id_stock
+                    JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
+                    JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+                    WHERE sc.no_model = master_order.no_model
+                    AND sc.kode_warna = material.kode_warna
+                    AND sc.item_type = material.item_type
+                )
             ) AS kgs_stock_awal,
 
-            -- in-out
+            -- kgs in-out
             (
-                SELECT SUM(COALESCE(s.kgs_in_out, 0))
+                SELECT SUM(DISTINCT COALESCE(s.kgs_in_out, 0))
                 FROM stock s
-                LEFT JOIN pemasukan p ON p.id_stock = s.id_stock
-                LEFT JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
-                LEFT JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
-                WHERE sc.no_model = master_order.no_model
-                AND sc.kode_warna = material.kode_warna
-                AND sc.item_type = material.item_type
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM pemasukan p
+                    LEFT JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
+                    LEFT JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+                    WHERE p.id_stock = s.id_stock
+                    AND sc.no_model = master_order.no_model
+                    AND sc.kode_warna = material.kode_warna
+                    AND sc.item_type = material.item_type
+                )
             ) AS kgs_in_out,
 
             -- kgs kirim

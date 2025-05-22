@@ -1764,8 +1764,8 @@ class ExcelController extends BaseController
             $sheet->setCellValue('O' . $row, isset($item['kgs_in_out']) ? number_format($item['kgs_in_out'], 2, '.', '') : 0);
 
             // Tagihan GBN dan Jatah Area perhitungan
-            $tagihanGbn = isset($item['kgs']) ? $item['kgs'] - $item['kgs_out'] : 0;
-            $jatahArea = isset($item['kgs']) ? $item['kgs'] - $item['kgs_kirim'] : 0;
+            $tagihanGbn = isset($item['kgs']) ? $item['kgs'] - ($item['kgs_kirim'] + $item['kgs_stock_awal']) : 0;
+            $jatahArea = isset($item['kgs']) ? $item['kgs'] - $item['kgs_out'] : 0;
 
             // Format Tagihan GBN dan Jatah Area
             $sheet->setCellValue('P' . $row, number_format($tagihanGbn, 2, '.', ''));
