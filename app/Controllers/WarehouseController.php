@@ -2326,4 +2326,23 @@ class WarehouseController extends BaseController
         ];
         return view($this->role . '/warehouse/detailOtherBarcode', $data);
     }
+
+    public function reportGlobalStockBenang()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/warehouse/report-global-benang', $data);
+    }
+
+    public function filterReportGlobalBenang()
+    {
+        $key = $this->request->getGet('key');
+
+        $data = $this->stockModel->getFilterReportGlobalBenang($key);
+
+        return $this->response->setJSON($data);
+    }
 }

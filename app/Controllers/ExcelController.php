@@ -2580,4 +2580,99 @@ class ExcelController extends BaseController
             exit;
         }
     }
+
+    public function exportReportGlobalBenang()
+    {
+        $key = $this->request->getGet('key');
+
+        $data = $this->stockModel->getFilterReportGlobalBenang($key);
+        // dd($data);
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Judul
+        $sheet->mergeCells('A1:AB1');
+        $sheet->setCellValue('A1', 'REPORT GLOBAL BENANG' . $key);
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Header
+        $headers = ['No', 'No Model', 'Item Type', 'Kode Warna', 'Warna', 'Loss', 'Qty PO', 'Qty PO(+)', 'Stock Awal', 'Stock Opname', 'Datang Solid', '(+)Datang Solid', 'Ganti Retur', 'Datang Lurex', '(+)Datang Lurex', 'Retur PB Gbn', 'Retur Pb Area', 'Pakai Area', 'Pakai Lain-Lain', 'Retur Stock', 'Retur Titip', 'Dipinjam', 'Pindah Order', 'Pindah Stock Mati', 'Stock Akhir', 'Tagihan Gbn', 'Jatah Area'];
+        $col = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($col . '3', $header);
+            $sheet->getStyle($col . '3')->getFont()->setBold(true);
+            $col++;
+        }
+
+        // Data
+        $row = 4;
+        $no = 1;
+        foreach ($data as $item) {
+            // Format setiap nilai untuk memastikan nilai 0 dan angka dengan dua desimal
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $item['no_model'] ?: '-');
+            $sheet->setCellValue('C' . $row, $item['item_type'] ?: '-');
+            $sheet->setCellValue('D' . $row, $item['kode_warna'] ?: '-');
+            $sheet->setCellValue('E' . $row, $item['warna'] ?: '-');
+            $sheet->setCellValue('F' . $row, $item['loss'] . '%' ?: '-');
+            $sheet->setCellValue('G' . $row, $item['qty_po'] ?: 0);
+            // $sheet->setCellValue('H' . $row, $item['qty_po_plus'] ?: 0);
+            $sheet->setCellValue('I' . $row, $item['kgs_stock_awal'] ?: 0);
+            // $sheet->setCellValue('J' . $row, $item['stock_opname'] ?: 0);
+            // $sheet->setCellValue('K' . $row, $item['datang_solid'] ?: 0);
+            // $sheet->setCellValue('L' . $row, $item['datang_solid_plus'] ?: 0);
+            // $sheet->setCellValue('M' . $row, $item['ganti_retur'] ?: 0);
+            // $sheet->setCellValue('N' . $row, $item['datang_lurex'] ?: 0);
+            // $sheet->setCellValue('O' . $row, $item['datang_lurex_plus'] ?: 0);
+            // $sheet->setCellValue('P' . $row, $item['retur_pb_gbn'] ?: 0);
+            // $sheet->setCellValue('Q' . $row, $item['retur_pb_area'] ?: 0);
+            // $sheet->setCellValue('R' . $row, $item['pakai_area'] ?: 0);
+            // $sheet->setCellValue('S' . $row, $item['pakai_lain_lain'] ?: 0);
+            // $sheet->setCellValue('T' . $row, $item['retur_stock'] ?: 0);
+            // $sheet->setCellValue('V' . $row, $item['retur_titip'] ?: 0);
+            // $sheet->setCellValue('W' . $row, $item['dipinjam'] ?: 0);
+            // $sheet->setCellValue('X' . $row, $item['pindah_order'] ?: 0);
+            // $sheet->setCellValue('Y' . $row, $item['pindah_stock_mati'] ?: 0);
+            // $sheet->setCellValue('Z' . $row, $item['stock_akhir'] ?: 0);
+
+            // Tagihan GBN dan Jatah Area perhitungan
+            // $tagihanGbn = isset($item['kgs']) ? $item['kgs'] - $item['kgs_out'] : 0;
+            // $jatahArea = isset($item['kgs']) ? $item['kgs'] - $item['kgs_kirim'] : 0;
+            $tagihanGbn = ($item['kgs_stock_awal'] + $item['stock_opname'] + $item['datang_solid'] + $item['retur_stock']) - $item['qty_po'] - $item['qty_po_plus'] ?? 0;
+            $jatahArea = isset($item['kgs']) ? $item['kgs'] - $item['kgs_kirim'] : 0;
+
+            // Format Tagihan GBN dan Jatah Area
+            $sheet->setCellValue('AA' . $row, number_format($tagihanGbn, 2, '.', ''));
+            $sheet->setCellValue('AB' . $row, number_format($jatahArea, 2, '.', ''));
+            $row++;
+        }
+
+        // Border
+        $lastRow = $row - 1;
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => 'FF000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle("A3:AB{$lastRow}")->applyFromArray($styleArray);
+
+        // Auto-size
+        foreach (range('A', 'AB') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Download
+        $filename = 'Report_Global_Benang_' . $key . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
 }

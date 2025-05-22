@@ -90,7 +90,7 @@ class ScheduleCelupModel extends Model
     public function getScheduleDetails($machine, $date, $lot)
     {
         return $this->table('schedule_celup')
-            ->select('schedule_celup.*, mesin_celup.no_mesin, sum(kg_celup) as total_kg, open_po.ket_celup')
+            ->select('schedule_celup.*, mesin_celup.no_mesin, sum(kg_celup) as total_kg, open_po.ket_celup, open_po.keterangan')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->join('open_po', 'open_po.no_model = schedule_celup.no_model AND open_po.item_type = schedule_celup.item_type AND open_po.kode_warna = schedule_celup.kode_warna', 'left')
             ->where('mesin_celup.no_mesin', $machine)
