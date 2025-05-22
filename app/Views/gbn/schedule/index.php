@@ -370,10 +370,16 @@
                                     <input type="text" class="form-control" id="last_status" value="${item.last_status}" readonly>
                                 </div>
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="keterangan" class="form-label">Keterangan</label>
+                                    <textarea class="form-control" id="keterangan" rows="3" readonly>${item.keterangan || ''}</textarea>
+                                </div>
+                            </div> 
+                            <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="ket_celup" class="form-label">Keterangan Celup</label>
-                                    <textarea class="form-control" id="ket_celup" rows="3" readonly>${item.ket_celup}</textarea>
+                                    <textarea class="form-control" id="ket_celup" rows="3" readonly>${item.ket_celup || ''}</textarea>
                                 </div>
                             </div> 
                         </div>

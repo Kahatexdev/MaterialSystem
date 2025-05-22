@@ -321,4 +321,36 @@ class StockModel extends Model
             ->where('item_type', $itemTypeEncoded)
             ->first();
     }
+
+    public function getFilterReportGlobalBenang($key)
+    {
+        return $this->select("
+            stock.*, 
+            material.loss,
+            (
+                SELECT SUM(m.kgs)
+                FROM material m
+                JOIN master_order mo ON mo.id_order = m.id_order
+                WHERE m.item_type = stock.item_type 
+                  AND m.kode_warna = stock.kode_warna 
+                  AND m.color = stock.warna 
+                  AND mo.no_model = stock.no_model
+            ) AS qty_po,
+             (
+                SELECT SUM(COALESCE(p.kgs_out, 0))
+                FROM pengeluaran p
+                JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
+                JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+                WHERE sc.no_model = master_order.no_model
+                AND sc.kode_warna = material.kode_warna
+                AND sc.item_type = material.item_type
+            ) AS kgs_out
+        ")
+            ->join('material', 'material.item_type = stock.item_type AND material.kode_warna = stock.kode_warna', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('stock.no_model', $key)
+            ->groupBy('stock.id_stock')
+            ->get()
+            ->getResultArray();
+    }
 }

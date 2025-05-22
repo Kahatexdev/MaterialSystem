@@ -186,7 +186,6 @@ class PemasukanModel extends Model
             ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
             ->join('open_po', 'open_po.no_model = master_order.no_model AND open_po.kode_warna = schedule_celup.kode_warna AND open_po.item_type = schedule_celup.item_type', 'left')
             ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
-            ->where('pemasukan.out_jalur', "0")
             ->groupBy('pemasukan.id_pemasukan')
             ->orderBy('pemasukan.tgl_masuk', 'DESC');
 
