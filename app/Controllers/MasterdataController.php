@@ -697,26 +697,28 @@ class MasterdataController extends BaseController
             // dd($totalKg, $details);
             $headerData = [];
             foreach ($items as $item) {
+                $spesifikasiBenang = (!empty($item['jenis_benang']) && !empty($item['spesifikasi_benang'])) ? $item['jenis_benang'] . ' ' . $item['spesifikasi_benang'] : NULL;
                 $headerData[] = [
-                    'no_model'         => 'POCOVERING ' . $noModels,
-                    'item_type'        => $item['item_type'],
-                    'kode_warna'       => $item['kode_warna'],
-                    'color'            => $item['color'],
-                    'kg_po'            => $item['kg_po'],
-                    'keterangan'       => $data['keterangan'] ?? '',
-                    'ket_celup'        => $item['ket_celup'],
-                    'bentuk_celup'     => $item['bentuk_celup'],
-                    'kg_percones'      => $item['kg_percones'],
-                    'jumlah_cones'     => $item['jumlah_cones'],
-                    'jenis_produksi'   => $item['jenis_produksi'],
-                    'contoh_warna'     => $item['contoh_warna'],
-                    'penerima'         => $data['penerima'],
-                    'po_plus'          => $data['po_plus'],
-                    'penanggung_jawab' => $data['penanggung_jawab'],
-                    'admin'            => session()->get('username'),
-                    'created_at'       => date('Y-m-d H:i:s'),
-                    'updated_at'       => date('Y-m-d H:i:s'),
-                    'id_induk'         => null,
+                    'no_model'              => 'POCOVERING ' . $noModels,
+                    'item_type'             => $item['item_type'],
+                    'kode_warna'            => $item['kode_warna'],
+                    'color'                 => $item['color'],
+                    'spesifikasi_benang'    => $spesifikasiBenang,
+                    'kg_po'                 => $item['kg_po'],
+                    'keterangan'            => $data['keterangan'] ?? '',
+                    'ket_celup'             => $item['ket_celup'],
+                    'bentuk_celup'          => $item['bentuk_celup'],
+                    'kg_percones'           => $item['kg_percones'],
+                    'jumlah_cones'          => $item['jumlah_cones'],
+                    'jenis_produksi'        => $item['jenis_produksi'],
+                    'contoh_warna'          => $item['contoh_warna'],
+                    'penerima'              => $data['penerima'],
+                    'po_plus'               => $data['po_plus'],
+                    'penanggung_jawab'      => $data['penanggung_jawab'],
+                    'admin'                 => session()->get('username'),
+                    'created_at'            => date('Y-m-d H:i:s'),
+                    'updated_at'            => date('Y-m-d H:i:s'),
+                    'id_induk'              => null,
                 ];
             }
             // dd ($headerData, $items);
@@ -734,26 +736,28 @@ class MasterdataController extends BaseController
             // 3. Siapkan detail per header (1-to-1)
             $batch = [];
             foreach ($items as $i => $d) {
+                $spesifikasiBenang = (!empty($d['jenis_benang']) && !empty($d['spesifikasi_benang'])) ? $d['jenis_benang'] . ' ' . $d['spesifikasi_benang'] : NULL;
                 $batch[] = [
-                    'no_model'         => $noModels ?? '-',
-                    'item_type'        => $d['item_type'],
-                    'kode_warna'       => $d['kode_warna'],
-                    'color'            => $d['color'],
-                    'kg_po'            => $d['kg_po'],
-                    'keterangan'       => $data['keterangan'] ?? '',
-                    'ket_celup'        => $d['ket_celup'],
-                    'bentuk_celup'     => $d['bentuk_celup'],
-                    'kg_percones'      => $d['kg_percones'],
-                    'jumlah_cones'     => $d['jumlah_cones'],
-                    'jenis_produksi'   => $d['jenis_produksi'],
-                    'contoh_warna'     => $d['contoh_warna'],
-                    'penerima'         => $data['penerima'],
-                    'po_plus'          => $data['po_plus'],
-                    'penanggung_jawab' => $data['penanggung_jawab'],
-                    'admin'            => session()->get('username'),
-                    'created_at'       => date('Y-m-d H:i:s'),
-                    'updated_at'       => date('Y-m-d H:i:s'),
-                    'id_induk'         => $insertedIds[$i], // id header ke-i
+                    'no_model'              => $noModels ?? '-',
+                    'item_type'             => $d['item_type'],
+                    'kode_warna'            => $d['kode_warna'],
+                    'color'                 => $d['color'],
+                    'spesifikasi_benang'    => $spesifikasiBenang,
+                    'kg_po'                 => $d['kg_po'],
+                    'keterangan'            => $data['keterangan'] ?? '',
+                    'ket_celup'             => $d['ket_celup'],
+                    'bentuk_celup'          => $d['bentuk_celup'],
+                    'kg_percones'           => $d['kg_percones'],
+                    'jumlah_cones'          => $d['jumlah_cones'],
+                    'jenis_produksi'        => $d['jenis_produksi'],
+                    'contoh_warna'          => $d['contoh_warna'],
+                    'penerima'              => $data['penerima'],
+                    'po_plus'               => $data['po_plus'],
+                    'penanggung_jawab'      => $data['penanggung_jawab'],
+                    'admin'                 => session()->get('username'),
+                    'created_at'            => date('Y-m-d H:i:s'),
+                    'updated_at'            => date('Y-m-d H:i:s'),
+                    'id_induk'              => $insertedIds[$i], // id header ke-i
                 ];
             }
             // dd ($batch);
@@ -782,24 +786,26 @@ class MasterdataController extends BaseController
                 ->with('success', 'Data PO Covering berhasil disimpan.');
         } else {
             foreach ($items as $item) {
+                $spesifikasiBenang = (!empty($item['jenis_benang']) && !empty($item['spesifikasi_benang'])) ? $item['jenis_benang'] . ' ' . $item['spesifikasi_benang'] : NULL;
                 $itemData = [
-                    'role'             => $this->role,
-                    'no_model'         => $data['no_model'],
-                    'item_type'        => $item['item_type'],
-                    'kode_warna'       => $item['kode_warna'],
-                    'color'            => $item['color'],
-                    'kg_po'            => $item['kg_po'],
-                    'keterangan'       => $data['keterangan'],
-                    'ket_celup'        => $item['ket_celup'],
-                    'bentuk_celup'     => $item['bentuk_celup'],
-                    'kg_percones'      => $item['kg_percones'],
-                    'jumlah_cones'     => $item['jumlah_cones'],
-                    'jenis_produksi'   => $item['jenis_produksi'],
-                    'contoh_warna'     => $item['contoh_warna'],
-                    'penerima'         => $data['penerima'],
-                    'po_plus'          => $data['po_plus'],
-                    'penanggung_jawab' => $data['penanggung_jawab'],
-                    'admin'            => session()->get('username'),
+                    'role'                  => $this->role,
+                    'no_model'              => $data['no_model'],
+                    'item_type'             => $item['item_type'],
+                    'kode_warna'            => $item['kode_warna'],
+                    'color'                 => $item['color'],
+                    'spesifikasi_benang'    => $spesifikasiBenang,
+                    'kg_po'                 => $item['kg_po'],
+                    'keterangan'            => $data['keterangan'],
+                    'ket_celup'             => $item['ket_celup'],
+                    'bentuk_celup'          => $item['bentuk_celup'],
+                    'kg_percones'           => $item['kg_percones'],
+                    'jumlah_cones'          => $item['jumlah_cones'],
+                    'jenis_produksi'        => $item['jenis_produksi'],
+                    'contoh_warna'          => $item['contoh_warna'],
+                    'penerima'              => $data['penerima'],
+                    'po_plus'               => $data['po_plus'],
+                    'penanggung_jawab'      => $data['penanggung_jawab'],
+                    'admin'                 => session()->get('username'),
                 ];
                 // Simpan data ke database
                 $this->openPoModel->insert($itemData);

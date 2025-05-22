@@ -223,7 +223,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button
-                        type="submit"
+                        type="button"
                         class="btn btn-info"
                         id="btnSubmitExport">
                         Export
