@@ -124,7 +124,8 @@
                                 <li><a href="<?= base_url($role . '/warehouse/reportPoBenang') ?>" class="dropdown-item" href="#">PO Benang</a></li>
                                 <li><a href="<?= base_url($role . '/warehouse/reportDatangBenang') ?>" class="dropdown-item" href="#">Datang Benang</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportPengiriman') ?>">Report Pengiriman</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobal') ?>">Report Global</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobal') ?>">Report Global All BB</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobal') ?>">Report Global Nylon</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/otherIn/listBarcode') ?>">List Barcode</a></li>
                             </ul>
                         </li>
