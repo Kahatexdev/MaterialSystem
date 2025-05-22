@@ -126,6 +126,7 @@
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportPengiriman') ?>">Report Pengiriman</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobal') ?>">Report Global All BB</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobal') ?>">Report Global Nylon</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobalStockBenang') ?>">Report Global Benang</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/otherIn/listBarcode') ?>">List Barcode</a></li>
                             </ul>
                         </li>

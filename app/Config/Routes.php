@@ -166,6 +166,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportGlobal', 'WarehouseController::reportGlobal');
     $routes->get('warehouse/filterReportGlobal', 'WarehouseController::filterReportGlobal');
     $routes->get('warehouse/exportGlobalReport', 'ExcelController::exportGlobalReport');
+    $routes->get('warehouse/reportGlobalStockBenang', 'WarehouseController::reportGlobalStockBenang');
+    $routes->get('warehouse/filterReportGlobalBenang', 'WarehouseController::filterReportGlobalBenang');
+    $routes->get('warehouse/exportReportGlobalBenang', 'ExcelController::exportReportGlobalBenang');
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');
     $routes->post('otherIn/saveOtherIn', 'WarehouseController::saveOtherIn');

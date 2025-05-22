@@ -435,8 +435,16 @@
                     <h3>Barcode</h3>
                     <div class="row">
                         <?php foreach ($dataBon['groupedDetails'] as $group) { ?>
+                            <?php
+                            $countBarcodes = count($group['barcodes']); // Hitung jumlah barcode
+                            if ($countBarcodes > 4) {
+                                $colMd = "4";
+                            } else {
+                                $colMd = 12 / $countBarcodes;
+                            }
+                            ?>
                             <?php foreach ($group['barcodes'] as $barcode) { ?>
-                                <div class="col-md-4 d-flex flex-column align-items-center mt-4">
+                                <div class="col-md-<?= $colMd ?> d-flex flex-column align-items-center mt-4">
                                     <div style="margin-top: 10px;">
                                         <img
                                             src="data:image/png;base64,<?= $barcode['barcode']; ?>"
