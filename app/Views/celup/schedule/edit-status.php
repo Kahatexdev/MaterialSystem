@@ -155,15 +155,8 @@
                                 <div class="col-md-3">
                                     <!-- Tanggal Press -->
                                     <div class="form-group" id="tglPressGroup">
-                                        <label for="tgl_press">Tanggal Press</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_press" id="tgl_press" value="<?= $data['tgl_press'] ?>">
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <!-- Tanggal Oven -->
-                                    <div class="form-group" id="tglOvenGroup">
-                                        <label for="tgl_oven">Tanggal Oven</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_oven" id="tgl_oven" value="<?= $data['tgl_oven'] ?>">
+                                        <label for="tgl_press">Tanggal Press/Oven</label>
+                                        <input type="datetime-local" class="form-control" name="tgl_press_oven" id="tgl_press_oven" value="<?= $data['tgl_press_oven'] ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -188,24 +181,31 @@
                                     </div>
                                 </div>
                                 <div class="col-md-3">
-                                    <!-- Tanggal ACC -->
-                                    <div class="form-group" id="tglACCGroup">
-                                        <label for="tgl_acc">Tanggal ACC</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_acc" id="tgl_acc" value="<?= $data['tgl_acc'] ?>">
+                                    <!-- Tanggal Serah Terima ACC -->
+                                    <div class="form-group" id="tglSTGroup">
+                                        <label for="serah_terima">Serah Terima ACC</label>
+                                        <input type="datetime-local" class="form-control" name="serah_terima_acc" id="serah_terima_acc" value="<?= $data['serah_terima_acc'] ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
-                                    <!-- Tanggal Kelos -->
-                                    <div class="form-group" id="tglKelosGroup">
-                                        <label for="tgl_kelos">Tanggal Kelos</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_kelos" id="tgl_kelos" value="<?= $data['tgl_kelos'] ?>">
+                                    <!-- Tanggal ACC -->
+                                    <div class="form-group" id="tglACCGroup">
+                                        <label for="tgl_acc">Tanggal ACC KK</label>
+                                        <input type="datetime-local" class="form-control" name="tgl_acc" id="tgl_acc" value="<?= $data['tgl_acc'] ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <!-- Tanggal Reject -->
                                     <div class="form-group" id="tglRejectGroup">
-                                        <label for="tgl_reject">Tanggal Reject</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_reject" id="tgl_reject" value="<?= $data['tgl_reject'] ?>">
+                                        <label for="tgl_reject">Tanggal Reject KK</label>
+                                        <input type="datetime-local" class="form-control" name="tgl_reject" id="tgl_reject" value="<?= $data['tgl_reject'] ?>" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <!-- Tanggal Matching -->
+                                    <div class="form-group" id="tglMatchingGroup">
+                                        <label for="tgl_matching">Tanggal Matching</label>
+                                        <input type="datetime-local" class="form-control" name="tgl_matching" id="tgl_matching" value="<?= $data['tgl_matching'] ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -213,6 +213,13 @@
                                     <div class="form-group" id="tglPBGroup">
                                         <label for="tgl_pb">Tanggal Perbaikan</label>
                                         <input type="datetime-local" class="form-control" name="tgl_pb" id="tgl_pb" value="<?= $data['tgl_pb'] ?>">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <!-- Tanggal Kelos -->
+                                    <div class="form-group" id="tglKelosGroup">
+                                        <label for="tgl_kelos">Tanggal Kelos</label>
+                                        <input type="datetime-local" class="form-control" name="tgl_kelos" id="tgl_kelos" value="<?= $data['tgl_kelos'] ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-12">

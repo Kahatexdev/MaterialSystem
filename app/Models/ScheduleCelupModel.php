@@ -29,7 +29,7 @@ class ScheduleCelupModel extends Model
         'tanggal_celup',
         'tanggal_bongkar',
         'tanggal_press',
-        'tanggal_oven',
+        // 'tanggal_oven',
         'tanggal_tl',
         'tanggal_rajut_pagi',
         'tanggal_kelos',
@@ -37,6 +37,8 @@ class ScheduleCelupModel extends Model
         'tanggal_reject',
         'tanggal_perbaikan',
         'tanggal_teslab',
+        'serah_terima_acc',
+        'matching',
         'last_status',
         'ket_daily_cek',
         'ket_schedule',
@@ -212,11 +214,11 @@ class ScheduleCelupModel extends Model
             ->select('schedule_celup.*, mesin_celup.no_mesin, 
                    IF(po_plus = "0", kg_celup, 0) AS qty_celup, 
                    IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus')
-            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-            // exclude statuses
-            ->where('schedule_celup.last_status !=', 'done')
-            ->where('schedule_celup.last_status !=', 'sent')
-            ->where('schedule_celup.last_status !=', 'complain');
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin');
+        // exclude statuses
+        // ->where('schedule_celup.last_status !=', 'done')
+        // ->where('schedule_celup.last_status !=', 'sent')
+        // ->where('schedule_celup.last_status !=', 'complain');
 
         // Filter tanggal jika ada
         if ($filterTglSch) {
@@ -393,7 +395,7 @@ class ScheduleCelupModel extends Model
                 'schedule_celup.tanggal_celup',
                 'schedule_celup.tanggal_bongkar',
                 'schedule_celup.tanggal_press',
-                'schedule_celup.tanggal_oven',
+                // 'schedule_celup.tanggal_oven',
                 'schedule_celup.tanggal_tl',
                 'schedule_celup.tanggal_rajut_pagi',
                 'schedule_celup.tanggal_kelos',
