@@ -226,13 +226,13 @@ class PoGabunganController extends BaseController
                 $ket .= ' / ';
             }
         }
-        // Hitung sisa
-        $sisa = $data['ttl_keb'] - $totalKg;
+        // // Hitung sisa
+        // $sisa = $data['ttl_keb'] - $totalKg;
 
-        // Tambahkan " / STOCK $sisa" jika sisa lebih dari 0
-        if ($sisa > 0) {
-            $ket .= " / STOCK = $sisa";
-        }
+        // // Tambahkan " / STOCK $sisa" jika sisa lebih dari 0
+        // if ($sisa > 0) {
+        //     $ket .= " / STOCK = $sisa";
+        // }
 
         $keys = array_map(function ($d) {
             return $d['item_type'] . '|' . $d['kode_warna'] . '|' . $d['color'];
@@ -243,26 +243,29 @@ class PoGabunganController extends BaseController
                 ->withInput()
                 ->with('error', 'Data tidak disimpan: kombinasi item_type, kode warna, dan color harus sama.');
         }
+        $spesifikasiBenang = (!empty($data['jenis_benang']) && !empty($data['spesifikasi_benang'])) ? $data['jenis_benang'] . ' ' . $data['spesifikasi_benang'] : NULL;
+
         // 3. Persist header PO gabungan
         $headerData = [
-            'no_model'         => 'POGABUNGAN ' . implode('_', $noModelMap),
-            'item_type'        => $details[0]['item_type'],
-            'kode_warna'       => $details[0]['kode_warna'],
-            'color'            => $details[0]['color'],
-            'kg_po'            => $data['ttl_keb'],
-            'keterangan'       => $data['keterangan'],
-            'ket_celup'        => $ket,
-            'penerima'         => $data['penerima'],
-            'penanggung_jawab' => $data['penanggung_jawab'],
-            'bentuk_celup'     => $data['bentuk_celup'],
-            'kg_percones'      => $data['kg_percones'],
-            'jumlah_cones'     => $data['jumlah_cones'],
-            'jenis_produksi'   => $data['jenis_produksi'],
-            'contoh_warna'     => $data['contoh_warna'],
-            'admin'            => session()->get('username'),
-            'created_at'       => date('Y-m-d H:i:s'),
-            'updated_at'       => date('Y-m-d H:i:s'),
-            'id_induk'         => null,
+            'no_model'              => 'POGABUNGAN ' . implode('_', $noModelMap),
+            'item_type'             => $details[0]['item_type'],
+            'kode_warna'            => $details[0]['kode_warna'],
+            'color'                 => $details[0]['color'],
+            'spesifikasi_benang'    => $spesifikasiBenang,
+            'kg_po'                 => $data['ttl_keb'],
+            'keterangan'            => $data['keterangan'],
+            'ket_celup'             => $ket,
+            'penerima'              => $data['penerima'],
+            'penanggung_jawab'      => $data['penanggung_jawab'],
+            'bentuk_celup'          => $data['bentuk_celup'],
+            'kg_percones'           => $data['kg_percones'],
+            'jumlah_cones'          => $data['jumlah_cones'],
+            'jenis_produksi'        => $data['jenis_produksi'],
+            'contoh_warna'          => $data['contoh_warna'],
+            'admin'                 => session()->get('username'),
+            'created_at'            => date('Y-m-d H:i:s'),
+            'updated_at'            => date('Y-m-d H:i:s'),
+            'id_induk'              => null,
         ];
         // dd ($headerData, $details);
         $db = \Config\Database::connect();

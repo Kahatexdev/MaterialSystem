@@ -79,10 +79,9 @@
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label>Jenis FIllament</label>
-                                            <select class="form-control fillamen" name="items[0][fillamen]" required>
-                                                <option value="">Pilih Texture</option>
-                                                <option value="-">-</option>
+                                            <label>Jenis Benang</label>
+                                            <select class="form-control texture" name="items[0][jenis_benang]" required>
+                                                <option value="">Pilih Jenis Benang</option>
                                                 <option value="DTY">DTY</option>
                                                 <option value="FDY">FDY</option>
                                                 <option value="NFY">NFY</option>
@@ -92,13 +91,12 @@
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label>jenis</label>
-                                            <select class="form-control fillamen" name="items[0][jenis]" required>
-                                                <option value="">Pilih Fillamen</option>
-                                                <option value="-">-</option>
-                                                <option value="sim">SIM DH</option>
-                                                <option value="nim">NIM DH</option>
-                                                <option value="lim">LIM DH</option>
+                                            <label>Spesifikasi Benang</label>
+                                            <select class="form-control fillamen" name="items[0][spesifikasi_benang]" required>
+                                                <option value="">Pilih Spesifikasi Benang</option>
+                                                <option value="SIM DH">SIM DH</option>
+                                                <option value="NIM DH">NIM DH</option>
+                                                <option value="LIM DH">LIM DH</option>
                                             </select>
                                         </div>
                                     </div>
@@ -139,6 +137,41 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="kg_percones">Permintan Kelos (Kg Cones)</label>
+                                        <input type="number" step="0.01" min="0.01" class="form-control kg-percones" name="items[0][kg_percones]" placeholder="Kg">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="jumlah_cones">Permintan Kelos (Total Cones)</label>
+                                        <input type="text" class="form-control jumlah-cones" name="items[0][jumlah_cones]" placeholder="Cns" readonly>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="bentuk_celup">Bentuk Celup</label>
+                                        <select class="form-control bentuk-celup" name="items[0][bentuk_celup]">
+                                            <option value="">Pilih Bentuk Celup</option>
+                                            <option value="Cones">Cones</option>
+                                            <option value="Hank">Hank</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="jenis_produksi">Untuk Produksi</label>
+                                        <input type="text" class="form-control jenis-produksi" name="items[0][jenis_produksi]">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="contoh_warna">Contoh Warna</label>
+                                        <input type="text" class="form-control contoh-warna" name="items[0][contoh_warna]">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="ket_celup">Keterangan Celup</label>
+                                        <textarea class="form-control ket-celup" name="items[0][ket_celup]"></textarea>
+                                    </div>
+                                </div>
+
                                 <div style="width: 100%; text-align: center; margin-top: 10px; margin-bottom:10px;">
                                     <button class="btn btn-icon btn-3 btn-outline-info add-more" type="button">
                                         <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
@@ -151,21 +184,41 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="exampleFormControlInput1">Keterangan</label>
-                    <textarea class="form-control" name="keterangan" id="keterangan"></textarea>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Penerima</label>
+                            <input type="text" class="form-control" id="penerima" name="penerima" readonly required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Penanggung Jawab</label>
+                            <select class="form-control" name="penanggung_jawab" required>
+                                <option value="">Pilih</option>
+                                <option value="HARTANTO">Hartanto</option>
+                                <option value="Megah">Megah</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Penerima</label>
-                    <input type="text" class="form-control" id="penerima" name="penerima" readonly required>
-                </div>
-                <div class="form-group">
-                    <label>Penanggung Jawab</label>
-                    <select class="form-control" name="penanggung_jawab" required>
-                        <option value="">Pilih</option>
-                        <option value="HARTANTO">Hartanto</option>
-                        <option value="Megah">Megah</option>
-                    </select>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="">PO(+)</label>
+                            <select class="form-control" name="po_plus" id="po_plus">
+                                <option value="">Pilih</option>
+                                <option value="1">YA</option>
+                                <option value="0">TIDAK</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="keterangan">Keterangan</label>
+                            <textarea class="form-control" name="keterangan" id="keterangan" rows=""></textarea>
+                        </div>
+                    </div>
                 </div>
                 <button type="submit" class="btn btn-info w-100">Save</button>
         </div>
@@ -240,7 +293,7 @@
             newTabPane.innerHTML = `
                             <div class="kebutuhan-item">
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="itemType">Item Type</label>
                                             <select class="form-control item-type" name="items[${tabIndex - 1}][item_type]" required>
@@ -253,7 +306,30 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Jenis Benang</label>
+                                            <select class="form-control texture" name="items[${tabIndex - 1}][jenis_benang]" required>
+                                                <option value="">Pilih Jenis Benang</option>
+                                                <option value="DTY">DTY</option>
+                                                <option value="FDY">FDY</option>
+                                                <option value="NFY">NFY</option>
+                                                <option value="POY">POY</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Spesifikasi Benang</label>
+                                            <select class="form-control fillamen" name="items[0][spesifikasi_benang]" required>
+                                                <option value="">Pilih Spesifikasi Benang</option>
+                                                <option value="SIM DH">SIM DH</option>
+                                                <option value="NIM DH">NIM DH</option>
+                                                <option value="LIM DH">LIM DH</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Kode Warna</label>
                                             <select class="form-control kode-warna" name="items[${tabIndex - 1}][kode_warna]" required>
@@ -288,6 +364,40 @@
                                             <label for="kgKebutuhan">Kg Kebutuhan</label>
                                             <input type="float" class="form-control kg-po" name="items[${tabIndex - 1}][kg_po]" required>
                                         </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="kg_percones">Permintan Kelos (Kg Cones)</label>
+                                        <input type="text" class="form-control kg-percones" name="items[${tabIndex - 1}][kg_percones]" placeholder="Kg">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="jumlah_cones">Permintan Kelos (Total Cones)</label>
+                                        <input type="text" class="form-control jumlah-cones" name="items[${tabIndex - 1}][jumlah_cones]" placeholder="Cns" readonly>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="bentuk_celup">Bentuk Celup</label>
+                                        <select class="form-control bentuk-celup" name="items[${tabIndex - 1}][bentuk_celup]">
+                                            <option value="">Pilih Bentuk Celup</option>
+                                            <option value="Cones">Cones</option>
+                                            <option value="Hank">Hank</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="jenis_produksi">Untuk Produksi</label>
+                                        <input type="text" class="form-control jenis-produksi" name="items[${tabIndex - 1}][jenis_produksi]">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="contoh_warna">Contoh Warna</label>
+                                        <input type="text" class="form-control contoh-warna" name="items[${tabIndex - 1}][contoh_warna]">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="ket_celup">Keterangan Celup</label>
+                                        <textarea class="form-control ket-celup" name="items[${tabIndex - 1}][ket_celup]"></textarea>
                                     </div>
                                 </div>
                                 <div style="width: 100%; text-align: center; margin-top: 10px; margin-bottom:10px;">
@@ -332,6 +442,33 @@
                 alert("Minimal harus ada satu tab.");
             }
         }
+
+
+        document.getElementById('nav-tabContent').addEventListener('input', function(event) {
+            // Periksa apakah event berasal dari input kg-percones atau kg-po
+            if (event.target.classList.contains('kg-percones') || event.target.classList.contains('kg-po')) {
+                const parentTab = event.target.closest('.kebutuhan-item'); // Cari parent container
+                const kgPoInput = parentTab.querySelector('.kg-po'); // Input kg-po di tab terkait
+                const kgPerconesInput = parentTab.querySelector('.kg-percones'); // Input kg-percones di tab terkait
+                const jumlahConesInput = parentTab.querySelector('.jumlah-cones'); // Output jumlah-cones di tab terkait
+
+                const kg_po = parseFloat(kgPoInput.value);
+                const kg_percones = parseFloat(kgPerconesInput.value);
+
+                // Validasi nilai input
+                if (isNaN(kg_po) || isNaN(kg_percones) || kg_percones <= 0) {
+                    jumlahConesInput.value = '-';
+                    return;
+                }
+
+                // Hitung jumlah cones
+                const jumlah_cones = kg_po / kg_percones;
+
+                // Tampilkan hasil
+                jumlahConesInput.value = Math.ceil(jumlah_cones);
+            }
+        });
+
 
         // Event listener untuk tombol "Add More" di tab pertama
         const addMoreButton = document.querySelector(".add-more");
