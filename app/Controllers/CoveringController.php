@@ -193,7 +193,33 @@ class CoveringController extends BaseController
     {
         $tgl_po = urldecode($tgl_po);
         $tgl_po = date('Y-m-d', strtotime($tgl_po));
+        // 1. Fetch the details for today’s POs
         $poDetail = $this->openPoModel->getPODetailCovering($tgl_po);
+
+        // 2. Fetch all POs for this person (so we can see who is a child of whom)
+        $poAll = $this->openPoModel
+            ->select('id_po, id_induk, penanggung_jawab')
+            ->where('penanggung_jawab', 'Paryanti')
+            ->groupBy('id_po')
+            ->findAll();
+
+        // 3. Extract only the non-null parent-IDs that we want to exclude
+        $indukIds = array_filter(array_column($poAll, 'id_induk'), function ($v) {
+            return $v !== null;
+        });
+
+        // 4. Loop through your details and skip any whose id_po is in the $indukIds list
+        $filteredDetails = [];
+        foreach ($poDetail as $item) {
+            if (in_array($item['id_po'], $indukIds, true)) {
+                // this PO has already “parented” another one, so skip it
+                continue;
+            }
+            $filteredDetails[] = $item;
+        }
+
+        // 5. Inspect what’s left
+        // dd($poDetail,$poAll,$filteredDetails);
         $coveringData = session()->get('covering_data');
         if (empty($coveringData)) {
             $coveringData[0] = [
@@ -207,12 +233,13 @@ class CoveringController extends BaseController
                 'qty_covering' => ''
             ];
         }
+        
         $data = [
             'active' => $this->active,
             'title' => 'PO Celup',
             'role' => $this->role,
             'tgl_po' => $tgl_po,
-            'poDetail' => $poDetail,
+            'poDetail' => $filteredDetails,
             'coveringData' => $coveringData,
         ];
         return view($this->role . '/po/detail', $data);
@@ -229,6 +256,7 @@ class CoveringController extends BaseController
         $noModelArray = str_replace('','',$noModel);
         // dd ($noModelArray);
         // $idInduk = $this->request->getGet('id_induk');
+        // $data = $this->openPoModel->getPODetailCovering($tgl_po);
 
         $data = $this->openPoModel->getDetailByNoModel($tgl_po, $noModelArray);
         log_message('debug', 'Data from getDetailByNoModel: ' . json_encode($data));

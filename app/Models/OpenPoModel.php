@@ -233,11 +233,11 @@ class OpenPoModel extends Model
 
     public function getPODetailCovering($tgl_po)
     {
-        return $this->select('open_po.id_po,open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan,open_po.penerima, open_po.penanggung_jawab,open_po.admin, open_po.created_at,open_po.updated_at')
+        return $this->select('open_po.id_po,open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan,open_po.penerima, open_po.penanggung_jawab,open_po.admin, open_po.created_at,open_po.updated_at,open_po.id_induk')
             ->where('penerima', 'Paryanti')
             ->where('id_induk IS NULL')
             ->where('DATE(open_po.created_at)', $tgl_po)
-            ->groupBy('open_po.no_model')
+            ->groupBy('open_po.id_po')
             ->findAll();
     }
 

@@ -148,7 +148,7 @@
                     <h5 class="modal-title" id="editModalLabel">Update Status Pemesanan</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="<?= base_url($role. '/updatePemesanan/' . $list['id_psk']) ?>" method="POST">
+                <form action="<?= base_url($role . '/updatePemesanan/' . $list['id_psk']) ?>" method="POST">
                     <?= csrf_field(); ?>
                     <div class="modal-body">
                         <div class="row">
