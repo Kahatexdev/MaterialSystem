@@ -1,7 +1,6 @@
 <?php $this->extend($role . '/dashboard/header'); ?>
 <?php $this->section('content'); ?>
-
-<div class="container-fluid py-4">
+<div class="container-fluid">
     <div class="row my-4">
         <div class="col-xl-12 col-sm-12 mb-xl-0 mb-4">
             <div class="card">
