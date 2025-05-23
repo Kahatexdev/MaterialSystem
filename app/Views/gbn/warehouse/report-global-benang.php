@@ -146,18 +146,18 @@
                             const returStock = item.retur_stock || 0;
                             const qtyPo = item.qty_po || 0;
                             const qtyPoPlus = item.qty_po_plus || 0;
-                            const kgsOut = item.kgs_out || 0;
+                            const pakaiArea = item.pakai_area || 0;
+                            const returArea = item.retur_area || 0;
                             console.log('stock awal :', stockAwal);
                             console.log('opname :', stockOpname);
                             console.log('datang solid :', datangSolid);
                             console.log('retur stock :', returStock);
                             console.log('qty po :', qtyPo);
                             console.log('po plus :', qtyPoPlus);
-                            console.log('kgsout :', kgsOut);
                             // console.log('stock :', stockAwal, stockOpname, datangSolid, returStock, qtyPo, qtyPoPlus, kgsOut);
 
                             const tagihanBenang = (stockAwal + stockOpname + datangSolid + returStock) - qtyPo - qtyPoPlus;
-                            const jatahArea = qtyPo - kgsOut;
+                            const jatahArea = pakaiArea - returArea - qtyPo - qtyPoPlus;
                             console.log('jatah area :', jatahArea);
 
                             dataTable.row.add([
