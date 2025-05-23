@@ -64,7 +64,7 @@
                         <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
                             <div class="kebutuhan-item">
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="itemType">Item Type</label>
                                             <select class="form-control item-type" name="items[0][item_type]" required>
@@ -77,7 +77,30 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Jenis Benang</label>
+                                            <select class="form-control texture" name="items[0][jenis_benang]" required>
+                                                <option value="">Pilih Jenis Benang</option>
+                                                <option value="DTY">DTY</option>
+                                                <option value="FDY">FDY</option>
+                                                <option value="NFY">NFY</option>
+                                                <option value="POY">POY</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Spesifikasi Benang</label>
+                                            <select class="form-control fillamen" name="items[0][spesifikasi_benang]" required>
+                                                <option value="">Pilih Spesifikasi Benang</option>
+                                                <option value="SIM DH">SIM DH</option>
+                                                <option value="NIM DH">NIM DH</option>
+                                                <option value="LIM DH">LIM DH</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Kode Warna</label>
                                             <select class="form-control kode-warna" name="items[0][kode_warna]" required>
@@ -117,7 +140,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <label for="kg_percones">Permintan Kelos (Kg Cones)</label>
-                                        <input type="text" class="form-control kg-percones" name="items[0][kg_percones]" placeholder="Kg">
+                                        <input type="number" step="0.01" min="0.01" class="form-control kg-percones" name="items[0][kg_percones]" placeholder="Kg">
                                     </div>
                                     <div class="col-md-6">
                                         <label for="jumlah_cones">Permintan Kelos (Total Cones)</label>
@@ -270,7 +293,7 @@
             newTabPane.innerHTML = `
                             <div class="kebutuhan-item">
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="itemType">Item Type</label>
                                             <select class="form-control item-type" name="items[${tabIndex - 1}][item_type]" required>
@@ -283,7 +306,30 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Jenis Benang</label>
+                                            <select class="form-control texture" name="items[${tabIndex - 1}][jenis_benang]" required>
+                                                <option value="">Pilih Jenis Benang</option>
+                                                <option value="DTY">DTY</option>
+                                                <option value="FDY">FDY</option>
+                                                <option value="NFY">NFY</option>
+                                                <option value="POY">POY</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Spesifikasi Benang</label>
+                                            <select class="form-control fillamen" name="items[0][spesifikasi_benang]" required>
+                                                <option value="">Pilih Spesifikasi Benang</option>
+                                                <option value="SIM DH">SIM DH</option>
+                                                <option value="NIM DH">NIM DH</option>
+                                                <option value="LIM DH">LIM DH</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Kode Warna</label>
                                             <select class="form-control kode-warna" name="items[${tabIndex - 1}][kode_warna]" required>
