@@ -780,6 +780,7 @@ class MasterdataController extends BaseController
             $db->transComplete();
             if (! $db->transStatus()) {
                 return redirect()->back()->with('error', 'Gagal menyimpan PO Covering.');
+                dd('Transaksi gagal', $db->error(), $db->getLastQuery());
             }
 
             return redirect()->to(base_url($this->role . '/material/' . $id_order))
