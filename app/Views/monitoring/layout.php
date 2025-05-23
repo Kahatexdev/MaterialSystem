@@ -4,8 +4,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="apple-touch-icon" sizes="76x76" href="<?= base_url('../assets/img/apple-icon.png') ?>">
-    <link rel="icon" type="image/png" href="<?= base_url('../assets/img/favicon.png') ?>">
+    <link rel="apple-touch-icon" sizes="76x76" href="<?= base_url('../assets/ms2.png') ?>">
+    <link rel="icon" type="image/png" href="<?= base_url('../assets/ms2.png') ?>">
     <title>
         <?= $title ?>
     </title>
@@ -77,13 +77,14 @@
 
 <body class="g-sidenav-show  bg-gray-100">
     <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " data-color="info" id="sidenav-main">
+
         <div class="sidenav-header">
             <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
-            <a class="navbar-brand m-0" href="">
-                <div class="icon icon-shape bg-dark shadow text-center border-radius-lg" style="font-size: 17px;">
-                    <i class="fab fa-accusoft" style="color: white;"></i>
+            <a class="navbar-brand m-0" href="<?= base_url('/gbn') ?> " target="_blank">
+                <div class="icon icon-shape bg-white shadow text-center border-radius-lg" style="font-size: 17px;">
+                    <img src="<?= base_url('assets/ms2.png') ?>" alt="Logo" style="max-height: 100%; max-width: 100%; object-fit: contain;">
                 </div>
-                <span class="ms-1 font-weight-bold" style="font-size: 20px;">Material System</span>
+                <span class="ms-1 font-weight-bold" style="font-size: 18px;">Material System</span>
             </a>
         </div>
         <hr class="horizontal dark mt-0">
