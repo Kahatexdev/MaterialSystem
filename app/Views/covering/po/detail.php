@@ -13,9 +13,17 @@
                                 <label for="noModelSelect">No Model</label>
                                 <select class="form-control" id="noModelSelect">
                                     <option value="">Pilih No Model</option>
-                                    <?php foreach ($poDetail as $row) : ?>
+                                    <?php
+                                        $uniqueModels = [];
+                                        foreach ($poDetail as $row) :
+                                            if (!in_array($row['no_model'], $uniqueModels)) :
+                                                $uniqueModels[] = $row['no_model'];
+                                        ?>
                                         <option value="<?= $row['no_model'] ?>"><?= $row['no_model'] ?></option>
-                                    <?php endforeach; ?>
+                                    <?php
+                                            endif;
+                                        endforeach;
+                                    ?>
                                 </select>
                             </div>
                         </div>
@@ -121,7 +129,7 @@
                 noModel = noModel.replace("POCOVERING", "").replace(/_/g, "").trim();
             }
 
-            console.log(noModel);
+            // console.log(noModel);
             if (noModel) {
                 $.ajax({
                     url: "<?= base_url($role . '/getDetailByNoModel') ?>/" + tglPO + "/" + noModel,
