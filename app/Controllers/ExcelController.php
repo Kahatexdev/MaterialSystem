@@ -1417,22 +1417,23 @@ class ExcelController extends BaseController
         exit;
     }
 
-    public function excelPemesananKaretCovering()
+    public function excelPemesananCovering()
     {
-        $tanggal_awal = $this->request->getGet('tanggal_awal');
-        $tanggal_akhir = $this->request->getGet('tanggal_akhir');
-        $data = $this->pemesananModel->getFilterPemesananKaret($tanggal_awal, $tanggal_akhir);
+        $tglPakai = $this->request->getGet('tgl_pakai');
+        $jenis = $this->request->getGet('jenis');
+
+        $data = $this->pemesananModel->getDataPemesananCovering($tglPakai, $jenis);
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         // Judul
-        $sheet->mergeCells('A1:K1');
-        $sheet->setCellValue('A1', 'REPORT PEMESANAN KARET COVERING');
+        $sheet->mergeCells('A1:J1');
+        $sheet->setCellValue('A1', 'REPORT PEMESANAN ' . $jenis . ' COVERING');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $headers = ['No', 'Tanggal Pakai', 'Item Type', 'Warna', 'Kode Warna', 'No Model', 'Jalan MC', 'Total Pesan (Kg)', 'Cones', 'Area', 'Keterangan'];
+        $headers = ['No', 'Tanggal Pakai', 'Item Type', 'Warna', 'Kode Warna', 'No Model', 'Jalan MC', 'Total Pesan (Kg)', 'Cones', 'Keterangan'];
         $col = 'A';
         foreach ($headers as $header) {
             $sheet->setCellValue($col . '3', $header);
@@ -1451,10 +1452,9 @@ class ExcelController extends BaseController
             $sheet->setCellValue('E' . $row, $item['kode_warna']);
             $sheet->setCellValue('F' . $row, $item['no_model']);
             $sheet->setCellValue('G' . $row, $item['jl_mc']);
-            $sheet->setCellValue('H' . $row, $item['ttl_berat_cones']);
-            $sheet->setCellValue('I' . $row, $item['ttl_qty_cones']);
-            $sheet->setCellValue('J' . $row, $item['admin']);
-            $sheet->setCellValue('K' . $row, $item['keterangan']);
+            $sheet->setCellValue('H' . $row, $item['ttl_kg']);
+            $sheet->setCellValue('I' . $row, $item['ttl_cns']);
+            $sheet->setCellValue('J' . $row, $item['keterangan']);
             $row++;
         }
 
@@ -1468,15 +1468,15 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle("A3:K{$lastRow}")->applyFromArray($styleArray);
+        $sheet->getStyle("A3:J{$lastRow}")->applyFromArray($styleArray);
 
         // Auto-size
-        foreach (range('A', 'K') as $col) {
+        foreach (range('A', 'J') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
         // Download
-        $filename = 'Report_Pemesanan_Karet' . '.xlsx';
+        $filename = 'Report_Pemesanan_' . $jenis . '_Tgl_Pakai_' . $tglPakai . '.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"$filename\"");
         header('Cache-Control: max-age=0');
@@ -1486,17 +1486,18 @@ class ExcelController extends BaseController
         exit;
     }
 
-    public function excelPemesananSpandexCovering()
+    public function excelPemesananCoveringPerArea()
     {
-        $tanggal_awal = $this->request->getGet('tanggal_awal');
-        $tanggal_akhir = $this->request->getGet('tanggal_akhir');
-        $data = $this->pemesananModel->getFilterPemesananSpandex($tanggal_awal, $tanggal_akhir);
+        $tglPakai = $this->request->getGet('tgl_pakai');
+        $jenis = $this->request->getGet('jenis');
+
+        $data = $this->pemesananModel->getDataPemesananCoveringPerArea($tglPakai, $jenis);
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         // Judul
         $sheet->mergeCells('A1:K1');
-        $sheet->setCellValue('A1', 'REPORT PEMESANAN SPANDEX COVERING');
+        $sheet->setCellValue('A1', 'REPORT PEMESANAN ' . $jenis . ' COVERING');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
@@ -1520,8 +1521,8 @@ class ExcelController extends BaseController
             $sheet->setCellValue('E' . $row, $item['kode_warna']);
             $sheet->setCellValue('F' . $row, $item['no_model']);
             $sheet->setCellValue('G' . $row, $item['jl_mc']);
-            $sheet->setCellValue('H' . $row, $item['ttl_berat_cones']);
-            $sheet->setCellValue('I' . $row, $item['ttl_qty_cones']);
+            $sheet->setCellValue('H' . $row, $item['ttl_kg']);
+            $sheet->setCellValue('I' . $row, $item['ttl_cns']);
             $sheet->setCellValue('J' . $row, $item['admin']);
             $sheet->setCellValue('K' . $row, $item['keterangan']);
             $row++;
@@ -1545,7 +1546,7 @@ class ExcelController extends BaseController
         }
 
         // Download
-        $filename = 'Report_Pemesanan_Spandex' . '.xlsx';
+        $filename = 'Report_Pemesanan_' . $jenis . '_Per_Area' . '.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"$filename\"");
         header('Cache-Control: max-age=0');

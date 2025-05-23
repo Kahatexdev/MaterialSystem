@@ -122,16 +122,20 @@
                     dataTable.clear().draw();
                     if (response.length > 0) {
                         $.each(response, function(index, item) {
-                            var link1 = '<a href="' + item.url_excel1 + '" target="_blank">' +
+                            var tgl = item;
+                            var jenis = "KARET";
+
+                            var link1 = '<a href="<?= base_url($role . '/excelPemesananCovering') ?>?tgl_pakai=' + tgl + '&jenis=' + jenis + '" target="_blank">' +
                                 '<i class="fas fa-file-excel"></i>' +
                                 '</a>';
-                            var link2 = '<a href="' + item.url_excel2 + '" target="_blank">' +
+
+                            var link2 = '<a href="<?= base_url($role . '/excelPemesananCoveringPerArea') ?>?tgl_pakai=' + tgl + '&jenis=' + jenis + '" target="_blank">' +
                                 '<i class="fas fa-file-excel"></i>' +
                                 '</a>';
 
                             dataTable.row.add([
                                 index + 1,
-                                item.tgl_pakai,
+                                tgl,
                                 link1,
                                 link2
                             ]).draw(false);
@@ -152,11 +156,11 @@
             loadData();
         });
 
-        $('#btnExport').click(function() {
-            let tanggal_awal = $('#tglAwal').val().trim();
-            let tanggal_akhir = $('#tglAkhir').val().trim();
-            window.location.href = "<?= base_url($role . '/excelPemesananKaretCovering') ?>?tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
-        });
+        // $('#btnExport').click(function() {
+        //     let tanggal_awal = $('#tglAwal').val().trim();
+        //     let tanggal_akhir = $('#tglAkhir').val().trim();
+        //     window.location.href = "<?= base_url($role . '/excelPemesananKaretCovering') ?>?tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
+        // });
 
         dataTable.clear().draw();
     });

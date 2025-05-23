@@ -349,10 +349,11 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('detailPemesanan/(:any)', 'CoveringPemesananController::detailPemesanan/$1');
     $routes->get('reportPemesananKaretCovering', 'CoveringPemesananController::reportPemesananKaretCovering');
     $routes->get('filterPemesananKaretCovering', 'CoveringPemesananController::filterPemesananKaretCovering');
-    $routes->get('excelPemesananKaretCovering', 'ExcelController::excelPemesananKaretCovering');
+    $routes->get('excelPemesananCovering', 'ExcelController::excelPemesananCovering');
     $routes->get('reportPemesananSpandexCovering', 'CoveringPemesananController::reportPemesananSpandexCovering');
     $routes->get('filterPemesananSpandexCovering', 'CoveringPemesananController::filterPemesananSpandexCovering');
-    $routes->get('excelPemesananSpandexCovering', 'ExcelController::excelPemesananSpandexCovering');
+    $routes->get('excelPemesananCoveringPerArea', 'ExcelController::excelPemesananCoveringPerArea');
+    // $routes->get('excelPemesananSpandexCovering', 'ExcelController::excelPemesananSpandexCovering');
 
     $routes->post('updatePemesanan/(:any)', 'CoveringPemesananController::updatePemesanan/$1');
     $routes->get('generatePemesananSpandexKaretCovering/(:any)/(:any)', 'PdfController::generatePemesananSpandexKaretCovering/$1/$2');

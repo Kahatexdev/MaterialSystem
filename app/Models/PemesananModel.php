@@ -641,4 +641,34 @@ class PemesananModel extends Model
 
         return $query->get()->getResultArray();
     }
+    public function getDataPemesananCovering($tanggal_pakai, $jenis)
+    {
+        $this->select('pemesanan.*, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
+            // ->where('tp.ttl_jl_mc >', 0)
+            ->where('pemesanan.status_kirim', 'YA')
+            ->where('pemesanan.tgl_pakai', $tanggal_pakai)
+            ->where('master_material.jenis', $jenis)
+            ->groupBy('material.item_type, material.kode_warna');
+
+        return $this->findAll();
+    }
+    public function getDataPemesananCoveringPerArea($tanggal_pakai, $jenis)
+    {
+        $this->select('pemesanan.*, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
+            // ->where('tp.ttl_jl_mc >', 0)
+            ->where('pemesanan.status_kirim', 'YA')
+            ->where('master_material.jenis', $jenis)
+            ->where('pemesanan.tgl_pakai', $tanggal_pakai)
+            ->groupBy('material.item_type, material.kode_warna, pemesanan.admin');
+
+        return $this->findAll();
+    }
 }

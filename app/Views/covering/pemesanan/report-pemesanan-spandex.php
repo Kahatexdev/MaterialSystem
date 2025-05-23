@@ -129,18 +129,22 @@
                     dataTable.clear().draw();
                     if (response.length > 0) {
                         $.each(response, function(index, item) {
+                            var tgl = item;
+                            var jenis = "SPANDEX";
+
+                            var link1 = '<a href="<?= base_url($role . '/excelPemesananCovering') ?>?tgl_pakai=' + tgl + '&jenis=' + jenis + '" target="_blank">' +
+                                '<i class="fas fa-file-excel"></i>' +
+                                '</a>';
+
+                            var link2 = '<a href="<?= base_url($role . '/excelPemesananCoveringPerArea') ?>?tgl_pakai=' + tgl + '&jenis=' + jenis + '" target="_blank">' +
+                                '<i class="fas fa-file-excel"></i>' +
+                                '</a>';
+
                             dataTable.row.add([
                                 index + 1,
-                                item.tgl_pakai,
-                                item.item_type,
-                                item.color,
-                                item.kode_warna,
-                                item.no_model,
-                                item.jl_mc,
-                                item.ttl_berat_cones,
-                                item.ttl_qty_cones,
-                                item.admin,
-                                item.keterangan
+                                tgl,
+                                link1,
+                                link2
                             ]).draw(false);
                         });
 
@@ -159,11 +163,11 @@
             loadData();
         });
 
-        $('#btnExport').click(function() {
-            let tanggal_awal = $('#tglAwal').val().trim();
-            let tanggal_akhir = $('#tglAkhir').val().trim();
-            window.location.href = "<?= base_url($role . '/excelPemesananSpandexCovering') ?>?tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
-        });
+        // $('#btnExport').click(function() {
+        //     let tanggal_awal = $('#tglAwal').val().trim();
+        //     let tanggal_akhir = $('#tglAkhir').val().trim();
+        //     window.location.href = "<?= base_url($role . '/excelPemesananSpandexCovering') ?>?tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
+        // });
 
         dataTable.clear().draw();
     });

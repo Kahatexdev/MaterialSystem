@@ -93,7 +93,11 @@ class CoveringPemesananController extends BaseController
 
         $data = $this->pemesananModel->getFilterPemesananKaret($tanggalAwal, $tanggalAkhir);
 
-        return $this->response->setJSON($data);
+        // Ambil hanya kolom 'tgl_pakai' lalu buat jadi unik
+        $tglPakaiList = array_column($data, 'tgl_pakai');
+        $uniqTglPakai = array_values(array_unique($tglPakaiList));
+
+        return $this->response->setJSON($uniqTglPakai);
     }
 
     public function reportPemesananSpandexCovering()
