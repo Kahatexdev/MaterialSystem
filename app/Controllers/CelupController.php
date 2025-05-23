@@ -204,14 +204,16 @@ class CelupController extends BaseController
                     'tgl_bon' => $id['tanggal_bon'],
                     'tgl_celup' => $id['tanggal_celup'],
                     'tgl_bongkar' => $id['tanggal_bongkar'],
-                    'tgl_press' => $id['tanggal_press'],
-                    'tgl_oven' => $id['tanggal_oven'],
+                    'tgl_press_oven' => $id['tanggal_press_oven'],
+                    // 'tgl_oven' => $id['tanggal_oven'],
                     'tgl_tl' => $id['tanggal_tl'],
                     'tgl_teslab' => $id['tanggal_teslab'],
                     'tgl_rajut_pagi' => $id['tanggal_rajut_pagi'],
                     'tgl_kelos' => $id['tanggal_kelos'],
+                    'serah_terima_acc' => $id['serah_terima_acc'],
                     'tgl_acc' => $id['tanggal_acc'],
                     'tgl_reject' => $id['tanggal_reject'],
+                    'tgl_matching' => $id['tanggal_matching'],
                     'tgl_pb' => $id['tanggal_perbaikan'],
                     'last_status' => $id['last_status'],
                     'ket_daily_cek' => $id['ket_daily_cek'],
@@ -238,14 +240,16 @@ class CelupController extends BaseController
         $tglBon = $this->request->getPost('tgl_bon');
         $tglCelup = $this->request->getPost('tgl_celup');
         $tglBongkar = $this->request->getPost('tgl_bongkar');
-        $tglPress = $this->request->getPost('tgl_press');
-        $tglOven = $this->request->getPost('tgl_oven');
+        $tglPressOven = $this->request->getPost('tgl_press_oven');
+        // $tglOven = $this->request->getPost('tgl_oven');
         $tglTL = $this->request->getPost('tgl_tl');
         $tglTesLab = $this->request->getPost('tgl_teslab');
         $tglRajut = $this->request->getPost('tgl_rajut_pagi');
+        $tglSerahTerimaAcc = $this->request->getPost('serah_terima_acc');
         $tglACC = $this->request->getPost('tgl_acc');
         $tglKelos = $this->request->getPost('tgl_kelos');
         $tglReject = $this->request->getPost('tgl_reject');
+        $tglMatching = $this->request->getPost('tgl_matching');
         $tglPB = $this->request->getPost('tgl_pb');
         $user  = session()->get('username');
 
@@ -254,14 +258,16 @@ class CelupController extends BaseController
             'Buka Bon' => $tglBon,
             'Celup' => $tglCelup,
             'Bongkar' => $tglBongkar,
-            'Press' => $tglPress,
-            'Oven' => $tglOven,
+            'Press Oven' => $tglPressOven,
+            // 'Oven' => $tglOven,
             'TL' => $tglTL,
             'TesLab' => $tglTesLab,
             'Rajut Pagi' => $tglRajut,
-            'ACC' => $tglACC,
+            'Serah Terima ACC' => $tglSerahTerimaAcc,
+            'ACC KK' => $tglACC,
             'Kelos' => $tglKelos,
-            'Reject' => $tglReject,
+            'Reject KK' => $tglReject,
+            'Matching' => $tglMatching,
             'PB' => $tglPB,
         ];
 
@@ -290,14 +296,16 @@ class CelupController extends BaseController
         if ($tglBon) $dataUpdate['tanggal_bon'] = $tglBon;
         if ($tglCelup) $dataUpdate['tanggal_celup'] = $tglCelup;
         if ($tglBongkar) $dataUpdate['tanggal_bongkar'] = $tglBongkar;
-        if ($tglPress) $dataUpdate['tanggal_press'] = $tglPress;
-        if ($tglOven) $dataUpdate['tanggal_oven'] = $tglOven;
+        if ($tglPressOven) $dataUpdate['tgl_press_oven'] = $tglPressOven;
+        // if ($tglOven) $dataUpdate['tanggal_oven'] = $tglOven;
         if ($tglTL) $dataUpdate['tanggal_tl'] = $tglTL;
         if ($tglTesLab) $dataUpdate['tanggal_teslab'] = $tglTesLab;
         if ($tglRajut) $dataUpdate['tanggal_rajut_pagi'] = $tglRajut;
+        if ($tglSerahTerimaAcc) $dataUpdate['serah_terima_acc'] = $tglSerahTerimaAcc;
         if ($tglACC) $dataUpdate['tanggal_acc'] = $tglACC;
         if ($tglKelos) $dataUpdate['tanggal_kelos'] = $tglKelos;
         if ($tglReject) $dataUpdate['tanggal_reject'] = $tglReject;
+        if ($tglMatching) $dataUpdate['tanggal_matching'] = $tglMatching;
         if ($tglPB) $dataUpdate['tanggal_perbaikan'] = $tglPB;
         if ($user) $dataUpdate['user_cek_status'] = $user;
         if ($ketDailyCek) $dataUpdate['ket_daily_cek'] = $ketDailyCek;
@@ -318,7 +326,7 @@ class CelupController extends BaseController
 
         // Jika tgl_celup diisi, update last_status menjadi 'celup'
         if (!empty($tglPress)) {
-            $dataUpdate['last_status'] = 'press';
+            $dataUpdate['last_status'] = 'press_oven';
         }
 
         // Jika tgl_celup diisi, update last_status menjadi 'celup'
