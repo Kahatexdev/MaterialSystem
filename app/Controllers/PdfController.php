@@ -234,9 +234,14 @@ class PdfController extends BaseController
             $rowHeight = 5;
             $heights = [];
 
+            // Kolom item_type dengan center vertikal dan horizontal
+            $itemType = $row['spesifikasi_benang']
+                ? $row['item_type'] . ' (' . $row['spesifikasi_benang'] . ')'
+                : $row['item_type'];
+
             // hitung jumlah baris per kolom
             $heights = [
-                'item_type'      => ceil($pdf->GetStringWidth($row['item_type']) / 25) * $rowHeight,
+                'item_type'      => ceil($pdf->GetStringWidth($itemType) / 25) * $rowHeight,
                 'ukuran'         => ceil($pdf->GetStringWidth($row['ukuran']) / 12) * $rowHeight,
                 'bentuk_celup'   => ceil($pdf->GetStringWidth($row['bentuk_celup']) / 17) * $rowHeight,
                 'buyer'          => ceil($pdf->GetStringWidth($row['buyer']) / 10) * $rowHeight,
@@ -263,7 +268,7 @@ class PdfController extends BaseController
             $pdf->Cell(6, $rowHeight, $no++, 1, 0, 'C'); // No
             $xNow = $pdf->GetX();
             $rowItem = $heights['item_type'] / 5 > 1 ? 5 : $rowHeight;
-            $pdf->MultiCell(25, $rowItem, $row['item_type'], 1, 'C'); // Jenis
+            $pdf->MultiCell(25, $rowItem, $itemType, 1, 'C'); // Jenis
             $pdf->SetXY($xNow + 25, $yStart);
 
             $xNow = $pdf->GetX();
@@ -1533,7 +1538,7 @@ class PdfController extends BaseController
 
             // hitung jumlah baris per kolom
             $heights = [
-                'item_type'      => ceil($pdf->GetStringWidth($po['item_type']) / 26) * $rowHeight,
+                'item_type'      => ceil($pdf->GetStringWidth($po['item_type'] . ' (' . $po['spesifikasi_benang'] . ')') / 26) * $rowHeight,
                 'ukuran'         => ceil($pdf->GetStringWidth($po['ukuran']) / 12) * $rowHeight,
                 'bentuk_celup'   => ceil($pdf->GetStringWidth($po['bentuk_celup']) / 12) * $rowHeight,
                 'buyer'          => ceil($pdf->GetStringWidth($po['buyer']) / 10) * $rowHeight,
@@ -1550,7 +1555,7 @@ class PdfController extends BaseController
             $pdf->Cell(6, $rowHeight, $no++, 1, 0, 'C'); // No
             $xNow = $pdf->GetX();
             $rowItem = $heights['item_type'] / 4 > 1 ? 4 : $rowHeight;
-            $pdf->MultiCell(26, $rowItem, $po['item_type'], 1, 'C'); // Jenis
+            $pdf->MultiCell(26, $rowItem, $po['item_type'] . ' (' . $po['spesifikasi_benang'] . ')', 1, 'C'); // Jenis
             $pdf->SetXY($xNow + 26, $yStart);
 
             $xNow = $pdf->GetX();

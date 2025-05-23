@@ -40,11 +40,21 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty PO</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty PO(+)</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Stock Awal</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty Datang</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Retur GBN</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Retur Area</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kirim Area</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kirim Lain-Lain</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Stock Opname</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Datang Solid</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">(+) Datang Solid</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Ganti Retur</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Datang Lurex</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">(+) Datang Lurex</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Retur PB GBN</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Retur PB Area</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Pakai Area</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Pakai Lain-Lain</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Retur Stock</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Retur Titip</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Dipinjam</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Pindah Order</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Pindah Ke Stock Mati</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Stock Akhir</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tagihan GBN</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jatah Area</th>
@@ -116,22 +126,32 @@
 
                             dataTable.row.add([
                                 index + 1,
-                                item.no_model || '-',
-                                item.item_type || '-',
-                                item.kode_warna || '-',
-                                item.color || '-',
-                                fmt(loss),
-                                fmt(kgs),
-                                '-',
-                                fmt(kgsStockAwal),
-                                fmt(kgsKirim),
-                                '-',
-                                fmt(kgsRetur),
-                                fmt(kgsOut),
-                                fmt(kgsOtherOut),
-                                fmt(kgsInOut),
-                                fmt(tagihanGbn),
-                                fmt(jatahArea),
+                                item.no_model || '-', // no model
+                                item.item_type || '-', // item type
+                                item.kode_warna || '-', //kode warna
+                                item.color || '-', // warna
+                                fmt(loss), // loss
+                                fmt(kgs), // qty po
+                                '-', // qty po (+)
+                                fmt(kgsStockAwal), // stock awal
+                                '-', // stock opname
+                                fmt(kgsKirim), // datang solid
+                                '-', // (+) datang solid
+                                '-', // ganti retur
+                                '-', // datang lurex
+                                '-', // (+) datang lurex
+                                '-', // retur pb gbn
+                                fmt(kgsRetur), // retur pb area
+                                fmt(kgsOut), // pakai area 
+                                fmt(kgsOtherOut), // pakai lain-lain
+                                '-', // retur stock
+                                '-', // retur titip
+                                '-', // dipinjam
+                                '-', // pindah order
+                                '-', // pindah ke stock mati
+                                fmt(kgsInOut), // stock akhir
+                                fmt(tagihanGbn), // tagihan gbn
+                                fmt(jatahArea), // jatah area
                             ]).draw(false);
                         });
 

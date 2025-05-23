@@ -47,6 +47,33 @@
                         <!-- <option value="Covering">Covering</option> -->
                     </select>
                 </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Jenis Benang</label>
+                                <select class="form-control texture" name="jenis_benang" required>
+                                    <option value="">Pilih Jenis Benang</option>
+                                    <option value="DTY">DTY</option>
+                                    <option value="FDY">FDY</option>
+                                    <option value="NFY">NFY</option>
+                                    <option value="POY">POY</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Spesifikasi Benang</label>
+                                <select class="form-control fillamen" name="spesifikasi_benang" required>
+                                    <option value="">Pilih Spesifikasi Benang</option>
+                                    <option value="SIM DH">SIM DH</option>
+                                    <option value="NIM DH">NIM DH</option>
+                                    <option value="LIM DH">LIM DH</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div id="kebutuhan-container">
                     <label>Pilih Bahan Baku</label>
