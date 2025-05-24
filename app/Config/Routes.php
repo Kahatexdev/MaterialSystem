@@ -319,6 +319,13 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('mesin/updateDataMesin', 'MesinCelupController::updateDataMesin');
     $routes->get('mesin/deleteDataMesin/(:num)', 'MesinCelupController::deleteDataMesin/$1');
 
+    $routes->get('po/bukaPoCovering', 'CoveringController::bukaPoCovering');
+    $routes->post('po/getDetailByTglPO', 'CoveringController::getDetailByTglPO');
+    $routes->get('po/getItemType/(:any)', 'CoveringController::getItemType/$1');
+    $routes->get('po/getKodeWarna', 'CoveringController::getKodeWarna');
+    $routes->get('po/getColor', 'CoveringController::getColor');
+    $routes->get('po/getTotalKgPo', 'CoveringController::getTotalKgPo');
+    $routes->post('po/saveOpenPOCovering', 'CoveringController::saveOpenPOCovering');
     $routes->get('poDetail/(:any)', 'CoveringController::poDetail/$1');
     $routes->get('getDetailByNoModel/(:any)/(:any)', 'CoveringController::getDetailByNoModel/$1/$2');
     $routes->post('po/simpanKeSession', 'CoveringController::simpanKeSession');
