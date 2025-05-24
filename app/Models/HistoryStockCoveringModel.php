@@ -20,10 +20,6 @@ class HistoryStockCoveringModel extends Model
         'lmd',
         'ttl_cns',
         'ttl_kg',
-        'box',
-        'no_rak',
-        'posisi_rak',
-        'no_palet',
         'admin',
         'keterangan'
     ];

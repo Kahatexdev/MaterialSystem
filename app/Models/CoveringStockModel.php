@@ -19,10 +19,6 @@ class CoveringStockModel extends Model
         'lmd',
         'ttl_cns',
         'ttl_kg',
-        'box',
-        'no_rak',
-        'posisi_rak',
-        'no_palet',
         'admin'
     ];
 
@@ -73,5 +69,13 @@ class CoveringStockModel extends Model
             ->where('code', $code)
             ->get()
             ->getRowArray();
+    }
+
+    public function getStockSingleCover($jenisBenang)
+    {
+        return $this->select('*')
+            // ->where('jenis', $jenisBenang)
+            ->orderBy('jenis', 'ASC')
+            ->findAll();
     }
 }

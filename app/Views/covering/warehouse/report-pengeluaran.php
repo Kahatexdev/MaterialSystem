@@ -53,10 +53,6 @@
                             <th text-center class="text-uppercase text-secondary text-xxs font-weight-bolder">LMD</th>
                             <th text-center class="text-uppercase text-secondary text-xxs font-weight-bolder">TTL CNS</th>
                             <th text-center class="text-uppercase text-secondary text-xxs font-weight-bolder">TTL KG</th>
-                            <th text-center class="text-uppercase text-secondary text-xxs font-weight-bolder">Box</th>
-                            <th text-center class="text-uppercase text-secondary text-xxs font-weight-bolder">No Rak</th>
-                            <th text-center class="text-uppercase text-secondary text-xxs font-weight-bolder">Posisi Rak</th>
-                            <th text-center class="text-uppercase text-secondary text-xxs font-weight-bolder">No Palet</th>
                             <th text-center class="text-uppercase text-secondary text-xxs font-weight-bolder">Admin</th>
                             <th text-center class="text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
                             <th text-center class="text-uppercase text-secondary text-xxs font-weight-bolder">Created At</th>
@@ -74,10 +70,6 @@
                                 <td class="text-center align-middle"><?= esc($row['lmd']) ?></td>
                                 <td class="text-center align-middle"><?= esc($row['ttl_cns']) ?></td>
                                 <td class="text-center align-middle"><?= esc($row['ttl_kg']) ?></td>
-                                <td class="text-center align-middle"><?= esc($row['box']) ?></td>
-                                <td class="text-center align-middle"><?= esc($row['no_rak']) ?></td>
-                                <td class="text-center align-middle"><?= esc($row['posisi_rak']) ?></td>
-                                <td class="text-center align-middle"><?= esc($row['no_palet']) ?></td>
                                 <td class="text-center align-middle"><?= esc($row['admin']) ?></td>
                                 <td class="text-center align-middle"><?= esc($row['keterangan']) ?></td>
                                 <td class="text-center align-middle"><?= esc($row['created_at']) ?></td>

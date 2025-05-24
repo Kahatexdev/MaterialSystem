@@ -342,6 +342,7 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('warehouse/excelPengeluaranCovering', 'ExcelController::excelPengeluaranCovering');
     $routes->get('warehouse/pengeluaran_jalur', 'CoveringController::pengeluaranJalur');
     $routes->get('warehouse/pengiriman_area', 'CoveringController::pengirimanArea');
+    $routes->post('warehouse/exportStockSingleCover/(:any)', 'ExcelController::exportStockSingleCover/$1');
 
     //Pemesanan
     $routes->get('pemesanan', 'CoveringPemesananController::index');
