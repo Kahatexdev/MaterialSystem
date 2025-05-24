@@ -66,17 +66,29 @@
         <div class="col-xl-12 col-sm-12 mb-xl-0 mb-4 mt-2">
             <div class="card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <h5 class="mb-0">
-                            Pemasukan
-                        </h5>
-                        <div class="d-flex gap-2">
-                            <button class="btn bg-gradient-info" data-bs-toggle="modal" data-bs-target="#inputManual">Input</button>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <h5 class="mb-0">Pemasukan</h5>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <!-- Tombol Input -->
+                            <button class="btn btn-sm bg-gradient-info d-flex align-items-center justify-content-center"
+                                data-bs-toggle="modal" data-bs-target="#inputManual" title="Input Manual">
+                                <i class="fas fa-plus"></i>
+                                <span class="d-none d-sm-inline ms-1">Input</span>
+                            </button>
+
+                            <!-- Tombol Reset -->
                             <form action="<?= base_url($role . '/reset_pemasukan') ?>" method="post">
-                                <button type="submit" class="btn bg-gradient-secondary"><i class="fas fa-redo"></i> Reset Data</button>
+                                <button type="submit" class="btn btn-sm bg-gradient-secondary d-flex align-items-center justify-content-center"
+                                    title="Reset Data">
+                                    <i class="fas fa-redo"></i>
+                                    <span class="d-none d-sm-inline ms-1">Reset</span>
+                                </button>
                             </form>
                         </div>
                     </div>
+
+
+
                     <div class="row">
                         <div class="col-lg-3 col-sm-12">
                             <form action="<?= base_url($role . '/pemasukan') ?>" method="post">
@@ -123,65 +135,52 @@
                                                     <input type="hidden" name="id_out_celup[]" value="<?= $data['id_out_celup'] ?>">
                                                     <td align="center"><input type="checkbox" name="checked_id[]" class="checkbox" value="<?= $no - 1 ?>"> <?= $no++ ?></td>
                                                     <td>
-                                                        <div class="form-group d-flex justify-content-end">
-                                                            <label for="tgl">Tanggal Masuk : <?= $today ?></label>
+                                                        <div class="mb-2 d-flex justify-content-between flex-wrap">
+                                                            <strong class="text-primary">Tanggal Masuk: <?= $today ?></strong>
                                                             <input type="date" class="form-control" name="tgl_masuk[]" value="<?= $formated ?>" hidden>
                                                         </div>
-                                                        <div class="form-group">
-                                                            <label for="tgl">Model : </label>
-                                                            <input type="text" class="form-control" name="no_model[]" value="<?= $data['no_model'] ?>" readonly>
+
+                                                        <div class="mb-2">
+                                                            <label class="form-label">Model:</label>
+                                                            <input type="text" class="form-control form-control-sm" name="no_model[]" value="<?= $data['no_model'] ?>" readonly>
                                                             <input type="hidden" name="id_retur[]" value="<?= $data['id_retur'] ?? NULL ?>">
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-6">
-                                                                <div class="form-group">
-                                                                    <label for="">Kode Benang:</label>
-                                                                    <input type="text" class="form-control" name="item_type[]" value="<?= $data['item_type'] ?>" readonly>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-6">
-                                                                <div class="form-group">
-                                                                    <label for="">Kode Warna:</label>
-                                                                    <input type="text" class="form-control" name="kode_warna[]" value="<?= $data['kode_warna'] ?>" readonly>
-                                                                </div>
-                                                            </div>
                                                         </div>
 
                                                         <div class="row">
-                                                            <div class="col-6">
-                                                                <div class="form-group">
-                                                                    <label for=""> Warna:</label>
-                                                                    <input type="text" class="form-control" name="warna[]" value="<?= $data['warna'] ?>" readonly>
-                                                                </div>
+                                                            <div class="col-12 col-md-6 mb-2">
+                                                                <label class="form-label">Kode Benang:</label>
+                                                                <input type="text" class="form-control form-control-sm" name="item_type[]" value="<?= $data['item_type'] ?>" readonly>
                                                             </div>
-                                                            <div class="col-6">
-                                                                <div class="form-group">
-                                                                    <label for=""> Lot:</label>
-                                                                    <input type="text" class="form-control" name="lot_kirim[]" value="<?= $data['lot_kirim'] ?? $data['lot_retur'] ?>" readonly>
-                                                                </div>
+                                                            <div class="col-12 col-md-6 mb-2">
+                                                                <label class="form-label">Kode Warna:</label>
+                                                                <input type="text" class="form-control form-control-sm" name="kode_warna[]" value="<?= $data['kode_warna'] ?>" readonly>
                                                             </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-6">
-                                                                <div class="form-group">
-                                                                    <label for=""> Kgs Kirim:</label>
-                                                                    <input type="number" class="form-control kgs_kirim" name="kgs_kirim[]" value="<?= $data['kgs_kirim'] ?? $data['kgs_retur'] ?>" readonly>
-                                                                </div>
+                                                            <div class="col-12 col-md-6 mb-2">
+                                                                <label class="form-label">Warna:</label>
+                                                                <input type="text" class="form-control form-control-sm" name="warna[]" value="<?= $data['warna'] ?>" readonly>
                                                             </div>
-                                                            <div class="col-6">
-                                                                <div class="form-group">
-                                                                    <label for="">Cones:</label>
-                                                                    <input type="number" class="form-control" name="cns_kirim[]" value="<?= $data['cones_kirim'] ?? $data['cns_retur'] ?>" readonly>
-                                                                </div>
+                                                            <div class="col-12 col-md-6 mb-2">
+                                                                <label class="form-label">Lot:</label>
+                                                                <input type="text" class="form-control form-control-sm" name="lot_kirim[]" value="<?= $data['lot_kirim'] ?? $data['lot_retur'] ?>" readonly>
+                                                            </div>
+                                                            <div class="col-12 col-md-6 mb-2">
+                                                                <label class="form-label">Kgs Kirim:</label>
+                                                                <input type="number" class="form-control form-control-sm kgs_kirim" name="kgs_kirim[]" value="<?= $data['kgs_kirim'] ?? $data['kgs_retur'] ?>" readonly>
+                                                            </div>
+                                                            <div class="col-12 col-md-6 mb-2">
+                                                                <label class="form-label">Cones:</label>
+                                                                <input type="number" class="form-control form-control-sm" name="cns_kirim[]" value="<?= $data['cones_kirim'] ?? $data['cns_retur'] ?>" readonly>
                                                             </div>
                                                         </div>
-                                                        <div class="form-group d-flex justify-content-end">
-                                                            <button type="button" class="btn btn-danger removeRow btn-hapus" data-id="<?= $data['id_out_celup'] ?>">
+
+                                                        <!-- Tombol Aksi -->
+                                                        <div class="d-flex justify-content-end gap-2 mt-2 flex-wrap">
+                                                            <button type="button" class="btn btn-sm btn-danger removeRow btn-hapus" title="Hapus Data" data-id="<?= $data['id_out_celup'] ?>">
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
-                                                            <!-- Tombol Komplain -->
-                                                            <button type="button" class="btn bg-gradient-warning btn-komplain ms-2" data-id="<?= $data['id_out_celup'] ?>" data-bs-toggle="modal" data-bs-target="#complainModal">
-                                                                <i class="fas fa-exclamation-triangle"></i> Komplain
+
+                                                            <button type="button" class="btn btn-sm bg-gradient-warning btn-komplain" title="Komplain" data-id="<?= $data['id_out_celup'] ?>" data-bs-toggle="modal" data-bs-target="#complainModal">
+                                                                <i class="fas fa-exclamation-triangle"></i> <span class="d-none d-sm-inline">Komplain</span>
                                                             </button>
                                                         </div>
                                                     </td>

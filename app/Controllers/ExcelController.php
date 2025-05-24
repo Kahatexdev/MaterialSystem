@@ -26,6 +26,7 @@ use App\Models\CoveringStockModel;
 use PhpOffice\PhpSpreadsheet\Style\{Border, Alignment, Fill};
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use PhpParser\Node\Stmt\Else_;
 
 class ExcelController extends BaseController
 {
@@ -2812,94 +2813,155 @@ class ExcelController extends BaseController
     public function exportReportGlobalBenang()
     {
         $key = $this->request->getGet('key');
-
-        $data = $this->stockModel->getFilterReportGlobalBenang($key);
-        // dd($data);
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        // Judul
-        $sheet->mergeCells('A1:AB1');
-        $sheet->setCellValue('A1', 'REPORT GLOBAL BENANG' . $key);
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
-        // Header
-        $headers = ['No', 'No Model', 'Item Type', 'Kode Warna', 'Warna', 'Loss', 'Qty PO', 'Qty PO(+)', 'Stock Awal', 'Stock Opname', 'Datang Solid', '(+)Datang Solid', 'Ganti Retur', 'Datang Lurex', '(+)Datang Lurex', 'Retur PB Gbn', 'Retur Pb Area', 'Pakai Area', 'Pakai Lain-Lain', 'Retur Stock', 'Retur Titip', 'Dipinjam', 'Pindah Order', 'Pindah Stock Mati', 'Stock Akhir', 'Tagihan Gbn', 'Jatah Area'];
-        $col = 'A';
-        foreach ($headers as $header) {
-            $sheet->setCellValue($col . '3', $header);
-            $sheet->getStyle($col . '3')->getFont()->setBold(true);
-            $col++;
-        }
-
-        // Data
-        $row = 4;
-        $no = 1;
-        foreach ($data as $item) {
-            // Format setiap nilai untuk memastikan nilai 0 dan angka dengan dua desimal
-            $sheet->setCellValue('A' . $row, $no++);
-            $sheet->setCellValue('B' . $row, $item['no_model'] ?: '-');
-            $sheet->setCellValue('C' . $row, $item['item_type'] ?: '-');
-            $sheet->setCellValue('D' . $row, $item['kode_warna'] ?: '-');
-            $sheet->setCellValue('E' . $row, $item['warna'] ?: '-');
-            $sheet->setCellValue('F' . $row, $item['loss'] . '%' ?: '-');
-            $sheet->setCellValue('G' . $row, $item['qty_po'] ?: 0);
-            // $sheet->setCellValue('H' . $row, $item['qty_po_plus'] ?: 0);
-            $sheet->setCellValue('I' . $row, $item['kgs_stock_awal'] ?: 0);
-            // $sheet->setCellValue('J' . $row, $item['stock_opname'] ?: 0);
-            // $sheet->setCellValue('K' . $row, $item['datang_solid'] ?: 0);
-            // $sheet->setCellValue('L' . $row, $item['datang_solid_plus'] ?: 0);
-            // $sheet->setCellValue('M' . $row, $item['ganti_retur'] ?: 0);
-            // $sheet->setCellValue('N' . $row, $item['datang_lurex'] ?: 0);
-            // $sheet->setCellValue('O' . $row, $item['datang_lurex_plus'] ?: 0);
-            // $sheet->setCellValue('P' . $row, $item['retur_pb_gbn'] ?: 0);
-            // $sheet->setCellValue('Q' . $row, $item['retur_pb_area'] ?: 0);
-            // $sheet->setCellValue('R' . $row, $item['pakai_area'] ?: 0);
-            // $sheet->setCellValue('S' . $row, $item['pakai_lain_lain'] ?: 0);
-            // $sheet->setCellValue('T' . $row, $item['retur_stock'] ?: 0);
-            // $sheet->setCellValue('V' . $row, $item['retur_titip'] ?: 0);
-            // $sheet->setCellValue('W' . $row, $item['dipinjam'] ?: 0);
-            // $sheet->setCellValue('X' . $row, $item['pindah_order'] ?: 0);
-            // $sheet->setCellValue('Y' . $row, $item['pindah_stock_mati'] ?: 0);
-            // $sheet->setCellValue('Z' . $row, $item['stock_akhir'] ?: 0);
-
-            // Tagihan GBN dan Jatah Area perhitungan
-            // $tagihanGbn = isset($item['kgs']) ? $item['kgs'] - $item['kgs_out'] : 0;
-            // $jatahArea = isset($item['kgs']) ? $item['kgs'] - $item['kgs_kirim'] : 0;
-            $tagihanGbn = ($item['kgs_stock_awal'] + $item['stock_opname'] + $item['datang_solid'] + $item['retur_stock']) - $item['qty_po'] - $item['qty_po_plus'] ?? 0;
-            $jatahArea = isset($item['kgs']) ? $item['kgs'] - $item['kgs_kirim'] : 0;
-
-            // Format Tagihan GBN dan Jatah Area
-            $sheet->setCellValue('AA' . $row, number_format($tagihanGbn, 2, '.', ''));
-            $sheet->setCellValue('AB' . $row, number_format($jatahArea, 2, '.', ''));
-            $row++;
-        }
-
-        // Border
-        $lastRow = $row - 1;
-        $styleArray = [
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => ['argb' => 'FF000000'],
-                ],
-            ],
+        // Daftar judul sheet—juga dipakai sebagai filter ke model
+        $sheetTitles = [
+            'GLOBAL BENANG ' . $key,
+            'STOCK AWAL ' . $key,
+            'DATANG SOLID ' . $key,
+            '(+) DATANG SOLID ' . $key,
+            'GANTI RETUR ' . $key,
+            'DATANG LUREX ' . $key,
+            '(+) DATANG LUREX ' . $key,
+            'RETUR PERBAIKAN GBN ' . $key,
+            'RETUR PERBAIKAN AREA ' . $key,
+            'PAKAI AREA ' . $key,
+            'PAKAI LAIN-LAIN ' . $key,
+            'RETUR STOCK ' . $key,
+            'RETUR TITIP ' . $key,
+            'ORDER ' . $key . ' DIPINJAM',
+            'PINDAH ORDER ' . $key,
         ];
-        $sheet->getStyle("A3:AB{$lastRow}")->applyFromArray($styleArray);
 
-        // Auto-size
-        foreach (range('A', 'AB') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        // Hapus sheet default kosong
+        $spreadsheet->removeSheetByIndex(0);
+
+        foreach ($sheetTitles as $title) {
+            $data = $this->stockModel->getFilterReportGlobalBenang($key);
+
+            $sheet = $spreadsheet->createSheet();
+            $sheet->setTitle($title);
+
+            // Judul di baris 1
+            $sheet->mergeCells('A1:AA1');
+            $sheet->setCellValue('A1', $title);
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+            $sheet->getStyle('A1')->getAlignment()
+                ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            // Header di baris 3
+            $headers = [
+                'No',
+                'No Model',
+                'Item Type',
+                'Kode Warna',
+                'Warna',
+                'Loss',
+                'Qty PO',
+                'Qty PO(+)',
+                'Stock Awal',
+                'Stock Opname',
+                'Datang Solid',
+                '(+)Datang Solid',
+                'Ganti Retur',
+                'Datang Lurex',
+                '(+)Datang Lurex',
+                'Retur PB Gbn',
+                'Retur Pb Area',
+                'Pakai Area',
+                'Pakai Lain-Lain',
+                'Retur Stock',
+                'Retur Titip',
+                'Dipinjam',
+                'Pindah Order',
+                'Pindah Stock Mati',
+                'Stock Akhir',
+                'Tagihan Gbn',
+                'Jatah Area'
+            ];
+            $col = 'A';
+            foreach ($headers as $header) {
+                $sheet->setCellValue($col . '3', $header);
+                $sheet->getStyle($col . '3')->getFont()->setBold(true);
+                $sheet->getStyle($col . '3')->getAlignment()
+                    ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $col++;
+            }
+
+            // Isi Data mulai baris 4
+            $row = 4;
+            $no = 1;
+            foreach ($data as $item) {
+                $sheet->setCellValue('A' . $row, $no++);
+                $sheet->setCellValue('B' . $row, $item['no_model'] ?: '-');
+                $sheet->setCellValue('C' . $row, $item['item_type'] ?: '-');
+                $sheet->setCellValue('D' . $row, $item['kode_warna'] ?: '-');
+                $sheet->setCellValue('E' . $row, $item['warna'] ?: '-');
+                $sheet->setCellValue('F' . $row, $item['loss'] . '%' ?: '-');
+                $sheet->setCellValue('G' . $row, $item['qty_po'] ?: 0);
+                $sheet->setCellValue('I' . $row, $item['kgs_stock_awal'] ?: 0);
+                $sheet->setCellValue('K' . $row, $item['datang_solid'] ?: 0);
+                $sheet->setCellValue('M' . $row, $item['ganti_retur'] ?: 0);
+                $sheet->setCellValue('R' . $row, $item['pakai_area'] ?: 0);
+
+                if ($item['ganti_retur'] == 0) {
+                    $tagihanGbn = ($item['kgs_stock_awal'] ?? 0)
+                        + ($item['stock_opname'] ?? 0)
+                        + ($item['datang_solid'] ?? 0)
+                        + ($item['retur_stock'] ?? 0)
+                        - ($item['qty_po'] ?? 0)
+                        - ($item['qty_po_plus'] ?? 0);
+                } else {
+                    $tagihanGbn = ($item['kgs_stock_awal'] ?? 0)
+                        + ($item['stock_opname'] ?? 0)
+                        + ($item['datang_solid'] ?? 0)
+                        + ($item['retur_stock'] ?? 0)
+                        + ($item['ganti_retur'] ?? 0)
+                        - ($item['qty_po'] ?? 0)
+                        - ($item['qty_po_plus'] ?? 0)
+                        - ($item['retur_belang_gbn'] ?? 0)
+                        - ($item['retur_belang_area'] ?? 0);
+                }
+                $sheet->setCellValue('AA' . $row, number_format($tagihanGbn, 2, '.', ''));
+                $row++;
+            }
+
+            $lastRow = $row - 1;
+
+            // Border untuk semua cell
+            $styleArray = [
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['argb' => 'FF000000'],
+                    ],
+                ],
+            ];
+            $sheet->getStyle("A3:AA{$lastRow}")->applyFromArray($styleArray);
+
+            // Center align untuk data
+            $sheet->getStyle("A4:AA{$lastRow}")->getAlignment()
+                ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+            // Manual column widths (karena A–Z autoSize, AA manual)
+            foreach (range('A', 'Z') as $c) {
+                $sheet->getColumnDimension($c)->setAutoSize(true);
+            }
+            $sheet->getColumnDimension('AA')->setWidth(14);
         }
 
-        // Download
-        $filename = 'Report_Global_Benang_' . $key . '.xlsx';
+        // Aktifkan sheet pertama
+        $spreadsheet->setActiveSheetIndex(0);
+
+        // Download semua sheet
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $filename = 'Report-Global-Benang-AllArea.xlsx';
+
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"$filename\"");
         header('Cache-Control: max-age=0');
-
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
     }

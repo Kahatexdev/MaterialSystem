@@ -325,29 +325,47 @@ class StockModel extends Model
     public function getFilterReportGlobalBenang($key)
     {
         return $this->select("
-            stock.*, 
-            material.loss,
-            (
-                SELECT SUM(m.kgs)
-                FROM material m
-                JOIN master_order mo ON mo.id_order = m.id_order
-                WHERE m.item_type = stock.item_type 
-                  AND m.kode_warna = stock.kode_warna 
-                  AND m.color = stock.warna 
-                  AND mo.no_model = stock.no_model
-            ) AS qty_po,
-             (
-                SELECT SUM(COALESCE(p.kgs_out, 0))
-                FROM pengeluaran p
-                JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
-                JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
-                WHERE sc.no_model = master_order.no_model
-                AND sc.kode_warna = material.kode_warna
-                AND sc.item_type = material.item_type
-            ) AS kgs_out
-        ")
+                stock.*, 
+                material.loss,
+                out_celup.ganti_retur,
+                out_celup.id_out_celup,
+                (
+                    SELECT SUM(m.kgs)
+                    FROM material m
+                    JOIN master_order mo ON mo.id_order = m.id_order
+                    WHERE m.item_type = stock.item_type 
+                    AND m.kode_warna = stock.kode_warna 
+                    AND m.color = stock.warna 
+                    AND mo.no_model = stock.no_model
+                ) AS qty_po,
+                (
+                    SELECT SUM(COALESCE(p.kgs_out, 0))
+                    FROM pengeluaran p
+                    JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
+                    JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+                    WHERE sc.no_model = stock.no_model
+                    AND sc.kode_warna = stock.kode_warna
+                    AND sc.item_type = stock.item_type
+                ) AS pakai_area,
+                (
+                    SELECT SUM(COALESCE(oc.kgs_kirim, 0))
+                    FROM pemasukan pm
+                    JOIN out_celup oc ON oc.id_out_celup = pm.id_out_celup
+                    WHERE pm.id_stock = stock.id_stock
+                    AND oc.ganti_retur = 0
+                ) AS datang_solid,
+                (
+                    SELECT SUM(COALESCE(oc.kgs_kirim, 0))
+                    FROM pemasukan pm
+                    JOIN out_celup oc ON oc.id_out_celup = pm.id_out_celup
+                    WHERE pm.id_stock = stock.id_stock
+                    AND oc.ganti_retur = 1
+                ) AS ganti_retur,
+            ")
             ->join('material', 'material.item_type = stock.item_type AND material.kode_warna = stock.kode_warna', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->join('pemasukan', 'pemasukan.id_stock = stock.id_stock', 'left')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
             ->where('stock.no_model', $key)
             ->groupBy('stock.id_stock')
             ->get()
