@@ -61,15 +61,8 @@
                         <tr>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Pakai</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jalan MC</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Pesan (Kg)</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Global</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Per Area</th>
                         </tr>
                     </thead>
                     <tbody>
