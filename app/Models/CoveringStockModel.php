@@ -14,6 +14,8 @@ class CoveringStockModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'jenis',
+        'jenis_benang',
+        'jenis_cover',
         'color',
         'code',
         'lmd',
@@ -71,11 +73,11 @@ class CoveringStockModel extends Model
             ->getRowArray();
     }
 
-    public function getStockSingleCover($jenisBenang)
+    public function getStockCover($jenisBenang, $jenisCover)
     {
         return $this->select('*')
-            // ->where('jenis', $jenisBenang)
-            ->orderBy('jenis', 'ASC')
+            ->where('jenis_benang', $jenisBenang)
+            ->where('jenis_cover', $jenisCover)
             ->findAll();
     }
 }

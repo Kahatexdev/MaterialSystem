@@ -15,6 +15,8 @@ class HistoryStockCoveringModel extends Model
     protected $allowedFields    = [
         'no_model',
         'jenis',
+        'jenis_benang',
+        'jenis_cover',
         'color',
         'code',
         'lmd',

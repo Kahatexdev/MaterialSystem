@@ -330,7 +330,7 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('po/updateListTrackingPo/(:any)', 'TrackingPoCoveringController::updateListTrackingPo/$1');
 
 
-    // warehouse
+    // warehouse barang jadi
     $routes->get('warehouse', 'CoveringWarehouseController::index');
     $routes->post('warehouse/tambahStock', 'CoveringWarehouseController::create');
     $routes->post('warehouse/updateStock', 'CoveringWarehouseController::updateStock');
@@ -342,8 +342,11 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('warehouse/excelPengeluaranCovering', 'ExcelController::excelPengeluaranCovering');
     $routes->get('warehouse/pengeluaran_jalur', 'CoveringController::pengeluaranJalur');
     $routes->get('warehouse/pengiriman_area', 'CoveringController::pengirimanArea');
-    $routes->post('warehouse/exportStockSingleCover/(:any)', 'ExcelController::exportStockSingleCover/$1');
+    $routes->post('warehouse/exportStock', 'ExcelController::exportStock');
+    $routes->post('warehouse/exportStockPdf', 'PdfController::exportStockPdf');
 
+    // warehouse bahan baku
+    $routes->get('warehouseBB', 'CoveringWarehouseBBController::index');
     //Pemesanan
     $routes->get('pemesanan', 'CoveringPemesananController::index');
     $routes->get('pemesanan/(:any)', 'CoveringPemesananController::pemesanan/$1');

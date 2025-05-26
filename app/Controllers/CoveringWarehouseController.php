@@ -108,6 +108,8 @@ class CoveringWarehouseController extends BaseController
 
         $data = [
             'jenis'      => $this->request->getPost('jenis'),
+            'jenis_cover' => $this->request->getPost('jenis_cover'),
+            'jenis_benang' => $this->request->getPost('jenis_benang'),
             'color'      => $this->request->getPost('color'),
             'code'       => $this->request->getPost('code'),
             'lmd'        => $lmdValue,
@@ -184,6 +186,8 @@ class CoveringWarehouseController extends BaseController
         $historyStock = [
             'no_model'    => $postData['no_model'],
             'jenis'       => $stockData['jenis'],
+            'jenis_benang' => $stockData['jenis_benang'],
+            'jenis_cover' => $stockData['jenis_cover'],
             'color'       => $stockData['color'],
             'code'        => $stockData['code'],
             'lmd'         => $stockData['lmd'],
@@ -234,6 +238,8 @@ class CoveringWarehouseController extends BaseController
         // Persiapkan data untuk update
         $updateData = [
             'jenis'       => $json['jenis'] ?? $existingStock['jenis'],
+            'jenis_benang' => $json['jenis_benang'] ?? $existingStock['jenis_benang'],
+            'jenis_cover' => $json['jenis_cover'] ?? $existingStock['jenis_cover'],
             'color'       => $json['color'] ?? $existingStock['color'],
             'code'        => $json['code'] ?? $existingStock['code'],
             'ttl_kg'      => $json['ttl_kg'] ?? $existingStock['ttl_kg'],
@@ -370,4 +376,5 @@ class CoveringWarehouseController extends BaseController
         ];
         return view($this->role . '/schedule/reqschedule', $data);
     }
+
 }

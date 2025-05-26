@@ -27,6 +27,7 @@ use PhpOffice\PhpSpreadsheet\Style\{Border, Alignment, Fill};
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpParser\Node\Stmt\Else_;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 
 class ExcelController extends BaseController
 {
@@ -2966,9 +2967,15 @@ class ExcelController extends BaseController
         exit;
     }
 
-    public function exportStockSingleCover($jenisBenang)
+    public function exportStock()
     {
-        $data = $this->coveringStockModel->getStockSingleCover($jenisBenang);
+        $jenisCover = $this->request->getPost('jenis_cover');
+        $jenisBenang = $this->request->getPost('jenis_benang');
+        if (empty($jenisBenang) || empty($jenisCover)) {
+            return redirect()->back()->with('error', 'Jenis Benang dan Jenis Cover tidak boleh kosong.');
+        }
+
+        $data = $this->coveringStockModel->getStockCover($jenisBenang, $jenisCover);
         // dd($data);
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -3005,7 +3012,7 @@ class ExcelController extends BaseController
         $sheet->mergeCells('C2:Q2');
         $sheet->setCellValue('C2', 'DEPARTEMEN COVERING');
         $sheet->mergeCells('C3:Q3');
-        $sheet->setCellValue('C3', 'STOCK SINGLE COVER DI GUDANG COVERING');
+        $sheet->setCellValue('C3', 'STOCK '. $jenisCover.' COVER DI GUDANG COVERING');
         $sheet->getStyle('C1:Q3')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('C1:Q3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('C1:Q3')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
@@ -3036,7 +3043,7 @@ class ExcelController extends BaseController
         $sheet->mergeCells('A5:B5')
             ->setCellValue('A5', 'Jenis Benang');
         $sheet->mergeCells('C5:K5')
-            ->setCellValue('C5', 'Nylon');
+            ->setCellValue('C5', $jenisBenang);
         $sheet->mergeCells('L5:N5')
             ->setCellValue('L5', 'Tanggal');
         // Format tanggal menjadi 23-Mei-2025
@@ -3259,7 +3266,7 @@ class ExcelController extends BaseController
         $sheet->mergeCells("C{$row}:D{$row}")
             ->setCellValue("B{$row}", "Total");
         $sheet->setCellValue("C{$row}", ": {$totalKg} KG");
-        $rowstar = $row-2;
+        $rowstar = $row-1;
         $rowEnd = $row ;
         $sheet->getStyle("B{$rowstar}:D{$rowEnd}")->getFont()->setBold(true);
         $sheet->getStyle("B{$rowstar}:D{$rowEnd}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
@@ -3272,6 +3279,7 @@ class ExcelController extends BaseController
         $sheet->getStyle("E{$row}")
             ->getFont()->setItalic(true);
 
+
         // Download
         $filename = 'Formulir_Stock_' . $jenisBenang . '.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -3282,4 +3290,6 @@ class ExcelController extends BaseController
         $writer->save('php://output');
         exit;
     }
+
+    
 }
