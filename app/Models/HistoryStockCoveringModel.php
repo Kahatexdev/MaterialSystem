@@ -15,15 +15,13 @@ class HistoryStockCoveringModel extends Model
     protected $allowedFields    = [
         'no_model',
         'jenis',
+        'jenis_benang',
+        'jenis_cover',
         'color',
         'code',
         'lmd',
         'ttl_cns',
         'ttl_kg',
-        'box',
-        'no_rak',
-        'posisi_rak',
-        'no_palet',
         'admin',
         'keterangan'
     ];

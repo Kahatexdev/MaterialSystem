@@ -201,15 +201,13 @@
 
     <div class="card mb-4">
         <div class="card-body">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                <h3 class="mb-0 text-center text-md-start">Request PO GBN</h3>
-                <a href="<?= base_url($role . '/po/bukaPoCovering') ?>" class="btn btn-outline-info">
-                    <i class="fas fa-file-import me-2"></i>Buka PO
-                </a>
-            </div>
+            <form method="post" action="<?= base_url($role . '/schedule') ?>">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                    <h3 class="mb-0 text-center text-md-start">Request PO GBN</h3>
+                </div>
+            </form>
         </div>
     </div>
-
 
 
     <div class="card">

@@ -62,6 +62,7 @@
 
     <!-- Header Card & Filter Section -->
     <div class="card mb-4">
+        <!-- button export -->
         <div class="card-body">
             <h5 class="tittle-card">STOK BARANG JADI COVERING</h5>
             <p class="text-muted">Material System</p>
@@ -69,7 +70,6 @@
                 <?php $filters = [
                     ['id' => 'searchInput', 'icon' => 'search', 'type' => 'text', 'placeholder' => 'Cari jenis...'],
                     ['id' => 'filterStatus', 'options' => ['' => 'Semua Status', 'ada' => 'Tersedia', 'habis' => 'Tidak Tersedia']],
-                    ['id' => 'filterLocation', 'options' => ['' => 'Semua Rak', '1' => 'Rak 1', '2' => 'Rak 2', '3' => 'Rak 3', '4' => 'Rak 4', '5' => 'Rak 5', '6' => 'Rak 6', '7' => 'Rak 7', '8' => 'Rak 8']],
                 ]; ?>
 
                 <?php foreach ($filters as $filter) : ?>
@@ -94,6 +94,47 @@
                         <i class="fas fa-plus"></i> Jenis Baru
                     </button>
                 </div>
+                <div class="col-md-3 col-sm-6 action-container">
+                    <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <i class="fas fa-file-excel me-2"></i>EXPORT
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal export -->
+    <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exportModalLabel">Export Data Stok</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="exportForm" action="<?= base_url('covering/warehouse/exportStock') ?>" method="POST">
+                        <div class="mb-3">
+                            <label for="jenisCover" class="form-label">Jenis Cover</label>
+                            <select class="form-select" id="jenisCover" name="jenis_cover">
+                                <option value="">Pilih Jenis Cover</option>
+                                <option value="SINGLE">SINGLE COVER</option>
+                                <option value="DOUBLE">DOUBLE COVER</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="jenisBenang" class="form-label">Jenis Benang</label>
+                            <select class="form-select" id="jenisBenang" name="jenis_benang">
+                                <option value="">Pilih Jenis Benang</option>
+                                <option value="NYLON">NYLON</option>
+                                <option value="POLYESTER">POLYESTER</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success" form="exportForm">Export</button>
+                </div>
             </div>
         </div>
     </div>
@@ -101,7 +142,7 @@
     <!-- Grid View -->
     <div class="row g-3" id="warehouseGrid">
         <?php foreach ($stok as $item) : ?>
-            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 warehouse-card" data-status="<?= $item['status'] ?>" data-location="<?= $item['no_rak'] ?>" data-name="<?= $item['jenis'] ?>" data-category="<?= $item['color'] ?>">
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 warehouse-card" data-status="<?= $item['status'] ?>" data-name="<?= $item['jenis'] ?>" data-category="<?= $item['color'] ?>">
                 <div class="card h-100 border">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
                         <h6 class="mb-0 text-truncate"> <?= $item['jenis'] ?> </h6>
@@ -116,8 +157,6 @@
                             'LMD' => $item['lmd'],
                             'Stok' => $item['ttl_kg'] . ' Kg',
                             'Cones' => $item['ttl_cns'] . ' Cns',
-                            'No Rak' => $item['no_rak'],
-                            'Posisi Rak' => $item['posisi_rak'],
                             'Update' => $item['updated_at'] ?? 'N/A'
                         ]; ?>
 
@@ -207,16 +246,35 @@
                                     <input type="text" class="form-control" id="jenis" name="jenis" required>
                                 </div>
                                 <div class="mb-3">
+                                    <label for="jenis_cover" class="form-label">Jenis Cover</label>
+                                    <select class="form-select" id="jenis_cover" name="jenis_cover" required>
+                                        <option value="">Pilih Jenis Cover</option>
+                                        <option value="SINGLE">SINGLE COVER</option>
+                                        <option value="DOUBLE">DOUBLE COVER</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="jenis_benang" class="form-label">Jenis Benang</label>
+                                    <input type="text" class="form-control" id="jenis_benang" name="jenis_benang" required>
+                                </div>
+                                <div class="mb-3">
                                     <label for="color" class="form-label">Warna</label>
                                     <input type="text" class="form-control" id="color" name="color" required>
                                 </div>
+                            </div>
+
+                            <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="code" class="form-label">Kode</label>
                                     <input type="text" class="form-control" id="code" name="code" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="box" class="form-label">Box</label>
-                                    <input type="text" class="form-control" id="box" name="box">
+                                    <label for="ttl_kg" class="form-label">Jumlah Stok (Kg)</label>
+                                    <input type="number" class="form-control" id="ttl_kg" name="ttl_kg" step="0.1" required inputmode="decimal">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ttl_cns" class="form-label">Jumlah Cones</label>
+                                    <input type="number" class="form-control" id="ttl_cns" name="ttl_cns" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">LMD</label><br>
@@ -234,54 +292,6 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="ttl_kg" class="form-label">Jumlah Stok (Kg)</label>
-                                    <input type="number" class="form-control" id="ttl_kg" name="ttl_kg" step="0.1" required inputmode="decimal">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="ttl_cns" class="form-label">Jumlah Cones</label>
-                                    <input type="number" class="form-control" id="ttl_cns" name="ttl_cns" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="no_palet" class="form-label">No Palet</label>
-                                    <input type="text" class="form-control" id="no_palet" name="no_palet">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="no_rak" class="form-label">Nomor Rak</label>
-                                    <select name="no_rak" id="no_rak" class="form-select" required>
-                                        <option value="" disabled selected>Pilih Nomor Rak</option>
-                                        <option value="1">Rak 1</option>
-                                        <option value="2">Rak 2</option>
-                                        <option value="3">Rak 3</option>
-                                        <option value="4">Rak 4</option>
-                                        <option value="5">Rak 5</option>
-                                        <option value="6">Rak 6</option>
-                                        <option value="7">Rak 7</option>
-                                        <option value="8">Rak 8</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Posisi Rak</label><br>
-                                    <div class="form-check form-check-inline">
-                                        <input type="checkbox" class="form-check-input" id="posisiRak1" name="posisi_rak[]" value="Kiri">
-                                        <label class="form-check-label" for="posisiRak1">Kiri</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input type="checkbox" class="form-check-input" id="posisiRak2" name="posisi_rak[]" value="Kanan">
-                                        <label class="form-check-label" for="posisiRak2">Kanan</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input type="checkbox" class="form-check-input" id="posisiRak3" name="posisi_rak[]" value="Atas">
-                                        <label class="form-check-label" for="posisiRak3">Atas</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input type="checkbox" class="form-check-input" id="posisiRak4" name="posisi_rak[]" value="Bawah">
-                                        <label class="form-check-label" for="posisiRak4">Bawah</label>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <div class="modal-footer">
@@ -294,19 +304,18 @@
         </div>
     </div>
 
-
-    <!-- Modal Edit Data -->
     <!-- Modal Edit Data -->
     <div class="modal fade" id="editStockModal" tabindex="-1" aria-labelledby="editStockModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header text-white">
+                <div class="modal-header bg-info text-white">
                     <h5 class="modal-title" id="editStockModalLabel">Edit Data Barang</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="editStockForm" method="POST" enctype="multipart/form-data">
-                        <input type="hidden" id="editStockItemId" name="stockItemId">
+                    <form id="editStockForm">
+                        <!-- Ganti name jadi id_covering_stock supaya controller langsung terima -->
+                        <input type="hidden" id="editStockItemId" name="id_covering_stock">
 
                         <div class="row">
                             <div class="col-md-6">
@@ -315,16 +324,34 @@
                                     <input type="text" class="form-control" id="editJenis" name="jenis" required>
                                 </div>
                                 <div class="mb-3">
+                                    <label for="editjenis_cover" class="form-label">Jenis Cover</label>
+                                    <select class="form-select" id="editjenis_cover" name="editjenis_cover" required>
+                                        <option value="">Pilih Jenis Cover</option>
+                                        <option value="SINGLE">SINGLE COVER</option>
+                                        <option value="DOUBLE">DOUBLE COVER</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editjenis_benang" class="form-label">Jenis Benang</label>
+                                    <input type="text" class="form-control" id="editjenis_benang" name="editjenis_benang" required>
+                                </div>
+                                <div class="mb-3">
                                     <label for="editColor" class="form-label">Warna</label>
                                     <input type="text" class="form-control" id="editColor" name="color" required>
                                 </div>
+                            </div>
+                            <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="editCode" class="form-label">Kode</label>
                                     <input type="text" class="form-control" id="editCode" name="code" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="editBox" class="form-label">Box</label>
-                                    <input type="text" class="form-control" id="editBox" name="box" required>
+                                    <label for="editTtlKg" class="form-label">Jumlah Stok (Kg)</label>
+                                    <input type="number" class="form-control" id="editTtlKg" name="ttl_kg" step="0.1" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editTtlCns" class="form-label">Jumlah Cones</label>
+                                    <input type="number" class="form-control" id="editTtlCns" name="ttl_cns" readonly>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">LMD</label><br>
@@ -342,54 +369,6 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="editTtlKg" class="form-label">Jumlah Stok (Kg)</label>
-                                    <input type="number" class="form-control" id="editTtlKg" name="ttl_kg" step="0.1" readonly inputmode="decimal">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editTtlCns" class="form-label">Jumlah Cones</label>
-                                    <input type="number" class="form-control" id="editTtlCns" name="ttl_cns" readonly>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editNoPalet" class="form-label">No Palet</label>
-                                    <input type="text" class="form-control" id="editNoPalet" name="no_palet" readonly>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editNoRak" class="form-label">Nomor Rak</label>
-                                    <select name="no_rak" id="editNoRak" class="form-select" required>
-                                        <option value="" disabled selected>Pilih Nomor Rak</option>
-                                        <option value="1">Rak 1</option>
-                                        <option value="2">Rak 2</option>
-                                        <option value="3">Rak 3</option>
-                                        <option value="4">Rak 4</option>
-                                        <option value="5">Rak 5</option>
-                                        <option value="6">Rak 6</option>
-                                        <option value="7">Rak 7</option>
-                                        <option value="8">Rak 8</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Posisi Rak</label><br>
-                                    <div class="form-check form-check-inline">
-                                        <input type="checkbox" class="form-check-input" id="editPosisiRak1" name="posisi_rak[]" value="Kiri">
-                                        <label class="form-check-label" for="editPosisiRak1">Kiri</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input type="checkbox" class="form-check-input" id="editPosisiRak2" name="posisi_rak[]" value="Kanan">
-                                        <label class="form-check-label" for="editPosisiRak2">Kanan</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input type="checkbox" class="form-check-input" id="editPosisiRak3" name="posisi_rak[]" value="Atas">
-                                        <label class="form-check-label" for="editPosisiRak3">Atas</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input type="checkbox" class="form-check-input" id="editPosisiRak4" name="posisi_rak[]" value="Bawah">
-                                        <label class="form-check-label" for="editPosisiRak4">Bawah</label>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <div class="modal-footer">
@@ -404,25 +383,13 @@
 
 
 
+
     <!-- Script Section -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.all.min.js"></script>
     <script>
         // Fungsi untuk menghitung jumlah item sesuai status dan filter
 
 
-        // Inisialisasi tampilan dan event listener
-        document.addEventListener('DOMContentLoaded', function() {
-
-            // Toggle antara Grid & Table view
-            document.getElementById('viewGrid').addEventListener('click', function() {
-                document.getElementById('warehouseGrid').style.display = '';
-                document.getElementById('warehouseTable').style.display = 'none';
-                this.classList.replace('btn-info', 'btn-info');
-                document.getElementById('viewTable').classList.replace('btn-info', 'btn-info');
-            });
-            // Set tampilan default
-            document.getElementById('viewGrid').click();
-        });
 
         // Fungsi pencarian berdasarkan nama barang
         document.getElementById('searchInput').addEventListener('input', function() {
@@ -443,146 +410,131 @@
             });
         });
 
-        // Filter berdasarkan lokasi
-        document.getElementById('filterLocation').addEventListener('change', function() {
-            const location = this.value;
-            document.querySelectorAll('.warehouse-card').forEach(card => {
-                const itemLocation = card.getAttribute('data-location');
-                card.style.display = (location === '' || itemLocation === location) ? '' : 'none';
-            });
-        });
 
 
-        document.getElementById("editStockForm").addEventListener("submit", function(event) {
-            event.preventDefault(); // Mencegah reload halaman
+        const BASE_URL = "<?= base_url() ?>/";
+        // Bootstrap 5 modal instance
+        const editModalEl = document.getElementById('editStockModal');
 
-            const stockId = document.getElementById("editStockItemId").value;
-            const jenis = document.getElementById("editJenis").value;
-            const color = document.getElementById("editColor").value;
-            const code = document.getElementById("editCode").value;
-            const box = document.getElementById("editBox").value;
-            const ttlKg = document.getElementById("editTtlKg").value;
-            const ttlCns = document.getElementById("editTtlCns").value;
-            const noPalet = document.getElementById("editNoPalet").value;
-            const noRak = document.getElementById("editNoRak").value;
+        // Fungsi untuk buka modal & isi data
+        function editItem(id) {
+            fetch(`${BASE_URL}covering/warehouse/getStock/${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) {
+                        return Swal.fire("Gagal!", "Data tidak ditemukan", "error");
+                    }
+                    const stock = data.stock;
 
-            // Ambil data checkbox LMD
-            let lmdValues = [];
-            document.querySelectorAll("input[name='lmd[]']:checked").forEach((checkbox) => {
-                lmdValues.push(checkbox.value);
-            });
+                    // Isi form
+                    document.getElementById('editStockItemId').value = stock.id_covering_stock;
+                    document.getElementById('editJenis').value = stock.jenis;
+                    document.getElementById('editjenis_cover').value = stock.jenis_cover || '';
+                    document.getElementById('editjenis_benang').value = stock.jenis_benang || '';
+                    document.getElementById('editColor').value = stock.color;
+                    document.getElementById('editCode').value = stock.code;
+                    document.getElementById('editTtlKg').value = stock.ttl_kg;
+                    document.getElementById('editTtlCns').value = stock.ttl_cns;
 
-            // Ambil data checkbox Posisi Rak
-            let posisiRakValues = [];
-            document.querySelectorAll("input[name='posisi_rak[]']:checked").forEach((checkbox) => {
-                posisiRakValues.push(checkbox.value);
-            });
+                    // Reset & check LMD only in edit modal
+                    editModalEl.querySelectorAll("input[name='lmd[]']").forEach(cb => cb.checked = false);
+                    (stock.lmd || "").split(',').map(x => x.trim()).forEach(val => {
+                        const cb = editModalEl.querySelector(`input[name='lmd[]'][value='${val}']`);
+                        if (cb) cb.checked = true;
+                    });
 
-            const BASE_URL = "<?= base_url(); ?>";
+                    // Tampilkan modal
+                    $("#editStockModal").modal("show");
+                })
+                .catch(() => Swal.fire("Error!", "Gagal mengambil data", "error"));
+        }
 
-            // Kirim data ke backend menggunakan fetch
+        // Handle form submit
+        document.getElementById("editStockForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            // Kumpulkan payload
+            const payload = {
+                id_covering_stock: document.getElementById('editStockItemId').value,
+                jenis: document.getElementById('editJenis').value,
+                jenis_cover: document.getElementById('editjenis_cover').value,
+                jenis_benang: document.getElementById('editjenis_benang').value,
+                color: document.getElementById('editColor').value,
+                code: document.getElementById('editCode').value,
+                ttl_kg: document.getElementById('editTtlKg').value,
+                ttl_cns: document.getElementById('editTtlCns').value,
+                lmd: Array.from(document.querySelectorAll("input[name='lmd[]']:checked"))
+                    .map(cb => cb.value)
+            };
+            // console.log(payload);
             fetch(`${BASE_URL}covering/warehouse/updateEditStock`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({
-                        id_covering_stock: stockId,
-                        jenis: jenis,
-                        color: color,
-                        code: code,
-                        box: box,
-                        ttl_kg: ttlKg,
-                        ttl_cns: ttlCns,
-                        no_palet: noPalet,
-                        no_rak: noRak,
-                        lmd: lmdValues,
-                        posisi_rak: posisiRakValues
-                    })
+                    body: JSON.stringify(payload),
                 })
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(result => {
                     if (result.success) {
                         Swal.fire({
-                            icon: "success",
-                            title: "Berhasil!",
-                            text: "Stok berhasil diperbarui!",
-                            timer: 2000,
-                            showConfirmButton: false
-                        }).then(() => {
-                            location.reload(); // Reload halaman setelah update berhasil
-                        });
+                                icon: "success",
+                                title: "Berhasil Update Data Stock !",
+                                timer: 1500,
+                                showConfirmButton: false
+                            })
+                            .then(() => location.reload());
+                        var modal = bootstrap.Modal.getInstance(editModalEl);
+                        if (modal) modal.hide();
                     } else {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Gagal!",
-                            text: "Gagal memperbarui stok: " + result.message
-                        });
+                        Swal.fire("Gagal!", result.message || "Tidak dapat memperbarui.", "error");
                     }
                 })
-                .catch(error => {
-                    console.error("Error:", error);
-                    Swal.fire({
-                        icon: "error",
-                        title: "Error!",
-                        text: "Terjadi kesalahan saat mengupdate stok"
-                    });
-                });
-
-            // Tutup modal setelah submit
-            $("#editStockModal").modal("hide");
+                .catch(() => Swal.fire("Error!", "Gagal mengupdate data", "error"));
         });
 
 
-        // Fungsi Edit Barang
-        function editItem(id) {
-            fetch(`<?= base_url(); ?>covering/warehouse/getStock/${id}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const stock = data.stock;
+        // // Fungsi Edit Barang
+        // function editItem(id) {
+        //     fetch(`<?= base_url(); ?>covering/warehouse/getStock/${id}`)
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             if (data.success) {
+        //                 const stock = data.stock;
 
-                        // Isi modal dengan data stok yang diterima
-                        document.getElementById("editStockItemId").value = stock.id_covering_stock;
-                        document.getElementById("editJenis").value = stock.jenis;
-                        document.getElementById("editColor").value = stock.color;
-                        document.getElementById("editCode").value = stock.code;
-                        document.getElementById("editBox").value = stock.box;
-                        document.getElementById("editTtlKg").value = stock.ttl_kg;
-                        document.getElementById("editTtlCns").value = stock.ttl_cns;
-                        document.getElementById("editNoPalet").value = stock.no_palet;
-                        document.getElementById("editNoRak").value = stock.no_rak;
+        //                 // Isi modal dengan data stok yang diterima
+        //                 document.getElementById("editStockItemId").value = stock.id_covering_stock;
+        //                 document.getElementById("editJenis").value = stock.jenis;
+        //                 document.getElementById("editColor").value = stock.color;
+        //                 document.getElementById("editCode").value = stock.code;
+        //                 document.getElementById("editTtlKg").value = stock.ttl_kg;
+        //                 document.getElementById("editTtlCns").value = stock.ttl_cns;
 
-                        // Cek dan tandai checkbox LMD
-                        ["L", "M", "D"].forEach((val, index) => {
-                            document.getElementById(`editLmd${index + 1}`).checked = stock.lmd?.includes(val) || false;
-                        });
+        //                 // Cek dan tandai checkbox LMD
+        //                 ["L", "M", "D"].forEach((val, index) => {
+        //                     document.getElementById(`editLmd${index + 1}`).checked = stock.lmd?.includes(val) || false;
+        //                 });
 
 
-                        // Cek dan tandai checkbox Posisi Rak
-                        ["Kiri", "Kanan", "Atas", "Bawah"].forEach((val, index) => {
-                            document.getElementById(`editPosisiRak${index + 1}`).checked = stock.posisi_rak.includes(val);
-                        });
-
-                        // Tampilkan modal edit
-                        $("#editStockModal").modal("show");
-                    } else {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Gagal!",
-                            text: "Data barang tidak ditemukan"
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                    Swal.fire({
-                        icon: "error",
-                        title: "Error!",
-                        text: "Terjadi kesalahan saat mengambil data"
-                    });
-                });
-        }
+        //                 // Tampilkan modal edit
+        //                 $("#editStockModal").modal("show");
+        //             } else {
+        //                 Swal.fire({
+        //                     icon: "error",
+        //                     title: "Gagal!",
+        //                     text: "Data barang tidak ditemukan"
+        //                 });
+        //             }
+        //         })
+        //         .catch(error => {
+        //             console.error("Error:", error);
+        //             Swal.fire({
+        //                 icon: "error",
+        //                 title: "Error!",
+        //                 text: "Terjadi kesalahan saat mengambil data"
+        //             });
+        //         });
+        // }
 
 
 

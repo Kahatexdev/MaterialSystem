@@ -319,6 +319,13 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('mesin/updateDataMesin', 'MesinCelupController::updateDataMesin');
     $routes->get('mesin/deleteDataMesin/(:num)', 'MesinCelupController::deleteDataMesin/$1');
 
+    $routes->get('po/bukaPoCovering', 'CoveringController::bukaPoCovering');
+    $routes->post('po/getDetailByTglPO', 'CoveringController::getDetailByTglPO');
+    $routes->get('po/getItemType/(:any)', 'CoveringController::getItemType/$1');
+    $routes->get('po/getKodeWarna', 'CoveringController::getKodeWarna');
+    $routes->get('po/getColor', 'CoveringController::getColor');
+    $routes->get('po/getTotalKgPo', 'CoveringController::getTotalKgPo');
+    $routes->post('po/saveOpenPOCovering', 'CoveringController::saveOpenPOCovering');
     $routes->get('poDetail/(:any)', 'CoveringController::poDetail/$1');
     $routes->get('getDetailByNoModel/(:any)/(:any)', 'CoveringController::getDetailByNoModel/$1/$2');
     $routes->post('po/simpanKeSession', 'CoveringController::simpanKeSession');
@@ -330,7 +337,7 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('po/updateListTrackingPo/(:any)', 'TrackingPoCoveringController::updateListTrackingPo/$1');
 
 
-    // warehouse
+    // warehouse barang jadi
     $routes->get('warehouse', 'CoveringWarehouseController::index');
     $routes->post('warehouse/tambahStock', 'CoveringWarehouseController::create');
     $routes->post('warehouse/updateStock', 'CoveringWarehouseController::updateStock');
@@ -342,7 +349,11 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('warehouse/excelPengeluaranCovering', 'ExcelController::excelPengeluaranCovering');
     $routes->get('warehouse/pengeluaran_jalur', 'CoveringController::pengeluaranJalur');
     $routes->get('warehouse/pengiriman_area', 'CoveringController::pengirimanArea');
+    $routes->post('warehouse/exportStock', 'ExcelController::exportStock');
+    $routes->post('warehouse/exportStockPdf', 'PdfController::exportStockPdf');
 
+    // warehouse bahan baku
+    $routes->get('warehouseBB', 'CoveringWarehouseBBController::index');
     //Pemesanan
     $routes->get('pemesanan', 'CoveringPemesananController::index');
     $routes->get('pemesanan/(:any)', 'CoveringPemesananController::pemesanan/$1');
