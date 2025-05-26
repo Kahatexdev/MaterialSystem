@@ -18,6 +18,7 @@ use FPDF;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use App\Models\PemesananSpandexKaretModel;
 use App\Models\CoveringStockModel;
+use App\Models\PemesananModel;
 use PhpOffice\PhpSpreadsheet\Style\{Border, Alignment, Fill};
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
@@ -39,6 +40,7 @@ class PdfController extends BaseController
     protected $otherBonModel;
     protected $pemesananSpandexKaretModel;
     protected $coveringStockModel;
+    protected $pemesananModel;
 
     public function __construct()
     {
@@ -51,6 +53,7 @@ class PdfController extends BaseController
         $this->otherBonModel = new OtherBonModel();
         $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
         $this->coveringStockModel = new CoveringStockModel();
+        $this->pemesananModel = new PemesananModel();
 
 
         $this->role = session()->get('role');
@@ -1672,7 +1675,7 @@ class PdfController extends BaseController
             ->setBody($pdf->Output('PO Gabungan.pdf', 'I'));
     }
 
-    public function generatePemesananSpandexKaretCovering($jenis, $tgl_po)
+    public function generatePengeluaranSpandexKaretCovering($jenis, $tgl_po)
     {
         // Ambil data dari model
         $data = $this->pemesananSpandexKaretModel->getDataForPdf($jenis, $tgl_po);
@@ -2379,7 +2382,153 @@ class PdfController extends BaseController
         $filename = 'stock_covering_' . date('Ymd_His') . '.pdf';
         header('Content-Type: application/pdf');
         header('Content-Disposition: inline; filename="' . $filename . '"');
-        $writer->save('php://output');  
+        $writer->save('php://output');
         exit;
+    }
+
+    public function exportPemesananSandexKaretCovering()
+    {
+        $tglPakai = $this->request->getGet('tgl_pakai');
+        $jenis = $this->request->getGet('jenis');
+
+        $data = $this->pemesananModel->getDataPemesananCovering($tglPakai, $jenis);
+
+        // Inisialisasi FPDF (portrait A4)
+        $pdf = new FPDF('P', 'mm', 'A4');
+        $pdf->AddPage();
+
+        // Garis tepi luar (margin 10mm → konten 190×277)
+        $pdf->SetDrawColor(0, 0, 0);
+        $pdf->SetLineWidth(0.3);
+        $pdf->Rect(9, 9, 192, 279);    // sedikit lebih besar untuk border luar
+        $pdf->SetLineWidth(0.2);
+        $pdf->Rect(10, 10, 190, 277);  // border dalam
+
+        // Logo
+        $x = $pdf->GetX();
+        $y = $pdf->GetY();
+        $pdf->Image('assets/img/logo-kahatex.png', $x + 10, $y + 1, 10, 8);
+
+        // Header
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->Cell(30, 13, '', 1, 0, 'C');
+        $pdf->SetFillColor(170, 255, 255);
+        $pdf->Cell(160, 4, 'FORMULIR', 1, 1, 'C', 1);
+
+        $pdf->SetFont('Arial', 'B', 6);
+        $pdf->Cell(30, 5, '', 0, 0, 'L');
+        $pdf->Cell(160, 5, 'DEPARTEMEN COVERING', 0, 1, 'C');
+
+        $pdf->SetFont('Arial', 'B', 6);
+        $pdf->Cell(30, 4, 'PT.KAHATEX', 0, 0, 'C');
+        $pdf->Cell(160, 4, 'RANGKUMAN PEMESANAN BAHAN BAKU ' . $jenis . ' (KAOS KAKI)', 0, 1, 'C');
+
+        // Tabel Header Atas (total lebar 190)
+        $pdf->SetFont('Arial', 'B', 5);
+        $pdf->Cell(30, 4, 'No.Dokumen', 1, 0, 'L');
+        $pdf->SetFont('Arial', 'B', 5);
+        if ($jenis == 'SPANDEX') {
+            $pdf->Cell(73, 4, 'FOR-COV-059/REV_01/HAL_1/1', 1, 0, 'L');
+        } else {
+            $pdf->Cell(73, 4, 'FOR-COV-060/REV_01/HAL_1/1', 1, 0, 'L');
+        }
+        $pdf->SetFont('Arial', 'B', 5);
+        $pdf->Cell(24, 4, 'Tanggal Revisi', 1, 0, 'L');
+        $pdf->Cell(63, 4, '07 November 2019', 1, 1, 'C');
+
+        // garis double
+        $pdf->SetLineWidth(0.2);
+        $pdf->SetDrawColor(0, 0, 0);
+        $pdf->Line(10, 27.5, 200, 27.5); // Garis horizontal
+        $pdf->Cell(0, 1, '', 0, 1); // Pindah ke baris berikutnya
+        $pdf->Line(10, 23.5, 200, 23.5); // Garis horizontal
+        $pdf->Cell(0, 1, '', 0, 1); // Pindah ke baris berikutnya
+
+        // customer
+        $pdf->SetFont('Arial', 'B', 5);
+        $pdf->Cell(190, 4, '', 0, 1, 'C'); // Tinggi cell diatur menjadi 8 agar teks berada di tengah
+        $pdf->Cell(100, 4, 'TGL: ', 0, 0, 'L'); // Tinggi cell diatur menjadi 8 agar teks berada di tengah
+        $pdf->Cell(85, 4, 'TGL:', 0, 1, 'L'); // Tinggi cell diatur menjadi 8 agar teks berada di tengah
+
+        //Simpan posisi awal Season & MaterialType
+        function MultiCellFit($pdf, $w, $h, $txt, $border = 1, $align = 'C')
+        {
+            // Simpan posisi awal
+            $x = $pdf->GetX();
+            $y = $pdf->GetY();
+
+            // Simulasikan MultiCell tetapi tetap pakai tinggi tetap (12)
+            $pdf->MultiCell($w, $h, $txt, $border, $align);
+
+            // Kembalikan ke kanan cell agar sejajar
+            $pdf->SetXY($x + $w, $y);
+        }
+
+        // Header Tabel Pertama
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(20, 6,  'JENIS', 1, 0, 'C');
+        $pdf->Cell(15, 6,  'COLOUR', 1, 0, 'C');
+        $pdf->Cell(15, 6,  'CODE', 1, 0, 'C');
+        MultiCellFit($pdf, 10, 3, "JLN\nMC KK", 1, 'C');
+        $pdf->Cell(10, 6,  'CONES', 1, 0, 'C');
+        $pdf->Cell(10, 6,  'KG', 1, 0, 'C');
+        $pdf->Cell(10, 6,  'KG', 1, 0, 'C');
+
+        // pemisah
+        $pdf->Cell(10, 6,  '', 0, 0, 'C');
+
+        // Header Tabel Kedua
+        $pdf->Cell(20, 6,  'JENIS', 1, 0, 'C');
+        $pdf->Cell(15, 6,  'COLOUR', 1, 0, 'C');
+        $pdf->Cell(15, 6,  'CODE', 1, 0, 'C');
+        MultiCellFit($pdf, 10, 3, "JLN\nMC KK");
+        $pdf->Cell(10, 6,  'CONES', 1, 0, 'C');
+        $pdf->Cell(10, 6,  'KG', 1, 0, 'C');
+        $pdf->Cell(10, 6,  'KG', 1, 1, 'C');
+
+        //body
+        $pdf->SetFont('Arial', '', 5);
+        $jumlahBarisKosong = 50; // bisa disesuaikan
+        for ($i = 0; $i < $jumlahBarisKosong; $i++) {
+            // Tabel Pertama
+            $pdf->Cell(20, 4, '', 1);
+            $pdf->Cell(15, 4, '', 1);
+            $pdf->Cell(15, 4, '', 1);
+            $pdf->Cell(10, 4, '', 1);
+            $pdf->Cell(10, 4, '', 1);
+            $pdf->Cell(10, 4, '', 1);
+            $pdf->Cell(10, 4, '', 1);
+
+            // Pemisah antar tabel (tanpa border)
+            $pdf->Cell(10, 4, '', 0);
+
+            // Tabel Kedua
+            $pdf->Cell(20, 4, '', 1);
+            $pdf->Cell(15, 4, '', 1);
+            $pdf->Cell(15, 4, '', 1);
+            $pdf->Cell(10, 4, '', 1);
+            $pdf->Cell(10, 4, '', 1);
+            $pdf->Cell(10, 4, '', 1);
+            $pdf->Cell(10, 4, '', 1);
+
+            $pdf->Ln(); // pindah baris
+        }
+
+        $pdf->Ln(5); // spasi setelah tabel
+
+        $pdf->SetFont('Arial', '', 6);
+        $pdf->Cell(95, 5, 'Mengetahui,', 0, 0, 'C');
+        $pdf->Cell(95, 5, 'Dibuat Oleh,', 0, 1, 'C');
+
+        $pdf->Ln(15); // ruang untuk tanda tangan
+
+        $pdf->Cell(95, 5, '(__________________)', 0, 0, 'C');
+        $pdf->Cell(95, 5, '(__________________)', 0, 1, 'C');
+
+
+        // Output PDF
+        return $this->response
+            ->setHeader('Content-Type', 'application/pdf')
+            ->setBody($pdf->Output('S'));
     }
 }

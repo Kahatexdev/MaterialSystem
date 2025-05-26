@@ -125,7 +125,7 @@
                             var tgl = item;
                             var jenis = "SPANDEX";
 
-                            var link1 = '<a href="<?= base_url($role . '/excelPemesananCovering') ?>?tgl_pakai=' + tgl + '&jenis=' + jenis + '" target="_blank">' +
+                            var link1 = '<a href="<?= base_url($role . '/exportPemesananSandexKaretCovering') ?>?tgl_pakai=' + tgl + '&jenis=' + jenis + '" target="_blank">' +
                                 '<i class="fas fa-file-excel"></i>' +
                                 '</a>';
 
