@@ -199,6 +199,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pemesanan/exportPemesananArea', 'ExcelController::excelPemesananArea');
     $routes->post('pemesanan/listBarangKeluarPertgl', 'PemesananController::listBarangKeluarPertgl');
     $routes->get('pemesanan/exportListBarangKeluar', 'ExcelController::exportListBarangKeluar');
+    $routes->post('pemesanan/listPemesananSpandexKaretPertgl', 'PemesananController::listPemesananSpandexKaretPertgl');
+    $routes->get('pemesanan/exportListPemesananSpdxKaretPertgl', 'ExcelController::exportListPemesananSpdxKaretPertgl');
 
     $routes->get('pph', 'PphController::tampilPerModel');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
