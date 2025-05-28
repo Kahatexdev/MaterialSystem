@@ -3282,7 +3282,7 @@ class ExcelController extends BaseController
 
 
         // Download
-        $filename = 'Formulir_Stock_' . $jenisBenang . '.xlsx';
+        $filename = 'Formulir_Stock_' . $jenisBenang . '_' . $jenisCover . '_' . date('Ymd') . '.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"$filename\"");
         header('Cache-Control: max-age=0');

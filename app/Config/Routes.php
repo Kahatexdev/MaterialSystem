@@ -354,8 +354,12 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('warehouse/exportStock', 'ExcelController::exportStock');
     $routes->post('warehouse/exportStockPdf', 'PdfController::exportStockPdf');
 
+
     // warehouse bahan baku
     $routes->get('warehouseBB', 'CoveringWarehouseBBController::index');
+    $routes->post('warehouseBB/store', 'CoveringWarehouseBBController::store');
+    $routes->post('warehouseBB/update/(:any)', 'CoveringWarehouseBBController::update/$1');
+    $routes->get('warehouseBB/BahanBakuCovPdf', 'PdfController::BahanBakuCovPdf');
     //Pemesanan
     $routes->get('pemesanan', 'CoveringPemesananController::index');
     $routes->get('pemesanan/(:any)', 'CoveringPemesananController::pemesanan/$1');
