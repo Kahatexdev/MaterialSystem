@@ -14,6 +14,7 @@ use App\Models\OpenPoModel;
 use App\Models\BonCelupModel;
 use App\Models\OutCelupModel;
 use App\Models\OtherBonModel;
+use App\Models\WarehouseBBModel;
 use FPDF;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use App\Models\PemesananSpandexKaretModel;
@@ -39,6 +40,7 @@ class PdfController extends BaseController
     protected $otherBonModel;
     protected $pemesananSpandexKaretModel;
     protected $coveringStockModel;
+    protected $warehouseBBModel;
 
     public function __construct()
     {
@@ -51,6 +53,7 @@ class PdfController extends BaseController
         $this->otherBonModel = new OtherBonModel();
         $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
         $this->coveringStockModel = new CoveringStockModel();
+        $this->warehouseBBModel = new WarehouseBBModel();
 
 
         $this->role = session()->get('role');
@@ -2379,7 +2382,208 @@ class PdfController extends BaseController
         $filename = 'stock_covering_' . date('Ymd_His') . '.pdf';
         header('Content-Type: application/pdf');
         header('Content-Disposition: inline; filename="' . $filename . '"');
-        $writer->save('php://output');  
+        $writer->save('php://output');
         exit;
+    }
+
+    public function BahanBakuCovPdf()
+    {
+        $data = $this->warehouseBBModel
+            ->orderBy('jenis_benang', 'ASC')
+            ->orderBy('denier', 'ASC')
+            ->orderBy('warna', 'ASC')
+            ->orderBy('kode', 'ASC')
+            ->findAll();
+        if (!$data) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Tidak ada data.');
+        }
+
+        // Kelompokkan per jenis_benang, lalu per denier
+        $groups = [];
+        foreach ($data as $item) {
+            $groups[$item['jenis_benang']][$item['denier']][] = $item;
+        }
+        ksort($groups);
+
+        $pdf = new FPDF('P', 'mm', 'A4');
+        $leftX = 10;
+        $tableHalfWidth = 90;
+        $gap = 10;
+        $rightX = $leftX + $tableHalfWidth + $gap;
+        $rowH = 5;
+        $maxRows = 40;
+        $colWidths = array_fill(0, 5, $tableHalfWidth / 5);
+
+        $drawTableHeader = function ($pdf, $x, $y, $colWidths) {
+            $pdf->SetXY($x, $y);
+            $pdf->Cell($colWidths[0], 6, 'Denier', 1, 0, 'C');
+            $pdf->Cell($colWidths[1], 6, 'Warna', 1, 0, 'C');
+            $pdf->Cell($colWidths[2], 6, 'Code', 1, 0, 'C');
+            $pdf->Cell($colWidths[3], 3, 'Stock', 1, 0, 'C');
+            $pdf->Cell($colWidths[4], 6, 'Keterangan', 1, 1, 'C');
+            $pdf->SetX($x);
+            $pdf->Cell($colWidths[0], 3, '', 0, 0, 'C');
+            $pdf->Cell($colWidths[1], 3, '', 0, 0, 'C');
+            $pdf->Cell($colWidths[2], 3, '', 0, 0, 'C');
+            $pdf->Cell($colWidths[3], -3, 'Kg', 1, 0, 'C');
+            $pdf->Cell($colWidths[4], 3, '', 0, 1, 'C');
+        };
+
+        $pageNo = 1;
+        foreach ($groups as $jenis_benang => $denierGroups) {
+            // Setiap jenis_benang mulai halaman baru
+            $pdf->AddPage();
+
+            // Border & header
+            $pdf->SetDrawColor(0, 0, 0);
+            $pdf->SetLineWidth(0.4);
+            $pdf->Rect(9, 9, 192, 272);
+            $pdf->SetLineWidth(0.2);
+            $pdf->Rect(10, 10, 190, 270);
+
+            $pdf->Image('assets/img/logo-kahatex.png', 26, 11, 10, 8);
+            $pdf->SetFont('Arial', 'B', 7);
+            $pdf->Cell(43, 13, '', 1, 0, 'C');
+            $pdf->SetFillColor(170, 255, 255);
+            $pdf->Cell(147, 4, 'FORMULIR', 1, 1, 'C', 1);
+            $pdf->SetFont('Arial', 'B', 6);
+            $pdf->Cell(43, 5, '', 0, 0);
+            $pdf->Cell(147, 5, 'DEPARTEMEN COVERING', 0, 1, 'C');
+            $pdf->Cell(43, 4, 'PT KAHATEX', 0, 0, 'C');
+            $pdf->Cell(147, 4, 'STOCK BAHAN BAKU PER HARI', 0, 1, 'C');
+
+            $pdf->SetFont('Arial', 'B', 5);
+            $pdf->Cell(43, 4, 'No. Dokumen', 1, 0, 'L');
+            $pdf->Cell(60, 4, 'FOR-COV-092/REV_00/HAL_'. $pageNo.'/3', 1, 0, 'L');
+            $pdf->Cell(24, 4, 'Tanggal Revisi', 1, 0, 'L');
+            $pdf->Cell(63, 4, '07 Januari 2019', 1, 1, 'C');
+            $pdf->SetFont('Arial', '', 5);
+            $pdf->Cell(43, 4, 'Tanggal : ' . date('D, d M Y'), 0, 1, 'L');
+            $pdf->Cell(43, 4, 'Jenis : ' . $jenis_benang, 0, 1, 'L');
+            $pdf->Cell(0, 1, '', 0, 1);
+            $pdf->Line(10, 28, 200, 28);
+
+            // Table header
+            $baseY = $pdf->GetY();
+            $drawTableHeader($pdf, $leftX, $baseY, $colWidths);
+            $drawTableHeader($pdf, $rightX, $baseY, $colWidths);
+
+            $xPos = ['left' => $leftX, 'right' => $rightX];
+            $yPos = ['left' => $baseY + 6, 'right' => $baseY + 6];
+            $rowCount = ['left' => 0, 'right' => 0];
+            $col = 'left';
+
+            foreach ($denierGroups as $denier => $rows) {
+                $sumKg = array_sum(array_column($rows, 'kg'));
+                $needed = count($rows) + 1;
+
+                if ($rowCount[$col] + $needed > $maxRows) {
+                    $col = $col === 'left' ? 'right' : 'left';
+
+                    if ($rowCount[$col] + $needed > $maxRows) {
+                        // Halaman baru untuk jenis_benang yang sama
+                        $pdf->AddPage();
+
+                        // Border & header ulang
+                        $pdf->SetDrawColor(0, 0, 0);
+                        $pdf->SetLineWidth(0.4);
+                        $pdf->Rect(9, 9, 192, 272);
+                        $pdf->SetLineWidth(0.2);
+                        $pdf->Rect(10, 10, 190, 270);
+
+                        $pdf->Image('assets/img/logo-kahatex.png', 26, 11, 10, 8);
+                        $pdf->SetFont('Arial', 'B', 7);
+                        $pdf->Cell(43, 13, '', 1, 0, 'C');
+                        $pdf->SetFillColor(170, 255, 255);
+                        $pdf->Cell(147, 4, 'FORMULIR', 1, 1, 'C', 1);
+                        $pdf->SetFont('Arial', 'B', 6);
+                        $pdf->Cell(43, 5, '', 0, 0);
+                        $pdf->Cell(147, 5, 'DEPARTEMEN COVERING', 0, 1, 'C');
+                        $pdf->Cell(43, 4, 'PT KAHATEX', 0, 0, 'C');
+                        $pdf->Cell(147, 4, 'STOCK BAHAN BAKU PER HARI', 0, 1, 'C');
+
+                        $pdf->SetFont('Arial', 'B', 5);
+                        $pdf->Cell(43, 4, 'No. Dokumen', 1, 0, 'L');
+                        $pdf->Cell(60, 4, 'FOR-COV-092/REV_00/HAL_1/3', 1, 0, 'L');
+                        $pdf->Cell(24, 4, 'Tanggal Revisi', 1, 0, 'L');
+                        $pdf->Cell(63, 4, '07 Januari 2019', 1, 1, 'C');
+                        $pdf->SetFont('Arial', '', 5);
+                        $pdf->Cell(43, 4, 'Tanggal : ' . date('D, d M Y'), 0, 1, 'L');
+                        $pdf->Cell(43, 4, 'Jenis : ' . $jenis_benang, 0, 1, 'L');
+                        $pdf->Cell(0, 1, '', 0, 1);
+                        $pdf->Line(10, 28, 200, 28);
+
+                        // Nomor halaman dinamis
+                        $pageNo++;
+                        $pdf->SetFont('Arial', 'I', 6);
+                        $pdf->SetXY(170, 280);
+                        $pdf->Cell(30, 4, 'Halaman: ' . $pageNo, 0, 0, 'R');
+                        $pdf->SetFont('Arial', '', 5);
+
+                        $drawTableHeader($pdf, $leftX, $pdf->GetY(), $colWidths);
+                        $drawTableHeader($pdf, $rightX, $pdf->GetY(), $colWidths);
+                        $xPos = ['left' => $leftX, 'right' => $rightX];
+                        $yPos = ['left' => $pdf->GetY() + 6, 'right' => $pdf->GetY() + 6];
+                        $rowCount = ['left' => 0, 'right' => 0];
+                        $col = 'left';
+                    }
+                }
+
+                $firstRow = true;
+                foreach ($rows as $item) {
+                    $pdf->SetXY($xPos[$col], $yPos[$col]);
+
+                    if ($firstRow) {
+                        $pdf->Cell($colWidths[0], $rowH * count($rows), $denier, 1, 0, 'C');
+                        $firstRow = false;
+                    } else {
+                        $pdf->Cell($colWidths[0], $rowH, '', 0, 0);
+                    }
+
+                    $pdf->Cell($colWidths[1], $rowH, $item['warna'], 1, 0, 'C');
+                    $pdf->Cell($colWidths[2], $rowH, $item['kode'], 1, 0, 'C');
+                    $pdf->Cell($colWidths[3], $rowH, number_format($item['kg'], 2), 1, 0, 'C');
+                    $pdf->Cell($colWidths[4], $rowH, '', 1, 1);
+
+                    $yPos[$col] += $rowH;
+                    $rowCount[$col]++;
+                }
+
+                $pdf->SetXY($xPos[$col], $yPos[$col]);
+                $pdf->SetFont('Arial', 'B', 5);
+                $pdf->SetFillColor(170, 255, 255);
+                $pdf->Cell($colWidths[0] + $colWidths[1] + $colWidths[2], $rowH, 'Total ' . $denier, 1, 0, 'C', true);
+                $pdf->Cell($colWidths[3], $rowH, number_format($sumKg, 2), 1, 0, 'C', true);
+                $pdf->Cell($colWidths[4], $rowH, '', 1, 1, 'C', true);
+                $pdf->SetFont('Arial', '', 5);
+                $pdf->SetFillColor(255, 255, 255);
+
+                $yPos[$col] += $rowH;
+                $rowCount[$col]++;
+            }
+
+            // Tambahkan baris kosong jika data tidak memenuhi halaman
+            foreach (['left', 'right'] as $side) {
+                while ($rowCount[$side] < $maxRows) {
+                    $pdf->SetXY($xPos[$side], $yPos[$side]);
+                    for ($i = 0; $i < 5; $i++) {
+                        $pdf->Cell($colWidths[$i], $rowH, '', 1, $i === 4 ? 1 : 0, 'C');
+                    }
+                    $yPos[$side] += $rowH;
+                    $rowCount[$side]++;
+                }
+            }
+
+            $pdf->SetXY($rightX, $yPos['right'] + 2);
+            $pdf->Cell(array_sum($colWidths), 4, 'Yang Bertanggung Jawab', 0, 1, 'C');
+            $pdf->SetXY($rightX, $yPos['right'] + 14);
+            $pdf->Cell(array_sum($colWidths), 4, '( LIS RAHAYU )', 0, 1, 'C');
+
+            $pageNo++;
+        }
+
+        return $this->response
+            ->setHeader('Content-Type', 'application/pdf')
+            ->setBody($pdf->Output('stock.pdf', 'I'));
     }
 }
