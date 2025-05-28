@@ -3013,7 +3013,7 @@ class ExcelController extends BaseController
         $sheet->mergeCells('C2:Q2');
         $sheet->setCellValue('C2', 'DEPARTEMEN COVERING');
         $sheet->mergeCells('C3:Q3');
-        $sheet->setCellValue('C3', 'STOCK '. $jenisCover.' COVER DI GUDANG COVERING');
+        $sheet->setCellValue('C3', 'STOCK ' . $jenisCover . ' COVER DI GUDANG COVERING');
         $sheet->getStyle('C1:Q3')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('C1:Q3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('C1:Q3')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
@@ -3121,7 +3121,7 @@ class ExcelController extends BaseController
         $sheet->getStyle('A2:Q7')->getFill()->getStartColor()->setARGB('FFFFFF');
         // $sheet->getStyle('J7:Q7')->getFont()->setBold(true);
         $sheet->getStyle('J7:Q7')->getFont()->setSize(10);
-        
+
         // Data
         $row            = 8;
         // Untuk merge fullJenis (level-1)
@@ -3267,8 +3267,8 @@ class ExcelController extends BaseController
         $sheet->mergeCells("C{$row}:D{$row}")
             ->setCellValue("B{$row}", "Total");
         $sheet->setCellValue("C{$row}", ": {$totalKg} KG");
-        $rowstar = $row-1;
-        $rowEnd = $row ;
+        $rowstar = $row - 1;
+        $rowEnd = $row;
         $sheet->getStyle("B{$rowstar}:D{$rowEnd}")->getFont()->setBold(true);
         $sheet->getStyle("B{$rowstar}:D{$rowEnd}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
         $sheet->getStyle("B{$rowstar}:D{$rowEnd}")->getFill()->getStartColor()->setARGB('DCDCDC');
@@ -3292,5 +3292,186 @@ class ExcelController extends BaseController
         exit;
     }
 
-    
+    public function exportListPemesananSpdxKaretPertgl()
+    {
+        $key   = $this->request->getGet('tglPakai');
+        $jenis = $this->request->getGet('jenis');
+
+        // 1. Ambil semua data, lalu group per admin
+        $allData = $this->pemesananModel->getDataPemesananPerArea($key, $jenis);
+
+        $grouped = [];
+        foreach ($allData as $item) {
+            $admin = $item['admin'] ?: 'Unknown';
+            $grouped[$admin][] = $item;
+        }
+
+        // 2. Inisialisasi Spreadsheet
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+
+        $filename = 'Report_PEMESANAN_BAHAN_BAKU_' . $jenis . '_' . $key . '.xlsx';
+        $sheetIndex = 0;
+        foreach ($grouped as $adminName => $items) {
+            // Untuk sheet pertama, pakai sheet default; selebihnya createSheet()
+            if ($sheetIndex === 0) {
+                $sheet = $spreadsheet->getActiveSheet();
+            } else {
+                $sheet = $spreadsheet->createSheet();
+            }
+            $sheet->setTitle($adminName);
+
+            // --- Judul & keterangan ---
+            $sheet->mergeCells('A1:O1');
+            $sheet->setCellValue('A1', 'REPORT PERMINTAAN BAHAN BAKU');
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+            $sheet->getStyle('A1')->getAlignment()
+                ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            $sheet->mergeCells('A2:C2');
+            $sheet->setCellValue('A2', 'JENIS BAHAN BAKU');
+            $sheet->setCellValue('D2', ': ' . $jenis);
+            $sheet->setCellValue('H2', 'AREA');
+            $sheet->setCellValue('I2', ': ' . $adminName);
+            $sheet->setCellValue('M2', 'TANGGAL PAKAI');
+            $sheet->mergeCells('N2:O2');
+            $sheet->setCellValue('N2', ': ' . $key);
+            foreach (['A2', 'C2', 'H2', 'I2', 'M2', 'N2'] as $cell) {
+                $sheet->getStyle($cell)->getFont()->setBold(true)->setSize(12);
+                $sheet->getStyle($cell)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+            }
+
+            // --- Header kolom ---
+            $headers = [
+                'NO',
+                'JAM',
+                'TGL PESAN',
+                'NO MODEL',
+                'ITEM TYPE',
+                'KODE WARNA',
+                'WARNA',
+                'LOT',
+                'JL MC',
+                'TOTAL',
+                'CONES',
+                'KETERANGAN',
+                'BAGIAN PERSIAPAN',
+                'QTY OUT',
+                'CNS OUT'
+            ];
+            $col = 'A';
+            foreach ($headers as $h) {
+                $sheet->setCellValue($col . '4', $h);
+                $sheet->getStyle($col . '4')->getFont()->setBold(true);
+                $col++;
+            }
+
+            // --- Data baris ---
+            $row = 5;
+            $no  = 1;
+            foreach ($items as $item) {
+                $sheet->setCellValue('A' . $row, $no++);
+                $sheet->setCellValue('B' . $row, $item['jam_pesan'] ?: '-');
+                $sheet->setCellValue('C' . $row, $item['tgl_pesan'] ?: '-');
+                $sheet->setCellValue('D' . $row, $item['no_model'] ?: '-');
+                $sheet->setCellValue('E' . $row, $item['item_type'] ?: '-');
+                $sheet->setCellValue('F' . $row, $item['kode_warna'] ?: '-');
+                $sheet->setCellValue('G' . $row, $item['color'] ?: '-');
+                $sheet->setCellValue('H' . $row, '');
+                $sheet->setCellValue('I' . $row, $item['ttl_jl_mc'] ?? 0);
+                $sheet->setCellValue('J' . $row, $item['ttl_kg']    ?? 0);
+                $sheet->setCellValue('K' . $row, $item['ttl_cns']   ?? 0);
+                $sheet->setCellValue('L' . $row, '');
+                $sheet->setCellValue('M' . $row, '');
+                $sheet->setCellValue('N' . $row, '');
+                $sheet->setCellValue('O' . $row, '');
+                $row++;
+            }
+
+            // --- Border & wrap text ---
+            $lastRow = $row - 1;
+
+            // Border untuk semua kolom dari A3 sampai O baris terakhir
+            $styleArray = [
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['argb' => 'FF000000'],
+                    ],
+                ],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                ],
+            ];
+
+            $sheet->getStyle("A4:O{$lastRow}")->applyFromArray($styleArray);
+
+            // Atur lebar kolom agar pas 1 halaman
+            $columnWidths = [
+                'A' => 5,   // NO
+                'B' => 10,  // JAM
+                'C' => 12,  // TGL PESAN
+                'D' => 12,  // NO MODEL
+                'E' => 18,  // ITEM TYPE
+                'F' => 15,  // KODE WARNA
+                'G' => 15,  // WARNA
+                'H' => 15,  // LOT
+                'I' => 10,  // JL MC
+                'J' => 10,  // TOTAL
+                'K' => 10,  // CONES
+                'L' => 18,  // KETERANGAN
+                'M' => 20,  // BAGIAN PERSIAPAN
+                'N' => 10,  // QTY OUT
+                'O' => 10,  // CNS OUT
+            ];
+
+            foreach ($columnWidths as $col => $width) {
+                $sheet->getColumnDimension($col)->setWidth($width);
+            }
+
+            // Aktifkan wrap text untuk kolom tertentu dari baris 2 sampai baris terakhir
+            $wrapColumns = ['E', 'F', 'G', 'L', 'M'];
+            foreach ($wrapColumns as $col) {
+                $sheet->getStyle("{$col}2:{$col}{$lastRow}")
+                    ->getAlignment()->setWrapText(true);
+            }
+
+            // Pastikan muat 1 halaman saat cetak
+            $sheet->getPageSetup()->setFitToWidth(1);
+            $sheet->getPageSetup()->setFitToHeight(0);
+
+            // Set orientasi halaman menjadi landscape
+            $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
+
+            // Ukuran kertas A4 (bisa juga A3, Legal, dll)
+            $sheet->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4);
+
+            // Margin halaman (opsional, bisa disesuaikan)
+            $sheet->getPageMargins()->setTop(0.5);
+            $sheet->getPageMargins()->setRight(0.4);
+            $sheet->getPageMargins()->setLeft(0.4);
+            $sheet->getPageMargins()->setBottom(0.5);
+
+            // Aktifkan fit to width (agar tidak kepotong saat print)
+            $sheet->getPageSetup()->setFitToWidth(1);
+            $sheet->getPageSetup()->setFitToHeight(0);
+
+            // Header/Footer cetakan (opsional)
+            // $sheet->getHeaderFooter()->setOddFooter('&L&B' . $filename . '&RPage &P of &N');
+
+            $sheetIndex++;
+        }
+
+        // kembali ke sheet pertama
+        $spreadsheet->setActiveSheetIndex(0);
+
+        // --- Output ke browser ---
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"{$filename}\"");
+        header('Cache-Control: max-age=0');
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
 }

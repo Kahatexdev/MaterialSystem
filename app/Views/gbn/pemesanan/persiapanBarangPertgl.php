@@ -57,7 +57,7 @@
                                         <td class="text-center">
                                             <?php if ($jenis === 'SPANDEX' || $jenis === 'KARET') : ?>
                                         <td class="text-center">
-                                            <a href="<?= base_url($role . '/exportListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
+                                            <a href="<?= base_url($role . '/pemesanan/exportListPemesananSpdxKaretPertgl?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
                                                 <i class="fas fa-file-excel fa-2x"></i>
                                             </a>
                                         </td>
