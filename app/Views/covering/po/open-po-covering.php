@@ -106,37 +106,40 @@
                 if (data.length > 0) {
                     data.forEach((item, index) => {
                         const card = `
-                <div class="col-md-6">
-                    <div class="card border-dark">
-                        <div class="card-header bg-dark text-white">
-                            Item Type : ${item.item_type}
-                            <input type="hidden" class="form-control" name="detail[${index}][id_induk]" value="${item.id_induk ?? ''}" >
-                        </div>
-                        <div class="card-body">
-                            <div class="form-group mb-2">
-                                <label>Item Type</label><label class="text-danger">*</label>
-                                <input type="text" class="form-control" name="detail[${index}][item_type]" value="${item.item_type ?? ''}" required>
-                                <label class="text-danger">*Sesuaikan Item Type</label>
+                        <div class="col-md-6" id="card-${index}">
+                            <div class="card border-dark">
+                                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                                    <span>Item Type : ${item.item_type}</span>
+                                    <button type="button" class="btn btn-white" onclick="hapusCard(${index})">
+                                        <i class="fas fa-trash dark""></i>
+                                    </button>
+                                    <input type="hidden" class="form-control" name="detail[${index}][id_induk]" value="${item.id_induk ?? ''}" >
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group mb-2">
+                                        <label>Item Type</label><label class="text-danger">*</label>
+                                        <input type="text" class="form-control" name="detail[${index}][item_type]" value="${item.item_type ?? ''}" required>
+                                        <label class="text-danger">*Sesuaikan Item Type</label>
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label>Kode Warna</label>
+                                        <input type="text" class="form-control" name="detail[${index}][kode_warna]" value="${item.kode_warna ?? ''}" required>
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label>Warna</label>
+                                        <input type="text" class="form-control" name="detail[${index}][color]" value="${item.color ?? ''}" required>
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label>Total KG PO</label>
+                                        <input type="number" step="0.01" class="form-control" name="detail[${index}][kg_total_po]" value="${item.total_kg_po ?? 0}" required readonly>
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label>KG Celup</label>
+                                        <input type="number" step="0.01" class="form-control" name="detail[${index}][kg_po]" required>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-group mb-2">
-                                <label>Kode Warna</label>
-                                <input type="text" class="form-control" name="detail[${index}][kode_warna]" value="${item.kode_warna ?? ''}" required>
-                            </div>
-                            <div class="form-group mb-2">
-                                <label>Warna</label>
-                                <input type="text" class="form-control" name="detail[${index}][color]" value="${item.color ?? ''}" required>
-                            </div>
-                            <div class="form-group mb-2">
-                                <label>Total KG PO</label>
-                                <input type="number" step="0.01" class="form-control" name="detail[${index}][kg_total_po]" value="${item.total_kg_po ?? 0}" required readonly>
-                            </div>
-                            <div class="form-group mb-2">
-                                <label>KG Celup</label>
-                                <input type="number" step="0.01" class="form-control" name="detail[${index}][kg_po]" " required>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
+                        </div>`;
                         container.innerHTML += card;
                     });
                 } else {
@@ -144,6 +147,14 @@
                 }
             });
     });
+</script>
+<script>
+    function hapusCard(index) {
+        const card = document.getElementById(`card-${index}`);
+        if (card) {
+            card.remove();
+        }
+    }
 </script>
 
 <?php $this->endSection(); ?>
