@@ -46,7 +46,7 @@
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/reportPemesananArea') ?>">Pemesanan Area</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/permintaanKaretCovering') ?>">Permintaan Karet</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/permintaanSpandexCovering') ?>">Permintaan Spandex</a></li>
-                                <li><a class="dropdown-item" href="#" id="showModalButton">Persiapan Benang & Nylon</a></li>
+                                <li><a class="dropdown-item" href="#" id="showModalButton">Persiapan Pengeluaran Barang</a></li>
                             </ul>
                         </li>
                         <li class="nav-item d-flex align-items-center">
@@ -84,6 +84,8 @@
                                     <option value="" selected disabled>Pilih Jenis Benang</option>
                                     <option value="BENANG">BENANG</option>
                                     <option value="NYLON">NYLON</option>
+                                    <option value="SPANDEX">SPANDEX</option>
+                                    <option value="KARET">KARET</option>
                                 </select>
                             </div>
                             <div class="d-grid">
@@ -94,7 +96,6 @@
                 </div>
             </div>
         </div>
-
     </nav>
     <script>
         function updateCount() {
@@ -122,7 +123,6 @@
                 e.preventDefault(); // Mencegah redirect langsung
                 $('#threadModal1').modal('show');
             });
-
         });
     </script>
     <?= $this->renderSection('content'); ?>
