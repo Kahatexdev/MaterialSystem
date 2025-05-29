@@ -225,7 +225,8 @@ class OpenPoModel extends Model
     public function getPOCovering()
     {
         return $this->select('id_po,DATE(open_po.created_at) tgl_po, id_induk')
-            ->where('penerima', 'Paryanti')
+            ->where('penerima', 'Retno')
+            ->where('penanggung_jawab', 'Paryanti')
             ->orderBy('tgl_po', 'DESC')
             ->groupBy('tgl_po')
             ->findAll();
@@ -269,14 +270,19 @@ class OpenPoModel extends Model
 
     public function getPoForCelup($tgl_po)
     {
-        return $this->select('open_po.*, master_material.jenis')
-            ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
-            ->where('open_po.id_induk IS NOT NULL')
-            ->where('open_po.penerima', 'Retno')
-            ->where('open_po.penanggung_jawab', 'Paryanti')
-            ->where('DATE(open_po.created_at)', $tgl_po)
-            ->findAll();
+        return $this->db->table('open_po AS anak')
+            ->select('anak.*, anak.no_model AS anak_no_model, master_material.jenis, induk.no_model AS induk_no_model, master_order.buyer, master_order.delivery_awal, master_order.no_order') // ← ambil no_model dari induk
+            ->join('open_po AS induk', 'induk.id_po = anak.id_induk') // ← self join
+            ->join('master_material', 'master_material.item_type = anak.item_type', 'left')
+            ->join('master_order', 'master_order.no_model = REPLACE(induk.no_model, "POCOVERING ", "")', 'left')
+            ->where('anak.id_induk IS NOT NULL')
+            ->where('anak.penerima', 'Retno')
+            ->where('anak.penanggung_jawab', 'Paryanti')
+            ->where('DATE(anak.created_at)', $tgl_po)
+            ->get()
+            ->getResult();
     }
+
     public function
     getQtyPOForCvr($noModel, $itemType, $kodeWarna)
     {
@@ -297,31 +303,6 @@ class OpenPoModel extends Model
             ->where('open_po.kode_warna', $kodeWarna)
             ->first();
     }
-
-    public function getDeliveryAwalNoOrderBuyer($tgl_po)
-    {
-        return $this->select('DISTINCT open_po.id_po, open_po.no_model, master_order.buyer, master_order.delivery_awal, master_order.no_order', false)
-            ->join('master_order', 'master_order.no_model = open_po.no_model', 'left') // Join berdasarkan no_model
-            ->where('open_po.id_induk', null) // Hanya ambil id_po asli
-            ->whereNotIn('open_po.id_po', function ($builder) use ($tgl_po) {
-                return $builder->select('id_induk')
-                    ->from('open_po')
-                    ->where('DATE(created_at) !=', $tgl_po) // Hapus jika id_induk memiliki tanggal berbeda
-                    ->where('id_induk IS NOT NULL'); // Pastikan id_induk bukan NULL
-            })
-            ->where('DATE(open_po.created_at)', $tgl_po) // Hanya ambil sesuai tanggal di routes
-            ->findAll();
-    }
-
-
-
-    // public function getDeliveryAwalNoOrderBuyer()
-    // {
-    //     return $this->select('open_po.id_po, open_po.no_model, open_po.id_induk, master_order.buyer, master_order.no_order, master_order.delivery_awal')
-    //         ->join('master_order', 'TRIM(master_order.no_model) = TRIM(open_po.no_model)', 'left') // Hindari perbedaan format no_model
-    //         ->where('open_po.id_induk IS NULL') // Ambil hanya data tanpa id_induk
-    //         ->findAll();
-    // }
 
     public function poCoveringCount()
     {
