@@ -65,7 +65,7 @@
                             <?php foreach ($trackingPoCovering as $po) : ?>
                                 <tr>
                                     <td><?= date('d-m-Y', strtotime($po['created_at'])) ?></td>
-                                    <td><?= esc($po['no_model']) ?></td>
+                                    <td><?= esc($po['no_model_anak']) ?></td>
                                     <td><?= esc($po['item_type']) ?></td>
                                     <td><?= esc($po['kode_warna']) ?></td>
                                     <td><?= esc($po['color']) ?></td>

@@ -37,7 +37,7 @@
 
     <div class="card mt-4">
         <div class="card-body">
-            <form action="<?= base_url($role . '/po/saveOpenPOCovering/') ?>" method="post">
+            <form action="<?= base_url($role . '/po/saveOpenPOCovering') ?>" method="post">
                 <div class="row">
                     <div class="col-md-6 mt-2">
                         <div class="form-group">
