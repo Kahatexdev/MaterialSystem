@@ -1,6 +1,17 @@
 <?php $this->extend($role . '/mastermaterial/header'); ?>
 <?php $this->section('content'); ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
+
+<style>
+    .input-tinggi-2baris {
+        height: calc(3em + 1rem + 5px);
+    }
+
+    .select-tinggi-2baris {
+        height: calc(3em + 1rem + 5px);
+    }
+</style>
+
 <div class="container-fluid py-4">
     <?php if (session()->getFlashdata('success')) : ?>
         <script>
@@ -139,36 +150,48 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <label for="kg_percones">Permintan Kelos (Kg Cones)</label>
-                                        <input type="number" step="0.01" min="0.01" class="form-control kg-percones" name="items[0][kg_percones]" placeholder="Kg">
+                                        <div class="form-group">
+                                            <label for="kg_percones">Permintan Kelos (Kg Cones)</label>
+                                            <input type="number" step="0.01" min="0.01" class="form-control kg-percones" name="items[0][kg_percones]" placeholder="Kg">
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="jumlah_cones">Permintan Kelos (Total Cones)</label>
-                                        <input type="text" class="form-control jumlah-cones" name="items[0][jumlah_cones]" placeholder="Cns" readonly>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label for="bentuk_celup">Bentuk Celup</label>
-                                        <select class="form-control bentuk-celup" name="items[0][bentuk_celup]">
-                                            <option value="">Pilih Bentuk Celup</option>
-                                            <option value="Cones">Cones</option>
-                                            <option value="Hank">Hank</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="jenis_produksi">Untuk Produksi</label>
-                                        <input type="text" class="form-control jenis-produksi" name="items[0][jenis_produksi]">
+                                        <div class="form-group">
+                                            <label for="jumlah_cones">Permintan Kelos (Total Cones)</label>
+                                            <input type="text" class="form-control jumlah-cones" name="items[0][jumlah_cones]" placeholder="Cns" readonly>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <label for="contoh_warna">Contoh Warna</label>
-                                        <input type="text" class="form-control contoh-warna" name="items[0][contoh_warna]">
+                                        <div class="form-group">
+                                            <label for="bentuk_celup">Bentuk Celup</label>
+                                            <select class="form-control bentuk-celup" name="items[0][bentuk_celup]">
+                                                <option value="">Pilih Bentuk Celup</option>
+                                                <option value="Cones">Cones</option>
+                                                <option value="Hank">Hank</option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="ket_celup">Keterangan Celup</label>
-                                        <textarea class="form-control ket-celup" name="items[0][ket_celup]"></textarea>
+                                        <div class="form-group">
+                                            <label for="jenis_produksi">Untuk Produksi</label>
+                                            <input type="text" class="form-control jenis-produksi" name="items[0][jenis_produksi]">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="contoh_warna">Contoh Warna</label>
+                                            <input type="text" class="form-control input-tinggi-2baris contoh-warna" name="items[0][contoh_warna]">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="ket_celup">Keterangan Celup</label>
+                                            <textarea class="form-control ket-celup" name="items[0][ket_celup]"></textarea>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -180,6 +203,7 @@
                                         <span class="btn-inner--icon"><i class="fas fa-trash"></i></span>
                                     </button>
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -206,7 +230,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="">PO(+)</label>
-                            <select class="form-control" name="po_plus" id="po_plus">
+                            <select class="form-select select-tinggi-2baris" name="po_plus" id="po_plus">
                                 <option value="">Pilih</option>
                                 <option value="1">YA</option>
                                 <option value="0">TIDAK</option>
@@ -378,26 +402,34 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <label for="bentuk_celup">Bentuk Celup</label>
-                                        <select class="form-control bentuk-celup" name="items[${tabIndex - 1}][bentuk_celup]">
-                                            <option value="">Pilih Bentuk Celup</option>
-                                            <option value="Cones">Cones</option>
-                                            <option value="Hank">Hank</option>
-                                        </select>
+                                        <div class="form-group">
+                                            <label for="bentuk_celup">Bentuk Celup</label>
+                                            <select class="form-control bentuk-celup" name="items[${tabIndex - 1}][bentuk_celup]">
+                                                <option value="">Pilih Bentuk Celup</option>
+                                                <option value="Cones">Cones</option>
+                                                <option value="Hank">Hank</option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="jenis_produksi">Untuk Produksi</label>
-                                        <input type="text" class="form-control jenis-produksi" name="items[${tabIndex - 1}][jenis_produksi]">
+                                        <div class="form-group">
+                                            <label for="jenis_produksi">Untuk Produksi</label>
+                                            <input type="text" class="form-control jenis-produksi" name="items[${tabIndex - 1}][jenis_produksi]">
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <label for="contoh_warna">Contoh Warna</label>
-                                        <input type="text" class="form-control contoh-warna" name="items[${tabIndex - 1}][contoh_warna]">
+                                        <div class="form-group">
+                                            <label for="contoh_warna">Contoh Warna</label>
+                                            <input type="text" class="form-control input-tinggi-2baris contoh-warna" name="items[${tabIndex - 1}][contoh_warna]">
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="ket_celup">Keterangan Celup</label>
-                                        <textarea class="form-control ket-celup" name="items[${tabIndex - 1}][ket_celup]"></textarea>
+                                        <div class="form-group">
+                                            <label for="ket_celup">Keterangan Celup</label>
+                                            <textarea class="form-control ket-celup" name="items[${tabIndex - 1}][ket_celup]"></textarea>
+                                        </div>
                                     </div>
                                 </div>
                                 <div style="width: 100%; text-align: center; margin-top: 10px; margin-bottom:10px;">

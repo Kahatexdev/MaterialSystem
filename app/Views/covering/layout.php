@@ -86,9 +86,9 @@
 
                 <li class="nav-item ">
                     <a class="nav-link <?= set_active($active) ?>" href="<?= base_url('covering') ?>">
-                            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                                <i class="fa-solid fa-table-columns text-dark"></i>
-                            </div>
+                        <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fa-solid fa-table-columns text-dark"></i>
+                        </div>
                         <span class="nav-link-text ms-1">Dashboard</span>
                     </a>
                 </li>
@@ -119,17 +119,17 @@
                 </li> -->
                 <li class="nav-item">
                     <a class="nav-link   <?= set_active($active . '/po') ?>" href="<?= base_url($role . '/po') ?>">
-                            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                                <i class="fa-solid fa-file text-dark"></i>
-                            </div>
+                        <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fa-solid fa-file text-dark"></i>
+                        </div>
                         <span class="nav-link-text ms-1">PO Celup</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link <?= set_active($active . '/schedule') ?>" href="<?= base_url($role . '/schedule') ?>">
-                            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                                <i class="fas fa-calendar-plus text-dark"></i>
-                            </div>
+                        <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-calendar-plus text-dark"></i>
+                        </div>
                         <span class="nav-link-text ms-1">Schedule</span>
                     </a>
                 </li>
