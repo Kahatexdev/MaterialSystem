@@ -135,9 +135,8 @@
                                         <label for="jenis_bahan_baku" class="form-label">Jenis Bahan Baku</label>
                                         <select class="form-select" id="jenis_bahan_baku" name="jenis_bahan_baku" required>
                                             <option value="">Pilih Jenis Bahan Baku</option>
-                                            <?php foreach ($jenis_bahan_baku as $jenis): ?>
-                                                <option value="<?= $jenis['jenis'] ?>" <?= ($jenis['jenis'] == $jenis_bahan_baku) ? 'selected' : '' ?>><?= $jenis['jenis'] ?></option>
-                                            <?php endforeach; ?>
+                                            <option value="BENANG">BENANG</option>
+                                            <option value="NYLON">NYLON</option>
                                         </select>
                                     </div>
                                 </div>

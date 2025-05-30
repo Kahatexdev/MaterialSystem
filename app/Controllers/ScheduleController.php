@@ -126,7 +126,7 @@ class ScheduleController extends BaseController
         $lot_urut = $this->request->getGet('lot_urut');
         $no_model = $this->request->getGet('no_model');
 
-        $jenis_bahan_baku = $this->masterMaterialModel->getJenisBahanBaku();
+        // $jenis_bahan_baku = $this->masterMaterialModel->getJenisBahanBaku();
         $item_type = $this->masterMaterialModel->getItemType();
         $min = $this->mesinCelupModel->getMinCaps($no_mesin);
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
@@ -144,7 +144,7 @@ class ScheduleController extends BaseController
             'no_mesin' => $no_mesin,
             'tanggal_schedule' => $tanggal_schedule,
             'lot_urut' => $lot_urut,
-            'jenis_bahan_baku' => $jenis_bahan_baku,
+            // 'jenis_bahan_baku' => $jenis_bahan_baku,
             'item_type' => $item_type,
             'min_caps' => $min['min_caps'],
             'max_caps' => $max['max_caps'],
@@ -486,8 +486,8 @@ class ScheduleController extends BaseController
             }
 
             $kg_kebutuhan = $this->openPoModel->getKgKebutuhan($noModel, $itemType, $kodeWarna);
-            $row['delivery_awal'] = $Order['delivery_awal'] ?? null;
-            $row['delivery_akhir'] = $Order['delivery_akhir'] ?? null;
+            // $row['delivery_awal'] = $Order['delivery_awal'] ?? null;
+            // $row['delivery_akhir'] = $Order['delivery_akhir'] ?? null;
             $row['qty_po'] = $Order['qty_po'] ?? 0;
 
             // Pastikan 'kg_po' ada di $kg_kebutuhan

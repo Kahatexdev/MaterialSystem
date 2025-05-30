@@ -179,9 +179,8 @@
                                         <!-- select with search -->
                                         <select class="form-select" id="jenis_bahan_baku" name="jenis_bahan_baku" required>
                                             <option value="">Pilih Jenis Bahan Baku</option>
-                                            <?php foreach ($jenis_bahan_baku as $bahan): ?>
-                                                <option value="<?= $bahan['jenis'] ?>"><?= $bahan['jenis'] ?></option>
-                                            <?php endforeach; ?>
+                                            <option value="BENANG">BENANG</option>
+                                            <option value="NYLON">NYLON</option>
                                         </select>
                                     </div>
                                 </div>

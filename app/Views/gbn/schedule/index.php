@@ -349,11 +349,11 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="lot_celup" class="form-label">Lot Celup</label>
-                                    <input type="text" class="form-control" id="lot_celup" value="${item.lot_celup}" readonly>
+                                    <input type="text" class="form-control" id="lot_celup" value="${item.lot_celup ? item.lot_celup : 'Lot Belum Diisi'}" readonly>
                                 </div>
                                 <div class="mb-3">
                                     <label for="tgl_celup" class="form-label">Tanggal Celup</label>
-                                    <input type="text" class="form-control" id="tgl_celup" value="${item.tanggal_celup}" readonly>
+                                    <input type="text" class="form-control" id="tgl_celup" value="${item.tanggal_celup ? item.tanggal_celup : 'Tanggal Celup Belum Di Update'}" readonly>
                                 </div>
                             </div>
                             <div class="col-md-4">

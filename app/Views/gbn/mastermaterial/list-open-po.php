@@ -199,6 +199,7 @@
         $('#updateModal').on('shown.bs.modal', function() {
             $('#add_item_type').select2({
                 dropdownParent: $('#updateModal'),
+                width: '100%'
             });
         });
     });
