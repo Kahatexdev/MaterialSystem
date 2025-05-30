@@ -329,7 +329,7 @@
                             <div class="mb-3">
                                 <label for="style_size" class="form-label">Tujuan</label>
                                 <select class="form-control tujuan" name="tujuan" required>
-                                    <option value="-">Pilih Tujuan</option>
+                                    <option value="">Pilih Tujuan</option>
                                     <option value="CELUP">CELUP</option>
                                     <option value="COVERING">COVERING</option>
                                 </select>
@@ -337,7 +337,7 @@
                             <div class="mb-3">
                                 <label for="style_size" class="form-label">Jenis Bahan Baku</label>
                                 <select class="form-control jenis" name="jenis" id="jenis" required>
-                                    <option value="-">Pilih Jenis</option>
+                                    <option value="">Pilih Jenis</option>
                                     <option value="BENANG">BENANG</option>
                                     <option value="NYLON">NYLON</option>
                                     <option value="SPANDEX">SPANDEX & KARET</option>
