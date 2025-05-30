@@ -3327,15 +3327,15 @@ class ExcelController extends BaseController
             $sheet->getStyle('A1')->getAlignment()
                 ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-            $sheet->mergeCells('A2:C2');
-            $sheet->setCellValue('A2', 'JENIS BAHAN BAKU');
-            $sheet->setCellValue('D2', ': ' . $jenis);
-            $sheet->setCellValue('H2', 'AREA');
-            $sheet->setCellValue('I2', ': ' . $adminName);
-            $sheet->setCellValue('M2', 'TANGGAL PAKAI');
-            $sheet->mergeCells('N2:O2');
-            $sheet->setCellValue('N2', ': ' . $key);
-            foreach (['A2', 'C2', 'H2', 'I2', 'M2', 'N2'] as $cell) {
+            $sheet->mergeCells('A3:C3');
+            $sheet->setCellValue('A3', 'JENIS BAHAN BAKU');
+            $sheet->setCellValue('D3', ': ' . $jenis);
+            $sheet->setCellValue('H3', 'AREA');
+            $sheet->setCellValue('I3', ': ' . $adminName);
+            $sheet->setCellValue('M3', 'TANGGAL PAKAI');
+            $sheet->mergeCells('N3:O3');
+            $sheet->setCellValue('N3', ': ' . $key);
+            foreach (['A3', 'C3', 'H3', 'I3', 'M3', 'N3'] as $cell) {
                 $sheet->getStyle($cell)->getFont()->setBold(true)->setSize(12);
                 $sheet->getStyle($cell)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
             }
@@ -3387,8 +3387,41 @@ class ExcelController extends BaseController
                 $row++;
             }
 
+            // Buat bold untuk total
+            foreach (['I', 'J', 'K', 'N', 'O'] as $col) {
+                $sheet->getStyle("{$col}{$row}")->getFont()->setBold(true);
+            }
+
+            // Merge kolom A:H di baris total
+            $sheet->mergeCells("A{$row}:H{$row}");
+            $sheet->setCellValue("A{$row}", 'TOTAL');
+            $sheet->getStyle("A{$row}")->getFont()->setBold(true);
+            $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            // Set total dengan SUM formula
+            $sheet->setCellValue("I{$row}", "=SUM(I4:I" . ($row - 1) . ")");
+            $sheet->setCellValue("J{$row}", "=SUM(J4:J" . ($row - 1) . ")");
+            $sheet->setCellValue("K{$row}", "=SUM(K4:K" . ($row - 1) . ")");
+            $sheet->setCellValue("N{$row}", "=SUM(N4:N" . ($row - 1) . ")");
+            $sheet->setCellValue("O{$row}", "=SUM(O4:O" . ($row - 1) . ")");
+
+            // Bold untuk angka total
+            foreach (['I', 'J', 'K', 'N', 'O'] as $col) {
+                $sheet->getStyle("{$col}{$row}")->getFont()->setBold(true);
+            }
+
+            // Tambahkan border baris total
+            $borderStyle = [
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    ],
+                ],
+            ];
+            $sheet->getStyle("A{$row}:O{$row}")->applyFromArray($borderStyle);
+
             // --- Border & wrap text ---
-            $lastRow = $row - 1;
+            $lastRow = $row;
 
             // Border untuk semua kolom dari A3 sampai O baris terakhir
             $styleArray = [
