@@ -73,12 +73,10 @@ class TrackingPoCoveringController extends BaseController
             'updated_at' => $date,
         ];
 
-        // dd ($data);
-
         if ($this->trackingPoCoveringModel->update($id, $data)) {
-            return redirect()->to(base_url($this->role . '/po/listTrackingPo'))->with('success', 'Data updated successfully');
+            return redirect()->to(base_url($this->role . '/po/listTrackingPo/' . $date))->with('success', 'Data updated successfully');
         } else {
-            return redirect()->to(base_url($this->role . '/po/listTrackingPo'))->with('error', 'Failed to update data');
+            return redirect()->to(base_url($this->role . '/po/listTrackingPo/' . $date))->with('error', 'Failed to update data');
         }
     }
 }
