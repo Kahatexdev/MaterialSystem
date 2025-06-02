@@ -304,17 +304,33 @@ class MaterialController extends BaseController
     public function updatePo()
     {
         $idPo = $this->request->getPost('id_po');
+        $noModel   = $this->request->getPost('no_model');
+        $keterangan = $this->request->getPost('keterangan');
+
         $data = [
             'item_type'  => $this->request->getPost('item_type'),
             'kode_warna' => $this->request->getPost('kode_warna'),
             'color'      => $this->request->getPost('color'),
-            'kg_po'      => $this->request->getPost('kg_po')
+            'kg_po'      => $this->request->getPost('kg_po'),
+            'ket_celup'  => $this->request->getPost('ket_celup'),
         ];
 
-        if ($this->openPoModel->update($idPo, $data)) {
-            return redirect()->back()->with('success', 'Berhasil memperbarui data.');
+        $db = db_connect();
+        $db->transStart();
+
+        $this->openPoModel->update($idPo, $data);
+
+        $builder = $db->table($this->openPoModel->table);
+        $builder
+            ->where('no_model', $noModel)
+            ->update(['keterangan' => $keterangan]);
+
+        $db->transComplete();
+
+        if ($db->transStatus()) {
+            return redirect()->back()->with('success', 'Data berhasil diperbarui.');
         } else {
-            return redirect()->back()->with('error', 'Gagal memperbarui data.');
+            return redirect()->back()->with('error', 'Update gagal. Silakan coba lagi.');
         }
     }
 

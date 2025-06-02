@@ -110,6 +110,7 @@
             <div class="modal-body">
                 <form id="updateForm" action="<?= base_url($role . '/updatePo') ?>" method="post">
                     <input type="hidden" name="id_po" id="id_po">
+                    <input type="hidden" name="no_model" id="no_model">
 
                     <div class="mb-3">
                         <label for="itemType">Item Type</label>
@@ -135,6 +136,16 @@
                     <div class="mb-3">
                         <label for="kg_po" class="form-label">Kg Kebutuhan</label>
                         <input type="text" class="form-control" id="kg_po" name="kg_po" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="">Keterangan Celup</label>
+                        <textarea class="form-control" name="ket_celup" id="ket_celup"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="">Keterangan</label>
+                        <textarea class="form-control" name="keterangan" id="keterangan"></textarea>
                     </div>
 
                     <!-- Button update dan batal di sebelah kanan -->
@@ -220,10 +231,13 @@
                 success: function(response) {
                     // Isi data ke dalam form modal
                     $('#id_po').val(response.id_po);
+                    $('#no_model').val(response.no_model);
                     $('#add_item_type').val(response.item_type);
                     $('#kode_warna').val(response.kode_warna);
                     $('#color').val(response.color);
                     $('#kg_po').val(response.kg_po);
+                    $('#ket_celup').val(response.ket_celup);
+                    $('#keterangan').val(response.keterangan);
                     // Show modal dialog
                     $('#updateModal').modal('show');
                 },
