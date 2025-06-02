@@ -88,6 +88,7 @@ class PdfController extends BaseController
 
         $result = $this->openPoModel->getData($no_model, $jenis, $jenis2);
         $unit = $this->masterOrderModel->getUnit($no_model);
+        // dd($result);
 
         // Inisialisasi FPDF
         $pdf = new FPDF('L', 'mm', 'A4');
@@ -136,6 +137,14 @@ class PdfController extends BaseController
         $pdf->Cell(41, 4, 'Internal', 1, 1, 'L');
 
         $pdf->SetFont('Arial', '', 7);
+
+        if (isset($result[0])) {
+            if ($result[0]['po_plus'] == 1) {
+                $no_model = '(+) ' . $result[0]['no_model'];
+            } else {
+                $no_model = $result[0]['no_model'];
+            }
+        }
 
         $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
         $pdf->Cell(30, 5, ': ' . $no_model, 0, 1, 'L');
