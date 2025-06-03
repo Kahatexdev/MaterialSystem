@@ -276,12 +276,15 @@ class CelupController extends BaseController
             return !empty($value);
         });
 
+        $ketDailyCek = null;
+
         // Cari tanggal terbaru beserta labelnya
         $mostRecentDate = null;
         $mostRecentLabel = null;
         if (!empty($filteredDates)) {
             $mostRecentDate = max($filteredDates); // Tanggal paling baru
             $mostRecentLabel = array_search($mostRecentDate, $filteredDates); // Cari label sesuai tanggal
+            $ketDailyCek = "$mostRecentLabel (" . date('d-m-Y', strtotime($mostRecentDate)) . ")";
         }
 
         // Set nilai ketDailyCek berdasarkan tanggal terbaru dan labelnya
@@ -296,7 +299,7 @@ class CelupController extends BaseController
         if ($tglBon) $dataUpdate['tanggal_bon'] = $tglBon;
         if ($tglCelup) $dataUpdate['tanggal_celup'] = $tglCelup;
         if ($tglBongkar) $dataUpdate['tanggal_bongkar'] = $tglBongkar;
-        if ($tglPressOven) $dataUpdate['tgl_press_oven'] = $tglPressOven;
+        if ($tglPressOven) $dataUpdate['tanggal_press_oven'] = $tglPressOven;
         // if ($tglOven) $dataUpdate['tanggal_oven'] = $tglOven;
         if ($tglTL) $dataUpdate['tanggal_tl'] = $tglTL;
         if ($tglTesLab) $dataUpdate['tanggal_teslab'] = $tglTesLab;
@@ -325,19 +328,15 @@ class CelupController extends BaseController
         }
 
         // Jika tgl_celup diisi, update last_status menjadi 'celup'
-        if (!empty($tglPress)) {
+        if (!empty($tglPressOven)) {
             $dataUpdate['last_status'] = 'press_oven';
-        }
-
-        // Jika tgl_celup diisi, update last_status menjadi 'celup'
-        if (!empty($tglOven)) {
-            $dataUpdate['last_status'] = 'oven';
         }
 
         // Jika tgl_celup diisi, update last_status menjadi 'celup'
         if (!empty($tglTL)) {
             $dataUpdate['last_status'] = 'tl';
         }
+
         if (!empty($tglTesLab)) {
             $dataUpdate['last_status'] = 'test Lab';
         }
@@ -360,6 +359,11 @@ class CelupController extends BaseController
         // Jika tgl_kelos diisi, update last_status menjadi 'done'
         if (!empty($tglReject)) {
             $dataUpdate['last_status'] = 'reject';
+        }
+
+        // Jika tgl_matching diisi, update last_status menjadi 'matching'
+        if (!empty($tglMatching)) {
+            $dataUpdate['last_status'] = 'matching';
         }
 
         // Jika tgl_kelos diisi, update last_status menjadi 'done'
