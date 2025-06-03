@@ -92,7 +92,7 @@
                                         <div class="form-group">
                                             <label>Jenis Benang</label>
                                             <select class="form-control texture" name="items[0][jenis_benang]">
-                                                <option value="">Pilih Jenis Benang</option>
+                                                <option value="-">Pilih Jenis Benang</option>
                                                 <option value="DTY">DTY</option>
                                                 <option value="FDY">FDY</option>
                                                 <option value="NFY">NFY</option>
@@ -104,7 +104,7 @@
                                         <div class="form-group">
                                             <label>Spesifikasi Benang</label>
                                             <select class="form-control fillamen" name="items[0][spesifikasi_benang]">
-                                                <option value="">Pilih Spesifikasi Benang</option>
+                                                <option value="-">Pilih Spesifikasi Benang</option>
                                                 <option value="SIM DH">SIM DH</option>
                                                 <option value="NIM DH">NIM DH</option>
                                                 <option value="LIM DH">LIM DH</option>
@@ -334,7 +334,7 @@
                                         <div class="form-group">
                                             <label>Jenis Benang</label>
                                             <select class="form-control texture" name="items[${tabIndex - 1}][jenis_benang]">
-                                                <option value="">Pilih Jenis Benang</option>
+                                                <option value="-">Pilih Jenis Benang</option>
                                                 <option value="DTY">DTY</option>
                                                 <option value="FDY">FDY</option>
                                                 <option value="NFY">NFY</option>
@@ -346,7 +346,7 @@
                                         <div class="form-group">
                                             <label>Spesifikasi Benang</label>
                                             <select class="form-control fillamen" name="items[0][spesifikasi_benang]">
-                                                <option value="">Pilih Spesifikasi Benang</option>
+                                                <option value="-">Pilih Spesifikasi Benang</option>
                                                 <option value="SIM DH">SIM DH</option>
                                                 <option value="NIM DH">NIM DH</option>
                                                 <option value="LIM DH">LIM DH</option>
