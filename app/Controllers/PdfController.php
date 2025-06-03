@@ -1298,17 +1298,16 @@ class PdfController extends BaseController
     public function generateOpenPOCovering($tgl_po)
     {
         $poCovering = $this->openPoModel->getPoForCelup($tgl_po);
-        $idPO = $this->openPoModel->getDeliveryAwalNoOrderBuyer($tgl_po);
 
         //Cek PO
-        if (empty($poCovering) || empty($poCovering[0]['no_model'])) {
+        if (empty($poCovering) || empty($poCovering[0]->no_model)) {
             session()->setFlashdata('error', 'PO Tidak Ditemukan. Open PO Terlebih Dahulu');
             return redirect()->back();
         }
 
         //Hapus Kata POCOVERING
-        foreach ($idPO as $key => $row) {
-            $idPO[$key]['no_model'] = preg_replace('/POCOVERING\s*/i', '', $row['no_model']);
+        foreach ($poCovering as $key => $row) {
+            $poCovering[$key]->induk_no_model = preg_replace('/POCOVERING\s*/i', '', $row->induk_no_model);
         }
 
         // Inisialisasi FPDF
@@ -1361,7 +1360,7 @@ class PdfController extends BaseController
 
         $pdf->SetFont('Arial', '', 7);
         $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
-        $pdf->Cell(234, 5, ': ' . $poCovering[0]['no_model'], 0, 1, 'L');
+        $pdf->Cell(234, 5, ': ' . $poCovering[0]->anak_no_model, 0, 1, 'L');
 
         $pdf->Cell(43, 5, 'Pemesanan', 0, 0, 'L');
         $pdf->Cell(234, 5, ': COVERING', 0, 1, 'L');
@@ -1369,7 +1368,7 @@ class PdfController extends BaseController
         $pdf->Cell(43, 5, 'Tgl', 0, 0, 'L');
         // Check if the result array is not empty and display only the first delivery_awal
         if (!empty($poCovering)) {
-            $pdf->Cell(234, 5, ': ' . date('Y-m-d', strtotime($poCovering[0]['created_at'])), 0, 1, 'L');
+            $pdf->Cell(234, 5, ': ' . date('Y-m-d', strtotime($poCovering[0]->created_at)), 0, 1, 'L');
         } else {
             $pdf->Cell(234, 5, ': No delivery date available', 0, 1, 'L');
         }
@@ -1420,73 +1419,111 @@ class PdfController extends BaseController
         $pdf->Cell(87, 8, '', 0, 1, 'C'); // Kosong untuk menyesuaikan posisi
 
         $pdf->SetFont('Arial', '', 7);
+
         $no = 1;
-        $maxHeight = 8; // Default tinggi baris
         $yLimit = 180;
+        $lineHeight = 8;
+        $standardHeight = 5;
 
-        $poMapping = [];
-        foreach ($idPO as $po) {
-            if (empty($po['id_induk'])) { // Hanya ambil data yang tidak punya id_induk
-                $poMapping[$po['id_po']] = [
-                    'no_model' => $po['no_model'],
-                    'buyer' => $po['buyer'],
-                    'delivery_awal' => $po['delivery_awal']
-                ];
-            }
-        }
+        foreach ($poCovering as $row) {
+            $pdf->SetFillColor(255, 255, 255);
 
-        foreach ($poCovering as $index => $row) {
-            // Ambil data dari poMapping, kalau ada
-            $poData = isset($poMapping[$index]) ? $poMapping[$index] : ['no_model' => '-', 'buyer' => '-', 'delivery_awal' => '-'];
+            $heights = [
+                'jenis'          => ceil($pdf->GetStringWidth($row->jenis) / 12) * $lineHeight,
+                'item_type'      => ceil($pdf->GetStringWidth($row->item_type) / 25) * $lineHeight,
+                'bentuk_celup'   => ceil($pdf->GetStringWidth($row->bentuk_celup) / 17) * $lineHeight,
+                'color'          => ceil($pdf->GetStringWidth($row->color) / 20) * $lineHeight,
+                'kode_warna'     => ceil($pdf->GetStringWidth($row->kode_warna) / 20) * $lineHeight,
+                'buyer'          => ceil($pdf->GetStringWidth($row->buyer) / 10) * $lineHeight,
+                'no_order'       => ceil($pdf->GetStringWidth($row->no_order) / 25) * $lineHeight,
+                'jenis_produksi' => ceil($pdf->GetStringWidth($row->jenis_produksi) / 18) * $lineHeight,
+                'ket_celup'      => ceil($pdf->GetStringWidth($row->ket_celup) / 23) * $lineHeight,
+            ];
+
+            $maxHeight = max($heights);
 
             if ($pdf->GetY() + $maxHeight > $yLimit) {
-                $pdf->AddPage(); // Tambah halaman baru
-                // Ulangi Header Formulir
+                $pdf->AddPage();
                 $this->generateHeaderPOCovering($pdf, $tgl_po);
             }
 
-            $pdf->Cell(6, 8, $no++, 1, 0, 'C'); // Align center
-            $pdf->Cell(12, 8, $row['jenis'], 1, 0, 'C'); // Align center
+            $x = $pdf->GetX();
+            $y = $pdf->GetY();
 
-            //Wrap text jika melebihi space
-            $itemTypeWidth = 25; // Lebar kolom item_type
-            $lineHeight = 4; // Tinggi per baris untuk MultiCell
-            $textWidth = $pdf->GetStringWidth($row['item_type']); // Panjang teks
+            // Simpan posisi X awal
+            $pdf->SetXY($x, $y);
+            $pdf->Rect($x, $y, 6, $maxHeight);
+            $pdf->MultiCell(6, $standardHeight, $no++, 0, 'C');
+            $x += 6;
 
-            if ($textWidth > $itemTypeWidth) {
-                $pdf->MultiCell($itemTypeWidth, $lineHeight, $row['item_type'], 1, 'C', false);
-                $pdf->SetXY($pdf->GetX(), $pdf->GetY() - 8);
-                $pdf->Cell(43, -8, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
-            } else {
-                $adjustedHeight = 8; // Tinggi standar jika cukup 1 baris
-                $pdf->Cell($itemTypeWidth, $adjustedHeight, $row['item_type'], 1, 0, 'C');
+            $pdf->SetXY($x, $y);
+            $pdf->Rect($x, $y, 12, $maxHeight);
+            $pdf->MultiCell(12, $standardHeight, $row->jenis, 0, 'C');
+            $x += 12;
+
+            $pdf->SetXY($x, $y);
+            $pdf->Rect($x, $y, 25, $maxHeight);
+            $pdf->MultiCell(25, $standardHeight, $row->item_type, 0, 'L');
+            $x += 25;
+
+            $pdf->SetXY($x, $y);
+            $pdf->Rect($x, $y, 17, $maxHeight);
+            $pdf->MultiCell(17, $standardHeight, $row->bentuk_celup, 0, 'C');
+            $x += 17;
+
+            $pdf->SetXY($x, $y);
+            $pdf->Rect($x, $y, 20, $maxHeight);
+            $pdf->MultiCell(20, $standardHeight, $row->color, 0, 'C');
+            $x += 20;
+
+            $pdf->SetXY($x, $y);
+            $pdf->Rect($x, $y, 20, $maxHeight);
+            $pdf->MultiCell(20, $standardHeight, $row->kode_warna, 0, 'C');
+            $x += 20;
+
+            $pdf->SetXY($x, $y);
+            $pdf->Rect($x, $y, 10, $maxHeight);
+            $pdf->MultiCell(10, $standardHeight, $row->buyer, 0, 'C');
+            $x += 10;
+
+            $pdf->SetXY($x, $y);
+            $pdf->Rect($x, $y, 25, $maxHeight);
+            $pdf->MultiCell(25, $standardHeight, $row->induk_no_model, 0, 'C');
+            $x += 25;
+
+            $pdf->SetXY($x, $y);
+            $pdf->Rect($x, $y, 16, $maxHeight);
+            $pdf->MultiCell(16, $standardHeight, $row->delivery_awal, 0, 'C');
+            $x += 16;
+
+            $pdf->SetXY($x, $y);
+            $pdf->Rect($x, $y, 15, $maxHeight);
+            $pdf->MultiCell(15, $standardHeight, $row->kg_po, 0, 'C');
+            $x += 15;
+
+            foreach ([13, 13, 13, 13] as $width) {
+                $pdf->SetXY($x, $y);
+                $pdf->Rect($x, $y, $width, $maxHeight);
+                $x += $width;
             }
 
-            // Gunakan data dari id_po asli
-            $id_po_asli = empty($row['id_induk']) ? $row['id_po'] : $row['id_induk'];
+            $pdf->SetXY($x, $y);
+            $pdf->Rect($x, $y, 18, $maxHeight);
+            $pdf->MultiCell(18, $standardHeight, $row->jenis, 0, 'C');
+            $x += 18;
 
-            if (isset($poMapping[$id_po_asli])) {
-                $poData = $poMapping[$id_po_asli];
-            } else {
-                $poData = ['no_model' => '-', 'buyer' => '-', 'delivery_awal' => '-'];
-            }
+            $pdf->SetXY($x, $y);
+            $pdf->Rect($x, $y, 18, $maxHeight);
+            $pdf->MultiCell(18, $standardHeight, '', 0, 'C');
+            $x += 18;
 
-            // Lanjutkan dengan sel lainnya yang juga menyesuaikan tinggi
-            $pdf->Cell(17, $maxHeight, '', 1, 0, 'C'); // Bentuk Celup
-            $pdf->Cell(20, $maxHeight, $row['color'], 1, 0, 'C');
-            $pdf->Cell(20, $maxHeight, $row['kode_warna'], 1, 0, 'C');
-            $pdf->Cell(10, $maxHeight, $poData['buyer'], 1, 0, 'C');
-            $pdf->Cell(25, $maxHeight, $poData['no_model'], 1, 0, 'C');
-            $pdf->Cell(16, $maxHeight, $poData['delivery_awal'], 1, 0, 'C');
-            $pdf->Cell(15, $maxHeight, $row['kg_po'], 1, 0, 'C');
-            $pdf->Cell(13, $maxHeight, '', 1, 0, 'C');
-            $pdf->Cell(13, $maxHeight, '', 1, 0, 'C');
-            $pdf->Cell(13, $maxHeight, '', 1, 0, 'C');
-            $pdf->Cell(13, $maxHeight, '', 1, 0, 'C');
-            $pdf->Cell(18, $maxHeight, $row['jenis'], 1, 0, 'C');
-            $pdf->Cell(18, $maxHeight, '', 1, 0, 'C');
-            $pdf->Cell(23, $maxHeight, '', 1, 1, 'C');
+            $pdf->SetXY($x, $y);
+            $pdf->Rect($x, $y, 23, $maxHeight);
+            $pdf->MultiCell(23, $standardHeight, $row->ket_celup, 0, 'C');
+
+            $pdf->SetY($y + $maxHeight);
         }
+
         //KETERANGAN
         $pdf->Cell(277, 5, '', 0, 1, 'C');
 
@@ -1502,16 +1539,17 @@ class PdfController extends BaseController
         $pdf->Cell(55, 5, '', 0, 0, 'C');
         $pdf->Cell(55, 5, '(                               )', 0, 0, 'C');
         if (!empty($poCovering)) {
-            $pdf->Cell(55, 5, $poCovering[0]['penanggung_jawab'], 0, 0, 'C');
+            $pdf->Cell(55, 5, $poCovering[0]->penanggung_jawab, 0, 0, 'C');
         } else {
             $pdf->Cell(234, 5, ': No penanggung_jawab available', 0, 0, 'C');
         }
-        $pdf->Cell(55, 5, '(       ' . $poCovering[0]['penerima'] . '       )', 0, 1, 'C');
+        $pdf->Cell(55, 5, '(       ' . $poCovering[0]->penerima . '       )', 0, 1, 'C');
 
         // Output PDF
         return $this->response->setHeader('Content-Type', 'application/pdf')
             ->setBody($pdf->Output('S'));
     }
+
 
     public function exportOpenPOGabung()
     {
