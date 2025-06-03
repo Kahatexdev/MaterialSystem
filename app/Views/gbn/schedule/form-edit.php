@@ -583,7 +583,7 @@
             if (sisaKapasitasElement) {
                 const sisaKapasitas = maxCaps - totalQtyCelup;
                 sisaKapasitasElement.value = sisaKapasitas.toFixed(2);
-                if (sisaKapasitas <= 0) {
+                if (sisaKapasitas <= -1) {
                     alert("⚠️ Sisa Kapasitas negatif!");
                     sisaKapasitasElement.classList.add("is-invalid");
                     sisaKapasitasElement.focus();

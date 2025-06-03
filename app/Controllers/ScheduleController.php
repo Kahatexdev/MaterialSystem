@@ -482,7 +482,42 @@ class ScheduleController extends BaseController
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
 
         $scheduleData = $this->scheduleCelupModel->getScheduleDetailsData($id_mesin, $tanggal_schedule, $lot_urut);
-        // dd($scheduleData);
+
+        if (!empty($scheduleData['id_induk'])) {
+        }
+        foreach ($scheduleData as &$item) {
+            if (empty($item['id_induk'])) {
+                // Tanpa induk: langsung pakai no_model anak
+                $masterOrder = $this->masterOrderModel
+                    ->where('no_model', $item['no_model'])
+                    ->first();
+
+                $item['delivery_awal']  = $masterOrder['delivery_awal'] ?? null;
+                $item['delivery_akhir'] = $masterOrder['delivery_akhir'] ?? null;
+            } else {
+                // Ada induk: ambil no_model induk terlebih dahulu
+                $parentPo = $this->openPoModel
+                    ->where('id_po', $item['id_induk'])
+                    ->first();
+
+                if ($parentPo) {
+                    // Bersihkan label "POCOVERING" dari no_model induk
+                    $noModelInduk = trim(str_replace('POCOVERING', '', $parentPo['no_model']));
+
+                    $masterOrder = $this->masterOrderModel
+                        ->where('no_model', $noModelInduk)
+                        ->first();
+
+                    $item['delivery_awal']  = $masterOrder['delivery_awal'] ?? null;
+                    $item['delivery_akhir'] = $masterOrder['delivery_akhir'] ?? null;
+                } else {
+                    // Induk tidak ditemukan
+                    $item['delivery_awal']  = null;
+                    $item['delivery_akhir'] = null;
+                }
+            }
+        }
+
         // $jenis = [];
         $kodeWarna = '';
         $warna = '';
