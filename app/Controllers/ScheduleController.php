@@ -435,6 +435,7 @@ class ScheduleController extends BaseController
 
         // Ambil id_mesin dan no_model
         $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
+        $mesin = $this->mesinCelupModel->getKeteranganMesin($scheduleData['no_mesin']);
         $poList = $scheduleData['po']; // Array po[]
         $dataBatch = []; // Untuk menyimpan batch data
 
@@ -462,9 +463,18 @@ class ScheduleController extends BaseController
         $result = $this->scheduleCelupModel->insertBatch($dataBatch);
         // dd($result);
 
+        $mapping = [
+            'ACRYLIC'            => 'acrylic',
+            'BENANG'             => '',
+            'NYLON'              => 'nylon',
+            'MC BENANG SAMPLE'   => 'sample',
+        ];
+        $ket   = strtoupper($mesin['ket_mesin']);
+        $view  = $mapping[$ket] ?? 'index';
+
         // Cek apakah data berhasil disimpan
         if ($result) {
-            return redirect()->to(session()->get('role') . '/schedule')->with('success', 'Jadwal berhasil disimpan!');
+            return redirect()->to(session()->get('role') . '/schedule/' . $view)->with('success', 'Jadwal berhasil disimpan!');
         } else {
             return redirect()->back()->with('error', 'Gagal menyimpan jadwal!');
         }
@@ -483,6 +493,41 @@ class ScheduleController extends BaseController
 
         $scheduleData = $this->scheduleCelupModel->getScheduleDetailsData($id_mesin, $tanggal_schedule, $lot_urut);
         // dd($scheduleData);
+        if (!empty($scheduleData['id_induk'])) {
+        }
+        foreach ($scheduleData as &$item) {
+            if (empty($item['id_induk'])) {
+                // Tanpa induk: langsung pakai no_model anak
+                $masterOrder = $this->masterOrderModel
+                    ->where('no_model', $item['no_model'])
+                    ->first();
+
+                $item['delivery_awal']  = $masterOrder['delivery_awal'] ?? null;
+                $item['delivery_akhir'] = $masterOrder['delivery_akhir'] ?? null;
+            } else {
+                // Ada induk: ambil no_model induk terlebih dahulu
+                $parentPo = $this->openPoModel
+                    ->where('id_po', $item['id_induk'])
+                    ->first();
+
+                if ($parentPo) {
+                    // Bersihkan label "POCOVERING" dari no_model induk
+                    $noModelInduk = trim(str_replace('POCOVERING', '', $parentPo['no_model']));
+
+                    $masterOrder = $this->masterOrderModel
+                        ->where('no_model', $noModelInduk)
+                        ->first();
+
+                    $item['delivery_awal']  = $masterOrder['delivery_awal'] ?? null;
+                    $item['delivery_akhir'] = $masterOrder['delivery_akhir'] ?? null;
+                } else {
+                    // Induk tidak ditemukan
+                    $item['delivery_awal']  = null;
+                    $item['delivery_akhir'] = null;
+                }
+            }
+        }
+
         // $jenis = [];
         $kodeWarna = '';
         $warna = '';

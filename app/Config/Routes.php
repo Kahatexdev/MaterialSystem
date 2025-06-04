@@ -557,7 +557,7 @@ $routes->group(
         $routes->post('savePoTambahan', 'ApiController::savePoTambahan');
         $routes->get('filterPoTambahan', 'ApiController::filterPoTambahan');
         $routes->get('cekMaterial/(:any)', 'ApiController::cekMaterial/$1');
-        $routes->get('listRetur', 'ApiController::listRetur');
+        $routes->get('listRetur/(:any)', 'ApiController::listRetur/$1');
         $routes->get('filterTglPakai/(:any)', 'ApiController::filterTglPakai/$1');
         $routes->get('dataPemesananArea', 'ApiController::getDataPemesanan');
     }

@@ -36,7 +36,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <form action="<?= base_url(session('role') . '/updateSchedule/' . $data['id_celup']) ?>" method="post">
+                        <form id="formUpdate" action="<?= base_url(session('role') . '/updateSchedule/' . $data['id_celup']) ?>" method="post">
                             <div class="row">
                                 <div class="col-md-3">
                                     <!-- No Mesin -->
@@ -245,7 +245,19 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <script>
+    document.getElementById('formUpdate').addEventListener('submit', function(e) {
+        const lot = document.getElementById('lot_celup').value.trim();
 
+        if (lot === '') {
+            e.preventDefault(); // hentikan submit
+            Swal.fire({
+                icon: 'warning',
+                title: 'Lot Kosong',
+                text: 'Lot Celup Belum Diisi',
+                confirmButtonText: 'OK'
+            });
+        }
+    });
 </script>
 
 <?php $this->endSection(); ?>
