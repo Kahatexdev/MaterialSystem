@@ -156,11 +156,11 @@
             loadData();
         });
 
-        // $('#btnExport').click(function() {
-        //     let tanggal_awal = $('#tglAwal').val().trim();
-        //     let tanggal_akhir = $('#tglAkhir').val().trim();
-        //     window.location.href = "<?= base_url($role . '/excelPemesananKaretCovering') ?>?tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
-        // });
+        $('#btnExport').click(function() {
+            let tanggal_awal = $('#tglAwal').val().trim();
+            let tanggal_akhir = $('#tglAkhir').val().trim();
+            window.location.href = "<?= base_url($role . '/excelPemesananKaretCovering') ?>?tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
+        });
 
         dataTable.clear().draw();
     });

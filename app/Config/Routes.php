@@ -371,9 +371,10 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('filterPemesananSpandexCovering', 'CoveringPemesananController::filterPemesananSpandexCovering');
     $routes->get('excelPemesananCoveringPerArea', 'ExcelController::excelPemesananCoveringPerArea');
     $routes->get('exportPemesananSandexKaretCovering', 'PdfController::exportPemesananSandexKaretCovering');
-
+    
     $routes->post('updatePemesanan/(:any)', 'CoveringPemesananController::updatePemesanan/$1');
     $routes->get('generatePengeluaranSpandexKaretCovering/(:any)/(:any)', 'PdfController::generatePengeluaranSpandexKaretCovering/$1/$2');
+
 });
 
 

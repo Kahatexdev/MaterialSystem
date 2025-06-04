@@ -2230,19 +2230,44 @@ class ExcelController extends BaseController
             $sheet->setCellValue('E' . $row, $item['no_model']);
             $sheet->setCellValue('F' . $row, 'Sum - JALAN MC:');
             $sheet->setCellValue('G' . $row, '=SUM(H' . $row . ':U' . $row . ')');
-            $sheet->setCellValue('H' . $row, $item['ttl_jl_mc']);
+            // Isi per area
+            $col = 'H';
+            foreach ($areaHeaders as $area) {
+                if ($item['admin'] == $area) {
+                    $sheet->setCellValue($col . $row, isset($item['ttl_jl_mc']) ? $item['ttl_jl_mc'] : 0);
+                } else {
+                    $sheet->setCellValue($col . $row, 0);
+                }
+                $col++;
+            }
             $row++;
 
             // Row 2: TOTAL PESAN (KG)
             $sheet->setCellValue('F' . $row, 'Sum - TOTAL PESAN (KG):');
             $sheet->setCellValue('G' . $row, '=SUM(H' . $row . ':U' . $row . ')');
-            $sheet->setCellValue('H' . $row, $item['ttl_kg']);
+            $col = 'H';
+            foreach ($areaHeaders as $area) {
+                if ($item['admin'] == $area) {
+                    $sheet->setCellValue($col . $row, isset($item['ttl_kg']) ? $item['ttl_kg'] : 0);
+                } else {
+                    $sheet->setCellValue($col . $row, 0);
+                }
+                $col++;
+            }
             $row++;
 
             // Row 3: CONES
             $sheet->setCellValue('F' . $row, 'Sum - CONES:');
             $sheet->setCellValue('G' . $row, '=SUM(H' . $row . ':U' . $row . ')');
-            $sheet->setCellValue('H' . $row, $item['ttl_cns']);
+            $col = 'H';
+            foreach ($areaHeaders as $area) {
+                if ($item['admin'] == $area) {
+                    $sheet->setCellValue($col . $row, isset($item['ttl_cns']) ? $item['ttl_cns'] : 0);
+                } else {
+                    $sheet->setCellValue($col . $row, 0);
+                }
+                $col++;
+            }
             $row++;
         }
 
@@ -2375,7 +2400,7 @@ class ExcelController extends BaseController
             $sheet->getStyle($col . '3')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
             $col++;
         }
-
+        // dd ($data);
         // Menulis data
         $row = 4;
         foreach ($data as $item) {
@@ -2387,19 +2412,44 @@ class ExcelController extends BaseController
             $sheet->setCellValue('E' . $row, $item['no_model']);
             $sheet->setCellValue('F' . $row, 'Sum - JALAN MC:');
             $sheet->setCellValue('G' . $row, '=SUM(H' . $row . ':U' . $row . ')');
-            $sheet->setCellValue('H' . $row, $item['ttl_jl_mc']);
+            // Isi per area
+            $col = 'H';
+            foreach ($areaHeaders as $area) {
+                if($item['admin'] == $area) {
+                    $sheet->setCellValue($col . $row, isset($item['ttl_jl_mc']) ? $item['ttl_jl_mc'] : 0);
+                } else {
+                    $sheet->setCellValue($col . $row, 0);
+                }
+                $col++;
+            }
             $row++;
 
             // Row 2: TOTAL PESAN (KG)
             $sheet->setCellValue('F' . $row, 'Sum - TOTAL PESAN (KG):');
             $sheet->setCellValue('G' . $row, '=SUM(H' . $row . ':U' . $row . ')');
-            $sheet->setCellValue('H' . $row, $item['ttl_kg']);
+            $col = 'H';
+            foreach ($areaHeaders as $area) {
+                if($item['admin'] == $area) {
+                    $sheet->setCellValue($col . $row, isset($item['ttl_kg']) ? $item['ttl_kg'] : 0);
+                } else {
+                    $sheet->setCellValue($col . $row, 0);
+                }
+                $col++;
+            }
             $row++;
 
             // Row 3: CONES
             $sheet->setCellValue('F' . $row, 'Sum - CONES:');
             $sheet->setCellValue('G' . $row, '=SUM(H' . $row . ':U' . $row . ')');
-            $sheet->setCellValue('H' . $row, $item['ttl_cns']);
+            $col = 'H';
+            foreach ($areaHeaders as $area) {
+                if($item['admin'] == $area) {
+                    $sheet->setCellValue($col . $row, isset($item['ttl_cns']) ? $item['ttl_cns'] : 0);
+                } else {
+                    $sheet->setCellValue($col . $row, 0);
+                }
+                $col++;
+            }
             $row++;
         }
 
@@ -2429,13 +2479,12 @@ class ExcelController extends BaseController
             'CONES' => '*CONES*',
         ];
 
+        // Untuk setiap kategori, hitung total per area sesuai areaHeaders
         $row = $row - 3;
         foreach ($categories as $label => $keyword) {
-            // $sheet->mergeCells("A{$row}:F{$row}")->setCellValue("A{$row}", "Total Per Area - {$label}");
-            // $sheet->getStyle("A{$row}")->getFont()->setBold(true);
-
             $colLetter = 'H';
-            foreach ($areaHeaders as $_) {
+            foreach ($areaHeaders as $area) {
+                // SUMIF untuk kolom area spesifik
                 $formula = "=SUMIF(F{$totalRowStart}:F" . ($row - 1) . ",\"{$keyword}\",{$colLetter}{$totalRowStart}:{$colLetter}" . ($row - 1) . ")";
                 $sheet->setCellValue("{$colLetter}{$row}", $formula);
                 $sheet->getStyle("{$colLetter}{$row}")->getFont()->setBold(true);
