@@ -83,7 +83,7 @@
 <div class="card card-frame">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 font-weight-bolder">Detail Pemesanan <?= $listPemesanan[0]['jenis'] ?></h5>
+            <h5 class="mb-0 font-weight-bolder">Detail Pemesanan <?= $listPemesanan[0]['jenis'] ?? null ?></h5>
 
         </div>
     </div>
@@ -124,7 +124,7 @@
                             <td class="text-center"><?= number_format($list['total_pesan'], 2); ?></td>
                             <td class="text-center"><?= $list['total_cones']; ?></td>
                             <td class="text-center"><?= $list['admin']; ?></td>
-                            <td class="text-center"><span class="badge bg-gradient <?= $list['status'] == 'REQUEST' ? 'bg-warning' : ($list['status'] == 'SEDANG DISIAPKAN' ? 'bg-info' : 'bg-success') ?>"><?= $list['status']; ?></span></td>
+                            <td class="text-center"><span class="badge bg-gradient-info"><?= $list['status']; ?></span></td>
                             <td class="text-center">
                                 <!-- button modal edit -->
                                 <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $list['id_psk'] ?>">
@@ -174,11 +174,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Status</label>
-                                <select class="form-select" name="status" required>
-                                    <option value="REQUEST" <?= $list['status'] == 'REQUEST' ? 'selected' : '' ?>>REQUEST</option>
-                                    <option value="SEDANG DISIAPKAN" <?= $list['status'] == 'SEDANG DISIAPKAN' ? 'selected' : '' ?>>SEDANG DISIAPKAN</option>
-                                    <option value="DONE" <?= $list['status'] == 'DONE' ? 'selected' : '' ?>>SELESAI</option>
-                                </select>
+                                <input type="text" class="form-control" name="status" value="<?= $list['status'] ?>" required>
                             </div>
                         </div>
 

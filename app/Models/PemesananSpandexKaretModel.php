@@ -61,7 +61,6 @@ class PemesananSpandexKaretModel extends Model
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->where('master_material.jenis', $jenis)
             ->where('pemesanan.tgl_pakai', $tgl_pakai)
-            ->whereIn('pemesanan_spandex_karet.status', ['REQUEST', 'SEDANG DISIAPKAN', 'DONE'])
             ->groupBy('pemesanan.tgl_pakai, master_material.jenis, material.item_type, material.color, material.kode_warna, master_order.no_model, pemesanan.admin')
             ->findAll();
     }

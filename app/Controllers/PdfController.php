@@ -2717,7 +2717,7 @@ class PdfController extends BaseController
             $pdf->SetXY($rightX, $yPos['right'] + 2);
             $pdf->Cell(array_sum($colWidths), 4, 'Yang Bertanggung Jawab', 0, 1, 'C');
             $pdf->SetXY($rightX, $yPos['right'] + 14);
-            $pdf->Cell(array_sum($colWidths), 4, '( LIS RAHAYU )', 0, 1, 'C');
+            $pdf->Cell(array_sum($colWidths), 4, '( IIS RAHAYU )', 0, 1, 'C');
 
             $pageNo++;
         }
