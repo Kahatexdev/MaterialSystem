@@ -435,6 +435,7 @@ class ScheduleController extends BaseController
 
         // Ambil id_mesin dan no_model
         $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
+        $mesin = $this->mesinCelupModel->getKeteranganMesin($scheduleData['no_mesin']);
         $poList = $scheduleData['po']; // Array po[]
         $dataBatch = []; // Untuk menyimpan batch data
 
@@ -462,9 +463,18 @@ class ScheduleController extends BaseController
         $result = $this->scheduleCelupModel->insertBatch($dataBatch);
         // dd($result);
 
+        $mapping = [
+            'ACRYLIC'            => 'acrylic',
+            'BENANG'             => '',
+            'NYLON'              => 'nylon',
+            'MC BENANG SAMPLE'   => 'sample',
+        ];
+        $ket   = strtoupper($mesin['ket_mesin']);
+        $view  = $mapping[$ket] ?? 'index';
+
         // Cek apakah data berhasil disimpan
         if ($result) {
-            return redirect()->to(session()->get('role') . '/schedule')->with('success', 'Jadwal berhasil disimpan!');
+            return redirect()->to(session()->get('role') . '/schedule/' . $view)->with('success', 'Jadwal berhasil disimpan!');
         } else {
             return redirect()->back()->with('error', 'Gagal menyimpan jadwal!');
         }
@@ -482,7 +492,7 @@ class ScheduleController extends BaseController
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
 
         $scheduleData = $this->scheduleCelupModel->getScheduleDetailsData($id_mesin, $tanggal_schedule, $lot_urut);
-
+        // dd($scheduleData);
         if (!empty($scheduleData['id_induk'])) {
         }
         foreach ($scheduleData as &$item) {

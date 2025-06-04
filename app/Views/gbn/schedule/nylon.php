@@ -126,10 +126,16 @@
                             // Pastikan tanggal disimpan dengan format yang sesuai (Y-m-d)
                             $key = "{$job['no_mesin']} | " . (new DateTime($job['tanggal_schedule']))->format('Y-m-d') . " | {$job['lot_urut']}";
                             // Jika key sudah ada, gabungkan total_kg-nya
-                            if (isset($scheduleGrouped[$key])) {
-                                $scheduleGrouped[$key]['total_kg'] += $job['total_kg'];
-                            } else {
-                                $scheduleGrouped[$key] = $job;
+                            if (in_array($job['last_status'], ['scheduled', 'celup', 'reschedule', 'bon', 'bongkar'])) {
+                                // if (in_array($job['last_status'], ['scheduled', 'celup', 'reschedule', 'bon', 'bongkar', 'press_oven', 'tes_luntur', 'tes_lab', 'rajut', 'acc'])) {
+                                // Jika key sudah ada, gabungkan total_kg-nya
+                                if (isset($scheduleGrouped[$key])) {
+                                    $scheduleGrouped[$key]['total_kg'] += $job['total_kg'];
+                                    // format total_kg menjadi 2 angka di belakang koma
+                                    $scheduleGrouped[$key]['total_kg'] = number_format($scheduleGrouped[$key]['total_kg'], 2);
+                                } else {
+                                    $scheduleGrouped[$key] = $job;
+                                }
                             }
                         }
                         // echo '<pre>';

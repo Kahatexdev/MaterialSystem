@@ -196,7 +196,8 @@ class ScheduleCelupModel extends Model
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->where('tanggal_schedule >=', $startDate->format('Y-m-d'))
             ->where('tanggal_schedule <=', $endDate->format('Y-m-d'))
-            ->whereIn('schedule_celup.last_status', ['scheduled', 'celup', 'reschedule', 'bon', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc', 'reject', 'perbaikan']) // Filter berdasarkan last_status
+            ->whereIn('schedule_celup.last_status', ['scheduled', 'celup', 'reschedule', 'bon', 'bongkar']) // Filter berdasarkan last_status
+            // ->whereIn('schedule_celup.last_status', ['scheduled', 'celup', 'reschedule', 'bon', 'bongkar', 'press_oven', 'tes_luntur', 'rajut', 'acc', 'reject', 'perbaikan', 'tes_lab']) // Filter berdasarkan last_status
             ->groupBy('schedule_celup.id_mesin')
             ->groupBy('schedule_celup.tanggal_schedule')
             ->groupBy('schedule_celup.lot_urut');

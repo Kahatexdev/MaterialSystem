@@ -85,6 +85,11 @@
         gap: 5px;
     }
 
+    .bg-custom-dark {
+        background-color: rgb(0, 77, 94);
+        color: white;
+        /* agar teks tetap terbaca */
+    }
 
     /* input[type="radio"] {
         margin-right: 5px;
@@ -265,8 +270,8 @@
                                                                         $status = $detail['last_status'];
                                                                         if (in_array($status, ['scheduled', 'retur', 'reschedule'])) {
                                                                             $badgeColor = 'info';
-                                                                        } elseif (in_array($status, ['bon', 'celup', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc', 'reject', 'perbaikan'])) {
-                                                                            $badgeColor = 'warning';
+                                                                        } elseif (in_array($status, ['bon', 'celup', 'bongkar', 'press_oven', 'tes_luntur', 'tes_lab', 'rajut', 'acc', 'reject', 'perbaikan', 'serah_terima_acc', 'matching'])) {
+                                                                            $badgeColor = 'custom-dark';
                                                                         } else {
                                                                             in_array($status, ['done', 'sent']);
                                                                             $badgeColor = 'success';
