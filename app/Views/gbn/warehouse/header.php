@@ -128,6 +128,9 @@
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobal') ?>">Report Global Nylon</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobalStockBenang') ?>">Report Global Benang</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaPakaiBenang') ?>">Report Sisa Pakai Benang</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaPakaiNylon') ?>">Report Sisa Pakai Nylon</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaPakaiSpandex') ?>">Report Sisa Pakai Spandex</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaPakaiKaret') ?>">Report Sisa Pakai Karet</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/otherIn/listBarcode') ?>">List Barcode</a></li>
                             </ul>
                         </li>
