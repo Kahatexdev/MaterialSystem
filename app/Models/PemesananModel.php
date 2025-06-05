@@ -414,9 +414,9 @@ class PemesananModel extends Model
     {
         $this->select('pemesanan.*, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             // ->where('tp.ttl_jl_mc >', 0)
             ->where('pemesanan.status_kirim', 'YA')
             ->where('master_material.jenis', 'KARET');
@@ -434,7 +434,7 @@ class PemesananModel extends Model
             }
             $this->groupEnd();
         }
-
+        $this->groupBy('tp.id_total_pemesanan');
         return $this->findAll();
     }
 

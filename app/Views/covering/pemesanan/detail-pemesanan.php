@@ -83,7 +83,7 @@
 <div class="card card-frame">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 font-weight-bolder">Detail Pemesanan <?= $listPemesanan[0]['jenis'] ?></h5>
+            <h5 class="mb-0 font-weight-bolder">Detail Pemesanan <?= $listPemesanan[0]['jenis'] ?? null ?></h5>
 
         </div>
     </div>
@@ -106,7 +106,6 @@
                         <th class="sticky text-center">Total Pesan (Kg)</th>
                         <th class="sticky text-center">Cones</th>
                         <th class="sticky text-center">Area</th>
-                        <th class="sticky text-center">Status</th>
                         <th class="sticky text-center">Action</th>
                     </tr>
                 </thead>
@@ -124,12 +123,20 @@
                             <td class="text-center"><?= number_format($list['total_pesan'], 2); ?></td>
                             <td class="text-center"><?= $list['total_cones']; ?></td>
                             <td class="text-center"><?= $list['admin']; ?></td>
-                            <td class="text-center"><span class="badge bg-gradient <?= $list['status'] == 'REQUEST' ? 'bg-warning' : ($list['status'] == 'SEDANG DISIAPKAN' ? 'bg-info' : 'bg-success') ?>"><?= $list['status']; ?></span></td>
                             <td class="text-center">
-                                <!-- button modal edit -->
-                                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $list['id_psk'] ?>">
-                                    <i class="fas fa-edit"></i>
-                                </button>
+                                <!-- button modal pilih stock -->
+                                <?php if ($list['button'] == 'disable') : ?>
+                                    <button type="button" class="btn bg-gradient-secondary" disabled>
+                                        <i class="fas fa-box"></i> Stock Sudah Dipilih
+                                    </button>
+                                <?php else : ?>
+                                    <button type="button" class="btn bg-gradient-info" data-bs-toggle="modal" data-bs-target="#editModal<?= $list['id_psk'] ?>">
+                                        <i class="fas fa-paper-plane"></i> Pilih Stock
+                                    </button>
+                                <?php endif; ?>
+                                <!-- <button type="button" class="btn bg-gradient-info" data-bs-toggle="modal" data-bs-target="#editModal<?= $list['id_psk'] ?>">
+                                    <i class="fas fa-paper-plane"></i> Pilih Stock
+                                </button> -->
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -145,7 +152,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header text-white">
-                    <h5 class="modal-title" id="editModalLabel">Update Status Pemesanan</h5>
+                    <h5 class="modal-title" id="editModalLabel">Detail Pemesanan U/ Pengeluaran Barang</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="<?= base_url($role . '/updatePemesanan/' . $list['id_psk']) ?>" method="POST">
@@ -157,14 +164,6 @@
                                 <input type="text" class="form-control" value="<?= $list['jl_mc'] ?>" readonly>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Total Pesan (Kg)</label>
-                                <input type="text" class="form-control" value="<?= number_format($list['total_pesan'], 2) ?>" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Total Cones</label>
-                                <input type="text" class="form-control" value="<?= $list['total_cones'] ?>" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">
                                 <label class="form-label">Area</label>
                                 <input type="text" class="form-control" value="<?= $list['admin'] ?>" readonly>
                             </div>
@@ -173,12 +172,37 @@
                                 <input type="date" class="form-control" value="<?= $list['tgl_pakai'] ?>" readonly>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Status</label>
-                                <select class="form-select" name="status" required>
-                                    <option value="REQUEST" <?= $list['status'] == 'REQUEST' ? 'selected' : '' ?>>REQUEST</option>
-                                    <option value="SEDANG DISIAPKAN" <?= $list['status'] == 'SEDANG DISIAPKAN' ? 'selected' : '' ?>>SEDANG DISIAPKAN</option>
-                                    <option value="DONE" <?= $list['status'] == 'DONE' ? 'selected' : '' ?>>SELESAI</option>
+                                <label class="form-label">Jenis</label>
+                                <select class="form-select" name="itemtype" required>
+                                    <option value="" disabled selected>Pilih Jenis</option>
+                                    <option value="SCY 2040N DR 3.4">SCY 2040N DR 3.4</option>
                                 </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Code</label>
+                                <select class="form-select" name="kode_warna" required>
+                                    <option value="" disabled selected>Pilih Kode Warna</option>
+                                    <option value="1110">1110</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Warna</label>
+                                <select class="form-select" name="color" required>
+                                    <option value="" disabled selected>Pilih Warna</option>
+                                    <option value="RW">RW</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Total Cones</label>
+                                <input type="number" class="form-control" name="total_cones" value="<?= $list['total_cones'] ?>" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Total Pesan (Kg)</label>
+                                <input type="number" class="form-control" name="total_pesan" value="<?= number_format($list['total_pesan'], 2) ?>" required>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Keterangan</label>
+                                <textarea class="form-control" name="keterangan" rows="3" aria-placeholder="Masukkan keterangan" placeholder="Masukkan keterangan" required></textarea>
                             </div>
                         </div>
 
@@ -189,7 +213,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
-                        <button type="submit" class="btn btn-info">Simpan Perubahan</button>
+                        <button type="submit" class="btn btn-info">Submit</button>
                     </div>
                 </form>
             </div>

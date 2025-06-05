@@ -7,6 +7,8 @@ use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\MasterMaterialModel;
 use App\Models\PemesananModel;
 use App\Models\PemesananSpandexKaretModel;
+use App\Models\CoveringStockModel;
+use App\Models\HistoryStockCoveringModel;
 
 class CoveringPemesananController extends BaseController
 {
@@ -17,12 +19,16 @@ class CoveringPemesananController extends BaseController
     protected $masterMaterialModel;
     protected $pemesananModel;
     protected $pemesananSpandexKaretModel;
+    protected $coveringStockModel;
+    protected $historyCoveringStockModel;
 
     public function __construct()
     {
         $this->masterMaterialModel = new MasterMaterialModel();
         $this->pemesananModel = new PemesananModel();
         $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
+        $this->coveringStockModel = new CoveringStockModel();
+        $this->historyCoveringStockModel = new HistoryStockCoveringModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -66,6 +72,18 @@ class CoveringPemesananController extends BaseController
     public function detailPemesanan($jenis, $tgl_pakai)
     {
         $listPemesanan = $this->pemesananSpandexKaretModel->getListPemesananCovering($jenis, $tgl_pakai);
+        // dd ($listPemesanan);
+        foreach ($listPemesanan as $key => $value) {
+            $idttlpemesananHistory = $this->historyCoveringStockModel
+                ->where('id_total_pemesanan', $value['id_total_pemesanan'])
+                ->first();
+            // dd ($idttlpemesananHistory);
+            if (!empty($idttlpemesananHistory)) {
+                $listPemesanan[$key]['button'] = 'disable';
+            } else {
+                $listPemesanan[$key]['button'] = 'enable';
+            }
+        }
         // dd ($listPemesanan);
         $data = [
             'active' => $this->active,
@@ -135,7 +153,7 @@ class CoveringPemesananController extends BaseController
 
             $dataSpandexKaret = [
                 'id_total_pemesanan' => $dataPemesanan['id_total_pemesanan'],
-                'status' => 'REQUEST',
+                'status' => '',
                 'admin' => session()->get('username'),
             ];
 
@@ -151,11 +169,70 @@ class CoveringPemesananController extends BaseController
 
     public function updatePemesanan($id_psk)
     {
-        $status = $this->request->getPost('status');
-        // dd ($status);
-        $this->pemesananSpandexKaretModel->update($id_psk, [
-            'status' => $status
-        ]);
+        $postData = $this->request->getPost();
+        // dd ($postData);
+        // dd ($idttlPemesanan);
+        $idStockCov = $this->coveringStockModel->select('id_covering_stock')
+            ->where('jenis', $postData['itemtype'])
+            ->where('code', $postData['kode_warna'])
+            ->where('color', $postData['color'])
+            ->first();
+        $postData['stockItemId'] = $idStockCov['id_covering_stock'] ?? null;
+        if (!$postData['stockItemId']) {
+            return redirect()->back()->with('error', 'Stock tidak ditemukan.');
+        }
+        // dd ($idStockCov, $postData);
+        // Ambil data stock lama berdasarkan ID
+        $stockLama = $this->coveringStockModel->find($postData['stockItemId']);
+        if (!$stockLama) {
+            return redirect()->back()->with('error', 'Data stock lama tidak ditemukan.');
+        }
+        // Hitung perubahan jumlah cones dan kg
+        $changeAmountCns = floatval($stockLama['ttl_cns']) - floatval($postData['total_cones']);
+        $changeAmountKg = floatval($stockLama['ttl_kg']) - floatval($postData['total_pesan']);
+        // dd ($changeAmountCns, $changeAmountKg);
+        // Siapkan data untuk update stock
+        $stockData = [
+            'jenis'     => $postData['itemtype'],
+            'code'   => $postData['kode_warna'],
+            'color'        => $postData['color'],
+            'ttl_cns'  => $changeAmountCns,
+            'ttl_kg'  => $changeAmountKg,
+            'jenis_cover'        => $stockLama['jenis_cover'],
+            'jenis_benang' => $stockLama['jenis_benang'],
+            'lmd'          => $stockLama['lmd'],
+            'admin'        => session('username') // Atau siapa pun admin login saat ini
+        ];
+        // dd ($stockData);
+        // Update stock di DB
+        $this->coveringStockModel->update($postData['stockItemId'], $stockData);
+        $noModel = $this->pemesananSpandexKaretModel->getNoModelById($id_psk);
+        $idttlPemesanan = $this->pemesananSpandexKaretModel->select('id_total_pemesanan')
+            ->where('id_psk', $id_psk)
+            ->first();
+        if (!$idttlPemesanan) {
+            return redirect()->back()->with('error', 'ID Total Pemesanan tidak ditemukan.');
+        }
+        // dd ($noModel, $postData, $stockLama, $stockData);
+        // Simpan ke history
+        $historyStock = [
+            'id_total_pemesanan' => $idttlPemesanan['id_total_pemesanan'] ?? null,
+            'no_model'     => $noModel['no_model'] ?? '',
+            'jenis'        => $stockLama['jenis'],
+            'jenis_benang' => $stockLama['jenis_benang'],
+            'jenis_cover'  => $stockLama['jenis_cover'],
+            'color'        => $stockLama['color'],
+            'code'         => $stockLama['code'],
+            'lmd'          => $stockLama['lmd'],
+            'ttl_cns'      => 0 - $postData['total_cones'],
+            'ttl_kg'       => 0 - $postData['total_pesan'],
+            'admin'        => $stockData['admin'],
+            'keterangan'   => $postData['keterangan'],
+            'created_at'   => date('Y-m-d H:i:s')
+        ];
+        // dd ($historyStock);
+        $this->historyCoveringStockModel->insert($historyStock);
+
 
         return redirect()->back()->with('success', 'Status pemesanan berhasil diperbarui.');
     }
