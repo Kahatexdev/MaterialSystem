@@ -71,27 +71,84 @@ class CoveringPemesananController extends BaseController
 
     public function detailPemesanan($jenis, $tgl_pakai)
     {
-        $listPemesanan = $this->pemesananSpandexKaretModel->getListPemesananCovering($jenis, $tgl_pakai);
-        // dd ($listPemesanan);
+        // Ambil daftar pemesanan (query dari model Anda)
+        $listPemesanan = $this->pemesananSpandexKaretModel
+            ->getListPemesananCovering($jenis, $tgl_pakai);
+
+        // Loop untuk men-set tombol enable/disable
         foreach ($listPemesanan as $key => $value) {
-            $idttlpemesananHistory = $this->historyCoveringStockModel
+            $history = $this->historyCoveringStockModel
                 ->where('id_total_pemesanan', $value['id_total_pemesanan'])
                 ->first();
-            // dd ($idttlpemesananHistory);
-            if (!empty($idttlpemesananHistory)) {
+
+            if (!empty($history)) {
+                // Jika di‐history sudah ada record, disable tombol
                 $listPemesanan[$key]['button'] = 'disable';
             } else {
                 $listPemesanan[$key]['button'] = 'enable';
             }
         }
-        // dd ($listPemesanan);
+
+        // Ambil daftar tipe (jenis) unik dari covering_stock untuk select “Jenis” di modal
+        $selectOptionData = $this->coveringStockModel
+            ->select('jenis')
+            ->distinct()
+            ->findAll();
+
+        $optionDataJenis = [];
+        foreach ($selectOptionData as $row) {
+            $optionDataJenis[] = $row['jenis'];
+        }
+
         $data = [
-            'active' => $this->active,
-            'title' => 'Material System',
-            'role' => $this->role,
-            'listPemesanan' => $listPemesanan,
+            'active'         => $this->active,
+            'title'          => 'Material System',
+            'role'           => $this->role,
+            'listPemesanan'  => $listPemesanan,
+            'optionDataJenis' => $optionDataJenis
         ];
-        return view($this->role . '/pemesanan/detail-pemesanan', $data);
+        return view("{$this->role}/pemesanan/detail-pemesanan", $data);
+    }
+
+    public function getCodePemesanan()
+    {
+        $itemType = $this->request->getGet('item_type');
+        if (empty($itemType)) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON(['error' => 'item_type tidak boleh kosong']);
+        }
+
+        $data = $this->coveringStockModel
+            ->select('code')
+            ->where('jenis', $itemType)
+            ->distinct()
+            ->findAll();
+
+        // Hasil: [ ['code' => '001'], ['code' => '002'], … ]
+        return $this->response->setJSON($data);
+    }
+
+    public function getColorPemesanan()
+    {
+        $itemType   = $this->request->getGet('item_type');
+        $kodeWarna  = $this->request->getGet('kode_warna');
+
+        if (empty($itemType) || empty($kodeWarna)) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON(['error' => 'item_type atau kode_warna tidak boleh kosong']);
+        }
+
+        $data = $this->coveringStockModel
+            ->select('color')
+            ->where('jenis', $itemType)
+            ->where('code', $kodeWarna)
+            ->distinct()
+            ->findAll();
+
+        // Hasil: [ ['color' => 'Merah'], ['color' => 'Biru'], … ]
+        return $this->response->setJSON($data);
     }
 
     public function reportPemesananKaretCovering()
