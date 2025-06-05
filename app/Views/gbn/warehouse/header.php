@@ -30,14 +30,14 @@
         margin-bottom: 1rem;
     }
 
-    .form-control {
+    /* .form-control {
         border: none;
         border-bottom: 2px solid var(--primary-color);
         border-radius: 0;
         padding: 0.75rem 0;
         margin-bottom: 1rem;
         transition: all 0.3s ease;
-    }
+    } */
 
     .form-control:focus {
         box-shadow: none;
@@ -127,6 +127,7 @@
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobal') ?>">Report Global All BB</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobal') ?>">Report Global Nylon</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobalStockBenang') ?>">Report Global Benang</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaPakaiBenang') ?>">Report Sisa Pakai Benang</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/otherIn/listBarcode') ?>">List Barcode</a></li>
                             </ul>
                         </li>
