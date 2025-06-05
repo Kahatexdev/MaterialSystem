@@ -387,6 +387,8 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
 
     $routes->post('updatePemesanan/(:any)', 'CoveringPemesananController::updatePemesanan/$1');
     $routes->get('generatePengeluaranSpandexKaretCovering/(:any)/(:any)', 'PdfController::generatePengeluaranSpandexKaretCovering/$1/$2');
+    $routes->get('getCodePemesanan', 'CoveringPemesananController::getCodePemesanan');
+    $routes->get('getColorPemesanan', 'CoveringPemesananController::getColorPemesanan');
 });
 
 
