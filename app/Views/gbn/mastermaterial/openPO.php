@@ -230,7 +230,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="">PO(+)</label>
-                            <select class="form-select select-tinggi-2baris" name="po_plus" id="po_plus">
+                            <select class="form-select" name="po_plus" id="po_plus" required>
                                 <option value="">Pilih</option>
                                 <option value="1">YA</option>
                                 <option value="0">TIDAK</option>

@@ -78,7 +78,14 @@ class PdfController extends BaseController
         $jenis = $this->request->getGet('jenis');
         $jenis2 = $this->request->getGet('jenis2');
         $season = $this->request->getGet('season');
+        $poPlus = $this->request->getGet('po_plus');
         $materialType = $this->request->getGet('material_type');
+
+        if ($poPlus == 'TIDAK') {
+            $result = $this->openPoModel->getDataPo($no_model, $jenis, $jenis2);
+        } else {
+            $result = $this->openPoModel->getDataPoPlus($no_model, $jenis, $jenis2);
+        }
 
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';
@@ -86,7 +93,6 @@ class PdfController extends BaseController
             $penerima = 'Paryanti';
         }
 
-        $result = $this->openPoModel->getData($no_model, $jenis, $jenis2);
         $unit = $this->masterOrderModel->getUnit($no_model);
 
         // Inisialisasi FPDF
@@ -138,7 +144,12 @@ class PdfController extends BaseController
         $pdf->SetFont('Arial', '', 7);
 
         $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
-        $pdf->Cell(30, 5, ': ' . $no_model, 0, 1, 'L');
+
+        if ($result[0]['po_plus'] == '0') {
+            $pdf->Cell(30, 5, ': ' . $no_model, 0, 1, 'L');
+        } else {
+            $pdf->Cell(30, 5, ': ' . '(+) ' . $no_model, 0, 1, 'L');
+        }
 
         $cellW1 = 20;  // lebar season
         $cellW2 = 30;  // lebar materialType
@@ -2058,9 +2069,9 @@ class PdfController extends BaseController
         if (count($data) > 0) {
             foreach ($data as $row) {
                 $pdf->Cell(10, 4,  $row['area'],           1, 0, 'C');
-                $pdf->Cell(55, 4,  $row['jenis']. ' ('. $row['no_model'] . ')', 1, 0, 'C');
+                $pdf->Cell(55, 4,  $row['jenis'] . ' (' . $row['no_model'] . ')', 1, 0, 'C');
                 $pdf->Cell(15, 4,  "",        1, 0, 'C');
-                $pdf->Cell(30, 4,  $row['color'] . '/'. $row['code'],    1, 0, 'C');
+                $pdf->Cell(30, 4,  $row['color'] . '/' . $row['code'],    1, 0, 'C');
                 $pdf->Cell(10, 4,  number_format($row['total_pesan'], 2),   1, 0, 'C');
                 $pdf->Cell(10, 4,  $row['total_cones'],   1, 0, 'C');
                 // Keterangan merge dua baris (8 + 4 mm = 12 mm)

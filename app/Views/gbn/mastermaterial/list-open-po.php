@@ -41,12 +41,7 @@
                     <!-- <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#exportModal">
                         <i class="ni ni-single-copy-04 me-2"></i>Export PO
                     </button> -->
-                    <button
-                        class="btn btn-outline-info"
-                        id="btnOpenModal"
-                        data-bs-toggle="modal"
-                        data-bs-target="#exportModal"
-                        data-base-url="<?= base_url("$role/exportOpenPO/$no_model") ?>">
+                    <button class="btn btn-outline-info" id="btnOpenModal" data-bs-toggle="modal" data-bs-target="#exportModal" data-base-url="<?= base_url("$role/exportOpenPO/$no_model") ?>">
                         <i class="ni ni-single-copy-04 me-2"></i>Export PO
                     </button>
 
@@ -69,6 +64,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Buyer</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Order</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">PO (+)</th>
                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                         </tr>
                     </thead>
@@ -82,6 +78,7 @@
                                 <td><?= $data['buyer'] ?></td>
                                 <td><?= $data['no_order'] ?></td>
                                 <td><?= $data['delivery_awal'] ?></td>
+                                <td><?= $data['po_plus'] ?></td>
                                 <td>
                                     <button class="btn btn-sm btn-warning btn-edit" data-id="<?= $data['id_po'] ?>">
                                         <i class="fas fa-edit text-lg"></i>
@@ -148,6 +145,15 @@
                         <textarea class="form-control" name="keterangan" id="keterangan"></textarea>
                     </div>
 
+                    <div class="mb-3">
+                        <label for="">PO (+)</label>
+                        <select name="po_plus_edit" id="po_plus_edit" class="form-control">
+                            <option value="">Pilih</option>
+                            <option value="YA">YA</option>
+                            <option value="0">TIDAK</option>
+                        </select>
+                    </div>
+
                     <!-- Button update dan batal di sebelah kanan -->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -170,7 +176,15 @@
             <div class="modal-body ">
                 <form id="exportForm" action="#" method="get" target="_blank">
                     <div class="mb-3">
-                        <label for="tujuan" class="form-label">Season</label>
+                        <label for="" class="form-label">PO (+)</label>
+                        <select name="po_plus" id="po_plus" class="form-control">
+                            <option value="">Pilih</option>
+                            <option value="YA">YA</option>
+                            <option value="TIDAK">TIDAK</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="season" class="form-label">Season</label>
                         <input type="text" class="form-control" id="season" name="season">
                     </div>
                     <div class="mb-3">
@@ -238,6 +252,7 @@
                     $('#kg_po').val(response.kg_po);
                     $('#ket_celup').val(response.ket_celup);
                     $('#keterangan').val(response.keterangan);
+                    $('#keterangan').val(response.po_plus_edit);
                     // Show modal dialog
                     $('#updateModal').modal('show');
                 },
@@ -315,10 +330,12 @@
             // 3) Ambil nilai modal
             const season = document.getElementById('season').value.trim();
             const materialType = document.getElementById('material_type').value;
+            const poPlus = document.getElementById('po_plus').value;
 
             // 4) Tambahkan kalau user mengisi
             if (season) params.set('season', season);
             if (materialType) params.set('material_type', materialType);
+            if (poPlus) params.set('po_plus', poPlus);
 
             // 5) Bentuk URL akhir & buka di tab baru
             const finalUrl = base + '?' + params.toString();
