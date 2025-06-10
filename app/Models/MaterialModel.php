@@ -157,6 +157,8 @@ class MaterialModel extends Model
             ->join('master_material', 'master_material.item_type=material.item_type')
             ->where('master_order.no_model', $model)
             ->where('material.style_size', $styleSize)
+            ->groupBy('material.item_type')
+            ->groupBy('material.kode_warna')
             ->orderBy('master_material.jenis, material.item_type', 'ASC')
             ->findAll();
     }

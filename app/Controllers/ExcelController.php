@@ -589,42 +589,48 @@ class ExcelController extends BaseController
             $key = $prod['mastermodel'] . '-' . $prod['size'];
 
             $material = $this->materialModel->getMU($prod['mastermodel'], $prod['size']);
-            if (empty($material)) {
-                $result[$prod['mastermodel']] = [
-                    'mastermodel' => $prod['mastermodel'],
-                    'item_type' => null,
-                    'kode_warna' => null,
-                    'warna' => null,
-                    'pph' => 0,
-                    'bruto' => $prod['prod'],
-                    'bs_mesin' => $prod['bs_mesin'],
-                ];
-            } else {
+
+            if (!empty($material)) {
                 foreach ($material as $mtr) {
+                    // Cek dulu apakah size cocok
+                    if ($prod['size'] !== $mtr['style_size']) {
+                        continue; // Lewati jika tidak cocok
+                    }
+
                     $gw = $mtr['gw'];
                     $comp = $mtr['composition'];
                     $gwpcs = ($gw * $comp) / 100;
 
                     $bruto = $prod['prod'] ?? 0;
                     $bs_mesin = $prod['bs_mesin'] ?? 0;
-                    $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
 
+                    $pph = ($gw == 0) ? 0 : ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
 
                     $pphInisial[] = [
                         'mastermodel'    => $prod['mastermodel'],
-                        'style_size'  => $prod['size'],
-                        'item_type'   => $mtr['item_type'] ?? null,
-                        'kode_warna'  => $mtr['kode_warna'] ?? null,
-                        'color'       => $mtr['color'] ?? null,
-                        'gw'          => $gw,
-                        'composition' => $comp,
-                        'bruto'       => $bruto,
-                        'qty'         => $prod['qty'] ?? 0,
-                        'sisa'        => $prod['sisa'] ?? 0,
-                        'bs_mesin'    => $bs_mesin,
-                        'pph'         => $pph
+                        'style_size'     => $prod['size'],
+                        'item_type'      => $mtr['item_type'] ?? null,
+                        'kode_warna'     => $mtr['kode_warna'] ?? null,
+                        'color'          => $mtr['color'] ?? null,
+                        'gw'             => $gw,
+                        'composition'    => $comp,
+                        'bruto'          => $bruto,
+                        'qty'            => $prod['qty'] ?? 0,
+                        'sisa'           => $prod['sisa'] ?? 0,
+                        'bs_mesin'       => $bs_mesin,
+                        'pph'            => $pph
                     ];
                 }
+            } else {
+                $result[$prod['mastermodel']] = [
+                    'mastermodel' => $prod['mastermodel'],
+                    'item_type'   => null,
+                    'kode_warna'  => null,
+                    'warna'       => null,
+                    'pph'         => 0,
+                    'bruto'       => $prod['prod'],
+                    'bs_mesin'    => $prod['bs_mesin'],
+                ];
             }
         }
 
