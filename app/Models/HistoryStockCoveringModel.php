@@ -13,6 +13,7 @@ class HistoryStockCoveringModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
+        'id_total_pemesanan',
         'no_model',
         'jenis',
         'jenis_benang',

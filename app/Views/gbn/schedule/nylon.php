@@ -126,10 +126,16 @@
                             // Pastikan tanggal disimpan dengan format yang sesuai (Y-m-d)
                             $key = "{$job['no_mesin']} | " . (new DateTime($job['tanggal_schedule']))->format('Y-m-d') . " | {$job['lot_urut']}";
                             // Jika key sudah ada, gabungkan total_kg-nya
-                            if (isset($scheduleGrouped[$key])) {
-                                $scheduleGrouped[$key]['total_kg'] += $job['total_kg'];
-                            } else {
-                                $scheduleGrouped[$key] = $job;
+                            if (in_array($job['last_status'], ['scheduled', 'celup', 'reschedule', 'bon', 'bongkar'])) {
+                                // if (in_array($job['last_status'], ['scheduled', 'celup', 'reschedule', 'bon', 'bongkar', 'press_oven', 'tes_luntur', 'tes_lab', 'rajut', 'acc'])) {
+                                // Jika key sudah ada, gabungkan total_kg-nya
+                                if (isset($scheduleGrouped[$key])) {
+                                    $scheduleGrouped[$key]['total_kg'] += $job['total_kg'];
+                                    // format total_kg menjadi 2 angka di belakang koma
+                                    $scheduleGrouped[$key]['total_kg'] = number_format($scheduleGrouped[$key]['total_kg'], 2);
+                                } else {
+                                    $scheduleGrouped[$key] = $job;
+                                }
                             }
                         }
                         // echo '<pre>';
@@ -334,11 +340,11 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="lot_celup" class="form-label">Lot Celup</label>
-                                    <input type="text" class="form-control" id="lot_celup" value="${item.lot_celup}" readonly>
+                                    <input type="text" class="form-control" id="lot_celup" value="${item.lot_celup ? item.lot_celup : 'Lot Belum Diisi'}" readonly>
                                 </div>
                                 <div class="mb-3">
                                     <label for="tgl_celup" class="form-label">Tanggal Celup</label>
-                                    <input type="text" class="form-control" id="tgl_celup" value="${item.tanggal_celup}" readonly>
+                                    <input type="text" class="form-control" id="tgl_celup" value="${item.tanggal_celup ? item.tanggal_celup : 'Tanggal Celup Belum Di Update'}" readonly>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -355,6 +361,18 @@
                                     <input type="text" class="form-control" id="last_status" value="${item.last_status}" readonly>
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="keterangan" class="form-label">Keterangan</label>
+                                    <textarea class="form-control" id="keterangan" rows="3" readonly>${item.keterangan || ''}</textarea>
+                                </div>
+                            </div> 
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="ket_celup" class="form-label">Keterangan Celup</label>
+                                    <textarea class="form-control" id="ket_celup" rows="3" readonly>${item.ket_celup || ''}</textarea>
+                                </div>
+                            </div> 
                         </div>
                         `;
                     });

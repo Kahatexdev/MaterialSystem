@@ -276,7 +276,6 @@ class ScheduleController extends BaseController
         $itemType = urldecode($this->request->getGet('item_type'));
         $kodeWarna = $this->request->getGet('kode_warna');
 
-        // \var_dump($id_order, $itemType, $kodeWarna);
         // Validasi parameter
         if (empty($no_model)) {
             return $this->response->setJSON(['error' => 'Invalid request no_model']);
@@ -286,14 +285,43 @@ class ScheduleController extends BaseController
             return $this->response->setJSON(['error' => 'Invalid request kode_warna']);
         }
 
-        // Ambil detail PO dari model
-        $poDetails = $this->masterOrderModel->getDelivery($no_model);
-        if (empty($poDetails)) {
-            return $this->response->setJSON(['error' => 'Order not found']);
+        $poCovering = $this->openPoModel->select('id_po, id_induk, no_model')
+            ->where('no_model', $no_model)
+            ->where('item_type', $itemType)
+            ->where('kode_warna', $kodeWarna)
+            ->first();
+        // Tentukan no_model induk
+        if (empty($poCovering['id_induk'])) {
+            $no_model_induk = $poCovering['no_model']; // Sudah induk
+        } else {
+            // Cari induknya berdasarkan id_po = id_induk
+            $parentPo = $this->openPoModel->select('no_model')
+                ->where('id_po', $poCovering['id_induk'])
+                ->first();
+
+            if (!$parentPo) {
+                return $this->response->setJSON([
+                    'status' => 'fail',
+                    'message' => 'Data induk tidak ditemukan'
+                ]);
+            }
+
+            $no_model_induk = $parentPo['no_model'];
         }
 
-        // Ambil nomor model dari detail PO
-        // $model = $poDetails['no_model'];
+        $no_model_induk = preg_replace('/^POCOVERING\s*/i', '', $no_model_induk);
+
+        // Gunakan no_model_induk untuk ambil delivery awal/akhir dari master_order
+        $deliveryPoCovering = $this->masterOrderModel
+            ->select('delivery_awal, delivery_akhir')
+            ->where('no_model', $no_model_induk)
+            ->first();
+        if (!$deliveryPoCovering) {
+            return $this->response->setJSON([
+                'status' => 'fail',
+                'message' => 'Delivery tidak ditemukan'
+            ]);
+        }
 
         // Ambil data kg_kebutuhan dari model
         $kg_kebutuhan = $this->openPoModel->getKgKebutuhan($no_model, $itemType, $kodeWarna);
@@ -338,13 +366,16 @@ class ScheduleController extends BaseController
             $poDetails['qty_po'] = $total_qty_po;
             $poDetails['sisa_jatah'] = $sisa_jatah;
             $poDetails['kg_kebutuhan'] = $kg_kebutuhan['kg_po'] ?? 0;
+            $poDetails['delivery_awal'] = $deliveryPoCovering['delivery_awal'] ?? 0;
+            $poDetails['delivery_akhir'] = $deliveryPoCovering['delivery_akhir'] ?? 0;
         } catch (\Exception $e) {
             // Tangani error dan assign fallback value
             $poDetails['start_mesin'] = 'Data Not Found';
             $poDetails['qty_po'] = $total_qty_po;
             $poDetails['sisa_jatah'] = $sisa_jatah;
             $poDetails['kg_kebutuhan'] = $kg_kebutuhan['kg_po'] ?? 0;
-
+            $poDetails['delivery_awal'] = $deliveryPoCovering['delivery_awal'] ?? 0;
+            $poDetails['delivery_akhir'] = $deliveryPoCovering['delivery_akhir'] ?? 0;
             // Log error
             log_message('error', 'Error fetching API data: ' . $e->getMessage());
         }
@@ -404,6 +435,7 @@ class ScheduleController extends BaseController
 
         // Ambil id_mesin dan no_model
         $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
+        $mesin = $this->mesinCelupModel->getKeteranganMesin($scheduleData['no_mesin']);
         $poList = $scheduleData['po']; // Array po[]
         $dataBatch = []; // Untuk menyimpan batch data
 
@@ -431,9 +463,18 @@ class ScheduleController extends BaseController
         $result = $this->scheduleCelupModel->insertBatch($dataBatch);
         // dd($result);
 
+        $mapping = [
+            'ACRYLIC'            => 'acrylic',
+            'BENANG'             => '',
+            'NYLON'              => 'nylon',
+            'MC BENANG SAMPLE'   => 'sample',
+        ];
+        $ket   = strtoupper($mesin['ket_mesin']);
+        $view  = $mapping[$ket] ?? 'index';
+
         // Cek apakah data berhasil disimpan
         if ($result) {
-            return redirect()->to(session()->get('role') . '/schedule')->with('success', 'Jadwal berhasil disimpan!');
+            return redirect()->to(session()->get('role') . '/schedule/' . $view)->with('success', 'Jadwal berhasil disimpan!');
         } else {
             return redirect()->back()->with('error', 'Gagal menyimpan jadwal!');
         }
@@ -452,6 +493,41 @@ class ScheduleController extends BaseController
 
         $scheduleData = $this->scheduleCelupModel->getScheduleDetailsData($id_mesin, $tanggal_schedule, $lot_urut);
         // dd($scheduleData);
+        if (!empty($scheduleData['id_induk'])) {
+        }
+        foreach ($scheduleData as &$item) {
+            if (empty($item['id_induk'])) {
+                // Tanpa induk: langsung pakai no_model anak
+                $masterOrder = $this->masterOrderModel
+                    ->where('no_model', $item['no_model'])
+                    ->first();
+
+                $item['delivery_awal']  = $masterOrder['delivery_awal'] ?? null;
+                $item['delivery_akhir'] = $masterOrder['delivery_akhir'] ?? null;
+            } else {
+                // Ada induk: ambil no_model induk terlebih dahulu
+                $parentPo = $this->openPoModel
+                    ->where('id_po', $item['id_induk'])
+                    ->first();
+
+                if ($parentPo) {
+                    // Bersihkan label "POCOVERING" dari no_model induk
+                    $noModelInduk = trim(str_replace('POCOVERING', '', $parentPo['no_model']));
+
+                    $masterOrder = $this->masterOrderModel
+                        ->where('no_model', $noModelInduk)
+                        ->first();
+
+                    $item['delivery_awal']  = $masterOrder['delivery_awal'] ?? null;
+                    $item['delivery_akhir'] = $masterOrder['delivery_akhir'] ?? null;
+                } else {
+                    // Induk tidak ditemukan
+                    $item['delivery_awal']  = null;
+                    $item['delivery_akhir'] = null;
+                }
+            }
+        }
+
         // $jenis = [];
         $kodeWarna = '';
         $warna = '';

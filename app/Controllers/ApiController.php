@@ -843,12 +843,11 @@ class ApiController extends ResourceController
         $material = $this->materialModel->materialCek($id);
         return $this->response->setJSON($material);
     }
-    public function listRetur()
+    public function listRetur($area)
     {
-        $model = $this->request->getGet('model');
-        $area = $this->request->getGet('area');
 
-        $listRetur = $this->returModel->getListRetur($model, $area);
+
+        $listRetur = $this->returModel->getListRetur($area);
         return $this->response->setJSON($listRetur);
     }
     public function filterTglPakai($area)

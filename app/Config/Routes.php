@@ -169,6 +169,19 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportGlobalStockBenang', 'WarehouseController::reportGlobalStockBenang');
     $routes->get('warehouse/filterReportGlobalBenang', 'WarehouseController::filterReportGlobalBenang');
     $routes->get('warehouse/exportReportGlobalBenang', 'ExcelController::exportReportGlobalBenang');
+    $routes->get('warehouse/reportSisaPakaiBenang', 'WarehouseController::reportSisaPakaiBenang');
+    $routes->get('warehouse/filterSisaPakaiBenang', 'WarehouseController::filterSisaPakaiBenang');
+    $routes->get('warehouse/exportReportSisaPakaiBenang', 'ExcelController::exportReportSisaPakaiBenang');
+    $routes->get('warehouse/reportSisaPakaiNylon', 'WarehouseController::reportSisaPakaiNylon');
+    $routes->get('warehouse/filterSisaPakaiNylon', 'WarehouseController::filterSisaPakaiNylon');
+    $routes->get('warehouse/exportReportSisaPakaiNylon', 'ExcelController::exportReportSisaPakaiNylon');
+    $routes->get('warehouse/reportSisaPakaiSpandex', 'WarehouseController::reportSisaPakaiSpandex');
+    $routes->get('warehouse/filterSisaPakaiSpandex', 'WarehouseController::filterSisaPakaiSpandex');
+    $routes->get('warehouse/exportReportSisaPakaiSpandex', 'ExcelController::exportReportSisaPakaiSpandex');
+    $routes->get('warehouse/reportSisaPakaiKaret', 'WarehouseController::reportSisaPakaiKaret');
+    $routes->get('warehouse/filterSisaPakaiKaret', 'WarehouseController::filterSisaPakaiKaret');
+    $routes->get('warehouse/exportReportSisaPakaiKaret', 'ExcelController::exportReportSisaPakaiKaret');
+
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');
     $routes->post('otherIn/saveOtherIn', 'WarehouseController::saveOtherIn');
@@ -374,6 +387,8 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
 
     $routes->post('updatePemesanan/(:any)', 'CoveringPemesananController::updatePemesanan/$1');
     $routes->get('generatePengeluaranSpandexKaretCovering/(:any)/(:any)', 'PdfController::generatePengeluaranSpandexKaretCovering/$1/$2');
+    $routes->get('getCodePemesanan', 'CoveringPemesananController::getCodePemesanan');
+    $routes->get('getColorPemesanan', 'CoveringPemesananController::getColorPemesanan');
 });
 
 
@@ -557,7 +572,7 @@ $routes->group(
         $routes->post('savePoTambahan', 'ApiController::savePoTambahan');
         $routes->get('filterPoTambahan', 'ApiController::filterPoTambahan');
         $routes->get('cekMaterial/(:any)', 'ApiController::cekMaterial/$1');
-        $routes->get('listRetur', 'ApiController::listRetur');
+        $routes->get('listRetur/(:any)', 'ApiController::listRetur/$1');
         $routes->get('filterTglPakai/(:any)', 'ApiController::filterTglPakai/$1');
         $routes->get('dataPemesananArea', 'ApiController::getDataPemesanan');
     }

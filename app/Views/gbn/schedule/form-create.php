@@ -530,7 +530,6 @@
             const itemTypeEncoded = encodeURIComponent(itemType);
             idInduk = idInduk || 0;
             const url = `<?= base_url(session('role') . "/schedule/getPO") ?>?kode_warna=${kodeWarna}&warna=${warna}&item_type=${itemTypeEncoded}&id_induk=${idInduk}`;
-            console.log("Request URL:", url);
             fetch(url)
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
@@ -570,14 +569,12 @@
             const itemTypeEncoded = encodeURIComponent(itemType);
             // idInduk = idInduk || 0;
             const url = `<?= base_url(session('role') . "/schedule/getQtyPO") ?>?kode_warna=${kodeWarna}&color=${warna}&item_type=${itemTypeEncoded}`;
-            console.log("Request URL:", url);
             fetch(url)
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(data => {
-                    // console.log("Qty Data:", data);
                     if (data && !data.error) {
                         // Hanya update field tambahan (qty_po_plus, KG Kebutuhan dan Sisa Jatah)
                         const qtyPO = tr.querySelector("input[name='qty_po[]']");
@@ -606,7 +603,6 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log("Data received from server:", data);
                     if (data && !data.error) {
                         const tglStartMC = tr.querySelector("input[name='tgl_start_mc[]']");
                         const deliveryAwal = tr.querySelector("input[name='delivery_awal[]']");
@@ -617,7 +613,6 @@
                         }
 
                         tr.querySelector("input[name='delivery_akhir[]']").value = data.delivery_akhir || '';
-                        console.log("Delivery Awal : " + data.delivery_awal);
                     } else {
                         console.error('Error fetching PO details:', data.error || 'No data found');
                     }
@@ -633,15 +628,12 @@
             const warnaEnc = encodeURIComponent(warna);
             const itemTypeEncoded = encodeURIComponent(itemType);
             const url = `<?= base_url(session('role') . "/schedule/getStock") ?>?kode_warna=${kodeWarnaEnc}&color=${warnaEnc}&item_type=${itemTypeEncoded}`;
-            console.log("Request URL:", url);
             fetch(url)
                 .then(response => {
-                    console.log("Status:", response.status, response.statusText);
                     if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(data => {
-                    console.log("Stock Data:", data);
                     if (data && !data.error) {
 
                         const stock = tr.querySelector(".stock");
@@ -662,15 +654,12 @@
             const itemTypeEncoded = encodeURIComponent(itemType);
             const noModelEncoded = encodeURIComponent(noModel);
             const url = `<?= base_url(session('role') . "/schedule/getKeterangan") ?>?kode_warna=${kodeWarnaEnc}&color=${warnaEnc}&item_type=${itemTypeEncoded}&no_model=${noModelEncoded}`;
-            console.log("Request URL:", url);
             fetch(url)
                 .then(response => {
-                    console.log("Status:", response.status, response.statusText);
                     if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(data => {
-                    console.log("Keterangan Data:", data);
                     if (data && !data.error) {
                         const ketPo = tr.querySelector("textarea.keterangan");
                         if (ketPo) {

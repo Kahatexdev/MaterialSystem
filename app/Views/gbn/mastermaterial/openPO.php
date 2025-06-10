@@ -92,7 +92,7 @@
                                         <div class="form-group">
                                             <label>Jenis Benang</label>
                                             <select class="form-control texture" name="items[0][jenis_benang]">
-                                                <option value="">Pilih Jenis Benang</option>
+                                                <option value="-">Pilih Jenis Benang</option>
                                                 <option value="DTY">DTY</option>
                                                 <option value="FDY">FDY</option>
                                                 <option value="NFY">NFY</option>
@@ -104,7 +104,7 @@
                                         <div class="form-group">
                                             <label>Spesifikasi Benang</label>
                                             <select class="form-control fillamen" name="items[0][spesifikasi_benang]">
-                                                <option value="">Pilih Spesifikasi Benang</option>
+                                                <option value="-">Pilih Spesifikasi Benang</option>
                                                 <option value="SIM DH">SIM DH</option>
                                                 <option value="NIM DH">NIM DH</option>
                                                 <option value="LIM DH">LIM DH</option>
@@ -230,7 +230,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="">PO(+)</label>
-                            <select class="form-select select-tinggi-2baris" name="po_plus" id="po_plus">
+                            <select class="form-select" name="po_plus" id="po_plus" required>
                                 <option value="">Pilih</option>
                                 <option value="1">YA</option>
                                 <option value="0">TIDAK</option>
@@ -333,8 +333,8 @@
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Jenis Benang</label>
-                                            <select class="form-control texture" name="items[${tabIndex - 1}][jenis_benang]" required>
-                                                <option value="">Pilih Jenis Benang</option>
+                                            <select class="form-control texture" name="items[${tabIndex - 1}][jenis_benang]">
+                                                <option value="-">Pilih Jenis Benang</option>
                                                 <option value="DTY">DTY</option>
                                                 <option value="FDY">FDY</option>
                                                 <option value="NFY">NFY</option>
@@ -345,8 +345,8 @@
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Spesifikasi Benang</label>
-                                            <select class="form-control fillamen" name="items[0][spesifikasi_benang]" required>
-                                                <option value="">Pilih Spesifikasi Benang</option>
+                                            <select class="form-control fillamen" name="items[0][spesifikasi_benang]">
+                                                <option value="-">Pilih Spesifikasi Benang</option>
                                                 <option value="SIM DH">SIM DH</option>
                                                 <option value="NIM DH">NIM DH</option>
                                                 <option value="LIM DH">LIM DH</option>

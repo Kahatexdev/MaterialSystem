@@ -168,21 +168,24 @@
                         <?php endforeach; ?>
                     </div>
                     <div class="card-footer bg-white align-items-center">
-                        <button class="btn  btn-info action-btn w-100" onclick="editItem(<?= $item['id_covering_stock'] ?>)">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
                         <div class="row">
+                            <div class="col-6">
+                                <button class="btn  btn-info action-btn w-100" onclick="editItem(<?= $item['id_covering_stock'] ?>)">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                            </div>
                             <div class="col-6">
                                 <button class="btn  btn-success action-btn w-100" onclick="addStock(<?= $item['id_covering_stock'] ?>)">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
-                            <div class="col-6">
+
+                            <!-- <div class="col-6">
 
                                 <button class="btn  btn-danger action-btn w-100" onclick="removeStock(<?= $item['id_covering_stock'] ?>)" <?= $item['ttl_kg'] <= 0 ? 'disabled' : '' ?>>
                                     <i class="fas fa-minus"></i>
                                 </button>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
 

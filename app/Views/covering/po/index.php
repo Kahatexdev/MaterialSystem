@@ -49,7 +49,7 @@
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table">
+                <table class="table" id="tablePo">
                     <thead>
                         <tr>
                             <th class="text-center">No</th>
@@ -62,8 +62,8 @@
                             <?php $no = 1; ?>
                             <?php foreach ($poCovering as $po) : ?>
                                 <tr>
-                                    <td class="text-center"><?= $no++ ?></td>
-                                    <td class="text-center"><?= $po['tgl_po'] ?></td>
+                                    <td class="text-center"><?= $no++ ?? '-' ?></td>
+                                    <td class="text-center"><?= $po['tgl_po'] ?? '-' ?></td>
                                     <td class="text-center">
                                         <a class="btn bg-gradient-success" href="<?= base_url($role . '/po/exportPO/' . $po['tgl_po']) ?>">
                                             <i class="fas fa-file-pdf me-2"></i></i>Export PO
@@ -76,7 +76,9 @@
                             <?php endforeach; ?>
                         <?php else : ?>
                             <tr>
-                                <td colspan="3" class="text-center">Tidak ada data</td>
+                                <td class="text-center">-</td>
+                                <td class="text-center">Tidak ada data</td>
+                                <td class="text-center">-</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -107,7 +109,7 @@
 
 <script>
     $(document).ready(function() {
-        $('.table').DataTable({
+        $('#tablePo').DataTable({
             responsive: true,
             ordering: true,
             paging: true,
