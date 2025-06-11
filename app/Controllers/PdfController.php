@@ -100,8 +100,157 @@ class PdfController extends BaseController
         $pdf->SetAutoPageBreak(false);  // KITA MATIKAN AUTO PAGE BREAK
         $pdf->AddPage();
 
+
+        $seasonText = $season ?? '';
+        $mtText     = $materialType ?? '';
+
+        $rawUnit = $unit['unit'];
+        $rawUnit = strtoupper(trim($rawUnit));
+
+        $pemesanan = 'KAOS KAKI';
+        if ($rawUnit === 'MAJALAYA') {
+            $pemesanan .= ' / ' . $rawUnit;
+        }
+
         // CETAK HEADER halaman pertama
-        $this->generateHeaderOpenPO($pdf, $no_model);
+        // Garis margin luar (lebih tebal)
+        $pdf->SetDrawColor(0, 0, 0); // Warna hitam
+        $pdf->SetLineWidth(0.4); // Lebih tebal
+        $pdf->Rect(9, 9, 279, 192); // Sedikit lebih besar dari margin dalam
+
+        // Garis margin dalam (lebih tipis)
+        $pdf->SetLineWidth(0.2); // Lebih tipis
+        $pdf->Rect(10, 10, 277, 190); // Ukuran aslinya
+
+        // Masukkan gambar di dalam kolom
+        $x = $pdf->GetX(); // Simpan posisi X saat ini
+        $y = $pdf->GetY(); // Simpan posisi Y saat ini
+
+        // Menambahkan gambar
+        $pdf->Image('assets/img/logo-kahatex.png', $x + 16, $y + 1, 10, 8); // Lokasi X, Y, lebar, tinggi
+
+        // Header
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->Cell(43, 13, '', 1, 0, 'C'); // Tetap di baris yang sama
+        // Set warna latar belakang menjadi biru telur asin (RGB: 170, 255, 255)
+        $pdf->SetFillColor(170, 255, 255);
+        $pdf->Cell(234, 4, 'FORMULIR', 1, 1, 'C', 1); // Pindah ke baris berikutnya setelah ini
+
+        $pdf->SetFont('Arial', '', 6);
+        $pdf->Cell(43, 5, '', 0, 0, 'L'); // Tetap di baris yang sama
+        $pdf->Cell(234, 5, 'DEPARTMEN CELUP CONES', 0, 1, 'C'); // Pindah ke baris berikutnya setelah ini
+
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(43, 4, 'PT KAHATEX', 0, 0, 'C'); // Tetap di baris yang sama
+        $pdf->Cell(234, 4, 'FORMULIR PO', 0, 1, 'C'); // Pindah ke baris berikutnya setelah ini
+
+
+        // Tabel Header Atas
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(43, 4, 'No. Dokumen', 1, 0, 'L');
+        $pdf->Cell(162, 4, 'FOR-CC-087/REV_01/HAL_1/1', 1, 0, 'L');
+        $pdf->Cell(31, 4, 'Tanggal Revisi', 1, 0, 'L');
+        $pdf->Cell(41, 4, '04 Desember 2019', 1, 1, 'L');
+
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
+        if ($result[0]['po_plus'] == '0') {
+            $pdf->Cell(30, 5, ': ' . $no_model, 0, 1, 'L');
+        } else {
+            $pdf->Cell(30, 5, ': ' . '(+) ' . $no_model, 0, 1, 'L');
+        }
+
+        $cellW1 = 20;  // lebar season
+        $cellW2 = 30;  // lebar materialType
+        $lineH  = 4;   // tinggi tiap baris wrap
+
+        $seasonText = $season ?? '';
+        $mtText     = $materialType ?? '';
+
+        // Hitung tinggi masing-masing
+        $nb1   = ceil($pdf->GetStringWidth($seasonText) / $cellW1);
+        $nb1   = max(1, $nb1);
+        $rowH1 = $nb1 * $lineH;
+
+        $nb2   = ceil($pdf->GetStringWidth($mtText) / $cellW2);
+        $nb2   = max(1, $nb2);
+        $rowH2 = $nb2 * $lineH;
+
+        $rowH = max($rowH1, $rowH2);
+
+        $startX = $pdf->GetX();
+        $startY = $pdf->GetY();
+
+        $pdf->Cell(43, 5, 'Pemesanan', 0, 0, 'L');
+        $pdf->Cell(50, 5, ': ' . $pemesanan, 0, 0, 'L');
+
+        //Simpan posisi awal Season & MaterialType
+        $x = $pdf->GetX();
+        $y = $pdf->GetY();
+
+        //Season
+        $pdf->MultiCell($cellW1, $lineH, $seasonText, 0, 'C');
+        $pdf->SetXY($x + $cellW1, $y);
+
+        //Material Type
+        $pdf->SetFont('Arial', 'U', 7);
+        $pdf->MultiCell($cellW2, $lineH, $mtText, 0, 'C');
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->SetXY($startX, $startY + $rowH);
+
+        $pdf->Cell(43, 5, 'Tgl', 0, 0, 'L');
+        // Check if the result array is not empty and display only the first delivery_awal
+        if (!empty($result)) {
+            $pdf->Cell(234, 5, ': ' . $result[0]['tgl_po'], 0, 1, 'L');
+        } else {
+            $pdf->Cell(234, 5, ': No delivery date available', 0, 1, 'L');
+        }
+
+        // Tabel Header Baris Pertama
+        $pdf->SetFont('Arial', '', 9);
+        // Merge cells untuk kolom No, Bentuk Celup, Warna, Kode Warna, Buyer, Nomor Order, Delivery, Untuk Produksi, Contoh Warna, Keterangan Celup
+        $pdf->Cell(6, 16, 'No', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(37, 8, 'Benang', 1, 0, 'C'); // Merge 2 kolom ke samping untuk baris pertama
+        $pdf->MultiCell(17, 8, 'Bentuk Celup', 1, 'C', false); // Merge 2 baris
+        $pdf->SetXY($pdf->GetX(), $pdf->GetY() - 16);
+        $pdf->Cell(60, -8, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(20, 16, 'Warna', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(20, 16, 'Kode Warna', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(10, 16, 'Buyer', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(25, 16, 'Nomor Order', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(16, 16, 'Delivery', 1, 0, 'C'); // Merge 2 baris
+        $pdf->MultiCell(15, 4, 'Qty Pesanan', 1, 'C', false); // Merge 2 baris
+        $pdf->SetXY($pdf->GetX(), $pdf->GetY() - 8);
+        $pdf->Cell(166, -8, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(52, 8, 'Permintaan Kelos', 1, 0, 'C'); // Merge 4 kolom
+        $pdf->MultiCell(18, 8, 'Untuk Produksi', 1, 'C', false); // Merge 2 baris
+        $pdf->SetXY($pdf->GetX(), $pdf->GetY() - 16);
+        $pdf->Cell(236, -8, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
+        $pdf->MultiCell(18, 8, 'Contoh Warna', 1, 'C', false); // Merge 2 baris
+        $pdf->SetXY($pdf->GetX(), $pdf->GetY() - 16);
+        $pdf->Cell(254, -8, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
+        $pdf->MultiCell(23, 8, 'Keterangan Celup', 1, 'C', false); // Merge 2 baris
+        $pdf->SetXY($pdf->GetX(), $pdf->GetY() - 16);
+        $pdf->Cell(277, -8, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(23, 16, '', 0, 1, 'C'); // Merge 2 baris
+
+        // Sub-header untuk kolom "Benang" dan "Permintaan Kelos"
+        $pdf->Cell(6, -8, '', 0, 0); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(25, -8, 'Jenis', 1, 0, 'C');
+        $pdf->Cell(12, -8, 'Kode', 1, 0, 'C');
+        $pdf->Cell(108, -8, '', 0, 0); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(15, -8, 'Kg', 1, 0, 'C'); // Merge 4 kolom untuk Permintaan Kelos
+        $pdf->Cell(13, -8, 'Kg', 1, 0, 'C');
+        $pdf->Cell(13, -8, 'Yard', 1, 0, 'C');
+        $pdf->MultiCell(13, -4, 'Cones Total', 1, 'C', false);
+        $pdf->SetXY($pdf->GetX(), $pdf->GetY() + 8);
+        $pdf->Cell(205, -8, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
+        $pdf->MultiCell(13, -4, 'Cones Jenis', 1, 'C', false);
+        $pdf->SetXY($pdf->GetX(), $pdf->GetY() + 8);
+        $pdf->Cell(218, -8, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(87, -8, '', 0, 2, 'C'); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(87, 8, '', 0, 1, 'C'); // Kosong untuk menyesuaikan posisi
+
         $startYAfterHeader = $pdf->GetY();  // posisi Y tepat setelah header
         // $pdf->SetY($startYAfterHeader);
         $pdf->SetY($pdf->GetY());
@@ -243,7 +392,7 @@ class PdfController extends BaseController
 
                 // ======== (C) Pindah ke halaman baru ========
                 $pdf->AddPage();
-                $this->generateHeaderOpenPO($pdf, $no_model);
+                $this->generateHeaderOpenPO($pdf, $result, $no_model, $pemesanan);
 
                 // Pastikan cursor di bawah header baru
                 $pdf->SetY($pdf->GetY());
@@ -314,7 +463,7 @@ class PdfController extends BaseController
             $x += 13;
             $pdf->Cell(13, $maxHeight, '', 1, 0, 'C');
             $x += 13;
-            $pdf->Cell(13, $maxHeight, $row['jumlah_cones'] ?? '', 1, 0, 'C');
+            $pdf->Cell(13, $maxHeight, $row['jumlah_cones'] ?? 0, 1, 0, 'C');
             $x += 13;
             $pdf->Cell(13, $maxHeight, '', 1, 0, 'C');
             $x += 13;
@@ -396,7 +545,7 @@ class PdfController extends BaseController
             ->setBody($pdf->Output('S'));
     }
 
-    public function generateHeaderOpenPO($pdf, $no_model)
+    public function generateHeaderOpenPO($pdf, $result, $no_model, $pemesanan)
     {
         // Garis margin luar (lebih tebal)
         $pdf->SetDrawColor(0, 0, 0); // Warna hitam
@@ -439,10 +588,14 @@ class PdfController extends BaseController
 
         $pdf->SetFont('Arial', '', 7);
         $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
-        $pdf->Cell(234, 5, ': ' . $no_model, 0, 1, 'L');
+        if ($result[0]['po_plus'] == '0') {
+            $pdf->Cell(30, 5, ': ' . $no_model, 0, 1, 'L');
+        } else {
+            $pdf->Cell(30, 5, ': ' . '(+) ' . $no_model, 0, 1, 'L');
+        }
 
         $pdf->Cell(43, 5, 'Pemesanan', 0, 0, 'L');
-        $pdf->Cell(234, 5, ': KAOS KAKI', 0, 1, 'L');
+        $pdf->Cell(50, 5, ': ' . $pemesanan, 0, 1, 'L');
 
         $pdf->Cell(43, 5, 'Tgl', 0, 0, 'L');
         // Check if the result array is not empty and display only the first delivery_awal

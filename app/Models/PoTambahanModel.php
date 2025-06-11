@@ -81,4 +81,16 @@ class PoTambahanModel extends Model
             ->orderBy('po_tambahan.kode_warna', 'ASC')
             ->findAll();
     }
+
+    public function getData()
+    {
+        return $this->select('po_tambahan.id_po_tambahan, po_tambahan.no_model, po_tambahan.item_type, po_tambahan.kode_warna, po_tambahan.color, SUM(po_tambahan.kg_po_tambahan) AS kg_poplus, SUM(po_tambahan.cns_po_tambahan) AS cns_poplus, po_tambahan.status, DATE(po_tambahan.created_at) AS tgl_poplus, po_tambahan.admin')
+            ->groupBy('DATE(po_tambahan.created_at)', false)
+            ->groupBy('no_model')
+            ->groupBy('item_type')
+            ->groupBy('kode_warna')
+            ->groupBy('status')
+            ->orderBy('created_at', 'DESC')
+            ->findAll();
+    }
 }

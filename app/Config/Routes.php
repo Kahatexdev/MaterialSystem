@@ -243,6 +243,10 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('retur/reportReturArea', 'ReturController::reportReturArea');
     $routes->get('retur/filterReturArea', 'ReturController::filterReturArea');
     $routes->get('retur/exportReturArea', 'ExcelController::exportReturArea');
+    //Po Plus
+    $routes->get('poplus', 'MasterDataController::poPlus');
+    $routes->post('approvePoPlusArea', 'MasterDataController::prosesApprovePoPlusArea');
+
     // tambahan waktu
     $routes->get('pemesanan/requestAdditionalTime', 'PemesananController::requestAdditionalTime');
     $routes->get('pemesanan/getCountStatusRequest', 'PemesananController::getCountStatusRequest');
