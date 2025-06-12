@@ -82,11 +82,8 @@
                                             Approve
                                         </button>
                                     <?php else: ?>
-                                        <button class="btn btn-success">
-                                            <span class="text-white">
-                                                <i class="fas fa-check-circle"></i>
-                                            </span>
-                                        </button> <!-- Font Awesome centang hijau -->
+                                        <a class="btn btn-info" href="<?= base_url($role . '/masterdata/poGabungan/' . $data['jenis']) ?>"> BUKA PO (+)
+                                        </a> <!-- Font Awesome centang hijau -->
                                     <?php endif; ?>
                                 </td>
                             </tr>

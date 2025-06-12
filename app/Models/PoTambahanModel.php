@@ -84,7 +84,8 @@ class PoTambahanModel extends Model
 
     public function getData()
     {
-        return $this->select('po_tambahan.id_po_tambahan, po_tambahan.no_model, po_tambahan.item_type, po_tambahan.kode_warna, po_tambahan.color, SUM(po_tambahan.kg_po_tambahan) AS kg_poplus, SUM(po_tambahan.cns_po_tambahan) AS cns_poplus, po_tambahan.status, DATE(po_tambahan.created_at) AS tgl_poplus, po_tambahan.admin')
+        return $this->select('po_tambahan.id_po_tambahan, po_tambahan.no_model, po_tambahan.item_type, po_tambahan.kode_warna, po_tambahan.color, SUM(po_tambahan.kg_po_tambahan) AS kg_poplus, SUM(po_tambahan.cns_po_tambahan) AS cns_poplus, po_tambahan.status, DATE(po_tambahan.created_at) AS tgl_poplus, po_tambahan.admin, master_material.jenis')
+            ->join('master_material', 'master_material.item_type = po_tambahan.item_type', 'left')
             ->groupBy('DATE(po_tambahan.created_at)', false)
             ->groupBy('no_model')
             ->groupBy('item_type')

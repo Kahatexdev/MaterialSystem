@@ -62,6 +62,11 @@ class MasterdataController extends BaseController
         $material = $this->materialModel->findAll();
         // Ambil semua id_order dari material
         $materialOrderIds = array_column($material, 'id_order');
+        $duplikatMU = $this->materialModel->getDataDuplicate();
+        $duplikatIds = array_map(function ($row) {
+            return $row->id_order;
+        }, $duplikatMU);
+
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
@@ -69,6 +74,7 @@ class MasterdataController extends BaseController
             'masterOrder' => $masterOrder,
             'material' => $material,
             'materialOrderIds' => $materialOrderIds,
+            'duplikatMU' => $duplikatIds
         ];
         return view($this->role . '/masterdata/index', $data);
     }
@@ -642,6 +648,16 @@ class MasterdataController extends BaseController
             return redirect()->to(base_url($this->role . '/material/' . $idorder))->with('success', 'Data Berhasil dihapus.');
         } else {
             return redirect()->to(base_url($this->role . '/material/' . $idorder))->with('error', 'Data gagal dihapus.');
+        }
+    }
+
+    public function deleteDuplicateMu($id_order)
+    {
+        $deleteMU = $this->materialModel->deleteDuplicate($id_order);
+        if ($deleteMU) {
+            return redirect()->to(base_url($this->role . '/material/' . $id_order))->with('success', 'Data Duplikat Berhasil dihapus.');
+        } else {
+            return redirect()->to(base_url($this->role . '/material/' . $id_order))->with('error', 'Data Duplikat Gagal dihapus.');
         }
     }
 

@@ -282,4 +282,40 @@ class MaterialModel extends Model
     {
         return $this->select('style_size, inisial')->where('id_order', $id)->groupBy('style_size')->findAll();
     }
+    public function getDataDuplicate()
+    {
+        $db = \Config\Database::connect();
+
+        // Subquery: cari kombinasi duplikat
+        $subquery = $db->table('material')
+            ->select('CONCAT(id_order, style_size, item_type, kode_warna, kgs) as combo')
+            ->groupBy('combo')
+            ->having('COUNT(*) >', 1)
+            ->getCompiledSelect();
+
+        return $db->table('material')
+            ->select('id_order')
+            ->where("CONCAT(id_order, style_size, item_type, kode_warna, kgs) IN ($subquery)", null, false)
+            ->groupBy('id_order')
+            ->get()
+            ->getResult();
+    }
+    public function deleteDuplicate($id_order)
+    {
+        $db = \Config\Database::connect();
+
+        $sql = "
+        DELETE m1 FROM material m1
+        JOIN material m2
+          ON m1.id_order = m2.id_order
+          AND m1.style_size = m2.style_size
+          AND m1.item_type = m2.item_type
+          AND m1.kode_warna = m2.kode_warna
+          AND m1.kgs = m2.kgs
+          AND m1.id_material > m2.id_material
+        WHERE m1.id_order = ?
+    ";
+
+        return $db->query($sql, [$id_order]);
+    }
 }
