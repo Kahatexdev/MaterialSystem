@@ -97,8 +97,22 @@ class PdfController extends BaseController
 
         // Inisialisasi FPDF
         $pdf = new FPDF('L', 'mm', 'A4');
+        $pdf->SetAutoPageBreak(false);  // KITA MATIKAN AUTO PAGE BREAK
         $pdf->AddPage();
 
+
+        $seasonText = $season ?? '';
+        $mtText     = $materialType ?? '';
+
+        $rawUnit = $unit['unit'];
+        $rawUnit = strtoupper(trim($rawUnit));
+
+        $pemesanan = 'KAOS KAKI';
+        if ($rawUnit === 'MAJALAYA') {
+            $pemesanan .= ' / ' . $rawUnit;
+        }
+
+        // CETAK HEADER halaman pertama
         // Garis margin luar (lebih tebal)
         $pdf->SetDrawColor(0, 0, 0); // Warna hitam
         $pdf->SetLineWidth(0.4); // Lebih tebal
@@ -130,6 +144,7 @@ class PdfController extends BaseController
         $pdf->Cell(43, 4, 'PT KAHATEX', 0, 0, 'C'); // Tetap di baris yang sama
         $pdf->Cell(234, 4, 'FORMULIR PO', 0, 1, 'C'); // Pindah ke baris berikutnya setelah ini
 
+
         // Tabel Header Atas
         $pdf->SetFont('Arial', '', 5);
         $pdf->Cell(43, 4, 'No. Dokumen', 1, 0, 'L');
@@ -137,12 +152,7 @@ class PdfController extends BaseController
         $pdf->Cell(31, 4, 'Tanggal Revisi', 1, 0, 'L');
         $pdf->Cell(41, 4, '04 Desember 2019', 1, 1, 'L');
 
-        $pdf->Cell(205, 4, '', 1, 0, 'L');
-        $pdf->Cell(31, 4, 'Klasifikasi', 1, 0, 'L');
-        $pdf->Cell(41, 4, 'Internal', 1, 1, 'L');
-
         $pdf->SetFont('Arial', '', 7);
-
         $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
 
         if (!empty($result) && isset($result[0]['po_plus']) && $result[0]['po_plus'] == '0') {
@@ -174,16 +184,8 @@ class PdfController extends BaseController
         $startX = $pdf->GetX();
         $startY = $pdf->GetY();
 
-        $rawUnit = $unit['unit'];
-        $rawUnit = strtoupper(trim($rawUnit));
-
-        $pemesanan = 'KAOS KAKI';
-        if ($rawUnit === 'MAJALAYA') {
-            $pemesanan .= ' / ' . $rawUnit;
-        }
-
-        $pdf->Cell(43, $rowH, 'Pemesanan', 0, 0, 'L');
-        $pdf->Cell(50, $rowH, ': ' . $pemesanan, 0, 0, 'L');
+        $pdf->Cell(43, 5, 'Pemesanan', 0, 0, 'L');
+        $pdf->Cell(50, 5, ': ' . $pemesanan, 0, 0, 'L');
 
         //Simpan posisi awal Season & MaterialType
         $x = $pdf->GetX();
@@ -200,6 +202,7 @@ class PdfController extends BaseController
         $pdf->SetXY($startX, $startY + $rowH);
 
         $pdf->Cell(43, 5, 'Tgl', 0, 0, 'L');
+        // Check if the result array is not empty and display only the first delivery_awal
         if (!empty($result)) {
             $pdf->Cell(234, 5, ': ' . $result[0]['tgl_po'], 0, 1, 'L');
         } else {
@@ -250,31 +253,30 @@ class PdfController extends BaseController
         $pdf->Cell(218, -8, '', 0, 0, 'C'); // Kosong untuk menyesuaikan posisi
         $pdf->Cell(87, -8, '', 0, 2, 'C'); // Kosong untuk menyesuaikan posisi
         $pdf->Cell(87, 8, '', 0, 1, 'C'); // Kosong untuk menyesuaikan posisi
-        // END HEADER
 
-        $lineHeight = 4;      // tinggi dasar setiap baris MultiCell
+        $startYAfterHeader = $pdf->GetY();  // posisi Y tepat setelah header
+        // $pdf->SetY($startYAfterHeader);
+        $pdf->SetY($pdf->GetY());
+
+        // == START ISI TABEL ==
         $pdf->SetFont('Arial', '', 7);
-        $no = 1;
-        $yLimit = 180;
+        $lineHeight         = 4;      // tinggi dasar setiap baris MultiCell
+        $no                 = 1;
+        $totalPrintedRows   = 0;      // hitung total baris logis yang sudah dicetak di halaman sekarang
+        $maxRowsPerPage     = 18;     // maksimum baris logis per halaman
+        $barisNormalHeight  = 4;      // tinggi satu baris “logis” (4 mm)
 
         // Total tinggi baris untuk memastikan 15 baris jika perlu kosong
-        $totalKg     = 0;
-        $totalPermintaanCones  = 0;
-        $totalYard = 0;
-        $totalCones  = 0;
-        $totalRowHeight     = 0;
-        $barisNormalHeight  = 4;
-        $maxTotalHeight     = 15 * $barisNormalHeight;
-
+        $totalKg                = 0;
+        $totalPermintaanCones   = 0;
+        $totalYard              = 0;
+        $totalCones             = 0;
+        $totalRowHeight         = 0;
+        $maxTotalHeight         = $maxRowsPerPage * $barisNormalHeight;
 
         for ($i = 0; $i < count($result); $i++) {
-            $currentY = $pdf->GetY();
-            if ($currentY + 6 > $yLimit) {
-                // Tambah halaman baru dan cetak header + footer
-                $pdf->AddPage();
-                $this->generateHeaderOpenPO($pdf, $no_model);
-                $this->generateFooterOpenPO($pdf, $tujuan, $result, $penerima);
-            }
+            // $currentY = $pdf->GetY();
+            // $rowspan = isset($result[$i]['rowspan']) ? $result[$i]['rowspan'] : 1;
 
             $row = $result[$i];
             $pdf->SetFont('Arial', '', 7);
@@ -293,6 +295,7 @@ class PdfController extends BaseController
             $kodeWarna  = $row['kode_warna']   ?? '';
             $buyer      = $row['buyer']        ?? '';
             $noOrder    = $row['no_order']     ?? '';
+            $ketCelup    = $row['ket_celup']     ?? '';
 
             // Tentukan lebar masing-masing kolom agar sesuai header
             $widths = [
@@ -303,6 +306,7 @@ class PdfController extends BaseController
                 'kodeWarna'  => 20,
                 'buyer'      => 10,
                 'noOrder'    => 25,
+                'ketCelup'    => 23,
             ];
 
             // 1) Simulasikan MultiCell() untuk masing-masing kolom, tanpa border,
@@ -310,7 +314,7 @@ class PdfController extends BaseController
             $heights = [];
             $tempX = $startX + 6; // kolom pertama setelah kolom No
 
-            foreach (['itemType', 'ukuran', 'bentuk', 'warna', 'kodeWarna', 'buyer', 'noOrder'] as $key) {
+            foreach (['itemType', 'ukuran', 'bentuk', 'warna', 'kodeWarna', 'buyer', 'noOrder', 'ketCelup'] as $key) {
                 $text = ${$key};
                 $w    = $widths[$key];
 
@@ -337,14 +341,80 @@ class PdfController extends BaseController
             // Track totalRowHeight agar kelak kita bisa tambahkan baris kosong sisa
             $totalRowHeight += $maxHeight;
 
-            // 3) Sekarang cetak seluruh kolom dengan tinggi maxHeight, 
-            //    memastikan semua posisi X, Y direset ke start tiap kolom.
-            // Cetak kolom No (menggunakan Cell, karena hanya angka satu baris)
+            // Hitung berapa “rowspan” logis (dalam satuan baris NormalHeight)
+            $rowspan = (int) ceil($maxHeight / $barisNormalHeight);
+
+            // Sisa baris logis di halaman sekarang = $maxRowsPerPage - $totalPrintedRows
+            $remainingRows = $maxRowsPerPage - $totalPrintedRows;
+
+            if ($rowspan > $remainingRows) {
+                // → TIDAK MUAT, MAKA: Pindah halaman baru
+
+                // ======== (A) Isi sisa halaman ini dengan baris kosong (dengan border) ========
+                for ($j = 0; $j < $remainingRows; $j++) {
+                    // Kolom “No” (6mm)
+                    $pdf->Cell(6, $barisNormalHeight, '', 1, 0, 'C');
+                    // Kolom “itemType” (25mm)
+                    $pdf->Cell(25, $barisNormalHeight, '', 1, 0);
+                    // Kolom “ukuran” (12mm)
+                    $pdf->Cell(12, $barisNormalHeight, '', 1, 0);
+                    // Kolom “bentuk” (17mm)
+                    $pdf->Cell(17, $barisNormalHeight, '', 1, 0);
+                    // Kolom “warna” (20mm)
+                    $pdf->Cell(20, $barisNormalHeight, '', 1, 0);
+                    // Kolom “kodeWarna” (20mm)
+                    $pdf->Cell(20, $barisNormalHeight, '', 1, 0);
+                    // Kolom “buyer” (10mm)
+                    $pdf->Cell(10, $barisNormalHeight, '', 1, 0);
+                    // Kolom “noOrder” (25mm)
+                    $pdf->Cell(25, $barisNormalHeight, '', 1, 0);
+                    // Kolom “delivery_awal” (16mm)
+                    $pdf->Cell(16, $barisNormalHeight, '', 1, 0, 'C');
+                    // Kolom “kg_po” (15mm)
+                    $pdf->Cell(15, $barisNormalHeight, '', 1, 0, 'C');
+                    // Kolom “kg_percones” (13mm)
+                    $pdf->Cell(13, $barisNormalHeight, '', 1, 0, 'C');
+                    // Kolom kosong (13mm)
+                    $pdf->Cell(13, $barisNormalHeight, '', 1, 0, 'C');
+                    // Kolom “jumlah_cones” (13mm)
+                    $pdf->Cell(13, $barisNormalHeight, '', 1, 0, 'C');
+                    // Kolom kosong (13mm)
+                    $pdf->Cell(13, $barisNormalHeight, '', 1, 0, 'C');
+                    // Kolom “jenis_produksi” (18mm)
+                    $pdf->Cell(18, $barisNormalHeight, '', 1, 0, 'C');
+                    // Kolom “contoh_warna” (18mm)
+                    $pdf->Cell(18, $barisNormalHeight, '', 1, 0, 'C');
+                    // Kolom “ketCelup” (23mm)
+                    $pdf->Cell(23, $barisNormalHeight, '', 1, 0);
+                    // Pindah ke baris berikutnya
+                    $pdf->Ln($barisNormalHeight);
+                }
+
+                // ======== (B) Cetak footer di halaman ini ========
+                $this->generateFooterOpenPO($pdf, $tujuan, $result, $penerima);
+
+                // ======== (C) Pindah ke halaman baru ========
+                $pdf->AddPage();
+                $this->generateHeaderOpenPO($pdf, $result, $no_model, $pemesanan);
+
+                // Pastikan cursor di bawah header baru
+                $pdf->SetY($pdf->GetY());
+
+                // Reset counter baris di halaman baru
+                $totalPrintedRows = 0;
+
+                // Update posisi startX / startY untuk cetak data berikutnya di halaman baru
+                $startX = $pdf->GetX();
+                $startY = $pdf->GetY();
+
+                // Karena sudah pindah halaman, maka remainingRows “baru” = $maxRowsPerPage
+                $remainingRows = $maxRowsPerPage;
+            }
+
+            // Cetak kolom “No”
             $pdf->SetXY($startX, $startY);
             $pdf->Cell(6, $maxHeight, $no++, 1, 0, 'C');
 
-            // Kolom-kolom MultiCell: kita gunakan SetXY sebelum tiap MultiCell,
-            // lalu kembalikan X ke posisi awal + lebar kolom setelah mencetak.
             $x = $startX + 6;
 
             // itemType
@@ -396,7 +466,7 @@ class PdfController extends BaseController
             $x += 13;
             $pdf->Cell(13, $maxHeight, '', 1, 0, 'C');
             $x += 13;
-            $pdf->Cell(13, $maxHeight, $row['jumlah_cones'] ?? '', 1, 0, 'C');
+            $pdf->Cell(13, $maxHeight, $row['jumlah_cones'] ?? 0, 1, 0, 'C');
             $x += 13;
             $pdf->Cell(13, $maxHeight, '', 1, 0, 'C');
             $x += 13;
@@ -404,46 +474,50 @@ class PdfController extends BaseController
             $x += 18;
             $pdf->Cell(18, $maxHeight, $row['contoh_warna'] ?? '', 1, 0, 'C');
             $x += 18;
-            $pdf->Cell(23, $maxHeight, $row['ket_celup'] ?? '', 1, 0, 'C');
-            $x += 23;
+            // noOrder
+            $pdf->SetXY($x, $startY);
+            $pdf->MultiCell($widths['ketCelup'], $maxHeight, '', 1, 'C');
+            $x += $widths['ketCelup'];
+            $pdf->SetXY($x, $startY);
 
             // Pindah ke baris berikutnya
             $pdf->Ln($maxHeight);
-            $totalKg += $kg;
-            $totalPermintaanCones += $permintaanCones;
-            $totalCones += $row['jumlah_cones'];
+
+            $totalPrintedRows += $rowspan;
+
+            $totalKg              += floatval($row['kg_po'] ?? 0);
+            $totalPermintaanCones += floatval($row['kg_percones'] ?? 0);
+            $totalCones           += floatval($row['jumlah_cones'] ?? 0);
         }
 
         // Setelah semua data dicetak, tambahkan baris kosong jika totalRowHeight < maxTotalHeight
-        $remainingHeight = $maxTotalHeight - $totalRowHeight;
-        $remainingRows   = floor($remainingHeight / $barisNormalHeight);
-
-        for ($j = 0; $j < $remainingRows; $j++) {
-            $pdf->Cell(6, 4, '', 1, 0, 'C');
-            $pdf->Cell(25, 4, '', 1);
-            $pdf->Cell(12, 4, '', 1);
-            $pdf->Cell(17, 4, '', 1);
-            $pdf->Cell(20, 4, '', 1);
-            $pdf->Cell(20, 4, '', 1);
-            $pdf->Cell(10, 4, '', 1);
-            $pdf->Cell(25, 4, '', 1);
-            $pdf->Cell(16, 4, '', 1);
-            $pdf->Cell(15, 4, '', 1);
-            $pdf->Cell(13, 4, '', 1);
-            $pdf->Cell(13, 4, '', 1);
-            $pdf->Cell(13, 4, '', 1);
-            $pdf->Cell(13, 4, '', 1);
-            $pdf->Cell(18, 4, '', 1);
-            $pdf->Cell(18, 4, '', 1);
-            $pdf->Cell(23, 4, '', 1);
-            $pdf->Ln(4);
+        if ($totalPrintedRows < $maxRowsPerPage) {
+            $remainingRows = $maxRowsPerPage - $totalPrintedRows;
+            for ($j = 0; $j < $remainingRows; $j++) {
+                $pdf->Cell(6, $barisNormalHeight, '', 1, 0, 'C');
+                $pdf->Cell(25, $barisNormalHeight, '', 1);
+                $pdf->Cell(12, $barisNormalHeight, '', 1);
+                $pdf->Cell(17, $barisNormalHeight, '', 1);
+                $pdf->Cell(20, $barisNormalHeight, '', 1);
+                $pdf->Cell(20, $barisNormalHeight, '', 1);
+                $pdf->Cell(10, $barisNormalHeight, '', 1);
+                $pdf->Cell(25, $barisNormalHeight, '', 1);
+                $pdf->Cell(16, $barisNormalHeight, '', 1);
+                $pdf->Cell(15, $barisNormalHeight, '', 1);
+                $pdf->Cell(13, $barisNormalHeight, '', 1);
+                $pdf->Cell(13, $barisNormalHeight, '', 1);
+                $pdf->Cell(13, $barisNormalHeight, '', 1);
+                $pdf->Cell(13, $barisNormalHeight, '', 1);
+                $pdf->Cell(18, $barisNormalHeight, '', 1);
+                $pdf->Cell(18, $barisNormalHeight, '', 1);
+                $pdf->Cell(23, $barisNormalHeight, '', 1);
+                $pdf->Ln($barisNormalHeight);
+            }
         }
 
         // Baris TOTAL (baris ke-16)
         $pdf->SetFont('Arial', 'B', 7);
         $pdf->Cell(6 + 25 + 12 + 17 + 20 + 20 + 10 + 25 + 16, 6, 'TOTAL', 1, 0, 'R');
-        // Lebar merge = jumlah lebar kolom No sampai Delivery = 6+25+12+17+20+20+10+25+16 = 151
-
         $pdf->Cell(15, 6, number_format($totalKg, 2), 1, 0, 'C');
         $pdf->Cell(13, 6, number_format($totalPermintaanCones, 2), 1, 0, 'C');
         $pdf->Cell(13, 6, number_format($totalYard, 2), 1, 0, 'C');
@@ -452,6 +526,7 @@ class PdfController extends BaseController
         $pdf->Cell(18, 6, '', 1, 0, 'C');
         $pdf->Cell(18, 6, '', 1, 0, 'C');
         $pdf->Cell(23, 6, '', 1, 1, 'C');
+
 
         //KETERANGAN
         $pdf->Cell(277, 5, '', 0, 1, 'C');
@@ -464,34 +539,16 @@ class PdfController extends BaseController
             $pdf->MultiCell(117, 5, ': ', 0, 1, 'L');
         }
 
-        $pdf->SetY(-55); // Atur jarak dari bawah halaman, sesuaikan jika terlalu atas/bawah
-        $pdf->SetFont('Arial', '', 7);
 
-        $pdf->Cell(277, 5, '', 0, 1, 'C');
-        $pdf->Cell(170, 5, 'UNTUK DEPARTMEN ' . $tujuan, 0, 1, 'C');
-
-        $pdf->Cell(55, 5, '', 0, 0, 'C');
-        $pdf->Cell(55, 5, 'Pemesanan', 0, 0, 'C');
-        $pdf->Cell(55, 5, 'Mengetahui', 0, 0, 'C');
-        $pdf->Cell(55, 5, 'Tanda Terima ' . $tujuan, 0, 1, 'C');
-
-        $pdf->Cell(55, 12, '', 0, 1, 'C');
-
-        $pdf->Cell(55, 5, '', 0, 0, 'C');
-        $pdf->Cell(55, 5, '(                               )', 0, 0, 'C');
-        if (!empty($result)) {
-            $pdf->Cell(55, 5, '(       ' . $result[0]['penanggung_jawab'] . '      )', 0, 0, 'C');
-        } else {
-            $pdf->Cell(234, 5, ': No penanggung_jawab available', 0, 0, 'C');
-        }
-        $pdf->Cell(55, 5, '(       ' . $penerima . '       )', 0, 1, 'C');
+        // FOOTER
+        $this->generateFooterOpenPO($pdf, $tujuan, $result, $penerima);
 
         // Output PDF
         return $this->response->setHeader('Content-Type', 'application/pdf')
             ->setBody($pdf->Output('S'));
     }
 
-    public function generateHeaderOpenPO($pdf, $no_model)
+    public function generateHeaderOpenPO($pdf, $result, $no_model, $pemesanan)
     {
         // Garis margin luar (lebih tebal)
         $pdf->SetDrawColor(0, 0, 0); // Warna hitam
@@ -534,10 +591,14 @@ class PdfController extends BaseController
 
         $pdf->SetFont('Arial', '', 7);
         $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
-        $pdf->Cell(234, 5, ': ' . $no_model, 0, 1, 'L');
+        if ($result[0]['po_plus'] == '0') {
+            $pdf->Cell(30, 5, ': ' . $no_model, 0, 1, 'L');
+        } else {
+            $pdf->Cell(30, 5, ': ' . '(+) ' . $no_model, 0, 1, 'L');
+        }
 
         $pdf->Cell(43, 5, 'Pemesanan', 0, 0, 'L');
-        $pdf->Cell(234, 5, ': KAOS KAKI', 0, 1, 'L');
+        $pdf->Cell(50, 5, ': ' . $pemesanan, 0, 1, 'L');
 
         $pdf->Cell(43, 5, 'Tgl', 0, 0, 'L');
         // Check if the result array is not empty and display only the first delivery_awal
@@ -577,8 +638,8 @@ class PdfController extends BaseController
 
         // Sub-header untuk kolom "Benang" dan "Permintaan Kelos"
         $pdf->Cell(6, -8, '', 0, 0); // Kosong untuk menyesuaikan posisi
-        $pdf->Cell(12, -8, 'Jenis', 1, 0, 'C');
-        $pdf->Cell(25, -8, 'Kode', 1, 0, 'C');
+        $pdf->Cell(25, -8, 'Jenis', 1, 0, 'C');
+        $pdf->Cell(12, -8, 'Kode', 1, 0, 'C');
         $pdf->Cell(108, -8, '', 0, 0); // Kosong untuk menyesuaikan posisi
         $pdf->Cell(15, -8, 'Kg', 1, 0, 'C'); // Merge 4 kolom untuk Permintaan Kelos
         $pdf->Cell(13, -8, 'Kg', 1, 0, 'C');
@@ -593,7 +654,7 @@ class PdfController extends BaseController
         $pdf->Cell(87, 8, '', 0, 1, 'C'); // Kosong untuk menyesuaikan posisi
     }
 
-    private function generateFooterOpenPO(FPDF $pdf, string $tujuan, array $result, string $penerima)
+    private function generateFooterOpenPO($pdf, $tujuan, $result, $penerima)
     {
         // Posisi 55 mm dari bawah
         $pdf->SetY(-55);

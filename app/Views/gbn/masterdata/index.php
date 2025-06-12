@@ -214,96 +214,97 @@
             </div>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $('#dataTable').DataTable({
-                "pageLength": 35,
-                "order": []
-            });
-
-            // Event listener untuk submit form update
-
-            $('#dataTable').on('click', '.btn-edit', function() {
-                const id = $(this).data('id');
-                console.log(id);
-
-                // Lakukan AJAX request untuk mendapatkan data
-                $.ajax({
-                    url: '<?= base_url($role . '/getOrderDetails') ?>/' + id,
-                    type: 'GET',
-                    success: function(response) {
-                        // Isi data ke dalam form modal
-                        $('#id_order').val(response.id_order);
-                        $('#foll_up').val(response.foll_up);
-                        $('#lco_date').val(response.lco_date);
-                        $('#no_model').val(response.no_model);
-                        $('#no_order').val(response.no_order);
-                        $('#buyer').val(response.buyer);
-                        $('#memo').val(response.memo);
-                        $('#delivery_awal').val(response.delivery_awal);
-                        $('#delivery_akhir').val(response.delivery_akhir);
-                        $('#unit').val(response.unit);
-
-                        // Tambahkan data lain sesuai kebutuhan
-
-                        // Tampilkan modal
-                        $('#updateModal').modal('show');
-                    },
-                    error: function() {
-                        alert('Gagal memuat data.');
-                    }
-                });
-            });
-
-            // Event listener untuk submit form update
-
-            // // Event listener untuk tombol delete
-            // $('#example').on('click', '.btn-delete', function() {
-            //     const id = $(this).data('id');
-            //     // Tampilkan konfirmasi
-            //     Swal.fire({
-            //         title: 'Apakah Anda yakin?',
-            //         text: "Data yang dihapus tidak dapat dikembalikan!",
-            //         icon: 'warning',
-            //         showCancelButton: true,
-            //         confirmButtonColor: '#3085d6',
-            //         cancelButtonColor: '#d33',
-            //         confirmButtonText: 'Ya, hapus!',
-            //         cancelButtonText: 'Batal'
-            //     }).then((result) => {
-            //         if (result.isConfirmed) {
-            //             // Kirim request ke server
-            //             $.ajax({
-            //                 url: '<?= base_url($role . '/deleteOrder') ?>',
-            //                 type: 'POST',
-            //                 data: {
-            //                     id: id
-            //                 },
-            //                 success: function(response) {
-            //                     // Tampilkan pesan sukses
-            //                     Swal.fire({
-            //                         icon: 'success',
-            //                         title: 'Berhasil!',
-            //                         text: response,
-            //                     });
-            //                     // Refresh tabel
-            //                     $('#example').DataTable().ajax.reload();
-            //                 },
-            //                 error: function(xhr, status, error) {
-            //                     // Tampilkan pesan error
-            //                     Swal.fire({
-            //                         icon: 'error',
-            //                         title: 'Error!',
-            //                         text: xhr.responseText,
-            //                     });
-            //                 }
-            //             });
-            //         }
-            //     });
-            // });
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#dataTable').DataTable({
+            "pageLength": 35,
+            "order": []
         });
-    </script>
 
-    <?php $this->endSection(); ?>
+        // Event listener untuk submit form update
+
+        $('#dataTable').on('click', '.btn-edit', function() {
+            const id = $(this).data('id');
+            console.log(id);
+
+            // Lakukan AJAX request untuk mendapatkan data
+            $.ajax({
+                url: '<?= base_url($role . '/getOrderDetails') ?>/' + id,
+                type: 'GET',
+                success: function(response) {
+                    // Isi data ke dalam form modal
+                    $('#id_order').val(response.id_order);
+                    $('#foll_up').val(response.foll_up);
+                    $('#lco_date').val(response.lco_date);
+                    $('#no_model').val(response.no_model);
+                    $('#no_order').val(response.no_order);
+                    $('#buyer').val(response.buyer);
+                    $('#memo').val(response.memo);
+                    $('#delivery_awal').val(response.delivery_awal);
+                    $('#delivery_akhir').val(response.delivery_akhir);
+                    $('#unit').val(response.unit);
+
+                    // Tambahkan data lain sesuai kebutuhan
+
+                    // Tampilkan modal
+                    $('#updateModal').modal('show');
+                },
+                error: function() {
+                    alert('Gagal memuat data.');
+                }
+            });
+        });
+
+        // Event listener untuk submit form update
+
+        // // Event listener untuk tombol delete
+        // $('#example').on('click', '.btn-delete', function() {
+        //     const id = $(this).data('id');
+        //     // Tampilkan konfirmasi
+        //     Swal.fire({
+        //         title: 'Apakah Anda yakin?',
+        //         text: "Data yang dihapus tidak dapat dikembalikan!",
+        //         icon: 'warning',
+        //         showCancelButton: true,
+        //         confirmButtonColor: '#3085d6',
+        //         cancelButtonColor: '#d33',
+        //         confirmButtonText: 'Ya, hapus!',
+        //         cancelButtonText: 'Batal'
+        //     }).then((result) => {
+        //         if (result.isConfirmed) {
+        //             // Kirim request ke server
+        //             $.ajax({
+        //                 url: '<?= base_url($role . '/deleteOrder') ?>',
+        //                 type: 'POST',
+        //                 data: {
+        //                     id: id
+        //                 },
+        //                 success: function(response) {
+        //                     // Tampilkan pesan sukses
+        //                     Swal.fire({
+        //                         icon: 'success',
+        //                         title: 'Berhasil!',
+        //                         text: response,
+        //                     });
+        //                     // Refresh tabel
+        //                     $('#example').DataTable().ajax.reload();
+        //                 },
+        //                 error: function(xhr, status, error) {
+        //                     // Tampilkan pesan error
+        //                     Swal.fire({
+        //                         icon: 'error',
+        //                         title: 'Error!',
+        //                         text: xhr.responseText,
+        //                     });
+        //                 }
+        //             });
+        //         }
+        //     });
+        // });
+    });
+</script>
+
+<?php $this->endSection(); ?>

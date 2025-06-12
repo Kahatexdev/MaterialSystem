@@ -15,6 +15,7 @@ use App\Models\OpenPOModel;
 use App\Models\EstimasiStokModel;
 use App\Models\StockModel;
 use App\Models\TrackingPoCovering;
+use App\Models\PoTambahanModel;
 
 class MasterdataController extends BaseController
 {
@@ -29,6 +30,7 @@ class MasterdataController extends BaseController
     protected $openPoModel;
     protected $stockModel;
     protected $trackingPoCoveringModel;
+    protected $poTambahanModel;
 
     public function __construct()
     {
@@ -39,6 +41,7 @@ class MasterdataController extends BaseController
         $this->openPoModel = new OpenPoModel();
         $this->stockModel = new StockModel();
         $this->trackingPoCoveringModel = new TrackingPoCovering();
+        $this->poTambahanModel = new PoTambahanModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -930,5 +933,43 @@ class MasterdataController extends BaseController
         $data = $this->masterOrderModel->getFilterMasterOrder($key, $tanggalAwal, $tanggalAkhir);
 
         return $this->response->setJSON($data);
+    }
+
+    public function poPlus()
+    {
+        $poTambahan = $this->poTambahanModel->getData();
+        $data = [
+            'active' => $this->active,
+            'title' => 'Po Tambahan',
+            'role' => $this->role,
+            'poTambahan' => $poTambahan,
+        ];
+        return view($this->role . '/poplus/index', $data);
+    }
+
+    public function prosesApprovePoPlusArea()
+    {
+        $tglPo = $this->request->getPost('tgl_poplus');
+        $noModel = $this->request->getPost('no_model');
+        $itemType = $this->request->getPost('item_type');
+        $kodeWarna = $this->request->getPost('kode_warna');
+        $status = $this->request->getPost('status');
+
+        // dd($tglPo, $noModel, $itemType, $kodeWarna, $status);
+
+        $update = $this->poTambahanModel
+            ->set('status', 'approved')
+            ->where('no_model', $noModel)
+            ->where('item_type', $itemType)
+            ->where('kode_warna', $kodeWarna)
+            ->where('status', $status)
+            ->like('created_at', $tglPo, 'after')
+            ->update();
+
+        if ($update) {
+            return redirect()->to(base_url($this->role . '/poplus'))->with('success', 'Data Po Tambahan Berhasil disetujui.');
+        } else {
+            return redirect()->to(base_url($this->role . '/poplus'))->with('error', 'Data Po Tambahan Gagal disetuji.');
+        }
     }
 }
