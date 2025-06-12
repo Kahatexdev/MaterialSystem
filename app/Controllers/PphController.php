@@ -143,8 +143,6 @@ class PphController extends BaseController
                 }
                 $ttl_kebutuhan = ($data['qty'] * $comp * $gw / 100 / 1000) + ($loss / 100 * ($data['qty'] * $comp * $gw / 100 / 1000));
 
-
-
                 $pphInisial[] = [
                     'area'  => $items['area'],
                     'style_size'  => $items['style_size'],
