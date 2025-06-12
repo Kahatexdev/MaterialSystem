@@ -2,6 +2,16 @@
 <?php $this->section('content'); ?>
 
 <!-- DataTables CSS -->
+<style>
+    #poTable tbody tr {
+        height: 50px;
+    }
+
+    #poTable tbody td {
+        vertical-align: middle;
+        line-height: 50px;
+    }
+</style>
 
 <div class="container-fluid py-4">
     <!-- Flash Messages -->
@@ -65,14 +75,13 @@
                             <?php foreach ($trackingPoCovering as $po) : ?>
                                 <tr>
                                     <td><?= date('d-m-Y', strtotime($po['created_at'])) ?></td>
-                                    <td><?= esc($po['no_model']) ?></td>
+                                    <td><?= esc($po['no_model_anak']) ?></td>
                                     <td><?= esc($po['item_type']) ?></td>
                                     <td><?= esc($po['kode_warna']) ?></td>
                                     <td><?= esc($po['color']) ?></td>
                                     <td><?= esc($po['kg_po']) ?> Kg</td>
                                     <td><?= esc($po['status']) ?></td>
                                     <td><?= esc($po['keterangan']) ?></td>
-
                                 </tr>
                                 <!-- Modal -->
                                 <div class="modal fade" id="editModal<?= $po['id_tpc'] ?>" tabindex="-1" aria-labelledby="editModalLabel<?= $po['id_tpc'] ?>" aria-hidden="true">

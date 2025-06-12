@@ -38,6 +38,7 @@ class TrackingPoCoveringController extends BaseController
         $tgl_po = urldecode($date);
         $tgl_po = date('Y-m-d', strtotime($tgl_po));
         $trackingData = $this->trackingPoCoveringModel->trackingDataDaily($tgl_po);
+        // dd($trackingData);
         $data = [
             'title' => 'Tracking PO Covering',
             'role' => $this->role,
@@ -56,6 +57,7 @@ class TrackingPoCoveringController extends BaseController
     {
         $dataPost = $this->request->getPost();
         $date = date('Y-m-d H:i:s');
+        $tglPo = $dataPost['created_at'];
         // Ambil data lama
         $find = $this->trackingPoCoveringModel->find($id);
         $oldKeterangan = $find['keterangan'] ?? '';
@@ -74,9 +76,9 @@ class TrackingPoCoveringController extends BaseController
         ];
 
         if ($this->trackingPoCoveringModel->update($id, $data)) {
-            return redirect()->to(base_url($this->role . '/po/listTrackingPo/' . $date))->with('success', 'Data updated successfully');
+            return redirect()->to(base_url($this->role . '/po/listTrackingPo/' . $tglPo))->with('success', 'Data updated successfully');
         } else {
-            return redirect()->to(base_url($this->role . '/po/listTrackingPo/' . $date))->with('error', 'Failed to update data');
+            return redirect()->to(base_url($this->role . '/po/listTrackingPo/' . $tglPo))->with('error', 'Failed to update data');
         }
     }
 }
