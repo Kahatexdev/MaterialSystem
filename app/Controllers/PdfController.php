@@ -154,10 +154,13 @@ class PdfController extends BaseController
 
         $pdf->SetFont('Arial', '', 7);
         $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
-        if ($result[0]['po_plus'] == '0') {
+
+        if (!empty($result) && isset($result[0]['po_plus']) && $result[0]['po_plus'] == '0') {
             $pdf->Cell(30, 5, ': ' . $no_model, 0, 1, 'L');
-        } else {
+        } elseif (!empty($result) && isset($result[0]['po_plus'])) {
             $pdf->Cell(30, 5, ': ' . '(+) ' . $no_model, 0, 1, 'L');
+        } else {
+            $pdf->Cell(30, 5, ': ' . $no_model, 0, 1, 'L');
         }
 
         $cellW1 = 20;  // lebar season
