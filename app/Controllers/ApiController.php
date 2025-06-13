@@ -767,10 +767,10 @@ class ApiController extends ResourceController
         }
         return $this->respond($res, 200);
     }
-    public function poTambahanDetail($noModel, $styleSize)
+    public function poTambahanDetail($noModel, $area)
     {
         $idOrder = $this->masterOrderModel->getIdOrder($noModel);
-        $material = $this->masterOrderModel->getMaterial($idOrder, $styleSize);
+        $material = $this->masterOrderModel->getMaterial($idOrder, $area);
 
         return response()->setJSON($material);
     }
