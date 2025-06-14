@@ -11,7 +11,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
-use App\Models\OpenPOModel;
+use App\Models\OpenPoModel;
 use App\Models\EstimasiStokModel;
 use App\Models\StockModel;
 use App\Models\TrackingPoCovering;
