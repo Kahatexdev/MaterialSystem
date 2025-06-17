@@ -13,15 +13,18 @@ class PoTambahanModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'area',
-        'no_model',
-        'style_size',
-        'item_type',
-        'kode_warna',
-        'color',
-        'pcs_po_tambahan',
-        'kg_po_tambahan',
-        'cns_po_tambahan',
+        'id_material',
+        'terima_kg',
+        'sisa_bb_mc',
+        'sisa_order_pcs',
+        'bs_mesin_kg',
+        'bs_st_pcs',
+        'poplus_mc_kg',
+        'poplus_mc_cns',
+        'plus_pck_pcs',
+        'plus_pck_kg',
+        'plus_pck_cns',
+        'lebih_pakai_kg',
         'keterangan',
         'status',
         'admin',
@@ -65,20 +68,20 @@ class PoTambahanModel extends Model
             ->select('id_material, admin, SUM(ttl_berat_cones) AS kgs_pesan')
             ->groupBy('id_material, admin');
 
-        return $this->select('po_tambahan.*, master_order.delivery_akhir, material.composition, material.gw, material.qty_pcs, material.loss, pem.kgs_pesan, SUM(pengeluaran.kgs_out) AS kgs_kirim')
-            ->join('master_order', 'master_order.no_model = po_tambahan.no_model', 'left')
-            ->join('material', 'master_order.id_order = material.id_order AND po_tambahan.item_type = material.item_type AND po_tambahan.kode_warna = material.kode_warna AND po_tambahan.color = material.color', 'left')
-            ->join("({$subquery->getCompiledSelect()}) pem", 'material.id_material = pem.id_material AND po_tambahan.area = pem.admin', 'left')
+        return $this->select('po_tambahan.*, master_order.no_model, master_order.delivery_akhir, material.item_type, material.kode_warna, material.color, material.style_size, material.composition, material.gw, material.qty_pcs, material.loss, pem.kgs_pesan, SUM(pengeluaran.kgs_out) AS kgs_kirim')
+            ->join('material', 'po_tambahan.id_material = material.id_order', 'left')
+            ->join('master_order', 'material.id_order = master_order.id_order', 'left')
+            ->join("({$subquery->getCompiledSelect()}) pem", 'material.id_material = pem.id_material', 'left')
             ->join('pemesanan', 'pemesanan.id_material = material.id_material', 'left') // Diperlukan
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('pengeluaran', 'total_pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left')
-            ->where('po_tambahan.area', $area)
-            ->where('po_tambahan.no_model', $noModel)
+            ->where('material.area', $area)
+            ->where('master_order.no_model', $noModel)
             ->groupBy('po_tambahan.id_po_tambahan')
             ->orderBy('po_tambahan.created_at', 'ASC')
-            ->orderBy('po_tambahan.style_size', 'ASC')
-            ->orderBy('po_tambahan.item_type', 'ASC')
-            ->orderBy('po_tambahan.kode_warna', 'ASC')
+            ->orderBy('material.style_size', 'ASC')
+            ->orderBy('material.item_type', 'ASC')
+            ->orderBy('material.kode_warna', 'ASC')
             ->findAll();
     }
 
