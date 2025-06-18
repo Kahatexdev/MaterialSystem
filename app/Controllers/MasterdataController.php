@@ -970,22 +970,75 @@ class MasterdataController extends BaseController
         $itemType = $this->request->getPost('item_type');
         $kodeWarna = $this->request->getPost('kode_warna');
         $status = $this->request->getPost('status');
+        $area = $this->request->getPost('area');
 
-        // dd($tglPo, $noModel, $itemType, $kodeWarna, $status);
+        $validate = [
+            'no_model'   => $noModel,
+            'area'       => $area,
+            'item_type'  => $itemType,
+            'kode_warna' => $kodeWarna,
+        ];
 
-        $update = $this->poTambahanModel
-            ->set('status', 'approved')
-            ->where('no_model', $noModel)
-            ->where('item_type', $itemType)
-            ->where('kode_warna', $kodeWarna)
+        $idMaterialResult = $this->materialModel->getId($validate);
+        $idMaterial = array_column($idMaterialResult, 'id_material');
+
+        if (empty($idMaterial)) {
+            return redirect()->to(base_url($this->role . '/poplus'))->with('error', 'Tidak ada data material yang ditemukan.');
+        }
+
+        // Jalankan update hanya jika data ada
+        $builder = $this->poTambahanModel
+            ->builder()
+            ->whereIn('id_material', $idMaterial)
             ->where('status', $status)
-            ->like('created_at', $tglPo, 'after')
-            ->update();
+            ->like('created_at', $tglPo, 'after');
 
-        if ($update) {
+        $updated = $builder->update(['status' => 'approved']);
+
+        if ($updated) {
             return redirect()->to(base_url($this->role . '/poplus'))->with('success', 'Data Po Tambahan Berhasil disetujui.');
         } else {
             return redirect()->to(base_url($this->role . '/poplus'))->with('error', 'Data Po Tambahan Gagal disetuji.');
         }
+    }
+    public function detailPoPlus()
+    {
+        $tglPo = $this->request->getGet('tgl_poplus');
+        $noModel = $this->request->getGet('no_model');
+        $itemType = $this->request->getGet('item_type');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $warna = $this->request->getGet('warna');
+        $status = $this->request->getGet('status');
+        $area = $this->request->getGet('area');
+
+        $validate = [
+            'no_model'   => $noModel,
+            'area'       => $area,
+            'item_type'  => $itemType,
+            'kode_warna' => $kodeWarna,
+        ];
+
+        $idMaterialResult = $this->materialModel->getId($validate);
+        $idMaterial = array_column($idMaterialResult, 'id_material');
+
+        if (empty($idMaterial)) {
+            return redirect()->to(base_url($this->role . '/poplus'))->with('error', 'Tidak ada data material yang ditemukan.');
+        }
+
+        $detail = $this->poTambahanModel->detailPoTambahan($idMaterial, $tglPo, $status);
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Po Tambahan',
+            'role' => $this->role,
+            'detail' => $detail,
+            'tglPo' => $tglPo,
+            'noModel' => $noModel,
+            'itemType' => $itemType,
+            'kodeWarna' => $kodeWarna,
+            'warna' => $warna,
+            'area' => $area,
+        ];
+        return view($this->role . '/poplus/detail', $data);
     }
 }

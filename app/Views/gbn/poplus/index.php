@@ -73,16 +73,16 @@
                                 <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= number_format($data['kg_poplus'], 2) ?></td>
                                 <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= $data['cns_poplus'] ?></td>
                                 <td style="<?= $isNotApproved ? 'color:red;' : '' ?>">
-                                    <!-- <a href="<?= base_url($role . '/material/' . $data['id_po_tambahan']) ?>" class="btn btn-info btn-sm">
+                                    <a href="<?= base_url($role . '/poplus/detail?area=' . $data['admin'] . '&tgl_poplus=' . $data['tgl_poplus'] . '&no_model=' . $data['no_model'] . '&item_type=' . $data['item_type'] . '&kode_warna=' . $data['kode_warna'] . '&warna=' . $data['color'] . '&status=' . $data['status']) ?>" class="btn btn-info btn-sm">
                                         Detail
-                                    </a> -->
+                                    </a>
                                     <?php if ($isNotApproved): ?>
                                         <button class="btn btn-info btn-sm btn-warning btn-approve" data-id="<?= $data['id_po_tambahan'] ?>" data-tgl="<?= $data['tgl_poplus'] ?>" data-model="<?= $data['no_model'] ?>" data-type="<?= $data['item_type'] ?>"
-                                            data-warna="<?= $data['kode_warna'] ?>" data-status="<?= $data['status'] ?>" data-bs-toggle="modal" data-bs-target="#approveModal">
+                                            data-warna="<?= $data['kode_warna'] ?>" data-status="<?= $data['status'] ?>" data-area="<?= $data['admin'] ?>" data-bs-toggle="modal" data-bs-target="#approveModal">
                                             Approve
                                         </button>
                                     <?php else: ?>
-                                        <a class="btn btn-info" href="<?= base_url($role . '/masterdata/poGabungan/' . $data['jenis']) ?>"> BUKA PO (+)
+                                        <a class="btn btn-success btn-sm" href="<?= base_url($role . '/masterdata/poGabungan/' . $data['jenis']) ?>"> BUKA PO (+)
                                         </a> <!-- Font Awesome centang hijau -->
                                     <?php endif; ?>
                                 </td>
@@ -120,6 +120,7 @@
                     <input type="hidden" name="item_type" id="modal-type">
                     <input type="hidden" name="kode_warna" id="modal-warna">
                     <input type="hidden" name="status" id="modal-status">
+                    <input type="hidden" name="area" id="modal-area">
                     Are You Sure Want to Approve ?
             </div>
             <div class="modal-footer">
@@ -150,6 +151,7 @@
                 document.getElementById('modal-type').value = this.getAttribute('data-type');
                 document.getElementById('modal-warna').value = this.getAttribute('data-warna');
                 document.getElementById('modal-status').value = this.getAttribute('data-status');
+                document.getElementById('modal-area').value = this.getAttribute('data-area');
             });
         });
     });

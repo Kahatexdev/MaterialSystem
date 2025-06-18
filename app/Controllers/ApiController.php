@@ -847,8 +847,9 @@ class ApiController extends ResourceController
     {
         $area = $this->request->getGet('area');
         $noModel = $this->request->getGet('model');
+        $tglBuat = $this->request->getGet('tglBuat') ?? null;
 
-        $filterData = $this->poTambahanModel->filterData($area, $noModel);
+        $filterData = $this->poTambahanModel->filterData($area, $noModel, $tglBuat);
 
         return $this->respond($filterData);
     }
