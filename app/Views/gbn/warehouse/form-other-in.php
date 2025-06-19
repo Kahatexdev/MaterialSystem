@@ -66,7 +66,7 @@
                                         <input type="text" class="form-control" id="no_surat_jalan" name="no_surat_jalan" placeholder="No Surat Jalan" required>
                                     </div>
                                     <div class="col-md-4">
-                                        <label>Tanggal Kirim</label>
+                                        <label>Tanggal Datang</label>
                                         <input type="date" class="form-control" id="tgl_datang" name="tgl_datang" required>
                                     </div>
                                 </div>
