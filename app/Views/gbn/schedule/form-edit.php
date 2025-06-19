@@ -85,6 +85,11 @@
         gap: 5px;
     }
 
+    .bg-custom-dark {
+        background-color: rgb(0, 77, 94);
+        color: white;
+        /* agar teks tetap terbaca */
+    }
 
     /* input[type="radio"] {
         margin-right: 5px;
@@ -135,9 +140,8 @@
                                         <label for="jenis_bahan_baku" class="form-label">Jenis Bahan Baku</label>
                                         <select class="form-select" id="jenis_bahan_baku" name="jenis_bahan_baku" required>
                                             <option value="">Pilih Jenis Bahan Baku</option>
-                                            <?php foreach ($jenis_bahan_baku as $jenis): ?>
-                                                <option value="<?= $jenis['jenis'] ?>" <?= ($jenis['jenis'] == $jenis_bahan_baku) ? 'selected' : '' ?>><?= $jenis['jenis'] ?></option>
-                                            <?php endforeach; ?>
+                                            <option value="BENANG">BENANG</option>
+                                            <option value="NYLON">NYLON</option>
                                         </select>
                                     </div>
                                 </div>
@@ -266,8 +270,8 @@
                                                                         $status = $detail['last_status'];
                                                                         if (in_array($status, ['scheduled', 'retur', 'reschedule'])) {
                                                                             $badgeColor = 'info';
-                                                                        } elseif (in_array($status, ['bon', 'celup', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc', 'reject', 'perbaikan'])) {
-                                                                            $badgeColor = 'warning';
+                                                                        } elseif (in_array($status, ['bon', 'celup', 'bongkar', 'press_oven', 'tes_luntur', 'tes_lab', 'rajut', 'acc', 'reject', 'perbaikan', 'serah_terima_acc', 'matching'])) {
+                                                                            $badgeColor = 'custom-dark';
                                                                         } else {
                                                                             in_array($status, ['done', 'sent']);
                                                                             $badgeColor = 'success';
@@ -584,7 +588,7 @@
             if (sisaKapasitasElement) {
                 const sisaKapasitas = maxCaps - totalQtyCelup;
                 sisaKapasitasElement.value = sisaKapasitas.toFixed(2);
-                if (sisaKapasitas <= 0) {
+                if (sisaKapasitas <= -1) {
                     alert("⚠️ Sisa Kapasitas negatif!");
                     sisaKapasitasElement.classList.add("is-invalid");
                     sisaKapasitasElement.focus();

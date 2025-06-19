@@ -9,7 +9,7 @@
                         <div>
                             <p class="text-sm mb-0 text-capitalize font-weight-bold"><?= $title; ?></p>
                             <h5 class="font-weight-bolder mb-0">
-                                Data Pemasukan Lain - Lain By Tanggal Datang
+                                Data Persiapan Pengeluaran Barang <?= $jenis ?>
                             </h5>
                         </div>
                         <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
@@ -25,12 +25,12 @@
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header">
-                    <h6 class="mb-0">Data Bon</h6>
+                    <h6 class="mb-0"></h6>
                 </div>
                 <div class="card-body">
                     <form class="row g-3">
                         <div class="col-md-10">
-                            <label for="filter_date" class="form-label">Tanggal</label>
+                            <label for="filter_date" class="form-label">Tanggal Pakai</label>
                             <input type="date" id="filter_date" name="filter_date" class="form-control">
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
@@ -56,13 +56,12 @@
                                         </td>
                                         <td class="text-center">
                                             <?php if ($jenis === 'SPANDEX' || $jenis === 'KARET') : ?>
-                                                <!-- <td class="text-center">
-                                                <a href="<?= base_url($role . '/generatePemesananSpandexKaretCovering/' . $area . '/' . $jenis . '/' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success">
-                                                    <i class="fas fa-file-excel"></i>
-                                                    Export
-                                                </a>
-                                            </td> -->
-                                            <?php else : ?>
+                                        <td class="text-center">
+                                            <a href="<?= base_url($role . '/pemesanan/exportListPemesananSpdxKaretPertgl?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
+                                                <i class="fas fa-file-excel fa-2x"></i>
+                                            </a>
+                                        </td>
+                                    <?php else : ?>
                                         <td class="text-center">
                                             <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
                                                 <i class="fas fa-file-excel fa-2x"></i>

@@ -11,10 +11,11 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
-use App\Models\OpenPOModel;
+use App\Models\OpenPoModel;
 use App\Models\EstimasiStokModel;
 use App\Models\StockModel;
 use App\Models\TrackingPoCovering;
+use App\Models\PoTambahanModel;
 
 class MasterdataController extends BaseController
 {
@@ -29,6 +30,7 @@ class MasterdataController extends BaseController
     protected $openPoModel;
     protected $stockModel;
     protected $trackingPoCoveringModel;
+    protected $poTambahanModel;
 
     public function __construct()
     {
@@ -39,6 +41,7 @@ class MasterdataController extends BaseController
         $this->openPoModel = new OpenPoModel();
         $this->stockModel = new StockModel();
         $this->trackingPoCoveringModel = new TrackingPoCovering();
+        $this->poTambahanModel = new PoTambahanModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -59,6 +62,11 @@ class MasterdataController extends BaseController
         $material = $this->materialModel->findAll();
         // Ambil semua id_order dari material
         $materialOrderIds = array_column($material, 'id_order');
+        $duplikatMU = $this->materialModel->getDataDuplicate();
+        $duplikatIds = array_map(function ($row) {
+            return $row->id_order;
+        }, $duplikatMU);
+
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
@@ -66,6 +74,7 @@ class MasterdataController extends BaseController
             'masterOrder' => $masterOrder,
             'material' => $material,
             'materialOrderIds' => $materialOrderIds,
+            'duplikatMU' => $duplikatIds
         ];
         return view($this->role . '/masterdata/index', $data);
     }
@@ -642,6 +651,16 @@ class MasterdataController extends BaseController
         }
     }
 
+    public function deleteDuplicateMu($id_order)
+    {
+        $deleteMU = $this->materialModel->deleteDuplicate($id_order);
+        if ($deleteMU) {
+            return redirect()->to(base_url($this->role . '/material/' . $id_order))->with('success', 'Data Duplikat Berhasil dihapus.');
+        } else {
+            return redirect()->to(base_url($this->role . '/material/' . $id_order))->with('error', 'Data Duplikat Gagal dihapus.');
+        }
+    }
+
     public function openPO($id)
     {
         $masterOrder = $this->masterOrderModel->getMaterialOrder($id);
@@ -780,6 +799,7 @@ class MasterdataController extends BaseController
             $db->transComplete();
             if (! $db->transStatus()) {
                 return redirect()->back()->with('error', 'Gagal menyimpan PO Covering.');
+                dd('Transaksi gagal', $db->error(), $db->getLastQuery());
             }
 
             return redirect()->to(base_url($this->role . '/material/' . $id_order))
@@ -929,5 +949,96 @@ class MasterdataController extends BaseController
         $data = $this->masterOrderModel->getFilterMasterOrder($key, $tanggalAwal, $tanggalAkhir);
 
         return $this->response->setJSON($data);
+    }
+
+    public function poPlus()
+    {
+        $poTambahan = $this->poTambahanModel->getData();
+        $data = [
+            'active' => $this->active,
+            'title' => 'Po Tambahan',
+            'role' => $this->role,
+            'poTambahan' => $poTambahan,
+        ];
+        return view($this->role . '/poplus/index', $data);
+    }
+
+    public function prosesApprovePoPlusArea()
+    {
+        $tglPo = $this->request->getPost('tgl_poplus');
+        $noModel = $this->request->getPost('no_model');
+        $itemType = $this->request->getPost('item_type');
+        $kodeWarna = $this->request->getPost('kode_warna');
+        $status = $this->request->getPost('status');
+        $area = $this->request->getPost('area');
+
+        $validate = [
+            'no_model'   => $noModel,
+            'area'       => $area,
+            'item_type'  => $itemType,
+            'kode_warna' => $kodeWarna,
+        ];
+
+        $idMaterialResult = $this->materialModel->getId($validate);
+        $idMaterial = array_column($idMaterialResult, 'id_material');
+
+        if (empty($idMaterial)) {
+            return redirect()->to(base_url($this->role . '/poplus'))->with('error', 'Tidak ada data material yang ditemukan.');
+        }
+
+        // Jalankan update hanya jika data ada
+        $builder = $this->poTambahanModel
+            ->builder()
+            ->whereIn('id_material', $idMaterial)
+            ->where('status', $status)
+            ->like('created_at', $tglPo, 'after');
+
+        $updated = $builder->update(['status' => 'approved']);
+
+        if ($updated) {
+            return redirect()->to(base_url($this->role . '/poplus'))->with('success', 'Data Po Tambahan Berhasil disetujui.');
+        } else {
+            return redirect()->to(base_url($this->role . '/poplus'))->with('error', 'Data Po Tambahan Gagal disetuji.');
+        }
+    }
+    public function detailPoPlus()
+    {
+        $tglPo = $this->request->getGet('tgl_poplus');
+        $noModel = $this->request->getGet('no_model');
+        $itemType = $this->request->getGet('item_type');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $warna = $this->request->getGet('warna');
+        $status = $this->request->getGet('status');
+        $area = $this->request->getGet('area');
+
+        $validate = [
+            'no_model'   => $noModel,
+            'area'       => $area,
+            'item_type'  => $itemType,
+            'kode_warna' => $kodeWarna,
+        ];
+
+        $idMaterialResult = $this->materialModel->getId($validate);
+        $idMaterial = array_column($idMaterialResult, 'id_material');
+
+        if (empty($idMaterial)) {
+            return redirect()->to(base_url($this->role . '/poplus'))->with('error', 'Tidak ada data material yang ditemukan.');
+        }
+
+        $detail = $this->poTambahanModel->detailPoTambahan($idMaterial, $tglPo, $status);
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Po Tambahan',
+            'role' => $this->role,
+            'detail' => $detail,
+            'tglPo' => $tglPo,
+            'noModel' => $noModel,
+            'itemType' => $itemType,
+            'kodeWarna' => $kodeWarna,
+            'warna' => $warna,
+            'area' => $area,
+        ];
+        return view($this->role . '/poplus/detail', $data);
     }
 }

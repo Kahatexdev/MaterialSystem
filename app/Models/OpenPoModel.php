@@ -65,14 +65,29 @@ class OpenPoModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
-    public function getData($no_model, $jenis, $jenis2)
+    public function getDataPo($no_model, $jenis, $jenis2)
     {
-        return $this->select('open_po.no_model, open_po.item_type, open_po.spesifikasi_benang, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.ket_celup, open_po.bentuk_celup, open_po.kg_percones, open_po.jumlah_cones, open_po.jenis_produksi, open_po.contoh_warna, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, master_material.jenis, master_material.ukuran, master_order.buyer, master_order.no_order, master_order.delivery_awal')
+        return $this->select('open_po.no_model, open_po.item_type, open_po.spesifikasi_benang, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.ket_celup, open_po.bentuk_celup, open_po.kg_percones, open_po.jumlah_cones, open_po.jenis_produksi, open_po.contoh_warna, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, master_material.jenis, master_material.ukuran, master_order.buyer, master_order.no_order, master_order.delivery_awal, open_po.po_plus')
             ->where(['open_po.no_model' => $no_model])
             ->groupStart() // Mulai grup untuk kondisi OR
             ->where('master_material.jenis', $jenis)
             ->orWhere('master_material.jenis', $jenis2)
             ->groupEnd() // Akhiri grup
+            ->where('open_po.po_plus', '0')
+            ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
+            ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
+            ->findAll();
+    }
+
+    public function getDataPoPlus($no_model, $jenis, $jenis2)
+    {
+        return $this->select('open_po.no_model, open_po.item_type, open_po.spesifikasi_benang, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.ket_celup, open_po.bentuk_celup, open_po.kg_percones, open_po.jumlah_cones, open_po.jenis_produksi, open_po.contoh_warna, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, master_material.jenis, master_material.ukuran, master_order.buyer, master_order.no_order, master_order.delivery_awal, open_po.po_plus')
+            ->where(['open_po.no_model' => $no_model])
+            ->groupStart() // Mulai grup untuk kondisi OR
+            ->where('master_material.jenis', $jenis)
+            ->orWhere('master_material.jenis', $jenis2)
+            ->groupEnd() // Akhiri grup
+            ->where('open_po.po_plus', '1')
             ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
             ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
             ->findAll();
@@ -224,8 +239,9 @@ class OpenPoModel extends Model
 
     public function getPOCovering()
     {
-        return $this->select('id_po,DATE(open_po.created_at) tgl_po, id_induk')
-            ->where('penerima', 'Paryanti')
+        return $this->select('id_po,DATE(open_po.created_at) AS tgl_po, id_induk')
+            ->where('penerima', 'Retno')
+            ->where('penanggung_jawab', 'Paryanti')
             ->orderBy('tgl_po', 'DESC')
             ->groupBy('tgl_po')
             ->findAll();
@@ -233,11 +249,12 @@ class OpenPoModel extends Model
 
     public function getPODetailCovering($tgl_po)
     {
-        return $this->select('open_po.id_po,open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan,open_po.penerima, open_po.penanggung_jawab,open_po.admin, open_po.created_at,open_po.updated_at,open_po.id_induk')
+        return $this->select('open_po.id_po,open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, ROUND(SUM(kg_po), 2) as total_kg_po, open_po.keterangan,open_po.penerima, open_po.penanggung_jawab,open_po.admin, open_po.created_at,open_po.updated_at,open_po.id_induk')
             ->where('penerima', 'Paryanti')
-            ->where('id_induk IS NULL')
+            ->where('id_induk IS NOT NULL')
             ->where('DATE(open_po.created_at)', $tgl_po)
-            ->groupBy('open_po.id_po')
+            ->whereNotIn('kode_warna', ['DDBLK', 'RW'])
+            ->groupBy('open_po.item_type, open_po.kode_warna, open_po.color')
             ->findAll();
     }
 
@@ -268,14 +285,19 @@ class OpenPoModel extends Model
 
     public function getPoForCelup($tgl_po)
     {
-        return $this->select('open_po.*, master_material.jenis')
-            ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
-            ->where('open_po.id_induk IS NOT NULL')
-            ->where('open_po.penerima', 'Retno')
-            ->where('open_po.penanggung_jawab', 'Paryanti')
-            ->where('DATE(open_po.created_at)', $tgl_po)
-            ->findAll();
+        return $this->db->table('open_po AS anak')
+            ->select('anak.*, anak.no_model AS anak_no_model, master_material.jenis, induk.no_model AS induk_no_model, master_order.buyer, master_order.delivery_awal, master_order.no_order') // ← ambil no_model dari induk
+            ->join('open_po AS induk', 'induk.id_po = anak.id_induk') // ← self join
+            ->join('master_material', 'master_material.item_type = anak.item_type', 'left')
+            ->join('master_order', 'master_order.no_model = REPLACE(induk.no_model, "POCOVERING ", "")', 'left')
+            ->where('anak.id_induk IS NOT NULL')
+            ->where('anak.penerima', 'Retno')
+            ->where('anak.penanggung_jawab', 'Paryanti')
+            ->where('DATE(anak.created_at)', $tgl_po)
+            ->get()
+            ->getResult();
     }
+
     public function
     getQtyPOForCvr($noModel, $itemType, $kodeWarna)
     {
@@ -296,31 +318,6 @@ class OpenPoModel extends Model
             ->where('open_po.kode_warna', $kodeWarna)
             ->first();
     }
-
-    public function getDeliveryAwalNoOrderBuyer($tgl_po)
-    {
-        return $this->select('DISTINCT open_po.id_po, open_po.no_model, master_order.buyer, master_order.delivery_awal, master_order.no_order', false)
-            ->join('master_order', 'master_order.no_model = open_po.no_model', 'left') // Join berdasarkan no_model
-            ->where('open_po.id_induk', null) // Hanya ambil id_po asli
-            ->whereNotIn('open_po.id_po', function ($builder) use ($tgl_po) {
-                return $builder->select('id_induk')
-                    ->from('open_po')
-                    ->where('DATE(created_at) !=', $tgl_po) // Hapus jika id_induk memiliki tanggal berbeda
-                    ->where('id_induk IS NOT NULL'); // Pastikan id_induk bukan NULL
-            })
-            ->where('DATE(open_po.created_at)', $tgl_po) // Hanya ambil sesuai tanggal di routes
-            ->findAll();
-    }
-
-
-
-    // public function getDeliveryAwalNoOrderBuyer()
-    // {
-    //     return $this->select('open_po.id_po, open_po.no_model, open_po.id_induk, master_order.buyer, master_order.no_order, master_order.delivery_awal')
-    //         ->join('master_order', 'TRIM(master_order.no_model) = TRIM(open_po.no_model)', 'left') // Hindari perbedaan format no_model
-    //         ->where('open_po.id_induk IS NULL') // Ambil hanya data tanpa id_induk
-    //         ->findAll();
-    // }
 
     public function poCoveringCount()
     {
@@ -374,7 +371,7 @@ class OpenPoModel extends Model
     // } 
     public function listOpenPo($no_model, $jenis, $jenis2, $penerima)
     {
-        return $this->select('DISTINCT open_po.id_po, open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, master_material.jenis, master_order.buyer, master_order.no_order, master_order.delivery_awal, material.kgs, stock.kgs_stock_awal', false)
+        return $this->select('DISTINCT open_po.id_po, open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, master_material.jenis, master_order.buyer, master_order.no_order, master_order.delivery_awal, material.kgs, stock.kgs_stock_awal, open_po.po_plus', false)
             ->where(['open_po.no_model' => $no_model])
             ->where('open_po.penerima', $penerima)
             ->groupStart()

@@ -276,12 +276,15 @@ class CelupController extends BaseController
             return !empty($value);
         });
 
+        $ketDailyCek = null;
+
         // Cari tanggal terbaru beserta labelnya
         $mostRecentDate = null;
         $mostRecentLabel = null;
         if (!empty($filteredDates)) {
             $mostRecentDate = max($filteredDates); // Tanggal paling baru
             $mostRecentLabel = array_search($mostRecentDate, $filteredDates); // Cari label sesuai tanggal
+            $ketDailyCek = "$mostRecentLabel (" . date('d-m-Y', strtotime($mostRecentDate)) . ")";
         }
 
         // Set nilai ketDailyCek berdasarkan tanggal terbaru dan labelnya
@@ -296,17 +299,17 @@ class CelupController extends BaseController
         if ($tglBon) $dataUpdate['tanggal_bon'] = $tglBon;
         if ($tglCelup) $dataUpdate['tanggal_celup'] = $tglCelup;
         if ($tglBongkar) $dataUpdate['tanggal_bongkar'] = $tglBongkar;
-        if ($tglPressOven) $dataUpdate['tgl_press_oven'] = $tglPressOven;
+        if ($tglPressOven) $dataUpdate['tanggal_press_oven'] = $tglPressOven;
         // if ($tglOven) $dataUpdate['tanggal_oven'] = $tglOven;
         if ($tglTL) $dataUpdate['tanggal_tl'] = $tglTL;
         if ($tglTesLab) $dataUpdate['tanggal_teslab'] = $tglTesLab;
         if ($tglRajut) $dataUpdate['tanggal_rajut_pagi'] = $tglRajut;
         if ($tglSerahTerimaAcc) $dataUpdate['serah_terima_acc'] = $tglSerahTerimaAcc;
         if ($tglACC) $dataUpdate['tanggal_acc'] = $tglACC;
-        if ($tglKelos) $dataUpdate['tanggal_kelos'] = $tglKelos;
         if ($tglReject) $dataUpdate['tanggal_reject'] = $tglReject;
         if ($tglMatching) $dataUpdate['tanggal_matching'] = $tglMatching;
         if ($tglPB) $dataUpdate['tanggal_perbaikan'] = $tglPB;
+        if ($tglKelos) $dataUpdate['tanggal_kelos'] = $tglKelos;
         if ($user) $dataUpdate['user_cek_status'] = $user;
         if ($ketDailyCek) $dataUpdate['ket_daily_cek'] = $ketDailyCek;
 
@@ -319,54 +322,60 @@ class CelupController extends BaseController
         if (!empty($tglCelup)) {
             $dataUpdate['last_status'] = 'celup';
         }
-        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        // Jika tgl_bongkar diisi, update last_status menjadi 'celup'
         if (!empty($tglBongkar)) {
             $dataUpdate['last_status'] = 'bongkar';
         }
 
-        // Jika tgl_celup diisi, update last_status menjadi 'celup'
-        if (!empty($tglPress)) {
+        // Jika tgl_press_oven diisi, update last_status menjadi 'celup'
+        if (!empty($tglPressOven)) {
             $dataUpdate['last_status'] = 'press_oven';
         }
 
-        // Jika tgl_celup diisi, update last_status menjadi 'celup'
-        if (!empty($tglOven)) {
-            $dataUpdate['last_status'] = 'oven';
-        }
-
-        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        // Jika tgl_tl diisi, update last_status menjadi 'celup'
         if (!empty($tglTL)) {
-            $dataUpdate['last_status'] = 'tl';
-        }
-        if (!empty($tglTesLab)) {
-            $dataUpdate['last_status'] = 'test Lab';
+            $dataUpdate['last_status'] = 'tes_luntur';
         }
 
-        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        if (!empty($tglTesLab)) {
+            $dataUpdate['last_status'] = 'tes_lab';
+        }
+
+        // Jika tgl_rajut_pagi diisi, update last_status menjadi 'celup'
         if (!empty($tglRajut)) {
             $dataUpdate['last_status'] = 'rajut';
         }
 
-        // Jika tgl_celup diisi, update last_status menjadi 'celup'
+        // Jika tgl_acc diisi, update last_status menjadi 'celup'
         if (!empty($tglACC)) {
             $dataUpdate['last_status'] = 'acc';
+        }
+
+        // Jika serah_terima_acc diisi, update last_status menjadi 'serah_terima_acc'
+        if (!empty($tglSerahTerimaAcc)) {
+            $dataUpdate['last_status'] = 'serah_terima_acc';
+        }
+
+        // Jika tgl_reject diisi, update last_status menjadi 'done'
+        if (!empty($tglReject)) {
+            $dataUpdate['last_status'] = 'reject';
+        }
+
+        // Jika tgl_matching diisi, update last_status menjadi 'matching'
+        if (!empty($tglMatching)) {
+            $dataUpdate['last_status'] = 'matching';
+        }
+
+        // Jika tgl_perbaikan diisi, update last_status menjadi 'done'
+        if (!empty($tglPB)) {
+            $dataUpdate['last_status'] = 'perbaikan';
         }
 
         // Jika tgl_kelos diisi, update last_status menjadi 'done'
         if (!empty($tglKelos)) {
             $dataUpdate['last_status'] = 'done';
         }
-
-        // Jika tgl_kelos diisi, update last_status menjadi 'done'
-        if (!empty($tglReject)) {
-            $dataUpdate['last_status'] = 'reject';
-        }
-
-        // Jika tgl_kelos diisi, update last_status menjadi 'done'
-        if (!empty($tglPB)) {
-            $dataUpdate['last_status'] = 'perbaikan';
-        }
-
+        // dd($dataUpdate);
         // Validasi apakah data dengan ID yang diberikan ada
         $existingProduction = $this->scheduleCelupModel->find($id);
         if (!$existingProduction) {

@@ -41,12 +41,7 @@
                     <!-- <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#exportModal">
                         <i class="ni ni-single-copy-04 me-2"></i>Export PO
                     </button> -->
-                    <button
-                        class="btn btn-outline-info"
-                        id="btnOpenModal"
-                        data-bs-toggle="modal"
-                        data-bs-target="#exportModal"
-                        data-base-url="<?= base_url("$role/exportOpenPO/$no_model") ?>">
+                    <button class="btn btn-outline-info" id="btnOpenModal" data-bs-toggle="modal" data-bs-target="#exportModal" data-base-url="<?= base_url("$role/exportOpenPO/$no_model") ?>">
                         <i class="ni ni-single-copy-04 me-2"></i>Export PO
                     </button>
 
@@ -69,6 +64,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Buyer</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Order</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">PO (+)</th>
                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                         </tr>
                     </thead>
@@ -82,6 +78,7 @@
                                 <td><?= $data['buyer'] ?></td>
                                 <td><?= $data['no_order'] ?></td>
                                 <td><?= $data['delivery_awal'] ?></td>
+                                <td><?= $data['po_plus'] ?></td>
                                 <td>
                                     <button class="btn btn-sm btn-warning btn-edit" data-id="<?= $data['id_po'] ?>">
                                         <i class="fas fa-edit text-lg"></i>
@@ -110,6 +107,7 @@
             <div class="modal-body">
                 <form id="updateForm" action="<?= base_url($role . '/updatePo') ?>" method="post">
                     <input type="hidden" name="id_po" id="id_po">
+                    <input type="hidden" name="no_model" id="no_model">
 
                     <div class="mb-3">
                         <label for="itemType">Item Type</label>
@@ -137,6 +135,25 @@
                         <input type="text" class="form-control" id="kg_po" name="kg_po" required>
                     </div>
 
+                    <div class="mb-3">
+                        <label for="">Keterangan Celup</label>
+                        <textarea class="form-control" name="ket_celup" id="ket_celup"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="">Keterangan</label>
+                        <textarea class="form-control" name="keterangan" id="keterangan"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="">PO (+)</label>
+                        <select name="po_plus_edit" id="po_plus_edit" class="form-control">
+                            <option value="">Pilih</option>
+                            <option value="YA">YA</option>
+                            <option value="0">TIDAK</option>
+                        </select>
+                    </div>
+
                     <!-- Button update dan batal di sebelah kanan -->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -159,7 +176,15 @@
             <div class="modal-body ">
                 <form id="exportForm" action="#" method="get" target="_blank">
                     <div class="mb-3">
-                        <label for="tujuan" class="form-label">Season</label>
+                        <label for="" class="form-label">PO (+)</label>
+                        <select name="po_plus" id="po_plus" class="form-control" required>
+                            <option value="">Pilih</option>
+                            <option value="YA">YA</option>
+                            <option value="TIDAK">TIDAK</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="season" class="form-label">Season</label>
                         <input type="text" class="form-control" id="season" name="season">
                     </div>
                     <div class="mb-3">
@@ -181,7 +206,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="button"
+                        <button type="submit"
                             class="btn btn-info"
                             id="btnSubmitExport">
                             Export
@@ -199,6 +224,7 @@
         $('#updateModal').on('shown.bs.modal', function() {
             $('#add_item_type').select2({
                 dropdownParent: $('#updateModal'),
+                width: '100%'
             });
         });
     });
@@ -219,10 +245,14 @@
                 success: function(response) {
                     // Isi data ke dalam form modal
                     $('#id_po').val(response.id_po);
+                    $('#no_model').val(response.no_model);
                     $('#add_item_type').val(response.item_type);
                     $('#kode_warna').val(response.kode_warna);
                     $('#color').val(response.color);
                     $('#kg_po').val(response.kg_po);
+                    $('#ket_celup').val(response.ket_celup);
+                    $('#keterangan').val(response.keterangan);
+                    $('#keterangan').val(response.po_plus_edit);
                     // Show modal dialog
                     $('#updateModal').modal('show');
                 },
@@ -282,34 +312,34 @@
     });
 </script>
 <script>
-    document
-        .getElementById('btnSubmitExport')
-        .addEventListener('click', function() {
-            // 1) Ambil URL dasar dari tombol trigger
-            const base = document
-                .getElementById('btnOpenModal')
-                .getAttribute('data-base-url');
+    document.addEventListener('DOMContentLoaded', () => {
+        const exportForm = document.getElementById('exportForm');
 
-            // 2) Buat URLSearchParams dengan default params
-            const params = new URLSearchParams({
-                tujuan: "<?= $tujuan ?>",
-                jenis: "<?= $jenis ?>",
-                jenis2: "<?= $jenis2 ?>"
-            });
+        exportForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // cegah default submit
 
-            // 3) Ambil nilai modal
-            const season = document.getElementById('season').value.trim();
-            const materialType = document.getElementById('material_type').value;
+            // Jika invalid, browser akan otomatis men‐show pesan required
+            if (!exportForm.checkValidity()) {
+                exportForm.reportValidity();
+                return;
+            }
 
-            // 4) Tambahkan kalau user mengisi
-            if (season) params.set('season', season);
-            if (materialType) params.set('material_type', materialType);
+            // Bangun URL sama seperti sebelumnya
+            const formData = new FormData(exportForm);
+            const params = new URLSearchParams();
+            for (const [k, v] of formData.entries()) {
+                if (v.trim() !== '') params.append(k, v.trim());
+            }
 
-            // 5) Bentuk URL akhir & buka di tab baru
-            const finalUrl = base + '?' + params.toString();
-            window.open(finalUrl, '_blank');
+            // Base URL sudah diinisialisasi sebelumnya saat modal dibuka
+            const baseUrl = '<?= base_url($role . "/exportOpenPO/" . $no_model) ?>' +
+                '?tujuan=<?= $tujuan ?>&jenis=<?= $jenis ?>&jenis2=<?= $jenis2 ?>';
+
+            window.open(baseUrl + '&' + params.toString(), '_blank');
         });
+    });
 </script>
+
 
 
 <!-- <script>

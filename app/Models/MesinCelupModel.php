@@ -137,4 +137,12 @@ class MesinCelupModel extends Model
             ->orderBy('no_mesin', 'ASC')
             ->findAll();
     }
+
+    // app/Models/MesinCelupModel.php
+    public function getKeteranganMesin($no_mesin)
+    {
+        return $this->select('id_mesin, ket_mesin')
+            ->where('no_mesin', $no_mesin)
+            ->first();
+    }
 }

@@ -87,9 +87,7 @@
                 <li class="nav-item ">
                     <a class="nav-link <?= set_active($active) ?>" href="<?= base_url('covering') ?>">
                         <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                                <i class="fa-solid fa-table-columns"></i>
-                            </div>
+                            <i class="fa-solid fa-table-columns text-dark"></i>
                         </div>
                         <span class="nav-link-text ms-1">Dashboard</span>
                     </a>
@@ -122,21 +120,33 @@
                 <li class="nav-item">
                     <a class="nav-link   <?= set_active($active . '/po') ?>" href="<?= base_url($role . '/po') ?>">
                         <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                                <i class="fa-solid fa-file text-dark"></i>
-                            </div>
+                            <i class="fa-solid fa-file text-dark"></i>
                         </div>
                         <span class="nav-link-text ms-1">PO Celup</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link <?= set_active($active . '/schedule') ?>" href="<?= base_url($role . '/schedule') ?>">
                         <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                                <i class="fas fa-calendar-plus text-dark"></i>
-                            </div>
+                            <i class="fas fa-calendar-plus text-dark"></i>
                         </div>
                         <span class="nav-link-text ms-1">Schedule</span>
+                    </a>
+                </li> -->
+                <!-- <li class="nav-item">
+                    <a class="nav-link <?= set_active($active . '/warehouseBB') ?>" href="<?= base_url($role . '/warehouseBB') ?>">
+                        <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fa-solid fa-shop text-dark"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Warehouse Bahan Baku</span>
+                    </a>
+                </li> -->
+                <li class="nav-item">
+                    <a class="nav-link <?= set_active($active . '/pemesanan') ?>" href="<?= base_url($role . '/pemesanan') ?>">
+                        <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fa-solid fa-cart-shopping text-dark"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Pemesanan</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -144,15 +154,7 @@
                         <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="fa-solid fa-shop text-dark"></i>
                         </div>
-                        <span class="nav-link-text ms-1">Warehouse</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?= set_active($active . '/pemesanan') ?>" href="<?= base_url($role . '/pemesanan') ?>">
-                        <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                            <i class="fa-solid fa-cart-shopping text-dark"></i>
-                        </div>
-                        <span class="nav-link-text ms-1">Pemesanan</span>
+                        <span class="nav-link-text ms-1">Warehouse Barang</span>
                     </a>
                 </li>
             </ul>

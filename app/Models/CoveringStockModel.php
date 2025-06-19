@@ -14,15 +14,13 @@ class CoveringStockModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'jenis',
+        'jenis_benang',
+        'jenis_cover',
         'color',
         'code',
         'lmd',
         'ttl_cns',
         'ttl_kg',
-        'box',
-        'no_rak',
-        'posisi_rak',
-        'no_palet',
         'admin'
     ];
 
@@ -73,5 +71,13 @@ class CoveringStockModel extends Model
             ->where('code', $code)
             ->get()
             ->getRowArray();
+    }
+
+    public function getStockCover($jenisBenang, $jenisCover)
+    {
+        return $this->select('*')
+            ->where('jenis_benang', $jenisBenang)
+            ->where('jenis_cover', $jenisCover)
+            ->findAll();
     }
 }

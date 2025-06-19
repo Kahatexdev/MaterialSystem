@@ -82,9 +82,7 @@ class CoveringWarehouseController extends BaseController
             'color'      => 'required',
             'code'       => 'required',
             'ttl_kg'     => 'required|numeric',
-            'ttl_cns'    => 'required|numeric',
-            'no_rak'     => 'required|numeric',
-            'posisi_rak' => 'required'
+            'ttl_cns'    => 'required|numeric'
         ];
 
         // Validasi input
@@ -110,15 +108,13 @@ class CoveringWarehouseController extends BaseController
 
         $data = [
             'jenis'      => $this->request->getPost('jenis'),
+            'jenis_cover' => $this->request->getPost('jenis_cover'),
+            'jenis_benang' => $this->request->getPost('jenis_benang'),
             'color'      => $this->request->getPost('color'),
             'code'       => $this->request->getPost('code'),
             'lmd'        => $lmdValue,
-            'box'        => $this->request->getPost('box'),
             'ttl_kg'     => $this->request->getPost('ttl_kg'),
             'ttl_cns'    => $this->request->getPost('ttl_cns'),
-            'no_palet'   => $this->request->getPost('no_palet'),
-            'no_rak'     => $this->request->getPost('no_rak'),
-            'posisi_rak' => $posisiRakValue,
             'admin'      => $admin
         ];
 
@@ -190,15 +186,13 @@ class CoveringWarehouseController extends BaseController
         $historyStock = [
             'no_model'    => $postData['no_model'],
             'jenis'       => $stockData['jenis'],
+            'jenis_benang' => $stockData['jenis_benang'],
+            'jenis_cover' => $stockData['jenis_cover'],
             'color'       => $stockData['color'],
             'code'        => $stockData['code'],
             'lmd'         => $stockData['lmd'],
             'ttl_cns'     => $changeAmountCns, // Jumlah yang berubah
             'ttl_kg'      => $changeAmountKg, // Jumlah yang berubah
-            'box'         => $stockData['box'],
-            'no_rak'      => $stockData['no_rak'],
-            'posisi_rak'  => $stockData['posisi_rak'],
-            'no_palet'    => $stockData['no_palet'],
             'admin'       => $stockData['admin'],
             'keterangan'  => $postData['stockNote'], // Catatan dari input
             'created_at'  => date('Y-m-d H:i:s') // Waktu penyimpanan
@@ -227,7 +221,7 @@ class CoveringWarehouseController extends BaseController
     {
         // Ambil data JSON dari request
         $json = $this->request->getJSON(true);
-
+        log_message('debug', 'Data JSON: ' . json_encode($json));
         // Validasi ID stok
         if (!isset($json['id_covering_stock'])) {
             return $this->fail("ID Stok tidak ditemukan!", 400);
@@ -244,14 +238,12 @@ class CoveringWarehouseController extends BaseController
         // Persiapkan data untuk update
         $updateData = [
             'jenis'       => $json['jenis'] ?? $existingStock['jenis'],
+            'jenis_benang' => $json['jenis_benang'] ?? $existingStock['jenis_benang'],
+            'jenis_cover' => $json['jenis_cover'] ?? $existingStock['jenis_cover'],
             'color'       => $json['color'] ?? $existingStock['color'],
             'code'        => $json['code'] ?? $existingStock['code'],
-            'box'         => $json['box'] ?? $existingStock['box'],
             'ttl_kg'      => $json['ttl_kg'] ?? $existingStock['ttl_kg'],
             'ttl_cns'     => $json['ttl_cns'] ?? $existingStock['ttl_cns'],
-            'no_palet'    => $json['no_palet'] ?? $existingStock['no_palet'],
-            'no_rak'      => $json['no_rak'] ?? $existingStock['no_rak'],
-            'posisi_rak'  => isset($json['posisi_rak']) ? implode(", ", $json['posisi_rak']) : $existingStock['posisi_rak'],
             'lmd'         => isset($json['lmd']) ? implode(", ", $json['lmd']) : $existingStock['lmd'],
             'updated_at'  => date('Y-m-d H:i:s')
         ];
@@ -384,4 +376,5 @@ class CoveringWarehouseController extends BaseController
         ];
         return view($this->role . '/schedule/reqschedule', $data);
     }
+
 }

@@ -13,15 +13,18 @@ class PoTambahanModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'area',
-        'no_model',
-        'style_size',
-        'item_type',
-        'kode_warna',
-        'color',
-        'pcs_po_tambahan',
-        'kg_po_tambahan',
-        'cns_po_tambahan',
+        'id_material',
+        'terima_kg',
+        'sisa_bb_mc',
+        'sisa_order_pcs',
+        'bs_mesin_kg',
+        'bs_st_pcs',
+        'poplus_mc_kg',
+        'poplus_mc_cns',
+        'plus_pck_pcs',
+        'plus_pck_kg',
+        'plus_pck_cns',
+        'lebih_pakai_kg',
         'keterangan',
         'status',
         'admin',
@@ -59,26 +62,46 @@ class PoTambahanModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
-    public function filterData($area, $noModel)
+    public function filterData($area, $noModel, $tglBuat = null)
     {
-        $subquery = $this->db->table('pemesanan')
-            ->select('id_material, admin, SUM(ttl_berat_cones) AS kgs_pesan')
-            ->groupBy('id_material, admin');
-
-        return $this->select('po_tambahan.*, master_order.delivery_akhir, material.composition, material.gw, material.qty_pcs, material.loss, pem.kgs_pesan, SUM(pengeluaran.kgs_out) AS kgs_kirim')
-            ->join('master_order', 'master_order.no_model = po_tambahan.no_model', 'left')
-            ->join('material', 'master_order.id_order = material.id_order AND po_tambahan.item_type = material.item_type AND po_tambahan.kode_warna = material.kode_warna AND po_tambahan.color = material.color', 'left')
-            ->join("({$subquery->getCompiledSelect()}) pem", 'material.id_material = pem.id_material AND po_tambahan.area = pem.admin', 'left')
-            ->join('pemesanan', 'pemesanan.id_material = material.id_material', 'left') // Diperlukan
-            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
-            ->join('pengeluaran', 'total_pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left')
-            ->where('po_tambahan.area', $area)
-            ->where('po_tambahan.no_model', $noModel)
+        $builder = $this->select('po_tambahan.*, master_order.no_model, master_order.delivery_akhir, material.item_type, material.kode_warna, material.color, material.style_size, material.kgs, material.composition, material.gw, material.qty_pcs, material.loss')
+            ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
+            ->join('master_order', 'material.id_order = master_order.id_order', 'left')
+            ->where('material.area', $area)
+            ->where('master_order.no_model', $noModel);
+        // Cek apakah tglBuat diisi, baru apply filter
+        if (!empty($tglBuat)) {
+            $builder->like('po_tambahan.created_at', $tglBuat);
+        }
+        return $builder
             ->groupBy('po_tambahan.id_po_tambahan')
             ->orderBy('po_tambahan.created_at', 'ASC')
-            ->orderBy('po_tambahan.style_size', 'ASC')
-            ->orderBy('po_tambahan.item_type', 'ASC')
-            ->orderBy('po_tambahan.kode_warna', 'ASC')
+            ->orderBy('material.style_size', 'ASC')
+            ->orderBy('material.item_type', 'ASC')
+            ->orderBy('material.kode_warna', 'ASC')
+            ->findAll();
+    }
+    public function getData()
+    {
+        return $this->select('po_tambahan.id_po_tambahan, master_order.no_model, material.item_type, material.kode_warna, material.color, (SUM(po_tambahan.poplus_mc_kg) + SUM(po_tambahan.plus_pck_kg)) AS kg_poplus, (po_tambahan.poplus_mc_cns + po_tambahan.plus_pck_cns) AS cns_poplus, po_tambahan.status, DATE(po_tambahan.created_at) AS tgl_poplus, po_tambahan.admin, master_material.jenis')
+            ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
+            ->join('master_order', 'material.id_order = master_order.id_order', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->groupBy('DATE(po_tambahan.created_at)', false)
+            ->groupBy('master_order.no_model')
+            ->groupBy('material.item_type')
+            ->groupBy('material.kode_warna')
+            ->groupBy('po_tambahan.status')
+            ->orderBy('po_tambahan.created_at', 'DESC')
+            ->findAll();
+    }
+    public function detailPoTambahan($idMaterial, $tglBuat, $status)
+    {
+        return $this->select('material.style_size, po_tambahan.*')
+            ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
+            ->whereIn('po_tambahan.id_material', $idMaterial)
+            ->like('po_tambahan.created_at', $tglBuat)
+            ->where('po_tambahan.status', $status)
             ->findAll();
     }
 }

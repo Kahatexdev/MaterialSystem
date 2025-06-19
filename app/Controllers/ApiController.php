@@ -767,54 +767,68 @@ class ApiController extends ResourceController
         }
         return $this->respond($res, 200);
     }
-    public function poTambahanDetail($noModel, $styleSize)
+    public function poTambahanDetail($noModel, $area)
     {
         $idOrder = $this->masterOrderModel->getIdOrder($noModel);
-        $material = $this->masterOrderModel->getMaterial($idOrder, $styleSize);
-        // dd($material);
-        $data = [
-            'active' => $this->active,
-            'title' => 'Material System',
-            'role' => $this->role,
-            'material' => $material
-        ];
-        return response()->setJSON($data);
+        $materials = $this->masterOrderModel->getMaterial($idOrder, $area);
+
+        foreach ($materials as $itemType => &$itemData) {
+            foreach ($itemData['kode_warna'] as $kodeWarna => &$warnaData) {
+                // Ambil kirimArea hanya sekali per kode_warna
+                $dataKirim = [
+                    'area' => $area,
+                    'no_model' => $noModel,
+                    'item_type' => $itemType,
+                    'kode_warna' => $kodeWarna
+                ];
+
+                $kirimArea = $this->pengeluaranModel->getTotalPengiriman($dataKirim);
+                $warnaData['kgs_out'] = $kirimArea['kgs_out'] ?? 0;
+            }
+        }
+
+        return response()->setJSON($materials);
     }
     public function savePoTambahan()
     {
-        $request = $this->request->getJSON(true);
-        log_message('debug', 'Data received: ' . json_encode($request));
-
-        if (empty($request['items']) || !is_array($request['items'])) {
-            return $this->respond([
-                'status'  => 'error',
-                'message' => 'Data items tidak ditemukan atau bukan array.',
-            ], 400);
+        $req = $this->request->getJSON(true);
+        if (empty($req['items']) || !is_array($req['items'])) {
+            return $this->respond(['status' => 'error', 'message' => 'Items tidak ditemukan.'], 400);
         }
 
         $sukses = 0;
-        $gagal = 0;
+        $gagal  = 0;
 
-        foreach ($request['items'] as $item) {
-            // Validasi field (minimal area dan item_type misalnya)
-            if (
-                !isset($item['area']) ||
-                !isset($item['no_model']) ||
-                !isset($item['style_size']) ||
-                !isset($item['item_type']) ||
-                !isset($item['kode_warna']) ||
-                !isset($item['color']) ||
-                !isset($item['pcs_po_tambahan']) ||
-                !isset($item['kg_po_tambahan']) ||
-                !isset($item['keterangan']) ||
-                !isset($item['admin']) ||
-                !isset($item['created_at'])
-            ) {
+        foreach ($req['items'] as $item) {
+            // 1) Cari id_material berdasarkan no_model, area, item_type, kode_warna, style_size
+            $validate = [
+                'no_model'   => $item['no_model'],
+                'area'       => $item['area'],
+                'item_type'  => $item['item_type'],
+                'kode_warna' => $item['kode_warna'],
+                'style_size' => $item['style_size'],
+            ];
+
+            $idMat = $this->materialModel->getIdMaterial($validate);
+            if (empty($idMat)) {
+                // gagal jika tidak ada material
                 $gagal++;
                 continue;
             }
+            // getIdMaterial sekarang mengembalikan single id
+            $item['id_material'] = $idMat;
 
-            // Insert ke DB
+            // 2) Hapus field yang tidak ada di table po_tambahan
+            unset(
+                $item['area'],
+                $item['no_model'],
+                $item['item_type'],
+                $item['kode_warna'],
+                $item['color'],
+                $item['style_size']
+            );
+
+            // 3) Simpan
             if ($this->poTambahanModel->insert($item)) {
                 $sukses++;
             } else {
@@ -824,17 +838,18 @@ class ApiController extends ResourceController
 
         return $this->respond([
             'status'  => 'success',
-            'message' => "Sukses insert: $sukses, Gagal insert: $gagal",
             'sukses'  => $sukses,
             'gagal'   => $gagal,
+            'message' => "Sukses insert: $sukses, Gagal insert: $gagal",
         ]);
     }
     public function filterPoTambahan()
     {
         $area = $this->request->getGet('area');
         $noModel = $this->request->getGet('model');
+        $tglBuat = $this->request->getGet('tglBuat') ?? null;
 
-        $filterData = $this->poTambahanModel->filterData($area, $noModel);
+        $filterData = $this->poTambahanModel->filterData($area, $noModel, $tglBuat);
 
         return $this->respond($filterData);
     }
@@ -843,12 +858,11 @@ class ApiController extends ResourceController
         $material = $this->materialModel->materialCek($id);
         return $this->response->setJSON($material);
     }
-    public function listRetur()
+    public function listRetur($area)
     {
-        $model = $this->request->getGet('model');
-        $area = $this->request->getGet('area');
 
-        $listRetur = $this->returModel->getListRetur($model, $area);
+
+        $listRetur = $this->returModel->getListRetur($area);
         return $this->response->setJSON($listRetur);
     }
     public function filterTglPakai($area)

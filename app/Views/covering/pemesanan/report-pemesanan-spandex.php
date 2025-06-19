@@ -61,15 +61,8 @@
                         <tr>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Pakai</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jalan MC</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Pesan (Kg)</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Global</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Per Area</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -129,18 +122,22 @@
                     dataTable.clear().draw();
                     if (response.length > 0) {
                         $.each(response, function(index, item) {
+                            var tgl = item;
+                            var jenis = "SPANDEX";
+
+                            var link1 = '<a href="<?= base_url($role . '/exportPemesananSandexKaretCovering') ?>?tgl_pakai=' + tgl + '&jenis=' + jenis + '" target="_blank">' +
+                                '<i class="fas fa-file-excel"></i>' +
+                                '</a>';
+
+                            var link2 = '<a href="<?= base_url($role . '/excelPemesananCoveringPerArea') ?>?tgl_pakai=' + tgl + '&jenis=' + jenis + '" target="_blank">' +
+                                '<i class="fas fa-file-excel"></i>' +
+                                '</a>';
+
                             dataTable.row.add([
                                 index + 1,
-                                item.tgl_pakai,
-                                item.item_type,
-                                item.color,
-                                item.kode_warna,
-                                item.no_model,
-                                item.jl_mc,
-                                item.ttl_berat_cones,
-                                item.ttl_qty_cones,
-                                item.admin,
-                                item.keterangan
+                                tgl,
+                                link1,
+                                link2
                             ]).draw(false);
                         });
 

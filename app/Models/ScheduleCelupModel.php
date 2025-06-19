@@ -28,13 +28,13 @@ class ScheduleCelupModel extends Model
         'tanggal_bon',
         'tanggal_celup',
         'tanggal_bongkar',
-        'tanggal_press',
-        // 'tanggal_oven',
+        'tanggal_press_oven',
         'tanggal_tl',
         'tanggal_rajut_pagi',
         'tanggal_kelos',
         'tanggal_acc',
         'tanggal_reject',
+        'tanggal_matching',
         'tanggal_perbaikan',
         'tanggal_teslab',
         'serah_terima_acc',
@@ -132,16 +132,14 @@ class ScheduleCelupModel extends Model
 
     public function getScheduleDetailsData($machine, $date, $lot)
     {
-        return $this->select('schedule_celup.id_celup,sum(schedule_celup.kg_celup) as qty_celup,schedule_celup.item_type, schedule_celup.no_model, DATE(schedule_celup.start_mc) AS start_mc, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.last_status, schedule_celup.po_plus, DATE(schedule_celup.updated_at) as last_update,TIME(schedule_celup.updated_at) as jam_update,schedule_celup.user_cek_status as admin, schedule_celup.ket_schedule, open_po.keterangan')
-            ->join('open_po', 'open_po.no_model = schedule_celup.no_model')
+        return $this->select('schedule_celup.id_celup,sum(schedule_celup.kg_celup) as qty_celup,schedule_celup.item_type, schedule_celup.no_model, DATE(schedule_celup.start_mc) AS start_mc, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.last_status, schedule_celup.po_plus, DATE(schedule_celup.updated_at) as last_update,TIME(schedule_celup.updated_at) as jam_update,schedule_celup.user_cek_status as admin, schedule_celup.ket_schedule, open_po.keterangan, open_po.id_induk')
+            ->join('open_po', 'open_po.no_model = schedule_celup.no_model AND open_po.item_type = schedule_celup.item_type AND open_po.kode_warna = schedule_celup.kode_warna')
             ->where('tanggal_schedule', $date)
             ->where('id_mesin', $machine)
             ->where('lot_urut', $lot)
             ->groupBy('id_celup')
             ->findAll();
     }
-
-
 
     public function getTanggalCelup($no_mesin, $tanggal_schedule, $lot_urut)
     {
@@ -198,7 +196,8 @@ class ScheduleCelupModel extends Model
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->where('tanggal_schedule >=', $startDate->format('Y-m-d'))
             ->where('tanggal_schedule <=', $endDate->format('Y-m-d'))
-            ->whereIn('schedule_celup.last_status', ['scheduled', 'celup', 'reschedule', 'bon', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc', 'reject', 'perbaikan']) // Filter berdasarkan last_status
+            ->whereIn('schedule_celup.last_status', ['scheduled', 'celup', 'reschedule', 'bon', 'bongkar']) // Filter berdasarkan last_status
+            // ->whereIn('schedule_celup.last_status', ['scheduled', 'celup', 'reschedule', 'bon', 'bongkar', 'press_oven', 'tes_luntur', 'rajut', 'acc', 'reject', 'perbaikan', 'tes_lab']) // Filter berdasarkan last_status
             ->groupBy('schedule_celup.id_mesin')
             ->groupBy('schedule_celup.tanggal_schedule')
             ->groupBy('schedule_celup.lot_urut');

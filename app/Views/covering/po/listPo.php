@@ -65,7 +65,7 @@
                             <?php foreach ($trackingPoCovering as $po) : ?>
                                 <tr>
                                     <td><?= date('d-m-Y', strtotime($po['created_at'])) ?></td>
-                                    <td><?= esc($po['no_model']) ?></td>
+                                    <td><?= esc($po['no_model_anak']) ?></td>
                                     <td><?= esc($po['item_type']) ?></td>
                                     <td><?= esc($po['kode_warna']) ?></td>
                                     <td><?= esc($po['color']) ?></td>
@@ -88,6 +88,7 @@
                                             </div>
                                             <div class="modal-body">
                                                 <form method="post" action="<?= base_url("{$role}/po/updateListTrackingPo/{$po['id_tpc']}") ?>">
+                                                    <input type="hidden" class="form-control" id="createdAt<?= $po['id_tpc'] ?>" name="created_at" value="<?= esc($po['created_at']) ?>" readonly>
                                                     <div class="row">
                                                         <div class="col-md-6 mb-3">
                                                             <label for="itemType<?= $po['id_tpc'] ?>" class="form-label">Item Type</label>

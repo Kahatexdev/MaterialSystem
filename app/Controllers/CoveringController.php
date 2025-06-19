@@ -233,7 +233,7 @@ class CoveringController extends BaseController
                 'qty_covering' => ''
             ];
         }
-        
+
         $data = [
             'active' => $this->active,
             'title' => 'PO Celup',
@@ -250,10 +250,10 @@ class CoveringController extends BaseController
         $tgl_po = urldecode($tgl_po);
         $tgl_po = date('Y-m-d', strtotime($tgl_po));
         $noModel = $noModel;
-        
+
         // Parse noModel into an array
         // $noModel = str_replace(' ', '', $noModel); // Remove spaces
-        $noModelArray = str_replace('','',$noModel);
+        $noModelArray = str_replace('', '', $noModel);
         // dd ($noModelArray);
         // $idInduk = $this->request->getGet('id_induk');
         // $data = $this->openPoModel->getPODetailCovering($tgl_po);
@@ -441,5 +441,49 @@ class CoveringController extends BaseController
     {
         $getPemasukan = $this->HistoryStockCoveringModel->getPemasukan();
         dd($getPemasukan);
+    }
+
+    public function bukaPoCovering()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Buka PO',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/po/open-po-covering', $data);
+    }
+
+    public function getDetailByTglPO()
+    {
+        $tgl_po = $this->request->getPost('tgl_po');
+        $data = $this->openPoModel->getPODetailCovering($tgl_po);
+        return $this->response->setJSON($data);
+    }
+
+    public function saveOpenPOCovering()
+    {
+        $data = $this->request->getPost();
+
+        if (isset($data['detail']) && is_array($data['detail'])) {
+            foreach ($data['detail'] as $row) {
+                $this->openPoModel->save([
+                    'id_induk'        => $row['id_induk'],
+                    'no_model'        => $data['no_model'],
+                    'item_type'       => $row['item_type'],
+                    'kode_warna'      => $row['kode_warna'],
+                    'color'           => $row['color'],
+                    'kg_po'           => $row['kg_po'] ?? null,
+                    'bentuk_celup'    => $data['bentuk_celup'] ?? null,
+                    'jenis_produksi'  => $data['jenis_produksi'] ?? null,
+                    'ket_celup'       => $data['ket_celup'] ?? null,
+                    'penerima'        => 'Retno',
+                    'penanggung_jawab' => 'Paryanti',
+                    'admin'           => $this->role,
+                    'created_at'      => date('Y-m-d H:i:s')
+                ]);
+            }
+        }
+
+        return redirect()->to(base_url($this->role . '/po'))->with('success', 'Data Open PO Celup berhasil disimpan.');
     }
 }

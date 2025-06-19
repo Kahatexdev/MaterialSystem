@@ -138,7 +138,8 @@
                             $key = "{$job['no_mesin']} | " . (new DateTime($job['tanggal_schedule']))->format('Y-m-d') . " | {$job['lot_urut']}";
 
                             // Cek last_status sebelum memasukkan data ke dalam kelompok
-                            if (in_array($job['last_status'], ['scheduled', 'celup', 'reschedule', 'bon', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc'])) {
+                            if (in_array($job['last_status'], ['scheduled', 'celup', 'reschedule', 'bon', 'bongkar'])) {
+                                // if (in_array($job['last_status'], ['scheduled', 'celup', 'reschedule', 'bon', 'bongkar', 'press_oven', 'tes_luntur', 'tes_lab', 'rajut', 'acc'])) {
                                 // Jika key sudah ada, gabungkan total_kg-nya
                                 if (isset($scheduleGrouped[$key])) {
                                     $scheduleGrouped[$key]['total_kg'] += $job['total_kg'];
@@ -349,11 +350,11 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="lot_celup" class="form-label">Lot Celup</label>
-                                    <input type="text" class="form-control" id="lot_celup" value="${item.lot_celup}" readonly>
+                                    <input type="text" class="form-control" id="lot_celup" value="${item.lot_celup ? item.lot_celup : 'Lot Belum Diisi'}" readonly>
                                 </div>
                                 <div class="mb-3">
                                     <label for="tgl_celup" class="form-label">Tanggal Celup</label>
-                                    <input type="text" class="form-control" id="tgl_celup" value="${item.tanggal_celup}" readonly>
+                                    <input type="text" class="form-control" id="tgl_celup" value="${item.tanggal_celup ? item.tanggal_celup : 'Tanggal Celup Belum Di Update'}" readonly>
                                 </div>
                             </div>
                             <div class="col-md-4">

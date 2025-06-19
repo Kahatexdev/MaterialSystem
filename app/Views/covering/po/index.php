@@ -1,176 +1,12 @@
 <?php $this->extend($role . '/po/header'); ?>
 <?php $this->section('content'); ?>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
 <style>
-    .card {
-        border-radius: 20px;
-        box-shadow: 0 10px 20px rgba(76, 175, 80, 0.1);
-        border: none;
-        background-color: white;
-        transition: all 0.3s ease;
-    }
-
-    .card:hover {
-        box-shadow: 0 15px 30px rgba(76, 175, 80, 0.15);
-        transform: translateY(-5px);
-    }
-
-    .table {
-        border-radius: 15px;
-        /* overflow: hidden; */
-        border-collapse: separate;
-        /* Ganti dari collapse ke separate */
-        border-spacing: 0;
-        /* Pastikan jarak antar sel tetap rapat */
-        overflow: auto;
-        position: relative;
-    }
-
-    .table th {
-
-        background-color: rgb(8, 38, 83);
-        border: none;
-        font-size: 0.9rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: rgb(255, 255, 255);
-    }
-
-    .table td {
-        border: none;
-        vertical-align: middle;
-        font-size: 0.9rem;
-        padding: 1rem 0.75rem;
-    }
-
-    .table tr:nth-child(even) {
-        background-color: rgb(237, 237, 237);
-    }
-
-    .table th.sticky {
+    th.sticky {
         position: sticky;
         top: 0;
-        z-index: 3;
-        background-color: rgb(4, 55, 91);
-    }
-
-    .table td.sticky {
-        position: sticky;
-        left: 0;
-        z-index: 2;
-        background-color: #e3f2fd;
-        box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
-    }
-
-
-    .capacity-bar {
-        height: 6px;
-        border-radius: 3px;
-        margin-bottom: 5px;
-    }
-
-    .btn {
-        border-radius: 12px;
-        padding: 0.6rem 1.2rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-    }
-
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(33, 150, 243, 0.2);
-    }
-
-    .btn-filter {
-        background: linear-gradient(135deg, #1e88e5, #64b5f6);
-        color: white;
-        border: none;
-    }
-
-    .btn-filter:hover {
-        background: linear-gradient(135deg, #1976d2, #42a5f5);
-    }
-
-    .date-navigation {
-        background-color: white;
-        border-radius: 15px;
-        padding: 0.5rem;
-        box-shadow: 0 4px 6px rgba(33, 150, 243, 0.1);
-    }
-
-    .date-navigation input[type="date"] {
-        border: none;
-        font-weight: 500;
-        color: #1565c0;
-    }
-
-    .machine-info {
-        font-size: 0.85rem;
-    }
-
-    .machine-info strong {
-        font-size: 1rem;
-        color: #2e7d32;
-    }
-
-    .job-item {
-        background-color: white;
-        border-radius: 10px;
-        padding: 0.7rem;
-        margin-bottom: 0.7rem;
-        box-shadow: 0 2px 4px rgba(76, 175, 80, 0.1);
-        transition: all 0.2s ease;
-    }
-
-    .job-item:hover {
-        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
-    }
-
-    .job-item span {
-        font-size: 0.8rem;
-        color: #558b2f;
-    }
-
-    .job-item .btn {
-        display: block;
-        width: 100%;
-        height: 100%;
-        text-align: center;
-    }
-
-    .job-item .btn span {
-        font-size: 0.9rem;
-        color: black;
-        font-weight: bold;
-    }
-
-    .job-item .btn .total-kg {
-        font-size: 0.85rem;
-    }
-
-    .no-schedule .btn {
-        background-color: #f8f9fa;
-        border: 1px dashed #ccc;
-        color: #6c757d;
-    }
-
-
-    .bg-success {
-        background-color: #66bb6a !important;
-    }
-
-    .bg-warning {
-        background-color: #ffd54f !important;
-    }
-
-    .bg-danger {
-        background-color: #ef5350 !important;
-    }
-
-    .text-success {
-        color: #43a047 !important;
+        background: #f9f9f9;
+        z-index: 10;
     }
 </style>
 
@@ -201,24 +37,24 @@
 
     <div class="card mb-4">
         <div class="card-body">
-            <form method="post" action="<?= base_url($role . '/schedule') ?>">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                    <h3 class="mb-0 text-center text-md-start">Request PO GBN</h3>
-                </div>
-            </form>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                <h3 class="mb-0 text-center text-md-start">Request PO GBN</h3>
+                <a href="<?= base_url($role . '/po/bukaPoCovering') ?>" class="btn btn-outline-info">
+                    <i class="fas fa-file-import me-2"></i>Buka PO
+                </a>
+            </div>
         </div>
     </div>
-
 
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table">
+                <table class="table" id="tablePo">
                     <thead>
                         <tr>
-                            <th class="sticky text-center">No</th>
-                            <th class="sticky text-center">Tanggal PO</th>
-                            <th class="sticky text-center">Action</th>
+                            <th class="text-center">No</th>
+                            <th class="text-center">Tanggal PO</th>
+                            <th class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -226,15 +62,11 @@
                             <?php $no = 1; ?>
                             <?php foreach ($poCovering as $po) : ?>
                                 <tr>
-                                    <td class="sticky text-center"><?= $no++ ?></td>
-                                    <td class="sticky text-center"><?= $po['tgl_po'] ?></td>
-                                    <td class="sticky text-center">
-                                        <a class="btn bg-gradient-info" href="<?= base_url($role . '/poDetail/' . $po['tgl_po']) ?>">
-                                            <i class="bi bi-eye me-2"></i>Lihat PO
-                                        </a>
-                                        <!-- export PO -->
+                                    <td class="text-center"><?= $no++ ?? '-' ?></td>
+                                    <td class="text-center"><?= $po['tgl_po'] ?? '-' ?></td>
+                                    <td class="text-center">
                                         <a class="btn bg-gradient-success" href="<?= base_url($role . '/po/exportPO/' . $po['tgl_po']) ?>">
-                                            <i class="bi bi-file-earmark-arrow-down me-2"></i>Export PO
+                                            <i class="fas fa-file-pdf me-2"></i></i>Export PO
                                         </a>
                                         <a class="btn bg-gradient-warning" href="<?= base_url($role . '/po/listTrackingPo/' . $po['tgl_po']) ?>">
                                             <i class="far fa-question-circle"></i> Status PO
@@ -244,7 +76,9 @@
                             <?php endforeach; ?>
                         <?php else : ?>
                             <tr>
-                                <td colspan="3" class="text-center">Tidak ada data</td>
+                                <td class="text-center">-</td>
+                                <td class="text-center">Tidak ada data</td>
+                                <td class="text-center">-</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -252,7 +86,6 @@
             </div>
         </div>
     </div>
-
 </div>
 
 <div class="modal fade" id="modalSchedule" tabindex="-1" aria-labelledby="modalScheduleLabel" aria-hidden="true">
@@ -273,6 +106,21 @@
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function() {
+        $('#tablePo').DataTable({
+            responsive: true,
+            ordering: true,
+            paging: true,
+            searching: true,
+            columnDefs: [{
+                orderable: false,
+                targets: 2
+            }]
+        });
+    });
+</script>
 
 
 <script>

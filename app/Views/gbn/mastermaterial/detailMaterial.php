@@ -329,7 +329,7 @@
                             <div class="mb-3">
                                 <label for="style_size" class="form-label">Tujuan</label>
                                 <select class="form-control tujuan" name="tujuan" required>
-                                    <option value="-">Pilih Tujuan</option>
+                                    <option value="">Pilih Tujuan</option>
                                     <option value="CELUP">CELUP</option>
                                     <option value="COVERING">COVERING</option>
                                 </select>
@@ -337,7 +337,7 @@
                             <div class="mb-3">
                                 <label for="style_size" class="form-label">Jenis Bahan Baku</label>
                                 <select class="form-control jenis" name="jenis" id="jenis" required>
-                                    <option value="-">Pilih Jenis</option>
+                                    <option value="">Pilih Jenis</option>
                                     <option value="BENANG">BENANG</option>
                                     <option value="NYLON">NYLON</option>
                                     <option value="SPANDEX">SPANDEX & KARET</option>
@@ -398,7 +398,7 @@
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="splitQtyModalLabel">Split Area</h5>
+                    <h5 class="modal-title" id="splitQtyModalLabel">Split Qty</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="modal-body">

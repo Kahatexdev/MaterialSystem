@@ -13,17 +13,16 @@ class HistoryStockCoveringModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
+        'id_total_pemesanan',
         'no_model',
         'jenis',
+        'jenis_benang',
+        'jenis_cover',
         'color',
         'code',
         'lmd',
         'ttl_cns',
         'ttl_kg',
-        'box',
-        'no_rak',
-        'posisi_rak',
-        'no_palet',
         'admin',
         'keterangan'
     ];
