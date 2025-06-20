@@ -846,10 +846,14 @@ class ApiController extends ResourceController
     public function filterPoTambahan()
     {
         $area = $this->request->getGet('area');
-        $noModel = $this->request->getGet('model');
-        $tglBuat = $this->request->getGet('tglBuat') ?? null;
+        $tglBuat = $this->request->getGet('tglBuat');
+        $noModel = $this->request->getGet('model') ?? null;
 
-        $filterData = $this->poTambahanModel->filterData($area, $noModel, $tglBuat);
+        // $area = 'KK2A';
+        // $noModel = '';
+        // $tglBuat = '2025-06-17';
+
+        $filterData = $this->poTambahanModel->filterData($area, $tglBuat, $noModel);
 
         return $this->respond($filterData);
     }
