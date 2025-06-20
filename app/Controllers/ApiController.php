@@ -882,4 +882,22 @@ class ApiController extends ResourceController
         $listTglPaki = $this->pemesananModel->getreportPemesanan($area, $jenis, $tgl_pakai);
         return $this->response->setJSON($listTglPaki);
     }
+    public function getNoModelByPoTambahan()
+    {
+        // Ambil parameter 'area' dari query string
+        $area = $this->request->getGet('area');
+
+        // Periksa apakah parameter 'area' tersedia
+        if (empty($area)) {
+            return $this->response
+                ->setStatusCode(400) // Kode HTTP 400 (Bad Request)
+                ->setJSON(['error' => 'Parameter area is required']);
+        }
+
+        $data = $this->poTambahanModel->getNoModelByArea($area);
+
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($data);
+    }
 }

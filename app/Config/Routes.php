@@ -581,5 +581,6 @@ $routes->group(
         $routes->get('listRetur/(:any)', 'ApiController::listRetur/$1');
         $routes->get('filterTglPakai/(:any)', 'ApiController::filterTglPakai/$1');
         $routes->get('dataPemesananArea', 'ApiController::getDataPemesanan');
+        $routes->get('getNoModelByPoTambahan', 'ApiController::getNoModelByPoTambahan');
     }
 );
