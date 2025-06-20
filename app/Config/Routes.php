@@ -582,5 +582,6 @@ $routes->group(
         $routes->get('filterTglPakai/(:any)', 'ApiController::filterTglPakai/$1');
         $routes->get('dataPemesananArea', 'ApiController::getDataPemesanan');
         $routes->get('getNoModelByPoTambahan', 'ApiController::getNoModelByPoTambahan');
+        $routes->get('getStyleSizeByPoTambahan', 'ApiController::getStyleSizeByPoTambahan');
     }
 );

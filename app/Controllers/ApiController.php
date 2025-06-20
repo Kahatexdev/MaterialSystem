@@ -900,4 +900,23 @@ class ApiController extends ResourceController
             ->setStatusCode(200)
             ->setJSON($data);
     }
+    public function getStyleSizeByPoTambahan()
+    {
+        // Ambil parameter 'area' dari query string
+        $area = $this->request->getGet('area');
+        $noModel = $this->request->getGet('no_model');
+
+        // Periksa apakah parameter 'area' tersedia
+        if (empty($area)) {
+            return $this->response
+                ->setStatusCode(400) // Kode HTTP 400 (Bad Request)
+                ->setJSON(['error' => 'Parameter area is required']);
+        }
+
+        $data = $this->poTambahanModel->getStyleSizeBYNoModelArea($area, $noModel);
+
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($data);
+    }
 }

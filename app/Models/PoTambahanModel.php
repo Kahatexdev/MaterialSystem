@@ -109,10 +109,22 @@ class PoTambahanModel extends Model
         return $this->select('po_tambahan.admin, po_tambahan.status, master_order.no_model')
             ->join('material', 'material.id_material=po_tambahan.id_material', 'left')
             ->join('master_order', 'master_order.id_order=material.id_order', 'left')
-            ->where('admin', $area)
-            ->where('status', 'approved')
+            ->where('po_tambahan.admin', $area)
+            ->where('po_tambahan.status', 'approved')
             ->groupBy('master_order.no_model')
             ->orderBy('master_order.no_model', 'ASC')
+            ->findAll();
+    }
+    public function getStyleSizeBYNoModelArea($area, $noModel)
+    {
+        return $this->select('po_tambahan.admin, po_tambahan.status, master_order.no_model as model')
+            ->join('material', 'material.id_material=po_tambahan.id_material', 'left')
+            ->join('master_order', 'master_order.id_order=material.id_order', 'left')
+            ->where('master_order.no_model', $noModel)
+            ->where('po_tambahan.admin', $area)
+            ->where('po_tambahan.status', 'approved')
+            ->groupBy('material.style_size')
+            ->orderBy('material.style_size', 'ASC')
             ->findAll();
     }
 }
