@@ -62,16 +62,16 @@ class PoTambahanModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
-    public function filterData($area, $noModel, $tglBuat = null)
+    public function filterData($area, $tglBuat, $noModel = null)
     {
         $builder = $this->select('po_tambahan.*, master_order.no_model, master_order.delivery_akhir, material.item_type, material.kode_warna, material.color, material.style_size, material.kgs, material.composition, material.gw, material.qty_pcs, material.loss')
             ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
             ->join('master_order', 'material.id_order = master_order.id_order', 'left')
             ->where('material.area', $area)
-            ->where('master_order.no_model', $noModel);
+            ->like('po_tambahan.created_at', $tglBuat);
         // Cek apakah tglBuat diisi, baru apply filter
-        if (!empty($tglBuat)) {
-            $builder->like('po_tambahan.created_at', $tglBuat);
+        if (!empty($noModel)) {
+            $builder->where('master_order.no_model', $noModel);
         }
         return $builder
             ->groupBy('po_tambahan.id_po_tambahan')
@@ -106,7 +106,7 @@ class PoTambahanModel extends Model
     }
     public function getNoModelByArea($area)
     {
-        return $this->select('po_tambahan.admin, po_tambahan.status, master_order.no_model')
+        return $this->select('po_tambahan.admin, po_tambahan.status, master_order.no_model as model')
             ->join('material', 'material.id_material=po_tambahan.id_material', 'left')
             ->join('master_order', 'master_order.id_order=material.id_order', 'left')
             ->where('po_tambahan.admin', $area)
