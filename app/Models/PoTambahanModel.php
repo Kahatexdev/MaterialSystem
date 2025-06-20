@@ -117,7 +117,7 @@ class PoTambahanModel extends Model
     }
     public function getStyleSizeBYNoModelArea($area, $noModel)
     {
-        return $this->select('po_tambahan.admin, po_tambahan.status, master_order.no_model as model')
+        return $this->select('po_tambahan.admin, po_tambahan.status, master_order.no_model as model, material.style_size as size')
             ->join('material', 'material.id_material=po_tambahan.id_material', 'left')
             ->join('master_order', 'master_order.id_order=material.id_order', 'left')
             ->where('master_order.no_model', $noModel)
