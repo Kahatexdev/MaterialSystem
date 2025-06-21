@@ -12,8 +12,7 @@
                 </nav>
                 <div class="d-flex align-items-center">
                     <ul class="navbar-nav justify-content-end">
-
-                        <li class="nav-item dropdown">
+                        <!-- <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownReports" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-file-alt"></i>
                                 <span class="d-lg-inline-block d-none ms-1">Dropdown</span>
@@ -23,7 +22,7 @@
                                 <li><a class="dropdown-item" href="#">Dropdown 2</a></li>
                                 <li><a class="dropdown-item" href="#">Dropdown 3</a></li>
                             </ul>
-                        </li>
+                        </li> -->
                         <li class="nav-item d-flex align-items-center">
                             <a href="" data-bs-toggle="modal" data-bs-target="#LogoutModal" class="nav-link text-body font-weight-bold px-2">
                                 <i class="fa fa-user"></i>

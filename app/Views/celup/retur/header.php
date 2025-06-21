@@ -12,7 +12,7 @@
             <div class="collgbne navbar-collgbne mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
 
                 <ul class="navbar-nav  justify-content-end">
-                    <li class="nav-item d-flex align-items-center px-1">
+                    <!-- <li class="nav-item d-flex align-items-center px-1">
                         <a href="">
                             <span class=" badge bg-gradient-info ">Submenu1</span>
 
@@ -43,8 +43,7 @@
                                 </a>
                             </li>
                         </ul>
-
-                    </li>
+                    </li> -->
                     <li class="nav-item d-flex align-items-center">
                         <a href="" data-bs-toggle="modal" data-bs-target="#LogoutModal" class=" nav-link text-body font-weight-bold px-0">
                             <i class="fa fa-user me-sm-1"></i>
@@ -60,9 +59,6 @@
                             </div>
                         </a>
                     </li>
-
-
-
                 </ul>
             </div>
         </div>
