@@ -22,12 +22,6 @@
                 </nav>
                 <div class="d-flex align-items-center">
                     <ul class="navbar-nav justify-content-end">
-                        <li class="nav-item d-flex align-items-center">
-                            <a href="" class="nav-link text-body font-weight-bold px-2">
-                                <i class="fas fa-database"></i>
-                                <span class="d-lg-inline-block d-none ms-1">Submenu 1</span>
-                            </a>
-                        </li>
                         <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownReports" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-file-alt"></i>

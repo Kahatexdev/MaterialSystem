@@ -9,16 +9,7 @@
                 <h6 class="font-weight-bolder mb-0"><?= $title ?></h6>
             </nav>
             <div class="collgbne navbar-collgbne mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
-
                 <ul class="navbar-nav  justify-content-end">
-                    <li class="nav-item d-flex align-items-center px-1">
-                        <a href="<?= base_url(session()->get('role')) . '/dropdown' ?>" class="text-decoration-none d-flex align-items-center">
-                            <span class="badge bg-gradient-info">
-                                <i class="fas fa-database me-sm-1"></i>
-                                Dropdown</span>
-                        </a>
-                    </li>
-
                     <li class="nav-item d-flex align-items-center">
                         <a href="" data-bs-toggle="modal" data-bs-target="#LogoutModal" class=" nav-link text-body font-weight-bold px-0">
                             <i class="fa fa-user me-sm-1"></i>

@@ -4,12 +4,12 @@
 <!-- DataTables CSS -->
 <style>
     #poTable tbody tr {
-        height: 50px;
+        height: 30px;
     }
 
     #poTable tbody td {
         vertical-align: middle;
-        line-height: 50px;
+        line-height: 30px;
     }
 </style>
 

@@ -53,14 +53,14 @@
             --secondary-color: #778899;
         }
 
-        .form-control {
+        /* .form-control {
             border: none;
             border-bottom: 2px solid var(--primary-color);
             border-radius: 0;
             padding: 0.75rem 0;
             margin-bottom: 1rem;
             transition: all 0.3s ease;
-        }
+        } */
 
         .form-control:focus {
             box-shadow: none;
@@ -81,7 +81,7 @@
 
         <div class="sidenav-header">
             <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
-            <a class="navbar-brand m-0" href="<?= base_url('/gbn') ?> " target="_blank">
+            <a class="navbar-brand m-0" href="<?= base_url('/monitoring') ?> " target="_blank">
                 <div class="icon icon-shape bg-white shadow text-center border-radius-lg" style="font-size: 17px;">
                     <img src="<?= base_url('assets/ms2.png') ?>" alt="Logo" style="max-height: 100%; max-width: 100%; object-fit: contain;">
                 </div>
