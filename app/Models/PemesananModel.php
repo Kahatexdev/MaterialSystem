@@ -166,7 +166,7 @@ class PemesananModel extends Model
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pemesanan.admin', $area)
             ->where('pemesanan.status_kirim!=', 'YA')
-            ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai')
+            ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')
             ->orderBy('pemesanan.tgl_pakai', 'DESC')
             ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
         return $query->get()->getResultArray();

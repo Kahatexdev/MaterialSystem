@@ -348,6 +348,7 @@ class ApiController extends ResourceController
                 'jl_mc'           => $data['jalan_mc'][$i] ?? null,
                 'ttl_qty_cones'   => $data['ttl_cns'][$i] ?? null,
                 'ttl_berat_cones' => $data['ttl_berat_cns'][$i] ?? null,
+                'po_tambahan'     => $data['po_tambahan'][$i] ?? null,
                 'admin'           => $data['area'][$i] ?? null,
                 'no_model'        => $data['no_model'][$i] ?? null,
                 'style_size'      => $data['style_size'][$i] ?? null,
@@ -370,6 +371,7 @@ class ApiController extends ResourceController
             $existingData = $this->pemesananModel
                 ->where('id_material', $resultItem['id_material'])
                 ->where('tgl_pakai', $resultItem['tgl_pakai'])
+                ->where('po_tambahan', $resultItem['po_tambahan'])
                 ->where('admin', $resultItem['admin'])
                 ->first();
 
