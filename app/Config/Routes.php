@@ -583,5 +583,7 @@ $routes->group(
         $routes->get('dataPemesananArea', 'ApiController::getDataPemesanan');
         $routes->get('getNoModelByPoTambahan', 'ApiController::getNoModelByPoTambahan');
         $routes->get('getStyleSizeByPoTambahan', 'ApiController::getStyleSizeByPoTambahan');
+        $routes->get('getPcsPoTambahan', 'ApiController::getPcsPoTambahan');
+        $routes->get('getMUPoTambahan', 'ApiController::getMUPoTambahan');
     }
 );

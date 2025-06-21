@@ -23,6 +23,7 @@ use App\Models\ReturModel;
 use App\Models\KategoriReturModel;
 use App\Models\PoTambahanModel;
 use App\Models\TrackingPoCovering;
+use PHPUnit\Framework\Attributes\IgnoreFunctionForCodeCoverage;
 
 class ApiController extends ResourceController
 {
@@ -918,6 +919,19 @@ class ApiController extends ResourceController
         }
 
         $data = $this->poTambahanModel->getStyleSizeBYNoModelArea($area, $noModel);
+
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($data);
+    }
+    public function getMUPoTambahan()
+    {
+        $no_model = $this->request->getGet('no_model');
+        $style_size = $this->request->getGet('style_size');
+        $area = $this->request->getGet('area');
+        // $qty = $this->request->getGet('qty');
+
+        $data = $this->poTambahanModel->getMuPoTambahan($no_model, $style_size, $area);
 
         return $this->response
             ->setStatusCode(200)
