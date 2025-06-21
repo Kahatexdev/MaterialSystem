@@ -143,18 +143,19 @@
                         <?php foreach ($masterOrder as $data):
                             // Cek apakah id_order ini ada di materialOrderIds
                             $isNotInMaterial = !in_array($data['id_order'], $materialOrderIds);
+                            $isDuplikat = in_array($data['id_order'], $duplikatMU);
                         ?>
                             <tr>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['foll_up'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['lco_date'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['no_model'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['no_order'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['buyer'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['memo'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['delivery_awal'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['delivery_akhir'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['unit'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>">
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['foll_up'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['lco_date'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['no_model'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['no_order'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['buyer'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['memo'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['delivery_awal'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['delivery_akhir'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['unit'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>">
                                     <a href="<?= base_url($role . '/material/' . $data['id_order']) ?>" class="btn btn-info btn-sm">
                                         Detail
                                     </a>

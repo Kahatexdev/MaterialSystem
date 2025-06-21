@@ -2270,7 +2270,7 @@ class WarehouseController extends BaseController
                     'cones_kirim' => $data['cones'][$i],
                     'lot_kirim' => $data['lot'],
                     'ganti_retur' => $data['ganti_retur'],
-                    'ganti_retur' => session()->get('username'),
+                    'admin' => session()->get('username'),
                     'created_at' => date('Y-m-d H:i:s'),
                 ];
                 $saveKrg = $outCelup->insert($dataKrg); // Melakukan insert
