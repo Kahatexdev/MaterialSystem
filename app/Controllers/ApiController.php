@@ -348,7 +348,7 @@ class ApiController extends ResourceController
                 'jl_mc'           => $data['jalan_mc'][$i] ?? null,
                 'ttl_qty_cones'   => $data['ttl_cns'][$i] ?? null,
                 'ttl_berat_cones' => $data['ttl_berat_cns'][$i] ?? null,
-                'po_tambahan'     => $data['po_tambahan'][$i] ?? null,
+                'po_tambahan'     => $data['po_tambahan'][$i] ?? 0,
                 'admin'           => $data['area'][$i] ?? null,
                 'no_model'        => $data['no_model'][$i] ?? null,
                 'style_size'      => $data['style_size'][$i] ?? null,

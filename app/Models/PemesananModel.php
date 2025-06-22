@@ -153,12 +153,13 @@ class PemesananModel extends Model
                 SUM(pemesanan.jl_mc) AS jl_mc,
                 SUM(pemesanan.ttl_qty_cones) AS cns_pesan,
                 SUM(pemesanan.ttl_berat_cones) AS qty_pesan,
-                AVG(pemesanan.sisa_kgs_mc) AS qty_sisa,
-                AVG(pemesanan.sisa_cones_mc) AS cns_sisa,
+                SUM(pemesanan.sisa_kgs_mc) AS qty_sisa,
+                SUM(pemesanan.sisa_cones_mc) AS cns_sisa,
                 pemesanan.lot,
                 pemesanan.keterangan,
                 pemesanan.status_kirim,
-                pemesanan.additional_time
+                pemesanan.additional_time,
+                pemesanan.po_tambahan
             ")
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
