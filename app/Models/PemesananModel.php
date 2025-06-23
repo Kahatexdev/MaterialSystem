@@ -240,6 +240,7 @@ class PemesananModel extends Model
             ->where('material.kode_warna', $id['kode_warna'])
             ->where('material.color', $id['color'])
             ->where('pemesanan.tgl_pakai', $id['tgl_pakai'])
+            ->where('pemesanan.po_tambahan', $id['po_tambahan'])
             ->get()
             ->getResultArray(); // Ambil semua baris sebagai array
 
