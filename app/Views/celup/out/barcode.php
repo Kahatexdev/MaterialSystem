@@ -30,19 +30,19 @@
             <tr>
                 <td style="width: 3cm; vertical-align: top;">
                     <div class="label-box" style="padding: 5px;">
-                        <div class="barcode-box" style="text-align: center; font-size: 13px;">
+                        <div class="barcode-box" style="text-align: center; font-size: 9pt;">
                             <img src="<?= $barcodeImages[$i] ?>" alt="barcode" style="max-width: 100%; height: 40px;">
                             <div style="margin-top:5px;">No Model : <?= $row['no_model'] ?? '-' ?></div>
                             <div>GW : <?= $row['gw_kirim'] ?></div>
                             <div>NW : <?= $row['kgs_kirim'] ?></div>
                             <div>Cones : <?= $row['cones_kirim'] ?></div>
-                            <div style="margin-top: 19px; text-align:left;"><?= $row['operator_packing'] ?> | <?= $row['shift'] ?></div>
+                            <div style="margin-top: 10px; text-align:left;"><?= $row['operator_packing'] ?? '-' ?> | <?= $row['shift'] ?? '-' ?></div>
                         </div>
                     </div>
                 </td>
                 <td style="width: 4cm; vertical-align: top;">
                     <div class="label-box" style="padding: 5px;">
-                        <div class="data" style="font-size: 14px; line-height: 1.5;">
+                        <div class="data" style="font-size: 9pt; line-height: 1.5;">
                             <div>Item Type : <?= $row['item_type'] ?></div>
                             <div>Kode Warna : <?= $row['kode_warna'] ?></div>
                             <div>Warna : <?= $row['warna'] ?></div>
