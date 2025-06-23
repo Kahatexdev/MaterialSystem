@@ -157,6 +157,8 @@ class MaterialModel extends Model
             ->join('master_material', 'master_material.item_type=material.item_type')
             ->where('master_order.no_model', $model)
             ->where('material.style_size', $styleSize)
+            ->groupBy('material.item_type')
+            ->groupBy('material.kode_warna')
             ->orderBy('master_material.jenis, material.item_type', 'ASC')
             ->findAll();
     }
@@ -279,5 +281,64 @@ class MaterialModel extends Model
     public function getStyle($id)
     {
         return $this->select('style_size, inisial')->where('id_order', $id)->groupBy('style_size')->findAll();
+    }
+    public function getDataDuplicate()
+    {
+        $db = \Config\Database::connect();
+
+        // Subquery: cari kombinasi duplikat
+        $subquery = $db->table('material')
+            ->select('CONCAT(id_order, style_size, item_type, kode_warna, kgs) as combo')
+            ->groupBy('combo')
+            ->having('COUNT(*) >', 1)
+            ->getCompiledSelect();
+
+        return $db->table('material')
+            ->select('id_order')
+            ->where("CONCAT(id_order, style_size, item_type, kode_warna, kgs) IN ($subquery)", null, false)
+            ->groupBy('id_order')
+            ->get()
+            ->getResult();
+    }
+    public function deleteDuplicate($id_order)
+    {
+        $db = \Config\Database::connect();
+
+        $sql = "
+        DELETE m1 FROM material m1
+        JOIN material m2
+          ON m1.id_order = m2.id_order
+          AND m1.style_size = m2.style_size
+          AND m1.item_type = m2.item_type
+          AND m1.kode_warna = m2.kode_warna
+          AND m1.kgs = m2.kgs
+          AND m1.id_material > m2.id_material
+        WHERE m1.id_order = ?
+    ";
+
+        return $db->query($sql, [$id_order]);
+    }
+    public function getIdMaterial(array $validate)
+    {
+        $row = $this->select('material.id_material')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('master_order.no_model', $validate['no_model'])
+            ->where('material.area', $validate['area'])
+            ->where('material.item_type', $validate['item_type'])
+            ->where('material.kode_warna', $validate['kode_warna'])
+            ->where('material.style_size', $validate['style_size'])
+            ->first();    // ambil satu baris
+
+        return $row ? $row['id_material'] : null;
+    }
+    public function getId($validate)
+    {
+        return $this->select('material.id_material')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('master_order.no_model', $validate['no_model'])
+            ->where('material.area', $validate['area'])
+            ->where('material.item_type', $validate['item_type'])
+            ->where('material.kode_warna', $validate['kode_warna'])
+            ->findAll();
     }
 }

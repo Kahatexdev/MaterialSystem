@@ -23,6 +23,7 @@ use App\Models\ReturModel;
 use App\Models\KategoriReturModel;
 use App\Models\PoTambahanModel;
 use App\Models\TrackingPoCovering;
+use PHPUnit\Framework\Attributes\IgnoreFunctionForCodeCoverage;
 
 class ApiController extends ResourceController
 {
@@ -347,6 +348,7 @@ class ApiController extends ResourceController
                 'jl_mc'           => $data['jalan_mc'][$i] ?? null,
                 'ttl_qty_cones'   => $data['ttl_cns'][$i] ?? null,
                 'ttl_berat_cones' => $data['ttl_berat_cns'][$i] ?? null,
+                'po_tambahan'     => $data['po_tambahan'][$i] ?? 0,
                 'admin'           => $data['area'][$i] ?? null,
                 'no_model'        => $data['no_model'][$i] ?? null,
                 'style_size'      => $data['style_size'][$i] ?? null,
@@ -369,6 +371,7 @@ class ApiController extends ResourceController
             $existingData = $this->pemesananModel
                 ->where('id_material', $resultItem['id_material'])
                 ->where('tgl_pakai', $resultItem['tgl_pakai'])
+                ->where('po_tambahan', $resultItem['po_tambahan'])
                 ->where('admin', $resultItem['admin'])
                 ->first();
 
@@ -767,54 +770,68 @@ class ApiController extends ResourceController
         }
         return $this->respond($res, 200);
     }
-    public function poTambahanDetail($noModel, $styleSize)
+    public function poTambahanDetail($noModel, $area)
     {
         $idOrder = $this->masterOrderModel->getIdOrder($noModel);
-        $material = $this->masterOrderModel->getMaterial($idOrder, $styleSize);
-        // dd($material);
-        $data = [
-            'active' => $this->active,
-            'title' => 'Material System',
-            'role' => $this->role,
-            'material' => $material
-        ];
-        return response()->setJSON($data);
+        $materials = $this->masterOrderModel->getMaterial($idOrder, $area);
+
+        foreach ($materials as $itemType => &$itemData) {
+            foreach ($itemData['kode_warna'] as $kodeWarna => &$warnaData) {
+                // Ambil kirimArea hanya sekali per kode_warna
+                $dataKirim = [
+                    'area' => $area,
+                    'no_model' => $noModel,
+                    'item_type' => $itemType,
+                    'kode_warna' => $kodeWarna
+                ];
+
+                $kirimArea = $this->pengeluaranModel->getTotalPengiriman($dataKirim);
+                $warnaData['kgs_out'] = $kirimArea['kgs_out'] ?? 0;
+            }
+        }
+
+        return response()->setJSON($materials);
     }
     public function savePoTambahan()
     {
-        $request = $this->request->getJSON(true);
-        log_message('debug', 'Data received: ' . json_encode($request));
-
-        if (empty($request['items']) || !is_array($request['items'])) {
-            return $this->respond([
-                'status'  => 'error',
-                'message' => 'Data items tidak ditemukan atau bukan array.',
-            ], 400);
+        $req = $this->request->getJSON(true);
+        if (empty($req['items']) || !is_array($req['items'])) {
+            return $this->respond(['status' => 'error', 'message' => 'Items tidak ditemukan.'], 400);
         }
 
         $sukses = 0;
-        $gagal = 0;
+        $gagal  = 0;
 
-        foreach ($request['items'] as $item) {
-            // Validasi field (minimal area dan item_type misalnya)
-            if (
-                !isset($item['area']) ||
-                !isset($item['no_model']) ||
-                !isset($item['style_size']) ||
-                !isset($item['item_type']) ||
-                !isset($item['kode_warna']) ||
-                !isset($item['color']) ||
-                !isset($item['pcs_po_tambahan']) ||
-                !isset($item['kg_po_tambahan']) ||
-                !isset($item['keterangan']) ||
-                !isset($item['admin']) ||
-                !isset($item['created_at'])
-            ) {
+        foreach ($req['items'] as $item) {
+            // 1) Cari id_material berdasarkan no_model, area, item_type, kode_warna, style_size
+            $validate = [
+                'no_model'   => $item['no_model'],
+                'area'       => $item['area'],
+                'item_type'  => $item['item_type'],
+                'kode_warna' => $item['kode_warna'],
+                'style_size' => $item['style_size'],
+            ];
+
+            $idMat = $this->materialModel->getIdMaterial($validate);
+            if (empty($idMat)) {
+                // gagal jika tidak ada material
                 $gagal++;
                 continue;
             }
+            // getIdMaterial sekarang mengembalikan single id
+            $item['id_material'] = $idMat;
 
-            // Insert ke DB
+            // 2) Hapus field yang tidak ada di table po_tambahan
+            unset(
+                $item['area'],
+                $item['no_model'],
+                $item['item_type'],
+                $item['kode_warna'],
+                $item['color'],
+                $item['style_size']
+            );
+
+            // 3) Simpan
             if ($this->poTambahanModel->insert($item)) {
                 $sukses++;
             } else {
@@ -824,17 +841,22 @@ class ApiController extends ResourceController
 
         return $this->respond([
             'status'  => 'success',
-            'message' => "Sukses insert: $sukses, Gagal insert: $gagal",
             'sukses'  => $sukses,
             'gagal'   => $gagal,
+            'message' => "Sukses insert: $sukses, Gagal insert: $gagal",
         ]);
     }
     public function filterPoTambahan()
     {
         $area = $this->request->getGet('area');
-        $noModel = $this->request->getGet('model');
+        $tglBuat = $this->request->getGet('tglBuat');
+        $noModel = $this->request->getGet('model') ?? null;
 
-        $filterData = $this->poTambahanModel->filterData($area, $noModel);
+        // $area = 'KK2A';
+        // $noModel = '';
+        // $tglBuat = '2025-06-17';
+
+        $filterData = $this->poTambahanModel->filterData($area, $tglBuat, $noModel);
 
         return $this->respond($filterData);
     }
@@ -866,5 +888,55 @@ class ApiController extends ResourceController
 
         $listTglPaki = $this->pemesananModel->getreportPemesanan($area, $jenis, $tgl_pakai);
         return $this->response->setJSON($listTglPaki);
+    }
+    public function getNoModelByPoTambahan()
+    {
+        // Ambil parameter 'area' dari query string
+        $area = $this->request->getGet('area');
+
+        // Periksa apakah parameter 'area' tersedia
+        if (empty($area)) {
+            return $this->response
+                ->setStatusCode(400) // Kode HTTP 400 (Bad Request)
+                ->setJSON(['error' => 'Parameter area is required']);
+        }
+
+        $data = $this->poTambahanModel->getNoModelByArea($area);
+
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($data);
+    }
+    public function getStyleSizeByPoTambahan()
+    {
+        // Ambil parameter 'area' dari query string
+        $area = $this->request->getGet('area');
+        $noModel = $this->request->getGet('no_model');
+
+        // Periksa apakah parameter 'area' tersedia
+        if (empty($area)) {
+            return $this->response
+                ->setStatusCode(400) // Kode HTTP 400 (Bad Request)
+                ->setJSON(['error' => 'Parameter area is required']);
+        }
+
+        $data = $this->poTambahanModel->getStyleSizeBYNoModelArea($area, $noModel);
+
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($data);
+    }
+    public function getMUPoTambahan()
+    {
+        $no_model = $this->request->getGet('no_model');
+        $style_size = $this->request->getGet('style_size');
+        $area = $this->request->getGet('area');
+        // $qty = $this->request->getGet('qty');
+
+        $data = $this->poTambahanModel->getMuPoTambahan($no_model, $style_size, $area);
+
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($data);
     }
 }

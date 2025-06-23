@@ -47,6 +47,9 @@
                     <button type="submit" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#ExportModal">
                         <i class="fas fa-file-export me-2"></i>EXPORT PO
                     </button>
+                    <button type="button" class="btn btn-outline-info me-2" data-bs-toggle="modal" data-bs-target="#deleteDuplicateModal">
+                        <i class="fa fa-trash me-2"></i>Delete Duplicate
+                    </button>
                 </div>
             </div>
         </div>
@@ -324,42 +327,66 @@
                 </div>
             </div>
         </div>
-    </div>
+        <!-- Modal Ubah Semua Area -->
+        <div class="modal fade" id="ubahAreaModal" tabindex="-1" aria-labelledby="ubahAreaModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ubahAreaModalLabel">Ubah Area</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="<?= base_url($role . '/updateArea/' . $id_order) ?>" method="post">
+                            <input type="hidden" name="id_order" value="<?= $id_order ?>">
+                            <div class="mb-3">
+                                <label for="area" class="form-label">Area</label>
+                                <select class="form-control" name="edit_all_area" id="edit_all_area">
+                                    <option value="">Pilih Area</option>
+                                    <?php
+                                    $areaList = ['KK1A', 'KK1B', 'KK2A', 'KK2B', 'KK2C', 'KK5G', 'KK7K', 'KK7L', 'KK8D', 'KK8F', 'KK8J', 'KK9', 'KK10', 'KK11M'];
 
-    <!-- Modal Ubah Semua Area -->
-    <div class="modal fade" id="ubahAreaModal" tabindex="-1" aria-labelledby="ubahAreaModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="ubahAreaModalLabel">Ubah Area</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="<?= base_url($role . '/updateArea/' . $id_order) ?>" method="post">
-                        <input type="hidden" name="id_order" value="<?= $id_order ?>">
-                        <div class="mb-3">
-                            <label for="area" class="form-label">Area</label>
-                            <select class="form-control" name="edit_all_area" id="edit_all_area">
-                                <option value="">Pilih Area</option>
-                                <?php
-                                $areaList = ['KK1A', 'KK1B', 'KK2A', 'KK2B', 'KK2C', 'KK5G', 'KK7K', 'KK7L', 'KK8D', 'KK8F', 'KK8J', 'KK9', 'KK10', 'KK11M'];
+                                    foreach ($areaList as $areaOption) {
+                                        $selected = in_array($areaOption, $area) ? 'selected' : ''; // Cek apakah area ada di $areaData
+                                    ?>
+                                        <option value="<?= $areaOption ?>" <?= $selected ?>><?= $areaOption ?></option>
+                                    <?php } ?>
+                                </select>
 
-                                foreach ($areaList as $areaOption) {
-                                    $selected = in_array($areaOption, $area) ? 'selected' : ''; // Cek apakah area ada di $areaData
-                                ?>
-                                    <option value="<?= $areaOption ?>" <?= $selected ?>><?= $areaOption ?></option>
-                                <?php } ?>
-                            </select>
-
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-info">Ubah</button>
-                        </div>
-                    </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-info">Ubah</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
+        <!-- Modal Delete Duplicate -->
+        <div class="modal fade" id="deleteDuplicateModal" tabindex="-1" aria-labelledby="deleteDuplicateModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteDuplicateModalLabel">Delete Duplicate Data</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="<?= base_url($role . '/deleteDuplicate/mu/' . $id_order) ?>" method="get" target="_blank">
+                            <div class="mb-3">
+                                <span>Apakah anda yakin ingin menghapus data ini?</span>
+                            </div>
+                            <!-- Button update dan batal di sebelah kanan -->
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-danger">Hapus</button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 

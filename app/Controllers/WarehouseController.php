@@ -2270,7 +2270,7 @@ class WarehouseController extends BaseController
                     'cones_kirim' => $data['cones'][$i],
                     'lot_kirim' => $data['lot'],
                     'ganti_retur' => $data['ganti_retur'],
-                    'ganti_retur' => session()->get('username'),
+                    'admin' => session()->get('username'),
                     'created_at' => date('Y-m-d H:i:s'),
                 ];
                 $saveKrg = $outCelup->insert($dataKrg); // Melakukan insert
@@ -2350,7 +2350,7 @@ class WarehouseController extends BaseController
     {
         $data = [
             'active' => $this->active,
-            'title' => 'Material System',
+            'title' => 'Report Sisa Pakai Benang',
             'role' => $this->role,
         ];
         return view($this->role . '/warehouse/report-sisa-pakai-benang', $data);
@@ -2377,6 +2377,111 @@ class WarehouseController extends BaseController
         ];
         $bulan = $bulanMap[$delivery] ?? null;
         $data = $this->stockModel->getFilterSisaPakaiBenang($bulan, $noModel, $kodeWarna);
+
+        return $this->response->setJSON($data);
+    }
+
+    public function reportSisaPakaiNylon()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Report Sisa Pakai Nylon',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/warehouse/report-sisa-pakai-nylon', $data);
+    }
+
+    public function filterSisaPakaiNylon()
+    {
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $bulanMap = [
+            'Januari' => 1,
+            'Februari' => 2,
+            'Maret' => 3,
+            'April' => 4,
+            'Mei' => 5,
+            'Juni' => 6,
+            'Juli' => 7,
+            'Agustus' => 8,
+            'September' => 9,
+            'Oktober' => 10,
+            'November' => 11,
+            'Desember' => 12
+        ];
+        $bulan = $bulanMap[$delivery] ?? null;
+        $data = $this->stockModel->getFilterSisaPakaiNylon($bulan, $noModel, $kodeWarna);
+
+        return $this->response->setJSON($data);
+    }
+
+    public function reportSisaPakaiSpandex()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Report Sisa Pakai Spandex',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/warehouse/report-sisa-pakai-spandex', $data);
+    }
+
+    public function filterSisaPakaiSpandex()
+    {
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $bulanMap = [
+            'Januari' => 1,
+            'Februari' => 2,
+            'Maret' => 3,
+            'April' => 4,
+            'Mei' => 5,
+            'Juni' => 6,
+            'Juli' => 7,
+            'Agustus' => 8,
+            'September' => 9,
+            'Oktober' => 10,
+            'November' => 11,
+            'Desember' => 12
+        ];
+        $bulan = $bulanMap[$delivery] ?? null;
+        $data = $this->stockModel->getFilterSisaPakaiSpandex($bulan, $noModel, $kodeWarna);
+
+        return $this->response->setJSON($data);
+    }
+
+    public function reportSisaPakaiKaret()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Report Sisa Pakai Karet',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/warehouse/report-sisa-pakai-karet', $data);
+    }
+
+    public function filterSisaPakaiKaret()
+    {
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $bulanMap = [
+            'Januari' => 1,
+            'Februari' => 2,
+            'Maret' => 3,
+            'April' => 4,
+            'Mei' => 5,
+            'Juni' => 6,
+            'Juli' => 7,
+            'Agustus' => 8,
+            'September' => 9,
+            'Oktober' => 10,
+            'November' => 11,
+            'Desember' => 12
+        ];
+        $bulan = $bulanMap[$delivery] ?? null;
+        $data = $this->stockModel->getFilterSisaPakaiKaret($bulan, $noModel, $kodeWarna);
 
         return $this->response->setJSON($data);
     }

@@ -172,6 +172,15 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportSisaPakaiBenang', 'WarehouseController::reportSisaPakaiBenang');
     $routes->get('warehouse/filterSisaPakaiBenang', 'WarehouseController::filterSisaPakaiBenang');
     $routes->get('warehouse/exportReportSisaPakaiBenang', 'ExcelController::exportReportSisaPakaiBenang');
+    $routes->get('warehouse/reportSisaPakaiNylon', 'WarehouseController::reportSisaPakaiNylon');
+    $routes->get('warehouse/filterSisaPakaiNylon', 'WarehouseController::filterSisaPakaiNylon');
+    $routes->get('warehouse/exportReportSisaPakaiNylon', 'ExcelController::exportReportSisaPakaiNylon');
+    $routes->get('warehouse/reportSisaPakaiSpandex', 'WarehouseController::reportSisaPakaiSpandex');
+    $routes->get('warehouse/filterSisaPakaiSpandex', 'WarehouseController::filterSisaPakaiSpandex');
+    $routes->get('warehouse/exportReportSisaPakaiSpandex', 'ExcelController::exportReportSisaPakaiSpandex');
+    $routes->get('warehouse/reportSisaPakaiKaret', 'WarehouseController::reportSisaPakaiKaret');
+    $routes->get('warehouse/filterSisaPakaiKaret', 'WarehouseController::filterSisaPakaiKaret');
+    $routes->get('warehouse/exportReportSisaPakaiKaret', 'ExcelController::exportReportSisaPakaiKaret');
 
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');
@@ -234,6 +243,11 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('retur/reportReturArea', 'ReturController::reportReturArea');
     $routes->get('retur/filterReturArea', 'ReturController::filterReturArea');
     $routes->get('retur/exportReturArea', 'ExcelController::exportReturArea');
+    //Po Plus
+    $routes->get('poplus', 'MasterdataController::poPlus');
+    $routes->get('poplus/detail', 'MasterdataController::detailPoPlus');
+    $routes->post('approvePoPlusArea', 'MasterdataController::prosesApprovePoPlusArea');
+
     // tambahan waktu
     $routes->get('pemesanan/requestAdditionalTime', 'PemesananController::requestAdditionalTime');
     $routes->get('pemesanan/getCountStatusRequest', 'PemesananController::getCountStatusRequest');
@@ -375,10 +389,9 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('filterPemesananSpandexCovering', 'CoveringPemesananController::filterPemesananSpandexCovering');
     $routes->get('excelPemesananCoveringPerArea', 'ExcelController::excelPemesananCoveringPerArea');
     $routes->get('exportPemesananSandexKaretCovering', 'PdfController::exportPemesananSandexKaretCovering');
-    
+
     $routes->post('updatePemesanan/(:any)', 'CoveringPemesananController::updatePemesanan/$1');
     $routes->get('generatePengeluaranSpandexKaretCovering/(:any)/(:any)', 'PdfController::generatePengeluaranSpandexKaretCovering/$1/$2');
-
     $routes->get('getCodePemesanan', 'CoveringPemesananController::getCodePemesanan');
     $routes->get('getColorPemesanan', 'CoveringPemesananController::getColorPemesanan');
 });
@@ -414,6 +427,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
 
     $routes->post('import/mu', 'MasterdataController::importMU');
     $routes->post('revise/mu', 'MasterdataController::reviseMU');
+    $routes->get('deleteDuplicate/mu/(:any)', 'MasterdataController::deleteDuplicateMu/$1');
 
     $routes->get('masterMaterial', 'MastermaterialController::index');
     $routes->post('tampilMasterMaterial', 'MastermaterialController::tampilMasterMaterial');
@@ -567,5 +581,9 @@ $routes->group(
         $routes->get('listRetur/(:any)', 'ApiController::listRetur/$1');
         $routes->get('filterTglPakai/(:any)', 'ApiController::filterTglPakai/$1');
         $routes->get('dataPemesananArea', 'ApiController::getDataPemesanan');
+        $routes->get('getNoModelByPoTambahan', 'ApiController::getNoModelByPoTambahan');
+        $routes->get('getStyleSizeByPoTambahan', 'ApiController::getStyleSizeByPoTambahan');
+        $routes->get('getPcsPoTambahan', 'ApiController::getPcsPoTambahan');
+        $routes->get('getMUPoTambahan', 'ApiController::getMUPoTambahan');
     }
 );

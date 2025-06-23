@@ -267,7 +267,9 @@ class MaterialController extends BaseController
 
         $itemType = $this->masterMaterialModel->getItemType();
         $openPo = $this->openPoModel->listOpenPo($no_model, $jenis, $jenis2, $penerima);
-
+        foreach ($openPo as &$po) {
+            $po['po_plus'] = ($po['po_plus'] == '1') ? 'YA' : 'TIDAK';
+        }
         // dd($openPo);
         $data =
             [
