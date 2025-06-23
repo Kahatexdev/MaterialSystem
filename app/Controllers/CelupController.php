@@ -692,6 +692,10 @@ class CelupController extends BaseController
 
     public function generateBarcode($idBon)
     {
+        $path = FCPATH . 'assets/img/logo-kahatex.png';
+        $type = pathinfo($path, PATHINFO_EXTENSION);
+        $data = file_get_contents($path);
+        $img = 'data:image/' . $type . ';base64,' . base64_encode($data);
         // data ALL BON
         $dataBon = $this->bonCelupModel->getDataById($idBon); // get data by id_bon
         $detailBon = $this->outCelupModel->getDetailBonByIdBon($idBon); // get data detail bon by id_bon
@@ -716,6 +720,7 @@ class CelupController extends BaseController
                         'cones_kirim' => 0,
                         'gw_kirim' => 0,
                         'kgs_kirim' => 0,
+                        'admin' => $detail['admin'],
                     ],
                     'ganti_retur' => $gantiRetur,
                     'jmlKarung' => 0,
@@ -764,7 +769,8 @@ class CelupController extends BaseController
                     'cones' => $id['cones_kirim'],
                     'lot' => $id['lot_kirim'],
                     'no_karung' => $id['no_karung'],
-                    'barcode' => base64_encode($barcode),
+                    'admin' => $group['totals']['admin'],
+                    'barcode' => 'data:image/png;base64,' . base64_encode($barcode),
                 ];
             }
         }
@@ -778,6 +784,7 @@ class CelupController extends BaseController
             'title' => "Generate",
             'id_bon' => $idBon,
             'dataBon' => $dataBon,
+            'img' => $img
         ];
         // dd($data);
         return view($this->role . '/out/generate', $data);
