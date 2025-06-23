@@ -558,6 +558,8 @@ class CelupController extends BaseController
                         'cones_kirim' => $data['cones_kirim'][$h][$i] ?? null,
                         'lot_kirim' => $lot['lot_celup'],
                         'ganti_retur' => $gantiRetur,
+                        'operator_packing' => $data['operator_packing'][$h][$i] ?? null,
+                        'shift' => $data['shift'][$h][$i] ?? null,
                         'admin' => session()->get('username'),
                         'created_at' => date('Y-m-d H:i:s'),
                         'updated_at' => '',

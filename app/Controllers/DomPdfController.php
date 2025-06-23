@@ -42,28 +42,6 @@ class DomPdfController extends BaseController
         //
     }
 
-    public function printBon($idBon)
-    {
-        $dompdf = new DompdfService();
-
-        $dataBon = $this->bonCelupModel->getDataById($idBon); // get data by id_bon
-        $detailBon = $this->outCelupModel->getDetailBonByIdBon($idBon); // get data detail bon by id_bon
-
-        // Ambil data dari database sesuai $id jika perlu
-        $html = view($this->role . '/out/bon', [
-            'id' => $idBon,
-            'dataBon' => $dataBon,
-            'detailBon' => $detailBon
-        ]);
-
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
-
-        // Stream preview atau download
-        return $dompdf->stream("bon_$idBon.pdf", ['Attachment' => false]);
-    }
-
     public function printBarcode($idBon)
     {
         $dompdf = new DompdfService();

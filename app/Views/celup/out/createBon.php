@@ -126,15 +126,15 @@
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label>Harga</label>
-                                                    <input type="float" class="form-control" name="harga[0]" id="harga" required>
+                                                    <input type="number" step="0.01" class="form-control" name="harga[0]" id="harga" required>
                                                 </div>
                                                 <div class="col-md-1">
                                                     <label for="ganti-retur" class="text-center">Ganti Retur</label>
                                                     <div class="row">
-                                                        <div class="col-md-3">
+                                                        <div class="col-md-3 form-check">
                                                             <label>
                                                                 <input type="hidden" name="ganti_retur[0]" value="0">
-                                                                <input type="checkbox" name="ganti_retur[0]" id="ganti_retur" value="1"
+                                                                <input type="checkbox" name="ganti_retur[0]" id="ganti_retur" value="1" class="form-check-input"
                                                                     <?= isset($data['ganti_retur']) && $data['ganti_retur'] == 1 ? 'checked' : '' ?>>
                                                             </label>
                                                         </div>
@@ -161,6 +161,8 @@
                                                                 <th class="text-center">NW Kirim</th>
                                                                 <th class="text-center">Cones Kirim</th>
                                                                 <th class="text-center">Lot Kirim</th>
+                                                                <th class="text-center">Operator Packing</th>
+                                                                <th class="text-center">Shift</th>
                                                                 <th class="text-center">
                                                                     <button type="button" class="btn btn-info" id="addRow">
                                                                         <i class="fas fa-plus"></i>
@@ -171,10 +173,17 @@
                                                         <tbody>
                                                             <tr>
                                                                 <td><input type="text" class="form-control text-center" name="no_karung[0][0]" value="1" readonly></td>
-                                                                <td><input type="float" class="form-control gw_kirim_input" name="gw_kirim[0][0]" required></td>
-                                                                <td><input type="float" class="form-control kgs_kirim_input" name="kgs_kirim[0][0]" required></td>
-                                                                <td><input type="float" class="form-control cones_kirim_input" name="cones_kirim[0][0]" required></td>
+                                                                <td><input type="number" step="0.01" class="form-control gw_kirim_input" name="gw_kirim[0][0]" required></td>
+                                                                <td><input type="number" step="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[0][0]" required></td>
+                                                                <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[0][0]" required></td>
                                                                 <td><input type="text" class="form-control lot_celup_input" name="items[0][lot_celup]" id="lot_celup" required></td>
+                                                                <td><input type="text" class="form-control operator_packing_input" name="operator_packing[0][0]" id="operator_packing" required></td>
+                                                                <td><select class="form-control" name="shift[0][0]" id="shift" required>
+                                                                        <option value="">Pilih Shift</option>
+                                                                        <option value="SHIFT A">Shift A</option>
+                                                                        <option value="SHIFT B">Shift B</option>
+                                                                        <option value="SHIFT C">Shift C</option>
+                                                                    </select></td>
                                                                 <td class="text-center">
                                                                     <!-- <button type="button" class="btn btn-danger removeRow">
                                                                         <i class="fas fa-trash"></i>
@@ -409,7 +418,7 @@
                                             </div>
                                             <div class="col-md-3">
                                                 <label>Harga</label>
-                                                <input type="float" class="form-control" name="harga[${tabIndex - 1}]" id="harga" required>
+                                                <input type="number" step="0.01" class="form-control" name="harga[${tabIndex - 1}]" id="harga" required>
                                             </div>
                                             <div class="col-md-1">
                                                 <label for="ganti-retur" class="text-center">Ganti Retur</label>
@@ -441,6 +450,8 @@
                                                             <th class="text-center">Kgs Kirim</th>
                                                             <th class="text-center">Cones Kirim</th>
                                                             <th class="text-center">Lot Kirim</th>
+                                                            <th class="text-center">Operator Packing</th>
+                                                            <th class="text-center">Shift</th>
                                                             <th class="text-center">
                                                                 <button type="button" class="btn btn-info" id="addRow">
                                                                     <i class="fas fa-plus"></i>
@@ -451,11 +462,17 @@
                                                     <tbody>
                                                         <tr>
                                                             <td><input type="text" class="form-control text-center" name="no_karung[${tabIndex - 1}][0]" value="1" readonly></td>
-                                                            <td><input type="float" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex - 1}][0]" required></td>
-                                                            <td><input type="float" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex - 1}][0]" required></td>
-                                                            <td><input type="float" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex - 1}][0]" required></td>
+                                                            <td><input type="number" step="0.01" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex - 1}][0]" required></td>
+                                                            <td><input type="number" step="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex - 1}][0]" required></td>
+                                                            <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex - 1}][0]" required></td>
                                                             <td><input type="text" class="form-control lot_celup_input" name="items[${tabIndex - 1}][lot_celup]" id="${lotCelupId}" required></td>
-
+                                                            <td><input type="text" class="form-control operator_packing_input" name="operator_packing[${tabIndex - 1}][0]" required></td>
+                                                                <td><select class="form-control" name="shift[${tabIndex - 1}][0]" id="shift" required>
+                                                                        <option value="">Pilih Shift</option>
+                                                                        <option value="SHIFT A">Shift A</option>
+                                                                        <option value="SHIFT B">Shift B</option>
+                                                                        <option value="SHIFT C">Shift C</option>
+                                                                    </select></td>
                                                             <td class="text-center">
                                                                 <!-- <button type="button" class="btn btn-danger removeRow">
                                                                         <i class="fas fa-trash"></i>
@@ -558,10 +575,17 @@
 
                     newRow.innerHTML = `
                     <td><input type="text" class="form-control text-center" name="no_karung[${tabIndex-2}][${rowCount-1}]" value="${rowCount}" readonly></td>
-                    <td><input type="float" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
-                    <td><input type="float" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
-                    <td><input type="float" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
-                    <td><input type="float" class="form-control lot_celup_input" name="lot_celup[${tabIndex-2}][${rowCount-1}]" value="${valueLot}" id="${lotCelupId}" required></td>
+                    <td><input type="number" step="0.01" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
+                    <td><input type="number" step="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
+                    <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
+                    <td><input type="text" class="form-control lot_celup_input" name="lot_celup[${tabIndex-2}][${rowCount-1}]" value="${valueLot}" id="${lotCelupId}" required></td>
+                    <td><input type="text" class="form-control operator_packing_input" name="operator_packing[${tabIndex-2}][${rowCount-1}]" required></td>
+                        <td><select class="form-control" name="shift[${tabIndex-2}][${rowCount-1}]" id="shift" required>
+                        <option value="">Pilih Shift</option>
+                        <option value="SHIFT A">Shift A</option>
+                        <option value="SHIFT B">Shift B</option>
+                        <option value="SHIFT C">Shift C</option>
+                        </select></td>
                     <td class="text-center">
                     <button type="button" class="btn btn-danger removeRow"><i class="fas fa-trash"></i></button>
                     </td>
@@ -673,10 +697,17 @@
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
             <td><input type="text" class="form-control text-center" name="no_karung[0][${rowCount-1}]" value="${rowCount}" readonly></td>
-            <td><input type="float" class="form-control" name="gw_kirim[0][${rowCount-1}]" required></td>
-            <td><input type="float" class="form-control" name="kgs_kirim[0][${rowCount-1}]" required></td>
-            <td><input type="float" class="form-control" name="cones_kirim[0][${rowCount-1}]" required></td>
+            <td><input type="number" step="0.01" class="form-control" name="gw_kirim[0][${rowCount-1}]" required></td>
+            <td><input type="number" step="0.01" class="form-control" name="kgs_kirim[0][${rowCount-1}]" required></td>
+            <td><input type="number" step="0.01" class="form-control" name="cones_kirim[0][${rowCount-1}]" required></td>
             <td><input type="text" class="form-control lot_celup_input" name="items[0][lot_celup]" id="lot_celup" value="${lotCelupValue}" required></td>
+            <td><input type="text" class="form-control" name="operator_packing[0][${rowCount - 1}]" required></td>
+            <td><select class="form-control" name="shift[0][${rowCount - 1}]" id="shift" required>
+                <option value="">Pilih Shift</option>
+                <option value="SHIFT A">Shift A</option>
+                <option value="SHIFT B">Shift B</option>
+                <option value="SHIFT C">Shift C</option>
+            </select></td>
             <td class="text-center">
                 <button type="button" class="btn btn-danger removeRow"><i class="fas fa-trash"></i></button>
             </td>
