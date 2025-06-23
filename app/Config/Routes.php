@@ -532,6 +532,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('outCelup/saveBon/', 'CelupController::saveBon');
     $routes->get('generate/(:num)', 'CelupController::generateBarcode/$1');
     $routes->get('printBon/(:num)', 'PdfController::printBon/$1');
+    // god routes
+    $routes->get('importStock', 'GodController::index');
+    $routes->post('importStock/upload', 'GodController::importStock');
 });
 
 $routes->options('(:any)', function () {
