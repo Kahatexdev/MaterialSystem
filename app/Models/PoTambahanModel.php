@@ -127,4 +127,17 @@ class PoTambahanModel extends Model
             ->orderBy('material.style_size', 'ASC')
             ->findAll();
     }
+    public function getMuPoTambahan($no_model, $style_size, $area)
+    {
+        return $this->select(' master_material.jenis, material.*, SUM(po_tambahan.poplus_mc_kg+po_tambahan.plus_pck_kg) AS ttl_keb')
+            ->join('material', 'material.id_material=po_tambahan.id_material', 'left')
+            ->join('master_material', 'master_material.item_type=material.item_type', 'left')
+            ->join('master_order', 'master_order.id_order=material.id_order', 'left')
+            ->where('po_tambahan.admin', $area)
+            ->where('master_order.no_model', $no_model)
+            ->where('material.style_size', $style_size)
+            ->where('po_tambahan.status', 'approved')
+            ->groupBy('master_order.no_model, material.item_type, material.kode_warna')
+            ->findAll();
+    }
 }

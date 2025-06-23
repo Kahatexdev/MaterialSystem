@@ -23,6 +23,7 @@ use App\Models\ReturModel;
 use App\Models\KategoriReturModel;
 use App\Models\PoTambahanModel;
 use App\Models\TrackingPoCovering;
+use PHPUnit\Framework\Attributes\IgnoreFunctionForCodeCoverage;
 
 class ApiController extends ResourceController
 {
@@ -347,6 +348,7 @@ class ApiController extends ResourceController
                 'jl_mc'           => $data['jalan_mc'][$i] ?? null,
                 'ttl_qty_cones'   => $data['ttl_cns'][$i] ?? null,
                 'ttl_berat_cones' => $data['ttl_berat_cns'][$i] ?? null,
+                'po_tambahan'     => $data['po_tambahan'][$i] ?? 0,
                 'admin'           => $data['area'][$i] ?? null,
                 'no_model'        => $data['no_model'][$i] ?? null,
                 'style_size'      => $data['style_size'][$i] ?? null,
@@ -369,6 +371,7 @@ class ApiController extends ResourceController
             $existingData = $this->pemesananModel
                 ->where('id_material', $resultItem['id_material'])
                 ->where('tgl_pakai', $resultItem['tgl_pakai'])
+                ->where('po_tambahan', $resultItem['po_tambahan'])
                 ->where('admin', $resultItem['admin'])
                 ->first();
 
@@ -918,6 +921,19 @@ class ApiController extends ResourceController
         }
 
         $data = $this->poTambahanModel->getStyleSizeBYNoModelArea($area, $noModel);
+
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($data);
+    }
+    public function getMUPoTambahan()
+    {
+        $no_model = $this->request->getGet('no_model');
+        $style_size = $this->request->getGet('style_size');
+        $area = $this->request->getGet('area');
+        // $qty = $this->request->getGet('qty');
+
+        $data = $this->poTambahanModel->getMuPoTambahan($no_model, $style_size, $area);
 
         return $this->response
             ->setStatusCode(200)
