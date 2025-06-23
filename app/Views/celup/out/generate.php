@@ -215,7 +215,11 @@
                 <div class="group">
                     <a href="<?= base_url($role . '/printBon/' . $id_bon) ?>" class="btn btn-info" target="_blank">
                         <i class="ni ni-single-copy-04 me-2"></i>
-                        PRINT
+                        PRINT BON
+                    </a>
+                    <a href="<?= base_url($role . '/printBarcode/' . $id_bon) ?>" class="btn btn-info" target="_blank">
+                        <i class="ni ni-single-copy-04 me-2"></i>
+                        PRINT BARCODE
                     </a>
                 </div>
             </div>
