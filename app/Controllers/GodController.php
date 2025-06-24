@@ -186,7 +186,7 @@ class GodController extends BaseController
                     $material = $this->materialModel
                         ->where('item_type', $normalizedType)
                         ->where('kode_warna', $kodeWarna)
-                        ->findAll();
+                        ->first();
                     // var_dump($normalizedType, $kodeWarna);
                     if (! $material) {
                         $msg = sprintf(
@@ -214,7 +214,7 @@ class GodController extends BaseController
                         'no_model'         => $noModel,
                         'item_type'        => $normalizedType,
                         'kode_warna'       => $kodeWarna,
-                        'warna'            => $color,
+                        'warna'            => $material['warna'],
                         'kg_celup'         => $kgCelup,
                         'lot_urut'         => 1,
                         'lot_celup'        => trim(ltrim($row[16], ', ')),
@@ -277,7 +277,7 @@ class GodController extends BaseController
                         'no_model'      => $noModel,
                         'item_type'     => $normalizedType,
                         'kode_warna'    => $kodeWarna,
-                        'warna'         => $color,
+                        'warna'         => $material['warna'],
                         'kgs_stock_awal' => 0,
                         'cns_stock_awal' => 0,
                         'krg_stock_awal' => 0,
