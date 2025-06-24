@@ -15,6 +15,7 @@ use App\Models\PemasukanModel;
 use App\Models\StockModel;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
+use App\Models\ClusterModel;
 
 
 class GodController extends BaseController
@@ -28,6 +29,7 @@ class GodController extends BaseController
     protected $pemasukanModel;
     protected $masterOrderModel;
     protected $materialModel;
+    protected $clusterModel;
     protected $request;
 
 
@@ -40,6 +42,7 @@ class GodController extends BaseController
         $this->pemasukanModel = new PemasukanModel();
         $this->masterOrderModel = new MasterOrderModel();
         $this->materialModel = new MaterialModel();
+        $this->clusterModel = new ClusterModel();
         $this->request = \Config\Services::request();
 
         $this->role = session()->get('role');
@@ -134,9 +137,16 @@ class GodController extends BaseController
                         continue;
                     }
 
-                    // Format kode LB, tambahkan "00" setelah 'LB '
-                    $row[10] = preg_replace('/(LB\s)(\d+-\d+)/', '${1}00${2}', $row[10]);
+                    // Untuk kode yang diawali dengan "LB "
+                    if (preg_match('/LB\s\d+-\d+/', $row[10])) {
+                        $row[10] = preg_replace('/LB\s(\d+-\d+)/', 'LB.00$1', $row[10]);
+                    }
 
+
+                    // Untuk kode yang diawali dengan LC, LCJ, KHT, atau KP
+                    if (preg_match('/^(LC|LCJ|KHT|KP)\s+\d+$/', $row[10])) {
+                        $row[10] = preg_replace('/^([A-Z]+)\s+(\d+)$/', '$1.$2', $row[10]);
+                    }
                     // cek material
                     if (! $this->materialModel
                         ->where('item_type', trim($row[9]))
@@ -168,8 +178,8 @@ class GodController extends BaseController
                         'kg_celup'         => $kgCelup,
                         'lot_urut'         => 1,
                         'lot_celup'        => trim(ltrim($row[16], ', ')),
-                        'tanggal_schedule' => '1999-01-01',
-                        'tanggal_kelos'    => '1999-01-01',
+                        'tanggal_schedule' => date('Y-m-d'),
+                        'tanggal_kelos'    => date('Y-m-d'),
                         'last_status'      => 'sent',
                         'ket_daily_cek'    => 'Kelos (1999-01-01)',
                         'po_plus'          => '0',
@@ -197,11 +207,21 @@ class GodController extends BaseController
 
                     $idOutCelup = $outCelupMdl->getInsertID();
 
+                    $clusterName = strtoupper(trim($row[1]));
+                    if (! $this->clusterModel
+                        ->where('nama_cluster', $clusterName)
+                        ->first()) {
+                        $msg = "Baris $line dilewati: cluster '{$clusterName}' tidak ditemukan.";
+                        log_message('warning', 'ImportStock: ' . $msg);
+                        $errorLogs[] = $msg;
+                        // lewati seluruh proses insert untuk baris ini
+                        continue;
+                    }
                     // Insert pemasukan
                     $this->pemasukanModel->insert([
                         'id_out_celup' => $idOutCelup,
-                        'tgl_masuk'    => '1999-01-01',
-                        'nama_cluster' => strtoupper(trim($row[1])),
+                        'tgl_masuk'    => date('Y-m-d'),
+                        'nama_cluster' => $clusterName,
                         'out_jalur'    => '0',
                         'admin'        => session()->get('username'),
                         'created_at'   => date('Y-m-d H:i:s'),
@@ -224,7 +244,7 @@ class GodController extends BaseController
                         'cns_in_out'    => floatval(str_replace(',', '.', $row[13])),
                         'krg_in_out'    => trim($row[14]),
                         'lot_stock'     => trim(ltrim($row[16], ', ')),
-                        'nama_cluster'  => strtoupper(trim($row[1])),
+                        'nama_cluster'  => $clusterName,
                         'admin'         => session()->get('username'),
                         'created_at'    => date('Y-m-d H:i:s')
                     ]);
