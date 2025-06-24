@@ -29,6 +29,8 @@ class OutCelupModel extends Model
         'cones_kirim',
         'lot_kirim',
         'ganti_retur',
+        'operator_packing',
+        'shift',
         'admin',
         'created_at',
         'updated_at',

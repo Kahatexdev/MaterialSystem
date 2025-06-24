@@ -42,28 +42,6 @@ class DomPdfController extends BaseController
         //
     }
 
-    public function printBon($idBon)
-    {
-        $dompdf = new DompdfService();
-
-        $dataBon = $this->bonCelupModel->getDataById($idBon); // get data by id_bon
-        $detailBon = $this->outCelupModel->getDetailBonByIdBon($idBon); // get data detail bon by id_bon
-
-        // Ambil data dari database sesuai $id jika perlu
-        $html = view($this->role . '/out/bon', [
-            'id' => $idBon,
-            'dataBon' => $dataBon,
-            'detailBon' => $detailBon
-        ]);
-
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
-
-        // Stream preview atau download
-        return $dompdf->stream("bon_$idBon.pdf", ['Attachment' => false]);
-    }
-
     public function printBarcode($idBon)
     {
         $dompdf = new DompdfService();
@@ -76,11 +54,19 @@ class DomPdfController extends BaseController
 
         $generator = new BarcodeGeneratorPNG();
         $barcodeImages = [];
-        foreach ($detailBon as $i => $row) {
+        foreach ($detailBon as $i => &$row) {
             $id = $row['id_out_celup'];
             $bin = $generator->getBarcode($id, $generator::TYPE_CODE_128);
             $barcodeImages[$i] = 'data:image/png;base64,' . base64_encode($bin);
+            $operator = $row['operator_packing'];
+            $operatorParts = explode(' ', trim($operator));
+            $firstName = $operatorParts[0] ?? '';
+            $secondInitial = isset($operatorParts[1]) ? strtoupper(substr($operatorParts[1], 0, 1)) : '';
+            $operatorShort = $firstName . ($secondInitial ? ' ' . $secondInitial : '');
+            $row['operator_packing'] = $operatorShort;
         }
+        unset($row); // break the reference
+
         // Ambil data barcode sesuai $id
         $html = view($this->role . '/out/barcode', [
             'id' => $idBon,
@@ -88,6 +74,7 @@ class DomPdfController extends BaseController
             'detailBon' => $detailBon,
             'img' => $img,
             'barcodeImages' => $barcodeImages,
+            'operatorShort' => $operatorShort,
         ]);
 
         $dompdf->loadHtml($html);
