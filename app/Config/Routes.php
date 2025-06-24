@@ -590,6 +590,6 @@ $routes->group(
         $routes->get('getStyleSizeByPoTambahan', 'ApiController::getStyleSizeByPoTambahan');
         $routes->get('getPcsPoTambahan', 'ApiController::getPcsPoTambahan');
         $routes->get('getMUPoTambahan', 'ApiController::getMUPoTambahan');
-        $routes->get('exportGlobalReport', 'ExcelController::exportGlobalReport');
+        $routes->get('apiexportGlobalReport/(:any)', 'ExcelController::apiexportGlobalReport/$1');
     }
 );
