@@ -112,6 +112,27 @@ class GodController extends BaseController
             $count     = 0;
             $errorLogs = [];
 
+            function normalizeItemType(string $rawType): string
+            {
+                // mapping kata → singkatan
+                $map = [
+                    'COTTON'  => 'CTN',
+                    'ORGANIC' => 'ORG',
+                    'SPNDX' => 'SPD',
+                    // tambahkan mapping lain kalau perlu
+                ];
+                // lakukan penggantian untuk setiap mapping
+                foreach ($map as $search => $replace) {
+                    // \b supaya hanya kata utuh; i supaya case-insensitive
+                    $rawType = preg_replace(
+                        '/\b' . preg_quote($search, '/') . '\b/i',
+                        $replace,
+                        $rawType
+                    );
+                }
+                return $rawType;
+            }
+
             foreach (array_slice($rows, 3) as $i => $row) {
                 $line = $i + 4;
                 if (empty($row[1]) || empty($row[6])) {
@@ -121,40 +142,59 @@ class GodController extends BaseController
                     continue;
                 }
 
+                // prepare data fields
+                $noModel    = trim($row[6]);
+                $rawType = trim($row[9]);
+                $kodeWarna  = trim($row[10]);
+                $color      = trim($row[11]);
+
                 try {
                     // parsing tanggal
                     $delAwal  = $this->parseExcelDate($row[7]);
+                    $delAkhir = $this->parseExcelDate($row[8]);
 
-                    // cek referensi
-                    if (! $this->masterOrderModel
-                        ->where('no_model', trim($row[6]))
+                    // cek referensi master order
+                    $masterOrder = $this->masterOrderModel
+                        ->where('no_model', $noModel)
                         ->where('delivery_awal', $delAwal)
-                        ->first()) {
+                        ->first();
 
-                        $msg = "Baris $line dilewati: master order tidak ditemukan.";
+                    if (! $masterOrder) {
+                        $msg = sprintf(
+                            "Baris %d dilewati: master order tidak ditemukan (no_model=%s, delivery_awal=%s)",
+                            $line,
+                            $noModel,
+                            $delAwal
+                        );
                         log_message('warning', 'ImportStock: ' . $msg);
                         $errorLogs[] = $msg;
                         continue;
                     }
 
-                    // Untuk kode yang diawali dengan "LB "
-                    if (preg_match('/LB\s\d+-\d+/', $row[10])) {
-                        $row[10] = preg_replace('/LB\s(\d+-\d+)/', 'LB.00$1', $row[10]);
+                    $normalizedType = normalizeItemType($rawType);
+                    // normalisasi kode warna
+                    if (preg_match('/LB\s\d+-[\d-]+$/', $kodeWarna)) {
+                        // Contoh: LB 123-456 jadi LB.00123-456
+                        $kodeWarna = preg_replace('/LB\s(\d+-[\d-]+)$/', 'LB.00$1', $kodeWarna);
+                    }
+                    if (preg_match('/^(LC|LCJ|KHT|KP|C|KPM)\s+[\d-]+(?:-[\d-]+)*$/', $kodeWarna)) {
+                        // Tangani LCJ 00130-1-1 dan variasi lain
+                        $kodeWarna = preg_replace('/^([A-Z]+)\s+(.+)$/', '$1.$2', $kodeWarna);
                     }
 
-
-                    // Untuk kode yang diawali dengan LC, LCJ, KHT, atau KP
-                    if (preg_match('/^(LC|LCJ|KHT|KP)\s+\d+$/', $row[10])) {
-                        $row[10] = preg_replace('/^([A-Z]+)\s+(\d+)$/', '$1.$2', $row[10]);
-                    }
                     // cek material
-                    if (! $this->materialModel
-                        ->where('item_type', trim($row[9]))
-                        ->where('kode_warna', trim($row[10]))
-                        ->where('color', trim($row[11]))
-                        ->first()) {
-
-                        $msg = "Baris $line dilewati: material tidak ditemukan.";
+                    $material = $this->materialModel
+                        ->where('item_type', $normalizedType)
+                        ->where('kode_warna', $kodeWarna)
+                        ->findAll();
+                    // var_dump($normalizedType, $kodeWarna);
+                    if (! $material) {
+                        $msg = sprintf(
+                            "Baris %d dilewati: material tidak ditemukan (item_type=%s, kode_warna=%s)",
+                            $line,
+                            $normalizedType,
+                            $kodeWarna
+                        );
                         log_message('warning', 'ImportStock: ' . $msg);
                         $errorLogs[] = $msg;
                         continue;
@@ -171,30 +211,29 @@ class GodController extends BaseController
 
                     // Insert schedule_celup
                     $scheduleMdl->insert([
-                        'no_model'         => trim($row[6]),
-                        'item_type'        => trim($row[9]),
-                        'kode_warna'       => trim($row[10]),
-                        'warna'            => trim($row[11]),
+                        'no_model'         => $noModel,
+                        'item_type'        => $normalizedType,
+                        'kode_warna'       => $kodeWarna,
+                        'warna'            => $color,
                         'kg_celup'         => $kgCelup,
                         'lot_urut'         => 1,
                         'lot_celup'        => trim(ltrim($row[16], ', ')),
                         'tanggal_schedule' => date('Y-m-d'),
                         'tanggal_kelos'    => date('Y-m-d'),
                         'last_status'      => 'sent',
-                        'ket_daily_cek'    => 'Kelos (1999-01-01)',
+                        'ket_daily_cek'    => 'Kelos (' . date('Y-m-d') . ')',
                         'po_plus'          => '0',
                         'user_cek_status'  => session()->get('role'),
                         'created_at'       => date('Y-m-d H:i:s'),
                         'updated_at'       => date('Y-m-d H:i:s'),
                     ]);
 
-
                     $idCelup = $scheduleMdl->getInsertID();
 
                     // Insert out_celup
                     $outCelupMdl->insert([
                         'id_celup'    => $idCelup,
-                        'no_model'    => trim($row[6]),
+                        'no_model'    => $noModel,
                         'l_m_d'       => floatval(str_replace(',', '.', $row[3])),
                         'kgs_kirim'   => $kgCelup,
                         'cones_kirim' => floatval(str_replace(',', '.', $row[13])),
@@ -207,16 +246,19 @@ class GodController extends BaseController
 
                     $idOutCelup = $outCelupMdl->getInsertID();
 
+                    // cek cluster
                     $clusterName = strtoupper(trim($row[1]));
-                    if (! $this->clusterModel
-                        ->where('nama_cluster', $clusterName)
-                        ->first()) {
-                        $msg = "Baris $line dilewati: cluster '{$clusterName}' tidak ditemukan.";
+                    if (! $this->clusterModel->where('nama_cluster', $clusterName)->first()) {
+                        $msg = sprintf(
+                            "Baris %d dilewati: cluster '%s' tidak ditemukan.",
+                            $line,
+                            $clusterName
+                        );
                         log_message('warning', 'ImportStock: ' . $msg);
                         $errorLogs[] = $msg;
-                        // lewati seluruh proses insert untuk baris ini
                         continue;
                     }
+
                     // Insert pemasukan
                     $this->pemasukanModel->insert([
                         'id_out_celup' => $idOutCelup,
@@ -232,10 +274,10 @@ class GodController extends BaseController
 
                     // Insert stock
                     $this->stockModel->insert([
-                        'no_model'      => trim($row[6]),
-                        'item_type'     => trim($row[9]),
-                        'kode_warna'    => trim($row[10]),
-                        'warna'         => trim($row[11]),
+                        'no_model'      => $noModel,
+                        'item_type'     => $normalizedType,
+                        'kode_warna'    => $kodeWarna,
+                        'warna'         => $color,
                         'kgs_stock_awal' => 0,
                         'cns_stock_awal' => 0,
                         'krg_stock_awal' => 0,
