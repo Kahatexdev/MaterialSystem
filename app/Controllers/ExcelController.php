@@ -1744,7 +1744,7 @@ class ExcelController extends BaseController
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $headers = ['No', 'No Model', 'Delivery', 'Area', 'Item Type', 'Kode Warna', 'Warna', 'Loss', 'Qty PO', 'Qty PO(+)', 'Stock Awal', 'Stock Opname', 'Datang Solid', '(+) Datang Solid', 'Ganti Retur', 'Datang Lurex', '(+)Datang Lurex', 'Datang PB GBN', 'Retur PB Area', 'Pakai Area', 'Pakai Lain-Lain', 'Retur Stock', 'Retur Titip', 'Dipinjam', 'Pindah Order', 'Pindah Ke Stock Mati', 'Stock Akhir', 'Tagihan GBN', 'Jatah Area'];
+        $headers = ['No', 'Buyer', 'No Model', 'Delivery', 'Area', 'Item Type', 'Kode Warna', 'Warna', 'Loss', 'Qty PO', 'Qty PO(+)', 'Stock Awal', 'Stock Opname', 'Datang Solid', '(+) Datang Solid', 'Ganti Retur', 'Datang Lurex', '(+)Datang Lurex', 'Datang PB GBN', 'Retur PB Area', 'Pakai Area', 'Pakai Lain-Lain', 'Retur Stock', 'Retur Titip', 'Dipinjam', 'Pindah Order', 'Pindah Ke Stock Mati', 'Stock Akhir', 'Tagihan GBN', 'Jatah Area'];
         $col = 'A';
         foreach ($headers as $header) {
             $sheet->setCellValue($col . '3', $header);
@@ -1759,37 +1759,38 @@ class ExcelController extends BaseController
         foreach ($data as $item) {
             // Format setiap nilai untuk memastikan nilai 0 dan angka dengan dua desimal
             $sheet->setCellValue('A' . $row, $no++);
-            $sheet->setCellValue('B' . $row, $item['no_model'] ?: '-'); // no model
+            $sheet->setCellValue('B' . $row, $item['buyer'] ?: '-'); // no model
+            $sheet->setCellValue('C' . $row, $item['no_model'] ?: '-'); // no model
             if ($delIndex < $totalDel) {
-                $sheet->setCellValue('C' . $row, $delivery[$delIndex]['delivery']);
+                $sheet->setCellValue('D' . $row, $delivery[$delIndex]['delivery']);
                 $delIndex++;
             } else {
-                $sheet->setCellValue('C' . $row, '');  // atau '-' sesuai preferensi
+                $sheet->setCellValue('D' . $row, '');  // atau '-' sesuai preferensi
             }
-            $sheet->setCellValue('D' . $row, $item['area'] ?: '-');
-            $sheet->setCellValue('E' . $row, $item['item_type'] ?: '-'); // item type
-            $sheet->setCellValue('F' . $row, $item['kode_warna'] ?: '-'); //kode warna
-            $sheet->setCellValue('G' . $row, $item['color'] ?: '-'); // color
-            $sheet->setCellValue('H' . $row, isset($item['loss']) ? number_format($item['loss'], 2, '.', '') : 0); // loss
-            $sheet->setCellValue('I' . $row, isset($item['kgs']) ? number_format($item['kgs'], 2, '.', '') : 0); // qty po
-            $sheet->setCellValue('J' . $row, '-'); // qty po (+)
-            $sheet->setCellValue('K' . $row, isset($item['kgs_stock_awal']) ? number_format($item['kgs_stock_awal'], 2, '.', '') : 0); // stock awal
-            $sheet->setCellValue('L' . $row, '-'); // stock opname
-            $sheet->setCellValue('M' . $row, isset($item['kgs_kirim']) ? number_format($item['kgs_kirim'], 2, '.', '') : 0); // datan solid
-            $sheet->setCellValue('N' . $row, '-'); // (+) datang solid
-            $sheet->setCellValue('O' . $row, '-'); // ganti retur
-            $sheet->setCellValue('P' . $row, '-'); // datang lurex
-            $sheet->setCellValue('Q' . $row, '-'); // (+) datang lurex
-            $sheet->setCellValue('R' . $row, '-'); // retur pb gbn
-            $sheet->setCellValue('S' . $row, isset($item['kgs_retur']) ? number_format($item['kgs_retur'], 2, '.', '') : 0); // retur bp area
-            $sheet->setCellValue('T' . $row, isset($item['kgs_out']) ? number_format($item['kgs_out'], 2, '.', '') : 0); // pakai area
-            $sheet->setCellValue('U' . $row, '-'); // pakai lain-lain
-            $sheet->setCellValue('V' . $row, '-'); // retur stock
-            $sheet->setCellValue('W' . $row, '-'); // retur titip
-            $sheet->setCellValue('X' . $row, '-'); // dipinjam
-            $sheet->setCellValue('Y' . $row, '-'); // pindah order
-            $sheet->setCellValue('Z' . $row, '-'); // pindah ke stock mati
-            $sheet->setCellValue('AA' . $row, isset($item['kgs_in_out']) ? number_format($item['kgs_in_out'], 2, '.', '') : 0); // stock akhir
+            $sheet->setCellValue('E' . $row, $item['area'] ?: '-');
+            $sheet->setCellValue('F' . $row, $item['item_type'] ?: '-'); // item type
+            $sheet->setCellValue('G' . $row, $item['kode_warna'] ?: '-'); //kode warna
+            $sheet->setCellValue('H' . $row, $item['color'] ?: '-'); // color
+            $sheet->setCellValue('I' . $row, isset($item['loss']) ? number_format($item['loss'], 2, '.', '') : 0); // loss
+            $sheet->setCellValue('J' . $row, isset($item['kgs']) ? number_format($item['kgs'], 2, '.', '') : 0); // qty po
+            $sheet->setCellValue('K' . $row, '-'); // qty po (+)
+            $sheet->setCellValue('L' . $row, isset($item['kgs_stock_awal']) ? number_format($item['kgs_stock_awal'], 2, '.', '') : 0); // stock awal
+            $sheet->setCellValue('M' . $row, '-'); // stock opname
+            $sheet->setCellValue('N' . $row, isset($item['kgs_kirim']) ? number_format($item['kgs_kirim'], 2, '.', '') : 0); // datan solid
+            $sheet->setCellValue('O' . $row, '-'); // (+) datang solid
+            $sheet->setCellValue('P' . $row, '-'); // ganti retur
+            $sheet->setCellValue('Q' . $row, '-'); // datang lurex
+            $sheet->setCellValue('R' . $row, '-'); // (+) datang lurex
+            $sheet->setCellValue('S' . $row, '-'); // retur pb gbn
+            $sheet->setCellValue('T' . $row, isset($item['kgs_retur']) ? number_format($item['kgs_retur'], 2, '.', '') : 0); // retur bp area
+            $sheet->setCellValue('U' . $row, isset($item['kgs_out']) ? number_format($item['kgs_out'], 2, '.', '') : 0); // pakai area
+            $sheet->setCellValue('V' . $row, '-'); // pakai lain-lain
+            $sheet->setCellValue('W' . $row, '-'); // retur stock
+            $sheet->setCellValue('X' . $row, '-'); // retur titip
+            $sheet->setCellValue('Y' . $row, '-'); // dipinjam
+            $sheet->setCellValue('Z' . $row, '-'); // pindah order
+            $sheet->setCellValue('AA' . $row, '-'); // pindah ke stock mati
+            $sheet->setCellValue('AB' . $row, isset($item['kgs_in_out']) ? number_format($item['kgs_in_out'], 2, '.', '') : 0); // stock akhir
 
             // Tagihan GBN dan Jatah Area perhitungan
             $tagihanGbn = isset($item['kgs']) ? $item['kgs'] - ($item['kgs_kirim'] + $item['kgs_stock_awal']) : 0;
