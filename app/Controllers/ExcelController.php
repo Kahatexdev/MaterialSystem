@@ -2870,6 +2870,12 @@ class ExcelController extends BaseController
     public function exportReportGlobalBenang()
     {
         $key = $this->request->getGet('key');
+        $getDeliv = 'http://172.23.44.14/CapacityApps/public/api/getDeliv/' . $key;
+        $response = file_get_contents($getDeliv);
+
+        // $data = $this->stockModel->getFilterReportGlobalBenang($key);
+        // dd($data);
+        // dd($key);
         // Daftar judul sheet—juga dipakai sebagai filter ke model
         $sheetTitles = [
             'GLOBAL BENANG ' . $key,
@@ -2895,7 +2901,10 @@ class ExcelController extends BaseController
 
         foreach ($sheetTitles as $title) {
             $data = $this->stockModel->getFilterReportGlobalBenang($key);
+            $delivery = json_decode($response, true);
+            $totalDel  = count($delivery);
 
+            // dd($data, $delivery);
             $sheet = $spreadsheet->createSheet();
             $sheet->setTitle($title);
 
@@ -2910,6 +2919,8 @@ class ExcelController extends BaseController
             $headers = [
                 'No',
                 'No Model',
+                'Delivery',
+                'Area',
                 'Item Type',
                 'Kode Warna',
                 'Warna',
@@ -2949,19 +2960,27 @@ class ExcelController extends BaseController
             // Isi Data mulai baris 4
             $row = 4;
             $no = 1;
+            $delIndex  = 0;
             foreach ($data as $item) {
+                // dd($delivery);
                 $sheet->setCellValue('A' . $row, $no++);
                 $sheet->setCellValue('B' . $row, $item['no_model'] ?: '-');
-                $sheet->setCellValue('C' . $row, $item['item_type'] ?: '-');
-                $sheet->setCellValue('D' . $row, $item['kode_warna'] ?: '-');
-                $sheet->setCellValue('E' . $row, $item['warna'] ?: '-');
-                $sheet->setCellValue('F' . $row, $item['loss'] . '%' ?: '-');
-                $sheet->setCellValue('G' . $row, $item['qty_po'] ?: 0);
-                $sheet->setCellValue('I' . $row, $item['kgs_stock_awal'] ?: 0);
+                if ($delIndex < $totalDel) {
+                    $sheet->setCellValue('C' . $row, $delivery[$delIndex]['delivery']);
+                    $delIndex++;
+                } else {
+                    $sheet->setCellValue('C' . $row, '');  // atau '-' sesuai preferensi
+                }
+                $sheet->setCellValue('D' . $row, $item['area'] ?: '-');
+                $sheet->setCellValue('E' . $row, $item['item_type'] ?: '-');
+                $sheet->setCellValue('F' . $row, $item['kode_warna'] ?: '-');
+                $sheet->setCellValue('G' . $row, $item['warna'] ?: '-');
+                $sheet->setCellValue('H' . $row, $item['loss'] . '%' ?: '-');
+                $sheet->setCellValue('I' . $row, $item['qty_po'] ?: 0);
+                $sheet->setCellValue('J' . $row, $item['kgs_stock_awal'] ?: 0);
                 $sheet->setCellValue('K' . $row, $item['datang_solid'] ?: 0);
-                $sheet->setCellValue('M' . $row, $item['ganti_retur'] ?: 0);
-                $sheet->setCellValue('R' . $row, $item['pakai_area'] ?: 0);
-
+                $sheet->setCellValue('L' . $row, $item['ganti_retur'] ?: 0);
+                $sheet->setCellValue('M' . $row, $item['pakai_area'] ?: 0);
                 if ($item['ganti_retur'] == 0) {
                     $tagihanGbn = ($item['kgs_stock_awal'] ?? 0)
                         + ($item['stock_opname'] ?? 0)

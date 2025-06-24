@@ -45,8 +45,12 @@ class DomPdfController extends BaseController
     public function printBarcode($idBon)
     {
         $dompdf = new DompdfService();
-        $dataBon = $this->bonCelupModel->getDataById($idBon); // get data by id_bon
-        $detailBon = $this->outCelupModel->getDetailBonByIdBon($idBon); // get data detail bon by id_bon
+        $dataBon = $this->bonCelupModel->getDataById($idBon);
+        $detailBon = $this->outCelupModel->getDetailBonByIdBon($idBon);
+
+        dd($detailBon);
+        if ($detailBon['no_model'] === 'POGABUNGAN') {
+        }
         $path = FCPATH . 'assets/img/logo-kahatex.png';
         $type = pathinfo($path, PATHINFO_EXTENSION);
         $data = file_get_contents($path);
