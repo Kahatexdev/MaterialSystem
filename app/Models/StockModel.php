@@ -361,11 +361,18 @@ class StockModel extends Model
                     WHERE pm.id_stock = stock.id_stock
                     AND oc.ganti_retur = 1
                 ) AS ganti_retur,
+                 (
+                    SELECT area_out
+                    FROM pengeluaran p
+                    WHERE p.lot_out = stock.lot_stock
+                    AND p.nama_cluster = stock.nama_cluster
+                ) AS area,
             ")
             ->join('material', 'material.item_type = stock.item_type AND material.kode_warna = stock.kode_warna', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->join('pemasukan', 'pemasukan.id_stock = stock.id_stock', 'left')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->join('pengeluaran', 'pengeluaran.lot_out = stock.lot_stock', 'left')
             ->where('stock.no_model', $key)
             ->groupBy('stock.id_stock')
             ->get()

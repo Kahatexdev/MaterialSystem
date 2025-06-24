@@ -204,7 +204,7 @@ class MasterOrderModel extends Model
             material.kode_warna,
             material.color,
             material.loss,
-
+            material.area,
             -- SUM material.kgs
             (
                 SELECT SUM(COALESCE(m.kgs, 0))

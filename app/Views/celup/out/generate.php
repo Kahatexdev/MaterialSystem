@@ -215,7 +215,11 @@
                 <div class="group">
                     <a href="<?= base_url($role . '/printBon/' . $id_bon) ?>" class="btn btn-info" target="_blank">
                         <i class="ni ni-single-copy-04 me-2"></i>
-                        PRINT
+                        PRINT BON
+                    </a>
+                    <a href="<?= base_url($role . '/printBarcode/' . $id_bon) ?>" class="btn btn-info" target="_blank">
+                        <i class="ni ni-single-copy-04 me-2"></i>
+                        PRINT BARCODE
                     </a>
                 </div>
             </div>
@@ -437,96 +441,46 @@
                         <?php foreach ($dataBon['groupedDetails'] as $group) { ?>
                             <?php
                             $countBarcodes = count($group['barcodes']); // Hitung jumlah barcode
-                            if ($countBarcodes > 4) {
-                                $colMd = "4";
+                            if ($countBarcodes > 2) {
+                                $colMd = "6";
                             } else {
                                 $colMd = 12 / $countBarcodes;
                             }
                             ?>
                             <?php foreach ($group['barcodes'] as $barcode) { ?>
-                                <div class="col-md-<?= $colMd ?> d-flex flex-column align-items-center mt-4">
-                                    <div style="margin-top: 10px;">
-                                        <img
-                                            src="data:image/png;base64,<?= $barcode['barcode']; ?>"
-                                            alt="Barcode for <?= $barcode['id_out_celup']; ?>"
-                                            style="width: 370px; height: auto; border: 1px solid #ddd; padding: 10px; border-radius: 8px;">
-                                    </div>
-                                    <div class="details w-100">
-
-                                        <div class="row">
-                                            <div class="col-md-4" style="text-align: left;">
-                                                <label>No Model</label>
+                                <table style="width: 9.9cm; height:4.7cm; border-collapse: collapse; border: 1px solid #000; margin:auto; margin-top:10px;">
+                                    <tr style=" border: 1px solid #000;">
+                                        <td colspan="2" class="header" style="text-align: center; font-size: 18px; font-weight: bold; color: #013182;">
+                                            <img src="<?= $img ?>" alt="" width="17" style="position: relative; top: -2px;">
+                                            PT. KAHATEX
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 3cm; vertical-align: top;">
+                                            <div class="label-box" style="padding: 5px;">
+                                                <div class="barcode-box" style="text-align: center; font-size: 13px; font-weight: bold">
+                                                    <img src="<?= $barcode['barcode'] ?>" alt="barcode" style="max-width: 100%; height: 40px;">
+                                                    <div style="margin-top:5px;">No Model : <?= $barcode['no_model'] ?? '-' ?></div>
+                                                    <div>GW : <?= $barcode['gw'] ?></div>
+                                                    <div>NW : <?= $barcode['kgs'] ?></div>
+                                                    <div>Cones : <?= $barcode['cones'] ?></div>
+                                                    <div style="margin-top: 15px; text-align:left;"><?= $barcode['admin'] ?> | SHIFT A</div>
+                                                </div>
                                             </div>
-                                            <div class=" col-md-8 text-left" style="text-align: left;">
-                                                <label>: <?= $barcode['no_model'] ?></label>
+                                        </td>
+                                        <td style="width: 4cm; vertical-align: top;">
+                                            <div class="label-box" style="padding: 5px;">
+                                                <div class="data" style="font-size: 13px; line-height: 1.5; font-weight: bold">
+                                                    <div>Item Type : <?= $barcode['item_type'] ?></div>
+                                                    <div>Kode Warna : <?= $barcode['kode_warna'] ?></div>
+                                                    <div>Warna : <?= $barcode['warna'] ?></div>
+                                                    <div>Lot : <?= $barcode['lot'] ?></div>
+                                                    <div>No Karung : <?= $barcode['no_karung'] ?></div>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-4" style="text-align: left;">
-                                                <label>Item Type</label>
-                                            </div>
-                                            <div class=" col-md-8 text-left" style="text-align: left;">
-                                                <label>: <?= $barcode['item_type'] ?></label>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-4" style="text-align: left;">
-                                                <label>Kode Warna</label>
-                                            </div>
-                                            <div class=" col-md-8 text-left" style="text-align: left;">
-                                                <label>: <?= $barcode['kode_warna'] ?></label>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-4" style="text-align: left;">
-                                                <label>Warna</label>
-                                            </div>
-                                            <div class=" col-md-8 text-left" style="text-align: left;">
-                                                <label>: <?= $barcode['warna'] ?></label>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-4" style="text-align: left;">
-                                                <label>Gw</label>
-                                            </div>
-                                            <div class=" col-md-8 text-left" style="text-align: left;">
-                                                <label>: <?= $barcode['gw'] ?></label>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-4" style="text-align: left;">
-                                                <label>Nw</label>
-                                            </div>
-                                            <div class=" col-md-8 text-left" style="text-align: left;">
-                                                <label>: <?= $barcode['kgs'] ?></label>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-4" style="text-align: left;">
-                                                <label>Cones</label>
-                                            </div>
-                                            <div class=" col-md-8 text-left" style="text-align: left;">
-                                                <label>: <?= $barcode['cones'] ?></label>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-4" style="text-align: left;">
-                                                <label>Lot</label>
-                                            </div>
-                                            <div class=" col-md-8 text-left" style="text-align: left;">
-                                                <label>: <?= $barcode['lot'] ?></label>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-4" style="text-align: left;">
-                                                <label>No Karung</label>
-                                            </div>
-                                            <div class=" col-md-8 text-left" style="text-align: left;">
-                                                <label>: <?= $barcode['no_karung'] ?></label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                        </td>
+                                    </tr>
+                                </table>
                             <?php } ?>
                         <?php } ?>
                     </div>

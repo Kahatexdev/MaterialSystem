@@ -153,12 +153,13 @@ class PemesananModel extends Model
                 SUM(pemesanan.jl_mc) AS jl_mc,
                 SUM(pemesanan.ttl_qty_cones) AS cns_pesan,
                 SUM(pemesanan.ttl_berat_cones) AS qty_pesan,
-                AVG(pemesanan.sisa_kgs_mc) AS qty_sisa,
-                AVG(pemesanan.sisa_cones_mc) AS cns_sisa,
+                SUM(pemesanan.sisa_kgs_mc) AS qty_sisa,
+                SUM(pemesanan.sisa_cones_mc) AS cns_sisa,
                 pemesanan.lot,
                 pemesanan.keterangan,
                 pemesanan.status_kirim,
-                pemesanan.additional_time
+                pemesanan.additional_time,
+                pemesanan.po_tambahan
             ")
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
@@ -166,7 +167,7 @@ class PemesananModel extends Model
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pemesanan.admin', $area)
             ->where('pemesanan.status_kirim!=', 'YA')
-            ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai')
+            ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')
             ->orderBy('pemesanan.tgl_pakai', 'DESC')
             ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
         return $query->get()->getResultArray();
@@ -239,6 +240,7 @@ class PemesananModel extends Model
             ->where('material.kode_warna', $id['kode_warna'])
             ->where('material.color', $id['color'])
             ->where('pemesanan.tgl_pakai', $id['tgl_pakai'])
+            ->where('pemesanan.po_tambahan', $id['po_tambahan'])
             ->get()
             ->getResultArray(); // Ambil semua baris sebagai array
 

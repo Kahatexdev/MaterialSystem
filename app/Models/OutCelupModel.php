@@ -29,6 +29,8 @@ class OutCelupModel extends Model
         'cones_kirim',
         'lot_kirim',
         'ganti_retur',
+        'operator_packing',
+        'shift',
         'admin',
         'created_at',
         'updated_at',
@@ -66,14 +68,46 @@ class OutCelupModel extends Model
 
     public function getDetailBonByIdBon($id)
     {
-        return $this->select('master_order.buyer, master_material.ukuran, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, out_celup.*')
-            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'right')
-            ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'right')
-            ->join('master_material', 'master_material.item_type = schedule_celup.item_type', 'right')
+        // Ambil semua no_model dari out_celup untuk bon ini
+        $subModels = $this->db->table('out_celup')
+            ->select('no_model')
+            ->where('id_bon', $id)
+            ->get()
+            ->getResultArray();
+
+        $modelList = [];
+
+        foreach ($subModels as $row) {
+            $no_model = strtoupper(str_replace('POGABUNGAN', '', $row['no_model']));
+            $models = preg_split('/[_\s]+/', trim($no_model));
+            foreach ($models as $m) {
+                if (!in_array($m, $modelList)) {
+                    $modelList[] = $m;
+                }
+            }
+        }
+
+        if (empty($modelList)) {
+            return [];
+        }
+
+        // Ambil data lengkap dari out_celup dan gabungkan manual ke buyer, ukuran, dll
+        return $this->select('
+            out_celup.*, 
+            schedule_celup.item_type, 
+            schedule_celup.kode_warna, 
+            schedule_celup.warna,
+            master_material.ukuran,
+            master_order.buyer
+        ')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
+            ->join('master_material', 'master_material.item_type = schedule_celup.item_type', 'left')
+            ->join('master_order', 'master_order.no_model IN ("' . implode('","', $modelList) . '")', '', false) // RAW JOIN
             ->where('out_celup.id_bon', $id)
             ->groupBy('id_out_celup')
             ->findAll();
     }
+
 
     public function getDataOut($id)
     {
