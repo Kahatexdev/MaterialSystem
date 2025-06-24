@@ -1797,8 +1797,8 @@ class ExcelController extends BaseController
             $jatahArea = isset($item['kgs']) ? $item['kgs'] - $item['kgs_out'] : 0;
 
             // Format Tagihan GBN dan Jatah Area
-            $sheet->setCellValue('AB' . $row, number_format($tagihanGbn, 2, '.', '')); // tagihan gbn
-            $sheet->setCellValue('AC' . $row, number_format($jatahArea, 2, '.', '')); // jatah area
+            $sheet->setCellValue('AC' . $row, number_format($tagihanGbn, 2, '.', '')); // tagihan gbn
+            $sheet->setCellValue('AD' . $row, number_format($jatahArea, 2, '.', '')); // jatah area
             $row++;
         }
 
@@ -1812,10 +1812,10 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle("A3:AC{$lastRow}")->applyFromArray($styleArray);
+        $sheet->getStyle("A3:AD{$lastRow}")->applyFromArray($styleArray);
 
         // Auto-size
-        foreach (range('A', 'AC') as $col) {
+        foreach (range('A', 'AD') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
