@@ -931,7 +931,6 @@ class ApiController extends ResourceController
         $no_model = $this->request->getGet('no_model');
         $style_size = $this->request->getGet('style_size');
         $area = $this->request->getGet('area');
-        // $qty = $this->request->getGet('qty');
 
         $data = $this->poTambahanModel->getMuPoTambahan($no_model, $style_size, $area);
 

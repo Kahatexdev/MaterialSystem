@@ -200,6 +200,7 @@ class MasterOrderModel extends Model
     {
         return $this->select("
             master_order.no_model,
+            master_order.buyer,
             material.item_type,
             material.kode_warna,
             material.color,
