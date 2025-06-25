@@ -78,7 +78,7 @@ class DomPdfController extends BaseController
         ]);
 
         $dompdf->loadHtml($html);
-        $dompdf->setPaper('10cm', '5cm');
+        $dompdf->setPaper('10cm', '10cm');
         $dompdf->render();
 
         return $dompdf->stream("barcode_$idBon.pdf", ['Attachment' => false]);
