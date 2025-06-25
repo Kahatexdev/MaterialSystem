@@ -709,4 +709,73 @@ class PemesananController extends BaseController
         ];
         return view($this->role . '/pemesanan/persiapanBarangPertgl', $data);
     }
+    public function pemesananArea()
+    {
+        function fetchApiData($url)
+        {
+            try {
+                $response = file_get_contents($url);
+                if ($response === false) {
+                    throw new \Exception("Error fetching data from $url");
+                }
+                $data = json_decode($response, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw new \Exception("Invalid JSON response from $url");
+                }
+                return $data;
+            } catch (\Exception $e) {
+                error_log($e->getMessage());
+                return null;
+            }
+        }
+
+        $tglPakai = DATE('Y-m-d');
+        $dataList = $this->pemesananModel->getDataPemesananArea($tglPakai);
+
+        foreach ($dataList as $key => $order) {
+            $dataList[$key]['ttl_kebutuhan_bb'] = 0;
+            $area = $order['admin'];
+            if (isset($order['no_model'], $order['item_type'], $order['kode_warna'])) {
+                $styleList = $this->materialModel->getStyleSizeByBb($order['no_model'], $order['item_type'], $order['kode_warna']);
+
+                if ($styleList) {
+                    $totalRequirement = 0;
+                    foreach ($styleList as $style) {
+                        if (isset($style['no_model'], $style['style_size'], $style['gw'], $style['composition'], $style['loss'])) {
+                            $orderApiUrl = 'http://172.23.39.114/CapcityApps/public/api/getQtyOrder?no_model='
+                                . $order['no_model'] . '&style_size=' . urlencode($style['style_size']) . '&area=' . urlencode($area);
+                            $orderQty = fetchApiData($orderApiUrl);
+                            if (isset($orderQty['qty'])) {
+                                $requirement = $orderQty['qty'] * $style['gw'] * ($style['composition'] / 100) * (1 + ($style['loss'] / 100)) / 1000;
+                                $totalRequirement += $requirement;
+                                $dataList[$key]['qty'] = $orderQty['qty'];
+                            }
+                        }
+                    }
+                    $dataList[$key]['ttl_kebutuhan_bb'] = $totalRequirement;
+                }
+
+                $data = [
+                    'area' => $area,
+                    'no_model' => $order['no_model'],
+                    'item_type' => $order['item_type'],
+                    'kode_warna' => $order['kode_warna'],
+                ];
+
+                $pengiriman = $this->pengeluaranModel->getTotalPengiriman($data);
+                $dataList[$key]['ttl_pengiriman'] = $pengiriman['kgs_out'] ?? 0;
+
+                // Hitung sisa jatah
+                $dataList[$key]['sisa_jatah'] = $dataList[$key]['ttl_kebutuhan_bb'] - $dataList[$key]['ttl_pengiriman'];
+            }
+        }
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Pemesanan',
+            'role' => $this->role,
+            'dataList' => $dataList,
+        ];
+        return view($this->role . '/pemesanan/index', $data);
+    }
 }
