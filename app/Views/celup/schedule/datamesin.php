@@ -48,7 +48,7 @@
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 font-weight-bolder">Data Mesin Celup</h5>
-                <button type="button" class="btn btn-outline-info mb-0" data-bs-toggle="modal" data-bs-target="#tambahModal">
+                <button type="button" class="btn btn-outline-info mb-0" data-bs-toggle="modal" data-bs-target="#tambahModal" disabled>
                     <i class="fas fa-plus me-2"></i>Tambah Mesin
                 </button>
             </div>
@@ -82,8 +82,8 @@
                                     <td class="text-center align-middle"><?= $data['lmd'] ?></td>
                                     <td class="text-center align-middle"><?= $data['ket_mesin'] ?></td>
                                     <td class="text-center align-middle">
-                                        <button class="btn btn-warning btn-edit" data-id="<?= $data['id_mesin'] ?>">Update</button>
-                                        <button class="btn btn-danger btn-delete" data-id="<?= $data['id_mesin'] ?>">Delete</button>
+                                        <button class="btn btn-warning btn-edit" data-id="<?= $data['id_mesin'] ?>" disabled>Update</button>
+                                        <button class="btn btn-danger btn-delete" data-id="<?= $data['id_mesin'] ?>" disabled>Delete</button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
