@@ -378,7 +378,7 @@ class ApiController extends ResourceController
             if ($existingData) {
                 return $this->respond([
                     'status'  => 'error',
-                    'message' => "Data pemesanan sudah ada.",
+                    'message' => "Data pemesanan sudah ada. " . $resultItem['po_tambahan'],
                     'debug'   => $existingData,
                 ], 400);
             }
@@ -443,7 +443,8 @@ class ApiController extends ResourceController
             'no_model',
             'item_type',
             'kode_warna',
-            'color'
+            'color',
+            'po_tambahan'
         ]);
 
         $dataList = $this->pemesananModel->getListPemesananByUpdate($data);
@@ -933,6 +934,22 @@ class ApiController extends ResourceController
         $area = $this->request->getGet('area');
 
         $data = $this->poTambahanModel->getMuPoTambahan($no_model, $style_size, $area);
+
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($data);
+    }
+    public function getKgTambahan()
+    {
+        $params = [
+            'no_model' => $this->request->getGet('no_model'),
+            'item_type' => $this->request->getGet('item_type'),
+            'kode_warna' => $this->request->getGet('kode_warna'),
+            'style_size' => $this->request->getGet('style_size'),
+            'area' => $this->request->getGet('area'),
+        ];
+
+        $data = $this->poTambahanModel->getKgPoTambahan($params);
 
         return $this->response
             ->setStatusCode(200)
