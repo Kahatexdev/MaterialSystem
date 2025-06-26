@@ -31,6 +31,13 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('masterdata/poGabungan', 'PoGabunganController::index');
     $routes->get('masterdata/poGabungan/(:any)', 'PoGabunganController::poGabungan/$1');
     $routes->get('masterdata/poGabunganDetail/(:any)', 'PoGabunganController::poGabunganDetail/$1');
+    $routes->get('masterdata/poBooking', 'PoBookingController::index');
+    $routes->get('masterdata/poBooking/getItemType/(:any)', 'PoBookingController::getItemType/$1');
+    $routes->get('masterdata/poBooking/getKodeWarna', 'PoBookingController::getKodeWarna');
+    $routes->get('masterdata/poBooking/getColor', 'PoBookingController::getColor');
+    // $routes->get('masterdata/poBooking/getKodeWarna/(:any)/(:any)', 'PoBookingController::getKodeWarna/$1/$2');
+    // $routes->get('masterdata/poBooking/getWarna/(:any)/(:any)/(:any)', 'PoBookingController::getWarna/$1/$2/$3');
+    $routes->get('masterdata/poManual', 'PoManualController::index');
     $routes->get('masterdata/cekStockOrder/(:any)/(:any)/(:any)', 'PoGabunganController::cekStockOrder/$1/$2/$3');
     $routes->post('openPO/saveOpenPOGabungan', 'PoGabunganController::saveOpenPOGabungan');
     $routes->get('listPoGabungan', 'PoGabunganController::listPoGabungan');

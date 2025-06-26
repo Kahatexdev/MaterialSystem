@@ -361,4 +361,11 @@ class MasterOrderModel extends Model
             ->orderBy('no_model', 'ASC')
             ->findAll();
     }
+
+    public function getBuyer()
+    {
+        return $this->select('buyer')
+            ->groupBy('buyer')
+            ->findAll();
+    }
 }
