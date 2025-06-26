@@ -22,10 +22,12 @@ use App\Models\PemesananModel;
 use App\Models\TotalPemesananModel;
 use App\Models\OtherOutModel;
 use App\Models\PemesananSpandexKaretModel;
+use CodeIgniter\API\ResponseTrait;
 
 
 class PemesananController extends BaseController
 {
+    use ResponseTrait;
     protected $role;
     protected $active;
     protected $filters;
@@ -777,5 +779,29 @@ class PemesananController extends BaseController
             'dataList' => $dataList,
         ];
         return view($this->role . '/pemesanan/index', $data);
+    }
+    public function getUpdateListPemesanan()
+    {
+        $data = $this->request->getPost([
+            'area',
+            'tgl_pakai',
+            'no_model',
+            'item_type',
+            'kode_warna',
+            'color',
+            'po_tambahan'
+        ]);
+        // Log isi $data
+        log_message('info', 'getUpdateListPemesanan → input data: ' . print_r($data, true));
+
+        $dataList = $this->pemesananModel->getListPemesananByUpdate($data);
+
+        // Cetak ke log (application/logs) dengan level INFO
+        log_message('info', 'getUpdateListPemesanan → dataList: ' . print_r($dataList, true));
+
+        return $this->respond([
+            'status'  => 'success',
+            'data' => $dataList,
+        ], 200);
     }
 }

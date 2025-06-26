@@ -588,7 +588,7 @@ class PdfController extends BaseController
         }
 
         //  Baris TOTAL (baris ke-16)
-        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->SetFont('Arial', 'B', 6);
         $pdf->Cell(6 + 25 + 12 + 17 + 20 + 20 + 10 + 25 + 16, 6, 'TOTAL', 1, 0, 'R');
         $pdf->Cell(15, 6, number_format($totalKg, 2), 1, 0, 'C');
         $pdf->Cell(13, 6, number_format($totalPermintaanCones, 2), 1, 0, 'C');
