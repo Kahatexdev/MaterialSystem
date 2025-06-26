@@ -140,4 +140,25 @@ class PoTambahanModel extends Model
             ->groupBy('master_order.no_model, material.item_type, material.kode_warna')
             ->findAll();
     }
+    public function getKgPoTambahan($data)
+    {
+        $no_model = $data['no_model'] ?? null;
+        $item_type = $data['item_type'] ?? null;
+        $kode_warna = $data['kode_warna'] ?? null;
+        $style_size = $data['style_size'] ?? null;
+        $area = $data['area'] ?? null;
+
+        return $this->select('SUM(po_tambahan.poplus_mc_kg+po_tambahan.plus_pck_kg) AS ttl_keb_potambahan')
+            ->join('material', 'material.id_material=po_tambahan.id_material', 'left')
+            ->join('master_material', 'master_material.item_type=material.item_type', 'left')
+            ->join('master_order', 'master_order.id_order=material.id_order', 'left')
+            ->where('po_tambahan.admin', $area)
+            ->where('master_order.no_model', $no_model)
+            ->where('material.style_size', $style_size)
+            ->where('material.item_type', $item_type)
+            ->where('material.kode_warna', $kode_warna)
+            ->where('po_tambahan.status', 'approved')
+            ->groupBy('master_order.no_model, material.item_type, material.kode_warna')
+            ->first();
+    }
 }

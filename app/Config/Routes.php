@@ -532,6 +532,11 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('otherIn/detailListBarcode/(:any)', 'WarehouseController::detailListBarcode/$1');
     $routes->get('otherIn/printBarcode/(:any)', 'PdfController::printBarcodeOtherBon/$1');
 
+    //Po Plus
+    $routes->get('poplus', 'MasterdataController::poPlus');
+    $routes->get('poplus/detail', 'MasterdataController::detailPoPlus');
+    $routes->post('approvePoPlusArea', 'MasterdataController::prosesApprovePoPlusArea');
+
     // $routes->get('pph', 'PphController::index');
     $routes->get('pph', 'PphController::tampilPerModel');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
@@ -633,5 +638,6 @@ $routes->group(
         $routes->get('getPcsPoTambahan', 'ApiController::getPcsPoTambahan');
         $routes->get('getMUPoTambahan', 'ApiController::getMUPoTambahan');
         $routes->get('apiexportGlobalReport/(:any)', 'ExcelController::apiexportGlobalReport/$1');
+        $routes->get('getKgTambahan', 'ApiController::getKgTambahan');
     }
 );

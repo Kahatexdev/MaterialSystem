@@ -220,7 +220,7 @@
 <script type="text/javascript">
     $(document).ready(function() {
         $('#dataTable').DataTable({
-            "pageLength": 35,
+            "pageLength": 10,
             "order": []
         });
 

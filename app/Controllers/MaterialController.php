@@ -53,38 +53,68 @@ class MaterialController extends BaseController
     {
         $data = $this->request->getPost();
         $idOrder = $this->request->getPost('id_order');
-        $style = $this->request->getPost('style_size');
-        $inisial = $this->request->getPost('inisial');
+        $style = $this->request->getPost('style_size') ?? [];
+        $inisial = $this->request->getPost('inisial') ?? [];
+        $id_order = $this->request->getPost('id_order');
+        $default = $this->materialModel->getStyleSizeAndInisial($id_order);
+        $defaultStyle  = $default[0]['style_size'];
+        $defaultInisial = $default[0]['inisial'];
+
+        if (count($style) === 0) {
+            $style   = [$defaultStyle];
+            $inisial = [$defaultInisial];
+        }
 
         try {
-            for ($i = 0; $i < count($style); $i++) {
+            if (count($style) > 0) {
+                for ($i = 0; $i < count($style); $i++) {
+                    $saveData = [
+                        'id_order'   => esc($idOrder),
+                        'style_size' => esc($style[$i]),
+                        'inisial'    => esc($inisial[$i]),
+                        'area'       => esc($data['area']),
+                        'item_type'  => esc($data['item_type']),
+                        'kode_warna' => esc($data['kode_warna']),
+                        'color'      => esc($data['color']),
+                        'composition' => esc($data['composition']),
+                        'gw'         => esc($data['gw']),
+                        'qty_pcs'    => esc($data['qty_pcs']),
+                        'loss'       => esc($data['loss']),
+                        'kgs'        => esc($data['kgs']),
+                        'admin'      => session()->get('id_user'),
+                    ];
+                    if (!$this->materialModel->insert($saveData)) {
+                        throw new \Exception('Gagal insert pada baris ke-' . ($i + 1));
+                    }
+                }
+            }
+            // Kalau tidak ada style sama sekali, buat satu insert tanpa style/inisial
+            else {
                 $saveData = [
-                    'id_order'     => esc($idOrder),
-                    'style_size'   => esc($style[$i]),
-                    'area'         => esc($data['area']),
-                    'inisial'      => esc($inisial[$i]),
-                    'color'        => esc($data['color']),
-                    'item_type'    => esc($data['item_type']),
-                    'kode_warna'   => esc($data['kode_warna']),
-                    'composition'  => esc($data['composition']),
-                    'gw'           => esc($data['gw']),
-                    'qty_pcs'      => esc($data['qty_pcs']),
-                    'loss'         => esc($data['loss']),
-                    'kgs'          => esc($data['kgs']),
-                    'admin'        => session()->get('id_user'),
+                    'id_order'   => esc($idOrder),
+                    'style_size' => null,
+                    'inisial'    => null,
+                    'area'       => esc($data['area']),
+                    'item_type'  => esc($data['item_type']),
+                    'kode_warna' => esc($data['kode_warna']),
+                    'color'      => esc($data['color']),
+                    'composition' => esc($data['composition']),
+                    'gw'         => esc($data['gw']),
+                    'qty_pcs'    => esc($data['qty_pcs']),
+                    'loss'       => esc($data['loss']),
+                    'kgs'        => esc($data['kgs']),
+                    'admin'      => session()->get('id_user'),
                 ];
-
                 if (!$this->materialModel->insert($saveData)) {
-                    // Kalau insert gagal, lempar error manual
-                    throw new \Exception("Gagal insert pada baris ke-" . ($i + 1));
+                    throw new \Exception('Gagal insert data material.');
                 }
             }
 
-            return redirect()->to(base_url($this->role . '/material/' . $idOrder))
+            return redirect()->to(base_url("$this->role/material/$idOrder"))
                 ->with('success', 'Data berhasil disimpan.');
         } catch (\Exception $e) {
-            return redirect()->to(base_url($this->role . '/material/' . $idOrder))
-                ->with('error', 'Data gagal disimpan: ' . esc($e->getMessage()));
+            return redirect()->to(base_url("$this->role/material/$idOrder"))
+                ->with('error', 'Data gagal disimpan: ' . $e->getMessage());
         }
     }
 

@@ -42,9 +42,11 @@
 
     <link href='<?= base_url('assets/calendar/fullcalendar/packages/core/main.css') ?>' rel='stylesheet' />
     <link href='<?= base_url('assets/calendar/fullcalendar/packages/daygrid/main.css') ?>' rel='stylesheet' />
-
+    <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet" />
     <!-- Bootstrap CSS -->
 
+    <!-- DataTables Buttons -->
+    <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" rel="stylesheet">
     <!-- style -->
     <style>
         :root {
@@ -491,6 +493,11 @@
     <script async defer src="<?= base_url('assets/js/buttons.js') ?>"></script>
     <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
     <script src="<?= base_url('assets/js/soft-ui-dashboard.min.js?v=1.0.7') ?>"></script>
+
+    <!-- JSZip (dibutuhkan oleh excelHtml5) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 </body>
 
 </html>

@@ -50,6 +50,7 @@
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 font-weight-bolder">Data Pemesanan <?= $jenis; ?> <?= $area; ?> <?= $tglPakai; ?></h5>
+                <a href="<?= base_url($role . '/pemesanan/' . $area . '/' . $jenis) ?>" class="btn bg-gradient-info"> Kembali</a>
             </div>
         </div>
 

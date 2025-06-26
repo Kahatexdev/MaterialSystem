@@ -634,7 +634,7 @@ class MasterdataController extends BaseController
         ];
 
         if ($this->materialModel->update($id, $data)) {
-            return redirect()->to(base_url($this->role . '/material/' . $idOrder))->with('success', 'Data Berhsil.');
+            return redirect()->to(base_url($this->role . '/material/' . $idOrder))->with('success', 'Data Berhasil.');
         } else {
             return redirect()->to(base_url($this->role . '/material/' . $idOrder))->with('error', 'Data Gagal Di Update.');
         }
