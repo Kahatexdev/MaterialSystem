@@ -532,6 +532,11 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('otherIn/detailListBarcode/(:any)', 'WarehouseController::detailListBarcode/$1');
     $routes->get('otherIn/printBarcode/(:any)', 'PdfController::printBarcodeOtherBon/$1');
 
+    //Po Plus
+    $routes->get('poplus', 'MasterdataController::poPlus');
+    $routes->get('poplus/detail', 'MasterdataController::detailPoPlus');
+    $routes->post('approvePoPlusArea', 'MasterdataController::prosesApprovePoPlusArea');
+
     // $routes->get('pph', 'PphController::index');
     $routes->get('pph', 'PphController::tampilPerModel');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
@@ -546,6 +551,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('excelPPHNomodel/(:any)/(:any)', 'ExcelController::excelPPHNomodel/$1/$2');
     $routes->get('excelPPHInisial/(:any)/(:any)', 'ExcelController::excelPPHInisial/$1/$2');
     $routes->get('excelPPHDays/(:any)/(:any)', 'ExcelController::excelPPHDays/$1/$2');
+
+    $routes->get('pemesanan', 'PemesananController::pemesananArea');
+
     //Celup
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');

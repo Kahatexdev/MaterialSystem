@@ -75,10 +75,10 @@ class PoTambahanModel extends Model
         }
         return $builder
             ->groupBy('po_tambahan.id_po_tambahan')
-            ->orderBy('po_tambahan.created_at', 'ASC')
-            ->orderBy('material.style_size', 'ASC')
+            ->orderBy('master_order.no_model', 'ASC')
             ->orderBy('material.item_type', 'ASC')
             ->orderBy('material.kode_warna', 'ASC')
+            ->orderBy('material.style_size', 'ASC')
             ->findAll();
     }
     public function getData()
