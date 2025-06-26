@@ -102,6 +102,7 @@ class PemesananModel extends Model
             ->where('mm.jenis', $jenis)
             ->where('p.status_kirim', 'YA')
             ->groupBy('p.tgl_pakai')
+            ->orderBy('p.tgl_pakai', 'DESC')
             ->get();
         if (!$query) {
             // Cek error pada query
@@ -224,6 +225,7 @@ class PemesananModel extends Model
             ->where('material.item_type', $data['item_type'])
             ->where('material.kode_warna', $data['kode_warna'])
             ->where('material.color', $data['color'])
+            ->where('pemesanan.po_tambahan', $data['po_tambahan'])
             ->groupBy('pemesanan.id_pemesanan')
             ->orderBy('pemesanan.id_pemesanan');
         return $data->get()->getResultArray();

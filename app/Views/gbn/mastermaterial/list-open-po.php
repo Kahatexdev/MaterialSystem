@@ -149,7 +149,7 @@
                         <label for="">PO (+)</label>
                         <select name="po_plus_edit" id="po_plus_edit" class="form-control">
                             <option value="">Pilih</option>
-                            <option value="YA">YA</option>
+                            <option value="1">YA</option>
                             <option value="0">TIDAK</option>
                         </select>
                     </div>
@@ -252,7 +252,17 @@
                     $('#kg_po').val(response.kg_po);
                     $('#ket_celup').val(response.ket_celup);
                     $('#keterangan').val(response.keterangan);
-                    $('#keterangan').val(response.po_plus_edit);
+
+                    console.log('po_plus_edit:', response);
+                    // Tentukan nilai po_plus_edit
+                    if (response.po_plus == "1") {
+                        $('#po_plus_edit').val("1");
+                    } else if (response.po_plus == "0") {
+                        $('#po_plus_edit').val("0");
+                    } else {
+                        $('#po_plus_edit').val("");
+                    }
+
                     // Show modal dialog
                     $('#updateModal').modal('show');
                 },

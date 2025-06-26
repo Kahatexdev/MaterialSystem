@@ -560,6 +560,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('excelPPHDays/(:any)/(:any)', 'ExcelController::excelPPHDays/$1/$2');
 
     $routes->get('pemesanan', 'PemesananController::pemesananArea');
+    $routes->post('getUpdateListPemesanan', 'PemesananController::getUpdateListPemesanan');
 
     //Celup
     $routes->get('schedule', 'ScheduleController::index');
@@ -645,5 +646,6 @@ $routes->group(
         $routes->get('getPcsPoTambahan', 'ApiController::getPcsPoTambahan');
         $routes->get('getMUPoTambahan', 'ApiController::getMUPoTambahan');
         $routes->get('apiexportGlobalReport/(:any)', 'ExcelController::apiexportGlobalReport/$1');
+        $routes->get('getKgTambahan', 'ApiController::getKgTambahan');
     }
 );
