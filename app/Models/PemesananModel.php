@@ -102,6 +102,7 @@ class PemesananModel extends Model
             ->where('mm.jenis', $jenis)
             ->where('p.status_kirim', 'YA')
             ->groupBy('p.tgl_pakai')
+            ->orderBy('p.tgl_pakai', 'DESC')
             ->get();
         if (!$query) {
             // Cek error pada query
