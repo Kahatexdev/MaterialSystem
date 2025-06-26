@@ -99,10 +99,10 @@
                                 <td><?= $data['item_type'] ?></td>
                                 <td><?= $data['kode_warna'] ?></td>
                                 <td><?= $data['color'] ?></td>
-                                <td><?= $data['composition'] ?> %</td>
-                                <td><?= $data['gw'] ?></td>
-                                <td><?= $data['qty_pcs'] ?></td>
-                                <td><?= $data['loss'] ?></td>
+                                <td><?= ($data['composition'] == 1) ? '-' : $data['composition'] . ' %' ?></td>
+                                <td><?= ($data['gw'] == 1) ? '-' : $data['gw'] ?></td>
+                                <td><?= ($data['qty_pcs'] == 1) ? '-' : $data['qty_pcs'] ?></td>
+                                <td><?= ($data['loss'] == 1) ? '-' : $data['loss'] ?></td>
                                 <td><?= $data['kgs'] ?></td>
                                 <td class="d-flex justify-content-start align-items-center gap-1">
                                     <button class="btn btn-warning btn-xs btn-edit" data-id="<?= $data['id_material'] ?>">
@@ -151,7 +151,7 @@
                                             <?= esc($st['style_size']) ?> | (<?= esc($st['inisial'] ?? '-') ?>)
                                         </label>
                                     </div>
-                                    <input type="hidden" name="insisal[]" id="" value="<?= $st['inisial'] ?>">
+                                    <input type="hidden" name="inisial[]" id="" value="<?= $st['inisial'] ?>">
                                 <?php endforeach; ?>
                             </div>
 

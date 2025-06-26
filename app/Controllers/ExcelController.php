@@ -23,6 +23,7 @@ use App\Models\TotalPemesananModel;
 use App\Models\ReturModel;
 use App\Models\MesinCelupModel;
 use App\Models\CoveringStockModel;
+use App\Models\PoTambahanModel;
 use PhpOffice\PhpSpreadsheet\Style\{Border, Alignment, Fill};
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
@@ -51,6 +52,7 @@ class ExcelController extends BaseController
     protected $returModel;
     protected $mesinCelupModel;
     protected $coveringStockModel;
+    protected $poPlusModel;
 
     public function __construct()
     {
@@ -70,6 +72,7 @@ class ExcelController extends BaseController
         $this->returModel = new ReturModel();
         $this->mesinCelupModel = new MesinCelupModel();
         $this->coveringStockModel = new CoveringStockModel();
+        $this->poPlusModel = new PoTambahanModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');

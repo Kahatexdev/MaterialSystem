@@ -341,4 +341,12 @@ class MaterialModel extends Model
             ->where('material.kode_warna', $validate['kode_warna'])
             ->findAll();
     }
+
+    public function getStyleSizeAndInisial($id_order)
+    {
+        return $this->select('material.id_order, material.style_size, material.inisial')
+            ->where('material.id_order', $id_order)
+            ->groupBy('style_size, inisial')
+            ->findAll();
+    }
 }
