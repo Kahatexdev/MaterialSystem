@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
+use App\Models\OpenPoModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class PoBookingController extends BaseController
@@ -14,14 +15,15 @@ class PoBookingController extends BaseController
     protected $filters;
     protected $masterOrderModel;
     protected $materialModel;
+    protected $openPoModel;
 
     public function __construct()
     {
         $this->masterOrderModel = new MasterOrderModel();
         $this->materialModel = new MaterialModel();
+        $this->openPoModel = new OpenPoModel();
         // $this->stockModel = new StockModel();
         // $this->masterMaterialModel = new MasterMaterialModel();
-        // $this->openPoModel = new OpenPoModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -51,8 +53,10 @@ class PoBookingController extends BaseController
         return view($this->role . '/masterdata/po-booking-form', $data);
     }
 
-    public function getItemType($buyer)
+    public function getItemType()
     {
+        $buyer    = $this->request->getGet('buyer');
+
         if ($buyer === null) {
             return $this->response->setStatusCode(400)
                 ->setJSON(['error' => 'buyerId missing']);
@@ -105,5 +109,47 @@ class PoBookingController extends BaseController
         $color = $data['color'] ?? 'Tidak ditemukan';
 
         return $this->response->setJSON(['color' => $color]);
+    }
+
+    public function saveOpenPoBooking()
+    {
+        $post = $this->request->getPost();
+
+        // pecah array
+        $items    = $post['items'] ?? [];
+        $noModels = $post['no_model'] ?? [];
+
+        // Loop setiap index
+        foreach ($items as $idx => $item) {
+            // cari no_model yang sesuai index
+            $nm = $noModels[$idx]['no_model'] ?? null;
+
+            // Build data sesuai allowedFields
+            $data = [
+                'no_model'            => $nm,
+                'item_type'           => $item['item_type']     ?? null,
+                'kode_warna'          => $item['kode_warna']    ?? null,
+                'color'               => $item['color']         ?? null,
+                'spesifikasi_benang'  => $post['spesifikasi_benang'] ?? null,
+                'kg_po'               => $item['kg_po']         ?? null,
+                'keterangan'          => $post['keterangan']        ?? null,
+                'ket_celup'           => $post['tujuan_po']         ?? null,
+                'bentuk_celup'        => $post['bentuk_celup']      ?? null,
+                'kg_percones'         => $post['kg_percones']       ?? null,
+                'jumlah_cones'        => $post['jumlah_cones']      ?? null,
+                'jenis_produksi'      => $post['jenis_produksi']    ?? null,
+                'contoh_warna'        => $post['contoh_warna']      ?? null,
+                'penerima'            => $post['penerima']          ?? null,
+                'penanggung_jawab'    => $post['penanggung_jawab']  ?? null,
+                'po_plus'             => null,
+                'admin'               => session()->get('username'),
+                'id_induk'            => null,
+            ];
+
+            $this->openPoModel->insert($data);
+        }
+
+        return redirect()->to(base_url($this->role . '/masterdata'))
+            ->with('success', 'Data PO Booking berhasil disimpan.');
     }
 }

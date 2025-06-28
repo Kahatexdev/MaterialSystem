@@ -38,7 +38,7 @@
     <!-- Form -->
     <div class="card mt-4">
         <div class="card-body">
-            <form action="<?= base_url($role . '/openPO/saveOpenPoBooking') ?>" method="post">
+            <form action="<?= base_url($role . '/masterdata/poBooking/saveOpenPoBooking') ?>" method="post">
                 <div class="form-group">
                     <div class="row">
                         <div class="col-md-6">
@@ -103,7 +103,7 @@
                                 <!-- No Model -->
                                 <div class="form-group">
                                     <label>No Model</label>
-                                    <input type="text" class="form-control select-no-model" name="no_model" id="no_model" required>
+                                    <input type="text" class="form-control select-no-model" name="no_model[0][no_model]" id="no_model" required>
                                 </div>
                                 <div class=" row">
                                     <div class="col-md-6">
@@ -139,7 +139,7 @@
                                         <!-- Kode Warna -->
                                         <div class="form-group">
                                             <div class="col"><label>Kg Kebutuhan</label>
-                                                <input type="text" class="form-control kg-po" name="items[0][kg_po]" required>
+                                                <input type="number" step="0.01" class="form-control kg-po" name="items[0][kg_po]" required>
                                             </div>
                                         </div>
                                     </div>
@@ -168,11 +168,11 @@
                         </div>
                         <div class="col-md-4">
                             <label for="kg_stock">Permintan Kelos (Kg Cones)</label>
-                            <input type="text" class="form-control" name="kg_percones" id="kg_percones" placeholder="Kg">
+                            <input type="number" step="0.01" class="form-control" name="kg_percones" id="kg_percones" placeholder="Kg">
                         </div>
                         <div class="col-md-4">
                             <label for="ttl_keb">Permintan Kelos (Total Cones)</label>
-                            <input type="text" class="form-control" name="jumlah_cones" id="jumlah_cones" placeholder="Cns">
+                            <input type="number" step="0.01" class="form-control" name="jumlah_cones" id="jumlah_cones" placeholder="Cns">
                         </div>
                     </div>
                 </div>
@@ -236,12 +236,41 @@
 
         // Inisialisasi Select2 pada konteks tertentu
         function initSelect2(ctx) {
+            // inisialisasi semua select2 dasar
             $(ctx).find('.buyer, .item-type, .kode-warna')
                 .select2({
                     width: '100%',
                     allowClear: true
                 });
+
+            // khusus untuk item-type: pakai AJAX, kirim GET parameter buyer
+            $(ctx).find('.item-type').select2({
+                width: '100%',
+                placeholder: 'Pilih Item Type',
+                allowClear: true,
+                ajax: {
+                    url: `<?= base_url() ?>/gbn/masterdata/poBooking/getItemType`,
+                    dataType: 'json',
+                    delay: 250, // debounce biar nggak kebanjiran request
+                    data: function(params) {
+                        return {
+                            buyer: $('.buyer').val(), // ambil buyer dari select utama
+                            q: params.term || '' // optional: kalau endpoint butuh search term
+                        };
+                    },
+                    processResults: function(data) {
+                        // sudah dalam format [{id, text}, …]
+                        return {
+                            results: data
+                        };
+                    },
+                    error: function() {
+                        console.error('Gagal load item type');
+                    }
+                }
+            });
         }
+
 
         // Tambah tab baru
         function addNewTab() {
@@ -290,7 +319,7 @@
                         </div>
                         <div class="col-md-6">
                             <label>Kg Kebutuhan</label>
-                            <input type="text" class="form-control kg-po" name="items[${idx}][kg_po]" required>
+                            <input type="number" step="0.01" class="form-control kg-po" name="items[${idx}][kg_po]" required>
                         </div>
                     </div>
                     <div class="text-center my-2">
@@ -375,118 +404,60 @@
             removeTab($btn, $pane);
         });
 
-        // isi Item Type setelah No Model
-        function populateItemTypes(matData, modelCode, $row) {
-            const $it = $row.find('.item-type')
-                .empty().append('<option value="">Pilih Item Type</option>');
-            Object.entries(matData).forEach(([type, info]) => {
-                if (info.no_model === modelCode) {
-                    $it.append(`<option value="${type}">${type}</option>`);
-                }
-            });
-            $it.trigger('change');
-        }
-
-
-
-        // init item-type Select2 dengan AJAX
-        $('.item-type').select2({
-            ajax: {
-                transport(params, success, failure) {
-                    const buyer = $('.buyer').val(); // selector buyer-mu
-                    if (!buyer) return success({
-                        results: []
-                    });
-                    $.ajax({
-                        url: `<?= base_url() ?>/gbn/masterdata/poBooking/getItemType/${buyer}`,
-                        dataType: 'json',
-                        data: {
-                            q: params.data.term
-                        },
-                        success: success,
-                        error: failure
-                    });
-                },
-                processResults(data) {
-                    console.log('Data Item Type : ', data);
-                    return {
-                        results: data
-                    };
-                }
-            },
-            placeholder: 'Pilih Item Type',
-            allowClear: true,
-            width: '100%'
-        });
-
         // Kalau buyer berubah, clear item-type
         $('.buyer').on('change', function() {
             $('.item-type').val(null).trigger('change');
         });
 
-        $(document).ready(function() {
-            // setiap buyer atau item-type berubah, refresh kode-warna
-            $('.buyer, .item-type').on('change', function() {
-                const buyer = $('.buyer').val();
-                const itemType = $('.item-type').val();
+        // Listener untuk populate kode-warna
+        $(document).on('change', '.item-type', function() {
+            const $pane = $(this).closest('.kebutuhan-item');
+            const buyer = $('.buyer').val();
+            const itemType = $(this).val();
+            const $kode = $pane.find('.kode-warna');
 
-                // kosongkan dulu
-                $('.kode-warna').html('<option value="">Pilih Kode Warna</option>');
+            $kode.empty().append('<option value="">Pilih Kode Warna</option>');
+            if (!buyer || !itemType) return;
 
-                if (!buyer || !itemType) return;
-
-                $.ajax({
-                    url: '<?= base_url($role . "/masterdata/poBooking/getKodeWarna") ?>',
-                    method: 'GET',
-                    data: {
-                        buyer: buyer,
-                        item_type: itemType
-                    },
-                    dataType: 'json',
-                    success: function(options) {
-                        // options = [{id,text}, …]
-                        options.forEach(opt => {
-                            $('.kode-warna').append(
-                                $('<option>').val(opt.id).text(opt.text)
-                            );
-                        });
-                    },
-                    error: function() {
-                        alert('Gagal mengambil kode warna');
-                    }
-                });
-            });
+            $.getJSON(
+                '<?= base_url($role . "/masterdata/poBooking/getKodeWarna") ?>', {
+                    buyer,
+                    item_type: itemType
+                },
+                function(options) {
+                    options.forEach(opt =>
+                        $kode.append($('<option>').val(opt.id).text(opt.text))
+                    );
+                    // jika kode-warna pakai Select2: perlu trigger update
+                    $kode.trigger('change.select2');
+                }
+            );
         });
 
-        $(document).ready(function() {
-            // ketika buyer, item-type, atau kode-warna berubah
-            $('.buyer, .item-type, .kode-warna').on('change', function() {
-                const buyer = $('.buyer').val();
-                const itemType = $('.item-type').val();
-                const kodeWarna = $('.kode-warna').val();
+        // Listener untuk ambil color
+        $(document).on('change', '.kode-warna', function() {
+            const $pane = $(this).closest('.kebutuhan-item');
+            const buyer = $('.buyer').val();
+            const itemType = $pane.find('.item-type').val();
+            const kodeWarna = $(this).val();
+            const $color = $pane.find('.color');
 
-                // jika semua sudah ada
-                if (buyer && itemType && kodeWarna) {
-                    $.ajax({
-                        url: '<?= base_url($role . "/masterdata/poBooking/getColor") ?>',
-                        method: 'GET',
-                        data: {
-                            buyer: buyer,
-                            item_type: itemType,
-                            kode_warna: kodeWarna
-                        },
-                        dataType: 'json',
-                        success: function(resp) {
-                            $('.color').val(resp.color);
-                        },
-                        error: function() {
-                            $('.color').val('Error ambil color');
-                        }
-                    });
-                } else {
-                    $('.color').val('');
-                }
-            });
+            if (buyer && itemType && kodeWarna) {
+                $.getJSON(
+                    '<?= base_url($role . "/masterdata/poBooking/getColor") ?>', {
+                        buyer,
+                        item_type: itemType,
+                        kode_warna: kodeWarna
+                    },
+                    function(resp) {
+                        $color.val(resp.color);
+                    }
+                ).fail(function() {
+                    $color.val('Error ambil color');
+                });
+            } else {
+                $color.val('');
+            }
         });
 
         // fungsi Tujuan → isi penerima
