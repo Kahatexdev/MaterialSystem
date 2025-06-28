@@ -105,13 +105,13 @@ class PdfController extends BaseController
         } else {
             $result = $this->openPoModel->getDataPoPlus($no_model, $jenis, $jenis2);
         }
-
+        // dd($result);
         $noModel =  $result[0]['no_model'];
 
         $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
 
         $buyerName = fetchApiData($buyerApiUrl);
-
+        // dd($buyerName);
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';
         } else {
@@ -308,6 +308,7 @@ class PdfController extends BaseController
         $prevNoOrder  = '';
 
         foreach ($result as $row) {
+            // dd($row['spesifikasi_benang']);
             // 1. tentukan text yang mau ditampilkan, atau kosong jika sama dgn sebelumnya
             $delivery = $row['delivery_awal'] ?? '';
             if ($delivery === $prevDelivery) {
@@ -317,13 +318,13 @@ class PdfController extends BaseController
                 $prevDelivery    = $delivery;
             }
 
-            $buyer = ($row['buyer'] ?? '') . ' (' . $buyerName['kd_buyer_order'] . ')';
-            if ($buyer === $prevBuyer) {
-                $displayBuyer = '';
-            } else {
-                $displayBuyer = $buyer;
-                $prevBuyer    = $buyer;
-            }
+            // $buyer = ($row['buyer'] ?? '') . ' (' . $buyerName['kd_buyer_order'] . ')';
+            // if ($buyer === $prevBuyer) {
+            //     $displayBuyer = '';
+            // } else {
+            //     $displayBuyer = $buyer;
+            //     $prevBuyer    = $buyer;
+            // }
 
             $noOrder = $row['no_order'] ?? '';
             if ($noOrder === $prevNoOrder) {
@@ -367,13 +368,12 @@ class PdfController extends BaseController
                 ['w' => 20, 'text' => $row['color']],
                 ['w' => 20, 'text' => $row['kode_warna']],
                 // ['w' => 20, 'text' => $row['buyer'] ? $row['buyer'] . '(' . $buyerName['kd_buyer_order'] . ')' : $buyerName['kd_buyer_order']],
-                ['w' => 20, 'text' => $displayBuyer],
+                ['w' => 20, 'text' => $row['buyer']],
                 ['w' => 20, 'text' => $displayNoOrder],
                 ['w' => 22, 'text' => $row['jenis_produksi']],
                 ['w' => 22, 'text' => $row['contoh_warna']],
                 ['w' => 22, 'text' => $row['ket_celup']],
             ];
-
             foreach ($multiCellData as $data) {
                 $pdf->SetXY($tempX, $startY);
                 $y0 = $pdf->GetY();
@@ -381,7 +381,7 @@ class PdfController extends BaseController
                 $heights[] = $pdf->GetY() - $y0;
                 $tempX += $data['w'];
             }
-
+            // dd($data);
             $pdf->SetTextColor(0, 0, 0); // kembali ke hitam
             $maxHeight = max($heights);
 
@@ -428,13 +428,13 @@ class PdfController extends BaseController
             $pdf->SetXY($currentX, $startY);
             $pdf->SetTextColor(255, 255, 255);
             $y0 = $pdf->GetY();
-            $pdf->MultiCell(25, $lineHeight, $row['item_type'], 0, 'C');
+            $pdf->MultiCell(25, $lineHeight, $row['item_type'] . $row['spesifikasi_benang'], 0, 'C');
             $textHeight = $pdf->GetY() - $y0;
             $pdf->SetTextColor(0, 0, 0);
 
             $centerY = $startY + ($maxHeight - $textHeight) / 2;
             $pdf->SetXY($currentX, $centerY);
-            $pdf->MultiCell(25, $lineHeight, $row['item_type'], 0, 'C');
+            $pdf->MultiCell(25, $lineHeight, $row['item_type'] . ' ' . $row['spesifikasi_benang'], 0, 'C');
             $currentX += 25;
 
             // Ukuran (mungkin multiline)
@@ -493,13 +493,13 @@ class PdfController extends BaseController
             $pdf->SetXY($currentX, $startY);
             $pdf->SetTextColor(255, 255, 255);
             $y0 = $pdf->GetY();
-            $pdf->MultiCell(20, $lineHeight, $displayBuyer, 0, 'C');
+            $pdf->MultiCell(20, $lineHeight, $row['buyer'], 0, 'C');
             $textHeight = $pdf->GetY() - $y0;
             $pdf->SetTextColor(0, 0, 0);
 
             $centerY = $startY + ($maxHeight - $textHeight) / 2;
             $pdf->SetXY($currentX, $centerY);
-            $pdf->MultiCell(20, $lineHeight, $displayBuyer, 0, 'C');
+            $pdf->MultiCell(20, $lineHeight, $row['buyer'], 0, 'C');
             $currentX += 20;
 
             // No Order (mungkin multiline)

@@ -142,7 +142,7 @@ class PoBookingController extends BaseController
                 'penerima'            => $post['penerima']          ?? null,
                 'penanggung_jawab'    => $post['penanggung_jawab']  ?? null,
                 'po_plus'             => null,
-                'admin'               => session()->get('role'),
+                'admin'               => session()->get('username'),
                 'id_induk'            => null,
             ];
 
