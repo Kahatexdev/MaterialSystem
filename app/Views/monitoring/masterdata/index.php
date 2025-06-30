@@ -136,6 +136,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Unit</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Admin</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                         </tr>
                     </thead>
@@ -155,6 +156,7 @@
                                 <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['delivery_awal'] ?></td>
                                 <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['delivery_akhir'] ?></td>
                                 <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['unit'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['admin'] ?></td>
                                 <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>">
                                     <a href="<?= base_url($role . '/material/' . $data['id_order']) ?>" class="btn btn-info btn-sm">
                                         Detail

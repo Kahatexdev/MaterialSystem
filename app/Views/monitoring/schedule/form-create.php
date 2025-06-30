@@ -95,101 +95,36 @@
         vertical-align: middle;
     }
 
-    /* Form Styles */
+    legend {
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+
+    fieldset {
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
     .form-group {
-        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
     }
 
-    .form-control,
-    .form-select {
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 8px 12px;
-        width: 100%;
-        transition: border-color 0.3s ease;
+    .col-4.d-flex {
+        gap: 10px;
     }
 
-    .form-control:focus,
-    .form-select:focus {
-        border-color: rgb(0, 147, 152);
-        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
-    }
-
-    .form-check-label {
-        /* bold */
-        font-weight: 600;
-
-    }
-
-    .form-check-input {
-        height: 30px;
-    }
-
-    /* Button Styles */
-    .btn {
-        padding: 10px 20px;
-        border-radius: 4px;
-        font-weight: 600;
-        text-transform: uppercase;
-        transition: all 0.3s ease;
+    .form-group div {
+        display: flex;
+        align-items: center;
+        gap: 15px;
     }
 
 
-    .btn-danger {
-        background-color: #e74c3c;
-        border-color: #e74c3c;
-    }
-
-    .btn-danger:hover {
-        background-color: #c0392b;
-        border-color: #c0392b;
-    }
-
-    /* Badge Styles */
-
-
-
-
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .suggestions-box {
-            max-height: 120px;
-            /* Mengurangi tinggi maksimal untuk layar kecil */
-            font-size: 12px;
-            /* Mengurangi ukuran font untuk layar kecil */
-            width: calc(100% - 20px);
-            /* Lebar lebih kecil untuk layar kecil */
-            left: 10px;
-            /* Menyesuaikan posisi untuk layar kecil */
-            right: 10px;
-            /* Menyesuaikan posisi untuk layar kecil */
-        }
-
-        .suggestions-box div {
-            padding: 6px;
-            /* Mengurangi padding untuk layar kecil */
-        }
-    }
-
-    @media (max-width: 480px) {
-        .suggestions-box {
-            max-height: 100px;
-            /* Lebih kecil lagi untuk layar sangat kecil */
-            font-size: 11px;
-            /* Ukuran font lebih kecil */
-            width: calc(100% - 10px);
-            /* Lebar lebih kecil untuk layar sangat kecil */
-            left: 5px;
-            /* Menyesuaikan posisi untuk layar sangat kecil */
-            right: 5px;
-            /* Menyesuaikan posisi untuk layar sangat kecil */
-        }
-
-        .suggestions-box div {
-            padding: 4px;
-            /* Padding lebih kecil */
-        }
+    input[type="radio"] {
+        margin-right: 5px;
     }
 </style>
 <div class="container-fluid">
@@ -244,9 +179,8 @@
                                         <!-- select with search -->
                                         <select class="form-select" id="jenis_bahan_baku" name="jenis_bahan_baku" required>
                                             <option value="">Pilih Jenis Bahan Baku</option>
-                                            <?php foreach ($jenis_bahan_baku as $bahan): ?>
-                                                <option value="<?= $bahan['jenis'] ?>"><?= $bahan['jenis'] ?></option>
-                                            <?php endforeach; ?>
+                                            <option value="BENANG">BENANG</option>
+                                            <option value="NYLON">NYLON</option>
                                         </select>
                                     </div>
                                 </div>
@@ -264,7 +198,9 @@
                                     <!-- Warna -->
                                     <div class="mb-3">
                                         <label for="warna" class="form-label">Warna</label>
-                                        <input type="text" class="form-control" id="warna" name="warna" maxlength="32" required readonly>
+                                        <select class="form-select" id="warna" name="warna" required>
+                                            <option value="">Pilih Warna</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -349,7 +285,16 @@
                                                             </div>
                                                         </div>
                                                         <div class="row">
-                                                            <div class="col-4">
+                                                            <div class="col-3">
+                                                                <div class="form-group">
+                                                                    <label for="qty_celup">Stock :</label>
+                                                                    <br />
+                                                                    <span class="badge bg-info">
+                                                                        <span class="stock">0.00</span> KG <!-- Ganti id dengan class -->
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-3">
                                                                 <div class="form-group">
                                                                     <label for="qty_celup">KG Kebutuhan :</label>
                                                                     <br />
@@ -358,22 +303,45 @@
                                                                     </span>
                                                                 </div>
                                                             </div>
-                                                            <div class="col-4">
+                                                            <div class="col-3">
                                                                 <div class="form-group">
-                                                                    <label for="qty_celup">Tagihan Sch :</label>
+                                                                    <label for="tagihan">Tagihan :</label>
                                                                     <br />
                                                                     <span class="badge bg-info">
-                                                                        <span class="sisa_jatah">0.00</span> KG <!-- Ganti id dengan class -->
+                                                                        <span class="tagihan">0.00</span> KG
                                                                     </span>
                                                                 </div>
                                                             </div>
-                                                            <div class="col-4 d-flex align-items-center">
+                                                            <div class="col-3 d-flex align-items-center">
                                                                 <div class="form-group">
-                                                                    <label for="po_plus">PO +</label>
-                                                                    <input type="checkbox" id="po_plus" class="form-control form-check-input" name="po_plus[]" value="1">
+                                                                    <label for="qty_celup">PO + :</label>
+                                                                    <fieldset>
+                                                                        <legend></legend>
+                                                                        <div>
+                                                                            <input type="radio" id="po_plus" name="po_plus[]" value="1">
+                                                                            <label for="iya">Iya</label>
+                                                                            <input type="radio" id="po_plus" name="po_plus[]" value="0">
+                                                                            <label for="tidak">Tidak</label>
+                                                                        </div>
+                                                                    </fieldset>
                                                                 </div>
                                                             </div>
-
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <div class="form-group">
+                                                                    <label for="">Keterangan PO</label>
+                                                                    <br />
+                                                                    <textarea class="form-control keterangan" name="keterangan" id="keterangan" disabled></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="form-group">
+                                                                    <label for="">Keterangan Schedule</label>
+                                                                    <br />
+                                                                    <textarea class="form-control ket_schedule[]" name="ket_schedule[]" id="ket_schedule"></textarea>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                     <td class="text-center">
@@ -418,39 +386,31 @@
         const suggestionsBox = document.querySelector('.suggestions-box');
         const kodeWarna = document.getElementById('kode_warna');
         const suggestionsBoxKWarna = document.getElementById('suggestionsKWarna');
-        const warnaInput = document.getElementById('warna'); // Input untuk menampilkan warna
+        // const warnaInput = document.getElementById('warna'); // Input untuk menampilkan warna
+        const warnaSelect = document.getElementById('warna');
         const poTable = document.getElementById("poTable");
-        const itemType = document.querySelector("select[name='item_type']"); // Pastikan ini adalah elemen <select>
-        const poSelect = document.querySelector("select[name='po[]']"); // Pastikan ini adalah elemen <select>
         // Variabel untuk debounce dan flag ketika saran dipilih
         let debounceTimer;
         let suggestionSelected = false;
 
-        // Event listener untuk input pada field kode warna
+        // === Event Listener untuk input kode warna dan saran ===
         kodeWarna.addEventListener('input', function() {
-            // Jika user baru saja memilih saran, jangan langsung fetch lagi
             if (suggestionSelected) {
                 suggestionSelected = false;
                 return;
             }
-
             clearTimeout(debounceTimer);
             const query = kodeWarna.value;
-
-            // Gunakan debounce agar fetch tidak terlalu sering dipanggil
             debounceTimer = setTimeout(() => {
                 fetchKodeWarnaSuggestions(query);
             }, 300);
         });
 
-        // Fungsi untuk mengambil data saran dari backend
         function fetchKodeWarnaSuggestions(query) {
-            // Jika query kurang dari 2 karakter, sembunyikan kotak saran
             if (query.length < 2) {
                 suggestionsBoxKWarna.style.display = 'none';
                 return;
             }
-
             fetch('<?= base_url(session('role') . "/schedule/getKodeWarna") ?>?query=' + encodeURIComponent(query))
                 .then(response => response.json())
                 .then(data => {
@@ -462,24 +422,19 @@
                 });
         }
 
-        // Fungsi untuk menampilkan saran di kotak saran
         function displayKodeWarnaSuggestions(suggestions) {
-            suggestionsBoxKWarna.innerHTML = ''; // Bersihkan saran sebelumnya
-
+            suggestionsBoxKWarna.innerHTML = '';
             if (suggestions.length > 0) {
-                suggestionsBoxKWarna.style.display = 'block'; // Tampilkan kotak saran
-
+                suggestionsBoxKWarna.style.display = 'block';
                 suggestions.forEach(suggestion => {
                     const suggestionDiv = document.createElement('div');
                     suggestionDiv.textContent = suggestion;
-
-                    // Ketika saran diklik, update nilai input dengan saran yang dipilih
                     suggestionDiv.addEventListener('click', function() {
                         suggestionSelected = true;
                         kodeWarna.value = suggestion;
                         suggestionsBoxKWarna.style.display = 'none';
+                        loadWarnaOptions(suggestion);
                     });
-
                     suggestionsBoxKWarna.appendChild(suggestionDiv);
                 });
             } else {
@@ -487,120 +442,80 @@
             }
         }
 
-        // Event listener untuk input pada field kode warna
-        kodeWarna.addEventListener('input', function() {
-            // Jika user baru saja memilih saran, jangan langsung fetch lagi
-            if (suggestionSelected) {
-                suggestionSelected = false;
-                return;
-            }
+        // function fetchWarnaByKodeWarna(kodeWarnaValue) {
+        //     fetch('<?= base_url(session('role') . "/schedule/getWarna") ?>?kode_warna=' + encodeURIComponent(kodeWarnaValue))
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             if (data.length > 0) {
+        //                 warnaInput.value = data[0].color;
+        //                 fetchItemType(kodeWarnaValue, data[0].color);
+        //             } else {
+        //                 warnaInput.value = 'Warna tidak ditemukan';
+        //             }
+        //         })
+        //         .catch(error => {
+        //             console.error('Error fetching warna by kode warna:', error);
+        //             warnaInput.value = 'Error mengambil warna';
+        //         });
+        // }
 
-            clearTimeout(debounceTimer);
-            const query = kodeWarna.value;
-
-            // Gunakan debounce agar fetch tidak terlalu sering dipanggil
-            debounceTimer = setTimeout(() => {
-                fetchKodeWarnaSuggestions(query);
-            }, 300);
-        });
-
-        // Fungsi untuk mengambil data saran dari backend
-        function fetchKodeWarnaSuggestions(query) {
-            // Jika query kurang dari 2 karakter, sembunyikan kotak saran
-            if (query.length < 2) {
-                suggestionsBoxKWarna.style.display = 'none';
-                return;
-            }
-
-            fetch('<?= base_url(session('role') . "/schedule/getKodeWarna") ?>?query=' + encodeURIComponent(query))
-                .then(response => response.json())
+        // Fetch warna list by kode warna
+        function loadWarnaOptions(kode) {
+            fetch('<?= base_url(session('role') . "/schedule/getWarna") ?>?kode_warna=' + encodeURIComponent(kode))
+                .then(res => res.json())
                 .then(data => {
-                    const kodeWarnaSuggestions = data.map(item => item.kode_warna);
-                    displayKodeWarnaSuggestions(kodeWarnaSuggestions);
-                })
-                .catch(error => {
-                    console.error('Error fetching kode warna suggestions:', error);
-                });
-        }
-
-        // Fungsi untuk menampilkan saran di kotak saran
-        function displayKodeWarnaSuggestions(suggestions) {
-            suggestionsBoxKWarna.innerHTML = ''; // Bersihkan saran sebelumnya
-
-            if (suggestions.length > 0) {
-                suggestionsBoxKWarna.style.display = 'block'; // Tampilkan kotak saran
-
-                suggestions.forEach(suggestion => {
-                    const suggestionDiv = document.createElement('div');
-                    suggestionDiv.textContent = suggestion;
-
-                    // Ketika saran diklik, update nilai input dan langsung panggil fetchWarnaByKodeWarna
-                    suggestionDiv.addEventListener('click', function() {
-                        suggestionSelected = true;
-                        kodeWarna.value = suggestion;
-                        suggestionsBoxKWarna.style.display = 'none';
-                        // Panggil fetch untuk mendapatkan warna berdasarkan kode warna yang dipilih
-                        fetchWarnaByKodeWarna(suggestion);
-                    });
-
-                    suggestionsBoxKWarna.appendChild(suggestionDiv);
-                });
-            } else {
-                suggestionsBoxKWarna.style.display = 'none';
-            }
-        }
-
-        // Fungsi Fetch Data Warna berdasarkan Kode Warna
-        function fetchWarnaByKodeWarna(kodeWarnaValue) {
-            fetch('<?= base_url(session('role') . "/schedule/getWarna") ?>?kode_warna=' + encodeURIComponent(kodeWarnaValue))
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length > 0) {
-                        warnaInput.value = data[0].color;
-                        fetchItemType(kodeWarnaValue, data[0].color);
+                    warnaSelect.innerHTML = '<option value="">Pilih Warna</option>';
+                    if (data.length) {
+                        data.forEach(item => {
+                            const opt = document.createElement('option');
+                            opt.value = item.color;
+                            opt.textContent = item.color;
+                            opt.dataset.idInduk = item.id_induk || '';
+                            warnaSelect.appendChild(opt);
+                        });
                     } else {
-                        warnaInput.value = 'Warna tidak ditemukan';
+                        warnaSelect.innerHTML += '<option value="">Tidak ada warna</option>';
                     }
                 })
-                .catch(error => {
-                    console.error('Error fetching warna by kode warna:', error);
-                    warnaInput.value = 'Error mengambil warna';
-                });
+                .catch(err => console.error(err));
         }
 
-
-
+        // On warna change, fetch item type
+        warnaSelect.addEventListener('change', function() {
+            const selected = warnaSelect.options[warnaSelect.selectedIndex];
+            const color = selected.value;
+            const idInduk = selected.dataset.idInduk;
+            if (color) {
+                fetchItemType(kodeWarna.value, color, idInduk);
+            }
+        });
+        // === Fungsi untuk mengambil dan mengisi Item Type ===
         function fetchItemType(kodeWarna, warna) {
             fetch(`<?= base_url(session('role') . "/schedule/getItemType") ?>?kode_warna=${kodeWarna}&warna=${warna}`)
                 .then(response => response.json())
                 .then(data => {
-                    // console.log("Item Type Data:", data);
                     const itemType = document.querySelector(".item-type");
-
                     if (data.length > 0) {
                         itemType.innerHTML = '<option value="">Pilih Item Type</option>';
-
-                        // Menambahkan option berdasarkan data yang diterima
                         data.forEach(item => {
                             const option = document.createElement('option');
                             option.value = item.item_type;
                             option.textContent = item.item_type;
+                            option.setAttribute("data-id-induk", item.id_induk);
                             itemType.appendChild(option);
                         });
-
-                        // Tambahkan event listener untuk menangani perubahan pilihan item type
+                        // Event ketika Item Type berubah
                         $(itemType).on('change', function() {
-                            const itemTypeValue = $(itemType).val(); // Gunakan .val() untuk mengambil nilai yang dipilih
-                            // console.log("Item Type Value:", itemTypeValue);
-
-                            // Panggil fetchPOByKodeWarna jika nilai item type terpilih
-                            if (itemTypeValue) {
-                                const poSelect = document.querySelector(".po-select");
-                                fetchPOByKodeWarna(kodeWarna, warna, itemTypeValue, poSelect);
+                            const selectedOption = itemType.options[itemType.selectedIndex];
+                            const tr = itemType.closest("tr");
+                            const kodeWarnaVal = document.querySelector("input[name='kode_warna']").value;
+                            const warnaVal = document.querySelector("select[name^='warna']").value;
+                            const idInduk = selectedOption.getAttribute("data-id-induk") || 0;
+                            if (selectedOption.value) {
+                                fetchPOByKodeWarna(kodeWarnaVal, tr, warnaVal, selectedOption.value, idInduk, tr.querySelector("select[name='po[]']"));
+                                fetchStock(kodeWarnaVal, tr, warnaVal, selectedOption.value);
                             }
                         });
-
-
                     } else {
                         itemType.innerHTML = '<option value="">Tidak ada Item Type</option>';
                     }
@@ -610,338 +525,510 @@
                 });
         }
 
-        // ✅ function untuk fetch data PO by kode warna, warna, item type
-        function fetchPOByKodeWarna(kodeWarna, warna, itemType, poSelect) {
-            // Encode itemType jika perlu
+        // === Fungsi untuk mengambil data PO berdasarkan kode warna, item type, dsb ===
+        function fetchPOByKodeWarna(kodeWarna, tr, warna, itemType, idInduk, poSelect) {
             const itemTypeEncoded = encodeURIComponent(itemType);
-
-            // Menyusun URL untuk pengambilan data PO
-            const url = `<?= base_url(session('role') . "/schedule/getPO") ?>?kode_warna=${kodeWarna}&warna=${warna}&item_type=${itemTypeEncoded}`;
-
-            // console.log("Request URL:", url); // Debugging URL
-            // console.log("Item Type:", itemType);
-            // console.log("Kode Warna:", kodeWarna);
-            // console.log("Warna:", warna);
-
-            // Gunakan fetch API untuk melakukan request
+            idInduk = idInduk || 0;
+            const url = `<?= base_url(session('role') . "/schedule/getPO") ?>?kode_warna=${kodeWarna}&warna=${warna}&item_type=${itemTypeEncoded}&id_induk=${idInduk}`;
             fetch(url)
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(data => {
-                    // console.log("PO Data:", data); // Debugging data
-
+                    console.log("PO Data:", data);
                     if (Array.isArray(data) && data.length > 0) {
-                        poSelect.innerHTML = '<option value="">Pilih PO</option>'; // Reset PO select
-                        // Menambahkan pilihan PO ke select dropdown
+                        poSelect.innerHTML = '<option value="">Pilih PO</option>';
                         data.forEach(po => {
                             const option = document.createElement('option');
-                            option.value = po.id_order;
+                            option.value = po.no_model;
                             option.textContent = po.no_model;
                             poSelect.appendChild(option);
+                            // const tglStartMC = tr.querySelector("input[name='tgl_start_mc[]']");
+                            const deliveryAwal = tr.querySelector("input[name='delivery_awal[]']");
+                            const deliveryAkhir = tr.querySelector("input[name='delivery_akhir[]']");
+                            // Update data schedule dan qty_po tanpa cek kondisi (selalu gunakan data terbaru)
+                            // tglStartMC.value = po.start_mesin || '';
+                            deliveryAwal.value = po.delivery_awal || '';
+                            deliveryAkhir.value = po.delivery_akhir || '';
+
                         });
+
                     } else {
                         poSelect.innerHTML = '<option value="">Tidak ada PO</option>';
                     }
-
                 })
                 .catch(error => {
-                    console.error('Error fetching PO data:', error); // Debugging error
+                    console.error('Error fetching PO data:', error);
                     poSelect.innerHTML = '<option value="">Gagal mengambil PO</option>';
                 });
         }
 
-        // ✅ Fungsi untuk menghitung total_qty_celup dan memeriksa max_caps serta tagihan SCH
+        // === Fungsi untuk mengambil data Qty dan Kebutuhan PO (selain qty_po) ===
+        function fetchQtyAndKebutuhanPO(kodeWarna, tr, warna, itemType) {
+            const itemTypeEncoded = encodeURIComponent(itemType);
+            // idInduk = idInduk || 0;
+            const url = `<?= base_url(session('role') . "/schedule/getQtyPO") ?>?kode_warna=${kodeWarna}&color=${warna}&item_type=${itemTypeEncoded}`;
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && !data.error) {
+                        // Hanya update field tambahan (qty_po_plus, KG Kebutuhan dan Sisa Jatah)
+                        const qtyPO = tr.querySelector("input[name='qty_po[]']");
+                        const qtyPOPlus = tr.querySelector("input[name='qty_po_plus[]']");
+                        const kgKebutuhan = tr.querySelector(".kg_kebutuhan");
+                        const tagihan = tr.querySelector(".tagihan");
+                        qtyPO.value = parseFloat(data.kg_po).toFixed(2);
+                        qtyPOPlus.value = parseFloat(data.qty_po_plus).toFixed(2) || '';
+                        kgKebutuhan.textContent = parseFloat(data.kg_po).toFixed(2) || '0.00';
+                        tagihan.textContent = parseFloat(data.sisa_kg_po).toFixed(2) || '0.00';
+                    } else {
+                        console.error('Error fetching PO details:', data.error || 'No data found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching Qty data:', error);
+                });
+        }
+
+        // === Fungsi untuk mengambil detail PO (schedule & qty_po) ===
+        function fetchPODetails(poNo, tr, itemType, kodeWarna) {
+            const url = `<?= base_url(session('role') . "/schedule/getPODetails") ?>?no_model=${poNo}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}`;
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && !data.error) {
+                        const tglStartMC = tr.querySelector("input[name='tgl_start_mc[]']");
+                        const deliveryAwal = tr.querySelector("input[name='delivery_awal[]']");
+                        if (deliveryAwal) {
+                            deliveryAwal.value = data.delivery_awal || '';
+                        } else {
+                            console.error("Input delivery_awal[] not found in row:", tr);
+                        }
+
+                        tr.querySelector("input[name='delivery_akhir[]']").value = data.delivery_akhir || '';
+                    } else {
+                        console.error('Error fetching PO details:', data.error || 'No data found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching PO details:', error);
+                });
+        }
+
+        //Cek Stok
+        function fetchStock(kodeWarna, tr, warna, itemType) {
+            const kodeWarnaEnc = encodeURIComponent(kodeWarna);
+            const warnaEnc = encodeURIComponent(warna);
+            const itemTypeEncoded = encodeURIComponent(itemType);
+            const url = `<?= base_url(session('role') . "/schedule/getStock") ?>?kode_warna=${kodeWarnaEnc}&color=${warnaEnc}&item_type=${itemTypeEncoded}`;
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && !data.error) {
+
+                        const stock = tr.querySelector(".stock");
+                        stock.textContent = isNaN(stok) ? '0.00' : stok.toFixed(2);
+                    } else {
+                        console.error('Error fetching Stock:', data.error || 'No data found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching Stock:', error);
+                });
+        }
+
+        //Keterangan dari Open PO
+        function fetchKeterangan(kodeWarna, tr, warna, itemType, noModel) {
+            const kodeWarnaEnc = encodeURIComponent(kodeWarna);
+            const warnaEnc = encodeURIComponent(warna);
+            const itemTypeEncoded = encodeURIComponent(itemType);
+            const noModelEncoded = encodeURIComponent(noModel);
+            const url = `<?= base_url(session('role') . "/schedule/getKeterangan") ?>?kode_warna=${kodeWarnaEnc}&color=${warnaEnc}&item_type=${itemTypeEncoded}&no_model=${noModelEncoded}`;
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && !data.error) {
+                        const ketPo = tr.querySelector("textarea.keterangan");
+                        if (ketPo) {
+                            ketPo.value = data.keterangan || '';
+                        }
+                    } else {
+                        console.error('Error fetching Keterangan:', data.error || 'No data found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching Keterangan:', error);
+                });
+        }
+
+        // Fungsi untuk menghitung sisa kapasitas
+        function calculateRemainingCapacity() {
+            const maxCaps = parseFloat(document.getElementById("max_caps").value) || 0;
+            let totalQtyCelup = 0;
+
+            document.querySelectorAll("input[name='qty_celup[]']").forEach(input => {
+                totalQtyCelup += parseFloat(input.value) || 0;
+            });
+
+            const sisaKapasitas = maxCaps - totalQtyCelup;
+            document.getElementById("sisa_kapasitas").value = sisaKapasitas.toFixed(2);
+
+            // Update tampilan berdasarkan kondisi
+            const sisaInput = document.getElementById("sisa_kapasitas");
+            if (sisaKapasitas < 0) {
+                sisaInput.classList.add("is-invalid");
+            } else {
+                sisaInput.classList.remove("is-invalid");
+            }
+        }
+
+        // Fungsi untuk validasi input qty_celup
+        function validateQtyCelup(input) {
+            const maxCaps = parseFloat(document.getElementById("max_caps").value);
+            const currentValue = parseFloat(input.value) || 0;
+
+            if (currentValue < 0.01) {
+                input.setCustomValidity("Qty Celup minimal 0.01");
+            } else if (currentValue > maxCaps) {
+                input.setCustomValidity("Qty Celup melebihi kapasitas maksimal");
+            } else {
+                input.setCustomValidity("");
+            }
+        }
+
+        // Event listener untuk input qty_celup
+        document.addEventListener("input", function(e) {
+            if (e.target.name === "qty_celup[]") {
+                validateQtyCelup(e.target);
+                calculateRemainingCapacity();
+            }
+        });
+
+        // Event listener untuk perubahan struktur tabel
+        document.addEventListener("DOMNodeInserted", function(e) {
+            if (e.target.classList.contains("removeRow")) {
+                calculateRemainingCapacity();
+            }
+        });
+
+        // Inisialisasi awal saat halaman dimuat
+        document.addEventListener("DOMContentLoaded", function() {
+            calculateRemainingCapacity();
+
+            // Tambahkan event listener untuk semua input yang ada
+            document.querySelectorAll("input[name='qty_celup[]']").forEach(input => {
+                input.addEventListener("input", function() {
+                    validateQtyCelup(this);
+                    calculateRemainingCapacity();
+                });
+            });
+        });
+
+        // === Fungsi untuk menghitung total Qty Celup dan sisa kapasitas ===
         function calculateTotalAndRemainingCapacity() {
             const qtyCelupInputs = document.querySelectorAll("input[name='qty_celup[]']");
             let totalQtyCelup = 0;
 
-            // Hitung total qty celup
             qtyCelupInputs.forEach(input => {
-                totalQtyCelup += parseFloat(input.value) || 0; // Pastikan nilai adalah angka
+                totalQtyCelup += parseFloat(input.value) || 0;
             });
 
-            // Update total_qty_celup
             const totalQtyCelupElement = document.getElementById("total_qty_celup");
             if (totalQtyCelupElement) {
-                totalQtyCelupElement.value = totalQtyCelup.toFixed(2); // Format 2 angka di belakang koma
+                totalQtyCelupElement.value = totalQtyCelup.toFixed(2);
             }
 
-            // Ambil nilai max_caps
             const maxCaps = parseFloat(document.getElementById("max_caps").value) || 0;
 
-            // Periksa apakah total_qty_celup melebihi max_caps
             if (totalQtyCelup > maxCaps) {
-                alert("⚠️ Total Qty Celup melebihi Max Caps!");
-                totalQtyCelupElement.classList.add("is-invalid");
-                totalQtyCelupElement.focus();
+                Swal.fire({
+                    icon: "warning",
+                    title: "Peringatan!",
+                    text: "Total Qty Celup melebihi Max Caps!",
+                    confirmButtonColor: "#d33"
+                }).then(() => {
+                    totalQtyCelupElement.classList.add("is-invalid");
+                    totalQtyCelupElement.focus();
+                    totalQtyCelupElement.value = "0.00";
+                    totalQtyCelup = 0; // Reset totalQtyCelup jika diperlukan
+
+                    qtyCelupInputs.forEach(input => {
+                        input.value = "0.00";
+                        input.classList.add("is-invalid");
+                    });
+                });
+            } else {
+                totalQtyCelupElement.value = totalQtyCelup.toFixed(2);
+                totalQtyCelupElement.classList.remove("is-invalid");
             }
 
-            // Periksa apakah qty_celup di setiap baris melebihi tagihan SCH di baris tersebut
             const rows = poTable.querySelectorAll("tbody tr");
+
             rows.forEach(row => {
-                const qtyCelup = parseFloat(row.querySelector("input[name='qty_celup[]']").value) || 0;
+                const inputCelup = row.querySelector("input[name='qty_celup[]']");
+                const qtyCelup = parseFloat(inputCelup.value) || 0;
                 const tagihanSCH = parseFloat(row.querySelector(".sisa_jatah").textContent) || 0;
 
                 if (qtyCelup > tagihanSCH) {
-                    alert(`⚠️ Qty Celup di baris ini melebihi Tagihan SCH! (Tagihan SCH: ${tagihanSCH.toFixed(2)})`);
-                    row.querySelector("input[name='qty_celup[]']").classList.add("is-invalid");
-                    row.querySelector("input[name='qty_celup[]']").focus();
-                    // reset qty celup
-                    row.querySelector("input[name='qty_celup[]']").value = '';
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Peringatan!",
+                        text: `Qty Celup di baris ini melebihi Tagihan SCH! (Tagihan SCH: ${tagihanSCH.toFixed(2)})`,
+                        confirmButtonColor: "#d33"
+                    }).then(() => {
+                        inputCelup.classList.add("is-invalid");
+                        inputCelup.focus();
+                        inputCelup.value = "0.00"; // Reset input qty celup di baris tersebut
+                    });
+                } else {
+                    inputCelup.classList.remove("is-invalid");
                 }
             });
 
-            // Update sisa kapasitas
+            // Hitung dan set sisa kapasitas
             const sisaKapasitasElement = document.getElementById("sisa_kapasitas");
             if (sisaKapasitasElement) {
                 const sisaKapasitas = maxCaps - totalQtyCelup;
-                sisaKapasitasElement.value = sisaKapasitas.toFixed(2); // Format 2 angka di belakang koma
+                sisaKapasitasElement.value = sisaKapasitas.toFixed(2);
+
                 if (sisaKapasitas < 0) {
-                    alert("⚠️ Sisa Kapasitas negatif!");
-                    sisaKapasitasElement.classList.add("is-invalid");
-                    sisaKapasitasElement.focus();
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Peringatan!",
+                        text: "Sisa Kapasitas negatif!",
+                        confirmButtonColor: "#d33"
+                    }).then(() => {
+                        sisaKapasitasElement.classList.add("is-invalid");
+                        sisaKapasitasElement.focus();
+                    });
                 } else {
                     sisaKapasitasElement.classList.remove("is-invalid");
                 }
             }
         }
 
-        // ✅ Event listener untuk menghitung total qty celup dan sisa kapasitas
         poTable.addEventListener("input", function(e) {
             if (e.target.name === "qty_celup[]") {
                 calculateTotalAndRemainingCapacity();
             }
         });
 
-        // ✅ Event listener untuk mengambil data PO
+        // === Event Listener saat user memilih PO ===
         poTable.addEventListener("change", function(e) {
             if (e.target.classList.contains("po-select")) {
                 const poSelect = e.target;
                 const selectedOption = poSelect.options[poSelect.selectedIndex];
                 const tr = poSelect.closest("tr");
-
-                // console.log("PO Select changed. Selected value:", selectedOption.value); // Log nilai yang dipilih
-
-                // Ambil nilai dari elemen <select> dan <input>
                 const itemTypeValue = tr.querySelector("select[name^='item_type']").value;
-                const kodeWarnaValue = document.querySelector("input[name='kode_warna']").value; // Ambil nilai dari <input>
+                const kodeWarnaValue = document.querySelector("input[name='kode_warna']").value;
+                const warna = document.querySelector("select[name^='warna']").value;
+                const idIndukValue = tr.querySelector("select[name^='item_type']").selectedOptions[0].getAttribute("data-id-induk") || 0;
+                const noModelValue = selectedOption.value;
 
-                // console.log("Item Type:", itemTypeValue); // Log nilai itemType
-                // console.log("Kode Warna:", kodeWarnaValue); // Log nilai kodeWarna
+                // Reset qty_po dan KG Kebutuhan ke 0.00 saat terjadi perubahan PO
+                const qtyPO = tr.querySelector("input[name='qty_po[]']");
+                const kgKebutuhanElement = tr.querySelector(".kg_kebutuhan");
+                qtyPO.value = "0.00";
+                kgKebutuhanElement.textContent = "0.00";
 
                 if (!itemTypeValue || !kodeWarnaValue) {
                     console.error("Item Type atau Kode Warna tidak boleh kosong.");
                     return;
                 }
-
                 if (selectedOption.value) {
-                    // console.log("Fetching PO details for PO No:", selectedOption.value); // Log sebelum fetch
+                    fetchQtyAndKebutuhanPO(kodeWarnaValue, tr, warna, itemTypeValue);
+                    fetchKeterangan(kodeWarnaValue, tr, warna, itemTypeValue, noModelValue);
                     fetchPODetails(selectedOption.value, tr, itemTypeValue, kodeWarnaValue);
                 } else {
-                    // console.log("No PO selected. Resetting fields."); // Log jika tidak ada PO yang dipilih
-                    // Reset fields if no PO is selected
+                    // Reset schedule jika PO kosong
                     const tglStartMC = tr.querySelector("input[name='tgl_start_mc[]']");
                     const deliveryAwal = tr.querySelector("input[name='delivery_awal[]']");
                     const deliveryAkhir = tr.querySelector("input[name='delivery_akhir[]']");
-                    const qtyPO = tr.querySelector("input[name='qty_po[]']");
-                    const qtyPOPlus = tr.querySelector("input[name='qty_po_plus[]']");
-                    const kgKebutuhan = tr.querySelector(".kg_kebutuhan");
-                    const sisaJatah = tr.querySelector(".sisa_jatah");
-
                     tglStartMC.value = '';
                     deliveryAwal.value = '';
                     deliveryAkhir.value = '';
-                    qtyPO.value = '';
-                    qtyPOPlus.value = '';
-                    kgKebutuhan.textContent = '0.00';
-                    sisaJatah.textContent = '0.00';
                 }
             }
         });
 
-        // ✅ Fungsi Fetch Detail PO
-        function fetchPODetails(poNo, tr, itemType, kodeWarna) {
-            const url = `<?= base_url(session('role') . "/schedule/getPODetails") ?>?id_order=${poNo}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}`;
-            // console.log("Request URL:", url); // Log URL yang digunakan untuk fetch
 
-            fetch(url)
-                .then(response => {
-                    // console.log("Response received from server."); // Log saat response diterima
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => {
-                    console.log("Data received from server:", data); // Log data yang diterima dari server
-
-                    if (data && !data.error) { // Pastikan tidak ada error
-                        const tglStartMC = tr.querySelector("input[name='tgl_start_mc[]']");
-                        const deliveryAwal = tr.querySelector("input[name='delivery_awal[]']");
-                        const deliveryAkhir = tr.querySelector("input[name='delivery_akhir[]']");
-                        const qtyPO = tr.querySelector("input[name='qty_po[]']");
-                        const qtyPOPlus = tr.querySelector("input[name='qty_po_plus[]']");
-                        const kgKebutuhan = tr.querySelector(".kg_kebutuhan");
-                        const sisaJatah = tr.querySelector(".sisa_jatah");
-
-                        // Isi data ke elemen HTML
-                        tglStartMC.value = data.start_mesin || '';
-                        deliveryAwal.value = data.delivery_awal || '';
-                        deliveryAkhir.value = data.delivery_akhir || '';
-                        // hanya 2 angka dibelakang koma
-                        if (qtyPO.value == '') {
-                            qtyPO.value = parseFloat(data.kg_kebutuhan).toFixed(2);
-                        } else {
-                            qtyPO.value = parseFloat(qtyPO.value).toFixed(2) || '';
-                        }
-                        qtyPOPlus.value = parseFloat(data.qty_po_plus).toFixed(2) || '';
-                        kgKebutuhan.textContent = parseFloat(data.kg_kebutuhan).toFixed(2) || '0.00';
-                        sisaJatah.textContent = parseFloat(data.sisa_jatah).toFixed(2) || '0.00';
-
-                    } else {
-                        console.error('Error fetching PO details:', data.error || 'No data found'); // Log error
-                    }
-
-                })
-                .catch(error => {
-                    console.error('Error fetching PO details:', error); // Log error jika fetch gagal
-                });
-        }
-
-
-        // ✅ Event Listener untuk Menambah Baris Baru
-        // Function to add a new row
+        // === Menambahkan baris baru ===
         document.getElementById("addRow").addEventListener("click", function() {
             const tbody = poTable.querySelector("tbody");
             const newRow = document.createElement("tr");
             newRow.innerHTML = `
-                <td class="text-center">${tbody.rows.length + 1}</td>
-                <td>
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label for="itemtype"> Item Type</label>
-                                <select class="form-select item-type" name="item_type[]" required>
-                                    <option value="">Pilih Item Type</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label for="po">PO</label>
-                                <select class="form-select po-select" name="po[]" required>
-                                    <option value="">Pilih PO</option>
-                                </select>
-                            </div>
+            <td class="text-center">${tbody.rows.length + 1}</td>
+            <td>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label for="itemtype"> Item Type</label>
+                            <select class="form-select item-type" name="item_type[]" required>
+                                <option value="">Pilih Item Type</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label for="tgl_start_mc">Tgl Start MC</label>
-                                <input type="date" class="form-control" name="tgl_start_mc[]" readonly>
-                            </div>
-                        </div>
-
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label for="delivery_awal">Delivery Awal</label>
-                                <input type="date" class="form-control" name="delivery_awal[]" readonly>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="form-group ">
-                                <label for="delivery_akhir">Delivery Akhir</label>
-                                <input type="date" class="form-control" name="delivery_akhir[]" readonly>
-                            </div>
-
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label for="po">PO</label>
+                            <select class="form-select po-select" name="po[]" required>
+                                <option value="">Pilih PO</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label for="qty_po">Qty PO</label>
-                                <input type="number" class="form-control" name="qty_po[]" readonly>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label for="qty_po_plus">Qty PO (+)</label>
-                                <input type="number" class="form-control" name="qty_po_plus[]" readonly>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label for="qty_celup">Qty Celup</label>
-                                <input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required>
-                            </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label for="tgl_start_mc">Tgl Start MC</label>
+                            <input type="date" class="form-control" name="tgl_start_mc[]" readonly>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label for="qty_celup">KG Kebutuhan :</label>
-                                <span class="badge bg-info">
-                                    <span class="kg_kebutuhan">0.00</span> KG <!-- Ganti id dengan class -->
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label for="qty_celup">Tagihan Sch :</label>
-
-                                <span class="badge bg-info">
-                                    <span class="sisa_jatah">0.00</span> KG <!-- Ganti id dengan class -->
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-4 d-flex align-items-center">
-                            <div class="form-group">
-                                <label for="po_plus">PO +</label>
-                                <input type="checkbox" id="po_plus" class="form-control form-check-input" name="po_plus[]" value="1">
-                            </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label for="delivery_awal">Delivery Awal</label>
+                            <input type="date" class="form-control" name="delivery_awal[]" readonly>
                         </div>
                     </div>
-
-                </td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-danger removeRow">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                        
-                </td>
-            `;
+                    <div class="col-4">
+                        <div class="form-group ">
+                            <label for="delivery_akhir">Delivery Akhir</label>
+                            <input type="date" class="form-control" name="delivery_akhir[]" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label for="qty_po">Qty PO</label>
+                            <input type="number" class="form-control" name="qty_po[]" readonly>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label for="qty_po_plus">Qty PO (+)</label>
+                            <input type="number" class="form-control" name="qty_po_plus[]" readonly>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label for="qty_celup">Qty Celup</label>
+                            <input type="number" step="0.01" min="0.01" class="form-control" name="qty_celup[]" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                <div class="col-3">
+                    <div class="form-group">
+                        <label for="qty_celup">Stock</label>
+                        <br />
+                            <span class="badge bg-info">
+                            <span class="stock">0.00</span> KG <!-- Ganti id dengan class -->
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-group">
+                            <label for="qty_celup">KG Kebutuhan :</label>
+                            <br />
+                            <span class="badge bg-info">
+                                <span class="kg_kebutuhan">0.00</span> KG
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-group">
+                            <label for="tagihan">Tagihan :</label>
+                            <br />
+                            <span class="badge bg-info">
+                                <span class="tagihan">0.00</span> KG
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-3 d-flex align-items-center">
+                        <div class="form-group">
+                            <label for="qty_celup">PO + :</label>
+                            <fieldset>
+                                <legend></legend>
+                                <div>
+                                    <input type="radio" id="po_plus" name="po_plus[]" value="1">
+                                    <label for="iya">Iya</label>
+                                    <input type="radio" id="po_plus" name="po_plus[]" value="0">
+                                    <label for="tidak">Tidak</label>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label for="">Keterangan</label>
+                            <br />
+                            <textarea class="form-control keterangan" name="keterangan" id="keterangan" readonly></textarea>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label for="">Keterangan Schedule</label>
+                            <br />
+                            <textarea class="form-control ket_schedule[]" name="ket_schedule[]" id="ket_schedule"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td class="text-center">
+                <button type="button" class="btn btn-danger removeRow">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
             tbody.appendChild(newRow);
 
-            // Mengisi opsi item_type di baris baru
+            // Isi opsi item_type di baris baru
             const itemTypeSelect = newRow.querySelector(".item-type");
-            fetchItemTypeRow(kodeWarna.value, warnaInput.value, itemTypeSelect);
+            fetchItemTypeRow(kodeWarna.value, warnaSelect.value, itemTypeSelect);
 
-            // Menambahkan event listener untuk perubahan item_type di baris baru
             $(itemTypeSelect).on('change', function() {
                 const itemTypeValue = $(this).val();
                 const poSelect = newRow.querySelector(".po-select");
-                fetchPOByKodeWarna(kodeWarna.value, warnaInput.value, itemTypeValue, poSelect);
+                const idIndukValue = $(this).find(':selected').data('id-induk') || 0;
+
+                fetchPOByKodeWarna(kodeWarna.value, newRow, warnaSelect.value, itemTypeValue, idIndukValue, poSelect);
+                fetchStock(kodeWarna.value, newRow, warnaSelect.value, itemTypeValue);
+                fetchKeterangan(kodeWarna.value, newRow, warnaSelect.value, itemTypeValue, poSelect);
+                // fetchQtyAndKebutuhanPO(kodeWarna.value, newRow, warnaSelect.value, itemTypeValue, idIndukValue);
             });
 
-            // Menambahkan event listener untuk input qty_celup di baris baru
             newRow.querySelector("input[name='qty_celup[]']").addEventListener("input", function() {
                 calculateTotalAndRemainingCapacity();
             });
         });
 
-        // Fungsi fetchItemType yang dimodifikasi untuk menerima parameter itemTypeSelect
         function fetchItemTypeRow(kodeWarna, warna, itemTypeSelect) {
             fetch(`<?= base_url(session('role') . "/schedule/getItemType") ?>?kode_warna=${kodeWarna}&warna=${warna}`)
                 .then(response => response.json())
                 .then(data => {
-                    // console.log("Item Type Data:", data);
                     if (data.length > 0) {
                         itemTypeSelect.innerHTML = '<option value="">Pilih Item Type</option>';
                         data.forEach(item => {
                             const option = document.createElement('option');
                             option.value = item.item_type;
                             option.textContent = item.item_type;
+                            option.setAttribute("data-id-induk", item.id_induk);
                             itemTypeSelect.appendChild(option);
                         });
                     } else {
@@ -953,16 +1040,14 @@
                 });
         }
 
-        // Function to remove a row
         poTable.addEventListener("click", function(e) {
             if (e.target.classList.contains("removeRow")) {
                 e.target.closest("tr").remove();
-                calculateTotalAndRemainingCapacity(); // Hitung ulang setelah menghapus baris
+                calculateTotalAndRemainingCapacity();
             }
         });
-
-
     });
 </script>
+
 
 <?php $this->endSection(); ?>
