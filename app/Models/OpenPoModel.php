@@ -29,6 +29,8 @@ class OpenPoModel extends Model
         'penerima',
         'penanggung_jawab',
         'po_plus',
+        'po_booking',
+        'po_manual',
         'admin',
         'created_at',
         'updated_at',
