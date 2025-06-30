@@ -106,7 +106,7 @@
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
-                    text: 'Apa yang mau dicari cuy?',
+                    text: 'Apa yang mau dicari?',
                 });
                 return;
             }
@@ -147,6 +147,11 @@
                         $('#btnExport').removeClass('d-none'); // Munculkan tombol Export Excel
                     } else {
                         $('#btnExport').addClass('d-none'); // Sembunyikan jika tidak ada data
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Data Tidak Ditemukan',
+                            text: 'Pencarian dengan filter: Tanggal Awal Schedule "' + tanggal_awal + '", Tanggal Akhir Schedule "' + tanggal_akhir + '" menghasilkan 0 data.',
+                        });
                     }
                 },
                 error: function(xhr, status, error) {
