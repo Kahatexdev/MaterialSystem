@@ -46,6 +46,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('updatePoGabungan', 'PoGabunganController::updatePoGabungan');
     $routes->post('deletePoGabungan/(:num)', 'PoGabunganController::deletePoGabungan/$1');
     $routes->get('exportOpenPOGabung', 'PdfController::exportOpenPOGabung');
+    $routes->get('exportPoBoking', 'ExcelController::exportPoBooking');
+
 
     $routes->get('material/(:num)', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');
@@ -561,7 +563,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('excelPPHDays/(:any)/(:any)', 'ExcelController::excelPPHDays/$1/$2');
 
     $routes->get('pemesanan', 'PemesananController::pemesananArea');
+    $routes->get('filter_pemesananarea', 'PemesananController::pemesananArea');
     $routes->post('getUpdateListPemesanan', 'PemesananController::getUpdateListPemesanan');
+    $routes->post('updateListPemesanan', 'ApiController::updateListPemesanan');
 
     //Celup
     $routes->get('schedule', 'ScheduleController::index');

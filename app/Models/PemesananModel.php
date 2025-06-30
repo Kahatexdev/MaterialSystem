@@ -690,9 +690,9 @@ class PemesananModel extends Model
         return $this->findAll();
     }
 
-    public function getDataPemesananArea($tglPakai)
+    public function getDataPemesananArea($tglPakai, $noModel = null)
     {
-        $query = $this->db->table('pemesanan')
+        $builder = $this->db->table('pemesanan')
             ->select("
                 pemesanan.admin,
                 pemesanan.tgl_pakai,
@@ -717,10 +717,14 @@ class PemesananModel extends Model
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pemesanan.status_kirim', 'YA')
-            ->where('pemesanan.tgl_pakai', $tglPakai)
-            ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')
+            ->where('pemesanan.tgl_pakai', $tglPakai);
+        if (!empty($noModel)) {
+            $builder->where('master_order.no_model', $noModel);
+        }
+
+        $builder->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')
             ->orderBy('pemesanan.tgl_pakai', 'DESC')
             ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
-        return $query->get()->getResultArray();
+        return $builder->get()->getResultArray();
     }
 }

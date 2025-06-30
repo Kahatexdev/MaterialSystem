@@ -117,7 +117,7 @@
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
-                    text: 'Apa yang mau dicari cuy?',
+                    text: 'Apa yang mau dicari?',
                 });
                 return;
             }
@@ -160,6 +160,11 @@
                         $('#btnExport').removeClass('d-none'); // Munculkan tombol Export Excel
                     } else {
                         $('#btnExport').addClass('d-none'); // Sembunyikan jika tidak ada data
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Data Tidak Ditemukan',
+                            text: 'Pencarian dengan filter: Key "' + key + '", Tanggal Schedule "' + tanggal_schedule + '", Tgl Start MC Dari "' + tanggal_awal + '", Tgl Start MC Sampai "' + tanggal_akhir + '" menghasilkan 0 data.',
+                        });
                     }
                 },
                 error: function(xhr, status, error) {
