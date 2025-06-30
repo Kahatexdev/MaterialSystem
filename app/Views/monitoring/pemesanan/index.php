@@ -44,7 +44,6 @@
         </div>
     </div>
 
-
     <!-- Button Import -->
     <div class="card card-frame">
         <div class="card-body">
@@ -56,7 +55,7 @@
                 <div class="d-flex">
                     <input type="text" class="form-control form-control-sm me-2" id="no_model" placeholder="No Model">
                     <input type="date" class="form-control form-control-sm me-2" id="tgl_pakai">
-                    <button class="btn btn-info btn-sm">
+                    <button class="btn btn-info btn-sm" id="btnFilter">
                         <i class="fa fa-search"></i> Search
                     </button>
                 </div>
@@ -256,6 +255,24 @@
     });
 </script>
 <script type="text/javascript">
+    //Filter data pemesanan
+    document.getElementById('btnFilter').addEventListener('click', function() {
+        const noModel = document.getElementById('no_model').value.trim();
+        const tglPakai = document.getElementById('tgl_pakai').value.trim();
+
+        if (noModel === '' && tglPakai === '') {
+            alert('Isi minimal No Model atau Tanggal Pakai untuk memfilter!');
+            return;
+        }
+
+        // Redirect ke controller dengan parameter
+        let url = '<?= base_url($role . '/filter_pemesananarea') ?>?';
+        if (noModel) url += 'model=' + encodeURIComponent(noModel) + '&';
+        if (tglPakai) url += 'tgl_pakai=' + encodeURIComponent(tglPakai);
+
+        window.location.href = url;
+    });
+
     // VIEW MODAL UPDATE PEMESANAN
     // Trigger import modal when import button is clicked
     $(document).on('click', '.update-btn', function() {
@@ -265,6 +282,7 @@
         var itemType = $(this).data('item');
         var kode_warna = $(this).data('kode');
         var color = $(this).data('color');
+        var po_tambahan = $(this).data('po-tambahan');
         const updateListUrl = "<?= base_url("$role/getUpdateListPemesanan") ?>";
 
         // Kirim data ke server untuk pencarian
@@ -277,7 +295,8 @@
                 no_model: noModel,
                 item_type: itemType,
                 kode_warna: kode_warna,
-                color: color
+                color: color,
+                po_tambahan: po_tambahan
             },
             dataType: 'json',
             success: function(response) {
@@ -449,5 +468,72 @@
         });
     });
     // END VIEW MODAL UPDATE PEMESANAN
+
+    // PROSES UPDATE PEMESANAN
+    document.getElementById('updatePemesanan').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+        const BASE_URL = "<?= base_url(); ?>";
+        const UPDATE_URL = "<?= base_url("$role/updateListPemesanan") ?>";
+
+        // Konversi FormData ke JSON tanpa "[]"
+        const payload = {};
+        formData.forEach((value, key) => {
+            const cleanKey = key.replace(/\[\]$/, ""); // Hapus "[]"
+            if (!payload[cleanKey]) payload[cleanKey] = [];
+            payload[cleanKey].push(value);
+        });
+        console.log(payload);
+
+        fetch(UPDATE_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+                // credentials: 'include', // Menyertakan cookie/session ID
+            })
+            .then(async (response) => {
+                const resData = await response.json();
+                // Ambil area dari payload untuk menentukan URL redirect
+                const area = payload.area?.[0] || ''; // Pastikan 'area' ada atau gunakan default
+                if (resData.status == "success") {
+                    // Tampilkan SweetAlert setelah session berhasil dihapus
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: resData.message,
+                        showConfirmButton: false,
+                        timer: 1500, // 2 detik
+                        timerProgressBar: true
+                    }).then(() => {
+                        // Redirect ke halaman yang diinginkan
+                        window.location.href = `${BASE_URL}monitoring/pemesanan`; // Halaman tujuan setelah sukses
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: resData.message || 'Gagal menyimpan data',
+                    }).then(() => {
+                        // Redirect ke halaman yang diinginkan
+                        window.location.href = `${BASE_URL}monitoring/pemesanan`; // Halaman tujuan setelah sukses
+                    });
+                    console.error('Response Data:', resData);
+                }
+            })
+            .catch((error) => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Terjadi kesalahan saat mengirim data',
+                });
+                console.error('Fetch Error:', error);
+            });
+
+    });
+    // END PROSES UPDATE PEMESANAN
 </script>
 <?php $this->endSection(); ?>

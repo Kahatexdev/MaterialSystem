@@ -553,7 +553,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('excelPPHDays/(:any)/(:any)', 'ExcelController::excelPPHDays/$1/$2');
 
     $routes->get('pemesanan', 'PemesananController::pemesananArea');
+    $routes->get('filter_pemesananarea', 'PemesananController::pemesananArea');
     $routes->post('getUpdateListPemesanan', 'PemesananController::getUpdateListPemesanan');
+    $routes->post('updateListPemesanan', 'ApiController::updateListPemesanan');
 
     //Celup
     $routes->get('schedule', 'ScheduleController::index');

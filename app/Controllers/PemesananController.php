@@ -731,8 +731,10 @@ class PemesananController extends BaseController
             }
         }
 
-        $tglPakai = DATE('Y-m-d');
-        $dataList = $this->pemesananModel->getDataPemesananArea($tglPakai);
+        $tglPakai = $this->request->getGet('tgl_pakai') ?? DATE('Y-m-d');
+        $noModel = $this->request->getGet('model');
+
+        $dataList = $this->pemesananModel->getDataPemesananArea($tglPakai, $noModel);
 
         foreach ($dataList as $key => $order) {
             $dataList[$key]['ttl_kebutuhan_bb'] = 0;
@@ -744,8 +746,12 @@ class PemesananController extends BaseController
                     $totalRequirement = 0;
                     foreach ($styleList as $style) {
                         if (isset($style['no_model'], $style['style_size'], $style['gw'], $style['composition'], $style['loss'])) {
-                            $orderApiUrl = 'http://172.23.39.114/CapcityApps/public/api/getQtyOrder?no_model='
+                            $orderApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model='
                                 . $order['no_model'] . '&style_size=' . urlencode($style['style_size']) . '&area=' . urlencode($area);
+
+                            // TAMBAHKAN INI UNTUK NAMPIL DI CONSOLE BROWSER
+                            echo "<script>console.log('API URL: " . htmlspecialchars($orderApiUrl) . "');</script>";
+
                             $orderQty = fetchApiData($orderApiUrl);
                             if (isset($orderQty['qty'])) {
                                 $requirement = $orderQty['qty'] * $style['gw'] * ($style['composition'] / 100) * (1 + ($style['loss'] / 100)) / 1000;
@@ -770,6 +776,8 @@ class PemesananController extends BaseController
                 // Hitung sisa jatah
                 $dataList[$key]['sisa_jatah'] = $dataList[$key]['ttl_kebutuhan_bb'] - $dataList[$key]['ttl_pengiriman'];
             }
+            // TAMPILKAN HASILNYA DI SINI
+            // dd($dataList[$key]['ttl_kebutuhan_bb']);
         }
 
         $data = [
