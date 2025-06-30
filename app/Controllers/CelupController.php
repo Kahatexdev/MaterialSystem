@@ -124,10 +124,11 @@ class CelupController extends BaseController
                     'lot_celup' => $id['lot_celup'],
                     'lot_urut' => $id['lot_urut'],
                     'tgl_schedule' => $id['tanggal_schedule'],
+                    'admin' => $id['user_cek_status'],
                 ];
             }
         }
-
+        // dd($uniqueData);
         $data = [
             'active' => $this->active,
             'title' => 'Schedule',
