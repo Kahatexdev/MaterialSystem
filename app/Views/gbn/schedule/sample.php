@@ -475,7 +475,7 @@
             }
 
             // Redirect ke URL dengan parameter filter
-            const url = `<?= base_url($role . '/schedule/acrylic') ?>?start_date=${startDate}&end_date=${endDate}`;
+            const url = `<?= base_url($role . '/schedule/sample') ?>?start_date=${startDate}&end_date=${endDate}`;
             window.location.href = url;
         });
 

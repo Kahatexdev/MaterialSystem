@@ -11,14 +11,18 @@
                     <h6 class="font-weight-bolder mb-0"><?= $title ?></h6>
                 </nav>
                 <div class="d-flex align-items-center">
-                    <li class="nav-item d-flex align-items-center px-1">
-                        <a href="<?= base_url(session()->get('role')) . '/masterdata/poGabungan' ?>" class="nav-link text-body font-weight-bold px-2">
-                            <i class="fas fa-file-import"></i>
-                            <span class="d-lg-inline-block d-none ms-1">
-                                PO Gabungan</span>
-                        </a>
-                    </li>
                     <ul class="navbar-nav justify-content-end">
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-file-alt"></i>
+                                <span class="d-lg-inline-block d-none ms-1">Other PO</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownMenuLink">
+                                <li><a href="<?= base_url($role . '/masterdata/poGabungan') ?>" class="dropdown-item" href="#">PO Gabungan</a></li>
+                                <li><a href="<?= base_url($role . '/masterdata/poBooking') ?>" class="dropdown-item" href="#">PO Booking</a></li>
+                                <li><a href="<?= base_url($role . '/masterdata/poManual') ?>" class="dropdown-item" href="#">PO Manual</a></li>
+                            </ul>
+                        </li>
                         <li class="nav-item d-flex align-items-center px-1">
                             <a href="<?= base_url(session()->get('role')) . '/masterMaterial' ?>" class="nav-link text-body font-weight-bold px-2">
                                 <i class="fas fa-database"></i>

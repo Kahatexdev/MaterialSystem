@@ -31,6 +31,13 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('masterdata/poGabungan', 'PoGabunganController::index');
     $routes->get('masterdata/poGabungan/(:any)', 'PoGabunganController::poGabungan/$1');
     $routes->get('masterdata/poGabunganDetail/(:any)', 'PoGabunganController::poGabunganDetail/$1');
+    $routes->get('masterdata/poBooking', 'PoBookingController::index');
+    // $routes->get('masterdata/poBooking/getItemType/(:any)', 'PoBookingController::getItemType/$1');
+    $routes->get('masterdata/poBooking/getItemType', 'PoBookingController::getItemType');
+    $routes->get('masterdata/poBooking/getKodeWarna', 'PoBookingController::getKodeWarna');
+    $routes->get('masterdata/poBooking/getColor', 'PoBookingController::getColor');
+    $routes->post('masterdata/poBooking/saveOpenPoBooking', 'PoBookingController::saveOpenPoBooking');
+    $routes->get('masterdata/poManual', 'PoManualController::index');
     $routes->get('masterdata/cekStockOrder/(:any)/(:any)/(:any)', 'PoGabunganController::cekStockOrder/$1/$2/$3');
     $routes->post('openPO/saveOpenPOGabungan', 'PoGabunganController::saveOpenPOGabungan');
     $routes->get('listPoGabungan', 'PoGabunganController::listPoGabungan');
@@ -38,6 +45,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('updatePoGabungan', 'PoGabunganController::updatePoGabungan');
     $routes->post('deletePoGabungan/(:num)', 'PoGabunganController::deletePoGabungan/$1');
     $routes->get('exportOpenPOGabung', 'PdfController::exportOpenPOGabung');
+    $routes->get('exportPoBoking', 'ExcelController::exportPoBooking');
+
 
     $routes->get('material/(:num)', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');

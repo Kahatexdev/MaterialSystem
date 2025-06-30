@@ -349,4 +349,37 @@ class MaterialModel extends Model
             ->groupBy('style_size, inisial')
             ->findAll();
     }
+
+    public function getItemTypeByBuyer($buyer)
+    {
+        return $this->select('material.item_type')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('master_order.buyer', $buyer)
+            ->groupBy('material.item_type')
+            ->orderBy('material.item_type')
+            ->findAll();
+    }
+
+    public function getKodeWarnaByBuyerAndItemType($buyer, $itemType)
+    {
+        return $this->select('material.kode_warna')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('master_order.buyer', $buyer)
+            ->where('material.item_type', $itemType)
+            ->groupBy('material.kode_warna')
+            ->orderBy('material.kode_warna')
+            ->findAll();
+    }
+
+    public function getWarnaByBuyerItemTypeAndKodeWarna($buyer, $itemType, $kodeWarna)
+    {
+        return $this->select('material.color')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('master_order.buyer', $buyer)
+            ->where('material.item_type', $itemType)
+            ->where('material.kode_warna', $kodeWarna)
+            ->groupBy('material.color')
+            ->orderBy('material.color')
+            ->first();
+    }
 }
