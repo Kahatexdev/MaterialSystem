@@ -4625,8 +4625,11 @@ class ExcelController extends BaseController
         $writer->save('php://output');
         exit;
     }
-    public function exportPoBooking()
+
+    public function exportPoBooking($noModel)
     {
+        $data = $this->openPoModel->getPoBookingByNoModel($noModel);
+        // dd($data);
         function applyBorders($style, $borders)
         {
             $style['borders'] = $borders;
@@ -4661,6 +4664,9 @@ class ExcelController extends BaseController
         $leftMiddle = [
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
         ];
+        $justify = [
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_JUSTIFY, 'vertical' => Alignment::VERTICAL_CENTER],
+        ];
 
         // ===== Drawing logo =====
         $drawing = new Drawing();
@@ -4668,9 +4674,9 @@ class ExcelController extends BaseController
             ->setDescription('PT. KAHATEX Logo')
             ->setPath(FCPATH . 'assets/img/logo-kahatex.png')
             ->setWorksheet($sheet)
-            ->setCoordinates('A1')
-            ->setOffsetX(45)
-            ->setOffsetY(50)
+            ->setCoordinates('B1')
+            ->setOffsetX(20)
+            ->setOffsetY(10)
             ->setHeight(1.25 * 37.7952755906)
             ->setWidth(1.25 * 37.7952755906);
 
@@ -4717,7 +4723,7 @@ class ExcelController extends BaseController
         }
 
         $fields = [
-            ['range' => 'C2:P2', 'value' => 'DEPARTEMEN KAOSKAKI',  'style' => array_merge($baseBold, $centerMiddle)],
+            ['range' => 'C2:P2', 'value' => 'DEPARTEMEN KAOS KAKI',  'style' => array_merge($baseBold, $centerMiddle)],
             ['range' => 'C3:P3', 'value' => 'BAGIAN PENCELUPAN',    'style' => array_merge($baseBold, $centerMiddle)],
             ['range' => 'A4:B4', 'value' => 'No. Dokumen',          'style' => array_merge($baseNormal, $leftMiddle)],
             ['range' => 'C4:I4', 'value' => 'FOR - KK - 013',       'style' => array_merge($baseBold, $leftMiddle)],
@@ -4733,16 +4739,16 @@ class ExcelController extends BaseController
             ['range' => 'L6:P6', 'value' => 'NO. :',       'style' => array_merge($baseBold, $leftMiddle), 'borders' => []],
 
             // Tambahan kolom baris 7
-            ['range' => 'A7:B7', 'value' => 'NAMA',                 'style' => array_merge($baseBold, $leftMiddle), 'borders' => [
+            ['range' => 'A7:B7', 'value' => 'NAMA',                 'style' => array_merge($baseBold, $centerMiddle), 'borders' => [
                 'top'    => ['borderStyle' => Border::BORDER_THIN],
                 'bottom' => ['borderStyle' => Border::BORDER_THIN],
                 'left'   => ['borderStyle' => Border::BORDER_DOUBLE],
                 'right'  => ['borderStyle' => Border::BORDER_THIN],
             ]],
             ['range' => 'C7:E7', 'value' => '',                     'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
-            ['range' => 'F7:H7', 'value' => 'JUMLAH PESANAN',       'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'F7:H7', 'value' => 'JUMLAH PESANAN',       'style' => array_merge($baseBold, $centerMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
             ['range' => 'I7:J7', 'value' => '',                     'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
-            ['range' => 'K7:K7', 'value' => 'JENIS',                'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'K7:K7', 'value' => 'JENIS',                'style' => array_merge($baseBold, $centerMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
             ['range' => 'L7:M7', 'value' => '',                     'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
             ['range' => 'N7:P7', 'value' => 'TGL. PENYERAHAN',      'style' => array_merge($baseBold, $leftMiddle), 'borders' => [
                 'top'    => ['borderStyle' => Border::BORDER_THIN],
@@ -4751,16 +4757,16 @@ class ExcelController extends BaseController
                 'right'  => ['borderStyle' => Border::BORDER_DOUBLE],
             ]],
             // Tambahan kolom baris 8
-            ['range' => 'A8:B9', 'value' => 'TEMPAT PENYERAHAN',    'style' => array_merge($baseBold, $leftMiddle, $centerMiddleWrap), 'borders' => [
+            ['range' => 'A8:B9', 'value' => 'TEMPAT PENYERAHAN',    'style' => array_merge($baseBold, $justify), 'borders' => [
                 'top'    => ['borderStyle' => Border::BORDER_THIN],
                 'bottom' => ['borderStyle' => Border::BORDER_THIN],
                 'left'   => ['borderStyle' => Border::BORDER_DOUBLE],
                 'right'  => ['borderStyle' => Border::BORDER_THIN],
             ]],
             ['range' => 'C8:E9', 'value' => '',                     'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
-            ['range' => 'F8:H9', 'value' => 'JUMLAH PIECE',         'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'F8:H9', 'value' => 'JUMLAH PIECE',         'style' => array_merge($baseBold, $centerMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
             ['range' => 'I8:J9', 'value' => '',                     'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
-            ['range' => 'K8:K9', 'value' => 'CODE',                 'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'K8:K9', 'value' => 'CODE',                 'style' => array_merge($baseBold, $centerMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
             ['range' => 'L8:M9', 'value' => '',                     'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
             ['range' => 'N8:P9', 'value' => '',                     'style' => array_merge($baseBold, $leftMiddle), 'borders' => [
                 'top'    => ['borderStyle' => Border::BORDER_THIN],
@@ -4806,6 +4812,53 @@ class ExcelController extends BaseController
         // Terapkan gaya
         // $sheet->getStyle('A12:P26')->applyFromArray($lineStyle);
 
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember'
+        ];
+
+        $tglArr = explode('-', date('Y-m-d', strtotime($data[0]['created_at'])));
+        $tgl = $tglArr[2] . '-' . $bulan[$tglArr[1]] . '-' . $tglArr[0];
+        $sheet->setCellValue('F6', 'TANGGAL : ' . $tgl);
+        $sheet->setCellValue('L7', $data[0]['jenis']);
+        $sheet->getStyle('L7')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        if (session()->get('role') === 'gbn') {
+            $sheet->setCellValue('C8', 'Gudang Benang');
+            $sheet->getStyle('C8')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        } else {
+            $sheet->setCellValue('C8', '');
+        }
+
+        $no = 1;
+        $row = 16;
+
+        $sheet->setCellValue('B12', $data[0]['jenis'] . ' ' . $data[0]['spesifikasi_benang'] . ' ' . $data[0]['keterangan']);
+        $sheet->setCellValue('B13', 'Order :');
+        $sheet->setCellValue('B14', 'Model :');
+
+        // $sheet->setCellValue('C13', 'Ini adalah Order');
+        $sheet->setCellValue('C14', $data[0]['no_model']);
+
+        foreach ($data as $po) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->setCellValue('B' . $row, $po['color']);
+            $sheet->setCellValue('C' . $row, $po['kode_warna']);
+            $sheet->setCellValue('K' . $row, $po['kg_po'] . ' kg');
+            $sheet->getStyle('K' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            $row++;
+        }
 
         $sheet->setCellValue('A27', 'Yang Bertanggung Jawab / Tanda tangan : (.......................................)');
         $sheet->mergeCells('A27:P27');
@@ -4828,10 +4881,339 @@ class ExcelController extends BaseController
         // ===== Double bottom border on row 3 =====
         $sheet->getStyle('A3:P3')->applyFromArray(['borders' => ['bottom' => ['borderStyle' => Border::BORDER_DOUBLE]]]);
 
+        for ($row = 12; $row <= 26; $row++) {
+            $sheet->getStyle('A' . $row)->applyFromArray([
+                'borders' => [
+                    'top'    => ['borderStyle' => Border::BORDER_THIN],
+                    'bottom' => ['borderStyle' => Border::BORDER_THIN],
+                    'left'   => ['borderStyle' => Border::BORDER_DOUBLE],
+                    'right'  => ['borderStyle' => Border::BORDER_THIN],
+                ],
+            ]);
+        }
 
+        for ($row = 12; $row <= 26; $row++) {
+            $sheet->getStyle('P' . $row)->applyFromArray([
+                'borders' => [
+                    'top'    => ['borderStyle' => Border::BORDER_THIN],
+                    'bottom' => ['borderStyle' => Border::BORDER_THIN],
+                    'left'   => ['borderStyle' => Border::BORDER_THIN],
+                    'right'  => ['borderStyle' => Border::BORDER_DOUBLE],
+                ],
+            ]);
+        }
+
+        // Border TENGAH B12–O26
+        $sheet->getStyle('B12:O26')->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color'       => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
 
         // Set judul file dan header untuk download
         $filename = 'Export PO Booking.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        // Tulis file excel ke output
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function exportPoManual($noModel)
+    {
+        $data = $this->openPoModel->getPoManualByNoModel($noModel);
+        // dd($data);
+        function applyBorders($style, $borders)
+        {
+            $style['borders'] = $borders;
+            return $style;
+        }
+        // Buat spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Base styles
+        $baseBold = [
+            'font' => ['bold' => true, 'size' => 11, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
+        ];
+        $baseNormal = [
+            'font' => ['size' => 11, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
+        ];
+        $centerTop = [
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_BOTTOM],
+        ];
+        $centerMiddle = [
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+        ];
+        $centerMiddleWrap = [
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ],
+        ];
+        $leftMiddle = [
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
+        ];
+        $justify = [
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_JUSTIFY, 'vertical' => Alignment::VERTICAL_CENTER],
+        ];
+
+        // ===== Drawing logo =====
+        $drawing = new Drawing();
+        $drawing->setName('Logo')
+            ->setDescription('PT. KAHATEX Logo')
+            ->setPath(FCPATH . 'assets/img/logo-kahatex.png')
+            ->setWorksheet($sheet)
+            ->setCoordinates('B1')
+            ->setOffsetX(20)
+            ->setOffsetY(10)
+            ->setHeight(1.25 * 37.7952755906)
+            ->setWidth(1.25 * 37.7952755906);
+
+        // Define outline style for full document
+        $outlineStyle = ['borders' => ['outline' => ['borderStyle' => Border::BORDER_DOUBLE]]];
+        // $lineStyle = ['AllBorder' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]];
+
+        // ===== Header blocks =====
+        $headers = [
+            [
+                'range'   => 'A1:B3',
+                'value'   => 'PT. KAHATEX',
+                'style'   => array_merge($baseBold, $centerTop),
+                'borders' => ['left' => ['borderStyle' => Border::BORDER_DOUBLE], 'right' => ['borderStyle' => Border::BORDER_DOUBLE], 'top' => ['borderStyle' => Border::BORDER_DOUBLE], 'bottom' => ['borderStyle' => Border::BORDER_DOUBLE]],
+            ],
+            [
+                'range'   => 'C1:P1',
+                'value'   => 'FORMULIR',
+                'style'   => array_merge(
+                    ['font' => ['bold' => true, 'size' => 16, 'name' => 'Arial']],
+                    $centerMiddle,
+                    ['fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '99FFFF']]]
+                ),
+                'borders' => ['left' => ['borderStyle' => Border::BORDER_DOUBLE], 'right' => ['borderStyle' => Border::BORDER_DOUBLE], 'top' => ['borderStyle' => Border::BORDER_DOUBLE], 'bottom' => ['borderStyle' => Border::BORDER_THIN]],
+            ],
+        ];
+
+        foreach ($headers as $h) {
+            $sheet->mergeCells($h['range']);
+            $sheet->setCellValue(explode(':', $h['range'])[0], $h['value']);
+            $sheet->getStyle($h['range'])->applyFromArray(applyBorders($h['style'], $h['borders']));
+        }
+
+        // ===== Column widths =====n
+        $colWidths = ['A' => 5, 'B' => 17, 'C' => 14, 'D' => 7, 'E' => 7, 'F' => 7, 'G' => 7, 'H' => 7, 'I' => 5, 'J' => 17, 'K' => 14, 'L' => 7, 'M' => 7, 'N' => 7, 'O' => 7, 'P' => 7];
+        foreach ($colWidths as $col => $width) {
+            $sheet->getColumnDimension($col)->setWidth($width);
+        }
+
+        // ===== Row heights (1-26) =====
+        $rowHeightPts = 0.7 / 0.0352778;
+        for ($row = 1; $row <= 26; $row++) {
+            $sheet->getRowDimension((string) $row)->setRowHeight($rowHeightPts);
+        }
+
+        $fields = [
+            ['range' => 'C2:P2', 'value' => 'DEPARTEMEN KAOS KAKI',  'style' => array_merge($baseBold, $centerMiddle)],
+            ['range' => 'C3:P3', 'value' => 'BAGIAN PENCELUPAN',    'style' => array_merge($baseBold, $centerMiddle)],
+            ['range' => 'A4:B4', 'value' => 'No. Dokumen',          'style' => array_merge($baseNormal, $leftMiddle)],
+            ['range' => 'C4:I4', 'value' => 'FOR - KK - 013',       'style' => array_merge($baseBold, $leftMiddle)],
+            ['range' => 'J4:K4', 'value' => 'Halaman',              'style' => array_merge($baseBold, $leftMiddle)],
+            ['range' => 'L4:P4', 'value' => '1/1',                  'style' => array_merge($baseBold, $centerMiddle)],
+            ['range' => 'A5:B5', 'value' => 'Tanggal Efektif',      'style' => array_merge($baseNormal, $leftMiddle)],
+            ['range' => 'C5:I5', 'value' => '01 Desember 2016',     'style' => array_merge($baseBold, $leftMiddle)],
+            ['range' => 'J5:K5', 'value' => 'Revisi',               'style' => array_merge($baseBold, $leftMiddle)],
+            ['range' => 'L5:P5', 'value' => '00',                   'style' => array_merge($baseBold, $centerMiddle)],
+            // Tambahan kolom baris 6 (tanpa border)
+            ['range' => 'A6:E6', 'value' => 'PEMESANAN :', 'style' => array_merge($baseBold, $leftMiddle), 'borders' => []],
+            ['range' => 'F6:K6', 'value' => 'TANGGAL :',   'style' => array_merge($baseBold, $leftMiddle), 'borders' => []],
+            ['range' => 'L6:P6', 'value' => 'NO. :',       'style' => array_merge($baseBold, $leftMiddle), 'borders' => []],
+
+            // Tambahan kolom baris 7
+            ['range' => 'A7:B7', 'value' => 'NAMA',                 'style' => array_merge($baseBold, $centerMiddle), 'borders' => [
+                'top'    => ['borderStyle' => Border::BORDER_THIN],
+                'bottom' => ['borderStyle' => Border::BORDER_THIN],
+                'left'   => ['borderStyle' => Border::BORDER_DOUBLE],
+                'right'  => ['borderStyle' => Border::BORDER_THIN],
+            ]],
+            ['range' => 'C7:E7', 'value' => '',                     'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'F7:H7', 'value' => 'JUMLAH PESANAN',       'style' => array_merge($baseBold, $centerMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'I7:J7', 'value' => '',                     'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'K7:K7', 'value' => 'JENIS',                'style' => array_merge($baseBold, $centerMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'L7:M7', 'value' => '',                     'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'N7:P7', 'value' => 'TGL. PENYERAHAN',      'style' => array_merge($baseBold, $leftMiddle), 'borders' => [
+                'top'    => ['borderStyle' => Border::BORDER_THIN],
+                'bottom' => ['borderStyle' => Border::BORDER_THIN],
+                'left'   => ['borderStyle' => Border::BORDER_THIN],
+                'right'  => ['borderStyle' => Border::BORDER_DOUBLE],
+            ]],
+            // Tambahan kolom baris 8
+            ['range' => 'A8:B9', 'value' => 'TEMPAT PENYERAHAN',    'style' => array_merge($baseBold, $justify), 'borders' => [
+                'top'    => ['borderStyle' => Border::BORDER_THIN],
+                'bottom' => ['borderStyle' => Border::BORDER_THIN],
+                'left'   => ['borderStyle' => Border::BORDER_DOUBLE],
+                'right'  => ['borderStyle' => Border::BORDER_THIN],
+            ]],
+            ['range' => 'C8:E9', 'value' => '',                     'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'F8:H9', 'value' => 'JUMLAH PIECE',         'style' => array_merge($baseBold, $centerMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'I8:J9', 'value' => '',                     'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'K8:K9', 'value' => 'CODE',                 'style' => array_merge($baseBold, $centerMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'L8:M9', 'value' => '',                     'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'N8:P9', 'value' => '',                     'style' => array_merge($baseBold, $leftMiddle), 'borders' => [
+                'top'    => ['borderStyle' => Border::BORDER_THIN],
+                'bottom' => ['borderStyle' => Border::BORDER_THIN],
+                'left'   => ['borderStyle' => Border::BORDER_THIN],
+                'right'  => ['borderStyle' => Border::BORDER_DOUBLE],
+            ]],
+
+            // Header Isi Tabel
+            ['range' => 'A10:A11', 'value' => 'NO.',                     'style' => array_merge($baseBold, $centerMiddle), 'borders' => [
+                'top'    => ['borderStyle' => Border::BORDER_THIN],
+                'bottom' => ['borderStyle' => Border::BORDER_THIN],
+                'left'   => ['borderStyle' => Border::BORDER_DOUBLE],
+                'right'  => ['borderStyle' => Border::BORDER_THIN],
+            ]],
+            ['range' => 'B10:B11', 'value' => 'WARNA',                   'style' => array_merge($baseBold, $centerMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'C10:C11', 'value' => 'JUMLAH PEMESANAN',        'style' => array_merge($baseBold, $centerMiddleWrap), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'D10:H10', 'value' => 'JUMLAH YANG DISERAHKAN',   'style' => array_merge($baseBold, $centerMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'D11', 'value' => '',   'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'E11', 'value' => '',   'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'F11', 'value' => '',   'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'G11', 'value' => '',   'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'H11', 'value' => '',   'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'I10:I11', 'value' => 'NO.',                   'style' => array_merge($baseBold, $centerMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'J10:J11', 'value' => 'WARNA',        'style' => array_merge($baseBold, $centerMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'K10:K11', 'value' => 'JUMLAH PESANAN',   'style' => array_merge($baseBold, $centerMiddleWrap), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'L10:P10', 'value' => 'JUMLAH YANG DISERAHKAN',   'style' => array_merge($baseBold, $centerMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'L11', 'value' => '',   'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'M11', 'value' => '',   'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'N11', 'value' => '',   'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'O11', 'value' => '',   'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+            ['range' => 'P11', 'value' => '',   'style' => array_merge($baseBold, $leftMiddle), 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN]]],
+        ];
+
+        // loop apply fields with conditional borders with conditional borders
+        foreach ($fields as $f) {
+            $sheet->mergeCells($f['range']);
+            $sheet->setCellValue(explode(':', $f['range'])[0], $f['value']);
+            $borders = $f['borders'] ?? ['outline' => ['borderStyle' => Border::BORDER_THIN]];
+            $sheet->getStyle($f['range'])->applyFromArray(applyBorders($f['style'], $borders));
+        }
+
+        // Terapkan gaya
+        // $sheet->getStyle('A12:P26')->applyFromArray($lineStyle);
+
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember'
+        ];
+
+        $tglArr = explode('-', date('Y-m-d', strtotime($data[0]['created_at'])));
+        $tgl = $tglArr[2] . '-' . $bulan[$tglArr[1]] . '-' . $tglArr[0];
+        $sheet->setCellValue('F6', 'TANGGAL : ' . $tgl);
+        $sheet->setCellValue('L7', $data[0]['jenis']);
+        $sheet->getStyle('L7')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        if (session()->get('role') === 'gbn') {
+            $sheet->setCellValue('C8', 'Gudang Benang');
+            $sheet->getStyle('C8')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        } else {
+            $sheet->setCellValue('C8', '');
+        }
+
+        $no = 1;
+        $row = 16;
+
+        $sheet->setCellValue('B12', $data[0]['jenis'] . ' ' . $data[0]['spesifikasi_benang'] . ' ' . $data[0]['keterangan']);
+        $sheet->setCellValue('B13', 'Order :');
+        $sheet->setCellValue('B14', 'Model :');
+
+        // $sheet->setCellValue('C13', 'Ini adalah Order');
+        $sheet->setCellValue('C14', $data[0]['no_model']);
+
+        foreach ($data as $po) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->setCellValue('B' . $row, $po['color']);
+            $sheet->setCellValue('C' . $row, $po['kode_warna']);
+            $sheet->setCellValue('K' . $row, $po['kg_po'] . ' kg');
+            $sheet->getStyle('K' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            $row++;
+        }
+
+        $sheet->setCellValue('A27', 'Yang Bertanggung Jawab / Tanda tangan : (.......................................)');
+        $sheet->mergeCells('A27:P27');
+
+        // Terapkan gaya
+        $sheet->getStyle('A27:P27')->applyFromArray([
+            'font' => $baseBold['font'],
+            'alignment' => $leftMiddle['alignment'],
+            'borders' => [
+                'outline' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'], // Warna garis, opsional
+                ],
+            ],
+        ]);
+
+        // ===== Outline border for full document 
+        $sheet->getStyle('A1:P27')->applyFromArray($outlineStyle);
+
+        // ===== Double bottom border on row 3 =====
+        $sheet->getStyle('A3:P3')->applyFromArray(['borders' => ['bottom' => ['borderStyle' => Border::BORDER_DOUBLE]]]);
+
+        for ($row = 12; $row <= 26; $row++) {
+            $sheet->getStyle('A' . $row)->applyFromArray([
+                'borders' => [
+                    'top'    => ['borderStyle' => Border::BORDER_THIN],
+                    'bottom' => ['borderStyle' => Border::BORDER_THIN],
+                    'left'   => ['borderStyle' => Border::BORDER_DOUBLE],
+                    'right'  => ['borderStyle' => Border::BORDER_THIN],
+                ],
+            ]);
+        }
+
+        for ($row = 12; $row <= 26; $row++) {
+            $sheet->getStyle('P' . $row)->applyFromArray([
+                'borders' => [
+                    'top'    => ['borderStyle' => Border::BORDER_THIN],
+                    'bottom' => ['borderStyle' => Border::BORDER_THIN],
+                    'left'   => ['borderStyle' => Border::BORDER_THIN],
+                    'right'  => ['borderStyle' => Border::BORDER_DOUBLE],
+                ],
+            ]);
+        }
+
+        // Border TENGAH B12–O26
+        $sheet->getStyle('B12:O26')->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color'       => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        // Set judul file dan header untuk download
+        $filename = 'Export PO Manual ' . $noModel . '.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Cache-Control: max-age=0');

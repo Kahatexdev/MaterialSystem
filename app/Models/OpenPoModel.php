@@ -444,4 +444,37 @@ class OpenPoModel extends Model
             ->where('item_type', $itemTypeEncoded)
             ->first();
     }
+
+    public function getPoBooking()
+    {
+        return $this->select('id_po, no_model, item_type, kode_warna, color, kg_po, keterangan, penerima, created_at')
+            ->where('po_booking', '1')
+            ->groupBy('no_model')
+            ->findAll();
+    }
+
+    public function getPoManual()
+    {
+        return $this->select('id_po, no_model, item_type, kode_warna, color, kg_po, keterangan, penerima, created_at')
+            ->where('po_manual', '1')
+            ->findAll();
+    }
+
+    public function getPoBookingByNoModel($noModel)
+    {
+        return $this->select('open_po.*, master_material.jenis')
+            ->join('master_material', 'master_material.item_type = open_po.item_type')
+            ->where('open_po.po_booking', '1')
+            ->where('open_po.no_model', $noModel)
+            ->findAll();
+    }
+
+    public function getPoManualByNoModel($noModel)
+    {
+        return $this->select('open_po.*, master_material.jenis')
+            ->join('master_material', 'master_material.item_type = open_po.item_type')
+            ->where('open_po.po_manual', '1')
+            ->where('open_po.no_model', $noModel)
+            ->findAll();
+    }
 }

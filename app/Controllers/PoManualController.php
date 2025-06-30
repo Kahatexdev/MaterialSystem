@@ -44,8 +44,21 @@ class PoManualController extends BaseController
 
     public function index()
     {
+        $poManual = $this->openPoModel->getPoManual();
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'poManual' => $poManual,
+        ];
+        return view($this->role . '/masterdata/po-manual', $data);
+    }
+
+    public function create()
+    {
         $itemType = $this->masterMaterialModel->findAll();
-        // dd($itemType);
+
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
@@ -58,7 +71,6 @@ class PoManualController extends BaseController
     public function saveOpenPoManual()
     {
         $post = $this->request->getPost();
-        // dd($post);
 
         $noModel = $post['no_model'] ?? [];
         $items = $post['items'] ?? [];

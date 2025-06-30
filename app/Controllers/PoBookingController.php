@@ -42,8 +42,20 @@ class PoBookingController extends BaseController
 
     public function index()
     {
+        $poBooking = $this->openPoModel->getPoBooking();
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'poBooking' => $poBooking
+        ];
+        return view($this->role . '/masterdata/po-booking', $data);
+    }
+    public function create()
+    {
         $buyer = $this->masterOrderModel->getBuyer();
-        // dd($itemType);
+
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
@@ -114,19 +126,19 @@ class PoBookingController extends BaseController
     public function saveOpenPoBooking()
     {
         $post = $this->request->getPost();
-
+        // dd($post);
         // pecah array
         $items    = $post['items'] ?? [];
-        $noModels = $post['no_model'] ?? [];
+        // $noModels = $post['no_model'] ?? [];
 
         // Loop setiap index
         foreach ($items as $idx => $item) {
             // cari no_model yang sesuai index
-            $nm = $noModels[$idx]['no_model'] ?? null;
+            // $nm = $noModels[$idx]['no_model'] ?? null;
 
             // Build data sesuai allowedFields
             $data = [
-                'no_model'            => $nm,
+                'no_model'            => $post['no_model'],
                 'item_type'           => $item['item_type']     ?? null,
                 'kode_warna'          => $item['kode_warna']    ?? null,
                 'color'               => $item['color']         ?? null,
@@ -151,7 +163,7 @@ class PoBookingController extends BaseController
             $this->openPoModel->insert($data);
         }
 
-        return redirect()->to(base_url($this->role . '/masterdata'))
+        return redirect()->to(base_url($this->role . '/masterdata/poBooking'))
             ->with('success', 'Data PO Booking berhasil disimpan.');
     }
 }

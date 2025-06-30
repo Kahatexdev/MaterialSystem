@@ -30,7 +30,7 @@
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 font-weight-bolder">Form Buka PO Manual</h5>
-                <a href="<?= base_url($role . '/masterdata') ?>" class="btn bg-gradient-info"> Kembali</a>
+                <a href="<?= base_url($role . '/masterdata/poManual') ?>" class="btn bg-gradient-info"> Kembali</a>
             </div>
         </div>
     </div>
@@ -39,6 +39,14 @@
     <div class="card mt-4">
         <div class="card-body">
             <form action="<?= base_url($role . '/masterdata/poManual/saveOpenPoManual') ?>" method="post">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>No Model</label>
+                            <input type="text" class="form-control select-no-model" name="no_model[0][no_model]" id="no_model" required>
+                        </div>
+                    </div>
+                </div>
                 <div class="form-group">
                     <div class="row">
                         <div class="col-md-12">
@@ -92,10 +100,7 @@
                         <div class="tab-pane fade show active" id="nav-home" role="tabpanel">
                             <div class="kebutuhan-item" data-index="0">
                                 <!-- No Model -->
-                                <div class="form-group">
-                                    <label>No Model</label>
-                                    <input type="text" class="form-control select-no-model" name="no_model[0][no_model]" id="no_model" required>
-                                </div>
+
                                 <div class=" row">
                                     <div class="col-md-6">
                                         <!-- Item Type -->
