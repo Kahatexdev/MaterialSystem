@@ -106,7 +106,7 @@ class PdfController extends BaseController
             $result = $this->openPoModel->getDataPoPlus($no_model, $jenis, $jenis2);
         }
         // dd($result);
-        $noModel =  $result[0]['no_model'];
+        $noModel =  $result[0]['no_model'] ?? '';
 
         $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
 
@@ -318,13 +318,13 @@ class PdfController extends BaseController
                 $prevDelivery    = $delivery;
             }
 
-            // $buyer = ($row['buyer'] ?? '') . ' (' . $buyerName['kd_buyer_order'] . ')';
-            // if ($buyer === $prevBuyer) {
-            //     $displayBuyer = '';
-            // } else {
-            //     $displayBuyer = $buyer;
-            //     $prevBuyer    = $buyer;
-            // }
+            $buyer = ($row['buyer'] ?? '') . ' (' . $buyerName['kd_buyer_order'] . ')';
+            if ($buyer === $prevBuyer) {
+                $displayBuyer = '';
+            } else {
+                $displayBuyer = $buyer;
+                $prevBuyer    = $buyer;
+            }
 
             $noOrder = $row['no_order'] ?? '';
             if ($noOrder === $prevNoOrder) {
@@ -367,13 +367,25 @@ class PdfController extends BaseController
                 ['w' => 12, 'text' => $row['bentuk_celup']],
                 ['w' => 20, 'text' => $row['color']],
                 ['w' => 20, 'text' => $row['kode_warna']],
-                // ['w' => 20, 'text' => $row['buyer'] ? $row['buyer'] . '(' . $buyerName['kd_buyer_order'] . ')' : $buyerName['kd_buyer_order']],
-                ['w' => 20, 'text' => $row['buyer']],
+                ['w' => 20, 'text' => $row['buyer'] ? $row['buyer'] . '(' . $buyerName['kd_buyer_order'] . ')' : $buyerName['kd_buyer_order']],
+                // ['w' => 20, 'text' => $row['buyer']],
                 ['w' => 20, 'text' => $displayNoOrder],
                 ['w' => 22, 'text' => $row['jenis_produksi']],
                 ['w' => 22, 'text' => $row['contoh_warna']],
                 ['w' => 22, 'text' => $row['ket_celup']],
             ];
+
+            // 1. Tentukan lineHeight: 5 pt jika semuanya muat satu baris, 3 pt kalau ada yg meluber
+            $singleLine = true;
+            foreach ($multiCellData as $cell) {
+                // GetStringWidth menghasilkan lebar dalam satuan point
+                if ($pdf->GetStringWidth($cell['text']) > $cell['w']) {
+                    $singleLine = false;
+                    break;
+                }
+            }
+            $lineHeight = $singleLine ? 5 : 3;
+
             foreach ($multiCellData as $data) {
                 $pdf->SetXY($tempX, $startY);
                 $y0 = $pdf->GetY();
@@ -499,7 +511,7 @@ class PdfController extends BaseController
 
             $centerY = $startY + ($maxHeight - $textHeight) / 2;
             $pdf->SetXY($currentX, $centerY);
-            $pdf->MultiCell(20, $lineHeight, $row['buyer'], 0, 'C');
+            $pdf->MultiCell(20, $lineHeight,  $row['buyer'] ? $row['buyer'] . '(' . $buyerName['kd_buyer_order'] . ')' : $buyerName['kd_buyer_order'], 0, 'C');
             $currentX += 20;
 
             // No Order (mungkin multiline)
@@ -783,9 +795,11 @@ class PdfController extends BaseController
         // Spasi untuk tanda tangan
         $pdf->Cell(55, 12, '', 0, 1, 'C');
 
+        $admin = $result[0]['admin'] ?? '';
+
         // Garis tangan
         $pdf->Cell(55, 5, '', 0, 0, 'C');
-        $pdf->Cell(55, 5, '(       ' . $result[0]['admin'] . '       )', 0, 0, 'C');
+        $pdf->Cell(55, 5, '(       ' . $admin . '       )', 0, 0, 'C');
         if (!empty($result)) {
             $pdf->Cell(55, 5, '(       ' . $result[0]['penanggung_jawab'] . '      )', 0, 0, 'C');
         } else {
