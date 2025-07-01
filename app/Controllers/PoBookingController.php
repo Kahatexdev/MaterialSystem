@@ -138,7 +138,7 @@ class PoBookingController extends BaseController
 
             // Build data sesuai allowedFields
             $data = [
-                'buyer'               => $item['buyer'],
+                'buyer'               => $post['buyer'],
                 'no_model'            => $post['no_model'],
                 'item_type'           => $item['item_type']     ?? null,
                 'kode_warna'          => $item['kode_warna']    ?? null,
