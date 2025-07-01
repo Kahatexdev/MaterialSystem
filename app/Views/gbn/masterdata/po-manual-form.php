@@ -40,10 +40,21 @@
         <div class="card-body">
             <form action="<?= base_url($role . '/masterdata/poManual/saveOpenPoManual') ?>" method="post">
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label>No Model</label>
-                            <input type="text" class="form-control select-no-model" name="no_model[0][no_model]" id="no_model" required>
+                            <select name="no_model" id="no_model" class="form-control">
+                                <option value="">Pilih No Model</option>
+                                <?php foreach ($noModel as $nm): ?>
+                                    <option value="<?= $nm['no_model'] ?>"><?= $nm['no_model'] ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>No Order</label>
+                            <input type="text" class="form-control no_order" name="no_order" id="no_order" readonly>
                         </div>
                     </div>
                 </div>
@@ -220,7 +231,41 @@
 </div>
 
 <!-- Pastikan jQuery load pertama -->
-
+<script>
+    $(document).ready(function() {
+        $('#no_model').select2({
+            placeholder: "Pilih No Model",
+            allowClear: true
+        });
+    });
+    // Isi otomatis No Order saat No Model berubah
+    $('#no_model').on('change', function() {
+        var selectedModel = $(this).val();
+        if (selectedModel) {
+            // AJAX ke backend untuk ambil no_order berdasarkan no_model
+            $.ajax({
+                url: '<?= base_url($role . "/masterdata/poManual/getNoOrderByModel") ?>',
+                type: 'GET',
+                data: {
+                    no_model: selectedModel
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response && response.no_order) {
+                        $('#no_order').val(response.no_order);
+                    } else {
+                        $('#no_order').val('');
+                    }
+                },
+                error: function() {
+                    $('#no_order').val('');
+                }
+            });
+        } else {
+            $('#no_order').val('');
+        }
+    });
+</script>
 <script>
     $(function() {
         const base = '<?= base_url() ?>';
@@ -274,11 +319,6 @@
             const $pane = $(`
     <div class="tab-pane fade" id="tab-content-${tabIndex}" role="tabpanel">
         <div class="kebutuhan-item" data-index="${idx}">
-            <div class="form-group">
-                <label>No Model</label>
-                <input type="text" class="form-control select-no-model"
-                    name="no_model[${idx}][no_model]" required />
-            </div>
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">

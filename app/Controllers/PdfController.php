@@ -3342,4 +3342,1384 @@ class PdfController extends BaseController
             ->setHeader('Content-Type', 'application/pdf')
             ->setBody($pdf->Output('S'));
     }
+
+    public function generateOpenPOBooking()
+    {
+        $tujuan = $this->request->getGet('tujuan');
+        // $jenis = $this->request->getGet('jenis');
+        // $jenis2 = $this->request->getGet('jenis2');
+        // $season = $this->request->getGet('season');
+        // $poPlus = $this->request->getGet('po_plus');
+        // $materialType = $this->request->getGet('material_type');
+
+        $noModel = $this->request->getGet('no_model');
+        $result = $this->openPoModel->getPoBookingByNoModel($noModel);
+
+        // if ($poPlus == 'TIDAK') {
+        //     $result = $this->openPoModel->getDataPo($no_model, $jenis, $jenis2);
+        // } else {
+        //     $result = $this->openPoModel->getDataPoPlus($no_model, $jenis, $jenis2);
+        // }
+        // dd($result);
+        // $noModel =  $result[0]['no_model'] ?? '';
+
+        // dd($buyerName);
+        if ($tujuan == 'CELUP') {
+            $penerima = 'Retno';
+        } else {
+            $penerima = 'Paryanti';
+        }
+
+        // $unit = $this->masterOrderModel->getUnit($no_model);
+
+        // Inisialisasi FPDF
+        $pdf = new FPDF('L', 'mm', 'A4');
+        $pdf->SetMargins(7, 7, 7);
+        $pdf->SetAutoPageBreak(true, 7);  // KITA MATIKAN AUTO PAGE BREAK
+        $pdf->AddPage();
+
+
+        $seasonText = $season ?? '';
+        $mtText     = $materialType ?? '';
+
+        // $rawUnit = $unit['unit'];
+        // $rawUnit = strtoupper(trim($rawUnit));
+
+        // $pemesanan = 'KAOS KAKI';
+        // if ($rawUnit === 'MAJALAYA') {
+        //     $pemesanan .= ' / ' . $rawUnit;
+        // }
+
+        // CETAK HEADER halaman pertama
+        // Garis margin luar (lebih tebal)
+        $pdf->SetDrawColor(0, 0, 0); // Warna hitam
+        $pdf->SetLineWidth(0.2); // Lebih tebal
+        $pdf->Rect(6.5, 6.5, 285, 197); // Sedikit lebih besar dari margin dalam
+
+        // Garis margin dalam (lebih tipis)
+        $pdf->SetLineWidth(0.1); // Lebih tipis
+        $pdf->Rect(7, 7, 284, 196); // Ukuran aslinya
+
+        // Masukkan gambar di dalam kolom
+        $x = $pdf->GetX(); // Simpan posisi X saat ini
+        $y = $pdf->GetY(); // Simpan posisi Y saat ini
+
+        // Menambahkan gambar
+        $pdf->Image('assets/img/logo-kahatex.png', $x + 16, $y + 1, 10, 8); // Lokasi X, Y, lebar, tinggi
+
+        // Header
+        $pdf->SetFont('Arial', 'B', 6);
+        $pdf->Cell(43, 12, '', 1, 0, 'C'); // Tetap di baris yang sama
+        // Set warna latar belakang menjadi biru telur asin (RGB: 170, 255, 255)
+        $pdf->SetFillColor(170, 255, 255);
+        $pdf->Cell(241, 4, 'FORMULIR', 1, 1, 'C', 1); // Pindah ke baris berikutnya setelah ini
+
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(43, 4, '', 0, 0, 'L'); // Tetap di baris yang sama
+        $pdf->Cell(241, 4, 'DEPARTMEN CELUP CONES', 0, 1, 'C'); // Pindah ke baris berikutnya setelah ini
+
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(43, 4, 'PT KAHATEX', 0, 0, 'C'); // Tetap di baris yang sama
+        $pdf->Cell(241, 4, 'FORMULIR PO', 0, 1, 'C'); // Pindah ke baris berikutnya setelah ini
+
+        // Tabel Header Atas
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(43, 4, 'No. Dokumen', 1, 0, 'L');
+        $pdf->Cell(162, 4, 'FOR-CC-087/REV_02/HAL_1/1', 1, 0, 'L');
+        $pdf->Cell(35, 4, 'Tanggal Revisi', 1, 0, 'L');
+        $pdf->Cell(44, 4, '17 Maret 2025', 1, 1, 'C');
+
+        // Tabel Header Atas
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(205, 4, '', 1, 0, 'L');
+        $pdf->Cell(35, 4, 'Klasifikasi', 1, 0, 'L');
+        $pdf->Cell(44, 4, 'Internal', 1, 1, 'C');
+
+        $pdf->SetFont('Arial', '', 6);
+        $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
+
+        $pdf->SetFont('Arial', '', 10);
+
+        if (!empty($result) && isset($result[0]['po_plus']) && $result[0]['po_plus'] == '0') {
+            $pdf->Cell(30, 5, ': ' . $noModel, 0, 1, 'L');
+        } elseif (!empty($result) && isset($result[0]['po_plus'])) {
+            $pdf->Cell(30, 5, ': ' . '(+) ' . $noModel, 0, 1, 'L');
+        } else {
+            $pdf->Cell(30, 5, ': ' . $noModel, 0, 1, 'L');
+        }
+
+        $cellW1 = 20;  // lebar season
+        $cellW2 = 30;  // lebar materialType
+        $lineH  = 4;   // tinggi tiap baris wrap
+
+        $seasonText = $season ?? '';
+        $mtText     = $materialType ?? '';
+
+        // Hitung tinggi masing-masing
+        $nb1   = ceil($pdf->GetStringWidth($seasonText) / $cellW1);
+        $nb1   = max(1, $nb1);
+        $rowH1 = $nb1 * $lineH;
+
+        $nb2   = ceil($pdf->GetStringWidth($mtText) / $cellW2);
+        $nb2   = max(1, $nb2);
+        $rowH2 = $nb2 * $lineH;
+
+        $rowH = max($rowH1, $rowH2);
+
+        $startX = $pdf->GetX();
+        $startY = $pdf->GetY();
+
+        $pdf->SetFont('Arial', '', 6);
+
+        $pdf->Cell(43, 5, 'Pemesan', 0, 0, 'L');
+        $pdf->Cell(50, 5, ': ' . 'KAOS KAKI', 0, 0, 'L');
+
+        //Simpan posisi awal Season & MaterialType
+        $x = $pdf->GetX();
+        $y = $pdf->GetY();
+
+        //Season
+        $pdf->MultiCell($cellW1, $lineH, $seasonText, 0, 'C');
+        $pdf->SetXY($x + $cellW1, $y);
+
+        //Material Type
+        $pdf->SetFont('Arial', 'U', 6);
+        $pdf->MultiCell($cellW2, $lineH, $mtText, 0, 'C');
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->SetXY($startX, $startY + $rowH);
+
+        $pdf->Cell(43, 5, 'Tgl', 0, 0, 'L');
+        // Check if the result array is not empty and display only the first delivery_awal
+        if (!empty($result)) {
+            $tgl_po = $result[0]['tgl_po'];
+            $tgl_formatted = date('d-m-Y', strtotime($tgl_po));
+            $pdf->Cell(234, 5, ': ' . $tgl_formatted, 0, 1, 'L');
+        } else {
+            $pdf->Cell(234, 5, ': No delivery date available', 0, 1, 'L');
+        }
+
+        function MultiCellFit($pdf, $w, $h, $txt, $border = 1, $align = 'C')
+        {
+            // Simpan posisi awal
+            $x = $pdf->GetX();
+            $y = $pdf->GetY();
+
+            // Simulasikan MultiCell tetapi tetap pakai tinggi tetap (12)
+            $pdf->MultiCell($w, $h, $txt, $border, $align);
+
+            // Kembalikan ke kanan cell agar sejajar
+            $pdf->SetXY($x + $w, $y);
+        }
+
+        // Tabel Header Baris Pertama
+        $pdf->SetFont('Arial', '', 6);
+        // Merge cells untuk kolom No, Bentuk Celup, Warna, Kode Warna, Buyer, Nomor Order, Delivery, Untuk Produksi, Contoh Warna, Keterangan Celup
+        $pdf->Cell(6, 12, 'No', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(37, 6, 'Benang', 1, 0, 'C'); // Merge 2 kolom ke samping untuk baris pertama
+        MultiCellFit($pdf, 12, 6, "Bentuk\nCelup");
+        $pdf->Cell(20, 12, 'Warna', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(20, 12, 'Kode Warna', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(20, 12, 'Buyer', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(20, 12, 'Nomor Order', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(16, 12, 'Delivery', 1, 0, 'C'); // Merge 2 baris
+        MultiCellFit($pdf, 15, 3, "Qty\nPesanan");
+        $pdf->Cell(52, 6, 'Permintaan Kelos', 1, 0, 'C');
+        $pdf->Cell(22, 12, 'Untuk Produksi', 1, 0, 'C');
+        $pdf->Cell(22, 12, 'Contoh Warna', 1, 0, 'C');
+        $pdf->Cell(22, 12, 'Keterangan Celup', 1, 1, 'C');
+
+        // Sub-header untuk kolom "Benang" dan "Permintaan Kelos"
+        $pdf->Cell(6, -6, '', 0, 0); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(25, -6, 'Jenis', 1, 0, 'C');
+        $pdf->Cell(12, -6, 'Kode', 1, 0, 'C');
+        $pdf->Cell(108, -6, '', 0, 0); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(15, -6, 'Kg', 1, 0, 'C'); // Merge 4 kolom untuk Permintaan Kelos
+        $pdf->Cell(13, -6, 'Kg', 1, 0, 'C');
+        $pdf->Cell(13, -6, 'Yard', 1, 0, 'C');
+        MultiCellFit($pdf, 13, -3, "Cones\nTotal");
+        MultiCellFit($pdf, 13, -3, "Jenis\nCones");
+
+        $startYAfterHeader = $pdf->GetY();  // posisi Y tepat setelah header
+        // $pdf->SetY($startYAfterHeader);
+        $pdf->SetY($pdf->GetY());
+
+        // == START ISI TABEL ==
+        $pdf->SetFont('Arial', '', 6);
+        $no                 = 1;
+        $yLimit             = 145;
+        $lineHeight         = 3;      // tinggi dasar setiap baris MultiCell
+
+        // Total tinggi baris untuk memastikan 15 baris jika perlu kosong
+        $totalKg                = 0;
+        $totalPermintaanCones   = 0;
+        $totalYard              = 0;
+        $totalCones             = 0;
+
+        $prevDelivery = '';
+        $prevBuyer    = '';
+        $prevNoOrder  = '';
+
+        foreach ($result as $row) {
+            // dd($row['spesifikasi_benang']);
+            // 1. tentukan text yang mau ditampilkan, atau kosong jika sama dgn sebelumnya
+            // $delivery = date('d-m-Y', strtotime($row['delivery_awal'])) ?? '';
+            // if ($delivery === $prevDelivery) {
+            //     $displayDelivery = '';
+            // } else {
+            //     $displayDelivery = $delivery;
+            //     $prevDelivery    = $delivery;
+            // }
+
+            // $buyer = ($row['buyer'] ?? '') . ' (' . $buyerName['kd_buyer_order'] . ')';
+            // if ($buyer === $prevBuyer) {
+            //     $displayBuyer = '';
+            // } else {
+            //     $displayBuyer = $buyer;
+            //     $prevBuyer    = $buyer;
+            // }
+
+            // $noOrder = $row['no_order'] ?? '';
+            // if ($noOrder === $prevNoOrder) {
+            //     $displayNoOrder = '';
+            // } else {
+            //     $displayNoOrder = $noOrder;
+            //     $prevNoOrder    = $noOrder;
+            // }
+
+            // Cek dulu apakah nambah baris ini bakal lewat batas
+            if ($pdf->GetY() + $lineHeight > $yLimit) {
+                $this->generateFooterOpenPOBooking($pdf, $tujuan, $result, $penerima);
+                $pdf->AddPage();
+                $this->generateHeaderOpenPOBooking($pdf, $result, $noModel);
+
+                // Gambar ulang margin & header halaman
+                $pdf->SetDrawColor(0, 0, 0);
+                $pdf->SetLineWidth(0.2); // Lebih tebal
+                $pdf->Rect(6.5, 6.5, 285, 197); // Sedikit lebih besar dari margin dalam
+                $pdf->SetLineWidth(0.1); // Lebih tipis
+                $pdf->Rect(7, 7, 284, 196); // Ukuran aslinya
+
+                $pdf->SetFont('Arial', '', 6);
+            }
+
+            $startX = $pdf->GetX();
+            $startY = $pdf->GetY();
+
+            // 1. SIMULASI: Hitung tinggi maksimum yang dibutuhkan
+            $heights = [];
+            $tempX = $startX;
+
+            $pdf->SetTextColor(255, 255, 255); // putih agar tidak terlihat
+
+            $multiCellData = [
+                ['w' => 25, 'text' => $row['spesifikasi_benang']
+                    ? $row['item_type'] . ' (' . $row['spesifikasi_benang'] . ')'
+                    : $row['item_type']],
+                ['w' => 12, 'text' => $row['ukuran']],
+                ['w' => 12, 'text' => $row['bentuk_celup']],
+                ['w' => 20, 'text' => $row['color']],
+                ['w' => 20, 'text' => $row['kode_warna']],
+                // ['w' => 20, 'text' => $row['buyer']] ?? '',
+                // ['w' => 20, 'text' => $row['buyer']],
+                ['w' => 20, 'text' => ''], //No Order
+                ['w' => 22, 'text' => $row['jenis_produksi']],
+                ['w' => 22, 'text' => $row['contoh_warna']],
+                ['w' => 22, 'text' => $row['ket_celup']],
+            ];
+
+            // 1. Tentukan lineHeight: 5 pt jika semuanya muat satu baris, 3 pt kalau ada yg meluber
+            $singleLine = true;
+            foreach ($multiCellData as $cell) {
+                // GetStringWidth menghasilkan lebar dalam satuan point
+                if ($pdf->GetStringWidth($cell['text']) > $cell['w']) {
+                    $singleLine = false;
+                    break;
+                }
+            }
+            $lineHeight = $singleLine ? 5 : 3;
+
+            foreach ($multiCellData as $data) {
+                $pdf->SetXY($tempX, $startY);
+                $y0 = $pdf->GetY();
+                $pdf->MultiCell($data['w'], $lineHeight, $data['text'], 0, 'C');
+                $heights[] = $pdf->GetY() - $y0;
+                $tempX += $data['w'];
+            }
+            // dd($data);
+            $pdf->SetTextColor(0, 0, 0); // kembali ke hitam
+            $maxHeight = max($heights);
+
+            // 2. RENDER: Gambar semua cell dengan tinggi yang sama
+            $pdf->SetXY($startX, $startY);
+
+            // Buat semua cell dengan border dan tinggi yang sama, tapi isi kosong dulu
+            $cellWidths = [6, 25, 12, 12, 20, 20, 20, 20, 16, 15, 13, 13, 13, 13, 22, 22, 22];
+            $cellData = [
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '', // Delivery
+                number_format($row['kg_po'], 2) ?? 0,
+                number_format($row['kg_percones'], 2) ?? 0,
+                '',
+                $row['jumlah_cones'] ?? 0,
+                '',
+                '',
+                '',
+                ''
+            ];
+
+            // Gambar semua cell dengan border
+            for ($i = 0; $i < count($cellWidths); $i++) {
+                $pdf->Cell($cellWidths[$i], $maxHeight, $cellData[$i], 1, 0, 'C');
+            }
+
+            // 3. ISI TEXT untuk kolom multiCell (overlay tanpa border)
+            $currentX = $startX;
+
+            // No
+            $textCenterY = $startY + ($maxHeight / 2) - ($lineHeight / 2);
+            $pdf->SetXY($currentX, $textCenterY);
+            $pdf->Cell(6, $lineHeight, $no, 0, 0, 'C');
+            $currentX += 6;
+
+            // Item Type (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(25, $lineHeight, $row['item_type'] . $row['spesifikasi_benang'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(25, $lineHeight, $row['item_type'] . ' ' . $row['spesifikasi_benang'], 0, 'C');
+            $currentX += 25;
+
+            // Ukuran (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(12, $lineHeight, $row['ukuran'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(12, $lineHeight, $row['ukuran'], 0, 'C');
+            $currentX += 12;
+
+            // Bentuk (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(12, $lineHeight, $row['bentuk_celup'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(12, $lineHeight, $row['bentuk_celup'], 0, 'C');
+            $currentX += 12;
+
+            // Warna (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(20, $lineHeight, $row['color'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(20, $lineHeight, $row['color'], 0, 'C');
+            $currentX += 20;
+
+            // Kode Warna (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(20, $lineHeight, $row['kode_warna'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(20, $lineHeight, $row['kode_warna'], 0, 'C');
+            $currentX += 20;
+
+            // Buyer (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(20, $lineHeight, $row['buyer'] ?? '', 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(20, $lineHeight,  $row['buyer'], 0, 'C');
+            $currentX += 20;
+
+            // No Order (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(20, $lineHeight, '', 0, 'C'); //No Order
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(20, $lineHeight, '', 0, 'C'); // No Order
+            $currentX += 20;
+
+            // Skip kolom yang sudah terisi dengan Cell biasa
+            $currentX += 16 + 15 + 13 + 13 + 13 + 13;
+
+            // Untuk Produksi (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(22, $lineHeight, $row['jenis_produksi'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(22, $lineHeight, $row['jenis_produksi'], 0, 'C');
+            $currentX += 22;
+
+            // Contoh Warna (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(22, $lineHeight, $row['contoh_warna'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(22, $lineHeight, $row['contoh_warna'], 0, 'C');
+            $currentX += 22;
+
+            // Keterangan (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(22, $lineHeight, $row['ket_celup'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(22, $lineHeight, $row['ket_celup'], 0, 'C');
+
+            // Pindah ke baris berikutnya
+            $pdf->SetY($startY + $maxHeight);
+
+            $no++;
+
+            $totalKg              += floatval($row['kg_po'] ?? 0);
+            $totalPermintaanCones += floatval($row['kg_percones'] ?? 0);
+            $totalCones           += floatval($row['jumlah_cones'] ?? 0);
+        }
+
+        $currentY = $pdf->GetY();
+        $footerY = 145; // batas sebelum footer (tergantung desain kamu)
+
+        // Tinggi standar baris kosong (bisa sesuaikan ke $maxHeight rata-rata atau tetap 6 misal)
+        $emptyRowHeight = 5;
+
+        // Selama posisi Y masih di atas footer, tambahkan baris kosong
+        while ($currentY + $emptyRowHeight < $footerY) {
+            $startX = $pdf->GetX();
+            $pdf->SetXY($startX, $currentY);
+
+            // Gambar semua cell border kosong
+            $cellWidths = [6, 25, 12, 12, 20, 20, 20, 20, 16, 15, 13, 13, 13, 13, 22, 22, 22];
+            foreach ($cellWidths as $width) {
+                $pdf->Cell($width, $emptyRowHeight, '', 1, 0, 'C');
+            }
+            $pdf->Ln($emptyRowHeight);
+
+            $currentY = $pdf->GetY();
+        }
+
+        //  Baris TOTAL (baris ke-16)
+        $pdf->SetFont('Arial', 'B', 6);
+        $pdf->Cell(6 + 25 + 12 + 17 + 20 + 20 + 10 + 25 + 16, 6, 'TOTAL', 1, 0, 'R');
+        $pdf->Cell(15, 6, number_format($totalKg, 2), 1, 0, 'C');
+        $pdf->Cell(13, 6, number_format($totalPermintaanCones, 2), 1, 0, 'C');
+        $pdf->Cell(13, 6, number_format($totalYard, 2), 1, 0, 'C');
+        $pdf->Cell(13, 6, number_format($totalCones), 1, 0, 'C');
+        $pdf->Cell(13, 6, '', 1, 0, 'C');
+        $pdf->Cell(22, 6, '', 1, 0, 'C');
+        $pdf->Cell(22, 6, '', 1, 0, 'C');
+        $pdf->Cell(22, 6, '', 1, 1, 'C');
+
+
+        //KETERANGAN
+        $pdf->Cell(277, 5, '', 0, 1, 'C');
+        $pdf->Cell(85, 5, 'KET', 0, 0, 'R');
+        $pdf->SetFillColor(255, 255, 255); // Atur warna latar belakang menjadi putih
+        // Check if the result array is not empty and display only the first delivery_awal
+        if (!empty($result)) {
+            $pdf->MultiCell(117, 5, ': ' . $result[0]['keterangan'], 0, 1, 'L');
+        } else {
+            $pdf->MultiCell(117, 5, ': ', 0, 1, 'L');
+        }
+
+        // FOOTER
+        $this->generateFooterOpenPOBooking($pdf, $tujuan, $result, $penerima);
+
+        // Output PDF
+        return $this->response->setHeader('Content-Type', 'application/pdf')
+            ->setBody($pdf->Output('S'));
+    }
+
+    public function generateHeaderOpenPOBooking($pdf, $result, $noModel)
+    {
+        // Garis margin luar (lebih tebal)
+        $pdf->SetDrawColor(0, 0, 0); // Warna hitam
+        $pdf->SetLineWidth(0.2); // Lebih tebal
+        $pdf->Rect(6.5, 6.5, 285, 197); // Sedikit lebih besar dari margin dalam
+
+        // Garis margin dalam (lebih tipis)
+        $pdf->SetLineWidth(0.1); // Lebih tipis
+        $pdf->Rect(7, 7, 284, 196); // Ukuran aslinya
+
+        // Masukkan gambar di dalam kolom
+        $x = $pdf->GetX(); // Simpan posisi X saat ini
+        $y = $pdf->GetY(); // Simpan posisi Y saat ini
+
+        // Menambahkan gambar
+        $pdf->Image('assets/img/logo-kahatex.png', $x + 16, $y + 1, 10, 8); // Lokasi X, Y, lebar, tinggi
+
+        // Header
+        $pdf->SetFont('Arial', 'B', 6);
+        $pdf->Cell(43, 12, '', 1, 0, 'C'); // Tetap di baris yang sama
+        // Set warna latar belakang menjadi biru telur asin (RGB: 170, 255, 255)
+        $pdf->SetFillColor(170, 255, 255);
+        $pdf->Cell(241, 4, 'FORMULIR', 1, 1, 'C', 1); // Pindah ke baris berikutnya setelah ini
+
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(43, 4, '', 0, 0, 'L'); // Tetap di baris yang sama
+        $pdf->Cell(241, 4, 'DEPARTMEN CELUP CONES', 0, 1, 'C'); // Pindah ke baris berikutnya setelah ini
+
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(43, 4, 'PT KAHATEX', 0, 0, 'C'); // Tetap di baris yang sama
+        $pdf->Cell(241, 4, 'FORMULIR PO', 0, 1, 'C'); // Pindah ke baris berikutnya setelah ini
+
+        // Tabel Header Atas
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(43, 4, 'No. Dokumen', 1, 0, 'L');
+        $pdf->Cell(162, 4, 'FOR-CC-087/REV_02/HAL_1/1', 1, 0, 'L');
+        $pdf->Cell(35, 4, 'Tanggal Revisi', 1, 0, 'L');
+        $pdf->Cell(44, 4, '17 Maret 2025', 1, 1, 'C');
+
+        // Tabel Header Atas
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(205, 4, '', 1, 0, 'L');
+        $pdf->Cell(35, 4, 'Klasifikasi', 1, 0, 'L');
+        $pdf->Cell(44, 4, 'Internal', 1, 1, 'C');
+
+        $pdf->SetFont('Arial', '', 6);
+        $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
+
+        $pdf->SetFont('Arial', '', 10);
+
+        if (!empty($result) && isset($result[0]['po_plus']) && $result[0]['po_plus'] == '0') {
+            $pdf->Cell(30, 5, ': ' . $noModel, 0, 1, 'L');
+        } elseif (!empty($result) && isset($result[0]['po_plus'])) {
+            $pdf->Cell(30, 5, ': ' . '(+) ' . $noModel, 0, 1, 'L');
+        } else {
+            $pdf->Cell(30, 5, ': ' . $noModel, 0, 1, 'L');
+        }
+
+        $cellW1 = 20;  // lebar season
+        $cellW2 = 30;  // lebar materialType
+        $lineH  = 4;   // tinggi tiap baris wrap
+
+        $seasonText = $season ?? '';
+        $mtText     = $materialType ?? '';
+
+        // Hitung tinggi masing-masing
+        $nb1   = ceil($pdf->GetStringWidth($seasonText) / $cellW1);
+        $nb1   = max(1, $nb1);
+        $rowH1 = $nb1 * $lineH;
+
+        $nb2   = ceil($pdf->GetStringWidth($mtText) / $cellW2);
+        $nb2   = max(1, $nb2);
+        $rowH2 = $nb2 * $lineH;
+
+        $rowH = max($rowH1, $rowH2);
+
+        $startX = $pdf->GetX();
+        $startY = $pdf->GetY();
+
+        $pdf->SetFont('Arial', '', 6);
+
+        $pdf->Cell(43, 5, 'Pemesan', 0, 0, 'L');
+        $pdf->Cell(50, 5, ': ' . 'Kaos Kaki', 0, 0, 'L');
+
+        //Simpan posisi awal Season & MaterialType
+        $x = $pdf->GetX();
+        $y = $pdf->GetY();
+
+        //Season
+        $pdf->MultiCell($cellW1, $lineH, $seasonText, 0, 'C');
+        $pdf->SetXY($x + $cellW1, $y);
+
+        //Material Type
+        $pdf->SetFont('Arial', 'U', 6);
+        $pdf->MultiCell($cellW2, $lineH, $mtText, 0, 'C');
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->SetXY($startX, $startY + $rowH);
+
+        $pdf->Cell(43, 5, 'Tgl', 0, 0, 'L');
+        // Check if the result array is not empty and display only the first delivery_awal
+        if (!empty($result)) {
+            $tgl_po = $result[0]['tgl_po'];
+            $tgl_formatted = date('d-m-Y', strtotime($tgl_po));
+            $pdf->Cell(234, 5, ': ' . $tgl_formatted, 0, 1, 'L');
+        } else {
+            $pdf->Cell(234, 5, ': No delivery date available', 0, 1, 'L');
+        }
+
+        // Tabel Header Baris Pertama
+        $pdf->SetFont('Arial', '', 6);
+        // Merge cells untuk kolom No, Bentuk Celup, Warna, Kode Warna, Buyer, Nomor Order, Delivery, Untuk Produksi, Contoh Warna, Keterangan Celup
+        $pdf->Cell(6, 12, 'No', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(37, 6, 'Benang', 1, 0, 'C'); // Merge 2 kolom ke samping untuk baris pertama
+        MultiCellFit($pdf, 12, 6, "Bentuk\nCelup");
+        $pdf->Cell(20, 12, 'Warna', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(20, 12, 'Kode Warna', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(20, 12, 'Buyer', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(20, 12, 'Nomor Order', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(16, 12, 'Delivery', 1, 0, 'C'); // Merge 2 baris
+        MultiCellFit($pdf, 15, 3, "Qty\nPesanan");
+        $pdf->Cell(52, 6, 'Permintaan Kelos', 1, 0, 'C');
+        $pdf->Cell(22, 12, 'Untuk Produksi', 1, 0, 'C');
+        $pdf->Cell(22, 12, 'Contoh Warna', 1, 0, 'C');
+        $pdf->Cell(22, 12, 'Keterangan Celup', 1, 1, 'C');
+
+        // Sub-header untuk kolom "Benang" dan "Permintaan Kelos"
+        $pdf->Cell(6, -6, '', 0, 0); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(25, -6, 'Jenis', 1, 0, 'C');
+        $pdf->Cell(12, -6, 'Kode', 1, 0, 'C');
+        $pdf->Cell(108, -6, '', 0, 0); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(15, -6, 'Kg', 1, 0, 'C'); // Merge 4 kolom untuk Permintaan Kelos
+        $pdf->Cell(13, -6, 'Kg', 1, 0, 'C');
+        $pdf->Cell(13, -6, 'Yard', 1, 0, 'C');
+        MultiCellFit($pdf, 13, -3, "Cones\nTotal");
+        MultiCellFit($pdf, 13, -3, "Jenis\nCones");
+        $pdf->SetY(53);
+    }
+
+    private function generateFooterOpenPOBooking($pdf, $tujuan, $result)
+    {
+        // konfigurasi
+        $bottomMargin = 7;      // harus sama dengan SetAutoPageBreak
+        $footerHeight = 35;     // tinggi area footer secara keseluruhan
+
+        // hitung Y = (tinggi halaman) - margin bawah - footer block
+        $y = $pdf->GetPageHeight() - $bottomMargin - $footerHeight;
+        $pdf->SetY($y);
+        $pdf->SetFont('Arial', '', 6);
+
+        // Baris kosong
+        $pdf->Cell(277, 5, '', 0, 1, 'C');
+        // Judul departemen
+        $pdf->Cell(170, 5, 'UNTUK DEPARTMEN ' . $tujuan, 0, 1, 'C');
+
+        // Judul kolom tanda tangan
+        $pdf->Cell(55, 5, '', 0, 0, 'C');
+        $pdf->Cell(55, 5, 'Pemesanan', 0, 0, 'C');
+        $pdf->Cell(55, 5, 'Mengetahui', 0, 0, 'C');
+        $pdf->Cell(55, 5, 'Tanda Terima ' . $tujuan, 0, 1, 'C');
+
+        // Spasi untuk tanda tangan
+        $pdf->Cell(55, 12, '', 0, 1, 'C');
+
+        $admin = $result[0]['admin'] ?? '';
+
+        // Garis tangan
+        $pdf->Cell(55, 5, '', 0, 0, 'C');
+        $pdf->Cell(55, 5, '(       ' . $admin . '       )', 0, 0, 'C');
+        if (!empty($result)) {
+            $pdf->Cell(55, 5, '(       ' . $result[0]['penanggung_jawab'] . '      )', 0, 0, 'C');
+        } else {
+            $pdf->Cell(55, 5, '(                               )', 0, 0, 'C');
+        }
+        $pdf->Cell(55, 5, '(       ' . 'Retno' . '       )', 0, 1, 'C');
+    }
+
+    public function generateOpenPOManual()
+    {
+        $tujuan = $this->request->getGet('tujuan');
+
+        $noModel = $this->request->getGet('no_model');
+        $result = $this->openPoModel->getPoManualByNoModel($noModel);
+
+        if ($tujuan == 'CELUP') {
+            $penerima = 'Retno';
+        } else {
+            $penerima = 'Paryanti';
+        }
+
+        // Inisialisasi FPDF
+        $pdf = new FPDF('L', 'mm', 'A4');
+        $pdf->SetMargins(7, 7, 7);
+        $pdf->SetAutoPageBreak(true, 7);  // KITA MATIKAN AUTO PAGE BREAK
+        $pdf->AddPage();
+
+
+        $seasonText = $season ?? '';
+        $mtText     = $materialType ?? '';
+
+        // CETAK HEADER halaman pertama
+        // Garis margin luar (lebih tebal)
+        $pdf->SetDrawColor(0, 0, 0); // Warna hitam
+        $pdf->SetLineWidth(0.2); // Lebih tebal
+        $pdf->Rect(6.5, 6.5, 285, 197); // Sedikit lebih besar dari margin dalam
+
+        // Garis margin dalam (lebih tipis)
+        $pdf->SetLineWidth(0.1); // Lebih tipis
+        $pdf->Rect(7, 7, 284, 196); // Ukuran aslinya
+
+        // Masukkan gambar di dalam kolom
+        $x = $pdf->GetX(); // Simpan posisi X saat ini
+        $y = $pdf->GetY(); // Simpan posisi Y saat ini
+
+        // Menambahkan gambar
+        $pdf->Image('assets/img/logo-kahatex.png', $x + 16, $y + 1, 10, 8); // Lokasi X, Y, lebar, tinggi
+
+        // Header
+        $pdf->SetFont('Arial', 'B', 6);
+        $pdf->Cell(43, 12, '', 1, 0, 'C'); // Tetap di baris yang sama
+        // Set warna latar belakang menjadi biru telur asin (RGB: 170, 255, 255)
+        $pdf->SetFillColor(170, 255, 255);
+        $pdf->Cell(241, 4, 'FORMULIR', 1, 1, 'C', 1); // Pindah ke baris berikutnya setelah ini
+
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(43, 4, '', 0, 0, 'L'); // Tetap di baris yang sama
+        $pdf->Cell(241, 4, 'DEPARTMEN CELUP CONES', 0, 1, 'C'); // Pindah ke baris berikutnya setelah ini
+
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(43, 4, 'PT KAHATEX', 0, 0, 'C'); // Tetap di baris yang sama
+        $pdf->Cell(241, 4, 'FORMULIR PO', 0, 1, 'C'); // Pindah ke baris berikutnya setelah ini
+
+        // Tabel Header Atas
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(43, 4, 'No. Dokumen', 1, 0, 'L');
+        $pdf->Cell(162, 4, 'FOR-CC-087/REV_02/HAL_1/1', 1, 0, 'L');
+        $pdf->Cell(35, 4, 'Tanggal Revisi', 1, 0, 'L');
+        $pdf->Cell(44, 4, '17 Maret 2025', 1, 1, 'C');
+
+        // Tabel Header Atas
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(205, 4, '', 1, 0, 'L');
+        $pdf->Cell(35, 4, 'Klasifikasi', 1, 0, 'L');
+        $pdf->Cell(44, 4, 'Internal', 1, 1, 'C');
+
+        $pdf->SetFont('Arial', '', 6);
+        $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
+
+        $pdf->SetFont('Arial', '', 10);
+
+        if (!empty($result) && isset($result[0]['po_plus']) && $result[0]['po_plus'] == '0') {
+            $pdf->Cell(30, 5, ': ' . $noModel, 0, 1, 'L');
+        } elseif (!empty($result) && isset($result[0]['po_plus'])) {
+            $pdf->Cell(30, 5, ': ' . '(+) ' . $noModel, 0, 1, 'L');
+        } else {
+            $pdf->Cell(30, 5, ': ' . $noModel, 0, 1, 'L');
+        }
+
+        $cellW1 = 20;  // lebar season
+        $cellW2 = 30;  // lebar materialType
+        $lineH  = 4;   // tinggi tiap baris wrap
+
+        $seasonText = $season ?? '';
+        $mtText     = $materialType ?? '';
+
+        // Hitung tinggi masing-masing
+        $nb1   = ceil($pdf->GetStringWidth($seasonText) / $cellW1);
+        $nb1   = max(1, $nb1);
+        $rowH1 = $nb1 * $lineH;
+
+        $nb2   = ceil($pdf->GetStringWidth($mtText) / $cellW2);
+        $nb2   = max(1, $nb2);
+        $rowH2 = $nb2 * $lineH;
+
+        $rowH = max($rowH1, $rowH2);
+
+        $startX = $pdf->GetX();
+        $startY = $pdf->GetY();
+
+        $pdf->SetFont('Arial', '', 6);
+
+        $pdf->Cell(43, 5, 'Pemesan', 0, 0, 'L');
+        $pdf->Cell(50, 5, ': ' . 'KAOS KAKI', 0, 0, 'L');
+
+        //Simpan posisi awal Season & MaterialType
+        $x = $pdf->GetX();
+        $y = $pdf->GetY();
+
+        //Season
+        $pdf->MultiCell($cellW1, $lineH, $seasonText, 0, 'C');
+        $pdf->SetXY($x + $cellW1, $y);
+
+        //Material Type
+        $pdf->SetFont('Arial', 'U', 6);
+        $pdf->MultiCell($cellW2, $lineH, $mtText, 0, 'C');
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->SetXY($startX, $startY + $rowH);
+
+        $pdf->Cell(43, 5, 'Tgl', 0, 0, 'L');
+        // Check if the result array is not empty and display only the first delivery_awal
+        if (!empty($result)) {
+            $tgl_po = $result[0]['tgl_po'];
+            $tgl_formatted = date('d-m-Y', strtotime($tgl_po));
+            $pdf->Cell(234, 5, ': ' . $tgl_formatted, 0, 1, 'L');
+        } else {
+            $pdf->Cell(234, 5, ': No delivery date available', 0, 1, 'L');
+        }
+
+        function MultiCellFit($pdf, $w, $h, $txt, $border = 1, $align = 'C')
+        {
+            // Simpan posisi awal
+            $x = $pdf->GetX();
+            $y = $pdf->GetY();
+
+            // Simulasikan MultiCell tetapi tetap pakai tinggi tetap (12)
+            $pdf->MultiCell($w, $h, $txt, $border, $align);
+
+            // Kembalikan ke kanan cell agar sejajar
+            $pdf->SetXY($x + $w, $y);
+        }
+
+        // Tabel Header Baris Pertama
+        $pdf->SetFont('Arial', '', 6);
+        // Merge cells untuk kolom No, Bentuk Celup, Warna, Kode Warna, Buyer, Nomor Order, Delivery, Untuk Produksi, Contoh Warna, Keterangan Celup
+        $pdf->Cell(6, 12, 'No', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(37, 6, 'Benang', 1, 0, 'C'); // Merge 2 kolom ke samping untuk baris pertama
+        MultiCellFit($pdf, 12, 6, "Bentuk\nCelup");
+        $pdf->Cell(20, 12, 'Warna', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(20, 12, 'Kode Warna', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(20, 12, 'Buyer', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(20, 12, 'Nomor Order', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(16, 12, 'Delivery', 1, 0, 'C'); // Merge 2 baris
+        MultiCellFit($pdf, 15, 3, "Qty\nPesanan");
+        $pdf->Cell(52, 6, 'Permintaan Kelos', 1, 0, 'C');
+        $pdf->Cell(22, 12, 'Untuk Produksi', 1, 0, 'C');
+        $pdf->Cell(22, 12, 'Contoh Warna', 1, 0, 'C');
+        $pdf->Cell(22, 12, 'Keterangan Celup', 1, 1, 'C');
+
+        // Sub-header untuk kolom "Benang" dan "Permintaan Kelos"
+        $pdf->Cell(6, -6, '', 0, 0); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(25, -6, 'Jenis', 1, 0, 'C');
+        $pdf->Cell(12, -6, 'Kode', 1, 0, 'C');
+        $pdf->Cell(108, -6, '', 0, 0); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(15, -6, 'Kg', 1, 0, 'C'); // Merge 4 kolom untuk Permintaan Kelos
+        $pdf->Cell(13, -6, 'Kg', 1, 0, 'C');
+        $pdf->Cell(13, -6, 'Yard', 1, 0, 'C');
+        MultiCellFit($pdf, 13, -3, "Cones\nTotal");
+        MultiCellFit($pdf, 13, -3, "Jenis\nCones");
+
+        $startYAfterHeader = $pdf->GetY();  // posisi Y tepat setelah header
+        // $pdf->SetY($startYAfterHeader);
+        $pdf->SetY($pdf->GetY());
+
+        // == START ISI TABEL ==
+        $pdf->SetFont('Arial', '', 6);
+        $no                 = 1;
+        $yLimit             = 145;
+        $lineHeight         = 3;      // tinggi dasar setiap baris MultiCell
+
+        // Total tinggi baris untuk memastikan 15 baris jika perlu kosong
+        $totalKg                = 0;
+        $totalPermintaanCones   = 0;
+        $totalYard              = 0;
+        $totalCones             = 0;
+        // dd($result);
+        foreach ($result as $row) {
+            // Cek dulu apakah nambah baris ini bakal lewat batas
+            if ($pdf->GetY() + $lineHeight > $yLimit) {
+                $this->generateFooterOpenPOManual($pdf, $tujuan, $result, $penerima);
+                $pdf->AddPage();
+                $this->generateHeaderOpenPOManual($pdf, $result, $noModel);
+
+                // Gambar ulang margin & header halaman
+                $pdf->SetDrawColor(0, 0, 0);
+                $pdf->SetLineWidth(0.2); // Lebih tebal
+                $pdf->Rect(6.5, 6.5, 285, 197); // Sedikit lebih besar dari margin dalam
+                $pdf->SetLineWidth(0.1); // Lebih tipis
+                $pdf->Rect(7, 7, 284, 196); // Ukuran aslinya
+
+                $pdf->SetFont('Arial', '', 6);
+            }
+
+            $startX = $pdf->GetX();
+            $startY = $pdf->GetY();
+
+            // 1. SIMULASI: Hitung tinggi maksimum yang dibutuhkan
+            $heights = [];
+            $tempX = $startX;
+
+            $pdf->SetTextColor(255, 255, 255); // putih agar tidak terlihat
+
+            $multiCellData = [
+                ['w' => 25, 'text' => $row['spesifikasi_benang']
+                    ? $row['item_type'] . ' (' . $row['spesifikasi_benang'] . ')'
+                    : $row['item_type']],
+                ['w' => 12, 'text' => $row['ukuran']],
+                ['w' => 12, 'text' => $row['bentuk_celup']],
+                ['w' => 20, 'text' => $row['color']],
+                ['w' => 20, 'text' => $row['kode_warna']],
+                ['w' => 20, 'text' => $row['buyer']],
+                // ['w' => 20, 'text' => $row['buyer']],
+                ['w' => 20, 'text' => $row['no_order']], //No Order
+                ['w' => 22, 'text' => $row['jenis_produksi']],
+                ['w' => 22, 'text' => $row['contoh_warna']],
+                ['w' => 22, 'text' => $row['ket_celup']],
+            ];
+
+            // 1. Tentukan lineHeight: 5 pt jika semuanya muat satu baris, 3 pt kalau ada yg meluber
+            $singleLine = true;
+            foreach ($multiCellData as $cell) {
+                // GetStringWidth menghasilkan lebar dalam satuan point
+                if ($pdf->GetStringWidth($cell['text']) > $cell['w']) {
+                    $singleLine = false;
+                    break;
+                }
+            }
+            $lineHeight = $singleLine ? 5 : 3;
+
+            foreach ($multiCellData as $data) {
+                $pdf->SetXY($tempX, $startY);
+                $y0 = $pdf->GetY();
+                $pdf->MultiCell($data['w'], $lineHeight, $data['text'], 0, 'C');
+                $heights[] = $pdf->GetY() - $y0;
+                $tempX += $data['w'];
+            }
+            // dd($data);
+            $pdf->SetTextColor(0, 0, 0); // kembali ke hitam
+            $maxHeight = max($heights);
+
+            // 2. RENDER: Gambar semua cell dengan tinggi yang sama
+            $pdf->SetXY($startX, $startY);
+
+            // Buat semua cell dengan border dan tinggi yang sama, tapi isi kosong dulu
+            $cellWidths = [6, 25, 12, 12, 20, 20, 20, 20, 16, 15, 13, 13, 13, 13, 22, 22, 22];
+            $cellData = [
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                $row['delivery_awal'], // Delivery
+                number_format($row['kg_po'], 2) ?? 0,
+                number_format($row['kg_percones'], 2) ?? 0,
+                '',
+                $row['jumlah_cones'] ?? 0,
+                '',
+                '',
+                '',
+                ''
+            ];
+
+            // Gambar semua cell dengan border
+            for ($i = 0; $i < count($cellWidths); $i++) {
+                $pdf->Cell($cellWidths[$i], $maxHeight, $cellData[$i], 1, 0, 'C');
+            }
+
+            // 3. ISI TEXT untuk kolom multiCell (overlay tanpa border)
+            $currentX = $startX;
+
+            // No
+            $textCenterY = $startY + ($maxHeight / 2) - ($lineHeight / 2);
+            $pdf->SetXY($currentX, $textCenterY);
+            $pdf->Cell(6, $lineHeight, $no, 0, 0, 'C');
+            $currentX += 6;
+
+            // Item Type (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(25, $lineHeight, $row['item_type'] . $row['spesifikasi_benang'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(25, $lineHeight, $row['item_type'] . ' ' . $row['spesifikasi_benang'], 0, 'C');
+            $currentX += 25;
+
+            // Ukuran (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(12, $lineHeight, $row['ukuran'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(12, $lineHeight, $row['ukuran'], 0, 'C');
+            $currentX += 12;
+
+            // Bentuk (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(12, $lineHeight, $row['bentuk_celup'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(12, $lineHeight, $row['bentuk_celup'], 0, 'C');
+            $currentX += 12;
+
+            // Warna (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(20, $lineHeight, $row['color'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(20, $lineHeight, $row['color'], 0, 'C');
+            $currentX += 20;
+
+            // Kode Warna (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(20, $lineHeight, $row['kode_warna'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(20, $lineHeight, $row['kode_warna'], 0, 'C');
+            $currentX += 20;
+
+            // Buyer (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(20, $lineHeight, $row['buyer'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(20, $lineHeight,  $row['buyer'], 0, 'C');
+            $currentX += 20;
+
+            // No Order (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(20, $lineHeight, $row['no_order'], 0, 'C'); //No Order
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(20, $lineHeight, $row['no_order'], 0, 'C'); // No Order
+            $currentX += 20;
+
+            // Skip kolom yang sudah terisi dengan Cell biasa
+            $currentX += 16 + 15 + 13 + 13 + 13 + 13;
+
+            // Untuk Produksi (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(22, $lineHeight, $row['jenis_produksi'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(22, $lineHeight, $row['jenis_produksi'], 0, 'C');
+            $currentX += 22;
+
+            // Contoh Warna (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(22, $lineHeight, $row['contoh_warna'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(22, $lineHeight, $row['contoh_warna'], 0, 'C');
+            $currentX += 22;
+
+            // Keterangan (mungkin multiline)
+            $pdf->SetXY($currentX, $startY);
+            $pdf->SetTextColor(255, 255, 255);
+            $y0 = $pdf->GetY();
+            $pdf->MultiCell(22, $lineHeight, $row['ket_celup'], 0, 'C');
+            $textHeight = $pdf->GetY() - $y0;
+            $pdf->SetTextColor(0, 0, 0);
+
+            $centerY = $startY + ($maxHeight - $textHeight) / 2;
+            $pdf->SetXY($currentX, $centerY);
+            $pdf->MultiCell(22, $lineHeight, $row['ket_celup'], 0, 'C');
+
+            // Pindah ke baris berikutnya
+            $pdf->SetY($startY + $maxHeight);
+
+            $no++;
+
+            $totalKg              += floatval($row['kg_po'] ?? 0);
+            $totalPermintaanCones += floatval($row['kg_percones'] ?? 0);
+            $totalCones           += floatval($row['jumlah_cones'] ?? 0);
+        }
+
+        $currentY = $pdf->GetY();
+        $footerY = 145; // batas sebelum footer (tergantung desain kamu)
+
+        // Tinggi standar baris kosong (bisa sesuaikan ke $maxHeight rata-rata atau tetap 6 misal)
+        $emptyRowHeight = 5;
+
+        // Selama posisi Y masih di atas footer, tambahkan baris kosong
+        while ($currentY + $emptyRowHeight < $footerY) {
+            $startX = $pdf->GetX();
+            $pdf->SetXY($startX, $currentY);
+
+            // Gambar semua cell border kosong
+            $cellWidths = [6, 25, 12, 12, 20, 20, 20, 20, 16, 15, 13, 13, 13, 13, 22, 22, 22];
+            foreach ($cellWidths as $width) {
+                $pdf->Cell($width, $emptyRowHeight, '', 1, 0, 'C');
+            }
+            $pdf->Ln($emptyRowHeight);
+
+            $currentY = $pdf->GetY();
+        }
+
+        //  Baris TOTAL (baris ke-16)
+        $pdf->SetFont('Arial', 'B', 6);
+        $pdf->Cell(6 + 25 + 12 + 17 + 20 + 20 + 10 + 25 + 16, 6, 'TOTAL', 1, 0, 'R');
+        $pdf->Cell(15, 6, number_format($totalKg, 2), 1, 0, 'C');
+        $pdf->Cell(13, 6, number_format($totalPermintaanCones, 2), 1, 0, 'C');
+        $pdf->Cell(13, 6, number_format($totalYard, 2), 1, 0, 'C');
+        $pdf->Cell(13, 6, number_format($totalCones), 1, 0, 'C');
+        $pdf->Cell(13, 6, '', 1, 0, 'C');
+        $pdf->Cell(22, 6, '', 1, 0, 'C');
+        $pdf->Cell(22, 6, '', 1, 0, 'C');
+        $pdf->Cell(22, 6, '', 1, 1, 'C');
+
+
+        //KETERANGAN
+        $pdf->Cell(277, 5, '', 0, 1, 'C');
+        $pdf->Cell(85, 5, 'KET', 0, 0, 'R');
+        $pdf->SetFillColor(255, 255, 255); // Atur warna latar belakang menjadi putih
+        // Check if the result array is not empty and display only the first delivery_awal
+        if (!empty($result)) {
+            $pdf->MultiCell(117, 5, ': ' . $result[0]['keterangan'], 0, 1, 'L');
+        } else {
+            $pdf->MultiCell(117, 5, ': ', 0, 1, 'L');
+        }
+
+        // FOOTER
+        $this->generateFooterOpenPOManual($pdf, $tujuan, $result, $penerima);
+
+        // Output PDF
+        return $this->response->setHeader('Content-Type', 'application/pdf')
+            ->setBody($pdf->Output('S'));
+    }
+
+    public function generateHeaderOpenPOManual($pdf, $result, $noModel)
+    {
+        // Garis margin luar (lebih tebal)
+        $pdf->SetDrawColor(0, 0, 0); // Warna hitam
+        $pdf->SetLineWidth(0.2); // Lebih tebal
+        $pdf->Rect(6.5, 6.5, 285, 197); // Sedikit lebih besar dari margin dalam
+
+        // Garis margin dalam (lebih tipis)
+        $pdf->SetLineWidth(0.1); // Lebih tipis
+        $pdf->Rect(7, 7, 284, 196); // Ukuran aslinya
+
+        // Masukkan gambar di dalam kolom
+        $x = $pdf->GetX(); // Simpan posisi X saat ini
+        $y = $pdf->GetY(); // Simpan posisi Y saat ini
+
+        // Menambahkan gambar
+        $pdf->Image('assets/img/logo-kahatex.png', $x + 16, $y + 1, 10, 8); // Lokasi X, Y, lebar, tinggi
+
+        // Header
+        $pdf->SetFont('Arial', 'B', 6);
+        $pdf->Cell(43, 12, '', 1, 0, 'C'); // Tetap di baris yang sama
+        // Set warna latar belakang menjadi biru telur asin (RGB: 170, 255, 255)
+        $pdf->SetFillColor(170, 255, 255);
+        $pdf->Cell(241, 4, 'FORMULIR', 1, 1, 'C', 1); // Pindah ke baris berikutnya setelah ini
+
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(43, 4, '', 0, 0, 'L'); // Tetap di baris yang sama
+        $pdf->Cell(241, 4, 'DEPARTMEN CELUP CONES', 0, 1, 'C'); // Pindah ke baris berikutnya setelah ini
+
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(43, 4, 'PT KAHATEX', 0, 0, 'C'); // Tetap di baris yang sama
+        $pdf->Cell(241, 4, 'FORMULIR PO', 0, 1, 'C'); // Pindah ke baris berikutnya setelah ini
+
+        // Tabel Header Atas
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(43, 4, 'No. Dokumen', 1, 0, 'L');
+        $pdf->Cell(162, 4, 'FOR-CC-087/REV_02/HAL_1/1', 1, 0, 'L');
+        $pdf->Cell(35, 4, 'Tanggal Revisi', 1, 0, 'L');
+        $pdf->Cell(44, 4, '17 Maret 2025', 1, 1, 'C');
+
+        // Tabel Header Atas
+        $pdf->SetFont('Arial', '', 5);
+        $pdf->Cell(205, 4, '', 1, 0, 'L');
+        $pdf->Cell(35, 4, 'Klasifikasi', 1, 0, 'L');
+        $pdf->Cell(44, 4, 'Internal', 1, 1, 'C');
+
+        $pdf->SetFont('Arial', '', 6);
+        $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
+
+        $pdf->SetFont('Arial', '', 10);
+
+        if (!empty($result) && isset($result[0]['po_plus']) && $result[0]['po_plus'] == '0') {
+            $pdf->Cell(30, 5, ': ' . $noModel, 0, 1, 'L');
+        } elseif (!empty($result) && isset($result[0]['po_plus'])) {
+            $pdf->Cell(30, 5, ': ' . '(+) ' . $noModel, 0, 1, 'L');
+        } else {
+            $pdf->Cell(30, 5, ': ' . $noModel, 0, 1, 'L');
+        }
+
+        $cellW1 = 20;  // lebar season
+        $cellW2 = 30;  // lebar materialType
+        $lineH  = 4;   // tinggi tiap baris wrap
+
+        $seasonText = $season ?? '';
+        $mtText     = $materialType ?? '';
+
+        // Hitung tinggi masing-masing
+        $nb1   = ceil($pdf->GetStringWidth($seasonText) / $cellW1);
+        $nb1   = max(1, $nb1);
+        $rowH1 = $nb1 * $lineH;
+
+        $nb2   = ceil($pdf->GetStringWidth($mtText) / $cellW2);
+        $nb2   = max(1, $nb2);
+        $rowH2 = $nb2 * $lineH;
+
+        $rowH = max($rowH1, $rowH2);
+
+        $startX = $pdf->GetX();
+        $startY = $pdf->GetY();
+
+        $pdf->SetFont('Arial', '', 6);
+
+        $pdf->Cell(43, 5, 'Pemesan', 0, 0, 'L');
+        $pdf->Cell(50, 5, ': ' . 'Kaos Kaki', 0, 0, 'L');
+
+        //Simpan posisi awal Season & MaterialType
+        $x = $pdf->GetX();
+        $y = $pdf->GetY();
+
+        //Season
+        $pdf->MultiCell($cellW1, $lineH, $seasonText, 0, 'C');
+        $pdf->SetXY($x + $cellW1, $y);
+
+        //Material Type
+        $pdf->SetFont('Arial', 'U', 6);
+        $pdf->MultiCell($cellW2, $lineH, $mtText, 0, 'C');
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->SetXY($startX, $startY + $rowH);
+
+        $pdf->Cell(43, 5, 'Tgl', 0, 0, 'L');
+        // Check if the result array is not empty and display only the first delivery_awal
+        if (!empty($result)) {
+            $tgl_po = $result[0]['tgl_po'];
+            $tgl_formatted = date('d-m-Y', strtotime($tgl_po));
+            $pdf->Cell(234, 5, ': ' . $tgl_formatted, 0, 1, 'L');
+        } else {
+            $pdf->Cell(234, 5, ': No delivery date available', 0, 1, 'L');
+        }
+
+        // Tabel Header Baris Pertama
+        $pdf->SetFont('Arial', '', 6);
+        // Merge cells untuk kolom No, Bentuk Celup, Warna, Kode Warna, Buyer, Nomor Order, Delivery, Untuk Produksi, Contoh Warna, Keterangan Celup
+        $pdf->Cell(6, 12, 'No', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(37, 6, 'Benang', 1, 0, 'C'); // Merge 2 kolom ke samping untuk baris pertama
+        MultiCellFit($pdf, 12, 6, "Bentuk\nCelup");
+        $pdf->Cell(20, 12, 'Warna', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(20, 12, 'Kode Warna', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(20, 12, 'Buyer', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(20, 12, 'Nomor Order', 1, 0, 'C'); // Merge 2 baris
+        $pdf->Cell(16, 12, 'Delivery', 1, 0, 'C'); // Merge 2 baris
+        MultiCellFit($pdf, 15, 3, "Qty\nPesanan");
+        $pdf->Cell(52, 6, 'Permintaan Kelos', 1, 0, 'C');
+        $pdf->Cell(22, 12, 'Untuk Produksi', 1, 0, 'C');
+        $pdf->Cell(22, 12, 'Contoh Warna', 1, 0, 'C');
+        $pdf->Cell(22, 12, 'Keterangan Celup', 1, 1, 'C');
+
+        // Sub-header untuk kolom "Benang" dan "Permintaan Kelos"
+        $pdf->Cell(6, -6, '', 0, 0); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(25, -6, 'Jenis', 1, 0, 'C');
+        $pdf->Cell(12, -6, 'Kode', 1, 0, 'C');
+        $pdf->Cell(108, -6, '', 0, 0); // Kosong untuk menyesuaikan posisi
+        $pdf->Cell(15, -6, 'Kg', 1, 0, 'C'); // Merge 4 kolom untuk Permintaan Kelos
+        $pdf->Cell(13, -6, 'Kg', 1, 0, 'C');
+        $pdf->Cell(13, -6, 'Yard', 1, 0, 'C');
+        MultiCellFit($pdf, 13, -3, "Cones\nTotal");
+        MultiCellFit($pdf, 13, -3, "Jenis\nCones");
+        $pdf->SetY(53);
+    }
+
+    private function generateFooterOpenPOManual($pdf, $tujuan, $result)
+    {
+        // konfigurasi
+        $bottomMargin = 7;      // harus sama dengan SetAutoPageBreak
+        $footerHeight = 35;     // tinggi area footer secara keseluruhan
+
+        // hitung Y = (tinggi halaman) - margin bawah - footer block
+        $y = $pdf->GetPageHeight() - $bottomMargin - $footerHeight;
+        $pdf->SetY($y);
+        $pdf->SetFont('Arial', '', 6);
+
+        // Baris kosong
+        $pdf->Cell(277, 5, '', 0, 1, 'C');
+        // Judul departemen
+        $pdf->Cell(170, 5, 'UNTUK DEPARTMEN ' . $tujuan, 0, 1, 'C');
+
+        // Judul kolom tanda tangan
+        $pdf->Cell(55, 5, '', 0, 0, 'C');
+        $pdf->Cell(55, 5, 'Pemesanan', 0, 0, 'C');
+        $pdf->Cell(55, 5, 'Mengetahui', 0, 0, 'C');
+        $pdf->Cell(55, 5, 'Tanda Terima ' . $tujuan, 0, 1, 'C');
+
+        // Spasi untuk tanda tangan
+        $pdf->Cell(55, 12, '', 0, 1, 'C');
+
+        $admin = $result[0]['admin'] ?? '';
+
+        // Garis tangan
+        $pdf->Cell(55, 5, '', 0, 0, 'C');
+        $pdf->Cell(55, 5, '(       ' . $admin . '       )', 0, 0, 'C');
+        if (!empty($result)) {
+            $pdf->Cell(55, 5, '(       ' . $result[0]['penanggung_jawab'] . '      )', 0, 0, 'C');
+        } else {
+            $pdf->Cell(55, 5, '(                               )', 0, 0, 'C');
+        }
+        $pdf->Cell(55, 5, '(       ' . 'Retno' . '       )', 0, 1, 'C');
+    }
 }
