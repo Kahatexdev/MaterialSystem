@@ -569,6 +569,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('filter_pemesananarea', 'PemesananController::pemesananArea');
     $routes->post('getUpdateListPemesanan', 'PemesananController::getUpdateListPemesanan');
     $routes->post('updateListPemesanan', 'ApiController::updateListPemesanan');
+    $routes->get('pemesanan/reportPemesananArea', 'PemesananController::reportPemesananArea');
+    $routes->get('pemesanan/filterPemesananArea', 'PemesananController::filterPemesananArea');
+    $routes->get('pemesanan/exportPemesananArea', 'ExcelController::excelPemesananArea');
 
     //Celup
     $routes->get('schedule', 'ScheduleController::index');
