@@ -47,6 +47,7 @@
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/permintaanKaretCovering') ?>">Permintaan Karet</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/permintaanSpandexCovering') ?>">Permintaan Spandex</a></li>
                                 <li><a class="dropdown-item" href="#" id="showModalButton">Persiapan Pengeluaran Barang</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/sisaKebutuhanArea') ?>" id="showModalButton">Sisa Kebutuhan Area</a></li>
                             </ul>
                         </li>
                         <li class="nav-item d-flex align-items-center">
