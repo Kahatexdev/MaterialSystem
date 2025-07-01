@@ -174,8 +174,8 @@ class PdfController extends BaseController
         $pdf->SetFont('Arial', '', 5);
         $pdf->Cell(43, 4, 'No. Dokumen', 1, 0, 'L');
         $pdf->Cell(162, 4, 'FOR-CC-087/REV_02/HAL_1/1', 1, 0, 'L');
-        $pdf->Cell(35, 4, 'Tanggal Revisi', 1, 0, 'L');
-        $pdf->Cell(44, 4, '17 Maret 2025', 1, 1, 'L');
+        $pdf->Cell(35, 4, 'Tanggal Revisi', 1, 0, 'C');
+        $pdf->Cell(44, 4, '17 Maret 2025', 1, 1, 'C');
 
         // Tabel Header Atas
         $pdf->SetFont('Arial', '', 5);
@@ -310,7 +310,7 @@ class PdfController extends BaseController
         foreach ($result as $row) {
             // dd($row['spesifikasi_benang']);
             // 1. tentukan text yang mau ditampilkan, atau kosong jika sama dgn sebelumnya
-            $delivery = $row['delivery_awal'] ?? '';
+            $delivery = date('d-m-Y', strtotime($row['delivery_awal'])) ?? '';
             if ($delivery === $prevDelivery) {
                 $displayDelivery = '';
             } else {
@@ -347,7 +347,7 @@ class PdfController extends BaseController
                 $pdf->SetLineWidth(0.1); // Lebih tipis
                 $pdf->Rect(7, 7, 284, 196); // Ukuran aslinya
 
-                $pdf->SetFont('Arial', '', 5);
+                $pdf->SetFont('Arial', '', 6);
             }
 
             $startX = $pdf->GetX();
