@@ -69,6 +69,7 @@
         </div>
     </div>
 
+
     <!-- Tabel Data -->
     <div class="card mt-4">
         <div class="card-body">
@@ -356,6 +357,43 @@
             </div>
         </div>
     </div>
+    <div class="card mt-4" id="totalKebutuhan">
+        <div class="card-body">
+            <h5> Total Kebutuhan Bahan Baku</h5>
+            <div class="table-responsive">
+                <table id="dataTable1" class="display text-uppercase text-xs font-bolder text-center" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Color</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Kebutuhan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($kebutuhan as $data1): ?>
+                            <tr>
+                                <td><?= $data1['item_type'] ?></td>
+                                <td><?= $data1['kode_warna'] ?></td>
+                                <td><?= $data1['color'] ?></td>
+                                <td><?= number_format($data1['kebutuhan'], 2) ?> kg</td>
+
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php if (empty($kebutuhan)) : ?>
+                <div class=" card-footer">
+                    <div class="row">
+                        <div class="col-lg-12 text-center">
+                            <p>No data available in the table.</p>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
 
     <!-- Modal Ubah Semua Area -->
     <div class="modal fade" id="ubahAreaModal" tabindex="-1" aria-labelledby="ubahAreaModalLabel" aria-hidden="true">
@@ -550,6 +588,10 @@
 
     $(document).ready(function() {
         $('#dataTable').DataTable({
+            "pageLength": 35,
+            "order": []
+        });
+        $('#dataTable1').DataTable({
             "pageLength": 35,
             "order": []
         });
