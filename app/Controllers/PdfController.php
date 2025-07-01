@@ -174,14 +174,14 @@ class PdfController extends BaseController
         $pdf->SetFont('Arial', '', 5);
         $pdf->Cell(43, 4, 'No. Dokumen', 1, 0, 'L');
         $pdf->Cell(162, 4, 'FOR-CC-087/REV_02/HAL_1/1', 1, 0, 'L');
-        $pdf->Cell(35, 4, 'Tanggal Revisi', 1, 0, 'C');
+        $pdf->Cell(35, 4, 'Tanggal Revisi', 1, 0, 'L');
         $pdf->Cell(44, 4, '17 Maret 2025', 1, 1, 'C');
 
         // Tabel Header Atas
         $pdf->SetFont('Arial', '', 5);
         $pdf->Cell(205, 4, '', 1, 0, 'L');
         $pdf->Cell(35, 4, 'Klasifikasi', 1, 0, 'L');
-        $pdf->Cell(44, 4, 'Internal', 1, 1, 'L');
+        $pdf->Cell(44, 4, 'Internal', 1, 1, 'C');
 
         $pdf->SetFont('Arial', '', 6);
         $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
@@ -669,13 +669,13 @@ class PdfController extends BaseController
         $pdf->Cell(43, 4, 'No. Dokumen', 1, 0, 'L');
         $pdf->Cell(162, 4, 'FOR-CC-087/REV_02/HAL_1/1', 1, 0, 'L');
         $pdf->Cell(35, 4, 'Tanggal Revisi', 1, 0, 'L');
-        $pdf->Cell(44, 4, '17 Maret 2025', 1, 1, 'L');
+        $pdf->Cell(44, 4, '17 Maret 2025', 1, 1, 'C');
 
         // Tabel Header Atas
         $pdf->SetFont('Arial', '', 5);
         $pdf->Cell(205, 4, '', 1, 0, 'L');
         $pdf->Cell(35, 4, 'Klasifikasi', 1, 0, 'L');
-        $pdf->Cell(44, 4, 'Internal', 1, 1, 'L');
+        $pdf->Cell(44, 4, 'Internal', 1, 1, 'C');
 
         $pdf->SetFont('Arial', '', 6);
         $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
