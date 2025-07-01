@@ -812,4 +812,31 @@ class PemesananController extends BaseController
             'data' => $dataList,
         ], 200);
     }
+    public function sisaKebutuhanArea()
+    {
+        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $response = file_get_contents($apiUrl);
+        $allArea = json_decode($response, true);
+
+        // get filter
+        $area = $this->request->getGet('filter_area') ?? 'KK2A';
+        $noModel = $this->request->getGet('filter_model') ?? 'L25067';
+
+        // Initialize dataPemesanan as empty by default
+        $dataPemesanan = [];
+
+        if (!empty($area) && !empty($noModel)) {
+            $dataPemesanan = $this->pemesananModel->getPemesananByModel($area, $noModel);
+        }
+        // Prepare data for the view
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'area' => $allArea,
+            'dataPemesanan' => $dataPemesanan, // Pass the filtered data
+        ];
+        var_dump($dataPemesanan);
+        return view($this->role . '/pemesanan/sisaKebutuhanArea', $data);
+    }
 }

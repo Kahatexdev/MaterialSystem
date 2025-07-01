@@ -727,4 +727,18 @@ class PemesananModel extends Model
             ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
         return $builder->get()->getResultArray();
     }
+    public function getPemesananByModel($area, $model)
+    {
+        $this->select('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, total_pemesanan.id_total_pemesanan, total_pemesanan.ttl_jl_mc, total_pemesanan.ttl_kg, total_pemesanan.ttl_cns, pemesanan.po_tambahan')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('pemesanan.status_kirim', 'YA')
+            ->where('pemesanan.admin', $area)
+            ->where('master_order.no_model', $model)
+            ->groupBy('total_pemesanan.id_total_pemesanan')
+            ->orderBy('material.item_type, material.kode_warna, pemesanan.tgl_pakai', 'ASC');
+
+        return $this->findAll();
+    }
 }
