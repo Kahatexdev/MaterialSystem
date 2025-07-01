@@ -32,12 +32,16 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('masterdata/poGabungan/(:any)', 'PoGabunganController::poGabungan/$1');
     $routes->get('masterdata/poGabunganDetail/(:any)', 'PoGabunganController::poGabunganDetail/$1');
     $routes->get('masterdata/poBooking', 'PoBookingController::index');
-    // $routes->get('masterdata/poBooking/getItemType/(:any)', 'PoBookingController::getItemType/$1');
+    $routes->get('masterdata/poBooking/create', 'PoBookingController::create');
     $routes->get('masterdata/poBooking/getItemType', 'PoBookingController::getItemType');
     $routes->get('masterdata/poBooking/getKodeWarna', 'PoBookingController::getKodeWarna');
     $routes->get('masterdata/poBooking/getColor', 'PoBookingController::getColor');
     $routes->post('masterdata/poBooking/saveOpenPoBooking', 'PoBookingController::saveOpenPoBooking');
+    $routes->get('masterdata/poBooking/exportPoBooking/(:any)', 'ExcelController::exportPoBooking/$1');
     $routes->get('masterdata/poManual', 'PoManualController::index');
+    $routes->get('masterdata/poManual/create', 'PoManualController::create');
+    $routes->post('masterdata/poManual/saveOpenPoManual', 'PoManualController::saveOpenPoManual');
+    $routes->get('masterdata/poManual/exportPoManual/(:any)', 'ExcelController::exportPoManual/$1');
     $routes->get('masterdata/cekStockOrder/(:any)/(:any)/(:any)', 'PoGabunganController::cekStockOrder/$1/$2/$3');
     $routes->post('openPO/saveOpenPOGabungan', 'PoGabunganController::saveOpenPOGabungan');
     $routes->get('listPoGabungan', 'PoGabunganController::listPoGabungan');
