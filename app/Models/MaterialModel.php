@@ -49,6 +49,14 @@ class MaterialModel extends Model
         return $this->join('master_order', 'master_order.id_order = material.id_order')
             ->where('material.id_order', $id_order)->findAll();
     }
+    public function getTotalKebutuhan($id_order)
+    {
+        return $this->select('material.item_type, material.kode_warna, material.color, sum(kgs) as kebutuhan')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('material.id_order', $id_order)
+            ->groupBy('material.kode_warna, material.item_type')
+            ->findAll();
+    }
 
     public function getQtyPO($id_order, $item_type, $kode_warna)
     {

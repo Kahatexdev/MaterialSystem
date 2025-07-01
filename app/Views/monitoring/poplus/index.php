@@ -111,15 +111,6 @@
                                     <a href="<?= base_url($role . '/poplus/detail?area=' . $data['admin'] . '&tgl_poplus=' . $data['tgl_poplus'] . '&no_model=' . $data['no_model'] . '&item_type=' . $data['item_type'] . '&kode_warna=' . $data['kode_warna'] . '&warna=' . $data['color'] . '&status=' . $data['status']) ?>" class="btn btn-info btn-sm">
                                         Detail
                                     </a>
-                                    <?php if ($isNotApproved): ?>
-                                        <button class="btn btn-info btn-sm btn-warning btn-approve" data-id="<?= $data['id_po_tambahan'] ?>" data-tgl="<?= $data['tgl_poplus'] ?>" data-model="<?= $data['no_model'] ?>" data-type="<?= $data['item_type'] ?>"
-                                            data-warna="<?= $data['kode_warna'] ?>" data-status="<?= $data['status'] ?>" data-area="<?= $data['admin'] ?>" data-bs-toggle="modal" data-bs-target="#approveModal">
-                                            Approve
-                                        </button>
-                                    <?php else: ?>
-                                        <a class="btn btn-success btn-sm" href="<?= base_url($role . '/masterdata/poGabungan/' . $data['jenis']) ?>"> BUKA PO (+)
-                                        </a> <!-- Font Awesome centang hijau -->
-                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -135,34 +126,6 @@
                     </div>
                 </div>
             <?php endif; ?>
-        </div>
-    </div>
-</div>
-<div class="modal fade  bd-example-modal-approve" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="modalCancel" aria-hidden="true">
-    <div class="modal-dialog  modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Approve</h5>
-                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="<?= base_url($role . '/approvePoPlusArea') ?>" method="post">
-                    <input type="hidden" name="id_po_tambahan" id="modal-id">
-                    <input type="hidden" name="tgl_poplus" id="modal-tgl">
-                    <input type="hidden" name="no_model" id="modal-model">
-                    <input type="hidden" name="item_type" id="modal-type">
-                    <input type="hidden" name="kode_warna" id="modal-warna">
-                    <input type="hidden" name="status" id="modal-status">
-                    <input type="hidden" name="area" id="modal-area">
-                    Are You Sure Want to Approve ?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn bg-gradient-success">Yes</button>
-            </div>
-            </form>
         </div>
     </div>
 </div>
@@ -186,22 +149,6 @@
             }]
         });
 
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const buttons = document.querySelectorAll('.btn-approve');
-
-        buttons.forEach(button => {
-            button.addEventListener('click', function() {
-                document.getElementById('modal-id').value = this.getAttribute('data-id');
-                document.getElementById('modal-tgl').value = this.getAttribute('data-tgl');
-                document.getElementById('modal-model').value = this.getAttribute('data-model');
-                document.getElementById('modal-type').value = this.getAttribute('data-type');
-                document.getElementById('modal-warna').value = this.getAttribute('data-warna');
-                document.getElementById('modal-status').value = this.getAttribute('data-status');
-                document.getElementById('modal-area').value = this.getAttribute('data-area');
-            });
-        });
     });
 </script>
 <?php $this->endSection(); ?>

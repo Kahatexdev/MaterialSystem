@@ -12,38 +12,14 @@
             <div class="collgbne navbar-collgbne mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
 
                 <ul class="navbar-nav  justify-content-end">
-                    <li class="nav-item d-flex align-items-center px-1">
-                        <a href="">
-                            <span class=" badge bg-gradient-info ">Submenu1</span>
-
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link text-body font-weight-bold px-2" id="navbarDropdownReports" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-file-alt"></i>
+                            <span class="d-lg-inline-block d-none ms-1">Report <i class="bi bi-caret-down-fill"></i></span>
                         </a>
-                    </li>
-                    <li class="nav-item d-flex align-items-center px-1">
-                        <a href="">
-                            <span class=" badge bg-gradient-info ">Submenu2</span>
-
-                        </a>
-                    </li>
-                    <li class=" nav-item dropdown pe-2 d-flex align-items-center">
-                        <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class=" badge bg-gradient-info ">Dropdown <i class="ni ni-bold-down"></i></span>
-                        </a>
-                        <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
-                            <li class="mb-2">
-                                <a class="dropdown-item border-radius-md" href="javascript:;">
-                                    <div class="d-flex py-1">
-
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="text-sm font-weight-normal mb-1">
-                                                <span class="font-weight-bold">dropdown</span>
-                                            </h6>
-
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
+                        <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownReports">
+                            <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/reportPemesananArea') ?>">Pemesanan Area</a></li>
                         </ul>
-
                     </li>
                     <li class="nav-item d-flex align-items-center">
                         <a href="" data-bs-toggle="modal" data-bs-target="#LogoutModal" class=" nav-link text-body font-weight-bold px-0">
