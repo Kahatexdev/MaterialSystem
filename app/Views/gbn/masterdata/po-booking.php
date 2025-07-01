@@ -60,7 +60,11 @@
                                 <td><?= $data['keterangan'] ?></td>
                                 <td><?= $data['penerima'] ?></td>
                                 <td>
-                                    <a href="<?= base_url($role . '/masterdata/poBooking/exportPoBooking/' . $data['no_model']) ?>" class="btn btn-success"><i class="fas fa-file me-2"></i>Excel</a>
+                                    <a
+                                        href="<?= base_url("$role/masterdata/poBooking/exportPoBooking?no_model=" . rawurlencode($data['no_model'])) ?>"
+                                        class="btn btn-success">
+                                        <i class="fas fa-file me-2"></i>Excel
+                                    </a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

@@ -4626,10 +4626,11 @@ class ExcelController extends BaseController
         exit;
     }
 
-    public function exportPoBooking($noModel)
+    public function exportPoBooking()
     {
+        $noModel = $this->request->getGet('no_model');
         $data = $this->openPoModel->getPoBookingByNoModel($noModel);
-        // dd($data);
+        // dd($noModel);
         function applyBorders($style, $borders)
         {
             $style['borders'] = $borders;
@@ -4826,11 +4827,13 @@ class ExcelController extends BaseController
             '11' => 'November',
             '12' => 'Desember'
         ];
-
+        // dd($data);
         $tglArr = explode('-', date('Y-m-d', strtotime($data[0]['created_at'])));
         $tgl = $tglArr[2] . '-' . $bulan[$tglArr[1]] . '-' . $tglArr[0];
         $sheet->setCellValue('F6', 'TANGGAL : ' . $tgl);
         $sheet->setCellValue('L7', $data[0]['jenis']);
+        $sheet->getStyle('L7')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('L8', $data[0]['ukuran']);
         $sheet->getStyle('L7')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         if (session()->get('role') === 'gbn') {
             $sheet->setCellValue('C8', 'Gudang Benang');

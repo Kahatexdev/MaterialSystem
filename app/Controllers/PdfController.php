@@ -106,7 +106,7 @@ class PdfController extends BaseController
             $result = $this->openPoModel->getDataPoPlus($no_model, $jenis, $jenis2);
         }
         // dd($result);
-        $noModel =  $result[0]['no_model'];
+        $noModel =  $result[0]['no_model'] ?? '';
 
         $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
 
@@ -175,13 +175,13 @@ class PdfController extends BaseController
         $pdf->Cell(43, 4, 'No. Dokumen', 1, 0, 'L');
         $pdf->Cell(162, 4, 'FOR-CC-087/REV_02/HAL_1/1', 1, 0, 'L');
         $pdf->Cell(35, 4, 'Tanggal Revisi', 1, 0, 'L');
-        $pdf->Cell(44, 4, '17 Maret 2025', 1, 1, 'L');
+        $pdf->Cell(44, 4, '17 Maret 2025', 1, 1, 'C');
 
         // Tabel Header Atas
         $pdf->SetFont('Arial', '', 5);
         $pdf->Cell(205, 4, '', 1, 0, 'L');
         $pdf->Cell(35, 4, 'Klasifikasi', 1, 0, 'L');
-        $pdf->Cell(44, 4, 'Internal', 1, 1, 'L');
+        $pdf->Cell(44, 4, 'Internal', 1, 1, 'C');
 
         $pdf->SetFont('Arial', '', 6);
         $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
@@ -310,7 +310,7 @@ class PdfController extends BaseController
         foreach ($result as $row) {
             // dd($row['spesifikasi_benang']);
             // 1. tentukan text yang mau ditampilkan, atau kosong jika sama dgn sebelumnya
-            $delivery = $row['delivery_awal'] ?? '';
+            $delivery = date('d-m-Y', strtotime($row['delivery_awal'])) ?? '';
             if ($delivery === $prevDelivery) {
                 $displayDelivery = '';
             } else {
@@ -318,13 +318,13 @@ class PdfController extends BaseController
                 $prevDelivery    = $delivery;
             }
 
-            // $buyer = ($row['buyer'] ?? '') . ' (' . $buyerName['kd_buyer_order'] . ')';
-            // if ($buyer === $prevBuyer) {
-            //     $displayBuyer = '';
-            // } else {
-            //     $displayBuyer = $buyer;
-            //     $prevBuyer    = $buyer;
-            // }
+            $buyer = ($row['buyer'] ?? '') . ' (' . $buyerName['kd_buyer_order'] . ')';
+            if ($buyer === $prevBuyer) {
+                $displayBuyer = '';
+            } else {
+                $displayBuyer = $buyer;
+                $prevBuyer    = $buyer;
+            }
 
             $noOrder = $row['no_order'] ?? '';
             if ($noOrder === $prevNoOrder) {
@@ -347,7 +347,7 @@ class PdfController extends BaseController
                 $pdf->SetLineWidth(0.1); // Lebih tipis
                 $pdf->Rect(7, 7, 284, 196); // Ukuran aslinya
 
-                $pdf->SetFont('Arial', '', 5);
+                $pdf->SetFont('Arial', '', 6);
             }
 
             $startX = $pdf->GetX();
@@ -367,13 +367,25 @@ class PdfController extends BaseController
                 ['w' => 12, 'text' => $row['bentuk_celup']],
                 ['w' => 20, 'text' => $row['color']],
                 ['w' => 20, 'text' => $row['kode_warna']],
-                // ['w' => 20, 'text' => $row['buyer'] ? $row['buyer'] . '(' . $buyerName['kd_buyer_order'] . ')' : $buyerName['kd_buyer_order']],
-                ['w' => 20, 'text' => $row['buyer']],
+                ['w' => 20, 'text' => $row['buyer'] ? $row['buyer'] . '(' . $buyerName['kd_buyer_order'] . ')' : $buyerName['kd_buyer_order']],
+                // ['w' => 20, 'text' => $row['buyer']],
                 ['w' => 20, 'text' => $displayNoOrder],
                 ['w' => 22, 'text' => $row['jenis_produksi']],
                 ['w' => 22, 'text' => $row['contoh_warna']],
                 ['w' => 22, 'text' => $row['ket_celup']],
             ];
+
+            // 1. Tentukan lineHeight: 5 pt jika semuanya muat satu baris, 3 pt kalau ada yg meluber
+            $singleLine = true;
+            foreach ($multiCellData as $cell) {
+                // GetStringWidth menghasilkan lebar dalam satuan point
+                if ($pdf->GetStringWidth($cell['text']) > $cell['w']) {
+                    $singleLine = false;
+                    break;
+                }
+            }
+            $lineHeight = $singleLine ? 5 : 3;
+
             foreach ($multiCellData as $data) {
                 $pdf->SetXY($tempX, $startY);
                 $y0 = $pdf->GetY();
@@ -499,7 +511,7 @@ class PdfController extends BaseController
 
             $centerY = $startY + ($maxHeight - $textHeight) / 2;
             $pdf->SetXY($currentX, $centerY);
-            $pdf->MultiCell(20, $lineHeight, $row['buyer'], 0, 'C');
+            $pdf->MultiCell(20, $lineHeight,  $row['buyer'] ? $row['buyer'] . '(' . $buyerName['kd_buyer_order'] . ')' : $buyerName['kd_buyer_order'], 0, 'C');
             $currentX += 20;
 
             // No Order (mungkin multiline)
@@ -657,13 +669,13 @@ class PdfController extends BaseController
         $pdf->Cell(43, 4, 'No. Dokumen', 1, 0, 'L');
         $pdf->Cell(162, 4, 'FOR-CC-087/REV_02/HAL_1/1', 1, 0, 'L');
         $pdf->Cell(35, 4, 'Tanggal Revisi', 1, 0, 'L');
-        $pdf->Cell(44, 4, '17 Maret 2025', 1, 1, 'L');
+        $pdf->Cell(44, 4, '17 Maret 2025', 1, 1, 'C');
 
         // Tabel Header Atas
         $pdf->SetFont('Arial', '', 5);
         $pdf->Cell(205, 4, '', 1, 0, 'L');
         $pdf->Cell(35, 4, 'Klasifikasi', 1, 0, 'L');
-        $pdf->Cell(44, 4, 'Internal', 1, 1, 'L');
+        $pdf->Cell(44, 4, 'Internal', 1, 1, 'C');
 
         $pdf->SetFont('Arial', '', 6);
         $pdf->Cell(43, 5, 'PO', 0, 0, 'L');
@@ -783,9 +795,11 @@ class PdfController extends BaseController
         // Spasi untuk tanda tangan
         $pdf->Cell(55, 12, '', 0, 1, 'C');
 
+        $admin = $result[0]['admin'] ?? '';
+
         // Garis tangan
         $pdf->Cell(55, 5, '', 0, 0, 'C');
-        $pdf->Cell(55, 5, '(       ' . $result[0]['admin'] . '       )', 0, 0, 'C');
+        $pdf->Cell(55, 5, '(       ' . $admin . '       )', 0, 0, 'C');
         if (!empty($result)) {
             $pdf->Cell(55, 5, '(       ' . $result[0]['penanggung_jawab'] . '      )', 0, 0, 'C');
         } else {
