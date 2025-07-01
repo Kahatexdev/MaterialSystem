@@ -462,7 +462,7 @@ class OpenPoModel extends Model
 
     public function getPoBookingByNoModel($noModel)
     {
-        return $this->select('open_po.*, master_material.jenis')
+        return $this->select('open_po.*, master_material.jenis, master_material.ukuran')
             ->join('master_material', 'master_material.item_type = open_po.item_type')
             ->where('open_po.po_booking', '1')
             ->where('open_po.no_model', $noModel)
