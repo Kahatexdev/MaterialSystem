@@ -63,7 +63,7 @@
                                     <a
                                         href="<?= base_url("$role/masterdata/poBooking/exportPoBooking?no_model=" . rawurlencode($data['no_model'])) ?>"
                                         class="btn btn-success">
-                                        <i class="fas fa-file me-2"></i>Excel
+                                        <i class="fas fa-file me-2"></i>Export
                                     </a>
                                 </td>
                             </tr>

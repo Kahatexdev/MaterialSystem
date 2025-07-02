@@ -104,55 +104,29 @@
                 <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>
                         <tr>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Foll Up</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LCO Date</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Order</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Buyer</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Memo</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Unit</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
+                            <th>Foll Up</th>
+                            <th>LCO Date</th>
+                            <th>No Model</th>
+                            <th>No Order</th>
+                            <th>Buyer</th>
+                            <th>Memo</th>
+                            <th>Delivery Awal</th>
+                            <th>Delivery Akhir</th>
+                            <th>Unit</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($masterOrder as $data):
-                            // Cek apakah id_order ini ada di materialOrderIds
-                            $isNotInMaterial = !in_array($data['id_order'], $materialOrderIds);
-                        ?>
-                            <tr>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['foll_up'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['lco_date'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['no_model'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['no_order'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['buyer'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['memo'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['delivery_awal'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['delivery_akhir'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>"><?= $data['unit'] ?></td>
-                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?>">
-                                    <a href="<?= base_url($role . '/material/' . $data['id_order']) ?>" class="btn btn-info btn-sm">
-                                        Detail
-                                    </a>
-                                    <button class="btn btn-info btn-sm btn-warning btn-edit" data-id="<?= $data['id_order'] ?>">
-                                        Update
-                                    </button>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
+                        <!-- Data akan diisi oleh DataTables AJAX -->
                     </tbody>
                 </table>
             </div>
-            <?php if (empty($masterOrder)) : ?>
-                <div class="card-footer">
-                    <div class="row">
-                        <div class="col-lg-12 text-center">
-                            <p>No data available in the table.</p>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
+
+            <!-- Kalau butuh info tambahan -->
+            <div id="no-data-message" class="text-center mt-4 d-none">
+                <p>No data available in the table.</p>
+            </div>
+
         </div>
     </div>
 
@@ -220,9 +194,51 @@
 <script type="text/javascript">
     $(document).ready(function() {
         $('#dataTable').DataTable({
+            "processing": true,
+            "serverSide": true,
             "pageLength": 10,
-            "order": []
+            "ajax": {
+                "url": "<?= base_url($role . '/getMasterData') ?>",
+                "type": "POST"
+            },
+            "columns": [{
+                    "data": "foll_up"
+                },
+                {
+                    "data": "lco_date"
+                },
+                {
+                    "data": "no_model"
+                },
+                {
+                    "data": "no_order"
+                },
+                {
+                    "data": "buyer"
+                },
+                {
+                    "data": "memo"
+                },
+                {
+                    "data": "delivery_awal"
+                },
+                {
+                    "data": "delivery_akhir"
+                },
+                {
+                    "data": "unit"
+                },
+                {
+                    "data": "action",
+                    "orderable": false,
+                    "searchable": false
+                }
+            ],
+            "language": {
+                "emptyTable": "Data belum tersedia untuk saat ini."
+            }
         });
+
 
         // Event listener untuk submit form update
 

@@ -59,7 +59,7 @@
                         </div>
                         <div class="col-md-6">
                             <label>Buyer</label>
-                            <select class="form-control buyer" name="items[0][buyer]" required>
+                            <select class="form-control buyer" name="buyer" required>
                                 <option value="">Pilih Buyer</option>
                                 <?php foreach ($buyer as $b) : ?>
                                     <option value="<?= $b['buyer'] ?>"><?= $b['buyer'] ?></option>

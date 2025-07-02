@@ -38,12 +38,12 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('masterdata/poBooking/getColor', 'PoBookingController::getColor');
     $routes->post('masterdata/poBooking/saveOpenPoBooking', 'PoBookingController::saveOpenPoBooking');
     // $routes->get('masterdata/poBooking/exportPoBooking/(:any)', 'ExcelController::exportPoBooking/$1');
-    $routes->get('masterdata/poBooking/exportPoBooking', 'ExcelController::exportPoBooking');
-
+    $routes->get('masterdata/poBooking/exportPoBooking', 'PdfController::generateOpenPOBooking');
     $routes->get('masterdata/poManual', 'PoManualController::index');
     $routes->get('masterdata/poManual/create', 'PoManualController::create');
+    $routes->get('masterdata/poManual/getNoOrderByModel', 'PoManualController::getNoOrderByModel');
     $routes->post('masterdata/poManual/saveOpenPoManual', 'PoManualController::saveOpenPoManual');
-    $routes->get('masterdata/poManual/exportPoManual/(:any)', 'ExcelController::exportPoManual/$1');
+    $routes->get('masterdata/poManual/exportPoManual', 'PdfController::generateOpenPOManual');
     $routes->get('masterdata/cekStockOrder/(:any)/(:any)/(:any)', 'PoGabunganController::cekStockOrder/$1/$2/$3');
     $routes->post('openPO/saveOpenPOGabungan', 'PoGabunganController::saveOpenPOGabungan');
     $routes->get('listPoGabungan', 'PoGabunganController::listPoGabungan');
@@ -54,6 +54,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('exportPoBoking', 'ExcelController::exportPoBooking');
 
 
+    $routes->post('getMasterData', 'MasterdataController::getMasterData');
     $routes->get('material/(:num)', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');
     $routes->get('getMaterialDetails/(:num)', 'MasterdataController::getMaterialDetails/$1');
@@ -427,6 +428,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('deleteUser/(:num)', 'MonitoringController::deleteUser/$1');
 
     // Gudang Benang
+    $routes->post('getMasterData', 'MasterdataController::getMasterData');
+
     $routes->get('masterdata', 'MasterdataController::index');
     $routes->post('tampilMasterOrder', 'MasterdataController::tampilMasterOrder');
     $routes->get('getOrderDetails/(:num)', 'MasterdataController::getOrderDetails/$1');

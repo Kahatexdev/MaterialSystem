@@ -57,38 +57,64 @@ class PoManualController extends BaseController
 
     public function create()
     {
+        $noModel = $this->masterOrderModel->getAllNoModel();
         $itemType = $this->masterMaterialModel->findAll();
 
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
+            'noModel' => $noModel,
             'itemType' => $itemType,
         ];
         return view($this->role . '/masterdata/po-manual-form', $data);
     }
 
+    public function getNoOrderByModel()
+    {
+        $noModel    = $this->request->getGet('no_model');
+
+        if ($noModel === null) {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'Parameter missing']);
+        }
+
+        $data = $this->masterOrderModel->getNoOrderByModel($noModel);
+
+        $noOrder = $data['no_order'] ?? 'Tidak ditemukan';
+
+        return $this->response->setJSON(['no_order' => $noOrder]);
+    }
+
     public function saveOpenPoManual()
     {
         $post = $this->request->getPost();
-
-        $noModel = $post['no_model'] ?? [];
+        $noModel = $post['no_model'];
+        $db      = \Config\Database::connect();
+        $builder = $db->table('master_order');
+        $query   = $builder->select('buyer')
+            ->where('no_model', $noModel)
+            ->get();
+        $buyerRow = $query->getRow();
+        $buyer = $buyerRow ? $buyerRow->buyer : null;
+        // dd($buyer);
+        // $noModel = $post['no_model'] ?? [];
         $items = $post['items'] ?? [];
 
         foreach ($items as $idx => $item) {
             // cari no_model yang sesuai index
-            $nm = $noModel[$idx]['no_model'] ?? null;
+            // $nm = $noModel[$idx]['no_model'] ?? null;
 
             // Build data sesuai allowedFields
             $data = [
-                'no_model'            => $nm,
+                'buyer'               => $buyer,
+                'no_model'            => $post['no_model'] ?? null,
                 'item_type'           => $item['item_type']     ?? null,
                 'kode_warna'          => $item['kode_warna']    ?? null,
                 'color'               => $item['color']         ?? null,
                 'spesifikasi_benang'  => $post['spesifikasi_benang'] ?? null,
                 'kg_po'               => $item['kg_po']         ?? null,
                 'keterangan'          => $post['keterangan']        ?? null,
-                'ket_celup'           => $post['tujuan_po']         ?? null,
+                'ket_celup'           => $post['ket_celup']         ?? null,
                 'bentuk_celup'        => $post['bentuk_celup']      ?? null,
                 'kg_percones'         => $post['kg_percones']       ?? null,
                 'jumlah_cones'        => $post['jumlah_cones']      ?? null,
@@ -106,7 +132,7 @@ class PoManualController extends BaseController
             $this->openPoModel->insert($data);
         }
 
-        return redirect()->to(base_url($this->role . '/masterdata'))
+        return redirect()->to(base_url($this->role . '/masterdata/poManual'))
             ->with('success', 'Data PO Manual berhasil disimpan.');
     }
 }

@@ -13,6 +13,7 @@ class OpenPoModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
+        'buyer',
         'no_model',
         'item_type',
         'kode_warna',
@@ -449,7 +450,7 @@ class OpenPoModel extends Model
     {
         return $this->select('id_po, no_model, item_type, kode_warna, color, kg_po, keterangan, penerima, created_at')
             ->where('po_booking', '1')
-            ->groupBy('no_model')
+            ->groupBy('no_model, spesifikasi_benang, keterangan')
             ->findAll();
     }
 
@@ -457,12 +458,13 @@ class OpenPoModel extends Model
     {
         return $this->select('id_po, no_model, item_type, kode_warna, color, kg_po, keterangan, penerima, created_at')
             ->where('po_manual', '1')
+            ->groupBy('no_model, spesifikasi_benang, keterangan')
             ->findAll();
     }
 
     public function getPoBookingByNoModel($noModel)
     {
-        return $this->select('open_po.*, master_material.jenis, master_material.ukuran')
+        return $this->select('open_po.*, DATE(open_po.created_at) AS tgl_po, master_material.jenis, master_material.ukuran')
             ->join('master_material', 'master_material.item_type = open_po.item_type')
             ->where('open_po.po_booking', '1')
             ->where('open_po.no_model', $noModel)
@@ -471,8 +473,9 @@ class OpenPoModel extends Model
 
     public function getPoManualByNoModel($noModel)
     {
-        return $this->select('open_po.*, master_material.jenis')
+        return $this->select('open_po.*, DATE(open_po.created_at) AS tgl_po, master_material.jenis, master_material.ukuran, master_order.buyer, master_order.no_order, master_order.delivery_awal')
             ->join('master_material', 'master_material.item_type = open_po.item_type')
+            ->join('master_order', 'master_order.no_model = open_po.no_model')
             ->where('open_po.po_manual', '1')
             ->where('open_po.no_model', $noModel)
             ->findAll();

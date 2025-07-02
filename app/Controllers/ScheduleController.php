@@ -474,7 +474,7 @@ class ScheduleController extends BaseController
 
         // Cek apakah data berhasil disimpan
         if ($result) {
-            return redirect()->to(session()->get('role') . '/schedule/' . $view)->with('success', 'Jadwal berhasil disimpan!');
+            return redirect()->to(session()->get('role') . '/schedule')->with('success', 'Jadwal berhasil disimpan!');
         } else {
             return redirect()->back()->with('error', 'Gagal menyimpan jadwal!');
         }

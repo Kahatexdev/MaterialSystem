@@ -368,4 +368,11 @@ class MasterOrderModel extends Model
             ->groupBy('buyer')
             ->findAll();
     }
+
+    public function getNoOrderByModel($noModel)
+    {
+        return $this->select('no_order')
+            ->where('no_model', $noModel)
+            ->first();
+    }
 }
