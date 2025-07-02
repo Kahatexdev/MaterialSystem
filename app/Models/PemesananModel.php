@@ -729,7 +729,7 @@ class PemesananModel extends Model
     }
     public function getPemesananByModel($area, $model)
     {
-        $this->select('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, total_pemesanan.id_total_pemesanan, total_pemesanan.ttl_jl_mc, total_pemesanan.ttl_kg, total_pemesanan.ttl_cns, pemesanan.po_tambahan')
+        $this->select('master_order.no_model, GROUP_CONCAT(material.style_size) AS style_size, GROUP_CONCAT(material.gw) AS gw, GROUP_CONCAT(material.composition) AS composition, GROUP_CONCAT(material.loss) AS loss, material.item_type, material.kode_warna, material.color, MAX(material.loss) AS max_loss,pemesanan.tgl_pakai, total_pemesanan.id_total_pemesanan, total_pemesanan.ttl_jl_mc, total_pemesanan.ttl_kg, pemesanan.po_tambahan')
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')

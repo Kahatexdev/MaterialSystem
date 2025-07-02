@@ -116,7 +116,7 @@
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
-                    text: 'Apa yang mau dicari?',
+                    text: 'Pilih salah satu filter!',
                 });
                 return;
             }

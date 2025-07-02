@@ -22,6 +22,7 @@ use App\Models\PemesananModel;
 use App\Models\TotalPemesananModel;
 use App\Models\OtherOutModel;
 use App\Models\PemesananSpandexKaretModel;
+use App\Models\PoTambahanModel;
 use CodeIgniter\API\ResponseTrait;
 
 
@@ -49,6 +50,7 @@ class PemesananController extends BaseController
     protected $totalPemesananModel;
     protected $otherOutModel;
     protected $pemesananSpandexKaretModel;
+    protected $poTambahanModel;
 
     public function __construct()
     {
@@ -69,6 +71,7 @@ class PemesananController extends BaseController
         $this->totalPemesananModel = new TotalPemesananModel();
         $this->otherOutModel = new OtherOutModel();
         $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
+        $this->poTambahanModel = new PoTambahanModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -819,8 +822,8 @@ class PemesananController extends BaseController
         $allArea = json_decode($response, true);
 
         // get filter
-        $area = $this->request->getGet('filter_area') ?? 'KK2A';
-        $noModel = $this->request->getGet('filter_model') ?? 'L25067';
+        $area = $this->request->getGet('filter_area') ?? '';
+        $noModel = $this->request->getGet('filter_model') ?? '';
 
         // Initialize dataPemesanan as empty by default
         $dataPemesanan = [];
@@ -828,15 +831,69 @@ class PemesananController extends BaseController
         if (!empty($area) && !empty($noModel)) {
             $dataPemesanan = $this->pemesananModel->getPemesananByModel($area, $noModel);
         }
-        // Prepare data for the view
+
+        foreach ($dataPemesanan as $key => &$id) {
+            $allStyle = $id['style_size'];
+            $allGw = $id['gw'];
+            $allLoss = $id['loss'];
+            $allComposition = $id['composition'];
+
+            $style = explode(',', $allStyle);
+            $gw = explode(',', $allGw);
+            $loss = explode(',', $allLoss);
+            $composition = explode(',', $allComposition);
+
+            $count = count($style);
+
+            $dataGabungan = [];
+
+            for ($i = 0; $i < $count; $i++) {
+                $dataGabungan[] = [
+                    'style_size' => trim($style[$i]),
+                    'gw'         => trim($gw[$i]),
+                    'loss'       => trim($loss[$i]),
+                    'composition'       => trim($composition[$i])
+                ];
+            }
+            $ttlKeb = 0;
+            $ttlQty = 0;
+            foreach ($dataGabungan as $data) {
+                // ambil data qty pcs
+                $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . $id['no_model'] . '&item_type=' . urlencode($id['item_type']) . '&kode_warna=' . urlencode($id['kode_warna']) . '&style_size=' . urlencode($data['style_size']) . '&area=' . $area;
+                $responseQty = file_get_contents($urlQty);
+                $qty = json_decode($responseQty, true);
+                // ambil kg po tambahan
+                $params = [
+                    'no_model' => $id['no_model'],
+                    'item_type' => $id['item_type'],
+                    'kode_warna' => $id['kode_warna'],
+                    'style_size' => $data['style_size'],
+                    'area' => $area,
+                ];
+
+                $tambahan = $this->poTambahanModel->getKgPoTambahan($params);
+                $kgPoTambahan = $kgPoTambahan = floatval($tambahan['ttl_keb_potambahan'] ?? '0');
+                if (isset($qty['qty'])) {
+                    $keb = (floatval($qty['qty']) * floatval($data['gw']) * (floatval($data['composition']) / 100) * (1 + (floatval($data['loss']) / 100)) / 1000) + $kgPoTambahan;
+                    $ttlKeb += $keb;
+                    $ttlQty  += floatval($qty['qty']);
+                    $dataPemesanan[$key]['qty'] = $ttlQty;
+                }
+            }
+            $dataPemesanan[$key]['ttl_keb'] = $ttlKeb;
+        }
+
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
-            'area' => $allArea,
+            'allArea' => $allArea,
             'dataPemesanan' => $dataPemesanan, // Pass the filtered data
+            'area' => $area, // Pass the filtered data
+            'noModel' => $noModel, // Pass the filtered data
         ];
-        var_dump($dataPemesanan);
+        // var_dump($dataPemesanan);
+        // dd($dataPemesanan);
         return view($this->role . '/pemesanan/sisaKebutuhanArea', $data);
     }
 }
