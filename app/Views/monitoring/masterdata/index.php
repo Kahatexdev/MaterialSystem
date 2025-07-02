@@ -177,6 +177,10 @@
                             <label for="unit" class="form-label">Unit</label>
                             <input type="text" class="form-control" name="unit" id="unit" required readonly>
                         </div>
+                        <div class="mb-3">
+                            <label for="unit" class="form-label">Admin</label>
+                            <input type="text" class="form-control" name="unit" id="unit" required readonly>
+                        </div>
                         <!-- Button update dan batal di sebelah kanan -->
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -227,6 +231,9 @@
                 },
                 {
                     "data": "unit"
+                },
+                {
+                    "data": "admin"
                 },
                 {
                     "data": "action",
