@@ -308,6 +308,9 @@
             const modalTitle = document.querySelector("#modalSchedule .modal-title");
             const modalBody = document.querySelector("#modalScheduleBody");
 
+            const card = document.getElementById('myCard');
+            card.classList.remove('fullscreen');
+
             // Update modal title
             modalTitle.textContent = `Mesin-${machine} | ${date} | Lot ${lotUrut}`;
 
@@ -403,11 +406,15 @@
                     </div>`;
 
                     modalBody.innerHTML = htmlContent;
-
-                    // Show the modal after content is loaded
+                    // 💥 clean up before showing
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    document.body.classList.remove('modal-open');
+                    document.body.style.removeProperty('padding-right');
                     const modal = new bootstrap.Modal(document.getElementById("modalSchedule"));
                     const idCelup = document.getElementById("id_celup").value;
                     modal.show();
+                    // Show the modal after content is loaded
+
 
                     // Tambahkan event listener untuk tombol "Edit Jadwal"
                     document.getElementById("editSchedule").addEventListener("click", function() {
