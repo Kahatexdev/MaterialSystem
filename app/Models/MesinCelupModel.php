@@ -65,7 +65,7 @@ class MesinCelupModel extends Model
     {
         return $this->table('mesin_celup')
             ->select('*')
-            ->where('ket_mesin', 'BENANG')
+            // ->where('ket_mesin', 'BENANG')
             ->orderBy('no_mesin', 'ASC')
             ->findAll();
     }
