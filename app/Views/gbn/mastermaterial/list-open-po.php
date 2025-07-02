@@ -184,6 +184,10 @@
                         </select>
                     </div>
                     <div class="mb-3">
+                        <label for="Delivery" class="form-label">Delivery</label>
+                        <input type="date" class="form-control" id="delivery" name="delivery" value="<?= $del ?>">
+                    </div>
+                    <div class="mb-3">
                         <label for="season" class="form-label">Season</label>
                         <input type="text" class="form-control" id="season" name="season">
                     </div>
@@ -343,7 +347,7 @@
 
             // Base URL sudah diinisialisasi sebelumnya saat modal dibuka
             const baseUrl = '<?= base_url($role . "/exportOpenPO/" . $no_model) ?>' +
-                '?tujuan=<?= $tujuan ?>&jenis=<?= $jenis ?>&jenis2=<?= $jenis2 ?>';
+                '?tujuan=<?= $tujuan ?>&jenis=<?= $jenis ?>&jenis2=<?= $jenis2 ?>&delivery=<?= $del ?>';
 
             window.open(baseUrl + '&' + params.toString(), '_blank');
         });

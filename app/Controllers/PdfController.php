@@ -98,6 +98,7 @@ class PdfController extends BaseController
         $season = $this->request->getGet('season');
         $poPlus = $this->request->getGet('po_plus');
         $materialType = $this->request->getGet('material_type');
+        $newDel = $this->request->getGet('delivery');
 
 
         if ($poPlus == 'TIDAK') {
@@ -310,7 +311,7 @@ class PdfController extends BaseController
         foreach ($result as $row) {
             // dd($row['spesifikasi_benang']);
             // 1. tentukan text yang mau ditampilkan, atau kosong jika sama dgn sebelumnya
-            $delivery = date('d-m-Y', strtotime($row['delivery_awal'])) ?? '';
+            $delivery = $newDel ?? '';
             if ($delivery === $prevDelivery) {
                 $displayDelivery = '';
             } else {
