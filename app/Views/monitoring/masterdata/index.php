@@ -25,6 +25,27 @@
             });
         </script>
     <?php endif; ?>
+    <?php if (session()->getFlashdata('invalid_material')): ?>
+        <div class="alert alert-warning">
+            <strong>Beberapa data gagal diimport:</strong>
+            <table class="table table-bordered mt-2">
+                <thead>
+                    <tr>
+                        <th>Baris</th>
+                        <th>Alasan Gagal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach (session()->getFlashdata('invalid_material') as $invalid): ?>
+                        <tr>
+                            <td><?= esc($invalid['row']) ?></td>
+                            <td><?= esc($invalid['reason']) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?>
 
     <!-- Modal untuk Upload File Excel -->
     <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
@@ -45,12 +66,13 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Upload</button>
+                        <button type="submit" class="btn btn-info">Upload</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
     <!-- Modal untuk Revise MU -->
     <div class="modal fade" id="reviseModal" tabindex="-1" aria-labelledby="reviseModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -97,6 +119,7 @@
         </div>
     </div>
 
+
     <!-- Tabel Data -->
     <div class="card mt-4">
         <div class="card-body">
@@ -104,30 +127,58 @@
                 <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Foll Up</th>
-                            <th>LCO Date</th>
-                            <th>No Model</th>
-                            <th>No Order</th>
-                            <th>Buyer</th>
-                            <th>Memo</th>
-                            <th>Delivery Awal</th>
-                            <th>Delivery Akhir</th>
-                            <th>Unit</th>
-                            <th>Admin</th>
-                            <th>Action</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Foll Up</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LCO Date</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Order</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Buyer</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Memo</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Unit</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Admin</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Data akan diisi oleh DataTables AJAX -->
+                        <?php foreach ($masterOrder as $data):
+                            // Cek apakah id_order ini ada di materialOrderIds
+                            $isNotInMaterial = !in_array($data['id_order'], $materialOrderIds);
+                            $isDuplikat = in_array($data['id_order'], $duplikatMU);
+                        ?>
+                            <tr>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['foll_up'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['lco_date'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['no_model'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['no_order'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['buyer'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['memo'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['delivery_awal'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['delivery_akhir'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['unit'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>"><?= $data['admin'] ?></td>
+                                <td style="<?= $isNotInMaterial ? 'color:red;' : '' ?> <?= $isDuplikat ? 'color:orange;' : '' ?>">
+                                    <a href="<?= base_url($role . '/material/' . $data['id_order']) ?>" class="btn btn-info btn-sm">
+                                        Detail
+                                    </a>
+                                    <button class="btn btn-info btn-sm btn-warning btn-edit" data-id="<?= $data['id_order'] ?>">
+                                        Update
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
-
-            <!-- Kalau butuh info tambahan -->
-            <div id="no-data-message" class="text-center mt-4 d-none">
-                <p>No data available in the table.</p>
-            </div>
-
+            <?php if (empty($masterOrder)) : ?>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-lg-12 text-center">
+                            <p>No data available in the table.</p>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -178,10 +229,6 @@
                             <label for="unit" class="form-label">Unit</label>
                             <input type="text" class="form-control" name="unit" id="unit" required readonly>
                         </div>
-                        <div class="mb-3">
-                            <label for="unit" class="form-label">Admin</label>
-                            <input type="text" class="form-control" name="unit" id="unit" required readonly>
-                        </div>
                         <!-- Button update dan batal di sebelah kanan -->
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -193,142 +240,96 @@
             </div>
         </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script type="text/javascript">
-    $(document).ready(function() {
-        $('#dataTable').DataTable({
-            "processing": true,
-            "serverSide": true,
-            "pageLength": 10,
-            "ajax": {
-                "url": "<?= base_url($role . '/getMasterData') ?>",
-                "type": "POST"
-            },
-            "columns": [{
-                    "data": "foll_up"
-                },
-                {
-                    "data": "lco_date"
-                },
-                {
-                    "data": "no_model"
-                },
-                {
-                    "data": "no_order"
-                },
-                {
-                    "data": "buyer"
-                },
-                {
-                    "data": "memo"
-                },
-                {
-                    "data": "delivery_awal"
-                },
-                {
-                    "data": "delivery_akhir"
-                },
-                {
-                    "data": "unit"
-                },
-                {
-                    "data": "admin"
-                },
-                {
-                    "data": "action",
-                    "orderable": false,
-                    "searchable": false
-                }
-            ],
-            "language": {
-                "emptyTable": "Data belum tersedia untuk saat ini."
-            }
-        });
-
-
-        // Event listener untuk submit form update
-
-        $('#dataTable').on('click', '.btn-edit', function() {
-            const id = $(this).data('id');
-            console.log(id);
-
-            // Lakukan AJAX request untuk mendapatkan data
-            $.ajax({
-                url: '<?= base_url($role . '/getOrderDetails') ?>/' + id,
-                type: 'GET',
-                success: function(response) {
-                    // Isi data ke dalam form modal
-                    $('#id_order').val(response.id_order);
-                    $('#foll_up').val(response.foll_up);
-                    $('#lco_date').val(response.lco_date);
-                    $('#no_model').val(response.no_model);
-                    $('#no_order').val(response.no_order);
-                    $('#buyer').val(response.buyer);
-                    $('#memo').val(response.memo);
-                    $('#delivery_awal').val(response.delivery_awal);
-                    $('#delivery_akhir').val(response.delivery_akhir);
-                    $('#unit').val(response.unit);
-
-                    // Tambahkan data lain sesuai kebutuhan
-
-                    // Tampilkan modal
-                    $('#updateModal').modal('show');
-                },
-                error: function() {
-                    alert('Gagal memuat data.');
-                }
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#dataTable').DataTable({
+                "pageLength": 35,
+                "order": []
             });
+
+            // Event listener untuk submit form update
+
+            $('#dataTable').on('click', '.btn-edit', function() {
+                const id = $(this).data('id');
+                console.log(id);
+
+                // Lakukan AJAX request untuk mendapatkan data
+                $.ajax({
+                    url: '<?= base_url($role . '/getOrderDetails') ?>/' + id,
+                    type: 'GET',
+                    success: function(response) {
+                        // Isi data ke dalam form modal
+                        $('#id_order').val(response.id_order);
+                        $('#foll_up').val(response.foll_up);
+                        $('#lco_date').val(response.lco_date);
+                        $('#no_model').val(response.no_model);
+                        $('#no_order').val(response.no_order);
+                        $('#buyer').val(response.buyer);
+                        $('#memo').val(response.memo);
+                        $('#delivery_awal').val(response.delivery_awal);
+                        $('#delivery_akhir').val(response.delivery_akhir);
+                        $('#unit').val(response.unit);
+
+                        // Tambahkan data lain sesuai kebutuhan
+
+                        // Tampilkan modal
+                        $('#updateModal').modal('show');
+                    },
+                    error: function() {
+                        alert('Gagal memuat data.');
+                    }
+                });
+            });
+
+            // Event listener untuk submit form update
+
+            // // Event listener untuk tombol delete
+            // $('#example').on('click', '.btn-delete', function() {
+            //     const id = $(this).data('id');
+            //     // Tampilkan konfirmasi
+            //     Swal.fire({
+            //         title: 'Apakah Anda yakin?',
+            //         text: "Data yang dihapus tidak dapat dikembalikan!",
+            //         icon: 'warning',
+            //         showCancelButton: true,
+            //         confirmButtonColor: '#3085d6',
+            //         cancelButtonColor: '#d33',
+            //         confirmButtonText: 'Ya, hapus!',
+            //         cancelButtonText: 'Batal'
+            //     }).then((result) => {
+            //         if (result.isConfirmed) {
+            //             // Kirim request ke server
+            //             $.ajax({
+            //                 url: '<?= base_url($role . '/deleteOrder') ?>',
+            //                 type: 'POST',
+            //                 data: {
+            //                     id: id
+            //                 },
+            //                 success: function(response) {
+            //                     // Tampilkan pesan sukses
+            //                     Swal.fire({
+            //                         icon: 'success',
+            //                         title: 'Berhasil!',
+            //                         text: response,
+            //                     });
+            //                     // Refresh tabel
+            //                     $('#example').DataTable().ajax.reload();
+            //                 },
+            //                 error: function(xhr, status, error) {
+            //                     // Tampilkan pesan error
+            //                     Swal.fire({
+            //                         icon: 'error',
+            //                         title: 'Error!',
+            //                         text: xhr.responseText,
+            //                     });
+            //                 }
+            //             });
+            //         }
+            //     });
+            // });
         });
+    </script>
 
-        // Event listener untuk submit form update
-
-        // // Event listener untuk tombol delete
-        // $('#example').on('click', '.btn-delete', function() {
-        //     const id = $(this).data('id');
-        //     // Tampilkan konfirmasi
-        //     Swal.fire({
-        //         title: 'Apakah Anda yakin?',
-        //         text: "Data yang dihapus tidak dapat dikembalikan!",
-        //         icon: 'warning',
-        //         showCancelButton: true,
-        //         confirmButtonColor: '#3085d6',
-        //         cancelButtonColor: '#d33',
-        //         confirmButtonText: 'Ya, hapus!',
-        //         cancelButtonText: 'Batal'
-        //     }).then((result) => {
-        //         if (result.isConfirmed) {
-        //             // Kirim request ke server
-        //             $.ajax({
-        //                 url: '<?= base_url($role . '/deleteOrder') ?>',
-        //                 type: 'POST',
-        //                 data: {
-        //                     id: id
-        //                 },
-        //                 success: function(response) {
-        //                     // Tampilkan pesan sukses
-        //                     Swal.fire({
-        //                         icon: 'success',
-        //                         title: 'Berhasil!',
-        //                         text: response,
-        //                     });
-        //                     // Refresh tabel
-        //                     $('#example').DataTable().ajax.reload();
-        //                 },
-        //                 error: function(xhr, status, error) {
-        //                     // Tampilkan pesan error
-        //                     Swal.fire({
-        //                         icon: 'error',
-        //                         title: 'Error!',
-        //                         text: xhr.responseText,
-        //                     });
-        //                 }
-        //             });
-        //         }
-        //     });
-        // });
-    });
-</script>
-
-<?php $this->endSection(); ?>
+    <?php $this->endSection(); ?>

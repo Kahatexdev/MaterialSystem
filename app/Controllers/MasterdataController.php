@@ -68,6 +68,28 @@ class MasterdataController extends BaseController
         ];
         return view($this->role . '/masterdata/index', $data);
     }
+    public function indexmon()
+    {
+        $masterOrder = $this->masterOrderModel->orderBy('id_order', 'DESC')->findAll();
+        $material = $this->materialModel->findAll();
+        // Ambil semua id_order dari material
+        $materialOrderIds = array_column($material, 'id_order');
+        $duplikatMU = $this->materialModel->getDataDuplicate();
+        $duplikatIds = array_map(function ($row) {
+            return $row->id_order;
+        }, $duplikatMU);
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'masterOrder' => $masterOrder,
+            'material' => $material,
+            'materialOrderIds' => $materialOrderIds,
+            'duplikatMU' => $duplikatIds
+        ];
+        return view($this->role . '/masterdata/index', $data);
+    }
 
 
 

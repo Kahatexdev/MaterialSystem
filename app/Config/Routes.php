@@ -428,7 +428,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('deleteUser/(:num)', 'MonitoringController::deleteUser/$1');
 
     // Gudang Benang
-    $routes->get('masterdata', 'MasterdataController::index');
+    $routes->get('masterdata', 'MasterdataController::indexmon');
     $routes->post('tampilMasterOrder', 'MasterdataController::tampilMasterOrder');
     $routes->get('getOrderDetails/(:num)', 'MasterdataController::getOrderDetails/$1');
     $routes->post('updateOrder', 'MasterdataController::updateOrder');
