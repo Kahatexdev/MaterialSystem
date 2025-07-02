@@ -83,7 +83,8 @@
     </div>
 
 
-    <div class="card">
+    <div class="card position-relative" id="myCard">
+        <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
         <div class="card-body">
             <div class="table-responsive" style="width:auto; height: 780px; overflow-y: auto; overflow-x: auto;">
                 <table class="table">
@@ -263,6 +264,10 @@
 
 
 <script>
+    function toggleFullscreen() {
+        const card = document.getElementById('myCard');
+        card.classList.toggle('fullscreen');
+    }
     document.addEventListener("DOMContentLoaded", function() {
         var tooltipList = [].slice
             .call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
