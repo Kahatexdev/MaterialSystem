@@ -113,6 +113,7 @@
                             <th>Delivery Awal</th>
                             <th>Delivery Akhir</th>
                             <th>Unit</th>
+                            <th>Admin</th>
                             <th>Action</th>
                         </tr>
                     </thead>
