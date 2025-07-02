@@ -54,6 +54,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('exportPoBoking', 'ExcelController::exportPoBooking');
 
 
+    $routes->post('getMasterData', 'MasterdataController::getMasterData');
     $routes->get('material/(:num)', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');
     $routes->get('getMaterialDetails/(:num)', 'MasterdataController::getMaterialDetails/$1');
