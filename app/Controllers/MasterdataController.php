@@ -1074,6 +1074,8 @@ class MasterdataController extends BaseController
             $this->masterOrderModel
                 ->like('no_order', $search)
                 ->orLike('buyer', $search)
+                ->orLike('admin', $search)
+                ->orLike('no_order', $search)
                 ->orLike('no_model', $search);
         }
 
