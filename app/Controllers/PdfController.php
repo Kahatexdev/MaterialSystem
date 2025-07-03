@@ -3346,49 +3346,25 @@ class PdfController extends BaseController
     public function generateOpenPOBooking()
     {
         $tujuan = $this->request->getGet('tujuan');
-        // $jenis = $this->request->getGet('jenis');
-        // $jenis2 = $this->request->getGet('jenis2');
-        // $season = $this->request->getGet('season');
-        // $poPlus = $this->request->getGet('po_plus');
-        // $materialType = $this->request->getGet('material_type');
 
         $noModel = $this->request->getGet('no_model');
         $result = $this->openPoModel->getPoBookingByNoModel($noModel);
 
-        // if ($poPlus == 'TIDAK') {
-        //     $result = $this->openPoModel->getDataPo($no_model, $jenis, $jenis2);
-        // } else {
-        //     $result = $this->openPoModel->getDataPoPlus($no_model, $jenis, $jenis2);
-        // }
-        // dd($result);
-        // $noModel =  $result[0]['no_model'] ?? '';
-
-        // dd($buyerName);
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';
         } else {
             $penerima = 'Paryanti';
         }
 
-        // $unit = $this->masterOrderModel->getUnit($no_model);
-
         // Inisialisasi FPDF
         $pdf = new FPDF('L', 'mm', 'A4');
         $pdf->SetMargins(7, 7, 7);
         $pdf->SetAutoPageBreak(true, 7);  // KITA MATIKAN AUTO PAGE BREAK
         $pdf->AddPage();
-
+        $pdf->SetTitle($noModel);
 
         $seasonText = $season ?? '';
         $mtText     = $materialType ?? '';
-
-        // $rawUnit = $unit['unit'];
-        // $rawUnit = strtoupper(trim($rawUnit));
-
-        // $pemesanan = 'KAOS KAKI';
-        // if ($rawUnit === 'MAJALAYA') {
-        //     $pemesanan .= ' / ' . $rawUnit;
-        // }
 
         // CETAK HEADER halaman pertama
         // Garis margin luar (lebih tebal)
@@ -3560,32 +3536,6 @@ class PdfController extends BaseController
         $prevNoOrder  = '';
 
         foreach ($result as $row) {
-            // dd($row['spesifikasi_benang']);
-            // 1. tentukan text yang mau ditampilkan, atau kosong jika sama dgn sebelumnya
-            // $delivery = date('d-m-Y', strtotime($row['delivery_awal'])) ?? '';
-            // if ($delivery === $prevDelivery) {
-            //     $displayDelivery = '';
-            // } else {
-            //     $displayDelivery = $delivery;
-            //     $prevDelivery    = $delivery;
-            // }
-
-            // $buyer = ($row['buyer'] ?? '') . ' (' . $buyerName['kd_buyer_order'] . ')';
-            // if ($buyer === $prevBuyer) {
-            //     $displayBuyer = '';
-            // } else {
-            //     $displayBuyer = $buyer;
-            //     $prevBuyer    = $buyer;
-            // }
-
-            // $noOrder = $row['no_order'] ?? '';
-            // if ($noOrder === $prevNoOrder) {
-            //     $displayNoOrder = '';
-            // } else {
-            //     $displayNoOrder = $noOrder;
-            //     $prevNoOrder    = $noOrder;
-            // }
-
             // Cek dulu apakah nambah baris ini bakal lewat batas
             if ($pdf->GetY() + $lineHeight > $yLimit) {
                 $this->generateFooterOpenPOBooking($pdf, $tujuan, $result, $penerima);
@@ -3645,7 +3595,7 @@ class PdfController extends BaseController
                 $heights[] = $pdf->GetY() - $y0;
                 $tempX += $data['w'];
             }
-            // dd($data);
+
             $pdf->SetTextColor(0, 0, 0); // kembali ke hitam
             $maxHeight = max($heights);
 
@@ -4078,7 +4028,7 @@ class PdfController extends BaseController
         $pdf->SetMargins(7, 7, 7);
         $pdf->SetAutoPageBreak(true, 7);  // KITA MATIKAN AUTO PAGE BREAK
         $pdf->AddPage();
-
+        $pdf->SetTitle($noModel);
 
         $seasonText = $season ?? '';
         $mtText     = $materialType ?? '';
