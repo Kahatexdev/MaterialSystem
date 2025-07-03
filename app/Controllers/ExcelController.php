@@ -5226,4 +5226,147 @@ class ExcelController extends BaseController
         $writer->save('php://output');
         exit;
     }
+
+    public function exportTagihanBenang()
+    {
+        $noModel       = $this->request->getGet('no_model');
+        $kodeWarna     = $this->request->getGet('kode_warna');
+        $deliveryAwal  = $this->request->getGet('delivery_awal');
+        $deliveryAkhir = $this->request->getGet('delivery_akhir');
+        $tglAwal       = $this->request->getGet('tanggal_awal');
+        $tglAkhir      = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->scheduleCelupModel->getFilterSchTagihanBenang($noModel, $kodeWarna, $deliveryAwal, $deliveryAkhir, $tglAwal, $tglAkhir);
+        // dd($data);
+        foreach ($data as &$row) {
+            $stockAwal    = (float) $row['stock_awal'];
+            $datangSolid  = (float) $row['qty_datang_solid'];
+            $gantiRetur   = (float) $row['qty_ganti_retur_solid']; // =0 jika null
+            $qtyPo        = (float) $row['qty_po'];
+            $poPlus       = (float) ($row['po_plus'] ?? 0);
+            $returBelang  = (float) ($row['retur_belang'] ?? 0);
+
+            if ($gantiRetur > 0) {
+                $tagihanDatang = ($stockAwal + $datangSolid + $gantiRetur) - $qtyPo - $poPlus - $returBelang;
+            } else {
+                $tagihanDatang = ($stockAwal + $datangSolid) - $qtyPo - $poPlus;
+            }
+            // tambahkan ke array
+            $row['tagihan_datang'] = $tagihanDatang;
+        }
+        unset($row);
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->mergeCells('A1:R1');
+        $sheet->setCellValue('A1', 'REPORT DATA TAGIHAN BENANG');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+        $sheet->getStyle('A1')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Buat header dengan sub-header
+        $sheet->mergeCells('A3:A4');
+        $sheet->mergeCells('B3:B4');
+        $sheet->mergeCells('C3:C4');
+        $sheet->mergeCells('D3:D4');
+        $sheet->mergeCells('E3:E4');
+        $sheet->mergeCells('F3:F4');
+        $sheet->mergeCells('G3:G4');
+        $sheet->mergeCells('H3:H4');
+        $sheet->mergeCells('I3:I4');
+        $sheet->mergeCells('J3:J4');
+        $sheet->mergeCells('K3:K4');
+        $sheet->mergeCells('L3:L4');
+        $sheet->mergeCells('M3:M4');
+        $sheet->mergeCells('N3:N4');
+        $sheet->mergeCells('O3:O4');
+        $sheet->mergeCells('P3:P4');
+        $sheet->mergeCells('Q3:Q4');
+        $sheet->mergeCells('R3:R4');
+
+        $sheet->setCellValue('A3', 'NO');
+        $sheet->setCellValue('B3', 'NO MODEL');
+        $sheet->setCellValue('C3', 'ITEM TYPE');
+        $sheet->setCellValue('D3', 'KODE WARNA');
+        $sheet->setCellValue('E3', 'WARNA');
+        $sheet->setCellValue('F3', 'AREA');
+        $sheet->setCellValue('G3', 'START MC');
+        $sheet->setCellValue('H3', 'DELIVERY AWAL');
+        $sheet->setCellValue('I3', 'DELIVERY AKHIR');
+        $sheet->setCellValue('J3', 'QTY PO');
+        $sheet->setCellValue('K3', 'QTY PO(+)');
+        $sheet->setCellValue('L3', 'STOCK AWAL');
+        $sheet->setCellValue('M3', 'RETUR STOCK');
+        $sheet->setCellValue('N3', 'TOTAL QTY SCHEDULE');
+        $sheet->setCellValue('O3', 'TOTAL QTY DATANG SOLID');
+        $sheet->setCellValue('P3', 'QTY GANTI RETUR SOLID');
+        $sheet->setCellValue('Q3', 'QTY RETUR BELANG');
+        $sheet->setCellValue('R3', 'TAGIHAN DATANG SOLID');
+
+        // Format semua header
+        $sheet->getStyle('A3:R4')->getFont()->setBold(true);
+        $sheet->getStyle('A3:R4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:R4')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3:R4')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+        $row = 5;
+        $no = 1;
+        foreach ($data as $item) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $item['no_model']);
+            $sheet->setCellValue('C' . $row, $item['item_type']);
+            $sheet->setCellValue('D' . $row, $item['kode_warna']);
+            $sheet->setCellValue('E' . $row, $item['warna']);
+            $sheet->setCellValue('F' . $row, $item['area']);
+            $sheet->setCellValue('G' . $row, $item['start_mc']);
+            $sheet->setCellValue('H' . $row, $item['delivery_awal'] ?? '');
+            $sheet->setCellValue('I' . $row, $item['delivery_akhir']) ?? '';
+            $sheet->setCellValue('J' . $row, $item['qty_po'] ?? 0);
+            $sheet->setCellValue('K' . $row, $item['po_plus'] ?? 0);
+            $sheet->setCellValue('L' . $row, $item['stock_awal'] ?? 0);
+            $sheet->setCellValue('M' . $row, $item['retur_stock'] ?? 0);
+            $sheet->setCellValue('N' . $row, $item['qty_sch'] ?? 0);
+            $sheet->setCellValue('O' . $row, $item['qty_datang_solid'] ?? 0);
+            $sheet->setCellValue('P' . $row, $item['qty_ganti_retur_solid'] ?? 0);
+            $sheet->setCellValue('Q' . $row, $item['retur_belang'] ?? 0);
+            $sheet->setCellValue('R' . $row, $item['tagihan_datang'] ?? 0);
+            $row++;
+        }
+
+        // Border
+        $lastRow = $row - 1;
+        $sheet->getStyle("A5:Y{$lastRow}")
+            ->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->getStyle("A5:Y{$lastRow}")
+            ->getAlignment()
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => 'FF000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle("A3:R{$lastRow}")->applyFromArray($styleArray);
+
+        // Auto-size
+        foreach (range('A', 'R') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Download
+        $filename = 'Report Data Tagihan Benang' . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
 }
