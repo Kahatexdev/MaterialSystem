@@ -62,9 +62,9 @@ class ScheduleController extends BaseController
 
         if ($startDate == null && $endDate == null) {
             // Jika startdate tidak tersedia, gunakan tanggal 3 hari ke belakang
-            $startDate = date('Y-m-d', strtotime('-3 days'));
+            $startDate = date('Y-m-d', strtotime('+5 days'));
             // end date 7 hari ke depan
-            $endDate = date('Y-m-d', strtotime('+6 days'));
+            $endDate = date('Y-m-d', strtotime('+14 days'));
         }
 
         // Konversi tanggal ke format DateTime jika tersedia
