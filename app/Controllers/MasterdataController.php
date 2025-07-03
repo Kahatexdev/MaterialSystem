@@ -58,6 +58,18 @@ class MasterdataController extends BaseController
     }
     public function index()
     {
+
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+
+        ];
+        return view($this->role . '/masterdata/index', $data);
+    }
+    public function indexmon()
+    {
         $masterOrder = $this->masterOrderModel->orderBy('id_order', 'DESC')->findAll();
         $material = $this->materialModel->findAll();
         // Ambil semua id_order dari material
@@ -1043,5 +1055,69 @@ class MasterdataController extends BaseController
             'area' => $area,
         ];
         return view($this->role . '/poplus/detail', $data);
+    }
+    public function getMasterData()
+    {
+        $request = service('request');
+        $postData = $request->getPost();
+
+        $draw = $postData['draw'];
+        $start = $postData['start'];
+        $length = $postData['length'];
+        $search = $postData['search']['value'];
+
+        // Total tanpa filter
+        $totalRecords = $this->masterOrderModel->countAll();
+
+        // Apply filter jika ada pencarian
+        if (!empty($search)) {
+            $this->masterOrderModel
+                ->like('no_order', $search)
+                ->orLike('buyer', $search)
+                ->orLike('admin', $search)
+                ->orLike('no_order', $search)
+                ->orLike('no_model', $search);
+        }
+
+        $totalFiltered = $this->masterOrderModel->countAllResults(false);
+
+        $data = $this->masterOrderModel
+            ->orderBy('id_order', 'DESC')
+            ->findAll($length, $start);
+
+        // Material untuk cross-check id_order
+        $material = $this->materialModel->findAll();
+        $materialOrderIds = array_column($material, 'id_order');
+
+        // Buat response array
+        $result = [];
+        foreach ($data as $row) {
+            $isNotInMaterial = !in_array($row['id_order'], $materialOrderIds);
+            $style = $isNotInMaterial ? 'color:red;' : '';
+
+            $result[] = [
+                'foll_up' => "<span style='$style'>{$row['foll_up']}</span>",
+                'lco_date' => "<span style='$style'>{$row['lco_date']}</span>",
+                'no_model' => "<span style='$style'>{$row['no_model']}</span>",
+                'no_order' => "<span style='$style'>{$row['no_order']}</span>",
+                'buyer' => "<span style='$style'>{$row['buyer']}</span>",
+                'memo' => "<span style='$style'>{$row['memo']}</span>",
+                'delivery_awal' => "<span style='$style'>{$row['delivery_awal']}</span>",
+                'delivery_akhir' => "<span style='$style'>{$row['delivery_akhir']}</span>",
+                'unit' => "<span style='$style'>{$row['unit']}</span>",
+                'admin' => "<span style='$style'>{$row['admin']}</span>",
+                'action' => "
+                <a href='" . base_url($this->role . '/material/' . $row['id_order']) . "' class='btn btn-info btn-sm'>Detail</a>
+                <button class='btn btn-warning btn-sm btn-edit' data-id='{$row['id_order']}'>Update</button>
+            "
+            ];
+        }
+
+        return $this->response->setJSON([
+            'draw' => intval($draw),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $totalFiltered,
+            'data' => $result
+        ]);
     }
 }

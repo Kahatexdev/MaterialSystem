@@ -25,12 +25,12 @@
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <form class="row g-3">
+                    <div class="row g-3">
                         <div class="col-md-3">
                             <label for="filter_area" class="form-label">Area</label>
                             <select class="form-control" name="filter_area" id="filter_area" required>
                                 <option value="">Pilih Area</option>
-                                <?php foreach ($area as $ar) {
+                                <?php foreach ($allArea as $ar) {
                                 ?>
                                     <option value="<?= $ar ?>"><?= $ar ?></option>
                                 <?php
@@ -41,15 +41,25 @@
                             <label for="filter_model" class="form-label">No Model</label>
                             <input type="text" id="filter_model" name="filter_model" class="form-control" placeholder="No Model" required>
                         </div>
-                        <div class="col-md-2 d-flex align-items-end">
+                        <!-- Tombol Filter -->
+                        <div class="col-md-2">
+                            <label class="form-label d-block invisible">Filter</label>
                             <button id="filterButton" type="button" class="btn bg-gradient-info w-100">
-                                <i class="fas fa-filter"></i>
-                                Filter
+                                <i class="fas fa-filter"></i> FILTER
                             </button>
                         </div>
-                    </form>
+
+                        <!-- Tombol Refresh -->
+                        <div class="col-md-1">
+                            <label class="form-label d-block invisible">Refresh</label>
+                            <button type="button" class="btn btn-secondary w-100"
+                                onclick="window.location.href='<?= base_url($role . 'pemesanan/sisaKebutuhanArea') ?>'">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
                     <div class="table-responsive mt-4">
-                        <table class="table  align-items-center">
+                        <table class="table align-items-center">
                             <thead class="table-light">
                                 <tr>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder">TANGGAL PAKAI</th>
@@ -71,9 +81,75 @@
                                 </tr>
                             </thead>
                             <tbody id="sisaKebutuhanTable">
-                                <tr>
-                                </tr>
+                                <?php
+                                if (empty($dataPemesanan) && !empty($area) && !empty($noModel)) { ?>
+                                    <tr>
+                                        <th colspan="16">Tidak Ada Data</th>
+                                    </tr>
+                                    <?php
+                                } elseif (!empty($dataPemesanan) && !empty($area) && !empty($noModel)) {
 
+                                    $prevKey = null;
+                                    $ttlKgPesan = 0;
+                                    foreach ($dataPemesanan as $key => $id) {
+                                        // Buat key unik untuk kombinasi
+                                        $currentKey = $id['item_type'] . '|' . $id['kode_warna'] . '|' . $id['color'];
+
+                                        // Cek jika sudah pindah grup (dan bukan pertama)
+                                        if ($prevKey !== null && $currentKey !== $prevKey) {
+                                            // Tampilkan total baris untuk grup sebelumnya
+                                    ?>
+                                            <tr style="font-weight: bold; background-color: #f0f0f0;">
+                                                <td colspan="7" class="text-end">Total KG</td>
+                                                <td class="text-start"><?= number_format($id['ttl_keb'], 2) ?></td>
+                                                <td class="text-start"><?= number_format($ttlKgPesan, 2) ?></td>
+                                                <td colspan="7"></td>
+                                            </tr>
+                                        <?php
+                                            // Reset total
+                                            $ttlKgPesan = 0;
+                                        }
+
+                                        // Hitung total sementara
+                                        $ttlKgPesan += floatval($id['ttl_kg']);
+
+                                        // Cetak baris data
+                                        ?>
+                                        <tr>
+                                            <td class="text-xs text-start"><?= $id['tgl_pakai']; ?></td>
+                                            <td></td>
+                                            <td class="text-xs text-start"><?= $id['no_model']; ?></td>
+                                            <td class="text-xs text-start"><?= $id['max_loss']; ?></td>
+                                            <td class="text-xs text-start"><?= $id['item_type']; ?></td>
+                                            <td class="text-xs text-start"><?= $id['kode_warna']; ?></td>
+                                            <td class="text-xs text-start"><?= $id['color']; ?></td>
+                                            <td></td>
+                                            <td class="text-xs text-start"><?= $id['ttl_kg']; ?></td>
+                                            <td class="text-xs text-start"><?= $id['po_tambahan'] == 1 ? 'YA' : ''; ?></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    <?php
+
+                                        $prevKey = $currentKey;
+                                    }
+
+                                    // Tampilkan total terakhir
+                                    if ($prevKey !== null) {
+                                    ?>
+                                        <tr style="background-color: #f0f0f0;">
+                                            <th colspan="7" class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">Total Kebutuhan</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($id['ttl_keb'], 2) ?></th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgPesan, 2) ?></th>
+                                            <td colspan="7"></td>
+                                        </tr>
+                                <?php
+                                    }
+                                } ?>
                             </tbody>
                         </table>
                     </div>
@@ -84,6 +160,28 @@
 </div>
 
 <script>
+    //Filter data pemesanan
+    document.getElementById('filterButton').addEventListener('click', function() {
+        const filterArea = document.getElementById('filter_area').value.trim();
+        const filterModel = document.getElementById('filter_model').value.trim();
+
+        // Validasi input
+        if (!filterArea || !filterModel) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Input Tidak Lengkap',
+                text: 'Area dan No Model harus diisi!',
+                confirmButtonText: 'OK',
+            });
+            return; // Hentikan eksekusi jika input kosong
+        }
+
+        // Redirect ke controller dengan parameter
+        let url = '<?= base_url($role . '/pemesanan/sisaKebutuhanArea') ?>?filter_model=' + encodeURIComponent(filterModel) + '&filter_area=' + encodeURIComponent(filterArea);
+        window.location.href = url;
+    });
+</script>
+<!-- <script>
     document.getElementById('filterButton').addEventListener('click', function() {
         const filterArea = document.getElementById('filter_area').value.trim();
         const filterModel = document.getElementById('filter_model').value.trim();
@@ -102,65 +200,66 @@
         // Buat URL dengan query parameters
         const url = `<?= base_url($role . "/pemesanan/sisaKebutuhanArea_filter") ?>?area=${encodeURIComponent(filterArea)}&model=${encodeURIComponent(filterModel)}`;
 
-        fetch(url, {
-                method: 'GET',
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                const tableBody = document.getElementById('sisaKebutuhanTable');
-                tableBody.innerHTML = ''; // Clear existing table rows
+        // fetch(url, {
+        //         method: 'GET',
+        //     })
+        //     .then(response => {
+        //         if (!response.ok) {
+        //             throw new Error(`HTTP error! status: ${response.status}`);
+        //         }
+        //         return response.json();
+        //         // console.log(response)
+        //     })
+        // .then(data => {
+        //     const tableBody = document.getElementById('sisaKebutuhanTable');
+        //     tableBody.innerHTML = ''; // Clear existing table rows
 
-                if (Array.isArray(data) && data.length > 0) {
-                    data.forEach(psn => {
-                        const row = document.createElement('tr');
+        //     if (Array.isArray(data) && data.length > 0) {
+        //         data.forEach(psn => {
+        //             const row = document.createElement('tr');
 
-                        const tglPakaiCell = document.createElement('td');
-                        tglPakaiCell.innerHTML = `<p class="text-sm font-weight-bold mb-0">${psn.tgl_pakai || '-'}</p>`;
-                        row.appendChild(tglPakaiCell);
+        //             const tglPakaiCell = document.createElement('td');
+        //             tglPakaiCell.innerHTML = `<p class="text-sm font-weight-bold mb-0">${psn.tgl_pakai || '-'}</p>`;
+        //             row.appendChild(tglPakaiCell);
 
-                        const actionCell = document.createElement('td');
-                        actionCell.classList.add('text-center');
-                        actionCell.innerHTML = `
-                        <a href="/${psn.tgl_pakai}" class="btn bg-gradient-info">
-                            <i class="fas fa-eye"></i>
-                            Detail
-                        </a>
-                    `;
-                        row.appendChild(actionCell);
+        //             const actionCell = document.createElement('td');
+        //             actionCell.classList.add('text-center');
+        //             actionCell.innerHTML = `
+        //             <a href="/${psn.tgl_pakai}" class="btn bg-gradient-info">
+        //                 <i class="fas fa-eye"></i>
+        //                 Detail
+        //             </a>
+        //         `;
+        //             row.appendChild(actionCell);
 
-                        tableBody.appendChild(row);
-                    });
-                } else {
-                    const row = document.createElement('tr');
-                    const noDataCell = document.createElement('td');
-                    noDataCell.setAttribute('colspan', '16'); // Sesuaikan jumlah kolom tabel
-                    noDataCell.classList.add('text-center');
-                    noDataCell.textContent = 'Tidak ada data yang ditemukan.';
-                    row.appendChild(noDataCell);
-                    tableBody.appendChild(row);
-                }
-            })
-            .catch(error => {
-                console.error('Fetch Error:', error);
+        //             tableBody.appendChild(row);
+        //         });
+        //     } else {
+        //         const row = document.createElement('tr');
+        //         const noDataCell = document.createElement('td');
+        //         noDataCell.setAttribute('colspan', '16'); // Sesuaikan jumlah kolom tabel
+        //         noDataCell.classList.add('text-center');
+        //         noDataCell.textContent = 'Tidak ada data yang ditemukan.';
+        //         row.appendChild(noDataCell);
+        //         tableBody.appendChild(row);
+        //     }
+        // })
+        // .catch(error => {
+        //     console.error('Fetch Error:', error);
 
-                // Tampilkan pesan error di tabel
-                const tableBody = document.getElementById('sisaKebutuhanTable');
-                tableBody.innerHTML = ''; // Bersihkan tabel
+        //     // Tampilkan pesan error di tabel
+        //     const tableBody = document.getElementById('sisaKebutuhanTable');
+        //     tableBody.innerHTML = ''; // Bersihkan tabel
 
-                const row = document.createElement('tr');
-                const errorCell = document.createElement('td');
-                errorCell.setAttribute('colspan', '16'); // Sesuaikan jumlah kolom tabel
-                errorCell.classList.add('text-center', 'text-danger');
-                errorCell.textContent = 'Terjadi kesalahan saat memuat data. Periksa kembali koneksi atau coba lagi nanti.';
-                row.appendChild(errorCell);
-                tableBody.appendChild(row);
-            });
+        //     const row = document.createElement('tr');
+        //     const errorCell = document.createElement('td');
+        //     errorCell.setAttribute('colspan', '16'); // Sesuaikan jumlah kolom tabel
+        //     errorCell.classList.add('text-center', 'text-danger');
+        //     errorCell.textContent = 'Terjadi kesalahan saat memuat data. Periksa kembali koneksi atau coba lagi nanti.';
+        //     row.appendChild(errorCell);
+        //     tableBody.appendChild(row);
+        // });
     });
-</script>
+</script> -->
 
 <?php $this->endSection(); ?>
