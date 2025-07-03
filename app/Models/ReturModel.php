@@ -259,4 +259,14 @@ class ReturModel extends Model
 
         return $this->findAll();
     }
+    public function getReturByAreaModel($area, $noModel)
+    {
+        return $this->select('retur.*')
+            ->join('kategori_retur', 'kategori_retur.nama_kategori=retur.kategori', 'left')
+            ->where('retur.area_retur', $area)
+            ->where('retur.no_model', $noModel)
+            ->where('kategori_retur.tipe_kategori', 'SIMPAN ULANG')
+            ->groupBy('id_retur')
+            ->findAll();
+    }
 }

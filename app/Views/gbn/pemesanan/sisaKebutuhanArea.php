@@ -91,44 +91,54 @@
 
                                     $prevKey = null;
                                     $ttlKgPesan = 0;
+                                    $ttlKgOut = 0;
+                                    $ttlKgRetur = 0;
+
                                     foreach ($dataPemesanan as $key => $id) {
                                         // Buat key unik untuk kombinasi
                                         $currentKey = $id['item_type'] . '|' . $id['kode_warna'] . '|' . $id['color'];
 
-                                        // Cek jika sudah pindah grup (dan bukan pertama)
                                         if ($prevKey !== null && $currentKey !== $prevKey) {
-                                            // Tampilkan total baris untuk grup sebelumnya
                                     ?>
                                             <tr style="font-weight: bold; background-color: #f0f0f0;">
-                                                <td colspan="7" class="text-end">Total KG</td>
-                                                <td class="text-start"><?= number_format($id['ttl_keb'], 2) ?></td>
-                                                <td class="text-start"><?= number_format($ttlKgPesan, 2) ?></td>
-                                                <td colspan="7"></td>
+                                                <th colspan="7" class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">Total Kebutuhan</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= $id['ttl_keb']; ?></th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgPesan, 2) ?></th>
+                                                <th></th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgOut, 2) ?></th>
+                                                <th></th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgRetur, 2) ?></th>
+                                                <th colspan="2"></th>
+                                                <th></th>
                                             </tr>
                                         <?php
-                                            // Reset total
                                             $ttlKgPesan = 0;
+                                            $ttlKgOut = 0;
+                                            $ttlKgRetur = 0;
                                         }
-
                                         // Hitung total sementara
                                         $ttlKgPesan += floatval($id['ttl_kg']);
+                                        $ttlKgOut += floatval($id['kg_out']);
+                                        $ttlKgRetur += floatval($id['kgs_retur']);
 
                                         // Cetak baris data
                                         ?>
                                         <tr>
-                                            <td class="text-xs text-start"><?= $id['tgl_pakai']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['tgl_pakai']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['tgl_retur']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['no_model']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['max_loss'] ?? ''; ?></td>
+                                            <td class="text-xs text-center"><?= $id['item_type']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['kode_warna']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['color']; ?></td>
                                             <td></td>
-                                            <td class="text-xs text-start"><?= $id['no_model']; ?></td>
-                                            <td class="text-xs text-start"><?= $id['max_loss']; ?></td>
-                                            <td class="text-xs text-start"><?= $id['item_type']; ?></td>
-                                            <td class="text-xs text-start"><?= $id['kode_warna']; ?></td>
-                                            <td class="text-xs text-start"><?= $id['color']; ?></td>
-                                            <td></td>
-                                            <td class="text-xs text-start"><?= $id['ttl_kg']; ?></td>
-                                            <td class="text-xs text-start"><?= $id['po_tambahan'] == 1 ? 'YA' : ''; ?></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td class="text-xs text-center"><?= $id['ttl_kg']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['po_tambahan'] == 1 ? 'YA' : ''; ?></td>
+                                            <td class="text-xs text-center"><?= $id['kg_out']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['lot_out']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['kgs_retur']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['lot_retur']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['ket_gbn']; ?></td>
                                             <td></td>
                                             <td></td>
                                             <td></td>
@@ -143,9 +153,14 @@
                                     ?>
                                         <tr style="background-color: #f0f0f0;">
                                             <th colspan="7" class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">Total Kebutuhan</th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($id['ttl_keb'], 2) ?></th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= $id['ttl_keb']; ?></th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgPesan, 2) ?></th>
-                                            <td colspan="7"></td>
+                                            <th></th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgOut, 2) ?></th>
+                                            <th></th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgRetur, 2) ?></th>
+                                            <th colspan="2"></th>
+                                            <th></th>
                                         </tr>
                                 <?php
                                     }
