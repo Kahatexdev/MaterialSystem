@@ -451,6 +451,7 @@ class OpenPoModel extends Model
         return $this->select('id_po, no_model, item_type, kode_warna, color, kg_po, keterangan, penerima, created_at')
             ->where('po_booking', '1')
             ->groupBy('no_model, spesifikasi_benang, keterangan')
+            ->orderBy('created_at', 'DESC')
             ->findAll();
     }
 
@@ -459,6 +460,7 @@ class OpenPoModel extends Model
         return $this->select('id_po, no_model, item_type, kode_warna, color, kg_po, keterangan, penerima, created_at')
             ->where('po_manual', '1')
             ->groupBy('no_model, spesifikasi_benang, keterangan')
+            ->orderBy('created_at', 'DESC')
             ->findAll();
     }
 

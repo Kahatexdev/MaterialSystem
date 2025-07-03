@@ -120,6 +120,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/reportSchWeekly', 'ScheduleController::reportSchWeekly');
     $routes->get('schedule/filterSchWeekly', 'ScheduleController::filterSchWeekly');
     $routes->get('schedule/exportScheduleWeekly', 'ExcelController::exportScheduleWeekly');
+    $routes->get('schedule/reportDataTagihanBenang', 'ScheduleController::reportDataTagihanBenang');
+    $routes->get('schedule/filterTagihanBenang', 'ScheduleController::filterTagihanBenang');
+    $routes->get('schedule/exportTagihanBenang', 'ExcelController::exportTagihanBenang');
     // $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJatah');
 
     $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');

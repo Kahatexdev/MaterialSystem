@@ -677,4 +677,128 @@ class ScheduleCelupModel extends Model
         return $this->select('schedule_celup.*')
             ->findAll();
     }
+
+    public function getFilterSchTagihanBenang(
+        $noModel       = null,
+        $kodeWarna     = null,
+        $deliveryAwal  = null,
+        $deliveryAkhir = null,
+        $tglAwal       = null,
+        $tglAkhir      = null
+    ) {
+        // 1) Subquery kebutuhan material
+        $subMaterial = $this->db->table('material')
+            ->select('mo.no_model, material.item_type, material.kode_warna, material.color AS warna, SUM(material.kgs) AS qty_po, material.area')
+            ->join('master_order mo', 'mo.id_order = material.id_order')
+            ->groupBy(['mo.no_model', 'material.item_type', 'material.kode_warna', 'material.color',]);
+
+        // Subquery Po Tambahan
+        $subPo = $this->db->table('po_tambahan')
+            ->select('mo.no_model, m.item_type, m.kode_warna, m.color AS warna, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS po_plus')
+            ->join('material m', 'm.id_material = po_tambahan.id_material')
+            ->join('master_order mo', 'mo.id_order = m.id_order')
+            ->groupBy(['mo.no_model', 'm.item_type', 'm.kode_warna', 'm.color', 'm.id_order',]);
+
+        // Subquery Stock
+        $subSt = $this->db->table('stock')
+            ->select('stock.no_model,stock.item_type,stock.kode_warna,stock.warna,SUM(kgs_stock_awal) AS stock_awal')
+            ->groupBy(['stock.no_model', 'stock.item_type', 'stock.kode_warna', 'stock.warna']);
+
+        // Subquery Retur
+        $subRt = $this->db->table('retur')
+            ->select('retur.no_model,retur.item_type,retur.kode_warna,retur.warna,SUM(retur.kgs_retur) AS retur_stock')
+            ->join('kategori_retur', 'kategori_retur.nama_kategori = retur.kategori')
+            ->where('waktu_acc_retur IS NOT NULL')
+            ->where('kategori_retur.tipe_kategori', 'SIMPAN ULANG')
+            ->groupBy(['retur.no_model', 'retur.item_type', 'retur.kode_warna', 'retur.warna']);
+
+        //Sub Open Po
+        $subOp = $this->db->table('open_po')
+            ->select('no_model, item_type, kode_warna, SUM(kg_po) AS qty_sch')
+            ->groupBy(['no_model', 'item_type', 'kode_warna']);
+
+        //Sub Pemasukan
+        $subPm = $this->db->table('pemasukan')
+            ->select('sc.no_model, sc.item_type, sc.kode_warna, sc.warna, SUM(oc.kgs_kirim) AS qty_datang_solid')
+            ->join('out_celup oc', 'oc.id_out_celup = pemasukan.id_out_celup')
+            ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup')
+            ->groupBy(['sc.no_model', 'sc.item_type', 'sc.kode_warna', 'sc.warna',]);
+
+        //Sub Ganti Retur Solid
+        $subOc = $this->db->table('out_celup')
+            ->select('out_celup.no_model, SUM(out_celup.kgs_kirim) AS qty_ganti_retur_solid, sc.item_type, sc.kode_warna, sc.warna')
+            ->join('schedule_celup sc', 'sc.id_celup = out_celup.id_celup')
+            ->where('out_celup.ganti_retur', '1')
+            ->groupBy(['sc.no_model', 'sc.item_type', 'sc.kode_warna', 'sc.warna',]);
+
+        // Subquery Retur Pengembalian
+        $subRtBl = $this->db->table('retur')
+            ->select('retur.no_model,retur.item_type,retur.kode_warna,retur.warna,SUM(retur.kgs_retur) AS retur_belang')
+            ->join('kategori_retur', 'kategori_retur.nama_kategori = retur.kategori')
+            ->where('waktu_acc_retur IS NOT NULL')
+            ->where('kategori_retur.tipe_kategori', 'PENGEMBALIAN')
+            ->groupBy(['retur.no_model', 'retur.item_type', 'retur.kode_warna', 'retur.warna']);
+
+        // 3) Main query
+        $builder = $this->db->table('schedule_celup sc')
+            ->select([
+                'sc.no_model',
+                'sc.item_type',
+                'sc.kode_warna',
+                'sc.warna',
+                'k.area',
+                'k.qty_po',
+                'pp.po_plus',
+                'mo.delivery_awal',
+                'mo.delivery_akhir',
+                'sc.start_mc',
+                'st.stock_awal',
+                'rt.retur_stock',
+                'op.qty_sch',
+                'pm.qty_datang_solid',
+                'oc.qty_ganti_retur_solid',
+                'rtbl.retur_belang',
+            ])
+            ->join('master_order mo', 'mo.no_model = sc.no_model')
+            ->join("({$subMaterial->getCompiledSelect()}) k", 'k.no_model = sc.no_model AND k.item_type = sc.item_type AND k.kode_warna = sc.kode_warna AND k.warna = sc.warna', 'left')
+            ->join("({$subPo->getCompiledSelect()}) pp", 'pp.no_model = sc.no_model AND pp.item_type  = sc.item_type AND pp.kode_warna = sc.kode_warna AND pp.warna = sc.warna', 'left')
+            ->join("({$subSt->getCompiledSelect()}) st", 'st.no_model   = sc.no_model AND st.item_type  = sc.item_type AND st.kode_warna = sc.kode_warna AND st.warna = sc.warna', 'left')
+            ->join("({$subOp->getCompiledSelect()}) op", 'op.no_model = sc.no_model AND op.item_type = sc.item_type AND op.kode_warna = sc.kode_warna', 'left')
+            ->join("({$subRt->getCompiledSelect()}) rt", 'rt.no_model = sc.no_model AND rt.item_type = sc.item_type AND rt.kode_warna = sc.kode_warna', 'left')
+            ->join("({$subPm->getCompiledSelect()}) pm", 'pm.no_model = sc.no_model AND pm.item_type   = sc.item_type AND pm.kode_warna  = sc.kode_warna AND pm.warna = sc.warna', 'left')
+            ->join("({$subOc->getCompiledSelect()}) oc", 'oc.no_model = sc.no_model AND oc.item_type   = sc.item_type AND oc.kode_warna  = sc.kode_warna AND oc.warna = sc.warna', 'left')
+            ->join("({$subRtBl->getCompiledSelect()}) rtbl", 'rtbl.no_model = sc.no_model AND rtbl.item_type = sc.item_type AND rtbl.kode_warna = sc.kode_warna', 'left');
+
+        // 4) Filter
+        if ($noModel) {
+            $builder->where('sc.no_model', $noModel);
+        }
+        if ($kodeWarna) {
+            $builder->like('sc.kode_warna', $kodeWarna);
+        }
+        if ($deliveryAwal && $deliveryAkhir) {
+            $builder
+                ->where('mo.delivery_awal >=', $deliveryAwal)
+                ->where('mo.delivery_awal <=', $deliveryAkhir);
+        }
+        if ($tglAwal && $tglAkhir) {
+            $builder
+                ->where('sc.start_mc >=', $tglAwal)
+                ->where('sc.start_mc <=', $tglAkhir);
+        }
+
+        return $builder
+            ->groupBy([
+                'sc.no_model',
+                'sc.item_type',
+                'sc.kode_warna',
+                'sc.warna',
+                'k.qty_po',
+                'mo.delivery_awal',
+                'mo.delivery_akhir',
+                'sc.start_mc',
+            ])
+            ->get()
+            ->getResultArray();
+    }
 }

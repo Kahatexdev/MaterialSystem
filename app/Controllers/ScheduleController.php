@@ -62,9 +62,9 @@ class ScheduleController extends BaseController
 
         if ($startDate == null && $endDate == null) {
             // Jika startdate tidak tersedia, gunakan tanggal 3 hari ke belakang
-            $startDate = date('Y-m-d', strtotime('-3 days'));
+            $startDate = date('Y-m-d', strtotime('+5 days'));
             // end date 7 hari ke depan
-            $endDate = date('Y-m-d', strtotime('+6 days'));
+            $endDate = date('Y-m-d', strtotime('+14 days'));
         }
 
         // Konversi tanggal ke format DateTime jika tersedia
@@ -1212,6 +1212,49 @@ class ScheduleController extends BaseController
 
         $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir);
         // dd($data);
+
+        return $this->response->setJSON($data);
+    }
+
+    public function reportDataTagihanBenang()
+    {
+        $data =
+            [
+                'active' => $this->active,
+                'title' => 'Material System',
+                'role' => $this->role,
+            ];
+        return view($this->role . '/schedule/report-tagihan-benang', $data);
+    }
+
+    public function filterTagihanBenang()
+    {
+        $noModel       = $this->request->getGet('no_model');
+        $kodeWarna     = $this->request->getGet('kode_warna');
+        $deliveryAwal  = $this->request->getGet('delivery_awal');
+        $deliveryAkhir = $this->request->getGet('delivery_akhir');
+        $tglAwal       = $this->request->getGet('tanggal_awal');
+        $tglAkhir      = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->scheduleCelupModel->getFilterSchTagihanBenang($noModel, $kodeWarna, $deliveryAwal, $deliveryAkhir, $tglAwal, $tglAkhir);
+
+        foreach ($data as &$row) {
+            $stockAwal    = (float) $row['stock_awal'];
+            $datangSolid  = (float) $row['qty_datang_solid'];
+            $gantiRetur   = (float) $row['qty_ganti_retur_solid']; // =0 jika null
+            $qtyPo        = (float) $row['qty_po'];
+            $poPlus       = (float) ($row['po_plus'] ?? 0);
+            $returBelang  = (float) ($row['retur_belang'] ?? 0);
+
+            if ($gantiRetur > 0) {
+                $tagihanDatang = ($stockAwal + $datangSolid + $gantiRetur) - $qtyPo - $poPlus - $returBelang;
+            } else {
+                $tagihanDatang = ($stockAwal + $datangSolid) - $qtyPo - $poPlus;
+            }
+            // tambahkan ke array
+            $row['tagihan_datang'] = $tagihanDatang;
+        }
+        unset($row);
 
         return $this->response->setJSON($data);
     }

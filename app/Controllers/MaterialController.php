@@ -297,6 +297,7 @@ class MaterialController extends BaseController
 
         $itemType = $this->masterMaterialModel->getItemType();
         $openPo = $this->openPoModel->listOpenPo($no_model, $jenis, $jenis2, $penerima);
+        $del = $openPo[0]['delivery_awal'] ?? 'yyyy-mm-dd';
         foreach ($openPo as &$po) {
             $po['po_plus'] = ($po['po_plus'] == '1') ? 'YA' : 'TIDAK';
         }
@@ -312,7 +313,8 @@ class MaterialController extends BaseController
                 'no_model' => $no_model,
                 'penerima' => $penerima,
                 'jenis' => $jenis,
-                'jenis2' => $jenis2
+                'jenis2' => $jenis2,
+                'del' => $del
             ];
         // dd($tujuan, $jenis, $jenis2);
         return view($this->role . '/mastermaterial/list-open-po', $data);
