@@ -896,4 +896,20 @@ class PemesananController extends BaseController
         // dd($dataPemesanan);
         return view($this->role . '/pemesanan/sisaKebutuhanArea', $data);
     }
+
+    public function pinjamOrder()
+    {
+        $area = $this->request->getGet('area');
+        $jenis = $this->request->getGet('jenis');
+        $tglPakai = $this->request->getGet('tglpakai');
+        dd($area, $jenis, $tglPakai);
+        // $dataPemesanan = $this->totalPemesananModel->getDataPemesanan($area, $jenis, $tglPakai);
+        // $getData = $this->stockModel->pemakaianArea();
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role
+        ];
+        return view($this->role . '/pemesanan/pinjam-order', $data);
+    }
 }

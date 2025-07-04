@@ -220,6 +220,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pemesananperarea/(:any)', 'PemesananController::pemesananPerArea/$1');
     $routes->get('detailpemesanan/(:any)/(:any)', 'PemesananController::detailPemesanan/$1/$2');
     $routes->get('selectClusterWarehouse/(:any)', 'PemesananController::selectClusterWarehouse/$1');
+    $routes->get('pinjamOrder', 'PemesananController::pinjamOrder');
     $routes->post('saveUsage', 'PemesananController::saveUsage');
     $routes->get('pengiriman_area', 'PemesananController::pengirimanArea');
     $routes->post('pengiriman_area', 'PemesananController::pengirimanArea');

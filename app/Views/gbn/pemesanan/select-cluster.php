@@ -263,6 +263,13 @@
                         <div class="row" id="formPengeluaran">
                             <!-- Form input pengeluaran stock will be loaded here -->
                         </div>
+                        <div class="row">
+                            <h6>PINJAM ORDER</h6>
+                            <button class="btn btn-info ms-3 text-center" style="width: 60px;" id="addPinjam"><i class="fas fa-plus text-center"></i></button>
+                        </div>
+                        <div class="row" id="dataPinjamOrder">
+                            <!-- Data Pinjam Order -->
+                        </div>
                         <div class="d-flex justify-content-end mt-3">
                             <button type="submit" class="btn btn-primary btn-submit">
                                 <i class="bi bi-check-circle me-1"></i> Submit
@@ -313,6 +320,14 @@
 </div>
 
 <script>
+    // Inisialisasi select2 saat modal ditampilkan
+    $('#dataModal').on('shown.bs.modal', function() {
+        $('#no_model_pinjam').select2({
+            dropdownParent: $('#dataModal'), // ini penting biar dropdown muncul di dalam modal
+            width: '100%' // biar select2 ngikutin lebar parent
+        });
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         // Card click event
         const cards = document.querySelectorAll('.stock-card');
@@ -536,6 +551,132 @@
                     });
                 });
         });
+
+        //     document.getElementById('addPinjam').addEventListener('click', async function(e) {
+        //         e.preventDefault(); // agar button tidak reload page
+
+        //         // Contoh: ambil list opsi pinjam via AJAX
+        //         const res = await fetch('<?= base_url("/gbn/pinjamOrder/options") ?>');
+        //         if (!res.ok) return console.error('Gagal load opsi pinjam');
+        //         const options = await res.json();
+        //         // options diasumsikan [{id:1, label:"Order A"}, {id:2, label:"Order B"}, ...]
+
+        //         // Buat wrapper baris baru
+        //         const wrapper = document.createElement('div');
+        //         wrapper.classList.add('row', 'mb-3');
+
+        //         // Kolom kiri: select
+        //         const colSelect = document.createElement('div');
+        //         colSelect.classList.add('col-md-4');
+        //         const select = document.createElement('select');
+        //         select.classList.add('form-select', 'pinjam-select');
+        //         select.innerHTML = `<option value="">-- Pilih Order --</option>` +
+        //             options.map(opt => `<option value="${opt.id}">${opt.label}</option>`).join('');
+        //         colSelect.appendChild(select);
+
+        //         // Kolom kanan: placeholder detail
+        //         const colDetail = document.createElement('div');
+        //         colDetail.classList.add('col-md-8');
+        //         colDetail.innerHTML = `<div class="alert alert-secondary">Pilih order untuk lihat detail.</div>`;
+
+        //         wrapper.appendChild(colSelect);
+        //         wrapper.appendChild(colDetail);
+        //         document.getElementById('dataPinjamOrder').appendChild(wrapper);
+
+        //         // Ketika user memilih di dropdown, load detail
+        //         select.addEventListener('change', async function() {
+        //             const id = this.value;
+        //             if (!id) {
+        //                 colDetail.innerHTML = `<div class="alert alert-secondary">Pilih order untuk lihat detail.</div>`;
+        //                 return;
+        //             }
+
+        //             // Tampilkan spinner sementara
+        //             colDetail.innerHTML = `
+        //   <div class="d-flex align-items-center">
+        //     <strong>Loading...</strong>
+        //     <div class="spinner-border ms-2" role="status" aria-hidden="true"></div>
+        //   </div>`;
+
+        //             // Fetch detail berdasarkan id
+        //             try {
+        //                 const detailRes = await fetch(`<?= base_url("/gbn/pinjamOrder/detail") ?>/${id}`);
+        //                 if (!detailRes.ok) throw new Error('Network response was not ok');
+        //                 const data = await detailRes.json();
+
+        //                 // Render detail sesuai struktur data Anda
+        //                 colDetail.innerHTML = `
+        //     <ul class="list-group">
+        //       <li class="list-group-item"><strong>No Order:</strong> ${data.no_order}</li>
+        //       <li class="list-group-item"><strong>Tanggal:</strong> ${data.tgl_order}</li>
+        //       <li class="list-group-item"><strong>Total KG:</strong> ${data.total_kg} KG</li>
+        //       <li class="list-group-item"><strong>Total Cones:</strong> ${data.total_cones} CNS</li>
+        //       <!-- dst. -->
+        //     </ul>
+        //   `;
+        //             } catch (err) {
+        //                 console.error(err);
+        //                 colDetail.innerHTML = `<div class="alert alert-danger">Gagal memuat detail.</div>`;
+        //             }
+        //         });
+        //     });
+        document.getElementById('addPinjam').addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Buat wrapper row baru
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('row', 'mb-3');
+
+            // Kolom select
+            const colSelect = document.createElement('div');
+            colSelect.classList.add('col-md-4');
+
+            // Buat <select> kosong atau dengan opsi dummy
+            const select = document.createElement('select');
+            select.classList.add('form-select', 'pinjam-select');
+            select.setAttribute('name', 'pinjam_id[]');
+            select.setAttribute('id', 'select_pinjam');
+
+            // Opsi No Model
+            select.innerHTML = `<option value=""></option>`;
+
+            colSelect.appendChild(select);
+
+            // Kolom placeholder detail
+            const colDetail = document.createElement('div');
+            colDetail.classList.add('col-md-4');
+            colDetail.innerHTML = `<div class="alert alert-secondary">Detail akan muncul di sini.</div>`;
+
+            const colDelete = document.createElement('div');
+            colDelete.classList.add('col-md-4');
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.classList.add('btn', 'btn-danger', 'delete-btn');
+            deleteBtn.setAttribute('name', 'delete');
+
+            // **Tambahan untuk fitur hapus per baris:**
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                wrapper.remove();
+            });
+
+            colDelete.appendChild(deleteBtn);
+
+            wrapper.append(colSelect, colDetail, colDelete);
+            document.getElementById('dataPinjamOrder').appendChild(wrapper);
+
+            // Inisialisasi select2 saat modal ditampilkan
+            $('#dataModal').on('shown.bs.modal', function() {
+                $('#select_pinjam').select2({
+                    dropdownParent: $('#dataModal'), // ini penting biar dropdown muncul di dalam modal
+                    width: '100%' // biar select2 ngikutin lebar parent
+                });
+            });
+
+            // (Listener change nanti kamu tambahkan di sini untuk fetch detail)
+        });
+
     });
 </script>
 

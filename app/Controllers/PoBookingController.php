@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\MasterMaterialModel;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\OpenPoModel;
@@ -16,14 +17,15 @@ class PoBookingController extends BaseController
     protected $masterOrderModel;
     protected $materialModel;
     protected $openPoModel;
+    protected $masterMaterialModel;
 
     public function __construct()
     {
         $this->masterOrderModel = new MasterOrderModel();
         $this->materialModel = new MaterialModel();
         $this->openPoModel = new OpenPoModel();
+        $this->masterMaterialModel = new MasterMaterialModel();
         // $this->stockModel = new StockModel();
-        // $this->masterMaterialModel = new MasterMaterialModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -67,14 +69,14 @@ class PoBookingController extends BaseController
 
     public function getItemType()
     {
-        $buyer    = $this->request->getGet('buyer');
+        // if ($buyer === null) {
+        //     return $this->response->setStatusCode(400)
+        //         ->setJSON(['error' => 'buyerId missing']);
+        // }
+        // $itemType = $this->materialModel->getItemTypeByBuyer($buyer);
 
-        if ($buyer === null) {
-            return $this->response->setStatusCode(400)
-                ->setJSON(['error' => 'buyerId missing']);
-        }
-        $itemType = $this->materialModel->getItemTypeByBuyer($buyer);
-
+        $itemType = $this->masterMaterialModel->getItemtype();
+        // dd($itemType);
         $result = array_map(fn($r) => [
             'id'   => $r['item_type'],
             'text' => $r['item_type']

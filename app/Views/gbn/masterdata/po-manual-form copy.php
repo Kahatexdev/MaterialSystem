@@ -29,8 +29,8 @@
     <div class="card card-frame">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 font-weight-bolder">Form Buka PO Booking</h5>
-                <a href="<?= base_url($role . '/masterdata/poBooking') ?>" class="btn bg-gradient-info"> Kembali</a>
+                <h5 class="mb-0 font-weight-bolder">Form Buka PO Manual</h5>
+                <a href="<?= base_url($role . '/masterdata') ?>" class="btn bg-gradient-info"> Kembali</a>
             </div>
         </div>
     </div>
@@ -38,32 +38,15 @@
     <!-- Form -->
     <div class="card mt-4">
         <div class="card-body">
-            <form action="<?= base_url($role . '/masterdata/poBooking/saveOpenPoBooking') ?>" method="post">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label>No Model</label>
-                            <input type="text" class="form-control select-no-model" name="no_model" id="no_model" required>
-                        </div>
-                    </div>
-                </div>
+            <form action="<?= base_url($role . '/masterdata/poManual/saveOpenPoManual') ?>" method="post">
                 <div class="form-group">
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <label>Tujuan</label>
                             <select class="form-control" name="tujuan_po" id="selectTujuan" onchange="tujuan()" required>
                                 <option value="">Pilih Tujuan</option>
                                 <option value="Celup Cones">Celup Cones</option>
                                 <option value="Covering">Covering</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label>Buyer</label>
-                            <select class="form-control buyer" name="buyer" required>
-                                <option value="">Pilih Buyer</option>
-                                <?php foreach ($buyer as $b) : ?>
-                                    <option value="<?= $b['buyer'] ?>"><?= $b['buyer'] ?></option>
-                                <?php endforeach; ?>
                             </select>
                         </div>
                     </div>
@@ -109,7 +92,10 @@
                         <div class="tab-pane fade show active" id="nav-home" role="tabpanel">
                             <div class="kebutuhan-item" data-index="0">
                                 <!-- No Model -->
-
+                                <div class="form-group">
+                                    <label>No Model</label>
+                                    <input type="text" class="form-control select-no-model" name="no_model[0][no_model]" id="no_model" required>
+                                </div>
                                 <div class=" row">
                                     <div class="col-md-6">
                                         <!-- Item Type -->
@@ -117,6 +103,9 @@
                                             <label>Item Type</label>
                                             <select class="form-control item-type" name="items[0][item_type]" id="item-type" required>
                                                 <option value="">Pilih Item Type</option>
+                                                <?php foreach ($itemType as $item) : ?>
+                                                    <option value="<?= $item['item_type'] ?>"><?= $item['item_type'] ?></option>
+                                                <?php endforeach; ?>
                                             </select>
                                         </div>
                                     </div>
@@ -125,9 +114,6 @@
                                         <div class="form-group">
                                             <label>Kode Warna</label>
                                             <input type="text" class="form-control kode-warna" name="items[0][kode_warna]" required>
-                                            <!-- <select class="form-control kode-warna" name="items[0][kode_warna]" required>
-                                                <option value="">Pilih Kode Warna</option>
-                                            </select> -->
                                         </div>
                                     </div>
                                 </div>
@@ -203,16 +189,8 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label for="exampleFormControlInput1">Keterangan</label>
-                            <textarea class="form-control" name="keterangan" id="keterangan"></textarea>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="exampleFormControlInput1">Keterangan Celup</label>
-                            <textarea class="form-control" name="ket_celup" id="ket_celup"></textarea>
-                        </div>
-                    </div>
+                    <label for="exampleFormControlInput1">Keterangan</label>
+                    <textarea class="form-control" name="keterangan" id="keterangan"></textarea>
                 </div>
                 <div class="form-group">
                     <div class="row">
@@ -244,46 +222,25 @@
         const role = '<?= $role ?>';
         const materialDataCache = {};
         let tabIndex = 2;
+        // Log semua value dari select dengan class 'item-type'
 
         const $navTab = $('#nav-tab');
         const $navTabContent = $('#nav-tabContent');
 
         // Inisialisasi Select2 pada konteks tertentu
         function initSelect2(ctx) {
-            // buyer & kode‑warna
-            $(ctx).find('.buyer').select2({
-                width: '100%',
-                allowClear: true
-            });
-
-            // item‑type: AJAX tanpa buyer
-            $(ctx).find('.item-type').select2({
-                width: '100%',
-                placeholder: 'Pilih Item Type',
-                allowClear: true,
-                minimumInputLength: 0,
-                ajax: {
-                    url: `<?= base_url() ?>/gbn/masterdata/poBooking/getItemType`,
-                    dataType: 'json',
-                    delay: 250,
-                    cache: true,
-                    data: params => ({
-                        q: params.term || ''
-                    }),
-                    processResults: data => {
-                        console.log('ITEM‑TYPE:', data);
-                        return {
-                            results: data
-                        };
-                    },
-                    error: (xhr, status, error) =>
-                        console.error('Gagal load item type:', status, error)
-                }
-            });
+            // inisialisasi semua select2 dasar
+            $(ctx).find('.item-type')
+                .select2({
+                    width: '100%',
+                    allowClear: true
+                });
         }
 
-
-
+        // Log value setiap kali select.item-type berubah
+        $(document).on('change', '.item-type', function() {
+            console.log($(this).val());
+        });
 
         // Tambah tab baru
         function addNewTab() {
@@ -303,6 +260,10 @@
             <div class="tab-pane fade" id="nav-content-${tabIndex}" role="tabpanel"
                  aria-labelledby="nav-tab-${tabIndex}-button">
                 <div class="kebutuhan-item" data-index="${idx}">
+                    <div class="form-group">
+                        <label>No Model</label>
+                         <input type="text" class="form-control select-no-model" name="no_model[${idx}][no_model]" id="no_model" required>
+                    </div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -315,7 +276,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Kode Warna</label>
-                                 <input type="text" class="form-control kode-warna" name="items[${idx}][kode_warna]" required>
+                                <input type="text" class="form-control kode-warna" name="items[${idx}][kode_warna]" required>
                             </div>
                         </div>
                     </div>
@@ -339,9 +300,21 @@
             const $pane = $(paneHtml);
             $navTabContent.append($pane);
 
-            // re-init Select2 di tab baru
-            initSelect2($pane);
+            // ambil HTML opsi dari tab pertama
+            const opsi = $('#nav-home .item-type').html();
+            const $select = $pane.find('.item-type');
 
+            // kalau sudah pernah inisialisasi (class hidden-accessible), destroy dulu
+            if ($select.hasClass('select2-hidden-accessible')) {
+                $select.select2('destroy');
+            }
+
+            // isi opsi & init Select2
+            $select.html(opsi).select2({
+                width: '100%',
+                allowClear: true,
+                placeholder: 'Pilih Item Type'
+            });
             // tunjukkan tab baru
             new bootstrap.Tab($btn[0]).show();
 
