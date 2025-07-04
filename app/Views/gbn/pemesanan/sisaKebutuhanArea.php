@@ -91,65 +91,89 @@
 
                                     $prevKey = null;
                                     $ttlKgPesan = 0;
+                                    $ttlKgOut = 0;
+                                    $ttlKgRetur = 0;
+                                    $ttlKebTotal = 0;
+                                    $sisa = 0;
+
                                     foreach ($dataPemesanan as $key => $id) {
                                         // Buat key unik untuk kombinasi
                                         $currentKey = $id['item_type'] . '|' . $id['kode_warna'] . '|' . $id['color'];
 
-                                        // Cek jika sudah pindah grup (dan bukan pertama)
                                         if ($prevKey !== null && $currentKey !== $prevKey) {
-                                            // Tampilkan total baris untuk grup sebelumnya
                                     ?>
                                             <tr style="font-weight: bold; background-color: #f0f0f0;">
-                                                <td colspan="7" class="text-end">Total KG</td>
-                                                <td class="text-start"><?= number_format($id['ttl_keb'], 2) ?></td>
-                                                <td class="text-start"><?= number_format($ttlKgPesan, 2) ?></td>
-                                                <td colspan="7"></td>
+                                                <th colspan="7" class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">Total Kebutuhan</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKebTotal, 2) ?></th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgPesan, 2) ?></th>
+                                                <th></th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgOut, 2) ?></th>
+                                                <th></th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgRetur, 2) ?></th>
+                                                <th colspan="2"></th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($sisa, 2) ?></th>
                                             </tr>
                                         <?php
-                                            // Reset total
+                                            // Reset total untuk grup berikutnya
                                             $ttlKgPesan = 0;
+                                            $ttlKgOut = 0;
+                                            $ttlKgRetur = 0;
+                                            $ttlKebTotal = 0;
+                                            $sisa = 0;
                                         }
-
                                         // Hitung total sementara
                                         $ttlKgPesan += floatval($id['ttl_kg']);
-
-                                        // Cetak baris data
+                                        $ttlKgOut += floatval($id['kg_out']);
+                                        $ttlKgRetur += floatval($id['kgs_retur']);
+                                        // Ambil ttl_keb satu kali per grup
+                                        if (!isset($shownKebutuhan[$currentKey])) {
+                                            $ttlKebTotal = floatval($id['ttl_keb']); // Ambil hanya sekali
+                                            $shownKebutuhan[$currentKey] = true;
+                                        }
+                                        $sisa = $ttlKebTotal - $ttlKgOut + $ttlKgRetur;
                                         ?>
                                         <tr>
-                                            <td class="text-xs text-start"><?= $id['tgl_pakai']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['tgl_pakai']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['tgl_retur']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['no_model']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['max_loss'] ?? ''; ?></td>
+                                            <td class="text-xs text-center"><?= $id['item_type']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['kode_warna']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['color']; ?></td>
                                             <td></td>
-                                            <td class="text-xs text-start"><?= $id['no_model']; ?></td>
-                                            <td class="text-xs text-start"><?= $id['max_loss']; ?></td>
-                                            <td class="text-xs text-start"><?= $id['item_type']; ?></td>
-                                            <td class="text-xs text-start"><?= $id['kode_warna']; ?></td>
-                                            <td class="text-xs text-start"><?= $id['color']; ?></td>
-                                            <td></td>
-                                            <td class="text-xs text-start"><?= $id['ttl_kg']; ?></td>
-                                            <td class="text-xs text-start"><?= $id['po_tambahan'] == 1 ? 'YA' : ''; ?></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td class="text-xs text-center"><?= number_format($id['ttl_kg'], 2) ?></td>
+                                            <td class="text-xs text-center"><?= $id['po_tambahan'] == 1 ? 'YA' : ''; ?></td>
+                                            <td class="text-xs text-center"><?= number_format($id['kg_out'], 2) ?></td>
+                                            <td class="text-xs text-center"><?= $id['lot_out']; ?></td>
+                                            <td class="text-xs text-center"><?= number_format($id['kgs_retur'], 2) ?></td>
+                                            <td class="text-xs text-center"><?= $id['lot_retur']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['ket_gbn']; ?></td>
                                             <td></td>
                                             <td></td>
                                             <td></td>
                                         </tr>
                                     <?php
-
                                         $prevKey = $currentKey;
                                     }
 
-                                    // Tampilkan total terakhir
+                                    // Tampilkan total untuk grup terakhir
                                     if ($prevKey !== null) {
                                     ?>
-                                        <tr style="background-color: #f0f0f0;">
+                                        <tr style="font-weight: bold; background-color: #f0f0f0;">
                                             <th colspan="7" class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">Total Kebutuhan</th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($id['ttl_keb'], 2) ?></th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKebTotal, 2) ?></th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgPesan, 2) ?></th>
-                                            <td colspan="7"></td>
+                                            <th></th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgOut, 2) ?></th>
+                                            <th></th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgRetur, 2) ?></th>
+                                            <th colspan="2"></th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($sisa, 2) ?></th>
                                         </tr>
                                 <?php
                                     }
-                                } ?>
+                                }
+                                ?>
                             </tbody>
                         </table>
                     </div>
@@ -181,85 +205,5 @@
         window.location.href = url;
     });
 </script>
-<!-- <script>
-    document.getElementById('filterButton').addEventListener('click', function() {
-        const filterArea = document.getElementById('filter_area').value.trim();
-        const filterModel = document.getElementById('filter_model').value.trim();
-
-        // Validasi input
-        if (!filterArea || !filterModel) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Input Tidak Lengkap',
-                text: 'Area dan No Model harus diisi!',
-                confirmButtonText: 'OK',
-            });
-            return; // Hentikan eksekusi jika input kosong
-        }
-
-        // Buat URL dengan query parameters
-        const url = `<?= base_url($role . "/pemesanan/sisaKebutuhanArea_filter") ?>?area=${encodeURIComponent(filterArea)}&model=${encodeURIComponent(filterModel)}`;
-
-        // fetch(url, {
-        //         method: 'GET',
-        //     })
-        //     .then(response => {
-        //         if (!response.ok) {
-        //             throw new Error(`HTTP error! status: ${response.status}`);
-        //         }
-        //         return response.json();
-        //         // console.log(response)
-        //     })
-        // .then(data => {
-        //     const tableBody = document.getElementById('sisaKebutuhanTable');
-        //     tableBody.innerHTML = ''; // Clear existing table rows
-
-        //     if (Array.isArray(data) && data.length > 0) {
-        //         data.forEach(psn => {
-        //             const row = document.createElement('tr');
-
-        //             const tglPakaiCell = document.createElement('td');
-        //             tglPakaiCell.innerHTML = `<p class="text-sm font-weight-bold mb-0">${psn.tgl_pakai || '-'}</p>`;
-        //             row.appendChild(tglPakaiCell);
-
-        //             const actionCell = document.createElement('td');
-        //             actionCell.classList.add('text-center');
-        //             actionCell.innerHTML = `
-        //             <a href="/${psn.tgl_pakai}" class="btn bg-gradient-info">
-        //                 <i class="fas fa-eye"></i>
-        //                 Detail
-        //             </a>
-        //         `;
-        //             row.appendChild(actionCell);
-
-        //             tableBody.appendChild(row);
-        //         });
-        //     } else {
-        //         const row = document.createElement('tr');
-        //         const noDataCell = document.createElement('td');
-        //         noDataCell.setAttribute('colspan', '16'); // Sesuaikan jumlah kolom tabel
-        //         noDataCell.classList.add('text-center');
-        //         noDataCell.textContent = 'Tidak ada data yang ditemukan.';
-        //         row.appendChild(noDataCell);
-        //         tableBody.appendChild(row);
-        //     }
-        // })
-        // .catch(error => {
-        //     console.error('Fetch Error:', error);
-
-        //     // Tampilkan pesan error di tabel
-        //     const tableBody = document.getElementById('sisaKebutuhanTable');
-        //     tableBody.innerHTML = ''; // Bersihkan tabel
-
-        //     const row = document.createElement('tr');
-        //     const errorCell = document.createElement('td');
-        //     errorCell.setAttribute('colspan', '16'); // Sesuaikan jumlah kolom tabel
-        //     errorCell.classList.add('text-center', 'text-danger');
-        //     errorCell.textContent = 'Terjadi kesalahan saat memuat data. Periksa kembali koneksi atau coba lagi nanti.';
-        //     row.appendChild(errorCell);
-        //     tableBody.appendChild(row);
-        // });
-    });
-</script> -->
 
 <?php $this->endSection(); ?>
