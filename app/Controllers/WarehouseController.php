@@ -2485,4 +2485,46 @@ class WarehouseController extends BaseController
 
         return $this->response->setJSON($data);
     }
+    public function historyPindahOrder()
+    {
+        $noModel   = $this->request->getGet('model')     ?? '';
+        $kodeWarna = $this->request->getGet('kode_warna') ?? '';
+
+        // 1) Ambil data
+        $dataPindah = $this->historyStock->getHistoryPindahOrder($noModel, $kodeWarna);
+
+        // 2) Siapkan HTTP client
+        $client = \Config\Services::curlrequest([
+            'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
+            'timeout' => 5
+        ]);
+
+        // 3) Loop dan merge API result
+        foreach ($dataPindah as &$row) {
+            try {
+                $res = $client->get('getDeliveryAwalAkhir', [
+                    'query' => ['model' => $row['no_model_new']]
+                ]);
+                $body = json_decode($res->getBody(), true);
+                $row['delivery_awal']  = $body['delivery_awal']  ?? '-';
+                $row['delivery_akhir'] = $body['delivery_akhir'] ?? '-';
+            } catch (\Exception $e) {
+                $row['delivery_awal']  = '-';
+                $row['delivery_akhir'] = '-';
+            }
+        }
+        unset($row);
+
+        // 4) Response
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON($dataPindah);
+        }
+
+        return view($this->role . '/warehouse/history-pindah-order', [
+            'role'    => $this->role,
+            'title'   => 'History Pindah Order',
+            'active'  => $this->active,
+            'history' => $dataPindah,
+        ]);
+    }
 }

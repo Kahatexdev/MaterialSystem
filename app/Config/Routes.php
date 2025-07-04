@@ -200,6 +200,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportSisaPakaiKaret', 'WarehouseController::reportSisaPakaiKaret');
     $routes->get('warehouse/filterSisaPakaiKaret', 'WarehouseController::filterSisaPakaiKaret');
     $routes->get('warehouse/exportReportSisaPakaiKaret', 'ExcelController::exportReportSisaPakaiKaret');
+    $routes->get('warehouse/historyPindahOrder', 'WarehouseController::historyPindahOrder');
+    $routes->get('warehouse/exportHistoryPindahOrder', 'ExcelController::exportHistoryPindahOrder');
+
 
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');
