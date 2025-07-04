@@ -796,6 +796,8 @@ class PemesananController extends BaseController
     }
     public function getUpdateListPemesanan()
     {
+        $post = $this->request->getPost();
+        dd($post);
         $data = $this->request->getPost([
             'area',
             'tgl_pakai',
@@ -1005,19 +1007,23 @@ class PemesananController extends BaseController
         return view($this->role . '/pemesanan/sisaKebutuhanArea', $data);
     }
 
-    public function pinjamOrder()
+    public function optionsPinjamOrder()
     {
-        $area = $this->request->getGet('area');
-        $jenis = $this->request->getGet('jenis');
-        $tglPakai = $this->request->getGet('tglpakai');
-        dd($area, $jenis, $tglPakai);
-        // $dataPemesanan = $this->totalPemesananModel->getDataPemesanan($area, $jenis, $tglPakai);
-        // $getData = $this->stockModel->pemakaianArea();
-        $data = [
-            'active' => $this->active,
-            'title' => 'Material System',
-            'role' => $this->role
-        ];
-        return view($this->role . '/pemesanan/pinjam-order', $data);
+        $itemType  = $this->request->getGet('item_type');
+        $kodeWarna = $this->request->getGet('kode_warna');
+
+        $getData = $this->stockModel->getPinjamOrder($itemType, $kodeWarna);
+
+        return $this->response->setJSON($getData);
+    }
+
+    public function detailPinjamOrder()
+    {
+        $noModel   = $this->request->getGet('no_model');
+        $itemType  = $this->request->getGet('item_type');
+        $kodeWarna = $this->request->getGet('kode_warna');
+
+        $detail = $this->stockModel->getPinjamOrderDetail($noModel, $itemType, $kodeWarna);
+        return $this->response->setJSON($detail);
     }
 }
