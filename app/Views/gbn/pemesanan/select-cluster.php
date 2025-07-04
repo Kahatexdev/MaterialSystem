@@ -166,6 +166,59 @@
         font-weight: 500;
     }
 
+    .custom-button {
+        background-color: #061c3e;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        min-width: 80px;
+        justify-content: center;
+    }
+
+    .custom-button:hover {
+        background-color: rgb(13, 42, 85);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+    }
+
+    .custom-button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+    }
+
+    .custom-button i {
+        font-size: 16px;
+    }
+
+    .btn-xs {
+        width: 28px;
+        height: 28px;
+    }
+
+    .btn-round {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: auto;
+    }
+
+    .btn-round i {
+        font-size: 14px;
+    }
+
     /* Responsive Layout */
     @media (min-width: 768px) {
         .card-container {
@@ -262,6 +315,15 @@
                     <form id="pengeluaran" method="post" action="<?= base_url('gbn/simpanPengeluaranJalur/' . $id . '?Area=' . $area . '&KgsPesan=' . $KgsPesan . '&CnsPesan=' . $CnsPesan); ?>">
                         <div class="row" id="formPengeluaran">
                             <!-- Form input pengeluaran stock will be loaded here -->
+                        </div>
+                        <div class="row mt-2">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h6 class="form-section-title">PINJAM ORDER</h6>
+                                <button class="custom-button btn-round btn-xs ms-auto" id="addPinjam"><i class="fas fa-plus text-center"></i></button>
+                            </div>
+                        </div>
+                        <div class="row" id="dataPinjamOrder">
+                            <!-- Data Pinjam Order -->
                         </div>
                         <div class="d-flex justify-content-end mt-3">
                             <button type="submit" class="btn btn-primary btn-submit">
@@ -442,6 +504,9 @@
             document.getElementById('formPengeluaran').innerHTML += formPengeluaran;
 
             document.getElementById('modalContent').innerHTML = content;
+
+            window.currentItemType = item.item_type;
+            window.currentKodeWarna = item.kode_warna;
         }
 
 
@@ -536,6 +601,122 @@
                     });
                 });
         });
+
+        document.getElementById('addPinjam').addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Buat wrapper row baru
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('row', 'mb-3', 'mt-3');
+
+            // Kolom select
+            const colSelect = document.createElement('div');
+            colSelect.classList.add('col-md-4');
+
+            // Buat <select> kosong atau dengan opsi dummy
+            const select = document.createElement('select');
+            select.classList.add('form-select', 'pinjam-select');
+            select.setAttribute('name', 'pinjam_id[]');
+            select.classList.add('pinjam-select');
+
+            // Opsi No Model
+            select.innerHTML = `<option value=""></option>`;
+
+            colSelect.appendChild(select);
+
+            // Kolom placeholder detail
+            const colDetail = document.createElement('div');
+            colDetail.classList.add('col-md-7');
+            colDetail.innerHTML = `<div class="info-badge">Detail akan muncul di sini.</div>`;
+
+            const colDelete = document.createElement('div');
+            colDelete.classList.add('col-md-1');
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.classList.add('btn', 'btn-danger', 'delete-btn');
+            deleteBtn.setAttribute('name', 'delete');
+
+            // **Tambahan untuk fitur hapus per baris:**
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                wrapper.remove();
+            });
+
+            colDelete.appendChild(deleteBtn);
+
+            wrapper.append(colSelect, colDetail, colDelete);
+            document.getElementById('dataPinjamOrder').appendChild(wrapper);
+
+            // Inisialisasi select2 saat modal ditampilkan
+            $(select).select2({
+                placeholder: 'Pilih No Model',
+                allowClear: true,
+                dropdownParent: $('#dataPinjamOrder'),
+                width: '100%',
+                ajax: {
+                    url: '<?= base_url("/gbn/pinjamOrder/options") ?>',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            q: params.term,
+                            item_type: window.currentItemType,
+                            kode_warna: window.currentKodeWarna
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.map(item => ({
+                                id: item.no_model,
+                                text: `${item.no_model} | ${item.item_type} | ${item.kode_warna}`
+                            }))
+                        };
+                    }
+                }
+            }).on('select2:select', async function(e) {
+                const selectedData = e.params.data;
+                console.log('Selected:', selectedData);
+                // const noModel = e.params.data.id; // misal `id` tadi adalah no_model
+                const [noModel, itemType, kodeWarna] = selectedData.text.split('|').map(v => v.trim());
+                // Kosongkan dulu area detail:
+                colDetail.innerHTML = '';
+
+                try {
+                    // 1. Fetch data detail berdasarkan no_model
+                    const res = await fetch(`<?= base_url('/gbn/pinjamOrder/detail') ?>?no_model=${encodeURIComponent(noModel)}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}`);
+                    if (!res.ok) throw new Error('Gagal load detail');
+                    const items = await res.json(); // asumsikan array of { id_pemasukan, no_karung, … }
+
+                    // 2. Render setiap item ke dalam colDetail
+                    items.forEach(item => {
+                        const card = document.createElement('div');
+                        card.classList.add('card-body');
+                        card.innerHTML = `
+                <strong>No Karung:</strong> ${item.no_karung ?? 0}<br>
+                <strong>Cluster:</strong> ${item.nama_cluster ?? 'Tidak Ada di Cluster'}<br>
+                <strong>PDK:</strong> ${item.no_model ?? ''}<br>
+                <strong>Item Type:</strong> ${item.item_type ?? ''}<br>
+                <strong>Kode Warna:</strong> ${item.kode_warna ?? ''}<br>
+                <strong>Warna:</strong> ${item.warna ?? ''}<br>
+                <strong>Lot Stock:</strong> ${item.lot_stock ?? 0}<br>
+                <strong>Total Kg:</strong> ${item.stock_awal ?? 0} KG<br>
+                <strong>Total Cones:</strong> ${item.cns_awal ?? 0} CNS
+              </label>
+        `;
+                        colDetail.appendChild(card);
+                    });
+
+                } catch (err) {
+                    console.error(err);
+                    colDetail.innerHTML = `<div class="alert alert-danger">Gagal memuat detail.</div>`;
+                }
+            });
+
+
+            // (Listener change nanti kamu tambahkan di sini untuk fetch detail)
+        });
+
     });
 </script>
 

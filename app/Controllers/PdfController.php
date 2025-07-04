@@ -3349,6 +3349,7 @@ class PdfController extends BaseController
         $tujuan = $this->request->getGet('tujuan');
 
         $noModel = $this->request->getGet('no_model');
+        $delivery = $this->request->getGet('delivery');
         $result = $this->openPoModel->getPoBookingByNoModel($noModel);
 
         if ($tujuan == 'CELUP') {
@@ -3614,7 +3615,7 @@ class PdfController extends BaseController
                 '',
                 '',
                 '',
-                '', // Delivery
+                $delivery, // Delivery
                 number_format($row['kg_po'], 2) ?? 0,
                 number_format($row['kg_percones'], 2) ?? 0,
                 '',
