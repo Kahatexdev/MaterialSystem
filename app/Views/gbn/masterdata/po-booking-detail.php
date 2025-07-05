@@ -33,7 +33,7 @@
                 <a
                     href="<?= base_url("$role/masterdata/poBooking/exportPoBooking?no_model=" . rawurlencode($detail[0]['no_model'])) ?>"
                     class="btn btn-success" id="exportPo">
-                    <i class="fas fa-file me-2"></i>Export
+                    <i class="fa-solid fa-file-pdf me-2"></i>Export
                 </a>
             </div>
         </div>
@@ -75,7 +75,13 @@
                                         data-color="<?= htmlspecialchars($data['color']) ?>"
                                         data-buyer="<?= htmlspecialchars($data['buyer']) ?>"
                                         data-kg_po="<?= htmlspecialchars($data['kg_po']) ?>"
-                                        data-ket_celup="<?= htmlspecialchars($data['ket_celup']) ?>">
+                                        data-ket_celup="<?= htmlspecialchars($data['ket_celup']) ?>"
+                                        data-spesifikasi_benang="<?= htmlspecialchars(isset($data['spesifikasi_benang']) ? $data['spesifikasi_benang'] : '') ?>"
+                                        data-keterangan="<?= htmlspecialchars(isset($data['keterangan']) ? $data['keterangan'] : '') ?>"
+                                        data-bentuk_celup="<?= htmlspecialchars(isset($data['bentuk_celup']) ? $data['bentuk_celup'] : '') ?>"
+                                        data-kg_percones="<?= htmlspecialchars(isset($data['kg_percones']) ? $data['kg_percones'] : '') ?>"
+                                        data-jumlah_cones="<?= htmlspecialchars(isset($data['jumlah_cones']) ? $data['jumlah_cones'] : '') ?>"
+                                        data-jenis_produksi="<?= htmlspecialchars(isset($data['jenis_produksi']) ? $data['jenis_produksi'] : '') ?>">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <!-- Tombol Hapus -->
@@ -110,6 +116,10 @@
                         <input type="date" class="form-control" id="delivery" name="delivery">
                     </div>
                     <div class="mb-3">
+                        <label for="no_order" class="form-label">No Order</label>
+                        <input type="text" class="form-control" id="no_order" name="no_order">
+                    </div>
+                    <div class="mb-3">
                         <label for="jenis" class="form-label">Material Type</label>
                         <select name="material_type" id="material_type" class="form-control">
                             <option value="">Pilih Material Type</option>
@@ -137,7 +147,7 @@
 </div>
 <!-- Modal Edit PO -->
 <div class="modal fade" id="modalEditPO" tabindex="-1" aria-labelledby="modalEditPOLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <form id="formEditPO" method="post" action="<?= base_url("$role/masterdata/poBooking/updatePoBooking") ?>">
             <div class="modal-content">
                 <div class="modal-header">
@@ -146,29 +156,83 @@
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="id_po" id="edit-id_po">
-                    <div class="mb-3">
-                        <label for="edit-item_type" class="form-label">Item Type</label>
-                        <input type="text" class="form-control" id="edit-item_type" name="item_type" readonly>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="edit-buyer" class="form-label">Buyer</label>
+                                <input type="text" class="form-control" id="edit-buyer" name="buyer" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="edit-item_type" class="form-label">Item Type</label>
+                                <input type="text" class="form-control" id="edit-item_type" name="item_type" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="edit-kode_warna" class="form-label">Kode Warna</label>
+                                <input type="text" class="form-control" id="edit-kode_warna" name="kode_warna" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="edit-color" class="form-label">Warna</label>
+                                <input type="text" class="form-control" id="edit-color" name="color" required>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="edit-kode_warna" class="form-label">Kode Warna</label>
-                        <input type="text" class="form-control" id="edit-kode_warna" name="kode_warna" readonly>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="edit-kg_po" class="form-label">Kg Kebutuhan</label>
+                                <input type="number" step="0.01" class="form-control" id="edit-kg_po" name="kg_po" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="edit-spesifikasi_benang" class="form-label">Spesifikasi Benang</label>
+                                <input type="text" class="form-control" id="edit-spesifikasi_benang" name="spesifikasi_benang" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="edit-keterangan" class="form-label">Keterangan</label>
+                                <input type="text" class="form-control" id="edit-keterangan" name="keterangan">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="edit-ket_celup" class="form-label">Keterangan Celup</label>
+                                <input type="text" class="form-control" id="edit-ket_celup" name="ket_celup">
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="edit-color" class="form-label">Warna</label>
-                        <input type="text" class="form-control" id="edit-color" name="color" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit-buyer" class="form-label">Buyer</label>
-                        <input type="text" class="form-control" id="edit-buyer" name="buyer" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit-kg_po" class="form-label">Kg Kebutuhan</label>
-                        <input type="number" step="0.01" class="form-control" id="edit-kg_po" name="kg_po" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit-ket_celup" class="form-label">Keterangan Celup</label>
-                        <input type="text" class="form-control" id="edit-ket_celup" name="ket_celup">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="edit-bentuk_celup" class="form-label">Keterangan Celup</label>
+                                <input type="text" class="form-control" id="edit-bentuk_celup" name="bentuk_celup">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="edit-kg_percones" class="form-label">Permintan Kelos (Kg Cones)</label>
+                                <input type="text" class="form-control" id="edit-kg_percones" name="kg_percones">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="edit-jumlah_cones" class="form-label">Permintan Kelos (Total Cones)</label>
+                                <input type="text" class="form-control" id="edit-jumlah_cones" name="jumlah_cones">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="edit-jenis_produksi" class="form-label">Untuk Produksi</label>
+                                <input type="text" class="form-control" id="edit-jenis_produksi" name="jenis_produksi">
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -213,6 +277,12 @@
             $('#edit-buyer').val($(this).data('buyer'));
             $('#edit-kg_po').val($(this).data('kg_po'));
             $('#edit-ket_celup').val($(this).data('ket_celup'));
+            $('#edit-spesifikasi_benang').val($(this).data('spesifikasi_benang') || '');
+            $('#edit-keterangan').val($(this).data('keterangan') || '');
+            $('#edit-bentuk_celup').val($(this).data('bentuk_celup') || '');
+            $('#edit-kg_percones').val($(this).data('kg_percones') || '');
+            $('#edit-jumlah_cones').val($(this).data('jumlah_cones') || '');
+            $('#edit-jenis_produksi').val($(this).data('jenis_produksi') || '');
             $('#modalEditPO').modal('show');
         });
 
@@ -241,12 +311,14 @@
             var action = $(this).attr('action');
             var date = $('#delivery').val();
             var material_type = $('#material_type').val();
+            var no_order = $('#no_order').val();
             let baseUrl = $(this).attr('action');
 
-            if (date || material_type) {
-                // Append delivery and material params, handle if URL already has query params
-                baseUrl += (baseUrl.indexOf('?') === -1 ? '?' : '&') + 'delivery=' + encodeURIComponent(date) + '&material_type=' + encodeURIComponent(material_type);
-            }
+            baseUrl += (baseUrl.indexOf('?') === -1 ? '?' : '&') +
+                'delivery=' + encodeURIComponent(date) +
+                '&material_type=' + encodeURIComponent(material_type) +
+                '&no_order=' + encodeURIComponent(no_order);
+
 
             window.open(baseUrl, '_blank');
         });

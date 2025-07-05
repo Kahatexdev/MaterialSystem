@@ -3351,7 +3351,8 @@ class PdfController extends BaseController
         $noModel = $this->request->getGet('no_model');
         $delivery = $this->request->getGet('delivery');
         $materialType = $this->request->getGet('material_type');
-        // dd($materialType);
+        $noOrder = $this->request->getGet('no_order');
+        // dd($noOrder);
         $result = $this->openPoModel->getPoBookingByNoModel($noModel);
 
         if ($tujuan == 'CELUP') {
@@ -3724,13 +3725,13 @@ class PdfController extends BaseController
             $pdf->SetXY($currentX, $startY);
             $pdf->SetTextColor(255, 255, 255);
             $y0 = $pdf->GetY();
-            $pdf->MultiCell(20, $lineHeight, '', 0, 'C'); //No Order
+            $pdf->MultiCell(20, $lineHeight, $noOrder, 0, 'C'); //No Order
             $textHeight = $pdf->GetY() - $y0;
             $pdf->SetTextColor(0, 0, 0);
 
             $centerY = $startY + ($maxHeight - $textHeight) / 2;
             $pdf->SetXY($currentX, $centerY);
-            $pdf->MultiCell(20, $lineHeight, '', 0, 'C'); // No Order
+            $pdf->MultiCell(20, $lineHeight, $noOrder, 0, 'C'); // No Order
             $currentX += 20;
 
             // Skip kolom yang sudah terisi dengan Cell biasa
