@@ -22,6 +22,7 @@ use App\Models\PemesananModel;
 use App\Models\TotalPemesananModel;
 use App\Models\OtherOutModel;
 use App\Models\PemesananSpandexKaretModel;
+use App\Models\ReturModel;
 use App\Models\PoTambahanModel;
 use CodeIgniter\API\ResponseTrait;
 
@@ -51,6 +52,7 @@ class PemesananController extends BaseController
     protected $otherOutModel;
     protected $pemesananSpandexKaretModel;
     protected $poTambahanModel;
+    protected $returModel;
 
     public function __construct()
     {
@@ -72,6 +74,7 @@ class PemesananController extends BaseController
         $this->otherOutModel = new OtherOutModel();
         $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
         $this->poTambahanModel = new PoTambahanModel();
+        $this->returModel = new ReturModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -827,60 +830,167 @@ class PemesananController extends BaseController
 
         // Initialize dataPemesanan as empty by default
         $dataPemesanan = [];
+        $dataRetur = [];
 
         if (!empty($area) && !empty($noModel)) {
-            $dataPemesanan = $this->pemesananModel->getPemesananByModel($area, $noModel);
+            $dataPemesanan = $this->pemesananModel->getPemesananByAreaModel($area, $noModel);
+            $dataRetur = $this->returModel->getReturByAreaModel($area, $noModel);
         }
+        // dd($dataPemesanan);
 
-        foreach ($dataPemesanan as $key => &$id) {
-            $allStyle = $id['style_size'];
-            $allGw = $id['gw'];
-            $allLoss = $id['loss'];
-            $allComposition = $id['composition'];
+        $mergedData = [];
+        $kebutuhan = [];
 
-            $style = explode(',', $allStyle);
-            $gw = explode(',', $allGw);
-            $loss = explode(',', $allLoss);
-            $composition = explode(',', $allComposition);
+        // Tambahkan semua data pemesanan ke mergedData
+        foreach ($dataPemesanan as $key => $pemesanan) {
+            // ambil data styleSize by bb
+            $getStyle = $this->materialModel->getStyleSizeByBb($pemesanan['no_model'], $pemesanan['item_type'], $pemesanan['kode_warna']);
 
-            $count = count($style);
-
-            $dataGabungan = [];
-
-            for ($i = 0; $i < $count; $i++) {
-                $dataGabungan[] = [
-                    'style_size' => trim($style[$i]),
-                    'gw'         => trim($gw[$i]),
-                    'loss'       => trim($loss[$i]),
-                    'composition'       => trim($composition[$i])
-                ];
-            }
             $ttlKeb = 0;
             $ttlQty = 0;
-            foreach ($dataGabungan as $data) {
-                // ambil data qty pcs
-                $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . $id['no_model'] . '&item_type=' . urlencode($id['item_type']) . '&kode_warna=' . urlencode($id['kode_warna']) . '&style_size=' . urlencode($data['style_size']) . '&area=' . $area;
-                $responseQty = file_get_contents($urlQty);
-                $qty = json_decode($responseQty, true);
-                // ambil kg po tambahan
-                $params = [
-                    'no_model' => $id['no_model'],
-                    'item_type' => $id['item_type'],
-                    'kode_warna' => $id['kode_warna'],
-                    'style_size' => $data['style_size'],
-                    'area' => $area,
-                ];
 
-                $tambahan = $this->poTambahanModel->getKgPoTambahan($params);
-                $kgPoTambahan = $kgPoTambahan = floatval($tambahan['ttl_keb_potambahan'] ?? '0');
-                if (isset($qty['qty'])) {
-                    $keb = (floatval($qty['qty']) * floatval($data['gw']) * (floatval($data['composition']) / 100) * (1 + (floatval($data['loss']) / 100)) / 1000) + $kgPoTambahan;
-                    $ttlKeb += $keb;
-                    $ttlQty  += floatval($qty['qty']);
-                    $dataPemesanan[$key]['qty'] = $ttlQty;
+            foreach ($getStyle as $i => $data) {
+                // Ambil qty
+                $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . $pemesanan['no_model']
+                    . '&style_size=' . urlencode($data['style_size'])
+                    . '&area=' . $area;
+
+                $qtyResponse = file_get_contents($urlQty);
+                $qtyData     = json_decode($qtyResponse, true);
+                $qty         = (intval($qtyData['qty']) ?? 0);
+
+                // Ambil kg po tambahan
+                $kgPoTambahan = floatval(
+                    $this->poTambahanModel->getKgPoTambahan([
+                        'no_model'    => $pemesanan['no_model'],
+                        'item_type'   => $pemesanan['item_type'],
+                        'kode_warna'  => $pemesanan['kode_warna'],
+                        'style_size'  => $data['style_size'],
+                        'area'        => $area,
+                    ])['ttl_keb_potambahan'] ?? 0
+                );
+
+                if ($qty > 0) {
+                    $kebutuhan = (($qty * $data['gw'] * ($data['composition'] / 100)) * (1 + ($data['loss'] / 100)) / 1000) + $kgPoTambahan;
+                    $pemesanan['ttl_keb'] = $ttlKeb;
                 }
+                $ttlKeb += $kebutuhan;
+                $ttlQty += $qty;
             }
-            $dataPemesanan[$key]['ttl_keb'] = $ttlKeb;
+            $pemesanan['qty']     = $ttlQty; // ttl qty pcs
+            $pemesanan['ttl_keb'] = $ttlKeb; // ttl kebutuhan bb
+
+
+            $mergedData[] = [
+                'no_model'           => $pemesanan['no_model'],
+                'item_type'          => $pemesanan['item_type'],
+                'kode_warna'         => $pemesanan['kode_warna'],
+                'color'              => $pemesanan['color'],
+                'max_loss'           => $pemesanan['max_loss'],
+                'tgl_pakai'          => $pemesanan['tgl_pakai'],
+                'id_total_pemesanan' => $pemesanan['id_total_pemesanan'],
+                'ttl_jl_mc'          => $pemesanan['ttl_jl_mc'],
+                'ttl_kg'             => number_format($pemesanan['ttl_kg'], 2),
+                'po_tambahan'        => $pemesanan['po_tambahan'],
+                'ttl_keb'            => number_format($pemesanan['ttl_keb'], 2),
+                'kg_out'             => number_format($pemesanan['kgs_out'], 2),
+                'lot_out'            => $pemesanan['lot_out'],
+                // field retur kosong
+                'tgl_retur'          => null,
+                'kgs_retur'          => null,
+                'lot_retur'          => null,
+                'ket_gbn'            => null,
+            ];
+            $kebutuhanDipakai[$key] = true;
+        }
+
+        // Tambahkan semua data retur ke mergedData (data pemesanan diset null)
+        foreach ($dataRetur as $retur) {
+            // ambil data styleSize by bb
+            $getStyle = $this->materialModel->getStyleSizeByBb($retur['no_model'], $retur['item_type'], $retur['kode_warna']);
+            // dd($getStyle);
+
+            $ttlKeb = 0;
+            $ttlQty = 0;
+
+            foreach ($getStyle as $i => $data) {
+                // Ambil qty
+                $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . $retur['no_model']
+                    . '&style_size=' . urlencode($data['style_size'])
+                    . '&area=' . $area;
+
+                $qtyResponse = file_get_contents($urlQty);
+                $qtyData     = json_decode($qtyResponse, true);
+                $qty         = (intval($qtyData['qty']) ?? 0);
+
+                // Ambil kg po tambahan
+                $kgPoTambahan = floatval(
+                    $this->poTambahanModel->getKgPoTambahan([
+                        'no_model'    => $retur['no_model'],
+                        'item_type'   => $retur['item_type'],
+                        'kode_warna'  => $retur['kode_warna'],
+                        'style_size'  => $data['style_size'],
+                        'area'        => $area,
+                    ])['ttl_keb_potambahan'] ?? 0
+                );
+
+                if ($qty > 0) {
+                    $kebutuhan = (($qty * $data['gw'] * ($data['composition'] / 100)) * (1 + ($data['loss'] / 100)) / 1000) + $kgPoTambahan;
+                    $retur['ttl_keb'] = $ttlKeb;
+                }
+                $ttlKeb += $kebutuhan;
+                $ttlQty += $qty;
+            }
+            $retur['qty']     = $ttlQty; // ttl qty pcs
+            $retur['ttl_keb'] = $ttlKeb; // ttl kebutuhan bb
+
+
+            $mergedData[] = [
+                'no_model'           => $retur['no_model'],
+                'item_type'          => $retur['item_type'],
+                'kode_warna'         => $retur['kode_warna'],
+                'color'              => $retur['warna'],
+                'max_loss'           => 0,
+                'tgl_pakai'          => null,
+                'id_total_pemesanan' => null,
+                'ttl_jl_mc'          => null,
+                'ttl_kg'             => null,
+                'po_tambahan'        => null,
+                'ttl_keb'            => number_format($retur['ttl_keb'], 2),
+                'kg_out'             => null,
+                'lot_out'            => null,
+                'tgl_retur'          => $retur['tgl_retur'],
+                'kgs_retur'          => number_format($retur['kgs_retur'], 2),
+                'lot_retur'          => $retur['lot_retur'],
+                'ket_gbn'            => $retur['keterangan_gbn'],
+            ];
+        }
+
+        if ($mergedData) {
+            usort($mergedData, function ($a, $b) {
+                // Bandingkan item_type (ASC)
+                $cmpItem = strcmp($a['item_type'], $b['item_type']);
+                if ($cmpItem !== 0) {
+                    return $cmpItem;
+                }
+
+                // Bandingkan kode_warna (ASC)
+                $cmpWarna = strcmp($a['kode_warna'], $b['kode_warna']);
+                if ($cmpWarna !== 0) {
+                    return $cmpWarna;
+                }
+
+                // Ambil tanggal (prioritas tgl_pakai, fallback ke tgl_retur)
+                $tanggalA = $a['tgl_pakai'] ?: $a['tgl_retur'];
+                $tanggalB = $b['tgl_pakai'] ?: $b['tgl_retur'];
+
+                // Handle tanggal kosong supaya selalu di bawah
+                if (empty($tanggalA) && !empty($tanggalB)) return 1;
+                if (!empty($tanggalA) && empty($tanggalB)) return -1;
+
+                // Bandingkan tanggal (DESC)
+                return strtotime($tanggalB) <=> strtotime($tanggalA);
+            });
         }
 
         $data = [
@@ -888,12 +998,30 @@ class PemesananController extends BaseController
             'title' => 'Material System',
             'role' => $this->role,
             'allArea' => $allArea,
-            'dataPemesanan' => $dataPemesanan, // Pass the filtered data
+            'dataPemesanan' => $mergedData, // Pass the filtered data
             'area' => $area, // Pass the filtered data
             'noModel' => $noModel, // Pass the filtered data
         ];
-        // var_dump($dataPemesanan);
-        // dd($dataPemesanan);
         return view($this->role . '/pemesanan/sisaKebutuhanArea', $data);
+    }
+
+    public function optionsPinjamOrder()
+    {
+        $itemType  = $this->request->getGet('item_type');
+        $kodeWarna = $this->request->getGet('kode_warna');
+
+        $getData = $this->stockModel->getPinjamOrder($itemType, $kodeWarna);
+
+        return $this->response->setJSON($getData);
+    }
+
+    public function detailPinjamOrder()
+    {
+        $noModel   = $this->request->getGet('no_model');
+        $itemType  = $this->request->getGet('item_type');
+        $kodeWarna = $this->request->getGet('kode_warna');
+
+        $detail = $this->stockModel->getPinjamOrderDetail($noModel, $itemType, $kodeWarna);
+        return $this->response->setJSON($detail);
     }
 }
