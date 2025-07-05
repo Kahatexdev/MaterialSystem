@@ -39,7 +39,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('masterdata/poBooking/saveOpenPoBooking', 'PoBookingController::saveOpenPoBooking');
     $routes->get('masterdata/poBooking/exportPoBooking', 'PdfController::generateOpenPOBooking');
     $routes->get('masterdata/poBooking/detail', 'PoBookingController::detail');
-    $routes->post('masterdata/poBooking/updatePoBooking/(:num)', 'PoBookingController::updatePoBooking/$1');
+    $routes->post('masterdata/poBooking/updatePoBooking', 'PoBookingController::updatePoBooking');
+    $routes->post('masterdata/poBooking/deletePoBooking', 'PoBookingController::deletePoBooking');
     $routes->get('masterdata/poManual', 'PoManualController::index');
     $routes->get('masterdata/poManual/create', 'PoManualController::create');
     $routes->get('masterdata/poManual/getNoOrderByModel', 'PoManualController::getNoOrderByModel');
