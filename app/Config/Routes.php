@@ -100,6 +100,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
     $routes->get('schedule/getNoModel', 'ScheduleController::getNoModel');
     $routes->post('schedule/saveSchedule', 'ScheduleController::saveSchedule');
+    $routes->post('schedule/saveScheduleSample', 'ScheduleController::saveScheduleSample');
     $routes->get('schedule/editSchedule', 'ScheduleController::editSchedule');
     $routes->post('schedule/updateSchedule', 'ScheduleController::updateSchedule');
     $routes->post('schedule/updateTglSchedule', 'ScheduleController::updateTglSchedule');

@@ -1258,4 +1258,19 @@ class ScheduleController extends BaseController
 
         return $this->response->setJSON($data);
     }
+    public function saveScheduleSample()
+    {
+        $scheduleData = $this->request->getPost();
+        // dd($this->request->getPost());
+
+        // Ambil id_mesin dan no_model
+        $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
+        $mesin = $this->mesinCelupModel->getKeteranganMesin($scheduleData['no_mesin']);
+        $result = $this->scheduleCelupModel->insert($scheduleData);
+        if ($result) {
+            return redirect()->to(session()->get('role') . '/schedule')->with('success', 'Jadwal berhasil disimpan!');
+        } else {
+            return redirect()->back()->with('error', 'Gagal menyimpan jadwal!');
+        }
+    }
 }
