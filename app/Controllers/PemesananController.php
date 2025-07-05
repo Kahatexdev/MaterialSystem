@@ -1156,4 +1156,24 @@ class PemesananController extends BaseController
     // }
     //  END JANGAN DI HAPUS BUAT PERBANDINGAN NANTI KALO DATA NYA BANYAK LAMA YG MANA
 
+
+    public function optionsPinjamOrder()
+    {
+        $itemType  = $this->request->getGet('item_type');
+        $kodeWarna = $this->request->getGet('kode_warna');
+
+        $getData = $this->stockModel->getPinjamOrder($itemType, $kodeWarna);
+
+        return $this->response->setJSON($getData);
+    }
+
+    public function detailPinjamOrder()
+    {
+        $noModel   = $this->request->getGet('no_model');
+        $itemType  = $this->request->getGet('item_type');
+        $kodeWarna = $this->request->getGet('kode_warna');
+
+        $detail = $this->stockModel->getPinjamOrderDetail($noModel, $itemType, $kodeWarna);
+        return $this->response->setJSON($detail);
+    }
 }

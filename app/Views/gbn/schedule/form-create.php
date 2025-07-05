@@ -131,13 +131,33 @@
     <div class="row">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Form Input Schedule Celup</h3>
-                    <!-- text keterangan -->
-                    <div class="card-tools">
-                        <h6 class="badge bg-info text-white">Tanggal Schedule : <?= $tanggal_schedule ?> | Lot Urut : <?= $lot_urut ?></h6>
+                <div class="card-header d-flex justify-content-between align-items-start align-items-sm-center flex-column flex-sm-row gap-2">
+                    <div>
+                        <h3 class="card-title mb-1">Form Input Schedule Celup</h3>
+                        <div class="card-tools">
+                            <h6 class="badge bg-info text-white mb-0">
+                                Tanggal Schedule : <?= $tanggal_schedule ?> | Lot Urut : <?= $lot_urut ?>
+                            </h6>
+                        </div>
+                    </div>
+                    <div class="form-sample">
+                        <form action="<?= base_url(session('role') . '/schedule/saveScheduleSample') ?>" method="post">
+                            <input type="hidden" class="form-control" id="no_mesin" name="no_mesin" value="<?= $no_mesin ?>" readonly>
+                            <input type="hidden" name="tanggal_schedule" value="<?= $tanggal_schedule ?>">
+                            <input type="hidden" name="lot_urut" value="<?= $lot_urut ?>">
+
+                            <input type="hidden" name="kg_celup" value="<?= $max_caps ?>">
+                            <input type="hidden" name="po_plus" value="0">
+                            <input type="hidden" name="last_status" value="scheduled">
+                            <input type="hidden" name="user_cek_status" value="<?= session()->get('username') ?>">
+                            <input type="hidden" name="ket_daily_cek" value="<?= $tanggal_schedule ?>">
+                            <button class="btn btn-info btn-sm px-1 py-1" type="submit" style="font-size: 1rem;">
+                                Mesin Untuk Sample
+                            </button>
+                        </form>
                     </div>
                 </div>
+
                 <div class="card-body">
                     <div class="row">
                         <form action="<?= base_url(session('role') . '/schedule/saveSchedule') ?>" method="post">

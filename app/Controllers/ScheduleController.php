@@ -1258,4 +1258,36 @@ class ScheduleController extends BaseController
 
         return $this->response->setJSON($data);
     }
+    public function saveScheduleSample()
+    {
+        $scheduleData = $this->request->getPost();
+        // dd($this->request->getPost());
+        $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
+
+        $insert = [
+            'id_mesin' => (int)$id_mesin['id_mesin'],
+            'no_model' => 'sample',
+            'item_type' => 'sample',
+            'kode_warna' => 'sample',
+            'warna' => 'sample',
+            'start_mc' => $scheduleData['tgl_start_mc'] ?? null,
+            'kg_celup' => $scheduleData['kg_celup'],
+            'lot_urut' => $scheduleData['lot_urut'],
+            'lot_celup' => $scheduleData['lot_celup'] ?? null,
+            'tanggal_schedule' => $scheduleData['tanggal_schedule'],
+            'last_status' => 'scheduled',
+            'ket_schedule' => $scheduleData['ket_schedule'] ?? null,
+            'po_plus' => $scheduleData['po_plus'] ?? 0,
+            'user_cek_status' => session()->get('username'),
+            'created_at' => date('Y-m-d H:i:s'),
+        ];
+        // Ambil id_mesin dan no_model
+        // dd($insert);
+        $result = $this->scheduleCelupModel->insert($insert);
+        if ($result) {
+            return redirect()->to(session()->get('role') . '/schedule')->with('success', 'Jadwal berhasil disimpan!');
+        } else {
+            return redirect()->back()->with('error', 'Gagal menyimpan jadwal!');
+        }
+    }
 }

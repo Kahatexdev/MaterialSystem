@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\MasterMaterialModel;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\OpenPoModel;
@@ -16,14 +17,15 @@ class PoBookingController extends BaseController
     protected $masterOrderModel;
     protected $materialModel;
     protected $openPoModel;
+    protected $masterMaterialModel;
 
     public function __construct()
     {
         $this->masterOrderModel = new MasterOrderModel();
         $this->materialModel = new MaterialModel();
         $this->openPoModel = new OpenPoModel();
+        $this->masterMaterialModel = new MasterMaterialModel();
         // $this->stockModel = new StockModel();
-        // $this->masterMaterialModel = new MasterMaterialModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -67,14 +69,14 @@ class PoBookingController extends BaseController
 
     public function getItemType()
     {
-        $buyer    = $this->request->getGet('buyer');
+        // if ($buyer === null) {
+        //     return $this->response->setStatusCode(400)
+        //         ->setJSON(['error' => 'buyerId missing']);
+        // }
+        // $itemType = $this->materialModel->getItemTypeByBuyer($buyer);
 
-        if ($buyer === null) {
-            return $this->response->setStatusCode(400)
-                ->setJSON(['error' => 'buyerId missing']);
-        }
-        $itemType = $this->materialModel->getItemTypeByBuyer($buyer);
-
+        $itemType = $this->masterMaterialModel->getItemtype();
+        // dd($itemType);
         $result = array_map(fn($r) => [
             'id'   => $r['item_type'],
             'text' => $r['item_type']
@@ -166,5 +168,70 @@ class PoBookingController extends BaseController
 
         return redirect()->to(base_url($this->role . '/masterdata/poBooking'))
             ->with('success', 'Data PO Booking berhasil disimpan.');
+    }
+
+    public function detail()
+    {
+        $noModel = $this->request->getGet('no_model');
+        $detail = $this->openPoModel->detailPoBooking($noModel);
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'detail' => $detail,
+        ];
+        return view($this->role . '/masterdata/po-booking-detail', $data);
+    }
+
+    public function updatePoBooking()
+    {
+        $post = $this->request->getPost();
+        $id = $post['id_po'];
+        $noModel = $post['no_model'];
+        // dd($noModel);
+        $data = [
+            'buyer'               => $post['buyer'] ?? null,
+            'no_model'            => $post['no_model'],
+            'item_type'           => $post['item_type'] ?? null,
+            'kode_warna'          => $post['kode_warna'] ?? null,
+            'color'               => $post['color'] ?? null,
+            'spesifikasi_benang'  => $post['spesifikasi_benang'] ?? null,
+            'kg_po'               => $post['kg_po'] ?? null,
+            'keterangan'          => $post['keterangan'] ?? null,
+            'ket_celup'           => $post['ket_celup'] ?? null,
+            'bentuk_celup'        => $post['bentuk_celup'] ?? null,
+            'kg_percones'         => $post['kg_percones'] ?? null,
+            'jumlah_cones'        => $post['jumlah_cones'] ?? null,
+            'jenis_produksi'      => $post['jenis_produksi'] ?? null,
+            'contoh_warna'        => $post['contoh_warna'] ?? null,
+            'penerima'            => $post['penerima'] ?? null,
+            'penanggung_jawab'    => $post['penanggung_jawab'] ?? null,
+            'admin'               => session()->get('username'),
+        ];
+
+        $this->openPoModel->update($id, $data);
+
+        return redirect()->to(base_url($this->role . '/masterdata/poBooking/detail?no_model=' . $noModel))
+            ->with('success', 'Data PO Booking berhasil diupdate.');
+    }
+
+    public function deletePoBooking()
+    {
+        $id = $this->request->getPost('id_po');
+        $noModel = $this->request->getPost('no_model');
+
+        if (!$id) {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'ID PO tidak ditemukan']);
+        }
+
+        $deleted = $this->openPoModel->delete($id);
+
+        if ($deleted) {
+            return redirect()->to(base_url($this->role . '/masterdata/poBooking/detail?no_model=' . $noModel))
+                ->with('success', 'Data PO Booking Berhasil Di Hapus.');
+        } else {
+            return redirect()->to(base_url($this->role . '/masterdata/poBooking/detail?no_model=' . $noModel))
+                ->with('error', 'Data PO Booking Gagal Di Hapus.');
+        }
     }
 }

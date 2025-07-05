@@ -37,8 +37,10 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('masterdata/poBooking/getKodeWarna', 'PoBookingController::getKodeWarna');
     $routes->get('masterdata/poBooking/getColor', 'PoBookingController::getColor');
     $routes->post('masterdata/poBooking/saveOpenPoBooking', 'PoBookingController::saveOpenPoBooking');
-    // $routes->get('masterdata/poBooking/exportPoBooking/(:any)', 'ExcelController::exportPoBooking/$1');
     $routes->get('masterdata/poBooking/exportPoBooking', 'PdfController::generateOpenPOBooking');
+    $routes->get('masterdata/poBooking/detail', 'PoBookingController::detail');
+    $routes->post('masterdata/poBooking/updatePoBooking', 'PoBookingController::updatePoBooking');
+    $routes->post('masterdata/poBooking/deletePoBooking', 'PoBookingController::deletePoBooking');
     $routes->get('masterdata/poManual', 'PoManualController::index');
     $routes->get('masterdata/poManual/create', 'PoManualController::create');
     $routes->get('masterdata/poManual/getNoOrderByModel', 'PoManualController::getNoOrderByModel');
@@ -100,6 +102,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
     $routes->get('schedule/getNoModel', 'ScheduleController::getNoModel');
     $routes->post('schedule/saveSchedule', 'ScheduleController::saveSchedule');
+    $routes->post('schedule/saveScheduleSample', 'ScheduleController::saveScheduleSample');
     $routes->get('schedule/editSchedule', 'ScheduleController::editSchedule');
     $routes->post('schedule/updateSchedule', 'ScheduleController::updateSchedule');
     $routes->post('schedule/updateTglSchedule', 'ScheduleController::updateTglSchedule');
@@ -200,6 +203,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportSisaPakaiKaret', 'WarehouseController::reportSisaPakaiKaret');
     $routes->get('warehouse/filterSisaPakaiKaret', 'WarehouseController::filterSisaPakaiKaret');
     $routes->get('warehouse/exportReportSisaPakaiKaret', 'ExcelController::exportReportSisaPakaiKaret');
+    $routes->get('warehouse/historyPindahOrder', 'WarehouseController::historyPindahOrder');
+    $routes->get('warehouse/exportHistoryPindahOrder', 'ExcelController::exportHistoryPindahOrder');
+
 
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');
@@ -220,6 +226,11 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pemesananperarea/(:any)', 'PemesananController::pemesananPerArea/$1');
     $routes->get('detailpemesanan/(:any)/(:any)', 'PemesananController::detailPemesanan/$1/$2');
     $routes->get('selectClusterWarehouse/(:any)', 'PemesananController::selectClusterWarehouse/$1');
+    $routes->get('pinjamOrder', 'PemesananController::pinjamOrder');
+    $routes->get('pinjamOrder/options', 'PemesananController::optionsPinjamOrder');
+    $routes->get('pinjamOrder/detail', 'PemesananController::detailPinjamOrder');
+    // $routes->get('pinjamOrder/options/(:segment)?', 'PemesananController::optionsPinjamOrder/$1');
+    // $routes->get('pinjamOrder/options/(:any)', 'PemesananController::optionsPinjamOrder');
     $routes->post('saveUsage', 'PemesananController::saveUsage');
     $routes->get('pengiriman_area', 'PemesananController::pengirimanArea');
     $routes->post('pengiriman_area', 'PemesananController::pengirimanArea');

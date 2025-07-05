@@ -57,4 +57,22 @@ class HistoryStock extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    public function getHistoryPindahOrder($noModel = null, $kodeWarna = null)
+    {
+        $builder = $this->db->table('history_stock')
+            ->select('s_old.no_model AS no_model_old, s_new.no_model AS no_model_new, s_old.item_type, s_old.kode_warna, s_old.warna, history_stock.kgs, history_stock.cns, history_stock.lot, history_stock.cluster_old, history_stock.cluster_new, history_stock.keterangan, history_stock.created_at')
+            ->join('stock s_old', 's_old.id_stock = history_stock.id_stock_old')
+            ->join('stock s_new', 's_new.id_stock = history_stock.id_stock_new')
+            ->where('keterangan', 'Pindah Order');
+
+        if (!empty($noModel)) {
+            $builder->where('s_new.no_model', $noModel);
+        }
+        if (!empty($kodeWarna)) {
+            $builder->where('s_new.kode_warna', $kodeWarna);
+        }
+
+        return $builder->groupBy('history_stock.id_history_pindah')->orderBy('history_stock.created_at')->get()->getResultArray();
+    }
 }

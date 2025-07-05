@@ -60,13 +60,41 @@
                                 <td><?= $data['keterangan'] ?></td>
                                 <td><?= $data['penerima'] ?></td>
                                 <td>
-                                    <a
+                                    <!-- <a
                                         href="<?= base_url("$role/masterdata/poBooking/exportPoBooking?no_model=" . rawurlencode($data['no_model'])) ?>"
                                         class="btn btn-success">
                                         <i class="fas fa-file me-2"></i>Export
+                                    </a> -->
+                                    <a
+                                        href="<?= base_url("$role/masterdata/poBooking/detail?no_model=" . rawurlencode($data['no_model'])) ?>"
+                                        class="btn btn-info">
+                                        <i class="fas fa-eye me-2"></i>Detail
                                     </a>
                                 </td>
                             </tr>
+                            <!-- Modal Export PO Booking -->
+                            <div class="modal fade" id="modalExportPO" tabindex="-1" aria-labelledby="modalExportPOLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <form id="formExportPO" method="get">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="modalExportPOLabel">Export PO <?= $data['no_model'] ?></h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label for="delivery" class="form-label">Delivery</label>
+                                                    <input type="date" class="form-control" id="delivery" name="delivery">
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                <button type="submit" class="btn btn-success">Export</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
@@ -74,6 +102,34 @@
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function() {
+        // Tangkap klik tombol export
+        $('#table-po').on('click', '.btn-success', function(e) {
+            e.preventDefault();
+            var exportUrl = $(this).attr('href');
+            $('#formExportPO').attr('action', exportUrl);
+            $('#modalExportPO').modal('show');
+        });
+
+        // Submit form export
+        $('#formExportPO').on('submit', function(e) {
+            e.preventDefault();
+            var action = $(this).attr('action');
+            var date = $('#delivery').val();
+
+            let baseUrl = $(this).attr('action');
+            if (date) {
+                // Append delivery param, handle if URL already has query params
+                baseUrl += (baseUrl.indexOf('?') === -1 ? '?' : '&') + 'delivery=' + encodeURIComponent(date);
+            }
+
+            window.open(baseUrl, '_blank');
+        });
+    });
+</script>
+
 <!-- Pastikan jQuery load pertama -->
 
 <script>
