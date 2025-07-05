@@ -183,13 +183,15 @@ class PoBookingController extends BaseController
         return view($this->role . '/masterdata/po-booking-detail', $data);
     }
 
-    public function updatePoBooking($id)
+    public function updatePoBooking()
     {
         $post = $this->request->getPost();
-
+        $id = $post['id_po'];
+        $noModel = $post['no_model'];
+        // dd($noModel);
         $data = [
             'buyer'               => $post['buyer'] ?? null,
-            'no_model'            => $post['no_model'] ?? null,
+            'no_model'            => $post['no_model'],
             'item_type'           => $post['item_type'] ?? null,
             'kode_warna'          => $post['kode_warna'] ?? null,
             'color'               => $post['color'] ?? null,
@@ -209,7 +211,27 @@ class PoBookingController extends BaseController
 
         $this->openPoModel->update($id, $data);
 
-        return redirect()->to(base_url($this->role . '/masterdata/poBooking'))
+        return redirect()->to(base_url($this->role . '/masterdata/poBooking/detail?no_model=' . $noModel))
             ->with('success', 'Data PO Booking berhasil diupdate.');
+    }
+
+    public function deletePoBooking()
+    {
+        $id = $this->request->getPost('id_po');
+        $noModel = $this->request->getPost('no_model');
+
+        if (!$id) {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'ID PO tidak ditemukan']);
+        }
+
+        $deleted = $this->openPoModel->delete($id);
+
+        if ($deleted) {
+            return redirect()->to(base_url($this->role . '/masterdata/poBooking/detail?no_model=' . $noModel))
+                ->with('success', 'Data PO Booking Berhasil Di Hapus.');
+        } else {
+            return redirect()->to(base_url($this->role . '/masterdata/poBooking/detail?no_model=' . $noModel))
+                ->with('error', 'Data PO Booking Gagal Di Hapus.');
+        }
     }
 }
