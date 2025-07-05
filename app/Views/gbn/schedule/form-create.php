@@ -145,11 +145,7 @@
                             <input type="hidden" class="form-control" id="no_mesin" name="no_mesin" value="<?= $no_mesin ?>" readonly>
                             <input type="hidden" name="tanggal_schedule" value="<?= $tanggal_schedule ?>">
                             <input type="hidden" name="lot_urut" value="<?= $lot_urut ?>">
-                            <input type="hidden" name="no_po" value="sample">
-                            <input type="hidden" name="no_model" value="sample">
-                            <input type="hidden" name="item_type" value="sample">
-                            <input type="hidden" name="kode_warna" value="sample">
-                            <input type="hidden" name="warna" value="sample">
+
                             <input type="hidden" name="kg_celup" value="<?= $max_caps ?>">
                             <input type="hidden" name="po_plus" value="0">
                             <input type="hidden" name="last_status" value="scheduled">
