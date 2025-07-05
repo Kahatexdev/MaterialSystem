@@ -62,8 +62,8 @@
                         <table class="table align-items-center">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">TANGGAL PAKAI</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">TGL RETUR</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">TANGGAL PAKAI</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">TANGGAL RETUR</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">NO MODEL</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">LOS</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">ITEM TYPE</th>
@@ -85,6 +85,11 @@
                                 if (empty($dataPemesanan) && !empty($area) && !empty($noModel)) { ?>
                                     <tr>
                                         <th colspan="16">Tidak Ada Data</th>
+                                    </tr>
+                                <?php
+                                } elseif (empty($dataPemesanan) && empty($area) && empty($noModel)) { ?>
+                                    <tr>
+                                        <td colspan="6" class="text-center">Silakan pilih area dan isi no model untuk menampilkan data.</td>
                                     </tr>
                                     <?php
                                 } elseif (!empty($dataPemesanan) && !empty($area) && !empty($noModel)) {
@@ -111,7 +116,7 @@
                                                 <th></th>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgRetur, 2) ?></th>
                                                 <th colspan="2"></th>
-                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($sisa, 2) ?></th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center" style="color: <?= $color; ?>"><?= number_format($sisa, 2) ?></th>
                                             </tr>
                                         <?php
                                             // Reset total untuk grup berikutnya
@@ -131,6 +136,11 @@
                                             $shownKebutuhan[$currentKey] = true;
                                         }
                                         $sisa = $ttlKebTotal - $ttlKgOut + $ttlKgRetur;
+                                        if ($sisa < 0) {
+                                            $color = "red";
+                                        } else {
+                                            $color = "green";
+                                        }
                                         ?>
                                         <tr>
                                             <td class="text-xs text-center"><?= $id['tgl_pakai']; ?></td>
@@ -149,8 +159,6 @@
                                             <td class="text-xs text-center"><?= $id['lot_retur']; ?></td>
                                             <td class="text-xs text-center"><?= $id['ket_gbn']; ?></td>
                                             <td></td>
-                                            <td></td>
-                                            <td></td>
                                         </tr>
                                     <?php
                                         $prevKey = $currentKey;
@@ -168,7 +176,7 @@
                                             <th></th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgRetur, 2) ?></th>
                                             <th colspan="2"></th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($sisa, 2) ?></th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center" style="color: <?= $color; ?>"><?= number_format($sisa, 2) ?></th>
                                         </tr>
                                 <?php
                                     }

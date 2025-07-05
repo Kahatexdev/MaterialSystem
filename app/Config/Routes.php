@@ -668,5 +668,8 @@ $routes->group(
         $routes->get('getMUPoTambahan', 'ApiController::getMUPoTambahan');
         $routes->get('apiexportGlobalReport/(:any)', 'ExcelController::apiexportGlobalReport/$1');
         $routes->get('getKgTambahan', 'ApiController::getKgTambahan');
+        $routes->get('getPemesananByAreaModel', 'ApiController::getPemesananByAreaModel');
+        $routes->get('getReturByAreaModel', 'ApiController::getReturByAreaModel');
+        $routes->get('getKgPoTambahan', 'ApiController::getKgPoTambahan');
     }
 );

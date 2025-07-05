@@ -851,7 +851,7 @@ class PemesananController extends BaseController
 
             foreach ($getStyle as $i => $data) {
                 // Ambil qty
-                $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . $pemesanan['no_model']
+                $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($pemesanan['no_model'])
                     . '&style_size=' . urlencode($data['style_size'])
                     . '&area=' . $area;
 
@@ -1004,4 +1004,156 @@ class PemesananController extends BaseController
         ];
         return view($this->role . '/pemesanan/sisaKebutuhanArea', $data);
     }
+
+    // JANGAN DI HAPUS BUAT PERBANDINGAN NANTI KALO DATA NYA BANYAK LAMA YG MANA
+    // public function sisaKebutuhanArea()
+    // {
+    //     // Ambil daftar area dari API eksternal
+    //     $apiUrl   = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+    //     $response = file_get_contents($apiUrl);
+    //     $allArea  = json_decode($response, true) ?? [];
+
+    //     // Ambil filter
+    //     $area    = $this->request->getGet('filter_area')  ?? '';
+    //     $noModel = $this->request->getGet('filter_model') ?? '';
+
+    //     // Proses data pemesanan dan retur jika filter diisi
+    //     $dataP = [];
+    //     $dataR = [];
+    //     if (!empty($area) && !empty($noModel)) {
+    //         $dataP = $this->processRecords(
+    //             $this->pemesananModel->getPemesananByAreaModel($area, $noModel),
+    //             false,
+    //             $area
+    //         );
+
+    //         $dataR = $this->processRecords(
+    //             $this->returModel->getReturByAreaModel($area, $noModel),
+    //             true,
+    //             $area
+    //         );
+    //     }
+
+    //     // Gabung dan sort hasil
+    //     $merged = array_merge($dataP, $dataR);
+    //     $this->sortByTanggalDesc($merged);
+
+    //     // Render view
+    //     return view(
+    //         $this->role . '/pemesanan/sisaKebutuhanArea',
+    //         [
+    //             'active'        => $this->active,
+    //             'title'         => 'Material System',
+    //             'role'          => $this->role,
+    //             'allArea'       => $allArea,
+    //             'dataPemesanan' => $merged,
+    //             'area'          => $area,
+    //             'noModel'       => $noModel,
+    //         ]
+    //     );
+    // }
+
+    // private function fetchQtyForStyles(string $noModel, string $area, array $styles): array
+    // {
+    //     $results = [];
+    //     foreach ($styles as $style) {
+    //         $url = sprintf(
+    //             'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=%s&style_size=%s&area=%s',
+    //             $noModel,
+    //             urlencode($style['style_size']),
+    //             $area
+    //         );
+    //         $resp = json_decode(file_get_contents($url), true) ?? [];
+    //         $results[$style['style_size']] = intval($resp['qty'] ?? 0);
+    //     }
+    //     return $results;
+    // }
+
+    // private function processRecords(array $records, bool $isRetur, string $area): array
+    // {
+    //     $output = [];
+    //     foreach ($records as $r) {
+    //         // Ambil styleSize data
+    //         $styles  = $this->materialModel->getStyleSizeByBb(
+    //             $r['no_model'],
+    //             $r['item_type'],
+    //             $isRetur ? $r['kode_warna'] : $r['kode_warna']
+    //         );
+
+    //         // Caching qty per style
+    //         $qtyMap  = $this->fetchQtyForStyles($r['no_model'], $area, $styles);
+
+    //         $ttlQty  = 0;
+    //         $ttlKeb  = 0.0;
+
+    //         foreach ($styles as $s) {
+    //             $qty = $qtyMap[$s['style_size']] ?? 0;
+    //             $poTambahan = floatval(
+    //                 $this->poTambahanModel->getKgPoTambahan([
+    //                     'no_model'   => $r['no_model'],
+    //                     'item_type'  => $r['item_type'],
+    //                     'kode_warna' => $r['kode_warna'],
+    //                     'style_size' => $s['style_size'],
+    //                     'area'       => $area,
+    //                 ])['ttl_keb_potambahan'] ?? 0
+    //             );
+
+    //             if ($qty > 0) {
+    //                 $keb = (
+    //                     ($qty * $s['gw'] * ($s['composition']/100))
+    //                     * (1 + ($s['loss']/100))
+    //                     / 1000
+    //                 ) + $poTambahan;
+    //                 $ttlKeb += $keb;
+    //                 $ttlQty += $qty;
+    //             }
+    //         }
+
+    //         // Bangun row output
+    //         $row = [
+    //             'no_model'           => $r['no_model'],
+    //             'item_type'          => $r['item_type'],
+    //             'kode_warna'         => $r['kode_warna'],
+    //             'color'              => $isRetur ? $r['warna'] : $r['color'],
+    //             'max_loss'           => $isRetur ? 0      : $r['max_loss'],
+    //             'tgl_pakai'          => $isRetur ? null   : $r['tgl_pakai'],
+    //             'tgl_retur'          => $isRetur ? $r['tgl_retur'] : null,
+    //             'id_total_pemesanan' => $isRetur ? null   : $r['id_total_pemesanan'],
+    //             'ttl_jl_mc'          => $isRetur ? null   : $r['ttl_jl_mc'],
+    //             'ttl_kg'             => $isRetur ? null   : number_format($r['ttl_kg'], 2),
+    //             'po_tambahan'        => $isRetur ? null   : $r['po_tambahan'],
+    //             'qty'                => $ttlQty,
+    //             'ttl_keb'            => number_format($ttlKeb, 2),
+    //             'kg_out'             => $isRetur ? null   : number_format($r['kgs_out'] ?? 0, 2),
+    //             'lot_out'            => $isRetur ? null   : $r['lot_out'],
+    //             'kgs_retur'          => $isRetur ? number_format($r['kgs_retur'], 2) : null,
+    //             'lot_retur'          => $isRetur ? $r['lot_retur'] : null,
+    //             'ket_gbn'            => $isRetur ? $r['keterangan_gbn'] : null,
+    //         ];
+
+    //         $output[] = $row;
+    //     }
+    //     return $output;
+    // }
+
+    // private function sortByTanggalDesc(array &$data)
+    // {
+    //     usort($data, function ($a, $b) {
+    //         $cmp = strcmp($a['item_type'], $b['item_type']);
+    //         if ($cmp !== 0) return $cmp;
+
+    //         $cmp = strcmp($a['kode_warna'], $b['kode_warna']);
+    //         if ($cmp !== 0) return $cmp;
+
+    //         $tA = $a['tgl_pakai'] ?: $a['tgl_retur'];
+    //         $tB = $b['tgl_pakai'] ?: $b['tgl_retur'];
+
+    //         if (empty($tA) && !empty($tB)) return 1;
+    //         if (!empty($tA) && empty($tB)) return -1;
+
+    //         return strtotime($tB) <=> strtotime($tA);
+    //     });
+    // }
+    //  END JANGAN DI HAPUS BUAT PERBANDINGAN NANTI KALO DATA NYA BANYAK LAMA YG MANA
+
 }

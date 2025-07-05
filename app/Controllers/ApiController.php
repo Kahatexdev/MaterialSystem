@@ -955,4 +955,37 @@ class ApiController extends ResourceController
             ->setStatusCode(200)
             ->setJSON($data);
     }
+    public function getPemesananByAreaModel()
+    {
+        $area = $this->request->getGet('area');
+        $noModel = $this->request->getGet('no_model');
+
+        $data = $this->pemesananModel->getPemesananByAreaModel($area, $noModel);
+
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($data);
+    }
+    public function getReturByAreaModel()
+    {
+        $area = $this->request->getGet('area');
+        $noModel = $this->request->getGet('no_model');
+
+        $data = $this->returModel->getReturByAreaModel($area, $noModel);
+
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($data);
+    }
+    public function getKgPoTambahan()
+    {
+        $area = $this->request->getGet('area');
+        $noModel = $this->request->getGet('no_model');
+
+        $data = $this->returModel->getReturByAreaModel($area, $noModel);
+
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($data);
+    }
 }
