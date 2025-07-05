@@ -448,9 +448,9 @@ class OpenPoModel extends Model
 
     public function getPoBooking()
     {
-        return $this->select('id_po, no_model, item_type, kode_warna, color, kg_po, keterangan, penerima, created_at')
+        return $this->select('id_po, no_model, item_type, kode_warna, color, kg_po, keterangan, penerima, created_at, spesifikasi_benang')
             ->where('po_booking', '1')
-            ->groupBy('no_model, spesifikasi_benang, keterangan')
+            ->groupBy('no_model')
             ->orderBy('created_at', 'DESC')
             ->findAll();
     }
@@ -480,6 +480,14 @@ class OpenPoModel extends Model
             ->join('master_order', 'master_order.no_model = open_po.no_model')
             ->where('open_po.po_manual', '1')
             ->where('open_po.no_model', $noModel)
+            ->findAll();
+    }
+
+    public function detailPoBooking($noModel)
+    {
+        return $this->select('*')
+            ->where('no_model', $noModel)
+            ->where('po_booking', '1')
             ->findAll();
     }
 }

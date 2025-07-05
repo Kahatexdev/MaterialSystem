@@ -3350,6 +3350,8 @@ class PdfController extends BaseController
 
         $noModel = $this->request->getGet('no_model');
         $delivery = $this->request->getGet('delivery');
+        $materialType = $this->request->getGet('material_type');
+        // dd($materialType);
         $result = $this->openPoModel->getPoBookingByNoModel($noModel);
 
         if ($tujuan == 'CELUP') {

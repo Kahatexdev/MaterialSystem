@@ -796,8 +796,6 @@ class PemesananController extends BaseController
     }
     public function getUpdateListPemesanan()
     {
-        $post = $this->request->getPost();
-        dd($post);
         $data = $this->request->getPost([
             'area',
             'tgl_pakai',

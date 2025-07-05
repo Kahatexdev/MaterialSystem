@@ -169,4 +169,47 @@ class PoBookingController extends BaseController
         return redirect()->to(base_url($this->role . '/masterdata/poBooking'))
             ->with('success', 'Data PO Booking berhasil disimpan.');
     }
+
+    public function detail()
+    {
+        $noModel = $this->request->getGet('no_model');
+        $detail = $this->openPoModel->detailPoBooking($noModel);
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'detail' => $detail,
+        ];
+        return view($this->role . '/masterdata/po-booking-detail', $data);
+    }
+
+    public function updatePoBooking($id)
+    {
+        $post = $this->request->getPost();
+
+        $data = [
+            'buyer'               => $post['buyer'] ?? null,
+            'no_model'            => $post['no_model'] ?? null,
+            'item_type'           => $post['item_type'] ?? null,
+            'kode_warna'          => $post['kode_warna'] ?? null,
+            'color'               => $post['color'] ?? null,
+            'spesifikasi_benang'  => $post['spesifikasi_benang'] ?? null,
+            'kg_po'               => $post['kg_po'] ?? null,
+            'keterangan'          => $post['keterangan'] ?? null,
+            'ket_celup'           => $post['ket_celup'] ?? null,
+            'bentuk_celup'        => $post['bentuk_celup'] ?? null,
+            'kg_percones'         => $post['kg_percones'] ?? null,
+            'jumlah_cones'        => $post['jumlah_cones'] ?? null,
+            'jenis_produksi'      => $post['jenis_produksi'] ?? null,
+            'contoh_warna'        => $post['contoh_warna'] ?? null,
+            'penerima'            => $post['penerima'] ?? null,
+            'penanggung_jawab'    => $post['penanggung_jawab'] ?? null,
+            'admin'               => session()->get('username'),
+        ];
+
+        $this->openPoModel->update($id, $data);
+
+        return redirect()->to(base_url($this->role . '/masterdata/poBooking'))
+            ->with('success', 'Data PO Booking berhasil diupdate.');
+    }
 }
