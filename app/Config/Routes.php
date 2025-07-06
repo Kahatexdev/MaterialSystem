@@ -279,6 +279,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('poplus', 'MasterdataController::poPlus');
     $routes->get('poplus/detail', 'MasterdataController::detailPoPlus');
     $routes->post('approvePoPlusArea', 'MasterdataController::prosesApprovePoPlusArea');
+    $routes->get('poplus/reportpotambahan', 'PoTambahanController::reportPoTambahan');
 
     // tambahan waktu
     $routes->get('pemesanan/requestAdditionalTime', 'PemesananController::requestAdditionalTime');
