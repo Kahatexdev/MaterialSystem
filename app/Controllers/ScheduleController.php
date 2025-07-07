@@ -154,6 +154,42 @@ class ScheduleController extends BaseController
 
         return view($this->role . '/schedule/form-create', $data);
     }
+    public function createsample()
+    {
+        // Ambil data dari URL menggunakan GET
+        $no_mesin = $this->request->getGet('no_mesin');
+        $tanggal_schedule = $this->request->getGet('tanggal_schedule');
+        $lot_urut = $this->request->getGet('lot_urut');
+        $no_model = $this->request->getGet('no_model');
+
+        // $jenis_bahan_baku = $this->masterMaterialModel->getJenisBahanBaku();
+        $item_type = $this->masterMaterialModel->getItemType();
+        $min = $this->mesinCelupModel->getMinCaps($no_mesin);
+        $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
+        $po = $this->openPoModel->getNomorModel();
+        // dd($jenis_bahan_baku, $item_type);
+        // Jika data tidak ditemukan, kembalikan ke halaman sebelumnya
+        if (!$no_mesin || !$tanggal_schedule || !$lot_urut) {
+            return redirect()->back();
+        }
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Schedule',
+            'role' => $this->role,
+            'no_mesin' => $no_mesin,
+            'tanggal_schedule' => $tanggal_schedule,
+            'lot_urut' => $lot_urut,
+            // 'jenis_bahan_baku' => $jenis_bahan_baku,
+            'item_type' => $item_type,
+            'min_caps' => $min['min_caps'],
+            'max_caps' => $max['max_caps'],
+            'po' => $po,
+        ];
+        // dd($data);
+
+        return view($this->role . '/schedule/form-create-sample', $data);
+    }
 
     public function getItemType()
     {
@@ -1262,28 +1298,47 @@ class ScheduleController extends BaseController
     {
         $scheduleData = $this->request->getPost();
         // dd($this->request->getPost());
-        $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
 
-        $insert = [
-            'id_mesin' => (int)$id_mesin['id_mesin'],
-            'no_model' => 'sample',
-            'item_type' => 'sample',
-            'kode_warna' => 'sample',
-            'warna' => 'sample',
-            'start_mc' => $scheduleData['tgl_start_mc'] ?? null,
-            'kg_celup' => $scheduleData['kg_celup'],
-            'lot_urut' => $scheduleData['lot_urut'],
-            'lot_celup' => $scheduleData['lot_celup'] ?? null,
-            'tanggal_schedule' => $scheduleData['tanggal_schedule'],
-            'last_status' => 'scheduled',
-            'ket_schedule' => $scheduleData['ket_schedule'] ?? null,
-            'po_plus' => $scheduleData['po_plus'] ?? 0,
-            'user_cek_status' => session()->get('username'),
-            'created_at' => date('Y-m-d H:i:s'),
-        ];
         // Ambil id_mesin dan no_model
-        // dd($insert);
-        $result = $this->scheduleCelupModel->insert($insert);
+        $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
+        $mesin = $this->mesinCelupModel->getKeteranganMesin($scheduleData['no_mesin']);
+        $poList = $scheduleData['po']; // Array po[]
+        $dataBatch = []; // Untuk menyimpan batch data
+
+        foreach ($poList as $index => $po) {
+            $no_model = $this->masterOrderModel->getNoModel($po);
+            $dataBatch[] = [
+                'id_mesin' => $id_mesin['id_mesin'],
+                'no_model' => $scheduleData['po'][$index],
+                'item_type' => $scheduleData['item_type'][$index] ?? null,
+                'kode_warna' => $scheduleData['kode_warna'],
+                'warna' => $scheduleData['warna'],
+                'start_mc' => $scheduleData['tgl_start_mc'][$index] ?? null,
+                'kg_celup' => $scheduleData['qty_celup'][$index],
+                'lot_urut' => $scheduleData['lot_urut'],
+                'lot_celup' => $scheduleData['lot_celup'] ?? null,
+                'tanggal_schedule' => $scheduleData['tanggal_schedule'],
+                'last_status' => 'scheduled',
+                'ket_schedule' => $scheduleData['ket_schedule'][$index] ?? null,
+                'po_plus' => $scheduleData['po_plus'][$index] ?? 0,
+                'user_cek_status' => session()->get('username'),
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
+        }
+
+        $result = $this->scheduleCelupModel->insertBatch($dataBatch);
+        // dd($result);
+
+        $mapping = [
+            'ACRYLIC'            => 'acrylic',
+            'BENANG'             => '',
+            'NYLON'              => 'nylon',
+            'MC BENANG SAMPLE'   => 'sample',
+        ];
+        $ket   = strtoupper($mesin['ket_mesin']);
+        $view  = $mapping[$ket] ?? 'index';
+
+        // Cek apakah data berhasil disimpan
         if ($result) {
             return redirect()->to(session()->get('role') . '/schedule')->with('success', 'Jadwal berhasil disimpan!');
         } else {

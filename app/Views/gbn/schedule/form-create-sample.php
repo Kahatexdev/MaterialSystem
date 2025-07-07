@@ -133,7 +133,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-start align-items-sm-center flex-column flex-sm-row gap-2">
                     <div>
-                        <h3 class="card-title mb-1">Form Input Schedule Celup</h3>
+                        <h3 class="card-title mb-1">Form Input Schedule Celup Sample</h3>
                         <div class="card-tools">
                             <h6 class="badge bg-info text-white mb-0">
                                 Tanggal Schedule : <?= $tanggal_schedule ?> | Lot Urut : <?= $lot_urut ?>
@@ -142,15 +142,15 @@
                     </div>
                     <div class="form-sample">
 
-                        <a class="btn btn-info btn-sm px-1 py-1" href="<?= base_url($role . '/schedule/formsample?no_mesin=' . $no_mesin . '&tanggal_schedule=' . $tanggal_schedule . '&lot_urut=' . $lot_urut) ?>" style=" font-size: 1rem;">
-                            Mesin Untuk Sample
+                        <a class="btn btn-info btn-sm px-1 py-1" style=" font-size: 1rem;">
+                            Mesin Normal
                         </a>
                     </div>
                 </div>
 
                 <div class="card-body">
                     <div class="row">
-                        <form action="<?= base_url(session('role') . '/schedule/saveSchedule') ?>" method="post">
+                        <form action="<?= base_url(session('role') . '/schedule/saveScheduleSample') ?>" method="post">
                             <div class="row">
                                 <div class="col-md-3">
                                     <!-- No Mesin -->
@@ -200,7 +200,6 @@
                                     <div class="mb-3">
                                         <label for="kode_warna" class="form-label">Kode Warna</label>
                                         <input type="text" class="form-control" id="kode_warna" name="kode_warna" required>
-                                        <div id="suggestionsKWarna" class="suggestions-box" style="display: none;"></div>
                                     </div>
                                 </div>
 
@@ -208,9 +207,8 @@
                                     <!-- Warna -->
                                     <div class="mb-3">
                                         <label for="warna" class="form-label">Warna</label>
-                                        <select class="form-select" id="warna" name="warna" required>
-                                            <option value="">Pilih Warna</option>
-                                        </select>
+                                        <input type="text" class="form-control" id="warna" name="warna" required>
+
                                     </div>
                                 </div>
                             </div>
@@ -238,17 +236,14 @@
                                                             <div class="col-6">
                                                                 <div class="form-group">
                                                                     <label for="itemtype"> Item Type</label>
-                                                                    <select class="form-select item-type" name="item_type[]" required>
-                                                                        <option value="">Pilih Item Type</option>
-                                                                    </select>
+                                                                    <input type="text" class="form-control" id="item_type[]" name="item_type[]" required>
                                                                 </div>
                                                             </div>
                                                             <div class="col-6">
                                                                 <div class="form-group">
                                                                     <label for="po">PO</label>
-                                                                    <select class="form-select po-select" name="po[]" required>
-                                                                        <option value="">Pilih PO</option>
-                                                                    </select>
+                                                                    <input type="text" class="form-control" id="po[]" name="po[]" required>
+
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -256,20 +251,20 @@
                                                             <div class="col-4">
                                                                 <div class="form-group">
                                                                     <label for="tgl_start_mc">Tgl Start MC</label>
-                                                                    <input type="date" class="form-control" name="tgl_start_mc[]" readonly>
+                                                                    <input type="date" class="form-control" name="tgl_start_mc[]">
                                                                 </div>
                                                             </div>
 
                                                             <div class="col-4">
                                                                 <div class="form-group">
                                                                     <label for="delivery_awal">Delivery Awal</label>
-                                                                    <input type="date" class="form-control" name="delivery_awal[]" readonly>
+                                                                    <input type="date" class="form-control" name="delivery_awal[]">
                                                                 </div>
                                                             </div>
                                                             <div class="col-4">
                                                                 <div class="form-group ">
                                                                     <label for="delivery_akhir">Delivery Akhir</label>
-                                                                    <input type="date" class="form-control" name="delivery_akhir[]" readonly>
+                                                                    <input type="date" class="form-control" name="delivery_akhir[]">
                                                                 </div>
 
                                                             </div>
@@ -278,13 +273,13 @@
                                                             <div class="col-4">
                                                                 <div class="form-group">
                                                                     <label for="qty_po">Qty PO</label>
-                                                                    <input type="number" class="form-control" name="qty_po[]" readonly>
+                                                                    <input type="number" class="form-control" name="qty_po[]">
                                                                 </div>
                                                             </div>
                                                             <div class="col-4">
                                                                 <div class="form-group">
                                                                     <label for="qty_po_plus">Qty PO (+)</label>
-                                                                    <input type="number" class="form-control" name="qty_po_plus[]" readonly>
+                                                                    <input type="number" class="form-control" name="qty_po_plus[]">
                                                                 </div>
                                                             </div>
                                                             <div class="col-4">
@@ -883,43 +878,42 @@
             <td class="text-center">${tbody.rows.length + 1}</td>
             <td>
                 <div class="row">
-                    <div class="col-6">
-                        <div class="form-group">
-                            <label for="itemtype"> Item Type</label>
-                            <select class="form-select item-type" name="item_type[]" required>
-                                <option value="">Pilih Item Type</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="form-group">
-                            <label for="po">PO</label>
-                            <select class="form-select po-select" name="po[]" required>
-                                <option value="">Pilih PO</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-4">
-                        <div class="form-group">
-                            <label for="tgl_start_mc">Tgl Start MC</label>
-                            <input type="date" class="form-control" name="tgl_start_mc[]" readonly>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="form-group">
-                            <label for="delivery_awal">Delivery Awal</label>
-                            <input type="date" class="form-control" name="delivery_awal[]" readonly>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="form-group ">
-                            <label for="delivery_akhir">Delivery Akhir</label>
-                            <input type="date" class="form-control" name="delivery_akhir[]" readonly>
-                        </div>
-                    </div>
-                </div>
+                                                            <div class="col-6">
+                                                                <div class="form-group">
+                                                                    <label for="itemtype"> Item Type</label>
+                                                                    <input type="text" class="form-control" id="item_type[]" name="item_type[]" required>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="form-group">
+                                                                    <label for="po">PO</label>
+                                                                    <input type="text" class="form-control" id="po[]" name="po[]" required>
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-4">
+                                                                <div class="form-group">
+                                                                    <label for="tgl_start_mc">Tgl Start MC</label>
+                                                                    <input type="date" class="form-control" name="tgl_start_mc[]">
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-4">
+                                                                <div class="form-group">
+                                                                    <label for="delivery_awal">Delivery Awal</label>
+                                                                    <input type="date" class="form-control" name="delivery_awal[]">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-4">
+                                                                <div class="form-group ">
+                                                                    <label for="delivery_akhir">Delivery Akhir</label>
+                                                                    <input type="date" class="form-control" name="delivery_akhir[]">
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
                 <div class="row">
                     <div class="col-4">
                         <div class="form-group">
