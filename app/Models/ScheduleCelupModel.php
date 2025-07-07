@@ -216,12 +216,13 @@ class ScheduleCelupModel extends Model
                   mesin_celup.no_mesin, 
                   IF(schedule_celup.po_plus = "0", schedule_celup.kg_celup, 0) AS qty_celup, 
                   IF(schedule_celup.po_plus = "1", schedule_celup.kg_celup, 0) AS qty_celup_plus')
-            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-            ->where('schedule_celup.tanggal_schedule >=', $lastMonth);
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin');
 
         // Filter berdasarkan tanggal jika ada
         if (!empty($filterTglSch)) {
             $builder->where('schedule_celup.tanggal_schedule', $filterTglSch);
+        } else {
+            $builder->where('schedule_celup.tanggal_schedule >=', $lastMonth);
         }
 
         // Filter berdasarkan no_model atau kode_warna
