@@ -207,54 +207,43 @@ class ScheduleCelupModel extends Model
 
     public function getSchedule($filterTglSch = null, $filterNoModel = null)
     {
-        // dd($filterNoModel, $filterTglSch);
-        // Mulai query builder
-        $builder = $this->builder()
-            ->select('schedule_celup.*, mesin_celup.no_mesin, 
-                   IF(po_plus = "0", kg_celup, 0) AS qty_celup, 
-                   IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus')
-            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin');
-        // exclude statuses
-        // ->where('schedule_celup.last_status !=', 'done')
-        // ->where('schedule_celup.last_status !=', 'sent')
-        // ->where('schedule_celup.last_status !=', 'complain');
+        // Ambil tanggal 1 bulan lalu dalam format YYYY-MM-DD
+        $lastMonth = date('Y-m-d', strtotime('1 month ago'));
 
-        // Filter tanggal jika ada
+        // Build query
+        $builder = $this->builder()
+            ->select('schedule_celup.*, 
+                  mesin_celup.no_mesin, 
+                  IF(schedule_celup.po_plus = "0", schedule_celup.kg_celup, 0) AS qty_celup, 
+                  IF(schedule_celup.po_plus = "1", schedule_celup.kg_celup, 0) AS qty_celup_plus')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin');
+
+        // Filter berdasarkan tanggal jika ada
         if ($filterTglSch) {
-            // pastikan $filterTglSch sudah diformat yyyy-mm-dd
             $builder->where('schedule_celup.tanggal_schedule', $filterTglSch);
+        } else {
+            $builder->where('schedule_celup.tanggal_schedule >=', $lastMonth);
         }
 
-        // Filter no_model atau kode_warna jika ada
+        // Filter berdasarkan no_model atau kode_warna
         if ($filterNoModel) {
-            $builder
-                ->groupStart()
+            $builder->groupStart()
                 ->like('schedule_celup.no_model', $filterNoModel)
                 ->orLike('schedule_celup.kode_warna', $filterNoModel)
                 ->groupEnd();
         }
 
-        // Pengelompokan hasil
-        $builder
-            ->groupBy('schedule_celup.id_mesin')
-            ->groupBy('schedule_celup.id_celup')
-            ->groupBy('schedule_celup.tanggal_schedule')
-            ->groupBy('schedule_celup.lot_urut');
+        // Grouping untuk menghindari duplikasi
+        $builder->groupBy([
+            'schedule_celup.id_mesin',
+            'schedule_celup.id_celup',
+            'schedule_celup.tanggal_schedule',
+            'schedule_celup.lot_urut'
+        ]);
 
-        $query = $builder->get();
-        return $query->getResultArray();
-        //     return $this->select('schedule_celup.*, mesin_celup.no_mesin, IF(po_plus = "0", kg_celup, 0) AS qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus')
-        //         ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-        //         ->where('schedule_celup.last_status !=', 'done')
-        //         ->where('schedule_celup.last_status !=', 'sent')
-        //         ->where('schedule_celup.last_status !=', 'complain')
-        //         ->$filter
-        //         ->groupBy('schedule_celup.id_mesin')
-        //         ->groupBy('schedule_celup.id_celup')
-        //         ->groupBy('schedule_celup.tanggal_schedule')
-        //         ->groupBy('schedule_celup.lot_urut')
-        //         ->findAll();
+        return $builder->get()->getResultArray();
     }
+
 
     public function getDataByIdCelup($id)
     {

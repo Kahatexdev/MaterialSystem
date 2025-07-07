@@ -275,10 +275,13 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('retur/reportReturArea', 'ReturController::reportReturArea');
     $routes->get('retur/filterReturArea', 'ReturController::filterReturArea');
     $routes->get('retur/exportReturArea', 'ExcelController::exportReturArea');
+
     //Po Plus
-    $routes->get('poplus', 'MasterdataController::poPlus');
-    $routes->get('poplus/detail', 'MasterdataController::detailPoPlus');
-    $routes->post('approvePoPlusArea', 'MasterdataController::prosesApprovePoPlusArea');
+    $routes->get('poplus', 'PoTambahanController::index');
+    $routes->get('poplus/detail', 'PoTambahanController::detailPoPlus');
+    $routes->post('approvePoPlusArea', 'PoTambahanController::prosesApprovePoPlusArea');
+    $routes->get('poplus/reportPoTambahan', 'PoTambahanController::reportPoTambahan');
+    $routes->get('poplus/exportPoTambahan', 'ExcelController::exportPoTambahan');
 
     // tambahan waktu
     $routes->get('pemesanan/requestAdditionalTime', 'PemesananController::requestAdditionalTime');
@@ -298,11 +301,11 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
 $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('', 'DashboardCelupController::index');
     $routes->get('getStackedChartData', 'DashboardCelupController::getStackedChartData');
-    $routes->get('schedule', 'ScheduleController::index');
+    // $routes->get('schedule', 'ScheduleController::index');
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
     $routes->get('schedule/nylon', 'ScheduleController::nylon');
     $routes->get('reqschedule', 'ScheduleController::reqschedule');
-    $routes->post('schedule', 'CelupController::schedule');
+    $routes->post('schedule', 'ScheduleController::reqschedule');
     $routes->get('edit/(:num)', 'CelupController::editStatus/$1');
     $routes->post('updateSchedule/(:num)', 'CelupController::updateSchedule/$1');
     $routes->get('schedule/getScheduleDetails/(:any)/(:any)/(:any)', 'ScheduleController::getScheduleDetails/$1/$2/$3');
