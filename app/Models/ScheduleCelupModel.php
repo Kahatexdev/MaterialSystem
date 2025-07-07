@@ -219,14 +219,14 @@ class ScheduleCelupModel extends Model
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin');
 
         // Filter berdasarkan tanggal jika ada
-        if (!empty($filterTglSch)) {
+        if ($filterTglSch) {
             $builder->where('schedule_celup.tanggal_schedule', $filterTglSch);
         } else {
             $builder->where('schedule_celup.tanggal_schedule >=', $lastMonth);
         }
 
         // Filter berdasarkan no_model atau kode_warna
-        if (!empty($filterNoModel)) {
+        if ($filterNoModel) {
             $builder->groupStart()
                 ->like('schedule_celup.no_model', $filterNoModel)
                 ->orLike('schedule_celup.kode_warna', $filterNoModel)
