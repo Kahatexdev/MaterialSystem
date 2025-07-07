@@ -25,6 +25,7 @@ use App\Models\OtherBonModel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use App\Models\PoTambahanModel;
 
 class PoTambahanController extends BaseController
 {
@@ -51,6 +52,7 @@ class PoTambahanController extends BaseController
     protected $returModel;
     protected $otherOutModel;
     protected $otherBonModel;
+    protected $poTambahanModel;
 
     public function __construct()
     {
@@ -72,6 +74,7 @@ class PoTambahanController extends BaseController
         $this->otherOutModel = new OtherOutModel();
         $this->otherBonModel = new OtherBonModel();
         $this->db = \Config\Database::connect(); // Menghubungkan ke database
+        $this->poTambahanModel = new PoTambahanModel();
 
         $this->role = session()->get('role');
         $this->username = session()->get('username');
@@ -89,48 +92,113 @@ class PoTambahanController extends BaseController
     }
     public function index()
     {
-        //
+        $poTambahan = $this->poTambahanModel->getData();
+        $data = [
+            'active' => $this->active,
+            'title' => 'Po Tambahan',
+            'role' => $this->role,
+            'poTambahan' => $poTambahan,
+        ];
+        return view($this->role . '/poplus/index', $data);
+    }
+
+    public function prosesApprovePoPlusArea()
+    {
+        $tglPo = $this->request->getPost('tgl_poplus');
+        $noModel = $this->request->getPost('no_model');
+        $itemType = $this->request->getPost('item_type');
+        $kodeWarna = $this->request->getPost('kode_warna');
+        $status = $this->request->getPost('status');
+        $area = $this->request->getPost('area');
+
+        $validate = [
+            'no_model'   => $noModel,
+            'area'       => $area,
+            'item_type'  => $itemType,
+            'kode_warna' => $kodeWarna,
+        ];
+
+        $idMaterialResult = $this->materialModel->getId($validate);
+        $idMaterial = array_column($idMaterialResult, 'id_material');
+
+        if (empty($idMaterial)) {
+            return redirect()->to(base_url($this->role . '/poplus'))->with('error', 'Tidak ada data material yang ditemukan.');
+        }
+
+        // Jalankan update hanya jika data ada
+        $builder = $this->poTambahanModel
+            ->builder()
+            ->whereIn('id_material', $idMaterial)
+            ->where('status', $status)
+            ->like('created_at', $tglPo, 'after');
+
+        $updated = $builder->update(['status' => 'approved']);
+
+        if ($updated) {
+            return redirect()->to(base_url($this->role . '/poplus'))->with('success', 'Data Po Tambahan Berhasil disetujui.');
+        } else {
+            return redirect()->to(base_url($this->role . '/poplus'))->with('error', 'Data Po Tambahan Gagal disetuji.');
+        }
+    }
+    public function detailPoPlus()
+    {
+        $tglPo = $this->request->getGet('tgl_poplus');
+        $noModel = $this->request->getGet('no_model');
+        $itemType = $this->request->getGet('item_type');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $warna = $this->request->getGet('warna');
+        $status = $this->request->getGet('status');
+        $area = $this->request->getGet('area');
+
+        $validate = [
+            'no_model'   => $noModel,
+            'area'       => $area,
+            'item_type'  => $itemType,
+            'kode_warna' => $kodeWarna,
+        ];
+
+        $idMaterialResult = $this->materialModel->getId($validate);
+        $idMaterial = array_column($idMaterialResult, 'id_material');
+
+        if (empty($idMaterial)) {
+            return redirect()->to(base_url($this->role . '/poplus'))->with('error', 'Tidak ada data material yang ditemukan.');
+        }
+
+        $detail = $this->poTambahanModel->detailPoTambahan($idMaterial, $tglPo, $status);
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Po Tambahan',
+            'role' => $this->role,
+            'detail' => $detail,
+            'tglPo' => $tglPo,
+            'noModel' => $noModel,
+            'itemType' => $itemType,
+            'kodeWarna' => $kodeWarna,
+            'warna' => $warna,
+            'area' => $area,
+        ];
+        return view($this->role . '/poplus/detail', $data);
     }
     public function reportPoTambahan()
     {
         $noModel   = $this->request->getGet('model')     ?? '';
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
+        $tglPo = $this->request->getGet('tgl_po') ?? date('Y-m-d', strtotime('-1 day'));
 
         // 1) Ambil data
-        $dataPindah = $this->historyStock->getHistoryPindahOrder($noModel, $kodeWarna);
-
-        // 2) Siapkan HTTP client
-        $client = \Config\Services::curlrequest([
-            'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
-            'timeout' => 5
-        ]);
-
-        // 3) Loop dan merge API result
-        foreach ($dataPindah as &$row) {
-            try {
-                $res = $client->get('getDeliveryAwalAkhir', [
-                    'query' => ['model' => $row['no_model_new']]
-                ]);
-                $body = json_decode($res->getBody(), true);
-                $row['delivery_awal']  = $body['delivery_awal']  ?? '-';
-                $row['delivery_akhir'] = $body['delivery_akhir'] ?? '-';
-            } catch (\Exception $e) {
-                $row['delivery_awal']  = '-';
-                $row['delivery_akhir'] = '-';
-            }
-        }
-        unset($row);
+        $dataPoPlus = $this->poTambahanModel->getDataPoPlus($tglPo, $noModel, $kodeWarna);
 
         // 4) Response
         if ($this->request->isAJAX()) {
-            return $this->response->setJSON($dataPindah);
+            return $this->response->setJSON($dataPoPlus);
         }
 
         return view($this->role . '/poplus/report-po-tambahan', [
             'role'    => $this->role,
             'title'   => 'Report PO Tambahan',
             'active'  => $this->active,
-            'history' => $dataPindah,
+            'poPlus' => $dataPoPlus,
         ]);
     }
 }
