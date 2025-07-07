@@ -165,23 +165,21 @@
                     </div>
 
                 </div>
-                <!-- <div class="form-group">
-                    <label for="ttl_keb">Total Kg Kebutuhan</label>
-                    <input type="text" class="form-control" name="ttl_keb" id="ttl_keb" readonly>
-
-                </div> -->
                 <div class=" form-group">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
+                            <label for="ttl_keb">Celup Stock</label>
+                            <input type="text" class="form-control" name="celup_stock" id="celup_stock">
+                        </div>
+                        <div class="col-md-6">
                             <label for="ttl_keb">Total Kg Kebutuhan</label>
                             <input type="text" class="form-control" name="ttl_keb" id="ttl_keb" readonly>
-
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label for="kg_stock">Permintan Kelos (Kg Cones)</label>
                             <input type="text" class="form-control" name="kg_percones" id="kg_percones" placeholder="Kg">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label for="ttl_keb">Permintan Kelos (Total Cones)</label>
                             <input type="text" class="form-control" name="jumlah_cones" id="jumlah_cones" placeholder="Cns">
                         </div>
@@ -332,6 +330,7 @@
 
             // Attach event listener for the new inputs
             $(`#nav-content-${tabIndex} .kg-po`).on('input', calculateTotal);
+            $('#celup_stock').on('input', calculateTotal);
 
             tabIndex++;
         }
@@ -355,6 +354,10 @@
             $('.kg-po').each(function() {
                 totalKebutuhan += parseFloat($(this).val()) || 0;
             });
+
+            // Ambil nilai dari celup_stock dan tambahkan ke total
+            let celupStock = parseFloat($('#celup_stock').val()) || 0;
+            totalKebutuhan += celupStock;
 
             // Update nilai Total Kg Kebutuhan
             $('#ttl_keb').val(totalKebutuhan);
@@ -382,6 +385,7 @@
 
         // Trigger calculation on input changes
         $('#kg_stock, .kg-po').on('input', calculateTotal);
+        $('#celup_stock').on('input', calculateTotal);
         $('#kg_percones, #ttl_keb').on('input', hitungCones);
 
         // -----------------------

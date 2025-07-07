@@ -189,6 +189,8 @@ class PoGabunganController extends BaseController
     {
         // 1. Ambil input dan korelasi model IDs dengan nomor model
         $data = $this->request->getPost();
+        $stock_celup = $data['celup_stock'];
+        // dd($data);
         // dd($data);
         $modelIds = array_column($data['no_model'], 'no_model');      // ['12','10']
         $modelList = $this->masterOrderModel
@@ -200,6 +202,9 @@ class PoGabunganController extends BaseController
         $noModelMap = [];
         foreach ($modelList as $m) {
             $noModelMap[$m['id_order']] = $m['no_model'];
+            // if($stock_celup > 0) {
+            //     $noModelMap[$m['id_order']];
+            // }
         }
         // dd($noModelMap);
         // 2. Hitung total untuk header dan siapkan detail original
@@ -226,13 +231,12 @@ class PoGabunganController extends BaseController
                 $ket .= ' / ';
             }
         }
-        // // Hitung sisa
-        // $sisa = $data['ttl_keb'] - $totalKg;
-
-        // // Tambahkan " / STOCK $sisa" jika sisa lebih dari 0
-        // if ($sisa > 0) {
-        //     $ket .= " / STOCK = $sisa";
-        // }
+        $modelStock = "";
+        // Tambahkan " / STOCK $sisa" jika sisa lebih dari 0
+        if ($stock_celup > 0) {
+            $ket .= " / STOCK = $stock_celup";
+            $modelStock = "STOCK";
+        }
 
         $keys = array_map(function ($d) {
             return $d['item_type'] . '|' . $d['kode_warna'] . '|' . $d['color'];
@@ -247,7 +251,7 @@ class PoGabunganController extends BaseController
 
         // 3. Persist header PO gabungan
         $headerData = [
-            'no_model'              => 'POGABUNGAN ' . implode('_', $noModelMap),
+            'no_model'              => 'POGABUNGAN ' . implode('_', $noModelMap) . '_' . $modelStock,
             'item_type'             => $details[0]['item_type'],
             'kode_warna'            => $details[0]['kode_warna'],
             'color'                 => $details[0]['color'],
@@ -292,7 +296,22 @@ class PoGabunganController extends BaseController
                 'id_induk'         => $parentId,
             ];
         }
-        // dd ($batch);
+        if ($stock_celup > 0) {
+            $batch[] = [
+                'no_model'         => 'STOCK',
+                'item_type'        => '',
+                'kode_warna'       => '',
+                'color'            => '',
+                'kg_po'            => $stock_celup,
+                'keterangan'       => $data['keterangan'] ?? '',
+                'penerima'         => $data['penerima'],
+                'penanggung_jawab' => $data['penanggung_jawab'],
+                'admin'            => session()->get('username'),
+                'created_at'       => date('Y-m-d H:i:s'),
+                'updated_at'       => date('Y-m-d H:i:s'),
+                'id_induk'         => $parentId,
+            ];
+        }
         $this->openPoModel->insertBatch($batch);
 
         $db->transComplete();
