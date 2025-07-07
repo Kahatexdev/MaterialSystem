@@ -18,7 +18,11 @@
                     <label for="">Kode Warna</label>
                     <input type="text" class="form-control" name="kode_warna" id="kode_warna">
                 </div>
-                <div class="col-md-7">
+                <div class="col-md-2">
+                    <label for="">Tanggal PO</label>
+                    <input type="date" class="form-control" name="tgl_po" id="tgl_po">
+                </div>
+                <div class="col-md-4">
                     <label for="">Aksi</label><br>
                     <button class="btn btn-info btn-block" id="btnSearch"><i class="fas fa-search"></i></button>
                     <button class="btn btn-danger" id="btnReset"><i class="fas fa-redo-alt"></i></button>
@@ -39,37 +43,33 @@
                     <thead>
                         <tr>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal PO(+)</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Lot</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cluster</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kg PO(+)</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones PO(+)</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
                         $no = 1;
-                        foreach ($history as $data) {
+                        foreach ($poPlus as $data) {
                         ?>
                             <tr>
                                 <td><?= $no++ ?></td>
-                                <td><?= $data['no_model_old'] ?></td>
-                                <td><?= $data['delivery_awal'] ?? '-' ?></td>
-                                <td><?= $data['delivery_akhir'] ?? '-' ?></td>
+                                <td><?= $data['tgl_poplus'] ?></td>
+                                <td><?= $data['area'] ?? '-' ?></td>
+                                <td><?= $data['no_model'] ?? '-' ?></td>
                                 <td><?= $data['item_type'] ?></td>
                                 <td><?= $data['kode_warna'] ?></td>
-                                <td><?= $data['warna'] ?></td>
-                                <td><?= $data['kgs'] ?></td>
-                                <td><?= $data['cns'] ?></td>
-                                <td><?= $data['lot'] ?></td>
-                                <td><?= $data['cluster_old'] ?></td>
-                                <td><?= $data['created_at'] ?> <?php $data['keterangan'] ?> ke <?php $data['no_model_new'] ?> kode <?php $data['kode_warna'] ?></td>
+                                <td><?= $data['color'] ?></td>
+                                <td><?= number_format($data['kg_poplus'], 2) ?></td>
+                                <td><?= $data['cns_poplus'] ?></td>
+                                <td><?= $data['keterangan'] ?></td>
                             </tr>
                         <?php
                         } ?>
@@ -100,20 +100,23 @@
         });
 
         $('#btnExportAll').click(function() {
-            window.location.href = "<?= base_url("$role/warehouse/exportHistoryPindahOrder") ?>";
+            window.location.href = "<?= base_url("$role/poplus/exportPoTambahan") ?>";
         });
 
         $('#btnExport').click(function() {
             const m = $('#no_model').val().trim();
             const k = $('#kode_warna').val().trim();
-            window.location.href = "<?= base_url("$role/warehouse/exportHistoryPindahOrder") ?>" +
+            const t = $('#tgl_po').val().trim();
+            window.location.href = "<?= base_url("$role/poplus/exportPoTambahan") ?>" +
                 "?model=" + encodeURIComponent(m) +
-                "&kode_warna=" + encodeURIComponent(k);
+                "&kode_warna=" + encodeURIComponent(k) +
+                "&tgl_po=" + encodeURIComponent(t);
         });
 
         $('#btnReset').click(function() {
             $('#no_model').val('');
             $('#kode_warna').val('');
+            $('#tgl_po').val('');
             $('input[type="date"]').val('');
 
             loadDefaultData();
@@ -125,8 +128,9 @@
         function loadData() {
             let no_model = $('input[name="no_model"]').val().trim();
             let kode_warna = $('input[name="kode_warna"]').val().trim();
+            let tgl_po = $('input[name="tgl_po"]').val().trim();
 
-            if (no_model === '' && kode_warna === '') {
+            if (no_model === '' && kode_warna === '' && tgl_po === '') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
@@ -136,11 +140,12 @@
             }
 
             $.ajax({
-                url: "<?= base_url($role . '/warehouse/historyPindahOrder') ?>",
+                url: "<?= base_url($role . '/poplus/reportPoTambahan') ?>",
                 type: "GET",
                 data: {
                     model: no_model,
-                    kode_warna: kode_warna
+                    kode_warna: kode_warna,
+                    tgl_po: tgl_po
                 },
                 dataType: "json",
                 success: function(response) {
@@ -149,17 +154,15 @@
                     $.each(response, function(index, item) {
                         dataTable.row.add([
                             index + 1,
-                            item.no_model_old || '-',
-                            item.delivery_awal,
-                            item.delivery_akhir,
+                            item.tgl_poplus || '-',
+                            item.area,
+                            item.no_model,
                             item.item_type || '-',
                             item.kode_warna || '-',
-                            item.warna || '-',
-                            item.kgs,
-                            item.cns,
-                            item.lot,
-                            item.cluster_old,
-                            item.created_at + ' ' + item.keterangan + ' ke ' + item.no_model_new + ' kode ' + item.kode_warna
+                            item.color || '-',
+                            parseFloat(item.kg_poplus).toFixed(2),
+                            item.cns_poplus,
+                            item.keterangan
                         ]).draw(false);
                     });
 
@@ -175,7 +178,7 @@
 
         function loadDefaultData() {
             $.ajax({
-                url: "<?= base_url($role . '/warehouse/historyPindahOrder') ?>",
+                url: "<?= base_url($role . '/poplus/reportPoTambahan') ?>",
                 type: "GET",
                 dataType: "json",
                 success: function(response) {
@@ -184,17 +187,15 @@
                     $.each(response, function(index, item) {
                         dataTable.row.add([
                             index + 1,
-                            item.no_model_old || '-',
-                            item.delivery_awal,
-                            item.delivery_akhir,
+                            item.tgl_poplus || '-',
+                            item.area,
+                            item.no_model,
                             item.item_type || '-',
                             item.kode_warna || '-',
-                            item.warna || '-',
-                            item.kgs,
-                            item.cns,
-                            item.lot,
-                            item.cluster_old,
-                            item.created_at + ' ' + item.keterangan + ' ke ' + item.no_model_new + ' kode ' + item.kode_warna
+                            item.color || '-',
+                            parseFloat(item.kg_poplus).toFixed(2),
+                            item.cns_poplus,
+                            item.keterangan
                         ]).draw(false);
                     });
                 },

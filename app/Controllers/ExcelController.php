@@ -5521,4 +5521,136 @@ class ExcelController extends BaseController
         $writer->save('php://output');
         exit;
     }
+
+    public function exportPoTambahan()
+    {
+        $noModel   = $this->request->getGet('model')     ?? '';
+        $kodeWarna = $this->request->getGet('kode_warna') ?? '';
+        $tglPo = $this->request->getGet('tgl_po') ?? date('Y-m-d', strtotime('-1 day'));
+
+        // 1) Ambil data
+        $dataPoPlus = $this->poPlusModel->getDataPoPlus($tglPo, $noModel, $kodeWarna);
+
+        // Buat spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('REPORT PO TAMBAHAN');
+
+        // border
+        $styleHeader = [
+            'font' => [
+                'bold' => true, // Tebalkan teks
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER, // Alignment rata tengah
+            ],
+            'borders' => [
+                'outline' => [
+                    'borderStyle' => Border::BORDER_THIN, // Gaya garis tipis
+                    'color' => ['argb' => 'FF000000'],    // Warna garis hitam
+                ],
+            ],
+        ];
+        $styleBody = [
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER, // Alignment rata tengah
+            ],
+            'borders' => [
+                'outline' => [
+                    'borderStyle' => Border::BORDER_THIN, // Gaya garis tipis
+                    'color' => ['argb' => 'FF000000'],    // Warna garis hitam
+                ],
+            ],
+        ];
+
+        $dataFilter = '';
+
+        if (!empty($noModel) && !empty($kodeWarna) && !empty($tglPo)) {
+            $dataFilter = ' NOMOR MODEL ' . $noModel . ' KODE WARNA ' . $kodeWarna . ' TANGGAL PO ' . $tglPo;
+        } elseif (!empty($noModel) && !empty($kodeWarna)) {
+            $dataFilter = ' NOMOR MODEL ' . $noModel . ' KODE WARNA ' . $kodeWarna;
+        } elseif (!empty($noModel) && !empty($tglPo)) {
+            $dataFilter = ' NOMOR MODEL ' . $noModel . ' TANGGAL PO ' . $tglPo;
+        } elseif (!empty($kodeWarna) && !empty($tglPo)) {
+            $dataFilter = ' KODE WARNA ' . $kodeWarna . ' TANGGAL PO ' . $tglPo;
+        } elseif (!empty($noModel)) {
+            $dataFilter = ' NOMOR MODEL ' . $noModel;
+        } elseif (!empty($kodeWarna)) {
+            $dataFilter = ' KODE WARNA ' . $kodeWarna;
+        } elseif (!empty($tglPo)) {
+            $dataFilter = ' TANGGAL PO ' . $tglPo;
+        }
+
+        // Judul
+        $sheet->setCellValue('A1', 'REPORT PO TAMBAHAN' . $dataFilter);
+        $sheet->mergeCells('A1:J1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $row_header = 3;
+
+        $headers = [
+            'A' => 'NO',
+            'B' => 'TANGGAL PO(+)',
+            'C' => 'AREA',
+            'D' => 'NO MODEL',
+            'E' => 'ITEM TYPE',
+            'F' => 'KODE WARNA',
+            'G' => 'WARNA',
+            'H' => 'KG PO(+)',
+            'I' => 'CONES PO(+)',
+            'J' => 'KETERANGAN',
+        ];
+
+        foreach ($headers as $col => $title) {
+            $sheet->setCellValue($col . $row_header, $title);
+            $sheet->getStyle($col . $row_header)->applyFromArray($styleHeader);
+        }
+
+
+        // Isi data
+        $row = 4;
+        $no = 1;
+
+        foreach ($dataPoPlus as $key => $data) {
+            if (!is_array($data)) {
+                continue; // Lewati nilai akumulasi di $result
+            }
+
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $data['tgl_poplus']);
+            $sheet->setCellValue('C' . $row, $data['area']);
+            $sheet->setCellValue('D' . $row, $data['no_model']);
+            $sheet->setCellValue('E' . $row, $data['item_type']);
+            $sheet->setCellValue('F' . $row, $data['kode_warna']);
+            $sheet->setCellValue('G' . $row, $data['color']);
+            $sheet->setCellValue('H' . $row, number_format($data['kg_poplus'], 2));
+            $sheet->setCellValue('I' . $row, $data['cns_poplus']);
+            $sheet->setCellValue('J' . $row, $data['keterangan']);
+
+            // style body
+            $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+
+            foreach ($columns as $column) {
+                $sheet->getStyle($column . $row)->applyFromArray($styleBody);
+            }
+
+            $row++;
+        }
+
+        foreach (['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set judul file dan header untuk download
+        $filename = 'REPORT PO TAMBAHAN' . $dataFilter . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        // Tulis file excel ke output
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
 }

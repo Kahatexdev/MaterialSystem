@@ -162,4 +162,27 @@ class PoTambahanModel extends Model
             ->groupBy('master_order.no_model, material.item_type, material.kode_warna')
             ->first();
     }
+    public function getDataPoPlus($tgl_po, $no_model = null, $kode_warna = null)
+    {
+        $builder = $this->select('po_tambahan.id_po_tambahan, master_order.no_model, material.area, material.item_type, material.kode_warna, material.color, (SUM(po_tambahan.poplus_mc_kg) + SUM(po_tambahan.plus_pck_kg)) AS kg_poplus, (po_tambahan.poplus_mc_cns + po_tambahan.plus_pck_cns) AS cns_poplus, po_tambahan.status, DATE(po_tambahan.created_at) AS tgl_poplus, po_tambahan.admin, po_tambahan.keterangan, master_material.jenis')
+            ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
+            ->join('master_order', 'material.id_order = master_order.id_order', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->groupBy('DATE(po_tambahan.created_at)', false)
+            ->groupBy('master_order.no_model')
+            ->groupBy('material.item_type')
+            ->groupBy('material.kode_warna')
+            ->groupBy('po_tambahan.status')
+            ->where('DATE(po_tambahan.created_at)', $tgl_po)
+            ->where('status', 'approved');
+        if (!empty($noModel)) {
+            $builder->where('master_order.no_model', $noModel);
+        }
+        if (!empty($kodeWarna)) {
+            $builder->where('material.kode_warna', $kodeWarna);
+        }
+        return $builder->orderBy('po_tambahan.status', 'ASC')
+            ->orderBy('po_tambahan.created_at', 'DESC')
+            ->findAll();
+    }
 }
