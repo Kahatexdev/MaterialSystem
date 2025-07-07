@@ -66,7 +66,7 @@ class CelupController extends BaseController
         $filterNoModel = $this->request->getPost('filter_nomodel');
 
         $sch = $this->scheduleCelupModel->getSchedule();
-
+        // dd($sch);
         if ($filterTglSch && $filterNoModel) {
             $sch = array_filter($sch, function ($data) use ($filterTglSch, $filterNoModel) {
                 return $data['tanggal_schedule'] === $filterTglSch &&
