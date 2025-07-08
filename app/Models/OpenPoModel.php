@@ -490,4 +490,12 @@ class OpenPoModel extends Model
             ->where('po_booking', '1')
             ->findAll();
     }
+    public function detailPoManual($noModel)
+    {
+        return $this->select('open_po.*, master_order.delivery_awal')
+            ->join('master_order', 'master_order.no_model = open_po.no_model', 'left')
+            ->where('open_po.no_model', $noModel)
+            ->where('open_po.po_manual', '1')
+            ->findAll();
+    }
 }

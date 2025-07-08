@@ -4018,8 +4018,9 @@ class PdfController extends BaseController
     public function generateOpenPOManual()
     {
         $tujuan = $this->request->getGet('tujuan');
-
         $noModel = $this->request->getGet('no_model');
+        $newDel = $this->request->getGet('delivery');
+        $materialType = $this->request->getGet('material_type');
         $result = $this->openPoModel->getPoManualByNoModel($noModel);
 
         if ($tujuan == 'CELUP') {
@@ -4202,8 +4203,16 @@ class PdfController extends BaseController
         $totalPermintaanCones   = 0;
         $totalYard              = 0;
         $totalCones             = 0;
+        $prevDelivery = '';
         // dd($result);
         foreach ($result as $row) {
+            $delivery = $newDel ?? '';
+            if ($delivery === $prevDelivery) {
+                $displayDelivery = '';
+            } else {
+                $displayDelivery = $delivery;
+                $prevDelivery    = $delivery;
+            }
             // Cek dulu apakah nambah baris ini bakal lewat batas
             if ($pdf->GetY() + $lineHeight > $yLimit) {
                 $this->generateFooterOpenPOManual($pdf, $tujuan, $result, $penerima);
@@ -4281,7 +4290,7 @@ class PdfController extends BaseController
                 '',
                 '',
                 '',
-                $row['delivery_awal'], // Delivery
+                $displayDelivery, // Delivery
                 number_format($row['kg_po'], 2) ?? 0,
                 number_format($row['kg_percones'], 2) ?? 0,
                 '',

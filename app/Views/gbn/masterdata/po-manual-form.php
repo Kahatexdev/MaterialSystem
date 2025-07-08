@@ -204,10 +204,21 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="exampleFormControlInput1">Keterangan</label>
-                    <textarea class="form-control" name="keterangan" id="keterangan"></textarea>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="exampleFormControlInput1">Keterangan</label>
+                            <textarea class="form-control" name="keterangan" id="keterangan"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="exampleFormControlInput1">Keterangan Celup</label>
+                            <textarea class="form-control" name="ket_celup" id="ket_celup"></textarea>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="form-group">
                     <div class="row">
                         <div class="col-md-6">

@@ -45,6 +45,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('masterdata/poManual/create', 'PoManualController::create');
     $routes->get('masterdata/poManual/getNoOrderByModel', 'PoManualController::getNoOrderByModel');
     $routes->post('masterdata/poManual/saveOpenPoManual', 'PoManualController::saveOpenPoManual');
+    $routes->get('masterdata/poManual/detail', 'PoManualController::detail');
+    $routes->post('masterdata/poManual/updatePoManual', 'PoManualController::updatePoManual');
+    $routes->post('masterdata/poManual/deletePoManual', 'PoManualController::deletePoManual');
     $routes->get('masterdata/poManual/exportPoManual', 'PdfController::generateOpenPOManual');
     $routes->get('masterdata/cekStockOrder/(:any)/(:any)/(:any)', 'PoGabunganController::cekStockOrder/$1/$2/$3');
     $routes->post('openPO/saveOpenPOGabungan', 'PoGabunganController::saveOpenPOGabungan');

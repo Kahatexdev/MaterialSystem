@@ -123,7 +123,7 @@ class PoManualController extends BaseController
                 'penerima'            => $post['penerima']          ?? null,
                 'penanggung_jawab'    => $post['penanggung_jawab']  ?? null,
                 'po_plus'             => '0',
-                'po_booking'          => '0',
+                'po_Booking'          => '0',
                 'po_manual'           => '1',
                 'admin'               => session()->get('username'),
                 'id_induk'            => null,
@@ -134,5 +134,72 @@ class PoManualController extends BaseController
 
         return redirect()->to(base_url($this->role . '/masterdata/poManual'))
             ->with('success', 'Data PO Manual berhasil disimpan.');
+    }
+
+    public function detail()
+    {
+        $noModel = $this->request->getGet('no_model');
+        $detail = $this->openPoModel->detailPoManual($noModel);
+        $del = $detail[0]['delivery_awal'];
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'detail' => $detail,
+            'del' => $del
+        ];
+        return view($this->role . '/masterdata/po-manual-detail', $data);
+    }
+
+    public function updatePoManual()
+    {
+        $post = $this->request->getPost();
+        $id = $post['id_po'];
+        $noModel = $post['no_model'];
+        // dd($noModel);
+        $data = [
+            'buyer'               => $post['buyer'] ?? null,
+            'no_model'            => $post['no_model'],
+            'item_type'           => $post['item_type'] ?? null,
+            'kode_warna'          => $post['kode_warna'] ?? null,
+            'color'               => $post['color'] ?? null,
+            'spesifikasi_benang'  => $post['spesifikasi_benang'] ?? null,
+            'kg_po'               => $post['kg_po'] ?? null,
+            'keterangan'          => $post['keterangan'] ?? null,
+            'ket_celup'           => $post['ket_celup'] ?? null,
+            'bentuk_celup'        => $post['bentuk_celup'] ?? null,
+            'kg_percones'         => $post['kg_percones'] ?? null,
+            'jumlah_cones'        => $post['jumlah_cones'] ?? null,
+            'jenis_produksi'      => $post['jenis_produksi'] ?? null,
+            'contoh_warna'        => $post['contoh_warna'] ?? null,
+            'penerima'            => $post['penerima'] ?? null,
+            'penanggung_jawab'    => $post['penanggung_jawab'] ?? null,
+            'admin'               => session()->get('username'),
+        ];
+
+        $this->openPoModel->update($id, $data);
+
+        return redirect()->to(base_url($this->role . '/masterdata/poManual/detail?no_model=' . $noModel))
+            ->with('success', 'Data PO Manual berhasil diupdate.');
+    }
+
+    public function deletePoManual()
+    {
+        $id = $this->request->getPost('id_po');
+        $noModel = $this->request->getPost('no_model');
+
+        if (!$id) {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'ID PO tidak ditemukan']);
+        }
+
+        $deleted = $this->openPoModel->delete($id);
+
+        if ($deleted) {
+            return redirect()->to(base_url($this->role . '/masterdata/poManual/detail?no_model=' . $noModel))
+                ->with('success', 'Data PO Manual Berhasil Di Hapus.');
+        } else {
+            return redirect()->to(base_url($this->role . '/masterdata/poManual/detail?no_model=' . $noModel))
+                ->with('error', 'Data PO Manual Gagal Di Hapus.');
+        }
     }
 }
