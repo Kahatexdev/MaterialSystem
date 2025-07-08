@@ -60,10 +60,15 @@
                                 <td><?= $data['keterangan'] ?></td>
                                 <td><?= $data['penerima'] ?></td>
                                 <td>
-                                    <a
+                                    <!-- <a
                                         href="<?= base_url("$role/masterdata/poManual/exportPoManual?no_model=" . rawurlencode($data['no_model'])) ?>"
                                         class="btn btn-success">
                                         <i class="fas fa-file me-2"></i>Export
+                                    </a> -->
+                                    <a
+                                        href="<?= base_url("$role/masterdata/poManual/detail?no_model=" . rawurlencode($data['no_model'])) ?>"
+                                        class="btn btn-info">
+                                        <i class="fas fa-eye me-2"></i>Detail
                                     </a>
                                 </td>
                             </tr>
