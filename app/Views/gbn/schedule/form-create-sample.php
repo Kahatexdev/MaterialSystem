@@ -142,7 +142,7 @@
                     </div>
                     <div class="form-sample">
 
-                        <a class="btn btn-info btn-sm px-1 py-1" style=" font-size: 1rem;">
+                        <a href="<?= base_url($role . '/schedule/form?no_mesin=' . $no_mesin . '&tanggal_schedule=' . $tanggal_schedule . '&lot_urut=' . $lot_urut) ?>" class="btn btn-info btn-sm px-1 py-1" style=" font-size: 1rem;">
                             Mesin Normal
                         </a>
                     </div>
