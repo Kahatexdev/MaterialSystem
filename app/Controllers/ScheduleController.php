@@ -1307,6 +1307,80 @@ class ScheduleController extends BaseController
 
         foreach ($poList as $index => $po) {
             $no_model = $this->masterOrderModel->getNoModel($po);
+            // dd ($no_model);
+            if (empty($no_model)) {
+                // data insert ke master_order
+                $noOrder = '';
+                $no_model = $scheduleData['po'][$index];
+                $buyer = '';
+                $FU = '';
+                $lcodate = date('Y-m-d');
+                $deliveryAwal = $scheduleData['delivery_awal'][$index] ?? null;
+                $deliveryAkhir = $scheduleData['delivery_akhir'][$index] ?? null;
+                $admin = session()->get('username');
+                // dd ($no_model, $buyer, $FU, $lcodate, $deliveryAwal, $deliveryAkhir, $admin);
+                // inser data ke master_order
+                $this->masterOrderModel->insert([
+                    'no_order' => $noOrder,
+                    'no_model' => $no_model,
+                    'buyer' => $buyer,
+                    'foll_up' => $FU,
+                    'lco_date' => $lcodate,
+                    'delivery_awal' => $deliveryAwal,
+                    'delivery_akhir' => $deliveryAkhir,
+                    'admin' => $admin,
+                ]);
+
+                // get inserted id_order
+                $newOrder = $this->masterOrderModel->getInsertID();
+                // dd ($newOrder);
+                $masterMaterial = $this->masterMaterialModel->where('item_type', $scheduleData['item_type'][$index])->first();
+                // dd ($masterMaterial);
+                if (empty($masterMaterial)) {
+
+                    // dd ($scheduleData['item_type'][$index], $scheduleData['jenis_bahan_baku']);
+                    // Jika tidak ada data di master_material, buat data baru
+                    $this->masterMaterialModel->insert([
+                        'item_type' => $scheduleData['item_type'][$index],
+                        'deskripsi' => $scheduleData['item_type'][$index],
+                        'jenis' => $scheduleData['jenis_bahan_baku']
+                    ]);
+                } else {
+                    // dd ($newOrder, $scheduleData['item_type'][$index], $scheduleData['warna'], $scheduleData['kode_warna'], $scheduleData['qty_celup'][$index]);
+                    // data insert ke Material
+                    $this->materialModel->insert([
+                        'id_order' => $newOrder,
+                        'style_size' => '',
+                        'area' => 'SAMPLE',
+                        'color' => $scheduleData['warna'],
+                        'item_type' => $scheduleData['item_type'][$index],
+                        'kode_warna' => $scheduleData['kode_warna'],
+                        'composition' => '',
+                        'gw' => $scheduleData['qty_celup'][$index],
+                        'qty_pcs' => 0,
+                        'loss' => 0,
+                        'kgs' => $scheduleData['qty_celup'][$index],
+                        'admin' => session()->get('username'),
+                        'qty_cns' => 0,
+                        'qty_berat_cns' => 0
+                    ]);
+                }
+            }
+            // data untuk insert ke po
+            $this->openPoModel->insert([
+                'no_model' => $no_model,
+                'item_type' => $scheduleData['item_type'][$index],
+                'kode_warna' => $scheduleData['kode_warna'],
+                'color' => $scheduleData['warna'],
+                'kg_po' => $scheduleData['qty_po'][$index],
+                'keterangan' => '',
+                'penerima' => 'RETNO',
+                'penanggung_jawab' => session()->get('username'),
+                'po_plus' => $scheduleData['po_plus'][$index] ?? 0,
+                'admin' => session()->get('username')
+            ]);
+            // dd ($newOrder);
+
             $dataBatch[] = [
                 'id_mesin' => $id_mesin['id_mesin'],
                 'no_model' => $scheduleData['po'][$index],
