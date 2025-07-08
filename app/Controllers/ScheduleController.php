@@ -1303,15 +1303,16 @@ class ScheduleController extends BaseController
         $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
         $mesin = $this->mesinCelupModel->getKeteranganMesin($scheduleData['no_mesin']);
         $poList = $scheduleData['po']; // Array po[]
+        // dd ($poList);
         $dataBatch = []; // Untuk menyimpan batch data
 
         foreach ($poList as $index => $po) {
-            $no_model = $this->masterOrderModel->getNoModel($po);
-            // dd ($no_model);
+            $no_model = $this->masterOrderModel->where('no_model', $po)->first();
+            // dd ($po,$no_model);
             if (empty($no_model)) {
                 // data insert ke master_order
                 $noOrder = '';
-                $no_model = $scheduleData['po'][$index];
+                $cekModel = $scheduleData['po'][$index];
                 $buyer = '';
                 $FU = '';
                 $lcodate = date('Y-m-d');
@@ -1322,7 +1323,7 @@ class ScheduleController extends BaseController
                 // inser data ke master_order
                 $this->masterOrderModel->insert([
                     'no_order' => $noOrder,
-                    'no_model' => $no_model,
+                    'no_model' => $cekModel,
                     'buyer' => $buyer,
                     'foll_up' => $FU,
                     'lco_date' => $lcodate,
@@ -1368,7 +1369,7 @@ class ScheduleController extends BaseController
             }
             // data untuk insert ke po
             $this->openPoModel->insert([
-                'no_model' => $no_model,
+                'no_model' => $no_model['no_model'],
                 'item_type' => $scheduleData['item_type'][$index],
                 'kode_warna' => $scheduleData['kode_warna'],
                 'color' => $scheduleData['warna'],
