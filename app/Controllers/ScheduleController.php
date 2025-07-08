@@ -529,6 +529,7 @@ class ScheduleController extends BaseController
 
         $scheduleData = $this->scheduleCelupModel->getScheduleDetailsData($id_mesin, $tanggal_schedule, $lot_urut);
         // dd($scheduleData);
+        // dd($scheduleData);
         if (!empty($scheduleData['id_induk'])) {
         }
         foreach ($scheduleData as &$item) {
@@ -1346,7 +1347,7 @@ class ScheduleController extends BaseController
                         'deskripsi' => $scheduleData['item_type'][$index],
                         'jenis' => $scheduleData['jenis_bahan_baku']
                     ]);
-                } else {
+
                     // dd ($newOrder, $scheduleData['item_type'][$index], $scheduleData['warna'], $scheduleData['kode_warna'], $scheduleData['qty_celup'][$index]);
                     // data insert ke Material
                     $this->materialModel->insert([
@@ -1357,10 +1358,10 @@ class ScheduleController extends BaseController
                         'item_type' => $scheduleData['item_type'][$index],
                         'kode_warna' => $scheduleData['kode_warna'],
                         'composition' => '',
-                        'gw' => $scheduleData['qty_celup'][$index],
+                        'gw' => 0,
                         'qty_pcs' => 0,
                         'loss' => 0,
-                        'kgs' => $scheduleData['qty_celup'][$index],
+                        'kgs' => $scheduleData['qty_po'][$index],
                         'admin' => session()->get('username'),
                         'qty_cns' => 0,
                         'qty_berat_cns' => 0
@@ -1369,7 +1370,7 @@ class ScheduleController extends BaseController
             }
             // data untuk insert ke po
             $this->openPoModel->insert([
-                'no_model' => $no_model['no_model'],
+                'no_model' => $no_model['no_model'] ?? $cekModel,
                 'item_type' => $scheduleData['item_type'][$index],
                 'kode_warna' => $scheduleData['kode_warna'],
                 'color' => $scheduleData['warna'],
