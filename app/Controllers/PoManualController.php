@@ -29,7 +29,8 @@ class PoManualController extends BaseController
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
-        if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
+        $allowed_roles = ['gbn', 'covering'];
+        if (!in_array(session()->get('role'), $allowed_roles)) {
             return redirect()->to(base_url('/login'));
         }
         $this->isLogedin();

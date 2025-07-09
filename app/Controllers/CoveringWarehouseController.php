@@ -110,6 +110,8 @@ class CoveringWarehouseController extends BaseController
             'jenis'      => $this->request->getPost('jenis'),
             'jenis_cover' => $this->request->getPost('jenis_cover'),
             'jenis_benang' => $this->request->getPost('jenis_benang'),
+            'jenis_mesin' => $this->request->getPost('jenis_mesin'),
+            'dr'         => $this->request->getPost('dr'),
             'color'      => $this->request->getPost('color'),
             'code'       => $this->request->getPost('code'),
             'lmd'        => $lmdValue,
@@ -188,6 +190,8 @@ class CoveringWarehouseController extends BaseController
             'jenis'       => $stockData['jenis'],
             'jenis_benang' => $stockData['jenis_benang'],
             'jenis_cover' => $stockData['jenis_cover'],
+            'jenis_mesin' => $stockData['jenis_mesin'],
+            'dr'          => $stockData['dr'],
             'color'       => $stockData['color'],
             'code'        => $stockData['code'],
             'lmd'         => $stockData['lmd'],
@@ -221,7 +225,7 @@ class CoveringWarehouseController extends BaseController
     {
         // Ambil data JSON dari request
         $json = $this->request->getJSON(true);
-        log_message('debug', 'Data JSON: ' . json_encode($json));
+        // log_message('debug', 'Data JSON: ' . json_encode($json));
         // Validasi ID stok
         if (!isset($json['id_covering_stock'])) {
             return $this->fail("ID Stok tidak ditemukan!", 400);
@@ -240,6 +244,8 @@ class CoveringWarehouseController extends BaseController
             'jenis'       => $json['jenis'] ?? $existingStock['jenis'],
             'jenis_benang' => $json['jenis_benang'] ?? $existingStock['jenis_benang'],
             'jenis_cover' => $json['jenis_cover'] ?? $existingStock['jenis_cover'],
+            'jenis_mesin' => $json['jenis_mesin'] ?? $existingStock['jenis_mesin'],
+            'dr'          => $json['dr'] ?? $existingStock['dr'],
             'color'       => $json['color'] ?? $existingStock['color'],
             'code'        => $json['code'] ?? $existingStock['code'],
             'ttl_kg'      => $json['ttl_kg'] ?? $existingStock['ttl_kg'],

@@ -340,6 +340,8 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
 
 // covering routes
 $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
+    $routes->get('po-manual/covering', 'PoManualController::createCovering');
+    $routes->post('po-manual/covering/save', 'PoManualController::saveCovering');
     $routes->get('', 'CoveringController::index');
     $routes->get('memo', 'CoveringController::memo');
     $routes->get('mesinCov', 'MesinCoveringController::mesinCovering');
