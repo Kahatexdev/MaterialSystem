@@ -1,4 +1,4 @@
-7<?php $this->extend($role . '/mastermaterial/header'); ?>
+<?php $this->extend($role . '/mastermaterial/header'); ?>
 <?php $this->section('content'); ?>
 
 <div class="container-fluid py-4">

@@ -89,7 +89,6 @@ class ApiController extends ResourceController
         $res = [];
         foreach ($model as &$row) {
             $scheduleData = [];
-            $jadwal = [];
 
             $jenis = strtoupper($row['jenis']);
 
@@ -102,7 +101,6 @@ class ApiController extends ResourceController
                     $search
                 );
                 $scheduleData = !empty($schedule) ? $schedule[0] : [];
-                // $scheduleData = $schedule;
             } else if (in_array($jenis, ['KARET', 'SPANDEX'])) {
                 // Ambil data covering
                 $covering = $this->trackingPoCovering->statusBahanBaku(
@@ -112,17 +110,8 @@ class ApiController extends ResourceController
                     $search
                 );
                 $scheduleData = !empty($covering) ? $covering[0] : [];
-                // $scheduleData = $covering;
             }
 
-            // Ambil data stock terpisah
-            $stock = $this->stockModel->getKgStock(
-                $row['no_model'],
-                $row['item_type'],
-                $row['kode_warna']
-            );
-
-            $scheduleData['kg_stock'] = $stock['kg_stock'] ?? 0;
             $scheduleData['jenis'] = $row['jenis'];
 
             $fields = [
