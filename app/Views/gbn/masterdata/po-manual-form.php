@@ -75,7 +75,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Jenis Benang</label>
-                                <select class="form-control texture" name="jenis_benang" required>
+                                <select class="form-control texture" name="jenis_benang">
                                     <option value="">Pilih Jenis Benang</option>
                                     <option value="DTY">DTY</option>
                                     <option value="FDY">FDY</option>
@@ -87,7 +87,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Spesifikasi Benang</label>
-                                <select class="form-control fillamen" name="spesifikasi_benang" required>
+                                <select class="form-control fillamen" name="spesifikasi_benang">
                                     <option value="">Pilih Spesifikasi Benang</option>
                                     <option value="SIM DH">SIM DH</option>
                                     <option value="NIM DH">NIM DH</option>

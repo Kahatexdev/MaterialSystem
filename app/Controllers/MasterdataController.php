@@ -595,6 +595,7 @@ class MasterdataController extends BaseController
             }
             unset($keb); // good practice setelah foreach by reference
         }
+        // dd($totalKebutuhan);
 
         // dd($totalKebutuhan);
         $styleSize = $this->materialModel->getStyle($id);
@@ -736,7 +737,11 @@ class MasterdataController extends BaseController
         // dd($data);
         $noModels  = $data['no_model'] ?? null;  // sekarang tetap string
         $id_order = $id;
-        // dd($id_order);
+        $buyer = $this->masterOrderModel
+            ->select('buyer')
+            ->where('no_model', $noModels)
+            ->get()
+            ->getRow('buyer');
 
         $items = $data['items'] ?? [];
         if (($data['penerima'] ?? '') === 'Paryanti') {
@@ -745,6 +750,7 @@ class MasterdataController extends BaseController
             foreach ($items as $item) {
                 $spesifikasiBenang = (!empty($item['jenis_benang']) && !empty($item['spesifikasi_benang'])) ? $item['jenis_benang'] . ' ' . $item['spesifikasi_benang'] : NULL;
                 $headerData[] = [
+                    'buyer'                 => $buyer,
                     'no_model'              => 'POCOVERING ' . $noModels,
                     'item_type'             => $item['item_type'],
                     'kode_warna'            => $item['kode_warna'],
@@ -784,6 +790,7 @@ class MasterdataController extends BaseController
             foreach ($items as $i => $d) {
                 $spesifikasiBenang = (!empty($d['jenis_benang']) && !empty($d['spesifikasi_benang'])) ? $d['jenis_benang'] . ' ' . $d['spesifikasi_benang'] : NULL;
                 $batch[] = [
+                    'buyer'                 => $buyer,
                     'no_model'              => $noModels ?? '-',
                     'item_type'             => $d['item_type'],
                     'kode_warna'            => $d['kode_warna'],
@@ -836,6 +843,7 @@ class MasterdataController extends BaseController
                 $spesifikasiBenang = (!empty($item['jenis_benang']) && !empty($item['spesifikasi_benang'])) ? $item['jenis_benang'] . ' ' . $item['spesifikasi_benang'] : NULL;
                 $itemData = [
                     'role'                  => $this->role,
+                    'buyer'                 => $buyer,
                     'no_model'              => $data['no_model'],
                     'item_type'             => $item['item_type'],
                     'kode_warna'            => $item['kode_warna'],
