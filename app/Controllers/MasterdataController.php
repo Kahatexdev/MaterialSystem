@@ -16,6 +16,8 @@ use App\Models\EstimasiStokModel;
 use App\Models\StockModel;
 use App\Models\TrackingPoCovering;
 use App\Models\PoTambahanModel;
+use App\Models\ScheduleCelupModel;
+
 
 class MasterdataController extends BaseController
 {
@@ -31,7 +33,7 @@ class MasterdataController extends BaseController
     protected $stockModel;
     protected $trackingPoCoveringModel;
     protected $poTambahanModel;
-
+    protected $scheduleCelupModel;
     public function __construct()
     {
         $this->masterOrderModel = new MasterOrderModel();
@@ -42,6 +44,7 @@ class MasterdataController extends BaseController
         $this->stockModel = new StockModel();
         $this->trackingPoCoveringModel = new TrackingPoCovering();
         $this->poTambahanModel = new PoTambahanModel();
+        $this->scheduleCelupModel = new ScheduleCelupModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -581,9 +584,18 @@ class MasterdataController extends BaseController
         if (!$id_order) {
             return redirect()->to(base_url($this->role . '/masterOrder'))->with('error', 'ID Order tidak ditemukan.');
         }
+        $model = $this->masterOrderModel->select('no_model')->where('id_order', $id_order)->first();
         $itemType = $this->masterMaterialModel->getItemType();
         $orderData = $this->materialModel->getMaterial($id_order);
         $totalKebutuhan = $this->materialModel->getTotalKebutuhan($id_order);
+        if ($totalKebutuhan) {
+            foreach ($totalKebutuhan as &$keb) { // ← Pake referensi &
+                $tgl = $this->scheduleCelupModel->cekSch($model, $keb) ?? '-';
+                $keb['tanggal_schedule'] = $tgl;
+            }
+            unset($keb); // good practice setelah foreach by reference
+        }
+
         // dd($totalKebutuhan);
         $styleSize = $this->materialModel->getStyle($id);
         if (empty($orderData)) {
@@ -994,7 +1006,12 @@ class MasterdataController extends BaseController
         $data = $this->masterOrderModel
             ->orderBy('id_order', 'DESC')
             ->findAll($length, $start);
-
+        // dd($data);
+        foreach ($data as &$dt) {
+            $tanggal_po = $this->openPoModel->getTanggalPo($dt);
+            $dt['tanggal_po'] = $tanggal_po ?? '-';
+        }
+        unset($dt); // amanin reference
         // Material untuk cross-check id_order
         $material = $this->materialModel->findAll();
         $materialOrderIds = array_column($material, 'id_order');
@@ -1015,6 +1032,7 @@ class MasterdataController extends BaseController
                 'delivery_awal' => "<span style='$style'>{$row['delivery_awal']}</span>",
                 'delivery_akhir' => "<span style='$style'>{$row['delivery_akhir']}</span>",
                 'unit' => "<span style='$style'>{$row['unit']}</span>",
+                'tanggal_po' => "<span style='$style'>{$row['tanggal_po']}</span>",
                 'admin' => "<span style='$style'>{$row['admin']}</span>",
                 'action' => "
                 <a href='" . base_url($this->role . '/material/' . $row['id_order']) . "' class='btn btn-info btn-sm'>Detail</a>

@@ -498,4 +498,13 @@ class OpenPoModel extends Model
             ->where('open_po.po_manual', '1')
             ->findAll();
     }
+    public function getTanggalPo($dt)
+    {
+        $po = $this->select('created_at as tanggal_po')
+            ->where('no_model', $dt['no_model'])
+            ->orderBy('created_at', 'DESC')
+            ->first();
+
+        return $po ? $po['tanggal_po'] : null;
+    }
 }
