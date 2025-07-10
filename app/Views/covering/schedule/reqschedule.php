@@ -216,6 +216,9 @@
                         <button class="btn btn-filter mt-md-4" id="filter_date_range" type="submit">
                             <i class="bi bi-funnel me-2"></i>Filter
                         </button>
+                        <button class="btn btn-filter mt-md-4" id="btnReset">
+                            <i class="fas fa-redo-alt"></i>
+                        </button>
                     </div>
                 </div>
             </form>
@@ -254,8 +257,15 @@
                                 <td><?= $data['warna']; ?></td>
                                 <td><?= $data['start_mc']; ?></td>
                                 <td><?= $data['tgl_schedule']; ?></td>
-                                <td><a href="<?= base_url($role . '/schedule/reqschedule/show/' . $data['id_celup']) ?>" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Detail">
-                                        <i class="fas fa-eye"></i></a></td>
+                                <?php if ($data['last_status'] != 'complain') { ?>
+                                    <td>
+                                        <a href="<?= base_url($role . '/schedule/reqschedule/show/' . $data['id_celup']) ?>" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Detail">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                <?php } else { ?>
+                                    <td></td>
+                                <?php } ?>
                             </tr>
                         <?php
                         endforeach;
@@ -277,12 +287,7 @@
             </div>
             <div class="modal-body" id="modalScheduleBody">
                 <!-- Isi modal dengan JS -->
-
-
             </div>
-
-
-
         </div>
     </div>
 </div>

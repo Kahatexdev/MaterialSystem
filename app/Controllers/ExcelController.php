@@ -25,6 +25,7 @@ use App\Models\MesinCelupModel;
 use App\Models\CoveringStockModel;
 use App\Models\PoTambahanModel;
 use App\Models\HistoryStock;
+use App\Models\PemesananSpandexKaretModel;
 use PhpOffice\PhpSpreadsheet\Style\{Border, Alignment, Fill};
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
@@ -55,6 +56,7 @@ class ExcelController extends BaseController
     protected $coveringStockModel;
     protected $poPlusModel;
     protected $historyStock;
+    protected $pemesananSpandexKaretModel;
 
     public function __construct()
     {
@@ -76,6 +78,7 @@ class ExcelController extends BaseController
         $this->coveringStockModel = new CoveringStockModel();
         $this->poPlusModel = new PoTambahanModel();
         $this->historyStock = new HistoryStock();
+        $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -6206,6 +6209,264 @@ class ExcelController extends BaseController
         $writer = new Xlsx($spreadsheet);
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"$filename\"");
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function generateOpenPOCovering($jenis, $tgl_po)
+    {
+        // Ambil data
+        $data = $this->pemesananSpandexKaretModel
+            ->getDataForPdf($jenis, $tgl_po);
+
+        // Buat objek Spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // -- HEADER LOGO & JUDUL --
+        // Sisipkan logo jika diperlukan (path relatif ke public/)
+        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+        $drawing->setName('Logo Kahatex');
+        $drawing->setPath(FCPATH . 'assets/img/logo-kahatex.png');
+        $drawing->setCoordinates('A1');
+        $drawing->setHeight(50);
+        $drawing->setWorksheet($sheet);
+
+        // Judul Form
+        $sheet->mergeCells('B2:G2');
+        $sheet->setCellValue('B2', 'FORMULIR');
+        $sheet->getStyle('B2')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('B2')->getAlignment()->setHorizontal('center');
+
+        $sheet->mergeCells('B3:G3');
+        $sheet->setCellValue('B3', 'DEPARTEMEN COVERING');
+        $sheet->getStyle('B3')->getFont()->setBold(true)->setSize(10);
+        $sheet->getStyle('B3')->getAlignment()->setHorizontal('center');
+
+        $sheet->mergeCells('B4:G4');
+        $sheet->setCellValue('B4', 'SURAT PENGELUARAN BARANG');
+        $sheet->getStyle('B4')->getFont()->setBold(true)->setSize(10);
+        $sheet->getStyle('B4')->getAlignment()->setHorizontal('center');
+
+        // -- META INFO (No Dokumen, Halaman, Tgl Efektif, Revisi) --
+        $sheet->setCellValue('A6', 'No. Dokumen');
+        $sheet->setCellValue('B6', 'FOR-COV-631');
+        $sheet->setCellValue('D6', 'Halaman');
+        $sheet->setCellValue('E6', '1 dari 1');
+
+        $sheet->setCellValue('A7', 'Tanggal Efektif');
+        $sheet->setCellValue('B7', '01 Mei 2017');
+        $sheet->setCellValue('D7', 'Revisi');
+        $sheet->setCellValue('E7', '00');
+
+        $sheet->setCellValue('D8', 'Tanggal Revisi');
+
+        // -- CUSTOMER & NO/TANGGAL PO --
+        $sheet->setCellValue('A10', 'CUSTOMER:');
+        $sheet->setCellValue('D10', 'NO:');
+        $sheet->setCellValue('E10', $tgl_po);
+        $sheet->setCellValue('D11', 'TANGGAL:');
+        $sheet->setCellValue('E11', $tgl_po);
+
+        // -- HEADER TABEL --
+        $startRow = 13;
+        $sheet->setCellValue('A' . $startRow, 'No');
+        $sheet->setCellValue('B' . $startRow, 'JENIS BARANG');
+        $sheet->setCellValue('C' . $startRow, 'DR/TPM');
+        $sheet->setCellValue('D' . $startRow, 'WARNA/CODE');
+        $sheet->setCellValue('E' . $startRow, 'KG');
+        $sheet->setCellValue('F' . $startRow, 'CONES');
+        $sheet->setCellValue('G' . $startRow, 'KETERANGAN');
+
+        // Styling header tabel
+        $headerRange = 'A' . $startRow . ':G' . $startRow;
+        $sheet->getStyle($headerRange)
+            ->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)
+            ->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        // -- LOOP DATA --
+        $row = $startRow + 1;
+        $no = 1;
+        foreach ($data as $item) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $item['jenis'] . ' (' . $item['no_model'] . ')');
+            $sheet->setCellValue('C' . $row, ''); // kolom DR/TPM kosong
+            $sheet->setCellValue('D' . $row, $item['color'] . '/' . $item['code']);
+            $sheet->setCellValue('E' . $row, number_format($item['total_pesan'], 2, '.', ''));
+            $sheet->setCellValue('F' . $row, $item['total_cones']);
+            $sheet->setCellValue('G' . $row, $item['keterangan']);
+
+            // border per baris
+            $sheet->getStyle("A{$row}:G{$row}")
+                ->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+            $row++;
+        }
+
+        // Jika kurang dari 18 baris, tambahkan row kosong
+        $minRows = 18;
+        for ($i = $no; $i <= $minRows; $i++) {
+            $sheet->getStyle("A{$row}:G{$row}")
+                ->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            $row++;
+        }
+
+        // -- TANDA TANGAN --
+        $row += 2;
+        $sheet->setCellValue("A{$row}", 'YANG BUKA BON');
+        $sheet->setCellValue("C{$row}", 'GUDANG ANGKUTAN');
+        $sheet->setCellValue("E{$row}", 'PENERIMA');
+        $row += 4;
+        $sheet->setCellValue("A{$row}", '(       PARYANTI       )');
+        $sheet->setCellValue("C{$row}", '(                     )');
+        $sheet->setCellValue("E{$row}", '(       HARTANTO       )');
+
+        // Atur lebar kolom agar pas
+        foreach (range('A', 'G') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Output ke browser
+        $writer = new Xlsx($spreadsheet);
+        return service('response')
+            ->setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            ->setHeader('Content-Disposition', 'attachment; filename="Pengeluaran_Covering_' . $tgl_po . '.xlsx"')
+            ->setHeader('Cache-Control', 'max-age=0')
+            ->setBody((string) $writer->save('php://output'));
+    }
+
+    public function generateOpenPOCoveringExcel($tgl_po)
+    {
+        // Ambil data PO
+        $poCovering = $this->openPoModel->getPoForCelup($tgl_po);
+        if (empty($poCovering) || empty($poCovering[0]->no_model)) {
+            session()->setFlashdata('error', 'PO Tidak Ditemukan. Open PO Terlebih Dahulu');
+            return redirect()->back();
+        }
+
+        // Hilangkan kata POCOVERING pada induk_no_model
+        foreach ($poCovering as $i => $row) {
+            $poCovering[$i]->induk_no_model = preg_replace('/POCOVERING\s*/i', '', $row->induk_no_model);
+        }
+
+        // Inisialisasi Spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Atur judul dan header
+        $sheet->mergeCells('A1:D1');
+        $sheet->setCellValue('A1', 'FORMULIR PO COVERING');
+        $sheet->getStyle('A1')->getFont()->setBold(true);
+
+        $sheet->setCellValue('A3', 'No. Dokumen');
+        $sheet->setCellValue('B3', 'FOR-CC-087/REV_01/HAL_1/1');
+        $sheet->setCellValue('E3', 'Tanggal Revisi');
+        $sheet->setCellValue('F3', '04 Desember 2019');
+
+        $sheet->setCellValue('A5', 'PO');
+        $sheet->setCellValue('B5', $poCovering[0]->anak_no_model);
+        $sheet->setCellValue('A6', 'Pemesanan');
+        $sheet->setCellValue('B6', 'COVERING');
+        $sheet->setCellValue('A7', 'Tgl');
+        $sheet->setCellValue('B7', date('Y-m-d', strtotime($poCovering[0]->created_at)));
+
+        // Header kolom data mulai row 9
+        $headers = [
+            'A' => 'No',
+            'B' => 'Jenis Benang',
+            'C' => 'Kode Benang',
+            'D' => 'Bentuk Celup',
+            'E' => 'Warna',
+            'F' => 'Kode Warna',
+            'G' => 'Buyer',
+            'H' => 'Nomor Order',
+            'I' => 'Delivery',
+            'J' => 'Kg Pesanan',
+            'K' => 'Kg Permintaan Cones',
+            'L' => 'Yard',
+            'M' => 'Cones Total',
+            'N' => 'Jenis Produksi',
+            'O' => 'Contoh Warna',
+            'P' => 'Keterangan'
+        ];
+
+        $rowNum = 9;
+        foreach ($headers as $col => $text) {
+            $sheet->setCellValue("{$col}{$rowNum}", $text);
+            $sheet->getStyle("{$col}{$rowNum}")
+                ->getFont()->setBold(true);
+            $sheet->getStyle("{$col}{$rowNum}")
+                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle("{$col}{$rowNum}")
+                ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            // Lebar kolom
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Isi data
+        $rowNum++;
+        $no = 1;
+        $totalKg = 0;
+        $totalPermCones = 0;
+        $totalYard = 0;
+        $totalCones = 0;
+
+        foreach ($poCovering as $row) {
+            $sheet->setCellValue("A{$rowNum}", $no++);
+            $sheet->setCellValue("B{$rowNum}", $row->jenis);
+            $sheet->setCellValue("C{$rowNum}", $row->item_type);
+            $sheet->setCellValue("D{$rowNum}", $row->bentuk_celup);
+            $sheet->setCellValue("E{$rowNum}", $row->color);
+            $sheet->setCellValue("F{$rowNum}", $row->kode_warna);
+            $sheet->setCellValue("G{$rowNum}", $row->buyer);
+            $sheet->setCellValue("H{$rowNum}", $row->no_order);
+            $sheet->setCellValue("I{$rowNum}", $row->delivery_awal);
+            $sheet->setCellValue("J{$rowNum}", $row->kg_po);
+            $sheet->setCellValue("K{$rowNum}", $row->kg_percones);
+            $sheet->setCellValue("L{$rowNum}", $row->yard ?? '');
+            $sheet->setCellValue("M{$rowNum}", $row->jumlah_cones);
+            $sheet->setCellValue("N{$rowNum}", $row->jenis_produksi);
+            $sheet->setCellValue("O{$rowNum}", $row->contoh_warna);
+            $sheet->setCellValue("P{$rowNum}", $row->ket_celup);
+
+            // Borders
+            foreach (array_keys($headers) as $col) {
+                $sheet->getStyle("{$col}{$rowNum}")
+                    ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            }
+
+            $totalKg += $row->kg_po;
+            $totalPermCones += $row->kg_percones;
+            $totalCones += $row->jumlah_cones;
+            $totalYard += $row->yard ?? 0;
+            $rowNum++;
+        }
+
+        // Baris total
+        $sheet->setCellValue("I{$rowNum}", 'TOTAL');
+        $sheet->mergeCells("I{$rowNum}:J{$rowNum}");
+        $sheet->setCellValue("J{$rowNum}", number_format($totalKg, 2));
+        $sheet->setCellValue("K{$rowNum}", number_format($totalPermCones, 2));
+        $sheet->setCellValue("L{$rowNum}", number_format($totalYard, 2));
+        $sheet->setCellValue("M{$rowNum}", $totalCones);
+
+        foreach (['I', 'J', 'K', 'L', 'M'] as $col) {
+            $sheet->getStyle("{$col}{$rowNum}")
+                ->getFont()->setBold(true);
+            $sheet->getStyle("{$col}{$rowNum}")
+                ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $sheet->getStyle("{$col}{$rowNum}")
+                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        }
+
+        // Header respons
+        $filename = 'OpenPOCovering_' . $tgl_po . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
     }

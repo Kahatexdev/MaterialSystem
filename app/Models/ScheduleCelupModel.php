@@ -790,4 +790,14 @@ class ScheduleCelupModel extends Model
             ->get()
             ->getResultArray();
     }
+    public function cekSch($model, $keb)
+    {
+        $data = $this->select('tanggal_schedule')
+            ->where('no_model', $model['no_model'])
+            ->where('item_type', $keb['item_type'])
+            ->where('kode_warna', $keb['kode_warna'])
+            ->where('warna', $keb['color'])
+            ->first();
+        return $data['tanggal_schedule'] ?? '-';
+    }
 }

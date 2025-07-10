@@ -311,6 +311,7 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('schedule/nylon', 'ScheduleController::nylon');
     $routes->get('reqschedule', 'ScheduleController::reqschedule');
     $routes->post('schedule', 'ScheduleController::reqschedule');
+    $routes->get('schedule', 'ScheduleController::index');
     $routes->get('edit/(:num)', 'CelupController::editStatus/$1');
     $routes->post('updateSchedule/(:num)', 'CelupController::updateSchedule/$1');
     $routes->get('schedule/getScheduleDetails/(:any)/(:any)/(:any)', 'ScheduleController::getScheduleDetails/$1/$2/$3');
@@ -341,6 +342,8 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
 
 // covering routes
 $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
+    $routes->get('po-manual/covering', 'PoManualController::createCovering');
+    $routes->post('po-manual/covering/save', 'PoManualController::saveCovering');
     $routes->get('', 'CoveringController::index');
     $routes->get('memo', 'CoveringController::memo');
     $routes->get('mesinCov', 'MesinCoveringController::mesinCovering');

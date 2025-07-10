@@ -368,6 +368,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Color</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Kebutuhan</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Sch</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -377,6 +378,7 @@
                                 <td><?= $data1['kode_warna'] ?></td>
                                 <td><?= $data1['color'] ?></td>
                                 <td><?= number_format($data1['kebutuhan'], 2) ?> kg</td>
+                                <td><?= $data1['tanggal_schedule'] ?></td>
 
                             </tr>
                         <?php endforeach; ?>
