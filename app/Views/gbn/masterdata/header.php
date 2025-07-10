@@ -21,6 +21,15 @@
                                 <li><a href="<?= base_url($role . '/masterdata/poGabungan') ?>" class="dropdown-item" href="#">PO Gabungan</a></li>
                                 <li><a href="<?= base_url($role . '/masterdata/poBooking') ?>" class="dropdown-item" href="#">PO Booking</a></li>
                                 <li><a href="<?= base_url($role . '/masterdata/poManual') ?>" class="dropdown-item" href="#">PO Manual</a></li>
+                                <li>
+                                    <button
+                                        type="button"
+                                        class="dropdown-item"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalPoNylon">
+                                        PO Nylon
+                                    </button>
+                                </li>
                             </ul>
                         </li>
                         <li class="nav-item d-flex align-items-center px-1">

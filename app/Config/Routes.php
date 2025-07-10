@@ -37,7 +37,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('masterdata/poBooking/getKodeWarna', 'PoBookingController::getKodeWarna');
     $routes->get('masterdata/poBooking/getColor', 'PoBookingController::getColor');
     $routes->post('masterdata/poBooking/saveOpenPoBooking', 'PoBookingController::saveOpenPoBooking');
-    $routes->get('masterdata/poBooking/exportPoBooking', 'PdfController::generateOpenPOBooking');
+    // $routes->get('masterdata/poBooking/exportPoBooking', 'PdfController::generateOpenPOBooking');
+    $routes->get('masterdata/poBooking/exportPoBooking', 'ExcelController::generateOpenPOBookingExcel');
     $routes->get('masterdata/poBooking/detail', 'PoBookingController::detail');
     $routes->post('masterdata/poBooking/updatePoBooking', 'PoBookingController::updatePoBooking');
     $routes->post('masterdata/poBooking/deletePoBooking', 'PoBookingController::deletePoBooking');
@@ -48,7 +49,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('masterdata/poManual/detail', 'PoManualController::detail');
     $routes->post('masterdata/poManual/updatePoManual', 'PoManualController::updatePoManual');
     $routes->post('masterdata/poManual/deletePoManual', 'PoManualController::deletePoManual');
-    $routes->get('masterdata/poManual/exportPoManual', 'PdfController::generateOpenPOManual');
+    // $routes->get('masterdata/poManual/exportPoManual', 'PdfController::generateOpenPOManual');
+    $routes->get('masterdata/poManual/exportPoManual', 'ExcelController::generateOpenPOManualExcel');
     $routes->get('masterdata/cekStockOrder/(:any)/(:any)/(:any)', 'PoGabunganController::cekStockOrder/$1/$2/$3');
     $routes->post('openPO/saveOpenPOGabungan', 'PoGabunganController::saveOpenPOGabungan');
     $routes->get('listPoGabungan', 'PoGabunganController::listPoGabungan');
@@ -75,6 +77,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('updatePo', 'MaterialController::updatePo');
     // $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
     $routes->get('exportOpenPO/(:any)', 'ExcelController::generateOpenPOExcel/$1');
+    $routes->post('exportPoNylon', 'ExcelController::generateOpenPONylon');
     $routes->get('getPoDetails/(:num)', 'MaterialController::getPoDetails/$1');
     $routes->delete('deletePo/(:num)', 'MaterialController::deletePo/$1');
     $routes->post('splitMaterial', 'MaterialController::splitMaterial');

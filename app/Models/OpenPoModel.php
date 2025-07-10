@@ -507,4 +507,14 @@ class OpenPoModel extends Model
 
         return $po ? $po['tanggal_po'] : null;
     }
+    public function getDataPoNylon($tanggal)
+    {
+        return $this->select('open_po.no_model, open_po.item_type, open_po.spesifikasi_benang, open_po.kode_warna, open_po.color, open_po.kg_po, open_po.keterangan, open_po.ket_celup, open_po.bentuk_celup, open_po.kg_percones, open_po.jumlah_cones, open_po.jenis_produksi, open_po.contoh_warna, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, master_material.jenis, master_material.ukuran, master_order.buyer, master_order.no_order, master_order.delivery_awal, open_po.po_plus, open_po.admin')
+            ->where('DATE(open_po.created_at)', $tanggal)
+            ->where('master_material.jenis', 'NYLON')
+            ->where('open_po.po_plus', '0')
+            ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
+            ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
+            ->findAll();
+    }
 }
