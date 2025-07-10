@@ -595,6 +595,7 @@ class MasterdataController extends BaseController
             }
             unset($keb); // good practice setelah foreach by reference
         }
+        // dd($totalKebutuhan);
 
         // dd($totalKebutuhan);
         $styleSize = $this->materialModel->getStyle($id);
