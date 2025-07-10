@@ -125,14 +125,14 @@
                         <span class="nav-link-text ms-1">PO Celup</span>
                     </a>
                 </li>
-                <!-- <li class="nav-item">
-                    <a class="nav-link <?= set_active($active . '/schedule') ?>" href="<?= base_url($role . '/schedule') ?>">
+                <li class="nav-item">
+                    <a class="nav-link <?= set_active($active . '/schedule/reqschedule') ?>" href="<?= base_url($role . '/schedule/reqschedule') ?>">
                         <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="fas fa-calendar-plus text-dark"></i>
                         </div>
-                        <span class="nav-link-text ms-1">Schedule</span>
+                        <span class="nav-link-text ms-1">Reqschedule</span>
                     </a>
-                </li> -->
+                </li>
                 <li class="nav-item">
                     <a class="nav-link <?= set_active($active . '/pemesanan') ?>" href="<?= base_url($role . '/pemesanan') ?>">
                         <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
