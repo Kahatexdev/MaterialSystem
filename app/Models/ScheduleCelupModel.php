@@ -798,6 +798,6 @@ class ScheduleCelupModel extends Model
             ->where('kode_warna', $keb['kode_warna'])
             ->where('warna', $keb['color'])
             ->first();
-        return $data['tanggal_schedule'];
+        return $data['tanggal_schedule'] ?? = '-';
     }
 }
