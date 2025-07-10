@@ -55,7 +55,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('getPoGabungan/(:any)', 'PoGabunganController::getPoGabungan/$1');
     $routes->post('updatePoGabungan', 'PoGabunganController::updatePoGabungan');
     $routes->post('deletePoGabungan/(:num)', 'PoGabunganController::deletePoGabungan/$1');
-    $routes->get('exportOpenPOGabung', 'PdfController::exportOpenPOGabung');
+    // $routes->get('exportOpenPOGabung', 'PdfController::exportOpenPOGabung');
+    $routes->get('exportOpenPOGabung', 'ExcelController::exportOpenPOGabung');
     $routes->get('exportPoBoking', 'ExcelController::exportPoBooking');
 
 

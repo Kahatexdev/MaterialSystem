@@ -5914,4 +5914,521 @@ class ExcelController extends BaseController
         $writer->save('php://output');
         exit;
     }
+
+    public function exportOpenPOGabung()
+    {
+        $tujuan = $this->request->getGet('tujuan');
+        $jenis = $this->request->getGet('jenis');
+        $jenis2 = $this->request->getGet('jenis2');
+        $startDate = $this->request->getGet('start_date');
+        $endDate = $this->request->getGet('end_date');
+        // dd($tujuan, $jenis, $jenis2, $startDate, $endDate);
+
+        // Tentukan penerima berdasarkan tujuan
+        if ($tujuan == 'CELUP') {
+            $penerima = 'Retno';
+        } elseif ($tujuan == 'COVERING') {
+            $penerima = 'Paryanti';
+        } else {
+            return redirect()->back()->with('error', 'Tujuan tidak valid.');
+        }
+
+        $buyer = [];
+        $openPoGabung = $this->openPoModel->listOpenPoGabungbyDate($jenis, $jenis2, $penerima, $startDate, $endDate);
+        // dd ($openPoGabung);
+        foreach ($openPoGabung as &$po) {
+            $buyersData = $this->openPoModel->getBuyer($po['id_po']); // Ambil semua data buyer terkait
+            if (is_array($buyersData) && count($buyersData) > 0) {
+                // Ambil semua buyer, no_order, dan delivery_awal
+                $buyers = array_column($buyersData, 'buyer');
+                $noOrders = array_column($buyersData, 'no_order');
+                $deliveries = array_column($buyersData, 'delivery_awal');
+
+                // Tentukan buyer: kosong jika lebih dari satu jenis
+                $po['buyer'] = count(array_unique($buyers)) === 1 ? $buyers[0] : null;
+
+                // Tentukan delivery_awal paling awal
+                $earliestDeliveryIndex = array_keys($deliveries, min($deliveries))[0];
+                $po['delivery_awal'] = $deliveries[$earliestDeliveryIndex];
+
+                // Tentukan no_order yang berhubungan dengan delivery_awal paling awal
+                $po['no_order'] = $noOrders[$earliestDeliveryIndex];
+            } else {
+                // Jika tidak ada data buyersData
+                $po['buyer'] = null;
+                $po['no_order'] = null;
+                $po['delivery_awal'] = null;
+            }
+        }
+        // Pastikan untuk tidak menggunakan referensi lagi setelah loop selesai
+        unset($po);
+
+        // Buat spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Style
+        $styleHeader = [
+            'font' => [
+                'size' => 12,
+                'bold' => true,
+                'name' => 'Arial',
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER, // Alignment rata tengah
+                'vertical' => Alignment::VERTICAL_CENTER, // Alignment rata tengah
+            ],
+            'borders' => [
+                'outline' => [
+                    'borderStyle' => Border::BORDER_THIN, // Gaya garis tipis
+                    'color' => ['argb' => 'FF000000'],    // Warna garis hitam
+                ],
+            ],
+        ];
+        $styleHeader2 = [
+            'font' => [
+                'size' => 11,
+                'bold' => true,
+                'name' => 'Arial',
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER, // Alignment rata tengah
+                'vertical' => Alignment::VERTICAL_CENTER, // Alignment rata tengah
+            ],
+            'borders' => [
+                'outline' => [
+                    'borderStyle' => Border::BORDER_THIN, // Gaya garis tipis
+                    'color' => ['argb' => 'FF000000'],    // Warna garis hitam
+                ],
+            ],
+        ];
+        $styleBody = [
+            'font' => [
+                'size' => 12,
+                'name' => 'Arial',
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER, // Alignment rata tengah
+                'vertical' => Alignment::VERTICAL_CENTER, // Alignment rata tengah
+            ],
+            'borders' => [
+                'outline' => [
+                    'borderStyle' => Border::BORDER_THIN, // Gaya garis tipis
+                    'color' => ['argb' => 'FF000000'],    // Warna garis hitam
+                ],
+            ],
+        ];
+        // mengatur tinggi semua baris
+        $sheet->getDefaultRowDimension()->setRowHeight(19);
+        // Mendefinisikan kolom B sampai AD
+        $columns = range('B', 'AF');
+
+        // Mengatur autosize untuk setiap kolom dalam range B sampai AD
+        // foreach ($columns as $columnID) {
+        //     $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        // }
+
+        // Header ISO
+        $drawing =  new Drawing();
+        $drawing->setName('Sample Image');
+        $drawing->setDescription('Sample Image');
+        $pathToImage = FCPATH . 'assets/img/logo-kahatex.png';
+
+        $drawing->setPath($pathToImage);
+        $drawing->setCoordinates('A1');
+        // Set ukuran gambar
+        $sizeInCm = 1.25;
+        $sizeInPixels = $sizeInCm * 37.7952755906;
+        $drawing->setHeight($sizeInPixels);
+        $drawing->setWidth($sizeInPixels);
+        $drawing->setOffsetY(50);
+        $drawing->setOffsetX(45);
+
+        $drawing->setWorksheet($sheet);
+
+        $sheet->mergeCells('A1:A3')->getStyle('A1:A3')->applyFromArray([
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_TOP
+            ],
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'left' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'right' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        // mengatur lebar kolom
+        $sheet->getColumnDimension('A')->setWidth(19);
+        $sheet->getColumnDimension('B')->setWidth(11);
+        $sheet->getColumnDimension('C')->setWidth(14);
+        $sheet->getColumnDimension('D')->setWidth(7);
+        $sheet->getColumnDimension('E')->setWidth(9);
+        $sheet->getColumnDimension('F')->setWidth(6);
+        $sheet->getColumnDimension('G')->setWidth(12);
+        $sheet->getColumnDimension('H')->setWidth(35);
+        $sheet->getColumnDimension('I')->setWidth(8);
+        $sheet->getColumnDimension('J')->setWidth(12);
+        $sheet->getColumnDimension('K')->setWidth(9);
+        $sheet->getColumnDimension('L')->setWidth(8);
+        $sheet->getColumnDimension('M')->setWidth(8);
+        $sheet->getColumnDimension('N')->setWidth(8);
+        $sheet->getColumnDimension('O')->setWidth(8);
+        $sheet->getColumnDimension('P')->setWidth(8);
+        $sheet->getColumnDimension('Q')->setWidth(8);
+        $sheet->getColumnDimension('R')->setWidth(8);
+        $sheet->getColumnDimension('S')->setWidth(8);
+        $sheet->getColumnDimension('T')->setWidth(8);
+        $sheet->getColumnDimension('U')->setWidth(8);
+        $sheet->getColumnDimension('V')->setWidth(8);
+        $sheet->getColumnDimension('W')->setWidth(8);
+        $sheet->getColumnDimension('X')->setWidth(8);
+        $sheet->getColumnDimension('Y')->setWidth(8);
+        $sheet->getColumnDimension('Z')->setWidth(8);
+        $sheet->getColumnDimension('AA')->setWidth(8);
+        $sheet->getColumnDimension('AB')->setWidth(8);
+        $sheet->getColumnDimension('AC')->setWidth(8);
+        $sheet->getColumnDimension('AD')->setWidth(8);
+        $sheet->getColumnDimension('AE')->setWidth(8);
+        $sheet->getColumnDimension('AF')->setWidth(35);
+
+
+        // mengatur tinggi baris 1
+        $heightInCm = 1.25;
+        $heightInPoints = $heightInCm / 0.0352778;
+        $sheet->getRowDimension('1')->setRowHeight($heightInPoints);
+
+        $sheet->setCellValue('A1', 'PT. KAHATEX');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 11,
+                'name' => 'Arial',
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_BOTTOM,
+            ],
+        ]);
+
+        $sheet->setCellValue('B1', 'FORMULIR');
+        $sheet->mergeCells('B1:AF1')->getStyle('B1:AF1')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 16,
+                'name' => 'Arial',
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'left' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'right' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => '99FFFF', // Warna dengan red 153, green 255, dan blue 255 dalam format RGB
+                ],
+            ],
+        ]);
+
+        // mengatur tinggi baris 2 - 7
+        $heightInCm2 = 1.25;
+        $heightInPoints2 = $heightInCm2 / 0.0352778;
+        $sheet->getRowDimension('2')->setRowHeight($heightInPoints2);
+        $sheet->getRowDimension('3')->setRowHeight($heightInPoints2);
+        $sheet->getRowDimension('4')->setRowHeight($heightInPoints2);
+        $sheet->getRowDimension('5')->setRowHeight($heightInPoints2);
+        $sheet->getRowDimension('6')->setRowHeight($heightInPoints2);
+        $sheet->getRowDimension('7')->setRowHeight($heightInPoints2);
+
+        $sheet->setCellValue('B2', 'DEPARTEMEN KAOSKAKI');
+        $sheet->mergeCells('B2:AF2')->getStyle('B2:AF2')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 12,
+                'name' => 'Arial',
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'left' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'right' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        $sheet->setCellValue('B3', 'TIMBANG TERIMA');
+        $sheet->mergeCells('B3:AF3')->getStyle('B3:AF3')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 12,
+                'name' => 'Arial',
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'left' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'right' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        $sheet->setCellValue('A4', 'No. Dokumen');
+        $sheet->getStyle('A4')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 11,
+                'name' => 'Arial',
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'left' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'right' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        $sheet->setCellValue('B4', ' FOR–KK–025/REV-01/HAL_/_');
+        $sheet->mergeCells('B4:W4')->getStyle('B4:W4')->applyFromArray([
+            'font' => [
+                'size' => 11,
+                'bold' => true,
+                'name' => 'Arial',
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'left' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'right' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        $sheet->setCellValue('X4', 'Tanggal Revisi ');
+        $sheet->mergeCells('X4:AA4')->getStyle('X4:AA4')->applyFromArray([
+            'font' => [
+                'size' => 11,
+                'bold' => true,
+                'name' => 'Arial',
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'left' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'right' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        $sheet->setCellValue('AB4', '31 Desember 2018');
+        $sheet->mergeCells('AB4:AF4')->getStyle('AB4:AF4')->applyFromArray([
+            'font' => [
+                'size' => 11,
+                'bold' => true,
+                'name' => 'Arial',
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'left' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'right' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        $sheet->setCellValue('A5', ' AREA : ');
+        $sheet->mergeCells('A5:W5')->getStyle('A5:W5')->applyFromArray([
+            'font' => [
+                'size' => 12,
+                'bold' => true,
+                'name' => 'Arial',
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'left' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'right' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        $sheet->setCellValue('X5', 'Tanggal : ');
+        $sheet->mergeCells('X5:AF5')->getStyle('U5:AF5')->applyFromArray([
+            'font' => [
+                'size' => 12,
+                'bold' => true,
+                'name' => 'Arial',
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'left' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'right' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+        // header ISO end
+
+
+        // Header respons
+        $filename = 'PO Gabungan' . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
 }
