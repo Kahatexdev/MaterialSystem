@@ -34,7 +34,7 @@
                     <a
                         href="<?= base_url("$role/masterdata/poBooking/exportPoBooking?no_model=" . rawurlencode($detail[0]['no_model'])) ?>"
                         class="btn btn-success" id="exportPo">
-                        <i class="fa-solid fa-file-pdf me-2"></i>Export
+                        <i class="fa-solid fa-file-excel me-2"></i>Export
                     </a>
                 </div>
             </div>
@@ -113,6 +113,14 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="tujuan" class="form-label">Tujuan</label>
+                            <select name="tujuan" id="tujuan" class="form-control">
+                                <option value="">Pilih Tujuan</option>
+                                <option value="CELUP">CELUP</option>
+                                <option value="COVERING">COVERING</option>
+                            </select>
+                        </div>
                         <div class="mb-3">
                             <label for="delivery" class="form-label">Delivery</label>
                             <input type="date" class="form-control" id="delivery" name="delivery">
@@ -328,13 +336,15 @@
         $('#formExportPO').on('submit', function(e) {
             e.preventDefault();
             var action = $(this).attr('action');
+            var tujuan = $('#tujuan').val();
             var date = $('#delivery').val();
             var material_type = $('#material_type').val();
             var no_order = $('#no_order').val();
             let baseUrl = $(this).attr('action');
 
             baseUrl += (baseUrl.indexOf('?') === -1 ? '?' : '&') +
-                'delivery=' + encodeURIComponent(date) +
+                'tujuan=' + encodeURIComponent(tujuan) +
+                '&delivery=' + encodeURIComponent(date) +
                 '&material_type=' + encodeURIComponent(material_type) +
                 '&no_order=' + encodeURIComponent(no_order);
 
