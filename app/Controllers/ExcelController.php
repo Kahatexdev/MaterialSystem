@@ -2655,12 +2655,21 @@ class ExcelController extends BaseController
     {
         $tglAwal = $this->request->getGet('tanggal_awal');
         $tglAkhir = $this->request->getGet('tanggal_akhir');
+        $jenis = $this->request->getGet('jenis');
 
-        $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir);
+        $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir, $jenis);
+        //BISI HAYANG DIGANTI DEUI JADI KABEH MESIN TAMPIL TAH
         $getMesin = $this->mesinCelupModel
             ->orderBy('no_mesin', 'ASC')
             ->findAll();
-
+        $getMesin = array_values(array_filter($getMesin, function ($m) use ($jenis) {
+            if ($jenis === 'BENANG') {
+                return $m['no_mesin'] >= 1 && $m['no_mesin'] <= 38;
+            } else { // ACRYLIC
+                return $m['no_mesin'] >= 39 && $m['no_mesin'] <= 43;
+            }
+        }));
+        // dd($getMesin);
         // setelah $tglAwal, $tglAkhir ter-set
         $period = new \DatePeriod(
             new \DateTime($tglAwal),

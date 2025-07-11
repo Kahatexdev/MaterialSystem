@@ -25,13 +25,21 @@
         </div>
         <div class="card-body bg-white rounded-bottom-0 p-4">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label for="">Tanggal Schedule Dari</label>
                     <input type="date" class="form-control" id="schDateStart">
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label for="">Tanggal Schedule Sampai</label>
                     <input type="date" class="form-control" id="schDateEnd">
+                </div>
+                <div class="col-md-4">
+                    <label for="">Jenis</label>
+                    <select name="jenis" id="jenis" class="form-select">
+                        <option value="">PILIH JENIS</option>
+                        <option value="BENANG">BENANG</option>
+                        <option value="ACRYLIC">ACRYLIC</option>
+                    </select>
                 </div>
                 <div class="col-12">
                     <div class="d-flex justify-content-between align-items-center mt-3">
@@ -100,13 +108,14 @@
         function loadData() {
             let tanggal_awal = $('#schDateStart').val().trim();
             let tanggal_akhir = $('#schDateEnd').val().trim();
+            let jenis = $('#jenis').val().trim();
 
             // Validasi: Jika semua input kosong, tampilkan alert dan hentikan pencarian
-            if (tanggal_awal === '' && tanggal_akhir === '') {
+            if (tanggal_awal === '' && tanggal_akhir === '' && jenis === '') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
-                    text: 'Apa yang mau dicari?',
+                    text: 'Filter Tanggal Terlebih Dahulu!',
                 });
                 return;
             }
@@ -117,7 +126,8 @@
                 type: "GET",
                 data: {
                     tanggal_awal: tanggal_awal,
-                    tanggal_akhir: tanggal_akhir
+                    tanggal_akhir: tanggal_akhir,
+                    jenis: jenis
                 },
                 dataType: "json",
                 success: function(response) {
@@ -150,7 +160,7 @@
                         Swal.fire({
                             icon: 'info',
                             title: 'Data Tidak Ditemukan',
-                            text: 'Pencarian dengan filter: Tanggal Awal Schedule "' + tanggal_awal + '", Tanggal Akhir Schedule "' + tanggal_akhir + '" menghasilkan 0 data.',
+                            text: 'Pencarian dengan filter: Tanggal Awal Schedule "' + tanggal_awal + '", Tanggal Akhir Schedule "' + tanggal_akhir + '", Jenis "' + jenis + '" menghasilkan 0 data.',
                         });
                     }
                 },
@@ -167,7 +177,8 @@
         $('#btnExport').click(function() {
             let tanggal_awal = $('#schDateStart').val().trim();
             let tanggal_akhir = $('#schDateEnd').val().trim();
-            window.location.href = "<?= base_url($role . '/schedule/exportScheduleWeekly') ?>?tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
+            let jenis = $('#jenis').val().trim();
+            window.location.href = "<?= base_url($role . '/schedule/exportScheduleWeekly') ?>?tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir + "&jenis=" + jenis;
         });
 
         dataTable.clear().draw();

@@ -112,7 +112,7 @@
                                     <!-- Qty Celup -->
                                     <div class="form-group" id="qtyCelupGroup">
                                         <label for="qty_celup">Qty Celup</label>
-                                        <input type="number" class="form-control" name="qty_celup" id="qty_celup" value="<?= number_format($data['qty_celup'], 2, '.') ?>" readonly>
+                                        <input type="number" class="form-control" name="qty_celup" id="qty_celup" value="<?= number_format($data['qty_celup'], 2, '.') ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
