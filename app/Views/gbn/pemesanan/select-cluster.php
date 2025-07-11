@@ -528,6 +528,8 @@
             const KgsPesan = new URLSearchParams(window.location.search).get('KgsPesan');
             const CnsPesan = new URLSearchParams(window.location.search).get('CnsPesan');
 
+            const PinjamOrder = document.getElementById('pinjam_order').value;
+
             // Show loading state
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalBtnText = submitBtn.innerHTML;
@@ -693,6 +695,7 @@
                         const card = document.createElement('div');
                         card.classList.add('card-body');
                         card.innerHTML = `
+                <input class="form-check-input" type="checkbox" name="id_pemasukan" value="${item.id_pemasukan}" id="pemasukan_${item.id_pemasukan}">
                 <strong>No Karung:</strong> ${item.no_karung ?? 0}<br>
                 <strong>Cluster:</strong> ${item.nama_cluster ?? 'Tidak Ada di Cluster'}<br>
                 <strong>PDK:</strong> ${item.no_model ?? ''}<br>
