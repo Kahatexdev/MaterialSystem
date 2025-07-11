@@ -131,6 +131,7 @@ class OutCelupModel extends Model
             ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup')
             ->join('bon_celup', 'out_celup.id_bon = bon_celup.id_bon')
             ->groupBy('bon_celup.id_bon')
+            ->orderBy('bon_celup.id_bon', 'DESC')
             ->get()
             ->getResultArray();
     }

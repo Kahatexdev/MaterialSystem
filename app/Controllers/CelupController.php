@@ -568,13 +568,12 @@ class CelupController extends BaseController
                 }
             }
             // Perbarui total pengiriman dan status pada tabel schedule_celup
-            $totalPengiriman = $this->outCelupModel
-                ->select('SUM(out_celup.kgs_kirim) as total_kirim, schedule_celup.kg_celup')
-                ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
+            $totalPengiriman = $this->scheduleCelupModel
+                ->select('COALESCE(SUM(out_celup.kgs_kirim), 0) as total_kirim, schedule_celup.kg_celup')
+                ->join('out_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
                 ->where('out_celup.id_celup', $id_celup)
                 ->first();
-
-            if ($totalPengiriman && $totalPengiriman['total_kirim'] >= $totalPengiriman['kg_celup']) {
+            if ($totalPengiriman && $totalPengiriman['total_kirim'] ?? 0 >= $totalPengiriman['kg_celup']) {
                 $this->scheduleCelupModel->update($id_celup, ['id_bon' => $id_bon, 'last_status' => 'sent']);
             }
         }

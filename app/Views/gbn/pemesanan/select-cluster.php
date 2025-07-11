@@ -42,6 +42,26 @@
         padding: 1.25rem;
     }
 
+    .card-pinjam-order {
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        height: 100%;
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        border-color: #c9d1d9;
+        /* background-color: #082653; */
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1rem;
+        border-bottom: none;
+        padding: 1.25rem;
+        background: linear-gradient(45deg, #082653, rgb(20, 74, 155));
+        color: #fff;
+        /* border: 2px dashed #ff5722; */
+    }
+
     /* Stock info styling */
     .stock-info {
         display: flex;
@@ -219,6 +239,11 @@
         font-size: 14px;
     }
 
+    .bg-gradient-blue {
+        background: linear-gradient(45deg, #082653, rgb(33, 114, 235));
+    }
+
+
     /* Responsive Layout */
     @media (min-width: 768px) {
         .card-container {
@@ -266,25 +291,63 @@
         </script>
     <?php endif; ?>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-body d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">Data Stock <?= $noModel; ?></h3>
-            <span class="badge bg-gradient-info"><?= date('d F Y'); ?></span>
+    <div class="card shadow-sm rounded-3">
+        <div class="card-body">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold mb-0"><?= $noModel . ' - ' . $itemType . ' - ' . $kodeWarna; ?></h3>
+                <span class="badge bg-gradient-blue fs-6 shadow-sm px-3 py-2">
+                    <?= date('d F Y'); ?>
+                </span>
+            </div>
+
+            <!-- Sub Title -->
+            <h5 class="text-secondary fw-semibold mb-3">📦 Informasi Pemesanan</h5>
+
+            <!-- Grid Cards -->
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
+                        <h6 class="text-muted mb-1 small">Kg Pesan</h6>
+                        <h4 class="fw-semibold mb-0"><?= number_format($KgsPesan, 2) ?> Kg</h4>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
+                        <h6 class="text-muted mb-1 small">Cns Pesan</h6>
+                        <h4 class="fw-semibold mb-0"><?= $CnsPesan ?> Cns</h4>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
+                        <h6 class="text-muted mb-1 small">Kg Persiapan</h6>
+                        <h4 class="fw-semibold mb-0"><?= number_format($kgPersiapan, 2) ?> Kg</h4>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="card-container">
         <?php if (!empty($cluster)): ?>
             <?php foreach ($cluster as $item): ?>
-                <div class="stock-card" data-id-stok="<?= esc($item['id_stock']); ?>">
+                <div class="stock-card" data-id-stok="<?= esc($item['id_stock']); ?>" data-nama-cluster="<?= $item['nama_cluster']; ?>" data-no-model="<?= $item['no_model']; ?>" data-item-type="<?= $item['item_type']; ?>" data-kode-warna="<?= $item['kode_warna']; ?>">
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <span class="d-flex align-items-center">
                             <i class="fas fa-warehouse me-2 text-white"></i>
-                            Cluster <?= esc($item['nama_cluster']); ?>
+                            Cluster <?= esc($item['nama_cluster']); ?> (<?= (number_format($item['total_kgs'], 2) . ' Kg / ' . $item['total_krg'] . ' Krg'); ?>)
                         </span>
                     </div>
                 </div>
             <?php endforeach; ?>
+            <div class="card-pinjam-order" data-item-type="<?= $itemType ?>" data-kode-warna="<?= $kodeWarna ?>">
+                <div class=" card-header d-flex align-items-center justify-content-between">
+                    <span class="d-flex align-items-center">
+                        <i class="fas fa-warehouse me-2 text-white"></i>
+                        Pinjam Order
+                    </span>
+                </div>
+            </div>
         <?php else: ?>
             <div class="bg-gradient-danger w-100 empty-state">
                 <h6 class="text-white">Stock Kosong <?= $noModel; ?>.</h6>
@@ -302,28 +365,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="info-section">
-                    <h6 class="info-section-title">Informasi Pemesanan</h6>
-                    <div class="row" id="modalContent">
-                        <!-- Detail data will be loaded here -->
-                    </div>
-                </div>
-
-                <div class="divider"></div>
                 <div class="form-section">
                     <h6 class="form-section-title">Pengeluaran Stock</h6>
                     <form id="pengeluaran" method="post" action="<?= base_url('gbn/simpanPengeluaranJalur/' . $id . '?Area=' . $area . '&KgsPesan=' . $KgsPesan . '&CnsPesan=' . $CnsPesan); ?>">
                         <div class="row" id="formPengeluaran">
                             <!-- Form input pengeluaran stock will be loaded here -->
-                        </div>
-                        <div class="row mt-2">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <h6 class="form-section-title">PINJAM ORDER</h6>
-                                <button class="custom-button btn-round btn-xs ms-auto" id="addPinjam"><i class="fas fa-plus text-center"></i></button>
-                            </div>
-                        </div>
-                        <div class="row" id="dataPinjamOrder">
-                            <!-- Data Pinjam Order -->
                         </div>
                         <div class="d-flex justify-content-end mt-3">
                             <button type="submit" class="btn btn-primary btn-submit">
@@ -374,6 +420,32 @@
     </div>
 </div>
 
+<!-- modal pinjam order -->
+<div class="modal fade" id="pinjamOrderModal" tabindex="-1" aria-labelledby="modelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="w-100">
+                    <h5 class="modal-title text-white mb-2">Pinjam Order</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="pinjamOrder" method="post" action="<?= base_url('gbn/simpanPengeluaranJalur/' . $id . '?Area=' . $area . '&KgsPesan=' . $KgsPesan . '&CnsPesan=' . $CnsPesan); ?>">
+                    <div id="formPinjamOrder">
+                        <!-- Form input pengeluaran stock will be loaded here -->
+                    </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="submit" class="btn btn-primary btn-submit">
+                            <i class="bi bi-check-circle me-1"></i> Submit
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Card click event
@@ -381,19 +453,22 @@
         cards.forEach(card => {
             card.addEventListener('click', function() {
                 const idStok = this.getAttribute('data-id-stok');
+                const cluster = this.getAttribute('data-nama-cluster');
+                const noModel = this.getAttribute('data-no-model');
+                const itemType = this.getAttribute('data-item-type');
+                const kodeWarna = this.getAttribute('data-kode-warna');
                 document.getElementById('idStok').value = idStok;
-
-
                 // Reset form
                 // document.getElementById('usageForm').reset();
 
                 // Fetch data
-                fetch(`<?= base_url('/gbn/pemasukan/getDataByIdStok') ?>/${encodeURIComponent(idStok)}`)
+                fetch(`<?= base_url('/gbn/pemasukan/getDataByCluster') ?>?no_model=${encodeURIComponent(noModel)}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}&cluster=${encodeURIComponent(cluster)}`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
                         }
                         return response.json();
+                        console.log(response.json());
                     })
                     .then(data => {
                         let content = '';
@@ -434,49 +509,7 @@
         });
 
         // Function to render modal content
-        // Function to render modal content
         function renderModalContent(item) {
-            // Ambil nilai dari URL parameter
-            const KgsPesan = new URLSearchParams(window.location.search).get('KgsPesan') || '-';
-            const CnsPesan = new URLSearchParams(window.location.search).get('CnsPesan') || '-';
-
-            const content = `
-        <div class="col-md-4 mb-3">
-            <div class="info-badge">
-                <span>PDK: <strong>${item.no_model || '-'}</strong></span>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="info-badge">
-                <span>Item Type: <strong>${item.item_type || '-'}</strong></span>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="info-badge">
-                <span>Kode: <strong>${item.kode_warna || '-'}</strong></span>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="info-badge">
-                <span>Warna: <strong>${item.warna || '-'}</strong></span>
-            </div>
-        </div>
-        
-        <div class="col-md-4 mb-3">
-            <div class="info-badge">
-                <span>KG Pesan: <strong>${KgsPesan} KG</strong></span>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="info-badge">
-                <span>Cones Pesan: <strong>${CnsPesan} Cns</strong></span>
-            </div>
-        </div>
-        <input type="hidden" id="idOutCelup" value="${item.id_out_celup}">
-
-        
-    `;
-
             // Buat konten untuk satu item
             const formPengeluaran = `    
                 <div class="card mb-2">
@@ -503,12 +536,11 @@
             // Tambahkan konten item ke dalam container
             document.getElementById('formPengeluaran').innerHTML += formPengeluaran;
 
-            document.getElementById('modalContent').innerHTML = content;
+            // document.getElementById('modalContent').innerHTML = content;
 
             window.currentItemType = item.item_type;
             window.currentKodeWarna = item.kode_warna;
         }
-
 
         // Form submission
         document.getElementById('usageForm').addEventListener('submit', function(e) {
@@ -602,121 +634,172 @@
                 });
         });
 
-        document.getElementById('addPinjam').addEventListener('click', function(e) {
-            e.preventDefault();
+        // pinjam order
+        const pinjamCards = document.querySelectorAll('.card-pinjam-order');
+        pinjamCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const itemType = this.getAttribute('data-item-type');
+                const kodeWarna = this.getAttribute('data-kode-warna');
+                const noModel = "<?= $noModel; ?>";
 
-            // Buat wrapper row baru
-            const wrapper = document.createElement('div');
-            wrapper.classList.add('row', 'mb-3', 'mt-3');
+                console.log('Klik Pinjam Order:', itemType, kodeWarna);
 
-            // Kolom select
-            const colSelect = document.createElement('div');
-            colSelect.classList.add('col-md-4');
+                // Fetch data Pinjam Order
+                fetch(`<?= base_url('/gbn/pinjamOrder/getNoModel') ?>?no_model=${encodeURIComponent(noModel)}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // console.log(data);
+                        // Reset konten modal agar tidak terjadi penumpukan data
+                        document.getElementById('formPinjamOrder').innerHTML = '';
 
-            // Buat <select> kosong atau dengan opsi dummy
-            const select = document.createElement('select');
-            select.classList.add('form-select', 'pinjam-select');
-            select.setAttribute('name', 'pinjam_id[]');
-            select.classList.add('pinjam-select');
+                        // Siapkan variable untuk option no_model
+                        let options = `<option value="">-- Pilih No Model --</option>`;
 
-            // Opsi No Model
-            select.innerHTML = `<option value=""></option>`;
+                        if (Array.isArray(data) && data.length > 0) {
+                            data.forEach(item => {
+                                // Tambahkan setiap no_model ke option
+                                options += `
+                                    <option value="${item.no_model}">
+                                        ${item.no_model}
+                                    </option>
+                                `;
+                            });
+                        }
 
-            colSelect.appendChild(select);
+                        // Masukkan select ke formPinjamOrder
+                        document.getElementById('formPinjamOrder').innerHTML = `
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="noModelSelect" class="form-label">Pilih No Model</label>
+                                    <select id="noModelSelect" name="no_model" class="form-select mb-3">
+                                        ${options}
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="clusterSelect" class="form-label">Pilih Cluster</label>
+                                    <select id="clusterSelect" name="nama_cluster" class="form-select mb-3">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row" id="formDetailPinjamOrder">
+                            </div>
+                        `;
 
-            // Kolom placeholder detail
-            const colDetail = document.createElement('div');
-            colDetail.classList.add('col-md-7');
-            colDetail.innerHTML = `<div class="info-badge">Detail akan muncul di sini.</div>`;
+                        // Aktifkan Select2
+                        $('#noModelSelect').select2({
+                            placeholder: "Pilih No Model",
+                            width: '100%',
+                            dropdownParent: $('#pinjamOrderModal') // biar dropdown tetap dalam modal
+                        });
 
-            const colDelete = document.createElement('div');
-            colDelete.classList.add('col-md-1');
+                        // ambil data cluster
+                        $('#noModelSelect').on('change', function() {
+                            const noModel = $(this).val();
 
-            const deleteBtn = document.createElement('button');
-            deleteBtn.classList.add('btn', 'btn-danger', 'delete-btn');
-            deleteBtn.setAttribute('name', 'delete');
+                            if (!noModel) {
+                                $('#clusterSelect').html('<option value="">-- Pilih Cluster --</option>').trigger('change');
+                                return;
+                            }
 
-            // **Tambahan untuk fitur hapus per baris:**
-            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-            deleteBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                wrapper.remove();
-            });
+                            // AJAX untuk ambil cluster
+                            fetch(`<?= base_url('/gbn/pinjamOrder/getCluster') ?>?no_model=${encodeURIComponent(noModel)}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}`)
+                                .then(response => response.json())
+                                .then(clusters => {
+                                    let clusterOptions = '<option value="">-- Pilih Cluster --</option>';
+                                    if (Array.isArray(clusters) && clusters.length > 0) {
+                                        clusters.forEach(cluster => {
+                                            clusterOptions += `<option value="${cluster.nama_cluster}">${cluster.nama_cluster}</option>`;
+                                        });
+                                    }
+                                    $('#clusterSelect').html(clusterOptions).trigger('change');
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching clusters:', error);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Gagal mengambil data cluster.'
+                                    });
+                                });
+                        });
+                        // ambil data cluster
+                        function loadDetailPinjamOrder() {
+                            const noModel = $('#noModelSelect').val();
+                            const cluster = $('#clusterSelect').val();
 
-            colDelete.appendChild(deleteBtn);
+                            // Kalau salah satu kosong, clear detail
+                            if (!noModel || !cluster) {
+                                document.getElementById('formDetailPinjamOrder').innerHTML = '';
+                                return;
+                            }
 
-            wrapper.append(colSelect, colDetail, colDelete);
-            document.getElementById('dataPinjamOrder').appendChild(wrapper);
+                            fetch(`<?= base_url('/gbn/pemasukan/getDataByCluster') ?>?no_model=${encodeURIComponent(noModel)}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}&cluster=${encodeURIComponent(cluster)}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    document.getElementById('formDetailPinjamOrder').innerHTML = '';
 
-            // Inisialisasi select2 saat modal ditampilkan
-            $(select).select2({
-                placeholder: 'Pilih No Model',
-                allowClear: true,
-                dropdownParent: $('#dataPinjamOrder'),
-                width: '100%',
-                ajax: {
-                    url: '<?= base_url("/gbn/pinjamOrder/options") ?>',
-                    dataType: 'json',
-                    delay: 250,
-                    data: function(params) {
-                        return {
-                            q: params.term,
-                            item_type: window.currentItemType,
-                            kode_warna: window.currentKodeWarna
-                        };
-                    },
-                    processResults: function(data) {
-                        return {
-                            results: data.map(item => ({
-                                id: item.no_model,
-                                text: `${item.no_model} | ${item.item_type} | ${item.kode_warna}`
-                            }))
-                        };
-                    }
-                }
-            }).on('select2:select', async function(e) {
-                const selectedData = e.params.data;
-                console.log('Selected:', selectedData);
-                // const noModel = e.params.data.id; // misal `id` tadi adalah no_model
-                const [noModel, itemType, kodeWarna] = selectedData.text.split('|').map(v => v.trim());
-                // Kosongkan dulu area detail:
-                colDetail.innerHTML = '';
+                                    if (Array.isArray(data) && data.length > 0) {
+                                        data.forEach(item => {
+                                            const formPengeluaran = `
+                                                <div class="card mb-2">
+                                                    <div class="card-body">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="id_pemasukan[]" value="${item.id_pemasukan}" id="pemasukan_${item.id_pemasukan}">
+                                                            <label class="form-check-label" for="pemasukan_${item.id_pemasukan}">
+                                                                <strong>No Karung:</strong> ${item.no_karung}<br>
+                                                                <strong>Tanggal Masuk:</strong> ${item.tgl_masuk}<br>
+                                                                <strong>Cluster:</strong> ${item.nama_cluster}<br>
+                                                                <strong>PDK:</strong> ${item.no_model}<br>
+                                                                <strong>Item Type:</strong> ${item.item_type}<br>
+                                                                <strong>Kode Warna:</strong> ${item.kode_warna}<br>
+                                                                <strong>Warna:</strong> ${item.warna}<br>
+                                                                <strong>Lot Celup:</strong> ${item.lot_kirim}<br>
+                                                                <strong>Total Kg:</strong> ${item.kgs_kirim} KG<br>
+                                                                <strong>Total Cones:</strong> ${item.cones_kirim} CNS
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            `;
+                                            document.getElementById('formDetailPinjamOrder').innerHTML += formPengeluaran;
+                                        });
+                                    } else {
+                                        document.getElementById('formDetailPinjamOrder').innerHTML = `
+                                            <div class="alert alert-warning">Data stock tidak ditemukan.</div>
+                                        `;
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching detail pemasukan:', error);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Gagal mengambil data pemasukan.'
+                                    });
+                                });
+                        }
 
-                try {
-                    // 1. Fetch data detail berdasarkan no_model
-                    const res = await fetch(`<?= base_url('/gbn/pinjamOrder/detail') ?>?no_model=${encodeURIComponent(noModel)}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}`);
-                    if (!res.ok) throw new Error('Gagal load detail');
-                    const items = await res.json(); // asumsikan array of { id_pemasukan, no_karung, … }
-
-                    // 2. Render setiap item ke dalam colDetail
-                    items.forEach(item => {
-                        const card = document.createElement('div');
-                        card.classList.add('card-body');
-                        card.innerHTML = `
-                <strong>No Karung:</strong> ${item.no_karung ?? 0}<br>
-                <strong>Cluster:</strong> ${item.nama_cluster ?? 'Tidak Ada di Cluster'}<br>
-                <strong>PDK:</strong> ${item.no_model ?? ''}<br>
-                <strong>Item Type:</strong> ${item.item_type ?? ''}<br>
-                <strong>Kode Warna:</strong> ${item.kode_warna ?? ''}<br>
-                <strong>Warna:</strong> ${item.warna ?? ''}<br>
-                <strong>Lot Stock:</strong> ${item.lot_stock ?? 0}<br>
-                <strong>Total Kg:</strong> ${item.stock_awal ?? 0} KG<br>
-                <strong>Total Cones:</strong> ${item.cns_awal ?? 0} CNS
-              </label>
-        `;
-                        colDetail.appendChild(card);
+                        $('#clusterSelect').on('change', loadDetailPinjamOrder);
+                        // Tampilkan modal
+                        const modal = new bootstrap.Modal(document.getElementById('pinjamOrderModal'));
+                        modal.show();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Gagal memuat data Pinjam Order. Silakan coba lagi.',
+                            confirmButtonColor: '#082653'
+                        });
                     });
-
-                } catch (err) {
-                    console.error(err);
-                    colDetail.innerHTML = `<div class="alert alert-danger">Gagal memuat detail.</div>`;
-                }
             });
-
-
-            // (Listener change nanti kamu tambahkan di sini untuk fetch detail)
         });
-
     });
 </script>
 

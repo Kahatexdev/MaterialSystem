@@ -470,9 +470,8 @@ class PemesananController extends BaseController
         $KgsPesan = $this->request->getGet('KgsPesan');
         $CnsPesan = $this->request->getGet('CnsPesan');
         $getPemesanan = $this->totalPemesananModel->getDataPemesananbyId($id);
-        // dd($getPemesanan);
+        $getPersiapanPengeluaran = $this->pengeluaranModel->getKgPersiapanPengeluaran($getPemesanan['id_total_pemesanan']);
         $cluster = $this->stockModel->getDataCluster($getPemesanan['no_model'], $getPemesanan['item_type'], $getPemesanan['kode_warna'], $getPemesanan['color']);
-        // dd($getPemesanan, $cluster);
 
         // if (!$cluster) {
         //     session()->setFlashdata('error', 'Cluster tidak ditemukan');
@@ -485,6 +484,9 @@ class PemesananController extends BaseController
             'role' => $this->role,
             'cluster' => $cluster,
             'noModel' => $getPemesanan['no_model'],
+            'itemType' => $getPemesanan['item_type'],
+            'kodeWarna' => $getPemesanan['kode_warna'],
+            'noModel' => $getPemesanan['no_model'],
             'area' => $getPemesanan['admin'],
             // 'id_total_pemesanan' => $getPemesanan['id_total_pemesanan'],
             // 'namaCluster' => $getPemesanan['nama_cluster'],
@@ -492,6 +494,7 @@ class PemesananController extends BaseController
             'id' => $id,
             'KgsPesan' => $KgsPesan,
             'CnsPesan' => $CnsPesan,
+            'kgPersiapan' => $getPersiapanPengeluaran['kgs_out'],
         ];
 
         // dd ($data);
@@ -502,6 +505,8 @@ class PemesananController extends BaseController
     {
         // $data = $this->stockModel->getDataByIdStok($id);
         $stock = $this->pemasukanModel->getDataByIdStok($id);
+        log_message('debug', 'ini : ' . json_encode($stock));
+
         $data = [];
         foreach ($stock as $dt) {
             $other = $this->otherOutModel->getQty($dt['id_out_celup'], $dt['nama_cluster']);
@@ -522,7 +527,36 @@ class PemesananController extends BaseController
             ];
         }
         // Debugging
-        // var_dump($data);
+        return $this->response->setJSON($data);
+    }
+
+    public function getDataByCluster()
+    {
+        // $data = $this->stockModel->getDataByIdStok($id);
+        $data = $this->request->getGet();
+        $stock = $this->pemasukanModel->getDataByCluster($data);
+        log_message('debug', 'ini : ' . json_encode($stock));
+
+        $data = [];
+        foreach ($stock as $dt) {
+            $other = $this->otherOutModel->getQty($dt['id_out_celup'], $dt['nama_cluster']);
+
+            $data[] = [
+                'id_pemasukan' => $dt['id_pemasukan'],
+                'no_karung' => $dt['no_karung'],
+                'tgl_masuk' => $dt['tgl_masuk'],
+                'nama_cluster' => $dt['nama_cluster'],
+                'no_model' => $dt['no_model'],
+                'item_type' => $dt['item_type'],
+                'kode_warna' => $dt['kode_warna'],
+                'warna' => $dt['warna'],
+                'lot_kirim' => $dt['lot_kirim'],
+                'kgs_kirim' => round($dt['kgs_kirim'] - ($other[0]['kgs_other_out'] ?? 0), 2),
+                'cones_kirim' => $dt['cones_kirim'] - ($other[0]['cns_other_out'] ?? 0),
+                'id_out_celup' => $dt['id_out_celup']
+            ];
+        }
+        // Debugging
         return $this->response->setJSON($data);
     }
 
@@ -1167,13 +1201,39 @@ class PemesananController extends BaseController
         return $this->response->setJSON($getData);
     }
 
+    public function getNoModelPinjamOrder()
+    {
+        $noModel  = $this->request->getGet('no_model');
+        $itemType  = $this->request->getGet('item_type');
+        $kodeWarna = $this->request->getGet('kode_warna');
+
+        $getData = $this->stockModel->getNoModelPinjamOrder($noModel, $itemType, $kodeWarna);
+
+        return $this->response->setJSON($getData);
+    }
+
+    public function getClusterPinjamOrder()
+    {
+        $noModel  = $this->request->getGet('no_model');
+        $itemType  = $this->request->getGet('item_type');
+        $kodeWarna = $this->request->getGet('kode_warna');
+
+        $getData = $this->stockModel->getClusterPinjamOrder($noModel, $itemType, $kodeWarna);
+        log_message('info', 'no model :' . $noModel);
+        log_message('info', 'item type :' . $itemType);
+        log_message('info', 'kode warna :' . $kodeWarna);
+        log_message('info', 'kode warna :' . json_encode($getData));
+        return $this->response->setJSON($getData);
+    }
+
     public function detailPinjamOrder()
     {
         $noModel   = $this->request->getGet('no_model');
         $itemType  = $this->request->getGet('item_type');
         $kodeWarna = $this->request->getGet('kode_warna');
+        $cluster = $this->request->getGet('cluster');
 
-        $detail = $this->stockModel->getPinjamOrderDetail($noModel, $itemType, $kodeWarna);
+        $detail = $this->stockModel->getPinjamOrderDetail($noModel, $itemType, $kodeWarna, $cluster);
         return $this->response->setJSON($detail);
     }
 }
