@@ -479,11 +479,25 @@ class CoveringController extends BaseController
                     'penerima'        => 'Retno',
                     'penanggung_jawab' => 'Paryanti',
                     'admin'           => $this->role,
-                    'created_at'      => date('Y-m-d H:i:s')
+                    'created_at'      => $data['tgl_po_covering'] ?? null
                 ]);
             }
         }
 
         return redirect()->to(base_url($this->role . '/po'))->with('success', 'Data Open PO Celup berhasil disimpan.');
+    }
+
+    public function detailPoCovering($tgl_po)
+    {
+        $getData = $this->openPoModel->getDetailPoCovering($tgl_po);
+        // dd($getData);
+        $data = [
+            'active' => $this->active,
+            'title' => 'Detail PO Covering',
+            'role' => $this->role,
+            'getData' => $getData,
+        ];
+
+        return view($this->role . '/po/detail-po-covering', $data);
     }
 }

@@ -404,7 +404,7 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('po/listTrackingPo', 'TrackingPoCoveringController::listTrackingPo');
     $routes->get('po/listTrackingPo/(:any)', 'TrackingPoCoveringController::TrackingPo/$1');
     $routes->post('po/updateListTrackingPo/(:any)', 'TrackingPoCoveringController::updateListTrackingPo/$1');
-
+    $routes->get('po/detailPoCovering/(:any)', 'CoveringController::detailPoCovering/$1');
 
     // warehouse barang jadi
     $routes->get('warehouse', 'CoveringWarehouseController::index');

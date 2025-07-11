@@ -39,16 +39,24 @@
         <div class="card-body">
             <form action="<?= base_url($role . '/po/saveOpenPOCovering') ?>" method="post">
                 <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>No PO</label>
+                            <input type="text" class="form-control" name="no_model" value="" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-md-6 mt-2">
                         <div class="form-group">
-                            <label>Tanggal PO</label>
+                            <label>Tanggal PO (Gudang Benang)</label>
                             <input type="date" class="form-control" name="tgl_po" id="tgl_po" value="" required>
                         </div>
                     </div>
                     <div class="col-md-6 mt-2">
                         <div class="form-group">
-                            <label>No PO</label>
-                            <input type="text" class="form-control" name="no_model" value="" required>
+                            <label>Tanggal PO (Covering)</label>
+                            <input type="date" class="form-control" name="tgl_po_covering" id="tgl_po_covering" value="" required>
                         </div>
                     </div>
                 </div>
@@ -109,11 +117,16 @@
                         <div class="col-md-6" id="card-${index}">
                             <div class="card border-dark">
                                 <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                                    <span>Item Type : ${item.item_type}</span>
-                                    <button type="button" class="btn btn-white" onclick="hapusCard(${index})">
-                                        <i class="fas fa-trash dark""></i>
-                                    </button>
-                                    <input type="hidden" class="form-control" name="detail[${index}][id_induk]" value="${item.id_induk ?? ''}" >
+                                    <div class="d-flex flex-column">
+                                        <strong> ${item.no_model}</strong>
+                                        <strong>${item.item_type}</strong>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-white" onclick="hapusCard(${index})">
+                                            <i class="fas fa-trash dark"></i>
+                                        </button>
+                                        <input type="hidden" class="form-control" name="detail[${index}][id_induk]" value="${item.id_induk ?? ''}">
+                                    </div>
                                 </div>
                                 <div class="card-body">
                                     <div class="form-group mb-2">
