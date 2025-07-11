@@ -148,6 +148,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pemasukan', 'WarehouseController::pemasukan');
     $routes->post('pemasukan', 'WarehouseController::pemasukan');
     $routes->get('pemasukan/getDataByIdStok/(:any)', 'PemesananController::getDataByIdStok/$1');
+    $routes->get('pemasukan/getDataByCluster', 'PemesananController::getDataByCluster');
     $routes->post('reset_pemasukan', 'WarehouseController::reset_pemasukan');
     $routes->post('hapus_pemasukan', 'WarehouseController::hapusListPemasukan');
     $routes->post('proses_pemasukan', 'WarehouseController::prosesPemasukan');
@@ -237,7 +238,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('selectClusterWarehouse/(:any)', 'PemesananController::selectClusterWarehouse/$1');
     $routes->get('pinjamOrder', 'PemesananController::pinjamOrder');
     $routes->get('pinjamOrder/options', 'PemesananController::optionsPinjamOrder');
-    $routes->get('pinjamOrder/detail', 'PemesananController::detailPinjamOrder');
+    $routes->get('pinjamOrder/getNoModel', 'PemesananController::getNoModelPinjamOrder');
+    $routes->get('pinjamOrder/getCluster', 'PemesananController::getClusterPinjamOrder');
+    // $routes->get('pinjamOrder/detail', 'PemesananController::detailPinjamOrder');
     // $routes->get('pinjamOrder/options/(:segment)?', 'PemesananController::optionsPinjamOrder/$1');
     // $routes->get('pinjamOrder/options/(:any)', 'PemesananController::optionsPinjamOrder');
     $routes->post('saveUsage', 'PemesananController::saveUsage');
@@ -400,7 +403,8 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('po/simpanKeSession', 'CoveringController::simpanKeSession');
     $routes->post('po/savePOCovering', 'CoveringController::savePOCovering');
     $routes->get('po/deletePOCovering/(:any)', 'CoveringController::unsetSession/$1');
-    $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
+    // $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
+    $routes->get('po/exportPO/(:any)', 'ExcelController::generateOpenPOCoveringExcel/$1');
     $routes->get('po/listTrackingPo', 'TrackingPoCoveringController::listTrackingPo');
     $routes->get('po/listTrackingPo/(:any)', 'TrackingPoCoveringController::TrackingPo/$1');
     $routes->post('po/updateListTrackingPo/(:any)', 'TrackingPoCoveringController::updateListTrackingPo/$1');

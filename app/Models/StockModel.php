@@ -203,6 +203,9 @@ class StockModel extends Model
     {
         return $this->select("
         nama_cluster,
+        no_model,
+        item_type,
+        kode_warna,
         MAX(id_stock) AS id_stock,
         SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS total_kgs,
         SUM(COALESCE(cns_stock_awal, 0) + COALESCE(cns_in_out, 0)) AS total_cns,
@@ -511,29 +514,62 @@ class StockModel extends Model
         return $builder->get()->getResultArray();
     }
 
-    public function getPinjamOrder($itemType, $kodeWarna)
+    // public function getPinjamOrder($itemType, $kodeWarna)
+    // {
+    //     return $this->select('no_model, item_type, kode_warna, warna, SUM(kgs_stock_awal) AS stock_awal, SUM(cns_stock_awal) AS cns_awal, SUM(krg_stock_awal) AS krg_awal, lot_awal, kgs_in_out, cns_in_out, krg_in_out, lot_stock, nama_cluster')
+    //         ->where('item_type', $itemType)
+    //         ->where('kode_warna', $kodeWarna)
+    //         ->where('kgs_stock_awal >', 0)
+    //         ->where('cns_stock_awal >', 0)
+    //         ->groupBy('no_model, kode_warna, warna')
+    //         ->findAll();
+    // }
+
+    // public function getPinjamOrder($itemType, $kodeWarna) {
+    //     return 
+    // }
+
+    public function getNoModelPinjamOrder($noModel, $item_type, $kode_warna)
     {
-        return $this->select('no_model, item_type, kode_warna, warna, SUM(kgs_stock_awal) AS stock_awal, SUM(cns_stock_awal) AS cns_awal, SUM(krg_stock_awal) AS krg_awal, lot_awal, kgs_in_out, cns_in_out, krg_in_out, lot_stock, nama_cluster')
-            ->where('item_type', $itemType)
-            ->where('kode_warna', $kodeWarna)
+        return $this->select('no_model, item_type, kode_warna, warna, kgs_stock_awal, kgs_in_out')
+            ->where('no_model !=', $noModel)
+            ->where('item_type', $item_type)
+            ->where('kode_warna', $kode_warna)
+            ->groupStart() // <-- Mulai grup untuk OR
             ->where('kgs_stock_awal >', 0)
-            ->where('cns_stock_awal >', 0)
-            ->groupBy('no_model, kode_warna, warna')
+            ->orWhere('kgs_in_out >', 0)
+            ->groupEnd()   // <-- Tutup grup
+            ->groupBy('no_model')
             ->findAll();
     }
 
-    public function getPinjamOrderDetail($noModel, $itemType, $kodeWarna)
+    public function getClusterPinjamOrder($noModel, $item_type, $kode_warna)
     {
         return $this->select('stock.no_model, stock.item_type, stock.kode_warna, stock.warna, SUM(stock.kgs_stock_awal) AS stock_awal, SUM(stock.cns_stock_awal) AS cns_awal, SUM(stock.krg_stock_awal) AS krg_awal, stock.lot_awal, stock.kgs_in_out, stock.cns_in_out, stock.krg_in_out, stock.lot_stock, stock.nama_cluster, pemasukan.id_pemasukan')
             ->join('pemasukan', 'pemasukan.id_stock=stock.id_stock')
             ->where('no_model', $noModel)
-            ->where('item_type', $itemType)
-            ->where('kode_warna', $kodeWarna)
+            ->where('item_type', $item_type)
+            ->where('kode_warna', $kode_warna)
+            ->groupStart() // <-- Mulai grup untuk OR
             ->where('kgs_stock_awal >', 0)
-            ->where('cns_stock_awal >', 0)
-            ->groupBy('no_model, kode_warna, warna')
+            ->orWhere('kgs_in_out >', 0)
+            ->groupEnd()   // <-- Tutup grup
+            ->groupBy('nama_cluster')
+            ->orderBy('nama_cluster', 'ASC')
             ->findAll();
     }
+
+    // public function getPinjamOrderDetail($noModel, $itemType, $kodeWarna)
+    // {
+    //     return $this->select('no_model, item_type, kode_warna, warna, SUM(kgs_stock_awal) AS stock_awal, SUM(cns_stock_awal) AS cns_awal, SUM(krg_stock_awal) AS krg_awal, lot_awal, kgs_in_out, cns_in_out, krg_in_out, lot_stock, nama_cluster')
+    //         ->where('no_model', $noModel)
+    //         ->where('item_type', $itemType)
+    //         ->where('kode_warna', $kodeWarna)
+    //         ->where('kgs_stock_awal >', 0)
+    //         ->where('cns_stock_awal >', 0)
+    //         ->groupBy('no_model, kode_warna, warna')
+    //         ->findAll();
+    // }
 
     public function getKgStock($no_model, $item_type, $kode_warna)
     {

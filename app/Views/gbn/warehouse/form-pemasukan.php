@@ -136,7 +136,7 @@
                                                     <td align="center"><input type="checkbox" name="checked_id[]" class="checkbox" value="<?= $no - 1 ?>"> <?= $no++ ?></td>
                                                     <td>
                                                         <div class="mb-2 d-flex justify-content-between flex-wrap">
-                                                            <strong class="text-primary">Tanggal Masuk: <?= $today ?></strong>
+                                                            <strong class="text-dark">Tanggal Masuk: <?= $today ?></strong>
                                                             <input type="date" class="form-control" name="tgl_masuk[]" value="<?= $formated ?>" hidden>
                                                         </div>
 
