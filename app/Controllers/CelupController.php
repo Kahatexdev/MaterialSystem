@@ -194,7 +194,7 @@ class CelupController extends BaseController
                     'start_mc' => $id['start_mc'],
                     'del_awal' => $pdk['delivery_awal'] ?? null,
                     'del_akhir' => $pdk['delivery_akhir'] ?? null,
-                    'qty_po' => $pdk['qty_po'],
+                    'qty_po' => $pdk['qty_po'] ?? null,
                     'qty_po_plus' => 0,
                     'qty_celup' => $id['qty_celup'],
                     'no_mesin' => $id['no_mesin'],
