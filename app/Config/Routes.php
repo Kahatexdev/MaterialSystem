@@ -307,6 +307,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pemesanan/getFilterPemesananSpandex', 'PemesananController::getFilterPemesananSpandex');
     $routes->get('pemesanan/exportPermintaanKaret', 'ExcelController::exportPermintaanKaret');
     $routes->get('pemesanan/exportPermintaanSpandex', 'ExcelController::exportPermintaanSpandex');
+
+    $routes->get('statusBahanBaku', 'ScheduleController::statusBahanBaku');
+    $routes->get('filterstatusbahanbaku/(:any)', 'ScheduleController::filterstatusbahanbaku/$1');
 });
 
 // celup routes

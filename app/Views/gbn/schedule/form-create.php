@@ -546,7 +546,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log("PO Data:", data);
+                    // console.log("PO Data:", data);
                     if (Array.isArray(data) && data.length > 0) {
                         poSelect.innerHTML = '<option value="">Pilih PO</option>';
                         data.forEach(po => {
@@ -615,6 +615,11 @@
                 .then(data => {
                     if (data && !data.error) {
                         const tglStartMC = tr.querySelector("input[name='tgl_start_mc[]']");
+                        if (tglStartMC) {
+                            tglStartMC.value = data.start_mesin || '';
+                        } else {
+                            console.error("Input tgl_start_mc[] not found in row:", tr);
+                        }
                         const deliveryAwal = tr.querySelector("input[name='delivery_awal[]']");
                         if (deliveryAwal) {
                             deliveryAwal.value = data.delivery_awal || '';
