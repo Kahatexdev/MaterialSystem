@@ -5926,21 +5926,24 @@ class ExcelController extends BaseController
         }
 
         // Header Form
-        // Logo dan judul perusahaan di bawah logo
-        $sheet->mergeCells('A1:C3');
-        $sheet->setCellValue('A1', 'PT. KAHATEX');
-        $sheet->getStyle('A1')->getFont()->setSize(11);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $drawing = new Drawing();
-        $drawing->setName('Logo')
-            ->setDescription('PT. KAHATEX Logo')
-            ->setPath(FCPATH . 'assets/img/logo-kahatex.png')
-            ->setWorksheet($sheet)
-            ->setCoordinates('B1')
-            ->setOffsetX(150)
-            ->setOffsetY(7)
-            ->setHeight(40)
-            ->setWidth(40);
+        $sheet->mergeCells('A1:B2');
+        $sheet->getColumnDimension('A')->setWidth(10);
+        $sheet->getColumnDimension('B')->setWidth(15);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+        $drawing->setName('Logo');
+        $drawing->setDescription('Logo Perusahaan');
+        $drawing->setPath('assets/img/logo-kahatex.png');
+        $drawing->setCoordinates('B1');
+        $drawing->setHeight(50);
+        $drawing->setOffsetX(55);
+        $drawing->setOffsetY(10);
+        $drawing->setWorksheet($sheet);
+        $sheet->mergeCells('A3:C3');
+        $sheet->setCellValue('A3', 'PT. KAHATEX');
+        $sheet->getStyle('A3')->getFont()->setSize(11);
+        $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         $sheet->setCellValue('D1', 'FORMULIR');
         $sheet->getStyle('D1')->getFont()->setBold(true)->setSize(16);
@@ -6492,7 +6495,9 @@ class ExcelController extends BaseController
         $jenis     = $this->request->getGet('jenis');
         $jenis2    = $this->request->getGet('jenis2');
         $startDate = $this->request->getGet('start_date');
-        $endDate   = $this->request->getGet('end_date');
+        $endDate   = $this->request->getGet('end_date') ?? null;
+        $season = $this->request->getGet('season');
+        $materialType = $this->request->getGet('material_type');
 
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';
@@ -6522,6 +6527,8 @@ class ExcelController extends BaseController
             }
         }
         unset($po);
+
+        $noModel =  $openPoGabung[0]['no_model'] ?? '';
 
         // Buat Excel
         $spreadsheet = new Spreadsheet();
@@ -6786,31 +6793,34 @@ class ExcelController extends BaseController
         $sheet->mergeCells('A6:A7');
         $sheet->setCellValue('A6', 'PO');
         $sheet->getStyle('D1')->getFont()->setSize(18);
+
         $sheet->getStyle('A6')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
             ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-        $sheet->mergeCells('C6:E7');
-        $sheet->setCellValue('C6', ': ');
-        $sheet->getStyle('C6')->getFont()->setSize(24);
-        $sheet->getStyle('C6')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->setCellValue('D6', ': ' . $noModel ?? '-');
+        $sheet->mergeCells('D6:F7');
+        $sheet->getStyle('D6')->getFont()->setSize(24);
+        $sheet->getStyle('D6')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         $sheet->setCellValue('A8', 'Pemesan');
-        $sheet->setCellValue('C8', ': ');
+        $sheet->setCellValue('D8', ': KK');
 
+        $createdAt = $openPoGabung[0]['created_at'] ?? null;
         $sheet->setCellValue('A9', 'Tgl');
-        $sheet->setCellValue('C9', ': ' . (isset($result[0]['tgl_po']) ? date('d/m/Y', strtotime($result[0]['tgl_po'])) : ''));
+        $sheet->setCellValue('D9', ': ' . ($createdAt ? date('d/m/Y', strtotime($createdAt)) : '-'));
 
-        $sheet->setCellValue('F7', '');
-        $sheet->mergeCells('F7:F9');
-        $sheet->getStyle('F7')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER)
-            ->setWrapText(true);
-
-        $sheet->setCellValue('G7', '');
+        $sheet->setCellValue('G7', $season);
         $sheet->mergeCells('G7:G9');
         $sheet->getStyle('G7')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
             ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER)
             ->setWrapText(true);
-        $sheet->getStyle('G7')->getFont()->setUnderline(true);
+
+        $sheet->setCellValue('H7', $materialType);
+        $sheet->mergeCells('H7:H9');
+        $sheet->getStyle('H7')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER)
+            ->setWrapText(true);
+        $sheet->getStyle('H7')->getFont()->setUnderline(true);
+        $sheet->getStyle('A6:H9')->getFont()->setBold(true);
 
         // Header utama dan sub-header
         $sheet->setCellValue('A11', 'No');
@@ -6910,60 +6920,57 @@ class ExcelController extends BaseController
         $sheet->getStyle('Q11:Q12')->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
             ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A11:Q12')->getFont()->setBold(true);
 
         // Mulai menulis data dari baris 13
         $rowNum = 13;
         $no = 1;
         $totalKgPo = 0;
         $totalCones = 0;
+
         foreach ($openPoGabung as $po) {
             // Kolom A: No
             $sheet->setCellValue('A' . $rowNum, $no++);
-            // B: Jenis + spesifikasi
-            $sheet->setCellValue('B' . $rowNum, $po['item_type'] . ' (' . $po['spesifikasi_benang'] . ')');
-            // C: Ukuran
+
+            // Kolom B: item_type + spesifikasi, MERGE 2 baris (baris data + baris kosong)
+            $itemTypeText = $po['item_type'] . ' (' . $po['spesifikasi_benang'] . ')';
+            $sheet->setCellValue('B' . $rowNum, $itemTypeText);
+            $sheet->mergeCells('B' . $rowNum . ':B' . ($rowNum + 1));
+
+            // Kolom C: Ukuran
             $sheet->setCellValue('C' . $rowNum, $po['ukuran']);
-            // D: Bentuk Celup
+
+            // Kolom D: bentuk_celup, MERGE 2 baris
             $sheet->setCellValue('D' . $rowNum, $po['bentuk_celup']);
-            // E: Warna
+            $sheet->mergeCells('D' . $rowNum . ':D' . ($rowNum + 1));
+
+            // Kolom E–Q: hanya isi di baris pertama
             $sheet->setCellValue('E' . $rowNum, $po['color']);
-            // F: Kode Warna
             $sheet->setCellValue('F' . $rowNum, $po['kode_warna']);
-            // G: Buyer
             $sheet->setCellValue('G' . $rowNum, $po['buyer']);
-            // H: No Order
             $sheet->setCellValue('H' . $rowNum, $po['no_order']);
-            // I: Delivery Awal
             $sheet->setCellValue('I' . $rowNum, $po['delivery_awal']);
-            // J: Qty Pesanan (Kg)
             $sheet->setCellValue('J' . $rowNum, number_format($po['kg_po'], 2));
-            // K: Permintaan Cones (Kg per cones)
             $sheet->setCellValue('K' . $rowNum, $po['kg_percones']);
-            // L: Permintaan Cones (Yard) — kosong
             $sheet->setCellValue('L' . $rowNum, '');
-            // M: Total Cones
             $sheet->setCellValue('M' . $rowNum, $po['jumlah_cones']);
-            // N: Jenis Cones — kosong
             $sheet->setCellValue('N' . $rowNum, '');
-            // O: Untuk Produksi (jenis_produksi)
             $sheet->setCellValue('O' . $rowNum, $po['jenis_produksi']);
-            // P: Contoh Warna — kosong
             $sheet->setCellValue('P' . $rowNum, '');
-            // Q: Keterangan Celup
             $sheet->setCellValue('Q' . $rowNum, $po['ket_celup']);
 
             // Akumulasi total
             $totalKgPo   += $po['kg_po'];
             $totalCones  += $po['jumlah_cones'];
 
-            $rowNum++;
+            // Baris kosong sebagai pemisah
+            $rowNum += 2;
         }
-
 
         // Baris Total (sama layout seperti PDF)
         // Gabungkan A–I untuk label "Total"
-        $sheet->mergeCells("A38:I38");
         $sheet->setCellValue("A38", 'Total');
+        $sheet->mergeCells("A38:I38");
         $sheet->getStyle("A38")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
 
         // J: Total Kg PO
@@ -6977,43 +6984,64 @@ class ExcelController extends BaseController
         foreach (range('N', 'Q') as $col) {
             $sheet->setCellValue("{$col}38", '');
         }
+        // Tambahkan border untuk seluruh baris total A38:Q38
+        $sheet->getStyle('A38:Q38')->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => 'FF000000'],
+                ],
+            ],
+            'font' => [
+                'bold' => true,
+            ],
+        ]);
+        // Kolom A (border kiri double)
+        $sheet->getStyle('A38')->getBorders()->getLeft()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_DOUBLE);
+
+        // Kolom Q (border kanan double)
+        $sheet->getStyle('Q38')->getBorders()->getRight()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_DOUBLE);
 
         //Keterangan
-        $sheet->setCellValue('F30', $openPoGabung[0]['ket_celup'] ?? '');
-        $sheet->mergeCells('F30:J30');
-        $sheet->getStyle('F30:J30')->getAlignment()
+        $sheet->setCellValue('F39', $openPoGabung[0]['keterangan'] ?? '');
+        $sheet->mergeCells('F39:J39');
+        $sheet->getStyle('F39:J39')->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
             ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('F39:J39')->getFont()->setBold(true);
+
         //Tanda Tangan
         $sheet->setCellValue('E43', 'Pemesan');
         $sheet->getStyle('E43')->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $sheet->setCellValue('H43', 'Mengetahui');
-        $sheet->getStyle('H43')->getAlignment()
+        $sheet->mergeCells('H43:I43');
+        $sheet->getStyle('H43:I43')->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->setCellValue('J43', 'Tanda terima');
-        $sheet->mergeCells('J43:L43');
-        $sheet->getStyle('J43:L43')->getAlignment()
+        $sheet->setCellValue('N43', 'Tanda terima');
+        $sheet->mergeCells('N43:P43');
+        $sheet->getStyle('N43:P43')->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->setCellValue('J44', 'Celup Cones');
-        $sheet->mergeCells('J44:L44');
-        $sheet->getStyle('J44:L44')->getAlignment()
+        $sheet->setCellValue('N44', 'Celup Cones');
+        $sheet->mergeCells('N44:P44');
+        $sheet->getStyle('N44:P44')->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
         $sheet->setCellValue('E49', '(   ' . $openPoGabung[0]['admin'] . '   )');
         $sheet->getStyle('E49')->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $sheet->setCellValue('H49', '(   ' . $openPoGabung[0]['penanggung_jawab'] . '   )');
-        $sheet->getStyle('H49')->getAlignment()
+        $sheet->mergeCells('H49:I49');
+        $sheet->getStyle('H49:I49')->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->setCellValue('J49', '(   ' . $penerima . '   )');
-        $sheet->mergeCells('J49:L49');
-        $sheet->getStyle('J49:L49')->getAlignment()
+        $sheet->setCellValue('N49', '(   ' . $penerima . '   )');
+        $sheet->mergeCells('N49:P49');
+        $sheet->getStyle('N49:P49')->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('K49')->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-        $sheet->getStyle("A11:Q28")->getAlignment()
+        $sheet->getStyle("A11:Q38")->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
             ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
@@ -7027,6 +7055,7 @@ class ExcelController extends BaseController
         $writer->save('php://output');
         exit;
     }
+
     public function generateOpenPONylon()
     {
         $tujuan = $this->request->getPost('tujuan');
@@ -7299,21 +7328,24 @@ class ExcelController extends BaseController
         }
 
         // Header Form
-        // Logo dan judul perusahaan di bawah logo
-        $sheet->mergeCells('A1:C3');
-        $sheet->setCellValue('A1', 'PT. KAHATEX');
-        $sheet->getStyle('A1')->getFont()->setSize(11);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $drawing = new Drawing();
-        $drawing->setName('Logo')
-            ->setDescription('PT. KAHATEX Logo')
-            ->setPath(FCPATH . 'assets/img/logo-kahatex.png')
-            ->setWorksheet($sheet)
-            ->setCoordinates('B1')
-            ->setOffsetX(150)
-            ->setOffsetY(7)
-            ->setHeight(40)
-            ->setWidth(40);
+        $sheet->mergeCells('A1:B2');
+        $sheet->getColumnDimension('A')->setWidth(10);
+        $sheet->getColumnDimension('B')->setWidth(15);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+        $drawing->setName('Logo');
+        $drawing->setDescription('Logo Perusahaan');
+        $drawing->setPath('assets/img/logo-kahatex.png');
+        $drawing->setCoordinates('B1');
+        $drawing->setHeight(50);
+        $drawing->setOffsetX(55);
+        $drawing->setOffsetY(10);
+        $drawing->setWorksheet($sheet);
+        $sheet->mergeCells('A3:C3');
+        $sheet->setCellValue('A3', 'PT. KAHATEX');
+        $sheet->getStyle('A3')->getFont()->setSize(11);
+        $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         $sheet->setCellValue('D1', 'FORMULIR');
         $sheet->getStyle('D1')->getFont()->setBold(true)->setSize(16);
@@ -7846,21 +7878,24 @@ class ExcelController extends BaseController
         }
 
         // Header Form
-        // Logo dan judul perusahaan di bawah logo
-        $sheet->mergeCells('A1:C3');
-        $sheet->setCellValue('A1', 'PT. KAHATEX');
-        $sheet->getStyle('A1')->getFont()->setSize(11);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $drawing = new Drawing();
-        $drawing->setName('Logo')
-            ->setDescription('PT. KAHATEX Logo')
-            ->setPath(FCPATH . 'assets/img/logo-kahatex.png')
-            ->setWorksheet($sheet)
-            ->setCoordinates('B1')
-            ->setOffsetX(150)
-            ->setOffsetY(7)
-            ->setHeight(40)
-            ->setWidth(40);
+        $sheet->mergeCells('A1:B2');
+        $sheet->getColumnDimension('A')->setWidth(10);
+        $sheet->getColumnDimension('B')->setWidth(15);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+        $drawing->setName('Logo');
+        $drawing->setDescription('Logo Perusahaan');
+        $drawing->setPath('assets/img/logo-kahatex.png');
+        $drawing->setCoordinates('B1');
+        $drawing->setHeight(50);
+        $drawing->setOffsetX(55);
+        $drawing->setOffsetY(10);
+        $drawing->setWorksheet($sheet);
+        $sheet->mergeCells('A3:C3');
+        $sheet->setCellValue('A3', 'PT. KAHATEX');
+        $sheet->getStyle('A3')->getFont()->setSize(11);
+        $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         $sheet->setCellValue('D1', 'FORMULIR');
         $sheet->getStyle('D1')->getFont()->setBold(true)->setSize(16);
@@ -8196,7 +8231,7 @@ class ExcelController extends BaseController
         // Buat Excel
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Open PO Booking' . $noModel);
+        $sheet->setTitle('Open PO Manual ' . $noModel);
         $spreadsheet->getDefaultStyle()->getFont()->setName('Arial');
         $spreadsheet->getDefaultStyle()->getFont()->setSize(16);
 
@@ -8401,21 +8436,25 @@ class ExcelController extends BaseController
         }
 
         // Header Form
-        // Logo dan judul perusahaan di bawah logo
-        $sheet->mergeCells('A1:C3');
-        $sheet->setCellValue('A1', 'PT. KAHATEX');
-        $sheet->getStyle('A1')->getFont()->setSize(11);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $drawing = new Drawing();
-        $drawing->setName('Logo')
-            ->setDescription('PT. KAHATEX Logo')
-            ->setPath(FCPATH . 'assets/img/logo-kahatex.png')
-            ->setWorksheet($sheet)
-            ->setCoordinates('B1')
-            ->setOffsetX(150)
-            ->setOffsetY(7)
-            ->setHeight(40)
-            ->setWidth(40);
+        $sheet->mergeCells('A1:B2');
+        $sheet->getColumnDimension('A')->setWidth(10);
+        $sheet->getColumnDimension('B')->setWidth(15);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        // Logo kahatex
+        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+        $drawing->setName('Logo');
+        $drawing->setDescription('Logo Perusahaan');
+        $drawing->setPath('assets/img/logo-kahatex.png');
+        $drawing->setCoordinates('B1');
+        $drawing->setHeight(50);
+        $drawing->setOffsetX(55);
+        $drawing->setOffsetY(10);
+        $drawing->setWorksheet($sheet);
+        $sheet->mergeCells('A3:C3');
+        $sheet->setCellValue('A3', 'PT. KAHATEX');
+        $sheet->getStyle('A3')->getFont()->setSize(11);
+        $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         $sheet->setCellValue('D1', 'FORMULIR');
         $sheet->getStyle('D1')->getFont()->setBold(true)->setSize(16);
