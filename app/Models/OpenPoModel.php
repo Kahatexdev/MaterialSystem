@@ -523,7 +523,7 @@ class OpenPoModel extends Model
     }
     public function MaterialPDK($model)
     {
-        return $this->select('material.area, open_po.no_model, area, open_po.kode_warna, open_po.item_type, open_po.color, sum(kg_po) as qty_po, master_material.jenis')
+        return $this->select('material.area, open_po.no_model, area, open_po.kode_warna, open_po.item_type, open_po.color, kg_po as qty_po, master_material.jenis, master_order.*')
             ->join('master_material', 'master_material.item_type = open_po.item_type', 'left')
             ->join('master_order', 'master_order.no_model = open_po.no_model', 'left')
             ->join('material', 'master_order.id_order=material.id_order and material.item_type = open_po.item_type and material.kode_warna = open_po.kode_warna', 'left')

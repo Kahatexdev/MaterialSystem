@@ -340,7 +340,7 @@ class ApiController extends ResourceController
                         // Merge data schedule
                         $scheduleData['jenis'] = $row['jenis'];
                         foreach ($fields as $f) {
-                            $newRow[$f] = $scheduleData[$f] ?? '';
+                            $newRow[$f] = $scheduleData[$f] ?? '-';
                         }
 
                         $res[] = $newRow;
@@ -350,7 +350,7 @@ class ApiController extends ResourceController
                     $newRow = $row;
                     $newRow['qty_po'] = $masterQty;
                     foreach ($fields as $f) {
-                        $newRow[$f] = '';
+                        $newRow[$f] = '-';
                     }
                     $res[] = $newRow;
                 }
@@ -370,7 +370,7 @@ class ApiController extends ResourceController
 
                         $coverData['jenis'] = $row['jenis'];
                         foreach ($fields as $f) {
-                            $newRow[$f] = $coverData[$f] ?? '';
+                            $newRow[$f] = $coverData[$f] ?? '-';
                         }
 
                         $res[] = $newRow;
@@ -379,7 +379,7 @@ class ApiController extends ResourceController
                     $newRow = $row;
                     $newRow['qty_po'] = $masterQty;
                     foreach ($fields as $f) {
-                        $newRow[$f] = '';
+                        $newRow[$f] = '-';
                     }
                     $res[] = $newRow;
                 }
@@ -388,7 +388,7 @@ class ApiController extends ResourceController
                 $newRow = $row;
                 $newRow['qty_po'] = $masterQty;
                 foreach ($fields as $f) {
-                    $newRow[$f] = '';
+                    $newRow[$f] = '-';
                 }
                 $res[] = $newRow;
             }
