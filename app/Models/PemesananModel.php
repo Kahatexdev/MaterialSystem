@@ -495,7 +495,7 @@ class PemesananModel extends Model
             ->join('master_material', 'master_material.item_type = material.item_type')
             ->like('pemesanan.status_kirim', 'request')
             ->groupBy('pemesanan.admin, pemesanan.tgl_pakai, master_material.jenis')
-            ->orderBy('pemesanan.tgl_pakai, master_material.jenis')
+            ->orderBy('pemesanan.tgl_pakai', 'DESC')
             ->findAll();
     }
     public function additionalTimeAccept($data)

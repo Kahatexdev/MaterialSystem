@@ -338,6 +338,7 @@ class WarehouseController extends BaseController
                         ->where('no_model', $stock['no_model'])
                         ->where('item_type', $stock['item_type'])
                         ->where('kode_warna', $stock['kode_warna'])
+                        ->where('nama_cluster', $stock['nama_cluster'])
                         ->where('lot_stock', $stock['lot_stock'])
                         ->first();
 
@@ -1616,7 +1617,7 @@ class WarehouseController extends BaseController
         $KgsPesan = $this->request->getGet('KgsPesan');
         $CnsPesan = $this->request->getGet('CnsPesan');
         $data = $this->request->getPost();
-        dd($data);
+        // dd($data);
         // Validasi dasar: pastikan id_pemasukan ada
         if (empty($data['id_pemasukan'])) {
             session()->setFlashdata('error', 'Data pemasukan tidak valid.');
@@ -1707,7 +1708,7 @@ class WarehouseController extends BaseController
 
         // Setelah semua data selesai di proses, set flash alert success
         session()->setFlashdata('success', 'Data pengeluaran jalur berhasil disimpan.');
-        return redirect()->to('gbn/selectClusterWarehouse/' . $idTtlPemesanan . '?Area=' . $area . '&KgsPesan' . $KgsPesan . '&CnsPesan' . $CnsPesan);
+        return redirect()->to('gbn/selectClusterWarehouse/' . $idTtlPemesanan . '?Area=' . $area . '&KgsPesan=' . $KgsPesan . '&CnsPesan=' . $CnsPesan);
     }
 
     public function savePengeluaranJalur()
