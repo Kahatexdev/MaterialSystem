@@ -16,6 +16,8 @@ class CoveringStockModel extends Model
         'jenis',
         'jenis_benang',
         'jenis_cover',
+        'jenis_mesin',
+        'dr',
         'color',
         'code',
         'lmd',

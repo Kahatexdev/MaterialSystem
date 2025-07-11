@@ -192,9 +192,9 @@ class CelupController extends BaseController
                     'kode_warna' => $kodewarna,
                     'warna' => $id['warna'],
                     'start_mc' => $id['start_mc'],
-                    'del_awal' => $pdk['delivery_awal'],
-                    'del_akhir' => $pdk['delivery_akhir'],
-                    'qty_po' => $pdk['qty_po'],
+                    'del_awal' => $pdk['delivery_awal'] ?? null,
+                    'del_akhir' => $pdk['delivery_akhir'] ?? null,
+                    'qty_po' => $pdk['qty_po'] ?? null,
                     'qty_po_plus' => 0,
                     'qty_celup' => $id['qty_celup'],
                     'no_mesin' => $id['no_mesin'],
@@ -252,6 +252,7 @@ class CelupController extends BaseController
         $tglReject = $this->request->getPost('tgl_reject');
         $tglMatching = $this->request->getPost('tgl_matching');
         $tglPB = $this->request->getPost('tgl_pb');
+        $qtyCelup = $this->request->getPost('qty_celup');
         $user  = session()->get('username');
 
         // Array untuk menyimpan nama variabel dan nilai tanggal
@@ -313,6 +314,7 @@ class CelupController extends BaseController
         if ($tglKelos) $dataUpdate['tanggal_kelos'] = $tglKelos;
         if ($user) $dataUpdate['user_cek_status'] = $user;
         if ($ketDailyCek) $dataUpdate['ket_daily_cek'] = $ketDailyCek;
+        $dataUpdate['kg_celup'] = $qtyCelup;
 
         // Jika tgl_bon diisi, update last_status menjadi 'bon'
         if (!empty($tglBon)) {

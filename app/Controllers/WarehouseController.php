@@ -1617,7 +1617,7 @@ class WarehouseController extends BaseController
         $KgsPesan = $this->request->getGet('KgsPesan');
         $CnsPesan = $this->request->getGet('CnsPesan');
         $data = $this->request->getPost();
-        // dd($KgsPesan);
+        // dd($data);
         // Validasi dasar: pastikan id_pemasukan ada
         if (empty($data['id_pemasukan'])) {
             session()->setFlashdata('error', 'Data pemasukan tidak valid.');

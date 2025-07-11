@@ -370,50 +370,229 @@ class ScheduleCelupModel extends Model
     }
     public function schedulePerArea($model, $itemType, $kodeWarna, $search)
     {
-        $builder = $this->select(
-            [
-                'schedule_celup.no_model',
-                'schedule_celup.item_type',
-                'schedule_celup.kode_warna',
-                'COALESCE(SUM(schedule_celup.kg_celup), 0) AS kg_celup',
-                'schedule_celup.lot_urut',
-                'schedule_celup.lot_celup',
-                'schedule_celup.tanggal_schedule',
-                'schedule_celup.tanggal_bon',
-                'schedule_celup.tanggal_celup',
-                'schedule_celup.tanggal_bongkar',
-                'schedule_celup.tanggal_press_oven',
-                // 'schedule_celup.tanggal_oven',
-                'schedule_celup.tanggal_tl',
-                'schedule_celup.tanggal_rajut_pagi',
-                'schedule_celup.tanggal_kelos',
-                'schedule_celup.serah_terima_acc',
-                'schedule_celup.tanggal_acc',
-                'schedule_celup.tanggal_reject',
-                'schedule_celup.tanggal_matching',
-                'schedule_celup.tanggal_perbaikan',
-                'schedule_celup.tanggal_teslab',
-                'schedule_celup.last_status',
-                'schedule_celup.ket_daily_cek',
-                'schedule_celup.po_plus',
-                'COALESCE(stock.kg_stock, 0) AS kg_stock'
-            ]
-        )
-            ->join('(SELECT no_model, item_type, kode_warna, SUM(kgs_stock_awal + kgs_in_out) AS kg_stock FROM stock GROUP BY no_model, item_type, kode_warna) AS stock', 'stock.no_model = schedule_celup.no_model AND stock.item_type = schedule_celup.item_type AND stock.kode_warna = schedule_celup.kode_warna')
-            ->where('schedule_celup.no_model', $model)
-            ->where('schedule_celup.item_type', $itemType)
-            ->where('schedule_celup.kode_warna', $kodeWarna);
+        // $builder = $this->select(
+        //     [
+        //         'schedule_celup.id_celup',
+        //         'schedule_celup.no_model',
+        //         'schedule_celup.item_type',
+        //         'schedule_celup.kode_warna',
+        //         'COALESCE(SUM(schedule_celup.kg_celup), 0) AS kg_celup',
+        //         'schedule_celup.lot_urut',
+        //         'schedule_celup.lot_celup',
+        //         'schedule_celup.tanggal_schedule',
+        //         'schedule_celup.tanggal_bon',
+        //         'schedule_celup.tanggal_celup',
+        //         'schedule_celup.tanggal_bongkar',
+        //         'schedule_celup.tanggal_press_oven',
+        //         // 'schedule_celup.tanggal_oven',
+        //         'schedule_celup.tanggal_tl',
+        //         'schedule_celup.tanggal_rajut_pagi',
+        //         'schedule_celup.tanggal_kelos',
+        //         'schedule_celup.serah_terima_acc',
+        //         'schedule_celup.tanggal_acc',
+        //         'schedule_celup.tanggal_reject',
+        //         'schedule_celup.tanggal_matching',
+        //         'schedule_celup.tanggal_perbaikan',
+        //         'schedule_celup.tanggal_teslab',
+        //         'schedule_celup.last_status',
+        //         'schedule_celup.ket_daily_cek',
+        //         'schedule_celup.po_plus',
+        //         'COALESCE(stock.kg_stock, 0) AS kg_stock'
+        //     ]
+        // )
+        //     ->join('(SELECT no_model, item_type, kode_warna, SUM(kgs_stock_awal + kgs_in_out) AS kg_stock FROM stock GROUP BY no_model, item_type, kode_warna) AS stock', 'stock.no_model = schedule_celup.no_model AND stock.item_type = schedule_celup.item_type AND stock.kode_warna = schedule_celup.kode_warna')
+        //     ->where('schedule_celup.no_model', $model)
+        //     ->where('schedule_celup.item_type', $itemType)
+        //     ->where('schedule_celup.kode_warna', $kodeWarna);
 
-        if (!empty($search)) {
+        // if (!empty($search)) {
+        //     $builder->groupStart()
+        //         ->like('schedule_celup.no_model', $search)
+        //         ->orLike('schedule_celup.kode_warna', $search)
+        //         ->orLike('schedule_celup.tanggal_schedule', $search)
+        //         ->orLike('schedule_celup.lot_celup', $search)
+        //         ->groupEnd();
+        // }
+
+        // return $builder->findAll();
+
+        // v2
+        // $builder = $this->select([
+        //     'schedule_celup.id_celup',
+        //     'schedule_celup.no_model',
+        //     'schedule_celup.item_type',
+        //     'schedule_celup.kode_warna',
+        //     'COALESCE(SUM(schedule_celup.kg_celup), 0) AS kg_celup',
+        //     'schedule_celup.lot_urut',
+        //     'schedule_celup.lot_celup',
+        //     'schedule_celup.tanggal_schedule',
+        //     'schedule_celup.tanggal_bon',
+        //     'schedule_celup.tanggal_celup',
+        //     'schedule_celup.tanggal_bongkar',
+        //     'schedule_celup.tanggal_press_oven',
+        //     'schedule_celup.tanggal_tl',
+        //     'schedule_celup.tanggal_rajut_pagi',
+        //     'schedule_celup.tanggal_kelos',
+        //     'schedule_celup.serah_terima_acc',
+        //     'schedule_celup.tanggal_acc',
+        //     'schedule_celup.tanggal_reject',
+        //     'schedule_celup.tanggal_matching',
+        //     'schedule_celup.tanggal_perbaikan',
+        //     'schedule_celup.tanggal_teslab',
+        //     'schedule_celup.last_status',
+        //     'schedule_celup.ket_daily_cek',
+        //     'schedule_celup.po_plus',
+        //     'COALESCE(stock.kg_stock, 0) AS kg_stock',
+        // ])
+        //     ->join(
+        //         '(SELECT no_model, item_type, kode_warna, SUM(kgs_stock_awal + kgs_in_out) AS kg_stock
+        //      FROM stock
+        //      GROUP BY no_model, item_type, kode_warna) AS stock'
+        //      ,
+        //         'stock.no_model = schedule_celup.no_model
+        //      AND stock.item_type = schedule_celup.item_type
+        //      AND stock.kode_warna = schedule_celup.kode_warna'
+        //     )
+        //     ->where('schedule_celup.no_model', $model)
+        //     ->where('schedule_celup.item_type', $itemType)
+        //     ->where('schedule_celup.kode_warna', $kodeWarna);
+
+        // if (!empty($search)) {
+        //     $builder->groupStart()
+        //         ->like('schedule_celup.no_model', $search)
+        //         ->orLike('schedule_celup.kode_warna', $search)
+        //         ->orLike('schedule_celup.tanggal_schedule', $search)
+        //         ->orLike('schedule_celup.lot_celup', $search)
+        //         ->groupEnd();
+        // }
+
+        // // Tambahkan GROUP BY id_celup
+        // $builder->groupBy('schedule_celup.id_celup');
+
+        // return $builder->findAll();
+
+        // v3
+        // $builder = $this->select([
+        //     'schedule_celup.tanggal_schedule',
+        //     'schedule_celup.id_mesin',
+        //     'schedule_celup.lot_urut',
+        //     'schedule_celup.no_model',
+        //     'schedule_celup.item_type',
+        //     'schedule_celup.kode_warna',
+        //     'COALESCE(SUM(schedule_celup.kg_celup), 0) AS kg_celup',
+        //     'schedule_celup.lot_celup',
+        //     'schedule_celup.tanggal_bon',
+        //     'schedule_celup.tanggal_celup',
+        //     'schedule_celup.tanggal_bongkar',
+        //     'schedule_celup.tanggal_press_oven',
+        //     'schedule_celup.tanggal_tl',
+        //     'schedule_celup.tanggal_rajut_pagi',
+        //     'schedule_celup.tanggal_kelos',
+        //     'schedule_celup.serah_terima_acc',
+        //     'schedule_celup.tanggal_acc',
+        //     'schedule_celup.tanggal_reject',
+        //     'schedule_celup.tanggal_matching',
+        //     'schedule_celup.tanggal_perbaikan',
+        //     'schedule_celup.tanggal_teslab',
+        //     'schedule_celup.last_status',
+        //     'schedule_celup.ket_daily_cek',
+        //     'schedule_celup.po_plus',
+        //     'COALESCE(stock.kg_stock, 0) AS kg_stock',
+        // ])
+        //     ->join(
+        //         '(SELECT no_model, item_type, kode_warna, SUM(kgs_stock_awal + kgs_in_out) AS kg_stock
+        //      FROM stock
+        //      GROUP BY no_model, item_type, kode_warna) AS stock',
+        //         'stock.no_model = schedule_celup.no_model
+        //      AND stock.item_type = schedule_celup.item_type
+        //      AND stock.kode_warna = schedule_celup.kode_warna'
+        //     )
+        //     ->where('schedule_celup.no_model', $model)
+        //     ->where('schedule_celup.item_type', $itemType)
+        //     ->where('schedule_celup.kode_warna', $kodeWarna);
+
+        // if (!empty($search)) {
+        //     $builder->groupStart()
+        //         ->like('schedule_celup.no_model', $search)
+        //         ->orLike('schedule_celup.kode_warna', $search)
+        //         ->orLike('schedule_celup.tanggal_schedule', $search)
+        //         ->orLike('schedule_celup.lot_celup', $search)
+        //         ->groupEnd();
+        // }
+
+        // // Tambahkan GROUP BY tanggal_schedule, no_mesin, lot_urut
+        // $builder->groupBy([
+        //     'schedule_celup.tanggal_schedule',
+        //     'schedule_celup.id_mesin',
+        //     'schedule_celup.lot_urut'
+        // ]);
+
+        // return $builder->findAll();
+
+        // v4
+        $db = \Config\Database::connect();
+
+        // Subquery: hitung stock per no_model/item_type/kode_warna
+        $stockSub = $db->table('stock')
+            ->select('no_model, item_type, kode_warna, SUM(kgs_stock_awal + kgs_in_out) AS kg_stock')
+            ->groupBy(['no_model', 'item_type', 'kode_warna'])
+            ->getCompiledSelect();
+
+        // Main query builder
+        $builder = $db->table('schedule_celup sc')
+            ->select([
+                'sc.id_celup',
+                'sc.no_model',
+                'sc.item_type',
+                'sc.kode_warna',
+                'COALESCE(SUM(sc.kg_celup), 0) AS kg_celup',
+                'sc.lot_urut',
+                'sc.lot_celup',
+                'sc.tanggal_schedule',
+                'sc.tanggal_bon',
+                'sc.tanggal_celup',
+                'sc.tanggal_bongkar',
+                'sc.tanggal_press_oven',
+                'sc.tanggal_tl',
+                'sc.tanggal_rajut_pagi',
+                'sc.tanggal_kelos',
+                'sc.serah_terima_acc',
+                'sc.tanggal_acc',
+                'sc.tanggal_reject',
+                'sc.tanggal_matching',
+                'sc.tanggal_perbaikan',
+                'sc.tanggal_teslab',
+                'sc.last_status',
+                'sc.ket_daily_cek',
+                'sc.po_plus',
+                'COALESCE(st.kg_stock, 0) AS kg_stock',
+            ], false)
+            ->join(
+                "($stockSub) st",
+                'st.no_model   = sc.no_model 
+                    AND st.item_type  = sc.item_type 
+                    AND st.kode_warna = sc.kode_warna',
+                'inner'
+            )
+            ->where('sc.no_model', $model)
+            ->where('sc.item_type', $itemType)
+            ->where('sc.kode_warna', $kodeWarna);
+
+        // Jika ada kata kunci pencarian
+        if (! empty($search)) {
             $builder->groupStart()
-                ->like('schedule_celup.no_model', $search)
-                ->orLike('schedule_celup.kode_warna', $search)
-                ->orLike('schedule_celup.tanggal_schedule', $search)
-                ->orLike('schedule_celup.lot_celup', $search)
+                ->like('sc.no_model',       $search)
+                ->orLike('sc.kode_warna',   $search)
+                ->orLike('sc.tanggal_schedule', $search)
+                ->orLike('sc.lot_celup',    $search)
                 ->groupEnd();
         }
 
-        return $builder->findAll();
+        $builder->groupBy('sc.id_celup');
+
+        return $builder
+            ->get()
+            ->getResultArray();
     }
     public function getDataComplain()
     {
@@ -789,5 +968,15 @@ class ScheduleCelupModel extends Model
             ])
             ->get()
             ->getResultArray();
+    }
+    public function cekSch($model, $keb)
+    {
+        $data = $this->select('tanggal_schedule')
+            ->where('no_model', $model['no_model'])
+            ->where('item_type', $keb['item_type'])
+            ->where('kode_warna', $keb['kode_warna'])
+            ->where('warna', $keb['color'])
+            ->first();
+        return $data['tanggal_schedule'] ?? null;
     }
 }

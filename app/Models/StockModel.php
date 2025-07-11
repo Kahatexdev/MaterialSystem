@@ -545,7 +545,8 @@ class StockModel extends Model
 
     public function getClusterPinjamOrder($noModel, $item_type, $kode_warna)
     {
-        return $this->select('nama_cluster')
+        return $this->select('stock.no_model, stock.item_type, stock.kode_warna, stock.warna, SUM(stock.kgs_stock_awal) AS stock_awal, SUM(stock.cns_stock_awal) AS cns_awal, SUM(stock.krg_stock_awal) AS krg_awal, stock.lot_awal, stock.kgs_in_out, stock.cns_in_out, stock.krg_in_out, stock.lot_stock, stock.nama_cluster, pemasukan.id_pemasukan')
+            ->join('pemasukan', 'pemasukan.id_stock=stock.id_stock')
             ->where('no_model', $noModel)
             ->where('item_type', $item_type)
             ->where('kode_warna', $kode_warna)
@@ -569,4 +570,14 @@ class StockModel extends Model
     //         ->groupBy('no_model, kode_warna, warna')
     //         ->findAll();
     // }
+
+    public function getKgStock($no_model, $item_type, $kode_warna)
+    {
+        return $this->select('(SUM(kgs_stock_awal) + SUM(kgs_in_out)) AS kg_stock')
+            ->where('no_model', $no_model)
+            ->where('item_type', $item_type)
+            ->where('kode_warna', $kode_warna)
+            ->get()
+            ->getRowArray();
+    }
 }

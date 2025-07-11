@@ -80,81 +80,324 @@ class ApiController extends ResourceController
     {
         //
     }
-    public function statusbahanbaku($model)
+    // public function statusbahanbaku($model)
+    // {
+    // $search = $this->request->getGet('search');
+    // // $search = 'L25067';
+    // $model = $this->materialModel->MaterialPDK($model);
+    // // \print_r($model);
+    // $res = [];
+    // foreach ($model as &$row) {
+    //     $scheduleData = [];
+
+    //     $jenis = strtoupper($row['jenis']);
+
+    //     if (in_array($jenis, ['BENANG', 'NYLON'])) {
+    //         // Ambil data celup
+    //         $schedule = $this->scheduleCelupModel->schedulePerArea(
+    //             $row['no_model'],
+    //             $row['item_type'],
+    //             $row['kode_warna'],
+    //             $search
+    //         );
+    //         $scheduleData = !empty($schedule) ? $schedule[0] : [];
+    //         // $res[] = $schedule;
+    //     } else if (in_array($jenis, ['KARET', 'SPANDEX'])) {
+    //         // Ambil data covering
+    //         $covering = $this->trackingPoCovering->statusBahanBaku(
+    //             $row['no_model'],
+    //             $row['item_type'],
+    //             $row['kode_warna'],
+    //             $search
+    //         );
+    //         $scheduleData = !empty($covering) ? $covering[0] : [];
+    //     }
+
+    //     \var_dump($scheduleData);
+    //     $scheduleData['jenis'] = $row['jenis'];
+    //     $fields = [
+    //         'jenis',
+    //         'start_mc',
+    //         'kg_celup',
+    //         'lot_urut',
+    //         'lot_celup',
+    //         'tanggal_schedule',
+    //         'tanggal_bon',
+    //         'tanggal_celup',
+    //         'tanggal_bongkar',
+    //         'tanggal_press_oven',
+    //         'tanggal_tl',
+    //         'tanggal_rajut_pagi',
+    //         'tanggal_kelos',
+    //         'serah_terima_acc',
+    //         'tanggal_acc',
+    //         'tanggal_reject',
+    //         'tanggal_matching',
+    //         'tanggal_perbaikan',
+    //         'last_status',
+    //         'ket_daily_cek',
+    //         'po_plus',
+    //         // Tambahan field dari trackingPoCovering
+    //         'id_po_gbn',
+    //         'status',
+    //         'keterangan',
+    //         'admin',
+    //         'created_at',
+    //         'updated_at',
+    //         'kg_stock'
+
+    //     ];
+
+    //     foreach ($fields as $field) {
+    //         $row[$field] = $scheduleData[$field] ?? ''; // Isi dengan data jadwal atau kosong jika tidak ada
+    //     }
+
+    //     $res[] = $row;
+    // }
+    // return $this->respond($res, 200);
+    // }
+
+    // v2
+
+    // public function statusbahanbaku($noModel)
+    // {
+    //     $search = $this->request->getGet('search');
+    //     $rows   = $this->materialModel->MaterialPDK($noModel);
+    //     $res    = [];
+
+    //     // Field‑field yang akan di-merge dari schedule/covering
+    //     $fields = [
+    //         'jenis',
+    //         'start_mc',
+    //         'kg_celup',
+    //         'lot_urut',
+    //         'lot_celup',
+    //         'tanggal_schedule',
+    //         'tanggal_bon',
+    //         'tanggal_celup',
+    //         'tanggal_bongkar',
+    //         'tanggal_press_oven',
+    //         'tanggal_tl',
+    //         'tanggal_rajut_pagi',
+    //         'tanggal_kelos',
+    //         'serah_terima_acc',
+    //         'tanggal_acc',
+    //         'tanggal_reject',
+    //         'tanggal_matching',
+    //         'tanggal_perbaikan',
+    //         'last_status',
+    //         'ket_daily_cek',
+    //         'po_plus',
+    //         'id_po_gbn',
+    //         'status',
+    //         'keterangan',
+    //         'admin',
+    //         'created_at',
+    //         'updated_at',
+    //         'kg_stock',
+    //     ];
+
+    //     foreach ($rows as $row) {
+    //         $jenis = strtoupper($row['jenis']);
+
+    //         if (in_array($jenis, ['BENANG', 'NYLON'])) {
+    //             // Ambil semua schedule celup
+    //             $allSchedules = $this->scheduleCelupModel
+    //                 ->schedulePerArea(
+    //                     $row['no_model'],
+    //                     $row['item_type'],
+    //                     $row['kode_warna'],
+    //                     $search
+    //                 );
+
+    //             // Untuk tiap baris schedule, clone $row dan merge datanya
+    //             foreach ($allSchedules as $scheduleData) {
+    //                 // Pastikan ada field `jenis` di data hasil merge
+    //                 $scheduleData['jenis'] = $row['jenis'];
+
+    //                 // Copy master row
+    //                 $newRow = $row;
+
+    //                 // Merge field‑field schedule
+    //                 foreach ($fields as $f) {
+    //                     $newRow[$f] = $scheduleData[$f] ?? '';
+    //                 }
+
+    //                 $res[] = $newRow;
+    //             }
+
+    //             // Jika sama sekali tidak ada schedule, tambahkan 1 baris kosong
+    //             if (empty($allSchedules)) {
+    //                 $newRow = $row;
+    //                 foreach ($fields as $f) {
+    //                     $newRow[$f] = '';
+    //                 }
+    //                 $res[] = $newRow;
+    //             }
+    //         } else if (in_array($jenis, ['KARET', 'SPANDEX'])) {
+    //             // Ambil semua covering
+    //             $allCoverings = $this->trackingPoCovering
+    //                 ->statusBahanBaku(
+    //                     $row['no_model'],
+    //                     $row['item_type'],
+    //                     $row['kode_warna'],
+    //                     $search
+    //                 );
+
+    //             foreach ($allCoverings as $coverData) {
+    //                 $coverData['jenis'] = $row['jenis'];
+    //                 $newRow = $row;
+    //                 foreach ($fields as $f) {
+    //                     $newRow[$f] = $coverData[$f] ?? '';
+    //                 }
+    //                 $res[] = $newRow;
+    //             }
+
+    //             if (empty($allCoverings)) {
+    //                 $newRow = $row;
+    //                 foreach ($fields as $f) {
+    //                     $newRow[$f] = '';
+    //                 }
+    //                 $res[] = $newRow;
+    //             }
+    //         } else {
+    //             // Jika jenis lain, sekadar push row tanpa schedule/covering
+    //             $newRow = $row;
+    //             foreach ($fields as $f) {
+    //                 $newRow[$f] = '';
+    //             }
+    //             $res[] = $newRow;
+    //         }
+    //     }
+
+    //     return $this->respond($res, 200);
+    // }
+
+    // v3
+
+    public function statusbahanbaku($noModel)
     {
         $search = $this->request->getGet('search');
-        // $search = 'L25067';
-        $model = $this->materialModel->MaterialPDK($model);
+        // $rows   = $this->materialModel->MaterialPDK($noModel);
+        $rows   = $this->openPoModel->MaterialPDK($noModel);
+        $res    = [];
 
-        $res = [];
-        foreach ($model as &$row) {
-            $scheduleData = [];
+        // Field‑field schedule yang ingin di-merge (tidak termasuk 'qty_po'!)
+        $fields = [
+            'jenis',
+            'start_mc',
+            'kg_celup',
+            'lot_urut',
+            'lot_celup',
+            'tanggal_schedule',
+            'tanggal_bon',
+            'tanggal_celup',
+            'tanggal_bongkar',
+            'tanggal_press_oven',
+            'tanggal_tl',
+            'tanggal_rajut_pagi',
+            'tanggal_kelos',
+            'serah_terima_acc',
+            'tanggal_acc',
+            'tanggal_reject',
+            'tanggal_matching',
+            'tanggal_perbaikan',
+            'last_status',
+            'ket_daily_cek',
+            'po_plus',
+            'id_po_gbn',
+            'status',
+            'keterangan',
+            'admin',
+            'created_at',
+            'updated_at',
+            'kg_stock',
+        ];
 
+        foreach ($rows as $row) {
             $jenis = strtoupper($row['jenis']);
 
+            // Simpan qty_po dari PO master
+            $masterQty = $row['qty_po'];
+
             if (in_array($jenis, ['BENANG', 'NYLON'])) {
-                // Ambil data celup
-                $schedule = $this->scheduleCelupModel->schedulePerArea(
-                    $row['no_model'],
-                    $row['item_type'],
-                    $row['kode_warna'],
-                    $search
-                );
-                $scheduleData = !empty($schedule) ? $schedule[0] : [];
+                $allSchedules = $this->scheduleCelupModel
+                    ->schedulePerArea(
+                        $row['no_model'],
+                        $row['item_type'],
+                        $row['kode_warna'],
+                        $search
+                    );
+
+                if (! empty($allSchedules)) {
+                    foreach ($allSchedules as $scheduleData) {
+                        // Start dangan data master
+                        $newRow = $row;
+
+                        // Pastikan qty_po tetap dari master
+                        $newRow['qty_po'] = $masterQty;
+
+                        // Merge data schedule
+                        $scheduleData['jenis'] = $row['jenis'];
+                        foreach ($fields as $f) {
+                            $newRow[$f] = $scheduleData[$f] ?? '-';
+                        }
+
+                        $res[] = $newRow;
+                    }
+                } else {
+                    // Kalau gak ada schedule, tetap munculkan 1 baris dengan qty_po
+                    $newRow = $row;
+                    $newRow['qty_po'] = $masterQty;
+                    foreach ($fields as $f) {
+                        $newRow[$f] = '-';
+                    }
+                    $res[] = $newRow;
+                }
             } else if (in_array($jenis, ['KARET', 'SPANDEX'])) {
-                // Ambil data covering
-                $covering = $this->trackingPoCovering->statusBahanBaku(
-                    $row['no_model'],
-                    $row['item_type'],
-                    $row['kode_warna'],
-                    $search
-                );
-                $scheduleData = !empty($covering) ? $covering[0] : [];
+                $allCoverings = $this->trackingPoCovering
+                    ->statusBahanBaku(
+                        $row['no_model'],
+                        $row['item_type'],
+                        $row['kode_warna'],
+                        $search
+                    );
+
+                if (! empty($allCoverings)) {
+                    foreach ($allCoverings as $coverData) {
+                        $newRow = $row;
+                        $newRow['qty_po'] = $masterQty;
+
+                        $coverData['jenis'] = $row['jenis'];
+                        foreach ($fields as $f) {
+                            $newRow[$f] = $coverData[$f] ?? '-';
+                        }
+
+                        $res[] = $newRow;
+                    }
+                } else {
+                    $newRow = $row;
+                    $newRow['qty_po'] = $masterQty;
+                    foreach ($fields as $f) {
+                        $newRow[$f] = '-';
+                    }
+                    $res[] = $newRow;
+                }
+            } else {
+                // jenis lain
+                $newRow = $row;
+                $newRow['qty_po'] = $masterQty;
+                foreach ($fields as $f) {
+                    $newRow[$f] = '-';
+                }
+                $res[] = $newRow;
             }
-
-            $scheduleData['jenis'] = $row['jenis'];
-
-            $fields = [
-                'jenis',
-                'start_mc',
-                'kg_celup',
-                'lot_urut',
-                'lot_celup',
-                'tanggal_schedule',
-                'tanggal_bon',
-                'tanggal_celup',
-                'tanggal_bongkar',
-                'tanggal_press_oven',
-                'tanggal_tl',
-                'tanggal_rajut_pagi',
-                'tanggal_kelos',
-                'serah_terima_acc',
-                'tanggal_acc',
-                'tanggal_reject',
-                'tanggal_matching',
-                'tanggal_perbaikan',
-                'last_status',
-                'ket_daily_cek',
-                'po_plus',
-                // Tambahan field dari trackingPoCovering
-                'id_po_gbn',
-                'status',
-                'keterangan',
-                'admin',
-                'created_at',
-                'updated_at',
-                'kg_stock'
-
-            ];
-
-            foreach ($fields as $field) {
-                $row[$field] = $scheduleData[$field] ?? ''; // Isi dengan data jadwal atau kosong jika tidak ada
-            }
-
-            $res[] = $row;
         }
+
         return $this->respond($res, 200);
     }
+
+
     public function cekBahanBaku($model)
     {
         $search = '';

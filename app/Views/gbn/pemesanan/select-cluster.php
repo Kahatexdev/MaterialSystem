@@ -560,6 +560,8 @@
             const KgsPesan = new URLSearchParams(window.location.search).get('KgsPesan');
             const CnsPesan = new URLSearchParams(window.location.search).get('CnsPesan');
 
+            const PinjamOrder = document.getElementById('pinjam_order').value;
+
             // Show loading state
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalBtnText = submitBtn.innerHTML;

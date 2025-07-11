@@ -37,7 +37,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('masterdata/poBooking/getKodeWarna', 'PoBookingController::getKodeWarna');
     $routes->get('masterdata/poBooking/getColor', 'PoBookingController::getColor');
     $routes->post('masterdata/poBooking/saveOpenPoBooking', 'PoBookingController::saveOpenPoBooking');
-    $routes->get('masterdata/poBooking/exportPoBooking', 'PdfController::generateOpenPOBooking');
+    // $routes->get('masterdata/poBooking/exportPoBooking', 'PdfController::generateOpenPOBooking');
+    $routes->get('masterdata/poBooking/exportPoBooking', 'ExcelController::generateOpenPOBookingExcel');
     $routes->get('masterdata/poBooking/detail', 'PoBookingController::detail');
     $routes->post('masterdata/poBooking/updatePoBooking', 'PoBookingController::updatePoBooking');
     $routes->post('masterdata/poBooking/deletePoBooking', 'PoBookingController::deletePoBooking');
@@ -48,14 +49,16 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('masterdata/poManual/detail', 'PoManualController::detail');
     $routes->post('masterdata/poManual/updatePoManual', 'PoManualController::updatePoManual');
     $routes->post('masterdata/poManual/deletePoManual', 'PoManualController::deletePoManual');
-    $routes->get('masterdata/poManual/exportPoManual', 'PdfController::generateOpenPOManual');
+    // $routes->get('masterdata/poManual/exportPoManual', 'PdfController::generateOpenPOManual');
+    $routes->get('masterdata/poManual/exportPoManual', 'ExcelController::generateOpenPOManualExcel');
     $routes->get('masterdata/cekStockOrder/(:any)/(:any)/(:any)', 'PoGabunganController::cekStockOrder/$1/$2/$3');
     $routes->post('openPO/saveOpenPOGabungan', 'PoGabunganController::saveOpenPOGabungan');
     $routes->get('listPoGabungan', 'PoGabunganController::listPoGabungan');
     $routes->get('getPoGabungan/(:any)', 'PoGabunganController::getPoGabungan/$1');
     $routes->post('updatePoGabungan', 'PoGabunganController::updatePoGabungan');
     $routes->post('deletePoGabungan/(:num)', 'PoGabunganController::deletePoGabungan/$1');
-    $routes->get('exportOpenPOGabung', 'PdfController::exportOpenPOGabung');
+    // $routes->get('exportOpenPOGabung', 'PdfController::exportOpenPOGabung');
+    $routes->get('exportOpenPOGabung', 'ExcelController::exportOpenPOGabung');
     $routes->get('exportPoBoking', 'ExcelController::exportPoBooking');
 
 
@@ -72,7 +75,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     // $routes->post('exportOpenPO/(:any)/(:any)', 'MasterdataController::exportOpenPO/$1/$2');
     $routes->get('listOpenPO/(:any)', 'MaterialController::listOpenPO/$1');
     $routes->post('updatePo', 'MaterialController::updatePo');
-    $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
+    // $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
+    $routes->get('exportOpenPO/(:any)', 'ExcelController::generateOpenPOExcel/$1');
+    $routes->post('exportPoNylon', 'ExcelController::generateOpenPONylon');
     $routes->get('getPoDetails/(:num)', 'MaterialController::getPoDetails/$1');
     $routes->delete('deletePo/(:num)', 'MaterialController::deletePo/$1');
     $routes->post('splitMaterial', 'MaterialController::splitMaterial');
@@ -313,6 +318,7 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('schedule/nylon', 'ScheduleController::nylon');
     $routes->get('reqschedule', 'ScheduleController::reqschedule');
     $routes->post('schedule', 'ScheduleController::reqschedule');
+    $routes->get('schedule', 'ScheduleController::index');
     $routes->get('edit/(:num)', 'CelupController::editStatus/$1');
     $routes->post('updateSchedule/(:num)', 'CelupController::updateSchedule/$1');
     $routes->get('schedule/getScheduleDetails/(:any)/(:any)/(:any)', 'ScheduleController::getScheduleDetails/$1/$2/$3');
@@ -343,6 +349,8 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
 
 // covering routes
 $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
+    $routes->get('po-manual/covering', 'PoManualController::createCovering');
+    $routes->post('po-manual/covering/save', 'PoManualController::saveCovering');
     $routes->get('', 'CoveringController::index');
     $routes->get('memo', 'CoveringController::memo');
     $routes->get('mesinCov', 'MesinCoveringController::mesinCovering');
