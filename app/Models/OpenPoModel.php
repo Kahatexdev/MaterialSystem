@@ -528,4 +528,15 @@ class OpenPoModel extends Model
             ->groupBy('open_po.no_model, open_po.kode_warna, open_po.item_type, open_po.color, material.area, master_material.jenis')
             ->findAll();
     }
+
+    public function getDetailPoCovering($tgl_po)
+    {
+        return $this->select('open_po.id_po,open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, ROUND(SUM(kg_po), 2) as total_kg_po, open_po.keterangan,open_po.penerima, open_po.penanggung_jawab,open_po.admin, open_po.created_at,open_po.updated_at,open_po.id_induk')
+            ->where('penanggung_jawab', 'Paryanti')
+            ->where('id_induk IS NOT NULL')
+            ->where('DATE(open_po.created_at)', $tgl_po)
+            ->whereNotIn('kode_warna', ['DDBLK', 'RW'])
+            ->groupBy('open_po.item_type, open_po.kode_warna, open_po.color')
+            ->findAll();
+    }
 }
