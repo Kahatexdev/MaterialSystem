@@ -6121,9 +6121,10 @@ class ExcelController extends BaseController
         $no = 1;
         $totalKg = $totalCones = $totalYard = $totalKgPerCones = 0;
         $firstRow = true;
+        $itemTypes = [];
 
         foreach ($result as $row) {
-            $spesifikasiBenang = trim($row['spesifikasi_benang'] ?? ''); // pakai null coalescing dan trim untuk keamanan
+            $spesifikasiBenang = trim($row['spesifikasi_benang'] ?? '');
             if ($spesifikasiBenang === '- -') {
                 $spesifikasiBenang = '';
             }
@@ -6139,10 +6140,26 @@ class ExcelController extends BaseController
                 $deliveryDisplay = '';
             }
 
+            // Buat key berdasarkan item_type + spesifikasi untuk memisahkan grup
+            $groupKey = $row['item_type'] . '|' . $spesifikasiBenang;
+
+            if (!in_array($groupKey, $itemTypes)) {
+                // Kemunculan pertama untuk grup ini
+                $tampilItemType = $row['item_type'] . ($spesifikasiBenang ? " {$spesifikasiBenang}" : '');
+                $tampilUkuran   = $row['ukuran'];
+                $itemTypes[]    = $groupKey;
+            } else {
+                // Baris selanjutnya dalam grup sama
+                $tampilItemType = '';
+                $tampilUkuran   = '';
+            }
+
+
             $sheet->fromArray([
                 $no++,
-                $row['item_type'] . ' ' . $spesifikasiBenang,
-                $row['ukuran'],
+                // $row['item_type'] . ' ' . $spesifikasiBenang,
+                $tampilItemType,
+                $tampilUkuran,
                 $row['bentuk_celup'],
                 $row['color'],
                 $row['kode_warna'],
