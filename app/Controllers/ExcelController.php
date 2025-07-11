@@ -5926,21 +5926,24 @@ class ExcelController extends BaseController
         }
 
         // Header Form
-        // Logo dan judul perusahaan di bawah logo
-        $sheet->mergeCells('A1:C3');
-        $sheet->setCellValue('A1', 'PT. KAHATEX');
-        $sheet->getStyle('A1')->getFont()->setSize(11);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $drawing = new Drawing();
-        $drawing->setName('Logo')
-            ->setDescription('PT. KAHATEX Logo')
-            ->setPath(FCPATH . 'assets/img/logo-kahatex.png')
-            ->setWorksheet($sheet)
-            ->setCoordinates('B1')
-            ->setOffsetX(150)
-            ->setOffsetY(7)
-            ->setHeight(40)
-            ->setWidth(40);
+        $sheet->mergeCells('A1:B2');
+        $sheet->getColumnDimension('A')->setWidth(10);
+        $sheet->getColumnDimension('B')->setWidth(15);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+        $drawing->setName('Logo');
+        $drawing->setDescription('Logo Perusahaan');
+        $drawing->setPath('assets/img/logo-kahatex.png');
+        $drawing->setCoordinates('B1');
+        $drawing->setHeight(50);
+        $drawing->setOffsetX(55);
+        $drawing->setOffsetY(10);
+        $drawing->setWorksheet($sheet);
+        $sheet->mergeCells('A3:C3');
+        $sheet->setCellValue('A3', 'PT. KAHATEX');
+        $sheet->getStyle('A3')->getFont()->setSize(11);
+        $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         $sheet->setCellValue('D1', 'FORMULIR');
         $sheet->getStyle('D1')->getFont()->setBold(true)->setSize(16);
@@ -7325,21 +7328,24 @@ class ExcelController extends BaseController
         }
 
         // Header Form
-        // Logo dan judul perusahaan di bawah logo
-        $sheet->mergeCells('A1:C3');
-        $sheet->setCellValue('A1', 'PT. KAHATEX');
-        $sheet->getStyle('A1')->getFont()->setSize(11);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $drawing = new Drawing();
-        $drawing->setName('Logo')
-            ->setDescription('PT. KAHATEX Logo')
-            ->setPath(FCPATH . 'assets/img/logo-kahatex.png')
-            ->setWorksheet($sheet)
-            ->setCoordinates('B1')
-            ->setOffsetX(150)
-            ->setOffsetY(7)
-            ->setHeight(40)
-            ->setWidth(40);
+        $sheet->mergeCells('A1:B2');
+        $sheet->getColumnDimension('A')->setWidth(10);
+        $sheet->getColumnDimension('B')->setWidth(15);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+        $drawing->setName('Logo');
+        $drawing->setDescription('Logo Perusahaan');
+        $drawing->setPath('assets/img/logo-kahatex.png');
+        $drawing->setCoordinates('B1');
+        $drawing->setHeight(50);
+        $drawing->setOffsetX(55);
+        $drawing->setOffsetY(10);
+        $drawing->setWorksheet($sheet);
+        $sheet->mergeCells('A3:C3');
+        $sheet->setCellValue('A3', 'PT. KAHATEX');
+        $sheet->getStyle('A3')->getFont()->setSize(11);
+        $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         $sheet->setCellValue('D1', 'FORMULIR');
         $sheet->getStyle('D1')->getFont()->setBold(true)->setSize(16);
@@ -7872,21 +7878,24 @@ class ExcelController extends BaseController
         }
 
         // Header Form
-        // Logo dan judul perusahaan di bawah logo
-        $sheet->mergeCells('A1:C3');
-        $sheet->setCellValue('A1', 'PT. KAHATEX');
-        $sheet->getStyle('A1')->getFont()->setSize(11);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $drawing = new Drawing();
-        $drawing->setName('Logo')
-            ->setDescription('PT. KAHATEX Logo')
-            ->setPath(FCPATH . 'assets/img/logo-kahatex.png')
-            ->setWorksheet($sheet)
-            ->setCoordinates('B1')
-            ->setOffsetX(150)
-            ->setOffsetY(7)
-            ->setHeight(40)
-            ->setWidth(40);
+        $sheet->mergeCells('A1:B2');
+        $sheet->getColumnDimension('A')->setWidth(10);
+        $sheet->getColumnDimension('B')->setWidth(15);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+        $drawing->setName('Logo');
+        $drawing->setDescription('Logo Perusahaan');
+        $drawing->setPath('assets/img/logo-kahatex.png');
+        $drawing->setCoordinates('B1');
+        $drawing->setHeight(50);
+        $drawing->setOffsetX(55);
+        $drawing->setOffsetY(10);
+        $drawing->setWorksheet($sheet);
+        $sheet->mergeCells('A3:C3');
+        $sheet->setCellValue('A3', 'PT. KAHATEX');
+        $sheet->getStyle('A3')->getFont()->setSize(11);
+        $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         $sheet->setCellValue('D1', 'FORMULIR');
         $sheet->getStyle('D1')->getFont()->setBold(true)->setSize(16);
@@ -8222,7 +8231,7 @@ class ExcelController extends BaseController
         // Buat Excel
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Open PO Booking' . $noModel);
+        $sheet->setTitle('Open PO Manual ' . $noModel);
         $spreadsheet->getDefaultStyle()->getFont()->setName('Arial');
         $spreadsheet->getDefaultStyle()->getFont()->setSize(16);
 
@@ -8427,21 +8436,25 @@ class ExcelController extends BaseController
         }
 
         // Header Form
-        // Logo dan judul perusahaan di bawah logo
-        $sheet->mergeCells('A1:C3');
-        $sheet->setCellValue('A1', 'PT. KAHATEX');
-        $sheet->getStyle('A1')->getFont()->setSize(11);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $drawing = new Drawing();
-        $drawing->setName('Logo')
-            ->setDescription('PT. KAHATEX Logo')
-            ->setPath(FCPATH . 'assets/img/logo-kahatex.png')
-            ->setWorksheet($sheet)
-            ->setCoordinates('B1')
-            ->setOffsetX(150)
-            ->setOffsetY(7)
-            ->setHeight(40)
-            ->setWidth(40);
+        $sheet->mergeCells('A1:B2');
+        $sheet->getColumnDimension('A')->setWidth(10);
+        $sheet->getColumnDimension('B')->setWidth(15);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        // Logo kahatex
+        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+        $drawing->setName('Logo');
+        $drawing->setDescription('Logo Perusahaan');
+        $drawing->setPath('assets/img/logo-kahatex.png');
+        $drawing->setCoordinates('B1');
+        $drawing->setHeight(50);
+        $drawing->setOffsetX(55);
+        $drawing->setOffsetY(10);
+        $drawing->setWorksheet($sheet);
+        $sheet->mergeCells('A3:C3');
+        $sheet->setCellValue('A3', 'PT. KAHATEX');
+        $sheet->getStyle('A3')->getFont()->setSize(11);
+        $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         $sheet->setCellValue('D1', 'FORMULIR');
         $sheet->getStyle('D1')->getFont()->setBold(true)->setSize(16);
