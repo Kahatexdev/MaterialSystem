@@ -169,4 +169,11 @@ class PengeluaranModel extends Model
             ->get() // Dapatkan objek query
             ->getResultArray(); // Konversi ke array hasil
     }
+    public function getKgPersiapanPengeluaran($id_total_pemesanan)
+    {
+        return $this->select('SUM(kgs_out) AS kgs_out')
+            ->where('id_total_pemesanan', $id_total_pemesanan)
+            ->where('status', 'Pengeluaran Jalur')
+            ->first();
+    }
 }
