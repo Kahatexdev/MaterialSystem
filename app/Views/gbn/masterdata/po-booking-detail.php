@@ -115,7 +115,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="tujuan" class="form-label">Tujuan</label>
-                            <select name="tujuan" id="tujuan" class="form-control">
+                            <select name="tujuan" id="tujuan" class="form-control" required>
                                 <option value="">Pilih Tujuan</option>
                                 <option value="CELUP">CELUP</option>
                                 <option value="COVERING">COVERING</option>
