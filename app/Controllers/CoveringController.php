@@ -500,4 +500,37 @@ class CoveringController extends BaseController
 
         return view($this->role . '/po/detail-po-covering', $data);
     }
+
+    public function updateDetailPoCovering($id_po)
+    {
+        $post = $this->request->getPost();
+
+        $updateData = [
+            'item_type'       => $post['item_type'] ?? null,
+            'kode_warna'      => $post['kode_warna'] ?? null,
+            'color'           => $post['color'] ?? null,
+            'kg_po'           => $post['kg_po'] ?? null,
+            'keterangan'      => $post['keterangan'] ?? null,
+            'updated_at'      => date('Y-m-d H:i:s'),
+        ];
+
+        $result = $this->openPoModel->update($id_po, $updateData);
+
+        if ($result) {
+            return redirect()->back()->with('success', 'Data PO Covering berhasil diupdate.');
+        } else {
+            return redirect()->back()->with('error', 'Gagal mengupdate data PO Covering.');
+        }
+    }
+
+    public function deleteDetailPoCovering($id_po)
+    {
+        $result = $this->openPoModel->delete($id_po);
+
+        if ($result) {
+            return redirect()->back()->with('success', 'Data PO Covering berhasil dihapus.');
+        } else {
+            return redirect()->back()->with('error', 'Gagal menghapus data PO Covering.');
+        }
+    }
 }

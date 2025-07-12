@@ -2658,7 +2658,7 @@ class ExcelController extends BaseController
         $jenis = $this->request->getGet('jenis');
 
         $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir, $jenis);
-        //BISI HAYANG DIGANTI DEUI JADI KABEH MESIN TAMPIL TAH
+
         $getMesin = $this->mesinCelupModel
             ->orderBy('no_mesin', 'ASC')
             ->findAll();
