@@ -1616,6 +1616,7 @@ class WarehouseController extends BaseController
         $area = $this->request->getGet('Area');
         $KgsPesan = $this->request->getGet('KgsPesan');
         $CnsPesan = $this->request->getGet('CnsPesan');
+        $pinjam = $this->request->getGet('pinjam');
         $data = $this->request->getPost();
         // dd($data);
         // Validasi dasar: pastikan id_pemasukan ada
@@ -1642,73 +1643,109 @@ class WarehouseController extends BaseController
             return redirect()->back();
         }
 
-        // Proses setiap data pemasukan
-        foreach ($pemasukanData as $pemasukan) {
-            // Ambil data tabel out_celup terkait
-            $outCelup = $this->outCelupModel->find($pemasukan['id_out_celup']);
+        // Mulai transaksi
+        $this->db->transStart();
 
-            // Update field out_jalur pada tabel pemasukan
-            $this->pemasukanModel->update($pemasukan['id_pemasukan'], ['out_jalur' => "1"]);
+        try {
+            // Proses setiap data pemasukan
+            foreach ($pemasukanData as $pemasukan) {
+                // Ambil data tabel out_celup terkait
+                $outCelup = $this->outCelupModel->find($pemasukan['id_out_celup']);
 
-            // Siapkan data pengeluaran sesuai masing-masing pemasukan
-            $insertData = [
-                'id_out_celup'       => $pemasukan['id_out_celup'],
-                'area_out'           => $area,
-                'tgl_out'            => date('Y-m-d H:i:s'),
-                'kgs_out'            => $pemasukan['kgs_kirim'],
-                'cns_out'            => $pemasukan['cones_kirim'],
-                'krg_out'            => 1,
-                'nama_cluster'       => $pemasukan['nama_cluster'],
-                'lot_out'            => $outCelup['lot_kirim'], // pastikan field ini ada di data pemasukan
-                'id_total_pemesanan' => $idTtlPemesanan,
-                'status'             => 'Pengeluaran Jalur',
-                'admin'              => $this->username,
-                'created_at'         => date('Y-m-d H:i:s')
-            ];
-            // dd ($insertData);
-            // Insert data pengeluaran
-            $this->pengeluaranModel->insert($insertData);
+                // Update field out_jalur pada tabel pemasukan
+                $this->pemasukanModel->update($pemasukan['id_pemasukan'], ['out_jalur' => "1"]);
 
-            // --- UPDATE TABEL STOCK BERDASARKAN id_stock ---
-            // Ambil data stok berdasarkan id_stock yang terkait
-            $stok = $this->db->table('stock')
-                ->where('id_stock', $pemasukan['id_stock'])
-                ->get()->getResultArray();
+                // Siapkan data pengeluaran sesuai masing-masing pemasukan
+                $insertData = [
+                    'id_out_celup'       => $pemasukan['id_out_celup'],
+                    'area_out'           => $area,
+                    'tgl_out'            => date('Y-m-d H:i:s'),
+                    'kgs_out'            => $pemasukan['kgs_kirim'],
+                    'cns_out'            => $pemasukan['cones_kirim'],
+                    'krg_out'            => 1,
+                    'nama_cluster'       => $pemasukan['nama_cluster'],
+                    'lot_out'            => $outCelup['lot_kirim'], // pastikan field ini ada di data pemasukan
+                    'id_total_pemesanan' => $idTtlPemesanan,
+                    'status'             => 'Pengeluaran Jalur',
+                    'admin'              => $this->username,
+                    'created_at'         => date('Y-m-d H:i:s')
+                ];
+                // dd ($insertData);
+                // Insert data pengeluaran
+                $this->pengeluaranModel->insert($insertData);
 
-            if (!empty($stok)) {
-                // Siapkan field yang akan diproses
-                $fields = ['kgs', 'cns', 'krg'];
-                $newStock = [];
-
-                foreach ($fields as $field) {
-                    // Ambil nilai dari database atau 0 jika kosong, gunakan casting ke float
-                    $inOut = !empty($stok[0][$field . '_in_out']) ? (float)$stok[0][$field . '_in_out'] : 0;
-                    $awal  = !empty($stok[0][$field . '_stock_awal']) ? (float)$stok[0][$field . '_stock_awal'] : 0;
-
-                    // Nilai yang akan dikurangkan berdasarkan nilai output yang diterima
-                    $input = (float)$insertData[$field . '_out'];
-
-                    // Jika field in_out memiliki nilai, update in_out; jika tidak, update stock_awal
-                    if ($inOut > 0) {
-                        $result = $inOut - $input;
-                        $newStock[$field . '_in_out'] = abs($result) < 0.0001 ? 0 : $result;
-                    } else {
-                        $result = $awal - $input;
-                        $newStock[$field . '_stock_awal'] = abs($result) < 0.0001 ? 0 : $result;
-                    }
-                }
-
-                // Update data stock di database berdasarkan id_stock
-                $this->db->table('stock')
+                // --- UPDATE TABEL STOCK BERDASARKAN id_stock ---
+                // Ambil data stok berdasarkan id_stock yang terkait
+                $stok = $this->db->table('stock')
                     ->where('id_stock', $pemasukan['id_stock'])
-                    ->update($newStock);
-            }
-            // --- END UPDATE TABEL STOCK ---
-        }
+                    ->get()->getResultArray();
 
-        // Setelah semua data selesai di proses, set flash alert success
-        session()->setFlashdata('success', 'Data pengeluaran jalur berhasil disimpan.');
-        return redirect()->to('gbn/selectClusterWarehouse/' . $idTtlPemesanan . '?Area=' . $area . '&KgsPesan=' . $KgsPesan . '&CnsPesan=' . $CnsPesan);
+                if (!empty($stok)) {
+                    // Siapkan field yang akan diproses
+                    $fields = ['kgs', 'cns', 'krg'];
+                    $newStock = [];
+
+                    foreach ($fields as $field) {
+                        // Ambil nilai dari database atau 0 jika kosong, gunakan casting ke float
+                        $inOut = !empty($stok[0][$field . '_in_out']) ? (float)$stok[0][$field . '_in_out'] : 0;
+                        $awal  = !empty($stok[0][$field . '_stock_awal']) ? (float)$stok[0][$field . '_stock_awal'] : 0;
+
+                        // Nilai yang akan dikurangkan berdasarkan nilai output yang diterima
+                        $input = (float)$insertData[$field . '_out'];
+
+                        // Jika field in_out memiliki nilai, update in_out; jika tidak, update stock_awal
+                        if ($inOut > 0) {
+                            $result = $inOut - $input;
+                            $newStock[$field . '_in_out'] = abs($result) < 0.0001 ? 0 : $result;
+                        } else {
+                            $result = $awal - $input;
+                            $newStock[$field . '_stock_awal'] = abs($result) < 0.0001 ? 0 : $result;
+                        }
+                    }
+
+                    // Update data stock di database berdasarkan id_stock
+                    $this->db->table('stock')
+                        ->where('id_stock', $pemasukan['id_stock'])
+                        ->update($newStock);
+                }
+                // --- END UPDATE TABEL STOCK ---
+
+                // JIKA PMINJAM ORDER, INSERT HISTORY ATOCK
+                if ($pinjam == 'YA') {
+                    $insertHistory = [
+                        'id_stock_old'   => $pemasukan['id_stock'],
+                        'cluster_old'    => $pemasukan['nama_cluster'],
+                        'cluster_new'    => $pemasukan['nama_cluster'],
+                        'kgs'            => $pemasukan['kgs_kirim'],
+                        'cns'            => $pemasukan['cones_kirim'],
+                        'lot'            => $outCelup['lot_kirim'], // pastikan field ini ada di data pemasukan
+                        'krg'            => 1,
+                        'keterangan'     => 'Pinjam Order',
+                        'admin'          => $this->username,
+                        'created_at'     => date('Y-m-d H:i:s')
+                    ];
+                    // dd ($insertData);
+                    // Insert data pengeluaran
+                    $this->historyStock->insert($insertHistory);
+                }
+            }
+            // Commit jika semua berhasil
+            $this->db->transComplete();
+
+            if ($this->db->transStatus() === FALSE) {
+                throw new \Exception('Transaksi gagal, semua perubahan dibatalkan.');
+            }
+            // Setelah semua data selesai di proses, set flash alert success
+            session()->setFlashdata('success', 'Data pengeluaran jalur berhasil disimpan.');
+            return redirect()->to('gbn/selectClusterWarehouse/' . $idTtlPemesanan . '?Area=' . $area . '&KgsPesan=' . $KgsPesan . '&CnsPesan=' . $CnsPesan);
+        } catch (\Exception $e) {
+            // Rollback jika ada error
+            $this->db->transRollback();
+
+            // Set error message
+            session()->setFlashdata('error', $e->getMessage());
+            return redirect()->back()->withInput();
+        }
     }
 
     public function savePengeluaranJalur()
@@ -2522,6 +2559,49 @@ class WarehouseController extends BaseController
         }
 
         return view($this->role . '/warehouse/history-pindah-order', [
+            'role'    => $this->role,
+            'title'   => 'History Pindah Order',
+            'active'  => $this->active,
+            'history' => $dataPindah,
+        ]);
+    }
+    public function HistoryPinjamOrder()
+    {
+        $noModel   = $this->request->getGet('model')     ?? '';
+        $kodeWarna = $this->request->getGet('kode_warna') ?? '';
+
+        // 1) Ambil data
+        // $dataPindah = $this->historyStock->getHistoryPindahOrder($noModel, $kodeWarna);
+        $dataPindah = $this->historyStock->getHistoryPinjamOrder($noModel, $kodeWarna);
+
+        // // 2) Siapkan HTTP client
+        // $client = \Config\Services::curlrequest([
+        //     'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
+        //     'timeout' => 5
+        // ]);
+
+        // // 3) Loop dan merge API result
+        // foreach ($dataPindah as &$row) {
+        //     try {
+        //         $res = $client->get('getDeliveryAwalAkhir', [
+        //             'query' => ['model' => $row['no_model_new']]
+        //         ]);
+        //         $body = json_decode($res->getBody(), true);
+        //         $row['delivery_awal']  = $body['delivery_awal']  ?? '-';
+        //         $row['delivery_akhir'] = $body['delivery_akhir'] ?? '-';
+        //     } catch (\Exception $e) {
+        //         $row['delivery_awal']  = '-';
+        //         $row['delivery_akhir'] = '-';
+        //     }
+        // }
+        // unset($row);
+
+        // // 4) Response
+        // if ($this->request->isAJAX()) {
+        //     return $this->response->setJSON($dataPindah);
+        // }
+
+        return view($this->role . '/pemesanan/history-pinjam-order', [
             'role'    => $this->role,
             'title'   => 'History Pindah Order',
             'active'  => $this->active,

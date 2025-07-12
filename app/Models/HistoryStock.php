@@ -75,4 +75,5 @@ class HistoryStock extends Model
 
         return $builder->groupBy('history_stock.id_history_pindah')->orderBy('history_stock.created_at')->get()->getResultArray();
     }
+    public function getHistoryPinjamOrder() {}
 }

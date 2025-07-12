@@ -302,7 +302,7 @@
             </div>
 
             <!-- Sub Title -->
-            <h5 class="text-secondary fw-semibold mb-3">📦 Informasi Pemesanan</h5>
+            <h5 class="text-bold fw-semibold mb-3">📦 Informasi Pemesanan</h5>
 
             <!-- Grid Cards -->
             <div class="row g-2">
@@ -321,7 +321,7 @@
                 <div class="col-md-4">
                     <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
                         <h6 class="text-muted mb-1 small">Kg Persiapan</h6>
-                        <h4 class="fw-semibold mb-0"><?= number_format($kgPersiapan, 2) ?> Kg</h4>
+                        <h4 class="fw-semibold mb-0"><?= $kgPersiapan ? number_format($kgPersiapan, 2) : '0' ?> Kg</h4>
                     </div>
                 </div>
             </div>
@@ -367,7 +367,7 @@
             <div class="modal-body">
                 <div class="form-section">
                     <h6 class="form-section-title">Pengeluaran Stock</h6>
-                    <form id="pengeluaran" method="post" action="<?= base_url('gbn/simpanPengeluaranJalur/' . $id . '?Area=' . $area . '&KgsPesan=' . $KgsPesan . '&CnsPesan=' . $CnsPesan); ?>">
+                    <form id="pengeluaran" method="post" action="<?= base_url('gbn/simpanPengeluaranJalur/' . $id . '?Area=' . $area . '&KgsPesan=' . $KgsPesan . '&CnsPesan=' . $CnsPesan . '&pinjam='); ?>">
                         <div class="row" id="formPengeluaran">
                             <!-- Form input pengeluaran stock will be loaded here -->
                         </div>
@@ -431,7 +431,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="pinjamOrder" method="post" action="<?= base_url('gbn/simpanPengeluaranJalur/' . $id . '?Area=' . $area . '&KgsPesan=' . $KgsPesan . '&CnsPesan=' . $CnsPesan); ?>">
+                <form id="pinjamOrder" method="post" action="<?= base_url('gbn/simpanPengeluaranJalur/' . $id . '?Area=' . $area . '&KgsPesan=' . $KgsPesan . '&CnsPesan=' . $CnsPesan . '&pinjam=YA'); ?>">
                     <div id="formPinjamOrder">
                         <!-- Form input pengeluaran stock will be loaded here -->
                     </div>
