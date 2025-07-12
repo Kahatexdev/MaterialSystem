@@ -479,11 +479,58 @@ class CoveringController extends BaseController
                     'penerima'        => 'Retno',
                     'penanggung_jawab' => 'Paryanti',
                     'admin'           => $this->role,
-                    'created_at'      => date('Y-m-d H:i:s')
+                    'created_at'      => $data['tgl_po_covering'] ?? null
                 ]);
             }
         }
 
         return redirect()->to(base_url($this->role . '/po'))->with('success', 'Data Open PO Celup berhasil disimpan.');
+    }
+
+    public function detailPoCovering($tgl_po)
+    {
+        $getData = $this->openPoModel->getDetailPoCovering($tgl_po);
+        // dd($getData);
+        $data = [
+            'active' => $this->active,
+            'title' => 'Detail PO Covering',
+            'role' => $this->role,
+            'getData' => $getData,
+        ];
+
+        return view($this->role . '/po/detail-po-covering', $data);
+    }
+
+    public function updateDetailPoCovering($id_po)
+    {
+        $post = $this->request->getPost();
+
+        $updateData = [
+            'item_type'       => $post['item_type'] ?? null,
+            'kode_warna'      => $post['kode_warna'] ?? null,
+            'color'           => $post['color'] ?? null,
+            'kg_po'           => $post['kg_po'] ?? null,
+            'keterangan'      => $post['keterangan'] ?? null,
+            'updated_at'      => date('Y-m-d H:i:s'),
+        ];
+
+        $result = $this->openPoModel->update($id_po, $updateData);
+
+        if ($result) {
+            return redirect()->back()->with('success', 'Data PO Covering berhasil diupdate.');
+        } else {
+            return redirect()->back()->with('error', 'Gagal mengupdate data PO Covering.');
+        }
+    }
+
+    public function deleteDetailPoCovering($id_po)
+    {
+        $result = $this->openPoModel->delete($id_po);
+
+        if ($result) {
+            return redirect()->back()->with('success', 'Data PO Covering berhasil dihapus.');
+        } else {
+            return redirect()->back()->with('error', 'Gagal menghapus data PO Covering.');
+        }
     }
 }

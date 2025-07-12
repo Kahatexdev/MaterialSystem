@@ -309,6 +309,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pemesanan/getFilterPemesananSpandex', 'PemesananController::getFilterPemesananSpandex');
     $routes->get('pemesanan/exportPermintaanKaret', 'ExcelController::exportPermintaanKaret');
     $routes->get('pemesanan/exportPermintaanSpandex', 'ExcelController::exportPermintaanSpandex');
+
+    $routes->get('statusBahanBaku', 'ScheduleController::statusBahanBaku');
+    $routes->get('filterstatusbahanbaku/(:any)', 'ScheduleController::filterstatusbahanbaku/$1');
 });
 
 // celup routes
@@ -405,11 +408,14 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('po/simpanKeSession', 'CoveringController::simpanKeSession');
     $routes->post('po/savePOCovering', 'CoveringController::savePOCovering');
     $routes->get('po/deletePOCovering/(:any)', 'CoveringController::unsetSession/$1');
-    $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
+    // $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
+    $routes->get('po/exportPO/(:any)', 'ExcelController::generateOpenPOCoveringExcel/$1');
     $routes->get('po/listTrackingPo', 'TrackingPoCoveringController::listTrackingPo');
     $routes->get('po/listTrackingPo/(:any)', 'TrackingPoCoveringController::TrackingPo/$1');
     $routes->post('po/updateListTrackingPo/(:any)', 'TrackingPoCoveringController::updateListTrackingPo/$1');
-
+    $routes->get('po/detailPoCovering/(:any)', 'CoveringController::detailPoCovering/$1');
+    $routes->post('po/updateDetailPoCovering/(:any)', 'CoveringController::updateDetailPoCovering/$1');
+    $routes->get('po/deleteDetailPoCovering/(:num)', 'CoveringController::deleteDetailPoCovering/$1');
 
     // warehouse barang jadi
     $routes->get('warehouse', 'CoveringWarehouseController::index');

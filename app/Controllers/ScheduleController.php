@@ -1246,8 +1246,8 @@ class ScheduleController extends BaseController
     {
         $tglAwal = $this->request->getGet('tanggal_awal');
         $tglAkhir = $this->request->getGet('tanggal_akhir');
-
-        $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir);
+        $jenis = $this->request->getGet('jenis');
+        $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir, $jenis);
         // dd($data);
 
         return $this->response->setJSON($data);
@@ -1420,5 +1420,60 @@ class ScheduleController extends BaseController
         } else {
             return redirect()->back()->with('error', 'Gagal menyimpan jadwal!');
         }
+    }
+
+    public function statusBahanBaku()
+    {
+        return view($this->role . '/statusbahanbaku/index', [
+            'active' => $this->active,
+            'title' => 'Status Bahan Baku',
+            'role' => $this->role,
+        ]);
+    }
+
+    public function filterstatusbahanbaku($model)
+    {
+        // Mengambil data master
+        $masterApi = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . $model;
+        $masterResponse = file_get_contents($masterApi);
+        $master = json_decode($masterResponse, true);
+        
+
+        // Mengambil nilai 'search' yang dikirim oleh frontend
+        $search = $this->request->getGet('search');
+        // Jika search ada, panggil API eksternal dengan query parameter 'search'
+        $apiUrl = 'http://172.23.44.14/MaterialSystem/public/api/statusbahanbaku/' . $model . '?search=' . urlencode($search);
+
+        // Mengambil data dari API eksternal
+        $response = file_get_contents($apiUrl);
+        $status = json_decode($response, true);
+        // Filter data berdasarkan 'no_model' jika ada keyword 'search'
+        if ($search) {
+            $status = array_filter($status, function ($item) use ($search) {
+                // Cek apakah pencarian ada di no_model terlebih dahulu
+                if (isset($item['no_model']) && strpos(strtolower($item['no_model']), strtolower($search)) !== false) {
+                    return true;
+                }
+                // Lanjutkan pencarian ke kode_warna, lot_celup, dan tanggal_schedule jika no_model tidak cocok
+                if (isset($item['kode_warna']) && strpos(strtolower($item['kode_warna']), strtolower($search)) !== false) {
+                    return true;
+                }
+                if (isset($item['lot_celup']) && strpos(strtolower($item['lot_celup']), strtolower($search)) !== false) {
+                    return true;
+                }
+                if (isset($item['tanggal_schedule']) && strpos(strtolower($item['tanggal_schedule']), strtolower($search)) !== false) {
+                    return true;
+                }
+                return false;
+            });
+        }
+        // Gabungkan data master dan status dalam satu array
+        $responseData = [
+            'master' => $master, // Data master dari getStartMc
+            'status' => $status // Data status yang sudah difilter (gunakan array_values untuk mereset indeks array)
+        ];
+
+        // Kembalikan data yang sudah difilter ke frontend
+        return $this->response->setJSON($responseData);
     }
 }

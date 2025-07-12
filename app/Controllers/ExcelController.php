@@ -2655,12 +2655,21 @@ class ExcelController extends BaseController
     {
         $tglAwal = $this->request->getGet('tanggal_awal');
         $tglAkhir = $this->request->getGet('tanggal_akhir');
+        $jenis = $this->request->getGet('jenis');
 
-        $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir);
+        $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir, $jenis);
+
         $getMesin = $this->mesinCelupModel
             ->orderBy('no_mesin', 'ASC')
             ->findAll();
-
+        $getMesin = array_values(array_filter($getMesin, function ($m) use ($jenis) {
+            if ($jenis === 'BENANG') {
+                return $m['no_mesin'] >= 1 && $m['no_mesin'] <= 38;
+            } else { // ACRYLIC
+                return $m['no_mesin'] >= 39 && $m['no_mesin'] <= 43;
+            }
+        }));
+        // dd($getMesin);
         // setelah $tglAwal, $tglAkhir ter-set
         $period = new \DatePeriod(
             new \DateTime($tglAwal),
@@ -6385,62 +6394,402 @@ class ExcelController extends BaseController
             $poCovering[$i]->induk_no_model = preg_replace('/POCOVERING\s*/i', '', $row->induk_no_model);
         }
 
-        // Inisialisasi Spreadsheet
+        $noModel = $poCovering[0]->no_model;
+
+        // Buat Excel
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('PO Gabungan');
+        $spreadsheet->getDefaultStyle()->getFont()->setName('Arial');
+        $spreadsheet->getDefaultStyle()->getFont()->setSize(16);
 
-        // Atur judul dan header
-        $sheet->mergeCells('A1:D1');
-        $sheet->setCellValue('A1', 'FORMULIR PO COVERING');
-        $sheet->getStyle('A1')->getFont()->setBold(true);
+        //Outline Border
+        // 1. Top double border dari A1 ke Q1
+        $sheet->getStyle('A1:Q1')->applyFromArray([
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
 
-        $sheet->setCellValue('A3', 'No. Dokumen');
-        $sheet->setCellValue('B3', 'FOR-CC-087/REV_01/HAL_1/1');
-        $sheet->setCellValue('E3', 'Tanggal Revisi');
-        $sheet->setCellValue('F3', '04 Desember 2019');
+        // 2. Right double border dari Q1 ke Q50
+        $sheet->getStyle('Q1:Q50')->applyFromArray([
+            'borders' => [
+                'right' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
 
-        $sheet->setCellValue('A5', 'PO');
-        $sheet->setCellValue('B5', $poCovering[0]->anak_no_model);
-        $sheet->setCellValue('A6', 'Pemesanan');
-        $sheet->setCellValue('B6', 'COVERING');
-        $sheet->setCellValue('A7', 'Tgl');
-        $sheet->setCellValue('B7', date('Y-m-d', strtotime($poCovering[0]->created_at)));
+        // 3. Bottom double border dari A50 ke Q50
+        $sheet->getStyle('A50:Q50')->applyFromArray([
+            'borders' => [
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
 
-        // Header kolom data mulai row 9
-        $headers = [
-            'A' => 'No',
-            'B' => 'Jenis Benang',
-            'C' => 'Kode Benang',
-            'D' => 'Bentuk Celup',
-            'E' => 'Warna',
-            'F' => 'Kode Warna',
-            'G' => 'Buyer',
-            'H' => 'Nomor Order',
-            'I' => 'Delivery',
-            'J' => 'Kg Pesanan',
-            'K' => 'Kg Permintaan Cones',
-            'L' => 'Yard',
-            'M' => 'Cones Total',
-            'N' => 'Jenis Produksi',
-            'O' => 'Contoh Warna',
-            'P' => 'Keterangan'
+        // 4. Left double border dari A1 ke A50
+        $sheet->getStyle('A1:A50')->applyFromArray([
+            'borders' => [
+                'left' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        //Border Thin
+        $sheet->getStyle('C1:C3')->applyFromArray([
+            'borders' => [
+                'right' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+        $sheet->getStyle('C4')->applyFromArray([
+            'borders' => [
+                'right' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+        $sheet->getStyle('N4:O4')->applyFromArray([
+            'borders' => [
+                'left' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'right' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+        $sheet->getStyle('N5:O5')->applyFromArray([
+            'borders' => [
+                'left' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'right' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        // Double border baris 4 dan 5
+        $sheet->getStyle('A4:Q4')->applyFromArray([
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+        $sheet->getStyle('A5:Q5')->applyFromArray([
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        $thinInside = [
+            'borders' => [
+                // border antar kolom (vertical lines) di dalam range
+                'vertical' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                // border antar baris (horizontal lines) di dalam range
+                'horizontal' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
         ];
 
-        $rowNum = 9;
-        foreach ($headers as $col => $text) {
-            $sheet->setCellValue("{$col}{$rowNum}", $text);
-            $sheet->getStyle("{$col}{$rowNum}")
-                ->getFont()->setBold(true);
-            $sheet->getStyle("{$col}{$rowNum}")
-                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle("{$col}{$rowNum}")
-                ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-            // Lebar kolom
-            $sheet->getColumnDimension($col)->setAutoSize(true);
+        $thinInside = [
+            'borders' => [
+                'vertical' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'horizontal' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle('A11:Q37')->applyFromArray($thinInside);
+
+        // 2) Border tipis atas untuk baris header tabel (A11:Q11)
+        $sheet->getStyle('A11:Q11')->applyFromArray([
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        // 3) Border tipis bawah untuk baris total (A28:Q28)
+        $sheet->getStyle('A28:Q28')->applyFromArray([
+            'borders' => [
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        // Aktifkan wrap text di A11:Q28
+        $sheet->getStyle('A11:Q28')->getAlignment()->setWrapText(true);
+
+        // Atur lebar kolom dalam satuan pt
+        $columnWidths = [
+            'A' => 20,
+            'B' => 120,
+            'C' => 40,
+            'D' => 50,
+            'E' => 100,
+            'F' => 100,
+            'G' => 100,
+            'H' => 100,
+            'I' => 100,
+            'J' => 50,
+            'K' => 25,
+            'L' => 25,
+            'M' => 40,
+            'N' => 40,
+            'O' => 100,
+            'P' => 100,
+            'Q' => 100,
+        ];
+
+        $rowHeightsPt = [
+            11 => 50, // misal 25 pt untuk header tabel
+            12 => 50, // misal 20 pt untuk baris pertama data
+        ];
+
+        //Atur Tinggi Baris dan Lebar Kolom
+        foreach ($rowHeightsPt as $row => $heightPt) {
+            $sheet->getRowDimension($row)
+                ->setRowHeight($heightPt);
         }
 
-        // Isi data
-        $rowNum++;
+        foreach ($columnWidths as $col => $widthPt) {
+            $charWidth = round($widthPt / 5.25, 2);
+            $sheet->getColumnDimension($col)
+                ->setWidth($charWidth)
+                ->setAutoSize(false);
+        }
+
+        // Header Form
+        // Logo dan judul perusahaan di bawah logo
+        $sheet->mergeCells('A1:C3');
+        $sheet->setCellValue('A1', 'PT. KAHATEX');
+        $sheet->getStyle('A1')->getFont()->setSize(11);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $drawing = new Drawing();
+        $drawing->setName('Logo')
+            ->setDescription('PT. KAHATEX Logo')
+            ->setPath(FCPATH . 'assets/img/logo-kahatex.png')
+            ->setWorksheet($sheet)
+            ->setCoordinates('B1')
+            ->setOffsetX(150)
+            ->setOffsetY(7)
+            ->setHeight(40)
+            ->setWidth(40);
+
+        $sheet->setCellValue('D1', 'FORMULIR');
+        $sheet->getStyle('D1')->getFont()->setBold(true)->setSize(16);
+        $sheet->getStyle('D1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+        $sheet->getStyle('D1')->getFill()->getStartColor()->setRGB('99FFFF');
+        $sheet->mergeCells('D1:Q1');
+        $sheet->getStyle('D1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->mergeCells('D2:Q2');
+        $sheet->setCellValue('D2', 'DEPARTEMEN CELUP CONES');
+        $sheet->getStyle('D2')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('D2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->mergeCells('D3:Q3');
+        $sheet->setCellValue('D3', 'FORMULIR PO');
+        $sheet->getStyle('D3')->getFont()->setBold(true)->setSize(11);
+        $sheet->getStyle('D3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->mergeCells('A4:C4');
+        $sheet->setCellValue('A4', 'No. Dokumen');
+        $sheet->setCellValue('D4', 'FOR-CC-087/REV_02/HAL_1/1');
+
+        $sheet->mergeCells('N4:O4');
+        $sheet->setCellValue('N4', 'Tanggal Revisi');
+        $sheet->mergeCells('P4:Q4');
+        $sheet->setCellValue('P4', '17 Maret 2025');
+        $sheet->getStyle('P4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->mergeCells('N5:O5');
+        $sheet->setCellValue('N5', 'Klasifikasi');
+        $sheet->mergeCells('P5:Q5');
+        $sheet->setCellValue('P5', 'Internal');
+        $sheet->getStyle('P5')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->mergeCells('A5:M5');
+        $sheet->getStyle('A4:Q5')->getFont()->setBold(true)->setSize(11);
+
+        $sheet->mergeCells('A6:A7');
+        $sheet->setCellValue('A6', 'PO');
+        $sheet->getStyle('D1')->getFont()->setSize(18);
+
+        $sheet->getStyle('A6')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->setCellValue('D6', ': ' . $noModel ?? '-');
+        $sheet->mergeCells('D6:F7');
+        $sheet->getStyle('D6')->getFont()->setSize(24);
+        $sheet->getStyle('D6')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $sheet->setCellValue('A8', 'Pemesan');
+        $sheet->setCellValue('D8', ': COVERING');
+
+        $createdAt = $openPoGabung[0]['created_at'] ?? null;
+        $sheet->setCellValue('A9', 'Tgl');
+        $sheet->setCellValue('D9', ': ' . ($createdAt ? date('d/m/Y', strtotime($createdAt)) : '-'));
+
+        $sheet->setCellValue('G7', '');
+        $sheet->mergeCells('G7:G9');
+        $sheet->getStyle('G7')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER)
+            ->setWrapText(true);
+
+        $sheet->setCellValue('H7', '');
+        $sheet->mergeCells('H7:H9');
+        $sheet->getStyle('H7')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER)
+            ->setWrapText(true);
+        $sheet->getStyle('H7')->getFont()->setUnderline(true);
+        $sheet->getStyle('A6:H9')->getFont()->setBold(true);
+
+        // Header utama dan sub-header
+        $sheet->setCellValue('A11', 'No');
+        $sheet->mergeCells('A11:A12');
+        $sheet->getStyle('A11:A12')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $sheet->setCellValue('B11', 'Benang');
+        $sheet->mergeCells('B11:C11');
+        $sheet->getStyle('B11:C11')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->setCellValue('B12', 'Jenis');
+        $sheet->getStyle('B12')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->setCellValue('C12', 'Kode');
+        $sheet->getStyle('C12')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $sheet->setCellValue('D11', 'Bentuk Celup');
+        $sheet->mergeCells('D11:D12');
+        $sheet->getStyle('D11:D12')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER)
+            ->setWrapText(true);
+
+        $sheet->setCellValue('E11', 'Warna');
+        $sheet->mergeCells('E11:E12');
+        $sheet->getStyle('E11:E12')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $sheet->setCellValue('F11', 'Kode Warna');
+        $sheet->mergeCells('F11:F12');
+        $sheet->getStyle('F11:F12')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $sheet->setCellValue('G11', 'Buyer');
+        $sheet->mergeCells('G11:G12');
+        $sheet->getStyle('G11:G12')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $sheet->setCellValue('H11', 'Nomor Order');
+        $sheet->mergeCells('H11:H12');
+        $sheet->getStyle('H11:H12')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $sheet->setCellValue('I11', 'Delivery');
+        $sheet->mergeCells('I11:I12');
+        $sheet->getStyle('I11:I12')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $sheet->setCellValue('J11', 'Qty Pesanan');
+        $sheet->mergeCells('J11:J11');
+        $sheet->getStyle('J11')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER)
+            ->setWrapText(true);
+        $sheet->setCellValue('J12', 'Kg');
+        $sheet->getStyle('J12')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->setCellValue('K11', 'Permintaan Cones');
+        $sheet->mergeCells('K11:N11');
+        $sheet->getStyle('K11:N11')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->setCellValue('K12', 'Kg');
+        $sheet->getStyle('K12')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('L12', 'Yard');
+        $sheet->getStyle('L12')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('M12', 'Total Cones');
+        $sheet->getStyle('M12')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setWrapText(true);
+        $sheet->setCellValue('N12', 'Jenis Cones');
+        $sheet->getStyle('N12')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setWrapText(true);
+
+        $sheet->setCellValue('O11', 'Untuk Produksi');
+        $sheet->mergeCells('O11:O12');
+        $sheet->getStyle('O11:O12')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $sheet->setCellValue('P11', 'Contoh Warna');
+        $sheet->mergeCells('P11:P12');
+        $sheet->getStyle('P11:P12')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $sheet->setCellValue('Q11', 'Keterangan Celup');
+        $sheet->mergeCells('Q11:Q12');
+        $sheet->getStyle('Q11:Q12')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A11:Q12')->getFont()->setBold(true);
+
+        // Mulai menulis data dari baris 13
+        $rowNum = 13;
         $no = 1;
         $totalKg = 0;
         $totalPermCones = 0;
@@ -6450,12 +6799,12 @@ class ExcelController extends BaseController
         foreach ($poCovering as $row) {
             $sheet->setCellValue("A{$rowNum}", $no++);
             $sheet->setCellValue("B{$rowNum}", $row->jenis);
-            $sheet->setCellValue("C{$rowNum}", $row->item_type);
+            $sheet->setCellValue("C{$rowNum}", $row->ukuran);
             $sheet->setCellValue("D{$rowNum}", $row->bentuk_celup);
             $sheet->setCellValue("E{$rowNum}", $row->color);
             $sheet->setCellValue("F{$rowNum}", $row->kode_warna);
             $sheet->setCellValue("G{$rowNum}", $row->buyer);
-            $sheet->setCellValue("H{$rowNum}", $row->no_order);
+            $sheet->setCellValue("H{$rowNum}", $row->no_model);
             $sheet->setCellValue("I{$rowNum}", $row->delivery_awal);
             $sheet->setCellValue("J{$rowNum}", $row->kg_po);
             $sheet->setCellValue("K{$rowNum}", $row->kg_percones);
@@ -6465,11 +6814,17 @@ class ExcelController extends BaseController
             $sheet->setCellValue("O{$rowNum}", $row->contoh_warna);
             $sheet->setCellValue("P{$rowNum}", $row->ket_celup);
 
-            // Borders
-            foreach (array_keys($headers) as $col) {
+            // Borders untuk kolom A–P
+            foreach (range('A', 'P') as $col) {
                 $sheet->getStyle("{$col}{$rowNum}")
-                    ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                    ->getBorders()->getAllBorders()
+                    ->setBorderStyle(Border::BORDER_THIN);
             }
+
+            // Border kiri kolom A = double
+            $sheet->getStyle("A{$rowNum}")
+                ->getBorders()->getLeft()
+                ->setBorderStyle(Border::BORDER_DOUBLE);
 
             $totalKg += $row->kg_po;
             $totalPermCones += $row->kg_percones;
@@ -6478,22 +6833,83 @@ class ExcelController extends BaseController
             $rowNum++;
         }
 
-        // Baris total
-        $sheet->setCellValue("I{$rowNum}", 'TOTAL');
-        $sheet->mergeCells("I{$rowNum}:J{$rowNum}");
-        $sheet->setCellValue("J{$rowNum}", number_format($totalKg, 2));
-        $sheet->setCellValue("K{$rowNum}", number_format($totalPermCones, 2));
-        $sheet->setCellValue("L{$rowNum}", number_format($totalYard, 2));
-        $sheet->setCellValue("M{$rowNum}", $totalCones);
+        // Baris Total (sama layout seperti PDF)
+        // Gabungkan A–I untuk label "Total"
+        $sheet->setCellValue("A38", 'Total');
+        $sheet->mergeCells("A38:I38");
+        $sheet->getStyle("A38")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
 
-        foreach (['I', 'J', 'K', 'L', 'M'] as $col) {
-            $sheet->getStyle("{$col}{$rowNum}")
-                ->getFont()->setBold(true);
-            $sheet->getStyle("{$col}{$rowNum}")
-                ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-            $sheet->getStyle("{$col}{$rowNum}")
-                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // J: Total Kg PO
+        $sheet->setCellValue("J38", number_format($totalKg, 2));
+        // K–L kosong
+        $sheet->setCellValue("K38", '');
+        $sheet->setCellValue("L38", '');
+        // M: Total Cones
+        $sheet->setCellValue("M38", $totalCones ?: '');
+        // N–Q kosong
+        foreach (range('N', 'Q') as $col) {
+            $sheet->setCellValue("{$col}38", '');
         }
+        // Tambahkan border untuk seluruh baris total A38:Q38
+        $sheet->getStyle('A38:Q38')->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => 'FF000000'],
+                ],
+            ],
+            'font' => [
+                'bold' => true,
+            ],
+        ]);
+        // Kolom A (border kiri double)
+        $sheet->getStyle('A38')->getBorders()->getLeft()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_DOUBLE);
+
+        // Kolom Q (border kanan double)
+        $sheet->getStyle('Q38')->getBorders()->getRight()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_DOUBLE);
+
+        //Keterangan
+        $sheet->setCellValue('F39', $openPoGabung[0]['keterangan'] ?? '');
+        $sheet->mergeCells('F39:J39');
+        $sheet->getStyle('F39:J39')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('F39:J39')->getFont()->setBold(true);
+
+        //Tanda Tangan
+        $sheet->setCellValue('E43', 'Pemesan');
+        $sheet->getStyle('E43')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('H43', 'Mengetahui');
+        $sheet->mergeCells('H43:I43');
+        $sheet->getStyle('H43:I43')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('N43', 'Tanda terima');
+        $sheet->mergeCells('N43:P43');
+        $sheet->getStyle('N43:P43')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('N44', 'Celup Cones');
+        $sheet->mergeCells('N44:P44');
+        $sheet->getStyle('N44:P44')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->setCellValue('E49', '(   ' . $poCovering[0]->admin . '   )');
+        $sheet->getStyle('E49')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('H49', '(   ' . $poCovering[0]->penanggung_jawab . '   )');
+        $sheet->mergeCells('H49:I49');
+        $sheet->getStyle('H49:I49')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('N49', '(   ' . $poCovering[0]->penerima . '   )');
+        $sheet->mergeCells('N49:P49');
+        $sheet->getStyle('N49:P49')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('K49')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->getStyle("A11:Q38")->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         // Header respons
         $filename = 'OpenPOCovering_' . $tgl_po . '.xlsx';
