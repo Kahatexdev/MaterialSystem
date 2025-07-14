@@ -69,13 +69,8 @@ class PoBookingController extends BaseController
 
     public function getItemType()
     {
-        // if ($buyer === null) {
-        //     return $this->response->setStatusCode(400)
-        //         ->setJSON(['error' => 'buyerId missing']);
-        // }
-        // $itemType = $this->materialModel->getItemTypeByBuyer($buyer);
-
-        $itemType = $this->masterMaterialModel->getItemtype();
+        $q       = $this->request->getGet('q');
+        $itemType = $this->masterMaterialModel->getItemTypeList($q);
         // dd($itemType);
         $result = array_map(fn($r) => [
             'id'   => $r['item_type'],
