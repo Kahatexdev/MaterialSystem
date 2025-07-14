@@ -548,7 +548,7 @@ class PemesananController extends BaseController
                 'id_pemasukan' => $dt['id_pemasukan'],
                 'no_karung' => $dt['no_karung'],
                 'tgl_masuk' => $dt['tgl_masuk'],
-                'nama_cluster' => $dt['nama_cluster'],
+                'nama_cluster' => $dt['cluster_real'],
                 'no_model' => $dt['no_model'],
                 'item_type' => $dt['item_type'],
                 'kode_warna' => $dt['kode_warna'],

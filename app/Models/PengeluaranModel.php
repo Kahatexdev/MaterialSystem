@@ -15,6 +15,7 @@ class PengeluaranModel extends Model
     protected $allowedFields    = [
         'id_pengeluaran',
         'id_out_celup',
+        'id_stock',
         'area_out',
         'tgl_out',
         'kgs_out',

@@ -254,7 +254,8 @@ class PemasukanModel extends Model
                 COALESCE(schedule_celup.kode_warna, retur.kode_warna) AS kode_warna,
                 COALESCE(schedule_celup.warna, retur.warna) AS warna,
                 pemasukan.*,
-                out_celup.no_karung, out_celup.lot_kirim, out_celup.kgs_kirim, out_celup.cones_kirim
+                out_celup.no_karung, out_celup.lot_kirim, out_celup.kgs_kirim, out_celup.cones_kirim,
+                stock.nama_cluster AS cluster_real
             ')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
             ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
