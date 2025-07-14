@@ -8064,6 +8064,10 @@ class ExcelController extends BaseController
             $penerima = 'Paryanti';
         }
 
+        if (strlen($noModel) > 16) {
+            $noModel = substr($noModel, 0, 16);
+        }
+
         // $noModel =  $result[0]['no_model'] ?? '';
 
         // Ambil buyer dari API
@@ -9139,7 +9143,6 @@ class ExcelController extends BaseController
             $sheet->getStyle('J46:L46')->getAlignment()
                 ->setHorizontal(Alignment::HORIZONTAL_CENTER);
         }
-
 
         $sheet->setCellValue('E49', '(   ' . $result[0]['admin'] . '   )');
         $sheet->getStyle('E49')->getAlignment()

@@ -98,4 +98,16 @@ class MasterMaterialModel extends Model
         $uniqueArea = array_column($query, 'jenis');
         return $uniqueArea;
     }
+
+    public function getItemTypeList($key = null)
+    {
+        $builder = $this->table('nama_table');
+        $builder->select('item_type');
+
+        if (!empty($key)) {
+            $builder->like('item_type', $key);
+        }
+
+        return $builder->get()->getResultArray();
+    }
 }

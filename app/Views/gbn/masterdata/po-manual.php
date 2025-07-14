@@ -42,23 +42,23 @@
                 <table class="table" id="table-po" style="width:100%">
                     <thead>
                         <tr>
-                            <th>No</th>
-                            <th>Tanggal Po</th>
+                            <th class="text-center">No</th>
+                            <th class="text-center">Tanggal Po</th>
                             <th>No Model</th>
                             <th>Keterangan</th>
-                            <th>Penerima</th>
-                            <th>Aksi</th>
+                            <th class="text-center">Penerima</th>
+                            <th class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php $no = 1 ?>
                         <?php foreach ($poManual as $data) : ?>
                             <tr>
-                                <td><?= $no++ ?></td>
-                                <td><?= date('Y-m-d', strtotime($data['created_at'])) ?></td>
+                                <td class="text-center"><?= $no++ ?></td>
+                                <td class="text-center"><?= date('Y-m-d', strtotime($data['created_at'])) ?></td>
                                 <td><?= $data['no_model'] ?></td>
                                 <td><?= $data['keterangan'] ?></td>
-                                <td><?= $data['penerima'] ?></td>
+                                <td class="text-center"><?= $data['penerima'] ?></td>
                                 <td>
                                     <!-- <a
                                         href="<?= base_url("$role/masterdata/poManual/exportPoManual?no_model=" . rawurlencode($data['no_model'])) ?>"
