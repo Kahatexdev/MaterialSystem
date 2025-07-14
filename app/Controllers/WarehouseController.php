@@ -1114,6 +1114,7 @@ class WarehouseController extends BaseController
                     'id_retur'    => $idRetur['id_retur'] ?? null,
                     'id_bon'      => $data['id_bon']   ?? null,
                     'id_celup'    => $data['id_celup'] ?? null,
+                    'no_model'    => $noModel,
                     'no_karung'   => $data['no_karung'],
                     'kgs_kirim'   => $data['kgs_kirim'],
                     'cones_kirim' => $data['cones_kirim'],
@@ -1637,6 +1638,7 @@ class WarehouseController extends BaseController
 
         // Ambil data pemasukan untuk semua id yang dipilih
         $pemasukanData = $this->outCelupModel->findOutCelup($idPemasukanArray);
+        // dd($pemasukanData);
 
         if (!$pemasukanData) {
             session()->setFlashdata('error', 'Data pemasukan tidak ditemukan.');
@@ -1658,6 +1660,7 @@ class WarehouseController extends BaseController
                 // Siapkan data pengeluaran sesuai masing-masing pemasukan
                 $insertData = [
                     'id_out_celup'       => $pemasukan['id_out_celup'],
+                    'id_stock'           => $pemasukan['id_stock'],
                     'area_out'           => $area,
                     'tgl_out'            => date('Y-m-d H:i:s'),
                     'kgs_out'            => $pemasukan['kgs_kirim'],
@@ -1710,7 +1713,7 @@ class WarehouseController extends BaseController
                 }
                 // --- END UPDATE TABEL STOCK ---
 
-                // JIKA PMINJAM ORDER, INSERT HISTORY ATOCK
+                // JIKA PMINJAM ORDER, INSERT HISTORY STOCK
                 if ($pinjam == 'YA') {
                     $insertHistory = [
                         'id_stock_old'   => $pemasukan['id_stock'],
@@ -1910,7 +1913,6 @@ class WarehouseController extends BaseController
                 $this->stockModel->update($cekStockBaru['id_stock'], $updateDataIn);
 
                 $newStockId = $cekStockBaru['id_stock'];
-                $cluster_old = $cekStockBaru['id_stock'];
                 // Update id_stock di tabel pemasukan berdasarkan id_out_celup
                 $updatePemasukan = [
                     'id_stock' => $cekStockBaru['id_stock'],
@@ -1962,6 +1964,7 @@ class WarehouseController extends BaseController
                         // Update id_stock di tabel pemasukan berdasarkan id_out_celup
                         $updatePemasukan = [
                             'id_stock' => $newStockId,
+                            'nama_cluster' => $cluster,
                         ];
 
                         $updateIdStock = $this->pemasukanModel
