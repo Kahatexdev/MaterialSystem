@@ -53,26 +53,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php
-                        $no = 1;
-                        foreach ($history as $data) {
-                        ?>
-                            <tr>
-                                <td><?= $no++ ?></td>
-                                <td><?= $data['no_model_old'] ?></td>
-                                <td><?= $data['delivery_awal'] ?? '-' ?></td>
-                                <td><?= $data['delivery_akhir'] ?? '-' ?></td>
-                                <td><?= $data['item_type'] ?></td>
-                                <td><?= $data['kode_warna'] ?></td>
-                                <td><?= $data['warna'] ?></td>
-                                <td><?= $data['kgs'] ?></td>
-                                <td><?= $data['cns'] ?></td>
-                                <td><?= $data['lot'] ?></td>
-                                <td><?= $data['cluster_old'] ?></td>
-                                <td><?= $data['created_at'] ?> <?php $data['keterangan'] ?> ke <?php $data['no_model_new'] ?> kode <?php $data['kode_warna'] ?></td>
-                            </tr>
-                        <?php
-                        } ?>
+                        <!--  -->
                     </tbody>
                 </table>
             </div>

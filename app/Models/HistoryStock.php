@@ -75,5 +75,37 @@ class HistoryStock extends Model
 
         return $builder->groupBy('history_stock.id_history_pindah')->orderBy('history_stock.created_at')->get()->getResultArray();
     }
-    public function getHistoryPinjamOrder() {}
+    public function getHistoryPinjamOrder($no_model, $kode_warna)
+    {
+        $builder = $this->select('
+            stock.no_model AS no_model_dipinjam,
+            stock.item_type AS item_type,
+            stock.kode_warna AS kode_warna,
+            stock.warna AS warna,
+            history_stock.cluster_old,
+            history_stock.kgs,
+            history_stock.cns,
+            history_stock.lot,
+            history_stock.keterangan,
+            history_stock.admin,
+            history_stock.created_at,
+            master_order.no_model AS no_model_meminjam
+        ')
+            ->join('pengeluaran', 'pengeluaran.id_stock = history_stock.id_stock_old', 'left')
+            ->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
+            ->join('pemesanan', 'pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('history_stock.id_stock_new', null);
+
+        if (!empty($no_model)) {
+            $builder->where('stock.no_model', $no_model);
+        }
+
+        if (!empty($kode_warna)) {
+            $builder->where('stock.kode_warna', $kode_warna);
+        }
+
+        return $builder->findAll();
+    }
 }
