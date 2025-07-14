@@ -261,7 +261,7 @@
                 width: '100%',
                 placeholder: 'Pilih Item Type',
                 allowClear: true,
-                minimumInputLength: 1,
+                minimumInputLength: 0,
                 ajax: {
                     url: `<?= base_url() ?>/gbn/masterdata/poBooking/getItemType`,
                     dataType: 'json',

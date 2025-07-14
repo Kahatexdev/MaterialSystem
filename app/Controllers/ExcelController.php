@@ -9144,7 +9144,6 @@ class ExcelController extends BaseController
                 ->setHorizontal(Alignment::HORIZONTAL_CENTER);
         }
 
-
         $sheet->setCellValue('E49', '(   ' . $result[0]['admin'] . '   )');
         $sheet->getStyle('E49')->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);

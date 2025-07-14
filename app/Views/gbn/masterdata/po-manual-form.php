@@ -43,7 +43,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label>No Model</label>
-                            <select name="no_model" id="no_model" class="form-control">
+                            <select name="no_model" id="no_model" class="form-control" required>
                                 <option value="">Pilih No Model</option>
                                 <?php foreach ($noModel as $nm): ?>
                                     <option value="<?= $nm['no_model'] ?>"><?= $nm['no_model'] ?></option>

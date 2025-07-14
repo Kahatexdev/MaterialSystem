@@ -223,11 +223,20 @@
                                         <input type="datetime-local" class="form-control" name="tgl_kelos" id="tgl_kelos" value="<?= $data['tgl_kelos'] ?>" disabled>
                                     </div>
                                 </div>
-                                <div class="col-md-12">
-                                    <!-- Ket Daily Cek -->
-                                    <div class="form-group" id="ketDailyCekGroup">
-                                        <label for="ket_daily_cek">Ket Daily Cek</label>
-                                        <input type="text" class="form-control" name="ket_daily_cek" id="ket_daily_cek" value="<?= $data['ket_daily_cek'] ?>" disabled>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <!-- Ket Daily Cek -->
+                                        <div class="form-group" id="ketDailyCekGroup">
+                                            <label for="ket_daily_cek">Ket Daily Cek</label>
+                                            <textarea name="ket_daily_cek" id="ket_daily_cek" class="form-control" disabled><?= $data['ket_daily_cek'] ?></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <!-- Ket Daily Cek -->
+                                        <div class="form-group" id="ketSchedule">
+                                            <label for="ket_schedule">Ket Schedule</label>
+                                            <textarea name="ket_schedule" id="ket_schedule" class="form-control"><?= $data['ket_schedule'] ?></textarea>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
