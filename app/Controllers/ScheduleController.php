@@ -526,10 +526,14 @@ class ScheduleController extends BaseController
 
         $min = $this->mesinCelupModel->getMinCaps($no_mesin);
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
-
+        $jmlLot = $this->mesinCelupModel->select('jml_lot')
+            ->where('no_mesin', $no_mesin)
+            ->first();
+        $jmlLot = intval($jmlLot['jml_lot']); // Pastikan jmlLot adalah integer
+        // dd($jmlLot);
         $scheduleData = $this->scheduleCelupModel->getScheduleDetailsData($id_mesin, $tanggal_schedule, $lot_urut);
         // dd($scheduleData);
-        // dd($scheduleData);
+
         if (!empty($scheduleData['id_induk'])) {
         }
         foreach ($scheduleData as &$item) {
@@ -627,6 +631,7 @@ class ScheduleController extends BaseController
             // 'jenis' => $jenis[0]['jenis'],
             'kode_warna' => $kodeWarna,
             'warna' => $warna,
+            'jmlLot' => $jmlLot,
         ];
         // dd ($data);
         return view($this->role . '/schedule/form-edit', $data);
@@ -1437,7 +1442,7 @@ class ScheduleController extends BaseController
         $masterApi = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . $model;
         $masterResponse = file_get_contents($masterApi);
         $master = json_decode($masterResponse, true);
-        
+
 
         // Mengambil nilai 'search' yang dikirim oleh frontend
         $search = $this->request->getGet('search');
