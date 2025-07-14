@@ -234,7 +234,7 @@
                                     <div class="col-md-6">
                                         <!-- Ket Daily Cek -->
                                         <div class="form-group" id="ketSchedule">
-                                            <label for="ket_schedule">Ket Schedule</label>
+                                            <label for="ket_schedule">Keterangan</label>
                                             <textarea name="ket_schedule" id="ket_schedule" class="form-control"><?= $data['ket_schedule'] ?></textarea>
                                         </div>
                                     </div>
