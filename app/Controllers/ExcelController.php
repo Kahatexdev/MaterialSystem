@@ -9170,4 +9170,152 @@ class ExcelController extends BaseController
         $writer->save('php://output');
         exit;
     }
+    public function exportHistoryPinjamOrder()
+    {
+        $noModel   = $this->request->getGet('model')     ?? '';
+        $kodeWarna = $this->request->getGet('kode_warna') ?? '';
+
+        // 1) Ambil data
+        $dataPinjam = $this->historyStock->getHistoryPinjamOrder($noModel, $kodeWarna);
+
+        // // 2) Siapkan HTTP client
+        // $client = \Config\Services::curlrequest([
+        //     'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
+        //     'timeout' => 5
+        // ]);
+
+        // // 3) Loop dan merge API result
+        // foreach ($dataPindah as &$row) {
+        //     try {
+        //         $res = $client->get('getDeliveryAwalAkhir', [
+        //             'query' => ['model' => $row['no_model_new']]
+        //         ]);
+        //         $body = json_decode($res->getBody(), true);
+        //         $row['delivery_awal']  = $body['delivery_awal']  ?? '-';
+        //         $row['delivery_akhir'] = $body['delivery_akhir'] ?? '-';
+        //     } catch (\Exception $e) {
+        //         $row['delivery_awal']  = '-';
+        //         $row['delivery_akhir'] = '-';
+        //     }
+        // }
+        // unset($row);
+
+        // Buat spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('REPORT HISTORY PINDAH ORDER');
+
+        // border
+        $styleHeader = [
+            'font' => [
+                'bold' => true, // Tebalkan teks
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER, // Alignment rata tengah
+            ],
+            'borders' => [
+                'outline' => [
+                    'borderStyle' => Border::BORDER_THIN, // Gaya garis tipis
+                    'color' => ['argb' => 'FF000000'],    // Warna garis hitam
+                ],
+            ],
+        ];
+        $styleBody = [
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER, // Alignment rata tengah
+            ],
+            'borders' => [
+                'outline' => [
+                    'borderStyle' => Border::BORDER_THIN, // Gaya garis tipis
+                    'color' => ['argb' => 'FF000000'],    // Warna garis hitam
+                ],
+            ],
+        ];
+
+        $dataFilter = '';
+
+        if (!empty($noModel) && !empty($kodeWarna)) {
+            $dataFilter = ' NOMOR MODEL ' . $noModel . ' KODE WARNA ' . $kodeWarna;
+        } elseif (!empty($noModel)) {
+            $dataFilter = ' NOMOR MODEL ' . $noModel;
+        } elseif (!empty($kodeWarna)) {
+            $dataFilter = ' KODE WARNA ' . $kodeWarna;
+        }
+
+        // Judul
+        $sheet->setCellValue('A1', 'REPORT HISTORY PINDAH ORDER' . $dataFilter);
+        $sheet->mergeCells('A1:L1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $row_header = 3;
+
+        $headers = [
+            'A' => 'NO',
+            'B' => 'NO MODEL',
+            // 'C' => 'DELIVERY AWAL',
+            // 'D' => 'DELIVERY AKHIR',
+            'C' => 'ITEM TYPE',
+            'D' => 'KODE WARNA',
+            'E' => 'WARNA',
+            'F' => 'QTY',
+            'G' => 'CONES',
+            'H' => 'LOT',
+            'I' => 'CLUSTER',
+            'J' => 'KETERANGAN'
+        ];
+
+        foreach ($headers as $col => $title) {
+            $sheet->setCellValue($col . $row_header, $title);
+            $sheet->getStyle($col . $row_header)->applyFromArray($styleHeader);
+        }
+
+
+        // Isi data
+        $row = 4;
+        $no = 1;
+
+        foreach ($dataPinjam as $key => $data) {
+            if (!is_array($data)) {
+                continue; // Lewati nilai akumulasi di $result
+            }
+
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $data['no_model_dipinjam']);
+            // $sheet->setCellValue('C' . $row, $data['delivery_awal']);
+            // $sheet->setCellValue('D' . $row, $data['delivery_akhir']);
+            $sheet->setCellValue('C' . $row, $data['item_type']);
+            $sheet->setCellValue('D' . $row, $data['kode_warna']);
+            $sheet->setCellValue('E' . $row, $data['warna']);
+            $sheet->setCellValue('F' . $row, $data['kgs']);
+            $sheet->setCellValue('G' . $row, $data['cns']);
+            $sheet->setCellValue('H' . $row, $data['lot']);
+            $sheet->setCellValue('I' . $row, $data['cluster_old']);
+            $sheet->setCellValue('J' . $row, strtoupper($data['created_at'] . ' Di' . $data['keterangan'] . ' ' . $data['no_model_meminjam'] . ' KODE ' . $data['kode_warna'] . '(' . $data['admin'] . ')'));
+
+            // style body
+            $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+
+            foreach ($columns as $column) {
+                $sheet->getStyle($column . $row)->applyFromArray($styleBody);
+            }
+
+            $row++;
+        }
+
+        foreach (['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set judul file dan header untuk download
+        $filename = 'REPORT HISTORY PINJAM ORDER' . $dataFilter . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        // Tulis file excel ke output
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
 }

@@ -24,6 +24,7 @@ use App\Models\OtherOutModel;
 use App\Models\PemesananSpandexKaretModel;
 use App\Models\ReturModel;
 use App\Models\PoTambahanModel;
+use App\Models\HistoryStock;
 use CodeIgniter\API\ResponseTrait;
 
 
@@ -53,6 +54,7 @@ class PemesananController extends BaseController
     protected $pemesananSpandexKaretModel;
     protected $poTambahanModel;
     protected $returModel;
+    protected $historyStock;
 
     public function __construct()
     {
@@ -75,6 +77,7 @@ class PemesananController extends BaseController
         $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
         $this->poTambahanModel = new PoTambahanModel();
         $this->returModel = new ReturModel();
+        $this->historyStock = new HistoryStock();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -1235,5 +1238,47 @@ class PemesananController extends BaseController
 
         $detail = $this->stockModel->getPinjamOrderDetail($noModel, $itemType, $kodeWarna, $cluster);
         return $this->response->setJSON($detail);
+    }
+    public function HistoryPinjamOrder()
+    {
+        $noModel   = $this->request->getGet('model')     ?? '';
+        $kodeWarna = $this->request->getGet('kode_warna') ?? '';
+
+        $dataPinjam = $this->historyStock->getHistoryPinjamOrder($noModel, $kodeWarna);
+        // dd($dataPinjam);
+
+        // // 2) Siapkan HTTP client
+        // $client = \Config\Services::curlrequest([
+        //     'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
+        //     'timeout' => 5
+        // ]);
+
+        // // 3) Loop dan merge API result
+        // foreach ($dataPindah as &$row) {
+        //     try {
+        //         $res = $client->get('getDeliveryAwalAkhir', [
+        //             'query' => ['model' => $row['no_model_new']]
+        //         ]);
+        //         $body = json_decode($res->getBody(), true);
+        //         $row['delivery_awal']  = $body['delivery_awal']  ?? '-';
+        //         $row['delivery_akhir'] = $body['delivery_akhir'] ?? '-';
+        //     } catch (\Exception $e) {
+        //         $row['delivery_awal']  = '-';
+        //         $row['delivery_akhir'] = '-';
+        //     }
+        // }
+        // unset($row);
+
+        // 4) Response
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON($dataPinjam);
+        }
+
+        return view($this->role . '/pemesanan/history-pinjam-order', [
+            'role'    => $this->role,
+            'title'   => 'History Pindah Order',
+            'active'  => $this->active,
+            'history' => $dataPinjam,
+        ]);
     }
 }
