@@ -6150,25 +6150,23 @@ class ExcelController extends BaseController
             }
 
             // Buat key berdasarkan item_type + spesifikasi untuk memisahkan grup
-            $groupKey = $row['item_type'] . '|' . $spesifikasiBenang;
+            // $groupKey = $row['item_type'] . '|' . $spesifikasiBenang;
 
-            if (!in_array($groupKey, $itemTypes)) {
-                // Kemunculan pertama untuk grup ini
-                $tampilItemType = $row['item_type'] . ($spesifikasiBenang ? " {$spesifikasiBenang}" : '');
-                $tampilUkuran   = $row['ukuran'];
-                $itemTypes[]    = $groupKey;
-            } else {
-                // Baris selanjutnya dalam grup sama
-                $tampilItemType = '';
-                $tampilUkuran   = '';
-            }
-
+            // if (!in_array($groupKey, $itemTypes)) {
+            //     // Kemunculan pertama untuk grup ini
+            //     $tampilItemType = $row['item_type'] . ($spesifikasiBenang ? " {$spesifikasiBenang}" : '');
+            //     $tampilUkuran   = $row['ukuran'];
+            //     $itemTypes[]    = $groupKey;
+            // } else {
+            //     // Baris selanjutnya dalam grup sama
+            //     $tampilItemType = '';
+            //     $tampilUkuran   = '';
+            // }
 
             $sheet->fromArray([
                 $no++,
-                // $row['item_type'] . ' ' . $spesifikasiBenang,
-                $tampilItemType,
-                $tampilUkuran,
+                $row['item_type'] . ' ' . $spesifikasiBenang,
+                $row['ukuran'],
                 $row['bentuk_celup'],
                 $row['color'],
                 $row['kode_warna'],
