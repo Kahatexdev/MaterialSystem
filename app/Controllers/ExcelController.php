@@ -6298,7 +6298,24 @@ class ExcelController extends BaseController
         // Buat objek Spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
+        // 1. Atur ukuran kertas jadi A4
+        $sheet->getPageSetup()
+            ->setPaperSize(PageSetup::PAPERSIZE_A4);
 
+        // 2. Atur orientasi jadi landscape
+        $sheet->getPageSetup()
+            ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+        // 3. (Opsional) Atur scaling, agar muat ke 1 halaman
+        $sheet->getPageSetup()
+            ->setFitToWidth(1)
+            ->setFitToHeight(0)    // 0 artinya auto height
+            ->setFitToPage(true); // aktifkan fitting
+
+        // 4. (Opsional) Atur margin supaya tidak terlalu sempit
+        $sheet->getPageMargins()->setTop(0.4)
+            ->setBottom(0.4)
+            ->setLeft(0.4)
+            ->setRight(0.2);
         // -- HEADER LOGO & JUDUL --
         // Sisipkan logo jika diperlukan (path relatif ke public/)
         $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
@@ -6428,13 +6445,201 @@ class ExcelController extends BaseController
 
         $noModel = $poCovering[0]->no_model;
 
+        // 1) Kelompokkan array berdasarkan no_model
+        $groups = [];
+        foreach ($poCovering as $row) {
+            $groups[$row->no_model][] = $row;
+        }
+
         // Buat Excel
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('PO Covering');
+        // 1. Atur ukuran kertas jadi A4
+        $sheet->getPageSetup()
+            ->setPaperSize(PageSetup::PAPERSIZE_A4);
+
+        // 2. Atur orientasi jadi landscape
+        $sheet->getPageSetup()
+            ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+        // 3. (Opsional) Atur scaling, agar muat ke 1 halaman
+        $sheet->getPageSetup()
+            ->setFitToWidth(1)
+            ->setFitToHeight(0)    // 0 artinya auto height
+            ->setFitToPage(true); // aktifkan fitting
+
+        // 4. (Opsional) Atur margin supaya tidak terlalu sempit
+        $sheet->getPageMargins()->setTop(0.4)
+            ->setBottom(0.4)
+            ->setLeft(0.4)
+            ->setRight(0.2);
         $spreadsheet->getDefaultStyle()->getFont()->setName('Arial');
         $spreadsheet->getDefaultStyle()->getFont()->setSize(16);
 
+        ///////////////
+        $first = true;
+        foreach ($groups as $noModel => $rows) {
+            // jika bukan sheet pertama, buat sheet baru
+            if ($first) {
+                $sheet = $spreadsheet->getActiveSheet();
+                // 1. Atur ukuran kertas jadi A4
+                $sheet->getPageSetup()
+                    ->setPaperSize(PageSetup::PAPERSIZE_A4);
+
+                // 2. Atur orientasi jadi landscape
+                $sheet->getPageSetup()
+                    ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+                // 3. (Opsional) Atur scaling, agar muat ke 1 halaman
+                $sheet->getPageSetup()
+                    ->setFitToWidth(1)
+                    ->setFitToHeight(0)    // 0 artinya auto height
+                    ->setFitToPage(true); // aktifkan fitting
+
+                // 4. (Opsional) Atur margin supaya tidak terlalu sempit
+                $sheet->getPageMargins()->setTop(0.4)
+                    ->setBottom(0.4)
+                    ->setLeft(0.4)
+                    ->setRight(0.2);
+                $first = false;
+            } else {
+                $sheet = $spreadsheet->createSheet();
+                        // 1. Atur ukuran kertas jadi A4
+                $sheet->getPageSetup()
+                    ->setPaperSize(PageSetup::PAPERSIZE_A4);
+
+                // 2. Atur orientasi jadi landscape
+                $sheet->getPageSetup()
+                    ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+                // 3. (Opsional) Atur scaling, agar muat ke 1 halaman
+                $sheet->getPageSetup()
+                    ->setFitToWidth(1)
+                    ->setFitToHeight(0)    // 0 artinya auto height
+                    ->setFitToPage(true); // aktifkan fitting
+
+                // 4. (Opsional) Atur margin supaya tidak terlalu sempit
+                $sheet->getPageMargins()->setTop(0.4)
+                    ->setBottom(0.4)
+                    ->setLeft(0.4)
+                    ->setRight(0.2);
+            }
+
+            // 3) Set judul sheet sesuai no_model
+            $title = substr($noModel, 0, 31); // maksimal 31 karakter
+            $sheet->setTitle($title);
+
+            // -- Sekarang panggil fungsi/potongan kode untuk mencetak header, styling, dsb --
+            // Misalnya:
+            $this->applyBordersAndStyles($sheet);
+            $this->writeHeaderForm($sheet, $noModel, $rows[0]->created_at);
+
+            // 4) Tuliskan data per‐baris
+            // Mulai menulis data dari baris 13
+            $rowNum = 13;
+            $no = 1;
+            $totalKg = 0;
+            $totalPermCones = 0;
+            $totalYard = 0;
+            $totalCones = 0;
+
+            foreach ($rows as $row) {
+                // dd($poCovering);
+                if ($row->jenis == 'NYLON') {
+                    $row->jenis = 'POLYESTER';
+                }
+                $sheet->setCellValue("A{$rowNum}", $no++);
+                $sheet->setCellValue("B{$rowNum}", $row->jenis);
+                $sheet->setCellValue("C{$rowNum}", $row->ukuran);
+                $sheet->setCellValue("D{$rowNum}", $row->bentuk_celup);
+                $sheet->setCellValue("E{$rowNum}", $row->color);
+                $sheet->setCellValue("F{$rowNum}", $row->kode_warna);
+                $sheet->setCellValue("G{$rowNum}", $row->buyer);
+                $sheet->setCellValue("H{$rowNum}", $row->induk_no_model);
+                $sheet->setCellValue("I{$rowNum}", $row->delivery_awal);
+                $sheet->setCellValue("J{$rowNum}", $row->kg_po);
+                $sheet->setCellValue("K{$rowNum}", $row->kg_percones);
+                $sheet->setCellValue("L{$rowNum}", $row->yard ?? '');
+                $sheet->setCellValue("M{$rowNum}", $row->jumlah_cones);
+                $sheet->setCellValue("N{$rowNum}", '');
+                $sheet->setCellValue("O{$rowNum}", $row->jenis_produksi);
+                $sheet->setCellValue("P{$rowNum}", $row->contoh_warna);
+                $sheet->setCellValue("Q{$rowNum}", $row->ket_celup);
+
+                // Borders untuk kolom A–Q
+                foreach (range('A', 'Q') as $col) {
+                    $sheet->getStyle("{$col}{$rowNum}")
+                        ->getBorders()->getAllBorders()
+                        ->setBorderStyle(Border::BORDER_THIN);
+                }
+
+                // Border kiri kolom A = double
+                $sheet->getStyle("A{$rowNum}")
+                    ->getBorders()->getLeft()
+                    ->setBorderStyle(Border::BORDER_DOUBLE);
+
+                // Border kiri kolom A = double
+                $sheet->getStyle("Q{$rowNum}")
+                    ->getBorders()->getRight()
+                    ->setBorderStyle(Border::BORDER_DOUBLE);
+
+                $totalKg += $row->kg_po;
+                $totalPermCones += $row->kg_percones;
+                $totalCones += $row->jumlah_cones;
+                $totalYard += $row->yard ?? 0;
+                $rowNum++;
+            }
+
+            // Baris Total (sama layout seperti PDF)
+            // Gabungkan A–I untuk label "Total"
+            $sheet->setCellValue("A38", 'Total');
+            $sheet->mergeCells("A38:I38");
+            $sheet->getStyle("A38")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+
+            // J: Total Kg PO
+            $sheet->setCellValue("J38", number_format($totalKg, 2));
+            // K–L kosong
+            $sheet->setCellValue("K38", '');
+            $sheet->setCellValue("L38", '');
+            // M: Total Cones
+            $sheet->setCellValue("M38", $totalCones ?: '');
+            // N–Q kosong
+            foreach (range('N', 'Q') as $col) {
+                $sheet->setCellValue("{$col}38", '');
+            }
+            // Tambahkan border untuk seluruh baris total A38:Q38
+            $sheet->getStyle('A38:Q38')->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['argb' => 'FF000000'],
+                    ],
+                ],
+                'font' => [
+                    'bold' => true,
+                ],
+            ]);
+            // Kolom A (border kiri double)
+            $sheet->getStyle('A38')->getBorders()->getLeft()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_DOUBLE);
+
+            // Kolom Q (border kanan double)
+            $sheet->getStyle('Q38')->getBorders()->getRight()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_DOUBLE);
+
+            // (Opsional) footer keterangan dan tanda tangan...
+            $this->writeFooter($sheet, $rows[0], $rows[0]->admin, $rows[0]->penanggung_jawab, $rows[0]->penerima);
+        }
+        ///////
+
+        // Header respons
+        $filename = 'OpenPOCovering_' . $tgl_po . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    private function applyBordersAndStyles($sheet)
+    {
         //Outline Border
         // 1. Top double border dari A1 ke Q1
         $sheet->getStyle('A1:Q1')->applyFromArray([
@@ -6634,7 +6839,10 @@ class ExcelController extends BaseController
                 ->setWidth($charWidth)
                 ->setAutoSize(false);
         }
+    }
 
+    private function writeHeaderForm($sheet, $noModel, $createdAt)
+    {
         // Header Form
         // Logo dan judul perusahaan di bawah logo
         $sheet->mergeCells('A1:C3');
@@ -6701,8 +6909,7 @@ class ExcelController extends BaseController
 
         $sheet->setCellValue('A8', 'Pemesan');
         $sheet->setCellValue('D8', ': COVERING');
-        // dd($poCovering);
-        $createdAt = $poCovering[0]->created_at;
+
         $sheet->setCellValue('A9', 'Tgl');
         $sheet->setCellValue('D9', ': ' . ($createdAt ? date('d/m/Y', strtotime($createdAt)) : ''));
 
@@ -6819,92 +7026,10 @@ class ExcelController extends BaseController
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
             ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
         $sheet->getStyle('A11:Q12')->getFont()->setBold(true);
+    }
 
-        // Mulai menulis data dari baris 13
-        $rowNum = 13;
-        $no = 1;
-        $totalKg = 0;
-        $totalPermCones = 0;
-        $totalYard = 0;
-        $totalCones = 0;
-
-        foreach ($poCovering as $row) {
-            // dd($poCovering);
-            if ($row->jenis == 'NYLON') {
-                $row->jenis = 'POLYESTER';
-            }
-            $sheet->setCellValue("A{$rowNum}", $no++);
-            $sheet->setCellValue("B{$rowNum}", $row->jenis);
-            $sheet->setCellValue("C{$rowNum}", $row->ukuran);
-            $sheet->setCellValue("D{$rowNum}", $row->bentuk_celup);
-            $sheet->setCellValue("E{$rowNum}", $row->color);
-            $sheet->setCellValue("F{$rowNum}", $row->kode_warna);
-            $sheet->setCellValue("G{$rowNum}", $row->buyer);
-            $sheet->setCellValue("H{$rowNum}", $row->induk_no_model);
-            $sheet->setCellValue("I{$rowNum}", $row->delivery_awal);
-            $sheet->setCellValue("J{$rowNum}", $row->kg_po);
-            $sheet->setCellValue("K{$rowNum}", $row->kg_percones);
-            $sheet->setCellValue("L{$rowNum}", $row->yard ?? '');
-            $sheet->setCellValue("M{$rowNum}", $row->jumlah_cones);
-            $sheet->setCellValue("N{$rowNum}", '');
-            $sheet->setCellValue("O{$rowNum}", $row->jenis_produksi);
-            $sheet->setCellValue("P{$rowNum}", $row->contoh_warna);
-            $sheet->setCellValue("Q{$rowNum}", $row->ket_celup);
-
-            // Borders untuk kolom A–Q
-            foreach (range('A', 'Q') as $col) {
-                $sheet->getStyle("{$col}{$rowNum}")
-                    ->getBorders()->getAllBorders()
-                    ->setBorderStyle(Border::BORDER_THIN);
-            }
-
-            // Border kiri kolom A = double
-            $sheet->getStyle("A{$rowNum}")
-                ->getBorders()->getLeft()
-                ->setBorderStyle(Border::BORDER_DOUBLE);
-
-            $totalKg += $row->kg_po;
-            $totalPermCones += $row->kg_percones;
-            $totalCones += $row->jumlah_cones;
-            $totalYard += $row->yard ?? 0;
-            $rowNum++;
-        }
-
-        // Baris Total (sama layout seperti PDF)
-        // Gabungkan A–I untuk label "Total"
-        $sheet->setCellValue("A38", 'Total');
-        $sheet->mergeCells("A38:I38");
-        $sheet->getStyle("A38")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
-
-        // J: Total Kg PO
-        $sheet->setCellValue("J38", number_format($totalKg, 2));
-        // K–L kosong
-        $sheet->setCellValue("K38", '');
-        $sheet->setCellValue("L38", '');
-        // M: Total Cones
-        $sheet->setCellValue("M38", $totalCones ?: '');
-        // N–Q kosong
-        foreach (range('N', 'Q') as $col) {
-            $sheet->setCellValue("{$col}38", '');
-        }
-        // Tambahkan border untuk seluruh baris total A38:Q38
-        $sheet->getStyle('A38:Q38')->applyFromArray([
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => ['argb' => 'FF000000'],
-                ],
-            ],
-            'font' => [
-                'bold' => true,
-            ],
-        ]);
-        // Kolom A (border kiri double)
-        $sheet->getStyle('A38')->getBorders()->getLeft()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_DOUBLE);
-
-        // Kolom Q (border kanan double)
-        $sheet->getStyle('Q38')->getBorders()->getRight()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_DOUBLE);
-
+    private function writeFooter($sheet, $row, $admin, $pj, $penerima)
+    {
         //Keterangan
         $sheet->setCellValue('F39', $openPoGabung[0]['keterangan'] ?? '');
         $sheet->mergeCells('F39:J39');
@@ -6930,14 +7055,14 @@ class ExcelController extends BaseController
         $sheet->getStyle('N44:P44')->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-        $sheet->setCellValue('E49', '(   ' . $poCovering[0]->admin . '   )');
+        $sheet->setCellValue('E49', '(   ' . $admin . '   )');
         $sheet->getStyle('E49')->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->setCellValue('H49', '(   ' . $poCovering[0]->penanggung_jawab . '   )');
+        $sheet->setCellValue('H49', '(   ' . $pj . '   )');
         $sheet->mergeCells('H49:I49');
         $sheet->getStyle('H49:I49')->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->setCellValue('N49', '(   ' . $poCovering[0]->penerima . '   )');
+        $sheet->setCellValue('N49', '(   ' . $penerima . '   )');
         $sheet->mergeCells('N49:P49');
         $sheet->getStyle('N49:P49')->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
@@ -6947,16 +7072,6 @@ class ExcelController extends BaseController
         $sheet->getStyle("A11:Q38")->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
             ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-
-        // Header respons
-        $filename = 'OpenPOCovering_' . $tgl_po . '.xlsx';
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-
-        $writer = new Xlsx($spreadsheet);
-        $writer->save('php://output');
-        exit;
     }
 
     public function exportOpenPOGabung()
