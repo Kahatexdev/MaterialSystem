@@ -9207,7 +9207,7 @@ class ExcelController extends BaseController
         // ]);
 
         // // 3) Loop dan merge API result
-        // foreach ($dataPindah as &$row) {
+        // foreach ($dataPinjam as &$row) {
         //     try {
         //         $res = $client->get('getDeliveryAwalAkhir', [
         //             'query' => ['model' => $row['no_model_new']]
@@ -9225,7 +9225,7 @@ class ExcelController extends BaseController
         // Buat spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('REPORT HISTORY PINDAH ORDER');
+        $sheet->setTitle('REPORT HISTORY PINJAM ORDER');
 
         // border
         $styleHeader = [
@@ -9265,7 +9265,7 @@ class ExcelController extends BaseController
         }
 
         // Judul
-        $sheet->setCellValue('A1', 'REPORT HISTORY PINDAH ORDER' . $dataFilter);
+        $sheet->setCellValue('A1', 'REPORT HISTORY PINJAM ORDER' . $dataFilter);
         $sheet->mergeCells('A1:L1');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -9291,7 +9291,6 @@ class ExcelController extends BaseController
             $sheet->setCellValue($col . $row_header, $title);
             $sheet->getStyle($col . $row_header)->applyFromArray($styleHeader);
         }
-
 
         // Isi data
         $row = 4;

@@ -294,6 +294,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('poplus', 'PoTambahanController::index');
     $routes->get('poplus/detail', 'PoTambahanController::detailPoPlus');
     $routes->post('approvePoPlusArea', 'PoTambahanController::prosesApprovePoPlusArea');
+    $routes->post('rejectPoPlusArea', 'PoTambahanController::prosesRejectPoPlusArea');
     $routes->get('poplus/reportPoTambahan', 'PoTambahanController::reportPoTambahan');
     $routes->get('poplus/exportPoTambahan', 'ExcelController::exportPoTambahan');
 

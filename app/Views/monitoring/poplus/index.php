@@ -108,9 +108,9 @@
                                 <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= number_format($data['kg_poplus'], 2) ?></td>
                                 <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= $data['cns_poplus'] ?></td>
                                 <td style="<?= $isNotApproved ? 'color:red;' : '' ?>">
-                                    <a href="<?= base_url($role . '/poplus/detail?area=' . $data['admin'] . '&tgl_poplus=' . $data['tgl_poplus'] . '&no_model=' . $data['no_model'] . '&item_type=' . $data['item_type'] . '&kode_warna=' . $data['kode_warna'] . '&warna=' . $data['color'] . '&status=' . $data['status']) ?>" class="btn btn-info btn-sm">
+                                    <!-- <a href="<?= base_url($role . '/poplus/detail?area=' . $data['admin'] . '&tgl_poplus=' . $data['tgl_poplus'] . '&no_model=' . $data['no_model'] . '&item_type=' . $data['item_type'] . '&kode_warna=' . $data['kode_warna'] . '&warna=' . $data['color'] . '&status=' . $data['status']) ?>" class="btn btn-info btn-sm">
                                         Detail
-                                    </a>
+                                    </a> -->
                                 </td>
                             </tr>
                         <?php endforeach; ?>

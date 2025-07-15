@@ -26,6 +26,7 @@ class PoTambahanModel extends Model
         'plus_pck_cns',
         'lebih_pakai_kg',
         'keterangan',
+        'ket_gbn',
         'status',
         'admin',
         'created_at',
@@ -98,11 +99,12 @@ class PoTambahanModel extends Model
     }
     public function detailPoTambahan($idMaterial, $tglBuat, $status)
     {
-        return $this->select('material.style_size, po_tambahan.*')
+        return $this->select('material.style_size, material.composition, material.gw, material.qty_pcs, material.loss, material.kgs, po_tambahan.*')
             ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
             ->whereIn('po_tambahan.id_material', $idMaterial)
             ->like('po_tambahan.created_at', $tglBuat)
             ->where('po_tambahan.status', $status)
+            ->groupBy('material.id_order, material. style_size')
             ->findAll();
     }
     public function getNoModelByArea($area)

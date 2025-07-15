@@ -164,13 +164,81 @@ class PoTambahanController extends BaseController
             return redirect()->to(base_url($this->role . '/poplus'))->with('error', 'Tidak ada data material yang ditemukan.');
         }
 
-        $detail = $this->poTambahanModel->detailPoTambahan($idMaterial, $tglPo, $status);
+        $details = $this->poTambahanModel->detailPoTambahan($idMaterial, $tglPo, $status);
+
+        $pphInisial = [];
+
+        foreach ($details as $items) {
+            $styleSize = $items['style_size'];
+            $gw = $items['gw'];
+            $comp = $items['composition'];
+            $loss = $items['loss'];
+            $gwpcs = ($gw * $comp) / 100;
+            $styleSize = urlencode($styleSize);
+            $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $noModel . '/' . $styleSize;
+
+            $response = file_get_contents($apiUrl);
+
+            if ($response === FALSE) {
+                log_message('error', "API tidak bisa diakses: $apiUrl");
+                return $this->response->setJSON(["error" => "Gagal mengambil data dari API"]);
+            } else {
+                $data = json_decode($response, true);
+
+                if (!is_array($data)) {
+                    log_message('error', "Response API tidak valid: $response");
+                    return $this->response->setJSON(["error" => "Data dari API tidak valid"]);
+                }
+
+                $bruto = $data['bruto'] ?? 0;
+                $bs_mesin = $data['bs_mesin'] ?? 0;
+                if ($gw == 0) {
+                    $pph = 0;
+                } else {
+
+                    $pph = ((($bruto + ($bs_mesin / $gw)) * $comp * $gw) / 100) / 1000;
+                }
+                $ttl_kebutuhan = ($data['qty'] * $comp * $gw / 100 / 1000) + ($loss / 100 * ($data['qty'] * $comp * $gw / 100 / 1000));
+
+                $pphInisial[] = [
+                    'area'  => $area,
+                    'style_size'    => $items['style_size'],
+                    'inisial'       => $data['inisial'],
+                    'item_type'     => $itemType,
+                    'kode_warna'    => $kodeWarna,
+                    'color'         => $warna,
+                    'ttl_kebutuhan' => $ttl_kebutuhan,
+                    'gw'            => $items['gw'],
+                    'loss'          => $items['loss'],
+                    'composition'   => $items['composition'],
+                    'jarum'         => $data['machinetypeid'] ?? null,
+                    'bruto'         => $bruto,
+                    'netto'         => $bruto - $data['bs_setting'] ?? 0,
+                    'qty'           => $data['qty'] ?? 0,
+                    'sisa'          => $data['sisa'] ?? 0,
+                    'po_plus'       => $data['po_plus'] ?? 0,
+                    'bs_setting'    => $data['bs_setting'] ?? 0,
+                    'bs_mesin'      => $bs_mesin,
+                    'pph'           => $pph,
+                    'pph_persen'    => ($ttl_kebutuhan != 0) ? ($pph / $ttl_kebutuhan) * 100 : 0,
+                    'po_plus'       => $items['poplus_mc_kg'] + $items['plus_pck_kg']
+                ];
+            }
+        }
+
+        $dataToSort = array_filter($pphInisial, 'is_array');
+
+        usort($dataToSort, function ($a, $b) {
+            return $a['inisial'] <=> $b['inisial']
+                ?: $a['item_type'] <=> $b['item_type']
+                ?: $a['kode_warna'] <=> $b['kode_warna'];
+        });
 
         $data = [
             'active' => $this->active,
             'title' => 'Po Tambahan',
             'role' => $this->role,
-            'detail' => $detail,
+            'detail' => $dataToSort,
             'tglPo' => $tglPo,
             'noModel' => $noModel,
             'itemType' => $itemType,
@@ -200,5 +268,44 @@ class PoTambahanController extends BaseController
             'active'  => $this->active,
             'poPlus' => $dataPoPlus,
         ]);
+    }
+    public function prosesRejectPoPlusArea()
+    {
+        $tglPo = $this->request->getPost('tgl_poplus');
+        $noModel = $this->request->getPost('no_model');
+        $itemType = $this->request->getPost('item_type');
+        $kodeWarna = $this->request->getPost('kode_warna');
+        $status = $this->request->getPost('status');
+        $area = $this->request->getPost('area');
+        $ketGbn = $this->request->getPost('ket_gbn');
+
+        $validate = [
+            'no_model'   => $noModel,
+            'area'       => $area,
+            'item_type'  => $itemType,
+            'kode_warna' => $kodeWarna,
+        ];
+
+        $idMaterialResult = $this->materialModel->getId($validate);
+        $idMaterial = array_column($idMaterialResult, 'id_material');
+
+        if (empty($idMaterial)) {
+            return redirect()->to(base_url($this->role . '/poplus'))->with('error', 'Tidak ada data material yang ditemukan.');
+        }
+
+        // Jalankan update hanya jika data ada
+        $builder = $this->poTambahanModel
+            ->builder()
+            ->whereIn('id_material', $idMaterial)
+            ->where('status', $status)
+            ->like('created_at', $tglPo, 'after');
+
+        $updated = $builder->update(['status' => 'rejected', 'ket_gbn' => $ketGbn]);
+
+        if ($updated) {
+            return redirect()->to(base_url($this->role . '/poplus'))->with('success', 'Data Po Tambahan Berhasil ditolak.');
+        } else {
+            return redirect()->to(base_url($this->role . '/poplus'))->with('error', 'Data Po Tambahan Gagal ditolak.');
+        }
     }
 }
