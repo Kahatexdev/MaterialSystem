@@ -478,7 +478,7 @@ class CoveringController extends BaseController
                     'ket_celup'       => $data['ket_celup'] ?? null,
                     'penerima'        => 'Retno',
                     'penanggung_jawab' => 'Paryanti',
-                    'admin'           => $this->role,
+                    'admin'           => session()->get('username') ?? '',
                     'created_at'      => $data['tgl_po_covering'] ?? null
                 ]);
             }
