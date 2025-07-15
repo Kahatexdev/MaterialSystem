@@ -5748,10 +5748,10 @@ class ExcelController extends BaseController
             ->setFitToPage(true); // aktifkan fitting
 
         // 4. (Opsional) Atur margin supaya tidak terlalu sempit
-        $sheet->getPageMargins()->setTop(0.5)
-            ->setBottom(0.5)
-            ->setLeft(0.5)
-            ->setRight(0.5);
+        $sheet->getPageMargins()->setTop(0.4)
+            ->setBottom(0.4)
+            ->setLeft(0.4)
+            ->setRight(0.2);
         //Outline Border
         // 1. Top double border dari A1 ke Q1
         $sheet->getStyle('A1:Q1')->applyFromArray([
@@ -5937,6 +5937,22 @@ class ExcelController extends BaseController
         $rowHeightsPt = [
             11 => 50, // misal 25 pt untuk header tabel
             12 => 50, // misal 20 pt untuk baris pertama data
+            13 => 36,
+            14 => 36,
+            15 => 36,
+            16 => 36,
+            17 => 36,
+            18 => 36,
+            19 => 36,
+            20 => 36,
+            21 => 36,
+            22 => 36,
+            23 => 36,
+            24 => 36,
+            25 => 36,
+            26 => 36,
+            27 => 36,
+            28 => 36,
         ];
 
         //Atur Tinggi Baris dan Lebar Kolom
