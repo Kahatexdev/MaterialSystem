@@ -31,6 +31,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpParser\Node\Stmt\Else_;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageMargins;
 
 class ExcelController extends BaseController
 {
@@ -5733,7 +5734,24 @@ class ExcelController extends BaseController
         $sheet->setTitle('Open PO ' . $noModel);
         $spreadsheet->getDefaultStyle()->getFont()->setName('Arial');
         $spreadsheet->getDefaultStyle()->getFont()->setSize(16);
+        // 1. Atur ukuran kertas jadi A4
+        $sheet->getPageSetup()
+            ->setPaperSize(PageSetup::PAPERSIZE_A4);
 
+        // 2. Atur orientasi jadi landscape
+        $sheet->getPageSetup()
+            ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+        // 3. (Opsional) Atur scaling, agar muat ke 1 halaman
+        $sheet->getPageSetup()
+            ->setFitToWidth(1)
+            ->setFitToHeight(0)    // 0 artinya auto height
+            ->setFitToPage(true); // aktifkan fitting
+
+        // 4. (Opsional) Atur margin supaya tidak terlalu sempit
+        $sheet->getPageMargins()->setTop(0.5)
+            ->setBottom(0.5)
+            ->setLeft(0.5)
+            ->setRight(0.5);
         //Outline Border
         // 1. Top double border dari A1 ke Q1
         $sheet->getStyle('A1:Q1')->applyFromArray([
@@ -6397,7 +6415,7 @@ class ExcelController extends BaseController
         // Buat Excel
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('PO Gabungan');
+        $sheet->setTitle('PO Covering');
         $spreadsheet->getDefaultStyle()->getFont()->setName('Arial');
         $spreadsheet->getDefaultStyle()->getFont()->setSize(16);
 
@@ -6667,10 +6685,10 @@ class ExcelController extends BaseController
 
         $sheet->setCellValue('A8', 'Pemesan');
         $sheet->setCellValue('D8', ': COVERING');
-
-        $createdAt = $openPoGabung[0]['created_at'] ?? null;
+        // dd($poCovering);
+        $createdAt = $poCovering[0]->created_at;
         $sheet->setCellValue('A9', 'Tgl');
-        $sheet->setCellValue('D9', ': ' . ($createdAt ? date('d/m/Y', strtotime($createdAt)) : '-'));
+        $sheet->setCellValue('D9', ': ' . ($createdAt ? date('d/m/Y', strtotime($createdAt)) : ''));
 
         $sheet->setCellValue('G7', '');
         $sheet->mergeCells('G7:G9');
@@ -6795,6 +6813,10 @@ class ExcelController extends BaseController
         $totalCones = 0;
 
         foreach ($poCovering as $row) {
+            // dd($poCovering);
+            if ($row->jenis == 'NYLON') {
+                $row->jenis = 'POLYESTER';
+            }
             $sheet->setCellValue("A{$rowNum}", $no++);
             $sheet->setCellValue("B{$rowNum}", $row->jenis);
             $sheet->setCellValue("C{$rowNum}", $row->ukuran);
@@ -6802,18 +6824,19 @@ class ExcelController extends BaseController
             $sheet->setCellValue("E{$rowNum}", $row->color);
             $sheet->setCellValue("F{$rowNum}", $row->kode_warna);
             $sheet->setCellValue("G{$rowNum}", $row->buyer);
-            $sheet->setCellValue("H{$rowNum}", $row->no_model);
+            $sheet->setCellValue("H{$rowNum}", $row->induk_no_model);
             $sheet->setCellValue("I{$rowNum}", $row->delivery_awal);
             $sheet->setCellValue("J{$rowNum}", $row->kg_po);
             $sheet->setCellValue("K{$rowNum}", $row->kg_percones);
             $sheet->setCellValue("L{$rowNum}", $row->yard ?? '');
             $sheet->setCellValue("M{$rowNum}", $row->jumlah_cones);
-            $sheet->setCellValue("N{$rowNum}", $row->jenis_produksi);
-            $sheet->setCellValue("O{$rowNum}", $row->contoh_warna);
-            $sheet->setCellValue("P{$rowNum}", $row->ket_celup);
+            $sheet->setCellValue("N{$rowNum}", '');
+            $sheet->setCellValue("O{$rowNum}", $row->jenis_produksi);
+            $sheet->setCellValue("P{$rowNum}", $row->contoh_warna);
+            $sheet->setCellValue("Q{$rowNum}", $row->ket_celup);
 
-            // Borders untuk kolom A–P
-            foreach (range('A', 'P') as $col) {
+            // Borders untuk kolom A–Q
+            foreach (range('A', 'Q') as $col) {
                 $sheet->getStyle("{$col}{$rowNum}")
                     ->getBorders()->getAllBorders()
                     ->setBorderStyle(Border::BORDER_THIN);
