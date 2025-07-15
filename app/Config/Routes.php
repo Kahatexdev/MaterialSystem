@@ -438,6 +438,8 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('warehouseBB', 'CoveringWarehouseBBController::index');
     $routes->post('warehouseBB/store', 'CoveringWarehouseBBController::store');
     $routes->post('warehouseBB/update/(:any)', 'CoveringWarehouseBBController::update/$1');
+    $routes->post('warehouseBB/pemasukan', 'CoveringWarehouseBBController::pemasukan');
+    $routes->post('warehouseBB/pengeluaran', 'CoveringWarehouseBBController::pengeluaran');
     $routes->get('warehouseBB/BahanBakuCovPdf', 'PdfController::BahanBakuCovPdf');
     //Pemesanan
     $routes->get('pemesanan', 'CoveringPemesananController::index');

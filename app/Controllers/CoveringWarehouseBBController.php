@@ -12,23 +12,27 @@ class CoveringWarehouseBBController extends BaseController
     protected $warehouseBBModel;
     protected $historyStockBBModel;
     protected $role;
+    protected $active;
 
     public function __construct()
     {
         $this->warehouseBBModel = new WarehouseBBModel();
         $this->historyStockBBModel = new HistoryStockBBModel();
         $this->role = session()->get('role');
+        $this->active = '/index.php/' . session()->get('role');
     }
     public function index()
     {
-        $warehouseBB = $this->warehouseBBModel->findAll();
+        $warehouseBB = $this->warehouseBBModel->getWarehouseBB();
+        // dd($warehouseBB);
         $data = [
             'title' => 'Warehouse Bahan Baku Covering',
-            'warehouseBB' => $warehouseBB,
+            'active' => $this->active,
             'role' => $this->role,
-            'active' => 'warehousebb',
+            'warehouseBB' => $warehouseBB,
+            'pager' => $this->warehouseBBModel->pager,
         ];
-        return view($this->role.'/warehousebb/index', $data);
+        return view($this->role . '/warehousebb/index', $data);
     }
 
     public function store()
@@ -92,7 +96,7 @@ class CoveringWarehouseBBController extends BaseController
             'keterangan' => $this->request->getPost('keterangan'),
             'admin' => session()->get('username')
         ];
-
+        // dd($data, $id);
         // Ambil data lama
         $dataLama = $this->warehouseBBModel->find($id);
         if (!$dataLama) {
@@ -106,7 +110,7 @@ class CoveringWarehouseBBController extends BaseController
 
         // Hitung selisih untuk history
         $selisihKg = $kgBaru - $dataLama['kg'];
-
+        // dd($selisihKg);
         if ($selisihKg != 0) {
             $this->historyStockBBModel->insert([
                 'denier' => $data['denier'],
@@ -123,6 +127,97 @@ class CoveringWarehouseBBController extends BaseController
 
         $this->warehouseBBModel->update($id, $data);
 
-        return redirect()->to($this->role.'/warehouseBB')->with('success', 'Data berhasil diupdate.');
+        return redirect()->to($this->role . '/warehouseBB')->with('success', 'Data berhasil diupdate.');
+    }
+
+    public function pemasukan()
+    {
+        $idstockbb = $this->request->getPost('idstockbb');
+        $kgBaru = (float)$this->request->getPost('kg');
+
+        $data = [
+            'denier' => $this->request->getPost('denier'),
+            'jenis_benang' => $this->request->getPost('jenis_benang'),
+            'warna' => $this->request->getPost('warna'),
+            'kode' => $this->request->getPost('kode'),
+            'kg' => $kgBaru,
+            'ttl_cns' => $this->request->getPost('ttl_cns'),
+            'keterangan' => $this->request->getPost('keterangan'),
+            'admin' => session()->get('username')
+        ];
+
+        if ($kgBaru > 0) {
+            $this->historyStockBBModel->insert([
+                'denier' => $data['denier'],
+                'jenis' => $data['jenis_benang'],
+                'jenis_benang' => $data['jenis_benang'],
+                'color' => $data['warna'],
+                'code' => $data['kode'],
+                'ttl_cns' => $data['ttl_cns'],
+                'ttl_kg' => $kgBaru,
+                'admin' => $data['admin'],
+                'keterangan' => $data['keterangan']
+            ]);
+        }
+
+        if ($idstockbb && $kgBaru > 0) {
+            $stokLama = $this->warehouseBBModel->find($idstockbb);
+
+            if ($stokLama) {
+                $kgBaru = $stokLama['kg'] + $kgBaru;
+                $this->warehouseBBModel->update($idstockbb, ['kg' => $kgBaru]);
+
+                return redirect()->to($this->role . '/warehouseBB')->with('success', 'Data pemasukan berhasil ditambahkan');
+            }
+
+            return redirect()->to($this->role . '/warehouseBB')->with('error', 'Data tidak ditemukan');
+        }
+
+        return redirect()->to($this->role . '/warehouseBB')->with('error', 'Data pemasukan gagal ditambahkan');
+    }
+
+    public function pengeluaran()
+    {
+        $idstockbb = $this->request->getPost('idstockbb');
+        $kgBaru = (float)$this->request->getPost('kg');
+
+        $data = [
+            'denier' => $this->request->getPost('denier'),
+            'jenis_benang' => $this->request->getPost('jenis_benang'),
+            'warna' => $this->request->getPost('warna'),
+            'kode' => $this->request->getPost('kode'),
+            'kg' => $kgBaru,
+            'ttl_cns' => $this->request->getPost('ttl_cns'),
+            'keterangan' => $this->request->getPost('keterangan'),
+            'admin' => session()->get('username')
+        ];
+
+        if ($kgBaru > 0) {
+            $this->historyStockBBModel->insert([
+                'denier' => $data['denier'],
+                'jenis' => $data['jenis_benang'],
+                'jenis_benang' => $data['jenis_benang'],
+                'color' => $data['warna'],
+                'code' => $data['kode'],
+                'ttl_cns' => $data['ttl_cns'],
+                'ttl_kg' => -$kgBaru,
+                'admin' => $data['admin'],
+                'keterangan' => $data['keterangan']
+            ]);
+        }
+
+        if ($idstockbb && $kgBaru > 0) {
+            // Ambil stok sekarang dulu
+            $stok = $this->warehouseBBModel->find($idstockbb);
+
+            if ($stok && $stok['kg'] >= $kgBaru) {
+                $this->warehouseBBModel->update($idstockbb, ['kg' => $stok['kg'] - $kgBaru]);
+
+                return redirect()->to($this->role . '/warehouseBB')->with('success', 'Pengeluaran berhasil dikurangi.');
+            }
+            return redirect()->to($this->role . '/warehouseBB')->with('error', 'Stok tidak mencukupi untuk pengeluaran');
+        }
+
+        return redirect()->to($this->role . '/warehouseBB')->with('error', 'Data tidak valid untuk pengeluaran');
     }
 }
