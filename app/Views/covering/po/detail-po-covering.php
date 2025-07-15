@@ -54,7 +54,7 @@
                 <table id="poTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>
                         <tr>
-                            <th class="text-center">No</th>
+                            <th class="text-center">No PO</th>
                             <th class="text-center">Item Type</th>
                             <th class="text-center">Kode Warna</th>
                             <th class="text-center">Warna</th>
@@ -65,10 +65,9 @@
                     </thead>
                     <tbody>
                         <?php if (!empty($getData)) : ?>
-                            <?php $no = 1; ?>
                             <?php foreach ($getData as $po) : ?>
                                 <tr>
-                                    <td class="text-center"><?= esc($no++) ?></td>
+                                    <td class="text-center"><?= esc($po['no_model']) ?></td>
                                     <td class="text-center"><?= esc($po['item_type']) ?></td>
                                     <td class="text-center"><?= esc($po['kode_warna']) ?></td>
                                     <td class="text-center"><?= esc($po['color']) ?></td>
