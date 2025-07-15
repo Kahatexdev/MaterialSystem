@@ -69,6 +69,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('tambahMaterial', 'MaterialController::tambahMaterial');
     $routes->post('updateMaterial', 'MasterdataController::updateMaterial');
     $routes->get('deleteMaterial/(:num)/(:num)', 'MasterdataController::deleteMaterial/$1/$2');
+    $routes->post('material/deleteSelected', 'MaterialController::deleteSelected');
     $routes->get('openPO/(:num)', 'MasterdataController::openPO/$1');
     $routes->post('openPO/saveOpenPO/(:num)', 'MasterdataController::saveOpenPO/$1');
     $routes->post('updateArea/(:num)', 'MaterialController::updateArea/$1');
