@@ -122,7 +122,7 @@
                                         <strong>${item.item_type}</strong>
                                     </div>
                                     <div>
-                                        <button type="button" class="btn btn-white" onclick="hapusCard(${index})">
+                                        <button type="button" class="btn btn-white" onclick="hapusCard(${index}, '${item.item_type ?? ''}')">
                                             <i class="fas fa-trash dark"></i>
                                         </button>
                                         <input type="hidden" class="form-control" name="detail[${index}][id_induk]" value="${item.id_induk ?? ''}">
@@ -162,10 +162,29 @@
     });
 </script>
 <script>
-    function hapusCard(index) {
+    function hapusCard(index, itemType) {
         const card = document.getElementById(`card-${index}`);
         if (card) {
-            card.remove();
+            Swal.fire({
+                title: 'Hapus ' + itemType + ' ?',
+                text: "Apakah Anda yakin ingin menghapus jenis?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal',
+                allowOutsideClick: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    card.remove();
+                    Swal.fire(
+                        'Dihapus!',
+                        itemType + ' berhasil dihapus.',
+                        'success'
+                    );
+                }
+            });
         }
     }
 </script>

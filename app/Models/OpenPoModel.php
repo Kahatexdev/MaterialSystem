@@ -536,7 +536,7 @@ class OpenPoModel extends Model
             ->where('id_induk IS NOT NULL')
             ->where('DATE(open_po.created_at)', $tgl_po)
             ->whereNotIn('kode_warna', ['DDBLK', 'RW'])
-            ->groupBy('open_po.item_type, open_po.kode_warna, open_po.color')
+            ->groupBy('open_po.no_model,open_po.item_type, open_po.kode_warna, open_po.color')
             ->findAll();
     }
 }
