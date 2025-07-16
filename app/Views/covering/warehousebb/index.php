@@ -1,142 +1,155 @@
-<?php $this->extend($role . '/warehousebb/header'); ?>
+<?php $this->extend($role . '/warehouse/header'); ?>
 <?php $this->section('content'); ?>
-
-<?php if (session()->getFlashdata('success')) : ?>
-    <script>
-        $(document).ready(function() {
-            Swal.fire({
-                title: "Success!",
-                html: '<?= session()->getFlashdata('success') ?>',
-                icon: 'success',
-                width: 600,
-                padding: "3em",
-            });
-        });
-    </script>
-<?php endif; ?>
-
-<?php if (session()->getFlashdata('error')) : ?>
-    <script>
-        $(document).ready(function() {
-            Swal.fire({
-                title: "Error!",
-                html: '<?= session()->getFlashdata('error') ?>',
-                icon: 'error',
-                width: 600,
-                padding: "3em",
-            });
-        });
-    </script>
-<?php endif; ?>
-
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <style>
-    .table {
-        border-radius: 15px;
-        /* overflow: hidden; */
-        border-collapse: separate;
-        /* Ganti dari collapse ke separate */
-        border-spacing: 0;
-        /* Pastikan jarak antar sel tetap rapat */
-        overflow: auto;
-        position: relative;
+    .summary-card {
+        border-left: 4px solid #007bff;
     }
 
-    .table th {
-
-        background-color: rgb(8, 38, 83);
-        border: none;
-        font-size: 0.9rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: rgb(255, 255, 255);
+    .summary-card.total-stock {
+        border-left-color: #28a745;
     }
 
-    .table td {
-        border: none;
-        vertical-align: middle;
-        font-size: 0.9rem;
-        padding: 1rem 0.75rem;
+    .summary-card.items-available {
+        border-left-color: #17a2b8;
     }
 
-    .table tr:nth-child(even) {
-        background-color: rgb(237, 237, 237);
+    .summary-card.items-out-of-stock {
+        border-left-color: #dc3545;
     }
 
-    .table th.sticky {
-        position: sticky;
-        top: 0;
-        z-index: 3;
-        background-color: rgb(4, 55, 91);
+    .warehouse-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
     }
 
-    .table td.sticky {
-        position: sticky;
-        left: 0;
-        z-index: 2;
-        background-color: #e3f2fd;
-        box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
+    /* Optional: subtle hover effect */
+    .btn-sm.btn-custom {
+        transition: transform 0.1s ease-in-out;
+    }
+
+    .btn-sm.btn-custom:hover {
+        transform: scale(1.02);
     }
 </style>
+
 <div class="container-fluid py-4">
+    <!-- Flash Messages -->
+    <?php if (session()->getFlashdata('success')) : ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => Swal.fire('Success!', '<?= session()->getFlashdata('success') ?>', 'success'));
+        </script>
+    <?php endif; ?>
+    <?php if (session()->getFlashdata('error')) : ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => Swal.fire('Error!', '<?= session()->getFlashdata('error') ?>', 'error'));
+        </script>
+    <?php endif; ?>
+
     <div class="card card-frame">
         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 font-weight-bolder">Stock Bahan Baku </h5>
-                <div class="d-flex">
-                    <button class="btn bg-gradient-info" data-bs-toggle="modal" data-bs-target="#addModal">
-                        <i class="fas fa-plus"></i> Bahan Baku
-                    </button>
-                    <button class="btn bg-gradient-success ms-2" onclick="window.location.href='<?= base_url($role . '/warehouseBB/BahanBakuCovPdf') ?>'">
-                        <i class="fas fa-file-excel me-2"></i> Export
-                    </button>
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-0 font-weight-bolder">Stock Bahan Baku</h5>
+                </div>
+                <div class="col-md-6">
+                    <div class="row g-2 justify-content-md-end">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                                <input type="text" id="searchInput" class="form-control" placeholder="Cari jenis barang...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn bg-gradient-info w-100" data-bs-toggle="modal" data-bs-target="#addModal">
+                                <i class="fas fa-plus"></i> Tambah
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn bg-gradient-success w-100" onclick="window.location.href='<?= base_url($role . '/warehouseBB/BahanBakuCovPdf') ?>'">
+                                <i class="fas fa-file-excel me-2"></i> Export
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Tabel Data -->
-    <div class="card mt-4">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table" id="dataTable">
-                    <thead>
-                        <tr>
-                            <th class="sticky text-center">No</th>
-                            <th class="sticky text-center">Jenis</th>
-                            <th class="sticky text-center">Denier</th>
-                            <th class="sticky text-center">Warna</th>
-                            <th class="sticky text-center">Kode Warna</th>
-                            <th class="sticky text-center">Stock</th>
-                            <th class="sticky text-center">Keterangan</th>
-                            <th class="sticky text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php $no = 1; ?>
-                        <?php foreach ($warehouseBB as $list) : ?>
-                            <tr>
-                                <td class="text-center"><?= $no++; ?></td>
-                                <td class="text-center"><?= $list['jenis_benang']; ?></td>
-                                <td class="text-center"><?= $list['denier']; ?></td>
-                                <td class="text-center"><?= $list['warna']; ?></td>
-                                <td class="text-center"><?= $list['kode']; ?></td>
-                                <td class="text-center"><?= $list['kg']; ?></td>
-                                <td class="text-center"><?= $list['keterangan']; ?></td>
-                                <td class="text-center">
-                                    <!-- button modal edit -->
-                                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $list['idstockbb'] ?>">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+    <!-- Grid View -->
+    <div class="row g-3 mt-3" id="warehouseGrid">
+        <?php if (empty($warehouseBB)) : ?>
+            <div class="col-12">
+                <div class="alert alert-info text-center">Belum ada data stok.</div>
             </div>
-        </div>
+        <?php else : ?>
+            <?php foreach ($warehouseBB as $item) : ?>
+                <div class="col-4 warehouse-card"
+                    data-jenis="<?= $item['jenis_benang'] ?? '' ?>"
+                    data-denier="<?= $item['denier'] ?? '' ?>"
+                    data-warna="<?= $item['warna'] ?? '' ?>"
+                    data-kode="<?= $item['kode'] ?? '' ?>"
+                    data-kg="<?= $item['kg'] ?? '' ?>"
+                    data-keterangan="<?= $item['keterangan'] ?? '' ?>">
+                    <div class="card h-100 border">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                            <h6 class="mb-0 text-truncate"><?= $item['jenis_benang'] ?></h6>
+                            <span class="badge <?= $item['status'] == 'ada' ? 'bg-gradient-info' : 'bg-gradient-secondary' ?>">
+                                <?= ucfirst($item['status']) ?>
+                            </span>
+                        </div>
+                        <div class="card-body small">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Jenis:</span> <span class="fw-bold"><?= $item['jenis_benang'] ?></span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Denier:</span> <span class="fw-bold"><?= $item['denier'] ?></span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Warna:</span> <span class="fw-bold"><?= $item['warna'] ?? '-' ?></span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Kode Warna:</span> <span class="fw-bold"><?= $item['kode'] ?? '-' ?></span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Stock:</span> <span class="fw-bold"><?= $item['kg'] ?> Kg</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Keterangan:</span> <span class="fw-bold"><?= $item['keterangan'] ?? '' ?></span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white">
+                            <div class="row g-2 mb-2">
+                                <div class="col-12 col-md-6 d-grid">
+                                    <button type="button" class="btn bg-gradient-info btn-sm btn-custom" data-bs-toggle="modal" data-bs-target="#modalPemasukan<?= $item['idstockbb'] ?>">
+                                        <i class="fas fa-plus me-1"></i> Pemasukan
+                                    </button>
+                                </div>
+                                <div class="col-12 col-md-6 d-grid">
+                                    <button type="button" class="btn bg-gradient-danger btn-sm btn-custom <?= $item['kg'] <= 0 ? 'disabled' : '' ?>"
+                                        data-bs-toggle="modal" data-bs-target="#modalPengeluaran<?= $item['idstockbb'] ?>" <?= $item['kg'] <= 0 ? 'disabled' : '' ?>>
+                                        <i class="fas fa-minus me-1"></i> Pengeluaran
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="d-grid">
+                                <button
+                                    class="btn btn-outline-secondary btn-sm btn-custom"
+                                    data-bs-target="#editModal<?= $item['idstockbb'] ?>" data-bs-toggle="modal">
+                                    <i class="fas fa-edit me-1"></i> Edit Detail
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
+    <div class="mt-3 d-flex justify-content-end">
+        <?= $pager->links('warehouse', 'bootstrap_pagination') ?>
+    </div>
+
 
     <!-- Modal Tambah warehouseBB -->
     <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
@@ -189,7 +202,7 @@
         </div>
     </div>
 
-    <!-- Modal Edit Pemesanan -->
+    <!-- Edit Item Modal -->
     <?php foreach ($warehouseBB as $list) : ?>
         <div class="modal fade" id="editModal<?= $list['idstockbb'] ?>" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -200,6 +213,7 @@
                     </div>
                     <form action="<?= base_url($role . '/warehouseBB/update/' . $list['idstockbb']) ?>" method="POST">
                         <?= csrf_field(); ?>
+                        <input type="hidden" step="0.01" class="form-control" name="kg" value="<?= $list['kg'] ?>" placeholder="Masukkan Stock (Kg)" required>
                         <div class="modal-body">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
@@ -222,13 +236,9 @@
                                     <label class="form-label">Kode Warna</label>
                                     <input type="text" class="form-control" name="kode" value="<?= $list['kode'] ?>" placeholder="Masukkan Kode Warna" required>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Stock (Kg)</label>
-                                    <input type="number" class="form-control" name="kg" value="<?= $list['kg'] ?>" placeholder="Masukkan Stock (Kg)" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-12 mb-3">
                                     <label class="form-label">Keterangan</label>
-                                    <input type="text" class="form-control" name="keterangan" value="<?= $list['keterangan'] ?>" placeholder="Masukkan Keterangan">
+                                    <textarea name="keterangan" id="" class="form-control" placeholder="Masukkan Keterangan"><?= $list['keterangan'] ?></textarea>
                                 </div>
 
                                 <!-- Hidden values for reference -->
@@ -245,11 +255,99 @@
             </div>
         </div>
     <?php endforeach; ?>
+
+    <!-- Modal Pemasukan -->
+    <?php foreach ($warehouseBB as $item) : ?>
+        <div class="modal fade" id="modalPemasukan<?= $item['idstockbb'] ?>" tabindex="-1" aria-labelledby="modalPemasukanLabel<?= $item['idstockbb'] ?>" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-gradient-info text-white">
+                        <h5 class="modal-title" id="modalPemasukanLabel<?= $item['idstockbb'] ?>">Pemasukan Stok (Kg)</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="<?= base_url($role . '/warehouseBB/pemasukan') ?>" method="POST">
+                        <input type="hidden" class="form-control" name="denier" value="<?= $item['denier'] ?>" placeholder="Masukkan Denier">
+                        <input type="hidden" name="jenis_benang" value="<?= $item['jenis_benang'] ?>">
+                        <input type="hidden" class="form-control" name="warna" value="<?= $item['warna'] ?>" placeholder="Masukkan Warna">
+                        <input type="hidden" class="form-control" name="kode" value="<?= $item['kode'] ?>" placeholder="Masukkan Kode Warna">
+                        <input type="hidden" step="0.01" class="form-control" name="kg" value="<?= $item['kg'] ?>" placeholder="Masukkan Stock (Kg)">
+                        <input type="hidden" name="keterangan" id="" class="form-control" placeholder="Masukkan Keterangan" value="<?= $item['keterangan'] ?>"></input>
+
+                        <div class="modal-body">
+                            <input type="hidden" name="idstockbb" value="<?= $item['idstockbb'] ?>">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Jumlah (Kg)</label>
+                                    <input type="number" step="0.01" min="0.01" name="kg" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Jumlah Cones</label>
+                                    <input type="number" name="ttl_cns" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                            <button type="submit" class="btn btn-info">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Pengeluaran -->
+        <div class="modal fade" id="modalPengeluaran<?= $item['idstockbb'] ?>" tabindex="-1" aria-labelledby="modalPengeluaranLabel<?= $item['idstockbb'] ?>" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-gradient-danger text-white">
+                        <h5 class="modal-title" id="modalPengeluaranLabel<?= $item['idstockbb'] ?>">Pengeluaran Stock (Kg)</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="<?= base_url($role . '/warehouseBB/pengeluaran') ?>" method="POST">
+                        <input type="hidden" class="form-control" name="denier" value="<?= $item['denier'] ?>" placeholder="Masukkan Denier">
+                        <input type="hidden" name="jenis_benang" value="<?= $item['jenis_benang'] ?>">
+                        <input type="hidden" class="form-control" name="warna" value="<?= $item['warna'] ?>" placeholder="Masukkan Warna">
+                        <input type="hidden" class="form-control" name="kode" value="<?= $item['kode'] ?>" placeholder="Masukkan Kode Warna">
+                        <input type="hidden" step="0.01" class="form-control" name="kg" value="<?= $item['kg'] ?>" placeholder="Masukkan Stock (Kg)">
+                        <input type="hidden" name="keterangan" id="" class="form-control" placeholder="Masukkan Keterangan" value="<?= $item['keterangan'] ?>"></input>
+
+                        <div class="modal-body">
+                            <input type="hidden" name="idstockbb" value="<?= $item['idstockbb'] ?>">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Jumlah (Kg)</label>
+                                    <input type="number" step="0.01" min="0.01" name="kg" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Jumlah Cones</label>
+                                    <input type="number" name="ttl_cns" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                            <button type="submit" class="btn btn-danger">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    <?php endforeach; ?>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    $(document).ready(function() {
-        $('#dataTable').DataTable({
-            "responsive": true,
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const cards = document.querySelectorAll('.warehouse-card');
+
+        searchInput.addEventListener('input', function() {
+            const term = this.value.trim().toLowerCase();
+            cards.forEach(card => {
+                const jenis = (card.getAttribute('data-jenis') || '').toLowerCase();
+                // tampilkan card jika jenis mengandung term, selain itu sembunyikan
+                card.style.display = jenis.includes(term) ? '' : 'none';
+            });
         });
     });
 </script>

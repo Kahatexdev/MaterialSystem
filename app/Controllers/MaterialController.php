@@ -383,4 +383,20 @@ class MaterialController extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menghapus data']);
         }
     }
+
+    public function deleteSelected()
+    {
+        if ($this->request->isAJAX()) {
+            $ids = $this->request->getJSON()->ids ?? [];
+
+            if (!empty($ids)) {
+                $this->materialModel->whereIn('id_material', $ids)->delete();
+                return $this->response->setJSON(['status' => 'success', 'message' => 'Data berhasil dihapus.']);
+            } else {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Tidak ada data untuk dihapus.']);
+            }
+        }
+
+        return redirect()->back()->with('error', 'Permintaan tidak valid.');
+    }
 }
