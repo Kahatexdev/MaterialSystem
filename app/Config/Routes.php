@@ -69,6 +69,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('tambahMaterial', 'MaterialController::tambahMaterial');
     $routes->post('updateMaterial', 'MasterdataController::updateMaterial');
     $routes->get('deleteMaterial/(:num)/(:num)', 'MasterdataController::deleteMaterial/$1/$2');
+    $routes->post('material/deleteSelected', 'MaterialController::deleteSelected');
     $routes->get('openPO/(:num)', 'MasterdataController::openPO/$1');
     $routes->post('openPO/saveOpenPO/(:num)', 'MasterdataController::saveOpenPO/$1');
     $routes->post('updateArea/(:num)', 'MaterialController::updateArea/$1');
@@ -438,6 +439,8 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('warehouseBB', 'CoveringWarehouseBBController::index');
     $routes->post('warehouseBB/store', 'CoveringWarehouseBBController::store');
     $routes->post('warehouseBB/update/(:any)', 'CoveringWarehouseBBController::update/$1');
+    $routes->post('warehouseBB/pemasukan', 'CoveringWarehouseBBController::pemasukan');
+    $routes->post('warehouseBB/pengeluaran', 'CoveringWarehouseBBController::pengeluaran');
     $routes->get('warehouseBB/BahanBakuCovPdf', 'PdfController::BahanBakuCovPdf');
     //Pemesanan
     $routes->get('pemesanan', 'CoveringPemesananController::index');

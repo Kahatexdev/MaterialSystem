@@ -52,6 +52,9 @@
                     <h5 class="mb-0 font-weight-bolder">Data Material <?= $no_model ?></h5>
                 </div>
                 <div class="group">
+                    <button id="btn-delete-selected" class="btn btn-danger me-2">
+                        <i class="fas fa-trash"></i> Hapus Terpilih
+                    </button>
                     <button type="button" class="btn btn-outline-info me-2" data-bs-toggle="modal" data-bs-target="#ubahAreaModal">
                         <i class="ni ni-building me-2"></i>Ubah Area
                     </button>
@@ -77,6 +80,7 @@
                 <table id="dataTable" class="display text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>
                         <tr>
+                            <th class="text-center"></th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Style Size</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Inisial</th>
@@ -94,6 +98,9 @@
                     <tbody>
                         <?php foreach ($orderData as $data): ?>
                             <tr>
+                                <td>
+                                    <input type="checkbox" class="form-check delete-checkbox" data-id="<?= $data['id_material'] ?>">
+                                </td>
                                 <td><?= $data['style_size'] ?></td>
                                 <td><?= $data['area'] ?></td>
                                 <td><?= $data['inisial'] ?></td>
@@ -811,6 +818,50 @@
             });
         });
 
+    });
+</script>
+<script>
+    document.getElementById('btn-delete-selected').addEventListener('click', function() {
+        const selected = Array.from(document.querySelectorAll('.delete-checkbox:checked'))
+            .map(cb => cb.getAttribute('data-id'));
+
+        if (selected.length === 0) {
+            Swal.fire('Peringatan', 'Tidak ada data yang dipilih.', 'warning');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Yakin ingin menghapus?',
+            text: `Menghapus ${selected.length} data terpilih.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('<?= base_url($role . '/material/deleteSelected') ?>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            ids: selected
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(response => {
+                        Swal.fire('Berhasil', response.message, 'success').then(() => {
+                            location.reload();
+                        });
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        Swal.fire('Error', 'Terjadi kesalahan saat menghapus.', 'error');
+                    });
+            }
+        });
     });
 </script>
 
