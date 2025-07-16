@@ -29,7 +29,7 @@
                     <div class="card-header">
                         <div class="card-header d-flex justify-content-between">
                             <h3 class="card-title">Form Edit Status Celup PO <?= implode(', ', $po) ?></h3>
-                            <a href="<?= base_url($role . '/reqschedule') ?>" class="btn btn-secondary ms-auto">Back</a>
+                            <a href="<?= base_url($role . '/schedule/reqschedule') ?>" class="btn btn-secondary ms-auto">Back</a>
                         </div>
                         <div class="card-header d-flex justify-content-between">
                             <h6 class="badge bg-info text-white">Tanggal Schedule : <?= $data['tgl_schedule'] ?> | Lot Urut : <?= $data['lot_urut'] ?> </h6>

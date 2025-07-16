@@ -29,14 +29,14 @@
                     <div class="card-header">
                         <div class="card-header d-flex justify-content-between">
                             <h3 class="card-title">Form Edit Status Celup PO <?= implode(', ', $po) ?></h3>
-                            <a href="<?= base_url($role . '/reqschedule') ?>" class="btn btn-secondary ms-auto">Back</a>
+                            <a href="<?= base_url($role . '/schedule/reqschedule') ?>" class="btn btn-secondary ms-auto">Back</a>
                         </div>
                         <div class="card-header d-flex justify-content-between">
                             <h6 class="badge bg-info text-white">Tanggal Schedule : <?= $data['tgl_schedule'] ?> | Lot Urut : <?= $data['lot_urut'] ?> </h6>
                         </div>
                     </div>
                     <div class="card-body">
-                        <form id="formUpdate" action="<?= base_url(session('role') . '/updateSchedule/' . $data['id_celup']) ?>" method="post">
+                        <form action="<?= base_url(session('role') . '/updateSchedule/' . $data['id_celup']) ?>" method="post">
                             <div class="row">
                                 <div class="col-md-3">
                                     <!-- No Mesin -->
@@ -126,7 +126,7 @@
                                     <!-- Lot Celup -->
                                     <div class="form-group" id="lotCelupGroup">
                                         <label for="qty_celup">Lot Celup</label>
-                                        <input type="text" class="form-control" name="lot_celup" id="lot_celup" value="<?= $data['lot_celup'] ?>">
+                                        <input type="text" class="form-control" name="lot_celup" id="lot_celup" value="<?= $data['lot_celup'] ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -134,7 +134,7 @@
                                     <div class="form-group" id="tglBonGroup">
                                         <label for="tgl_bon">Tanggal Bon</label>
                                         <!-- input type datetime -->
-                                        <input type="datetime-local" class="form-control" name="tgl_bon" id="tgl_bon" value="<?= $data['tgl_bon'] ?>">
+                                        <input type="datetime-local" class="form-control" name="tgl_bon" id="tgl_bon" value="<?= $data['tgl_bon'] ?>" disabled>
 
                                     </div>
                                 </div>
@@ -142,51 +142,52 @@
                                     <!-- Tanggal Celup -->
                                     <div class="form-group" id="tglCelupGroup">
                                         <label for="tgl_celup">Tanggal Celup</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_celup" id="tgl_celup" value="<?= $data['tgl_celup'] ?>">
+                                        <input type="datetime-local" class="form-control" name="tgl_celup" id="tgl_celup" value="<?= $data['tgl_celup'] ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <!-- Tanggal Bongkar -->
                                     <div class="form-group" id="tglBongkarGroup">
                                         <label for="tgl_bongkar">Tanggal Bongkar</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_bongkar" id="tgl_bongkar" value="<?= $data['tgl_bongkar'] ?>">
+                                        <input type="datetime-local" class="form-control" name="tgl_bongkar" id="tgl_bongkar" value="<?= $data['tgl_bongkar'] ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <!-- Tanggal Press -->
-                                    <div class="form-group" id="tglPressGroup">
+                                    <div class="form-group" id="tglPressOvenGroup">
                                         <label for="tgl_press">Tanggal Press/Oven</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_press_oven" id="tgl_press_oven" value="<?= $data['tgl_press_oven'] ?>">
+                                        <input type="datetime-local" class="form-control" name="tgl_press_oven" id="tgl_press_oven" value="<?= $data['tgl_press_oven'] ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <!-- Tanggal TL -->
                                     <div class="form-group" id="tglTLGroup">
                                         <label for="tgl_tl">Tanggal TL(Tes Luntur)</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_tl" id="tgl_tl" value="<?= $data['tgl_tl'] ?>">
+                                        <input type="datetime-local" class="form-control" name="tgl_tl" id="tgl_tl" value="<?= $data['tgl_tl'] ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <!-- Tanggal TL -->
                                     <div class="form-group" id="tglTLGroup">
                                         <label for="tgl_tl">Tanggal Tes Lab</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_teslab" id="tgl_teslab" value="<?= $data['tgl_teslab'] ?>">
+                                        <input type="datetime-local" class="form-control" name="tgl_teslab" id="tgl_teslab" value="<?= $data['tgl_teslab'] ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <!-- Tanggal Rajut Pagi -->
                                     <div class="form-group" id="tglRajutGroup">
                                         <label for="tgl_rajut">Tanggal Rajut Pagi</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_rajut_pagi" id="tgl_rajut_pagi" value="<?= $data['tgl_rajut_pagi'] ?>">
+                                        <input type="datetime-local" class="form-control" name="tgl_rajut_pagi" id="tgl_rajut_pagi" value="<?= $data['tgl_rajut_pagi'] ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <!-- Tanggal Serah Terima ACC -->
                                     <div class="form-group" id="tglSTGroup">
                                         <label for="serah_terima">Serah Terima ACC</label>
-                                        <input type="datetime-local" class="form-control" name="serah_terima_acc" id="serah_terima_acc" value="<?= $data['serah_terima_acc'] ?>">
+                                        <input type="datetime-local" class="form-control" name="serah_terima_acc" id="serah_terima_acc" value="<?= $data['serah_terima_acc'] ?>" disabled>
                                     </div>
                                 </div>
+
                                 <div class="col-md-3">
                                     <!-- Tanggal ACC -->
                                     <div class="form-group" id="tglACCGroup">
@@ -202,24 +203,24 @@
                                     </div>
                                 </div>
                                 <div class="col-md-3">
-                                    <!-- Tanggal Matching -->
+                                    <!-- Tanggal Reject -->
                                     <div class="form-group" id="tglMatchingGroup">
                                         <label for="tgl_matching">Tanggal Matching</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_matching" id="tgl_matching" value="<?= $data['tgl_matching'] ?>">
+                                        <input type="datetime-local" class="form-control" name="tgl_matching" id="tgl_matching" value="<?= $data['tgl_matching'] ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <!-- Tanggal Perbaikan -->
                                     <div class="form-group" id="tglPBGroup">
                                         <label for="tgl_pb">Tanggal Perbaikan</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_pb" id="tgl_pb" value="<?= $data['tgl_pb'] ?>">
+                                        <input type="datetime-local" class="form-control" name="tgl_pb" id="tgl_pb" value="<?= $data['tgl_pb'] ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <!-- Tanggal Kelos -->
                                     <div class="form-group" id="tglKelosGroup">
                                         <label for="tgl_kelos">Tanggal Kelos</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_kelos" id="tgl_kelos" value="<?= $data['tgl_kelos'] ?>">
+                                        <input type="datetime-local" class="form-control" name="tgl_kelos" id="tgl_kelos" value="<?= $data['tgl_kelos'] ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -231,9 +232,9 @@
                                 </div>
                             </div>
 
-                            <div class="text-end">
+                            <!-- <div class="text-end">
                                 <button type="submit" class="btn btn-info w-100">Simpan</button>
-                            </div>
+                            </div> -->
                         </form>
                     </div>
                 <?php endforeach; ?>
@@ -245,19 +246,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <script>
-    document.getElementById('formUpdate').addEventListener('submit', function(e) {
-        const lot = document.getElementById('lot_celup').value.trim();
 
-        if (lot === '') {
-            e.preventDefault(); // hentikan submit
-            Swal.fire({
-                icon: 'warning',
-                title: 'Lot Kosong',
-                text: 'Lot Celup Belum Diisi',
-                confirmButtonText: 'OK'
-            });
-        }
-    });
 </script>
 
 <?php $this->endSection(); ?>
