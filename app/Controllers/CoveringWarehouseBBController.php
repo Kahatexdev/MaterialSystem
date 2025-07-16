@@ -59,6 +59,18 @@ class CoveringWarehouseBBController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Semua field wajib diisi.');
         }
 
+        // Cek duplikasi berdasarkan denier, jenis_benang, warna, kode
+        $existing = $this->warehouseBBModel
+            ->where('denier', $data['denier'])
+            ->where('jenis_benang', $data['jenis_benang'])
+            ->where('warna', $data['warna'])
+            ->where('kode', $data['kode'])
+            ->first();
+
+        if ($existing) {
+            return redirect()->back()->withInput()->with('error', 'Data dengan kombinasi Denier, Jenis Benang, Warna, dan Kode tersebut sudah ada.');
+        }
+
         // Insert into history stock
         $historyData = [
             'denier' => $data['denier'],
