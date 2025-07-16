@@ -203,11 +203,15 @@
         <div class="card-body">
             <form method="post" action="<?= base_url($role . '/schedule/reqschedule') ?>">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                    <h3 class="mb-0 text-center text-md-start">Request Schedule Mesin Celup</h3>
+                    <h3 class="mb-0 text-center text-md-start">Schedule Mesin Celup</h3>
                     <div class="d-flex flex-column flex-md-row gap-2 align-items-center">
                         <div class="d-flex flex-column">
-                            <label for="filter_tglsch" class="form-label">Tanggal Schedule</label>
-                            <input type="date" id="filter_tglsch" name="filter_tglsch" class="form-control" placeholder="Tanggal Schedule">
+                            <label for="filter_tglsch" class="form-label">Tgl Schedule(Dari)</label>
+                            <input type="date" id="filter_tglsch" name="filter_tglsch" class="form-control" value="<?= old('filter_tglsch') ?>">
+                        </div>
+                        <div class="d-flex flex-column">
+                            <label for="filter_tglschsampai" class="form-label">Tgl Schedule(Sampai)</label>
+                            <input type="date" id="filter_tglschsampai" name="filter_tglschsampai" class="form-control" value="<?= old('filter_tglschsampai') ?>">
                         </div>
                         <div class="d-flex flex-column">
                             <label for="filter_nomodel" class="form-label">No Model / Kode Warna</label>
