@@ -230,7 +230,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3"><label class="form-label">Jenis Barang</label><input type="text" class="form-control" name="jenis" required></div>
                                 <div class="mb-3"><label class="form-label">Jenis Mesin</label><input type="text" class="form-control" name="jenis_mesin"></div>
-                                <div class="mb-3"><label class="form-label">DR (Daurasio)</label><input type="text" class="form-control" name="dr"></div>
+                                <div class="mb-3"><label class="form-label">DR (Draw Rasio)</label><input type="text" class="form-control" name="dr"></div>
                                 <div class="mb-3"><label class="form-label">Jenis Cover</label><select class="form-select" name="jenis_cover" required>
                                         <option value="">Pilih...</option>
                                         <option value="SINGLE">SINGLE</option>
@@ -242,6 +242,7 @@
                                         <option value="MYSTY">MYSTY</option>
                                         <option value="POLYESTER">POLYESTER</option>
                                         <option value="NYLON">NYLON</option>
+                                        <option value="RECYCLED">RECYCLED</option>
                                     </select>
                                 </div>
                             </div>

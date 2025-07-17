@@ -101,7 +101,9 @@ class CoveringWarehouseController extends BaseController
         $jenis = $this->request->getPost('jenis');
         $color = $this->request->getPost('color');
         $code = $this->request->getPost('code');
-        $existingStock = $this->coveringStockModel->getStockByJenisColorCode($jenis, $color, $code);
+        $mesin = $this->request->getPost('jenis_mesin');
+        // dd($mesin);
+        $existingStock = $this->coveringStockModel->getStockByJenisColorCodeMesin($jenis, $color, $code, $mesin);
         if ($existingStock) {
             return redirect()->back()->withInput()->with('error', 'Data stok sudah ada! </br> Silahkan update stok yang sudah ada.');
         }
@@ -382,5 +384,4 @@ class CoveringWarehouseController extends BaseController
         ];
         return view($this->role . '/schedule/reqschedule', $data);
     }
-
 }
