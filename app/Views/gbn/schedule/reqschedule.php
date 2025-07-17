@@ -256,7 +256,7 @@
                                 <td><?= $no++; ?></td>
                                 <td><?= $data['no_mesin']; ?></td>
                                 <?php
-                                $poFull = $order['PO'];
+                                $poFull = $data['no_model'];
                                 $poDisplay = strlen($poFull) > 55 ? substr($poFull, 0, 52) . '...' : $poFull;
                                 ?>
                                 <td><?= $poDisplay ?></td>
