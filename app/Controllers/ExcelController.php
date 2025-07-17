@@ -3091,6 +3091,24 @@ class ExcelController extends BaseController
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
+        // 1. Atur ukuran kertas jadi A4
+        $sheet->getPageSetup()
+            ->setPaperSize(PageSetup::PAPERSIZE_A4);
+
+        // 2. Atur orientasi jadi portrait
+        $sheet->getPageSetup()
+            ->setOrientation(PageSetup::ORIENTATION_PORTRAIT);
+        // 3. (Opsional) Atur scaling, agar muat ke 1 halaman
+        $sheet->getPageSetup()
+            ->setFitToWidth(1)
+            ->setFitToHeight(0)    // 0 artinya auto height
+            ->setFitToPage(true); // aktifkan fitting
+
+        // 4. (Opsional) Atur margin supaya tidak terlalu sempit
+        $sheet->getPageMargins()->setTop(0.4)
+            ->setBottom(0.4)
+            ->setLeft(0.4)
+            ->setRight(0.2);
         // Merge area logo dan autosize kolom A dan B
         $sheet->mergeCells('A1:B2');
         $sheet->getColumnDimension('A')->setWidth(10);
