@@ -26,6 +26,7 @@ use App\Models\CoveringStockModel;
 use App\Models\PoTambahanModel;
 use App\Models\HistoryStock;
 use App\Models\PemesananSpandexKaretModel;
+use App\Models\WarehouseBBModel;
 use PhpOffice\PhpSpreadsheet\Style\{Border, Alignment, Fill};
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
@@ -58,6 +59,7 @@ class ExcelController extends BaseController
     protected $poPlusModel;
     protected $historyStock;
     protected $pemesananSpandexKaretModel;
+    protected $warehouseBBModel;
 
     public function __construct()
     {
@@ -80,6 +82,7 @@ class ExcelController extends BaseController
         $this->poPlusModel = new PoTambahanModel();
         $this->historyStock = new HistoryStock();
         $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
+        $this->warehouseBBModel = new WarehouseBBModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -9542,6 +9545,453 @@ class ExcelController extends BaseController
         header('Cache-Control: max-age=0');
 
         // Tulis file excel ke output
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function BahanBakuCovExcel()
+    {
+        // 1. Ambil data dan grup
+        $jenis = $this->request->getGet('jenis_benang');
+        $data = $this->warehouseBBModel->getDataByJenis($jenis);
+        if (!$data) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Tidak ada data.');
+        }
+
+        // 2. Inisialisasi Spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Stock Bahan Baku');
+
+        $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4);
+        $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_PORTRAIT);
+        $spreadsheet->getDefaultStyle()->getFont()->setName('Arial');
+        $sheet->getStyle('D1:D3')->getFont()->setSize(8);
+        $sheet->getStyle('A4:K50')->getFont()->setSize(7);
+
+        // 3. Header umum
+        $sheet->mergeCells('A1:C2');
+        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+        $drawing->setName('Logo');
+        $drawing->setDescription('Logo Perusahaan');
+        $drawing->setPath('assets/img/logo-kahatex.png');
+        $drawing->setCoordinates('B1');
+        $drawing->setHeight(35);
+        $drawing->setOffsetX(25);
+        $drawing->setOffsetY(5);
+        $drawing->setWorksheet($sheet);
+        $sheet->mergeCells('A3:C3');
+        $sheet->setCellValue('A3', 'PT. KAHATEX');
+        $sheet->getStyle('A3')->getFont()->setSize(8);
+        $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->setCellValue('A2', 'Tanggal:');
+        $sheet->setCellValue('B2', date('d M Y'));
+
+        $sheet->mergeCells('D1:K1');
+        $sheet->setCellValue('D1', 'FORMULIR');
+        $sheet->getStyle('D1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+        $sheet->getStyle('D1')->getFill()->getStartColor()->setRGB('99FFFF');
+        $sheet->mergeCells('D2:K2');
+        $sheet->setCellValue('D2', 'DEPARTEMEN COVERING');
+        $sheet->mergeCells('D3:K3');
+        $sheet->setCellValue('D3', 'STOCK BAHAN BAKU PER HARI');
+        $sheet->getStyle('A1:K3')->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $sheet->mergeCells('A4:C4');
+        $sheet->setCellValue('A4', 'No. Dokumen');
+        $sheet->setCellValue('D4', 'FOR-COV-092/REV_00/HAL_1/3');
+        $sheet->getStyle('A4:K4')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        $sheet->mergeCells('G4:H4');
+        $sheet->setCellValue('G4', 'Tanggal Revisi');
+        $sheet->mergeCells('I4:K4');
+        $sheet->setCellValue('I4', '07 Januari 2019');
+        $sheet->getStyle('I4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Format tanggal: Rabu, 16 Jul 2025
+        $sheet->mergeCells('B5:K5');
+        $timestamp = strtotime($data[0]['created_at']);
+        $hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        $bulan = [
+            1 => 'Jan',
+            2 => 'Feb',
+            3 => 'Mar',
+            4 => 'Apr',
+            5 => 'Mei',
+            6 => 'Jun',
+            7 => 'Jul',
+            8 => 'Agu',
+            9 => 'Sep',
+            10 => 'Okt',
+            11 => 'Nov',
+            12 => 'Des'
+        ];
+        $hari = $hari[date('w', $timestamp)];
+        $tgl = date('j', $timestamp);
+        $bln = $bulan[(int)date('n', $timestamp)];
+        $thn = date('Y', $timestamp);
+        $sheet->setCellValue('A5', 'Tanggal');
+        $sheet->setCellValue('B5', ': ' . "{$hari}, {$tgl} {$bln} {$thn}");
+        $sheet->mergeCells('B6:K6');
+        $sheet->setCellValue('A6', 'Jenis');
+        $sheet->setCellValue('B6', ': ' . $data[0]['jenis_benang']);
+
+        $sheet->getStyle('A1:K4')->getFont()->setBold(true);
+
+        $columnWidths = [
+            'A' => 10,  // Denier
+            'B' => 10,  // Warna
+            'C' => 10,  // Code
+            'D' => 10,   // Stock (Kg)
+            'E' => 15,  // Keterangan
+            'F' => 10,   // Kosong atau dipakai untuk merge
+            'G' => 10,  // Denier
+            'H' => 10,  // Warna
+            'I' => 10,  // Code
+            'J' => 10,   // Stock (Kg)
+            'K' => 15,  // Keterangan
+        ];
+
+        foreach ($columnWidths as $col => $width) {
+            $sheet->getColumnDimension($col)->setWidth($width);
+        }
+
+        //Outline Border
+        // 1. Top double border dari A1 ke K1
+        $sheet->getStyle('A1:K1')->applyFromArray([
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        // 2. Right double border dari K1 ke K50
+        $sheet->getStyle('K1:K50')->applyFromArray([
+            'borders' => [
+                'right' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        // 3. Bottom double border dari A50 ke K50 
+        $sheet->getStyle('A50:K50')->applyFromArray([
+            'borders' => [
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        // 4. Left double border dari A1 ke A50
+        $sheet->getStyle('A1:A50')->applyFromArray([
+            'borders' => [
+                'left' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+
+        //Border Thin
+        //Title Departemen Covering
+        $sheet->getStyle('D2:K2')->applyFromArray([
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+        //Logo Kahatex
+        $sheet->getStyle('C1:C3')->applyFromArray([
+            'borders' => [
+                'right' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+        //Border Atas Bawah No Dokumen
+        $sheet->getStyle('A4:K4')->applyFromArray([
+            'borders' => [
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_DOUBLE,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'top' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+        //Border Kanan No Dokumen
+        $sheet->getStyle('C4')->applyFromArray([
+            'borders' => [
+                'right' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+        //Border Kiri Kanan Tanggal Revisi
+        $sheet->getStyle('G4:H4')->applyFromArray([
+            'borders' => [
+                'left' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'right' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+        //Border Isi Tabel
+        $thinInside = [
+            'borders' => [
+                'vertical' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+                'horizontal' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ];
+        //Tanpa Border
+        $noBorder = [
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_NONE,
+                ],
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_NONE,
+                ],
+            ],
+        ];
+        //Border Atas 
+        $sheet->getStyle("A7:E7")->getBorders()->applyFromArray([
+            'top' => [
+                'borderStyle' => Border::BORDER_THIN,
+                'color' => ['rgb' => '000000'],
+            ]
+        ]);
+        $sheet->getStyle("G7:K7")->getBorders()->applyFromArray([
+            'top' => [
+                'borderStyle' => Border::BORDER_THIN,
+                'color' => ['rgb' => '000000'],
+            ]
+        ]);
+        // Border kanan untuk kolom E
+        $sheet->getStyle('E7:E42')->applyFromArray([
+            'borders' => [
+                'right' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+        // Border kiri untuk kolom G
+        $sheet->getStyle('G7:G42')->applyFromArray([
+            'borders' => [
+                'left' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+        //Border bawah untuk baris 42
+        $sheet->getStyle('A42:K42')->applyFromArray([
+            'borders' => [
+                'bottom' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
+        //Border Isi Tabel
+        $sheet->getStyle('A7:E42')->applyFromArray($thinInside);
+        $sheet->getStyle('G7:K42')->applyFromArray($thinInside);
+
+        //Merge dan Hilangkan Border Atas dan Bawah di kolom F
+        $sheet->mergeCells('F7:F42');
+        $sheet->getStyle('F7:F42')->applyFromArray($noBorder);
+
+        //Penulisan header kolom
+        $firstHeaderRow = 7;
+        $secondHeaderRow = 8;
+        $endRow = 42;
+        $sheet->fromArray(['Denier', 'Warna', 'Code', 'Stock', 'Keterangan'], null, "A{$firstHeaderRow}");
+        $sheet->setCellValue("D{$secondHeaderRow}", 'Kg');
+        $sheet->setCellValue("J{$secondHeaderRow}", 'Kg');
+        $sheet->fromArray(['Denier', 'Warna', 'Code', 'Stock', 'Keterangan'], null, "G{$firstHeaderRow}");
+        // Merge kolom A, B, C, dan E baris 7-8
+        $sheet->mergeCells("A{$firstHeaderRow}:A{$secondHeaderRow}");
+        $sheet->mergeCells("B{$firstHeaderRow}:B{$secondHeaderRow}");
+        $sheet->mergeCells("C{$firstHeaderRow}:C{$secondHeaderRow}");
+        $sheet->mergeCells("E{$firstHeaderRow}:E{$secondHeaderRow}");
+        // Merge kolom G, H, I, dan K baris 7-8
+        $sheet->mergeCells("G{$firstHeaderRow}:G{$secondHeaderRow}");
+        $sheet->mergeCells("H{$firstHeaderRow}:H{$secondHeaderRow}");
+        $sheet->mergeCells("I{$firstHeaderRow}:I{$secondHeaderRow}");
+        $sheet->mergeCells("K{$firstHeaderRow}:K{$secondHeaderRow}");
+
+        $sheet->getStyle("A{$firstHeaderRow}:K{$firstHeaderRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle("A{$secondHeaderRow}:K{$secondHeaderRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+
+        //Mulai loop data
+        $currentRow = $secondHeaderRow + 1;
+        $grouped = [];
+        foreach ($data as $item) {
+            // asumsikan tiap $item berisi keys: denier, warna, kode, kg, keterangan
+            $grouped[$item['denier']][] = $item;
+        }
+
+        // Mulai loop data (tetap pakai $currentRow = $secondHeaderRow + 1;)
+        foreach ($grouped as $denierValue => $rows) {
+            $startRow = $currentRow;
+            $first = true;
+
+            foreach ($rows as $entry) {
+                // Tentukan target kolom & baris
+                if ($currentRow <= $endRow) {
+                    // sisi kiri: A–E
+                    $cols = ['A', 'B', 'C', 'D', 'E'];
+                    $row  = $currentRow;
+                } else {
+                    // sisi kanan: G–K, mulai dari baris 9
+                    $cols = ['G', 'H', 'I', 'J', 'K'];
+                    $row  = $secondHeaderRow + ($currentRow - $endRow);
+                }
+
+                // Cetak Denier hanya di kolom pertama ($cols[0]) & hanya sekali per group
+                if ($first) {
+                    $sheet->setCellValue("{$cols[0]}{$row}", $denierValue);
+                    $first = false;
+                }
+                // Cetak sisa fields
+                $sheet->setCellValue("{$cols[1]}{$row}", $entry['warna']);
+                $sheet->setCellValue("{$cols[2]}{$row}", $entry['kode']);
+                $sheet->setCellValue("{$cols[3]}{$row}", $entry['kg']);
+                $sheet->setCellValue("{$cols[4]}{$row}", $entry['keterangan']);
+
+                // Alignment center untuk A–E atau G–K
+                $sheet->getStyle("{$cols[0]}{$row}:{$cols[4]}{$row}")
+                    ->getAlignment()
+                    ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+                $currentRow++;
+            }
+
+            $endGroupRow = $currentRow - 1;
+            // Merge Denier di kolom pertama kelompok, hanya jika lebih dari 1 baris
+            if ($endGroupRow > $startRow) {
+                // 1) Jika seluruh group masih di kiri (≤ $endRow)
+                if ($endGroupRow <= $endRow) {
+                    $sheet->mergeCells("A{$startRow}:A{$endGroupRow}");
+                }
+                // 2) Jika seluruh group sudah di kanan (> $endRow)
+                elseif ($startRow > $endRow) {
+                    // hitung baris kanan
+                    $rightStart = $secondHeaderRow + ($startRow  - $endRow);
+                    $rightEnd   = $secondHeaderRow + ($endGroupRow - $endRow);
+                    $sheet->mergeCells("G{$rightStart}:G{$rightEnd}");
+                }
+                // 3) Jika group terpotong batas (sisi kiri & sisi kanan)
+                else {
+                    // kiri: dari startRow sampai endRow
+                    $sheet->mergeCells("A{$startRow}:A{$endRow}");
+                    // kanan: dari baris 9 (secondHeaderRow+1) sampai mapped end
+                    $rightEnd   = $secondHeaderRow + ($endGroupRow - $endRow);
+                    $sheet->mergeCells("G" . ($secondHeaderRow + 1) . ":G{$rightEnd}");
+                }
+
+                // styling alignment untuk kedua merge
+                // kiri
+                if ($startRow <= $endRow) {
+                    $mergeEnd = min($endGroupRow, $endRow);
+                    $sheet->getStyle("A{$startRow}:A{$mergeEnd}")
+                        ->getAlignment()
+                        ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                        ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                }
+                // kanan
+                if ($endGroupRow > $endRow) {
+                    $rightStart = max($startRow, $endRow + 1);
+                    $rightStart = $secondHeaderRow + ($rightStart - $endRow);
+                    $rightEnd   = $secondHeaderRow + ($endGroupRow - $endRow);
+                    $sheet->getStyle("G{$rightStart}:G{$rightEnd}")
+                        ->getAlignment()
+                        ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                        ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                }
+            }
+
+            // Hitung total kg untuk grup ini
+            $sumKg = array_sum(array_column($rows, 'kg'));
+
+            // Tentukan target kolom & baris untuk TOTAL, sama seperti di data loop
+            if ($currentRow <= $endRow) {
+                // sisi kiri: A–E, kita pakai A–D untuk total
+                $cols = ['A', 'B', 'C', 'D', 'E'];
+                $row  = $currentRow;
+            } else {
+                // sisi kanan: G–K, kita pakai G–J untuk total
+                $cols = ['G', 'H', 'I', 'J', 'K'];
+                $row  = $secondHeaderRow + ($currentRow - $endRow);
+            }
+
+            // Merge 3 kolom pertama untuk teks "Total"
+            $sheet->mergeCells("{$cols[0]}{$row}:{$cols[2]}{$row}");
+            $sheet->setCellValue("{$cols[0]}{$row}", 'Total');
+            $sheet->getStyle("{$cols[0]}{$row}:{$cols[2]}{$row}")->getFont()->setBold(true);
+
+            // Tulis total kg di kolom ke-4 dari array $cols
+            $sheet->setCellValue("{$cols[3]}{$row}", $sumKg);
+            $sheet->getStyle("{$cols[3]}{$row}")->getFont()->setBold(true);
+
+            // Alignment center
+            $sheet->getStyle("{$cols[0]}{$row}:{$cols[3]}{$row}")
+                ->getAlignment()
+                ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+            // Fill color #99FFFF
+            $sheet->getStyle("{$cols[0]}{$row}:{$cols[4]}{$row}")
+                ->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()
+                ->setRGB('99FFFF');
+
+            $currentRow++;
+        }
+
+        //Penanggung Jawab
+        $sheet->setCellValue('J44', 'Yang Bertanggung Jawab');
+        $sheet->setCellValue('J47', '(' . (session()->get('username') ?? '') . ')');
+        $sheet->getStyle('J44:J47')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // 7. Output ke browser
+        $filename = 'Stock Bahan Baku ' . $jenis . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment;filename=\"{$filename}\"");
+        header('Cache-Control: max-age=0');
+
         $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
