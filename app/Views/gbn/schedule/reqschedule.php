@@ -257,7 +257,7 @@
                                 <td><?= $data['no_mesin']; ?></td>
                                 <?php
                                 $poFull = $data['no_model'];
-                                $poDisplay = strlen($poFull) > 55 ? substr($poFull, 0, 52) . '...' : $poFull;
+                                $poDisplay = strlen($poFull) > 27 ? substr($poFull, 0, 27) . '...' : $poFull;
                                 ?>
                                 <td><?= $poDisplay ?></td>
                                 <td><?= $data['item_type']; ?></td>
