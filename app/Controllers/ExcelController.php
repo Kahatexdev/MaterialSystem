@@ -1306,7 +1306,8 @@ class ExcelController extends BaseController
     public function excelPemasukanCovering()
     {
         $date = $this->request->getGet('date');
-        $data = $this->historyCoveringStockModel->getPemasukanByDate($date);
+        $date2 = $this->request->getGet('date2');
+        $data = $this->historyCoveringStockModel->getPemasukanByDate($date, $date2);
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -1370,7 +1371,8 @@ class ExcelController extends BaseController
     public function excelPengeluaranCovering()
     {
         $date = $this->request->getGet('date');
-        $data = $this->historyCoveringStockModel->getPengeluaranByDate($date);
+        $date2 = $this->request->getGet('date2');
+        $data = $this->historyCoveringStockModel->getPengeluaranByDate($date, $date2);
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();

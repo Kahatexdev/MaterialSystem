@@ -276,10 +276,11 @@ class CoveringWarehouseController extends BaseController
     public function reportPemasukan()
     {
         $selectedDate = $this->request->getGet('date'); // Ambil tanggal dari parameter GET
+        $selectedDate2 = $this->request->getGet('date2'); // Ambil tanggal dari parameter GET
         $pemasukan = [];
 
-        if ($selectedDate) {
-            $pemasukan = $this->historyCoveringStockModel->getPemasukanByDate($selectedDate);
+        if ($selectedDate && $selectedDate2) {
+            $pemasukan = $this->historyCoveringStockModel->getPemasukanByDate($selectedDate, $selectedDate2);
         }
 
         $data = [
@@ -287,7 +288,8 @@ class CoveringWarehouseController extends BaseController
             'title' => 'Warehouse',
             'role' => $this->role,
             'pemasukan' => $pemasukan,
-            'selectedDate' => $selectedDate // Kirim ke view untuk referensi
+            'selectedDate' => $selectedDate, // Kirim ke view untuk referensi
+            'selectedDate2' => $selectedDate2, // Kirim ke view untuk referensi
         ];
 
         return view($this->role . '/warehouse/report-pemasukan', $data);
@@ -297,10 +299,11 @@ class CoveringWarehouseController extends BaseController
     public function reportPengeluaran()
     {
         $selectedDate = $this->request->getGet('date'); // Ambil tanggal dari parameter GET
+        $selectedDate2 = $this->request->getGet('date2');
         $pengeluaran = [];
 
         if ($selectedDate) {
-            $pengeluaran = $this->historyCoveringStockModel->getPengeluaranByDate($selectedDate);
+            $pengeluaran = $this->historyCoveringStockModel->getPengeluaranByDate($selectedDate, $selectedDate2);
         }
 
         $data = [
@@ -308,7 +311,8 @@ class CoveringWarehouseController extends BaseController
             'title' => 'Warehouse',
             'role' => $this->role,
             'pengeluaran' => $pengeluaran,
-            'selectedDate' => $selectedDate // Kirim ke view untuk referensi
+            'selectedDate' => $selectedDate, // Kirim ke view untuk referensi
+            'selectedDate2' => $selectedDate2 // Kirim ke view untuk referensi
         ];
 
         return view($this->role . '/warehouse/report-pengeluaran', $data);
