@@ -58,4 +58,11 @@ class WarehouseBBModel extends Model
             ->orderBy('kg', 'DESC')
             ->paginate($perPage, 'warehouse');
     }
+
+    public function getDataByJenis($jenis)
+    {
+        return $this->select('*')
+            ->where('jenis_benang', $jenis)
+            ->findAll();
+    }
 }

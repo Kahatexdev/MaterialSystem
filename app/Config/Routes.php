@@ -278,7 +278,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     //PO Covering
     $routes->get('poCovering', 'POCoveringController::index');
     $routes->get('po/listTrackingPo/(:any)', 'TrackingPoCoveringController::TrackingPo/$1');
-    $routes->get('po/exportPO/(:any)', 'PdfController::generateOpenPOCovering/$1');
+    $routes->get('po/exportPO/(:any)', 'ExcelController::generateOpenPOCoveringExcel/$1');
     $routes->get('pesanKeCovering/(:any)', 'CoveringPemesananController::pesanKeCovering/$1');
     //Retur
     $routes->get('retur', 'ReturController::index');
@@ -442,6 +442,7 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('warehouseBB/pemasukan', 'CoveringWarehouseBBController::pemasukan');
     $routes->post('warehouseBB/pengeluaran', 'CoveringWarehouseBBController::pengeluaran');
     $routes->get('warehouseBB/BahanBakuCovPdf', 'PdfController::BahanBakuCovPdf');
+    $routes->get('warehouseBB/BahanBakuCovExcel', 'ExcelController::BahanBakuCovExcel');
     //Pemesanan
     $routes->get('pemesanan', 'CoveringPemesananController::index');
     $routes->get('pemesanan/(:any)', 'CoveringPemesananController::pemesanan/$1');
