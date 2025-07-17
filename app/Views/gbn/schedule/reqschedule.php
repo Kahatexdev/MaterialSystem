@@ -255,7 +255,11 @@
                             <tr>
                                 <td><?= $no++; ?></td>
                                 <td><?= $data['no_mesin']; ?></td>
-                                <td><?= $data['no_model']; ?></td>
+                                <?php
+                                $poFull = $order['PO'];
+                                $poDisplay = strlen($poFull) > 55 ? substr($poFull, 0, 52) . '...' : $poFull;
+                                ?>
+                                <td><?= $poDisplay ?></td>
                                 <td><?= $data['item_type']; ?></td>
                                 <td><?= $data['kode_warna']; ?></td>
                                 <td><?= $data['warna']; ?></td>
