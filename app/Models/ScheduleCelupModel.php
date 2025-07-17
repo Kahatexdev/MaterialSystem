@@ -227,8 +227,8 @@ class ScheduleCelupModel extends Model
                 ->where('schedule_celup.tanggal_schedule <=', $filterTglSchsampai);
         } else {
             // Jika tidak ada filter tanggal, ambil data dari 1 bulan lalu sampai hari ini
-            $builder->where('schedule_celup.tanggal_schedule >=', $lastMonth)
-                ->where('schedule_celup.tanggal_schedule <=', date('Y-m-d'));
+            // $builder->where('schedule_celup.tanggal_schedule >=', $lastMonth)
+            //     ->where('schedule_celup.tanggal_schedule <=', date('Y-m-d'));
         }
 
         // Filter berdasarkan no_model atau kode_warna
