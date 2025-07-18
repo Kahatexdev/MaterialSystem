@@ -1,4 +1,4 @@
-<?php $this->extend($role . '/warehouse/header'); ?>
+<?php $this->extend($role . '/warehousebb/header'); ?>
 <?php $this->section('content'); ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <style>
@@ -67,7 +67,7 @@
                             </button>
                         </div>
                         <div class="col-md-3">
-                            <button class="btn bg-gradient-success w-100" onclick="window.location.href='<?= base_url($role . '/warehouseBB/BahanBakuCovPdf') ?>'">
+                            <button class="btn bg-gradient-success w-100" data-bs-target="#modalExport" data-bs-toggle="modal">
                                 <i class="fas fa-file-excel me-2"></i> Export
                             </button>
                         </div>
@@ -149,7 +149,6 @@
     <div class="mt-3 d-flex justify-content-end">
         <?= $pager->links('warehouse', 'bootstrap_pagination') ?>
     </div>
-
 
     <!-- Modal Tambah warehouseBB -->
     <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
@@ -328,6 +327,36 @@
                             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
                             <button type="submit" class="btn btn-danger">Simpan</button>
                         </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Export warehouseBB -->
+        <div class="modal fade" id="modalExport" tabindex="-1" aria-labelledby="modalExportLabel" aria-hidden="true">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+                    <div class="modal-header text-white">
+                        <h5 class="modal-title" id="modalExportLabel">Export Bahan Baku</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="<?= base_url($role . '/warehouseBB/BahanBakuCovExcel') ?>" method="GET">
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="form-label">Jenis Benang</label>
+                                    <select class="form-control" name="jenis_benang" required>
+                                        <option value="">Pilih Jenis Benang</option>
+                                        <option value="NYLON">NYLON</option>
+                                        <option value="POLYESTER/SPDX/KRT">POLYESTER/SPDX/KRT</option>
+                                        <option value="RECYCLED POLYESTER">RECYCLED POLYESTER</option>
+                                    </select>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                                    <button type="submit" class="btn btn-info">Export</button>
+                                </div>
+                            </div>
                     </form>
                 </div>
             </div>

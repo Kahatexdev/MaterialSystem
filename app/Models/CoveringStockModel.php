@@ -64,13 +64,14 @@ class CoveringStockModel extends Model
             ->getResultArray();
     }
 
-    public function getStockByJenisColorCode($jenis, $color, $code)
+    public function getStockByJenisColorCodeMesin($jenis, $color, $code, $mesin)
     {
         return $this->db->table('stock_covering')
             ->select('*')
             ->where('jenis', $jenis)
             ->where('color', $color)
             ->where('code', $code)
+            ->where('jenis_mesin', $mesin)
             ->get()
             ->getRowArray();
     }

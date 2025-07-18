@@ -18,9 +18,13 @@
             <!-- Filter Tanggal -->
             <div class="row mb-3">
                 <!-- Kolom Input Tanggal -->
-                <div class="col-md-8">
-                    <label for="filterDate" class="form-label fw-bold text-dark">Pilih Tanggal:</label>
+                <div class="col-md-4">
+                    <label for="filterDate" class="form-label fw-bold text-dark">Pilih Tanggal (Awal):</label>
                     <input type="date" id="filterDate" class="form-control shadow-sm" value="<?= esc($selectedDate) ?>">
+                </div>
+                <div class="col-md-4">
+                    <label for="filterDate" class="form-label fw-bold text-dark">Pilih Tanggal (Akhir):</label>
+                    <input type="date" id="filterDate2" class="form-control shadow-sm" value="<?= esc($selectedDate2) ?>">
                 </div>
 
                 <!-- Kolom Aksi -->
@@ -98,37 +102,40 @@
 
         // Filter button
         $('#filterButton').click(function() {
-            let selectedDate = $('#filterDate').val();
-            if (selectedDate) {
-                // Tampilkan tombol export setelah klik filter
+            let d1 = $('#filterDate').val();
+            let d2 = $('#filterDate2').val();
+            if (d1 && d2) {
+                // Tampilkan tombol export
                 $('#exportButton').removeClass('d-none');
-
-                // Redirect ke halaman dengan query string
-                window.location.href = "<?= base_url($role . '/warehouse/reportPemasukan') ?>?date=" + selectedDate;
+                // Redirect dengan dua parameter GET
+                const base = "<?= base_url($role . '/warehouse/reportPemasukan') ?>";
+                window.location.href = `${base}?date=${encodeURIComponent(d1)}&date2=${encodeURIComponent(d2)}`;
             } else {
-                alert('Silakan pilih tanggal terlebih dahulu.');
+                alert('Silakan pilih tanggal awal dan akhir terlebih dahulu.');
             }
         });
 
         // Reset button
         $('#resetButton').click(function() {
-            $('#filterDate').val('');
+            $('#filterDate, #filterDate2').val('');
             window.location.href = "<?= base_url($role . '/warehouse/reportPemasukan') ?>";
         });
 
-        // Cek apakah ada data, jika ya, tampilkan tabel
+        // Jika sudah ada data dari server, tampilkan tabel + export
         <?php if (!empty($pemasukan)) : ?>
             $('#tableContainer').show();
-            $('#exportButton').removeClass('d-none'); // Tampilkan tombol export jika sudah filter dan data ada
+            $('#exportButton').removeClass('d-none');
         <?php endif; ?>
 
-        // Tombol export (aksi bisa diarahkan ke controller yang handle export)
+        // Tombol export ke Excel, sertakan kedua tanggal
         $('#exportButton').click(function() {
-            let selectedDate = $('#filterDate').val();
-            if (selectedDate) {
-                window.location.href = "<?= base_url($role . '/warehouse/excelPemasukanCovering') ?>?date=" + selectedDate;
+            let d1 = $('#filterDate').val();
+            let d2 = $('#filterDate2').val();
+            if (d1 && d2) {
+                const url = "<?= base_url($role . '/warehouse/excelPemasukanCovering') ?>";
+                window.location.href = `${url}?date=${encodeURIComponent(d1)}&date2=${encodeURIComponent(d2)}`;
             } else {
-                alert('Silakan pilih tanggal terlebih dahulu.');
+                alert('Silakan pilih tanggal awal dan akhir terlebih dahulu.');
             }
         });
     });
