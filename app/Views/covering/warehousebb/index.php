@@ -55,7 +55,7 @@
                 </div>
                 <div class="col-md-6">
                     <div class="row g-2 justify-content-md-end">
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <div class="input-group">
                                 <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
                                 <input type="text" id="searchInput" class="form-control" placeholder="Cari jenis barang...">
@@ -67,8 +67,13 @@
                             </button>
                         </div>
                         <div class="col-md-3">
+                            <button class="btn bg-gradient-info w-100" data-bs-toggle="modal" data-bs-target="#modalImport">
+                                <i class="fas fa-file-import me-1"></i> Import
+                            </button>
+                        </div>
+                        <div class="col-md-3">
                             <button class="btn bg-gradient-success w-100" data-bs-target="#modalExport" data-bs-toggle="modal">
-                                <i class="fas fa-file-excel me-2"></i> Export
+                                <i class="fas fa-file-excel me-1"></i> Export
                             </button>
                         </div>
                     </div>
@@ -363,6 +368,11 @@
         </div>
     <?php endforeach; ?>
 </div>
+<script>
+    document.getElementById('modalImport').addEventListener('show.bs.modal', function() {
+        console.log('Modal akan muncul!');
+    });
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>

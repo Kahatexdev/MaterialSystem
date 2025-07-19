@@ -82,13 +82,14 @@ class CoveringWarehouseController extends BaseController
         $status  = $this->request->getGet('status', FILTER_SANITIZE_STRING);
         $mesin   = $this->request->getGet('mesin', FILTER_SANITIZE_STRING);
         $dr      = $this->request->getGet('dr', FILTER_SANITIZE_STRING);
+        $jb      = $this->request->getGet('jenis_benang', FILTER_SANITIZE_STRING);
         $perPage = 9;
 
         // Bangun query dengan chaining
         $builder = $this->coveringStockModel
             ->select('stock_covering.*, IF(stock_covering.ttl_kg > 0, "ada", "habis") AS status')
             ->orderBy('ttl_kg', 'DESC');
-        
+        // dd($builder);
         if ($q) {
             $builder->like('jenis', $q);
         }
@@ -103,6 +104,9 @@ class CoveringWarehouseController extends BaseController
         }
         if ($dr) {
             $builder->where('dr', $dr);
+        }
+        if ($jb) {
+            $builder->where('jenis_benang', $jb);
         }
 
         // Paginate hasilnya
@@ -154,7 +158,7 @@ class CoveringWarehouseController extends BaseController
         $jenisCover = $this->request->getPost('jenis_cover');
         $jenisBenang = $this->request->getPost('jenis_benang');
         // dd($mesin);
-        $existingStock = $this->coveringStockModel->getStockByJenisColorCodeMesin($jenis, $color, $code, $mesin,$dr, $jenisCover, $jenisBenang);
+        $existingStock = $this->coveringStockModel->getStockByJenisColorCodeMesin($jenis, $color, $code, $mesin, $dr, $jenisCover, $jenisBenang);
         if ($existingStock) {
             return redirect()->back()->withInput()->with('error', 'Data stok sudah ada! </br> Silahkan update stok yang sudah ada.');
         }
@@ -440,14 +444,14 @@ class CoveringWarehouseController extends BaseController
         return view($this->role . '/schedule/reqschedule', $data);
     }
 
-     public function importStokBarangJadi()
+    public function importStokBarangJadi()
     {
         $file = $this->request->getFile('file_excel');
         // Validasi file
         if (!$file || !$file->isValid()) {
             return redirect()->back()
-                             ->withInput()
-                             ->with('error', 'File tidak valid atau tidak ditemukan.');
+                ->withInput()
+                ->with('error', 'File tidak valid atau tidak ditemukan.');
         }
 
         // Cek ekstensi dan ukuran maksimal (misal max 5MB)
@@ -455,13 +459,13 @@ class CoveringWarehouseController extends BaseController
         $ext = $file->getExtension();
         if (!in_array($ext, $allowedExt)) {
             return redirect()->back()
-                             ->withInput()
-                             ->with('error', 'Format file tidak didukung. Gunakan .xlsx atau .xls');
+                ->withInput()
+                ->with('error', 'Format file tidak didukung. Gunakan .xlsx atau .xls');
         }
         if ($file->getSize() > 5 * 1024 * 1024) {
             return redirect()->back()
-                             ->withInput()
-                             ->with('error', 'Ukuran file terlalu besar. Maksimal 5MB.');
+                ->withInput()
+                ->with('error', 'Ukuran file terlalu besar. Maksimal 5MB.');
         }
 
         // Simpan sementara
@@ -471,8 +475,8 @@ class CoveringWarehouseController extends BaseController
             $file->move($uploadDir, null, true);
         } catch (Exception $e) {
             return redirect()->back()
-                             ->withInput()
-                             ->with('error', 'Gagal memindahkan file. ' . $e->getMessage());
+                ->withInput()
+                ->with('error', 'Gagal memindahkan file. ' . $e->getMessage());
         }
 
         // Jalankan import
@@ -481,8 +485,8 @@ class CoveringWarehouseController extends BaseController
         } catch (Exception $e) {
             unlink($filePath);
             return redirect()->back()
-                             ->withInput()
-                             ->with('error', 'Error saat proses import: ' . $e->getMessage());
+                ->withInput()
+                ->with('error', 'Error saat proses import: ' . $e->getMessage());
         }
 
         // Hapus file setelah selesai
@@ -502,7 +506,7 @@ class CoveringWarehouseController extends BaseController
 
         // Semua berhasil
         return redirect()->to(base_url($this->role . '/warehouse'))
-                         ->with('success', "Import berhasil seluruhnya ({$successCount} baris)");
+            ->with('success', "Import berhasil seluruhnya ({$successCount} baris)");
     }
 
     /**
@@ -527,7 +531,8 @@ class CoveringWarehouseController extends BaseController
             $rowNum = $row->getRowIndex();
 
             // Validasi minimal
-            if (count($rowData) < 10
+            if (
+                count($rowData) < 10
                 || empty($rowData[0])
                 || empty($rowData[2])
             ) {
@@ -553,9 +558,13 @@ class CoveringWarehouseController extends BaseController
 
                 // Cek duplikat
                 if ($this->coveringStockModel->getStockByJenisColorCodeMesin(
-                    $item['jenis'],$item['color'],$item['code'],
-                    $item['jenis_mesin'],$item['dr'],
-                    $item['jenis_cover'],$item['jenis_benang']
+                    $item['jenis'],
+                    $item['color'],
+                    $item['code'],
+                    $item['jenis_mesin'],
+                    $item['dr'],
+                    $item['jenis_cover'],
+                    $item['jenis_benang']
                 )) {
                     $failures[$rowNum] = 'Duplikat data di database';
                     $failures[$rowNum] .= ' (Jenis: ' . $item['jenis'] . ', Color: ' . $item['color'] . ', Code: ' . $item['code'] . ')';
@@ -565,7 +574,6 @@ class CoveringWarehouseController extends BaseController
                 // Insert
                 $this->coveringStockModel->insert($item);
                 $successCount++;
-
             } catch (\Exception $e) {
                 $failures[$rowNum] = 'Error: ' . $e->getMessage();
             }
@@ -573,5 +581,4 @@ class CoveringWarehouseController extends BaseController
 
         return [$successCount, $failures];
     }
-
 }

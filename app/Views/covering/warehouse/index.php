@@ -79,8 +79,10 @@
     // Extract unique values for new filters, handling potential nulls
     $unique_jenis_mesin = array_unique(array_column(array_filter($stok, fn($item) => !empty($item['jenis_mesin'])), 'jenis_mesin'));
     $unique_dr = array_unique(array_column(array_filter($stok, fn($item) => !empty($item['dr'])), 'dr'));
+    $unique_jenis_benang = array_unique(array_column(array_filter($stok, fn($item) => !empty($item['jenis_benang'])), 'jenis_benang'));
     sort($unique_jenis_mesin);
     sort($unique_dr);
+    sort($unique_jenis_benang);
     ?>
 
     <!-- Summary Cards -->
@@ -144,20 +146,14 @@
         <div class="card-body">
             <h5 class="card-title">Manajemen Stok Barang Jadi Covering</h5>
             <form id="filterForm" method="GET" action="<?= current_url() ?>">
-                <div class="row g-2 align-items-center">
-                    <div class="col-12 col-md-6 col-lg-3 mb-2 mb-lg-0">
+                <div class="row">
+                    <div class="col-md-3">
                         <div class="input-group">
                             <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
-                            <input
-                                type="text"
-                                name="q"
-                                id="searchInput"
-                                class="form-control"
-                                placeholder="Cari jenis barang..."
-                                value="<?= esc($request->getGet('q')) ?>">
+                            <input type="text" name="q" id="searchInput" class="form-control" placeholder="Cari jenis barang..." value="<?= esc($request->getGet('q')) ?>">
                         </div>
                     </div>
-                    <div class="col-12 col-md-6 col-lg-2 mb-2 mb-lg-0">
+                    <div class="col-md-3">
                         <select name="mesin" id="filterMesin" class="form-select">
                             <option value="">Semua Mesin</option>
                             <?php foreach ($unique_jenis_mesin as $mesin): ?>
@@ -168,7 +164,18 @@
                             <?php endforeach ?>
                         </select>
                     </div>
-                    <div class="col-12 col-md-6 col-lg-2 mb-2 mb-lg-0">
+                    <div class="col-md-3">
+                        <select name="jenis_benang" id="filterJb" class="form-select">
+                            <option value="">Semua Jenis Benang</option>
+                            <?php foreach ($unique_jenis_benang as $jb): ?>
+                                <option value="<?= esc($jb) ?>"
+                                    <?= set_select('jenis_benang', $jb, $request->getGet('jenis_benang') === $jb) ?>>
+                                    <?= esc($jb) ?>
+                                </option>
+                            <?php endforeach ?>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
                         <select name="dr" id="filterDr" class="form-select">
                             <option value="">Semua DR</option>
                             <?php foreach ($unique_dr as $dr): ?>
@@ -179,19 +186,21 @@
                             <?php endforeach ?>
                         </select>
                     </div>
-                    <div class="col-12 col-md-6 col-lg-2 mb-2 mb-lg-0 d-grid">
-                        <button type="submit" class="btn btn-sm bg-gradient-primary w-100">
-                            <i class="fas fa-filter me-1"></i> Filter
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-md bg-gradient-primary">
+                            <i class="fas fa-filter me-1"></i>
                         </button>
                     </div>
-                    <div class="col-12 col-lg-3 d-flex justify-content-lg-end justify-content-center gap-2 mt-2 mt-lg-0 flex-wrap">
-                        <button class="btn bg-gradient-info w-100 w-lg-auto" type="button" data-bs-toggle="modal" data-bs-target="#importModal">
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <button class="btn bg-gradient-info" type="button" data-bs-toggle="modal" data-bs-target="#importModal">
                             <i class="fas fa-file-import me-1"></i> Import
                         </button>
-                        <button class="btn bg-gradient-primary w-100 w-lg-auto" type="button" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                        <button class="btn bg-gradient-primary" type="button" data-bs-toggle="modal" data-bs-target="#addItemModal">
                             <i class="fas fa-plus me-1"></i> Jenis
                         </button>
-                        <button class="btn bg-gradient-success w-100 w-lg-auto" type="button" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <button class="btn bg-gradient-success" type="button" data-bs-toggle="modal" data-bs-target="#exportModal">
                             <i class="fas fa-file-excel me-1"></i> Export
                         </button>
                     </div>
@@ -214,7 +223,8 @@
                     data-status="<?= $item['status'] ?? '' ?>"
                     data-name="<?= strtolower($item['jenis'] ?? '') ?>"
                     data-mesin="<?= $item['jenis_mesin'] ?? '' ?>"
-                    data-dr="<?= $item['dr'] ?? '' ?>">
+                    data-dr="<?= $item['dr'] ?? '' ?>"
+                    data-jb=" <?= $item['jenis_benang'] ?? '' ?>">
                     <div class="card h-100 border">
                         <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
                             <h6 class="mb-0 text-truncate"><?= $item['jenis'] ?></h6>
@@ -492,25 +502,28 @@
         const filterStatus = document.getElementById('filterStatus');
         const filterMesin = document.getElementById('filterMesin');
         const filterDr = document.getElementById('filterDr');
+        const filterJb = document.getElementById('filterJb');
 
         function filterGrid() {
             const query = searchInput.value.toLowerCase();
             const status = filterStatus.value;
             const mesin = filterMesin.value;
             const dr = filterDr.value;
+            const jb = filterJb.value;
 
             document.querySelectorAll('.warehouse-card').forEach(card => {
                 const nameMatch = card.getAttribute('data-name').includes(query);
                 const statusMatch = (status === '' || card.getAttribute('data-status') === status);
                 const mesinMatch = (mesin === '' || card.getAttribute('data-mesin') === mesin);
                 const drMatch = (dr === '' || card.getAttribute('data-dr') === dr);
+                const jbMatch = (jb === '' || card.getAttribute('data-jb') === jb);
 
-                card.style.display = (nameMatch && statusMatch && mesinMatch && drMatch) ? '' : 'none';
+                card.style.display = (nameMatch && statusMatch && mesinMatch && drMatch) && jbMatch ? '' : 'none';
             });
         }
 
-        [searchInput, filterStatus, filterMesin, filterDr].forEach(el => el.addEventListener('input', filterGrid));
-        [filterStatus, filterMesin, filterDr].forEach(el => el.addEventListener('change', filterGrid));
+        [searchInput, filterStatus, filterMesin, filterDr, filterJb].forEach(el => el.addEventListener('input', filterGrid));
+        [filterStatus, filterMesin, filterDr, filterJb].forEach(el => el.addEventListener('change', filterGrid));
 
         document.getElementById("saveStockBtn").addEventListener("click", function() {
             const form = document.getElementById('stockForm');

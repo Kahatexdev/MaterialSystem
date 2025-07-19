@@ -27,7 +27,7 @@ class CoveringWarehouseBBController extends BaseController
         $perPage      = 9;
         $warehouseBB  = $this->warehouseBBModel->getWarehouseBB($perPage);
         $pager        = $this->warehouseBBModel->pager;
-        
+
         // dd($warehouseBB);
         $data = [
             'title' => 'Warehouse Bahan Baku Covering',
@@ -235,5 +235,140 @@ class CoveringWarehouseBBController extends BaseController
         }
 
         return redirect()->to($this->role . '/warehouseBB')->with('error', 'Data tidak valid untuk pengeluaran');
+    }
+
+    public function importStokBahanBaku()
+    {
+        $file = $this->request->getFile('file_excel');
+        // Validasi file
+        if (!$file || !$file->isValid()) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'File tidak valid atau tidak ditemukan.');
+        }
+
+        // Cek ekstensi dan ukuran maksimal (misal max 5MB)
+        $allowedExt = ['xlsx', 'xls'];
+        $ext = $file->getExtension();
+        if (!in_array($ext, $allowedExt)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Format file tidak didukung. Gunakan .xlsx atau .xls');
+        }
+        if ($file->getSize() > 5 * 1024 * 1024) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Ukuran file terlalu besar. Maksimal 5MB.');
+        }
+
+        // Simpan sementara
+        $uploadDir = WRITEPATH . 'uploads/';
+        $filePath = $uploadDir . $file->getName();
+        try {
+            $file->move($uploadDir, null, true);
+        } catch (Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal memindahkan file. ' . $e->getMessage());
+        }
+
+        // Jalankan import
+        try {
+            list($successCount, $failures) = $this->importStock($filePath);
+        } catch (Exception $e) {
+            unlink($filePath);
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error saat proses import: ' . $e->getMessage());
+        }
+
+        // Hapus file setelah selesai
+        unlink($filePath);
+
+        // Siapkan pesan
+        if ($failures) {
+            // Gagal sebagian
+            $msg  = "Berhasil import: {$successCount}. Gagal import: " . count($failures) . ".";
+            $msg .= '<ul>';
+            foreach ($failures as $rowNum => $reason) {
+                $msg .= "<li>Baris {$rowNum}: {$reason}</li>";
+            }
+            $msg .= '</ul>';
+            return redirect()->to(base_url($this->role . '/warehouse'))->with('warning', $msg);
+        }
+
+        // Semua berhasil
+        return redirect()->to(base_url($this->role . '/warehouse'))
+            ->with('success', "Import berhasil seluruhnya ({$successCount} baris)");
+    }
+
+    private function importStock(string $filePath): array
+    {
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
+        $worksheet = $spreadsheet->getActiveSheet();
+
+        $successCount = 0;
+        $failures = [];
+
+        foreach ($worksheet->getRowIterator(2) as $row) {
+            $cellIterator = $row->getCellIterator();
+            $cellIterator->setIterateOnlyExistingCells(false);
+
+            $rowData = [];
+            foreach ($cellIterator as $cell) {
+                $rowData[] = $cell->getValue();
+            }
+            $rowNum = $row->getRowIndex();
+
+            // Validasi minimal
+            if (
+                count($rowData) < 10
+                || empty($rowData[0])
+                || empty($rowData[2])
+            ) {
+                $failures[$rowNum] = 'Data kolom kurang lengkap';
+                continue;
+            }
+
+            // Mapping data
+            try {
+                $item = [
+                    'jenis'          => $rowData[0],
+                    'color'          => $rowData[1],
+                    'code'           => $rowData[2],
+                    'jenis_mesin'    => $rowData[3],
+                    'dr'             => $rowData[4],
+                    'jenis_cover'    => $rowData[5],
+                    'jenis_benang'   => $rowData[6],
+                    'lmd'            => isset($rowData[7]) ? implode(', ', explode(',', $rowData[7])) : null,
+                    'ttl_kg'         => (float) ($rowData[8] ?? 0),
+                    'ttl_cns'        => (int) ($rowData[9] ?? 0),
+                    'admin'          => session()->get('role'),
+                ];
+
+                // Cek duplikat
+                if ($this->coveringStockModel->getStockByJenisColorCodeMesin(
+                    $item['jenis'],
+                    $item['color'],
+                    $item['code'],
+                    $item['jenis_mesin'],
+                    $item['dr'],
+                    $item['jenis_cover'],
+                    $item['jenis_benang']
+                )) {
+                    $failures[$rowNum] = 'Duplikat data di database';
+                    $failures[$rowNum] .= ' (Jenis: ' . $item['jenis'] . ', Color: ' . $item['color'] . ', Code: ' . $item['code'] . ')';
+                    continue;
+                }
+
+                // Insert
+                $this->coveringStockModel->insert($item);
+                $successCount++;
+            } catch (\Exception $e) {
+                $failures[$rowNum] = 'Error: ' . $e->getMessage();
+            }
+        }
+
+        return [$successCount, $failures];
     }
 }
