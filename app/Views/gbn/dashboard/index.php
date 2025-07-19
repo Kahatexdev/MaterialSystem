@@ -285,8 +285,8 @@
 
             detailData.forEach((item) => {
                 let row = `<tr>
-                <td>${item.no_model}</td>
-                <td>${item.kode_warna}</td>
+                <td>${item.no_model || '-'}</td>
+                <td>${item.kode_warna || '-'}</td>
                 <td>${item.foll_up || '-'}</td>
                 <td>${item.delivery || '-'}</td>
                 <td>${item.qty || '-'} kg</td>
