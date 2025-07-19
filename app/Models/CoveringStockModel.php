@@ -56,15 +56,14 @@ class CoveringStockModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
-    public function stokCovering()
+    public function stokCovering($perPage = 9)
     {
-        return $this->db->table('stock_covering cs')
-            ->select('cs.*, IF(cs.ttl_kg > 0, "ada", "habis") AS status')
-            ->get()
-            ->getResultArray();
+        return $this->select('stock_covering.*, IF(stock_covering.ttl_kg > 0, "ada", "habis") AS status')
+            ->orderBy('ttl_kg', 'DESC')
+            ->paginate($perPage, 'warehouse');
     }
 
-    public function getStockByJenisColorCodeMesin($jenis, $color, $code, $mesin)
+    public function getStockByJenisColorCodeMesin($jenis, $color, $code, $mesin,$dr, $jenisCover, $jenisBenang)
     {
         return $this->db->table('stock_covering')
             ->select('*')
@@ -72,6 +71,9 @@ class CoveringStockModel extends Model
             ->where('color', $color)
             ->where('code', $code)
             ->where('jenis_mesin', $mesin)
+            ->where('dr', $dr)
+            ->where('jenis_cover', $jenisCover)
+            ->where('jenis_benang', $jenisBenang)
             ->get()
             ->getRowArray();
     }
@@ -81,6 +83,22 @@ class CoveringStockModel extends Model
         return $this->select('*')
             ->where('jenis_benang', $jenisBenang)
             ->where('jenis_cover', $jenisCover)
+            ->findAll();
+    }
+
+    public function getAllJenisMesin()
+    {
+        return $this->distinct()
+            ->select('jenis_mesin')
+            ->orderBy('jenis_mesin', 'ASC')
+            ->findAll();
+    }
+
+    public function getAllDr()
+    {
+        return $this->distinct()
+            ->select('dr')
+            ->orderBy('dr', 'ASC')
             ->findAll();
     }
 }

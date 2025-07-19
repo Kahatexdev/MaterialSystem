@@ -62,16 +62,64 @@ class CoveringWarehouseController extends BaseController
 
     public function index()
     {
-        $stok = $this->coveringStockModel->stokCovering();
-        // dd($stok);
-        $data = [
-            'active' => $this->active,
-            'title' => 'Warehouse',
-            'role' => $this->role,
-            'stok' => $stok
-        ];
+        // $perPage      = 9;
+        // $stok = $this->coveringStockModel->stokCovering($perPage);
+        // $pager = $this->coveringStockModel->pager;
+        // // dd($stok);
+        // $data = [
+        //     'active' => $this->active,
+        //     'title' => 'Warehouse',
+        //     'role' => $this->role,
+        //     'stok' => $stok,
+        //     'pager' => $pager,
+        // ];
 
-        return view($this->role . '/warehouse/index', $data);
+        // return view($this->role . '/warehouse/index', $data);
+        // Ambil parameter filter dari GET
+
+        helper('form');
+        $q       = $this->request->getGet('q', FILTER_SANITIZE_STRING);
+        $status  = $this->request->getGet('status', FILTER_SANITIZE_STRING);
+        $mesin   = $this->request->getGet('mesin', FILTER_SANITIZE_STRING);
+        $dr      = $this->request->getGet('dr', FILTER_SANITIZE_STRING);
+        $perPage = 9;
+
+        // Bangun query dengan chaining
+        $builder = $this->coveringStockModel
+            ->select('stock_covering.*, IF(stock_covering.ttl_kg > 0, "ada", "habis") AS status')
+            ->orderBy('ttl_kg', 'DESC');
+        
+        if ($q) {
+            $builder->like('jenis', $q);
+        }
+        // **GANTI FILTER status**:
+        if ($status === 'ada') {
+            $builder->where('ttl_kg >', 0);
+        } elseif ($status === 'habis') {
+            $builder->where('ttl_kg <=', 0);
+        }
+        if ($mesin) {
+            $builder->where('jenis_mesin', $mesin);
+        }
+        if ($dr) {
+            $builder->where('dr', $dr);
+        }
+
+        // Paginate hasilnya
+        $stok  = $builder->paginate($perPage, 'warehouse');
+        $pager = $builder->pager;
+
+        return view($this->role . '/warehouse/index', [
+            'active'              => $this->active,
+            'title'               => 'Warehouse',
+            'role'                => $this->role,
+            'stok'                => $stok,
+            'pager'               => $pager,
+            // Untuk daftar filter dropdown tetap lengkap:
+            'unique_jenis_mesin'  => $this->coveringStockModel->getAllJenisMesin(),
+            'unique_dr'           => $this->coveringStockModel->getAllDr(),
+            'request' => $this->request,
+        ]);
     }
 
     public function create()
@@ -102,8 +150,11 @@ class CoveringWarehouseController extends BaseController
         $color = $this->request->getPost('color');
         $code = $this->request->getPost('code');
         $mesin = $this->request->getPost('jenis_mesin');
+        $dr = $this->request->getPost('dr');
+        $jenisCover = $this->request->getPost('jenis_cover');
+        $jenisBenang = $this->request->getPost('jenis_benang');
         // dd($mesin);
-        $existingStock = $this->coveringStockModel->getStockByJenisColorCodeMesin($jenis, $color, $code, $mesin);
+        $existingStock = $this->coveringStockModel->getStockByJenisColorCodeMesin($jenis, $color, $code, $mesin,$dr, $jenisCover, $jenisBenang);
         if ($existingStock) {
             return redirect()->back()->withInput()->with('error', 'Data stok sudah ada! </br> Silahkan update stok yang sudah ada.');
         }
@@ -388,4 +439,139 @@ class CoveringWarehouseController extends BaseController
         ];
         return view($this->role . '/schedule/reqschedule', $data);
     }
+
+     public function importStokBarangJadi()
+    {
+        $file = $this->request->getFile('file_excel');
+        // Validasi file
+        if (!$file || !$file->isValid()) {
+            return redirect()->back()
+                             ->withInput()
+                             ->with('error', 'File tidak valid atau tidak ditemukan.');
+        }
+
+        // Cek ekstensi dan ukuran maksimal (misal max 5MB)
+        $allowedExt = ['xlsx', 'xls'];
+        $ext = $file->getExtension();
+        if (!in_array($ext, $allowedExt)) {
+            return redirect()->back()
+                             ->withInput()
+                             ->with('error', 'Format file tidak didukung. Gunakan .xlsx atau .xls');
+        }
+        if ($file->getSize() > 5 * 1024 * 1024) {
+            return redirect()->back()
+                             ->withInput()
+                             ->with('error', 'Ukuran file terlalu besar. Maksimal 5MB.');
+        }
+
+        // Simpan sementara
+        $uploadDir = WRITEPATH . 'uploads/';
+        $filePath = $uploadDir . $file->getName();
+        try {
+            $file->move($uploadDir, null, true);
+        } catch (Exception $e) {
+            return redirect()->back()
+                             ->withInput()
+                             ->with('error', 'Gagal memindahkan file. ' . $e->getMessage());
+        }
+
+        // Jalankan import
+        try {
+            list($successCount, $failures) = $this->importStock($filePath);
+        } catch (Exception $e) {
+            unlink($filePath);
+            return redirect()->back()
+                             ->withInput()
+                             ->with('error', 'Error saat proses import: ' . $e->getMessage());
+        }
+
+        // Hapus file setelah selesai
+        unlink($filePath);
+
+        // Siapkan pesan
+        if ($failures) {
+            // Gagal sebagian
+            $msg  = "Berhasil import: {$successCount}. Gagal import: " . count($failures) . ".";
+            $msg .= '<ul>';
+            foreach ($failures as $rowNum => $reason) {
+                $msg .= "<li>Baris {$rowNum}: {$reason}</li>";
+            }
+            $msg .= '</ul>';
+            return redirect()->to(base_url($this->role . '/warehouse'))->with('warning', $msg);
+        }
+
+        // Semua berhasil
+        return redirect()->to(base_url($this->role . '/warehouse'))
+                         ->with('success', "Import berhasil seluruhnya ({$successCount} baris)");
+    }
+
+    /**
+     * @return array [int $successCount, array $failures]
+     */
+    private function importStock(string $filePath): array
+    {
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
+        $worksheet = $spreadsheet->getActiveSheet();
+
+        $successCount = 0;
+        $failures = [];
+
+        foreach ($worksheet->getRowIterator(2) as $row) {
+            $cellIterator = $row->getCellIterator();
+            $cellIterator->setIterateOnlyExistingCells(false);
+
+            $rowData = [];
+            foreach ($cellIterator as $cell) {
+                $rowData[] = $cell->getValue();
+            }
+            $rowNum = $row->getRowIndex();
+
+            // Validasi minimal
+            if (count($rowData) < 10
+                || empty($rowData[0])
+                || empty($rowData[2])
+            ) {
+                $failures[$rowNum] = 'Data kolom kurang lengkap';
+                continue;
+            }
+
+            // Mapping data
+            try {
+                $item = [
+                    'jenis'          => $rowData[0],
+                    'color'          => $rowData[1],
+                    'code'           => $rowData[2],
+                    'jenis_mesin'    => $rowData[3],
+                    'dr'             => $rowData[4],
+                    'jenis_cover'    => $rowData[5],
+                    'jenis_benang'   => $rowData[6],
+                    'lmd'            => isset($rowData[7]) ? implode(', ', explode(',', $rowData[7])) : null,
+                    'ttl_kg'         => (float) ($rowData[8] ?? 0),
+                    'ttl_cns'        => (int) ($rowData[9] ?? 0),
+                    'admin'          => session()->get('role'),
+                ];
+
+                // Cek duplikat
+                if ($this->coveringStockModel->getStockByJenisColorCodeMesin(
+                    $item['jenis'],$item['color'],$item['code'],
+                    $item['jenis_mesin'],$item['dr'],
+                    $item['jenis_cover'],$item['jenis_benang']
+                )) {
+                    $failures[$rowNum] = 'Duplikat data di database';
+                    $failures[$rowNum] .= ' (Jenis: ' . $item['jenis'] . ', Color: ' . $item['color'] . ', Code: ' . $item['code'] . ')';
+                    continue;
+                }
+
+                // Insert
+                $this->coveringStockModel->insert($item);
+                $successCount++;
+
+            } catch (\Exception $e) {
+                $failures[$rowNum] = 'Error: ' . $e->getMessage();
+            }
+        }
+
+        return [$successCount, $failures];
+    }
+
 }
