@@ -249,7 +249,7 @@ class ClusterModel extends Model
                       ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, 
                       cluster.nama_cluster, 
                       CASE
-                      WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11|12|13|14|15|16|17|18|19|20|21|22)\\.[AB]$" 
+                      WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11|12|13|14|15|16|17|18|19|20|21|22)\\.[ABCD]$" 
                       THEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2)
                       ELSE RIGHT(cluster.nama_cluster, 3)
                       END AS simbol_cluster,
@@ -266,6 +266,33 @@ class ClusterModel extends Model
             ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
             ->join('master_order', 'master_order.no_model = stock.no_model', 'left')
             ->where('cluster.group', 'NYLON')
+            ->groupBy('cluster.nama_cluster')
+            ->findAll();
+    }
+    public function getClusterCov()
+    {
+        return $this->select(
+            'cluster.kapasitas, 
+                      ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, 
+                      cluster.nama_cluster, 
+                      CASE
+                      WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11)\\.[AB]$" 
+                      THEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2)
+                      ELSE RIGHT(cluster.nama_cluster, 3)
+                      END AS simbol_cluster,
+                      GROUP_CONCAT(DISTINCT 
+            JSON_OBJECT(
+                "no_model", stock.no_model,
+                "kode_warna", stock.kode_warna,
+                "foll_up", master_order.foll_up,
+                "delivery", master_order.delivery_awal,
+                "qty", ROUND(stock.kgs_stock_awal + stock.kgs_in_out, 2)
+            ) ORDER BY stock.no_model SEPARATOR ","
+        ) AS detail_data'
+        )
+            ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
+            ->join('master_order', 'master_order.no_model = stock.no_model', 'left')
+            ->where('cluster.group', 'COV')
             ->groupBy('cluster.nama_cluster')
             ->findAll();
     }

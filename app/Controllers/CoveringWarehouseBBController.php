@@ -21,16 +21,20 @@ class CoveringWarehouseBBController extends BaseController
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
     }
+
     public function index()
     {
-        $warehouseBB = $this->warehouseBBModel->getWarehouseBB();
+        $perPage      = 9;
+        $warehouseBB  = $this->warehouseBBModel->getWarehouseBB($perPage);
+        $pager        = $this->warehouseBBModel->pager;
+        
         // dd($warehouseBB);
         $data = [
             'title' => 'Warehouse Bahan Baku Covering',
             'active' => $this->active,
             'role' => $this->role,
             'warehouseBB' => $warehouseBB,
-            'pager' => $this->warehouseBBModel->pager,
+            'pager'       => $pager,
         ];
         return view($this->role . '/warehousebb/index', $data);
     }

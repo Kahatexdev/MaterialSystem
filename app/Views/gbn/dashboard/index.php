@@ -181,7 +181,8 @@
                                 <option value="I" selected>Group I</option>
                                 <option value="II">Group II</option>
                                 <option value="III">Group III</option>
-                                <option value="nylon">NYLON</option>
+                                <option value="covering">Covering</option>
+                                <option value="nylon">Nylon</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-info w-100">Apply</button>

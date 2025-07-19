@@ -6562,10 +6562,10 @@ class ExcelController extends BaseController
             $totalPermCones = 0;
             $totalYard = 0;
             $totalCones = 0;
-
+            // dd ($rows);
             foreach ($rows as $row) {
                 // dd($poCovering);
-                if ($row->jenis == 'NYLON') {
+                if ($row->jenis === 'NYLON') {
                     $row->jenis = 'POLYESTER';
                 }
                 $sheet->setCellValue("A{$rowNum}", $no++);
@@ -6645,8 +6645,9 @@ class ExcelController extends BaseController
             // Kolom Q (border kanan double)
             $sheet->getStyle('Q38')->getBorders()->getRight()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_DOUBLE);
 
+            $pemesanCov = 'IIS RAHAYU';
             // (Opsional) footer keterangan dan tanda tangan...
-            $this->writeFooter($sheet, $rows[0], $rows[0]->admin, $rows[0]->penanggung_jawab, $rows[0]->penerima);
+            $this->writeFooter($sheet, $rows[0], $pemesanCov, $rows[0]->penanggung_jawab, $rows[0]->penerima);
         }
         ///////
 

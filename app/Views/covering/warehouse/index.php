@@ -47,6 +47,28 @@
         </script>
     <?php endif; ?>
 
+    <!-- ALERT FLASHDATA -->
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3" role="alert">
+            <?= session()->getFlashdata('error') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('warning')): ?>
+        <div class="alert alert-warning alert-dismissible fade show mx-3 mt-3" role="alert">
+            <?= session()->getFlashdata('warning') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show mx-3 mt-3" role="alert">
+            <?= session()->getFlashdata('success') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
     <?php
     // Calculate summary and filter data
     $total_items = count($stok);
@@ -121,28 +143,64 @@
     <div class="card mb-4">
         <div class="card-body">
             <h5 class="card-title">Manajemen Stok Barang Jadi Covering</h5>
-            <div class="row g-2 align-items-center">
-                <div class="col-lg-3 col-md-6">
-                    <div class="input-group"><span class="input-group-text bg-white"><i class="fas fa-search"></i></span><input type="text" id="searchInput" class="form-control" placeholder="Cari jenis barang..."></div>
+            <form id="filterForm" method="GET" action="<?= current_url() ?>">
+                <div class="row g-2 align-items-center">
+                    <div class="col-12 col-md-6 col-lg-3 mb-2 mb-lg-0">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                            <input
+                                type="text"
+                                name="q"
+                                id="searchInput"
+                                class="form-control"
+                                placeholder="Cari jenis barang..."
+                                value="<?= esc($request->getGet('q')) ?>">
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-2 mb-2 mb-lg-0">
+                        <select name="mesin" id="filterMesin" class="form-select">
+                            <option value="">Semua Mesin</option>
+                            <?php foreach ($unique_jenis_mesin as $mesin): ?>
+                                <option value="<?= esc($mesin) ?>"
+                                    <?= set_select('mesin', $mesin, $request->getGet('mesin') === $mesin) ?>>
+                                    <?= esc($mesin) ?>
+                                </option>
+                            <?php endforeach ?>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-2 mb-2 mb-lg-0">
+                        <select name="dr" id="filterDr" class="form-select">
+                            <option value="">Semua DR</option>
+                            <?php foreach ($unique_dr as $dr): ?>
+                                <option value="<?= esc($dr) ?>"
+                                    <?= set_select('dr', $dr, $request->getGet('dr') === $dr) ?>>
+                                    <?= esc($dr) ?>
+                                </option>
+                            <?php endforeach ?>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-2 mb-2 mb-lg-0 d-grid">
+                        <button type="submit" class="btn btn-sm bg-gradient-primary w-100">
+                            <i class="fas fa-filter me-1"></i> Filter
+                        </button>
+                    </div>
+                    <div class="col-12 col-lg-3 d-flex justify-content-lg-end justify-content-center gap-2 mt-2 mt-lg-0 flex-wrap">
+                        <button class="btn bg-gradient-info w-100 w-lg-auto" type="button" data-bs-toggle="modal" data-bs-target="#importModal">
+                            <i class="fas fa-file-import me-1"></i> Import
+                        </button>
+                        <button class="btn bg-gradient-primary w-100 w-lg-auto" type="button" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                            <i class="fas fa-plus me-1"></i> Jenis
+                        </button>
+                        <button class="btn bg-gradient-success w-100 w-lg-auto" type="button" data-bs-toggle="modal" data-bs-target="#exportModal">
+                            <i class="fas fa-file-excel me-1"></i> Export
+                        </button>
+                    </div>
                 </div>
-                <div class="col-lg-2 col-md-6"><select id="filterStatus" class="form-select">
-                        <option value="">Semua Status</option>
-                        <option value="ada">Tersedia</option>
-                        <option value="habis">Tidak Tersedia</option>
-                    </select></div>
-                <div class="col-lg-2 col-md-6"><select id="filterMesin" class="form-select">
-                        <option value="">Semua Mesin</option><?php foreach ($unique_jenis_mesin as $mesin) : ?><option value="<?= $mesin ?>"><?= $mesin ?></option><?php endforeach; ?>
-                    </select></div>
-                <div class="col-lg-2 col-md-6"><select id="filterDr" class="form-select">
-                        <option value="">Semua DR</option><?php foreach ($unique_dr as $dr) : ?><option value="<?= $dr ?>"><?= $dr ?></option><?php endforeach; ?>
-                    </select></div>
-                <div class="col-lg-3 col-md-12 d-flex justify-content-lg-end justify-content-center gap-2 mt-2 mt-lg-0">
-                    <button class="btn bg-gradient-info" data-bs-toggle="modal" data-bs-target="#addItemModal"><i class="fas fa-plus me-1"></i> Jenis</button>
-                    <button class="btn bg-gradient-success" data-bs-toggle="modal" data-bs-target="#exportModal"><i class="fas fa-file-excel me-1"></i> Export</button>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
+
+
 
     <!-- Grid View -->
     <div class="row g-3" id="warehouseGrid">
@@ -213,6 +271,9 @@
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>
+        <div class="mt-3 d-flex justify-content-end">
+            <?= $pager->links('warehouse', 'bootstrap_pagination') ?>
+        </div>
     </div>
 
     <!-- Modals -->
@@ -357,6 +418,69 @@
             </div>
         </div>
     </div>
+
+    <!-- modal import -->
+    <!-- modal import -->
+    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered"> <!-- centered vertically -->
+            <div class="modal-content border-0 shadow-lg rounded-2xl">
+                <div class="modal-header bg-gradient-info text-white">
+                    <h5 class="modal-title text-white" id="importModalLabel">
+                        <i class="fas fa-file-import me-2"></i>Import Data Stok
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form id="importForm"
+                    action="<?= base_url(session()->get('role') . '/warehouse/importStokBarangJadi') ?>"
+                    method="POST"
+                    enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="mb-4">
+                            <label for="file_excel" class="form-label fw-semibold">Pilih File Excel</label>
+                            <div class="input-group">
+                                <input id="file_excel"
+                                    type="file"
+                                    class="form-control border-info rounded-pill px-3 py-2"
+                                    name="file_excel"
+                                    accept=".xlsx, .xls"
+                                    required
+                                    style="background-color: #f8f9fa; border-width: 2px;">
+                            </div>
+                            <small class="form-text text-muted ms-1">Hanya file Excel (.xlsx, .xls) yang diterima.</small>
+                        </div>
+
+                        <div class="alert alert-light border-info small">
+                            <p class="mb-1">Pastikan file yang diupload sesuai dengan template yang telah disediakan. Jika belum memiliki template, silakan download:</p>
+                            <a href="<?= base_url('template/CONTOH_FORMAT_IMPORT_STOK BARANG_JADI_COVERING.xlsx') ?>"
+                                class="text-white text-decoration-none fw-semibold badge bg-gradient-info"
+                                style="font-size: 1rem;"
+                                download>
+                                <i class="fas fa-download me-1"></i>Template Import Stok Barang Jadi
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                            Batal
+                        </button>
+                        <button id="importSubmit"
+                            type="submit"
+                            class="btn bg-gradient-info position-relative">
+                            <span class="spinner-border spinner-border-sm text-white position-absolute top-50 start-50 translate-middle d-none"
+                                role="status"
+                                aria-hidden="true"></span>
+                            <span class="btn-text">Import</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -518,5 +642,31 @@
             .catch(() => Swal.fire("Error!", "Gagal mengambil data.", "error"));
     }
 </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('importForm');
+        const btn = document.getElementById('importSubmit');
+        const spinner = btn.querySelector('.spinner-border');
+        const text = btn.querySelector('.btn-text');
+
+        form.addEventListener('submit', function() {
+            // disable tombol agar user tidak klik dua kali
+            btn.disabled = true;
+            // tampilkan spinner
+            spinner.classList.remove('d-none');
+            // ubah teks tombol
+            text.textContent = ' Importing…';
+            // biarkan form submit berjalan normal
+        });
+    });
+</script>
+<script>
+    // Optional: auto-submit on change
+    document.querySelectorAll('#filterForm select, #filterForm input').forEach(el => {
+        el.addEventListener('change', () => document.getElementById('filterForm').submit());
+    });
+</script>
+
 
 <?php $this->endSection(); ?>

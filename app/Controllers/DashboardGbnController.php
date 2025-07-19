@@ -61,6 +61,7 @@ class DashboardGbnController extends BaseController
         $groupII = $this->clusterModel->getClusterGroupII();
         $groupIII = $this->clusterModel->getClusterGroupIII();
         $nylon = $this->clusterModel->getClusterNylon();
+        $cov = $this->clusterModel->getClusterCov();
 
         $data = [
             'active' => $this->active,
@@ -74,6 +75,7 @@ class DashboardGbnController extends BaseController
             'groupII' => $groupII,
             'groupIII' => $groupIII,
             'nylon' => $nylon,
+            'cov' => $cov,
         ];
         return view($this->role . '/dashboard/index', $data);
     }
@@ -97,6 +99,9 @@ class DashboardGbnController extends BaseController
                 $groupData = $this->clusterModel->getClusterNylon();
                 // dd($groupData);
                 return view($this->role . '/dashboard/cluster_nylon', ['groupData' => $groupData, 'group' => $group]);
+            case 'covering':
+                $groupData = $this->clusterModel->getClusterCov();
+                return view($this->role . '/dashboard/cluster_cov', ['groupData' => $groupData, 'group' => $group]);
             default:
                 return "<p class='text-center text-danger'>Tidak ada data untuk Group $group.</p>";
         }

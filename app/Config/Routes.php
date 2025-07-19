@@ -435,6 +435,8 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('warehouse/pengiriman_area', 'CoveringController::pengirimanArea');
     $routes->post('warehouse/exportStock', 'ExcelController::exportStock');
     $routes->post('warehouse/exportStockPdf', 'PdfController::exportStockPdf');
+    // import stok barang jadi
+    $routes->post('warehouse/importStokBarangJadi', 'CoveringWarehouseController::importStokBarangJadi');
 
 
     // warehouse bahan baku

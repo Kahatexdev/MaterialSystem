@@ -20,42 +20,34 @@
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
     }
 </style>
-<?php $pager->setSurroundCount(2); ?>
 
-<nav aria-label="Page navigation">
-    <ul class="pagination mb-0">
-        <!-- Tombol Previous -->
-        <?php if ($pager->hasPrevious()) : ?>
-            <li class="page-item">
-                <a class="page-link" href="<?= $pager->getPrevious() ?>" aria-label="Previous">Previous</a>
-            </li>
-        <?php else : ?>
-            <li class="page-item">
-                <a class="page-link" href="<?= $pager->getCurrent() ?>" aria-label="Previous">Previous</a>
-            </li>
-        <?php endif; ?>
+<?php if ($pager->getPageCount() > 1): ?>
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-end">
+            <!-- First page link -->
+            <?php if ($pager->hasPrevious()): ?>
+                <li class="page-item">
+                    <a class="page-link" href="<?= $pager->getFirst() ?>" aria-label="First">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            <?php endif; ?>
 
-        <!-- Link Nomor Halaman -->
-        <?php foreach ($pager->links() as $link): ?>
-            <li class="page-item <?= $link['active'] ? 'active' : '' ?>">
-                <a class="page-link" href="<?= $link['uri'] ?>">
-                    <?= $link['title'] ?>
-                    <?php if ($link['active']) : ?>
-                        <span class="visually-hidden">(current)</span>
-                    <?php endif ?>
-                </a>
-            </li>
-        <?php endforeach ?>
+            <!-- Numeric links -->
+            <?php foreach ($pager->links('warehouse', 'default_full') as $link): ?>
+                <li class="page-item <?= $link['active'] ? 'active' : '' ?>">
+                    <a class="page-link" href="<?= $link['uri'] ?>"><?= $link['title'] ?></a>
+                </li>
+            <?php endforeach; ?>
 
-        <!-- Tombol Next -->
-        <?php if ($pager->hasNext()) : ?>
-            <li class="page-item">
-                <a class="page-link" href="<?= $pager->getNext() ?>" aria-label="Next">Next</a>
-            </li>
-        <?php else : ?>
-            <li class="page-item">
-                <a class="page-link" href="<?= $pager->getCurrent() ?>" aria-label="Next">Next</a>
-            </li>
-        <?php endif; ?>
-    </ul>
-</nav>
+            <!-- Last page link -->
+            <?php if ($pager->hasNext()): ?>
+                <li class="page-item">
+                    <a class="page-link" href="<?= $pager->getLast() ?>" aria-label="Last">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            <?php endif; ?>
+        </ul>
+    </nav>
+<?php endif; ?>
