@@ -499,14 +499,14 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
-        const filterStatus = document.getElementById('filterStatus');
+        // const filterStatus = document.getElementById('filterStatus');
         const filterMesin = document.getElementById('filterMesin');
         const filterDr = document.getElementById('filterDr');
         const filterJb = document.getElementById('filterJb');
 
         function filterGrid() {
             const query = searchInput.value.toLowerCase();
-            const status = filterStatus.value;
+            // const status = filterStatus.value;
             const mesin = filterMesin.value;
             const dr = filterDr.value;
             const jb = filterJb.value;
@@ -522,8 +522,8 @@
             });
         }
 
-        [searchInput, filterStatus, filterMesin, filterDr, filterJb].forEach(el => el.addEventListener('input', filterGrid));
-        [filterStatus, filterMesin, filterDr, filterJb].forEach(el => el.addEventListener('change', filterGrid));
+        [searchInput, filterMesin, filterDr, filterJb].forEach(el => el.addEventListener('input', filterGrid));
+        [filterMesin, filterDr, filterJb].forEach(el => el.addEventListener('change', filterGrid));
 
         document.getElementById("saveStockBtn").addEventListener("click", function() {
             const form = document.getElementById('stockForm');
