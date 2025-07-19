@@ -65,4 +65,16 @@ class WarehouseBBModel extends Model
             ->where('jenis_benang', $jenis)
             ->findAll();
     }
+
+    public function getStockByDenierJenisWarna($denier, $jenis_benang, $warna, $kode)
+    {
+        return $this->db->table('stock_bb_covering')
+            ->select('*')
+            ->where('denier', $denier)
+            ->where('jenis_benang', $jenis_benang)
+            ->where('warna', $warna)
+            ->where('kode', $kode)
+            ->get()
+            ->getRowArray();
+    }
 }

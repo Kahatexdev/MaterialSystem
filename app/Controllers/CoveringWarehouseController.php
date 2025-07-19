@@ -444,7 +444,7 @@ class CoveringWarehouseController extends BaseController
         return view($this->role . '/schedule/reqschedule', $data);
     }
 
-    public function importStokBarangJadi()
+    public function importStokBahanBaku()
     {
         $file = $this->request->getFile('file_excel');
         // Validasi file
@@ -543,17 +543,14 @@ class CoveringWarehouseController extends BaseController
             // Mapping data
             try {
                 $item = [
-                    'jenis'          => $rowData[0],
-                    'color'          => $rowData[1],
-                    'code'           => $rowData[2],
-                    'jenis_mesin'    => $rowData[3],
-                    'dr'             => $rowData[4],
-                    'jenis_cover'    => $rowData[5],
-                    'jenis_benang'   => $rowData[6],
-                    'lmd'            => isset($rowData[7]) ? implode(', ', explode(',', $rowData[7])) : null,
-                    'ttl_kg'         => (float) ($rowData[8] ?? 0),
-                    'ttl_cns'        => (int) ($rowData[9] ?? 0),
-                    'admin'          => session()->get('role'),
+                    'denier'          => $rowData[0],
+                    'jenis_benang'    => $rowData[1],
+                    'warna'           => $rowData[2],
+                    'kode'            => $rowData[3],
+                    'kg'              => (float) ($rowData[4] ?? 0),
+                    'keterangan'      => $rowData[5],
+                    'jenis_benang'    => $rowData[6],
+                    'admin'           => session()->get('username'),
                 ];
 
                 // Cek duplikat

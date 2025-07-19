@@ -47,6 +47,28 @@
         </script>
     <?php endif; ?>
 
+    <!-- ALERT FLASHDATA -->
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3" role="alert">
+            <?= session()->getFlashdata('error') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('warning')): ?>
+        <div class="alert alert-warning alert-dismissible fade show mx-3 mt-3" role="alert">
+            <?= session()->getFlashdata('warning') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show mx-3 mt-3" role="alert">
+            <?= session()->getFlashdata('success') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
     <div class="card card-frame">
         <div class="card-body">
             <div class="row align-items-center">
@@ -67,7 +89,7 @@
                             </button>
                         </div>
                         <div class="col-md-3">
-                            <button class="btn bg-gradient-info w-100" data-bs-toggle="modal" data-bs-target="#modalImport">
+                            <button class="btn bg-gradient-info w-100 import-btn" data-bs-toggle="modal" data-bs-target="#importModal">
                                 <i class="fas fa-file-import me-1"></i> Import
                             </button>
                         </div>
@@ -78,6 +100,67 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Import -->
+    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered"> <!-- centered vertically -->
+            <div class="modal-content border-0 shadow-lg rounded-2xl">
+                <div class="modal-header bg-gradient-info text-white">
+                    <h5 class="modal-title text-white" id="importModalLabel">
+                        <i class="fas fa-file-import me-2"></i>Import Data Stok
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form id="importForm"
+                    action="<?= base_url(session()->get('role') . '/warehouse/importStokBahanBaku') ?>"
+                    method="POST"
+                    enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="mb-4">
+                            <label for="file_excel" class="form-label fw-semibold">Pilih File Excel</label>
+                            <div class="input-group">
+                                <input id="file_excel"
+                                    type="file"
+                                    class="form-control border-info rounded-pill px-3 py-2"
+                                    name="file_excel"
+                                    accept=".xlsx, .xls"
+                                    required
+                                    style="background-color: #f8f9fa; border-width: 2px;">
+                            </div>
+                            <small class="form-text text-muted ms-1">Hanya file Excel (.xlsx, .xls) yang diterima.</small>
+                        </div>
+
+                        <div class="alert alert-light border-info small">
+                            <p class="mb-1">Pastikan file yang diupload sesuai dengan template yang telah disediakan. Jika belum memiliki template, silakan download:</p>
+                            <a href="<?= base_url('template/CONTOH_FORMAT_IMPORT_STOK BAHAN_BAKU_COVERING.xlsx') ?>"
+                                class="text-white text-decoration-none fw-semibold badge bg-gradient-info"
+                                style="font-size: 1rem;"
+                                download>
+                                <i class="fas fa-download me-1"></i>Template Import Stok Bahan Baku
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                            Batal
+                        </button>
+                        <button id="importSubmit"
+                            type="submit"
+                            class="btn bg-gradient-info position-relative">
+                            <span class="spinner-border spinner-border-sm text-white position-absolute top-50 start-50 translate-middle d-none"
+                                role="status"
+                                aria-hidden="true"></span>
+                            <span class="btn-text">Import</span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -366,16 +449,25 @@
                 </div>
             </div>
         </div>
+
+
+
     <?php endforeach; ?>
 </div>
-<script>
-    document.getElementById('modalImport').addEventListener('show.bs.modal', function() {
-        console.log('Modal akan muncul!');
-    });
-</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    // document.addEventListener('DOMContentLoaded', () => {
+    //     let importBtn = document.querySelector('.import-btn');
+    //     let importModal = new bootstrap.Modal(document.getElementById('test'));
+
+    //     importBtn.addEventListener('click', function() {
+    //         importModal.show();
+    //     });
+    // });
+
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
         const cards = document.querySelectorAll('.warehouse-card');

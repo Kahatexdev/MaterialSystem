@@ -294,11 +294,11 @@ class CoveringWarehouseBBController extends BaseController
                 $msg .= "<li>Baris {$rowNum}: {$reason}</li>";
             }
             $msg .= '</ul>';
-            return redirect()->to(base_url($this->role . '/warehouse'))->with('warning', $msg);
+            return redirect()->to(base_url($this->role . '/warehouseBB'))->with('warning', $msg);
         }
 
         // Semua berhasil
-        return redirect()->to(base_url($this->role . '/warehouse'))
+        return redirect()->to(base_url($this->role . '/warehouseBB'))
             ->with('success', "Import berhasil seluruhnya ({$successCount} baris)");
     }
 
@@ -333,36 +333,30 @@ class CoveringWarehouseBBController extends BaseController
             // Mapping data
             try {
                 $item = [
-                    'jenis'          => $rowData[0],
-                    'color'          => $rowData[1],
-                    'code'           => $rowData[2],
-                    'jenis_mesin'    => $rowData[3],
-                    'dr'             => $rowData[4],
-                    'jenis_cover'    => $rowData[5],
-                    'jenis_benang'   => $rowData[6],
-                    'lmd'            => isset($rowData[7]) ? implode(', ', explode(',', $rowData[7])) : null,
-                    'ttl_kg'         => (float) ($rowData[8] ?? 0),
-                    'ttl_cns'        => (int) ($rowData[9] ?? 0),
-                    'admin'          => session()->get('role'),
+                    'denier'          => $rowData[0],
+                    'jenis_benang'    => $rowData[1],
+                    'warna'           => $rowData[2],
+                    'kode'            => $rowData[3],
+                    'kg'              => $rowData[4],
+                    'keterangan'      => $rowData[5] ?? '',
+                    'admin'           => session()->get('username'),
                 ];
 
                 // Cek duplikat
-                if ($this->coveringStockModel->getStockByJenisColorCodeMesin(
-                    $item['jenis'],
-                    $item['color'],
-                    $item['code'],
-                    $item['jenis_mesin'],
-                    $item['dr'],
-                    $item['jenis_cover'],
-                    $item['jenis_benang']
+                if ($this->warehouseBBModel->getStockByDenierJenisWarna(
+                    $item['denier'],
+                    $item['jenis_benang'],
+                    $item['warna'],
+                    $item['kode'],
+                    $item['kg']
                 )) {
                     $failures[$rowNum] = 'Duplikat data di database';
-                    $failures[$rowNum] .= ' (Jenis: ' . $item['jenis'] . ', Color: ' . $item['color'] . ', Code: ' . $item['code'] . ')';
+                    $failures[$rowNum] .= ' (Denier: ' . $item['denier'] . ', Jenis Benang: ' . $item['jenis_benang'] . ', Warna: ' . $item['warna'] . ', Kode: ' . $item['kode'] . ')';
                     continue;
                 }
 
                 // Insert
-                $this->coveringStockModel->insert($item);
+                $this->warehouseBBModel->insert($item);
                 $successCount++;
             } catch (\Exception $e) {
                 $failures[$rowNum] = 'Error: ' . $e->getMessage();
