@@ -438,6 +438,10 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     // import stok barang jadi
     $routes->post('warehouse/importStokBarangJadi', 'CoveringWarehouseController::importStokBarangJadi');
     $routes->post('warehouse/importStokBahanBaku', 'CoveringWarehouseBBController::importStokBahanBaku');
+    $routes->post('warehouse/importStokCovering', 'CoveringWarehouseController::importStokCovering');
+
+    // delete stok barang jadi
+    $routes->post('warehouse/deleteStokBarangJadi/(:num)', 'CoveringWarehouseController::deleteStokBarangJadi/$1');
 
 
     // warehouse bahan baku

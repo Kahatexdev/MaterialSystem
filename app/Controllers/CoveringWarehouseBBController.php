@@ -6,6 +6,12 @@ use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\WarehouseBBModel;
 use App\Models\HistoryStockBBModel;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use Exception;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+
 
 class CoveringWarehouseBBController extends BaseController
 {
@@ -364,5 +370,87 @@ class CoveringWarehouseBBController extends BaseController
         }
 
         return [$successCount, $failures];
+    }
+
+    public function importStokCovering()
+    {
+        $file = $this->request->getFile('file_excel');
+        if (! $file->isValid() || $file->getError() !== UPLOAD_ERR_OK) {
+            return redirect()->back()->with('error', 'File tidak valid atau gagal di-upload.');
+        }
+
+        $ext = $file->getClientExtension();
+        if (! in_array($ext, ['xls', 'xlsx'])) {
+            return redirect()->back()->with('error', 'Format file harus .xls atau .xlsx');
+        }
+
+        $reader = $ext === 'xlsx' ? new Xlsx() : new Xls();
+        $spreadsheet = $reader->load($file->getTempName());
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray(null, true, true, true);
+        
+        // get tanggal import B2
+        $tanggalImport = $sheet->getCell('B2')->getFormattedValue();
+        if (empty($tanggalImport)) {
+            return redirect()->back()->with('error', 'Tanggal import tidak ditemukan di B2.');
+        }
+        
+
+        // Header berada di baris ke-3
+        $headerRow = 3;
+        $rawHeader = $rows[$headerRow];
+
+        // Mapping judul kolom Excel ke field model
+        $map = [
+            'JENIS BARANG'   => 'jenis',
+            'WARNA'          => 'color',
+            'KODE'           => 'code',
+            'JENIS COVER'    => 'jenis_cover',
+            'JENIS BENANG'   => 'jenis_benang',
+            'LMD'            => 'lmd',
+            'STOK KG'        => 'ttl_kg',
+            'STOK CONES'     => 'ttl_cns',
+            'KETERANGAN'     => 'keterangan',
+        ];
+
+        $dataToInsert = [];
+        foreach ($rows as $idx => $row) {
+            if ($idx <= $headerRow) continue; // skip judul/template
+            if (empty(array_filter($row))) continue; // skip kosong
+
+            $item = [];
+            foreach ($rawHeader as $col => $heading) {
+                $headingClean = trim(strtoupper($heading));
+                if (isset($map[$headingClean])) {
+                    $field = $map[$headingClean];
+                    $value = $row[$col];
+                    // Cast numeric fields
+                    if (in_array($field, ['ttl_kg', 'ttl_cns'])) {
+                        $value = is_numeric($value) ? (float)$value : (float) str_replace(',', '.', $value);
+                    }
+                    // LMD bisa koma atau list, simpan apa adanya
+                    $item[$field] = $value;
+                }
+            }
+            
+            // Tambahkan admin dan tanggal import jika model memperbolehkan
+            $item['admin'] = session()->get('username') ?? session()->get('email');
+            $item['keterangan'] = $item['keterangan'] ?? 'Import ' . date('Y-m-d H:i:s');
+            $item['created_at'] = $tanggalImport; // Tambahkan tanggal import
+
+            $dataToInsert[] = $item;
+        }
+        dd ($dataToInsert);
+
+        if (empty($dataToInsert)) {
+            return redirect()->back()->with('warning', 'Tidak ada data yang di-import.');
+        }
+
+        try {
+            $this->historyStockBBModel->insertBatch($dataToInsert);
+            return redirect()->back()->with('success', 'Data stok berhasil di-import!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
+        }
     }
 }

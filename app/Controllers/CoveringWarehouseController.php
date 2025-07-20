@@ -4,6 +4,10 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use Exception;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
@@ -35,6 +39,7 @@ class CoveringWarehouseController extends BaseController
 
     public function __construct()
     {
+        helper('filesystem');
         $this->masterOrderModel = new MasterOrderModel();
         $this->materialModel = new MaterialModel();
         $this->mesinCelupModel = new MesinCelupModel();
@@ -62,69 +67,50 @@ class CoveringWarehouseController extends BaseController
 
     public function index()
     {
-        // $perPage      = 9;
-        // $stok = $this->coveringStockModel->stokCovering($perPage);
-        // $pager = $this->coveringStockModel->pager;
-        // // dd($stok);
-        // $data = [
-        //     'active' => $this->active,
-        //     'title' => 'Warehouse',
-        //     'role' => $this->role,
-        //     'stok' => $stok,
-        //     'pager' => $pager,
-        // ];
+        // 1. Ambil pilihan unik
+        $jenisOptions        = $this->coveringStockModel->select('jenis')->distinct()->orderBy('jenis')->findColumn('jenis');
+        $benangOptions       = $this->coveringStockModel->select('jenis_benang')->distinct()->orderBy('jenis_benang')->findColumn('jenis_benang');
+        $mesinOptions        = $this->coveringStockModel->select('jenis_mesin')->distinct()->orderBy('jenis_mesin')->findColumn('jenis_mesin');
 
-        // return view($this->role . '/warehouse/index', $data);
-        // Ambil parameter filter dari GET
+        // 2. Baca filter dari GET
+        $fJenis     = $this->request->getGet('jenis')        ?? '';
+        $fBenang    = $this->request->getGet('jenis_benang') ?? '';
+        $fMesin     = $this->request->getGet('jenis_mesin')          ?? '';
 
-        helper('form');
-        $q       = $this->request->getGet('q', FILTER_SANITIZE_STRING);
-        $status  = $this->request->getGet('status', FILTER_SANITIZE_STRING);
-        $mesin   = $this->request->getGet('mesin', FILTER_SANITIZE_STRING);
-        $dr      = $this->request->getGet('dr', FILTER_SANITIZE_STRING);
-        $jb      = $this->request->getGet('jenis_benang', FILTER_SANITIZE_STRING);
-        $perPage = 9;
-
-        // Bangun query dengan chaining
+        // 3. Query dengan kondisi dinamis
         $builder = $this->coveringStockModel
             ->select('stock_covering.*, IF(stock_covering.ttl_kg > 0, "ada", "habis") AS status')
-            ->orderBy('ttl_kg', 'DESC');
-        // dd($builder);
-        if ($q) {
-            $builder->like('jenis', $q);
+            ->orderBy('ttl_kg', 'DESC')
+            ->orderBy('ttl_cns', 'DESC');
+
+        if ($fJenis) {
+            $builder->where('jenis', $fJenis);
         }
-        // **GANTI FILTER status**:
-        if ($status === 'ada') {
-            $builder->where('ttl_kg >', 0);
-        } elseif ($status === 'habis') {
-            $builder->where('ttl_kg <=', 0);
+        if ($fBenang) {
+            $builder->where('jenis_benang', $fBenang);
         }
-        if ($mesin) {
-            $builder->where('jenis_mesin', $mesin);
-        }
-        if ($dr) {
-            $builder->where('dr', $dr);
-        }
-        if ($jb) {
-            $builder->where('jenis_benang', $jb);
+        if ($fMesin) {
+            $builder->where('jenis_mesin', $fMesin);
         }
 
-        // Paginate hasilnya
-        $stok  = $builder->paginate($perPage, 'warehouse');
-        $pager = $builder->pager;
+        $stok = $builder->findAll();
 
         return view($this->role . '/warehouse/index', [
-            'active'              => $this->active,
-            'title'               => 'Warehouse',
-            'role'                => $this->role,
-            'stok'                => $stok,
-            'pager'               => $pager,
-            // Untuk daftar filter dropdown tetap lengkap:
-            'unique_jenis_mesin'  => $this->coveringStockModel->getAllJenisMesin(),
-            'unique_dr'           => $this->coveringStockModel->getAllDr(),
-            'request' => $this->request,
+            'active'         => $this->active,
+            'title'          => 'Warehouse',
+            'role'           => $this->role,
+            'stok'           => $stok,
+            // data untuk filter dropdown
+            'jenisOptions'   => $jenisOptions,
+            'benangOptions'  => $benangOptions,
+            'mesinOptions'   => $mesinOptions,
+            // nilai yang sedang dipilih
+            'fJenis'         => $fJenis,
+            'fBenang'        => $fBenang,
+            'fMesin'         => $fMesin,
         ]);
     }
+
 
     public function create()
     {
@@ -444,7 +430,7 @@ class CoveringWarehouseController extends BaseController
         return view($this->role . '/schedule/reqschedule', $data);
     }
 
-    public function importStokBahanBaku()
+    public function importStokBarangJadi()
     {
         $file = $this->request->getFile('file_excel');
         // Validasi file
@@ -543,13 +529,16 @@ class CoveringWarehouseController extends BaseController
             // Mapping data
             try {
                 $item = [
-                    'denier'          => $rowData[0],
-                    'jenis_benang'    => $rowData[1],
-                    'warna'           => $rowData[2],
-                    'kode'            => $rowData[3],
-                    'kg'              => (float) ($rowData[4] ?? 0),
-                    'keterangan'      => $rowData[5],
+                    'jenis'          => $rowData[0],
+                    'color'    => $rowData[1],
+                    'code'           => $rowData[2],
+                    'jenis_mesin'            => $rowData[3],
+                    'dr'              => (float) ($rowData[4] ?? 0),
+                    'jenis_cover'      => $rowData[5],
                     'jenis_benang'    => $rowData[6],
+                    'lmd'             => isset($rowData[7]) ? implode(', ', array_map('trim', explode(',', $rowData[7]))) : null,
+                    'ttl_kg'          => (float) ($rowData[8] ?? 0),
+                    'ttl_cns'         => (float) ($rowData[9] ?? 0),
                     'admin'           => session()->get('username'),
                 ];
 
@@ -577,5 +566,164 @@ class CoveringWarehouseController extends BaseController
         }
 
         return [$successCount, $failures];
+    }
+
+    public function importStokCovering()
+    {
+        $file = $this->request->getFile('file_excel');
+        if (!$file->isValid() || $file->getError() !== UPLOAD_ERR_OK) {
+            return redirect()->back()->with('error', 'File tidak valid atau gagal di-upload.');
+        }
+
+        $ext = strtolower($file->getClientExtension());
+        if (!in_array($ext, ['xls', 'xlsx'])) {
+            return redirect()->back()->with('error', 'Format file harus .xls atau .xlsx');
+        }
+
+        $reader      = $ext === 'xlsx' ? new Xlsx() : new Xls();
+        $spreadsheet = $reader->load($file->getTempName());
+
+        // Definisikan sheet yang akan diproses
+        $sheetNames = ['PEMASUKAN', 'PENGELUARAN'];
+
+        // Mapping header
+        $headerRow = 3;
+        $map = [
+            'JENIS BARANG' => 'jenis',
+            'WARNA'        => 'color',
+            'KODE'         => 'code',
+            'JENIS COVER'  => 'jenis_cover',
+            'JENIS BENANG' => 'jenis_benang',
+            'LMD'          => 'lmd',
+            'STOK KG'      => 'ttl_kg',
+            'STOK CONES'   => 'ttl_cns',
+            'KETERANGAN'   => 'keterangan',
+        ];
+
+        $historyData = [];
+        $updateData  = [];
+        $admin       = session()->get('username') ?? session()->get('email');
+        $nowLabel    = 'Import ' . date('Y-m-d H:i:s');
+
+        foreach ($sheetNames as $name) {
+            $sheet = $spreadsheet->getSheetByName($name);
+            if (!$sheet) continue;
+
+            // Ambil tanggal import dari cell B2 di sheet pertama yang ada
+            if (empty($tanggalImport ?? null)) {
+                $tanggalImport = $sheet->getCell('B2')->getFormattedValue();
+                if (empty($tanggalImport)) {
+                    return redirect()->back()->with('error', 'Tanggal import tidak ditemukan di B2 pada sheet ' . $name);
+                }
+            }
+
+            $rows = $sheet->toArray(null, true, true, true);
+            $rawHeader = array_map('strtoupper', array_map('trim', $rows[$headerRow]));
+
+            foreach ($rows as $idx => $row) {
+                if ($idx <= $headerRow) continue;
+                if (empty(array_filter($row))) continue;
+
+                $item = [
+                    'admin'      => $admin,
+                    'keterangan' => $nowLabel . ' [' . $name . ']',
+                    'created_at' => $tanggalImport,
+                ];
+
+                foreach ($rawHeader as $col => $heading) {
+                    if (!isset($map[$heading])) continue;
+                    $field = $map[$heading];
+                    $val   = $row[$col];
+
+                    if (in_array($field, ['ttl_kg', 'ttl_cns'], true)) {
+                        $clean = str_replace(',', '.', $val);
+                        $val   = is_numeric($clean) ? (float) $clean : 0;
+                    }
+
+                    $item[$field] = $val;
+                }
+
+                // Lewati jika jenis kosong
+                if (empty($item['jenis'])) {
+                    continue;
+                }
+
+                // Validasi kode
+                if (empty($item['code'])) {
+                    return redirect()->back()->with('error', 'Kode tidak lengkap pada sheet ' . $name . ' baris ' . $idx);
+                }
+
+                // Cek stok        
+                $stock = $this->coveringStockModel
+                    ->where('jenis', $item['jenis'])
+                    ->where('color', $item['color'])
+                    ->where('code', $item['code'])
+                    ->where('jenis_cover', $item['jenis_cover'])
+                    ->where('jenis_benang', $item['jenis_benang'])
+                    ->first();
+
+                if (!$stock) {
+                    return redirect()->back()->with('error', "Data tidak ditemukan pada sheet {$name} jenis {$item['jenis']} kode {$item['code']} (baris {$idx}).");
+                }
+
+                if ((($stock['ttl_kg'] ?? 0) <= 0) && (($stock['ttl_cns'] ?? 0) <= 0)) {
+                    return redirect()->back()->with('error', "Stok kosong pada sheet {$name} jenis {$item['jenis']} kode {$item['code']} (baris {$idx}).");
+                }
+
+                // Kumpulkan untuk batch
+                $historyData[] = $item;
+                $updateData[]  = [
+                    'id_covering_stock' => $stock['id_covering_stock'],
+                    'ttl_kg'            => $stock['ttl_kg'] + ($item['ttl_kg'] ?? 0),
+                    'ttl_cns'           => $stock['ttl_cns'] + ($item['ttl_cns'] ?? 0),
+                ];
+            }
+        }
+
+        if (empty($historyData)) {
+            return redirect()->back()->with('warning', 'Tidak ada data yang diproses di semua sheet.');
+        }
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        if (!empty($updateData)) {
+            $this->coveringStockModel->updateBatch($updateData, 'id_covering_stock');
+        }
+
+        $this->historyCoveringStockModel->insertBatch($historyData);
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->with('error', 'Gagal menyimpan data transaksi.');
+        }
+
+        return redirect()->back()->with('success', 'Import stok covering berhasil untuk sheet: ' . implode(', ', $sheetNames));
+    }
+
+    public function deleteStokBarangJadi($id)
+    {
+        // Hanya terima AJAX
+        if (! $this->request->isAJAX()) {
+            return redirect()->back();
+        }
+
+        $stock = $this->coveringStockModel->find($id);
+        if (!$stock) {
+            return $this->response
+                ->setStatusCode(404)
+                ->setJSON(['success' => false, 'message' => 'Data stok tidak ditemukan.']);
+        }
+
+        if ($this->coveringStockModel->delete($id)) {
+            return $this->response
+                ->setStatusCode(200)
+                ->setJSON(['success' => true, 'message' => 'Data stok berhasil dihapus.']);
+        } else {
+            return $this->response
+                ->setStatusCode(500)
+                ->setJSON(['success' => false, 'message' => 'Gagal menghapus data stok.']);
+        }
     }
 }
