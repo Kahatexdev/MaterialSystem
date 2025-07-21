@@ -515,4 +515,10 @@ class CoveringWarehouseBBController extends BaseController
 
         return redirect()->back()->with('success', 'Import stok covering berhasil untuk sheet: ' . implode(', ', $sheetNames));
     }
+
+    public function deleteBahanBakuCov($id)
+    {
+        $this->warehouseBBModel->delete($id);
+        return redirect()->back()->with('success', 'Data berhasil dihapus.');
+    }
 }

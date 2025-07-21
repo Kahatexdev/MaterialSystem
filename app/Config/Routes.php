@@ -437,13 +437,10 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('warehouse/exportStockPdf', 'PdfController::exportStockPdf');
     // import stok barang jadi
     $routes->post('warehouse/importStokBarangJadi', 'CoveringWarehouseController::importStokBarangJadi');
-    $routes->post('warehouse/importStokBahanBakuJenis', 'CoveringWarehouseBBController::importStokBahanBakuJenis');
-    $routes->post('warehouse/importStokBahanBaku', 'CoveringWarehouseBBController::importStokBahanBaku');
     $routes->post('warehouse/importStokCovering', 'CoveringWarehouseController::importStokCovering');
 
     // delete stok barang jadi
     $routes->post('warehouse/deleteStokBarangJadi/(:num)', 'CoveringWarehouseController::deleteStokBarangJadi/$1');
-
 
     // warehouse bahan baku
     $routes->get('warehouseBB', 'CoveringWarehouseBBController::index');
@@ -453,6 +450,10 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('warehouseBB/pengeluaran', 'CoveringWarehouseBBController::pengeluaran');
     $routes->get('warehouseBB/BahanBakuCovPdf', 'PdfController::BahanBakuCovPdf');
     $routes->get('warehouseBB/BahanBakuCovExcel', 'ExcelController::BahanBakuCovExcel');
+    $routes->get('warehouseBB/deleteBahanBakuCov/(:num)', 'CoveringWarehouseBBController::deleteBahanBakuCov/$1');
+    $routes->post('warehouse/importStokBahanBakuJenis', 'CoveringWarehouseBBController::importStokBahanBakuJenis');
+    $routes->post('warehouse/importStokBahanBaku', 'CoveringWarehouseBBController::importStokBahanBaku');
+
     //Pemesanan
     $routes->get('pemesanan', 'CoveringPemesananController::index');
     $routes->get('pemesanan/(:any)', 'CoveringPemesananController::pemesanan/$1');
