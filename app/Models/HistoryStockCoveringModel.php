@@ -24,7 +24,8 @@ class HistoryStockCoveringModel extends Model
         'ttl_cns',
         'ttl_kg',
         'admin',
-        'keterangan'
+        'keterangan',
+        'created_at',
     ];
 
     protected bool $allowEmptyInserts = false;

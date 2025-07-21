@@ -142,11 +142,11 @@
     <div class="card mb-4">
         <div class="card-body">
             <div class="row mt-2 align-items-end">
-                <div class="col-md-8">
+                <div class="col-md-5">
                     <h5 class="card-title mb-3">Warehouse Barang Jadi Covering</h5>
 
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-7 d-flex justify-content-center align-items-center gap-2">
                     <button class="btn bg-gradient-info" type="button" data-bs-toggle="modal" data-bs-target="#importModal">
                         <i class="fas fa-file-import me-1"></i> Import Jenis
                     </button>
@@ -201,12 +201,12 @@
                         <?php endforeach ?>
                     </select>
                 </div>
-                <div class="col-md-3 text-end">
-                    <button type="submit" class="btn btn-primary mt-2">
-                        <i class="fas fa-filter me-1"></i> Terapkan Filter
+                <div class="col-md-3 d-flex justify-content-center align-items-end">
+                    <button type="submit" class="btn bg-gradient-info mt-2 me-2">
+                        <i class="fas fa-filter"></i>
                     </button>
-                    <a href="<?= current_url() ?>" class="btn btn-outline-secondary mt-2">
-                        <i class="fas fa-times me-1"></i> Reset
+                    <a href="<?= current_url() ?>" class="btn bg-gradient-secondary mt-2">
+                        <i class="fas fa-times"></i>
                     </a>
                 </div>
             </form>
@@ -469,7 +469,7 @@
 
                         <div class="alert alert-light border-info small">
                             <p class="mb-1">Pastikan file yang diupload sesuai dengan template yang telah disediakan. Jika belum memiliki template, silakan download:</p>
-                            <a href="<?= base_url('template/FORMAT_IMPORT_STOK _COVERING.xlsx') ?>"
+                            <a href="<?= base_url('template/FORMAT_IMPORT_STOK_COVERING.xlsx') ?>"
                                 class="text-white text-decoration-none fw-semibold badge bg-gradient-info"
                                 style="font-size: 1rem;"
                                 download>

@@ -612,6 +612,7 @@ class CoveringWarehouseController extends BaseController
             // Ambil tanggal import dari cell B2 di sheet pertama yang ada
             if (empty($tanggalImport ?? null)) {
                 $tanggalImport = $sheet->getCell('B2')->getFormattedValue();
+                // dd ($tanggalImport);
                 if (empty($tanggalImport)) {
                     return redirect()->back()->with('error', 'Tanggal import tidak ditemukan di B2 pada sheet ' . $name);
                 }
@@ -672,6 +673,7 @@ class CoveringWarehouseController extends BaseController
 
                 // Kumpulkan untuk batch
                 $historyData[] = $item;
+                // dd ($historyData);
                 $updateData[]  = [
                     'id_covering_stock' => $stock['id_covering_stock'],
                     'ttl_kg'            => $stock['ttl_kg'] + ($item['ttl_kg'] ?? 0),
