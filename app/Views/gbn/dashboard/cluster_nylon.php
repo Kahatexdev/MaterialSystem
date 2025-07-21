@@ -204,9 +204,12 @@
 
                                                         // 4) Kalau kolom L, cukup A & B saja (C/D tetap null)
                                                     } elseif ($col === 'L') {
-                                                        if ($row >= 6 && $row <= 11) {
+                                                        if ($row >= 1 && $row <= 7) {
                                                             $namaC = "$col.{$rowFormatted}.C";
                                                             $namaD = "$col.{$rowFormatted}.D";
+                                                        } else {
+                                                            $namaC = "$col.{$rowFormatted}.C";
+                                                            $namaD = "";
                                                         }
                                                     }
                                                     renderClusterButtons($groupData, $namaA, $namaB, $namaC, $namaD);

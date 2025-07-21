@@ -1,6 +1,7 @@
 <?php $this->extend($role . '/warehousebb/header'); ?>
 <?php $this->section('content'); ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
 <style>
     .summary-card {
         border-left: 4px solid #007bff;
@@ -75,30 +76,34 @@
                 <div class="col-md-6">
                     <h5 class="mb-0 font-weight-bolder">Stock Bahan Baku</h5>
                 </div>
-                <div class="col-md-6">
-                    <div class="row g-2 justify-content-md-end">
-                        <div class="col-md-3">
-                            <div class="input-group">
-                                <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
-                                <input type="text" id="searchInput" class="form-control" placeholder="Cari jenis barang...">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <button class="btn bg-gradient-info w-100" data-bs-toggle="modal" data-bs-target="#addModal">
-                                <i class="fas fa-plus"></i> Tambah
-                            </button>
-                        </div>
-                        <div class="col-md-3">
-                            <button class="btn bg-gradient-info w-100 import-btn" data-bs-toggle="modal" data-bs-target="#importModal">
-                                <i class="fas fa-file-import me-1"></i> Import
-                            </button>
-                        </div>
-                        <div class="col-md-3">
-                            <button class="btn bg-gradient-success w-100" data-bs-target="#modalExport" data-bs-toggle="modal">
-                                <i class="fas fa-file-excel me-1"></i> Export
-                            </button>
-                        </div>
+
+            </div>
+            <div class="row d-flex justify-content-end mt-2">
+                <!-- <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                        <input type="text" id="searchInput" class="form-control" placeholder="Cari jenis barang...">
                     </div>
+                </div> -->
+                <div class="col-md-2">
+                    <button class="btn bg-gradient-info w-100" data-bs-toggle="modal" data-bs-target="#addModal">
+                        <i class="fas fa-plus"></i> Tambah
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn bg-gradient-info w-100 import-btn" data-bs-toggle="modal" data-bs-target="#importModal">
+                        <i class="fas fa-file-import me-1"></i> Import Stok
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn bg-gradient-info w-100 import-btn" data-bs-toggle="modal" data-bs-target="#importJenisModal">
+                        <i class="fas fa-file-import me-1"></i> Import Jenis
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn bg-gradient-success w-100" data-bs-target="#modalExport" data-bs-toggle="modal">
+                        <i class="fas fa-file-excel me-1"></i> Export
+                    </button>
                 </div>
             </div>
         </div>
@@ -136,7 +141,66 @@
 
                         <div class="alert alert-light border-info small">
                             <p class="mb-1">Pastikan file yang diupload sesuai dengan template yang telah disediakan. Jika belum memiliki template, silakan download:</p>
-                            <a href="<?= base_url('template/CONTOH_FORMAT_IMPORT_STOK BAHAN_BAKU_COVERING.xlsx') ?>"
+                            <a href="<?= base_url('template/FORMAT_IMPORT_STOK BAHAN_BAKU_COVERING.xlsx') ?>"
+                                class="text-white text-decoration-none fw-semibold badge bg-gradient-info"
+                                style="font-size: 1rem;"
+                                download>
+                                <i class="fas fa-download me-1"></i>Template Import Stok Bahan Baku
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                            Batal
+                        </button>
+                        <button id="importSubmit"
+                            type="submit"
+                            class="btn bg-gradient-info position-relative">
+                            <span class="spinner-border spinner-border-sm text-white position-absolute top-50 start-50 translate-middle d-none"
+                                role="status"
+                                aria-hidden="true"></span>
+                            <span class="btn-text">Import</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="importJenisModal" tabindex="-1" aria-labelledby="importJenisModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered"> <!-- centered vertically -->
+            <div class="modal-content border-0 shadow-lg rounded-2xl">
+                <div class="modal-header bg-gradient-info text-white">
+                    <h5 class="modal-title text-white" id="importJenisModalLabel">
+                        <i class="fas fa-file-import me-2"></i>Import Data Jenis
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form id="importForm"
+                    action="<?= base_url(session()->get('role') . '/warehouse/importStokBahanBakuJenis') ?>"
+                    method="POST"
+                    enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="mb-4">
+                            <label for="file_excel" class="form-label fw-semibold">Pilih File Excel</label>
+                            <div class="input-group">
+                                <input id="file_excel"
+                                    type="file"
+                                    class="form-control border-info rounded-pill px-3 py-2"
+                                    name="file_excel"
+                                    accept=".xlsx, .xls"
+                                    required
+                                    style="background-color: #f8f9fa; border-width: 2px;">
+                            </div>
+                            <small class="form-text text-muted ms-1">Hanya file Excel (.xlsx, .xls) yang diterima.</small>
+                        </div>
+
+                        <div class="alert alert-light border-info small">
+                            <p class="mb-1">Pastikan file yang diupload sesuai dengan template yang telah disediakan. Jika belum memiliki template, silakan download:</p>
+                            <a href="<?= base_url('template/CONTOH_FORMAT_IMPORT_STOK_JENIS BAHAN_BAKU_COVERING.xlsx') ?>"
                                 class="text-white text-decoration-none fw-semibold badge bg-gradient-info"
                                 style="font-size: 1rem;"
                                 download>
@@ -165,77 +229,41 @@
         </div>
     </div>
 
-    <!-- Grid View -->
-    <div class="row g-3 mt-3" id="warehouseGrid">
-        <?php if (empty($warehouseBB)) : ?>
-            <div class="col-12">
-                <div class="alert alert-info text-center">Belum ada data stok.</div>
-            </div>
-        <?php else : ?>
-            <?php foreach ($warehouseBB as $item) : ?>
-                <div class="col-4 warehouse-card"
-                    data-jenis="<?= $item['jenis_benang'] ?? '' ?>"
-                    data-denier="<?= $item['denier'] ?? '' ?>"
-                    data-warna="<?= $item['warna'] ?? '' ?>"
-                    data-kode="<?= $item['kode'] ?? '' ?>"
-                    data-kg="<?= $item['kg'] ?? '' ?>"
-                    data-keterangan="<?= $item['keterangan'] ?? '' ?>">
-                    <div class="card h-100 border">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
-                            <h6 class="mb-0 text-truncate"><?= $item['jenis_benang'] ?></h6>
-                            <span class="badge <?= $item['status'] == 'ada' ? 'bg-gradient-info' : 'bg-gradient-secondary' ?>">
-                                <?= ucfirst($item['status']) ?>
-                            </span>
-                        </div>
-                        <div class="card-body small">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Jenis:</span> <span class="fw-bold"><?= $item['jenis_benang'] ?></span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Denier:</span> <span class="fw-bold"><?= $item['denier'] ?></span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Warna:</span> <span class="fw-bold"><?= $item['warna'] ?? '-' ?></span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Kode Warna:</span> <span class="fw-bold"><?= $item['kode'] ?? '-' ?></span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Stock:</span> <span class="fw-bold"><?= $item['kg'] ?> Kg</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Keterangan:</span> <span class="fw-bold"><?= $item['keterangan'] ?? '' ?></span>
-                            </div>
-                        </div>
-                        <div class="card-footer bg-white">
-                            <div class="row g-2 mb-2">
-                                <div class="col-12 col-md-6 d-grid">
-                                    <button type="button" class="btn bg-gradient-info btn-sm btn-custom" data-bs-toggle="modal" data-bs-target="#modalPemasukan<?= $item['idstockbb'] ?>">
-                                        <i class="fas fa-plus me-1"></i> Pemasukan
-                                    </button>
-                                </div>
-                                <div class="col-12 col-md-6 d-grid">
-                                    <button type="button" class="btn bg-gradient-danger btn-sm btn-custom <?= $item['kg'] <= 0 ? 'disabled' : '' ?>"
-                                        data-bs-toggle="modal" data-bs-target="#modalPengeluaran<?= $item['idstockbb'] ?>" <?= $item['kg'] <= 0 ? 'disabled' : '' ?>>
-                                        <i class="fas fa-minus me-1"></i> Pengeluaran
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="d-grid">
-                                <button
-                                    class="btn btn-outline-secondary btn-sm btn-custom"
-                                    data-bs-target="#editModal<?= $item['idstockbb'] ?>" data-bs-toggle="modal">
-                                    <i class="fas fa-edit me-1"></i> Edit Detail
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </div>
-    <div class="mt-3 d-flex justify-content-end">
-        <?= $pager->links('warehouse', 'bootstrap_pagination') ?>
+    <div class="card px-3 py-3 mt-3">
+        <div class="table-responsive">
+            <table class="table" id="stockTable">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Jenis</th>
+                        <th>Denier</th>
+                        <th>Warna</th>
+                        <th>Kode Warna</th>
+                        <th>Stock</th>
+                        <th>Keterangan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php $no = 1; ?>
+                    <?php foreach ($warehouseBB as $bb) : ?>
+                        <tr>
+                            <td><?= $no++ ?></td>
+                            <td><?= $bb['jenis_benang'] ?></td>
+                            <td><?= $bb['denier'] ?></td>
+                            <td><?= $bb['warna'] ?></td>
+                            <td><?= $bb['kode'] ?></td>
+                            <td><?= $bb['kg'] ?> Kg</td>
+                            <td><?= $bb['keterangan'] ?></td>
+                            <td>
+                                <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $bb['idstockbb'] ?>"><i class="fas fa-edit"></i></button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+
+            </table>
+        </div>
     </div>
 
     <!-- Modal Tambah warehouseBB -->
@@ -343,131 +371,52 @@
         </div>
     <?php endforeach; ?>
 
-    <!-- Modal Pemasukan -->
-    <?php foreach ($warehouseBB as $item) : ?>
-        <div class="modal fade" id="modalPemasukan<?= $item['idstockbb'] ?>" tabindex="-1" aria-labelledby="modalPemasukanLabel<?= $item['idstockbb'] ?>" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-gradient-info text-white">
-                        <h5 class="modal-title" id="modalPemasukanLabel<?= $item['idstockbb'] ?>">Pemasukan Stok (Kg)</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="<?= base_url($role . '/warehouseBB/pemasukan') ?>" method="POST">
-                        <input type="hidden" class="form-control" name="denier" value="<?= $item['denier'] ?>" placeholder="Masukkan Denier">
-                        <input type="hidden" name="jenis_benang" value="<?= $item['jenis_benang'] ?>">
-                        <input type="hidden" class="form-control" name="warna" value="<?= $item['warna'] ?>" placeholder="Masukkan Warna">
-                        <input type="hidden" class="form-control" name="kode" value="<?= $item['kode'] ?>" placeholder="Masukkan Kode Warna">
-                        <input type="hidden" step="0.01" class="form-control" name="kg" value="<?= $item['kg'] ?>" placeholder="Masukkan Stock (Kg)">
-                        <input type="hidden" name="keterangan" id="" class="form-control" placeholder="Masukkan Keterangan" value="<?= $item['keterangan'] ?>"></input>
-
-                        <div class="modal-body">
-                            <input type="hidden" name="idstockbb" value="<?= $item['idstockbb'] ?>">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label class="form-label">Jumlah (Kg)</label>
-                                    <input type="number" step="0.01" min="0.01" name="kg" class="form-control" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Jumlah Cones</label>
-                                    <input type="number" name="ttl_cns" class="form-control">
-                                </div>
+    <!-- Modal Export warehouseBB -->
+    <div class="modal fade" id="modalExport" tabindex="-1" aria-labelledby="modalExportLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header text-white">
+                    <h5 class="modal-title" id="modalExportLabel">Export Bahan Baku</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="<?= base_url($role . '/warehouseBB/BahanBakuCovExcel') ?>" method="GET">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label class="form-label">Jenis Benang</label>
+                                <select class="form-control" name="jenis_benang" required>
+                                    <option value="">Pilih Jenis Benang</option>
+                                    <option value="NYLON">NYLON</option>
+                                    <option value="POLYESTER/SPDX/KRT">POLYESTER/SPDX/KRT</option>
+                                    <option value="RECYCLED POLYESTER">RECYCLED POLYESTER</option>
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                                <button type="submit" class="btn btn-info">Export</button>
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
-                            <button type="submit" class="btn btn-info">Simpan</button>
-                        </div>
-                    </form>
-                </div>
+                </form>
             </div>
         </div>
-
-        <!-- Modal Pengeluaran -->
-        <div class="modal fade" id="modalPengeluaran<?= $item['idstockbb'] ?>" tabindex="-1" aria-labelledby="modalPengeluaranLabel<?= $item['idstockbb'] ?>" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-gradient-danger text-white">
-                        <h5 class="modal-title" id="modalPengeluaranLabel<?= $item['idstockbb'] ?>">Pengeluaran Stock (Kg)</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="<?= base_url($role . '/warehouseBB/pengeluaran') ?>" method="POST">
-                        <input type="hidden" class="form-control" name="denier" value="<?= $item['denier'] ?>" placeholder="Masukkan Denier">
-                        <input type="hidden" name="jenis_benang" value="<?= $item['jenis_benang'] ?>">
-                        <input type="hidden" class="form-control" name="warna" value="<?= $item['warna'] ?>" placeholder="Masukkan Warna">
-                        <input type="hidden" class="form-control" name="kode" value="<?= $item['kode'] ?>" placeholder="Masukkan Kode Warna">
-                        <input type="hidden" step="0.01" class="form-control" name="kg" value="<?= $item['kg'] ?>" placeholder="Masukkan Stock (Kg)">
-                        <input type="hidden" name="keterangan" id="" class="form-control" placeholder="Masukkan Keterangan" value="<?= $item['keterangan'] ?>"></input>
-
-                        <div class="modal-body">
-                            <input type="hidden" name="idstockbb" value="<?= $item['idstockbb'] ?>">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label class="form-label">Jumlah (Kg)</label>
-                                    <input type="number" step="0.01" min="0.01" name="kg" class="form-control" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Jumlah Cones</label>
-                                    <input type="number" name="ttl_cns" class="form-control">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
-                            <button type="submit" class="btn btn-danger">Simpan</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal Export warehouseBB -->
-        <div class="modal fade" id="modalExport" tabindex="-1" aria-labelledby="modalExportLabel" aria-hidden="true">
-            <div class="modal-dialog modal-md">
-                <div class="modal-content">
-                    <div class="modal-header text-white">
-                        <h5 class="modal-title" id="modalExportLabel">Export Bahan Baku</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="<?= base_url($role . '/warehouseBB/BahanBakuCovExcel') ?>" method="GET">
-                        <div class="modal-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <label class="form-label">Jenis Benang</label>
-                                    <select class="form-control" name="jenis_benang" required>
-                                        <option value="">Pilih Jenis Benang</option>
-                                        <option value="NYLON">NYLON</option>
-                                        <option value="POLYESTER/SPDX/KRT">POLYESTER/SPDX/KRT</option>
-                                        <option value="RECYCLED POLYESTER">RECYCLED POLYESTER</option>
-                                    </select>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
-                                    <button type="submit" class="btn btn-info">Export</button>
-                                </div>
-                            </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-
-
-    <?php endforeach; ?>
+    </div>
 </div>
+<link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.css" />
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+<script src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // document.addEventListener('DOMContentLoaded', () => {
-    //     let importBtn = document.querySelector('.import-btn');
-    //     let importModal = new bootstrap.Modal(document.getElementById('test'));
-
-    //     importBtn.addEventListener('click', function() {
-    //         importModal.show();
-    //     });
-    // });
-
+    $(document).ready(function() {
+        $('#stockTable').DataTable({
+            responsive: true,
+            paging: true,
+            searching: true,
+            ordering: true,
+            info: true
+        });
+    });
+</script>
+<script>
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
         const cards = document.querySelectorAll('.warehouse-card');
