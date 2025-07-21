@@ -214,11 +214,15 @@
                             <input type="date" id="filter_tglschsampai" name="filter_tglschsampai" class="form-control" value="<?= old('filter_tglschsampai') ?>">
                         </div>
                         <div class="d-flex flex-column">
-                            <label for="filter_nomodel" class="form-label">No Model / Kode Warna</label>
-                            <input type="text" id="filter_nomodel" name="filter_nomodel" class="form-control" placeholder="No Model / Kode Warna">
+                            <label for="filter_nomodel" class="form-label">LOT / Model / Kode Warna</label>
+                            <input type="text" id="filter_nomodel" name="filter_nomodel" class="form-control" placeholder="LOT / Model / Kode Warna">
                         </div>
                         <button class="btn btn-filter mt-md-4" id="filter_date_range" type="submit">
                             <i class="bi bi-funnel me-2"></i>Filter
+                        </button>
+                        <!-- btn reset -->
+                        <button class="btn btn-secondary mt-md-4" id="reset_date_range" type="button">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Reset
                         </button>
                     </div>
                 </div>
@@ -237,6 +241,7 @@
                             <th class="sticky">No Mc</th>
                             <th class="sticky">PO</th>
                             <th class="sticky">Jenis Benang</th>
+                            <th class="sticky">LOT</th>
                             <th class="sticky">Kode Warna</th>
                             <th class="sticky">Warna</th>
                             <th class="sticky">Start Mc</th>
@@ -248,6 +253,9 @@
                         <?php
                         $no = 1;
                         foreach ($uniqueData as $data):
+                            if ($data['last_status'] == 'done') {
+                                continue; // Skip rows with last_status 'done'
+                            }
                         ?>
                             <tr>
                                 <td><?= $no++; ?></td>
@@ -258,6 +266,7 @@
                                 ?>
                                 <td><?= $poDisplay ?></td>
                                 <td><?= $data['item_type']; ?></td>
+                                <td><?= $data['lot_celup']; ?></td>
                                 <td><?= $data['kode_warna']; ?></td>
                                 <td><?= $data['warna']; ?></td>
                                 <td><?= $data['start_mc']; ?></td>
@@ -486,24 +495,19 @@
             }
 
             // Redirect ke URL dengan parameter filter
-            const url = `<?= base_url($role . '/schedule') ?>?start_date=${startDate}&end_date=${endDate}`;
+            const url = `<?= base_url($role . '/reqschedule') ?>?start_date=${startDate}&end_date=${endDate}`;
             window.location.href = url;
         });
 
         // reset filter tanggal
         document.getElementById('reset_date_range').addEventListener('click', function() {
-            // Redirect ke URL dengan parameter filter menampilkan data 2 hari kebelakang dan 7 hari kedepan
-            const start_date = new Date();
-            const end_date = new Date();
-            start_date.setDate(start_date.getDate() - 2);
-            end_date.setDate(end_date.getDate() + 7);
+            // Hapus nilai input tanggal
+            document.getElementById('filter_tglsch').value = '';
+            document.getElementById('filter_tglschsampai').value = '';
+            document.getElementById('filter_nomodel').value = '';
 
-            const startDate = start_date.toISOString().split('T')[0];
-
-            const endDate = end_date.toISOString().split('T')[0];
-
-            // Redirect ke URL dengan parameter filter
-            const url = `<?= base_url($role . '/schedule') ?>?start_date=${startDate}&end_date=${endDate}`;
+            // Redirect ke URL tanpa parameter filter
+            const url = `<?= base_url($role . '/reqschedule') ?>`;
             window.location.href = url;
         });
     });

@@ -33,6 +33,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpParser\Node\Stmt\Else_;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageMargins;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ExcelController extends BaseController
 {
@@ -3082,292 +3083,143 @@ class ExcelController extends BaseController
 
     public function exportStock()
     {
-        $jenisCover = $this->request->getPost('jenis_cover');
+        // Ambil input
+        $jenisCover  = $this->request->getPost('jenis_cover');
         $jenisBenang = $this->request->getPost('jenis_benang');
         if (empty($jenisBenang) || empty($jenisCover)) {
             return redirect()->back()->with('error', 'Jenis Benang dan Jenis Cover tidak boleh kosong.');
         }
 
+        // Data stok
         $data = $this->coveringStockModel->getStockCover($jenisBenang, $jenisCover);
-        // dd($data);
 
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        // 1. Atur ukuran kertas jadi A4
-        $sheet->getPageSetup()
-            ->setPaperSize(PageSetup::PAPERSIZE_A4);
+        // Inisialisasi spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet       = $spreadsheet->getActiveSheet();
 
-        // 2. Atur orientasi jadi portrait
+        // Setup kertas A4 portrait dan margin
         $sheet->getPageSetup()
-            ->setOrientation(PageSetup::ORIENTATION_PORTRAIT);
-        // 3. (Opsional) Atur scaling, agar muat ke 1 halaman
-        $sheet->getPageSetup()
+            ->setPaperSize(PageSetup::PAPERSIZE_A4)
+            ->setOrientation(PageSetup::ORIENTATION_PORTRAIT)
             ->setFitToWidth(1)
-            ->setFitToHeight(0)    // 0 artinya auto height
-            ->setFitToPage(true); // aktifkan fitting
+            ->setFitToHeight(0)
+            ->setFitToPage(true);
+        $sheet->getPageMargins()->setTop(0.4)->setBottom(0.4)->setLeft(0.4)->setRight(0.2);
 
-        // 4. (Opsional) Atur margin supaya tidak terlalu sempit
-        $sheet->getPageMargins()->setTop(0.4)
-            ->setBottom(0.4)
-            ->setLeft(0.4)
-            ->setRight(0.2);
-        // Merge area logo dan autosize kolom A dan B
+        // ----- Header Statis (Baris 1-5) -----
+        // Logo
         $sheet->mergeCells('A1:B2');
         $sheet->getColumnDimension('A')->setWidth(10);
         $sheet->getColumnDimension('B')->setWidth(15);
         $sheet->getRowDimension(1)->setRowHeight(30);
+        $drawing = new Drawing();
+        $drawing->setName('Logo')->setDescription('Logo')->setPath('assets/img/logo-kahatex.png')
+            ->setCoordinates('A1')->setHeight(50)->setOffsetX(40)->setOffsetY(5)->setWorksheet($sheet);
 
-        // Logo kahatex di tengah area A1:B2
-        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-        $drawing->setName('Logo');
-        $drawing->setDescription('Logo Perusahaan');
-        $drawing->setPath('assets/img/logo-kahatex.png');
-        // Set posisi di tengah merge cell A1:B2
-        $drawing->setCoordinates('A1');
-        $drawing->setHeight(50);
-        // Offset agar logo benar-benar di tengah
-        $drawing->setOffsetX(40);
-        $drawing->setOffsetY(5);
-        $drawing->setWorksheet($sheet);
-
-        // Judul
-        $sheet->mergeCells('A3:B3');
-        $sheet->setCellValue('A3', 'PT. KAHATEX');
+        // Judul Perusahaan
+        $sheet->mergeCells('A3:B3')->setCellValue('A3', 'PT. KAHATEX');
         $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(14);
-        $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
 
-
-        $sheet->mergeCells('C1:Q1');
-        $sheet->setCellValue('C1', 'FORMULIR');
-        $sheet->mergeCells('C2:Q2');
-        $sheet->setCellValue('C2', 'DEPARTEMEN COVERING');
-        $sheet->mergeCells('C3:Q3');
-        $sheet->setCellValue('C3', 'STOCK ' . $jenisCover . ' COVER DI GUDANG COVERING');
+        // FORMULIR & Departemen
+        $sheet->mergeCells('C1:Q1')->setCellValue('C1', 'FORMULIR');
+        $sheet->mergeCells('C2:Q2')->setCellValue('C2', 'DEPARTEMEN COVERING');
+        $sheet->mergeCells('C3:Q3')->setCellValue('C3', 'STOCK ' . $jenisCover . ' COVER DI GUDANG COVERING');
         $sheet->getStyle('C1:Q3')->getFont()->setBold(true)->setSize(14);
-        $sheet->getStyle('C1:Q3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('C1:Q3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-        // warna background
-        $sheet->getStyle('C1:Q1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
-        $sheet->getStyle('C1:Q1')->getFill()->getStartColor()->setARGB('99FFFF');
-        // Border kiri A1:A3
-        $sheet->getStyle('A1:A3')->getBorders()->getLeft()->setBorderStyle(Border::BORDER_DOUBLE);
+        $sheet->getStyle('C1:Q3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('C1:Q1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('99FFFF');
 
-        // Border atas A1:Q1
-        $sheet->getStyle('A1:Q1')->getBorders()->getTop()->setBorderStyle(Border::BORDER_DOUBLE);
+        // Dokumen & Tanggal Revisi - TAMBAHKAN PLACEHOLDER UNTUK HALAMAN
+        $sheet->mergeCells('A4:B4')->setCellValue('A4', 'No. Dokumen');
+        $sheet->mergeCells('C4:K4')->setCellValue('C4', 'FOR-CC-151/REV_01/HAL_?/?'); // Placeholder
+        $sheet->mergeCells('L4:N4')->setCellValue('L4', 'Tanggal Revisi');
+        $sheet->mergeCells('O4:Q4')->setCellValue('O4', '11 November 2019');
 
-        // Border kanan B1:B3
-        $sheet->getStyle('B1:B3')->getBorders()->getRight()->setBorderStyle(Border::BORDER_DOUBLE);
-
-        // Border kanan Q1:Q3
-        $sheet->getStyle('Q1:Q3')->getBorders()->getRight()->setBorderStyle(Border::BORDER_DOUBLE);
-
-        $sheet->mergeCells('A4:B4');
-        $sheet->setCellValue('A4', 'No. Dokumen');
-        $sheet->mergeCells('C4:K4');
-        $sheet->setCellValue('C4', 'FOR-CC-151/REV_01/HAL_../..');
-        $sheet->mergeCells('L4:N4');
-        $sheet->setCellValue('L4', 'Tanggal Revisi');
-        $sheet->mergeCells('O4:Q4');
-        $sheet->setCellValue('O4', '11 November 2019');
-
-        $sheet->mergeCells('A5:B5')
-            ->setCellValue('A5', 'Jenis Benang');
-        $sheet->mergeCells('C5:K5')
-            ->setCellValue('C5', $jenisBenang);
-        $sheet->mergeCells('L5:N5')
-            ->setCellValue('L5', 'Tanggal');
-        // Format tanggal menjadi 23-Mei-2025
-        $bulanIndo = [
-            '01' => 'Jan',
-            '02' => 'Feb',
-            '03' => 'Mar',
-            '04' => 'Apr',
-            '05' => 'Mei',
-            '06' => 'Jun',
-            '07' => 'Jul',
-            '08' => 'Agu',
-            '09' => 'Sep',
-            '10' => 'Okt',
-            '11' => 'Nov',
-            '12' => 'Des'
-        ];
-        $tanggalSekarang = date('Y-m-d');
-        $tglArr = explode('-', $tanggalSekarang);
-        $tglIndo = $tglArr[2] . '-' . $bulanIndo[$tglArr[1]] . '-' . $tglArr[0];
-        $sheet->mergeCells('O5:Q5')
-            ->setCellValue('O5', $tglIndo);
-        $sheet->getStyle('A4:Q5')->getFont()->setBold(true);
-        $sheet->getStyle('A4:Q5')->getFont()->setSize(12);
-
-        $sheet->getStyle('A4:Q4')->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_DOUBLE);
-        $sheet->getStyle('A5:Q5')->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-        $sheet->getStyle('A4:Q5')->getBorders()->getAllBorders()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK);
-        $sheet->getStyle('A4:Q5')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+        // Jenis Benang & Tanggal Cetak
+        $sheet->mergeCells('A5:B5')->setCellValue('A5', 'Jenis Benang');
+        $sheet->mergeCells('C5:K5')->setCellValue('C5', $jenisBenang);
+        $sheet->mergeCells('L5:N5')->setCellValue('L5', 'Tanggal');
+        $sheet->mergeCells('O5:Q5')->setCellValue('O5', date('d-M-Y'));
+        $sheet->getStyle('A4:Q5')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('A4:Q5')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
 
-        // Header
-        $sheet->mergeCells('A6:A7');
-        $sheet->setCellValue('A6', 'Jenis');
-        $sheet->mergeCells('B6:B7');
-        $sheet->setCellValue('B6', 'Color');
-        $sheet->mergeCells('C6:C7');
-        $sheet->setCellValue('C6', 'Code');
-        $sheet->mergeCells('D6:D7');
-        $sheet->setCellValue('D6', 'LMD');
-        $sheet->getColumnDimension('D')->setWidth(7);
-        $sheet->mergeCells('E6:I6');
-        $sheet->setCellValue('E6', 'Total');
-        $sheet->mergeCells('J6:K6');
-        $sheet->setCellValue('J6', 'Stock');
-        $sheet->mergeCells('L6:Q6');
-        $sheet->setCellValue('L6', 'Keterangan');
-        $sheet->mergeCells('E7:F7');
-        $sheet->setCellValue('E7', 'Cones');
-        $sheet->mergeCells('G7:H7');
-        $sheet->setCellValue('G7', 'Kg');
-        $sheet->getColumnDimension('I')->setWidth(7);
-        $sheet->setCellValue('I7', 'Box');
-        $sheet->getColumnDimension('J')->setWidth(7);
-        $sheet->setCellValue('J7', 'Ada');
-        $sheet->getColumnDimension('K')->setWidth(7);
-        $sheet->setCellValue('K7', 'Habis');
-        $sheet->setCellValue('L7', 'Rak No');
-        $sheet->setCellValue('M7', 'Kanan');
-        $sheet->setCellValue('N7', 'Kiri');
-        $sheet->setCellValue('O7', 'Atas');
-        $sheet->setCellValue('P7', 'Bawah');
-        $sheet->setCellValue('Q7', 'Palet No');
-        $sheet->getStyle('A6:Q7')->getFont()->setBold(true);
-        $sheet->getStyle('A6:Q7')->getFont()->setSize(11);
-        $sheet->getStyle('A6:Q7')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A6:Q7')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-        $sheet->getStyle('A6:Q7')->getAlignment()->setWrapText(true);
-        $sheet->getStyle('A6:Q7')->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-        $sheet->getStyle('A6:Q7')->getBorders()->getAllBorders()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK);
-        $sheet->getStyle('A6:Q7')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
-        // set background color white
-        $sheet->getStyle('A2:Q7')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
-        $sheet->getStyle('A2:Q7')->getFill()->getStartColor()->setARGB('FFFFFF');
-        // $sheet->getStyle('J7:Q7')->getFont()->setBold(true);
-        $sheet->getStyle('J7:Q7')->getFont()->setSize(10);
 
-        // Data
-        $row            = 8;
-        // Untuk merge fullJenis (level-1)
-        $fullStartRow   = $row;
-        $prevFullJenis  = null;
-        // Untuk subtotal baseJenis (level-2)
-        $mergeStartBase = $row;
-        $prevBaseJenis  = null;
-        $subtotalCns    = 0;
-        $subtotalKg     = 0;
+        // ----- Header Dinamis (Baris 8-9) -----
+        $renderHeader = function (Worksheet $sheet, int $row) {
+            // Baris utama header
+            $sheet->mergeCells("A{$row}:A" . ($row + 1))->setCellValue("A{$row}", 'Jenis');
+            $sheet->mergeCells("B{$row}:B" . ($row + 1))->setCellValue("B{$row}", 'Color');
+            $sheet->mergeCells("C{$row}:C" . ($row + 1))->setCellValue("C{$row}", 'Code');
+            $sheet->mergeCells("D{$row}:D" . ($row + 1))->setCellValue("D{$row}", 'LMD');
+            $sheet->mergeCells("E{$row}:I{$row}")->setCellValue("E{$row}", 'Total');
+            $sheet->mergeCells("J{$row}:K{$row}")->setCellValue("J{$row}", 'Stock');
+            $sheet->mergeCells("L{$row}:Q{$row}")->setCellValue("L{$row}", 'Keterangan');
 
+            // Sub-header
+            $sheet->mergeCells("E" . ($row + 1) . ":F" . ($row + 1))->setCellValue("E" . ($row + 1), 'Cones');
+            $sheet->mergeCells("G" . ($row + 1) . ":H" . ($row + 1))->setCellValue("G" . ($row + 1), 'Kg');
+            $sheet->setCellValue("I" . ($row + 1), 'Box');
+            $sheet->setCellValue("J" . ($row + 1), 'Ada');
+            $sheet->setCellValue("K" . ($row + 1), 'Habis');
+            foreach (range('L', 'Q') as $col) {
+                $sheet->setCellValue("{$col}" . ($row + 1), '');
+            }
+
+            // Style header
+            $sheet->getStyle("A{$row}:Q" . ($row + 1))->applyFromArray([
+                'font' => ['bold' => true, 'size' => 11],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical'   => Alignment::VERTICAL_CENTER,
+                    'wrapText'   => true
+                ],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+            ]);
+
+            $row += 2;
+        };
+
+        // Mulai baris data
+        $startRow    = 8;
+        $row         = $startRow;
+        $rowsPerPage = 60; // Jumlah baris per halaman
+        // Set baris yang akan diulang (header statis + dinamis)
+        $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(1, 9);
+
+        // Render header dinamis pertama
+        $renderHeader($sheet, $row-2);
+
+        // Loop data dan atur page break
         foreach ($data as $item) {
-            // normalisasi fullJenis
-            $fullJenisNorm = trim(strtoupper($item['jenis']));
-            // strip “DR xx” untuk grouping subtotal
-            $baseJenis = trim(
-                preg_replace('/\s*DR\s*\.?(\d+(\.\d+)*)$/i', '', $fullJenisNorm)
-            );
-
-            /// 1) detect change pada fullJenis => lakukan merge level-1
-            if ($prevFullJenis !== null && $fullJenisNorm !== $prevFullJenis) {
-                if ($row - 1 > $fullStartRow) {
-                    $sheet->mergeCells("A{$fullStartRow}:A" . ($row - 1));
-                }
-                $fullStartRow = $row;
-            }
-            // 2) detect change pada baseJenis => merge level-2 + subtotal
-            if ($prevBaseJenis !== null && $baseJenis !== $prevBaseJenis) {
-
-                // tulis subtotal
-                $sheet->mergeCells("B{$row}:D{$row}")->setCellValue("B{$row}", 'Subtotal ' . $prevBaseJenis);
-                $sheet->mergeCells("E{$row}:F{$row}")->setCellValue("E{$row}", $subtotalCns);
-                $sheet->mergeCells("G{$row}:H{$row}")->setCellValue("G{$row}", $subtotalKg);
-                $sheet->getStyle("A{$row}:Q{$row}")->getFont()->setBold(true);
-                $sheet->getStyle("A{$row}:Q{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle("A{$row}:Q{$row}")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-                $sheet->getStyle("A{$row}:Q{$row}")->getAlignment()->setWrapText(true);
-                $sheet->getStyle("A{$row}:Q{$row}")
-                    ->getBorders()->getAllBorders()
-                    ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN)
-                    ->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK);
-                $sheet->getStyle("B{$row}:H{$row}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
-                $sheet->getStyle("B{$row}:H{$row}")->getFill()->getStartColor()->setARGB('DCDCDC');
-                $mergeStartBase = $row + 1;
-                $row++;
-                $subtotalCns = $subtotalKg = 0;
+            // Cek jika perlu page break
+            if (($row - $startRow) % $rowsPerPage === 0 && $row > $startRow) {
+                $sheet->setBreak("A{$row}", Worksheet::BREAK_ROW);
             }
 
-            if ($fullJenisNorm === $prevFullJenis) {
-                // merge kolom A grup full
-                if ($row - 1 > $fullStartRow) {
-                    $sheet->mergeCells("A{$fullStartRow}:A" . ($row - 1));
-                }
-            } else {
-                // reset pointer
-                $fullStartRow = $row;
-            }
-            // Isi baris data
-            $sheet->setCellValue("A{$row}", $fullJenisNorm);
+            // Isi data
+            $sheet->setCellValue("A{$row}", strtoupper($item['jenis']));
             $sheet->setCellValue("B{$row}", $item['color']);
             $sheet->setCellValue("C{$row}", $item['code']);
             $sheet->setCellValue("D{$row}", $item['lmd']);
             $sheet->setCellValue("E{$row}", $item['ttl_cns']);
             $sheet->setCellValue("G{$row}", $item['ttl_kg']);
-            $sheet->setCellValue("I{$row}", '');
+            $sheet->setCellValue("J{$row}", $item['ttl_kg'] > 0 ? '✓' : '');
+            $sheet->setCellValue("K{$row}", $item['ttl_kg'] <= 0 ? '✓' : '');
 
-            if ($item['ttl_kg'] > 0) {
-                $sheet->setCellValue('J' . $row, '✓');
-            } else {
-                $sheet->setCellValue('K' . $row, '✓');
-            }
+            // Style data
+            $sheet->getStyle("A{$row}:Q{$row}")->applyFromArray([
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical'   => Alignment::VERTICAL_CENTER,
+                    'wrapText'   => true
+                ],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+            ]);
 
-            foreach (range('L', 'Q') as $col) {
-                $sheet->setCellValue($col . $row, '');
-            }
-
-            $sheet->getStyle("A{$row}:Q{$row}")
-                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle("A{$row}:Q{$row}")
-                ->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-            $sheet->getStyle("A{$row}:Q{$row}")
-                ->getAlignment()->setWrapText(true);
-            $sheet->getStyle("A{$row}:Q{$row}")
-                ->getBorders()->getAllBorders()
-                ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN)
-                ->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK);
-
-            $subtotalCns += $item['ttl_cns'];
-            $subtotalKg  += $item['ttl_kg'];
-
-            $prevFullJenis = $fullJenisNorm;
-            $prevBaseJenis = $baseJenis;
-            // dd ($prevBaseJenis, $prevFullJenis);
             $row++;
         }
-
-        if ($row - 1 > $fullStartRow) {
-            $sheet->mergeCells("A{$fullStartRow}:A" . ($row - 1));
-        }
-        if ($row - 1 >= $mergeStartBase) {
-
-            $sheet->mergeCells("B{$row}:D{$row}")->setCellValue("B{$row}", 'Subtotal ' . $prevBaseJenis);
-            $sheet->mergeCells("E{$row}:F{$row}")->setCellValue("E{$row}", $subtotalCns);
-            $sheet->mergeCells("G{$row}:H{$row}")->setCellValue("G{$row}", $subtotalKg);
-            $sheet->getStyle("A{$row}:Q{$row}")->getFont()->setBold(true);
-            $sheet->getStyle("A{$row}:Q{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle("A{$row}:Q{$row}")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-            $sheet->getStyle("A{$row}:Q{$row}")->getAlignment()->setWrapText(true);
-            $sheet->getStyle("A{$row}:Q{$row}")
-                ->getBorders()->getAllBorders()
-                ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN)
-                ->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK);
-            // warna background abu-abu
-            $sheet->getStyle("B{$row}:H{$row}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
-            $sheet->getStyle("B{$row}:H{$row}")->getFill()->getStartColor()->setARGB('DCDCDC');
-        }
+       
 
         // 1) Hitung subtotal per jenis benang utama
         $totalPerBenang = [];
@@ -3381,9 +3233,10 @@ class ExcelController extends BaseController
             }
             $totalPerBenang[$mainJenis] += $kg;
         }
+        $row += 2;
 
         // 2) Tulis summary di sheet
-        $row += 2;  // spasi antara data dan summary
+        // spasi antara data dan summary
         foreach ($totalPerBenang as $jenis => $kg) {
             // merge A–D untuk menampung teks “Nylon : xxx KG”
             $sheet->mergeCells("C{$row}:D{$row}")
@@ -3391,7 +3244,6 @@ class ExcelController extends BaseController
             $sheet->setCellValue("C{$row}", ": {$kg} KG");
             $row++;
         }
-
         // 3) Total keseluruhan
         $totalKg = array_sum($totalPerBenang);
         $sheet->mergeCells("C{$row}:D{$row}")
@@ -3405,12 +3257,21 @@ class ExcelController extends BaseController
         $row += 2;
 
         // 4) Tanda tangan penanggung jawab
-        $sheet->mergeCells("E{$row}:I{$row}")
-            ->setCellValue("E{$row}", "Yang Bertanggung Jawab : ………......................");
+        $sheet->mergeCells("E{$row}:I{$row}")->setCellValue("E{$row}", 'Yang Bertanggung Jawab : __________');
         $sheet->getStyle("E{$row}")
             ->getFont()->setItalic(true);
 
+        // HITUNG TOTAL HALAMAN
+        $totalDataRows = $row - $startRow;
+        $totalPages = max(1, ceil($totalDataRows / $rowsPerPage));
 
+        // SET HEADER/FOOTER DENGAN NOMOR HALAMAN
+        // $sheet->getHeaderFooter()
+        //     ->setOddHeader("&C&\"Arial,Bold\"FORMULIR\n&DEPARTEMEN COVERING\n&\"Arial\"STOCK $jenisCover COVER DI GUDANG COVERING")
+        //     ->setEvenHeader("&C&\"Arial,Bold\"FORMULIR\n&DEPARTEMEN COVERING\n&\"Arial\"STOCK $jenisCover COVER DI GUDANG COVERING");
+
+        // UPDATE PLACEHOLDER DI CONTENT (opsional)
+        $sheet->setCellValue('C4', "FOR-CC-151/REV_01/HAL_1/$totalPages");
         // Download
         $filename = 'Formulir_Stock_' . $jenisBenang . '_' . $jenisCover . '_' . date('Ymd') . '.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

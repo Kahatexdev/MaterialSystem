@@ -236,8 +236,12 @@ class ScheduleCelupModel extends Model
             $builder->groupStart()
                 ->like('schedule_celup.no_model', $filterNoModel)
                 ->orLike('schedule_celup.kode_warna', $filterNoModel)
+                ->orLike('schedule_celup.lot_celup', $filterNoModel)
                 ->groupEnd();
         }
+
+        // Filter berdasarkan last_status
+        // $builder->where('schedule_celup.last_status !=', 'done');
 
         // Grouping untuk menghindari duplikasi
         $builder->groupBy([
@@ -246,6 +250,9 @@ class ScheduleCelupModel extends Model
             'schedule_celup.tanggal_schedule',
             'schedule_celup.lot_urut'
         ]);
+
+        // sortby order by created_at DESC 
+        $builder->orderBy('schedule_celup.created_at', 'DESC');
 
         return $builder->get()->getResultArray();
     }
