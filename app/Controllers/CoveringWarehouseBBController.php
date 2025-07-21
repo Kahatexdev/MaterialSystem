@@ -243,7 +243,7 @@ class CoveringWarehouseBBController extends BaseController
         return redirect()->to($this->role . '/warehouseBB')->with('error', 'Data tidak valid untuk pengeluaran');
     }
 
-    public function importStokBahanBaku()
+    public function importStokBahanBakuJenis()
     {
         $file = $this->request->getFile('file_excel');
         // Validasi file
@@ -372,7 +372,7 @@ class CoveringWarehouseBBController extends BaseController
         return [$successCount, $failures];
     }
 
-    public function importStokCovering()
+    public function importStokBahanBaku()
     {
         $file = $this->request->getFile('file_excel');
         if (! $file->isValid() || $file->getError() !== UPLOAD_ERR_OK) {
@@ -386,71 +386,133 @@ class CoveringWarehouseBBController extends BaseController
 
         $reader = $ext === 'xlsx' ? new Xlsx() : new Xls();
         $spreadsheet = $reader->load($file->getTempName());
-        $sheet = $spreadsheet->getActiveSheet();
-        $rows = $sheet->toArray(null, true, true, true);
-        
-        // get tanggal import B2
-        $tanggalImport = $sheet->getCell('B2')->getFormattedValue();
-        if (empty($tanggalImport)) {
-            return redirect()->back()->with('error', 'Tanggal import tidak ditemukan di B2.');
-        }
-        
 
-        // Header berada di baris ke-3
-        $headerRow = 3;
-        $rawHeader = $rows[$headerRow];
+        $sheetNames = ['PEMASUKAN', 'PENGELUARAN'];
 
         // Mapping judul kolom Excel ke field model
-        $map = [
-            'JENIS BARANG'   => 'jenis',
-            'WARNA'          => 'color',
-            'KODE'           => 'code',
-            'JENIS COVER'    => 'jenis_cover',
-            'JENIS BENANG'   => 'jenis_benang',
-            'LMD'            => 'lmd',
-            'STOK KG'        => 'ttl_kg',
-            'STOK CONES'     => 'ttl_cns',
-            'KETERANGAN'     => 'keterangan',
+        $headerRow = 3;
+        $mapStock = [
+            'DENIER'        => 'denier',
+            'JENIS BENANG'  => 'jenis_benang',
+            'WARNA'         => 'warna',
+            'KODE'          => 'kode',
+            'CONES'         => 'ttl_cones',
+            'KG'            => 'kg',
+            'KETERANGAN'    => 'keterangan'
+        ];
+        $mapHistory = [
+            'DENIER'        => 'denier',
+            'JENIS BENANG'  => 'jenis_benang',
+            'WARNA'         => 'color',
+            'KODE'          => 'code',
+            'CONES'         => 'ttl_cns',
+            'KG'            => 'ttl_kg',
+            'KETERANGAN'    => 'keterangan'
         ];
 
-        $dataToInsert = [];
-        foreach ($rows as $idx => $row) {
-            if ($idx <= $headerRow) continue; // skip judul/template
-            if (empty(array_filter($row))) continue; // skip kosong
+        $historyData = [];
+        $updateData  = [];
+        $admin       = session()->get('username') ?? session()->get('email');
+        $nowLabel    = 'Import ' . date('Y-m-d H:i:s');
 
-            $item = [];
-            foreach ($rawHeader as $col => $heading) {
-                $headingClean = trim(strtoupper($heading));
-                if (isset($map[$headingClean])) {
-                    $field = $map[$headingClean];
-                    $value = $row[$col];
-                    // Cast numeric fields
-                    if (in_array($field, ['ttl_kg', 'ttl_cns'])) {
-                        $value = is_numeric($value) ? (float)$value : (float) str_replace(',', '.', $value);
-                    }
-                    // LMD bisa koma atau list, simpan apa adanya
-                    $item[$field] = $value;
+        foreach ($sheetNames as $name) {
+            $sheet = $spreadsheet->getSheetByName($name);
+            if (!$sheet) continue;
+
+            // Ambil tanggal import dari cell B2 di sheet pertama yang ada
+            if (empty($tanggalImport ?? null)) {
+                $tanggalImport = $sheet->getCell('B2')->getFormattedValue();
+                if (empty($tanggalImport)) {
+                    return redirect()->back()->with('error', 'Tanggal import tidak ditemukan di B2 pada sheet ' . $name);
                 }
             }
-            
-            // Tambahkan admin dan tanggal import jika model memperbolehkan
-            $item['admin'] = session()->get('username') ?? session()->get('email');
-            $item['keterangan'] = $item['keterangan'] ?? 'Import ' . date('Y-m-d H:i:s');
-            $item['created_at'] = $tanggalImport; // Tambahkan tanggal import
 
-            $dataToInsert[] = $item;
-        }
-        dd ($dataToInsert);
+            $rows = $sheet->toArray(null, true, true, true);
+            $rawHeader = array_map('strtoupper', array_map('trim', $rows[$headerRow]));
 
-        if (empty($dataToInsert)) {
-            return redirect()->back()->with('warning', 'Tidak ada data yang di-import.');
+            foreach ($rows as $idx => $row) {
+                if ($idx <= $headerRow) continue;
+                if (empty(array_filter($row))) continue;
+
+                $item = [
+                    'admin'      => $admin,
+                    'keterangan' => $nowLabel . ' [' . $name . ']',
+                    'created_at' => $tanggalImport,
+                ];
+
+                foreach ($rawHeader as $col => $heading) {
+                    if (!isset($mapStock[$heading])) continue;
+                    $field = $mapStock[$heading];
+                    $val   = $row[$col];
+
+                    if (in_array($field, ['kg', 'ttl_cns'], true)) {
+                        $clean = str_replace(',', '.', $val);
+                        $val   = is_numeric($clean) ? (float) $clean : 0;
+                    }
+
+                    $item[$field] = $val;
+                }
+
+                // Cek stok        
+                $stock = $this->warehouseBBModel
+                    ->where('denier', $item['denier'])
+                    ->where('jenis_benang', $item['jenis_benang'])
+                    ->where('warna', $item['warna'])
+                    ->where('kode', $item['kode'])
+                    ->first();
+                // dd($stock);
+                if (!$stock) {
+                    return redirect()->back()->with('error', "Data tidak ditemukan pada sheet {$name} denier {$item['denier']} jenis {$item['jenis_benang']} kode {$item['kode']} (baris {$idx}).");
+                }
+
+                if (($stock['kg'] ?? 0) <= 0) {
+                    return redirect()->back()->with('error', "Stok kosong pada sheet {$name} denier {$item['denier']} jenis {$item['jenis_benang']} kode {$item['kode']} (baris {$idx}).");
+                }
+
+                $updateData[]  = [
+                    'idstockbb' => $stock['idstockbb'],
+                    'kg'        => $stock['kg'] + ($item['kg'] ?? 0),
+                ];
+
+                $history = [
+                    'admin'      => $admin,
+                    'keterangan' => $nowLabel . ' [' . $name . ']',
+                    'created_at' => date('Y-m-d H:i:s'),
+                ];
+
+                foreach ($rawHeader as $col => $heading) {
+                    if (!isset($mapHistory[$heading])) continue;
+                    $field = $mapHistory[$heading];
+                    $val   = $row[$col];
+
+                    if (in_array($field, ['ttl_kg', 'ttl_cns'], true)) {
+                        $clean = str_replace(',', '.', $val);
+                        $val   = is_numeric($clean) ? (float) $clean : 0;
+                    }
+
+                    $history[$field] = $val;
+                }
+                $historyData[] = $history;
+            }
+        }
+        // dd($historyData);
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        if (!empty($updateData)) {
+            $this->warehouseBBModel->updateBatch($updateData, 'idstockbb');
         }
 
-        try {
-            $this->historyStockBBModel->insertBatch($dataToInsert);
-            return redirect()->back()->with('success', 'Data stok berhasil di-import!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
+        if (!empty($historyData)) {
+            $this->historyStockBBModel->insertBatch($historyData);
         }
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->with('error', 'Gagal menyimpan data transaksi.');
+        }
+
+        return redirect()->back()->with('success', 'Import stok covering berhasil untuk sheet: ' . implode(', ', $sheetNames));
     }
 }
