@@ -2608,4 +2608,124 @@ class WarehouseController extends BaseController
 
         return view($this->role . '/warehouse/report-sisa-datang-benang', $data);
     }
+
+    public function reportSisaDatangNylon()
+    {
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $bulanMap = [
+            'Januari' => 1,
+            'Februari' => 2,
+            'Maret' => 3,
+            'April' => 4,
+            'Mei' => 5,
+            'Juni' => 6,
+            'Juli' => 7,
+            'Agustus' => 8,
+            'September' => 9,
+            'Oktober' => 10,
+            'November' => 11,
+            'Desember' => 12
+        ];
+        $bulan = $bulanMap[$delivery] ?? null;
+
+        $getFilterData = $this->materialModel->getFilterSisaDatangNylon($bulan, $noModel, $kodeWarna);
+
+        if ($this->request->isAJAX()) {
+            // set header JSON dan langsung echo data
+            return $this->response
+                ->setStatusCode(200)
+                ->setJSON($getFilterData);
+        }
+
+        $data = [
+            'active' => $this->active,
+            'role' => $this->role,
+            'title' => 'Report Sisa Datang Nylon',
+            'getFilterData' => $getFilterData
+        ];
+
+        return view($this->role . '/warehouse/report-sisa-datang-nylon', $data);
+    }
+
+    public function reportSisaDatangSpandex()
+    {
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $bulanMap = [
+            'Januari' => 1,
+            'Februari' => 2,
+            'Maret' => 3,
+            'April' => 4,
+            'Mei' => 5,
+            'Juni' => 6,
+            'Juli' => 7,
+            'Agustus' => 8,
+            'September' => 9,
+            'Oktober' => 10,
+            'November' => 11,
+            'Desember' => 12
+        ];
+        $bulan = $bulanMap[$delivery] ?? null;
+
+        $getFilterData = $this->materialModel->getFilterSisaDatangSpandex($bulan, $noModel, $kodeWarna);
+
+        if ($this->request->isAJAX()) {
+            // set header JSON dan langsung echo data
+            return $this->response
+                ->setStatusCode(200)
+                ->setJSON($getFilterData);
+        }
+
+        $data = [
+            'active' => $this->active,
+            'role' => $this->role,
+            'title' => 'Report Sisa Datang Spandex',
+            'getFilterData' => $getFilterData
+        ];
+
+        return view($this->role . '/warehouse/report-sisa-datang-spandex', $data);
+    }
+
+    public function reportSisaDatangKaret()
+    {
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $bulanMap = [
+            'Januari' => 1,
+            'Februari' => 2,
+            'Maret' => 3,
+            'April' => 4,
+            'Mei' => 5,
+            'Juni' => 6,
+            'Juli' => 7,
+            'Agustus' => 8,
+            'September' => 9,
+            'Oktober' => 10,
+            'November' => 11,
+            'Desember' => 12
+        ];
+        $bulan = $bulanMap[$delivery] ?? null;
+
+        $getFilterData = $this->materialModel->getFilterSisaDatangKaret($bulan, $noModel, $kodeWarna);
+
+        if ($this->request->isAJAX()) {
+            // set header JSON dan langsung echo data
+            return $this->response
+                ->setStatusCode(200)
+                ->setJSON($getFilterData);
+        }
+
+        $data = [
+            'active' => $this->active,
+            'role' => $this->role,
+            'title' => 'Report Sisa Datang Karet',
+            'getFilterData' => $getFilterData
+        ];
+
+        return view($this->role . '/warehouse/report-sisa-datang-karet', $data);
+    }
 }
