@@ -257,6 +257,7 @@
                             <td><?= $bb['keterangan'] ?></td>
                             <td>
                                 <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $bb['idstockbb'] ?>"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger btn-delete" data-id="<?= $bb['idstockbb'] ?>"><i class="fas fa-trash"></i></button>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -427,6 +428,28 @@
                 const jenis = (card.getAttribute('data-jenis') || '').toLowerCase();
                 // tampilkan card jika jenis mengandung term, selain itu sembunyikan
                 card.style.display = jenis.includes(term) ? '' : 'none';
+            });
+        });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        $('.btn-delete').on('click', function(e) {
+            e.preventDefault();
+            const id = $(this).data('id');
+
+            Swal.fire({
+                title: 'Yakin ingin menghapus?',
+                text: "Data ini akan hilang permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '<?= base_url($role . '/warehouseBB/deleteBahanBakuCov/') ?>' + id;
+                }
             });
         });
     });

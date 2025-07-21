@@ -9669,7 +9669,7 @@ class ExcelController extends BaseController
             'C' => 10,  // Code
             'D' => 10,   // Stock (Kg)
             'E' => 15,  // Keterangan
-            'F' => 10,   // Kosong atau dipakai untuk merge
+            'F' => 2,   // Kosong atau dipakai untuk merge
             'G' => 10,  // Denier
             'H' => 10,  // Warna
             'I' => 10,  // Code
@@ -9914,7 +9914,8 @@ class ExcelController extends BaseController
                 $sheet->getStyle("{$cols[0]}{$row}:{$cols[4]}{$row}")
                     ->getAlignment()
                     ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
-                    ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                    ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER)
+                    ->setWrapText(true);
 
                 $currentRow++;
             }
@@ -10004,7 +10005,7 @@ class ExcelController extends BaseController
 
         //Penanggung Jawab
         $sheet->setCellValue('J44', 'Yang Bertanggung Jawab');
-        $sheet->setCellValue('J47', '(' . (session()->get('username') ?? '') . ')');
+        $sheet->setCellValue('J47', '( IIS RAHAYU )');
         $sheet->getStyle('J44:J47')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // 7. Output ke browser
