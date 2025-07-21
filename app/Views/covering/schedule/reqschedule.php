@@ -214,8 +214,8 @@
                             <input type="date" id="filter_tglschsampai" name="filter_tglschsampai" class="form-control" value="<?= old('filter_tglschsampai') ?>">
                         </div>
                         <div class="d-flex flex-column">
-                            <label for="filter_nomodel" class="form-label">No Model / Kode Warna</label>
-                            <input type="text" id="filter_nomodel" name="filter_nomodel" class="form-control" placeholder="No Model / Kode Warna">
+                            <label for="filter_nomodel" class="form-label">LOT / Model / Kode Warna</label>
+                            <input type="text" id="filter_nomodel" name="filter_nomodel" class="form-control" placeholder="LOT / Model / Kode Warna">
                         </div>
                         <button class="btn btn-filter mt-md-4" id="filter_date_range" type="submit">
                             <i class="bi bi-funnel me-2"></i>Filter
@@ -240,6 +240,7 @@
                             <th class="sticky">No Mc</th>
                             <th class="sticky">PO</th>
                             <th class="sticky">Jenis Benang</th>
+                            <th class="sticky">LOT</th>
                             <th class="sticky">Kode Warna</th>
                             <th class="sticky">Warna</th>
                             <th class="sticky">Start Mc</th>
@@ -255,8 +256,13 @@
                             <tr>
                                 <td><?= $no++; ?></td>
                                 <td><?= $data['no_mesin']; ?></td>
-                                <td><?= $data['no_model']; ?></td>
+                                <?php
+                                $poFull = $data['no_model'];
+                                $poDisplay = strlen($poFull) > 27 ? substr($poFull, 0, 27) . '...' : $poFull;
+                                ?>
+                                <td><?= $poDisplay ?></td>
                                 <td><?= $data['item_type']; ?></td>
+                                <td><?= $data['lot_celup']; ?></td>
                                 <td><?= $data['kode_warna']; ?></td>
                                 <td><?= $data['warna']; ?></td>
                                 <td><?= $data['start_mc']; ?></td>

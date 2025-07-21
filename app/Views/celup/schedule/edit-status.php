@@ -222,6 +222,14 @@
                                         <input type="datetime-local" class="form-control" name="tgl_kelos" id="tgl_kelos" value="<?= $data['tgl_kelos'] ?>">
                                     </div>
                                 </div>
+
+                                <div class="col-md-6">
+                                    <!-- Last update by -->
+                                    <div class="form-group" id="lastUpdateGroup">
+                                        <label for="last_update">Di Update Oleh</label>
+                                        <input type="text" class="form-control" name="last_update" id="last_update" value="<?= $data['admin'] ?> (<?= $data['updated_at'] ?>)" disabled>
+                                    </div>
+                                </div>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <!-- Ket Daily Cek -->

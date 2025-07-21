@@ -221,6 +221,7 @@
                         <th>No</th>
                         <th>Jenis Mesin</th>
                         <th>Jenis Barang</th>
+                        <th>DR</th>
                         <th>Color</th>
                         <th>Code</th>
                         <th>LMD</th>
@@ -235,6 +236,7 @@
                             <td><?= $i + 1 ?></td>
                             <td><?= esc($item['jenis_mesin']) ?></td>
                             <td><?= esc($item['jenis']) ?></td>
+                            <td><?= esc($item['dr']) ?></td>
                             <td><?= esc($item['color']) ?></td>
                             <td><?= esc($item['code']) ?></td>
                             <td><?= esc($item['lmd']) ?></td>
