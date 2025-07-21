@@ -36,9 +36,11 @@
         }
 
         .illustration {
-            width: 150px;
+            width: 100%;
+            max-width: 300px;
+            height: auto;
             margin: 1rem auto;
-            animation: rotate 3s linear infinite;
+            animation: rotate 10s linear infinite;
         }
 
         p {
@@ -108,8 +110,8 @@
 
 <body>
     <div class="container">
-        <img src="<?= base_url('assets/img/crescent-297801_1280.png') ?>" alt="404" class="illustration">
-        <h1>404</h1>
+        <img src="<?= base_url('assets/img/error-img.png') ?>" alt="404" class="illustration">
+        <!-- <h1>404</h1> -->
         <p>Oops! Halaman yang Anda cari tidak ditemukan.</p>
         <pre><?= esc($message) ?></pre>
         <a href=" /">Kembali ke Halaman Utama</a>
