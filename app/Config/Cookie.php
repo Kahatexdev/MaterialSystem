@@ -36,7 +36,7 @@ class Cookie extends BaseConfig
      *
      * Typically will be a forward slash.
      */
-    public string $path = '/';
+    public string $path = '/MaterialSystem/public/';
 
     /**
      * --------------------------------------------------------------------------
@@ -45,7 +45,7 @@ class Cookie extends BaseConfig
      *
      * Set to `.your-domain.com` for site-wide cookies.
      */
-    public string $domain = '';
+    public string $domain = 'http://172.23.44.14/MaterialSystem/public/';
 
     /**
      * --------------------------------------------------------------------------
