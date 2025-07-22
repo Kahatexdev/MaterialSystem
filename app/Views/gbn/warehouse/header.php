@@ -81,6 +81,17 @@
         border-radius: 20px;
         font-size: 0.9rem;
     }
+
+    .custom-dropdown-wide {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr);
+        gap: .2rem .2rem;
+        min-width: 400px !important;
+    }
+
+    .custom-dropdown-wide .dropdown-item {
+        box-sizing: border-box;
+    }
 </style>
 <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
     <!-- Navbar -->
@@ -120,7 +131,7 @@
                                 <i class="fas fa-file-alt"></i>
                                 <span class="d-lg-inline-block d-none ms-1">Reports</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownMenuLink">
+                            <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4 custom-dropdown-wide" aria-labelledby="navbarDropdownMenuLink">
                                 <li><a href="<?= base_url($role . '/warehouse/reportPoBenang') ?>" class="dropdown-item" href="#">PO Benang</a></li>
                                 <li><a href="<?= base_url($role . '/warehouse/reportDatangBenang') ?>" class="dropdown-item" href="#">Datang Benang</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportPengiriman') ?>">Report Pengiriman</a></li>
@@ -134,6 +145,9 @@
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/otherIn/listBarcode') ?>">List Barcode</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/historyPindahOrder') ?>">Report History Pindah Order</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaDatangBenang') ?>">Report Sisa Datang Benang</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaDatangNylon') ?>">Report Sisa Datang Nylon</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaDatangSpandex') ?>">Report Sisa Datang Spandex</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaDatangKaret') ?>">Report Sisa Datang Karet</a></li>
                             </ul>
                         </li>
                         <li class="nav-item d-flex align-items-center">

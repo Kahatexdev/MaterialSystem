@@ -73,35 +73,20 @@
     <div class="card card-frame">
         <div class="card-body">
             <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h5 class="mb-0 font-weight-bolder">Stock Bahan Baku</h5>
+                <div class="col-md-6 col-lg-4">
+                    <h5 class="font-weight-bolder mb-0">Stock Bahan Baku</h5>
                 </div>
-
-            </div>
-            <div class="row d-flex justify-content-end mt-2">
-                <!-- <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
-                        <input type="text" id="searchInput" class="form-control" placeholder="Cari jenis barang...">
-                    </div>
-                </div> -->
-                <div class="col-md-2">
-                    <button class="btn bg-gradient-info w-100" data-bs-toggle="modal" data-bs-target="#addModal">
-                        <i class="fas fa-plus"></i> Tambah
+                <div class="col-md-6 col-lg-8 d-flex justify-content-end flex-wrap gap-2">
+                    <button class="btn bg-gradient-info" data-bs-toggle="modal" data-bs-target="#addModal">
+                        <i class="fas fa-plus me-1"></i> Tambah
                     </button>
-                </div>
-                <div class="col-md-2">
-                    <button class="btn bg-gradient-info w-100 import-btn" data-bs-toggle="modal" data-bs-target="#importModal">
+                    <button class="btn bg-gradient-info" data-bs-toggle="modal" data-bs-target="#importModal">
                         <i class="fas fa-file-import me-1"></i> Import Stok
                     </button>
-                </div>
-                <div class="col-md-2">
-                    <button class="btn bg-gradient-info w-100 import-btn" data-bs-toggle="modal" data-bs-target="#importJenisModal">
+                    <button class="btn bg-gradient-info" data-bs-toggle="modal" data-bs-target="#importJenisModal">
                         <i class="fas fa-file-import me-1"></i> Import Jenis
                     </button>
-                </div>
-                <div class="col-md-2">
-                    <button class="btn bg-gradient-success w-100" data-bs-target="#modalExport" data-bs-toggle="modal">
+                    <button class="btn bg-gradient-success" data-bs-toggle="modal" data-bs-target="#modalExport">
                         <i class="fas fa-file-excel me-1"></i> Export
                     </button>
                 </div>
@@ -230,40 +215,41 @@
     </div>
 
     <div class="card px-3 py-3 mt-3">
-        <div class="table-responsive">
-            <table class="table" id="stockTable">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Jenis</th>
-                        <th>Denier</th>
-                        <th>Warna</th>
-                        <th>Kode Warna</th>
-                        <th>Stock</th>
-                        <th>Keterangan</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php $no = 1; ?>
-                    <?php foreach ($warehouseBB as $bb) : ?>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table" id="stockTable" style="width:100%">
+                    <thead>
                         <tr>
-                            <td><?= $no++ ?></td>
-                            <td><?= $bb['jenis_benang'] ?></td>
-                            <td><?= $bb['denier'] ?></td>
-                            <td><?= $bb['warna'] ?></td>
-                            <td><?= $bb['kode'] ?></td>
-                            <td><?= $bb['kg'] ?> Kg</td>
-                            <td><?= $bb['keterangan'] ?></td>
-                            <td>
-                                <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $bb['idstockbb'] ?>"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-danger btn-delete" data-id="<?= $bb['idstockbb'] ?>"><i class="fas fa-trash"></i></button>
-                            </td>
+                            <th>No</th>
+                            <th>Jenis</th>
+                            <th>Denier</th>
+                            <th>Warna</th>
+                            <th>Kode Warna</th>
+                            <th>Stock</th>
+                            <th>Keterangan</th>
+                            <th>Aksi</th>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php $no = 1; ?>
+                        <?php foreach ($warehouseBB as $bb) : ?>
+                            <tr>
+                                <td><?= $no++ ?></td>
+                                <td><?= $bb['jenis_benang'] ?></td>
+                                <td><?= $bb['denier'] ?></td>
+                                <td><?= $bb['warna'] ?></td>
+                                <td><?= $bb['kode'] ?></td>
+                                <td><?= $bb['kg'] ?> Kg</td>
+                                <td><?= $bb['keterangan'] ?></td>
+                                <td>
+                                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $bb['idstockbb'] ?>"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-danger btn-delete" data-id="<?= $bb['idstockbb'] ?>"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -283,7 +269,9 @@
                                 <select class="form-select" name="jenis_benang" required>
                                     <option value="">Pilih Jenis Benang</option>
                                     <option value="NYLON">NYLON</option>
-                                    <option value="POLYESTER/SPDX/KRT">POLYESTER/SPDX/KRT</option>
+                                    <option value="POLYESTER">POLYESTER</option>
+                                    <option value="SPANDEX">SPANDEX</option>
+                                    <option value="KARET">KARET</option>
                                     <option value="RECYCLED POLYESTER">RECYCLED POLYESTER</option>
                                 </select>
                             </div>
@@ -336,7 +324,9 @@
                                     <label class="form-label">Jenis Benang</label>
                                     <select class="form-select" name="jenis_benang" required>
                                         <option value="NYLON" <?= $list['jenis_benang'] == 'NYLON' ? 'selected' : '' ?>>NYLON</option>
-                                        <option value="POLYESTER/SPDX/KRT" <?= $list['jenis_benang'] == 'POLYESTER/SPDX/KRT' ? 'selected' : '' ?>>POLYESTER/SPDX/KRT</option>
+                                        <option value="POLYESTER" <?= $list['jenis_benang'] == 'POLYESTER' ? 'selected' : '' ?>>POLYESTER</option>
+                                        <option value="SPANDEX" <?= $list['jenis_benang'] == 'SPANDEX' ? 'selected' : '' ?>>SPANDEX</option>
+                                        <option value="KARET" <?= $list['jenis_benang'] == 'KARET' ? 'selected' : '' ?>>KARET</option>
                                         <option value="RECYCLED POLYESTER" <?= $list['jenis_benang'] == 'RECYCLED POLYESTER' ? 'selected' : '' ?>>RECYCLED POLYESTER</option>
                                     </select>
                                 </div>
@@ -388,7 +378,9 @@
                                 <select class="form-control" name="jenis_benang" required>
                                     <option value="">Pilih Jenis Benang</option>
                                     <option value="NYLON">NYLON</option>
-                                    <option value="POLYESTER/SPDX/KRT">POLYESTER/SPDX/KRT</option>
+                                    <option value="POLYESTER">POLYESTER</option>
+                                    <option value="SPANDEX">SPANDEX</option>
+                                    <option value="KARET">KARET</option>
                                     <option value="RECYCLED POLYESTER">RECYCLED POLYESTER</option>
                                 </select>
                             </div>
@@ -402,9 +394,7 @@
         </div>
     </div>
 </div>
-<link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.css" />
 
-<script src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $(document).ready(function() {

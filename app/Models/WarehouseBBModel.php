@@ -52,11 +52,11 @@ class WarehouseBBModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
-    public function getWarehouseBB($perPage = 9)
+    public function getWarehouseBB()
     {
         return $this->select('stock_bb_covering.*, IF(stock_bb_covering.kg > 0, "ada", "habis") AS status')
             ->orderBy('kg', 'DESC')
-            ->paginate($perPage, 'warehouse');
+            ->findAll();
     }
 
     public function getDataByJenis($jenis)
