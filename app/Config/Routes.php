@@ -405,6 +405,12 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->post('mesin/updateDataMesin', 'MesinCelupController::updateDataMesin');
     $routes->get('mesin/deleteDataMesin/(:num)', 'MesinCelupController::deleteDataMesin/$1');
 
+    $routes->get('masterMaterial', 'MastermaterialController::index');
+    $routes->post('tampilMasterMaterial', 'MastermaterialController::tampilMasterMaterial');
+    $routes->get('getMasterMaterialDetails', 'MastermaterialController::getMasterMaterialDetails');
+    $routes->post('updateMasterMaterial', 'MastermaterialController::updateMasterMaterial');
+    $routes->post('saveMasterMaterial', 'MastermaterialController::saveMasterMaterial');
+    $routes->get('deleteMasterMaterial', 'MastermaterialController::deleteMasterMaterial');
     $routes->get('po/bukaPoCovering', 'CoveringController::bukaPoCovering');
     $routes->post('po/getDetailByTglPO', 'CoveringController::getDetailByTglPO');
     $routes->get('po/getItemType/(:any)', 'CoveringController::getItemType/$1');
