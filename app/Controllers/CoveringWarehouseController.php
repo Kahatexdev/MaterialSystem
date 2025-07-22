@@ -583,8 +583,8 @@ class CoveringWarehouseController extends BaseController
         $reader      = $ext === 'xlsx' ? new Xlsx() : new Xls();
         $spreadsheet = $reader->load($file->getTempName());
 
-        // Definisikan sheet yang akan diproses
-        $sheetNames = ['PEMASUKAN', 'PENGELUARAN'];
+        // Ambil semua sheet secara dinamis
+        $sheetNames = $spreadsheet->getSheetNames();
 
         // Mapping header
         $headerRow = 3;
@@ -594,6 +594,8 @@ class CoveringWarehouseController extends BaseController
             'KODE'         => 'code',
             'JENIS COVER'  => 'jenis_cover',
             'JENIS BENANG' => 'jenis_benang',
+            'JENIS MESIN'  => 'jenis_mesin',
+            'DR'           => 'dr',
             'LMD'          => 'lmd',
             'STOK KG'      => 'ttl_kg',
             'STOK CONES'   => 'ttl_cns',
@@ -602,17 +604,18 @@ class CoveringWarehouseController extends BaseController
 
         $historyData = [];
         $updateData  = [];
+        $errors      = [];
         $admin       = session()->get('username') ?? session()->get('email');
         $nowLabel    = 'Import ' . date('Y-m-d H:i:s');
-
+        $agg = [];
         foreach ($sheetNames as $name) {
             $sheet = $spreadsheet->getSheetByName($name);
+            $multiplier = (strtoupper($name) === 'PENGELUARAN') ? -1 : 1;
             if (!$sheet) continue;
 
             // Ambil tanggal import dari cell B2 di sheet pertama yang ada
-            if (empty($tanggalImport ?? null)) {
+            if (empty($tanggalImport)) {
                 $tanggalImport = $sheet->getCell('B2')->getFormattedValue();
-                // dd ($tanggalImport);
                 if (empty($tanggalImport)) {
                     return redirect()->back()->with('error', 'Tanggal import tidak ditemukan di B2 pada sheet ' . $name);
                 }
@@ -620,17 +623,16 @@ class CoveringWarehouseController extends BaseController
 
             $rows = $sheet->toArray(null, true, true, true);
             $rawHeader = array_map('strtoupper', array_map('trim', $rows[$headerRow]));
-
             foreach ($rows as $idx => $row) {
                 if ($idx <= $headerRow) continue;
                 if (empty(array_filter($row))) continue;
 
                 $item = [
                     'admin'      => $admin,
-                    'keterangan' => $nowLabel . ' [' . $name . ']',
+                    'keterangan' => $nowLabel . ' [' . $name . ']' ?? '-',
                     'created_at' => $tanggalImport,
                 ];
-
+                // dd ($item);
                 foreach ($rawHeader as $col => $heading) {
                     if (!isset($map[$heading])) continue;
                     $field = $map[$heading];
@@ -643,15 +645,17 @@ class CoveringWarehouseController extends BaseController
 
                     $item[$field] = $val;
                 }
-
+                // dd ($item);
                 // Lewati jika jenis kosong
                 if (empty($item['jenis'])) {
+                    $errors[] = "Jenis tidak lengkap pada sheet " . $name . " baris " . $idx;
                     continue;
                 }
 
                 // Validasi kode
                 if (empty($item['code'])) {
-                    return redirect()->back()->with('error', 'Kode tidak lengkap pada sheet ' . $name . ' baris ' . $idx);
+                    $errors[] = 'Kode tidak lengkap pada sheet ' . $name . ' baris ' . $idx;
+                    continue;
                 }
 
                 // Cek stok        
@@ -661,26 +665,56 @@ class CoveringWarehouseController extends BaseController
                     ->where('code', $item['code'])
                     ->where('jenis_cover', $item['jenis_cover'])
                     ->where('jenis_benang', $item['jenis_benang'])
+                    ->where('jenis_mesin', $item['jenis_mesin'])
+                    ->where('dr', $item['dr'])
                     ->first();
+                $inKg  = abs($item['ttl_kg']);
+                $inCns = abs($item['ttl_cns']);
+                $deltaKg  = $multiplier * $inKg;
+                $deltaCns = $multiplier * $inCns;
 
-                if (!$stock) {
-                    return redirect()->back()->with('error', "Data tidak ditemukan pada sheet {$name} jenis {$item['jenis']} kode {$item['code']} (baris {$idx}).");
+                $id = $stock['id_covering_stock'];
+
+                // jika pertama kali ketemu ID ini, simpan stok originalnya
+                if (! isset($agg[$id])) {
+                    $agg[$id] = [
+                        'origKg'   => $stock['ttl_kg']  ?? 0,
+                        'origCns'  => $stock['ttl_cns'] ?? 0,
+                        'deltaKg'  => 0,
+                        'deltaCns' => 0,
+                    ];
                 }
 
-                if ((($stock['ttl_kg'] ?? 0) <= 0) && (($stock['ttl_cns'] ?? 0) <= 0)) {
-                    return redirect()->back()->with('error', "Stok kosong pada sheet {$name} jenis {$item['jenis']} kode {$item['code']} (baris {$idx}).");
-                }
-
-                // Kumpulkan untuk batch
-                $historyData[] = $item;
-                // dd ($historyData);
-                $updateData[]  = [
-                    'id_covering_stock' => $stock['id_covering_stock'],
-                    'ttl_kg'            => $stock['ttl_kg'] + ($item['ttl_kg'] ?? 0),
-                    'ttl_cns'           => $stock['ttl_cns'] + ($item['ttl_cns'] ?? 0),
-                ];
+                // tambahkan delta
+                $agg[$id]['deltaKg']  += $deltaKg;
+                $agg[$id]['deltaCns'] += $deltaCns;
+                // simpan history per‐baris seperti biasa
+                $historyData[] = array_merge($item, [
+                    'ttl_kg'  => $deltaKg,
+                    'ttl_cns' => $deltaCns,
+                ]);
+                // dd ($updateData);
             }
+            // setelah loop semua sheet, bangun updateData sekali jalan:
         }
+        $updateData = [];
+        foreach ($agg as $id => $v) {
+            $newKg  = $v['origKg']  + $v['deltaKg'];
+            $newCns = $v['origCns'] + $v['deltaCns'];
+
+            // kalau mau validasi negatif lagi:
+            if ($newKg < 0 || $newCns < 0) {
+                $errors[] = "Stok tidak mencukupi untuk {$item['jenis']} {$item['color']} {$item['code']} pada sheet {$name}";
+                continue;
+            }
+
+            $updateData[] = [
+                'id_covering_stock' => $id,
+                'ttl_kg'            => $newKg,
+                'ttl_cns'           => $newCns,
+            ];
+        }
+        // dd ($updateData);
 
         if (empty($historyData)) {
             return redirect()->back()->with('warning', 'Tidak ada data yang diproses di semua sheet.');
@@ -698,10 +732,13 @@ class CoveringWarehouseController extends BaseController
         $db->transComplete();
 
         if ($db->transStatus() === false) {
-            return redirect()->back()->with('error', 'Gagal menyimpan data transaksi.');
+            return redirect()->back()->with('error', 'Gagal menyimpan data ke database: ' . implode(',<br> ', $errors));
         }
-
-        return redirect()->back()->with('success', 'Import stok covering berhasil untuk sheet: ' . implode(', ', $sheetNames));
+        if (!empty($errors)) {
+            return redirect()->back()->with('warning', 'Beberapa data gagal diproses: ' . implode(',<br> ', $errors));
+        }
+        return redirect()->to(base_url($this->role . '/warehouse'))
+            ->with('success', 'Data berhasil diimpor dari semua sheet.');
     }
 
     public function deleteStokBarangJadi($id)
