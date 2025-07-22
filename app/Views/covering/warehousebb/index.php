@@ -269,7 +269,9 @@
                                 <select class="form-select" name="jenis_benang" required>
                                     <option value="">Pilih Jenis Benang</option>
                                     <option value="NYLON">NYLON</option>
-                                    <option value="POLYESTER/SPDX/KRT">POLYESTER/SPDX/KRT</option>
+                                    <option value="POLYESTER">POLYESTER</option>
+                                    <option value="SPANDEX">SPANDEX</option>
+                                    <option value="KARET">KARET</option>
                                     <option value="RECYCLED POLYESTER">RECYCLED POLYESTER</option>
                                 </select>
                             </div>
@@ -322,7 +324,9 @@
                                     <label class="form-label">Jenis Benang</label>
                                     <select class="form-select" name="jenis_benang" required>
                                         <option value="NYLON" <?= $list['jenis_benang'] == 'NYLON' ? 'selected' : '' ?>>NYLON</option>
-                                        <option value="POLYESTER/SPDX/KRT" <?= $list['jenis_benang'] == 'POLYESTER/SPDX/KRT' ? 'selected' : '' ?>>POLYESTER/SPDX/KRT</option>
+                                        <option value="POLYESTER" <?= $list['jenis_benang'] == 'POLYESTER' ? 'selected' : '' ?>>POLYESTER</option>
+                                        <option value="SPANDEX" <?= $list['jenis_benang'] == 'SPANDEX' ? 'selected' : '' ?>>SPANDEX</option>
+                                        <option value="KARET" <?= $list['jenis_benang'] == 'KARET' ? 'selected' : '' ?>>KARET</option>
                                         <option value="RECYCLED POLYESTER" <?= $list['jenis_benang'] == 'RECYCLED POLYESTER' ? 'selected' : '' ?>>RECYCLED POLYESTER</option>
                                     </select>
                                 </div>
@@ -374,7 +378,9 @@
                                 <select class="form-control" name="jenis_benang" required>
                                     <option value="">Pilih Jenis Benang</option>
                                     <option value="NYLON">NYLON</option>
-                                    <option value="POLYESTER/SPDX/KRT">POLYESTER/SPDX/KRT</option>
+                                    <option value="POLYESTER">POLYESTER</option>
+                                    <option value="SPANDEX">SPANDEX</option>
+                                    <option value="KARET">KARET</option>
                                     <option value="RECYCLED POLYESTER">RECYCLED POLYESTER</option>
                                 </select>
                             </div>
