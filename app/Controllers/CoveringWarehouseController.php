@@ -630,7 +630,10 @@ class CoveringWarehouseController extends BaseController
                 $item = [
                     'admin'      => $admin,
                     'keterangan' => $nowLabel . ' [' . $name . ']' ?? '-',
-                    'created_at' => $tanggalImport,
+                    // Convert date from dd/mm/yyyy to Y-m-d H:i:s
+                    'created_at' => \DateTime::createFromFormat('d/m/Y', $tanggalImport)
+                        ? \DateTime::createFromFormat('d/m/Y', $tanggalImport)->format('Y-m-d 00:00:00')
+                        : $tanggalImport,
                 ];
                 // dd ($item);
                 foreach ($rawHeader as $col => $heading) {

@@ -440,7 +440,9 @@ class CoveringWarehouseBBController extends BaseController
                 $item = [
                     'admin'      => $admin,
                     'keterangan' => "{$nowLabel} [{$name}]",
-                    'created_at' => $tanggalImport,
+                    'created_at' => \DateTime::createFromFormat('d/m/Y', $tanggalImport)
+                        ? \DateTime::createFromFormat('d/m/Y', $tanggalImport)->format('Y-m-d 00:00:00')
+                        : $tanggalImport,
                 ];
                 foreach ($rawHeader as $col => $hd) {
                     if (! isset($mapStock[$hd])) continue;
