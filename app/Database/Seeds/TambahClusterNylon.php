@@ -2546,27 +2546,6 @@ class TambahClusterNylon extends Seeder
                 'kapasitas' => '100',
                 'group' => 'NYLON',
             ],
-            [
-                'nama_cluster' => 'L.08.D',
-                'kapasitas' => '100',
-                'group' => 'NYLON',
-            ],
-            [
-                'nama_cluster' => 'L.09.D',
-                'kapasitas' => '100',
-                'group' => 'NYLON',
-            ],
-            [
-                'nama_cluster' => 'L.10.D',
-                'kapasitas' => '100',
-                'group' => 'NYLON',
-            ],
-            [
-                'nama_cluster' => 'L.11.D',
-                'kapasitas' => '100',
-                'group' => 'NYLON',
-            ],
-
         ];
 
         $this->db->table('cluster')->insertBatch($data);
