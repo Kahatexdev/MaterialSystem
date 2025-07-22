@@ -204,10 +204,10 @@
 
                                                         // 4) Kalau kolom L, cukup A & B saja (C/D tetap null)
                                                     } elseif ($col === 'L') {
-                                                        if ($row >= 1 && $row <= 7) {
+                                                        if ($row >= 6 && $row <= 7) {
                                                             $namaC = "$col.{$rowFormatted}.C";
                                                             $namaD = "$col.{$rowFormatted}.D";
-                                                        } else {
+                                                        } elseif ($row >= 8 && $row <= 11) {
                                                             $namaC = "$col.{$rowFormatted}.C";
                                                             $namaD = "";
                                                         }

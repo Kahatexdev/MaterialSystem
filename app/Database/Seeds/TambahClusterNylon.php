@@ -432,12 +432,12 @@ class TambahClusterNylon extends Seeder
             ],
             [
                 'nama_cluster' => 'H.08.A',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'H.09.A',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
@@ -1639,77 +1639,77 @@ class TambahClusterNylon extends Seeder
             ],
             [
                 'nama_cluster' => 'L.08.B',
-                'kapasitas' => '100',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'L.09.B',
-                'kapasitas' => '100',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'L.10.B',
-                'kapasitas' => '100',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'L.11.B',
-                'kapasitas' => '100',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'K.01.B',
-                'kapasitas' => '420',
+                'kapasitas' => '100',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'K.02.B',
-                'kapasitas' => '420',
+                'kapasitas' => '100',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'K.03.B',
-                'kapasitas' => '420',
+                'kapasitas' => '100',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'K.04.B',
-                'kapasitas' => '420',
+                'kapasitas' => '100',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'K.05.B',
-                'kapasitas' => '420',
+                'kapasitas' => '100',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'K.06.B',
-                'kapasitas' => '420',
+                'kapasitas' => '100',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'K.07.B',
-                'kapasitas' => '420',
+                'kapasitas' => '100',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'K.08.B',
-                'kapasitas' => '420',
+                'kapasitas' => '100',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'K.09.B',
-                'kapasitas' => '420',
+                'kapasitas' => '100',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'K.10.B',
-                'kapasitas' => '420',
+                'kapasitas' => '100',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'K.11.B',
-                'kapasitas' => '420',
+                'kapasitas' => '100',
                 'group' => 'NYLON',
             ],
             [
@@ -2097,12 +2097,12 @@ class TambahClusterNylon extends Seeder
             // cluster bag C
             [
                 'nama_cluster' => 'A.08.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'A.09.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
@@ -2117,12 +2117,12 @@ class TambahClusterNylon extends Seeder
             ],
             [
                 'nama_cluster' => 'B.08.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'B.09.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
@@ -2137,12 +2137,12 @@ class TambahClusterNylon extends Seeder
             ],
             [
                 'nama_cluster' => 'C.08.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'C.09.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
@@ -2157,12 +2157,12 @@ class TambahClusterNylon extends Seeder
             ],
             [
                 'nama_cluster' => 'D.08.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'D.09.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
@@ -2177,12 +2177,12 @@ class TambahClusterNylon extends Seeder
             ],
             [
                 'nama_cluster' => 'E.08.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'E.09.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
@@ -2197,12 +2197,12 @@ class TambahClusterNylon extends Seeder
             ],
             [
                 'nama_cluster' => 'F.08.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'F.09.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
@@ -2217,12 +2217,12 @@ class TambahClusterNylon extends Seeder
             ],
             [
                 'nama_cluster' => 'G.08.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'G.09.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
@@ -2257,12 +2257,12 @@ class TambahClusterNylon extends Seeder
             ],
             [
                 'nama_cluster' => 'I.08.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'I.09.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
@@ -2277,12 +2277,12 @@ class TambahClusterNylon extends Seeder
             ],
             [
                 'nama_cluster' => 'J.08.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'J.09.C',
-                'kapasitas' => '360',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
@@ -2362,22 +2362,22 @@ class TambahClusterNylon extends Seeder
             ],
             [
                 'nama_cluster' => 'L.08.C',
-                'kapasitas' => '100',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'L.09.C',
-                'kapasitas' => '100',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'L.10.C',
-                'kapasitas' => '100',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             [
                 'nama_cluster' => 'L.11.C',
-                'kapasitas' => '100',
+                'kapasitas' => '200',
                 'group' => 'NYLON',
             ],
             // cluster rak d
@@ -2546,27 +2546,6 @@ class TambahClusterNylon extends Seeder
                 'kapasitas' => '100',
                 'group' => 'NYLON',
             ],
-            [
-                'nama_cluster' => 'L.08.D',
-                'kapasitas' => '100',
-                'group' => 'NYLON',
-            ],
-            [
-                'nama_cluster' => 'L.09.D',
-                'kapasitas' => '100',
-                'group' => 'NYLON',
-            ],
-            [
-                'nama_cluster' => 'L.10.D',
-                'kapasitas' => '100',
-                'group' => 'NYLON',
-            ],
-            [
-                'nama_cluster' => 'L.11.D',
-                'kapasitas' => '100',
-                'group' => 'NYLON',
-            ],
-
         ];
 
         $this->db->table('cluster')->insertBatch($data);
