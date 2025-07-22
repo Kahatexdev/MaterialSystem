@@ -30,17 +30,13 @@ class CoveringWarehouseBBController extends BaseController
 
     public function index()
     {
-        $perPage      = 9;
-        $warehouseBB  = $this->warehouseBBModel->getWarehouseBB($perPage);
-        $pager        = $this->warehouseBBModel->pager;
+        $warehouseBB  = $this->warehouseBBModel->getWarehouseBB();
 
-        // dd($warehouseBB);
         $data = [
             'title' => 'Warehouse Bahan Baku Covering',
             'active' => $this->active,
             'role' => $this->role,
-            'warehouseBB' => $warehouseBB,
-            'pager'       => $pager,
+            'warehouseBB' => $warehouseBB
         ];
         return view($this->role . '/warehousebb/index', $data);
     }
