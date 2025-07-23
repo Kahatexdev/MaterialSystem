@@ -676,6 +676,11 @@ class CoveringWarehouseController extends BaseController
                 $deltaKg  = $multiplier * $inKg;
                 $deltaCns = $multiplier * $inCns;
 
+                if (!$stock || !isset($stock['id_covering_stock'])) {
+                    $errors[] = "Sheet {$name} baris {$idx}: Stok tidak ditemukan untuk {$item['jenis']} {$item['color']} {$item['code']}";
+                    continue;
+                }
+
                 $id = $stock['id_covering_stock'];
 
                 // jika pertama kali ketemu ID ini, simpan stok originalnya
