@@ -1318,7 +1318,16 @@ class ExcelController extends BaseController
         $sheet->setCellValue('A1', 'REPORT PEMASUKAN COVERING');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
+        
+        $sheet->setCellValue('A2', 'Tanggal: ' . $date . ' - ' . $date2);
+        $sheet->mergeCells('A2:H2');
+        $sheet->getStyle('A2:H2')->getFont()->setItalic(true);
+        $sheet->getStyle('A2:H2')->getFont()->setBold(true);
+        $sheet->getStyle('A2:H2')->getFont()->setSize(12);
+        $sheet->getStyle('A2:H2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A2:H2')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A2:H2')->getBorders()->getBottom()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+        $sheet->getStyle('A2:H2')->getBorders()->getBottom()->getColor()->setARGB('FF000000');
         // Header
         $headers = ['Jenis', 'Warna', 'Kode', 'LMD', 'Total Cones', 'Total Kg', 'Keterangan'];
         $col = 'A';
@@ -1384,6 +1393,15 @@ class ExcelController extends BaseController
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
+        $sheet->setCellValue('A2', 'Tanggal: ' . $date . ' - ' . $date2);
+        $sheet->mergeCells('A2:H2');
+        $sheet->getStyle('A2:H2')->getFont()->setItalic(true);
+        $sheet->getStyle('A2:H2')->getFont()->setBold(true);
+        $sheet->getStyle('A2:H2')->getFont()->setSize(12);
+        $sheet->getStyle('A2:H2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A2:H2')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A2:H2')->getBorders()->getBottom()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+        $sheet->getStyle('A2:H2')->getBorders()->getBottom()->getColor()->setARGB('FF000000');
         // Header
         $headers = ['No Model', 'Jenis', 'Warna', 'Kode', 'LMD', 'Total Cones', 'Total Kg', 'Keterangan'];
         $col = 'A';
