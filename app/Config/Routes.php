@@ -453,6 +453,7 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     // delete stok barang jadi
     $routes->post('warehouse/deleteStokBarangJadi/(:num)', 'CoveringWarehouseController::deleteStokBarangJadi/$1');
     $routes->get('warehouse/templateStokBarangJadi', 'CoveringWarehouseController::templateStokBarangJadi');
+    $routes->get('warehouse/templateStokBahanBaku', 'CoveringWarehouseBBController::templateStokBahanBaku');
 
     // warehouse bahan baku
     $routes->get('warehouseBB', 'CoveringWarehouseBBController::index');

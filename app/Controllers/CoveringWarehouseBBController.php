@@ -558,4 +558,117 @@ class CoveringWarehouseBBController extends BaseController
         $this->warehouseBBModel->delete($id);
         return redirect()->back()->with('success', 'Data berhasil dihapus.');
     }
+
+    public function templateStokBahanBaku()
+    {
+        $stok = $this->warehouseBBModel->findAll();
+        // dd ($stok);
+        // Define headings based on mapping
+        $headers = [
+            'A' => 'DENIER',
+            'B' => 'JENIS BENANG',
+            'C' => 'WARNA',
+            'D' => 'KODE',
+            'E' => 'CONES',
+            'F' => 'KG',
+            'G' => 'KETERANGAN',
+        ];
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+
+        // PEMASUKAN sheet dengan data stok
+        $sheetIn = $spreadsheet->getActiveSheet();
+        $sheetIn->setTitle('PEMASUKAN');
+        $this->applyTemplateFormat($sheetIn, $headers, $stok);
+
+        // PENGELUARAN sheet juga menampilkan data stok
+        $sheetOut = $spreadsheet->createSheet();
+        $sheetOut->setTitle('PENGELUARAN');
+        $this->applyTemplateFormat($sheetOut, $headers, $stok);
+
+        // Prepare download
+        $filename = 'TEMPLATE_IMPORT_BAHAN_BAKU_' . date('Ymd_His') . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    /**
+     * Apply header, styling, borders, and data to a sheet
+     */
+    protected function applyTemplateFormat($sheet, array $headers, array $data)
+    {
+        // Instruction and date
+        $sheet->setCellValue('A1', 'TEMPLATE DATA STOK BAHAN BAKU UNTUK ' . strtoupper($sheet->getTitle()));
+        $sheet->mergeCells('A1:G1');
+        $sheet->setCellValue('A2', 'Tanggal Import (dd/mm/yyyy):');
+        $sheet->setCellValue('B2', date('d/m/Y'));
+        $sheet->getStyle('A1:G2')->getFont()->setBold(true);
+
+        // Header row
+        foreach ($headers as $col => $title) {
+            $sheet->setCellValue("{$col}3", $title);
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // apply styling A1
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+        // blue sky background color
+        $sheet->getStyle('A1')->getFill()->getStartColor()->setARGB('87CEEB'); // Sky blue background
+        $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('A2')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('B2')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('B2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('B2')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        // styling a2:b2
+        $sheet->getStyle('A2:B2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+        // green tua tapi jangan ketuaan background color
+        $sheet->getStyle('A2:B2')->getFill()->getStartColor()->setARGB('228B22'); // Forest green background
+        // Apply header styling (background color and bold font)
+        $headerRange = 'A3:' . array_key_last($headers) . '3';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)
+            ->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setARGB('FFFF00'); // Yellow background
+
+        // Fill data rows
+        $startRow = 4;
+        $row = $startRow;
+        foreach ($data as $item) {
+            $sheet->setCellValue("A{$row}", $item['denier'] ?? '');
+            $sheet->setCellValue("B{$row}", $item['jenis_benang'] ?? '');
+            $sheet->setCellValue("C{$row}", $item['warna'] ?? '');
+            $sheet->setCellValue("D{$row}", $item['kode'] ?? '');
+            $sheet->setCellValue("E{$row}", 0);
+            $sheet->setCellValue("F{$row}", 0);
+            $sheet->setCellValue("G{$row}", $item['keterangan'] ?? '');
+            $row++;
+        }
+
+        // Determine last row for borders
+        $lastRow = max($row - 1, 3);
+        $fullRange = 'A3:' . array_key_last($headers) . $lastRow;
+
+        // Apply borders to all cells in range
+        $sheet->getStyle($fullRange)
+            ->getBorders()
+            ->getAllBorders()
+            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+        // set alignment center for all cells in range
+        $sheet->getStyle($fullRange)
+            ->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+    }
 }
