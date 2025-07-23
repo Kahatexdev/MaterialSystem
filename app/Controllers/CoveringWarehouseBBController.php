@@ -510,7 +510,12 @@ class CoveringWarehouseBBController extends BaseController
                 $hist['ttl_kg']  = $deltaKg;
                 $hist['ttl_cns'] = $deltaCns;
 
-                $historyData[] = $hist;
+                // hanya masukkan ke history jika ttl_kg != 0
+                if ($hist['ttl_kg'] != 0) {
+                    $historyData[] = $hist;
+                }
+
+                // $historyData[] = $hist;
             }
         }
 
@@ -537,10 +542,11 @@ class CoveringWarehouseBBController extends BaseController
         $db->transStart();
         if (! empty($updateData)) {
             $this->warehouseBBModel->updateBatch($updateData, 'idstockbb');
+            if (! empty($historyData)) {
+                $this->historyStockBBModel->insertBatch($historyData);
+            }
         }
-        if (! empty($historyData)) {
-            $this->historyStockBBModel->insertBatch($historyData);
-        }
+        
         $db->transComplete();
 
         // persiapkan flash message
