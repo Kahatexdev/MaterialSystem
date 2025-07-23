@@ -1347,7 +1347,7 @@ class ExcelController extends BaseController
             $sheet->setCellValue('E' . $row, $item['ttl_cns']);
             $sheet->setCellValue('F' . $row, $item['ttl_kg']);
             $sheet->setCellValue('G' . $row, $item['keterangan']);
-            $sheet->setCellValue('H' . $row, $item['tanggal']);
+            $sheet->setCellValue('H' . $row, $item['created_at']);
             $row++;
         }
 
@@ -1423,7 +1423,7 @@ class ExcelController extends BaseController
             $sheet->setCellValue('F' . $row, $item['ttl_cns']);
             $sheet->setCellValue('G' . $row, $item['ttl_kg']);
             $sheet->setCellValue('H' . $row, $item['keterangan']);
-            $sheet->setCellValue('I' . $row, $item['tanggal']);
+            $sheet->setCellValue('I' . $row, $item['created_at']);
             $row++;
         }
 
