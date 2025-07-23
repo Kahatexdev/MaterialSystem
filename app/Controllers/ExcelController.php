@@ -1318,7 +1318,7 @@ class ExcelController extends BaseController
         $sheet->setCellValue('A1', 'REPORT PEMASUKAN COVERING');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        
+
         $sheet->setCellValue('A2', 'Tanggal: ' . $date . ' - ' . $date2);
         $sheet->mergeCells('A2:H2');
         $sheet->getStyle('A2:H2')->getFont()->setItalic(true);
@@ -1329,7 +1329,7 @@ class ExcelController extends BaseController
         $sheet->getStyle('A2:H2')->getBorders()->getBottom()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
         $sheet->getStyle('A2:H2')->getBorders()->getBottom()->getColor()->setARGB('FF000000');
         // Header
-        $headers = ['Jenis', 'Warna', 'Kode', 'LMD', 'Total Cones', 'Total Kg', 'Keterangan'];
+        $headers = ['Jenis', 'Warna', 'Kode', 'LMD', 'Total Cones', 'Total Kg', 'Keterangan', 'Tanggal'];
         $col = 'A';
         foreach ($headers as $header) {
             $sheet->setCellValue($col . '3', $header);
@@ -1347,6 +1347,7 @@ class ExcelController extends BaseController
             $sheet->setCellValue('E' . $row, $item['ttl_cns']);
             $sheet->setCellValue('F' . $row, $item['ttl_kg']);
             $sheet->setCellValue('G' . $row, $item['keterangan']);
+            $sheet->setCellValue('H' . $row, $item['tanggal']);
             $row++;
         }
 
@@ -1360,10 +1361,10 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle("A3:G{$lastRow}")->applyFromArray($styleArray);
+        $sheet->getStyle("A3:H{$lastRow}")->applyFromArray($styleArray);
 
         // Auto-size
-        foreach (range('A', 'G') as $col) {
+        foreach (range('A', 'H') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
@@ -1403,7 +1404,7 @@ class ExcelController extends BaseController
         $sheet->getStyle('A2:H2')->getBorders()->getBottom()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
         $sheet->getStyle('A2:H2')->getBorders()->getBottom()->getColor()->setARGB('FF000000');
         // Header
-        $headers = ['No Model', 'Jenis', 'Warna', 'Kode', 'LMD', 'Total Cones', 'Total Kg', 'Keterangan'];
+        $headers = ['No Model', 'Jenis', 'Warna', 'Kode', 'LMD', 'Total Cones', 'Total Kg', 'Keterangan', 'Tanggal'];
         $col = 'A';
         foreach ($headers as $header) {
             $sheet->setCellValue($col . '3', $header);
@@ -1422,6 +1423,7 @@ class ExcelController extends BaseController
             $sheet->setCellValue('F' . $row, $item['ttl_cns']);
             $sheet->setCellValue('G' . $row, $item['ttl_kg']);
             $sheet->setCellValue('H' . $row, $item['keterangan']);
+            $sheet->setCellValue('I' . $row, $item['tanggal']);
             $row++;
         }
 
@@ -1435,10 +1437,10 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle("A3:H{$lastRow}")->applyFromArray($styleArray);
+        $sheet->getStyle("A3:I{$lastRow}")->applyFromArray($styleArray);
 
         // Auto-size
-        foreach (range('A', 'H') as $col) {
+        foreach (range('A', 'I') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
