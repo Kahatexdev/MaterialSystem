@@ -724,9 +724,10 @@ class CoveringWarehouseController extends BaseController
         }
         // dd ($updateData);
 
-        if (empty($historyData)) {
-            return redirect()->back()->with('warning', 'Tidak ada data yang diproses di semua sheet.');
-        }
+        // if (empty($historyData)) {
+        //     $errors[] = "Tidak ada data yang bisa diimpor dari semua sheet.";
+        //     continue;
+        // }
 
         $db = \Config\Database::connect();
         $db->transStart();
