@@ -501,7 +501,7 @@ class CelupController extends BaseController
 
     public function createBon()
     {
-        $no_model = $this->scheduleCelupModel->getCelupDone();
+        $no_model = $this->scheduleCelupModel->getCelupDoneAndComplain();
         // dd($no_model);
         $data = [
             'role' => $this->role,

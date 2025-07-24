@@ -181,7 +181,7 @@
                             if (gantiRetur > 0) {
                                 sisa = (kgsAwal + kgsDatang + kgsTambahanDatang + gantiRetur) - (kgPo - kgPoPlus - qtyRetur);
                             } else {
-                                sisa = (kgsAwal + kgsDatang + kgsTambahanDatang + gantiRetur) - (kgPo - kgPoPlus);
+                                sisa = (kgsAwal + kgsDatang + kgsTambahanDatang) - (kgPo - kgPoPlus);
                             }
 
                             html += `

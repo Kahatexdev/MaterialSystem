@@ -82,7 +82,7 @@
                                     <td class="text-center align-middle"><?= $data['lmd'] ?></td>
                                     <td class="text-center align-middle"><?= $data['ket_mesin'] ?></td>
                                     <td class="text-center align-middle">
-                                        <button class="btn btn-warning btn-edit" data-id="<?= $data['id_mesin'] ?>">Update</button>
+                                        <button class="btn btn-warning btn-edit" data-id="<?= $data['id_mesin'] ?>" data-bs-target="#updateModal" data-bs-toggle="modal">Update</button>
                                         <button class="btn btn-danger btn-delete" data-id="<?= $data['id_mesin'] ?>">Delete</button>
                                     </td>
                                 </tr>
@@ -212,149 +212,126 @@
                             <input type="text" class="form-control" name="jml_lot" id="jml_lotE" required>
                         </div>
                         <div class="mb-3">
-                            <label for="lmd" class="form-label">LMD</label>
+                            <label class="form-label">LMD</label>
                             <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" name="lmd[]" value="L" id="lmd_L">
-                                        <label class="form-check-label" for="lmd_L">L</label>
+                                <?php foreach (['L', 'M', 'D', 'WHITE', 'BLACK'] as $val): ?>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input
+                                                type="checkbox" class="form-check-input" name="lmd[]" value="<?= $val ?>" id="lmd_<?= $val ?>">
+                                            <label class="form-check-label" for="lmd_<?= $val ?>"><?= $val ?></label>
+                                        </div>
                                     </div>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" name="lmd[]" value="M" id="lmd_M">
-                                        <label class="form-check-label" for="lmd_M">M</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" name="lmd[]" value="D" id="lmd_D">
-                                        <label class="form-check-label" for="lmd_D">D</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" name="lmd[]" value="WHITE" id="lmd_WHITE">
-                                        <label class="form-check-label" for="lmd_WHITE">WHITE</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" name="lmd[]" value="BLACK" id="lmd_BLACK">
-                                        <label class="form-check-label" for="lmd_BLACK">BLACK</label>
-                                    </div>
-                                </div>
+                                <?php endforeach ?>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="ket_mesin" class="form-label">Keterangan Mesin</label>
+                            <label for="ket_mesinE" class="form-label">Keterangan Mesin</label>
                             <select class="form-select" name="ket_mesin" id="ket_mesinE" required>
-                                <option value="">Pilih Keterangan Mesin</option>
+                                <option value="">-- Pilih Keterangan Mesin --</option>
                                 <option value="BENANG">BENANG</option>
                                 <option value="MC BENANG SAMPLE">MC BENANG SAMPLE</option>
                                 <option value="ACRYLIC">ACRYLIC</option>
                                 <option value="NYLON">NYLON</option>
                             </select>
                         </div>
-                        <!-- Action Button -->
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-info update-btn">Update</button>
-                        </div>
-                    </form>
                 </div>
+                <!-- Action Button -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-info update-btn">Update</button>
+                </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="text/javascript">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#dataTable').DataTable({
+            "pageLength": 35,
+            "order": []
+        });
         $(document).ready(function() {
-            $('#dataTable').DataTable({
-                "pageLength": 35,
-                "order": []
-            });
-            $(document).ready(function() {
 
-                // Event listener untuk submit form update
-                $('#dataTable').on('click', '.btn-edit', function() {
-                    const id = $(this).data('id');
-
-                    // Lakukan AJAX request untuk mendapatkan data
-                    $.ajax({
-                        url: '<?= base_url($role . '/mesin/getMesinDetails') ?>/' + id,
-                        type: 'GET',
-                        success: function(response) {
-
-                            // Isi data ke dalam form modal
-                            $('#id_mesin').val(response.id_mesin);
-                            $('#no_mesinE').val(response.no_mesin);
-                            $('#min_capsE').val(response.min_caps);
-                            $('#max_capsE').val(response.max_caps);
-                            $('#jml_lotE').val(response.jml_lot);
-                            // Atur checkbox
-                            const lmdValues = response.lmd.split('');
-                            $('input[name="lmd[]"]').prop('checked', false); // Reset semua checkbox
-                            lmdValues.forEach(function(value) {
-                                $(`#lmd_${value}`).prop('checked', true); // Centang checkbox yang sesuai
-                            });
-                            $('#ket_mesinE').val(response.ket_mesin);
-                            // Show modal dialog
-                            $('#updateModal').modal('show');
-                        },
-                        error: function(xhr, status, error) {
-                            console.error(xhr.responseText);
-                        }
-                    });
-                });
-
-                // Event listener untuk tombol delete
-                $('#dataTable').on('click', '.btn-delete', function() {
-                    const id = $(this).data('id');
-
-                    // Tampilkan konfirmasi
-                    Swal.fire({
-                        title: 'Apakah Anda yakin?',
-                        text: "Data yang dihapus tidak dapat dikembalikan!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Ya, hapus!',
-                        cancelButtonText: 'Batal'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Kirim request ke server
-                            window.location = '<?= base_url($role . '/mesin/deleteDataMesin') ?>/' + id;
-                        }
-                    });
-                });
-            });
-        });
-
-        document.getElementById('no_mesin').addEventListener('input', function() {
-            const noMesinInput = this.value;
-            const noMesinFeedback = document.getElementById('no_mesin_feedback');
-            const addButton = document.querySelector('.add-btn');
-
-            $.ajax({
-                url: '<?= base_url($role . '/mesin/cekNoMesin') ?>',
-                type: 'POST',
-                data: {
-                    no_mesin: noMesinInput
-                },
-                success: function(response) {
-                    if (response.error) {
-                        noMesinFeedback.textContent = 'Nomor Mesin Bisa Digunakan';
-                        noMesinFeedback.classList.remove('feedback-error');
-                        noMesinFeedback.classList.add('feedback-success');
-                        addButton.removeAttribute('disabled');
-                    } else {
-                        noMesinFeedback.textContent = 'Nomor Mesin Sudah Ada Di Database';
-                        noMesinFeedback.classList.remove('feedback-success');
-                        noMesinFeedback.classList.add('feedback-error');
-                        addButton.setAttribute('disabled', 'disabled');
+            $('#dataTable').on('click', '.btn-edit', function() {
+                const id = $(this).data('id');
+                $.getJSON('<?= base_url($role . "/mesin/getMesinDetails") ?>/' + id, function(resp) {
+                    $('#id_mesin').val(resp.id_mesin);
+                    $('#no_mesinE').val(resp.no_mesin);
+                    $('#min_capsE').val(resp.min_caps);
+                    $('#max_capsE').val(resp.max_caps);
+                    $('#jml_lotE').val(resp.jml_lot);
+                    // reset LMD
+                    $('input[name="lmd[]"]').prop('checked', false);
+                    if (resp.lmd) {
+                        // misal resp.lmd = "L,M,WHITE"
+                        resp.lmd.split(',').forEach(function(val) {
+                            $(`#lmd_${val}`).prop('checked', true);
+                        });
                     }
-                },
-                error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
-                }
-            })
-        });
-    </script>
+                    $('#ket_mesinE').val(resp.ket_mesin);
 
-    <?php $this->endSection(); ?>
+                    $('#updateModal').modal('show');
+                });
+            });
+
+            // Event listener untuk tombol delete
+            $('#dataTable').on('click', '.btn-delete', function() {
+                const id = $(this).data('id');
+
+                // Tampilkan konfirmasi
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Kirim request ke server
+                        window.location = '<?= base_url($role . '/mesin/deleteDataMesin') ?>/' + id;
+                    }
+                });
+            });
+        });
+    });
+
+    document.getElementById('no_mesin').addEventListener('input', function() {
+        const noMesinInput = this.value;
+        const noMesinFeedback = document.getElementById('no_mesin_feedback');
+        const addButton = document.querySelector('.add-btn');
+
+        $.ajax({
+            url: '<?= base_url($role . '/mesin/cekNoMesin') ?>',
+            type: 'POST',
+            data: {
+                no_mesin: noMesinInput
+            },
+            success: function(response) {
+                if (response.error) {
+                    noMesinFeedback.textContent = 'Nomor Mesin Bisa Digunakan';
+                    noMesinFeedback.classList.remove('feedback-error');
+                    noMesinFeedback.classList.add('feedback-success');
+                    addButton.removeAttribute('disabled');
+                } else {
+                    noMesinFeedback.textContent = 'Nomor Mesin Sudah Ada Di Database';
+                    noMesinFeedback.classList.remove('feedback-success');
+                    noMesinFeedback.classList.add('feedback-error');
+                    addButton.setAttribute('disabled', 'disabled');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        })
+    });
+</script>
+
+<?php $this->endSection(); ?>
