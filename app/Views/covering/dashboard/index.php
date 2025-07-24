@@ -28,8 +28,8 @@
         $stats = [
             ['title' => 'Total PO', 'icon' => 'fas fa-book', 'value' => $poCount],
             ['title' => 'Total Qty PO', 'icon' => 'ni ni-cart', 'value' => number_format($ttlQtyPO, 2, ',', '.') . ' KG'],
-            ['title' => 'Pemasukan/Hari', 'icon' => 'fas fa-arrow-down', 'value' => $incomeToday . ' KG'],
-            ['title' => 'Pengeluaran/Hari', 'icon' => 'fas fa-arrow-up', 'value' => $expenseToday . ' KG']
+            ['title' => 'Pemasukan/Hari', 'icon' => 'fas fa-arrow-down', 'value' => number_format($incomeToday, 2, ',', '.') . ' KG'],
+            ['title' => 'Pengeluaran/Hari', 'icon' => 'fas fa-arrow-up', 'value' => number_format($expenseToday, 2, ',', '.') . ' KG']
         ];
         ?>
 
