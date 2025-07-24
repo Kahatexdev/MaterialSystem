@@ -3104,14 +3104,15 @@ class ExcelController extends BaseController
     public function exportStock()
     {
         // Ambil input
+        $jenisMesin = $this->request->getPost('jenis_mesin');
         $jenisCover  = $this->request->getPost('jenis_cover');
         $jenisBenang = $this->request->getPost('jenis_benang');
-        if (empty($jenisBenang) || empty($jenisCover)) {
-            return redirect()->back()->with('error', 'Jenis Benang dan Jenis Cover tidak boleh kosong.');
+        if (empty($jenisMesin || empty($jenisBenang))) {
+            return redirect()->back()->with('error', 'Jenis Mesin dan Jenis Benang tidak boleh kosong.');
         }
 
         // Data stok
-        $data = $this->coveringStockModel->getStockCover($jenisBenang, $jenisCover);
+        $data = $this->coveringStockModel->getStockCover($jenisMesin,$jenisBenang, $jenisCover);
 
         // Inisialisasi spreadsheet
         $spreadsheet = new Spreadsheet();

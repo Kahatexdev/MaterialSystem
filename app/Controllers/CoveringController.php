@@ -96,6 +96,7 @@ class CoveringController extends BaseController
             }
             $expenseData[$date] += $row['ttl_kg'];
         }
+        
 
         $incomeDataFinal = [];
         $expenseDataFinal = [];
@@ -103,6 +104,30 @@ class CoveringController extends BaseController
         foreach ($dateLabels as $date) {
             $incomeDataFinal[] = isset($incomeData[$date]) ? $incomeData[$date] : 0;
             $expenseDataFinal[] = isset($expenseData[$date]) ? $expenseData[$date] : 0;
+        }
+        $rawAll = array_merge(
+            array_map(fn($r) => ['type' => 'in',  'date' => date('Y-m-d', strtotime($r['created_at'])), 'rec' => $r], $incomeRaw),
+            array_map(fn($r) => ['type' => 'out', 'date' => date('Y-m-d', strtotime($r['created_at'])), 'rec' => $r], $expenseRaw)
+        );
+
+        // Inisialisasi detail per tanggal
+        $detailData = array_fill(0, count($dateLabels), []);
+        foreach ($rawAll as $item) {
+            $i = array_search($item['date'], $dateLabels);
+            if ($i !== false) {
+                // ambil hanya field yg penting
+                $r = $item['rec'];
+                $detailData[$i][] = [
+                    'type'      => $item['type'],       // in / out
+                    'no_model'  => $r['no_model'],
+                    'jenis'     => $r['jenis'],
+                    'color'     => $r['color'],
+                    'code'      => $r['code'],
+                    'ttl_kg'    => $r['ttl_kg'],
+                    'keterangan' => $r['keterangan'],
+                    'time'      => date('H:i', strtotime($r['created_at'])),
+                ];
+            }
         }
 
 
@@ -117,6 +142,7 @@ class CoveringController extends BaseController
             'dateLabels' => $dateLabels,
             'incomeData' => $incomeDataFinal, // Data yang sudah sesuai urutan tanggal
             'expenseData' => $expenseDataFinal, // Data yang sudah sesuai urutan tanggal
+            'detailData'    => $detailData,
         ];
 
 

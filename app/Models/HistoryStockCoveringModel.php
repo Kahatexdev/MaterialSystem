@@ -64,7 +64,7 @@ class HistoryStockCoveringModel extends Model
             ->select('*')
             ->where('ttl_kg >=', 0)
             ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-7 days'))) // Filter 7 hari terakhir
-            ->orderBy('created_at', 'DESC')
+            ->orderBy('created_at', 'ASC')
             ->get()
             ->getResultArray();
     }
@@ -75,7 +75,7 @@ class HistoryStockCoveringModel extends Model
             ->select('*')
             ->where('ttl_kg <=', 0)
             ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-7 days'))) // Filter 7 hari terakhir
-            ->orderBy('created_at', 'DESC')
+            ->orderBy('created_at', 'ASC')
             ->get()
             ->getResultArray();
     }
