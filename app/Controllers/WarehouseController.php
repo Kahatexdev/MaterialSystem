@@ -2454,7 +2454,7 @@ class WarehouseController extends BaseController
         $key = $this->request->getGet('key');
 
         $data = $this->stockModel->getFilterReportGlobalBenang($key);
-
+        // dd($data);
         return $this->response->setJSON($data);
     }
 

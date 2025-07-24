@@ -140,14 +140,18 @@
                     if (response.length > 0) {
                         $.each(response, function(index, item) {
 
-                            const stockAwal = item.kgs_stock_awal || 0;
-                            const stockOpname = item.stock_opname || 0;
-                            const datangSolid = item.datang_solid || 0;
-                            const returStock = item.retur_stock || 0;
-                            const qtyPo = item.qty_po || 0;
-                            const qtyPoPlus = item.qty_po_plus || 0;
-                            const pakaiArea = item.pakai_area || 0;
-                            const returArea = item.retur_area || 0;
+                            const stockAwal = item.kgs_stock_awal ?? 0;
+                            const stockOpname = item.stock_opname ?? 0;
+                            const datangSolid = item.datang_solid ?? 0;
+                            const returStock = item.retur_stock ?? 0;
+                            const gantiRetur = item.ganti_retur ?? 0;
+                            const qtyPo = item.qty_po ?? 0;
+                            const qtyPoPlus = item.qty_po_plus ?? 0;
+                            const pakaiArea = item.pakai_area ?? 0;
+                            const returGbn = item.retur_gbn ?? 0;
+                            const returArea = item.retur_area ?? 0;
+                            const returTitipArea = item.retur_titip_area ?? 0;
+                            let tagihanBenang = 0;
                             console.log('stock awal :', stockAwal);
                             console.log('opname :', stockOpname);
                             console.log('datang solid :', datangSolid);
@@ -156,8 +160,12 @@
                             console.log('po plus :', qtyPoPlus);
                             // console.log('stock :', stockAwal, stockOpname, datangSolid, returStock, qtyPo, qtyPoPlus, kgsOut);
 
-                            const tagihanBenang = (stockAwal + stockOpname + datangSolid + returStock) - qtyPo - qtyPoPlus;
-                            const jatahArea = pakaiArea - returArea - qtyPo - qtyPoPlus;
+                            if (gantiRetur > 0) {
+                                tagihanBenang = (stockAwal + stockOpname + datangSolid + returStock + gantiRetur) - qtyPo - qtyPoPlus - returGbn - returArea;
+                            } else {
+                                tagihanBenang = (stockAwal + stockOpname + datangSolid + returStock) - qtyPo - qtyPoPlus;
+                            }
+                            const jatahArea = pakaiArea - returArea - returStock - returTitipArea - qtyPo - qtyPoPlus;
                             console.log('jatah area :', jatahArea);
 
                             dataTable.row.add([
@@ -167,27 +175,27 @@
                                 item.kode_warna,
                                 item.warna,
                                 item.loss,
-                                item.qty_po,
-                                item.qty_po_plus || 0,
-                                item.kgs_stock_awal,
-                                item.stock_opname || 0,
-                                item.datang_solid || 0,
-                                item.datang_solid_plus || 0,
-                                item.ganti_retur || 0,
-                                item.datang_lurex || 0,
-                                item.datang_lurex_plus || 0,
-                                item.retur_pb_gbn || 0,
-                                item.retur_pb_area || 0,
-                                item.pakai_area || 0,
-                                item.pakai_lain_lain || 0,
-                                item.retur_stock || 0,
-                                item.retur_titip || 0,
-                                item.dipinjam || 0,
-                                item.pindah_order || 0,
-                                item.pindah_stock_mati || 0,
-                                item.stock_akhir || 0,
-                                tagihanBenang.toFixed(2) || 0,
-                                jatahArea.toFixed(2) || 0
+                                parseFloat(item.qty_po ?? 0).toFixed(2),
+                                parseFloat(item.qty_po_plus ?? 0).toFixed(2),
+                                parseFloat(item.kgs_stock_awal ?? 0).toFixed(2),
+                                parseFloat(item.stock_opname ?? 0).toFixed(2),
+                                parseFloat(item.datang_solid ?? 0).toFixed(2),
+                                parseFloat(item.datang_solid_plus ?? 0).toFixed(2),
+                                parseFloat(item.ganti_retur ?? 0).toFixed(2),
+                                parseFloat(item.datang_lurex ?? 0).toFixed(2),
+                                parseFloat(item.datang_lurex_plus ?? 0).toFixed(2),
+                                parseFloat(item.retur_gbn ?? 0).toFixed(2),
+                                parseFloat(item.retur_area ?? 0).toFixed(2),
+                                parseFloat(item.pakai_area ?? 0).toFixed(2),
+                                parseFloat(item.pakai_lain_lain ?? 0).toFixed(2),
+                                parseFloat(item.retur_stock ?? 0).toFixed(2),
+                                parseFloat(item.retur_titip_area ?? 0).toFixed(2),
+                                parseFloat(item.dipinjam ?? 0).toFixed(2),
+                                parseFloat(item.pindah_order ?? 0).toFixed(2),
+                                parseFloat(item.pindah_stock_mati ?? 0).toFixed(2),
+                                parseFloat(item.stock_akhir ?? 0).toFixed(2),
+                                (tagihanBenang ?? 0).toFixed(2),
+                                (jatahArea ?? 0).toFixed(2)
                             ]).draw(false);
                         });
 
