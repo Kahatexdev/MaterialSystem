@@ -3182,9 +3182,12 @@ class ExcelController extends BaseController
             $sheet->setCellValue("I" . ($row + 1), 'Box');
             $sheet->setCellValue("J" . ($row + 1), 'Ada');
             $sheet->setCellValue("K" . ($row + 1), 'Habis');
-            foreach (range('L', 'Q') as $col) {
-                $sheet->setCellValue("{$col}" . ($row + 1), '');
-            }
+            $sheet->setCellValue("L" . ($row + 1), 'Rak No');
+            $sheet->setCellValue("M" . ($row + 1), 'Kanan');
+            $sheet->setCellValue("N" . ($row + 1), 'Kiri');
+            $sheet->setCellValue("O" . ($row + 1), 'Atas');
+            $sheet->setCellValue("P" . ($row + 1), 'Bawah');
+            $sheet->setCellValue("Q" . ($row + 1), 'Palet No');
 
             // Style header
             $sheet->getStyle("A{$row}:Q" . ($row + 1))->applyFromArray([
@@ -3203,22 +3206,76 @@ class ExcelController extends BaseController
         // Mulai baris data
         $startRow    = 8;
         $row         = $startRow;
-        $rowsPerPage = 60; // Jumlah baris per halaman
+        $rowsPerPage = 70; // Jumlah baris per halaman
         // Set baris yang akan diulang (header statis + dinamis)
-        $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(1, 9);
+        $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(1, 7);
 
         // Render header dinamis pertama
-        $renderHeader($sheet, $row-2);
+        $renderHeader($sheet, $row - 2);
+
+        // Urutkan data berdasarkan jenis (denier)
+        usort($data, function ($a, $b) {
+            return strcmp($a['jenis'], $b['jenis']);
+        });
+
+        $groupStartRow = $row;     // baris data pertama dari grup
+        $currentJenis = null;
+        $currentDr    = null;
+        $subtotalCones = 0;
+        $subtotalKg = 0;
 
         // Loop data dan atur page break
         foreach ($data as $item) {
-            // Cek jika perlu page break
+            // Jika jenis berubah (kecuali data pertama)
+            // Jika jenis atau dr berubah (kecuali data pertama)
+            // Deteksi pergantian grup (jenis/dr)
+            if (
+                $currentJenis !== null
+                && ($currentJenis !== $item['jenis'] || $currentDr !== $item['dr'])
+            ) {
+                // 1) Merge cell jenis untuk grup lama
+                $sheet->mergeCells("A{$groupStartRow}:A" . ($row));
+
+                // 2) Tulis subtotal grup lama
+                $sheet->mergeCells("B{$row}:C{$row}")
+                    ->setCellValue("B{$row}", "SUBTOTAL");
+                $sheet->mergeCells("E{$row}:F{$row}")
+                    ->setCellValue("E{$row}", $subtotalCones);
+                $sheet->mergeCells("G{$row}:H{$row}")
+                    ->setCellValue("G{$row}", $subtotalKg);
+                // Style subtotal
+                $sheet->getStyle("B{$row}:H{$row}")->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['argb' => 'D3D3D3'] // Abu-abu muda
+                    ],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical'   => Alignment::VERTICAL_CENTER
+                    ]
+                ]);
+                $row++;
+
+                // Reset subtotal untuk jenis baru
+                $subtotalCones = 0;
+                $subtotalKg = 0;
+
+                $groupStartRow = $row;
+            }
+
+            $currentJenis = $item['jenis'];
+            $currentDr    = $item['dr'];
+
+            // Cek jika perlu page break (SETELAH subtotal)
             if (($row - $startRow) % $rowsPerPage === 0 && $row > $startRow) {
                 $sheet->setBreak("A{$row}", Worksheet::BREAK_ROW);
             }
 
+
             // Isi data
-            $sheet->setCellValue("A{$row}", strtoupper($item['jenis']));
+            $sheet->setCellValue("A{$row}", strtoupper($item['jenis']) . ' DR ' . strtoupper($item['dr']));
             $sheet->setCellValue("B{$row}", $item['color']);
             $sheet->setCellValue("C{$row}", $item['code']);
             $sheet->setCellValue("D{$row}", $item['lmd']);
@@ -3227,16 +3284,48 @@ class ExcelController extends BaseController
             $sheet->setCellValue("J{$row}", $item['ttl_kg'] > 0 ? '✓' : '');
             $sheet->setCellValue("K{$row}", $item['ttl_kg'] <= 0 ? '✓' : '');
 
+            // Akumulasi subtotal
+            $subtotalCones += $item['ttl_cns'];
+            $subtotalKg += $item['ttl_kg'];
+
             // Style data
-            $sheet->getStyle("A{$row}:Q{$row}")->applyFromArray([
+            $sheet->getStyle("A{$row}:Q" . ($row + 1))->applyFromArray([
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
                     'vertical'   => Alignment::VERTICAL_CENTER,
-                    'wrapText'   => true
+                ],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical'   => Alignment::VERTICAL_CENTER
+                ]
+            ]);
+            // sheet A wraptext
+            $sheet->getStyle("A{$row}")->getAlignment()->setWrapText(true);
+
+            $row++;
+        }
+
+        // Setelah loop, tambahkan subtotal untuk grup terakhir
+        if ($currentJenis !== null) {
+            // Merge kolom jenis untuk grup terakhir
+            $sheet->mergeCells("A{$groupStartRow}:A" . ($row));
+
+            // Subtotal akhir
+            $sheet->mergeCells("B{$row}:C{$row}")
+                ->setCellValue("B{$row}", "SUBTOTAL");
+            $sheet->mergeCells("E{$row}:F{$row}")
+                ->setCellValue("E{$row}", $subtotalCones);
+            $sheet->mergeCells("G{$row}:H{$row}")
+                ->setCellValue("G{$row}", $subtotalKg);
+            $sheet->getStyle("B{$row}:H{$row}")->applyFromArray([
+                'font' => ['bold' => true],
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['argb' => 'D3D3D3']
                 ],
                 'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
             ]);
-
             $row++;
         }
        
@@ -3284,11 +3373,6 @@ class ExcelController extends BaseController
         // HITUNG TOTAL HALAMAN
         $totalDataRows = $row - $startRow;
         $totalPages = max(1, ceil($totalDataRows / $rowsPerPage));
-
-        // SET HEADER/FOOTER DENGAN NOMOR HALAMAN
-        // $sheet->getHeaderFooter()
-        //     ->setOddHeader("&C&\"Arial,Bold\"FORMULIR\n&DEPARTEMEN COVERING\n&\"Arial\"STOCK $jenisCover COVER DI GUDANG COVERING")
-        //     ->setEvenHeader("&C&\"Arial,Bold\"FORMULIR\n&DEPARTEMEN COVERING\n&\"Arial\"STOCK $jenisCover COVER DI GUDANG COVERING");
 
         // UPDATE PLACEHOLDER DI CONTENT (opsional)
         $sheet->setCellValue('C4', "FOR-CC-151/REV_01/HAL_1/$totalPages");
