@@ -471,7 +471,7 @@
 
                         <div class="alert alert-light border-info small">
                             <p class="mb-1">Pastikan file yang diupload sesuai dengan template yang telah disediakan. Jika belum memiliki template, silakan download:</p>
-                            <a href="<?= base_url('template/FORMAT_IMPORT_STOK_COVERING.xlsx') ?>"
+                            <a href="<?= base_url('covering/warehouse/templateStokBarangJadi') ?>"
                                 class="text-white text-decoration-none fw-semibold badge bg-gradient-info"
                                 style="font-size: 1rem;"
                                 download>

@@ -324,7 +324,7 @@
         });
 
         // Load data default untuk Group I saat halaman pertama kali dibuka
-        loadGroupData("I");
+        loadGroupData("nylon");
     });
 </script>
 <?php $this->endSection(); ?>

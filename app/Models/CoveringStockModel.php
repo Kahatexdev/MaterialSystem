@@ -23,7 +23,8 @@ class CoveringStockModel extends Model
         'lmd',
         'ttl_cns',
         'ttl_kg',
-        'admin'
+        'admin',
+        'keterangan'
     ];
 
     protected bool $allowEmptyInserts = false;

@@ -375,146 +375,306 @@ class CoveringWarehouseBBController extends BaseController
             return redirect()->back()->with('error', 'File tidak valid atau gagal di-upload.');
         }
 
-        $ext = $file->getClientExtension();
+        $ext = strtolower($file->getClientExtension());
         if (! in_array($ext, ['xls', 'xlsx'])) {
             return redirect()->back()->with('error', 'Format file harus .xls atau .xlsx');
         }
 
-        $reader = $ext === 'xlsx' ? new Xlsx() : new Xls();
+        $reader      = $ext === 'xlsx' ? new Xlsx() : new Xls();
         $spreadsheet = $reader->load($file->getTempName());
 
-        $sheetNames = ['PEMASUKAN', 'PENGELUARAN'];
+        $sheetNames = $spreadsheet->getSheetNames();
 
-        // Mapping judul kolom Excel ke field model
+        // mapping header->field
         $headerRow = 3;
         $mapStock = [
-            'DENIER'        => 'denier',
-            'JENIS BENANG'  => 'jenis_benang',
-            'WARNA'         => 'warna',
-            'KODE'          => 'kode',
-            'CONES'         => 'ttl_cones',
-            'KG'            => 'kg',
-            'KETERANGAN'    => 'keterangan'
-        ];
-        $mapHistory = [
-            'DENIER'        => 'denier',
-            'JENIS BENANG'  => 'jenis_benang',
-            'WARNA'         => 'color',
-            'KODE'          => 'code',
-            'CONES'         => 'ttl_cns',
-            'KG'            => 'ttl_kg',
-            'KETERANGAN'    => 'keterangan'
+            'DENIER'       => 'denier',
+            'JENIS BENANG' => 'jenis_benang',
+            'WARNA'        => 'warna',
+            'KODE'         => 'kode',
+            'CONES'        => 'ttl_cns',
+            'KG'           => 'ttl_kg',
+            'KETERANGAN'   => 'keterangan',
         ];
 
+        $mapHistory = [
+            'DENIER'       => 'denier',
+            'JENIS BENANG' => 'jenis_benang',
+            'WARNA'        => 'color',
+            'KODE'         => 'code',
+            'CONES'        => 'ttl_cns',
+            'KG'           => 'ttl_kg',
+            'KETERANGAN'   => 'keterangan',
+        ];
+
+        $admin    = session()->get('username') ?? session()->get('email');
+        $nowLabel = 'Import ' . date('Y-m-d H:i:s');
+
+        // untuk agregasi stok
+        $agg = [];          // [ idstockbb => ['origKg'=>..., 'origCns'=>..., 'deltaKg'=>..., 'deltaCns'=>...] ]
         $historyData = [];
-        $updateData  = [];
-        $admin       = session()->get('username') ?? session()->get('email');
-        $nowLabel    = 'Import ' . date('Y-m-d H:i:s');
+        $errors      = [];
 
         foreach ($sheetNames as $name) {
             $sheet = $spreadsheet->getSheetByName($name);
-            if (!$sheet) continue;
+            if (! $sheet) continue;
 
-            // Ambil tanggal import dari cell B2 di sheet pertama yang ada
-            if (empty($tanggalImport ?? null)) {
+            $mult = (strtoupper($name) === 'PENGELUARAN') ? -1 : 1;
+
+            // ambil tanggal import sekali
+            if (empty($tanggalImport)) {
                 $tanggalImport = $sheet->getCell('B2')->getFormattedValue();
                 if (empty($tanggalImport)) {
-                    return redirect()->back()->with('error', 'Tanggal import tidak ditemukan di B2 pada sheet ' . $name);
+                    return redirect()->back()
+                        ->with('error', "Tanggal import tidak ditemukan di B2 pada sheet {$name}");
                 }
             }
 
-            $rows = $sheet->toArray(null, true, true, true);
+            $rows      = $sheet->toArray(null, true, true, true);
             $rawHeader = array_map('strtoupper', array_map('trim', $rows[$headerRow]));
 
-            foreach ($rows as $idx => $row) {
-                if ($idx <= $headerRow) continue;
-                if (empty(array_filter($row))) continue;
+            foreach ($rows as $i => $row) {
+                if ($i <= $headerRow || empty(array_filter($row))) continue;
 
+                // mapping stok
                 $item = [
                     'admin'      => $admin,
-                    'keterangan' => $nowLabel . ' [' . $name . ']',
-                    'created_at' => $tanggalImport,
+                    'keterangan' => "{$nowLabel} [{$name}]",
+                    'created_at' => \DateTime::createFromFormat('d/m/Y', $tanggalImport)
+                        ? \DateTime::createFromFormat('d/m/Y', $tanggalImport)->format('Y-m-d 00:00:00')
+                        : $tanggalImport,
                 ];
-
-                foreach ($rawHeader as $col => $heading) {
-                    if (!isset($mapStock[$heading])) continue;
-                    $field = $mapStock[$heading];
-                    $val   = $row[$col];
-
-                    if (in_array($field, ['kg', 'ttl_cns'], true)) {
-                        $clean = str_replace(',', '.', $val);
-                        $val   = is_numeric($clean) ? (float) $clean : 0;
+                foreach ($rawHeader as $col => $hd) {
+                    if (! isset($mapStock[$hd])) continue;
+                    $fld = $mapStock[$hd];
+                    $val = $row[$col];
+                    // normalize angka
+                    if (in_array($fld, ['ttl_kg', 'ttl_cns'], true)) {
+                        $c = str_replace(',', '.', $val);
+                        $val = is_numeric($c) ? (float) $c : 0;
                     }
-
-                    $item[$field] = $val;
+                    $item[$fld] = $val;
                 }
-
-                // Cek stok        
+                if (empty($item['denier']) || empty($item['jenis_benang']) || empty($item['warna'])) {
+                    $errors[] = "Sheet {$name} baris {$i}: data tidak lengkap (denier/jenis/warna/kode).";
+                    continue; // skip jika data tidak lengkap
+                }
+                // cari stok eksisting
                 $stock = $this->warehouseBBModel
                     ->where('denier', $item['denier'])
                     ->where('jenis_benang', $item['jenis_benang'])
                     ->where('warna', $item['warna'])
                     ->where('kode', $item['kode'])
                     ->first();
-                // dd($stock);
-                if (!$stock) {
-                    return redirect()->back()->with('error', "Data tidak ditemukan pada sheet {$name} denier {$item['denier']} jenis {$item['jenis_benang']} kode {$item['kode']} (baris {$idx}).");
+                if (! $stock) {
+                    $errors[] = "Sheet {$name} baris {$i}: stok tidak ditemukan untuk kode {$item['kode']}.";
+                    continue; // skip jika stok tidak ditemukan
                 }
 
-                if (($stock['kg'] ?? 0) <= 0) {
-                    return redirect()->back()->with('error', "Stok kosong pada sheet {$name} denier {$item['denier']} jenis {$item['jenis_benang']} kode {$item['kode']} (baris {$idx}).");
+                // ambil delta absolut & terapkan multiplier
+                $inKg  = abs($item['ttl_kg']  ?? 0);
+                $inCns = abs($item['ttl_cns'] ?? 0);
+                $deltaKg  = $mult * $inKg;
+                $deltaCns = $mult * $inCns;
+
+                $id = $stock['idstockbb'];
+                // simpan orig + akumulasi delta
+                if (! isset($agg[$id])) {
+                    $agg[$id] = [
+                        'origKg'   => $stock['kg']    ?? 0,
+                        'origCns'  => $stock['ttl_cns'] ?? 0,
+                        'deltaKg'  => 0,
+                        'deltaCns' => 0,
+                    ];
                 }
+                $agg[$id]['deltaKg']  += $deltaKg;
+                $agg[$id]['deltaCns'] += $deltaCns;
 
-                $updateData[]  = [
-                    'idstockbb' => $stock['idstockbb'],
-                    'kg'        => $stock['kg'] + ($item['kg'] ?? 0),
-                ];
-
-                $history = [
+                // mapping history (pakai mapHistory)
+                $hist = [
                     'admin'      => $admin,
-                    'keterangan' => $nowLabel . ' [' . $name . ']',
+                    'keterangan' => "{$nowLabel} [{$name}]",
                     'created_at' => date('Y-m-d H:i:s'),
                 ];
-
-                foreach ($rawHeader as $col => $heading) {
-                    if (!isset($mapHistory[$heading])) continue;
-                    $field = $mapHistory[$heading];
-                    $val   = $row[$col];
-
-                    if (in_array($field, ['ttl_kg', 'ttl_cns'], true)) {
-                        $clean = str_replace(',', '.', $val);
-                        $val   = is_numeric($clean) ? (float) $clean : 0;
+                foreach ($rawHeader as $col => $hd) {
+                    if (! isset($mapHistory[$hd])) continue;
+                    $fld = $mapHistory[$hd];
+                    $val = $row[$col];
+                    if (in_array($fld, ['ttl_kg', 'ttl_cns'], true)) {
+                        $c = str_replace(',', '.', $val);
+                        $val = is_numeric($c) ? (float) $c : 0;
                     }
-
-                    $history[$field] = $val;
+                    $hist[$fld] = $val;
                 }
-                $historyData[] = $history;
+                // ganti nilai history jadi signed delta
+                $hist['ttl_kg']  = $deltaKg;
+                $hist['ttl_cns'] = $deltaCns;
+
+                // hanya masukkan ke history jika ttl_kg != 0
+                if ($hist['ttl_kg'] != 0) {
+                    $historyData[] = $hist;
+                }
+
+                // $historyData[] = $hist;
             }
         }
-        // dd($historyData);
+
+        // build updateData sekali jalan
+        $updateData = [];
+        foreach ($agg as $id => $v) {
+            $newKg  = $v['origKg']  + $v['deltaKg'];
+            $newCns = $v['origCns'] + $v['deltaCns'];
+
+            // optional: validasi stok negatif
+            if ($newKg < 0 || $newCns < 0) {
+                $errors[] = "Stock {$hist['jenis_benang']} {$hist['denier']} {$hist['color']} {$hist['code']} Stock tidak mencukupi.";
+                continue;
+            }
+
+            $updateData[] = [
+                'idstockbb' => $id,
+                'kg'        => $newKg,
+            ];
+        }
+
+        // simpan ke DB
         $db = \Config\Database::connect();
         $db->transStart();
-
-        if (!empty($updateData)) {
+        if (! empty($updateData)) {
             $this->warehouseBBModel->updateBatch($updateData, 'idstockbb');
+            if (! empty($historyData)) {
+                $this->historyStockBBModel->insertBatch($historyData);
+            }
         }
-
-        if (!empty($historyData)) {
-            $this->historyStockBBModel->insertBatch($historyData);
-        }
-
+        
         $db->transComplete();
 
-        if ($db->transStatus() === false) {
-            return redirect()->back()->with('error', 'Gagal menyimpan data transaksi.');
+        // persiapkan flash message
+        $flash = [];
+        if (! empty($errors)) {
+            return redirect()->back()->with('warning', implode('<br>', $errors));
         }
 
-        return redirect()->back()->with('success', 'Import stok covering berhasil untuk sheet: ' . implode(', ', $sheetNames));
+        return redirect()->back()->with('success', 'Import stok bahan baku berhasil untuk semua data.');
     }
+
 
     public function deleteBahanBakuCov($id)
     {
         $this->warehouseBBModel->delete($id);
         return redirect()->back()->with('success', 'Data berhasil dihapus.');
+    }
+
+    public function templateStokBahanBaku()
+    {
+        $stok = $this->warehouseBBModel->findAll();
+        // dd ($stok);
+        // Define headings based on mapping
+        $headers = [
+            'A' => 'DENIER',
+            'B' => 'JENIS BENANG',
+            'C' => 'WARNA',
+            'D' => 'KODE',
+            'E' => 'CONES',
+            'F' => 'KG',
+            'G' => 'KETERANGAN',
+        ];
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+
+        // PEMASUKAN sheet dengan data stok
+        $sheetIn = $spreadsheet->getActiveSheet();
+        $sheetIn->setTitle('PEMASUKAN');
+        $this->applyTemplateFormat($sheetIn, $headers, $stok);
+
+        // PENGELUARAN sheet juga menampilkan data stok
+        $sheetOut = $spreadsheet->createSheet();
+        $sheetOut->setTitle('PENGELUARAN');
+        $this->applyTemplateFormat($sheetOut, $headers, $stok);
+
+        // Prepare download
+        $filename = 'TEMPLATE_IMPORT_BAHAN_BAKU_' . date('Ymd_His') . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    /**
+     * Apply header, styling, borders, and data to a sheet
+     */
+    protected function applyTemplateFormat($sheet, array $headers, array $data)
+    {
+        // Instruction and date
+        $sheet->setCellValue('A1', 'TEMPLATE DATA STOK BAHAN BAKU UNTUK ' . strtoupper($sheet->getTitle()));
+        $sheet->mergeCells('A1:G1');
+        $sheet->setCellValue('A2', 'Tanggal Import (dd/mm/yyyy):');
+        $sheet->setCellValue('B2', date('d/m/Y'));
+        $sheet->getStyle('A1:G2')->getFont()->setBold(true);
+
+        // Header row
+        foreach ($headers as $col => $title) {
+            $sheet->setCellValue("{$col}3", $title);
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // apply styling A1
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+        // blue sky background color
+        $sheet->getStyle('A1')->getFill()->getStartColor()->setARGB('87CEEB'); // Sky blue background
+        $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('A2')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('B2')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('B2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('B2')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        // styling a2:b2
+        $sheet->getStyle('A2:B2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+        // green tua tapi jangan ketuaan background color
+        $sheet->getStyle('A2:B2')->getFill()->getStartColor()->setARGB('228B22'); // Forest green background
+        // Apply header styling (background color and bold font)
+        $headerRange = 'A3:' . array_key_last($headers) . '3';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)
+            ->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setARGB('FFFF00'); // Yellow background
+
+        // Fill data rows
+        $startRow = 4;
+        $row = $startRow;
+        foreach ($data as $item) {
+            $sheet->setCellValue("A{$row}", $item['denier'] ?? '');
+            $sheet->setCellValue("B{$row}", $item['jenis_benang'] ?? '');
+            $sheet->setCellValue("C{$row}", $item['warna'] ?? '');
+            $sheet->setCellValue("D{$row}", $item['kode'] ?? '');
+            $sheet->setCellValue("E{$row}", 0);
+            $sheet->setCellValue("F{$row}", 0);
+            $sheet->setCellValue("G{$row}", $item['keterangan'] ?? '');
+            $row++;
+        }
+
+        // Determine last row for borders
+        $lastRow = max($row - 1, 3);
+        $fullRange = 'A3:' . array_key_last($headers) . $lastRow;
+
+        // Apply borders to all cells in range
+        $sheet->getStyle($fullRange)
+            ->getBorders()
+            ->getAllBorders()
+            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+        // set alignment center for all cells in range
+        $sheet->getStyle($fullRange)
+            ->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
     }
 }
