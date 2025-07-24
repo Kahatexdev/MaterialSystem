@@ -120,7 +120,7 @@
                         // Baris pertama: ringkasan sum
                         label: (item) => {
                             const val = item.parsed.y;
-                            return item.dataset.label + ': ' + val + ' kg';
+                            return item.dataset.label + ': ' + val.toFixed(2) + ' kg';
                         },
                         // Tambah detail di bawahnya
                         afterBody: (items) => {
