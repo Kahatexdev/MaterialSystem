@@ -81,6 +81,6 @@ class DomPdfController extends BaseController
         $dompdf->setPaper('10cm', '10cm');
         $dompdf->render();
 
-        return $dompdf->stream("barcode_$idBon.pdf", ['Attachment' => false]);
+        return $dompdf->stream("Barcode_$idBon.pdf", ['Attachment' => false]);
     }
 }

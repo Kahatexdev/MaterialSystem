@@ -181,7 +181,7 @@
                             if (gantiRetur > 0) {
                                 sisa = (kgsAwal + kgsDatang + kgsTambahanDatang + gantiRetur) - (kgPo - kgPoPlus - qtyRetur);
                             } else {
-                                sisa = (kgsAwal + kgsDatang + kgsTambahanDatang + gantiRetur) - (kgPo - kgPoPlus);
+                                sisa = (kgsAwal + kgsDatang + kgsTambahanDatang) - (kgPo - kgPoPlus);
                             }
 
                             html += `
@@ -208,8 +208,8 @@
                                     <td>${item.delivery_po_plus || ''}</td>
                                     <td>${item.kg_po_plus || 0}</td>
                                     <td>${(parseFloat(item.kgs_datang) || 0).toFixed(2)}</td>
-                                    <td>${item.kgs_datang_plus || 0}</td>
-                                    <td>${item.kgs_retur || 0}</td>
+                                    <td>${(parseFloat(item.kgs_datang_plus) || 0).toFixed(2)}</td>
+                                    <td>${(parseFloat(item.kgs_ganti_retur) || 0).toFixed(2)}</td>
                                     <td>${item.qty_retur || 0}</td>
                                     <td>${sisa.toFixed(2)}</td>
                                 </tr>

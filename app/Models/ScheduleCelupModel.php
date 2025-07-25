@@ -205,7 +205,7 @@ class ScheduleCelupModel extends Model
         return $builder->get()->getResultArray();
     }
 
-    public function getSchedule($filterTglSch = null, $filterTglSchsampai = null,$filterNoModel = null)
+    public function getSchedule($filterTglSch = null, $filterTglSchsampai = null, $filterNoModel = null)
     {
         // Ambil tanggal 1 bulan lalu dalam format YYYY-MM-DD
         $lastMonth = date('Y-m-d', strtotime('1 month ago'));
@@ -325,12 +325,11 @@ class ScheduleCelupModel extends Model
         return null;
     }
 
-
-    public function getCelupDone()
+    public function getCelupDoneAndComplain()
     {
         return $this
             ->select('id_celup,no_model, item_type, kode_warna, warna, lot_celup')
-            ->where('last_status', 'done')
+            ->whereIn('last_status', ['done', 'complain'])
             ->groupBy('id_celup')
             ->findAll();
     }

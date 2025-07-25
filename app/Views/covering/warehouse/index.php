@@ -358,18 +358,29 @@
                 </div>
                 <form action="<?= base_url('covering/warehouse/exportStock') ?>" method="POST">
                     <div class="modal-body">
-                        <div class="mb-3"><label class="form-label">Jenis Cover</label><select class="form-select" name="jenis_cover">
+                        <div class="mb-3"><label class="form-label">Jenis Mesin</label><select class="form-select" name="jenis_mesin">
                                 <option value="">Semua</option>
-                                <option value="SINGLE">SINGLE</option>
-                                <option value="DOUBLE">DOUBLE</option>
-                            </select></div>
+                                <?php foreach ($mesinOptions as $mesin): ?>
+                                    <option value="<?= esc($mesin) ?>"><?= esc($mesin) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        
                         <div class="mb-3"><label class="form-label">Jenis Benang</label><select class="form-select" name="jenis_benang">
                                 <option value="">Semua</option>
                                 <option value="NYLON">NYLON</option>
                                 <option value="POLYESTER">POLYESTER</option>
                                 <option value="MYSTY">MYSTY</option>
                                 <option value="RECYCLED">RECYCLED</option>
-                            </select></div>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3"><label class="form-label">Jenis Cover</label><select class="form-select" name="jenis_cover">
+                                <option value="">Semua</option>
+                                <option value="SINGLE">SINGLE</option>
+                                <option value="DOUBLE">DOUBLE</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-success">Export Excel</button></div>
                 </form>
@@ -471,7 +482,7 @@
 
                         <div class="alert alert-light border-info small">
                             <p class="mb-1">Pastikan file yang diupload sesuai dengan template yang telah disediakan. Jika belum memiliki template, silakan download:</p>
-                            <a href="<?= base_url('template/FORMAT_IMPORT_STOK_COVERING.xlsx') ?>"
+                            <a href="<?= base_url('covering/warehouse/templateStokBarangJadi') ?>"
                                 class="text-white text-decoration-none fw-semibold badge bg-gradient-info"
                                 style="font-size: 1rem;"
                                 download>

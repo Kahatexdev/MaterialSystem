@@ -28,8 +28,8 @@
         $stats = [
             ['title' => 'Total PO', 'icon' => 'fas fa-book', 'value' => $poCount],
             ['title' => 'Total Qty PO', 'icon' => 'ni ni-cart', 'value' => number_format($ttlQtyPO, 2, ',', '.') . ' KG'],
-            ['title' => 'Pemasukan/Hari', 'icon' => 'fas fa-arrow-down', 'value' => $incomeToday . ' KG'],
-            ['title' => 'Pengeluaran/Hari', 'icon' => 'fas fa-arrow-up', 'value' => $expenseToday . ' KG']
+            ['title' => 'Pemasukan/Hari', 'icon' => 'fas fa-arrow-down', 'value' => number_format($incomeToday, 2, ',', '.') . ' KG'],
+            ['title' => 'Pengeluaran/Hari', 'icon' => 'fas fa-arrow-up', 'value' => number_format($expenseToday, 2, ',', '.') . ' KG']
         ];
         ?>
 
@@ -63,7 +63,7 @@
         <div class="col-xl-12">
             <div class="card">
                 <div class="card-body">
-                    <h6 class="font-weight-bold text-uppercase">Statistik Pemasukan dan Pengeluaran</h6>
+                    <h6 class="font-weight-bold text-uppercase">Statistik Pemasukan dan Pengeluaran 7 Hari Terakhir</h6>
                     <canvas id="financeChart"></canvas>
                 </div>
             </div>
@@ -73,33 +73,73 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    var ctx = document.getElementById('financeChart').getContext('2d');
-    var financeChart = new Chart(ctx, {
+    const labels = <?= json_encode($dateLabels) ?>;
+    const dataIn = <?= json_encode($incomeData) ?>;
+    const dataOut = <?= json_encode($expenseData) ?>;
+    const detailData = <?= json_encode($detailData) ?>;
+
+    const ctx = document.getElementById('financeChart').getContext('2d');
+    new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: <?= json_encode($dateLabels) ?>,
+            labels,
             datasets: [{
                     label: 'Pemasukan',
-                    data: <?= json_encode($incomeData) ?>,
-                    backgroundColor: 'rgba(33, 179, 253, 0.6)',
-                    borderColor: 'rgba(33, 179, 253, 1)',
-                    borderWidth: 1
+                    data: dataIn,
+                    backgroundColor: 'rgba(33,179,253,0.6)',
+                    borderColor: 'rgba(33,179,253,1)',
+                    borderWidth: 1,
+                    stack: 'combined'
                 },
                 {
                     label: 'Pengeluaran',
-                    data: <?= json_encode($expenseData) ?>,
-                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
+                    data: dataOut,
+                    backgroundColor: 'rgba(255,99,132,0.6)',
+                    borderColor: 'rgba(255,99,132,1)',
+                    borderWidth: 1,
+                    stack: 'combined'
                 }
             ]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
             scales: {
+                x: {
+                    stacked: true
+                },
                 y: {
+                    stacked: true,
                     beginAtZero: true
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        // Judul tooltip: tanggal
+                        title: (items) => items[0].label,
+                        // Baris pertama: ringkasan sum
+                        label: (item) => {
+                            const val = item.parsed.y;
+                            return item.dataset.label + ': ' + val.toFixed(2) + ' kg';
+                        },
+                        // Tambah detail di bawahnya
+                        afterBody: (items) => {
+                            const idx = items[0].dataIndex;
+                            const datasetLabel = items[0].dataset.label.toLowerCase(); // 'pemasukan' atau 'pengeluaran'
+                            const isIncome = datasetLabel.includes('pemasukan');
+                            const details = (detailData[idx] || []).filter(d =>
+                                (isIncome && d.type === 'in') || (!isIncome && d.type === 'out')
+                            );
+
+                            if (!details.length) return ['(no detail)'];
+
+                            // satu array string per baris
+                            return details.map(d => {
+                                const sign = (d.type === 'out' ? '-' : '+');
+                                return `${sign} ${d.jenis} (${d.color}, ${d.code}): ${d.ttl_kg}kg`;
+                            });
+                        }
+                    }
                 }
             }
         }

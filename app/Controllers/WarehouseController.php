@@ -18,6 +18,7 @@ use App\Models\StockModel;
 use App\Models\HistoryPindahPalet;
 use App\Models\HistoryPindahOrder;
 use App\Models\HistoryStock;
+use App\Models\KategoriReturModel;
 use App\Models\PengeluaranModel;
 use App\Models\ReturModel;
 use App\Models\OtherOutModel;
@@ -51,6 +52,7 @@ class WarehouseController extends BaseController
     protected $returModel;
     protected $otherOutModel;
     protected $otherBonModel;
+    protected $kategoriModel;
 
     public function __construct()
     {
@@ -71,6 +73,7 @@ class WarehouseController extends BaseController
         $this->returModel = new ReturModel();
         $this->otherOutModel = new OtherOutModel();
         $this->otherBonModel = new OtherBonModel();
+        $this->kategoriModel = new KategoriReturModel();
         $this->db = \Config\Database::connect(); // Menghubungkan ke database
 
         $this->role = session()->get('role');
@@ -160,6 +163,7 @@ class WarehouseController extends BaseController
     {
         $id = $this->request->getPost('barcode');
         $cluster = $this->clusterModel->getDataCluster();
+        $kategori = $this->kategoriModel->findAll();
         // dd(session()->get('dataOut'));
         // Ambil data dari session (jika ada)
         $existingData = session()->get('dataOut') ?? [];
@@ -210,6 +214,7 @@ class WarehouseController extends BaseController
             'role'     => $this->role,
             'dataOut'  => $existingData,
             'cluster'  => $cluster,
+            'kategori'  => $kategori,
             'error'    => session()->getFlashdata('error'),
         ];
 
@@ -408,18 +413,18 @@ class WarehouseController extends BaseController
         $checkedIds = $this->request->getPost('checked_id');
         $idOutCelup = $this->request->getPost('id_out_celup');
         $alasan = $this->request->getPost('alasan');
-
+        $kategori = $this->request->getPost('kategori_retur');
+        $post = $this->request->getPost();
+        // dd($post);
         if (empty($checkedIds)) {
             session()->setFlashdata('error', 'Tidak ada data yang dipilih untuk dikomplain.');
             return redirect()->to($this->role . '/pemasukan');
-        } elseif (empty($alasan)) {
-            session()->setFlashdata('error', 'Alasan Tidak boleh kosong.');
+        } elseif (empty($alasan) || empty($kategori)) {
+            session()->setFlashdata('error', 'Alasan dan Kategori Tidak Boleh Kosong.');
             return redirect()->to($this->role . '/pemasukan');
         }
 
-
         $idCelup = $this->outCelupModel->getIdCelups($idOutCelup);
-
 
         // Tambahkan proses komplain sesuai kebutuhanmu
         $update = $this->scheduleCelupModel
@@ -431,24 +436,64 @@ class WarehouseController extends BaseController
             ->update();
 
         if ($update) {
-            // Ambil session dataOut
-            $existingData = session()->get('dataOut') ?? [];
-
-            // Pastikan $idOutCelup dalam bentuk array
-            $idOutCelup = is_array($idOutCelup) ? $idOutCelup : [$idOutCelup];
-
-            // Hapus data berdasarkan idOutCelup
-            $filteredData = array_filter($existingData, function ($item) use ($idOutCelup) {
-                return !in_array($item['id_out_celup'], $idOutCelup);
-            });
-
-            // Simpan kembali dataOut ke session tanpa data yang dihapus
-            session()->set('dataOut', array_values($filteredData));
-
-            session()->setFlashdata('success', 'Data berhasil dikomplain');
-        } else {
-            session()->setFlashdata('error', 'Gagal mengkomplain data.');
+            $existing = session()->get('dataOut') ?? [];
+            $filtered = array_filter($existing, fn($item) => ! in_array($item['id_out_celup'], $post['id_out_celup']));
+            session()->set('dataOut', array_values($filtered));
         }
+
+        $dataRetur = [];
+        foreach ($checkedIds as $idx => $outId) {
+            $dataRetur[] = [
+                'no_model'   => $post['no_model'][$idx],
+                'item_type'  => $post['item_type'][$idx],
+                'kode_warna' => $post['kode_warna'][$idx],
+                'warna'      => $post['warna'][$idx],
+                'area_retur' => 'GUDANG BENANG',
+                'tgl_retur'  => date('Y-m-d'),
+                'kgs_retur'  => $post['kgs_kirim'][$idx],
+                'cns_retur'  => $post['cns_kirim'][$idx],
+                'lot_retur'  => $post['lot_kirim'][$idx],
+                'krg_retur'  => 1,
+                'kategori'  => $post['kategori_retur'],
+                'keterangan_area'  => null,
+                'keterangan_gbn'  => $post['alasan'] ?? '',
+                'waktu_acc_retur'  => null,
+                'admin'  => session()->get('username'),
+            ];
+        }
+
+        //SUM berdasarkan no_model, item_type, kode_warna, dan warna
+        $grouped = [];
+        foreach ($dataRetur as $row) {
+            // buat key unik per kombinasi 4 kolom
+            $key = $row['no_model']
+                . '|' . $row['item_type']
+                . '|' . $row['kode_warna']
+                . '|' . $row['warna'];
+
+            if (! isset($grouped[$key])) {
+                // pertama kali, simpan seluruh row
+                $grouped[$key] = $row;
+            } else {
+                // sudah ada, cukup sum kgs_retur, dan cns_retur
+                $grouped[$key]['kgs_retur'] += $row['kgs_retur'];
+                $grouped[$key]['cns_retur'] += $row['cns_retur'];
+                $grouped[$key]['krg_retur'] += $row['krg_retur'];
+            }
+        }
+        // Re-index jadi array numerik
+        $dataRetur = array_values($grouped);
+
+        // Insert batch
+        $inserted = $this->returModel->insertBatch($dataRetur);
+
+        // Flashdata & redirect
+        if ($update && $inserted) {
+            session()->setFlashdata('success', 'Data berhasil dikomplain dan retur disimpan.');
+        } else {
+            session()->setFlashdata('error', 'Gagal memproses komplain atau menyimpan retur.');
+        }
+
         return redirect()->to($this->role . '/pemasukan');
     }
     public function reset_pemasukan()
@@ -1536,7 +1581,8 @@ class WarehouseController extends BaseController
     {
         $idOutCelup = $this->request->getPost('id_out_celup');
         $alasan = $this->request->getPost('alasan');
-
+        $post = $this->request->getPost();
+        // dd($post);
         $idCelup = $this->outCelupModel->getIdCelup($idOutCelup);
 
         if (!$idCelup) {
@@ -1563,12 +1609,37 @@ class WarehouseController extends BaseController
 
             // Simpan kembali dataOut ke session tanpa data yang dihapus
             session()->set('dataOut', array_values($filteredData));
-
-            session()->setFlashdata('success', 'Data berhasil dikomplain');
-        } else {
-            session()->setFlashdata('error', 'Gagal mengkomplain data.');
         }
-        return redirect()->back();
+
+        $dataRetur[] = [
+            'no_model'   => $post['no_model'],
+            'item_type'  => $post['item_type'],
+            'kode_warna' => $post['kode_warna'],
+            'warna'      => $post['warna'],
+            'area_retur' => 'GUDANG BENANG',
+            'tgl_retur'  => date('Y-m-d'),
+            'kgs_retur'  => $post['kgs_kirim'],
+            'cns_retur'  => $post['cns_kirim'],
+            'lot_retur'  => $post['lot_kirim'],
+            'krg_retur'  => 1,
+            'kategori'  => $post['kategori_retur'],
+            'keterangan_area'  => null,
+            'keterangan_gbn'  => $post['alasan'] ?? '',
+            'waktu_acc_retur'  => null,
+            'admin'  => session()->get('username'),
+        ];
+
+        // Insert batch
+        $inserted = $this->returModel->insertBatch($dataRetur);
+
+        // Flashdata & redirect
+        if ($update && $inserted) {
+            session()->setFlashdata('success', 'Data berhasil dikomplain dan retur disimpan.');
+        } else {
+            session()->setFlashdata('error', 'Gagal memproses komplain atau menyimpan retur.');
+        }
+
+        return redirect()->to($this->role . '/pemasukan');
     }
 
     public function reportPoBenang()
@@ -2383,7 +2454,7 @@ class WarehouseController extends BaseController
         $key = $this->request->getGet('key');
 
         $data = $this->stockModel->getFilterReportGlobalBenang($key);
-
+        // dd($data);
         return $this->response->setJSON($data);
     }
 
@@ -2605,6 +2676,7 @@ class WarehouseController extends BaseController
             'title' => 'Report Sisa Datang Benang',
             'getFilterData' => $getFilterData
         ];
+        // dd($data);
 
         return view($this->role . '/warehouse/report-sisa-datang-benang', $data);
     }

@@ -79,11 +79,16 @@ class CoveringStockModel extends Model
             ->getRowArray();
     }
 
-    public function getStockCover($jenisBenang, $jenisCover)
+    public function getStockCover($jenisMesin,$jenisBenang, $jenisCover)
     {
         return $this->select('*')
-            ->where('jenis_benang', $jenisBenang)
-            ->where('jenis_cover', $jenisCover)
+            ->where('jenis_mesin', $jenisMesin)
+            ->when($jenisBenang !== null && $jenisBenang !== '', function($query) use ($jenisBenang) {
+                return $query->where('jenis_benang', $jenisBenang);
+            })
+            ->when($jenisCover !== null && $jenisCover !== '', function($query) use ($jenisCover) {
+                return $query->where('jenis_cover', $jenisCover);
+            })
             ->findAll();
     }
 

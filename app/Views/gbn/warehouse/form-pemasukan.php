@@ -139,12 +139,18 @@
                                                             <strong class="text-dark">Tanggal Masuk: <?= $today ?></strong>
                                                             <input type="date" class="form-control" name="tgl_masuk[]" value="<?= $formated ?>" hidden>
                                                         </div>
-
-                                                        <div class="mb-2">
-                                                            <label class="form-label">Model:</label>
-                                                            <input type="text" class="form-control form-control-sm" name="no_model[]" value="<?= $data['no_model'] ?>" readonly>
-                                                            <input type="hidden" name="id_retur[]" value="<?= $data['id_retur'] ?? NULL ?>">
+                                                        <div class="row mb-2">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Model:</label>
+                                                                <input type="text" class="form-control form-control-sm" name="no_model[]" value="<?= $data['no_model'] ?>" readonly>
+                                                                <input type="hidden" name="id_retur[]" value="<?= $data['id_retur'] ?? NULL ?>">
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label for="">No Karung</label>
+                                                                <input type="text" class="form-control form-control-sm" name="no_karung[]" value="<?= $data['no_karung'] ?>" readonly>
+                                                            </div>
                                                         </div>
+
 
                                                         <div class="row">
                                                             <div class="col-12 col-md-6 mb-2">
@@ -179,9 +185,24 @@
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
 
-                                                            <button type="button" class="btn btn-sm bg-gradient-warning btn-komplain" title="Komplain" data-id="<?= $data['id_out_celup'] ?>" data-bs-toggle="modal" data-bs-target="#complainModal">
-                                                                <i class="fas fa-exclamation-triangle"></i> <span class="d-none d-sm-inline">Komplain</span>
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-sm bg-gradient-warning btn-komplain"
+                                                                title="Komplain"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#complainModal"
+                                                                data-id="<?= $data['id_out_celup'] ?>"
+                                                                data-model="<?= htmlspecialchars($data['no_model']) ?>"
+                                                                data-item_type="<?= htmlspecialchars($data['item_type']) ?>"
+                                                                data-kode_warna="<?= htmlspecialchars($data['kode_warna']) ?>"
+                                                                data-warna="<?= htmlspecialchars($data['warna']) ?>"
+                                                                data-lot_kirim="<?= htmlspecialchars($data['lot_kirim'] ?? $data['lot_retur']) ?>"
+                                                                data-kgs_kirim="<?= htmlspecialchars($data['kgs_kirim']  ?? $data['kgs_retur']) ?>"
+                                                                data-cns_kirim="<?= htmlspecialchars($data['cones_kirim'] ?? $data['cns_retur']) ?>">
+                                                                <i class="fas fa-exclamation-triangle"></i>
+                                                                <span class="d-none d-sm-inline">Komplain</span>
                                                             </button>
+
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -210,13 +231,24 @@
                                     <input type="number" class="form-control sisa_kapasitas" name="sisa_kapasitas" value="" readonly>
                                 </div>
 
+                                <p style="color: red; font-size: 12px; margin-top:10px;"> ⚠ Hanya diisi untuk komplain</p>
                                 <div class="col-md-12 sm-12">
-                                    <label for="alasan" class="form-label">Alasan:</label>
-                                    <p style="color: red; font-size: 12px;"> ⚠ Hanya diisi untuk komplain</p>
-                                    <input type="text" class="form-control" name="alasan" value="">
+                                    <label for="">Kategori</label>
+                                    <select name="kategori_retur" id="kategori_retur" class="form-control">
+                                        <option value="">Pilih Kategori Retur</option>
+                                        <?php foreach ($kategori as $k) : ?>
+                                            <option value="<?= $k['nama_kategori'] ?>"><?= $k['nama_kategori'] ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </div>
 
-                                <div class="col-md-12 d-flex align-items-end">
+                                <div class="col-md-12 sm-12" id="form_alasan">
+                                    <!-- <div class="col-md-12 sm-12" id="form_alasan" style="display: none;"> -->
+                                    <label for="alasan" class="form-label">Alasan:</label>
+                                    <input type="text" class="form-control" name="alasan" id="complain_reason">
+                                </div>
+
+                                <div class="col-md-12 d-flex align-items-end mt-3">
                                     <button type="submit" name="action" value="simpan" class="btn bg-gradient-info w-100">Simpan Pemasukan</button>
                                 </div>
                                 <div class="col-md-12 d-flex align-items-end">
@@ -366,9 +398,26 @@
                     <div class="modal-body">
                         <!-- Hidden field untuk ID barang -->
                         <input type="hidden" name="id_out_celup" id="complain_id">
+                        <input type="hidden" name="no_model" id="no_model_complain">
+                        <input type="hidden" name="item_type" id="item_type_complain">
+                        <input type="hidden" name="kode_warna" id="kode_warna_complain">
+                        <input type="hidden" name="warna" id="warna_complain">
+                        <input type="hidden" name="lot_kirim" id="lot_kirim_complain">
+                        <input type="hidden" name="kgs_kirim" id="kgs_kirim_complain">
+                        <input type="hidden" name="cns_kirim" id="cns_complain">
                         <div class="mb-3">
+                            <label for="">Kategori</label>
+                            <select name="kategori_retur" id="kategori_retur_modal" class="form-control" required>
+                                <option value="">Pilih Kategori Retur</option>
+                                <?php foreach ($kategori as $k) : ?>
+                                    <option value="<?= $k['nama_kategori'] ?>"><?= $k['nama_kategori'] ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="form_alasan_modal">
+                            <!-- <div class="mb-3" id="form_alasan_modal" style="display: none;"> -->
                             <label for="complain_reason" class="form-label">Alasan Komplain</label>
-                            <textarea class="form-control" name="alasan" id="complain_reason" rows="3" required></textarea>
+                            <textarea class="form-control" id="complain_reason_modal" name="alasan" rows="3"></textarea>
                         </div>
                         <!-- Tambahkan field lain jika diperlukan -->
                     </div>
@@ -748,9 +797,24 @@
                 button.addEventListener("click", function() {
                     // Ambil data-id dari tombol yang ditekan
                     const idOutCelup = this.getAttribute("data-id");
+                    const model = this.getAttribute("data-model");
+                    const itemType = this.getAttribute("data-item_type");
+                    const kodeWarna = this.getAttribute("data-kode_warna");
+                    const warna = this.getAttribute("data-warna");
+                    const lot = this.getAttribute("data-lot_kirim");
+                    const kgs = this.getAttribute("data-kgs_kirim");
+                    const cns = this.getAttribute("data-cns_kirim");
+
 
                     // Masukkan nilai id_out_celup ke dalam input di modal
                     document.getElementById("complain_id").value = idOutCelup;
+                    document.getElementById("no_model_complain").value = model;
+                    document.getElementById("item_type_complain").value = itemType;
+                    document.getElementById("kode_warna_complain").value = kodeWarna;
+                    document.getElementById("warna_complain").value = warna;
+                    document.getElementById("lot_kirim_complain").value = lot;
+                    document.getElementById("kgs_kirim_complain").value = kgs;
+                    document.getElementById("cns_complain").value = cns;
                 });
             });
         });
@@ -758,6 +822,39 @@
         function setAction(value) {
             document.getElementById('action').value = value;
         }
+
+        //Ketika Bon Revisi Dipilih Akan Menampilkan Text Area
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     const kategoriSelect = document.getElementById('kategori_retur');
+        //     const formAlasan = document.getElementById('form_alasan');
+        //     const alasanTextArea = document.getElementById('complain_reason');
+
+        //     const kategoriSelectModal = document.getElementById('kategori_retur_modal');
+        //     const formAlasanModal = document.getElementById('form_alasan_modal');
+        //     const alasanTextAreaModal = document.getElementById('complain_reason_modal');
+
+        //     kategoriSelect.addEventListener('change', function() {
+        //         if (this.value === 'REVISI BON') {
+        //             formAlasan.style.display = 'block';
+        //             alasanTextArea.setAttribute('required', 'required');
+        //         } else {
+        //             formAlasan.style.display = 'none';
+        //             alasanTextArea.removeAttribute('required');
+        //             alasanTextArea.value = ''; // optional: reset value
+        //         }
+        //     });
+
+        //     kategoriSelectModal.addEventListener('change', function() {
+        //         if (this.value === 'REVISI BON') {
+        //             formAlasanModal.style.display = 'block';
+        //             alasanTextAreaModal.setAttribute('required', 'required');
+        //         } else {
+        //             formAlasanModal.style.display = 'none';
+        //             alasanTextAreaModal.removeAttribute('required');
+        //             alasanTextAreaModal.value = ''; // optional: reset value
+        //         }
+        //     });
+        // });
     </script>
 
     <?php $this->endSection(); ?>
