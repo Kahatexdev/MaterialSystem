@@ -147,13 +147,13 @@ class PemasukanModel extends Model
     }
     public function stockInOut($no_model, $item_type, $kode_warna)
     {
-        $inout = $this->select('no_model, item_type, kode_warna, 
+        $inout = $this->select('schedule_celup.no_model, item_type, kode_warna, 
         SUM(out_celup.kgs_kirim) AS masuk, 
         SUM(pengeluaran.kgs_out) AS keluar')
             ->join('pengeluaran', 'pengeluaran.id_out_celup = pemasukan.id_out_celup', 'left')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
             ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
-            ->where('no_model', $no_model)
+            ->where('schedule_celup.no_model', $no_model)
             ->where('item_type', $item_type)
             ->where('kode_warna', $kode_warna)
             ->groupBy('kode_warna')
