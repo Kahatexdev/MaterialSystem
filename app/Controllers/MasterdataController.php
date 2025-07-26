@@ -201,7 +201,7 @@ class MasterdataController extends BaseController
                 } elseif (strpos($validate['area'], 'KK') !== false) {
                     $unit = 'CIJERAH';
                 } else {
-                    $unit = NULL;
+                    $unit = '-';
                 }
 
                 // if (!$validate) {
