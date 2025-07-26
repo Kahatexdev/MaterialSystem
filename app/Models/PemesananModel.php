@@ -583,9 +583,9 @@ class PemesananModel extends Model
                 master_material.jenis,
                 material.kode_warna,
                 material.color,
-                total_pemesanan.ttl_jl_mc)        AS jl_mc,
-                total_pemesanan.ttl_kg) AS cns_pesan,
-                total_pemesanan.ttl_cns) AS qty_pesan
+                total_pemesanan.ttl_jl_mc AS jl_mc,
+                total_pemesanan.ttl_cns AS cns_pesan,
+                total_pemesanan.ttl_kg AS qty_pesan
             ")
             ->join('total_pemesanan', 'pemesanan.id_total_pemesanan=total_pemesanan.id_total_pemesanan', 'left')
             ->join('material',       'material.id_material = pemesanan.id_material', 'left')
