@@ -344,6 +344,7 @@
                         dataPerstyle += `
                             <div class="col-lg-12">
                                 <div class="row mb-1">
+                                <input type="hidden" class="form-control id_material" name="items[${index}][id_total_pemesanan]" value="${item.id_total_pemesanan}" readonly>
                                 <input type="hidden" class="form-control id_material" name="items[${index}][id_material]" value="${item.id_material}" readonly>
                                 <input type="hidden" class="form-control id_pemesanan" name="items[${index}][id_pemesanan]" value="${item.id_pemesanan}" readonly>
                                 <div class="col-lg-3">
