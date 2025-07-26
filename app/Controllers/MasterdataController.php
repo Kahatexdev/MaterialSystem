@@ -190,22 +190,23 @@ class MasterdataController extends BaseController
                     if (!empty($no_model) && !empty($style_size)) {
                         $validate = $this->validateWithAPI($no_model, $style_size);
                         if ($validate) {
-                            break; // Gunakan validasi dari baris pertama yang valid
+                            // break; // Gunakan validasi dari baris pertama yang valid
+                            continue; // Lanjutkan untuk mencari baris berikutnya yang valid
                         }
                     }
                 }
 
-                if (!isset($validate['area']) || strpos($validate['area'], 'GEDUNG') !== false) {
+                if (!is_array($validate) || !isset($validate['area']) || strpos($validate['area'], 'GEDUNG') !== false) {
                     $unit = 'MAJALAYA';
                 } elseif (strpos($validate['area'], 'KK') !== false) {
                     $unit = 'CIJERAH';
                 } else {
-                    $unit = 'Belum di assign';
+                    $unit = 'Belum di Assign';
                 }
 
-                if (!$validate) {
-                    return redirect()->back()->with('error', 'Validasi master order gagal, tidak ditemukan style size yang valid.');
-                }
+                // if (!$validate) {
+                //     return redirect()->back()->with('error', 'Validasi master order gagal, tidak ditemukan style size yang valid.');
+                // }
                 // Siapkan data master order
                 $masterData = [
                     'no_order'       => $no_order,
@@ -214,15 +215,17 @@ class MasterdataController extends BaseController
                     'foll_up'        => $foll_up,
                     'lco_date'       => $lco_date,
                     'memo'           => NULL,
-                    'delivery_awal'  => $validate['delivery_awal'],
-                    'delivery_akhir' => $validate['delivery_akhir'],
-                    'unit'           => $unit,
+                    'delivery_awal'  => $validate['delivery_awal'] ?? NULL,
+                    'delivery_akhir' => $validate['delivery_akhir'] ?? NULL,
+                    'unit'           => $unit ?? NULL,
                     'admin'          => $admin,
                     'created_at'     => date('Y-m-d H:i:s'),
                     'updated_at'     => NULL,
                 ];
+                // dd ($masterData);
                 $masterOrderModel->insert($masterData);
             }
+            // dd($orderExists);
             // else {
             //     return redirect()->back()->with('error', 'Data dengan No Model ' . $orderExists['no_model'] . ' sudah ada di database.');
             // }
@@ -287,9 +290,9 @@ class MasterdataController extends BaseController
                 // Siapkan data material
                 $validDataMaterial[] = [
                     'id_order'   => $id_order,
-                    'style_size' => $validate['size'],
-                    'area'       => $validate['area'],
-                    'inisial'    => $validate['inisial'],
+                    'style_size' => $validate['size'] ?? strtoupper(trim($style_size)),
+                    'area'       => $validate['area'] ?? NULL,
+                    'inisial'    => $validate['inisial'] ?? NULL,
                     'color'      => $sheet->getCell($headerMap['Color'] . $rowIndex)->getValue(),
                     'item_type'  => htmlspecialchars_decode($item_type),
                     'kode_warna' => $sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue(),
@@ -487,16 +490,13 @@ class MasterdataController extends BaseController
                 // Validasi dengan API (pastikan respons valid dan memiliki format yang diharapkan)
                 $validate = $this->validateWithAPI($no_model, $style_sizeRaw);
                 if (!$validate || !isset($validate['size'])) {
-                    return redirect()->back()->with(
-                        'error',
-                        'Data <strong>StyleSize</strong> pada baris ke-' . $rowIndex . ': '
-                            . $style_sizeRaw
-                            . ' tidak valid atau tidak ditemukan di CapacityApps.'
-                    );
+                    // Catat error, tapi lanjutkan ke baris berikutnya tanpa return
+                    log_message('error', 'Data StyleSize pada baris ke-' . $rowIndex . ': ' . $style_sizeRaw . ' tidak valid atau tidak ditemukan di CapacityApps.');
+                    continue;
                 }
 
                 // Normalisasi style_size dari API
-                $style_size = strtoupper(trim($validate['size']));
+                $style_size = strtoupper(trim($validate['size'] ?? $style_sizeRaw));
 
                 // Ambil dan validasi item type
                 $raw_item_type = $sheet->getCell($headerMap['Item Type'] . $rowIndex)->getValue();
@@ -527,8 +527,8 @@ class MasterdataController extends BaseController
                 $materialData = [
                     'id_order'    => $id_order,
                     'style_size'  => $style_size,
-                    'area'        => $validate['area'] ?? '',
-                    'inisial'     => $validate['inisial'] ?? '',
+                    'area'        => $validate['area'] ?? NULL,
+                    'inisial'     => $validate['inisial'] ?? NULL,
                     'color'       => $color,
                     'item_type'   => $item_type,
                     'kode_warna'  => $kode_warna,
