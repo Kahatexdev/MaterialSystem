@@ -576,17 +576,18 @@ class PemesananModel extends Model
     {
         $subPemesanan = $this->db->table('pemesanan')
             ->select("
-                tgl_pesan,
-                id_total_pemesanan,
+                pemesanan.tgl_pesan,
+                pemesanan.id_total_pemesanan,
                 master_order.no_model,
                 material.item_type,
                 master_material.jenis,
                 material.kode_warna,
                 material.color,
-                SUM(jl_mc)        AS jl_mc,
-                SUM(ttl_qty_cones) AS cns_pesan,
-                SUM(ttl_berat_cones) AS qty_pesan
+                total_pemesanan.ttl_jl_mc)        AS jl_mc,
+                total_pemesanan.ttl_kg) AS cns_pesan,
+                total_pemesanan.ttl_cns) AS qty_pesan
             ")
+            ->join('total_pemesanan', 'pemesanan.id_total_pemesanan=total_pemesanan.id_total_pemesanan', 'left')
             ->join('material',       'material.id_material = pemesanan.id_material', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order',   'master_order.id_order    = material.id_order',  'left')
@@ -594,7 +595,7 @@ class PemesananModel extends Model
             ->where('tgl_pakai', $tgl_pakai)
             ->where('master_material.jenis', $jenis)
             ->where('tgl_pesan IS NOT NULL', null, false)
-            ->groupBy('tgl_pesan, id_total_pemesanan, master_order.no_model, material.item_type, material.kode_warna, material.color')
+            ->groupBy('pemesanan.tgl_pesan, pemesanan.id_total_pemesanan, master_order.no_model, material.item_type, material.kode_warna, material.color')
             ->getCompiledSelect();
 
         $subPengeluaran = $this->db->table('pengeluaran')
