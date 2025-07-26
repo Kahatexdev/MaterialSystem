@@ -188,22 +188,21 @@ class MasterdataController extends BaseController
                     }
                     $style_size = $sheet->getCell('D' . $key)->getValue();
                     if (!empty($no_model) && !empty($style_size)) {
-                        // $validate = $this->validateWithAPI($no_model, $style_size);
-                        // if ($validate) {
-                        //     break; // Gunakan validasi dari baris pertama yang valid
-                        // }
-                        continue;
+                        $validate = $this->validateWithAPI($no_model, $style_size);
+                        if ($validate) {
+                            // break; // Gunakan validasi dari baris pertama yang valid
+                            continue; // Lanjutkan untuk mencari baris berikutnya yang valid
+                        }
                     }
                 }
 
-                // if (!isset($validate['area']) || strpos($validate['area'], 'GEDUNG') !== false) {
-                //     $unit = 'MAJALAYA';
-                // } elseif (strpos($validate['area'], 'KK') !== false) {
-                //     $unit = 'CIJERAH';
-                // } else {
-                    
+                if (!is_array($validate) || !isset($validate['area']) || strpos($validate['area'], 'GEDUNG') !== false) {
+                    $unit = 'MAJALAYA';
+                } elseif (strpos($validate['area'], 'KK') !== false) {
+                    $unit = 'CIJERAH';
+                } else {
                     $unit = NULL;
-                // }
+                }
 
                 // if (!$validate) {
                 //     return redirect()->back()->with('error', 'Validasi master order gagal, tidak ditemukan style size yang valid.');
@@ -489,15 +488,12 @@ class MasterdataController extends BaseController
                 }
 
                 // Validasi dengan API (pastikan respons valid dan memiliki format yang diharapkan)
-                // $validate = $this->validateWithAPI($no_model, $style_sizeRaw);
-                // if (!$validate || !isset($validate['size'])) {
-                //     return redirect()->back()->with(
-                //         'error',
-                //         'Data <strong>StyleSize</strong> pada baris ke-' . $rowIndex . ': '
-                //             . $style_sizeRaw
-                //             . ' tidak valid atau tidak ditemukan di CapacityApps.'
-                //     );
-                // }
+                $validate = $this->validateWithAPI($no_model, $style_sizeRaw);
+                if (!$validate || !isset($validate['size'])) {
+                    // Catat error, tapi lanjutkan ke baris berikutnya tanpa return
+                    log_message('error', 'Data StyleSize pada baris ke-' . $rowIndex . ': ' . $style_sizeRaw . ' tidak valid atau tidak ditemukan di CapacityApps.');
+                    continue;
+                }
 
                 // Normalisasi style_size dari API
                 $style_size = strtoupper(trim($validate['size'] ?? $style_sizeRaw));
