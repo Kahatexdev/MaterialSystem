@@ -954,12 +954,12 @@ class ExcelController extends BaseController
 
     public function exportScheduleBenang()
     {
-        $key = $this->request->getGet('key');
-        $tanggal_schedule = $this->request->getGet('tanggal_schedule');
+        $key = $this->request->getGet('key') ?? '';
+        $tanggal_schedule = $this->request->getGet('tanggal_schedule') ?? '';
         $tanggal_awal = $this->request->getGet('tanggal_awal');
         $tanggal_akhir = $this->request->getGet('tanggal_akhir');
 
-        $data = $this->scheduleCelupModel->getFilterSchBenang($key, $tanggal_schedule, $tanggal_awal, $tanggal_akhir);
+        $data = $this->scheduleCelupModel->getFilterSchBenang($tanggal_awal, $tanggal_akhir, $key, $tanggal_schedule);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -1037,12 +1037,12 @@ class ExcelController extends BaseController
 
     public function exportScheduleNylon()
     {
-        $key = $this->request->getGet('key');
-        $tanggal_schedule = $this->request->getGet('tanggal_schedule');
+        $key = $this->request->getGet('key') ?? '';
+        $tanggal_schedule = $this->request->getGet('tanggal_schedule') ?? '';
         $tanggal_awal = $this->request->getGet('tanggal_awal');
         $tanggal_akhir = $this->request->getGet('tanggal_akhir');
 
-        $data = $this->scheduleCelupModel->getFilterSchNylon($key, $tanggal_schedule, $tanggal_awal, $tanggal_akhir);
+        $data = $this->scheduleCelupModel->getFilterSchNylon($tanggal_awal, $tanggal_akhir, $key, $tanggal_schedule);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
