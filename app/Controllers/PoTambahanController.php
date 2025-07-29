@@ -250,9 +250,9 @@ class PoTambahanController extends BaseController
     }
     public function reportPoTambahan()
     {
-        $noModel   = $this->request->getGet('model')     ?? '';
-        $kodeWarna = $this->request->getGet('kode_warna') ?? '';
-        $tglPo = $this->request->getGet('tgl_po') ?? date('Y-m-d', strtotime('-1 day'));
+        $noModel   = $this->request->getPost('model')     ?? '';
+        $kodeWarna = $this->request->getPost('kode_warna') ?? '';
+        $tglPo = $this->request->getPost('tgl_po') ?? '';
 
         // 1) Ambil data
         $dataPoPlus = $this->poTambahanModel->getDataPoPlus($tglPo, $noModel, $kodeWarna);

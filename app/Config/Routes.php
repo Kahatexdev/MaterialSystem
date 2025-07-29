@@ -304,6 +304,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('approvePoPlusArea', 'PoTambahanController::prosesApprovePoPlusArea');
     $routes->post('rejectPoPlusArea', 'PoTambahanController::prosesRejectPoPlusArea');
     $routes->get('poplus/reportPoTambahan', 'PoTambahanController::reportPoTambahan');
+    $routes->post('poplus/reportPoTambahan', 'PoTambahanController::reportPoTambahan');
     $routes->get('poplus/exportPoTambahan', 'ExcelController::exportPoTambahan');
 
     // tambahan waktu

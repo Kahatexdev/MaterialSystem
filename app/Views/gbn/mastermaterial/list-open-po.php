@@ -205,7 +205,7 @@
                             <option value="GRS BLENDED POST-CONSUMER">GRS BLENDED POST-CONSUMER</option>
                             <option value="ORGANIC IC2">ORGANIC IC2</option>
                             <option value="RCS BLENDED PRE-CONSUMER">RCS BLENDED PRE-CONSUMER</option>
-                            <option value="GRS BLENDED PRE-CONSUMER">GRS BLENDED PRE-CONSUMER</option>
+                            <option value="GRS PRE-CONSUMER">GRS PRE-CONSUMER</option>
                         </select>
                     </div>
                     <div class="modal-footer">
