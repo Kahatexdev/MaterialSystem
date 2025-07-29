@@ -180,8 +180,8 @@ class PoTambahanModel extends Model
         if (!empty($tgl_po)) {
             $builder->where('DATE(po_tambahan.created_at)', $tgl_po);
         }
-        if (!empty($noModel)) {
-            $builder->where('master_order.no_model', $noModel);
+        if (!empty($no_model)) {
+            $builder->where('master_order.no_model', $no_model);
         }
         if (!empty($kodeWarna)) {
             $builder->where('material.kode_warna', $kodeWarna);
