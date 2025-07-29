@@ -342,7 +342,7 @@
                                     <div class="col-md-4">
                                         <p><strong>Kode Warna:</strong> ${item.kode_warna}</p>
                                         <p><strong>Warna:</strong> ${item.warna}</p>
-                                        <p><strong>Total Kgs:</strong> ${(parseFloat(totalKgs) || 0).toFixed(2)} KG | ${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out} Cones | ${totalKrg} KRG</p>
+                                        <p><strong>Total Kgs:</strong> ${item.kgs_stock_awal && item.kgs_stock_awal > 0 ? item.kgs_stock_awal : item.kgs_in_out} KG | ${item.cns_stock_awal && item.cns_stock_awal > 0 ? item.cns_stock_awal : item.cns_in_out} Cones | ${item.krg_stock_awal && item.krg_stock_awal > 0 ? item.krg_stock_awal : item.krg_in_out} KRG</p>
                                     </div>
                                     <div class="col-md-4 d-flex flex-column gap-2">
                                         <button class="btn btn-outline-info btn-sm PindahCluster" 
