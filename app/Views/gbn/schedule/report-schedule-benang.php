@@ -35,11 +35,11 @@
                 </div>
                 <div class="col-md-6 col-lg-3">
                     <label for="startMcFrom">Tgl Start MC Dari</label>
-                    <input type="date" class="form-control" id="startMcFrom">
+                    <input type="date" class="form-control" id="startMcFrom" required>
                 </div>
                 <div class="col-md-6 col-lg-3">
                     <label for="startMcTo">Tgl Start MC Sampai</label>
-                    <input type="date" class="form-control" id="startMcTo">
+                    <input type="date" class="form-control" id="startMcTo" required>
                 </div>
                 <div class="col-12">
                     <div class="d-flex justify-content-between align-items-center mt-3">
@@ -112,11 +112,11 @@
             let tanggal_akhir = $('#startMcTo').val().trim();
 
             // Validasi: Jika semua input kosong, tampilkan alert dan hentikan pencarian
-            if (key === '' && tanggal_schedule === '' && tanggal_awal === '' && tanggal_akhir === '') {
+            if (tanggal_awal === '' && tanggal_akhir === '') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
-                    text: 'Pilih salah satu filter!',
+                    text: 'Tgl Start MC Wajib Diisi Keduanya !',
                 });
                 return;
             }

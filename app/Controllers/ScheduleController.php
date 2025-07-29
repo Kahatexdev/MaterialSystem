@@ -1206,12 +1206,12 @@ class ScheduleController extends BaseController
 
     public function filterSchBenang()
     {
-        $key = $this->request->getGet('key');
-        $tanggalSch = $this->request->getGet('tanggal_schedule');
+        $key = $this->request->getGet('key') ?? '';
+        $tanggalSch = $this->request->getGet('tanggal_schedule') ?? '';
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
-        $data = $this->scheduleCelupModel->getFilterSchBenang($key, $tanggalSch, $tanggalAwal, $tanggalAkhir);
+        $data = $this->scheduleCelupModel->getFilterSchBenang($tanggalAwal, $tanggalAkhir, $key, $tanggalSch);
 
         return $this->response->setJSON($data);
     }
@@ -1229,12 +1229,12 @@ class ScheduleController extends BaseController
 
     public function filterSchNylon()
     {
-        $key = $this->request->getGet('key');
-        $tanggalSch = $this->request->getGet('tanggal_schedule');
+        $key = $this->request->getGet('key') ?? '';
+        $tanggalSch = $this->request->getGet('tanggal_schedule') ?? '';
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
-        $data = $this->scheduleCelupModel->getFilterSchNylon($key, $tanggalSch, $tanggalAwal, $tanggalAkhir);
+        $data = $this->scheduleCelupModel->getFilterSchNylon($tanggalAwal, $tanggalAkhir, $key, $tanggalSch);
 
         return $this->response->setJSON($data);
     }
@@ -1254,7 +1254,7 @@ class ScheduleController extends BaseController
     {
         $tglAwal = $this->request->getGet('tanggal_awal');
         $tglAkhir = $this->request->getGet('tanggal_akhir');
-        $jenis = $this->request->getGet('jenis');
+        $jenis = $this->request->getGet('jenis') ?? '';
         $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir, $jenis);
         // dd($data);
 
