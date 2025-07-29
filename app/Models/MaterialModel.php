@@ -390,4 +390,300 @@ class MaterialModel extends Model
             ->orderBy('material.color')
             ->first();
     }
+
+    public function getFilterSisaDatangBenang($bulan = null, $noModel = null, $kodeWarna = null)
+    {
+        // Subquery Material
+        $material = $this->db->table('material')
+            ->select(['material.id_order', 'master_order.no_model', 'material.item_type', 'material.kode_warna', 'material.color', 'material.area', 'SUM(material.kgs) AS kg_po'])
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->groupBy(['material.id_order', 'master_order.no_model', 'material.item_type', 'material.kode_warna', 'material.color', 'material.area']);
+
+        // Subquery Stock
+        $stock = $this->db->table('stock')->select(['no_model', 'item_type', 'kode_warna', 'lot_awal', 'SUM(kgs_stock_awal) AS kgs_stock_awal'])
+            ->groupBy(['no_model', 'item_type', 'kode_warna', 'lot_awal']);
+
+        // Subquery Retur (Complain)
+        $retur = $this->db->table('retur')->select(['no_model', 'item_type', 'kode_warna', 'SUM(kgs_retur) AS qty_retur'])
+            ->where('area_retur', 'GUDANG BENANG')
+            ->groupBy(['no_model', 'item_type', 'kode_warna']);
+
+        // Subquery Datang
+        $datang = $this->db->table('pemasukan p')->select([
+            'oc.no_model',
+            'sc.item_type',
+            'sc.kode_warna',
+            'SUM(CASE WHEN oc.ganti_retur = "0" THEN oc.kgs_kirim ELSE 0 END) AS kgs_datang',
+            'SUM(CASE WHEN oc.ganti_retur = "1" THEN oc.kgs_kirim ELSE 0 END) AS kgs_ganti_retur'
+        ])
+            ->join('out_celup oc', 'p.id_out_celup = oc.id_out_celup')
+            ->join('schedule_celup sc', 'oc.id_celup = sc.id_celup');
+        $datang->groupBy([
+            'oc.no_model',
+            'sc.item_type',
+            'sc.kode_warna',
+        ]);
+
+        // Main Query
+        $builder = $this->db->table('(' . $material->getCompiledSelect(false) . ') AS m')
+            ->join('master_order AS mo', 'mo.id_order = m.id_order')
+            ->join('master_material AS mm', 'mm.item_type = m.item_type')
+            ->join(
+                '(' . $stock->getCompiledSelect(false)  . ') AS s',
+                's.no_model = m.no_model AND s.item_type = m.item_type AND s.kode_warna = m.kode_warna',
+                'left'
+            )
+            ->join(
+                '(' . $retur->getCompiledSelect(false)  . ') AS r',
+                'r.no_model = m.no_model AND r.item_type = m.item_type AND r.kode_warna = m.kode_warna',
+                'left'
+            )
+            ->join(
+                '(' . $datang->getCompiledSelect(false)  . ') AS d',
+                'd.no_model = m.no_model AND d.item_type = m.item_type AND d.kode_warna = m.kode_warna',
+                'left'
+            )
+            ->select(['mo.no_model', 'mo.lco_date', 'mo.foll_up', 'mo.no_order', 'm.area', 'mo.delivery_awal', 'mo.delivery_akhir', 'mo.unit', 'm.kg_po', 'm.item_type', 'm.kode_warna', 'm.color', 'mo.buyer', 'mm.jenis', 's.kgs_stock_awal', 's.lot_awal', 'r.qty_retur', 'd.kgs_datang', 'd.kgs_ganti_retur'])
+            ->where('mm.jenis', 'BENANG');
+
+        // Filters
+        if (!empty($noModel)) {
+            $builder->where('mo.no_model', $noModel);
+        }
+        if (!empty($kodeWarna)) {
+            $builder->where('m.kode_warna', $kodeWarna);
+        }
+        if (!empty($bulan)) {
+            $builder->where('MONTH(mo.delivery_awal)', $bulan);
+        }
+
+        // Final grouping and ordering
+        $builder
+            ->groupBy(['m.no_model', 'm.item_type', 'm.kode_warna', 'm.area'])
+            ->orderBy('mo.no_model', 'ASC');
+
+        return $builder->get()->getResultArray();
+    }
+
+    public function getFilterSisaDatangNylon($bulan = null, $noModel = null, $kodeWarna = null)
+    {
+        // Subquery Material
+        $material = $this->db->table('material')
+            ->select(['material.id_order', 'master_order.no_model', 'material.item_type', 'material.kode_warna', 'material.color', 'material.area', 'SUM(material.kgs) AS kg_po'])
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->groupBy(['material.id_order', 'master_order.no_model', 'material.item_type', 'material.kode_warna', 'material.color', 'material.area']);
+
+        // Subquery Stock
+        $stock = $this->db->table('stock')->select(['no_model', 'item_type', 'kode_warna', 'lot_awal', 'SUM(kgs_stock_awal) AS kgs_stock_awal'])
+            ->groupBy(['no_model', 'item_type', 'kode_warna', 'lot_awal']);
+
+        // Subquery Retur (Complain)
+        $retur = $this->db->table('retur')->select(['no_model', 'item_type', 'kode_warna', 'SUM(kgs_retur) AS qty_retur'])
+            ->where('area_retur', 'GUDANG BENANG')
+            ->groupBy(['no_model', 'item_type', 'kode_warna']);
+
+        // Subquery Datang
+        $datang = $this->db->table('pemasukan p')->select([
+            'oc.no_model',
+            'sc.item_type',
+            'sc.kode_warna',
+            'SUM(CASE WHEN oc.ganti_retur = "0" THEN oc.kgs_kirim ELSE 0 END) AS kgs_datang',
+            'SUM(CASE WHEN oc.ganti_retur = "1" THEN oc.kgs_kirim ELSE 0 END) AS kgs_ganti_retur'
+        ])
+            ->join('out_celup oc', 'p.id_out_celup = oc.id_out_celup')
+            ->join('schedule_celup sc', 'oc.id_celup = sc.id_celup');
+        $datang->groupBy([
+            'oc.no_model',
+            'sc.item_type',
+            'sc.kode_warna',
+        ]);
+
+        // Main Query
+        $builder = $this->db->table('(' . $material->getCompiledSelect(false) . ') AS m')
+            ->join('master_order AS mo', 'mo.id_order = m.id_order')
+            ->join('master_material AS mm', 'mm.item_type = m.item_type')
+            ->join(
+                '(' . $stock->getCompiledSelect(false)  . ') AS s',
+                's.no_model = m.no_model AND s.item_type = m.item_type AND s.kode_warna = m.kode_warna',
+                'left'
+            )
+            ->join(
+                '(' . $retur->getCompiledSelect(false)  . ') AS r',
+                'r.no_model = m.no_model AND r.item_type = m.item_type AND r.kode_warna = m.kode_warna',
+                'left'
+            )
+            ->join(
+                '(' . $datang->getCompiledSelect(false)  . ') AS d',
+                'd.no_model = m.no_model AND d.item_type = m.item_type AND d.kode_warna = m.kode_warna',
+                'left'
+            )
+            ->select(['mo.no_model', 'mo.lco_date', 'mo.foll_up', 'mo.no_order', 'm.area', 'mo.delivery_awal', 'mo.delivery_akhir', 'mo.unit', 'm.kg_po', 'm.item_type', 'm.kode_warna', 'm.color', 'mo.buyer', 'mm.jenis', 's.kgs_stock_awal', 's.lot_awal', 'r.qty_retur', 'd.kgs_datang', 'd.kgs_ganti_retur'])
+            ->where('mm.jenis', 'NYLON');
+
+        // Filters
+        if (!empty($noModel)) {
+            $builder->where('mo.no_model', $noModel);
+        }
+        if (!empty($kodeWarna)) {
+            $builder->where('m.kode_warna', $kodeWarna);
+        }
+        if (!empty($bulan)) {
+            $builder->where('MONTH(mo.delivery_awal)', $bulan);
+        }
+
+        // Final grouping and ordering
+        $builder
+            ->groupBy(['m.no_model', 'm.item_type', 'm.kode_warna', 'm.area'])
+            ->orderBy('mo.no_model', 'ASC');
+
+        return $builder->get()->getResultArray();
+    }
+
+    public function getFilterSisaDatangSpandex($bulan = null, $noModel = null, $kodeWarna = null)
+    {
+        // Subquery Material
+        $material = $this->db->table('material')
+            ->select(['material.id_order', 'master_order.no_model', 'material.item_type', 'material.kode_warna', 'material.color', 'material.area', 'SUM(material.kgs) AS kg_po'])
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->groupBy(['material.id_order', 'master_order.no_model', 'material.item_type', 'material.kode_warna', 'material.color', 'material.area']);
+
+        // Subquery Stock
+        $stock = $this->db->table('stock')->select(['no_model', 'item_type', 'kode_warna', 'lot_awal', 'SUM(kgs_stock_awal) AS kgs_stock_awal'])
+            ->groupBy(['no_model', 'item_type', 'kode_warna', 'lot_awal']);
+
+        // Subquery Retur (Complain)
+        $retur = $this->db->table('retur')->select(['no_model', 'item_type', 'kode_warna', 'SUM(kgs_retur) AS qty_retur'])
+            ->where('area_retur', 'GUDANG BENANG')
+            ->groupBy(['no_model', 'item_type', 'kode_warna']);
+
+        // Subquery Datang
+        $datang = $this->db->table('pemasukan p')->select([
+            'oc.no_model',
+            'sc.item_type',
+            'sc.kode_warna',
+            'SUM(CASE WHEN oc.ganti_retur = "0" THEN oc.kgs_kirim ELSE 0 END) AS kgs_datang',
+            'SUM(CASE WHEN oc.ganti_retur = "1" THEN oc.kgs_kirim ELSE 0 END) AS kgs_ganti_retur'
+        ])
+            ->join('out_celup oc', 'p.id_out_celup = oc.id_out_celup')
+            ->join('schedule_celup sc', 'oc.id_celup = sc.id_celup');
+        $datang->groupBy([
+            'oc.no_model',
+            'sc.item_type',
+            'sc.kode_warna',
+        ]);
+
+        // Main Query
+        $builder = $this->db->table('(' . $material->getCompiledSelect(false) . ') AS m')
+            ->join('master_order AS mo', 'mo.id_order = m.id_order')
+            ->join('master_material AS mm', 'mm.item_type = m.item_type')
+            ->join(
+                '(' . $stock->getCompiledSelect(false)  . ') AS s',
+                's.no_model = m.no_model AND s.item_type = m.item_type AND s.kode_warna = m.kode_warna',
+                'left'
+            )
+            ->join(
+                '(' . $retur->getCompiledSelect(false)  . ') AS r',
+                'r.no_model = m.no_model AND r.item_type = m.item_type AND r.kode_warna = m.kode_warna',
+                'left'
+            )
+            ->join(
+                '(' . $datang->getCompiledSelect(false)  . ') AS d',
+                'd.no_model = m.no_model AND d.item_type = m.item_type AND d.kode_warna = m.kode_warna',
+                'left'
+            )
+            ->select(['mo.no_model', 'mo.lco_date', 'mo.foll_up', 'mo.no_order', 'm.area', 'mo.delivery_awal', 'mo.delivery_akhir', 'mo.unit', 'm.kg_po', 'm.item_type', 'm.kode_warna', 'm.color', 'mo.buyer', 'mm.jenis', 's.kgs_stock_awal', 's.lot_awal', 'r.qty_retur', 'd.kgs_datang', 'd.kgs_ganti_retur'])
+            ->where('mm.jenis', 'SPANDEX');
+
+        // Filters
+        if (!empty($noModel)) {
+            $builder->where('mo.no_model', $noModel);
+        }
+        if (!empty($kodeWarna)) {
+            $builder->where('m.kode_warna', $kodeWarna);
+        }
+        if (!empty($bulan)) {
+            $builder->where('MONTH(mo.delivery_awal)', $bulan);
+        }
+
+        // Final grouping and ordering
+        $builder
+            ->groupBy(['m.no_model', 'm.item_type', 'm.kode_warna', 'm.area'])
+            ->orderBy('mo.no_model', 'ASC');
+
+        return $builder->get()->getResultArray();
+    }
+
+    public function getFilterSisaDatangKaret($bulan = null, $noModel = null, $kodeWarna = null)
+    {
+        // Subquery Material
+        $material = $this->db->table('material')
+            ->select(['material.id_order', 'master_order.no_model', 'material.item_type', 'material.kode_warna', 'material.color', 'material.area', 'SUM(material.kgs) AS kg_po'])
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->groupBy(['material.id_order', 'master_order.no_model', 'material.item_type', 'material.kode_warna', 'material.color', 'material.area']);
+
+        // Subquery Stock
+        $stock = $this->db->table('stock')->select(['no_model', 'item_type', 'kode_warna', 'lot_awal', 'SUM(kgs_stock_awal) AS kgs_stock_awal'])
+            ->groupBy(['no_model', 'item_type', 'kode_warna', 'lot_awal']);
+
+        // Subquery Retur (Complain)
+        $retur = $this->db->table('retur')->select(['no_model', 'item_type', 'kode_warna', 'SUM(kgs_retur) AS qty_retur'])
+            ->where('area_retur', 'GUDANG BENANG')
+            ->groupBy(['no_model', 'item_type', 'kode_warna']);
+
+        // Subquery Datang
+        $datang = $this->db->table('pemasukan p')->select([
+            'oc.no_model',
+            'sc.item_type',
+            'sc.kode_warna',
+            'SUM(CASE WHEN oc.ganti_retur = "0" THEN oc.kgs_kirim ELSE 0 END) AS kgs_datang',
+            'SUM(CASE WHEN oc.ganti_retur = "1" THEN oc.kgs_kirim ELSE 0 END) AS kgs_ganti_retur'
+        ])
+            ->join('out_celup oc', 'p.id_out_celup = oc.id_out_celup')
+            ->join('schedule_celup sc', 'oc.id_celup = sc.id_celup');
+        $datang->groupBy([
+            'oc.no_model',
+            'sc.item_type',
+            'sc.kode_warna',
+        ]);
+
+        // Main Query
+        $builder = $this->db->table('(' . $material->getCompiledSelect(false) . ') AS m')
+            ->join('master_order AS mo', 'mo.id_order = m.id_order')
+            ->join('master_material AS mm', 'mm.item_type = m.item_type')
+            ->join(
+                '(' . $stock->getCompiledSelect(false)  . ') AS s',
+                's.no_model = m.no_model AND s.item_type = m.item_type AND s.kode_warna = m.kode_warna',
+                'left'
+            )
+            ->join(
+                '(' . $retur->getCompiledSelect(false)  . ') AS r',
+                'r.no_model = m.no_model AND r.item_type = m.item_type AND r.kode_warna = m.kode_warna',
+                'left'
+            )
+            ->join(
+                '(' . $datang->getCompiledSelect(false)  . ') AS d',
+                'd.no_model = m.no_model AND d.item_type = m.item_type AND d.kode_warna = m.kode_warna',
+                'left'
+            )
+            ->select(['mo.no_model', 'mo.lco_date', 'mo.foll_up', 'mo.no_order', 'm.area', 'mo.delivery_awal', 'mo.delivery_akhir', 'mo.unit', 'm.kg_po', 'm.item_type', 'm.kode_warna', 'm.color', 'mo.buyer', 'mm.jenis', 's.kgs_stock_awal', 's.lot_awal', 'r.qty_retur', 'd.kgs_datang', 'd.kgs_ganti_retur'])
+            ->where('mm.jenis', 'KARET');
+
+        // Filters
+        if (!empty($noModel)) {
+            $builder->where('mo.no_model', $noModel);
+        }
+        if (!empty($kodeWarna)) {
+            $builder->where('m.kode_warna', $kodeWarna);
+        }
+        if (!empty($bulan)) {
+            $builder->where('MONTH(mo.delivery_awal)', $bulan);
+        }
+
+        // Final grouping and ordering
+        $builder
+            ->groupBy(['m.no_model', 'm.item_type', 'm.kode_warna', 'm.area'])
+            ->orderBy('mo.no_model', 'ASC');
+
+        return $builder->get()->getResultArray();
+    }
 }

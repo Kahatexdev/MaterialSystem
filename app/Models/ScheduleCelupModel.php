@@ -205,24 +205,30 @@ class ScheduleCelupModel extends Model
         return $builder->get()->getResultArray();
     }
 
-    public function getSchedule($filterTglSch = null, $filterNoModel = null)
+    public function getSchedule($filterTglSch = null, $filterTglSchsampai = null, $filterNoModel = null)
     {
         // Ambil tanggal 1 bulan lalu dalam format YYYY-MM-DD
         $lastMonth = date('Y-m-d', strtotime('1 month ago'));
 
         // Build query
         $builder = $this->builder()
-            ->select('schedule_celup.*, 
+            ->select('schedule_celup.*, schedule_celup.user_cek_status AS admin,
                   mesin_celup.no_mesin, 
                   IF(schedule_celup.po_plus = "0", schedule_celup.kg_celup, 0) AS qty_celup, 
                   IF(schedule_celup.po_plus = "1", schedule_celup.kg_celup, 0) AS qty_celup_plus')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin');
 
         // Filter berdasarkan tanggal jika ada
-        if ($filterTglSch) {
-            $builder->where('schedule_celup.tanggal_schedule', $filterTglSch);
+        if ($filterTglSch && !$filterTglSchsampai) {
+            $builder->where('schedule_celup.tanggal_schedule >=', $filterTglSch)
+                ->where('schedule_celup.tanggal_schedule <=', date('Y-m-d')); // Hanya ambil data sampai hari ini
+        } elseif ($filterTglSch && $filterTglSchsampai) {
+            $builder->where('schedule_celup.tanggal_schedule >=', $filterTglSch)
+                ->where('schedule_celup.tanggal_schedule <=', $filterTglSchsampai);
         } else {
-            $builder->where('schedule_celup.tanggal_schedule >=', $lastMonth);
+            // Jika tidak ada filter tanggal, ambil data dari 1 bulan lalu sampai hari ini
+            // $builder->where('schedule_celup.tanggal_schedule >=', $lastMonth)
+            //     ->where('schedule_celup.tanggal_schedule <=', date('Y-m-d'));
         }
 
         // Filter berdasarkan no_model atau kode_warna
@@ -230,8 +236,12 @@ class ScheduleCelupModel extends Model
             $builder->groupStart()
                 ->like('schedule_celup.no_model', $filterNoModel)
                 ->orLike('schedule_celup.kode_warna', $filterNoModel)
+                ->orLike('schedule_celup.lot_celup', $filterNoModel)
                 ->groupEnd();
         }
+
+        // Filter berdasarkan last_status
+        // $builder->where('schedule_celup.last_status !=', 'done');
 
         // Grouping untuk menghindari duplikasi
         $builder->groupBy([
@@ -240,6 +250,9 @@ class ScheduleCelupModel extends Model
             'schedule_celup.tanggal_schedule',
             'schedule_celup.lot_urut'
         ]);
+
+        // sortby order by created_at DESC 
+        $builder->orderBy('schedule_celup.created_at', 'DESC');
 
         return $builder->get()->getResultArray();
     }
@@ -312,12 +325,11 @@ class ScheduleCelupModel extends Model
         return null;
     }
 
-
-    public function getCelupDone()
+    public function getCelupDoneAndComplain()
     {
         return $this
             ->select('id_celup,no_model, item_type, kode_warna, warna, lot_celup')
-            ->where('last_status', 'done')
+            ->whereIn('last_status', ['done', 'complain'])
             ->groupBy('id_celup')
             ->findAll();
     }

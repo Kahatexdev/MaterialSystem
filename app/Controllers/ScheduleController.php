@@ -1037,9 +1037,11 @@ class ScheduleController extends BaseController
     public function reqschedule()
     {
         $filterTglSch = $this->request->getPost('filter_tglsch');
+        $filterTglSchsampai = $this->request->getPost('filter_tglschsampai');
         $filterNoModel = $this->request->getPost('filter_nomodel');
 
-        $sch = $this->scheduleCelupModel->getSchedule($filterTglSch, $filterNoModel);
+        $sch = $this->scheduleCelupModel->getSchedule($filterTglSch, $filterTglSchsampai, $filterNoModel);
+        // dd ($sch);
         // if ($filterTglSch && $filterNoModel) {
         //     $sch = array_filter($sch, function ($data) use ($filterTglSch, $filterNoModel) {
         //         return $data['tanggal_schedule'] === $filterTglSch &&
@@ -1091,6 +1093,7 @@ class ScheduleController extends BaseController
                     'lot_urut' => $id['lot_urut'],
                     'tgl_schedule' => $id['tanggal_schedule'],
                     'last_status' => $id['last_status'],
+                    'admin' => $id['user_cek_status']
                 ];
             }
         }

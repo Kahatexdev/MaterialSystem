@@ -35,6 +35,7 @@ class KategoriReturSeeder extends Seeder
             ['nama_kategori' => 'BENANG REJECT STOCK', 'tipe_kategori' => 'SIMPAN ULANG', 'role' => 'admin'],
             ['nama_kategori' => 'CANCEL BUYER', 'tipe_kategori' => 'SIMPAN ULANG', 'role' => 'admin'],
             ['nama_kategori' => 'BB SISA EXPORT', 'tipe_kategori' => 'SIMPAN ULANG', 'role' => 'admin'],
+            ['nama_kategori' => 'REVISI BON', 'tipe_kategori' => 'PENGEMBALIAN', 'role' => 'admin'],
         ];
 
         $this->db->table('kategori_retur')->insertBatch($data);

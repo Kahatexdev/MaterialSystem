@@ -221,6 +221,8 @@ class CelupController extends BaseController
                     'qty_celup_plus' => $id['qty_celup_plus'],
                     'ket_schedule' => $id['ket_schedule'],
                     'admin' => $id['user_cek_status'],
+                    'created_at' => $id['created_at'],
+                    'updated_at' => $id['updated_at'],
                 ];
             }
         }
@@ -499,7 +501,7 @@ class CelupController extends BaseController
 
     public function createBon()
     {
-        $no_model = $this->scheduleCelupModel->getCelupDone();
+        $no_model = $this->scheduleCelupModel->getCelupDoneAndComplain();
         // dd($no_model);
         $data = [
             'role' => $this->role,

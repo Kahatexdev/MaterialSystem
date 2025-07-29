@@ -13,22 +13,6 @@
                 <div class="d-flex align-items-center">
                     <ul class="navbar-nav justify-content-end">
                         <li class="nav-item d-flex align-items-center">
-                            <a href="" class="nav-link text-body font-weight-bold px-2">
-                                <i class="fas fa-database"></i>
-                                <span class="d-lg-inline-block d-none ms-1">Submenu 1</span>
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownReports" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-file-alt"></i>
-                                <span class="d-lg-inline-block d-none ms-1">Report</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownReports">
-                                <li><a class="dropdown-item" href="<?= base_url($role . '/reportPemesananKaretCovering') ?>">Pemesanan Karet</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url($role . '/reportPemesananSpandexCovering') ?>">Pemesanan Spandex</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item d-flex align-items-center">
                             <a href="" data-bs-toggle="modal" data-bs-target="#LogoutModal" class="nav-link text-body font-weight-bold px-2">
                                 <i class="fa fa-user"></i>
                                 <span class="d-lg-inline-block d-none ms-1"><?= session()->get('username') ?></span>

@@ -181,6 +181,8 @@
                                 <option value="I" selected>Group I</option>
                                 <option value="II">Group II</option>
                                 <option value="III">Group III</option>
+                                <option value="covering">Covering</option>
+                                <option value="nylon">Nylon</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-info w-100">Apply</button>
@@ -205,6 +207,7 @@
                 <p><strong>Nama Cluster:</strong> <span id="modalNamaCluster"></span></p>
                 <p><strong>Kapasitas:</strong> <span id="modalKapasitas"></span> kg</p>
                 <p><strong>Total Terisi:</strong> <span id="modalTotalQty"></span> kg</p>
+                <p><strong>Sisa Kapasitas:</strong> <span id="modalSisaKapasitas"></span> kg</p>
                 <div class="table-responsive">
                     <table class="table table-bordered">
                         <thead>
@@ -276,14 +279,15 @@
             document.getElementById("modalKapasitas").textContent = kapasitas;
             document.getElementById("modalTotalQty").textContent = total_qty;
             document.getElementById("modalNamaCluster").textContent = nama_cluster;
+            document.getElementById("modalSisaKapasitas").textContent = kapasitas - total_qty;
 
             let tableBody = document.getElementById("modalDetailTableBody");
             tableBody.innerHTML = "";
 
             detailData.forEach((item) => {
                 let row = `<tr>
-                <td>${item.no_model}</td>
-                <td>${item.kode_warna}</td>
+                <td>${item.no_model || '-'}</td>
+                <td>${item.kode_warna || '-'}</td>
                 <td>${item.foll_up || '-'}</td>
                 <td>${item.delivery || '-'}</td>
                 <td>${item.qty || '-'} kg</td>

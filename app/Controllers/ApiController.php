@@ -15,6 +15,7 @@ use App\Models\BonCelupModel;
 use App\Models\ClusterModel;
 use App\Models\PemasukanModel;
 use App\Models\PemesananModel;
+use App\Models\TotalPemesananModel;
 use App\Models\StockModel;
 use App\Models\HistoryPindahPalet;
 use App\Models\HistoryPindahOrder;
@@ -42,6 +43,7 @@ class ApiController extends ResourceController
     protected $pemasukanModel;
     protected $stockModel;
     protected $pemesananModel;
+    protected $totalPemesananModel;
     protected $historyPindahPalet;
     protected $historyPindahOrder;
     protected $pengeluaranModel;
@@ -64,6 +66,7 @@ class ApiController extends ResourceController
         $this->pemasukanModel = new PemasukanModel();
         $this->stockModel = new StockModel();
         $this->pemesananModel = new PemesananModel();
+        $this->totalPemesananModel = new TotalPemesananModel();
         $this->historyPindahPalet = new HistoryPindahPalet();
         $this->historyPindahOrder = new HistoryPindahOrder();
         $this->pengeluaranModel = new PengeluaranModel();
@@ -134,7 +137,7 @@ class ApiController extends ResourceController
                         $row['kode_warna'],
                         $search
                     );
-                    // dd ($allSchedules);
+                // dd ($allSchedules);
                 if (! empty($allSchedules)) {
                     foreach ($allSchedules as $scheduleData) {
                         // Start dangan data master
@@ -252,12 +255,13 @@ class ApiController extends ResourceController
 
             $stock = $this->stockModel->stockInOut($row['no_model'], $row['item_type'], $row['kode_warna']) ?? ['stock' => 0];
             $inout = $this->pemasukanModel->stockInOut($row['no_model'], $row['item_type'], $row['kode_warna']) ?? ['masuk' => 0, 'keluar' => 0];
+            // dd($inout);
             $row['stock'] = $stock['stock'] ?? 0;
             $row['masuk'] = $inout['masuk'] ?? 0;
             $row['keluar'] = $inout['keluar'];
             $res[] = $row;
         }
-        return $this->respond($res, 200);
+        return $this->respond($material, 200);
     }
     public function getMaterialForPemesanan($model, $styleSize, $area)
     {
@@ -603,6 +607,152 @@ class ApiController extends ResourceController
                 ], 400);
             }
         }
+
+        // Jika semua data berhasil diperbarui
+        return $this->respond([
+            'status'  => 'success',
+            'message' => "Semua data berhasil diperbarui",
+        ], 200);
+    }
+    public function updatePemesananArea()
+    {
+        // Ambil data JSON dari request
+        $data = $this->request->getJSON(true);
+
+        // Fungsi untuk parsing key nested menjadi array multidimensi
+        function parseNestedKeys2($data)
+        {
+            $result = [];
+            foreach ($data as $key => $value) {
+                if (preg_match('/^(.*)\[(\d+)\]\[(.*)\]$/', $key, $matches)) {
+                    $mainKey = $matches[1]; // "items"
+                    $index = $matches[2];  // "0", "1", dll.
+                    $subKey = $matches[3]; // "id_material", dll.
+                    $result[$mainKey][$index][$subKey] = is_array($value) ? $value[0] : $value;
+                } else {
+                    $result[$key] = is_array($value) ? $value[0] : $value;
+                }
+            }
+            return $result;
+        }
+
+        $data = parseNestedKeys2($data); // Parsing data
+
+        log_message('debug', 'Parsed data: ' . json_encode($data, JSON_PRETTY_PRINT));
+
+
+        // Validasi data
+        if (empty($data) || !isset($data['items'])) {
+            return $this->respond([
+                'status'  => 'error',
+                'message' => "Tidak ada data list pemesanan",
+            ], 400);
+        }
+        // Log data yang diterima
+        // log_message('debug', 'Data received: ' . json_encode($data['items']));
+
+        // Inisialisasi penjumlahan total
+        $totalJalanMc = 0;
+        $totalTtlQtyCns = 0;
+        $totalTtlBeratCns = 0;
+        // Looping data 'items'
+        foreach ($data['items'] as $index => $item) {
+            log_message('debug', "Processing item {$index}: " . json_encode($item));
+
+            // Contoh akses data
+            $idMaterial = $item['id_material'];
+            $idPemesanan = $item['id_pemesanan'];
+            $jalanMc = $item['jalan_mc'];
+            $qtyCns = $item['qty_cns'];
+            $ttlQtyCns = $item['ttl_qty_cns'];
+            $qtyBeratCns = $item['qty_berat_cns'];
+            $ttlBeratCns = $item['ttl_berat_cns'];
+
+            // Tambahkan ke total
+            $totalJalanMc     += (float) $jalanMc;
+            $totalTtlQtyCns   += (float) $ttlQtyCns;
+            $totalTtlBeratCns += (float) $ttlBeratCns;
+
+            // Lakukan operasi sesuai kebutuhan, contoh update data
+            $materialUpdate = [
+                'qty_cns'       => $qtyCns,
+                'qty_berat_cns' => $qtyBeratCns,
+            ];
+
+            $updateMaterial = $this->materialModel->update($idMaterial, $materialUpdate);
+
+            if (!$updateMaterial) {
+                log_message('error', "Gagal update material untuk id_material: {$idMaterial}");
+                return $this->respond([
+                    'status'  => 'error',
+                    'message' => "Gagal update material untuk id_material: {$idMaterial}",
+                ], 400);
+            }
+
+            log_message('debug', 'ini' . $index);
+            // Kondisi untuk data pertama saja
+            if ($index === 0) {
+                $pemesananUpdate = [
+                    'jl_mc'             => $jalanMc,
+                    'ttl_qty_cones'     => $ttlQtyCns,
+                    'ttl_berat_cones'   => $ttlBeratCns,
+                    'sisa_kgs_mc'       => $data['sisa_kg'],  // Isi hanya untuk data pertama
+                    'sisa_cones_mc'     => $data['sisa_cns'], // Isi hanya untuk data pertama
+                    'lot'               => $data['lot'],
+                    'keterangan'        => $data['keterangan'],
+                    'updated_at'        => date('Y-m-d H:i:s'),
+                ];
+            } else {
+                $pemesananUpdate = [
+                    'jl_mc'             => $jalanMc,
+                    'ttl_qty_cones'     => $ttlQtyCns,
+                    'ttl_berat_cones'   => $ttlBeratCns,
+                    'lot'               => $data['lot'],
+                    'keterangan'        => $data['keterangan'],
+                    'updated_at'        => date('Y-m-d H:i:s'),
+                ];
+            }
+
+
+            $updatePemesanan = $this->pemesananModel->update($idPemesanan, $pemesananUpdate);
+
+            if (!$updatePemesanan) {
+                log_message('error', "Gagal update pemesanan untuk id_pemesanan: {$idPemesanan}");
+                return $this->respond([
+                    'status'  => 'error',
+                    'message' => "Gagal update pemesanan untuk id_pemesanan: {$idPemesanan}",
+                ], 400);
+            }
+        }
+        // Setelah semua item diproses, update total_pemesanan
+        $sisaKg  = isset($data['sisa_kg']) ? (float) $data['sisa_kg'] : 0;
+        $sisaCns = isset($data['sisa_cns']) ? (float) $data['sisa_cns'] : 0;
+
+        $ttlKgBaru  = $totalTtlBeratCns - $sisaKg;
+        $ttlCnsBaru = $totalTtlQtyCns - $sisaCns;
+
+        // Ambil id_total_pemesanan dari item pertama
+        $idTotalPemesanan = $data['items'][0]['id_total_pemesanan'] ?? null;
+
+        if ($idTotalPemesanan) {
+            $updateTotalPemesanan = [
+                'ttl_jl_mc'   => $totalJalanMc,
+                'ttl_kg'      => $ttlKgBaru,
+                'ttl_cns'     => $ttlCnsBaru,
+                'updated_at'  => date('Y-m-d H:i:s'),
+            ];
+
+            $updateResult = $this->totalPemesananModel->update($idTotalPemesanan, $updateTotalPemesanan);
+
+            if (!$updateResult) {
+                log_message('error', "Gagal update total_pemesanan untuk id: {$idTotalPemesanan}");
+                return $this->respond([
+                    'status'  => 'error',
+                    'message' => "Gagal update total_pemesanan untuk id: {$idTotalPemesanan}",
+                ], 400);
+            }
+        }
+
 
         // Jika semua data berhasil diperbarui
         return $this->respond([

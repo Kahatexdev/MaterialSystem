@@ -24,7 +24,8 @@ class HistoryStockCoveringModel extends Model
         'ttl_cns',
         'ttl_kg',
         'admin',
-        'keterangan'
+        'keterangan',
+        'created_at',
     ];
 
     protected bool $allowEmptyInserts = false;
@@ -63,7 +64,7 @@ class HistoryStockCoveringModel extends Model
             ->select('*')
             ->where('ttl_kg >=', 0)
             ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-7 days'))) // Filter 7 hari terakhir
-            ->orderBy('created_at', 'DESC')
+            ->orderBy('created_at', 'ASC')
             ->get()
             ->getResultArray();
     }
@@ -74,16 +75,17 @@ class HistoryStockCoveringModel extends Model
             ->select('*')
             ->where('ttl_kg <=', 0)
             ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-7 days'))) // Filter 7 hari terakhir
-            ->orderBy('created_at', 'DESC')
+            ->orderBy('created_at', 'ASC')
             ->get()
             ->getResultArray();
     }
 
-    public function getPemasukanByDate($date)
+    public function getPemasukanByDate($date, $date2)
     {
         return $this->db->table('history_stock_covering')
             ->select('*')
-            ->where('DATE(created_at)', $date) // Filter berdasarkan tanggal
+            ->where('DATE(created_at) >=', $date) // Filter berdasarkan tanggal
+            ->where('DATE(created_at) <=', $date2) // Filter berdasarkan tanggal
             ->where('ttl_kg >=', 0)
             ->orderBy('created_at', 'DESC')
             ->get()
@@ -91,11 +93,12 @@ class HistoryStockCoveringModel extends Model
     }
 
 
-    public function getPengeluaranByDate($date)
+    public function getPengeluaranByDate($date, $date2)
     {
         return $this->db->table('history_stock_covering')
             ->select('*')
-            ->where('DATE(created_at)', $date) // Filter berdasarkan tanggal
+            ->where('DATE(created_at) >=', $date)
+            ->where('DATE(created_at) <=', $date2) // Filter berdasarkan tanggal
             ->where('ttl_kg <=', 0)
             ->orderBy('created_at', 'DESC')
             ->get()
