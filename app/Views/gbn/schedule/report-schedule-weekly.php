@@ -27,11 +27,11 @@
             <div class="row">
                 <div class="col-md-4">
                     <label for="">Tanggal Schedule Dari</label>
-                    <input type="date" class="form-control" id="schDateStart">
+                    <input type="date" class="form-control" id="schDateStart" required>
                 </div>
                 <div class="col-md-4">
                     <label for="">Tanggal Schedule Sampai</label>
-                    <input type="date" class="form-control" id="schDateEnd">
+                    <input type="date" class="form-control" id="schDateEnd" required>
                 </div>
                 <div class="col-md-4">
                     <label for="">Jenis</label>
@@ -111,7 +111,7 @@
             let jenis = $('#jenis').val().trim();
 
             // Validasi: Jika semua input kosong, tampilkan alert dan hentikan pencarian
-            if (tanggal_awal === '' && tanggal_akhir === '' && jenis === '') {
+            if (tanggal_awal === '' && tanggal_akhir === '') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
