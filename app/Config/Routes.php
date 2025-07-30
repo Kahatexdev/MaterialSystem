@@ -293,7 +293,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('retur/reject', 'ReturController::reject');
     $routes->get('retur/listBarcodeRetur', 'ReturController::listBarcodeRetur');
     $routes->get('retur/detailBarcodeRetur/(:any)', 'ReturController::detailBarcodeRetur/$1');
-    $routes->get('retur/generateBarcodeRetur/(:any)', 'PdfController::generateBarcodeRetur/$1');
+    $routes->get('retur/generateBarcodeRetur/(:any)', 'DomPdfController::generateBarcodeRetur/$1');
     $routes->get('retur/reportReturArea', 'ReturController::reportReturArea');
     $routes->get('retur/filterReturArea', 'ReturController::filterReturArea');
     $routes->get('retur/exportReturArea', 'ExcelController::exportReturArea');
