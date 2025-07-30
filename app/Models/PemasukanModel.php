@@ -180,7 +180,17 @@ class PemasukanModel extends Model
 
     public function getFilterDatangBenang($key, $tanggal_awal, $tanggal_akhir)
     {
-        $this->select('schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, out_celup.kgs_kirim, out_celup.cones_kirim, pemasukan.tgl_masuk, pemasukan.nama_cluster, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, open_po.kg_po, out_celup.lot_kirim, bon_celup.no_surat_jalan, out_celup.l_m_d, out_celup.gw_kirim, out_celup.harga')
+        // Query 1: Untuk data yang punya id_other_bon (other_bon)
+        $builder1 = $this->db->table('pemasukan')
+            ->select('out_celup.id_out_celup, out_celup.id_other_bon, out_celup.l_m_d, out_celup.harga, out_celup.no_karung, out_celup.gw_kirim, out_celup.kgs_kirim, out_celup.cones_kirim, out_celup.lot_kirim, other_bon.no_model, other_bon.item_type, other_bon.kode_warna, other_bon.warna, other_bon.no_surat_jalan, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, open_po.kg_po, pemasukan.tgl_masuk, pemasukan.nama_cluster')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
+            ->join('other_bon', 'out_celup.id_other_bon = other_bon.id_other_bon')
+            ->join('master_order', 'master_order.no_model = other_bon.no_model', 'left')
+            ->join('open_po', 'open_po.no_model = other_bon.no_model AND open_po.kode_warna = other_bon.kode_warna AND open_po.item_type = other_bon.item_type', 'left')
+            ->where('out_celup.id_other_bon IS NOT NULL');
+
+        $builder2 = $this->db->table('pemasukan')
+            ->select('schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, out_celup.kgs_kirim, out_celup.cones_kirim, pemasukan.tgl_masuk, pemasukan.nama_cluster, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, open_po.kg_po, out_celup.lot_kirim, bon_celup.no_surat_jalan, out_celup.l_m_d, out_celup.gw_kirim, out_celup.harga')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
             ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup')
             ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
@@ -192,8 +202,15 @@ class PemasukanModel extends Model
 
         // Cek apakah ada input key untuk pencarian
         if (!empty($key)) {
-            $this->groupStart()
+            // builder1 untuk pencarian di kolom other_bon
+            $builder1->groupStart()
+                ->like('other_bon.no_model', $key)
+                ->orLike('other_bon.item_type', $key)
+                ->orLike('other_bon.kode_warna', $key)
+                ->groupEnd();
 
+            // builder2 untuk pencarian di kolom schedule_celup
+            $builder2->groupStart()
                 ->like('schedule_celup.no_model', $key)
                 ->orLike('schedule_celup.item_type', $key)
                 ->orLike('schedule_celup.kode_warna', $key)
@@ -201,22 +218,25 @@ class PemasukanModel extends Model
                 ->groupEnd();
         }
 
-        // Filter berdasarkan tanggal
+        // Filter tanggal (berlaku di kedua query)
         if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
-            $this->groupStart();
             if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
-                $this->where('pemasukan.tgl_masuk >=', $tanggal_awal)
-                    ->where('pemasukan.tgl_masuk <=', $tanggal_akhir);
+                $builder1->where('pemasukan.tgl_masuk >=', $tanggal_awal)->where('pemasukan.tgl_masuk <=', $tanggal_akhir);
+                $builder2->where('pemasukan.tgl_masuk >=', $tanggal_awal)->where('pemasukan.tgl_masuk <=', $tanggal_akhir);
             } elseif (!empty($tanggal_awal)) {
-                $this->where('pemasukan.tgl_masuk >=', $tanggal_awal);
+                $builder1->where('pemasukan.tgl_masuk >=', $tanggal_awal);
+                $builder2->where('pemasukan.tgl_masuk >=', $tanggal_awal);
             } elseif (!empty($tanggal_akhir)) {
-                $this->where('pemasukan.tgl_masuk <=', $tanggal_akhir);
+                $builder1->where('pemasukan.tgl_masuk <=', $tanggal_akhir);
+                $builder2->where('pemasukan.tgl_masuk <=', $tanggal_akhir);
             }
-            $this->groupEnd();
         }
 
+        // Eksekusi dan gabungkan hasilnya
+        $result1 = $builder1->get()->getResultArray();
+        $result2 = $builder2->get()->getResultArray();
 
-        return $this->findAll();
+        return array_merge($result1, $result2);
     }
 
     public function getDataByIdOutCelup($idOutCelup)
