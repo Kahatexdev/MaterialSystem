@@ -1437,7 +1437,7 @@ class ScheduleController extends BaseController
         $masterApi = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . $model;
         $masterResponse = file_get_contents($masterApi);
         $master = json_decode($masterResponse, true);
-        
+
 
         // Mengambil nilai 'search' yang dikirim oleh frontend
         $search = $this->request->getGet('search');
