@@ -256,6 +256,13 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('saveUsage', 'PemesananController::saveUsage');
     $routes->get('pengiriman_area', 'PemesananController::pengirimanArea');
     $routes->post('pengiriman_area', 'PemesananController::pengirimanArea');
+    $routes->get('pengiriman_area_manual', 'PemesananController::pengirimanAreaManual');
+    $routes->get('pengiriman/getItemTypes', 'PemesananController::getItemTypes');
+    $routes->get('pengiriman/getKodeWarna', 'PemesananController::getKodeWarna');
+    $routes->get('pengiriman/getWarna', 'PemesananController::getWarna');
+    $routes->post('pengiriman/saveSessionDeliveryArea', 'PemesananController::saveSessionDeliveryArea');
+    $routes->post('pengiriman/removeSessionDelivery', 'PemesananController::removeSessionDelivery');
+    $routes->post('updateStatusKirim', 'PemesananController::updateStatusKirim');
     $routes->post('reset_pengiriman/(:any)/(:any)', 'PemesananController::resetPengirimanArea/$1/$2');
     $routes->post('hapus_pengiriman', 'PemesananController::hapusListPengiriman');
     $routes->post('proses_pengiriman', 'PemesananController::prosesPengirimanArea');
@@ -267,6 +274,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('pemesanan/listPemesananSpandexKaretPertgl', 'PemesananController::listPemesananSpandexKaretPertgl');
     $routes->get('pemesanan/exportListPemesananSpdxKaretPertgl', 'ExcelController::exportListPemesananSpdxKaretPertgl');
     $routes->get('pemesanan/sisaKebutuhanArea', 'PemesananController::sisaKebutuhanArea');
+    $routes->get('reportPermintaanBahanBaku', 'ExcelController::reportPermintaanBahanBaku');
     // $routes->get('pemesanan/sisaKebutuhanArea_filter', 'PemesananController::sisaKebutuhanArea');
 
     $routes->get('pph', 'PphController::tampilPerModel');
@@ -738,6 +746,7 @@ $routes->group(
         $routes->get('getPemesananByAreaModel', 'ApiController::getPemesananByAreaModel');
         $routes->get('getReturByAreaModel', 'ApiController::getReturByAreaModel');
         $routes->get('getKgPoTambahan', 'ApiController::getKgPoTambahan');
+        $routes->get('getMaterialByNoModel/(:any)', 'ApiController::getMaterialByNoModel/$1');
         $routes->get('getMUForRosso/(:any)/(:any)/(:any)', 'ApiController::getMaterialForPemesananRosso/$1/$2/$3');
     }
 );

@@ -686,6 +686,14 @@ class MaterialModel extends Model
 
         return $builder->get()->getResultArray();
     }
+    public function getMaterialByNoModel($noModel)
+    {
+        return $this->select('color, item_type, kode_warna, SUM(kgs) as kg')
+            ->join('master_order', 'master_order.id_order=material.id_order')
+            ->where('master_order.no_model', $noModel)
+            ->groupBy('item_type, kode_warna, color')
+            ->findAll();
+    }
 
     public function getMaterialForPemesananRosso($model, $styleSize, $area)
     {

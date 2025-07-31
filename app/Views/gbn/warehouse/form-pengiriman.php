@@ -69,7 +69,12 @@
                         <h5 class="mb-0">
                             Pengiriman Area
                         </h5>
-
+                        <div class="form-group  d-flex justify-content-end">
+                            <a href="<?= base_url($role . '/pengiriman_area_manual') ?>" class="btn bg-gradient-dark mb-0">
+                                <i class="fas fa-dolly-flatbed"></i>
+                                Manual
+                            </a>
+                        </div>
                     </div>
                     <hr class="horizontal dark my-3">
                     <div class="row">
