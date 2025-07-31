@@ -109,6 +109,12 @@ class GodController extends BaseController
             $scheduleMdl = $this->scheduleCelupModel;
             $outCelupMdl = $this->outCelupModel;
 
+            $scheduleMdl   = $this->scheduleCelupModel;
+            $outCelupMdl   = $this->outCelupModel;
+            $pemasukanMdl  = $this->pemasukanModel;
+            $stockMdl      = $this->stockModel;
+            $clusterMdl    = $this->clusterModel;
+
             $count     = 0;
             $errorLogs = [];
 
@@ -230,25 +236,13 @@ class GodController extends BaseController
 
                     $idCelup = $scheduleMdl->getInsertID();
 
-                    // Insert out_celup
-                    $outCelupMdl->insert([
-                        'id_celup'    => $idCelup,
-                        'no_model'    => $noModel,
-                        'l_m_d'       => floatval(str_replace(',', '.', $row[3])),
-                        'kgs_kirim'   => $kgCelup,
-                        'cones_kirim' => floatval(str_replace(',', '.', $row[13])),
-                        'lot_kirim'   => trim(ltrim($row[16], ', ')),
-                        'ganti_retur' => 0,
-                        'admin'       => session()->get('username'),
-                        'created_at'  => date('Y-m-d H:i:s'),
-                        'updated_at'  => date('Y-m-d H:i:s'),
-                    ]);
+                    // Ambil nilai krg (jumlah bagian)
+                    $krg = intval(trim($row[14]));
 
-                    $idOutCelup = $outCelupMdl->getInsertID();
-
-                    // cek cluster
                     $clusterName = strtoupper(trim($row[1]));
-                    if (! $this->clusterModel->where('nama_cluster', $clusterName)->first()) {
+
+                    // Cek cluster dulu
+                    if (!$this->clusterModel->where('nama_cluster', $clusterName)->first()) {
                         $msg = sprintf(
                             "Baris %d dilewati: cluster '%s' tidak ditemukan.",
                             $line,
@@ -259,40 +253,81 @@ class GodController extends BaseController
                         continue;
                     }
 
-                    // Insert pemasukan
-                    $this->pemasukanModel->insert([
-                        'id_out_celup' => $idOutCelup,
-                        'tgl_masuk'    => date('Y-m-d'),
-                        'nama_cluster' => $clusterName,
-                        'out_jalur'    => '0',
-                        'admin'        => session()->get('username'),
-                        'created_at'   => date('Y-m-d H:i:s'),
-                        'updated_at'   => date('Y-m-d H:i:s'),
-                    ]);
+                    // Hanya proceed kalau ada yang dikirim
+                    if ($kgCelup > 0 && $krg > 0) {
+                        // Hitung porsi per bagian
+                        $partKg    = $kgCelup / $krg;
+                        $partCones = floatval(str_replace(',', '.', $row[13])) / $krg;
 
-                    $idPemasukan = $this->pemasukanModel->getInsertID();
+                        // Loop sebanyak $krg kali
+                        for ($i = 0; $i < $krg; $i++) {
+                            $outCelupMdl->insert([
+                                'id_celup'    => $idCelup,
+                                'no_model'    => $noModel,
+                                'l_m_d'       => floatval(str_replace(',', '.', $row[3])),
+                                'kgs_kirim'   => number_format($partKg, 2, '.', ''),         // bulatkan sesuai kebutuhan
+                                'cones_kirim' => round($partCones),      // bulatkan sesuai kebutuhan
+                                'lot_kirim'   => trim(ltrim($row[16], ', ')), // atau sesuaikan bila lot unik tiap iterasi
+                                'ganti_retur' => 0,
+                                'admin'       => session()->get('username'),
+                                'created_at'  => date('Y-m-d H:i:s'),
+                                'updated_at'  => date('Y-m-d H:i:s'),
+                            ]);
+                            $idOutCelup = $outCelupMdl->getInsertID();
 
-                    // Insert stock
-                    $this->stockModel->insert([
-                        'no_model'      => $noModel,
-                        'item_type'     => $normalizedType,
-                        'kode_warna'    => $kodeWarna,
-                        'warna'         => $material['color'],
-                        'kgs_stock_awal' => 0,
-                        'cns_stock_awal' => 0,
-                        'krg_stock_awal' => 0,
-                        'lot_awal'      => '',
-                        'kgs_in_out'    => $kgCelup,
-                        'cns_in_out'    => floatval(str_replace(',', '.', $row[13])),
-                        'krg_in_out'    => trim($row[14]),
-                        'lot_stock'     => trim(ltrim($row[16], ', ')),
-                        'nama_cluster'  => $clusterName,
-                        'admin'         => session()->get('username'),
-                        'created_at'    => date('Y-m-d H:i:s')
-                    ]);
+                            // 2) Siapkan data stock unique key
+                            $stockKey = [
+                                'no_model'     => $noModel,
+                                'item_type'    => $normalizedType,
+                                'kode_warna'   => $kodeWarna,
+                                'warna'        => $material['color'],
+                                'lot_stock'    => trim(ltrim($row[16], ', '))
+                            ];
 
-                    $idStock = $this->stockModel->getInsertID();
-                    $this->pemasukanModel->update($idPemasukan, ['id_stock' => $idStock]);
+                            // 3) Cek existing stock
+                            $existing = $stockMdl->where($stockKey)->first();
+                            if ($existing) {
+                                // update qty
+                                $newKgs = $existing['kgs_in_out'] + round($partKg, 2);
+                                $newCns = $existing['cns_in_out'] + round($partCones);
+                                $newKrg = $existing['krg_in_out'] + 1;
+                                $stockMdl->update($existing['id_stock'], [
+                                    'kgs_in_out' => $newKgs,
+                                    'cns_in_out' => $newCns,
+                                    'krg_in_out' => $newKrg,
+                                    'updated_at' => date('Y-m-d H:i:s')
+                                ]);
+                                $idStock = $existing['id_stock'];
+                            } else {
+                                // insert baru
+                                $stockMdl->insert(array_merge($stockKey, [
+                                    'kgs_stock_awal' => 0,
+                                    'cns_stock_awal' => 0,
+                                    'krg_stock_awal' => 0,
+                                    'kgs_in_out'     => round($partKg, 2),
+                                    'cns_in_out'     => round($partCones),
+                                    'krg_in_out'     => 1,
+                                    'nama_cluster'   => $clusterName,
+                                    'admin'          => session()->get('username'),
+                                    'created_at'     => date('Y-m-d H:i:s')
+                                ]));
+                                $idStock = $stockMdl->getInsertID();
+                            }
+
+                            // 4) Insert pemasukan dan update dengan id_stock
+                            $pemasukanMdl->insert([
+                                'id_out_celup' => $idOutCelup,
+                                'tgl_masuk'    => date('Y-m-d'),
+                                'nama_cluster' => $clusterName,
+                                'out_jalur'    => '0',
+                                'admin'        => session()->get('username'),
+                                'created_at'   => date('Y-m-d H:i:s'),
+                                'updated_at'   => date('Y-m-d H:i:s')
+                            ]);
+                            $idPemasukan = $pemasukanMdl->getInsertID();
+                            $pemasukanMdl->update($idPemasukan, ['id_stock' => $idStock, 'updated_at' => date('Y-m-d H:i:s')]);
+                        }
+                    }
 
                     $count++;
                 } catch (\Exception $exRow) {

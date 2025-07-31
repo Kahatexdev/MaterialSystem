@@ -78,6 +78,12 @@ class StockModel extends Model
         }
         $builder->like('kode_warna', $warna);
 
+        // Kondisi OR: tampilkan jika kgs_stock_awal > 0 ATAU kgs_in_out > 0
+        $builder->groupStart()
+            ->where('stock.kgs_stock_awal >', 0)
+            ->orWhere('stock.kgs_in_out >', 0)
+            ->groupEnd();
+
         // Query dengan agregasi SUM(kgs_in_out) dan perhitungan sisa kapasitas
         $builder->select('
             stock.*, 
@@ -92,6 +98,7 @@ class StockModel extends Model
         ')
             ->join('cluster', 'cluster.nama_cluster = stock.nama_cluster', 'left')
             ->groupBy([
+                'stock.id_stock',
                 'stock.no_model',
                 'stock.kode_warna',
                 'stock.warna',

@@ -954,12 +954,12 @@ class ExcelController extends BaseController
 
     public function exportScheduleBenang()
     {
-        $key = $this->request->getGet('key');
-        $tanggal_schedule = $this->request->getGet('tanggal_schedule');
+        $key = $this->request->getGet('key') ?? '';
+        $tanggal_schedule = $this->request->getGet('tanggal_schedule') ?? '';
         $tanggal_awal = $this->request->getGet('tanggal_awal');
         $tanggal_akhir = $this->request->getGet('tanggal_akhir');
 
-        $data = $this->scheduleCelupModel->getFilterSchBenang($key, $tanggal_schedule, $tanggal_awal, $tanggal_akhir);
+        $data = $this->scheduleCelupModel->getFilterSchBenang($tanggal_awal, $tanggal_akhir, $key, $tanggal_schedule);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -1037,12 +1037,12 @@ class ExcelController extends BaseController
 
     public function exportScheduleNylon()
     {
-        $key = $this->request->getGet('key');
-        $tanggal_schedule = $this->request->getGet('tanggal_schedule');
+        $key = $this->request->getGet('key') ?? '';
+        $tanggal_schedule = $this->request->getGet('tanggal_schedule') ?? '';
         $tanggal_awal = $this->request->getGet('tanggal_awal');
         $tanggal_akhir = $this->request->getGet('tanggal_akhir');
 
-        $data = $this->scheduleCelupModel->getFilterSchNylon($key, $tanggal_schedule, $tanggal_awal, $tanggal_akhir);
+        $data = $this->scheduleCelupModel->getFilterSchNylon($tanggal_awal, $tanggal_akhir, $key, $tanggal_schedule);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -10747,6 +10747,143 @@ class ExcelController extends BaseController
         header("Content-Disposition: attachment; filename=\"$filename\"");
         header('Cache-Control: max-age=0');
 
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function reportPermintaanBahanBaku()
+    {
+        $jenis = $this->request->getGet('jenis');
+        $area = $this->request->getGet('area');
+        $tgl = $this->request->getGet('tgl');
+
+        $data = $this->pemesananSpandexKaretModel->getPermintaanBahanBaku($jenis, $area, $tgl);
+        // dd ($data);
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->mergeCells('A1:O1');
+        $sheet->setCellValue('A1', 'REPORT PERMINTAAN BAHAN BAKU');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+        $sheet->getStyle('A1')->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->mergeCells('A2:D2');
+        $sheet->setCellValue('A2', 'JENIS BAHAN BAKU: ' . strtoupper($jenis));
+        $sheet->setCellValue('H2', 'AREA: ' . strtoupper($area  ));
+        $sheet->mergeCells('M2:O2');
+        $sheet->setCellValue('M2', 'TANGGAL PAKAI: ' . date('d-m-Y', strtotime($tgl)));
+        $sheet->getStyle('A2:O2')->getFont()->setBold(true);
+        $sheet->getStyle('A2:O2')->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A2:O2')->getAlignment()
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+
+        // Buat header
+        $sheet->setCellValue('A3', 'NO');
+        $sheet->setCellValue('B3', 'JAM');
+        $sheet->setCellValue('C3', 'TGL PSN');
+        $sheet->setCellValue('D3', 'MODEL');
+        $sheet->setCellValue('E3', 'ITEM TYPE');
+        $sheet->setCellValue('F3', 'WARNA');
+        $sheet->setCellValue('G3', 'KODE WARNA');
+        $sheet->setCellValue('H3', 'LOT');
+        $sheet->setCellValue('I3', 'JL MC');
+        $sheet->setCellValue('J3', 'TOTAL');
+        $sheet->setCellValue('K3', 'CONES');
+        $sheet->setCellValue('L3', 'KETERANGAN');
+        $sheet->setCellValue('M3', 'BAGIAN PERSIAPAN');
+        $sheet->setCellValue('N3', 'QTY OUT');
+        $sheet->setCellValue('O3', 'CNS OUT');
+
+        // Format header
+        $sheet->getStyle('A3:O3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:O3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:O3')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+        // Data
+        $row = 4;
+        foreach ($data as $index => $item) {
+            $sheet->setCellValue('A' . $row, $index + 1);
+            $sheet->setCellValue('B' . $row, $item['jam_pesan']);
+            $sheet->setCellValue('C' . $row, $item['tanggal_pesan']);
+            $sheet->setCellValue('D' . $row, strtoupper($item['no_model']));
+            $sheet->setCellValue('E' . $row, strtoupper($item['item_type']));
+            $sheet->setCellValue('F' . $row, strtoupper($item['color']));
+            $sheet->setCellValue('G' . $row, strtoupper($item['kode_warna']));
+            $sheet->setCellValue('H' . $row, '');
+            $sheet->setCellValue('I' . $row, $item['ttl_jl_mc']);
+            $sheet->setCellValue('J' . $row, $item['ttl_kg']);
+            $sheet->setCellValue('K' . $row, $item['ttl_cns']);
+            $sheet->setCellValue('L' . $row, '');
+            $sheet->setCellValue('M' . $row, '');
+            $sheet->setCellValue('N' . $row, '');
+            $sheet->setCellValue('O' . $row, '');
+            $row++;
+        }
+        // Border
+        $lastRow = $row - 1;
+        $sheet->getStyle("A4:O{$lastRow}")
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("A4:O{$lastRow}")
+            ->getAlignment()
+            ->setVertical(Alignment::VERTICAL_CENTER);  
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => 'FF000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle("A3:O{$lastRow}")->applyFromArray($styleArray);
+        // manual COLUMN DIMENSION
+        $sheet->getColumnDimension('A')->setWidth(3);
+        $sheet->getColumnDimension('B')->setWidth(8);
+        $sheet->getColumnDimension('C')->setWidth(10);
+        $sheet->getColumnDimension('D')->setWidth(10);
+        $sheet->getColumnDimension('E')->setWidth(10);
+        $sheet->getColumnDimension('F')->setWidth(15);
+        $sheet->getColumnDimension('G')->setWidth(15);
+        $sheet->getColumnDimension('H')->setWidth(25);
+        $sheet->getColumnDimension('I')->setWidth(8);
+        $sheet->getColumnDimension('J')->setWidth(8);
+        $sheet->getColumnDimension('K')->setWidth(8);
+        $sheet->getColumnDimension('L')->setWidth(15);
+        $sheet->getColumnDimension('M')->setWidth(20);
+        $sheet->getColumnDimension('N')->setWidth(10);
+        $sheet->getColumnDimension('O')->setWidth(10);
+        
+
+        // // footer FOR_KK_369/TGL_REV_13_07_20/REV_02/HAL1/2
+        // $sheet->mergeCells('A' . ($lastRow + 2) . ':O' . ($lastRow + 2));
+        // $sheet->setCellValue('A' . ($lastRow + 2), 'FOR_KK_369/TGL_REV_13_07_20/REV_02/HAL 1/2');
+        // $sheet->getStyle('A' . ($lastRow + 2))->getFont()->setBold(true)->setSize(8);
+        // $sheet->getStyle('A' . ($lastRow + 2))->getAlignment()
+        //     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // wraptext form D4
+        $sheet->getStyle('D4:O' . $lastRow)->getAlignment()->setWrapText(true);
+        // Download
+        $sheet->getPageSetup()
+            ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
+            ->setPaperSize(PageSetup::PAPERSIZE_A4)
+            // optionally fit to width
+            ->setFitToPage(true)
+            ->setFitToWidth(1)
+            ->setFitToHeight(0);
+
+        // 2) Put your “FOR_KK_369/…/HAL x/y” in the center footer, with &P = current page, &N = total pages
+        $footerText = 'FOR_KK_369/TGL_REV_13_07_20/REV_02/HAL &P/&N';
+        $sheet->getHeaderFooter()
+            ->setOddFooter('&C' . $footerText)
+            ->setEvenFooter('&C' . $footerText);
+        $filename = 'Report Permintaan Bahan Baku' . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;

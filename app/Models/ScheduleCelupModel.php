@@ -650,71 +650,85 @@ class ScheduleCelupModel extends Model
             ->get()->getResultArray();
     }
 
-    public function getFilterSchBenang($key, $tanggal_schedule, $tanggal_awal, $tanggal_akhir)
+    public function getFilterSchBenang($tanggal_awal, $tanggal_akhir, $key = null, $tanggal_schedule = null)
     {
+        // 1) Normalize to full datetime
+        if (strlen($tanggal_awal) === 10) {
+            $tanggal_awal .= ' 00:00:00';
+        }
+        if (strlen($tanggal_akhir) === 10) {
+            $tanggal_akhir .= ' 23:59:59';
+        }
+
         $db = \Config\Database::connect();
 
-        // Subquery: summary material per item_type + kode_warna + color
-        $materialSubquery = $db->table('material')
-            ->select('id_order, item_type, kode_warna, color, SUM(kgs) AS total_kgs')
-            ->groupBy(['id_order', 'item_type', 'kode_warna', 'color']);
+        // 2) Build your material-summary subquery
+        $materialSub  = $db->table('material')
+            ->select('
+                           id_order,
+                           item_type,
+                           kode_warna,
+                           color,
+                           SUM(kgs) AS total_kgs
+                       ')
+            ->groupBy(['id_order', 'item_type', 'kode_warna', 'color'])
+            ->getCompiledSelect(false);  // false = no trailing semicolon
 
-        // Main builder
-        $builder = $this->select('
-        schedule_celup.*, 
-        master_order.delivery_awal, 
-        master_order.delivery_akhir, 
-        mesin_celup.no_mesin, 
-        mesin_celup.ket_mesin, 
-        master_material.jenis,
-        material_summary.total_kgs
-    ')
-            ->join('master_order', 'master_order.no_model = schedule_celup.no_model')
-            ->join('master_material', 'master_material.item_type = schedule_celup.item_type')
-            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+        // 3) Main query on schedule_celup
+        $builder = $db->table('schedule_celup')
+            ->select([
+                'schedule_celup.*',
+                'master_order.delivery_awal',
+                'master_order.delivery_akhir',
+                'mesin_celup.no_mesin',
+                'mesin_celup.ket_mesin',
+                'master_material.jenis',
+                'material_summary.total_kgs',
+            ])
+            ->join('master_order',    'master_order.no_model       = schedule_celup.no_model')
+            ->join('master_material', 'master_material.item_type   = schedule_celup.item_type')
+            ->join('mesin_celup',     'mesin_celup.id_mesin        = schedule_celup.id_mesin')
+            // manual derived‐table join:
             ->join(
-                '(' . $materialSubquery->getCompiledSelect(false) . ') AS material_summary',
-                'material_summary.item_type = schedule_celup.item_type 
-                AND material_summary.kode_warna = schedule_celup.kode_warna 
-                AND material_summary.color = schedule_celup.warna
-                AND material_summary.id_order = master_order.id_order',
+                "({$materialSub}) AS material_summary",
+                'material_summary.item_type   = schedule_celup.item_type
+             AND material_summary.kode_warna = schedule_celup.kode_warna
+             AND material_summary.color      = schedule_celup.warna
+             AND material_summary.id_order   = master_order.id_order',
                 'left'
             )
+            ->where('master_material.jenis',      'BENANG')
+            ->where('schedule_celup.start_mc >=', $tanggal_awal)
+            ->where('schedule_celup.start_mc <=', $tanggal_akhir);
 
-            ->where('master_material.jenis', 'BENANG');
-
-        // Filter pencarian (key)
-        if (!empty($key)) {
+        // 4) Optional keyword filter
+        if (! empty($key)) {
             $builder->groupStart()
-                ->like('schedule_celup.no_model', $key)
+                ->like('schedule_celup.no_model',    $key)
                 ->orLike('schedule_celup.kode_warna', $key)
                 ->groupEnd();
         }
 
-        // Filter tanggal schedule
-        if (!empty($tanggal_schedule)) {
+        // 5) Optional exact schedule-date filter
+        if (! empty($tanggal_schedule)) {
             $builder->where('schedule_celup.tanggal_schedule', $tanggal_schedule);
-        }
-
-        // Filter rentang tanggal start_mc
-        if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
-            $builder->groupStart();
-            if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
-                $builder->where('schedule_celup.start_mc >=', $tanggal_awal)
-                    ->where('schedule_celup.start_mc <=', $tanggal_akhir);
-            } elseif (!empty($tanggal_awal)) {
-                $builder->where('schedule_celup.start_mc >=', $tanggal_awal);
-            } elseif (!empty($tanggal_akhir)) {
-                $builder->where('schedule_celup.start_mc <=', $tanggal_akhir);
-            }
-            $builder->groupEnd();
         }
 
         return $builder->get()->getResult();
     }
 
-    public function getFilterSchNylon($key, $tanggal_schedule, $tanggal_awal, $tanggal_akhir)
+
+
+    public function getFilterSchNylon($tanggal_awal, $tanggal_akhir, $key = null, $tanggal_schedule = null)
     {
+        // Format ke datetime jika belum
+        if (strlen($tanggal_awal) === 10) {
+            $tanggal_awal .= ' 00:00:00';
+        }
+        if (strlen($tanggal_akhir) === 10) {
+            $tanggal_akhir .= ' 23:59:59';
+        }
+
         $db = \Config\Database::connect();
 
         // Subquery: summary material per item_type + kode_warna + color
@@ -744,6 +758,8 @@ class ScheduleCelupModel extends Model
                 'left'
             )
             ->where('master_material.jenis', 'NYLON');
+        $builder->where('schedule_celup.start_mc >=', $tanggal_awal);
+        $builder->where('schedule_celup.start_mc <=', $tanggal_akhir);
 
         // Cek apakah ada input key untuk pencarian
         if (!empty($key)) {
@@ -755,20 +771,6 @@ class ScheduleCelupModel extends Model
 
         if (!empty($tanggal_schedule)) {
             $builder->where('schedule_celup.tanggal_schedule', $tanggal_schedule);
-        }
-
-        // Filter berdasarkan tanggal
-        if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
-            $builder->groupStart();
-            if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
-                $builder->where('schedule_celup.start_mc >=', $tanggal_awal)
-                    ->where('schedule_celup.start_mc <=', $tanggal_akhir);
-            } elseif (!empty($tanggal_awal)) {
-                $builder->where('schedule_celup.start_mc >=', $tanggal_awal);
-            } elseif (!empty($tanggal_akhir)) {
-                $builder->where('schedule_celup.start_mc <=', $tanggal_akhir);
-            }
-            $builder->groupEnd();
         }
 
         return $builder->get()->getResult();
@@ -824,8 +826,16 @@ class ScheduleCelupModel extends Model
         return $builder->findAll();
     }
 
-    public function getFilterSchWeekly($tglAwal, $tglAkhir, $jenis)
+    public function getFilterSchWeekly($tglAwal, $tglAkhir, $jenis = null)
     {
+        // Format ke datetime jika belum
+        if (strlen($tglAwal) === 10) {
+            $tglAwal .= ' 00:00:00';
+        }
+        if (strlen($tglAkhir) === 10) {
+            $tglAkhir .= ' 23:59:59';
+        }
+
         $builder = $this->select('schedule_celup.*, mesin_celup.no_mesin, mesin_celup.min_caps, mesin_celup.max_caps, open_po.ket_celup, master_material.jenis, master_order.delivery_awal')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->join('open_po', 'open_po.no_model = schedule_celup.no_model')
@@ -835,15 +845,9 @@ class ScheduleCelupModel extends Model
             ->groupBy('schedule_celup.id_celup')
             ->orderBy('schedule_celup.tanggal_schedule', 'ASC')
             ->orderBy('mesin_celup.no_mesin', 'ASC');
+        $builder->where('schedule_celup.start_mc >=', $tglAwal);
+        $builder->where('schedule_celup.start_mc <=', $tglAkhir);
 
-        if (!empty($tglAwal) && !empty($tglAkhir)) {
-            $builder->where('schedule_celup.tanggal_schedule >=', $tglAwal)
-                ->where('schedule_celup.tanggal_schedule <=', $tglAkhir);
-        } elseif (!empty($tglAwal)) {
-            $builder->where('schedule_celup.tanggal_schedule >=', $tglAwal);
-        } elseif (!empty($tglAkhir)) {
-            $builder->where('schedule_celup.tanggal_schedule <=', $tglAkhir);
-        }
 
         if (!empty($jenis)) {
             $builder->where('mesin_celup.ket_mesin', $jenis);

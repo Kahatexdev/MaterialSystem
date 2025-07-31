@@ -300,7 +300,7 @@ class OutCelupModel extends Model
 
     public function getDataReturByTgl($tglRetur)
     {
-        return $this->select('out_celup.*, retur.no_model, retur.item_type, retur.kode_warna, retur.warna, retur.kgs_retur, retur.cns_retur, retur.krg_retur, retur.lot_retur, retur.tgl_retur')
+        return $this->select('out_celup.*, retur.no_model, retur.item_type, retur.kode_warna, retur.warna, retur.kgs_retur, retur.cns_retur, retur.krg_retur, retur.lot_retur, retur.tgl_retur, retur.kategori')
             ->join('retur', 'retur.id_retur = out_celup.id_retur')
             ->where('retur.tgl_retur', $tglRetur)
             ->orderBy('out_celup.id_out_celup', 'ASC')
