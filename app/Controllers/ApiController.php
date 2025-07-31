@@ -1186,4 +1186,12 @@ class ApiController extends ResourceController
             ->setStatusCode(200)
             ->setJSON($data);
     }
+    public function getMaterialByNoModel($noModel)
+    {
+        $data = $this->materialModel->getMaterialByNoModel($noModel);
+
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($data);
+    }
 }
