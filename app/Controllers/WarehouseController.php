@@ -2405,7 +2405,8 @@ class WarehouseController extends BaseController
                 'id_out_celup' => $id_out_celup,
                 'tgl_masuk'    => date('Y-m-d'),
                 'nama_cluster' => $data['cluster'][$i],
-                'out_jalur'    => 0,
+                'out_jalur'    => '0',
+                'keterangan'   => $data['keterangan'],
                 'admin'        => session()->get('username'),
                 'created_at'   => date('Y-m-d H:i:s'),
             ];

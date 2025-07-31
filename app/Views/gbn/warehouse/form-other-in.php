@@ -106,20 +106,23 @@
 
                                             <!-- Surat Jalan Section -->
                                             <div class="row g-3 mt-3">
-                                                <div class="col-md-3">
+                                                <div class="col-md-4">
                                                     <label>Warna</label>
                                                     <input type="text" class="form-control" name="warna" id="warna" required placeholder="Warna" readonly>
                                                 </div>
 
-                                                <div class="col-md-3">
+                                                <div class="col-md-4">
                                                     <label>Harga</label>
                                                     <input type="float" class="form-control" name="harga" id="harga" placeholder="Harga" required>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-4">
                                                     <label>Lot</label>
                                                     <input type="float" class="form-control" name="lot" id="lot" placeholder="Lot" required>
                                                 </div>
-                                                <div class="col-md-2">
+                                            </div>
+
+                                            <div class="row g-3 mt-3">
+                                                <div class="col-md-4">
                                                     <label>LMD</label>
                                                     <select class="form-control" name="l_m_d" id="l_m_d" placeholder="L/M/D" required>
                                                         <option value="">Pilih LMD</option>
@@ -127,6 +130,10 @@
                                                         <option value="M">M</option>
                                                         <option value="D">D</option>
                                                     </select>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <label>Keterangan</label>
+                                                    <input type="float" class="form-control" name="Keterangan" id="Keterangan" placeholder="Keterangan">
                                                 </div>
                                                 <div class="col-md-1">
                                                     <label for="ganti-retur" class="text-center">Ganti Retur</label>
