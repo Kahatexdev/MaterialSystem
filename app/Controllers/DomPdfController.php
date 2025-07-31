@@ -83,4 +83,40 @@ class DomPdfController extends BaseController
 
         return $dompdf->stream("Barcode_$idBon.pdf", ['Attachment' => false]);
     }
+
+    public function generateBarcodeRetur($tglRetur)
+    {
+        $dompdf = new DompdfService();
+        $dataList = $this->outCelupModel->getDataReturByTgl($tglRetur);
+        if (empty($dataList)) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException("Tidak ada retur pada tanggal {$tglRetur}");
+        }
+
+        $path = FCPATH . 'assets/img/logo-kahatex.png';
+        $type = pathinfo($path, PATHINFO_EXTENSION);
+        $data = file_get_contents($path);
+        $img = 'data:image/' . $type . ';base64,' . base64_encode($data);
+
+        $generator = new BarcodeGeneratorPNG();
+        $barcodeImages = [];
+        foreach ($dataList as $i => &$row) {
+            $id = $row['id_out_celup'];
+            $bin = $generator->getBarcode($id, $generator::TYPE_CODE_128);
+            $barcodeImages[$i] = 'data:image/png;base64,' . base64_encode($bin);
+        }
+
+        // Ambil data barcode sesuai $id
+        $html = view($this->role . '/retur/barcode', [
+            'tgl' => $tglRetur,
+            'dataList' => $dataList,
+            'img' => $img,
+            'barcodeImages' => $barcodeImages,
+        ]);
+
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('10cm', '10cm');
+        $dompdf->render();
+
+        return $dompdf->stream("Barcode_$tglRetur.pdf", ['Attachment' => false]);
+    }
 }

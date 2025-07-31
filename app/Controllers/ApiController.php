@@ -1066,9 +1066,10 @@ class ApiController extends ResourceController
     }
     public function listRetur($area)
     {
+        $noModel = $this->request->getGet('noModel') ?? '';
+        $tglBuat = $this->request->getGet('tglBuat') ?? '';
 
-
-        $listRetur = $this->returModel->getListRetur($area);
+        $listRetur = $this->returModel->getListRetur($area, $noModel, $tglBuat);
         return $this->response->setJSON($listRetur);
     }
     public function filterTglPakai($area)
