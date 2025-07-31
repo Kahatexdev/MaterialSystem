@@ -1187,4 +1187,10 @@ class ApiController extends ResourceController
             ->setStatusCode(200)
             ->setJSON($data);
     }
+    public function getMaterialForPemesananRosso($model, $styleSize, $area)
+    {
+        $mu = $this->materialModel->getMaterialForPemesananRosso($model, $styleSize, $area);
+
+        return $this->respond($mu, 200);
+    }
 }

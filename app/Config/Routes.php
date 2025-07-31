@@ -738,5 +738,6 @@ $routes->group(
         $routes->get('getPemesananByAreaModel', 'ApiController::getPemesananByAreaModel');
         $routes->get('getReturByAreaModel', 'ApiController::getReturByAreaModel');
         $routes->get('getKgPoTambahan', 'ApiController::getKgPoTambahan');
+        $routes->get('getMUForRosso/(:any)/(:any)/(:any)', 'ApiController::getMaterialForPemesananRosso/$1/$2/$3');
     }
 );
