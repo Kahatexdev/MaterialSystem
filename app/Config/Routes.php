@@ -256,6 +256,13 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('saveUsage', 'PemesananController::saveUsage');
     $routes->get('pengiriman_area', 'PemesananController::pengirimanArea');
     $routes->post('pengiriman_area', 'PemesananController::pengirimanArea');
+    $routes->get('pengiriman_area_manual', 'PemesananController::pengirimanAreaManual');
+    $routes->get('pengiriman/getItemTypes', 'PemesananController::getItemTypes');
+    $routes->get('pengiriman/getKodeWarna', 'PemesananController::getKodeWarna');
+    $routes->get('pengiriman/getWarna', 'PemesananController::getWarna');
+    $routes->post('pengiriman/saveSessionDeliveryArea', 'PemesananController::saveSessionDeliveryArea');
+    $routes->post('pengiriman/removeSessionDelivery', 'PemesananController::removeSessionDelivery');
+    $routes->post('updateStatusKirim', 'PemesananController::updateStatusKirim');
     $routes->post('reset_pengiriman/(:any)/(:any)', 'PemesananController::resetPengirimanArea/$1/$2');
     $routes->post('hapus_pengiriman', 'PemesananController::hapusListPengiriman');
     $routes->post('proses_pengiriman', 'PemesananController::prosesPengirimanArea');

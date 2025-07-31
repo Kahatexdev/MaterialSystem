@@ -2800,4 +2800,5 @@ class WarehouseController extends BaseController
 
         return view($this->role . '/warehouse/report-sisa-datang-karet', $data);
     }
+
 }
