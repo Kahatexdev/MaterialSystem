@@ -2800,4 +2800,23 @@ class WarehouseController extends BaseController
 
         return view($this->role . '/warehouse/report-sisa-datang-karet', $data);
     }
+
+    public function reportBenangMingguan()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Report Benang Per Minggu',
+            'active' => $this->active
+        ];
+        return view($this->role . '/warehouse/report-benang-mingguan', $data);
+    }
+
+    public function filterBenangMingguan()
+    {
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemasukanModel->getFilterBenangMingguan($tanggalAwal, $tanggalAkhir);
+        return $this->response->setJSON($data);
+    }
 }
