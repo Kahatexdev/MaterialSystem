@@ -4,6 +4,10 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use Exception;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
@@ -35,6 +39,7 @@ class CoveringWarehouseController extends BaseController
 
     public function __construct()
     {
+        helper('filesystem');
         $this->masterOrderModel = new MasterOrderModel();
         $this->materialModel = new MaterialModel();
         $this->mesinCelupModel = new MesinCelupModel();
@@ -62,17 +67,50 @@ class CoveringWarehouseController extends BaseController
 
     public function index()
     {
-        $stok = $this->coveringStockModel->stokCovering();
-        // dd($stok);
-        $data = [
-            'active' => $this->active,
-            'title' => 'Warehouse',
-            'role' => $this->role,
-            'stok' => $stok
-        ];
+        // 1. Ambil pilihan unik
+        $jenisOptions        = $this->coveringStockModel->select('jenis')->distinct()->orderBy('jenis')->findColumn('jenis');
+        $benangOptions       = $this->coveringStockModel->select('jenis_benang')->distinct()->orderBy('jenis_benang')->findColumn('jenis_benang');
+        $mesinOptions        = $this->coveringStockModel->select('jenis_mesin')->distinct()->orderBy('jenis_mesin')->findColumn('jenis_mesin');
 
-        return view($this->role . '/warehouse/index', $data);
+        // 2. Baca filter dari GET
+        $fJenis     = $this->request->getGet('jenis')        ?? '';
+        $fBenang    = $this->request->getGet('jenis_benang') ?? '';
+        $fMesin     = $this->request->getGet('jenis_mesin')          ?? '';
+
+        // 3. Query dengan kondisi dinamis
+        $builder = $this->coveringStockModel
+            ->select('stock_covering.*, IF(stock_covering.ttl_kg > 0, "ada", "habis") AS status')
+            ->orderBy('ttl_kg', 'DESC')
+            ->orderBy('ttl_cns', 'DESC');
+
+        if ($fJenis) {
+            $builder->where('jenis', $fJenis);
+        }
+        if ($fBenang) {
+            $builder->where('jenis_benang', $fBenang);
+        }
+        if ($fMesin) {
+            $builder->where('jenis_mesin', $fMesin);
+        }
+
+        $stok = $builder->findAll();
+
+        return view($this->role . '/warehouse/index', [
+            'active'         => $this->active,
+            'title'          => 'Warehouse',
+            'role'           => $this->role,
+            'stok'           => $stok,
+            // data untuk filter dropdown
+            'jenisOptions'   => $jenisOptions,
+            'benangOptions'  => $benangOptions,
+            'mesinOptions'   => $mesinOptions,
+            // nilai yang sedang dipilih
+            'fJenis'         => $fJenis,
+            'fBenang'        => $fBenang,
+            'fMesin'         => $fMesin,
+        ]);
     }
+
 
     public function create()
     {
@@ -101,7 +139,12 @@ class CoveringWarehouseController extends BaseController
         $jenis = $this->request->getPost('jenis');
         $color = $this->request->getPost('color');
         $code = $this->request->getPost('code');
-        $existingStock = $this->coveringStockModel->getStockByJenisColorCode($jenis, $color, $code);
+        $mesin = $this->request->getPost('jenis_mesin');
+        $dr = $this->request->getPost('dr');
+        $jenisCover = $this->request->getPost('jenis_cover');
+        $jenisBenang = $this->request->getPost('jenis_benang');
+        // dd($mesin);
+        $existingStock = $this->coveringStockModel->getStockByJenisColorCodeMesin($jenis, $color, $code, $mesin, $dr, $jenisCover, $jenisBenang);
         if ($existingStock) {
             return redirect()->back()->withInput()->with('error', 'Data stok sudah ada! </br> Silahkan update stok yang sudah ada.');
         }
@@ -274,10 +317,11 @@ class CoveringWarehouseController extends BaseController
     public function reportPemasukan()
     {
         $selectedDate = $this->request->getGet('date'); // Ambil tanggal dari parameter GET
+        $selectedDate2 = $this->request->getGet('date2'); // Ambil tanggal dari parameter GET
         $pemasukan = [];
 
-        if ($selectedDate) {
-            $pemasukan = $this->historyCoveringStockModel->getPemasukanByDate($selectedDate);
+        if ($selectedDate && $selectedDate2) {
+            $pemasukan = $this->historyCoveringStockModel->getPemasukanByDate($selectedDate, $selectedDate2);
         }
 
         $data = [
@@ -285,7 +329,8 @@ class CoveringWarehouseController extends BaseController
             'title' => 'Warehouse',
             'role' => $this->role,
             'pemasukan' => $pemasukan,
-            'selectedDate' => $selectedDate // Kirim ke view untuk referensi
+            'selectedDate' => $selectedDate, // Kirim ke view untuk referensi
+            'selectedDate2' => $selectedDate2, // Kirim ke view untuk referensi
         ];
 
         return view($this->role . '/warehouse/report-pemasukan', $data);
@@ -295,10 +340,11 @@ class CoveringWarehouseController extends BaseController
     public function reportPengeluaran()
     {
         $selectedDate = $this->request->getGet('date'); // Ambil tanggal dari parameter GET
+        $selectedDate2 = $this->request->getGet('date2');
         $pengeluaran = [];
 
         if ($selectedDate) {
-            $pengeluaran = $this->historyCoveringStockModel->getPengeluaranByDate($selectedDate);
+            $pengeluaran = $this->historyCoveringStockModel->getPengeluaranByDate($selectedDate, $selectedDate2);
         }
 
         $data = [
@@ -306,7 +352,8 @@ class CoveringWarehouseController extends BaseController
             'title' => 'Warehouse',
             'role' => $this->role,
             'pengeluaran' => $pengeluaran,
-            'selectedDate' => $selectedDate // Kirim ke view untuk referensi
+            'selectedDate' => $selectedDate, // Kirim ke view untuk referensi
+            'selectedDate2' => $selectedDate2 // Kirim ke view untuk referensi
         ];
 
         return view($this->role . '/warehouse/report-pengeluaran', $data);
@@ -381,6 +428,501 @@ class CoveringWarehouseController extends BaseController
             'uniqueData' => $uniqueData,
         ];
         return view($this->role . '/schedule/reqschedule', $data);
+    }
+
+    public function importStokBarangJadi()
+    {
+        $file = $this->request->getFile('file_excel');
+        // Validasi file
+        if (!$file || !$file->isValid()) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'File tidak valid atau tidak ditemukan.');
+        }
+
+        // Cek ekstensi dan ukuran maksimal (misal max 5MB)
+        $allowedExt = ['xlsx', 'xls'];
+        $ext = $file->getExtension();
+        if (!in_array($ext, $allowedExt)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Format file tidak didukung. Gunakan .xlsx atau .xls');
+        }
+        if ($file->getSize() > 5 * 1024 * 1024) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Ukuran file terlalu besar. Maksimal 5MB.');
+        }
+
+        // Simpan sementara
+        $uploadDir = WRITEPATH . 'uploads/';
+        $filePath = $uploadDir . $file->getName();
+        try {
+            $file->move($uploadDir, null, true);
+        } catch (Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal memindahkan file. ' . $e->getMessage());
+        }
+
+        // Jalankan import
+        try {
+            list($successCount, $failures) = $this->importStock($filePath);
+        } catch (Exception $e) {
+            unlink($filePath);
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error saat proses import: ' . $e->getMessage());
+        }
+
+        // Hapus file setelah selesai
+        unlink($filePath);
+
+        // Siapkan pesan
+        if ($failures) {
+            // Gagal sebagian
+            $msg  = "Berhasil import: {$successCount}. Gagal import: " . count($failures) . ".";
+            $msg .= '<ul>';
+            foreach ($failures as $rowNum => $reason) {
+                $msg .= "<li>Baris {$rowNum}: {$reason}</li>";
+            }
+            $msg .= '</ul>';
+            return redirect()->to(base_url($this->role . '/warehouse'))->with('warning', $msg);
+        }
+
+        // Semua berhasil
+        return redirect()->to(base_url($this->role . '/warehouse'))
+            ->with('success', "Import berhasil seluruhnya ({$successCount} baris)");
+    }
+
+    /**
+     * @return array [int $successCount, array $failures]
+     */
+    private function importStock(string $filePath): array
+    {
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
+        $worksheet = $spreadsheet->getActiveSheet();
+
+        $successCount = 0;
+        $failures = [];
+
+        foreach ($worksheet->getRowIterator(2) as $row) {
+            $cellIterator = $row->getCellIterator();
+            $cellIterator->setIterateOnlyExistingCells(false);
+
+            $rowData = [];
+            foreach ($cellIterator as $cell) {
+                $rowData[] = $cell->getValue();
+            }
+            $rowNum = $row->getRowIndex();
+
+            // Validasi minimal
+            if (
+                count($rowData) < 10
+                || empty($rowData[0])
+                || empty($rowData[2])
+            ) {
+                $failures[$rowNum] = 'Data kolom kurang lengkap';
+                continue;
+            }
+
+            // Mapping data
+            try {
+                $item = [
+                    'jenis'          => $rowData[0],
+                    'color'    => $rowData[1],
+                    'code'           => $rowData[2],
+                    'jenis_mesin'            => $rowData[3],
+                    'dr'              => (float) ($rowData[4] ?? 0),
+                    'jenis_cover'      => $rowData[5],
+                    'jenis_benang'    => $rowData[6],
+                    'lmd'             => isset($rowData[7]) ? implode(', ', array_map('trim', explode(',', $rowData[7]))) : null,
+                    'ttl_kg'          => (float) ($rowData[8] ?? 0),
+                    'ttl_cns'         => (float) ($rowData[9] ?? 0),
+                    'admin'           => session()->get('username'),
+                ];
+
+                // Cek duplikat
+                if ($this->coveringStockModel->getStockByJenisColorCodeMesin(
+                    $item['jenis'],
+                    $item['color'],
+                    $item['code'],
+                    $item['jenis_mesin'],
+                    $item['dr'],
+                    $item['jenis_cover'],
+                    $item['jenis_benang']
+                )) {
+                    $failures[$rowNum] = 'Duplikat data di database';
+                    $failures[$rowNum] .= ' (Jenis: ' . $item['jenis'] . ', Color: ' . $item['color'] . ', Code: ' . $item['code'] . ')';
+                    continue;
+                }
+
+                // Insert
+                $this->coveringStockModel->insert($item);
+                $successCount++;
+            } catch (\Exception $e) {
+                $failures[$rowNum] = 'Error: ' . $e->getMessage();
+            }
+        }
+
+        return [$successCount, $failures];
+    }
+
+    public function importStokCovering()
+    {
+        // Validate upload
+        $file = $this->request->getFile('file_excel');
+        if (!$file->isValid()) {
+            return redirect()->back()->with('error', 'File tidak valid atau gagal di-upload.');
+        }
+
+        $ext = strtolower($file->getClientExtension());
+        if (!in_array($ext, ['xls', 'xlsx'])) {
+            return redirect()->back()->with('error', 'Format file harus .xls atau .xlsx');
+        }
+
+        // Load spreadsheet
+        $reader      = ($ext === 'xlsx') ? new \PhpOffice\PhpSpreadsheet\Reader\Xlsx()
+            : new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+        $spreadsheet = $reader->load($file->getTempName());
+
+        // Define header mapping
+        $headerRow = 3;
+        $mapping   = [
+            'JENIS BARANG' => 'jenis',
+            'WARNA'        => 'color',
+            'KODE'         => 'code',
+            'JENIS COVER'  => 'jenis_cover',
+            'JENIS BENANG' => 'jenis_benang',
+            'JENIS MESIN'  => 'jenis_mesin',
+            'DR'           => 'dr',
+            'LMD'          => 'lmd',
+            'STOK KG'      => 'ttl_kg',
+            'STOK CONES'   => 'ttl_cns',
+            'KETERANGAN'   => 'keterangan',
+        ];
+
+        $admin     = session()->get('username') ?? session()->get('email');
+        $nowLabel  = 'Import ' . date('Y-m-d H:i:s');
+        $errors    = [];
+        $agg       = [];
+        $history   = [];
+        $tanggal   = null;
+
+        foreach ($spreadsheet->getSheetNames() as $sheetName) {
+            $sheet      = $spreadsheet->getSheetByName($sheetName);
+            $multiplier = (strtoupper($sheetName) === 'PENGELUARAN') ? -1 : 1;
+            if (!$sheet) continue;
+
+            // Capture import date
+            if (empty($tanggal)) {
+                $rawDate = trim($sheet->getCell('B2')->getValue());
+                $tanggal = $this->parseDate($rawDate, $errors, $sheetName);
+                if (!$tanggal) break;
+            }
+
+            $rows      = $sheet->toArray(null, true, true, true);
+            $rawHeader = $this->normalizeHeader($rows[$headerRow]);
+
+            foreach ($rows as $rowIndex => $row) {
+                if ($rowIndex <= $headerRow || empty(array_filter($row))) continue;
+
+                $record = [
+                    'admin'      => $admin,
+                    'keterangan' => "{$nowLabel} [{$sheetName}]",
+                    'created_at' => "{$tanggal} 00:00:00",
+                ];
+
+                foreach ($rawHeader as $col => $heading) {
+                    if (!isset($mapping[$heading])) continue;
+                    $key = $mapping[$heading];
+                    $val = $row[$col];
+
+                    if (in_array($key, ['ttl_kg', 'ttl_cns'], true)) {
+                        $val = $this->parseNumber($val);
+                    }
+
+                    $record[$key] = $val;
+                }
+
+                // Validate required fields
+                if (empty($record['jenis']) || empty($record['code'])) {
+                    $errors[] = "Sheet {$sheetName} baris {$rowIndex}: 'jenis' atau 'code' kosong.";
+                    continue;
+                }
+
+                // Fetch existing stock
+                $stock = $this->coveringStockModel
+                    ->where($this->buildWhereClause($record))
+                    ->first();
+
+                if (!$stock) {
+                    $errors[] = "Sheet {$sheetName} baris {$rowIndex}: Stok tidak ditemukan untuk jenis '{$record['jenis']}', color '{$record['color']}', code '{$record['code']}'.";
+                    continue;
+                }
+
+                $id        = $stock['id_covering_stock'];
+                $deltaKg   = $multiplier * abs($record['ttl_kg'] ?? 0);
+                $deltaCns  = $multiplier * abs($record['ttl_cns'] ?? 0);
+
+                // Aggregate deltas
+                if (!isset($agg[$id])) {
+                    $agg[$id] = [
+                        'origKg'   => $stock['ttl_kg'] ?? 0,
+                        'origCns'  => $stock['ttl_cns'] ?? 0,
+                        'deltaKg'  => 0,
+                        'deltaCns' => 0,
+                    ];
+                }
+
+                $agg[$id]['deltaKg']  += $deltaKg;
+                $agg[$id]['deltaCns'] += $deltaCns;
+
+                // Prepare history entry jika deltaKg (ttl_kg) tidak nol
+                if ($deltaKg != 0) {
+                    $history[] = array_merge($record, [
+                        'ttl_kg'  => $deltaKg,
+                        'ttl_cns' => $deltaCns,
+                    ]);
+                }
+            }
+        }
+
+        // Build batch update data
+        $updates = [];
+        foreach ($agg as $id => $data) {
+            $newKg  = $data['origKg'] + $data['deltaKg'];
+            $newCns = $data['origCns'] + $data['deltaCns'];
+
+            if ($newKg < 0 || $newCns < 0) {
+                $errors[] = "Stok tidak mencukupi untuk sheet {$sheetName} baris {$rowIndex}.";
+                continue;
+            }
+
+            $updates[] = [
+                'id_covering_stock' => $id,
+                'ttl_kg'            => $newKg,
+                'ttl_cns'           => $newCns,
+            ];
+        }
+
+        // Database transaction
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        if ($updates) {
+            $this->coveringStockModel->updateBatch($updates, 'id_covering_stock');
+            if ($history) {
+                $this->historyCoveringStockModel->insertBatch($history);
+            }
+        }
+
+        $db->transComplete();
+
+        // Handle response
+        if ($db->transStatus() === false) {
+            return redirect()->back()->with('error', 'Gagal menyimpan data.');
+        }
+
+        if ($errors) {
+            $msgType = empty($updates) ? 'error' : 'warning';
+            return redirect()->back()->with($msgType, implode('<br>', $errors));
+        }
+
+        return redirect()->to(base_url($this->role . '/warehouse'))
+            ->with('success', 'Data berhasil diimpor.');
+    }
+
+    private function normalizeHeader(array $row): array
+    {
+        return array_map(function ($h) {
+            return strtoupper(trim($h));
+        }, $row);
+    }
+
+    private function parseNumber($value)
+    {
+        $num = str_replace(',', '.', $value);
+        return is_numeric($num) ? (float) $num : 0;
+    }
+
+    private function parseDate($raw, array &$errors, string $sheet)
+    {
+        // Try dd/mm/yyyy
+        $dt = \DateTime::createFromFormat('d/m/Y', $raw);
+        if ($dt) {
+            return $dt->format('Y-m-d');
+        }
+
+        // Try Excel timestamp
+        if (is_numeric($raw)) {
+            return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($raw)
+                ->format('Y-m-d');
+        }
+
+        $errors[] = "Sheet {$sheet}: Tanggal import tidak valid (B2).";
+        return null;
+    }
+
+    private function buildWhereClause(array $rec): array
+    {
+        return array_filter([
+            'jenis'        => $rec['jenis'],
+            'color'        => $rec['color'] ?? null,
+            'code'         => $rec['code'],
+            'jenis_cover'  => $rec['jenis_cover'] ?? null,
+            'jenis_benang' => $rec['jenis_benang'] ?? null,
+            'jenis_mesin'  => $rec['jenis_mesin'] ?? null,
+            'dr'           => $rec['dr'] ?? null,
+        ], function ($v) {
+            return $v !== null && $v !== '';
+        });
+    }
+
+    public function deleteStokBarangJadi($id)
+    {
+        // Hanya terima AJAX
+        if (! $this->request->isAJAX()) {
+            return redirect()->back();
+        }
+
+        $stock = $this->coveringStockModel->find($id);
+        if (!$stock) {
+            return $this->response
+                ->setStatusCode(404)
+                ->setJSON(['success' => false, 'message' => 'Data stok tidak ditemukan.']);
+        }
+
+        if ($this->coveringStockModel->delete($id)) {
+            return $this->response
+                ->setStatusCode(200)
+                ->setJSON(['success' => true, 'message' => 'Data stok berhasil dihapus.']);
+        } else {
+            return $this->response
+                ->setStatusCode(500)
+                ->setJSON(['success' => false, 'message' => 'Gagal menghapus data stok.']);
+        }
+    }
+
+    public function templateStokBarangJadi()
+    {
+        $stok = $this->coveringStockModel->findAll();
+        // Define headings based on mapping
+        $headers = [
+            'A' => 'JENIS BARANG',
+            'B' => 'WARNA',
+            'C' => 'KODE',
+            'D' => 'JENIS MESIN',
+            'E' => 'DR',
+            'F' => 'JENIS COVER',
+            'G' => 'JENIS BENANG',
+            'H' => 'LMD',
+            'I' => 'STOK CONES',
+            'J' => 'STOK KG',
+            'K' => 'KETERANGAN',
+        ];
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+
+        // PEMASUKAN sheet dengan data stok
+        $sheetIn = $spreadsheet->getActiveSheet();
+        $sheetIn->setTitle('PEMASUKAN');
+        $this->applyTemplateFormat($sheetIn, $headers, $stok);
+
+        // PENGELUARAN sheet juga menampilkan data stok
+        $sheetOut = $spreadsheet->createSheet();
+        $sheetOut->setTitle('PENGELUARAN');
+        $this->applyTemplateFormat($sheetOut, $headers, $stok);
+
+        // Prepare download
+        $filename = 'TEMPLATE_IMPORT_STOK_COVERING_' . date('Ymd_His') . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    /**
+     * Apply header, styling, borders, and data to a sheet
+     */
+    protected function applyTemplateFormat($sheet, array $headers, array $data)
+    {
+        // Instruction and date
+        $sheet->setCellValue('A1', 'TEMPLATE DATA STOK BARANG JADI UNTUK ' . strtoupper($sheet->getTitle()));
+        $sheet->mergeCells('A1:L1');
+        $sheet->setCellValue('A2', 'Tanggal Import (dd/mm/yyyy):');
+        $sheet->setCellValue('B2', date('d/m/Y'));
+        $sheet->getStyle('A1:K2')->getFont()->setBold(true);
+
+        // Header row
+        foreach ($headers as $col => $title) {
+            $sheet->setCellValue("{$col}3", $title);
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // apply styling A1
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+        // blue sky background color
+        $sheet->getStyle('A1')->getFill()->getStartColor()->setARGB('87CEEB'); // Sky blue background
+        $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('A2')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('B2')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('B2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('B2')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        // styling a2:b2
+        $sheet->getStyle('A2:B2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+        // green tua tapi jangan ketuaan background color
+        $sheet->getStyle('A2:B2')->getFill()->getStartColor()->setARGB('228B22'); // Forest green background
+        // Apply header styling (background color and bold font)
+        $headerRange = 'A3:' . array_key_last($headers) . '3';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)
+            ->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setARGB('FFFF00'); // Yellow background
+
+        // Fill data rows
+        $startRow = 4;
+        $row = $startRow;
+        foreach ($data as $item) {
+            $sheet->setCellValue("A{$row}", $item['jenis'] ?? '');
+            $sheet->setCellValue("B{$row}", $item['color'] ?? '');
+            $sheet->setCellValue("C{$row}", $item['code'] ?? '');
+            $sheet->setCellValue("D{$row}", $item['jenis_mesin'] ?? '');
+            $sheet->setCellValue("E{$row}", $item['dr'] ?? '');
+            $sheet->setCellValue("F{$row}", $item['jenis_cover'] ?? '');
+            $sheet->setCellValue("G{$row}", $item['jenis_benang'] ?? '');
+            $sheet->setCellValue("H{$row}", $item['lmd'] ?? '');
+            $sheet->setCellValue("I{$row}", 0);
+            $sheet->setCellValue("J{$row}", 0);
+            $sheet->setCellValue("K{$row}", '');
+            $sheet->setCellValue("L{$row}", '');
+            $row++;
+        }
+
+        // Determine last row for borders
+        $lastRow = max($row - 1, 3);
+        $fullRange = 'A3:' . array_key_last($headers) . $lastRow;
+
+        // Apply borders to all cells in range
+        $sheet->getStyle($fullRange)
+            ->getBorders()
+            ->getAllBorders()
+            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            // set alignment center for all cells in range
+        $sheet->getStyle($fullRange)
+            ->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
     }
 
 }

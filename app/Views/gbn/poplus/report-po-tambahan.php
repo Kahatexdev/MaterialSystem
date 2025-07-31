@@ -141,7 +141,7 @@
 
             $.ajax({
                 url: "<?= base_url($role . '/poplus/reportPoTambahan') ?>",
-                type: "GET",
+                type: "POST",
                 data: {
                     model: no_model,
                     kode_warna: kode_warna,

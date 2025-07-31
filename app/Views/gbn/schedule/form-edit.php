@@ -102,34 +102,51 @@
                 <div class="card-header">
                     <h3 class="card-title">Form Edit Schedule Celup</h3>
                     <div class="card-tools">
-                        <h6 class="badge bg-info text-white">Tanggal Schedule : <?= $tanggal_schedule ?> | Lot Urut : <?= $lot_urut ?></h6>
+                        <!-- <h6 class="badge bg-info text-white">Tanggal Schedule : <?= $tanggal_schedule ?> | Lot Urut : <?= $lot_urut ?></h6> -->
                     </div>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <form action="<?= base_url(session('role') . '/schedule/updateSchedule') ?>" method="post">
                             <div class="row">
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="no_mesin" class="form-label">No Mesin</label>
                                         <input type="text" class="form-control" id="no_mesin" name="no_mesin" value="<?= $no_mesin ?>" readonly>
-                                        <input type="hidden" name="tanggal_schedule" value="<?= $tanggal_schedule ?>">
-                                        <input type="hidden" name="lot_urut" value="<?= $lot_urut ?>">
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="no_mesin" class="form-label">Tanggal Schedule</label>
+                                        <input type="date" class="form-control" name="tanggal_schedule" value="<?= $tanggal_schedule ?>" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="no_mesin" class="form-label">Lot Urut</label>
+                                        <select name="lot_urut" id="lot_urut" class="form-select">
+                                            <?php for ($i = 1; $i <= $jmlLot; $i++): ?>
+                                                <option value="<?= $i ?>" <?= $lot_urut == $i ? 'selected' : '' ?>><?= $i ?></option>
+                                            <?php endfor; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+
+                                <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="min_caps" class="form-label">Min Caps</label>
                                         <input type="number" class="form-control" id="min_caps" name="min_caps" value="<?= $min_caps ?>" readonly>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="max_caps" class="form-label">Max Caps</label>
                                         <input type="number" class="form-control" id="max_caps" name="max_caps" value="<?= $max_caps ?>" readonly>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="sisa_kapasitas" class="form-label">Sisa Kapasitas</label>
                                         <input type="number" class="form-control" id="sisa_kapasitas" name="sisa_kapasitas" value="<?= $max_caps ?>" data-max-caps="<?= $max_caps ?>" readonly>
@@ -395,6 +412,7 @@
         const suggestionsBoxKWarna = document.getElementById('suggestionsKWarna');
         const warnaInput = document.getElementById('warna');
         const poTable = document.getElementById("poTable");
+        const lot = document.getElementById("lot_urut");
 
         // Inisialisasi locked statuses (status yang mengunci input)
         const lockedStatuses = ['bon', 'celup', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc', 'done', 'reject', 'perbaikan', 'sent'];

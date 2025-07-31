@@ -15,6 +15,8 @@ class PengeluaranModel extends Model
     protected $allowedFields    = [
         'id_pengeluaran',
         'id_out_celup',
+        'id_psk',
+        'id_stock',
         'area_out',
         'tgl_out',
         'kgs_out',
@@ -175,5 +177,151 @@ class PengeluaranModel extends Model
             ->where('id_total_pemesanan', $id_total_pemesanan)
             ->where('status', 'Pengeluaran Jalur')
             ->first();
+    }
+
+    public function getItemTypes(string $no_model): array
+    {
+        $builder = $this->db
+            ->table('pengeluaran')
+            ->distinct()
+            // Ambil item_type: prioritas dari schedule_celup, fallback ke material
+            ->select('COALESCE(sc.item_type, m.item_type) AS item_type')
+            // JOIN semua tabel yang diperlukan
+            ->join('out_celup oc',                 'oc.id_out_celup    = pengeluaran.id_out_celup',      'left')
+            ->join('schedule_celup sc',            'sc.id_celup        = oc.id_celup',                   'left')
+            ->join('pemesanan_spandex_karet psk',  'psk.id_psk         = pengeluaran.id_psk',           'left')
+            ->join('pemesanan pe',                 'pe.id_total_pemesanan = psk.id_total_pemesanan',   'left')
+            ->join('material m',                   'm.id_material      = pe.id_material',               'left')
+            ->join('master_order mo',              'mo.id_order        = m.id_order',                   'left')
+            // Filter status
+            ->where('pengeluaran.status', 'Pengeluaran Jalur')
+            // Group kondisi no_model: bisa di schedule_celup atau di master_order
+            ->groupStart()
+            ->where('sc.no_model', $no_model)
+            ->orWhere('mo.no_model', $no_model)
+            ->groupEnd();
+
+        return $builder
+            ->get()
+            ->getResultArray();
+    }
+
+
+
+
+    public function getKodeWarna($model, $item_type): array
+    {
+        $builder = $this->db
+            ->table('pengeluaran')
+            ->distinct()
+            // Ambil item_type: prioritas dari schedule_celup, fallback ke material
+            ->select('COALESCE(sc.kode_warna, m.kode_warna) AS kode_warna')
+            // JOIN semua tabel yang diperlukan
+            ->join('out_celup oc',                 'oc.id_out_celup    = pengeluaran.id_out_celup',      'left')
+            ->join('schedule_celup sc',            'sc.id_celup        = oc.id_celup',                   'left')
+            ->join('pemesanan_spandex_karet psk',  'psk.id_psk         = pengeluaran.id_psk',           'left')
+            ->join('pemesanan pe',                 'pe.id_total_pemesanan = psk.id_total_pemesanan',   'left')
+            ->join('material m',                   'm.id_material      = pe.id_material',               'left')
+            ->join('master_order mo',              'mo.id_order        = m.id_order',                   'left')
+            // Filter status
+            ->where('pengeluaran.status', 'Pengeluaran Jalur')
+            // Group kondisi no_model: bisa di schedule_celup atau di master_order
+            ->groupStart()
+            ->where('sc.no_model', $model)
+            ->orWhere('mo.no_model', $model)
+            ->groupEnd()
+            ->groupStart()
+            ->where('sc.item_type', $item_type)
+            ->orWhere('m.item_type', $item_type)
+            ->groupEnd();
+
+        return $builder
+            ->get()
+            ->getResultArray();
+    }
+
+    public function getWarna($model, $item_type, $kode_warna): array
+    {
+        $builder = $this->db
+            ->table('pengeluaran')
+            ->distinct()
+            // Ambil item_type: prioritas dari schedule_celup, fallback ke material
+            ->select('COALESCE(sc.warna, m.color) AS warna')
+            // JOIN semua tabel yang diperlukan
+            ->join('out_celup oc',                 'oc.id_out_celup    = pengeluaran.id_out_celup',      'left')
+            ->join('schedule_celup sc',            'sc.id_celup        = oc.id_celup',                   'left')
+            ->join('pemesanan_spandex_karet psk',  'psk.id_psk         = pengeluaran.id_psk',           'left')
+            ->join('pemesanan pe',                 'pe.id_total_pemesanan = psk.id_total_pemesanan',   'left')
+            ->join('material m',                   'm.id_material      = pe.id_material',               'left')
+            ->join('master_order mo',              'mo.id_order        = m.id_order',                   'left')
+            // Filter status
+            ->where('pengeluaran.status', 'Pengeluaran Jalur')
+            // Group kondisi no_model: bisa di schedule_celup atau di master_order
+            ->groupStart()
+            ->where('sc.no_model', $model)
+            ->orWhere('mo.no_model', $model)
+            ->groupEnd()
+            ->groupStart()
+            ->where('sc.item_type', $item_type)
+            ->orWhere('m.item_type', $item_type)
+            ->groupEnd()
+            ->groupStart()
+            ->where('sc.kode_warna', $kode_warna)
+            ->orWhere('m.kode_warna', $kode_warna)
+            ->groupEnd();
+
+        return $builder
+            ->get()
+            ->getResultArray();
+    }
+
+    public function validateDeliveryData(array $data): array
+    {
+        $builder = $this->db
+            ->table('pengeluaran as p')
+            ->distinct()
+            ->select([
+                'p.*',
+                // jika ada di schedule_celup ambil sc.no_model, jika tidak ambil mo.no_model
+                'COALESCE(sc.no_model, mo.no_model) AS no_model',
+                'COALESCE(sc.item_type, m.item_type) AS item_type',
+                'COALESCE(sc.kode_warna, m.kode_warna)    AS kode_warna',
+                'COALESCE(sc.warna, m.color)             AS warna',
+                'mm.jenis',
+                'tp.ttl_kg',
+                'tp.ttl_cns',
+            ])
+            // JOIN semua tabel
+            ->join('out_celup oc',                'oc.id_out_celup    = p.id_out_celup',            'left')
+            ->join('schedule_celup sc',           'sc.id_celup        = oc.id_celup',               'left')
+            ->join('pemesanan_spandex_karet psk', 'psk.id_psk         = p.id_psk',                 'left')
+            ->join('pemesanan pe',                'pe.id_total_pemesanan = psk.id_total_pemesanan', 'left')
+            ->join('total_pemesanan tp',         'tp.id_total_pemesanan = p.id_total_pemesanan',   'left')
+            ->join('material m',                  'm.id_material      = pe.id_material',            'left')
+            ->join('master_material mm',          'mm.item_type     = m.item_type',             'left')
+            ->join('master_order mo',             'mo.id_order        = m.id_order',                'left')
+            // Filter status sebelum grouping
+            ->where('p.status', 'Pengeluaran Jalur')
+            // Filter no_model
+            ->groupStart()
+            ->where('sc.no_model', $data['no_model'])
+            ->orWhere('mo.no_model', $data['no_model'])
+            ->groupEnd()
+            // Filter item_type
+            ->groupStart()
+            ->where('sc.item_type', $data['item_type'])
+            ->orWhere('m.item_type', $data['item_type'])
+            ->groupEnd()
+            // Filter kode_warna
+            ->groupStart()
+            ->where('sc.kode_warna', $data['kode_warna'])
+            ->orWhere('m.kode_warna', $data['kode_warna'])
+            ->groupEnd()
+            // Group by id_pengeluaran untuk distinct
+            ->groupBy('p.id_pengeluaran');
+
+        return $builder
+            ->get()
+            ->getResultArray();
     }
 }

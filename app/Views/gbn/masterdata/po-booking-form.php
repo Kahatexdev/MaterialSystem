@@ -271,7 +271,6 @@
                         q: params.term || ''
                     }),
                     processResults: data => {
-                        console.log('ITEM‑TYPE:', data);
                         return {
                             results: data
                         };

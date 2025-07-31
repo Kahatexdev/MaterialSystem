@@ -51,4 +51,30 @@ class WarehouseBBModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    public function getWarehouseBB()
+    {
+        return $this->select('stock_bb_covering.*, IF(stock_bb_covering.kg > 0, "ada", "habis") AS status')
+            ->orderBy('kg', 'DESC')
+            ->findAll();
+    }
+
+    public function getDataByJenis($jenis)
+    {
+        return $this->select('*')
+            ->where('jenis_benang', $jenis)
+            ->findAll();
+    }
+
+    public function getStockByDenierJenisWarna($denier, $jenis_benang, $warna, $kode)
+    {
+        return $this->db->table('stock_bb_covering')
+            ->select('*')
+            ->where('denier', $denier)
+            ->where('jenis_benang', $jenis_benang)
+            ->where('warna', $warna)
+            ->where('kode', $kode)
+            ->get()
+            ->getRowArray();
+    }
 }

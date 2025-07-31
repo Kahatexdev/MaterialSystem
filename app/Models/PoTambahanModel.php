@@ -26,6 +26,7 @@ class PoTambahanModel extends Model
         'plus_pck_cns',
         'lebih_pakai_kg',
         'keterangan',
+        'ket_gbn',
         'status',
         'admin',
         'created_at',
@@ -98,11 +99,12 @@ class PoTambahanModel extends Model
     }
     public function detailPoTambahan($idMaterial, $tglBuat, $status)
     {
-        return $this->select('material.style_size, po_tambahan.*')
+        return $this->select('material.style_size, material.composition, material.gw, material.qty_pcs, material.loss, material.kgs, po_tambahan.*')
             ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
             ->whereIn('po_tambahan.id_material', $idMaterial)
             ->like('po_tambahan.created_at', $tglBuat)
             ->where('po_tambahan.status', $status)
+            ->groupBy('material.id_order, material. style_size')
             ->findAll();
     }
     public function getNoModelByArea($area)
@@ -162,7 +164,7 @@ class PoTambahanModel extends Model
             ->groupBy('master_order.no_model, material.item_type, material.kode_warna')
             ->first();
     }
-    public function getDataPoPlus($tgl_po, $no_model = null, $kode_warna = null)
+    public function getDataPoPlus($tgl_po = null, $no_model = null, $kode_warna = null)
     {
         $builder = $this->select('po_tambahan.id_po_tambahan, master_order.no_model, material.area, material.item_type, material.kode_warna, material.color, (SUM(po_tambahan.poplus_mc_kg) + SUM(po_tambahan.plus_pck_kg)) AS kg_poplus, (po_tambahan.poplus_mc_cns + po_tambahan.plus_pck_cns) AS cns_poplus, po_tambahan.status, DATE(po_tambahan.created_at) AS tgl_poplus, po_tambahan.admin, po_tambahan.keterangan, master_material.jenis')
             ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
@@ -173,10 +175,13 @@ class PoTambahanModel extends Model
             ->groupBy('material.item_type')
             ->groupBy('material.kode_warna')
             ->groupBy('po_tambahan.status')
-            ->where('DATE(po_tambahan.created_at)', $tgl_po)
+            // ->where('DATE(po_tambahan.created_at)', $tgl_po)
             ->where('status', 'approved');
-        if (!empty($noModel)) {
-            $builder->where('master_order.no_model', $noModel);
+        if (!empty($tgl_po)) {
+            $builder->where('DATE(po_tambahan.created_at)', $tgl_po);
+        }
+        if (!empty($no_model)) {
+            $builder->where('master_order.no_model', $no_model);
         }
         if (!empty($kodeWarna)) {
             $builder->where('material.kode_warna', $kodeWarna);

@@ -18,6 +18,7 @@ use App\Models\StockModel;
 use App\Models\HistoryPindahPalet;
 use App\Models\HistoryPindahOrder;
 use App\Models\HistoryStock;
+use App\Models\KategoriReturModel;
 use App\Models\PengeluaranModel;
 use App\Models\ReturModel;
 use App\Models\OtherOutModel;
@@ -51,6 +52,7 @@ class WarehouseController extends BaseController
     protected $returModel;
     protected $otherOutModel;
     protected $otherBonModel;
+    protected $kategoriModel;
 
     public function __construct()
     {
@@ -71,6 +73,7 @@ class WarehouseController extends BaseController
         $this->returModel = new ReturModel();
         $this->otherOutModel = new OtherOutModel();
         $this->otherBonModel = new OtherBonModel();
+        $this->kategoriModel = new KategoriReturModel();
         $this->db = \Config\Database::connect(); // Menghubungkan ke database
 
         $this->role = session()->get('role');
@@ -160,6 +163,7 @@ class WarehouseController extends BaseController
     {
         $id = $this->request->getPost('barcode');
         $cluster = $this->clusterModel->getDataCluster();
+        $kategori = $this->kategoriModel->findAll();
         // dd(session()->get('dataOut'));
         // Ambil data dari session (jika ada)
         $existingData = session()->get('dataOut') ?? [];
@@ -210,6 +214,7 @@ class WarehouseController extends BaseController
             'role'     => $this->role,
             'dataOut'  => $existingData,
             'cluster'  => $cluster,
+            'kategori'  => $kategori,
             'error'    => session()->getFlashdata('error'),
         ];
 
@@ -408,18 +413,18 @@ class WarehouseController extends BaseController
         $checkedIds = $this->request->getPost('checked_id');
         $idOutCelup = $this->request->getPost('id_out_celup');
         $alasan = $this->request->getPost('alasan');
-
+        $kategori = $this->request->getPost('kategori_retur');
+        $post = $this->request->getPost();
+        // dd($post);
         if (empty($checkedIds)) {
             session()->setFlashdata('error', 'Tidak ada data yang dipilih untuk dikomplain.');
             return redirect()->to($this->role . '/pemasukan');
-        } elseif (empty($alasan)) {
-            session()->setFlashdata('error', 'Alasan Tidak boleh kosong.');
+        } elseif (empty($alasan) || empty($kategori)) {
+            session()->setFlashdata('error', 'Alasan dan Kategori Tidak Boleh Kosong.');
             return redirect()->to($this->role . '/pemasukan');
         }
 
-
         $idCelup = $this->outCelupModel->getIdCelups($idOutCelup);
-
 
         // Tambahkan proses komplain sesuai kebutuhanmu
         $update = $this->scheduleCelupModel
@@ -431,24 +436,64 @@ class WarehouseController extends BaseController
             ->update();
 
         if ($update) {
-            // Ambil session dataOut
-            $existingData = session()->get('dataOut') ?? [];
-
-            // Pastikan $idOutCelup dalam bentuk array
-            $idOutCelup = is_array($idOutCelup) ? $idOutCelup : [$idOutCelup];
-
-            // Hapus data berdasarkan idOutCelup
-            $filteredData = array_filter($existingData, function ($item) use ($idOutCelup) {
-                return !in_array($item['id_out_celup'], $idOutCelup);
-            });
-
-            // Simpan kembali dataOut ke session tanpa data yang dihapus
-            session()->set('dataOut', array_values($filteredData));
-
-            session()->setFlashdata('success', 'Data berhasil dikomplain');
-        } else {
-            session()->setFlashdata('error', 'Gagal mengkomplain data.');
+            $existing = session()->get('dataOut') ?? [];
+            $filtered = array_filter($existing, fn($item) => ! in_array($item['id_out_celup'], $post['id_out_celup']));
+            session()->set('dataOut', array_values($filtered));
         }
+
+        $dataRetur = [];
+        foreach ($checkedIds as $idx => $outId) {
+            $dataRetur[] = [
+                'no_model'   => $post['no_model'][$idx],
+                'item_type'  => $post['item_type'][$idx],
+                'kode_warna' => $post['kode_warna'][$idx],
+                'warna'      => $post['warna'][$idx],
+                'area_retur' => 'GUDANG BENANG',
+                'tgl_retur'  => date('Y-m-d'),
+                'kgs_retur'  => $post['kgs_kirim'][$idx],
+                'cns_retur'  => $post['cns_kirim'][$idx],
+                'lot_retur'  => $post['lot_kirim'][$idx],
+                'krg_retur'  => 1,
+                'kategori'  => $post['kategori_retur'],
+                'keterangan_area'  => null,
+                'keterangan_gbn'  => $post['alasan'] ?? '',
+                'waktu_acc_retur'  => null,
+                'admin'  => session()->get('username'),
+            ];
+        }
+
+        //SUM berdasarkan no_model, item_type, kode_warna, dan warna
+        $grouped = [];
+        foreach ($dataRetur as $row) {
+            // buat key unik per kombinasi 4 kolom
+            $key = $row['no_model']
+                . '|' . $row['item_type']
+                . '|' . $row['kode_warna']
+                . '|' . $row['warna'];
+
+            if (! isset($grouped[$key])) {
+                // pertama kali, simpan seluruh row
+                $grouped[$key] = $row;
+            } else {
+                // sudah ada, cukup sum kgs_retur, dan cns_retur
+                $grouped[$key]['kgs_retur'] += $row['kgs_retur'];
+                $grouped[$key]['cns_retur'] += $row['cns_retur'];
+                $grouped[$key]['krg_retur'] += $row['krg_retur'];
+            }
+        }
+        // Re-index jadi array numerik
+        $dataRetur = array_values($grouped);
+
+        // Insert batch
+        $inserted = $this->returModel->insertBatch($dataRetur);
+
+        // Flashdata & redirect
+        if ($update && $inserted) {
+            session()->setFlashdata('success', 'Data berhasil dikomplain dan retur disimpan.');
+        } else {
+            session()->setFlashdata('error', 'Gagal memproses komplain atau menyimpan retur.');
+        }
+
         return redirect()->to($this->role . '/pemasukan');
     }
     public function reset_pemasukan()
@@ -1114,6 +1159,7 @@ class WarehouseController extends BaseController
                     'id_retur'    => $idRetur['id_retur'] ?? null,
                     'id_bon'      => $data['id_bon']   ?? null,
                     'id_celup'    => $data['id_celup'] ?? null,
+                    'no_model'    => $noModel,
                     'no_karung'   => $data['no_karung'],
                     'kgs_kirim'   => $data['kgs_kirim'],
                     'cones_kirim' => $data['cones_kirim'],
@@ -1535,7 +1581,8 @@ class WarehouseController extends BaseController
     {
         $idOutCelup = $this->request->getPost('id_out_celup');
         $alasan = $this->request->getPost('alasan');
-
+        $post = $this->request->getPost();
+        // dd($post);
         $idCelup = $this->outCelupModel->getIdCelup($idOutCelup);
 
         if (!$idCelup) {
@@ -1562,12 +1609,37 @@ class WarehouseController extends BaseController
 
             // Simpan kembali dataOut ke session tanpa data yang dihapus
             session()->set('dataOut', array_values($filteredData));
-
-            session()->setFlashdata('success', 'Data berhasil dikomplain');
-        } else {
-            session()->setFlashdata('error', 'Gagal mengkomplain data.');
         }
-        return redirect()->back();
+
+        $dataRetur[] = [
+            'no_model'   => $post['no_model'],
+            'item_type'  => $post['item_type'],
+            'kode_warna' => $post['kode_warna'],
+            'warna'      => $post['warna'],
+            'area_retur' => 'GUDANG BENANG',
+            'tgl_retur'  => date('Y-m-d'),
+            'kgs_retur'  => $post['kgs_kirim'],
+            'cns_retur'  => $post['cns_kirim'],
+            'lot_retur'  => $post['lot_kirim'],
+            'krg_retur'  => 1,
+            'kategori'  => $post['kategori_retur'],
+            'keterangan_area'  => null,
+            'keterangan_gbn'  => $post['alasan'] ?? '',
+            'waktu_acc_retur'  => null,
+            'admin'  => session()->get('username'),
+        ];
+
+        // Insert batch
+        $inserted = $this->returModel->insertBatch($dataRetur);
+
+        // Flashdata & redirect
+        if ($update && $inserted) {
+            session()->setFlashdata('success', 'Data berhasil dikomplain dan retur disimpan.');
+        } else {
+            session()->setFlashdata('error', 'Gagal memproses komplain atau menyimpan retur.');
+        }
+
+        return redirect()->to($this->role . '/pemasukan');
     }
 
     public function reportPoBenang()
@@ -1637,6 +1709,7 @@ class WarehouseController extends BaseController
 
         // Ambil data pemasukan untuk semua id yang dipilih
         $pemasukanData = $this->outCelupModel->findOutCelup($idPemasukanArray);
+        // dd($pemasukanData);
 
         if (!$pemasukanData) {
             session()->setFlashdata('error', 'Data pemasukan tidak ditemukan.');
@@ -1658,6 +1731,7 @@ class WarehouseController extends BaseController
                 // Siapkan data pengeluaran sesuai masing-masing pemasukan
                 $insertData = [
                     'id_out_celup'       => $pemasukan['id_out_celup'],
+                    'id_stock'           => $pemasukan['id_stock'],
                     'area_out'           => $area,
                     'tgl_out'            => date('Y-m-d H:i:s'),
                     'kgs_out'            => $pemasukan['kgs_kirim'],
@@ -1710,7 +1784,7 @@ class WarehouseController extends BaseController
                 }
                 // --- END UPDATE TABEL STOCK ---
 
-                // JIKA PMINJAM ORDER, INSERT HISTORY ATOCK
+                // JIKA PMINJAM ORDER, INSERT HISTORY STOCK
                 if ($pinjam == 'YA') {
                     $insertHistory = [
                         'id_stock_old'   => $pemasukan['id_stock'],
@@ -1910,7 +1984,6 @@ class WarehouseController extends BaseController
                 $this->stockModel->update($cekStockBaru['id_stock'], $updateDataIn);
 
                 $newStockId = $cekStockBaru['id_stock'];
-                $cluster_old = $cekStockBaru['id_stock'];
                 // Update id_stock di tabel pemasukan berdasarkan id_out_celup
                 $updatePemasukan = [
                     'id_stock' => $cekStockBaru['id_stock'],
@@ -1962,6 +2035,7 @@ class WarehouseController extends BaseController
                         // Update id_stock di tabel pemasukan berdasarkan id_out_celup
                         $updatePemasukan = [
                             'id_stock' => $newStockId,
+                            'nama_cluster' => $cluster,
                         ];
 
                         $updateIdStock = $this->pemasukanModel
@@ -2167,12 +2241,13 @@ class WarehouseController extends BaseController
     public function otherIn()
     {
         $no_model = $this->masterOrderModel->getAllNoModel();
-
+        $cluster = $this->clusterModel->getDataCluster();
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
             'no_model' => $no_model,
+            'cluster' => $cluster
         ];
         return view($this->role . '/warehouse/form-other-in', $data);
     }
@@ -2273,57 +2348,85 @@ class WarehouseController extends BaseController
     public function saveOtherIn()
     {
         $data = $this->request->getPost();
+        dd($data);
 
-        $otherBon = $this->otherBonModel; // Sesuaikan dengan model kamu
-        $outCelup = $this->outCelupModel; // Sesuaikan dengan model kamu
+        $db = \Config\Database::connect();
+        $db->transBegin();  // Mulai transaksi
+
+        // 1) Insert Bon
         $dataOtherBon = [
-            'no_model' => $data['no_model'],
-            'item_type' => $data['item_type'],
-            'kode_warna' => $data['kode_warna'],
-            'warna' => $data['warna'],
-            'tgl_datang' => $data['tgl_datang'],
+            'no_model'       => $data['no_model'],
+            'item_type'      => $data['item_type'],
+            'kode_warna'     => $data['kode_warna'],
+            'warna'          => $data['warna'],
+            'tgl_datang'     => $data['tgl_datang'],
             'no_surat_jalan' => $data['no_surat_jalan'],
-            'detail_sj' => $data['detail_sj'],
-            'ganti_retur' => $data['ganti_retur'],
-            'admin' => session()->get('username'),
-            'created_at' => date('Y-m-d H:i:s'),
+            'detail_sj'      => $data['detail_sj'],
+            'ganti_retur'    => $data['ganti_retur'],
+            'admin'          => session()->get('username'),
+            'created_at'     => date('Y-m-d H:i:s'),
         ];
+        $saveBon = $this->otherBonModel->insert($dataOtherBon);
+        $id_other_in = $this->otherBonModel->insertID();
 
-        $saveBon = $otherBon->insert($dataOtherBon); // Melakukan insert
-        if ($saveBon) {
-            $id_other_in = $otherBon->insertID(); // Mengambil ID yang baru saja diinsert
-            $allSaved = true; // Flag untuk mengecek apakah semua data berhasil disimpan
-
-            $jumlahKrg = count($data['no_karung']);
-
-            for ($i = 0; $i < $jumlahKrg; $i++) {
-                $dataKrg = [
-                    'id_other_bon' => $id_other_in,
-                    'no_model' => $data['no_model'],
-                    'l_m_d' => $data['l_m_d'],
-                    'harga' => $data['harga'],
-                    'no_karung' => $data['no_karung'][$i],
-                    'gw_kirim' => $data['gw'][$i],
-                    'kgs_kirim' => $data['kgs'][$i],
-                    'cones_kirim' => $data['cones'][$i],
-                    'lot_kirim' => $data['lot'],
-                    'ganti_retur' => $data['ganti_retur'],
-                    'admin' => session()->get('username'),
-                    'created_at' => date('Y-m-d H:i:s'),
-                ];
-                $saveKrg = $outCelup->insert($dataKrg); // Melakukan insert
-                if (!$saveKrg) {
-                    $allSaved = false; // Jika ada yang gagal, set flag ke false
-                    break; // Keluar dari loop jika ada kegagalan
-                }
-            }
-            if ($allSaved) {
-                session()->setFlashdata('success', "Data berhasil disimpan");
-            } else {
-                session()->setFlashdata('error', "Terjadi kesalahan saat menyimpan sebagian data");
-            }
-        } else {
+        if (!$saveBon) {
+            $db->transRollback();
             session()->setFlashdata('error', "Gagal menyimpan data Bon");
+            return redirect()->to(base_url($this->role . "/otherIn"));
+        }
+
+        // 2) Loop insert karung + pemasukan
+        $jumlahKrg = count($data['no_karung']);
+        for ($i = 0; $i < $jumlahKrg; $i++) {
+            // a) outCelup
+            $dataKrg = [
+                'id_other_bon' => $id_other_in,
+                'no_model'     => $data['no_model'],
+                'l_m_d'        => $data['l_m_d'],
+                'harga'        => $data['harga'],
+                'no_karung'    => $data['no_karung'][$i],
+                'gw_kirim'     => $data['gw'][$i],
+                'kgs_kirim'    => $data['kgs'][$i],
+                'cones_kirim'  => $data['cones'][$i],
+                'lot_kirim'    => $data['lot'],
+                'ganti_retur'  => $data['ganti_retur'],
+                'admin'        => session()->get('username'),
+                'created_at'   => date('Y-m-d H:i:s'),
+            ];
+            $saveKrg      = $this->outCelupModel->insert($dataKrg);
+            $id_out_celup = $this->outCelupModel->insertID();
+
+            if (!$saveKrg) {
+                $db->transRollback();
+                session()->setFlashdata('error', "Gagal menyimpan data Karung ke-$i");
+                return redirect()->to(base_url($this->role . "/otherIn"));
+            }
+
+            // b) pemasukan
+            $dataPemasukan = [
+                'id_out_celup' => $id_out_celup,
+                'tgl_masuk'    => date('Y-m-d'),
+                'nama_cluster' => $data['cluster'][$i],
+                'out_jalur'    => 0,
+                'admin'        => session()->get('username'),
+                'created_at'   => date('Y-m-d H:i:s'),
+            ];
+            $savePemasukan = $this->pemasukanModel->insert($dataPemasukan);
+
+            if (!$savePemasukan) {
+                $db->transRollback();
+                session()->setFlashdata('error', "Gagal menyimpan pemasukan ke-$i");
+                return redirect()->to(base_url($this->role . "/otherIn"));
+            }
+        }
+
+        // 3) Commit jika semua berhasil
+        if ($db->transStatus() === false) {
+            $db->transRollback();
+            session()->setFlashdata('error', "Transaksi gagal, data dibatalkan");
+        } else {
+            $db->transCommit();
+            session()->setFlashdata('success', "Data berhasil disimpan");
         }
 
         return redirect()->to(base_url($this->role . "/otherIn"));
@@ -2380,7 +2483,7 @@ class WarehouseController extends BaseController
         $key = $this->request->getGet('key');
 
         $data = $this->stockModel->getFilterReportGlobalBenang($key);
-
+        // dd($data);
         return $this->response->setJSON($data);
     }
 
@@ -2565,47 +2668,184 @@ class WarehouseController extends BaseController
             'history' => $dataPindah,
         ]);
     }
-    public function HistoryPinjamOrder()
+
+    public function reportSisaDatangBenang()
     {
-        $noModel   = $this->request->getGet('model')     ?? '';
-        $kodeWarna = $this->request->getGet('kode_warna') ?? '';
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $bulanMap = [
+            'Januari' => 1,
+            'Februari' => 2,
+            'Maret' => 3,
+            'April' => 4,
+            'Mei' => 5,
+            'Juni' => 6,
+            'Juli' => 7,
+            'Agustus' => 8,
+            'September' => 9,
+            'Oktober' => 10,
+            'November' => 11,
+            'Desember' => 12
+        ];
+        $bulan = $bulanMap[$delivery] ?? null;
+        // dd($bulan);
+        $getFilterData = $this->materialModel->getFilterSisaDatangBenang($bulan, $noModel, $kodeWarna);
+        // dd($getFilterData);
+        if ($this->request->isAJAX()) {
+            // set header JSON dan langsung echo data
+            return $this->response
+                ->setStatusCode(200)
+                ->setJSON($getFilterData);
+        }
 
-        // 1) Ambil data
-        // $dataPindah = $this->historyStock->getHistoryPindahOrder($noModel, $kodeWarna);
-        $dataPindah = $this->historyStock->getHistoryPinjamOrder($noModel, $kodeWarna);
+        $data = [
+            'active' => $this->active,
+            'role' => $this->role,
+            'title' => 'Report Sisa Datang Benang',
+            'getFilterData' => $getFilterData
+        ];
+        // dd($data);
 
-        // // 2) Siapkan HTTP client
-        // $client = \Config\Services::curlrequest([
-        //     'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
-        //     'timeout' => 5
-        // ]);
+        return view($this->role . '/warehouse/report-sisa-datang-benang', $data);
+    }
 
-        // // 3) Loop dan merge API result
-        // foreach ($dataPindah as &$row) {
-        //     try {
-        //         $res = $client->get('getDeliveryAwalAkhir', [
-        //             'query' => ['model' => $row['no_model_new']]
-        //         ]);
-        //         $body = json_decode($res->getBody(), true);
-        //         $row['delivery_awal']  = $body['delivery_awal']  ?? '-';
-        //         $row['delivery_akhir'] = $body['delivery_akhir'] ?? '-';
-        //     } catch (\Exception $e) {
-        //         $row['delivery_awal']  = '-';
-        //         $row['delivery_akhir'] = '-';
-        //     }
-        // }
-        // unset($row);
+    public function reportSisaDatangNylon()
+    {
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $bulanMap = [
+            'Januari' => 1,
+            'Februari' => 2,
+            'Maret' => 3,
+            'April' => 4,
+            'Mei' => 5,
+            'Juni' => 6,
+            'Juli' => 7,
+            'Agustus' => 8,
+            'September' => 9,
+            'Oktober' => 10,
+            'November' => 11,
+            'Desember' => 12
+        ];
+        $bulan = $bulanMap[$delivery] ?? null;
 
-        // // 4) Response
-        // if ($this->request->isAJAX()) {
-        //     return $this->response->setJSON($dataPindah);
-        // }
+        $getFilterData = $this->materialModel->getFilterSisaDatangNylon($bulan, $noModel, $kodeWarna);
 
-        return view($this->role . '/pemesanan/history-pinjam-order', [
-            'role'    => $this->role,
-            'title'   => 'History Pindah Order',
-            'active'  => $this->active,
-            'history' => $dataPindah,
-        ]);
+        if ($this->request->isAJAX()) {
+            // set header JSON dan langsung echo data
+            return $this->response
+                ->setStatusCode(200)
+                ->setJSON($getFilterData);
+        }
+
+        $data = [
+            'active' => $this->active,
+            'role' => $this->role,
+            'title' => 'Report Sisa Datang Nylon',
+            'getFilterData' => $getFilterData
+        ];
+
+        return view($this->role . '/warehouse/report-sisa-datang-nylon', $data);
+    }
+
+    public function reportSisaDatangSpandex()
+    {
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $bulanMap = [
+            'Januari' => 1,
+            'Februari' => 2,
+            'Maret' => 3,
+            'April' => 4,
+            'Mei' => 5,
+            'Juni' => 6,
+            'Juli' => 7,
+            'Agustus' => 8,
+            'September' => 9,
+            'Oktober' => 10,
+            'November' => 11,
+            'Desember' => 12
+        ];
+        $bulan = $bulanMap[$delivery] ?? null;
+
+        $getFilterData = $this->materialModel->getFilterSisaDatangSpandex($bulan, $noModel, $kodeWarna);
+
+        if ($this->request->isAJAX()) {
+            // set header JSON dan langsung echo data
+            return $this->response
+                ->setStatusCode(200)
+                ->setJSON($getFilterData);
+        }
+
+        $data = [
+            'active' => $this->active,
+            'role' => $this->role,
+            'title' => 'Report Sisa Datang Spandex',
+            'getFilterData' => $getFilterData
+        ];
+
+        return view($this->role . '/warehouse/report-sisa-datang-spandex', $data);
+    }
+
+    public function reportSisaDatangKaret()
+    {
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $bulanMap = [
+            'Januari' => 1,
+            'Februari' => 2,
+            'Maret' => 3,
+            'April' => 4,
+            'Mei' => 5,
+            'Juni' => 6,
+            'Juli' => 7,
+            'Agustus' => 8,
+            'September' => 9,
+            'Oktober' => 10,
+            'November' => 11,
+            'Desember' => 12
+        ];
+        $bulan = $bulanMap[$delivery] ?? null;
+
+        $getFilterData = $this->materialModel->getFilterSisaDatangKaret($bulan, $noModel, $kodeWarna);
+
+        if ($this->request->isAJAX()) {
+            // set header JSON dan langsung echo data
+            return $this->response
+                ->setStatusCode(200)
+                ->setJSON($getFilterData);
+        }
+
+        $data = [
+            'active' => $this->active,
+            'role' => $this->role,
+            'title' => 'Report Sisa Datang Karet',
+            'getFilterData' => $getFilterData
+        ];
+
+        return view($this->role . '/warehouse/report-sisa-datang-karet', $data);
+    }
+
+    public function reportBenangMingguan()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Report Benang Per Minggu',
+            'active' => $this->active
+        ];
+        return view($this->role . '/warehouse/report-benang-mingguan', $data);
+    }
+
+    public function filterBenangMingguan()
+    {
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemasukanModel->getFilterBenangMingguan($tanggalAwal, $tanggalAkhir);
+        return $this->response->setJSON($data);
     }
 }

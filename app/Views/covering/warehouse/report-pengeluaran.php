@@ -18,9 +18,13 @@
             <!-- Filter Tanggal -->
             <div class="row mb-3">
                 <!-- Kolom Input Tanggal -->
-                <div class="col-md-8">
+                <div class="col-md-4">
                     <label for="filterDate" class="form-label fw-bold text-dark">Pilih Tanggal:</label>
                     <input type="date" id="filterDate" class="form-control shadow-sm" value="<?= esc($selectedDate) ?>">
+                </div>
+                <div class="col-md-4">
+                    <label for="filterDate" class="form-label fw-bold text-dark">Pilih Tanggal (Akhir):</label>
+                    <input type="date" id="filterDate2" class="form-control shadow-sm" value="<?= esc($selectedDate2) ?>">
                 </div>
 
                 <!-- Kolom Aksi -->
@@ -99,16 +103,21 @@
         });
 
         $('#filterButton').click(function() {
-            let selectedDate = $('#filterDate').val();
-            if (selectedDate) {
-                window.location.href = "<?= base_url($role . '/warehouse/reportPengeluaran') ?>?date=" + selectedDate;
+            let d1 = $('#filterDate').val();
+            let d2 = $('#filterDate2').val();
+            if (d1 && d2) {
+                // Tampilkan tombol export
+                $('#exportButton').removeClass('d-none');
+                // Redirect dengan dua parameter GET
+                const base = "<?= base_url($role . '/warehouse/reportPengeluaran') ?>";
+                window.location.href = `${base}?date=${encodeURIComponent(d1)}&date2=${encodeURIComponent(d2)}`;
             } else {
-                alert('Silakan pilih tanggal terlebih dahulu.');
+                alert('Silakan pilih tanggal awal dan akhir terlebih dahulu.');
             }
         });
 
         $('#resetButton').click(function() {
-            $('#filterDate').val(''); // Kosongkan input tanggal
+            $('#filterDate', '#filterDate2').val(''); // Kosongkan input tanggal 
             window.location.href = "<?= base_url($role . '/warehouse/reportPengeluaran') ?>"; // Refresh ke halaman awal
         });
 
@@ -120,11 +129,13 @@
 
         // Tombol export (aksi bisa diarahkan ke controller yang handle export)
         $('#exportButton').click(function() {
-            let selectedDate = $('#filterDate').val();
-            if (selectedDate) {
-                window.location.href = "<?= base_url($role . '/warehouse/excelPengeluaranCovering') ?>?date=" + selectedDate;
+            let d1 = $('#filterDate').val();
+            let d2 = $('#filterDate2').val();
+            if (d1 && d2) {
+                const url = "<?= base_url($role . '/warehouse/excelPengeluaranCovering') ?>";
+                window.location.href = `${url}?date=${encodeURIComponent(d1)}&date2=${encodeURIComponent(d2)}`;
             } else {
-                alert('Silakan pilih tanggal terlebih dahulu.');
+                alert('Silakan pilih tanggal awal dan akhir terlebih dahulu.');
             }
         });
     });

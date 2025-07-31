@@ -263,7 +263,16 @@ class MaterialController extends BaseController
     {
         $model = $this->request->getPost('model'); // Gunakan POST
         $area = $this->request->getPost('area');
+        $delivery = $this->request->getPost('delivery');
+        $unit = $this->request->getPost('pu');
 
+        if ($unit == 'CJ') {
+            $unit = 'Cijerah';
+        } elseif ($unit == 'MJ') {
+            $unit = 'Majalaya';
+        } else {
+            $unit = 'Belum di Assign';
+        }
         $idOrder = $this->masterOrderModel
             ->where('no_model', $model)
             ->first();
@@ -272,7 +281,15 @@ class MaterialController extends BaseController
             return $this->response->setStatusCode(404)->setJSON(['error' => 'Material belum ada']);
         }
 
-        $update = $this->materialModel->assignAreal($idOrder['id_order'], $area);
+        $update = $this->masterOrderModel->update(
+            $idOrder['id_order'],
+            [
+                'delivery_awal' => $delivery['delivery_awal'],
+                'delivery_akhir' => $delivery['delivery_akhir'],
+                'unit' => $unit
+            ]
+        );
+        $areal = $this->materialModel->assignAreal($idOrder['id_order'], $area);
 
         if ($update) {
             return $this->response->setStatusCode(200)->setJSON(['success' => 'Berhasil Assign Area']);
@@ -382,5 +399,21 @@ class MaterialController extends BaseController
         } else {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menghapus data']);
         }
+    }
+
+    public function deleteSelected()
+    {
+        if ($this->request->isAJAX()) {
+            $ids = $this->request->getJSON()->ids ?? [];
+
+            if (!empty($ids)) {
+                $this->materialModel->whereIn('id_material', $ids)->delete();
+                return $this->response->setJSON(['status' => 'success', 'message' => 'Data berhasil dihapus.']);
+            } else {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Tidak ada data untuk dihapus.']);
+            }
+        }
+
+        return redirect()->back()->with('error', 'Permintaan tidak valid.');
     }
 }

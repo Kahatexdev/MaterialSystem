@@ -141,7 +141,7 @@ class CelupController extends BaseController
     public function editStatus($id)
     {
         $sch = $this->scheduleCelupModel->getDataByIdCelup($id);
-        // dd ($sch);
+        // dd($sch);
         $uniqueData = [];
         foreach ($sch as $key => $id) {
             // Ambil parameter dari data schedule
@@ -219,7 +219,10 @@ class CelupController extends BaseController
                     'last_status' => $id['last_status'],
                     'ket_daily_cek' => $id['ket_daily_cek'],
                     'qty_celup_plus' => $id['qty_celup_plus'],
+                    'ket_schedule' => $id['ket_schedule'],
                     'admin' => $id['user_cek_status'],
+                    'created_at' => $id['created_at'],
+                    'updated_at' => $id['updated_at'],
                 ];
             }
         }
@@ -253,6 +256,7 @@ class CelupController extends BaseController
         $tglMatching = $this->request->getPost('tgl_matching');
         $tglPB = $this->request->getPost('tgl_pb');
         $qtyCelup = $this->request->getPost('qty_celup');
+        $ketSchedule = $this->request->getPost('ket_schedule');
         $user  = session()->get('username');
 
         // Array untuk menyimpan nama variabel dan nilai tanggal
@@ -315,6 +319,7 @@ class CelupController extends BaseController
         if ($user) $dataUpdate['user_cek_status'] = $user;
         if ($ketDailyCek) $dataUpdate['ket_daily_cek'] = $ketDailyCek;
         $dataUpdate['kg_celup'] = $qtyCelup;
+        $dataUpdate['ket_schedule'] = $ketSchedule;
 
         // Jika tgl_bon diisi, update last_status menjadi 'bon'
         if (!empty($tglBon)) {
@@ -384,6 +389,7 @@ class CelupController extends BaseController
         if (!$existingProduction) {
             return redirect()->back()->with('error', 'Data tidak ditemukan.');
         }
+        // dd($dataUpdate);
         // Perbarui data di database
         $this->scheduleCelupModel->update($id, $dataUpdate);
 
@@ -495,7 +501,7 @@ class CelupController extends BaseController
 
     public function createBon()
     {
-        $no_model = $this->scheduleCelupModel->getCelupDone();
+        $no_model = $this->scheduleCelupModel->getCelupDoneAndComplain();
         // dd($no_model);
         $data = [
             'role' => $this->role,

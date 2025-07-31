@@ -526,10 +526,14 @@ class ScheduleController extends BaseController
 
         $min = $this->mesinCelupModel->getMinCaps($no_mesin);
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
-
+        $jmlLot = $this->mesinCelupModel->select('jml_lot')
+            ->where('no_mesin', $no_mesin)
+            ->first();
+        $jmlLot = intval($jmlLot['jml_lot']); // Pastikan jmlLot adalah integer
+        // dd($jmlLot);
         $scheduleData = $this->scheduleCelupModel->getScheduleDetailsData($id_mesin, $tanggal_schedule, $lot_urut);
         // dd($scheduleData);
-        // dd($scheduleData);
+
         if (!empty($scheduleData['id_induk'])) {
         }
         foreach ($scheduleData as &$item) {
@@ -627,6 +631,7 @@ class ScheduleController extends BaseController
             // 'jenis' => $jenis[0]['jenis'],
             'kode_warna' => $kodeWarna,
             'warna' => $warna,
+            'jmlLot' => $jmlLot,
         ];
         // dd ($data);
         return view($this->role . '/schedule/form-edit', $data);
@@ -1032,9 +1037,11 @@ class ScheduleController extends BaseController
     public function reqschedule()
     {
         $filterTglSch = $this->request->getPost('filter_tglsch');
+        $filterTglSchsampai = $this->request->getPost('filter_tglschsampai');
         $filterNoModel = $this->request->getPost('filter_nomodel');
 
-        $sch = $this->scheduleCelupModel->getSchedule($filterTglSch, $filterNoModel);
+        $sch = $this->scheduleCelupModel->getSchedule($filterTglSch, $filterTglSchsampai, $filterNoModel);
+        // dd ($sch);
         // if ($filterTglSch && $filterNoModel) {
         //     $sch = array_filter($sch, function ($data) use ($filterTglSch, $filterNoModel) {
         //         return $data['tanggal_schedule'] === $filterTglSch &&
@@ -1086,6 +1093,7 @@ class ScheduleController extends BaseController
                     'lot_urut' => $id['lot_urut'],
                     'tgl_schedule' => $id['tanggal_schedule'],
                     'last_status' => $id['last_status'],
+                    'admin' => $id['user_cek_status']
                 ];
             }
         }
@@ -1198,13 +1206,13 @@ class ScheduleController extends BaseController
 
     public function filterSchBenang()
     {
-        $key = $this->request->getGet('key');
-        $tanggalSch = $this->request->getGet('tanggal_schedule');
+        $key = $this->request->getGet('key') ?? '';
+        $tanggalSch = $this->request->getGet('tanggal_schedule') ?? '';
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
-        $data = $this->scheduleCelupModel->getFilterSchBenang($key, $tanggalSch, $tanggalAwal, $tanggalAkhir);
-
+        $data = $this->scheduleCelupModel->getFilterSchBenang($tanggalAwal, $tanggalAkhir, $key, $tanggalSch);
+        // dd ($data);
         return $this->response->setJSON($data);
     }
 
@@ -1221,12 +1229,12 @@ class ScheduleController extends BaseController
 
     public function filterSchNylon()
     {
-        $key = $this->request->getGet('key');
-        $tanggalSch = $this->request->getGet('tanggal_schedule');
+        $key = $this->request->getGet('key') ?? '';
+        $tanggalSch = $this->request->getGet('tanggal_schedule') ?? '';
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
-        $data = $this->scheduleCelupModel->getFilterSchNylon($key, $tanggalSch, $tanggalAwal, $tanggalAkhir);
+        $data = $this->scheduleCelupModel->getFilterSchNylon($tanggalAwal, $tanggalAkhir, $key, $tanggalSch);
 
         return $this->response->setJSON($data);
     }
@@ -1246,7 +1254,7 @@ class ScheduleController extends BaseController
     {
         $tglAwal = $this->request->getGet('tanggal_awal');
         $tglAkhir = $this->request->getGet('tanggal_akhir');
-        $jenis = $this->request->getGet('jenis');
+        $jenis = $this->request->getGet('jenis') ?? '';
         $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir, $jenis);
         // dd($data);
 

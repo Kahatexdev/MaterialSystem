@@ -40,8 +40,8 @@
                         <tr>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
+                            <!-- <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th> -->
+                            <!-- <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th> -->
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
@@ -53,6 +53,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <!--  -->
                     </tbody>
                 </table>
             </div>
@@ -80,13 +81,13 @@
         });
 
         $('#btnExportAll').click(function() {
-            window.location.href = "<?= base_url("$role/warehouse/exportHistoryPindahOrder") ?>";
+            window.location.href = "<?= base_url("$role/pemesanan/exportHistoryPinjamOrder") ?>";
         });
 
         $('#btnExport').click(function() {
             const m = $('#no_model').val().trim();
             const k = $('#kode_warna').val().trim();
-            window.location.href = "<?= base_url("$role/warehouse/exportHistoryPindahOrder") ?>" +
+            window.location.href = "<?= base_url("$role/pemesanan/exportHistoryPinjamOrder") ?>" +
                 "?model=" + encodeURIComponent(m) +
                 "&kode_warna=" + encodeURIComponent(k);
         });
@@ -116,7 +117,7 @@
             }
 
             $.ajax({
-                url: "<?= base_url($role . '/warehouse/historyPindahOrder') ?>",
+                url: "<?= base_url($role . '/pemesanan/historyPinjamOrder') ?>",
                 type: "GET",
                 data: {
                     model: no_model,
@@ -129,9 +130,7 @@
                     $.each(response, function(index, item) {
                         dataTable.row.add([
                             index + 1,
-                            item.no_model_old || '-',
-                            item.delivery_awal,
-                            item.delivery_akhir,
+                            item.no_model_dipinjam || '-',
                             item.item_type || '-',
                             item.kode_warna || '-',
                             item.warna || '-',
@@ -139,7 +138,7 @@
                             item.cns,
                             item.lot,
                             item.cluster_old,
-                            item.created_at + ' ' + item.keterangan + ' ke ' + item.no_model_new + ' kode ' + item.kode_warna
+                            item.created_at + ' ' + 'Di' + item.keterangan + ' ' + item.no_model_meminjam + ' kode ' + item.kode_warna + ' (' + item.admin + ')'
                         ]).draw(false);
                     });
 
@@ -155,7 +154,7 @@
 
         function loadDefaultData() {
             $.ajax({
-                url: "<?= base_url($role . '/warehouse/historyPindahOrder') ?>",
+                url: "<?= base_url($role . '/pemesanan/historyPinjamOrder') ?>",
                 type: "GET",
                 dataType: "json",
                 success: function(response) {
@@ -164,9 +163,7 @@
                     $.each(response, function(index, item) {
                         dataTable.row.add([
                             index + 1,
-                            item.no_model_old || '-',
-                            item.delivery_awal,
-                            item.delivery_akhir,
+                            item.no_model_dipinjam || '-',
                             item.item_type || '-',
                             item.kode_warna || '-',
                             item.warna || '-',
@@ -174,7 +171,7 @@
                             item.cns,
                             item.lot,
                             item.cluster_old,
-                            item.created_at + ' ' + item.keterangan + ' ke ' + item.no_model_new + ' kode ' + item.kode_warna
+                            item.created_at + ' ' + 'Di' + item.keterangan + ' ' + item.no_model_meminjam + ' kode ' + item.kode_warna + ' (' + item.admin + ')'
                         ]).draw(false);
                     });
                 },

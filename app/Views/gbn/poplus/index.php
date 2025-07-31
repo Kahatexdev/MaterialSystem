@@ -81,6 +81,10 @@
                                             data-warna="<?= $data['kode_warna'] ?>" data-status="<?= $data['status'] ?>" data-area="<?= $data['admin'] ?>" data-bs-toggle="modal" data-bs-target="#approveModal">
                                             Approve
                                         </button>
+                                        <button class="btn btn-info btn-sm btn-danger btn-reject" data-id="<?= $data['id_po_tambahan'] ?>" data-tgl="<?= $data['tgl_poplus'] ?>" data-model="<?= $data['no_model'] ?>" data-type="<?= $data['item_type'] ?>"
+                                            data-warna="<?= $data['kode_warna'] ?>" data-status="<?= $data['status'] ?>" data-area="<?= $data['admin'] ?>" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                                            Reject
+                                        </button>
                                     <?php else: ?>
                                         <a class="btn btn-success btn-sm" href="<?= base_url($role . '/masterdata/poGabungan/' . $data['jenis']) ?>"> BUKA PO (+)
                                         </a> <!-- Font Awesome centang hijau -->
@@ -131,6 +135,36 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade  bd-example-modal-reject" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="modalCancel" aria-hidden="true">
+    <div class="modal-dialog  modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Reject</h5>
+                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="<?= base_url($role . '/rejectPoPlusArea') ?>" method="post">
+                    <input type="hidden" name="id_po_tambahan" id="reject-modal-id">
+                    <input type="hidden" name="tgl_poplus" id="reject-modal-tgl">
+                    <input type="hidden" name="no_model" id="reject-modal-model">
+                    <input type="hidden" name="item_type" id="reject-modal-type">
+                    <input type="hidden" name="kode_warna" id="reject-modal-warna">
+                    <input type="hidden" name="status" id="reject-modal-status">
+                    <input type="hidden" name="area" id="reject-modal-area">
+                    <label for="ket_gbn">Keterangan</label>
+                    <input type="text" class="form-control" name="ket_gbn">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn bg-gradient-danger">Yes</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script type="text/javascript">
     $(document).ready(function() {
@@ -152,6 +186,22 @@
                 document.getElementById('modal-warna').value = this.getAttribute('data-warna');
                 document.getElementById('modal-status').value = this.getAttribute('data-status');
                 document.getElementById('modal-area').value = this.getAttribute('data-area');
+            });
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const buttons = document.querySelectorAll('.btn-reject');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                document.getElementById('reject-modal-id').value = this.getAttribute('data-id');
+                document.getElementById('reject-modal-tgl').value = this.getAttribute('data-tgl');
+                document.getElementById('reject-modal-model').value = this.getAttribute('data-model');
+                document.getElementById('reject-modal-type').value = this.getAttribute('data-type');
+                document.getElementById('reject-modal-warna').value = this.getAttribute('data-warna');
+                document.getElementById('reject-modal-status').value = this.getAttribute('data-status');
+                document.getElementById('reject-modal-area').value = this.getAttribute('data-area');
             });
         });
     });

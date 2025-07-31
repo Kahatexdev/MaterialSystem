@@ -1,6 +1,9 @@
 <?php $this->extend($role . '/warehouse/header'); ?>
 <?php $this->section('content'); ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.21.1/dist/bootstrap-table.min.css" />
 <style>
     .summary-card {
         border-left: 4px solid #007bff;
@@ -47,6 +50,28 @@
         </script>
     <?php endif; ?>
 
+    <!-- ALERT FLASHDATA -->
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3" role="alert">
+            <?= session()->getFlashdata('error') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('warning')): ?>
+        <div class="alert alert-warning alert-dismissible fade show mx-3 mt-3" role="alert">
+            <?= session()->getFlashdata('warning') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show mx-3 mt-3" role="alert">
+            <?= session()->getFlashdata('success') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
     <?php
     // Calculate summary and filter data
     $total_items = count($stok);
@@ -54,11 +79,6 @@
     $items_available = count(array_filter($stok, fn($item) => $item['status'] == 'ada'));
     $items_out_of_stock = $total_items - $items_available;
 
-    // Extract unique values for new filters, handling potential nulls
-    $unique_jenis_mesin = array_unique(array_column(array_filter($stok, fn($item) => !empty($item['jenis_mesin'])), 'jenis_mesin'));
-    $unique_dr = array_unique(array_column(array_filter($stok, fn($item) => !empty($item['dr'])), 'dr'));
-    sort($unique_jenis_mesin);
-    sort($unique_dr);
     ?>
 
     <!-- Summary Cards -->
@@ -117,103 +137,127 @@
         </div>
     </div>
 
+
     <!-- Header Card & Filter Section -->
     <div class="card mb-4">
         <div class="card-body">
-            <h5 class="card-title">Manajemen Stok Barang Jadi Covering</h5>
-            <div class="row g-2 align-items-center">
-                <div class="col-lg-3 col-md-6">
-                    <div class="input-group"><span class="input-group-text bg-white"><i class="fas fa-search"></i></span><input type="text" id="searchInput" class="form-control" placeholder="Cari jenis barang..."></div>
+            <div class="row mt-2 align-items-end">
+                <div class="col-md-5">
+                    <h5 class="card-title mb-3">Warehouse Barang Jadi Covering</h5>
+
                 </div>
-                <div class="col-lg-2 col-md-6"><select id="filterStatus" class="form-select">
-                        <option value="">Semua Status</option>
-                        <option value="ada">Tersedia</option>
-                        <option value="habis">Tidak Tersedia</option>
-                    </select></div>
-                <div class="col-lg-2 col-md-6"><select id="filterMesin" class="form-select">
-                        <option value="">Semua Mesin</option><?php foreach ($unique_jenis_mesin as $mesin) : ?><option value="<?= $mesin ?>"><?= $mesin ?></option><?php endforeach; ?>
-                    </select></div>
-                <div class="col-lg-2 col-md-6"><select id="filterDr" class="form-select">
-                        <option value="">Semua DR</option><?php foreach ($unique_dr as $dr) : ?><option value="<?= $dr ?>"><?= $dr ?></option><?php endforeach; ?>
-                    </select></div>
-                <div class="col-lg-3 col-md-12 d-flex justify-content-lg-end justify-content-center gap-2 mt-2 mt-lg-0">
-                    <button class="btn bg-gradient-info" data-bs-toggle="modal" data-bs-target="#addItemModal"><i class="fas fa-plus me-1"></i> Jenis</button>
-                    <button class="btn bg-gradient-success" data-bs-toggle="modal" data-bs-target="#exportModal"><i class="fas fa-file-excel me-1"></i> Export</button>
+                <div class="col-md-7 d-flex justify-content-center align-items-center gap-2">
+                    <button class="btn bg-gradient-info" type="button" data-bs-toggle="modal" data-bs-target="#importModal">
+                        <i class="fas fa-file-import me-1"></i> Import Jenis
+                    </button>
+                    <button class="btn bg-gradient-info" type="button" data-bs-toggle="modal" data-bs-target="#importStok">
+                        <i class="fas fa-file-import me-1"></i> Import Stok
+                    </button>
+                    <button class="btn bg-gradient-primary" type="button" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                        <i class="fas fa-plus me-1"></i> Jenis
+                    </button>
+                    <button class="btn bg-gradient-success" type="button" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <i class="fas fa-file-excel me-1"></i> Export
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Grid View -->
-    <div class="row g-3" id="warehouseGrid">
-        <?php if (empty($stok)) : ?>
-            <div class="col-12">
-                <div class="alert alert-info text-center">Belum ada data stok.</div>
-            </div>
-        <?php else : ?>
-            <?php foreach ($stok as $item) : ?>
-                <div class="col-4 warehouse-card"
-                    data-status="<?= $item['status'] ?? '' ?>"
-                    data-name="<?= strtolower($item['jenis'] ?? '') ?>"
-                    data-mesin="<?= $item['jenis_mesin'] ?? '' ?>"
-                    data-dr="<?= $item['dr'] ?? '' ?>">
-                    <div class="card h-100 border">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
-                            <h6 class="mb-0 text-truncate"><?= $item['jenis'] ?></h6>
-                            <span class="badge <?= $item['status'] == 'ada' ? 'bg-gradient-info' : 'bg-gradient-secondary' ?>">
-                                <?= ucfirst($item['status']) ?>
-                            </span>
-                        </div>
-                        <div class="card-body small">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Color:</span> <span class="fw-bold"><?= $item['color'] ?></span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Code:</span> <span class="fw-bold"><?= $item['code'] ?></span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Jenis Mesin:</span> <span class="fw-bold"><?= $item['jenis_mesin'] ?? '-' ?></span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>DR:</span> <span class="fw-bold"><?= $item['dr'] ?? '-' ?></span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Stok:</span> <span class="fw-bold"><?= $item['ttl_kg'] ?> Kg</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Update:</span> <span class="fw-bold"><?= $item['updated_at'] ?? 'N/A' ?></span>
-                            </div>
-                        </div>
-                        <div class="card-footer bg-white">
-                            <div class="row g-2 mb-2">
-                                <div class="col-12 col-md-6 d-grid">
-                                    <button
-                                        class="btn bg-gradient-info btn-sm btn-custom"
-                                        onclick="addStock(<?= $item['id_covering_stock'] ?>)">
-                                        <i class="fas fa-plus me-1"></i> Pemasukan
-                                    </button>
-                                </div>
-                                <div class="col-12 col-md-6 d-grid">
-                                    <button
-                                        class="btn bg-gradient-danger btn-sm btn-custom <?= $item['ttl_kg'] <= 0 ? 'disabled' : '' ?>"
-                                        onclick="removeStock(<?= $item['id_covering_stock'] ?>)">
-                                        <i class="fas fa-minus me-1"></i> Pengeluaran
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="d-grid">
-                                <button
-                                    class="btn btn-outline-secondary btn-sm btn-custom"
-                                    onclick="editItem(<?= $item['id_covering_stock'] ?>)">
-                                    <i class="fas fa-edit me-1"></i> Edit Detail
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Filter Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label for="filterJenis" class="form-label">Filter Jenis Barang</label>
+                    <select id="filterJenis" name="jenis" class="form-select">
+                        <option value="">-- Semua Jenis --</option>
+                        <?php foreach ($jenisOptions as $j): ?>
+                            <option value="<?= esc($j) ?>" <?= $fJenis === $j ? 'selected' : '' ?>>
+                                <?= esc($j) ?>
+                            </option>
+                        <?php endforeach ?>
+                    </select>
                 </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
+                <div class="col-md-3">
+                    <label for="filterBenang" class="form-label">Filter Jenis Benang</label>
+                    <select id="filterBenang" name="jenis_benang" class="form-select">
+                        <option value="">-- Semua Benang --</option>
+                        <?php foreach ($benangOptions as $b): ?>
+                            <option value="<?= esc($b) ?>" <?= $fBenang === $b ? 'selected' : '' ?>>
+                                <?= esc($b) ?>
+                            </option>
+                        <?php endforeach ?>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="filterMesin" class="form-label">Filter Jenis Mesin</label>
+                    <select id="filterMesin" name="jenis_mesin" class="form-select">
+                        <option value="">-- Semua Mesin --</option>
+                        <?php foreach ($mesinOptions as $m): ?>
+                            <option value="<?= esc($m) ?>" <?= $fMesin === $m ? 'selected' : '' ?>>
+                                <?= esc($m) ?>
+                            </option>
+                        <?php endforeach ?>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex justify-content-center align-items-end">
+                    <button type="submit" class="btn bg-gradient-info mt-2 me-2">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                    <a href="<?= current_url() ?>" class="btn bg-gradient-secondary mt-2">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <div class="card">
+        <div class="card-body table-responsive">
+            <table id="stokTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Jenis Mesin</th>
+                        <th>Jenis Barang</th>
+                        <th>DR</th>
+                        <th>Color</th>
+                        <th>Code</th>
+                        <th>LMD</th>
+                        <th>Cones</th>
+                        <th>Kg</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($stok as $i => $item): ?>
+                        <tr>
+                            <td><?= $i + 1 ?></td>
+                            <td><?= esc($item['jenis_mesin']) ?></td>
+                            <td><?= esc($item['jenis']) ?></td>
+                            <td><?= esc($item['dr']) ?></td>
+                            <td><?= esc($item['color']) ?></td>
+                            <td><?= esc($item['code']) ?></td>
+                            <td><?= esc($item['lmd']) ?></td>
+                            <td><?= esc($item['ttl_cns'] ?? '-') ?></td>
+                            <td><?= esc(number_format($item['ttl_kg'], 2)) ?> Kg</td>
+                            <td>
+                                <button class="btn btn-warning" onclick="editItem(<?= $item['id_covering_stock'] ?>)">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-danger" onclick="confirmDelete(<?= $item['id_covering_stock'] ?>)">
+                                    <i class="fas fa-trash"></i> Hapus
+                                </button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
 
     <!-- Modals -->
     <!-- Add New Item Modal -->
@@ -230,7 +274,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3"><label class="form-label">Jenis Barang</label><input type="text" class="form-control" name="jenis" required></div>
                                 <div class="mb-3"><label class="form-label">Jenis Mesin</label><input type="text" class="form-control" name="jenis_mesin"></div>
-                                <div class="mb-3"><label class="form-label">DR (Daurasio)</label><input type="text" class="form-control" name="dr"></div>
+                                <div class="mb-3"><label class="form-label">DR (Draw Rasio)</label><input type="text" class="form-control" name="dr"></div>
                                 <div class="mb-3"><label class="form-label">Jenis Cover</label><select class="form-select" name="jenis_cover" required>
                                         <option value="">Pilih...</option>
                                         <option value="SINGLE">SINGLE</option>
@@ -242,6 +286,7 @@
                                         <option value="MYSTY">MYSTY</option>
                                         <option value="POLYESTER">POLYESTER</option>
                                         <option value="NYLON">NYLON</option>
+                                        <option value="RECYCLED">RECYCLED</option>
                                     </select>
                                 </div>
                             </div>
@@ -305,33 +350,6 @@
         </div>
     </div>
 
-    <!-- Other Modals (Stock Transaction, Export) remain the same as before -->
-    <div class="modal fade" id="stockModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="stockModalLabel">Transaksi Stok</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="stockForm" autocomplete="off"><input type="hidden" id="stockItemId" name="stockItemId"><input type="hidden" id="stockAction" name="action">
-                        <div class="mb-3 row">
-                            <div class="col-6">
-                                <label class="form-label">No Model</label><input type="text" class="form-control" id="no_model" name="no_model" required>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label">Keterangan</label><input type="text" class="form-control" id="stockNote" name="stockNote" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-6"><label class="form-label">Jumlah KG</label><input type="number" class="form-control" id="stockAmount" name="stockAmount" step="0.01" required></div>
-                            <div class="col-6"><label class="form-label">Jumlah Cones</label><input type="number" class="form-control" id="amountcones" name="amountcones" required></div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer"><button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Batal</button><button type="button" class="btn bg-gradient-info" id="saveStockBtn">Simpan</button></div>
-            </div>
-        </div>
-    </div>
     <div class="modal fade" id="exportModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -340,96 +358,181 @@
                 </div>
                 <form action="<?= base_url('covering/warehouse/exportStock') ?>" method="POST">
                     <div class="modal-body">
-                        <div class="mb-3"><label class="form-label">Jenis Cover</label><select class="form-select" name="jenis_cover">
+                        <div class="mb-3"><label class="form-label">Jenis Mesin</label><select class="form-select" name="jenis_mesin">
                                 <option value="">Semua</option>
-                                <option value="SINGLE">SINGLE</option>
-                                <option value="DOUBLE">DOUBLE</option>
-                            </select></div>
+                                <?php foreach ($mesinOptions as $mesin): ?>
+                                    <option value="<?= esc($mesin) ?>"><?= esc($mesin) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        
                         <div class="mb-3"><label class="form-label">Jenis Benang</label><select class="form-select" name="jenis_benang">
                                 <option value="">Semua</option>
                                 <option value="NYLON">NYLON</option>
                                 <option value="POLYESTER">POLYESTER</option>
-                            </select></div>
+                                <option value="MYSTY">MYSTY</option>
+                                <option value="RECYCLED">RECYCLED</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3"><label class="form-label">Jenis Cover</label><select class="form-select" name="jenis_cover">
+                                <option value="">Semua</option>
+                                <option value="SINGLE">SINGLE</option>
+                                <option value="DOUBLE">DOUBLE</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-success">Export Excel</button></div>
                 </form>
             </div>
         </div>
     </div>
-</div>
 
+    <!-- modal import -->
+    <!-- modal import -->
+    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered"> <!-- centered vertically -->
+            <div class="modal-content border-0 shadow-lg rounded-2xl">
+                <div class="modal-header bg-gradient-info text-white">
+                    <h5 class="modal-title text-white" id="importModalLabel">
+                        <i class="fas fa-file-import me-2"></i>Import Jenis Barang
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form id="importForm"
+                    action="<?= base_url(session()->get('role') . '/warehouse/importStokBarangJadi') ?>"
+                    method="POST"
+                    enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="mb-4">
+                            <label for="file_excel" class="form-label fw-semibold">Pilih File Excel</label>
+                            <div class="input-group">
+                                <input id="file_excel"
+                                    type="file"
+                                    class="form-control border-info rounded-pill px-3 py-2"
+                                    name="file_excel"
+                                    accept=".xlsx, .xls"
+                                    required
+                                    style="background-color: #f8f9fa; border-width: 2px;">
+                            </div>
+                            <small class="form-text text-muted ms-1">Hanya file Excel (.xlsx, .xls) yang diterima.</small>
+                        </div>
+
+                        <div class="alert alert-light border-info small">
+                            <p class="mb-1">Pastikan file yang diupload sesuai dengan template yang telah disediakan. Jika belum memiliki template, silakan download:</p>
+                            <a href="<?= base_url('template/CONTOH_FORMAT_IMPORT_STOK BARANG_JADI_COVERING.xlsx') ?>"
+                                class="text-white text-decoration-none fw-semibold badge bg-gradient-info"
+                                style="font-size: 1rem;"
+                                download>
+                                <i class="fas fa-download me-1"></i>Template Import Stok Barang Jadi
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                            Batal
+                        </button>
+                        <button id="importSubmit"
+                            type="submit"
+                            class="btn bg-gradient-info position-relative">
+                            <span class="spinner-border spinner-border-sm text-white position-absolute top-50 start-50 translate-middle d-none"
+                                role="status"
+                                aria-hidden="true"></span>
+                            <span class="btn-text">Import</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal import stok -->
+    <div class="modal fade" id="importStok" tabindex="-1" aria-labelledby="importStokLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-2xl">
+                <div class="modal-header bg-gradient-info text-white">
+                    <h5 class="modal-title text-white" id="importStokLabel">
+                        <i class="fas fa-file-import me-2"></i>Import Data Stok
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form id="importForm"
+                    action="<?= base_url(session()->get('role') . '/warehouse/importStokCovering') ?>"
+                    method="POST"
+                    enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="mb-4">
+                            <label for="file_excel" class="form-label fw-semibold">Pilih File Excel</label>
+                            <div class="input-group">
+                                <input id="file_excel"
+                                    type="file"
+                                    class="form-control border-info rounded-pill px-3 py-2"
+                                    name="file_excel"
+                                    accept=".xlsx, .xls"
+                                    required
+                                    style="background-color: #f8f9fa; border-width: 2px;">
+                            </div>
+                            <small class="form-text text-muted ms-1">Hanya file Excel (.xlsx, .xls) yang diterima.</small>
+                        </div>
+
+                        <div class="alert alert-light border-info small">
+                            <p class="mb-1">Pastikan file yang diupload sesuai dengan template yang telah disediakan. Jika belum memiliki template, silakan download:</p>
+                            <a href="<?= base_url('covering/warehouse/templateStokBarangJadi') ?>"
+                                class="text-white text-decoration-none fw-semibold badge bg-gradient-info"
+                                style="font-size: 1rem;"
+                                download>
+                                <i class="fas fa-download me-1"></i>Template Import Stok Barang Jadi
+                            </a>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                            Batal
+                        </button>
+                        <button id="importSubmit"
+                            type="submit"
+                            class="btn bg-gradient-info position-relative">
+                            <span class="spinner-border spinner-border-sm text-white position-absolute top-50 start-50 translate-middle d-none"
+                                role="status"
+                                aria-hidden="true"></span>
+                            <span class="btn-text">Import</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.21.1/dist/bootstrap-table.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $(document).ready(function() {
+        $('#stokTable').DataTable({
+            // contoh opsi:
+            lengthMenu: [10, 25, 50, 100],
+            pageLength: 25,
+            order: [
+                [1, 'asc']
+            ], // default sort kolom Jenis Barang
+            columnDefs: [{
+                targets: [0, 7], // kolom No & Aksi tidak bisa di-sort
+                orderable: false
+            }],
+        });
+    });
+</script>
 <script>
     const BASE_URL = "<?= base_url() ?>";
 
     document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('searchInput');
-        const filterStatus = document.getElementById('filterStatus');
-        const filterMesin = document.getElementById('filterMesin');
-        const filterDr = document.getElementById('filterDr');
-
-        function filterGrid() {
-            const query = searchInput.value.toLowerCase();
-            const status = filterStatus.value;
-            const mesin = filterMesin.value;
-            const dr = filterDr.value;
-
-            document.querySelectorAll('.warehouse-card').forEach(card => {
-                const nameMatch = card.getAttribute('data-name').includes(query);
-                const statusMatch = (status === '' || card.getAttribute('data-status') === status);
-                const mesinMatch = (mesin === '' || card.getAttribute('data-mesin') === mesin);
-                const drMatch = (dr === '' || card.getAttribute('data-dr') === dr);
-
-                card.style.display = (nameMatch && statusMatch && mesinMatch && drMatch) ? '' : 'none';
-            });
-        }
-
-        [searchInput, filterStatus, filterMesin, filterDr].forEach(el => el.addEventListener('input', filterGrid));
-        [filterStatus, filterMesin, filterDr].forEach(el => el.addEventListener('change', filterGrid));
-
-        document.getElementById("saveStockBtn").addEventListener("click", function() {
-            const form = document.getElementById('stockForm');
-            if (!form.checkValidity()) {
-                return Swal.fire('Peringatan', 'Semua data transaksi harus diisi!', 'warning');
-            }
-
-            Swal.fire({
-                    title: "Konfirmasi",
-                    text: `Anda yakin ingin ${form.action.value === "remove" ? "mengurangi" : "menambah"} stok ini?`,
-                    icon: "question",
-                    showCancelButton: true,
-                    confirmButtonText: "Ya",
-                    cancelButtonText: "Batal"
-                })
-                .then((result) => {
-                    if (result.isConfirmed) {
-                        fetch(`${BASE_URL}covering/warehouse/updateStock`, {
-                                method: "POST",
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                },
-                                body: JSON.stringify({
-                                    stockItemId: form.stockItemId.value,
-                                    action: form.action.value,
-                                    no_model: form.no_model.value,
-                                    stockNote: form.stockNote.value,
-                                    stockAmount: form.stockAmount.value,
-                                    amountcones: form.amountcones.value
-                                })
-                            })
-                            .then(response => response.json())
-                            .then(result => {
-                                if (result.success) {
-                                    Swal.fire('Berhasil!', 'Stok berhasil diperbarui.', 'success').then(() => location.reload());
-                                } else {
-                                    Swal.fire('Gagal!', result.message || 'Gagal memperbarui stok.', 'error');
-                                }
-                            })
-                            .catch(error => Swal.fire('Error!', 'Terjadi kesalahan pada server.', 'error'));
-                    }
-                });
-        });
 
         document.getElementById("editStockForm").addEventListener("submit", function(e) {
             e.preventDefault();
@@ -466,24 +569,6 @@
         });
     });
 
-    function openStockModal(stockId, action) {
-        const modal = new bootstrap.Modal(document.getElementById('stockModal'));
-        const form = document.getElementById('stockForm');
-        form.reset();
-        form.stockItemId.value = stockId;
-        form.action.value = action;
-        document.getElementById('stockModalLabel').textContent = action === 'add' ? 'Tambah Stok (Pemasukan)' : 'Kurangi Stok (Pengeluaran)';
-        modal.show();
-    }
-
-    function addStock(stockId) {
-        openStockModal(stockId, 'add');
-    }
-
-    function removeStock(stockId) {
-        openStockModal(stockId, 'remove');
-    }
-
     function editItem(id) {
         fetch(`${BASE_URL}covering/warehouse/getStock/${id}`)
             .then(res => res.json())
@@ -516,6 +601,65 @@
             })
             .catch(() => Swal.fire("Error!", "Gagal mengambil data.", "error"));
     }
+
+    function confirmDelete(id) {
+        Swal.fire({
+            title: 'Konfirmasi Hapus',
+            text: "Apakah Anda yakin ingin menghapus item ini?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (!result.isConfirmed) return;
+
+            const tokenName = '<?= csrf_token() ?>'; // misal: csrf_token()
+            const tokenValue = '<?= csrf_hash() ?>'; // misal: csrf_hash()
+
+            fetch(`${BASE_URL}covering/warehouse/deleteStokBarangJadi/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        [tokenName]: tokenValue
+                    }
+                })
+                .then(async res => {
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        Swal.fire('Deleted!', data.message, 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error!', data.message || 'Gagal menghapus item.', 'error');
+                    }
+                })
+                .catch(() => {
+                    Swal.fire('Error!', 'Gagal menghapus item.', 'error');
+                });
+        });
+    }
 </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('importForm');
+        const btn = document.getElementById('importSubmit');
+        const spinner = btn.querySelector('.spinner-border');
+        const text = btn.querySelector('.btn-text');
+
+        form.addEventListener('submit', function() {
+            // disable tombol agar user tidak klik dua kali
+            btn.disabled = true;
+            // tampilkan spinner
+            spinner.classList.remove('d-none');
+            // ubah teks tombol
+            text.textContent = ' Importing…';
+            // biarkan form submit berjalan normal
+        });
+    });
+</script>
+
+
+
+
 
 <?php $this->endSection(); ?>

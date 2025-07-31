@@ -50,17 +50,30 @@
                         <tr>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Style Size</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Comp (%)</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">GW / Pcs</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty / Pcs</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Loss</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Pakai (Kg)</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">PO(+) Kg</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($detail as $data):
-                            $no = 1;
+                        <?php
+                        $no = 1;
+                        foreach ($detail as $data):
                         ?>
                             <tr>
-                                <td><?= $no++ ?></td>
-                                <td><?= $data['style_size'] ?></td>
-                                <td><?= number_format($data['poplus_mc_kg'] + $data['plus_pck_kg'], 2) ?></td>
+                                <td class="text-center text-seccondary text-xxs"><?= $no++ ?></td>
+                                <td class="text-center text-seccondary text-xxs"><?= $data['style_size'] ?></td>
+                                <td class="text-center text-seccondary text-xxs"><?= $data['composition'] ?></td>
+                                <td class="text-center text-seccondary text-xxs"><?= $data['gw'] ?></td>
+                                <td class="text-center text-seccondary text-xxs"><?= $data['qty'] ?></td>
+                                <td class="text-center text-seccondary text-xxs"><?= $data['loss'] ?></td>
+                                <td class="text-center text-seccondary text-xxs"><?= number_format($data['ttl_kebutuhan'], 2) ?></td>
+                                <td class="text-center text-seccondary text-xxs"><?= number_format($data['pph'], 2) ?></td>
+                                <td class="text-center text-seccondary text-xxs"><?= number_format($data['po_plus'], 2) ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -84,22 +97,6 @@
         $('#dataTable').DataTable({
             "pageLength": 35,
             "order": []
-        });
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const buttons = document.querySelectorAll('.btn-approve');
-
-        buttons.forEach(button => {
-            button.addEventListener('click', function() {
-                document.getElementById('modal-id').value = this.getAttribute('data-id');
-                document.getElementById('modal-tgl').value = this.getAttribute('data-tgl');
-                document.getElementById('modal-model').value = this.getAttribute('data-model');
-                document.getElementById('modal-type').value = this.getAttribute('data-type');
-                document.getElementById('modal-warna').value = this.getAttribute('data-warna');
-                document.getElementById('modal-status').value = this.getAttribute('data-status');
-                document.getElementById('modal-area').value = this.getAttribute('data-area');
-            });
         });
     });
 </script>

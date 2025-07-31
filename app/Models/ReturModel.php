@@ -206,10 +206,16 @@ class ReturModel extends Model
     //         ->get()
     //         ->getResultArray();
     // }
-    public function getListRetur($area)
+    public function getListRetur($area, $noModel = null, $tglBuat = null)
     {
-        return $this->where('area_retur', $area)
-            ->findAll();
+        $builder = $this->where('area_retur', $area);
+        if (!empty($noModel)) {
+            $builder = $this->where('no_model', $noModel);
+        }
+        if (!empty($tglBuat)) {
+            $builder = $this->where('DATE(created_at)', $tglBuat);
+        }
+        return $builder->findAll();
     }
 
     public function getFilterReturArea($area = null, $kategori = null, $tanggal_awal = null, $tanggal_akhir = null)

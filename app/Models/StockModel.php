@@ -78,6 +78,12 @@ class StockModel extends Model
         }
         $builder->like('kode_warna', $warna);
 
+        // Kondisi OR: tampilkan jika kgs_stock_awal > 0 ATAU kgs_in_out > 0
+        $builder->groupStart()
+            ->where('stock.kgs_stock_awal >', 0)
+            ->orWhere('stock.kgs_in_out >', 0)
+            ->groupEnd();
+
         // Query dengan agregasi SUM(kgs_in_out) dan perhitungan sisa kapasitas
         $builder->select('
             stock.*, 
@@ -92,6 +98,7 @@ class StockModel extends Model
         ')
             ->join('cluster', 'cluster.nama_cluster = stock.nama_cluster', 'left')
             ->groupBy([
+                'stock.id_stock',
                 'stock.no_model',
                 'stock.kode_warna',
                 'stock.warna',
@@ -355,14 +362,14 @@ class StockModel extends Model
                     FROM pemasukan pm
                     JOIN out_celup oc ON oc.id_out_celup = pm.id_out_celup
                     WHERE pm.id_stock = stock.id_stock
-                    AND oc.ganti_retur = 0
+                    AND oc.ganti_retur = '0'
                 ) AS datang_solid,
                 (
                     SELECT SUM(COALESCE(oc.kgs_kirim, 0))
                     FROM pemasukan pm
                     JOIN out_celup oc ON oc.id_out_celup = pm.id_out_celup
                     WHERE pm.id_stock = stock.id_stock
-                    AND oc.ganti_retur = 1
+                    AND oc.ganti_retur = '1'
                 ) AS ganti_retur,
                  (
                     SELECT area_out
@@ -370,12 +377,45 @@ class StockModel extends Model
                     WHERE p.lot_out = stock.lot_stock
                     AND p.nama_cluster = stock.nama_cluster
                 ) AS area,
+                 (
+                    SELECT SUM(COALESCE(kgs_retur, 0))
+                    FROM retur r
+                    JOIN kategori_retur kr ON kr.nama_kategori = r.kategori
+                    WHERE r.area_retur != 'GUDANG BENANG'
+                    AND r.no_model = stock.no_model
+                    AND kr.tipe_kategori = 'SIMPAN ULANG'
+                ) AS retur_stock,
+                 (
+                    SELECT SUM(COALESCE(kgs_retur, 0))
+                    FROM retur rgbn
+                    JOIN kategori_retur kr ON kr.nama_kategori = rgbn.kategori
+                    WHERE rgbn.area_retur = 'GUDANG BENANG'
+                    AND kr.tipe_kategori = 'PENGEMBALIAN'
+                    AND rgbn.no_model = stock.no_model
+                ) AS retur_gbn,
+                 (
+                    SELECT SUM(COALESCE(kgs_retur, 0))
+                    FROM retur rarea
+                    JOIN kategori_retur kr ON kr.nama_kategori = rarea.kategori
+                    WHERE rarea.area_retur != 'GUDANG BENANG'
+                    AND kr.tipe_kategori = 'PENGEMBALIAN'
+                    AND rarea.no_model = stock.no_model
+                ) AS retur_area,
+                 (
+                    SELECT SUM(COALESCE(kgs_retur, 0))
+                    FROM retur rtitip
+                    JOIN kategori_retur kr ON kr.nama_kategori = rtitip.kategori
+                    WHERE rtitip.area_retur != 'GUDANG BENANG'
+                    AND kr.tipe_kategori = 'BAHAN BAKU TITIP'
+                    AND rtitip.no_model = stock.no_model
+                ) AS retur_titip_area,
             ")
             ->join('material', 'material.item_type = stock.item_type AND material.kode_warna = stock.kode_warna', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->join('pemasukan', 'pemasukan.id_stock = stock.id_stock', 'left')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
             ->join('pengeluaran', 'pengeluaran.lot_out = stock.lot_stock', 'left')
+            ->join('retur', 'retur.no_model = stock.no_model', 'left')
             ->where('stock.no_model', $key)
             ->groupBy('stock.id_stock')
             ->get()
