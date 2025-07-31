@@ -270,6 +270,186 @@ class PemesananController extends BaseController
         return view($this->role . '/warehouse/form-pengiriman', $data);
     }
 
+    public function pengirimanAreaManual()
+    {
+         // Ambil current orders dari session, atau [] bila belum ada
+        $data['delivery_area'] = session()->get('manual_delivery') ?? [];
+        // dd ($data['delivery_area']);
+        // dd  ($data['delivery_area']);
+        // Ambil data dari database untuk dropdown
+        // $item_types = $this->pengeluaranModel->getItemTypes();
+        $data = [
+            'active' => $this->active,
+            'role' => $this->role,
+            'title' => 'Form Pengiriman Manual',
+            // 'item_types' => $item_types
+        ];
+
+        return view($this->role . '/warehouse/form-pengiriman-manual', $data);
+    }
+
+    public function getItemTypes()
+    {
+        if ($this->request->isAJAX()) {
+            $no_model = $this->request->getGet('no_model');
+            $item_types = $this->pengeluaranModel->getItemTypes($no_model);
+            return $this->response->setJSON($item_types);
+        }
+    }
+
+    public function getKodeWarna()
+    {
+        if ($this->request->isAJAX()) {
+            $model = $this->request->getGet('no_model');
+            $item_type = $this->request->getGet('item_type');
+            $kodeWarna = $this->pengeluaranModel->getKodeWarna($model, $item_type);
+
+            return $this->response->setJSON($kodeWarna);
+        }
+    }
+
+    public function getWarna()
+    {
+        if ($this->request->isAJAX()) {
+            $model = $this->request->getGet('no_model');
+            $item_type = $this->request->getGet('item_type');
+            $kode_warna = $this->request->getGet('kode_warna');
+            $warna = $this->pengeluaranModel->getWarna($model, $item_type, $kode_warna);
+
+            return $this->response->setJSON($warna);
+        }
+    }
+
+    public function saveSessionDeliveryArea()
+    {
+        $data = $this->request->getPost();
+        // Validasi data yang diperlukan: hasilnya bisa array of records
+        $validDatas = $this->pengeluaranModel->validateDeliveryData($data);
+        
+        // Pastikan ada data yang valid
+        if (empty($validDatas) || !is_array($validDatas)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Data Sudah Dikirim Sebelumnya']);
+        }
+
+        // Ambil satu record pertama (atau adjust sesuai kebutuhan)
+        $row = $validDatas[0];
+
+        // Ambil data yang sudah ada di session
+        $existingDelivery = session()->get('manual_delivery') ?? [];
+
+        // Cek apakah data yang sama sudah ada
+        foreach ($existingDelivery as $item) {
+            if (
+                $item['id_out_celup'] == $row['id_out_celup'] &&
+                $item['area_out'] == $row['area_out'] &&
+                $item['tgl_out'] == $row['tgl_out']
+            ) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Data sudah ada']);
+            }
+        }
+
+        // Tambahkan data baru ke session
+        $existingDelivery[] = [
+            'id_pengeluaran' => $row['id_pengeluaran'],
+            'id_out_celup'  => $row['id_out_celup'] ?? '',
+            'no_model'      => $row['no_model'] ?? '',
+            'item_type'     => $row['item_type'] ?? '',
+            'jenis'         => $row['jenis'] ?? '',
+            'kode_warna'    => $row['kode_warna'] ?? '',
+            'warna'         => $row['warna'] ?? '',
+            'area_out'      => $row['area_out'] ?? '',
+            'tgl_out'       => $row['tgl_out'] ?? '',
+            'kgs_out'       => $row['kgs_out'] ?? $row['ttl_kg'],
+            'cns_out'       => $row['cns_out'] ?? $row['ttl_cns'],
+            'krg_out'       => 1, // Asumsi
+            'lot_out'       => $row['lot_out'] ?? '',
+            'nama_cluster'  => $row['nama_cluster'] ?? '',
+            'admin'         => session()->get('username')
+        ];
+
+        // Simpan kembali ke session
+        session()->set('manual_delivery', $existingDelivery);
+
+        // Kembalikan JSON sukses tanpa dd
+        return $this->response->setJSON(['success' => true, 'message' => 'Data berhasil disimpan']);
+    }
+
+    public function removeSessionDelivery()
+    {
+        $idx = $this->request->getPost('index');
+        $session = session()->get('manual_delivery') ?? [];
+        if (isset($session[$idx])) {
+            array_splice($session, $idx, 1);
+            session()->set('manual_delivery', $session);
+            return $this->response->setJSON(['success' => true]);
+        }
+        return $this->response->setJSON(['success' => false, 'message' => 'Index tidak ditemukan']);
+    }
+
+    public function updateStatusKirim()
+    {
+        // Ambil data POST sekaligus
+        $post    = $this->request->getPost();
+        $ids     = $post['id_pengeluaran'] ?? [];
+        $kgsList = $post['kgs_out']       ?? [];
+        $cnsList = $post['cns_out']       ?? [];
+        $lotList = $post['lot_out']       ?? [];
+
+        // Validasi id_pengeluaran harus array dan tidak kosong
+        if (empty($ids) || !is_array($ids)) {
+            return redirect()->back()->with('error', 'ID Pengeluaran tidak valid');
+        }
+
+        // Cast id ke integer dan filter nilai <= 0
+        $ids = array_filter(array_map('intval', $ids));
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'Tidak ada ID Pengeluaran yang valid');
+        }
+
+        $sessionUser = session('username');
+        $updatedCount = 0;
+
+        foreach ($ids as $i => $id) {
+            // Siapkan data update
+            $data = [
+                'status' => 'Pengiriman Area',
+                'admin'  => $sessionUser,
+            ];
+
+            // Tambahkan jika nilai tersedia dan bukan string kosong
+            if (!empty($kgsList[$i]) || $kgsList[$i] === '0') {
+                $data['kgs_out'] = floatval($kgsList[$i]);
+            }
+            if (!empty($cnsList[$i]) || $cnsList[$i] === '0') {
+                $data['cns_out'] = floatval($cnsList[$i]);
+            }
+            if (isset($lotList[$i]) && $lotList[$i] !== '') {
+                $data['lot_out'] = $lotList[$i];
+            }
+
+            // Update dan hitung berhasilnya
+            if ($this->pengeluaranModel->update($id, $data)) {
+                $updatedCount++;
+            }
+        }
+
+        // Hapus session manual delivery
+        session()->remove('manual_delivery');
+
+        // Redirect dengan pesan
+        if ($updatedCount > 0) {
+            session()->setFlashdata('success', "{$updatedCount} status berhasil diperbarui");
+        } else {
+            session()->setFlashdata('error', 'Gagal memperbarui status atau data out tidak ada');
+        }
+
+        return redirect()->to(base_url("{$this->role}/pengiriman_area_manual"));
+    }
+
+
+
+
+
 
     // public function pengirimanArea()
     // {

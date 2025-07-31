@@ -159,6 +159,8 @@
                                                                 <th class="text-center">GW Kirim</th>
                                                                 <th class="text-center">NW Kirim</th>
                                                                 <th class="text-center">Cones Kirim</th>
+                                                                <th class="text-center">Cluster</th>
+                                                                <th class="text-center">Kapasitas</th>
                                                                 <th class="text-center">
                                                                     <button type="button" class="btn btn-info" id="addRow">
                                                                         <i class="fas fa-plus"></i>
@@ -169,9 +171,14 @@
                                                         <tbody>
                                                             <tr>
                                                                 <td><input type="text" class="form-control text-center" name="no_karung[0]" value="1" readonly></td>
-                                                                <td><input type="float" class="form-control gw" name="gw[0]" required></td>
-                                                                <td><input type="float" class="form-control kgs" name="kgs[0]" required></td>
-                                                                <td><input type="float" class="form-control cones" name="cones[0]" required></td>
+                                                                <td><input type="number" step="0.01" class="form-control gw" name="gw[0]" required></td>
+                                                                <td><input type="number" step="0.01" class="form-control kgs" name="kgs[0]" required></td>
+                                                                <td><input type="number" step="0.01" class="form-control cones" name="cones[0]" required></td>
+                                                                <td style="width: 180px;">
+                                                                    <select class="form-control cluster" name="cluster[0]" required>
+                                                                    </select>
+                                                                </td>
+                                                                <td><input type="text" class="form-control kapasitas" name="kapasitas[0]" data-sisa_kapasitas="" readonly></td>
                                                                 <td class="text-center">
                                                                     <!-- <button type="button" class="btn btn-danger removeRow">
                                                                         <i class="fas fa-trash"></i>
@@ -356,42 +363,186 @@
             const poTable = document.getElementById('poTable');
             let lotCelupValue = ""; // Variabel untuk menyimpan lot_celup dari select2
 
+            // Inisialisasi Select2 untuk semua .cluster (baris pertama dan nanti baris baru)
+            $('.cluster').select2({
+                allowClear: true,
+                minimumResultsForSearch: 0,
+                width: '100%'
+            });
+
             // Tambahkan event listener pada semua input di tbody
             poTable.querySelectorAll('tbody input').forEach(input => {
                 input.addEventListener('input', () => {
                     calculateTotals(poTable);
+                    updateClusterOptions();
                 });
             });
+            // hapus baris
+            poTable.querySelector('tbody').addEventListener('click', function(e) {
+                const btn = e.target.closest('.removeRow');
+                if (!btn) return;
+                const row = btn.closest('tr');
+                row.remove();
 
-            // Tombol tambah baris
-            document.getElementById('addRow').addEventListener('click', () => {
-                const rowCount = poTable.querySelectorAll("tbody tr").length + 1;
-                const tbody = poTable.querySelector('tbody');
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
+                // Setelah dihapus: update nomor dan total
+                updateRowNumbers(poTable);
+                calculateTotals(poTable);
+                updateClusterOptions();
+            });
+            // ambil data cluster dan kapasitas
+            $(poTable).on('input', '.kgs', function() {
+                const editedRow = $(this).closest('tr');
+                updateClusterOptions(editedRow);
+            });
+
+            // Isi kapasitas otomatis saat cluster dipilih
+            $(poTable).on('change', '.cluster', function() {
+                const $selected = $(this).find('option:selected');
+                const $kapasitas = $(this).closest('tr').find('.kapasitas');
+
+                if (!$selected.val()) {
+                    // Jika tidak dipilih atau dikosongkan, kosongkan kapasitas
+                    $kapasitas.val('');
+                } else {
+                    const sisa = $selected.data('sisa_kapasitas') || '';
+                    $kapasitas.val(sisa);
+                }
+            });
+
+            function updateClusterOptions(editedRow = null) {
+                const rows = $(poTable).find('tbody tr');
+                const $row = editedRow;
+                const currentKgs = $row ?
+                    parseFloat($row.find('.kgs').val()) || 0 :
+                    0;
+
+                // hitung penggunaan tiap cluster (kecuali baris yang sedang diedit)
+                const usage = {};
+                rows.each(function() {
+                    const r = $(this);
+                    if ($row && r.is($row)) return;
+                    const c = r.find('.cluster').val();
+                    const k = parseFloat(r.find('.kgs').val()) || 0;
+                    if (c && k > 0) usage[c] = (usage[c] || 0) + k;
+                });
+
+                $.ajax({
+                    url: '<?= base_url($role . "/getcluster") ?>',
+                    method: 'POST',
+                    data: {
+                        kgs: currentKgs
+                    },
+                    dataType: 'json',
+                    success(resp) {
+                        // rebuild semua dropdown
+                        rows.each(function() {
+                            const r = $(this);
+                            const old = r.find('.cluster').val();
+                            const sel = r.find('.cluster').empty()
+                                .append('<option value="">Pilih Cluster</option>');
+                            resp.forEach(c => {
+                                const avail = c.sisa_kapasitas - (usage[c.nama_cluster] || 0);
+                                const needed = parseFloat(r.find('.kgs').val()) || 0;
+                                if (avail >= needed) {
+                                    sel.append(
+                                        $('<option>')
+                                        .val(c.nama_cluster)
+                                        .text(c.nama_cluster)
+                                        .attr('data-sisa_kapasitas', avail.toFixed(2))
+                                    );
+                                }
+                            });
+                            sel.select2({
+                                placeholder: 'Pilih Cluster',
+                                allowClear: true,
+                                minimumResultsForSearch: 0,
+                                width: '100%'
+                            });
+                            if (sel.find(`option[value="${old}"]`).length) sel.val(old).trigger('change.select2');
+                        });
+
+                        // kumpulkan sisa terakhir per cluster
+                        const lastSisa = {};
+                        rows.each(function() {
+                            const r = $(this);
+                            const cl = r.find('.cluster').val();
+                            if (cl) {
+                                const s = parseFloat(r.find('.cluster option:selected').data('sisa_kapasitas')) || 0;
+                                // selalu overwrite sehingga akhirnya yang tertinggal adalah yang paling bawah
+                                lastSisa[cl] = s;
+                            }
+                        });
+
+                        // apply ke semua baris: 
+                        rows.each(function() {
+                            const r = $(this);
+                            const cl = r.find('.cluster').val();
+                            if (cl) {
+                                r.find('.kapasitas').val(lastSisa[cl].toFixed(2));
+                            } else {
+                                r.find('.kapasitas').val('');
+                            }
+                        });
+                    },
+                    error(_, __, err) {
+                        console.error('Error getcluster:', err);
+                    }
+                });
+            }
+
+        });
+
+        // Tombol tambah baris
+        document.getElementById('addRow').addEventListener('click', () => {
+            const rowCount = poTable.querySelectorAll("tbody tr").length + 1;
+            const tbody = poTable.querySelector('tbody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
                     <td><input type="text" class="form-control text-center" name="no_karung[${rowCount-1}]" value="${rowCount}" readonly></td>
-                    <td><input type="float" class="form-control" name="gw[${rowCount-1}]" required></td>
-                    <td><input type="float" class="form-control" name="kgs[${rowCount-1}]" required></td>
-                    <td><input type="float" class="form-control" name="cones[${rowCount-1}]" required></td>
+                    <td><input type="number" step="0.01" class="form-control gw" name="gw[${rowCount-1}]" required></td>
+                    <td><input type="number" step="0.01" class="form-control kgs" name="kgs[${rowCount-1}]" required></td>
+                    <td><input type="number" step="0.01" class="form-control cones" name="cones[${rowCount-1}]" required></td>
+                    <td style="width: 180px;">
+                        <select class="form-control cluster" name="cluster[${rowCount-1}]" aria-label="Pilih Cluster" required> 
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control kapasitas" name="kapasitas[${rowCount-1}]" readonly></td>
                     <td class="text-center">
                         <button type="button" class="btn btn-danger removeRow"><i class="fas fa-trash"></i></button>
                     </td>
                 `;
-                tbody.appendChild(newRow);
+            tbody.appendChild(newRow);
 
-                // Update nomor baris
-                updateRowNumbers(poTable);
+            // Update nomor baris
+            updateRowNumbers(poTable);
 
-                // Tambahkan event listener ke input baru
-                newRow.querySelectorAll('input').forEach(input => {
-                    input.addEventListener('input', () => {
-                        calculateTotals(poTable);
-                    });
+            // Tambahkan event listener ke input baru
+            newRow.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', () => {
+                    calculateTotals(poTable);
                 });
-
+            });
+            // re-init Select2 untuk elemen baru
+            $(newRow).find('.cluster').select2({
+                allowClear: true,
+                minimumResultsForSearch: 0
             });
 
-            // Panggil pertama kali untuk inisialisasi
+            // 1) Saat user memilih cluster, langsung hit updateClusterOptions untuk row ini
+            $newRow.on('change', '.cluster', function() {
+                updateClusterOptions($newRow);
+            });
+
+            // 2) Saat user ubah KGS *dan* sudah ada cluster terpilih, update juga
+            $newRow.on('input', '.kgs', function() {
+                const hasCluster = !!$newRow.find('.cluster').val();
+                calculateTotals(poTable);
+                if (hasCluster) {
+                    updateClusterOptions($newRow);
+                }
+            });
+
+            // Inisialisasi pertama kali hanya untuk row baru
             calculateTotals(poTable);
         });
 

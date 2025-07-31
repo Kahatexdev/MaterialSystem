@@ -2241,12 +2241,13 @@ class WarehouseController extends BaseController
     public function otherIn()
     {
         $no_model = $this->masterOrderModel->getAllNoModel();
-
+        $cluster = $this->clusterModel->getDataCluster();
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
             'no_model' => $no_model,
+            'cluster' => $cluster
         ];
         return view($this->role . '/warehouse/form-other-in', $data);
     }
@@ -2347,57 +2348,85 @@ class WarehouseController extends BaseController
     public function saveOtherIn()
     {
         $data = $this->request->getPost();
+        dd($data);
 
-        $otherBon = $this->otherBonModel; // Sesuaikan dengan model kamu
-        $outCelup = $this->outCelupModel; // Sesuaikan dengan model kamu
+        $db = \Config\Database::connect();
+        $db->transBegin();  // Mulai transaksi
+
+        // 1) Insert Bon
         $dataOtherBon = [
-            'no_model' => $data['no_model'],
-            'item_type' => $data['item_type'],
-            'kode_warna' => $data['kode_warna'],
-            'warna' => $data['warna'],
-            'tgl_datang' => $data['tgl_datang'],
+            'no_model'       => $data['no_model'],
+            'item_type'      => $data['item_type'],
+            'kode_warna'     => $data['kode_warna'],
+            'warna'          => $data['warna'],
+            'tgl_datang'     => $data['tgl_datang'],
             'no_surat_jalan' => $data['no_surat_jalan'],
-            'detail_sj' => $data['detail_sj'],
-            'ganti_retur' => $data['ganti_retur'],
-            'admin' => session()->get('username'),
-            'created_at' => date('Y-m-d H:i:s'),
+            'detail_sj'      => $data['detail_sj'],
+            'ganti_retur'    => $data['ganti_retur'],
+            'admin'          => session()->get('username'),
+            'created_at'     => date('Y-m-d H:i:s'),
         ];
+        $saveBon = $this->otherBonModel->insert($dataOtherBon);
+        $id_other_in = $this->otherBonModel->insertID();
 
-        $saveBon = $otherBon->insert($dataOtherBon); // Melakukan insert
-        if ($saveBon) {
-            $id_other_in = $otherBon->insertID(); // Mengambil ID yang baru saja diinsert
-            $allSaved = true; // Flag untuk mengecek apakah semua data berhasil disimpan
-
-            $jumlahKrg = count($data['no_karung']);
-
-            for ($i = 0; $i < $jumlahKrg; $i++) {
-                $dataKrg = [
-                    'id_other_bon' => $id_other_in,
-                    'no_model' => $data['no_model'],
-                    'l_m_d' => $data['l_m_d'],
-                    'harga' => $data['harga'],
-                    'no_karung' => $data['no_karung'][$i],
-                    'gw_kirim' => $data['gw'][$i],
-                    'kgs_kirim' => $data['kgs'][$i],
-                    'cones_kirim' => $data['cones'][$i],
-                    'lot_kirim' => $data['lot'],
-                    'ganti_retur' => $data['ganti_retur'],
-                    'admin' => session()->get('username'),
-                    'created_at' => date('Y-m-d H:i:s'),
-                ];
-                $saveKrg = $outCelup->insert($dataKrg); // Melakukan insert
-                if (!$saveKrg) {
-                    $allSaved = false; // Jika ada yang gagal, set flag ke false
-                    break; // Keluar dari loop jika ada kegagalan
-                }
-            }
-            if ($allSaved) {
-                session()->setFlashdata('success', "Data berhasil disimpan");
-            } else {
-                session()->setFlashdata('error', "Terjadi kesalahan saat menyimpan sebagian data");
-            }
-        } else {
+        if (!$saveBon) {
+            $db->transRollback();
             session()->setFlashdata('error', "Gagal menyimpan data Bon");
+            return redirect()->to(base_url($this->role . "/otherIn"));
+        }
+
+        // 2) Loop insert karung + pemasukan
+        $jumlahKrg = count($data['no_karung']);
+        for ($i = 0; $i < $jumlahKrg; $i++) {
+            // a) outCelup
+            $dataKrg = [
+                'id_other_bon' => $id_other_in,
+                'no_model'     => $data['no_model'],
+                'l_m_d'        => $data['l_m_d'],
+                'harga'        => $data['harga'],
+                'no_karung'    => $data['no_karung'][$i],
+                'gw_kirim'     => $data['gw'][$i],
+                'kgs_kirim'    => $data['kgs'][$i],
+                'cones_kirim'  => $data['cones'][$i],
+                'lot_kirim'    => $data['lot'],
+                'ganti_retur'  => $data['ganti_retur'],
+                'admin'        => session()->get('username'),
+                'created_at'   => date('Y-m-d H:i:s'),
+            ];
+            $saveKrg      = $this->outCelupModel->insert($dataKrg);
+            $id_out_celup = $this->outCelupModel->insertID();
+
+            if (!$saveKrg) {
+                $db->transRollback();
+                session()->setFlashdata('error', "Gagal menyimpan data Karung ke-$i");
+                return redirect()->to(base_url($this->role . "/otherIn"));
+            }
+
+            // b) pemasukan
+            $dataPemasukan = [
+                'id_out_celup' => $id_out_celup,
+                'tgl_masuk'    => date('Y-m-d'),
+                'nama_cluster' => $data['cluster'][$i],
+                'out_jalur'    => 0,
+                'admin'        => session()->get('username'),
+                'created_at'   => date('Y-m-d H:i:s'),
+            ];
+            $savePemasukan = $this->pemasukanModel->insert($dataPemasukan);
+
+            if (!$savePemasukan) {
+                $db->transRollback();
+                session()->setFlashdata('error', "Gagal menyimpan pemasukan ke-$i");
+                return redirect()->to(base_url($this->role . "/otherIn"));
+            }
+        }
+
+        // 3) Commit jika semua berhasil
+        if ($db->transStatus() === false) {
+            $db->transRollback();
+            session()->setFlashdata('error', "Transaksi gagal, data dibatalkan");
+        } else {
+            $db->transCommit();
+            session()->setFlashdata('success', "Data berhasil disimpan");
         }
 
         return redirect()->to(base_url($this->role . "/otherIn"));

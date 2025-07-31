@@ -1066,9 +1066,10 @@ class ApiController extends ResourceController
     }
     public function listRetur($area)
     {
+        $noModel = $this->request->getGet('noModel') ?? '';
+        $tglBuat = $this->request->getGet('tglBuat') ?? '';
 
-
-        $listRetur = $this->returModel->getListRetur($area);
+        $listRetur = $this->returModel->getListRetur($area, $noModel, $tglBuat);
         return $this->response->setJSON($listRetur);
     }
     public function filterTglPakai($area)
@@ -1185,5 +1186,19 @@ class ApiController extends ResourceController
         return $this->response
             ->setStatusCode(200)
             ->setJSON($data);
+    }
+    public function getMaterialByNoModel($noModel)
+    {
+        $data = $this->materialModel->getMaterialByNoModel($noModel);
+
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($data);
+    }
+    public function getMaterialForPemesananRosso($model, $styleSize, $area)
+    {
+        $mu = $this->materialModel->getMaterialForPemesananRosso($model, $styleSize, $area);
+
+        return $this->respond($mu, 200);
     }
 }

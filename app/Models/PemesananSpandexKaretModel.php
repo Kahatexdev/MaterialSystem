@@ -106,4 +106,42 @@ class PemesananSpandexKaretModel extends Model
             ->where('pemesanan_spandex_karet.id_psk', $id_psk)
             ->first();
     }
+
+    public function getPermintaanBahanBaku($jenis, $area, $tgl)
+    {
+        $builder = $this->db->table('pemesanan_spandex_karet AS psk');
+        $builder->select([
+            'mm.jenis',
+            'p.admin',
+            'p.tgl_pakai',
+            'TIME(p.tgl_pesan) AS jam_pesan',
+            'DATE(p.tgl_pesan) AS tanggal_pesan',
+            'mo.no_model',
+            'm.item_type',
+            'm.color',
+            'm.kode_warna',
+            'tp.ttl_jl_mc',
+            'tp.ttl_kg',
+            'tp.ttl_cns'
+        ]);
+
+        $builder->join('pengeluaran AS pe', 'pe.id_psk = psk.id_psk')
+            ->join('total_pemesanan AS tp', 'tp.id_total_pemesanan = psk.id_total_pemesanan')
+            ->join('pemesanan AS p', 'p.id_total_pemesanan = psk.id_total_pemesanan')
+            ->join('material AS m', 'm.id_material = p.id_material')
+            ->join('master_material AS mm', 'mm.item_type = m.item_type')
+            ->join('master_order AS mo', 'mo.id_order = m.id_order');
+
+        // Filter status pengeluaran
+        $builder->where('pe.status', 'Pengeluaran Jalur');
+        // Filter berdasarkan master_material.jenis
+        $builder->where('mm.jenis', $jenis);
+        // Filter berdasarkan area admin
+        $builder->where('p.admin', $area);
+        // Filter berdasarkan tanggal pemakaian sesuai format YYYY-MM-DD
+        $builder->where('p.tgl_pakai', $tgl);
+
+        $query = $builder->get();
+        return $query->getResultArray();
+    }
 }

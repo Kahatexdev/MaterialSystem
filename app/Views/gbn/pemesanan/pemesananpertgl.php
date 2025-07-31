@@ -55,10 +55,17 @@
                                             <p class="text-sm font-weight-bold mb-0"><?= $psn['tgl_pakai'] ?></p>
                                         </td>
                                         <td class="text-center">
-                                            <a href="<?= base_url($role . '/detailpemesanan/' . $area . '/' . $jenis . '/' . $psn['tgl_pakai']) ?>" class="btn bg-gradient-info">
+                                            <a href="<?= base_url($role . '/detailpemesanan/' . $area . '/' . $jenis . '/' . $psn['tgl_pakai']) ?>" class="btn bg-gradient-info me-2">
                                                 <i class="fas fa-eye"></i>
                                                 Detail
                                             </a>
+                                            <?php if ($jenis === 'SPANDEX' || $jenis === 'KARET') : ?>
+                                                <!-- btn export -->
+                                                <a href="<?= base_url($role . '/reportPermintaanBahanBaku?jenis=' . $jenis . '&area=' . $area . '&tgl=' . $psn['tgl_pakai']) ?>" class="btn bg-gradient-success">
+                                                    <i class="fas fa-file-export"></i>
+                                                    Export
+                                                </a>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
 
