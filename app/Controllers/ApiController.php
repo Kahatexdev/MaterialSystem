@@ -1201,4 +1201,14 @@ class ApiController extends ResourceController
 
         return $this->respond($mu, 200);
     }
+    public function listExportRetur($area)
+    {
+        // $noModel = $this->request->getGet('noModel') ?? '';
+        // $tglBuat = $this->request->getGet('tglBuat') ?? '';
+        $noModel = '';
+        $tglBuat = '2025-05-09';
+
+        $listRetur = $this->returModel->filterData($area, $tglBuat, $noModel);
+        return $this->response->setJSON($listRetur);
+    }
 }
