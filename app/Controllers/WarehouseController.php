@@ -2348,7 +2348,7 @@ class WarehouseController extends BaseController
     public function saveOtherIn()
     {
         $data = $this->request->getPost();
-        dd($data);
+        // dd($data);
 
         $db = \Config\Database::connect();
         $db->transBegin();  // Mulai transaksi
