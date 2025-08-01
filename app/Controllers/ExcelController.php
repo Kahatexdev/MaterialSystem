@@ -11088,62 +11088,63 @@ class ExcelController extends BaseController
             // Data
             $row = 8;
             $no = 1;
-            foreach ($rows as $item) {
-
-                $kgsKirim = $item['kgs_kirim'];
-                $harga = $item['harga'];
-                $totalUsd = $kgsKirim * $harga;
-
-                $sheet->setCellValue('A' . $row, $no++);
-                $sheet->setCellValue('B' . $row, $item['no_surat_jalan']);
-                $sheet->setCellValue('C' . $row, $item['tgl_masuk']);
-                $sheet->setCellValue('D' . $row, $item['tgl_input']);
-                $sheet->setCellValue('E' . $row, $item['item_type']);
-                $sheet->setCellValue('F' . $row, $item['ukuran']);
-                $sheet->setCellValue('G' . $row, $item['warna']);
-                $sheet->setCellValue('H' . $row, $item['kode_warna'] ?? '');
-                $sheet->setCellValue('I' . $row, $item['l_m_d']);
-                $sheet->setCellValue('J' . $row, $item['cones'] ?? 0);
-                $sheet->setCellValue('K' . $row, $item['gw']);
-                $sheet->setCellValue('L' . $row, $kgsKirim);
-                $sheet->setCellValue('M' . $row, $harga);
-                $sheet->setCellValue('N' . $row, $totalUsd);
-                $sheet->setCellValue('O' . $row, ''); // Keterangan
-                $sheet->setCellValue('P' . $row, $item['detail_sj']);
-                $sheet->setCellValue('Q' . $row, $item['jenis']);
-                $sheet->setCellValue('R' . $row, $item['ukuran'] ?? '');
-                $sheet->setCellValue('S' . $row, $item['warna'] ?? '');
-                $sheet->setCellValue('T' . $row, $kgsKirim ?? 0);
-                $row++;
-            }
-
             $groupTanggal = [];
             foreach ($rows as $item) {
                 $tgl = $item['tgl_masuk'];
-                $cones = (float)$item['cones'];
-                $gw    = (float)$item['gw'];
-                $kgs_kirim    = (float)$item['kgs_kirim'];
-                $usd   = $kgs_kirim * (float)$item['harga'];
-
-                if (!isset($groupTanggal[$tgl])) {
-                    $groupTanggal[$tgl] = ['cones' => 0, 'gw' => 0, 'kgs_kirim' => 0, 'usd' => 0];
-                }
-                $groupTanggal[$tgl]['cones'] += $cones;
-                $groupTanggal[$tgl]['gw']    += $gw;
-                $groupTanggal[$tgl]['kgs_kirim']    += $kgs_kirim;
-                $groupTanggal[$tgl]['usd']   += $usd;
+                $groupTanggal[$tgl][] = $item;
             }
 
-            // 4) Tuliskan TOTAL per tanggal
-            foreach ($groupTanggal as $date => $tot) {
+            foreach ($groupTanggal as $tgl => $items) {
+                $subtotal = ['cones' => 0, 'gw' => 0, 'kgs_kirim' => 0, 'usd' => 0];
+
+                foreach ($items as $item) {
+                    $kgsKirim = $item['kgs_kirim'];
+                    $harga = $item['harga'];
+                    $totalUsd = $kgsKirim * $harga;
+
+                    $tgl = $item['tgl_masuk'];
+                    $cones = (float)$item['cones'];
+                    $gw    = (float)$item['gw'];
+                    $kgs_kirim    = (float)$item['kgs_kirim'];
+                    $usd   = $kgs_kirim * (float)$item['harga'];
+
+                    $sheet->setCellValue('A' . $row, $no++);
+                    $sheet->setCellValue('B' . $row, $item['no_surat_jalan']);
+                    $sheet->setCellValue('C' . $row, $item['tgl_masuk']);
+                    $sheet->setCellValue('D' . $row, $item['tgl_input']);
+                    $sheet->setCellValue('E' . $row, $item['item_type']);
+                    $sheet->setCellValue('F' . $row, $item['ukuran']);
+                    $sheet->setCellValue('G' . $row, $item['warna']);
+                    $sheet->setCellValue('H' . $row, $item['kode_warna'] ?? '');
+                    $sheet->setCellValue('I' . $row, $item['l_m_d']);
+                    $sheet->setCellValue('J' . $row, $item['cones'] ?? 0);
+                    $sheet->setCellValue('K' . $row, $item['gw']);
+                    $sheet->setCellValue('L' . $row, $kgsKirim);
+                    $sheet->setCellValue('M' . $row, $harga);
+                    $sheet->setCellValue('N' . $row, $totalUsd);
+                    $sheet->setCellValue('O' . $row, ''); // Keterangan
+                    $sheet->setCellValue('P' . $row, $item['detail_sj']);
+                    $sheet->setCellValue('Q' . $row, $item['jenis']);
+                    $sheet->setCellValue('R' . $row, $item['ukuran'] ?? '');
+                    $sheet->setCellValue('S' . $row, $item['warna'] ?? '');
+                    $sheet->setCellValue('T' . $row, $kgsKirim ?? 0);
+                    $row++;
+
+                    // Hitung subtotal
+                    $subtotal['cones'] += $cones;
+                    $subtotal['gw'] += $gw;
+                    $subtotal['kgs_kirim'] += $kgs_kirim;
+                    $subtotal['usd'] += $usd;
+                }
+
+                // Tulis total setelah data tanggal itu
                 $sheet->mergeCells("A{$row}:H{$row}");
                 $sheet->setCellValue("A{$row}", "TOTAL");
                 $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                // isi kolom cones, gw, nw, totalUsd
-                $sheet->setCellValue("J{$row}", $tot['cones']);
-                $sheet->setCellValue("K{$row}", $tot['gw']);
-                $sheet->setCellValue("L{$row}", $tot['kgs_kirim']);
-                $sheet->setCellValue("N{$row}", $tot['usd']);
+                $sheet->setCellValue("J{$row}", $subtotal['cones']);
+                $sheet->setCellValue("K{$row}", $subtotal['gw']);
+                $sheet->setCellValue("L{$row}", $subtotal['kgs_kirim']);
+                $sheet->setCellValue("N{$row}", $subtotal['usd']);
                 $row++;
             }
 

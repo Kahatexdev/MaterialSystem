@@ -1724,9 +1724,22 @@ class WarehouseController extends BaseController
             foreach ($pemasukanData as $pemasukan) {
                 // Ambil data tabel out_celup terkait
                 $outCelup = $this->outCelupModel->find($pemasukan['id_out_celup']);
+                // jika kgs manual kosong maka
+                $rawKgsManual = $data['kgs_out_manual'][$pemasukan['id_pemasukan']] ?? '';
+                $rawCnsManual = $data['cns_out_manual'][$pemasukan['id_pemasukan']] ?? 0;
+
+                if ($rawKgsManual !== '' || $rawKgsManual > 0) {
+                    $kgsOut =  floatval($rawKgsManual);
+                    $cnsOut = floatval($rawCnsManual);
+                    $krgOut = 0;
+                } else {
+                    $kgsOut = $pemasukan['kgs_kirim'];
+                    $cnsOut = $pemasukan['cones_kirim'];
+                    $krgOut = 1;
+                    $this->pemasukanModel->update($pemasukan['id_pemasukan'], ['out_jalur' => "1"]);
+                }
 
                 // Update field out_jalur pada tabel pemasukan
-                $this->pemasukanModel->update($pemasukan['id_pemasukan'], ['out_jalur' => "1"]);
 
                 // Siapkan data pengeluaran sesuai masing-masing pemasukan
                 $insertData = [
@@ -1734,13 +1747,14 @@ class WarehouseController extends BaseController
                     'id_stock'           => $pemasukan['id_stock'],
                     'area_out'           => $area,
                     'tgl_out'            => date('Y-m-d H:i:s'),
-                    'kgs_out'            => $pemasukan['kgs_kirim'],
-                    'cns_out'            => $pemasukan['cones_kirim'],
-                    'krg_out'            => 1,
+                    'kgs_out'            => $kgsOut,
+                    'cns_out'            => $cnsOut,
+                    'krg_out'            => $krgOut,
                     'nama_cluster'       => $pemasukan['nama_cluster'],
                     'lot_out'            => $outCelup['lot_kirim'], // pastikan field ini ada di data pemasukan
                     'id_total_pemesanan' => $idTtlPemesanan,
                     'status'             => 'Pengeluaran Jalur',
+                    'keterangan_gbn'     => $data['keterangan'][$pemasukan['id_pemasukan']],
                     'admin'              => $this->username,
                     'created_at'         => date('Y-m-d H:i:s')
                 ];
@@ -2350,7 +2364,7 @@ class WarehouseController extends BaseController
         $data = $this->request->getPost();
         $db = \Config\Database::connect();
         $db->transBegin();  // Mulai transaksi
-
+        // dd($data);
         // 1) Insert Bon
         $dataOtherBon = [
             'no_model'       => $data['no_model'],

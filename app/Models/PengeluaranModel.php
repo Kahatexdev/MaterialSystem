@@ -25,6 +25,7 @@ class PengeluaranModel extends Model
         'lot_out',
         'nama_cluster',
         'status',
+        'keterangan_gbn',
         'id_total_pemesanan',
         'admin',
         'created_at',
@@ -323,5 +324,12 @@ class PengeluaranModel extends Model
         return $builder
             ->get()
             ->getResultArray();
+    }
+    public function getQtyOutByCns($id_out_celup)
+    {
+        return $this->select('SUM(kgs_out) AS kgs_out, SUM(cns_out) AS cns_out')
+            ->where('id_out_celup', $id_out_celup)
+            ->where('krg_out', 0)
+            ->first();
     }
 }
