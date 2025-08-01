@@ -133,7 +133,7 @@
                                                 </div>
                                                 <div class="col-md-7">
                                                     <label>Keterangan</label>
-                                                    <input type="float" class="form-control" name="Keterangan" id="Keterangan" placeholder="Keterangan">
+                                                    <input type="float" class="form-control" name="keterangan" id="keterangan" placeholder="Keterangan">
                                                 </div>
                                                 <div class="col-md-1">
                                                     <label for="ganti-retur" class="text-center">Ganti Retur</label>

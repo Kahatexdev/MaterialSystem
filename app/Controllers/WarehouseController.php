@@ -2350,7 +2350,7 @@ class WarehouseController extends BaseController
         $data = $this->request->getPost();
         $db = \Config\Database::connect();
         $db->transBegin();  // Mulai transaksi
-
+        // dd($data);
         // 1) Insert Bon
         $dataOtherBon = [
             'no_model'       => $data['no_model'],
