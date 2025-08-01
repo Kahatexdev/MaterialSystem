@@ -6555,9 +6555,9 @@ class ExcelController extends BaseController
             // dd ($rows);
             foreach ($rows as $row) {
                 // dd($poCovering);
-                if ($row->jenis === 'NYLON') {
-                    $row->jenis = 'POLYESTER';
-                }
+                // if ($row->jenis === 'NYLON') {
+                //     $row->jenis = 'POLYESTER';
+                // }
                 $sheet->setCellValue("A{$rowNum}", $no++);
                 $sheet->setCellValue("B{$rowNum}", $row->jenis);
                 $sheet->setCellValue("C{$rowNum}", $row->ukuran);
