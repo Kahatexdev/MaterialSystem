@@ -827,15 +827,15 @@ class ExcelController extends BaseController
                     $item['item_type'],
                     $item['kode_warna'],
                     $item['warna'],
-                    $item['kg_po'],
+                    number_format($item['kgs_material'], 2),
                     $item['tgl_masuk'],
-                    $item['kgs_kirim'],
+                    number_format($item['kgs_kirim'], 2),
                     $item['cones_kirim'],
                     $item['lot_kirim'],
                     $item['no_surat_jalan'],
                     $item['l_m_d'],
-                    $item['gw_kirim'],
-                    $item['harga'],
+                    number_format($item['gw_kirim'], 2),
+                    number_format($item['harga'], 2),
                     $item['nama_cluster']
                 ]
             ], NULL, 'A' . $row);
@@ -2693,8 +2693,10 @@ class ExcelController extends BaseController
         $getMesin = array_values(array_filter($getMesin, function ($m) use ($jenis) {
             if ($jenis === 'BENANG') {
                 return $m['no_mesin'] >= 1 && $m['no_mesin'] <= 38;
-            } else { // ACRYLIC
+            } else if ($jenis === 'ACRYLIC') {
                 return $m['no_mesin'] >= 39 && $m['no_mesin'] <= 43;
+            } else {
+                return $m['no_mesin'] >= 1 && $m['no_mesin'] <= 43;
             }
         }));
         // dd($getMesin);
