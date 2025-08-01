@@ -272,7 +272,7 @@ class PemesananController extends BaseController
 
     public function pengirimanAreaManual()
     {
-         // Ambil current orders dari session, atau [] bila belum ada
+        // Ambil current orders dari session, atau [] bila belum ada
         $data['delivery_area'] = session()->get('manual_delivery') ?? [];
         // dd ($data['delivery_area']);
         // dd  ($data['delivery_area']);
@@ -325,7 +325,7 @@ class PemesananController extends BaseController
         $data = $this->request->getPost();
         // Validasi data yang diperlukan: hasilnya bisa array of records
         $validDatas = $this->pengeluaranModel->validateDeliveryData($data);
-        
+
         // Pastikan ada data yang valid
         if (empty($validDatas) || !is_array($validDatas)) {
             return $this->response->setJSON(['success' => false, 'message' => 'Data Sudah Dikirim Sebelumnya']);
@@ -723,6 +723,9 @@ class PemesananController extends BaseController
         $data = [];
         foreach ($stock as $dt) {
             $other = $this->otherOutModel->getQty($dt['id_out_celup'], $dt['nama_cluster']);
+            $outByCns = $this->pengeluaranModel->getQtyOutByCns($dt['id_out_celup']);
+
+            // log_message('info', 'ini out cel ' . $outByCns[0]);
 
             $data[] = [
                 'id_pemasukan' => $dt['id_pemasukan'],
@@ -734,8 +737,8 @@ class PemesananController extends BaseController
                 'kode_warna' => $dt['kode_warna'],
                 'warna' => $dt['warna'],
                 'lot_kirim' => $dt['lot_kirim'],
-                'kgs_kirim' => round($dt['kgs_kirim'] - ($other[0]['kgs_other_out'] ?? 0), 2),
-                'cones_kirim' => $dt['cones_kirim'] - ($other[0]['cns_other_out'] ?? 0),
+                'kgs_kirim' => round($dt['kgs_kirim'] - ($other[0]['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0), 2),
+                'cones_kirim' => $dt['cones_kirim'] - ($other[0]['cns_other_out'] - ($outByCns['cns_out'] ?? 0) ?? 0),
                 'id_out_celup' => $dt['id_out_celup']
             ];
         }

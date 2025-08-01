@@ -340,19 +340,19 @@
                     </div>
                 </div>
             <?php endforeach; ?>
-            <div class="card-pinjam-order" data-item-type="<?= $itemType ?>" data-kode-warna="<?= $kodeWarna ?>">
-                <div class=" card-header d-flex align-items-center justify-content-between">
-                    <span class="d-flex align-items-center">
-                        <i class="fas fa-warehouse me-2 text-white"></i>
-                        Pinjam Order
-                    </span>
-                </div>
-            </div>
         <?php else: ?>
             <div class="bg-gradient-danger w-100 empty-state">
                 <h6 class="text-white">Stock Kosong <?= $noModel; ?>.</h6>
             </div>
         <?php endif; ?>
+        <div class="card-pinjam-order" data-item-type="<?= $itemType ?>" data-kode-warna="<?= $kodeWarna ?>">
+            <div class=" card-header d-flex align-items-center justify-content-between">
+                <span class="d-flex align-items-center">
+                    <i class="fas fa-warehouse me-2 text-white"></i>
+                    Pinjam Order
+                </span>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -366,7 +366,7 @@
             </div>
             <div class="modal-body">
                 <div class="form-section">
-                    <h6 class="form-section-title">Pengeluaran Stock</h6>
+                    <h4 class="form-section-title"><strong>Pengeluaran Stock</strong></h4>
                     <form id="pengeluaran" method="post" action="<?= base_url('gbn/simpanPengeluaranJalur/' . $id . '?Area=' . $area . '&KgsPesan=' . $KgsPesan . '&CnsPesan=' . $CnsPesan . '&pinjam='); ?>">
                         <div class="row" id="formPengeluaran">
                             <!-- Form input pengeluaran stock will be loaded here -->
@@ -508,29 +508,88 @@
             });
         });
 
+        $(document).on('change', '.form-check-input[type="checkbox"]', function() {
+            const id = $(this).val();
+            const enabled = this.checked;
+
+            // toggle disabled prop pada ketiga input
+            $(`#kgs_out_manual_${id},
+     #cns_out_manual_${id},
+     #keterangan_${id}`)
+                .prop('disabled', !enabled);
+        });
+
+        // Inisialisasi saat page load (opsional jika ada pre-checked)
+        $('.form-check-input[type="checkbox"]').trigger('change');
         // Function to render modal content
         function renderModalContent(item) {
             // Buat konten untuk satu item
-            const formPengeluaran = `    
-                <div class="card mb-2">
-                    <div class="card-body">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="id_pemasukan[]" value="${item.id_pemasukan}" id="pemasukan_${item.id_pemasukan}">
-                            <label class="form-check-label" for="pemasukan_${item.id_pemasukan}">
-                            <strong>No Karung:</strong> ${item.no_karung}<br>
-                            <strong>Tanggal Masuk:</strong> ${item.tgl_masuk}<br>
-                                <strong>Cluster:</strong> ${item.nama_cluster}<br>
-                                <strong>PDK:</strong> ${item.no_model}<br>
-                                <strong>Item Type:</strong> ${item.item_type}<br>
-                                <strong>Kode Warna:</strong> ${item.kode_warna}<br>
-                                <strong>Warna:</strong> ${item.warna}<br>
-                                <strong>Lot Celup:</strong> ${item.lot_kirim}<br>
-                                <strong>Total Kg:</strong> ${item.kgs_kirim} KG<br>
-                                <strong>Total Cones:</strong> ${item.cones_kirim} CNS
-                            </label>
+            const formPengeluaran = `
+            <div class="card mb-2">
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Kiri: detail label -->
+                        <div class="col-md-6">
+                            <h5><strong>Pengeluaran Per Karung</strong></h5>
+                            <div class="form-check">
+                                <input class="form-check-input"
+                                    type="checkbox"
+                                    name="id_pemasukan[]"
+                                    value="${item.id_pemasukan}"
+                                    id="pemasukan_${item.id_pemasukan}">
+                                <label class="form-check-label" for="pemasukan_${item.id_pemasukan}">
+                                    <strong>No Karung:</strong> ${item.no_karung}<br>
+                                    <strong>Tanggal Masuk:</strong> ${item.tgl_masuk}<br>
+                                    <strong>Cluster:</strong> ${item.nama_cluster}<br>
+                                    <strong>PDK:</strong> ${item.no_model}<br>
+                                    <strong>Item Type:</strong> ${item.item_type}<br>
+                                    <strong>Kode Warna:</strong> ${item.kode_warna}<br>
+                                    <strong>Warna:</strong> ${item.warna}<br>
+                                    <strong>Lot Celup:</strong> ${item.lot_kirim}<br>
+                                    <strong>Total Kg:</strong> ${item.kgs_kirim} KG<br>
+                                    <strong>Total Cones:</strong> ${item.cones_kirim} CNS
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- input manual -->
+                        <div class="col-md-6">
+                            <h5><strong>Pengeluaran Per Kones</strong></h5>
+                            <div class="row gx-2">
+                                <div class="col-6">
+                                    <label for="kgs_out_manual_${item.id_pemasukan}" class="form-label small mb-1">Kg Out Manual</label>
+                                    <input type="number"
+                                        step="0.01"
+                                        class="form-control form-control-sm"
+                                        name="kgs_out_manual[${item.id_pemasukan}]"
+                                        id="kgs_out_manual_${item.id_pemasukan}"
+                                        placeholder="Kg"
+                                        disabled>
+                                </div>
+                                <div class="col-6">
+                                    <label for="cns_out_manual_${item.id_pemasukan}" class="form-label small mb-1">Cones Out Manual</label>
+                                    <input type="number"
+                                        step="1"
+                                        class="form-control form-control-sm"
+                                        name="cns_out_manual[${item.id_pemasukan}]"
+                                        id="cns_out_manual_${item.id_pemasukan}"
+                                        placeholder="CNS"
+                                        disabled>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <label for="keterangan_${item.id_pemasukan}" class="form-label small">Keterangan</label>
+                                <textarea class="form-control form-control-sm"
+                                    name="keterangan[${item.id_pemasukan}]"
+                                    id="keterangan_${item.id_pemasukan}"
+                                    rows="3"
+                                    placeholder="Masukkan keterangan…"
+                                    disabled></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
             `;
 
             // Tambahkan konten item ke dalam container
@@ -666,31 +725,31 @@
                             data.forEach(item => {
                                 // Tambahkan setiap no_model ke option
                                 options += `
-                                    <option value="${item.no_model}">
-                                        ${item.no_model}
-                                    </option>
-                                `;
+<option value="${item.no_model}">
+    ${item.no_model}
+</option>
+`;
                             });
                         }
 
                         // Masukkan select ke formPinjamOrder
                         document.getElementById('formPinjamOrder').innerHTML = `
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label for="noModelSelect" class="form-label">Pilih No Model</label>
-                                    <select id="noModelSelect" name="no_model" class="form-select mb-3">
-                                        ${options}
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="clusterSelect" class="form-label">Pilih Cluster</label>
-                                    <select id="clusterSelect" name="nama_cluster" class="form-select mb-3">
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row" id="formDetailPinjamOrder">
-                            </div>
-                        `;
+<div class="row">
+    <div class="col-md-6">
+        <label for="noModelSelect" class="form-label">Pilih No Model</label>
+        <select id="noModelSelect" name="no_model" class="form-select mb-3">
+            ${options}
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label for="clusterSelect" class="form-label">Pilih Cluster</label>
+        <select id="clusterSelect" name="nama_cluster" class="form-select mb-3">
+        </select>
+    </div>
+</div>
+<div class="row" id="formDetailPinjamOrder">
+</div>
+`;
 
                         // Aktifkan Select2
                         $('#noModelSelect').select2({
@@ -748,32 +807,32 @@
                                     if (Array.isArray(data) && data.length > 0) {
                                         data.forEach(item => {
                                             const formPengeluaran = `
-                                                <div class="card mb-2">
-                                                    <div class="card-body">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox" name="id_pemasukan[]" value="${item.id_pemasukan}" id="pemasukan_${item.id_pemasukan}">
-                                                            <label class="form-check-label" for="pemasukan_${item.id_pemasukan}">
-                                                                <strong>No Karung:</strong> ${item.no_karung}<br>
-                                                                <strong>Tanggal Masuk:</strong> ${item.tgl_masuk}<br>
-                                                                <strong>Cluster:</strong> ${item.nama_cluster}<br>
-                                                                <strong>PDK:</strong> ${item.no_model}<br>
-                                                                <strong>Item Type:</strong> ${item.item_type}<br>
-                                                                <strong>Kode Warna:</strong> ${item.kode_warna}<br>
-                                                                <strong>Warna:</strong> ${item.warna}<br>
-                                                                <strong>Lot Celup:</strong> ${item.lot_kirim}<br>
-                                                                <strong>Total Kg:</strong> ${item.kgs_kirim} KG<br>
-                                                                <strong>Total Cones:</strong> ${item.cones_kirim} CNS
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            `;
+<div class="card mb-2">
+    <div class="card-body">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="id_pemasukan[]" value="${item.id_pemasukan}" id="pemasukan_${item.id_pemasukan}">
+            <label class="form-check-label" for="pemasukan_${item.id_pemasukan}">
+                <strong>No Karung:</strong> ${item.no_karung}<br>
+                <strong>Tanggal Masuk:</strong> ${item.tgl_masuk}<br>
+                <strong>Cluster:</strong> ${item.nama_cluster}<br>
+                <strong>PDK:</strong> ${item.no_model}<br>
+                <strong>Item Type:</strong> ${item.item_type}<br>
+                <strong>Kode Warna:</strong> ${item.kode_warna}<br>
+                <strong>Warna:</strong> ${item.warna}<br>
+                <strong>Lot Celup:</strong> ${item.lot_kirim}<br>
+                <strong>Total Kg:</strong> ${item.kgs_kirim} KG<br>
+                <strong>Total Cones:</strong> ${item.cones_kirim} CNS
+            </label>
+        </div>
+    </div>
+</div>
+`;
                                             document.getElementById('formDetailPinjamOrder').innerHTML += formPengeluaran;
                                         });
                                     } else {
                                         document.getElementById('formDetailPinjamOrder').innerHTML = `
-                                            <div class="alert alert-warning">Data stock tidak ditemukan.</div>
-                                        `;
+<div class="alert alert-warning">Data stock tidak ditemukan.</div>
+`;
                                     }
                                 })
                                 .catch(error => {
