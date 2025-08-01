@@ -120,7 +120,7 @@
                             <td class="text-center">
                                 <?php if ($list['button'] === 'disable') : ?>
                                     <button type="button" class="btn bg-gradient-secondary" disabled>
-                                        <i class="fas fa-box"></i> Stock Sudah Dipilih
+                                        <i class="fas fa-box"></i> Stock Terkirim
                                     </button>
                                 <?php else : ?>
                                     <button
@@ -128,7 +128,7 @@
                                         class="btn bg-gradient-info"
                                         data-bs-toggle="modal"
                                         data-bs-target="#editModal<?= esc($list['id_psk']) ?>">
-                                        <i class="fas fa-paper-plane"></i> Pilih Stock
+                                        <i class="fas fa-paper-plane"></i> Kirim Stock
                                     </button>
                                 <?php endif; ?>
                             </td>
