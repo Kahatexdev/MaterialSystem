@@ -226,7 +226,7 @@
                                                                 <div class="col-4">
                                                                     <div class="form-group">
                                                                         <label for="tgl_start_mc"> Tgl Start MC</label>
-                                                                        <input type="date" class="form-control" name="tgl_start_mc[]" value="<?= $detail['start_mc'] ?>" readonly>
+                                                                        <input type="date" class="form-control" name="tgl_start_mc[]" value="<?= $detail['start_mc'] ?>" required>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-4">
@@ -737,7 +737,7 @@
           <div class="col-4">
             <div class="form-group">
               <label for="tgl_start_mc">Tgl Start MC</label>
-              <input type="date" class="form-control" name="tgl_start_mc[]" readonly>
+              <input type="date" class="form-control" name="tgl_start_mc[]" required>
             </div>
           </div>
           <div class="col-4">
