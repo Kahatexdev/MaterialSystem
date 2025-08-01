@@ -226,6 +226,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/exportReportSisaDatangSpandex', 'ExcelController::exportReportSisaDatangSpandex');
     $routes->get('warehouse/reportSisaDatangKaret', 'WarehouseController::reportSisaDatangKaret');
     $routes->get('warehouse/exportReportSisaDatangKaret', 'ExcelController::exportReportSisaDatangKaret');
+    $routes->get('warehouse/reportBenangMingguan', 'WarehouseController::reportBenangMingguan');
+    $routes->get('warehouse/filterBenangMingguan', 'WarehouseController::filterBenangMingguan');
+    $routes->get('warehouse/exportReportBenangMingguan', 'ExcelController::exportReportBenangMingguan');
 
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');

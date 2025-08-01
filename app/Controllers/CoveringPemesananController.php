@@ -80,7 +80,7 @@ class CoveringPemesananController extends BaseController
 
         // Loop untuk men-set tombol enable/disable
         foreach ($listPemesanan as $key => $value) {
-            $history = $this->historyCoveringStockModel
+            $history = $this->pengeluaranModel
                 ->where('id_total_pemesanan', $value['id_total_pemesanan'])
                 ->first();
 
@@ -355,15 +355,15 @@ class CoveringPemesananController extends BaseController
         $kgDiff    = floatval($oldStock['ttl_kg'])  - floatval($post['total_pesan']);
 
         // Update stock
-        $this->coveringStockModel->update($stockId, [
-            'ttl_cns'      => $conesDiff,
-            'ttl_kg'       => $kgDiff,
-            'admin'        => $admin,
-            // tetap simpan field lain agar tidak null
-            'jenis_cover'  => $stockItem['jenis_cover'],
-            'jenis_benang' => $stockItem['jenis_benang'],
-            'lmd'          => $stockItem['lmd'],
-        ]);
+        // $this->coveringStockModel->update($stockId, [
+        //     'ttl_cns'      => $conesDiff,
+        //     'ttl_kg'       => $kgDiff,
+        //     'admin'        => $admin,
+        //     // tetap simpan field lain agar tidak null
+        //     'jenis_cover'  => $stockItem['jenis_cover'],
+        //     'jenis_benang' => $stockItem['jenis_benang'],
+        //     'lmd'          => $stockItem['lmd'],
+        // ]);
 
         // Ambil id_total_pemesanan dan no_model
         $total = $this->pemesananSpandexKaretModel
@@ -376,22 +376,22 @@ class CoveringPemesananController extends BaseController
         $noModel = $this->pemesananSpandexKaretModel
             ->getNoModelById($id_psk)['no_model'] ?? '';
 
-        // Insert history
-        $this->historyCoveringStockModel->insert([
-            'id_total_pemesanan' => $total['id_total_pemesanan'],
-            'no_model'           => $noModel,
-            'jenis'              => $oldStock['jenis'],
-            'jenis_benang'       => $oldStock['jenis_benang'],
-            'jenis_cover'        => $oldStock['jenis_cover'],
-            'color'              => $oldStock['color'],
-            'code'               => $oldStock['code'],
-            'lmd'                => $oldStock['lmd'],
-            'ttl_cns'            => -1 * floatval($post['total_cones']),
-            'ttl_kg'             => -1 * floatval($post['total_pesan']),
-            'admin'              => $admin,
-            'keterangan'         => $post['keterangan'],
-            'created_at'         => date('Y-m-d H:i:s'),
-        ]);
+        // // Insert history
+        // $this->historyCoveringStockModel->insert([
+        //     'id_total_pemesanan' => $total['id_total_pemesanan'],
+        //     'no_model'           => $noModel,
+        //     'jenis'              => $oldStock['jenis'],
+        //     'jenis_benang'       => $oldStock['jenis_benang'],
+        //     'jenis_cover'        => $oldStock['jenis_cover'],
+        //     'color'              => $oldStock['color'],
+        //     'code'               => $oldStock['code'],
+        //     'lmd'                => $oldStock['lmd'],
+        //     'ttl_cns'            => -1 * floatval($post['total_cones']),
+        //     'ttl_kg'             => -1 * floatval($post['total_pesan']),
+        //     'admin'              => $admin,
+        //     'keterangan'         => $post['keterangan'],
+        //     'created_at'         => date('Y-m-d H:i:s'),
+        // ]);
 
         // Update status pengeluaran
         $pengeluaran = $this->pengeluaranModel

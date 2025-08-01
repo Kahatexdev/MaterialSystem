@@ -1724,9 +1724,22 @@ class WarehouseController extends BaseController
             foreach ($pemasukanData as $pemasukan) {
                 // Ambil data tabel out_celup terkait
                 $outCelup = $this->outCelupModel->find($pemasukan['id_out_celup']);
+                // jika kgs manual kosong maka
+                $rawKgsManual = $data['kgs_out_manual'][$pemasukan['id_pemasukan']] ?? '';
+                $rawCnsManual = $data['cns_out_manual'][$pemasukan['id_pemasukan']] ?? 0;
+
+                if ($rawKgsManual !== '' || $rawKgsManual > 0) {
+                    $kgsOut =  floatval($rawKgsManual);
+                    $cnsOut = floatval($rawCnsManual);
+                    $krgOut = 0;
+                } else {
+                    $kgsOut = $pemasukan['kgs_kirim'];
+                    $cnsOut = $pemasukan['cones_kirim'];
+                    $krgOut = 1;
+                    $this->pemasukanModel->update($pemasukan['id_pemasukan'], ['out_jalur' => "1"]);
+                }
 
                 // Update field out_jalur pada tabel pemasukan
-                $this->pemasukanModel->update($pemasukan['id_pemasukan'], ['out_jalur' => "1"]);
 
                 // Siapkan data pengeluaran sesuai masing-masing pemasukan
                 $insertData = [
@@ -1734,13 +1747,14 @@ class WarehouseController extends BaseController
                     'id_stock'           => $pemasukan['id_stock'],
                     'area_out'           => $area,
                     'tgl_out'            => date('Y-m-d H:i:s'),
-                    'kgs_out'            => $pemasukan['kgs_kirim'],
-                    'cns_out'            => $pemasukan['cones_kirim'],
-                    'krg_out'            => 1,
+                    'kgs_out'            => $kgsOut,
+                    'cns_out'            => $cnsOut,
+                    'krg_out'            => $krgOut,
                     'nama_cluster'       => $pemasukan['nama_cluster'],
                     'lot_out'            => $outCelup['lot_kirim'], // pastikan field ini ada di data pemasukan
                     'id_total_pemesanan' => $idTtlPemesanan,
                     'status'             => 'Pengeluaran Jalur',
+                    'keterangan_gbn'     => $data['keterangan'][$pemasukan['id_pemasukan']],
                     'admin'              => $this->username,
                     'created_at'         => date('Y-m-d H:i:s')
                 ];
@@ -2348,11 +2362,9 @@ class WarehouseController extends BaseController
     public function saveOtherIn()
     {
         $data = $this->request->getPost();
-        dd($data);
-
         $db = \Config\Database::connect();
         $db->transBegin();  // Mulai transaksi
-
+        // dd($data);
         // 1) Insert Bon
         $dataOtherBon = [
             'no_model'       => $data['no_model'],
@@ -2378,7 +2390,7 @@ class WarehouseController extends BaseController
         // 2) Loop insert karung + pemasukan
         $jumlahKrg = count($data['no_karung']);
         for ($i = 0; $i < $jumlahKrg; $i++) {
-            // a) outCelup
+            // a) Insert ke outCelup
             $dataKrg = [
                 'id_other_bon' => $id_other_in,
                 'no_model'     => $data['no_model'],
@@ -2393,7 +2405,7 @@ class WarehouseController extends BaseController
                 'admin'        => session()->get('username'),
                 'created_at'   => date('Y-m-d H:i:s'),
             ];
-            $saveKrg      = $this->outCelupModel->insert($dataKrg);
+            $saveKrg = $this->outCelupModel->insert($dataKrg);
             $id_out_celup = $this->outCelupModel->insertID();
 
             if (!$saveKrg) {
@@ -2402,25 +2414,67 @@ class WarehouseController extends BaseController
                 return redirect()->to(base_url($this->role . "/otherIn"));
             }
 
-            // b) pemasukan
+            // b) Insert ke pemasukan
             $dataPemasukan = [
                 'id_out_celup' => $id_out_celup,
                 'tgl_masuk'    => date('Y-m-d'),
                 'nama_cluster' => $data['cluster'][$i],
-                'out_jalur'    => 0,
+                'out_jalur'    => '0',
+                'keterangan'   => $data['keterangan'],
                 'admin'        => session()->get('username'),
                 'created_at'   => date('Y-m-d H:i:s'),
             ];
             $savePemasukan = $this->pemasukanModel->insert($dataPemasukan);
+            $idPemasukan = $this->pemasukanModel->insertID();
 
             if (!$savePemasukan) {
                 $db->transRollback();
                 session()->setFlashdata('error', "Gagal menyimpan pemasukan ke-$i");
                 return redirect()->to(base_url($this->role . "/otherIn"));
             }
+
+            // c) Cek stock lama / insert baru
+            $existingStock = $this->stockModel
+                ->where('no_model', $data['no_model'])
+                ->where('item_type', $data['item_type'])
+                ->where('kode_warna', $data['kode_warna'])
+                ->where('nama_cluster', $data['cluster'][$i]) // Fix: 'nama_cluster'
+                ->where('lot_stock', $data['lot'])
+                ->first();
+
+            if ($existingStock) {
+                // Update stok lama
+                $this->stockModel->update($existingStock['id_stock'], [
+                    'kgs_in_out' => $existingStock['kgs_in_out'] + $data['kgs'][$i],
+                    'cns_in_out' => $existingStock['cns_in_out'] + $data['cones'][$i],
+                    'krg_in_out' => $existingStock['krg_in_out'] + 1,
+                ]);
+                $idStok = $existingStock['id_stock'];
+            } else {
+                // Insert stok baru
+                $newStock = [
+                    'no_model'     => $data['no_model'],
+                    'item_type'    => $data['item_type'],
+                    'kode_warna'   => $data['kode_warna'],
+                    'nama_cluster' => $data['cluster'][$i],
+                    'lot_stock'    => $data['lot'],
+                    'kgs_in_out'   => $data['kgs'][$i],
+                    'cns_in_out'   => $data['cones'][$i],
+                    'krg_in_out'   => 1,
+                    'admin'        => session()->get('username'),
+                    'created_at'   => date('Y-m-d H:i:s'),
+                ];
+                $this->stockModel->insert($newStock);
+                $idStok = $this->stockModel->insertID();
+            }
+
+            // d) Update pemasukan dengan id_stok
+            $this->pemasukanModel->update($idPemasukan, [
+                'id_stock' => $idStok
+            ]);
         }
 
-        // 3) Commit jika semua berhasil
+        // 3) Commit transaksi
         if ($db->transStatus() === false) {
             $db->transRollback();
             session()->setFlashdata('error', "Transaksi gagal, data dibatalkan");
@@ -2830,4 +2884,22 @@ class WarehouseController extends BaseController
         return view($this->role . '/warehouse/report-sisa-datang-karet', $data);
     }
 
+    public function reportBenangMingguan()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Report Benang Per Minggu',
+            'active' => $this->active
+        ];
+        return view($this->role . '/warehouse/report-benang-mingguan', $data);
+    }
+
+    public function filterBenangMingguan()
+    {
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemasukanModel->getFilterBenangMingguan($tanggalAwal, $tanggalAkhir);
+        return $this->response->setJSON($data);
+    }
 }
