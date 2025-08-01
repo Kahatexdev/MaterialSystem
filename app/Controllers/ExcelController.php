@@ -5328,15 +5328,15 @@ class ExcelController extends BaseController
             $sheet->setCellValue('G' . $row, $item['start_mc']);
             $sheet->setCellValue('H' . $row, $item['delivery_awal'] ?? '');
             $sheet->setCellValue('I' . $row, $item['delivery_akhir']) ?? '';
-            $sheet->setCellValue('J' . $row, $item['qty_po'] ?? 0);
-            $sheet->setCellValue('K' . $row, $item['po_plus'] ?? 0);
-            $sheet->setCellValue('L' . $row, $item['stock_awal'] ?? 0);
-            $sheet->setCellValue('M' . $row, $item['retur_stock'] ?? 0);
-            $sheet->setCellValue('N' . $row, $item['qty_sch'] ?? 0);
-            $sheet->setCellValue('O' . $row, $item['qty_datang_solid'] ?? 0);
-            $sheet->setCellValue('P' . $row, $item['qty_ganti_retur_solid'] ?? 0);
-            $sheet->setCellValue('Q' . $row, $item['retur_belang'] ?? 0);
-            $sheet->setCellValue('R' . $row, $item['tagihan_datang'] ?? 0);
+            $sheet->setCellValue('J' . $row, isset($item['qty_po']) ? number_format($item['qty_po'], 2, '.', '') : 0);
+            $sheet->setCellValue('K' . $row, isset($item['po_plus']) ? number_format($item['po_plus'], 2, '.', '') : 0);
+            $sheet->setCellValue('L' . $row, isset($item['stock_awal']) ? number_format($item['stock_awal'], 2, '.', '') : 0);
+            $sheet->setCellValue('M' . $row, isset($item['retur_stock']) ? number_format($item['retur_stock'], 2, '.', '') : 0);
+            $sheet->setCellValue('N' . $row, isset($item['qty_sch']) ? number_format($item['qty_sch'], 2, '.', '') : 0);
+            $sheet->setCellValue('O' . $row, isset($item['qty_datang_solid']) ? number_format($item['qty_datang_solid'], 2, '.', '') : 0);
+            $sheet->setCellValue('P' . $row, isset($item['qty_ganti_retur_solid']) ? number_format($item['qty_ganti_retur_solid'], 2, '.', '') : 0);
+            $sheet->setCellValue('Q' . $row, isset($item['retur_belang']) ? number_format($item['retur_belang'], 2, '.', '') : 0);
+            $sheet->setCellValue('R' . $row, isset($item['tagihan_datang']) ? number_format($item['tagihan_datang'], 2, '.', '') : 0);
             $row++;
         }
 
@@ -6555,9 +6555,9 @@ class ExcelController extends BaseController
             // dd ($rows);
             foreach ($rows as $row) {
                 // dd($poCovering);
-                if ($row->jenis === 'NYLON') {
-                    $row->jenis = 'POLYESTER';
-                }
+                // if ($row->jenis === 'NYLON') {
+                //     $row->jenis = 'POLYESTER';
+                // }
                 $sheet->setCellValue("A{$rowNum}", $no++);
                 $sheet->setCellValue("B{$rowNum}", $row->jenis);
                 $sheet->setCellValue("C{$rowNum}", $row->ukuran);

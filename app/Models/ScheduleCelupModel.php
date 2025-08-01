@@ -826,27 +826,18 @@ class ScheduleCelupModel extends Model
         return $builder->findAll();
     }
 
-    public function getFilterSchWeekly($tglAwal, $tglAkhir, $jenis = null)
+    public function getFilterSchWeekly($tglAwal, $tglAkhir, $jenis)
     {
-        // Format ke datetime jika belum
-        if (strlen($tglAwal) === 10) {
-            $tglAwal .= ' 00:00:00';
-        }
-        if (strlen($tglAkhir) === 10) {
-            $tglAkhir .= ' 23:59:59';
-        }
-
         $builder = $this->select('schedule_celup.*, mesin_celup.no_mesin, mesin_celup.min_caps, mesin_celup.max_caps, open_po.ket_celup, master_material.jenis, master_order.delivery_awal')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->join('open_po', 'open_po.no_model = schedule_celup.no_model')
             ->join('master_material', 'master_material.item_type = schedule_celup.item_type')
             ->join('master_order', 'master_order.no_model = schedule_celup.no_model')
             // ->where('mesin_celup.ket_mesin !=', 'ACRYLIC')
-            ->groupBy('schedule_celup.id_celup')
+            ->where('schedule_celup.tanggal_schedule >=', $tglAwal)
+            ->where('schedule_celup.tanggal_schedule <=', $tglAkhir)
             ->orderBy('schedule_celup.tanggal_schedule', 'ASC')
             ->orderBy('mesin_celup.no_mesin', 'ASC');
-        $builder->where('schedule_celup.start_mc >=', $tglAwal);
-        $builder->where('schedule_celup.start_mc <=', $tglAkhir);
 
 
         if (!empty($jenis)) {
@@ -859,8 +850,11 @@ class ScheduleCelupModel extends Model
                 $builder->where('mesin_celup.no_mesin >=', 39)
                     ->where('mesin_celup.no_mesin <=', 43);
             }
+        } else {
+            $builder->where('mesin_celup.no_mesin >=', 1)
+                ->where('mesin_celup.no_mesin <=', 43);
         }
-
+        $builder->groupBy('schedule_celup.id_celup');
         return $builder->findAll();
     }
 
