@@ -322,7 +322,7 @@ class PemasukanModel extends Model
             ->getRowArray(); // Ambil satu baris saja
     }
 
-    public function getFilterBenangMingguan($tanggal_awal, $tanggal_akhir)
+    public function getFilterBenang($tanggal_awal, $tanggal_akhir)
     {
         // Query 1: Untuk data yang punya id_other_bon (other_bon)
         $builder1 = $this->db->table('pemasukan')

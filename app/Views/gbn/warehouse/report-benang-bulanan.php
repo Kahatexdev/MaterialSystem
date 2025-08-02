@@ -1,6 +1,7 @@
 <?php $this->extend($role . '/warehouse/header'); ?>
 <?php $this->section('content'); ?>
-
+<link rel="stylesheet" href="<?= base_url('assets/css/flatpickr/flatpickr.min.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/js/plugins/flatpickr/style.css') ?>">
 <div class="container-fluid py-4">
 
     <!-- Button Filter -->
@@ -12,7 +13,7 @@
             <div class="row mt-2">
                 <div class="col-md-4">
                     <label for="">Bulan</label>
-                    <input type="month" class="form-control" onchange="ambilTahun(this.value)">
+                    <input type="text" id="bulanPicker" name="bulan" class="form-control" placeholder="Pilih bulan">
                 </div>
                 <div class="col-md-4">
                     <label for="">Aksi</label><br>
@@ -56,6 +57,20 @@
     </div>
 </div>
 
+<script src="<?= base_url('assets/css/flatpickr/flatpickr.min.js') ?>"></script>
+<script src="<?= base_url('assets/js/plugins/flatpickr/index.js') ?>"></script>
+<script>
+    flatpickr("#bulanPicker", {
+        dateFormat: "Y-m",
+        plugins: [
+            new monthSelectPlugin({
+                shorthand: true,
+                dateFormat: "Y-m",
+                altFormat: "F Y"
+            })
+        ]
+    });
+</script>
 <script>
     $(document).ready(function() {
         let dataTable = $('#dataTable').DataTable({
@@ -69,15 +84,14 @@
         });
 
         function loadData() {
-            let tanggal_awal = $('input[type="date"]').eq(0).val().trim();
-            let tanggal_akhir = $('input[type="date"]').eq(1).val().trim();
+            let bulan = $('input[type="text"]').eq(0).val().trim();
 
             // Validasi: Jika semua input kosong, tampilkan alert dan hentikan pencarian
-            if (tanggal_awal === '' && tanggal_akhir === '') {
+            if (bulan === '') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
-                    text: 'Harap isi tanggal sebelum melakukan pencarian!',
+                    text: 'Harap isi bulan sebelum melakukan pencarian!',
                 });
                 return;
             }
@@ -87,8 +101,7 @@
                 url: "<?= base_url($role . '/warehouse/filterBenangBulanan') ?>",
                 type: "GET",
                 data: {
-                    tanggal_awal: tanggal_awal,
-                    tanggal_akhir: tanggal_akhir
+                    bulan: bulan
                 },
                 dataType: "json",
                 success: function(response) {
@@ -131,10 +144,8 @@
         });
 
         $('#btnExport').click(function() {
-            let key = $('input[type="text"]').val();
-            let tanggal_awal = $('input[type="date"]').eq(0).val();
-            let tanggal_akhir = $('input[type="date"]').eq(1).val();
-            window.location.href = "<?= base_url($role . '/warehouse/exportReportBenangBulanan') ?>?tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
+            let bulan = $('input[type="text"]').eq(0).val();
+            window.location.href = "<?= base_url($role . '/warehouse/exportReportBenangBulanan') ?>?bulan=" + bulan;
         });
 
         dataTable.clear().draw();
@@ -152,12 +163,6 @@
         // Sembunyikan tombol Export Excel
         $('#btnExport').addClass('d-none');
     });
-</script>
-<script>
-    function ambilTahun(value) {
-        const tahun = value.split('-')[0];
-        console.log("Tahun yang dipilih:", tahun);
-    }
 </script>
 
 <?php $this->endSection(); ?>
