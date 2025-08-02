@@ -194,7 +194,7 @@ class PemasukanModel extends Model
             ->join('open_po', 'open_po.no_model = other_bon.no_model AND open_po.kode_warna = other_bon.kode_warna AND open_po.item_type = other_bon.item_type', 'left')
             ->join("($subMaterial) m", "m.no_model  = other_bon.no_model AND m.item_type  = other_bon.item_type AND m.kode_warna = other_bon.kode_warna AND m.color = other_bon.warna", 'left')
             ->where('out_celup.id_other_bon IS NOT NULL')
-            ->groupBy('other_bon.tgl_datang, other_bon.no_model, other_bon.item_type, other_bon.kode_warna');
+            ->groupBy('other_bon.id_other_bon, other_bon.no_model, other_bon.item_type, other_bon.kode_warna');
 
         $builder2 = $this->db->table('pemasukan')
             ->select('schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, SUM(out_celup.kgs_kirim) AS kgs_kirim, COUNT(out_celup.cones_kirim) AS cones_kirim, pemasukan.tgl_masuk, pemasukan.nama_cluster, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, m.total_kgs AS kgs_material, out_celup.lot_kirim, bon_celup.no_surat_jalan, bon_celup.tgl_datang, out_celup.l_m_d, out_celup.gw_kirim, SUM(out_celup.harga) AS harga')
@@ -204,7 +204,7 @@ class PemasukanModel extends Model
             ->join('open_po', 'open_po.no_model = master_order.no_model AND open_po.kode_warna = schedule_celup.kode_warna AND open_po.item_type = schedule_celup.item_type', 'left')
             ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
             ->join("($subMaterial) m", "m.no_model  = schedule_celup.no_model AND m.item_type  = schedule_celup.item_type AND m.kode_warna = schedule_celup.kode_warna AND m.color = schedule_celup.warna", 'left')
-            ->groupBy('bon_celup.tgl_datang, out_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna');
+            ->groupBy('bon_celup.id_bon, out_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna');
 
         // Cek apakah ada input key untuk pencarian
         if (!empty($key)) {
