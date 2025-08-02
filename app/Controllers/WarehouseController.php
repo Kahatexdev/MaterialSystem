@@ -2899,7 +2899,7 @@ class WarehouseController extends BaseController
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
-        $data = $this->pemasukanModel->getFilterBenangMingguan($tanggalAwal, $tanggalAkhir);
+        $data = $this->pemasukanModel->getFilterBenang($tanggalAwal, $tanggalAkhir);
         return $this->response->setJSON($data);
     }
 
@@ -2915,10 +2915,18 @@ class WarehouseController extends BaseController
 
     public function filterBenangBulanan()
     {
-        $tanggalAwal = $this->request->getGet('bulan');
-        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+        $bulan = $this->request->getGet('bulan');
+        if (empty($bulan) || ! preg_match('/^\d{4}\-\d{2}$/', $bulan)) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON(['error' => 'Parameter “bulan” harus dalam format YYYY-MM']);
+        }
 
-        $data = $this->pemasukanModel->getFilterBenangMingguan($tanggalAwal, $tanggalAkhir);
+        $timestamp     = strtotime($bulan . '-01');
+        $tanggalAwal   = date('Y-m-01', $timestamp);
+        $tanggalAkhir  = date('Y-m-t', $timestamp);
+        $data = $this->pemasukanModel->getFilterBenang($tanggalAwal, $tanggalAkhir);
+
         return $this->response->setJSON($data);
     }
 }
