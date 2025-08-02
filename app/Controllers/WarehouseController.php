@@ -2374,6 +2374,7 @@ class WarehouseController extends BaseController
             'tgl_datang'     => $data['tgl_datang'],
             'no_surat_jalan' => $data['no_surat_jalan'],
             'detail_sj'      => $data['detail_sj'],
+            'keterangan'     => $data['keterangan'],
             'ganti_retur'    => $data['ganti_retur'],
             'admin'          => session()->get('username'),
             'created_at'     => date('Y-m-d H:i:s'),
@@ -2420,7 +2421,6 @@ class WarehouseController extends BaseController
                 'tgl_masuk'    => date('Y-m-d'),
                 'nama_cluster' => $data['cluster'][$i],
                 'out_jalur'    => '0',
-                'keterangan'   => $data['keterangan'],
                 'admin'        => session()->get('username'),
                 'created_at'   => date('Y-m-d H:i:s'),
             ];
@@ -2920,5 +2920,22 @@ class WarehouseController extends BaseController
 
         $data = $this->pemasukanModel->getFilterBenangMingguan($tanggalAwal, $tanggalAkhir);
         return $this->response->setJSON($data);
+    }
+    public function getKeteranganDatang()
+    {
+        $idBonCelup = $this->request->getGet('id_bon_celup');
+        $idOtherBon = $this->request->getGet('id_other_bon');
+
+        $data = [];
+
+        if ($idBonCelup) {
+            $data = $this->bonCelupModel->where('id_bon_celup', $idBonCelup)->first();
+        } elseif ($idOtherBon) {
+            $data = $this->otherBonModel->where('id_other_bon', $idOtherBon)->first();
+        }
+
+        return $this->response->setJSON([
+            'keterangan' => $data['keterangan'] ?? ''
+        ]);
     }
 }

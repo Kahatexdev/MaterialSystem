@@ -187,7 +187,7 @@ class PemasukanModel extends Model
             ->getCompiledSelect();
         // Query 1: Untuk data yang punya id_other_bon (other_bon)
         $builder1 = $this->db->table('pemasukan')
-            ->select('out_celup.id_out_celup, out_celup.id_other_bon, out_celup.l_m_d, SUM(out_celup.harga) AS harga, out_celup.no_karung, SUM(out_celup.gw_kirim) AS gw_kirim, SUM(out_celup.kgs_kirim) AS kgs_kirim, SUM(out_celup.cones_kirim) AS cones_kirim, out_celup.lot_kirim, other_bon.no_model, other_bon.item_type, other_bon.kode_warna, other_bon.warna, other_bon.no_surat_jalan, other_bon.tgl_datang, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, m.total_kgs AS kgs_material, pemasukan.tgl_masuk, pemasukan.nama_cluster')
+            ->select('out_celup.id_out_celup, out_celup.id_other_bon, out_celup.l_m_d, SUM(out_celup.harga) AS harga, out_celup.no_karung, SUM(out_celup.gw_kirim) AS gw_kirim, SUM(out_celup.kgs_kirim) AS kgs_kirim, SUM(out_celup.cones_kirim) AS cones_kirim, out_celup.lot_kirim, other_bon.no_model, other_bon.item_type, other_bon.kode_warna, other_bon.warna, other_bon.no_surat_jalan, other_bon.tgl_datang, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, m.total_kgs AS kgs_material, pemasukan.tgl_masuk, pemasukan.nama_cluster, other_bon.keterangan')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
             ->join('other_bon', 'other_bon.id_other_bon = out_celup.id_other_bon')
             ->join('master_order', 'master_order.no_model = other_bon.no_model', 'left')
@@ -197,7 +197,7 @@ class PemasukanModel extends Model
             ->groupBy('other_bon.id_other_bon, other_bon.no_model, other_bon.item_type, other_bon.kode_warna');
 
         $builder2 = $this->db->table('pemasukan')
-            ->select('schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, SUM(out_celup.kgs_kirim) AS kgs_kirim, COUNT(out_celup.cones_kirim) AS cones_kirim, pemasukan.tgl_masuk, pemasukan.nama_cluster, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, m.total_kgs AS kgs_material, out_celup.lot_kirim, bon_celup.no_surat_jalan, bon_celup.tgl_datang, out_celup.l_m_d, out_celup.gw_kirim, SUM(out_celup.harga) AS harga')
+            ->select('schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, SUM(out_celup.kgs_kirim) AS kgs_kirim, COUNT(out_celup.cones_kirim) AS cones_kirim, pemasukan.tgl_masuk, pemasukan.nama_cluster, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, m.total_kgs AS kgs_material, out_celup.lot_kirim, bon_celup.no_surat_jalan, bon_celup.tgl_datang, out_celup.l_m_d, out_celup.gw_kirim, SUM(out_celup.harga) AS harga, bon_celup.keterangan')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
             ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup')
             ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
