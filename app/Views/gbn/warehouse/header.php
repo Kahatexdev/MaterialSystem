@@ -149,6 +149,7 @@
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaDatangSpandex') ?>">Report Sisa Datang Spandex</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaDatangKaret') ?>">Report Sisa Datang Karet</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportBenangMingguan') ?>">Report Benang Mingguan</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportBenangBulanan') ?>">Report Benang Bulanan</a></li>
                             </ul>
                         </li>
                         <li class="nav-item d-flex align-items-center">

@@ -229,6 +229,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportBenangMingguan', 'WarehouseController::reportBenangMingguan');
     $routes->get('warehouse/filterBenangMingguan', 'WarehouseController::filterBenangMingguan');
     $routes->get('warehouse/exportReportBenangMingguan', 'ExcelController::exportReportBenangMingguan');
+    $routes->get('warehouse/reportBenangBulanan', 'WarehouseController::reportBenangBulanan');
+    $routes->get('warehouse/filterBenangBulanan', 'WarehouseController::filterBenangBulanan');
+    $routes->get('warehouse/exportReportBenangBulanan', 'ExcelController::exportReportBenangBulanan');
 
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');
@@ -751,5 +754,6 @@ $routes->group(
         $routes->get('getKgPoTambahan', 'ApiController::getKgPoTambahan');
         $routes->get('getMaterialByNoModel/(:any)', 'ApiController::getMaterialByNoModel/$1');
         $routes->get('getMUForRosso/(:any)/(:any)/(:any)', 'ApiController::getMaterialForPemesananRosso/$1/$2/$3');
+        $routes->get('listExportRetur/(:any)', 'ApiController::listExportRetur/$1');
     }
 );

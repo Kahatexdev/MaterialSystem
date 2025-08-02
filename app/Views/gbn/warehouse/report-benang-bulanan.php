@@ -7,22 +7,14 @@
     <div class="card card-frame">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 font-weight-bolder">Filter Datang Benang</h5>
+                <h5 class="mb-0 font-weight-bolder">Filter Benang Per Bulan</h5>
             </div>
             <div class="row mt-2">
-                <div class="col-md-3">
-                    <label for="">Key</label>
-                    <input type="text" class="form-control" placeholder="No Model/Item Type/Kode Warna/Warna" style="font-size: 11px;">
+                <div class="col-md-4">
+                    <label for="">Bulan</label>
+                    <input type="month" class="form-control" onchange="ambilTahun(this.value)">
                 </div>
-                <div class="col-md-3">
-                    <label for="">Tanggal Awal (Tanggal Datang)</label>
-                    <input type="date" class="form-control">
-                </div>
-                <div class="col-md-3">
-                    <label for="">Tanggal Akhir (Tanggal Datang)</label>
-                    <input type="date" class="form-control">
-                </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label for="">Aksi</label><br>
                     <button class="btn btn-info btn-block" id="btnSearch"><i class="fas fa-search"></i></button>
                     <button class="btn btn-danger" id="btnReset"><i class="fas fa-redo-alt"></i></button>
@@ -40,26 +32,19 @@
                     <thead>
                         <tr>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Foll Up</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Order</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Buyer</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Order Type</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No SJ</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal SJ</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Penerimaan</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Benang</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">KG Pesan</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Datang</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs Datang</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones Datang</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LOT Datang</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Surat Jalan</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LMD</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">GW</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Harga</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Nama Cluster</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">L/M/D</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Krg/Pck</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">GW (Kg)</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">NW (Kg)</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Harga Per Kg (USD)</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total (USD)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -84,57 +69,49 @@
         });
 
         function loadData() {
-            let key = $('input[type="text"]').val().trim();
             let tanggal_awal = $('input[type="date"]').eq(0).val().trim();
             let tanggal_akhir = $('input[type="date"]').eq(1).val().trim();
 
             // Validasi: Jika semua input kosong, tampilkan alert dan hentikan pencarian
-            if (key === '' && tanggal_awal === '' && tanggal_akhir === '') {
+            if (tanggal_awal === '' && tanggal_akhir === '') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
-                    text: 'Harap isi minimal salah satu kolom sebelum melakukan pencarian!',
+                    text: 'Harap isi tanggal sebelum melakukan pencarian!',
                 });
                 return;
             }
 
 
             $.ajax({
-                url: "<?= base_url($role . '/warehouse/filterDatangBenang') ?>",
+                url: "<?= base_url($role . '/warehouse/filterBenangBulanan') ?>",
                 type: "GET",
                 data: {
-                    key: key,
                     tanggal_awal: tanggal_awal,
                     tanggal_akhir: tanggal_akhir
                 },
                 dataType: "json",
                 success: function(response) {
                     dataTable.clear().draw();
-
+                    let total = 0;
                     if (response.length > 0) {
                         $.each(response, function(index, item) {
+                            let totalUsd = item.kgs_kirim * item.harga;
                             dataTable.row.add([
                                 index + 1,
-                                item.foll_up,
-                                item.no_model,
-                                item.no_order,
-                                item.buyer,
-                                item.delivery_awal,
-                                item.delivery_akhir,
-                                item.unit,
-                                item.item_type,
-                                item.kode_warna,
-                                item.warna,
-                                parseFloat(item.kgs_material ?? 0).toFixed(2),
-                                item.tgl_masuk,
+                                item.no_surat_jalan ?? '',
+                                item.tgl_masuk ?? '',
+                                item.tgl_input ?? '',
+                                item.item_type ?? '',
+                                item.ukuran ?? '',
+                                item.kode_warna ?? '',
+                                item.warna ?? '',
+                                item.l_m_d ?? '',
+                                item.total_karung ?? '',
+                                parseFloat(item.gw ?? 0).toFixed(2),
                                 parseFloat(item.kgs_kirim ?? 0).toFixed(2),
-                                item.cones_kirim,
-                                item.lot_kirim,
-                                item.no_surat_jalan,
-                                item.l_m_d,
-                                item.gw_kirim,
-                                item.harga,
-                                item.nama_cluster,
+                                item.harga ?? '',
+                                parseFloat(totalUsd ?? '').toFixed(2),
                             ]).draw(false);
                         });
 
@@ -157,7 +134,7 @@
             let key = $('input[type="text"]').val();
             let tanggal_awal = $('input[type="date"]').eq(0).val();
             let tanggal_akhir = $('input[type="date"]').eq(1).val();
-            window.location.href = "<?= base_url($role . '/warehouse/exportDatangBenang') ?>?key=" + key + "&tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
+            window.location.href = "<?= base_url($role . '/warehouse/exportReportBenangBulanan') ?>?tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
         });
 
         dataTable.clear().draw();
@@ -176,6 +153,11 @@
         $('#btnExport').addClass('d-none');
     });
 </script>
-
+<script>
+    function ambilTahun(value) {
+        const tahun = value.split('-')[0];
+        console.log("Tahun yang dipilih:", tahun);
+    }
+</script>
 
 <?php $this->endSection(); ?>
