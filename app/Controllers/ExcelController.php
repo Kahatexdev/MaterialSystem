@@ -827,15 +827,15 @@ class ExcelController extends BaseController
                     $item['item_type'],
                     $item['kode_warna'],
                     $item['warna'],
-                    $item['kg_po'],
+                    number_format($item['kgs_material'], 2),
                     $item['tgl_masuk'],
-                    $item['kgs_kirim'],
+                    number_format($item['kgs_kirim'], 2),
                     $item['cones_kirim'],
                     $item['lot_kirim'],
                     $item['no_surat_jalan'],
                     $item['l_m_d'],
-                    $item['gw_kirim'],
-                    $item['harga'],
+                    number_format($item['gw_kirim'], 2),
+                    number_format($item['harga'], 2),
                     $item['nama_cluster']
                 ]
             ], NULL, 'A' . $row);
@@ -2693,8 +2693,10 @@ class ExcelController extends BaseController
         $getMesin = array_values(array_filter($getMesin, function ($m) use ($jenis) {
             if ($jenis === 'BENANG') {
                 return $m['no_mesin'] >= 1 && $m['no_mesin'] <= 38;
-            } else { // ACRYLIC
+            } else if ($jenis === 'ACRYLIC') {
                 return $m['no_mesin'] >= 39 && $m['no_mesin'] <= 43;
+            } else {
+                return $m['no_mesin'] >= 1 && $m['no_mesin'] <= 43;
             }
         }));
         // dd($getMesin);
@@ -10890,11 +10892,24 @@ class ExcelController extends BaseController
         exit;
     }
 
-    public function exportReportBenangMingguan()
+    public function exportReportBenang()
     {
         $tglAwal = $this->request->getGet('tanggal_awal');
         $tglAkhir = $this->request->getGet('tanggal_akhir');
-        $data = $this->pemasukanModel->getFilterBenangMingguan($tglAwal, $tglAkhir);
+        if (empty($tglAwal) && empty($tglAkhir)) {
+            $bulan = $this->request->getGet('bulan');
+            if (empty($bulan) || ! preg_match('/^\d{4}\-\d{2}$/', $bulan)) {
+                return $this->response
+                    ->setStatusCode(400)
+                    ->setJSON(['error' => 'Parameter “bulan” harus dalam format YYYY-MM']);
+            }
+
+            $timestamp     = strtotime($bulan . '-01');
+            $tglAwal   = date('Y-m-01', $timestamp);
+            $tglAkhir  = date('Y-m-t', $timestamp);
+        }
+        // dd($tglAwal, $tglAkhir);
+        $data = $this->pemasukanModel->getFilterBenang($tglAwal, $tglAkhir);
         $tanggal = $data[0]['tgl_input'];
         $date = new DateTime($tanggal);
         $angkaBulan = (int) $date->format('m');
@@ -11167,7 +11182,11 @@ class ExcelController extends BaseController
         }
 
         // Download
-        $filename = 'Report Benang Mingguan ' . $tglAwal . ' - ' . $tglAkhir . '.xlsx';
+        if ($this->request->getGet('tanggal_awal') && $this->request->getGet('tanggal_akhir')) {
+            $filename = 'Report Benang Mingguan ' . $tglAwal . ' - ' . $tglAkhir . '.xlsx';
+        } else {
+            $filename = 'Report Benang Bulan ' . $bulan . '.xlsx';
+        }
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"$filename\"");
         header('Cache-Control: max-age=0');

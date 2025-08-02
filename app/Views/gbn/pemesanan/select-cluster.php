@@ -725,31 +725,33 @@
                             data.forEach(item => {
                                 // Tambahkan setiap no_model ke option
                                 options += `
-<option value="${item.no_model}">
-    ${item.no_model}
-</option>
-`;
+                                    <option value="${item.no_model}"
+                                    data-item_type="${item.item_type}" 
+                                    data-kode_warna="${item.kode_warna}">
+                                        ${item.no_model} | ${item.item_type} | ${item.kode_warna} | ${item.warna}
+                                    </option>
+                                `;
                             });
                         }
 
                         // Masukkan select ke formPinjamOrder
                         document.getElementById('formPinjamOrder').innerHTML = `
-<div class="row">
-    <div class="col-md-6">
-        <label for="noModelSelect" class="form-label">Pilih No Model</label>
-        <select id="noModelSelect" name="no_model" class="form-select mb-3">
-            ${options}
-        </select>
-    </div>
-    <div class="col-md-6">
-        <label for="clusterSelect" class="form-label">Pilih Cluster</label>
-        <select id="clusterSelect" name="nama_cluster" class="form-select mb-3">
-        </select>
-    </div>
-</div>
-<div class="row" id="formDetailPinjamOrder">
-</div>
-`;
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="noModelSelect" class="form-label">Pilih No Model</label>
+                                    <select id="noModelSelect" name="no_model" class="form-select mb-3">
+                                        ${options}
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="clusterSelect" class="form-label">Pilih Cluster</label>
+                                    <select id="clusterSelect" name="nama_cluster" class="form-select mb-3">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row" id="formDetailPinjamOrder">
+                            </div>
+                        `;
 
                         // Aktifkan Select2
                         $('#noModelSelect').select2({
@@ -766,9 +768,12 @@
                                 $('#clusterSelect').html('<option value="">-- Pilih Cluster --</option>').trigger('change');
                                 return;
                             }
+                            const selectedOption = $(this).find('option:selected');
+                            const itemTypePinjam = selectedOption.data('item_type');
+                            const kodeWarnaPinjam = selectedOption.data('kode_warna');
 
                             // AJAX untuk ambil cluster
-                            fetch(`<?= base_url('/gbn/pinjamOrder/getCluster') ?>?no_model=${encodeURIComponent(noModel)}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}`)
+                            fetch(`<?= base_url('/gbn/pinjamOrder/getCluster') ?>?no_model=${encodeURIComponent(noModel)}&item_type=${encodeURIComponent(itemTypePinjam)}&kode_warna=${encodeURIComponent(kodeWarnaPinjam)}`)
                                 .then(response => response.json())
                                 .then(clusters => {
                                     let clusterOptions = '<option value="">-- Pilih Cluster --</option>';

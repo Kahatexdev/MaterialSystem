@@ -228,7 +228,10 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/exportReportSisaDatangKaret', 'ExcelController::exportReportSisaDatangKaret');
     $routes->get('warehouse/reportBenangMingguan', 'WarehouseController::reportBenangMingguan');
     $routes->get('warehouse/filterBenangMingguan', 'WarehouseController::filterBenangMingguan');
-    $routes->get('warehouse/exportReportBenangMingguan', 'ExcelController::exportReportBenangMingguan');
+    $routes->get('warehouse/exportReportBenangMingguan', 'ExcelController::exportReportBenang');
+    $routes->get('warehouse/reportBenangBulanan', 'WarehouseController::reportBenangBulanan');
+    $routes->get('warehouse/filterBenangBulanan', 'WarehouseController::filterBenangBulanan');
+    $routes->get('warehouse/exportReportBenangBulanan', 'ExcelController::exportReportBenang');
 
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');
@@ -598,6 +601,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('warehouse/exportPoBenang', 'ExcelController::exportPoBenang');
     $routes->get('warehouse/reportDatangBenang', 'WarehouseController::reportDatangBenang');
     $routes->get('warehouse/filterDatangBenang', 'WarehouseController::filterDatangBenang');
+    $routes->get('warehouse/getKeteranganDatang', 'WarehouseController::getKeteranganDatang');
+    $routes->get('warehouse/updateKeteranganDatang', 'WarehouseController::updateKeteranganDatang');
     $routes->get('warehouse/exportDatangBenang', 'ExcelController::exportDatangBenang');
     $routes->get('warehouse/exportExcel', 'ExcelController::excelStockMaterial');
     $routes->get('warehouse/reportPengiriman', 'WarehouseController::reportPengiriman');

@@ -12,7 +12,7 @@ class OtherBonModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id_other_bon', 'no_model', 'item_type', 'kode_warna', 'warna', 'tgl_datang', 'no_surat_jalan', 'detail_sj', 'ganti_retur', 'admin', 'created_at', 'update_at'];
+    protected $allowedFields    = ['id_other_bon', 'no_model', 'item_type', 'kode_warna', 'warna', 'tgl_datang', 'no_surat_jalan', 'detail_sj', 'keterangan', 'ganti_retur', 'admin', 'created_at', 'update_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;

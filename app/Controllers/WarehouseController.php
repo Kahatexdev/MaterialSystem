@@ -2374,6 +2374,7 @@ class WarehouseController extends BaseController
             'tgl_datang'     => $data['tgl_datang'],
             'no_surat_jalan' => $data['no_surat_jalan'],
             'detail_sj'      => $data['detail_sj'],
+            'keterangan'     => $data['keterangan'],
             'ganti_retur'    => $data['ganti_retur'],
             'admin'          => session()->get('username'),
             'created_at'     => date('Y-m-d H:i:s'),
@@ -2420,7 +2421,6 @@ class WarehouseController extends BaseController
                 'tgl_masuk'    => date('Y-m-d'),
                 'nama_cluster' => $data['cluster'][$i],
                 'out_jalur'    => '0',
-                'keterangan'   => $data['keterangan'],
                 'admin'        => session()->get('username'),
                 'created_at'   => date('Y-m-d H:i:s'),
             ];
@@ -2899,7 +2899,51 @@ class WarehouseController extends BaseController
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
-        $data = $this->pemasukanModel->getFilterBenangMingguan($tanggalAwal, $tanggalAkhir);
+        $data = $this->pemasukanModel->getFilterBenang($tanggalAwal, $tanggalAkhir);
         return $this->response->setJSON($data);
+    }
+
+    public function reportBenangBulanan()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Report Benang Per Bulan',
+            'active' => $this->active
+        ];
+        return view($this->role . '/warehouse/report-benang-bulanan', $data);
+    }
+
+    public function filterBenangBulanan()
+    {
+        $bulan = $this->request->getGet('bulan');
+        if (empty($bulan) || ! preg_match('/^\d{4}\-\d{2}$/', $bulan)) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON(['error' => 'Parameter “bulan” harus dalam format YYYY-MM']);
+        }
+
+        $timestamp     = strtotime($bulan . '-01');
+        $tanggalAwal   = date('Y-m-01', $timestamp);
+        $tanggalAkhir  = date('Y-m-t', $timestamp);
+        $data = $this->pemasukanModel->getFilterBenang($tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
+    }
+    public function getKeteranganDatang()
+    {
+        $idBonCelup = $this->request->getGet('id_bon_celup');
+        $idOtherBon = $this->request->getGet('id_other_bon');
+
+        $data = [];
+
+        if ($idBonCelup) {
+            $data = $this->bonCelupModel->where('id_bon_celup', $idBonCelup)->first();
+        } elseif ($idOtherBon) {
+            $data = $this->otherBonModel->where('id_other_bon', $idOtherBon)->first();
+        }
+
+        return $this->response->setJSON([
+            'keterangan' => $data['keterangan'] ?? ''
+        ]);
     }
 }

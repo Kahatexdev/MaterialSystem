@@ -18,6 +18,7 @@ class BonCelupModel extends Model
         'no_surat_jalan',
         'detail_sj',
         'admin',
+        'keterangan',
         'created_at',
         'updated_at',
     ];
