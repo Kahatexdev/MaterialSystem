@@ -151,6 +151,7 @@ class PemesananModel extends Model
                 master_material.jenis,
                 material.kode_warna,
                 material.color,
+                SUM(material.kgs) AS kgs,
                 SUM(pemesanan.jl_mc) AS jl_mc,
                 SUM(pemesanan.ttl_qty_cones) AS cns_pesan,
                 SUM(pemesanan.ttl_berat_cones) AS qty_pesan,
