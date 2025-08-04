@@ -231,10 +231,10 @@ class PemasukanModel extends Model
                 $builder2->where('bon_celup.tgl_datang >=', $tanggal_awal)->where('bon_celup.tgl_datang <=', $tanggal_akhir);
             } elseif (!empty($tanggal_awal)) {
                 $builder1->where('other_bon.tgl_datang >=', $tanggal_awal);
-                $builder2->where('other_bon.tgl_datang >=', $tanggal_awal);
+                $builder2->where('bon_celup.tgl_datang >=', $tanggal_awal);
             } elseif (!empty($tanggal_akhir)) {
                 $builder1->where('other_bon.tgl_datang <=', $tanggal_akhir);
-                $builder2->where('other_bon.tgl_datang <=', $tanggal_akhir);
+                $builder2->where('bon_celup.tgl_datang <=', $tanggal_akhir);
             }
         }
 
@@ -322,7 +322,7 @@ class PemasukanModel extends Model
             ->getRowArray(); // Ambil satu baris saja
     }
 
-    public function getFilterBenangMingguan($tanggal_awal, $tanggal_akhir)
+    public function getFilterBenang($tanggal_awal, $tanggal_akhir)
     {
         // Query 1: Untuk data yang punya id_other_bon (other_bon)
         $builder1 = $this->db->table('pemasukan')
