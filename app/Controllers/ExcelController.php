@@ -27,6 +27,7 @@ use App\Models\PoTambahanModel;
 use App\Models\HistoryStock;
 use App\Models\PemesananSpandexKaretModel;
 use App\Models\WarehouseBBModel;
+use App\Models\MasterWarnaBenangModel;
 use PhpOffice\PhpSpreadsheet\Style\{Border, Alignment, Fill};
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
@@ -62,6 +63,7 @@ class ExcelController extends BaseController
     protected $historyStock;
     protected $pemesananSpandexKaretModel;
     protected $warehouseBBModel;
+    protected $masterWarnaBenangModel;
 
     public function __construct()
     {
@@ -85,6 +87,7 @@ class ExcelController extends BaseController
         $this->historyStock = new HistoryStock();
         $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
         $this->warehouseBBModel = new WarehouseBBModel();
+        $this->masterWarnaBenangModel = new MasterWarnaBenangModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -10908,7 +10911,7 @@ class ExcelController extends BaseController
             $tglAwal   = date('Y-m-01', $timestamp);
             $tglAkhir  = date('Y-m-t', $timestamp);
         }
-        // dd($tglAwal, $tglAkhir);
+
         $data = $this->pemasukanModel->getFilterBenang($tglAwal, $tglAkhir);
         $tanggal = $data[0]['tgl_input'];
         $date = new DateTime($tanggal);
@@ -10932,6 +10935,7 @@ class ExcelController extends BaseController
         $bulan = $namaBulan[$angkaBulan];
 
         $groups = [
+            'COTTON' => [],
             'ACRYLIC' => [],
             'SPUN POLYESTER'   => [],
             'COTTON X LUREX'   => [],
@@ -10940,44 +10944,89 @@ class ExcelController extends BaseController
         ];
 
         foreach ($data as $row) {
-            // Bikin uppercase sekali agar pengecekan case-insensitive
-            $it = strtoupper($row['item_type']);
-            $ds = strtoupper($row['detail_sj'] ?? '');
+            $it = strtoupper($row['item_type']);        // bahan_baku.jenis
+            $sj = strtoupper($row['no_surat_jalan']);   // datang.no_suratjalan
 
-            // 1. COTTON X LUREX: ada LUREX + (CTN atau COTTON)
+            // 1) Surat Jalan Tidak Masuk
+            // jenis BUKAN Acrylic, BUKAN Lurex; SJ tidak diawali KWS, bukan '', bukan SL*, bukan SC*
             if (
-                strpos($it, 'LUREX') !== false
-                && (strpos($it, 'CTN') !== false || strpos($it, 'COTTON') !== false)
-            ) {
-                $groups['COTTON X LUREX'][] = $row;
-
-                // 2. ACRYLIC X LUREX: ada LUREX + (ACR atau ACRYLIC)
-            } elseif (
-                strpos($it, 'LUREX') !== false
-                && (strpos($it, 'ACR') !== false)
-            ) {
-                $groups['ACRYLIC X LUREX'][] = $row;
-
-                // 3. SPUN POLYESTER: ada SPUN + POLYESTER
-            } elseif (
-                strpos($it, 'SPUN') !== false
-                && strpos($it, 'POLYESTER') !== false
-            ) {
-                $groups['SPUN POLYESTER'][] = $row;
-
-                // 4. ACRYLIC (tanpa LUREX)
-            } elseif (strpos($it, 'ACRYLIC') !== false) {
-                $groups['ACRYLIC'][] = $row;
-
-                // 5. Lain‐lain ⇒ Surat Jalan Tidak Masuk (kecuali detail_sj = KHTEX/PO(+))
-            } elseif (
-                $ds !== 'KHTEX'
-                && strpos($ds, 'PO(+)') === false
+                stripos($it, 'ACRYLIC') === false
+                && stripos($it, 'LUREX') === false
+                && stripos($sj, 'KWS') !== 0
+                && $sj !== ''
+                && stripos($sj, 'SL') !== 0
+                && stripos($sj, 'SC') !== 0
             ) {
                 $groups['Surat Jalan Tidak Masuk'][] = $row;
-
-                // 6. Kalau detail_sj KHTEX atau PO(+), kita skip
+                continue;
             }
+
+            // 2) Cotton
+            // bukan Lurex, bukan Polyester, bukan Spun, bukan ACR; SJ diawali KWS atau ''
+            if (
+                stripos($it, 'LUREX') === false
+                && stripos($it, 'POLYESTER') === false
+                && stripos($it, 'SPUN') === false
+                && stripos($it, 'ACR') === false
+                && (stripos($sj, 'KWS') === 0 || $sj === '')
+            ) {
+                $groups['COTTON'][] = $row;
+                continue;
+            }
+
+            // 3) Acrylic
+            // mengandung ACR; bukan Spun, bukan Polyester, bukan pola Lurex-Acr/Lurex-Acrylic
+            if (
+                stripos($it, 'ACR') !== false
+                && stripos($sj, 'KWS') !== false
+                && stripos($it, 'SPUN') === false
+                && stripos($it, 'POLYESTER') === false
+                && stripos($it, 'LUREX ACR') === false
+                && stripos($it, 'ACRYLIC LUREX') === false
+                && stripos($it, 'ACR LUREX') === false
+            ) {
+                $groups['ACRYLIC'][] = $row;
+                continue;
+            }
+
+            // 4) Spun Polyester
+            // bukan ACR, bukan Lurex; mengandung SPUN atau POLYESTER; SJ diawali KWS atau ''
+            if (
+                stripos($it, 'ACR') === false
+                && stripos($it, 'LUREX') === false
+                && (stripos($it, 'SPUN') !== false || stripos($it, 'POLYESTER') !== false)
+                && (stripos($sj, 'KWS') === 0 || $sj === '')
+            ) {
+                $groups['SPUN POLYESTER'][] = $row;
+                continue;
+            }
+
+            // 5) Cotton X Lurex
+            // bukan ACR; mengandung LUREX
+            if (
+                stripos($it, 'ACR') === false
+                && stripos($it, 'LUREX') !== false
+            ) {
+                $groups['COTTON X LUREX'][] = $row;
+                continue;
+            }
+
+            // 6) Acrylic X Lurex
+            // mengandung "ACRYLIC LUREX" atau "LUREX ACR"; SJ diawali KWS atau '' atau mengandung LRX
+            if (
+                (stripos($it, 'LUREX') !== false
+                    || stripos($it, 'LUREX ACR') !== false)
+                && (
+                    stripos($sj, 'KWS') === 0
+                    || $sj === ''
+                    || stripos($sj, 'LRX') !== false
+                )
+            ) {
+                $groups['ACRYLIC X LUREX'][] = $row;
+                continue;
+            }
+
+            // kalau tidak masuk salah satu, bisa skip atau taruh di default
         }
 
         $spreadsheet = new Spreadsheet();
@@ -11133,15 +11182,15 @@ class ExcelController extends BaseController
                     $sheet->setCellValue('H' . $row, $item['kode_warna'] ?? '');
                     $sheet->setCellValue('I' . $row, $item['l_m_d']);
                     $sheet->setCellValue('J' . $row, $item['cones'] ?? 0);
-                    $sheet->setCellValue('K' . $row, $item['gw']);
-                    $sheet->setCellValue('L' . $row, $kgsKirim);
-                    $sheet->setCellValue('M' . $row, $harga);
-                    $sheet->setCellValue('N' . $row, $totalUsd);
+                    $sheet->setCellValue('K' . $row, number_format($item['gw'], 2));
+                    $sheet->setCellValue('L' . $row, number_format($kgsKirim, 2));
+                    $sheet->setCellValue('M' . $row, number_format($harga, 2));
+                    $sheet->setCellValue('N' . $row, number_format($totalUsd, 2));
                     $sheet->setCellValue('O' . $row, ''); // Keterangan
                     $sheet->setCellValue('P' . $row, $item['detail_sj']);
                     $sheet->setCellValue('Q' . $row, $item['jenis']);
                     $sheet->setCellValue('R' . $row, $item['ukuran'] ?? '');
-                    $sheet->setCellValue('S' . $row, $item['warna'] ?? '');
+                    $sheet->setCellValue('S' . $row, $item['warna_dasar'] ?? '');
                     $sheet->setCellValue('T' . $row, $kgsKirim ?? 0);
                     $row++;
 
@@ -11157,9 +11206,9 @@ class ExcelController extends BaseController
                 $sheet->setCellValue("A{$row}", "TOTAL");
                 $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                 $sheet->setCellValue("J{$row}", $subtotal['cones']);
-                $sheet->setCellValue("K{$row}", $subtotal['gw']);
-                $sheet->setCellValue("L{$row}", $subtotal['kgs_kirim']);
-                $sheet->setCellValue("N{$row}", $subtotal['usd']);
+                $sheet->setCellValue("K{$row}", number_format($subtotal['gw'], 2));
+                $sheet->setCellValue("L{$row}", number_format($subtotal['kgs_kirim'], 2));
+                $sheet->setCellValue("N{$row}", number_format($subtotal['usd'], 2));
                 $row++;
             }
 

@@ -745,4 +745,26 @@ class PemesananModel extends Model
 
         return $this->findAll();
     }
+
+    public function getJenisPemesananbyIdTtlPesan($idTtlPesan)
+    {
+        $query = $this->db->table('pemesanan p')
+            ->select("mm.jenis")
+            ->join('total_pemesanan tp', 'tp.id_total_pemesanan = p.id_total_pemesanan', 'left')
+            ->join('material m', 'm.id_material = p.id_material', 'left')
+            ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
+            ->join('master_material mm', 'mm.item_type = m.item_type', 'left')
+            ->where('p.status_kirim', 'YA')
+            ->where('tp.id_total_pemesanan', $idTtlPesan)
+            ->groupBy('p.tgl_pakai, mm.jenis')
+            ->get();
+
+        if (!$query) {
+            // Cek error pada query
+            print_r($this->db->error());
+            return false;
+        }
+
+        return $query->getResultArray();
+    }
 }

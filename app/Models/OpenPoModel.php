@@ -170,12 +170,13 @@ class OpenPoModel extends Model
     //     return $this->first();
     // }
 
-    public function getQtyPO($kodeWarna, $warna, $itemType)
+    public function getQtyPO($noModel, $kodeWarna, $warna, $itemType)
     {
         // 1) Hitung total celup
         $row = $this->db
             ->table('schedule_celup')
             ->selectSum('kg_celup', 'total_kg_celup')
+            ->where('no_model', $noModel)
             ->where('item_type',  $itemType)
             ->where('kode_warna', $kodeWarna)
             ->where('warna',      $warna)
@@ -188,6 +189,7 @@ class OpenPoModel extends Model
         $poRow = $this->db
             ->table('open_po')
             ->select('kg_po')
+            ->where('no_model',   $noModel)
             ->where('item_type',  $itemType)
             ->where('kode_warna', $kodeWarna)
             ->where('color',      $warna)

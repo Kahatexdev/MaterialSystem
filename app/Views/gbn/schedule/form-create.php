@@ -575,16 +575,17 @@
         }
 
         // === Fungsi untuk mengambil data Qty dan Kebutuhan PO (selain qty_po) ===
-        function fetchQtyAndKebutuhanPO(kodeWarna, tr, warna, itemType) {
+        function fetchQtyAndKebutuhanPO(noModel, kodeWarna, tr, warna, itemType) {
             const itemTypeEncoded = encodeURIComponent(itemType);
             // idInduk = idInduk || 0;
-            const url = `<?= base_url(session('role') . "/schedule/getQtyPO") ?>?kode_warna=${kodeWarna}&color=${warna}&item_type=${itemTypeEncoded}`;
+            const url = `<?= base_url(session('role') . "/schedule/getQtyPO") ?>?no_model=${noModel}&kode_warna=${kodeWarna}&color=${warna}&item_type=${itemTypeEncoded}`;
             fetch(url)
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(data => {
+                    console.log("Qty PO Data:", data);
                     if (data && !data.error) {
                         // Hanya update field tambahan (qty_po_plus, KG Kebutuhan dan Sisa Jatah)
                         const qtyPO = tr.querySelector("input[name='qty_po[]']");
@@ -864,7 +865,7 @@
                     return;
                 }
                 if (selectedOption.value) {
-                    fetchQtyAndKebutuhanPO(kodeWarnaValue, tr, warna, itemTypeValue);
+                    fetchQtyAndKebutuhanPO(noModelValue, kodeWarnaValue, tr, warna, itemTypeValue);
                     fetchKeterangan(kodeWarnaValue, tr, warna, itemTypeValue, noModelValue);
                     fetchPODetails(selectedOption.value, tr, itemTypeValue, kodeWarnaValue);
                 } else {

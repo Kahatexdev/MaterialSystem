@@ -16,7 +16,7 @@ use App\Models\StockModel;
 use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\ClusterModel;
-
+use App\Models\MasterWarnaBenangModel;
 
 class GodController extends BaseController
 {
@@ -30,6 +30,7 @@ class GodController extends BaseController
     protected $masterOrderModel;
     protected $materialModel;
     protected $clusterModel;
+    protected $masterWarnaBenangModel;
     protected $request;
 
 
@@ -43,6 +44,7 @@ class GodController extends BaseController
         $this->masterOrderModel = new MasterOrderModel();
         $this->materialModel = new MaterialModel();
         $this->clusterModel = new ClusterModel();
+        $this->masterWarnaBenangModel = new MasterWarnaBenangModel();
         $this->request = \Config\Services::request();
 
         $this->role = session()->get('role');
@@ -351,5 +353,57 @@ class GodController extends BaseController
                 'errorMsg' => $ex->getMessage()
             ]);
         }
+    }
+
+    public function masterWarnaBenang()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'God Monitoring',
+            'active' => $this->active,
+        ];
+        return view($this->role . '/god/import-master-warna-benang', $data);
+    }
+
+    public function importMasterWarnaBenang()
+    {
+        $file = $this->request->getFile('fileExcel');
+
+        if (!$file->isValid()) {
+            return redirect()->back()->with('error', 'File tidak valid.');
+        }
+
+        $ext = $file->getClientExtension();
+        if (!in_array($ext, ['xls', 'xlsx', 'csv'])) {
+            return redirect()->back()->with('error', 'Format file harus .xls, .xlsx, atau .csv.');
+        }
+
+        $spreadsheet = IOFactory::load($file->getPathname());
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+
+        // mulai dari baris kedua
+        for ($i = 1; $i < count($rows); $i++) {
+            $row = $rows[$i];
+
+            // Skip baris kosong
+            if (empty($row[0])) {
+                continue;
+            }
+
+            $data = [
+                'kode_warna'  => trim($row[0]),
+                'warna'       => trim($row[1] ?? ''),
+                'warna_dasar' => trim($row[2] ?? '')
+            ];
+
+            // Cek apakah kode_warna sudah ada
+            $existing = $this->masterWarnaBenangModel->find($data['kode_warna']);
+            if (!$existing) {
+                $this->masterWarnaBenangModel->insert($data);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Data berhasil diimport.');
     }
 }

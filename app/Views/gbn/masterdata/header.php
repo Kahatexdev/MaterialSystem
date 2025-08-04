@@ -39,6 +39,13 @@
                                     Master Material</span>
                             </a>
                         </li>
+                        <li class="nav-item d-flex align-items-center px-1">
+                            <a href="<?= base_url(session()->get('role')) . '/masterWarnaBenang' ?>" class="nav-link text-body font-weight-bold px-2">
+                                <i class="fas fa-palette"></i>
+                                <span class="d-lg-inline-block d-none ms-1">
+                                    Master Warna Benang</span>
+                            </a>
+                        </li>
                         <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-file-alt"></i>

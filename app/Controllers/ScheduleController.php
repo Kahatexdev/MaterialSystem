@@ -423,11 +423,12 @@ class ScheduleController extends BaseController
 
     public function getQtyPO()
     {
+        $noModel = $this->request->getGet('no_model');
         $kodeWarna = $this->request->getGet('kode_warna');
         $color = $this->request->getGet('color');
         $itemTypeEncoded = urldecode($this->request->getGet('item_type'));
         // $idInduk = $this->request->getGet('id_induk');
-        $qtyPO = $this->openPoModel->getQtyPO($kodeWarna, $color, $itemTypeEncoded);
+        $qtyPO = $this->openPoModel->getQtyPO($noModel, $kodeWarna, $color, $itemTypeEncoded);
 
         if ($qtyPO) {
             return $this->response->setJSON($qtyPO);
@@ -610,7 +611,7 @@ class ScheduleController extends BaseController
             // Pastikan 'kg_po' ada di $kg_kebutuhan
             $kg_po = isset($kg_kebutuhan['kg_po']) ? (float) $kg_kebutuhan['kg_po'] : 0;
             $row['kg_kebutuhan'] = $kg_po;
-            $tagihan = $this->openPoModel->getQtyPO($kodeWarna, $warna, $itemType);
+            $tagihan = $this->openPoModel->getQtyPO($noModel, $kodeWarna, $warna, $itemType);
             $row['sisa_jatah'] = $tagihan['sisa_kg_po'] ?? 0;
         }
         unset($row);
