@@ -60,12 +60,39 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">GW</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Harga</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Nama Cluster</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Update</th>
                         </tr>
                     </thead>
                     <tbody>
 
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- modal update keterangan bon -->
+<div class="modal fade" id="modalUpdate" tabindex="-1" aria-labelledby="modalUpdateLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalUpdateLabel">Update Keterangan Datang</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modalIdBon">
+                <input type="hidden" id="modalIdOther">
+
+                <div class="mb-3">
+                    <label for="keteranganDatang" class="form-label">Keterangan Datang</label>
+                    <textarea class="form-control" id="keteranganDatang" rows="4" placeholder="Tulis keterangan datang..."></textarea>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-primary" id="btnSubmitKeterangan">Simpan</button>
+                </div>
             </div>
         </div>
     </div>
@@ -109,6 +136,7 @@
                 },
                 dataType: "json",
                 success: function(response) {
+                    console.log(response);
                     dataTable.clear().draw();
 
                     if (response.length > 0) {
@@ -135,6 +163,13 @@
                                 item.gw_kirim,
                                 item.harga,
                                 item.nama_cluster,
+                                item.keterangan,
+                                `<button class="btn btn-warning btn-update" 
+                                    data-id_bon="${item.id_bon || ''}" 
+                                    data-id_other="${item.id_other_bon || ''}" 
+                                    title="Update">
+                                    <i class="fa fa-edit"></i>
+                                </button>`
                             ]).draw(false);
                         });
 
@@ -148,6 +183,41 @@
                 }
             });
         }
+        $('#dataTable').on('click', '.btn-update', function() {
+            const idBon = $(this).data('id_bon');
+            const idOther = $(this).data('id_other');
+
+            console.log('INI' + idBon);
+
+            // Masukkan ke input hidden
+            $('#modalIdBon').val(idBon);
+            $('#modalIdOther').val(idOther);
+
+            // Kosongkan sementara textarea
+            $('#keteranganDatang').val('');
+
+            // AJAX untuk ambil keterangan sebelumnya
+            $.ajax({
+                url: '<?= base_url($role . "/warehouse/getKeteranganDatang") ?>',
+                type: 'GET',
+                data: {
+                    id_bon: idBon,
+                    id_other_bon: idOther
+                },
+                dataType: 'json',
+                success: function(response) {
+                    $('#keteranganDatang').val(response.keterangan ?? '');
+                    $('#modalUpdate').modal('show');
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: 'Gagal mengambil data keterangan.'
+                    });
+                }
+            });
+        });
 
         $('#btnSearch').click(function() {
             loadData();
@@ -174,6 +244,38 @@
 
         // Sembunyikan tombol Export Excel
         $('#btnExport').addClass('d-none');
+    });
+    $('#btnSubmitKeterangan').on('click', function() {
+        const idBon = $('#modalIdBon').val();
+        const idOther = $('#modalIdOther').val();
+        const keterangan = $('#keteranganDatang').val();
+
+        $.ajax({
+            url: '<?= base_url($role . "/warehouse/updateKeteranganDatang") ?>',
+            type: 'POST',
+            data: {
+                id_bon: idBon,
+                id_other_bon: idOther,
+                keterangan: keterangan
+            },
+            success: function(res) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Keterangan berhasil diperbarui.'
+                });
+
+                $('#modalUpdate').modal('hide');
+                loadData(); // Reload tabel
+            },
+            error: function(xhr) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: 'Terjadi kesalahan saat menyimpan.'
+                });
+            }
+        });
     });
 </script>
 

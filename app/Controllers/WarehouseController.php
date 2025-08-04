@@ -26,6 +26,7 @@ use App\Models\OtherBonModel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpParser\Node\Expr\FuncCall;
 
 class WarehouseController extends BaseController
 {
@@ -2374,6 +2375,7 @@ class WarehouseController extends BaseController
             'tgl_datang'     => $data['tgl_datang'],
             'no_surat_jalan' => $data['no_surat_jalan'],
             'detail_sj'      => $data['detail_sj'],
+            'keterangan'     => $data['keterangan'],
             'ganti_retur'    => $data['ganti_retur'],
             'admin'          => session()->get('username'),
             'created_at'     => date('Y-m-d H:i:s'),
@@ -2420,7 +2422,6 @@ class WarehouseController extends BaseController
                 'tgl_masuk'    => date('Y-m-d'),
                 'nama_cluster' => $data['cluster'][$i],
                 'out_jalur'    => '0',
-                'keterangan'   => $data['keterangan'],
                 'admin'        => session()->get('username'),
                 'created_at'   => date('Y-m-d H:i:s'),
             ];
@@ -2928,5 +2929,39 @@ class WarehouseController extends BaseController
         $data = $this->pemasukanModel->getFilterBenang($tanggalAwal, $tanggalAkhir);
 
         return $this->response->setJSON($data);
+    }
+    public function getKeteranganDatang()
+    {
+        $idBon = $this->request->getGet('id_bon');
+        $idOtherBon = $this->request->getGet('id_other_bon');
+
+        $data = [];
+
+        if ($idBon) {
+            $data = $this->bonCelupModel->where('id_bon', $idBon)->first();
+        } elseif ($idOtherBon) {
+            $data = $this->otherBonModel->where('id_other_bon', $idOtherBon)->first();
+        }
+
+        return $this->response->setJSON([
+            'keterangan' => $data['keterangan'] ?? ''
+        ]);
+    }
+    public function updateKeteranganDatang()
+    {
+        $idBon = $this->request->getPost('id_bon');
+        $idOtherBon = $this->request->getPost('id_other_bon');
+        $keterangan = $this->request->getPost('keterangan');
+
+        if ($idBon) {
+            $this->bonCelupModel->update($idBon, ['keterangan' => $keterangan]);
+        } elseif ($idOtherBon) {
+            $this->otherBonModel->update($idOtherBon, ['keterangan' => $keterangan]);
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            // 'message' => 'Keterangan berhasil diperbarui.'
+        ]);
     }
 }

@@ -198,6 +198,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportDatangBenang', 'WarehouseController::reportDatangBenang');
     $routes->get('warehouse/filterDatangBenang', 'WarehouseController::filterDatangBenang');
     $routes->get('warehouse/exportDatangBenang', 'ExcelController::exportDatangBenang');
+    $routes->get('warehouse/getKeteranganDatang', 'WarehouseController::getKeteranganDatang');
+    $routes->post('warehouse/updateKeteranganDatang', 'WarehouseController::updateKeteranganDatang');
     $routes->get('warehouse/exportExcel', 'ExcelController::excelStockMaterial');
     $routes->get('warehouse/reportPengiriman', 'WarehouseController::reportPengiriman');
     $routes->get('warehouse/filterPengiriman', 'WarehouseController::filterPengiriman');
