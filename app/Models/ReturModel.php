@@ -287,7 +287,7 @@ class ReturModel extends Model
         IF(po_tambahan.status = 'approved', po_tambahan.plus_pck_kg, 0) AS plus_pck_kg,
         IF(po_tambahan.status = 'approved', po_tambahan.plus_pck_cns, 0) AS plus_pck_cns,
         IF(po_tambahan.status = 'approved', po_tambahan.lebih_pakai_kg, 0) AS lebih_pakai_kg, 
-        master_order.no_model, master_order.delivery_akhir, material.item_type, material.kode_warna, material.color, material.style_size, material.kgs, material.composition, material.gw, material.qty_pcs, material.loss")
+        master_order.no_model, master_order.delivery_akhir, material.item_type, material.kode_warna, material.color, material.style_size, SUM(material.kgs) AS kgs, material.composition, material.gw, SUM(material.qty_pcs) AS qty_pcs, material.loss")
             ->join('master_order', 'retur.no_model = master_order.no_model', 'left')
             ->join('material', 'master_order.id_order = material.id_order AND retur.item_type = material.item_type AND retur.kode_warna = material.kode_warna', 'left')
             ->join('po_tambahan', 'po_tambahan.id_material = material.id_material', 'left')
