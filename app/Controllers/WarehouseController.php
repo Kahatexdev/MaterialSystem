@@ -26,6 +26,7 @@ use App\Models\OtherBonModel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpParser\Node\Expr\FuncCall;
 
 class WarehouseController extends BaseController
 {
@@ -2931,19 +2932,36 @@ class WarehouseController extends BaseController
     }
     public function getKeteranganDatang()
     {
-        $idBonCelup = $this->request->getGet('id_bon_celup');
+        $idBon = $this->request->getGet('id_bon');
         $idOtherBon = $this->request->getGet('id_other_bon');
 
         $data = [];
 
-        if ($idBonCelup) {
-            $data = $this->bonCelupModel->where('id_bon_celup', $idBonCelup)->first();
+        if ($idBon) {
+            $data = $this->bonCelupModel->where('id_bon', $idBon)->first();
         } elseif ($idOtherBon) {
             $data = $this->otherBonModel->where('id_other_bon', $idOtherBon)->first();
         }
 
         return $this->response->setJSON([
             'keterangan' => $data['keterangan'] ?? ''
+        ]);
+    }
+    public function updateKeteranganDatang()
+    {
+        $idBon = $this->request->getPost('id_bon');
+        $idOtherBon = $this->request->getPost('id_other_bon');
+        $keterangan = $this->request->getPost('keterangan');
+
+        if ($idBon) {
+            $this->bonCelupModel->update($idBon, ['keterangan' => $keterangan]);
+        } elseif ($idOtherBon) {
+            $this->otherBonModel->update($idOtherBon, ['keterangan' => $keterangan]);
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            // 'message' => 'Keterangan berhasil diperbarui.'
         ]);
     }
 }
