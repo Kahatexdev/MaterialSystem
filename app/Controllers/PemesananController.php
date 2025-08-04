@@ -883,7 +883,7 @@ class PemesananController extends BaseController
                 'warna' => $dt['warna'],
                 'lot_kirim' => $dt['lot_kirim'],
                 'kgs_kirim' => round($dt['kgs_kirim'] - ($other[0]['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0), 2),
-                'cones_kirim' => $dt['cones_kirim'] - ($other[0]['cns_other_out'] - ($outByCns['cns_out'] ?? 0) ?? 0),
+                'cones_kirim' => $dt['cones_kirim'] - ($other[0]['cns_other_out'] ?? 0) - ($outByCns['cns_out'] ?? 0),
                 'id_out_celup' => $dt['id_out_celup']
             ];
         }

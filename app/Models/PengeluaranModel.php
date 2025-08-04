@@ -101,12 +101,16 @@ class PengeluaranModel extends Model
     }
     public function getFilterPengiriman($key, $tanggal_awal, $tanggal_akhir)
     {
-        $this->select('DATE(open_po.created_at) AS tgl_po, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, pengeluaran.tgl_out, pengeluaran.nama_cluster, pengeluaran.area_out, pengeluaran.kgs_out, pengeluaran.cns_out, pengeluaran.krg_out, pengeluaran.lot_out, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.unit, master_order.delivery_awal, master_order.delivery_akhir, total_pemesanan.ttl_kg, total_pemesanan.ttl_cns')
+        $this->select('master_order.no_model, material.item_type, material.kode_warna, material.color, pengeluaran.tgl_out, pengeluaran.nama_cluster, pengeluaran.area_out, pengeluaran.kgs_out, pengeluaran.cns_out, pengeluaran.krg_out, pengeluaran.lot_out, pengeluaran.keterangan_gbn,pengeluaran.admin, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.unit, master_order.delivery_awal, master_order.delivery_akhir, total_pemesanan.ttl_kg, total_pemesanan.ttl_cns, master_material.jenis')
+            ->join('pemesanan_spandex_karet', 'pengeluaran.id_psk = pemesanan_spandex_karet.id_psk', 'left')
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left')
-            ->join('out_celup', 'out_celup.id_out_celup = pengeluaran.id_out_celup')
-            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup')
-            ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
-            ->join('open_po', 'open_po.no_model = master_order.no_model AND open_po.kode_warna = schedule_celup.kode_warna AND open_po.item_type = schedule_celup.item_type', 'left')
+            ->join('pemesanan', '(
+                pemesanan.id_total_pemesanan = pemesanan_spandex_karet.id_total_pemesanan
+                OR pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan
+            )' , 'left' )
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pengeluaran.status', "Pengiriman Area")
             ->groupBy('pengeluaran.id_pengeluaran')
             ->orderBy('pengeluaran.tgl_out', 'DESC');

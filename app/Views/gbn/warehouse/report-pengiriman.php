@@ -54,6 +54,8 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Karung Kirim</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LOT Kirim</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Nama Cluster</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Admin</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -115,7 +117,7 @@
                                 item.delivery_akhir,
                                 item.item_type,
                                 item.kode_warna,
-                                item.warna,
+                                item.color,
                                 item.ttl_kg,
                                 item.tgl_out,
                                 item.kgs_out,
@@ -123,6 +125,8 @@
                                 item.krg_out,
                                 item.lot_out,
                                 item.nama_cluster,
+                                item.keterangan_gbn,
+                                item.admin
                             ]).draw(false);
                         });
 
