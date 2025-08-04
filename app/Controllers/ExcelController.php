@@ -1673,95 +1673,134 @@ class ExcelController extends BaseController
 
     public function exportPengiriman()
     {
-        $key = $this->request->getGet('key');
-        $tanggal_awal = $this->request->getGet('tanggal_awal');
-        $tanggal_akhir = $this->request->getGet('tanggal_akhir');
-        $data = $this->pengeluaranModel->getFilterPengiriman($key, $tanggal_awal, $tanggal_akhir);
+        $key            = $this->request->getGet('key');
+        $tanggal_awal   = $this->request->getGet('tanggal_awal');
+        $tanggal_akhir  = $this->request->getGet('tanggal_akhir');
+        $data           = $this->pengeluaranModel->getFilterPengiriman($key, $tanggal_awal, $tanggal_akhir);
 
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        // Judul
-        $sheet->mergeCells('A1:O1');
-        $sheet->setCellValue('A1', 'REPORT PENGIRIMAN AREA');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        //
-        $sheet->setCellValue('A2', 'Tanggal Awal');
-        $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(11);
-        $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-
-        $sheet->setCellValue('C2', ': ' . $tanggal_awal);
-        $sheet->getStyle('C2')->getFont()->setBold(true)->setSize(11);
-        $sheet->getStyle('C2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-
-        $sheet->setCellValue('N2', 'Tanggal Akhir');
-        $sheet->getStyle('N2')->getFont()->setBold(true)->setSize(11);
-        $sheet->getStyle('N2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-
-        $sheet->setCellValue('O2', ': ' . $tanggal_akhir);
-        $sheet->getStyle('O2')->getFont()->setBold(true)->setSize(11);
-        $sheet->getStyle('O2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-
-        // Header
-        $headers = ['No', 'No Model', 'Area', 'Delivery Awal', 'Delivery Akhir', 'Item Type', 'Kode Warna', 'Warna', 'Kgs Pesan', 'Tanggal Keluar', 'Kgs Kirim', 'Cones Kirim', 'Karung Kirim', 'Lot Kirim', 'Nama Cluster'];
-        $col = 'A';
-        foreach ($headers as $header) {
-            $sheet->setCellValue($col . '3', $header);
-            $sheet->getStyle($col . '3')->getFont()->setBold(true);
-            $col++;
-        }
-
-        // Data
-        $row = 4;
-        $no = 1;
+        // 1. Kelompokkan data berdasarkan 'jenis'
+        $grouped = [];
         foreach ($data as $item) {
-            $sheet->setCellValue('A' . $row, $no++);
-            $sheet->setCellValue('B' . $row, $item['no_model']);
-            $sheet->setCellValue('C' . $row, $item['area_out']);
-            $sheet->setCellValue('D' . $row, $item['delivery_awal']);
-            $sheet->setCellValue('E' . $row, $item['delivery_akhir']);
-            $sheet->setCellValue('F' . $row, $item['item_type']);
-            $sheet->setCellValue('G' . $row, $item['kode_warna']);
-            $sheet->setCellValue('H' . $row, $item['warna']);
-            $sheet->setCellValue('I' . $row, $item['ttl_kg']);
-            $sheet->setCellValue('J' . $row, $item['tgl_out']);
-            $sheet->setCellValue('K' . $row, $item['kgs_out']);
-            $sheet->setCellValue('L' . $row, $item['cns_out']);
-            $sheet->setCellValue('M' . $row, $item['krg_out']);
-            $sheet->setCellValue('N' . $row, $item['lot_out']);
-            $sheet->setCellValue('O' . $row, $item['nama_cluster']);
-            $row++;
+            $jenis = $item['jenis'] ?? 'Undefined';
+            $grouped[$jenis][] = $item;
         }
 
-        // Border
-        $lastRow = $row - 1;
-        $styleArray = [
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => ['argb' => 'FF000000'],
-                ],
-            ],
+        // 2. Inisialisasi Spreadsheet
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+
+        // Header kolom static
+        $headers = [
+            'No',
+            'No Model',
+            'Area',
+            'Delivery Awal',
+            'Delivery Akhir',
+            'Item Type',
+            'Kode Warna',
+            'Warna',
+            'Kgs Pesan',
+            'Tanggal Keluar',
+            'Kgs Kirim',
+            'Cones Kirim',
+            'Karung Kirim',
+            'Lot Kirim',
+            'Nama Cluster',
+            'Keterangan GBN',
+            'Admin'
         ];
-        $sheet->getStyle("A3:O{$lastRow}")->applyFromArray($styleArray);
 
-        // Auto-size
-        foreach (range('A', 'O') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
+        $sheetIndex = 0;
+        foreach ($grouped as $jenis => $rows) {
+            // Pilih atau buat sheet baru
+            if ($sheetIndex === 0) {
+                $sheet = $spreadsheet->getActiveSheet();
+            } else {
+                $sheet = $spreadsheet->createSheet();
+            }
+            // Rename sheet
+            $sheet->setTitle(substr($jenis, 0, 31)); // batas 31 karakter
+
+            // -- Judul --
+            $sheet->mergeCells('A1:Q1');
+            $sheet->setCellValue('A1', "REPORT PENGIRIMAN AREA - {$jenis}");
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+            $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            // -- Tanggal Awal/Akhir --
+            $sheet->setCellValue('A2', 'Tanggal Awal');
+            $sheet->setCellValue('C2', ": {$tanggal_awal}");
+            $sheet->setCellValue('N2', 'Tanggal Akhir');
+            $sheet->setCellValue('Q2', ": {$tanggal_akhir}");
+            foreach (['A2', 'C2', 'N2', 'Q2'] as $cell) {
+                $sheet->getStyle($cell)->getFont()->setBold(true)->setSize(11);
+                $sheet->getStyle($cell)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+            }
+
+            // -- Header Kolom --
+            $col = 'A';
+            foreach ($headers as $header) {
+                $sheet->setCellValue($col . '3', $header);
+                $sheet->getStyle($col . '3')->getFont()->setBold(true);
+                $col++;
+            }
+
+            // -- Isi Data --
+            $rowNum = 4;
+            $no = 1;
+            foreach ($rows as $item) {
+                $sheet->setCellValue("A{$rowNum}", $no++);
+                $sheet->setCellValue("B{$rowNum}", $item['no_model']);
+                $sheet->setCellValue("C{$rowNum}", $item['area_out']);
+                $sheet->setCellValue("D{$rowNum}", $item['delivery_awal']);
+                $sheet->setCellValue("E{$rowNum}", $item['delivery_akhir']);
+                $sheet->setCellValue("F{$rowNum}", $item['item_type']);
+                $sheet->setCellValue("G{$rowNum}", $item['kode_warna']);
+                $sheet->setCellValue("H{$rowNum}", $item['color']);
+                $sheet->setCellValue("I{$rowNum}", $item['ttl_kg']);
+                $sheet->setCellValue("J{$rowNum}", $item['tgl_out']);
+                $sheet->setCellValue("K{$rowNum}", $item['kgs_out']);
+                $sheet->setCellValue("L{$rowNum}", $item['cns_out']);
+                $sheet->setCellValue("M{$rowNum}", $item['krg_out']);
+                $sheet->setCellValue("N{$rowNum}", $item['lot_out']);
+                $sheet->setCellValue("O{$rowNum}", $item['nama_cluster']);
+                $sheet->setCellValue("P{$rowNum}", $item['keterangan_gbn']);
+                $sheet->setCellValue("Q{$rowNum}", $item['admin']);
+                $rowNum++;
+            }
+
+            // -- Border Tabel --
+            $lastRow = $rowNum - 1;
+            $sheet->getStyle("A3:Q{$lastRow}")
+                ->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color'       => ['argb' => 'FF000000'],
+                        ],
+                    ],
+                ]);
+
+            // -- Auto-size Kolom --
+            foreach (range('A', 'Q') as $c) {
+                $sheet->getColumnDimension($c)->setAutoSize(true);
+            }
+
+            $sheetIndex++;
         }
 
-        // Download
-        $filename = 'Report_Pengiriman_Area' . '.xlsx';
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-        header('Cache-Control: max-age=0');
+        // Kembalikan ke sheet pertama sebelum download
+        $spreadsheet->setActiveSheetIndex(0);
 
+        // Download seperti biasa
+        $filename = 'Report_Pengiriman_Area.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"{$filename}\"");
+        header('Cache-Control: max-age=0');
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
     }
+
 
     public function exportGlobalReport()
     {
