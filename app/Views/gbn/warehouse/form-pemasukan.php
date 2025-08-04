@@ -445,20 +445,6 @@
         });
 
         $(document).ready(function() {
-            $('#select_all').on('click', function() {
-                if (this.checked) {
-                    $('.checkbox').each(function() {
-                        this.checked = true;
-                    });
-                } else {
-                    $('.checkbox').each(function() {
-                        this.checked = false;
-                    });
-                }
-            });
-        });
-
-        $(document).ready(function() {
             $('#cluster').select2({
                 placeholder: "Pilih Cluster",
                 allowClear: true,
@@ -466,66 +452,56 @@
             });
         });
 
-        $(document).ready(function() {
-            // Event listener untuk tombol "Hapus"
-            $('button.btn-hapus').on('click', function() {
-                var id = $(this).data('id'); // Ambil ID yang ingin dihapus
-                var row = $(this).closest('tr'); // Ambil baris tabel yang akan dihapus
+        // Fungsi hitung total kgs
+        function updateTotalKgs() {
+            const checkboxes = document.querySelectorAll(".checkbox");
+            const kgsInputs = document.querySelectorAll(".kgs_kirim");
+            let total = 0;
 
-                // Kirim ID ke controller untuk dihapus dari session
+            checkboxes.forEach((checkbox, idx) => {
+                if (checkbox.checked) {
+                    total += parseFloat(kgsInputs[idx].value) || 0;
+                }
+            });
+
+            const ttlKgsInput = document.getElementById("ttl_kgs");
+            ttlKgsInput.value = total.toFixed(2);
+            ttlKgsInput.dispatchEvent(new Event("change", {
+                bubbles: true
+            }));
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Delegasi untuk checkbox dan select_all
+            document.getElementById("inTable").addEventListener("change", function(e) {
+                if (e.target.matches(".checkbox")) {
+                    updateTotalKgs();
+                }
+                if (e.target.matches("#select_all")) {
+                    document.querySelectorAll(".checkbox").forEach(cb => cb.checked = e.target.checked);
+                    updateTotalKgs();
+                }
+            });
+
+            // Delegasi untuk tombol hapus
+            document.getElementById("inTable").addEventListener("click", function(e) {
+                const btn = e.target.closest(".btn-hapus");
+                if (!btn) return;
+
+                const id = btn.getAttribute("data-id");
+                const row = btn.closest("tr");
+
                 $.post("<?= base_url($role . '/hapus_pemasukan') ?>", {
                     id: id
                 }, function(response) {
                     if (response.success) {
-                        row.remove(); // Hapus baris dari tabel
+                        row.remove();
+                        updateTotalKgs();
                     } else {
                         alert('Terjadi kesalahan saat menghapus data.');
                     }
                 }, 'json');
             });
-        });
-
-        document.addEventListener("DOMContentLoaded", function() {
-            // Ambil semua checkbox dan input total
-            let checkboxes = document.querySelectorAll(".checkbox");
-            let ttlKgsInput = document.getElementById("ttl_kgs");
-
-            function updateTotalKgs() {
-                let total = 0;
-                checkboxes.forEach((checkbox, index) => {
-                    if (checkbox.checked) {
-                        let kgsInput = document.querySelectorAll(".kgs_kirim")[index];
-                        total += parseFloat(kgsInput.value) || 0;
-                    }
-                });
-
-                // Set value dan trigger event change
-                let ttlKgsInput = document.getElementById("ttl_kgs");
-                ttlKgsInput.value = total.toFixed(2);
-
-                // Trigger event change secara manual
-                let event = new Event("change", {
-                    bubbles: true
-                });
-                ttlKgsInput.dispatchEvent(event);
-            }
-
-            // Tambahkan event listener ke setiap checkbox
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener("change", updateTotalKgs);
-            });
-
-            // Untuk fitur "Select All"
-            document.getElementById("select_all").addEventListener("change", function() {
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = this.checked;
-                });
-                updateTotalKgs();
-            });
-        });
-
-        //fungsi untuk memilih cluster
-        $(document).ready(function() {
             $('#ttl_kgs').on("change", function() {
                 var kgsKirim = $(this).val()?.trim(); // Cari input warna terkait
                 var $clusterSelect = $("#cluster");
@@ -856,5 +832,145 @@
         //     });
         // });
     </script>
+    <!-- Script Alin -->
+    <!-- <script type="text/javascript">
+        let isSubmitting = false;
 
+        document.getElementById('barcode').addEventListener('input', function() {
+            if (isSubmitting) return; // Cegah double submission
+            setTimeout(() => {
+                if (this.value.trim() !== '') {
+                    isSubmitting = true;
+                    this.form.submit();
+                }
+            }, 300);
+        });
+
+        $(document).ready(function() {
+            $('#select_all').on('click', function() {
+                if (this.checked) {
+                    $('.checkbox').each(function() {
+                        this.checked = true;
+                    });
+                } else {
+                    $('.checkbox').each(function() {
+                        this.checked = false;
+                    });
+                }
+            });
+        });
+
+        $(document).ready(function() {
+            $('#cluster').select2({
+                placeholder: "Pilih Cluster",
+                allowClear: true,
+                minimumResultsForSearch: 0
+            });
+        });
+
+        $(document).ready(function() {
+            // Event listener untuk tombol "Hapus"
+            $('button.btn-hapus').on('click', function() {
+                var id = $(this).data('id'); // Ambil ID yang ingin dihapus
+                var row = $(this).closest('tr'); // Ambil baris tabel yang akan dihapus
+
+                // Kirim ID ke controller untuk dihapus dari session
+                $.post("<?= base_url($role . '/hapus_pemasukan') ?>", {
+                    id: id
+                }, function(response) {
+                    if (response.success) {
+                        row.remove(); // Hapus baris dari tabel
+                    } else {
+                        alert('Terjadi kesalahan saat menghapus data.');
+                    }
+                }, 'json');
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Ambil semua checkbox dan input total
+            let checkboxes = document.querySelectorAll(".checkbox");
+            let ttlKgsInput = document.getElementById("ttl_kgs");
+
+            function updateTotalKgs() {
+                let total = 0;
+                checkboxes.forEach((checkbox, index) => {
+                    if (checkbox.checked) {
+                        let kgsInput = document.querySelectorAll(".kgs_kirim")[index];
+                        total += parseFloat(kgsInput.value) || 0;
+                    }
+                });
+
+                // Set value dan trigger event change
+                let ttlKgsInput = document.getElementById("ttl_kgs");
+                ttlKgsInput.value = total.toFixed(2);
+
+                // Trigger event change secara manual
+                let event = new Event("change", {
+                    bubbles: true
+                });
+                ttlKgsInput.dispatchEvent(event);
+            }
+
+            // Tambahkan event listener ke setiap checkbox
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener("change", updateTotalKgs);
+            });
+
+            // Untuk fitur "Select All"
+            document.getElementById("select_all").addEventListener("change", function() {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateTotalKgs();
+            });
+        });
+
+        //fungsi untuk memilih cluster
+        $(document).ready(function() {
+            $('#ttl_kgs').on("change", function() {
+                var kgsKirim = $(this).val()?.trim(); // Cari input warna terkait
+                var $clusterSelect = $("#cluster");
+
+                console.log("Kgs Kirim:", kgsKirim);
+                console.log("Cluster:", cluster);
+
+                var url = '<?= base_url($role . "/getcluster") ?>';
+
+                console.log("URL request:", url);
+
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: {
+                        kgs: kgsKirim
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        console.log("Respons dari server:", response);
+                        // Set Cluster
+                        $clusterSelect.empty(); // Kosongkan dulu
+                        $clusterSelect.append('<option value="">Pilih Cluster</option>'); // Tambahin opsi default
+                        if (response.length > 0) {
+                            response.forEach(function(cluster) {
+                                $clusterSelect.append('<option value="' + cluster.nama_cluster + '" data-sisa_kapasitas="' + cluster.sisa_kapasitas + '">' + cluster.nama_cluster + '</option>');
+                            });
+                        } else {
+                            console.warn("Cluster tidak ditemukan!");
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Terjadi kesalahan:", error);
+                        console.error("Respons yang diterima:", xhr.responseText);
+                    }
+                });
+            });
+            // Event listener saat cluster dipilih
+            $(document).on("change", "#cluster", function() {
+                var sisaKapasitas = $(this).find("option:selected").attr("data-sisa_kapasitas") || "";
+                console.log("Sisa Kapasitas:", sisaKapasitas);
+                $(".sisa_kapasitas").val(sisaKapasitas);
+            });
+        });
+    </script> -->
     <?php $this->endSection(); ?>

@@ -330,7 +330,7 @@ class PemasukanModel extends Model
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
             ->join('other_bon', 'other_bon.id_other_bon = out_celup.id_other_bon')
             ->join('master_material', 'master_material.item_type = other_bon.item_type')
-            ->join('master_warna_benang', 'master_warna_benang.kode_warna = other_bon.kode_warna')
+            ->join('master_warna_benang', 'master_warna_benang.kode_warna = other_bon.kode_warna', 'left')
             ->where('out_celup.id_other_bon IS NOT NULL')
             ->where('master_material.jenis', 'BENANG')
             ->groupBy('pemasukan.tgl_masuk, other_bon.item_type, other_bon.no_surat_jalan');
@@ -341,7 +341,7 @@ class PemasukanModel extends Model
             ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup')
             ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
             ->join('master_material', 'master_material.item_type = schedule_celup.item_type')
-            ->join('master_warna_benang', 'master_warna_benang.kode_warna = schedule_celup.kode_warna')
+            ->join('master_warna_benang', 'master_warna_benang.kode_warna = schedule_celup.kode_warna', 'left')
             ->where('master_material.jenis', 'BENANG')
             ->groupBy('pemasukan.tgl_masuk, schedule_celup.item_type, bon_celup.no_surat_jalan');
 
