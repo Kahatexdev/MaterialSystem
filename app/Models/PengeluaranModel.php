@@ -313,7 +313,7 @@ class PengeluaranModel extends Model
                 'pemesanan pe',
                 '(
                 pe.id_total_pemesanan = psk.id_total_pemesanan
-                OR pe.id_total_pemesanan = P.id_total_pemesanan
+                OR pe.id_total_pemesanan = p.id_total_pemesanan
             )',
                 'left'
             )
