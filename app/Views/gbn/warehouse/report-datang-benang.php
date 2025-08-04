@@ -164,7 +164,10 @@
                                 item.harga,
                                 item.nama_cluster,
                                 item.keterangan,
-                                `<button class="btn btn-warning btn-update" data-id_bon="${item.id_bon_celup ?? ''}" data-id_other="${item.id_other_bon ?? ''}" title="Update" data-bs-toggle="modal" data-bs-target="#modalUpdate">
+                                `<button class="btn btn-warning btn-update" 
+                                    data-id_bon="${item.id_bon || ''}" 
+                                    data-id_other="${item.id_other_bon || ''}" 
+                                    title="Update">
                                     <i class="fa fa-edit"></i>
                                 </button>`
                             ]).draw(false);
@@ -184,6 +187,8 @@
             const idBon = $(this).data('id_bon');
             const idOther = $(this).data('id_other');
 
+            console.log('INI' + idBon);
+
             // Masukkan ke input hidden
             $('#modalIdBon').val(idBon);
             $('#modalIdOther').val(idOther);
@@ -196,7 +201,7 @@
                 url: '<?= base_url($role . "/warehouse/getKeteranganDatang") ?>',
                 type: 'GET',
                 data: {
-                    id_bon_celup: idBon,
+                    id_bon: idBon,
                     id_other_bon: idOther
                 },
                 dataType: 'json',
@@ -249,7 +254,7 @@
             url: '<?= base_url($role . "/warehouse/updateKeteranganDatang") ?>',
             type: 'POST',
             data: {
-                id_bon_celup: idBon,
+                id_bon: idBon,
                 id_other_bon: idOther,
                 keterangan: keterangan
             },
