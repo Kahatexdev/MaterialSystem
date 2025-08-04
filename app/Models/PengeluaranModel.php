@@ -185,49 +185,60 @@ class PengeluaranModel extends Model
         $builder = $this->db
             ->table('pengeluaran')
             ->distinct()
-            // Ambil item_type: prioritas dari schedule_celup, fallback ke material
             ->select('COALESCE(sc.item_type, m.item_type) AS item_type')
-            // JOIN semua tabel yang diperlukan
-            ->join('out_celup oc',                 'oc.id_out_celup    = pengeluaran.id_out_celup',      'left')
-            ->join('schedule_celup sc',            'sc.id_celup        = oc.id_celup',                   'left')
-            ->join('pemesanan_spandex_karet psk',  'psk.id_psk         = pengeluaran.id_psk',           'left')
-            ->join('pemesanan pe',                 'pe.id_total_pemesanan = psk.id_total_pemesanan',   'left')
-            ->join('material m',                   'm.id_material      = pe.id_material',               'left')
-            ->join('master_order mo',              'mo.id_order        = m.id_order',                   'left')
-            // Filter status
+            ->join('out_celup oc', 'oc.id_out_celup = pengeluaran.id_out_celup', 'left')
+            // Gabungkan schedule_celup
+            ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup', 'left')
+            // Gabungkan pemesanan_spandex_karet
+            ->join('pemesanan_spandex_karet psk', 'psk.id_psk = pengeluaran.id_psk', 'left')
+            // Gabungkan pemesanan dengan kondisi OR di ON clause
+            ->join(
+                'pemesanan pe',
+                '(
+                pe.id_total_pemesanan = psk.id_total_pemesanan
+                OR pe.id_total_pemesanan = pengeluaran.id_total_pemesanan
+            )',
+                'left'
+            )
+            ->join('material m', 'm.id_material = pe.id_material', 'left')
+            ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
             ->where('pengeluaran.status', 'Pengeluaran Jalur')
-            // Group kondisi no_model: bisa di schedule_celup atau di master_order
             ->groupStart()
             ->where('sc.no_model', $no_model)
             ->orWhere('mo.no_model', $no_model)
             ->groupEnd();
 
-        return $builder
-            ->get()
-            ->getResultArray();
+        return $builder->get()->getResultArray();
     }
+
 
 
 
 
     public function getKodeWarna($model, $item_type): array
     {
-        $builder = $this->db
-            ->table('pengeluaran')
-            ->distinct()
-            // Ambil item_type: prioritas dari schedule_celup, fallback ke material
-            ->select('COALESCE(sc.kode_warna, m.kode_warna) AS kode_warna')
-            // JOIN semua tabel yang diperlukan
-            ->join('out_celup oc',                 'oc.id_out_celup    = pengeluaran.id_out_celup',      'left')
-            ->join('schedule_celup sc',            'sc.id_celup        = oc.id_celup',                   'left')
-            ->join('pemesanan_spandex_karet psk',  'psk.id_psk         = pengeluaran.id_psk',           'left')
-            ->join('pemesanan pe',                 'pe.id_total_pemesanan = psk.id_total_pemesanan',   'left')
-            ->join('material m',                   'm.id_material      = pe.id_material',               'left')
-            ->join('master_order mo',              'mo.id_order        = m.id_order',                   'left')
-            // Filter status
-            ->where('pengeluaran.status', 'Pengeluaran Jalur')
-            // Group kondisi no_model: bisa di schedule_celup atau di master_order
-            ->groupStart()
+    $builder = $this->db
+        ->table('pengeluaran')
+        ->distinct()
+        ->select('COALESCE(sc.kode_warna, m.kode_warna) AS kode_warna')
+        ->join('out_celup oc', 'oc.id_out_celup = pengeluaran.id_out_celup', 'left')
+        // Gabungkan schedule_celup
+        ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup', 'left')
+        // Gabungkan pemesanan_spandex_karet
+        ->join('pemesanan_spandex_karet psk', 'psk.id_psk = pengeluaran.id_psk', 'left')
+        // Gabungkan pemesanan dengan kondisi OR di ON clause
+        ->join(
+            'pemesanan pe',
+            '(
+                pe.id_total_pemesanan = psk.id_total_pemesanan
+                OR pe.id_total_pemesanan = pengeluaran.id_total_pemesanan
+            )',
+            'left'
+        )
+        ->join('material m', 'm.id_material = pe.id_material', 'left')
+        ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
+        ->where('pengeluaran.status', 'Pengeluaran Jalur')
+            -> groupStart()
             ->where('sc.no_model', $model)
             ->orWhere('mo.no_model', $model)
             ->groupEnd()
@@ -236,9 +247,7 @@ class PengeluaranModel extends Model
             ->orWhere('m.item_type', $item_type)
             ->groupEnd();
 
-        return $builder
-            ->get()
-            ->getResultArray();
+    return $builder->get()->getResultArray();
     }
 
     public function getWarna($model, $item_type, $kode_warna): array
@@ -246,18 +255,24 @@ class PengeluaranModel extends Model
         $builder = $this->db
             ->table('pengeluaran')
             ->distinct()
-            // Ambil item_type: prioritas dari schedule_celup, fallback ke material
             ->select('COALESCE(sc.warna, m.color) AS warna')
-            // JOIN semua tabel yang diperlukan
-            ->join('out_celup oc',                 'oc.id_out_celup    = pengeluaran.id_out_celup',      'left')
-            ->join('schedule_celup sc',            'sc.id_celup        = oc.id_celup',                   'left')
-            ->join('pemesanan_spandex_karet psk',  'psk.id_psk         = pengeluaran.id_psk',           'left')
-            ->join('pemesanan pe',                 'pe.id_total_pemesanan = psk.id_total_pemesanan',   'left')
-            ->join('material m',                   'm.id_material      = pe.id_material',               'left')
-            ->join('master_order mo',              'mo.id_order        = m.id_order',                   'left')
-            // Filter status
+            ->join('out_celup oc', 'oc.id_out_celup = pengeluaran.id_out_celup', 'left')
+            // Gabungkan schedule_celup
+            ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup', 'left')
+            // Gabungkan pemesanan_spandex_karet
+            ->join('pemesanan_spandex_karet psk', 'psk.id_psk = pengeluaran.id_psk', 'left')
+            // Gabungkan pemesanan dengan kondisi OR di ON clause
+            ->join(
+                'pemesanan pe',
+                '(
+                pe.id_total_pemesanan = psk.id_total_pemesanan
+                OR pe.id_total_pemesanan = pengeluaran.id_total_pemesanan
+            )',
+                'left'
+            )
+            ->join('material m', 'm.id_material = pe.id_material', 'left')
+            ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
             ->where('pengeluaran.status', 'Pengeluaran Jalur')
-            // Group kondisi no_model: bisa di schedule_celup atau di master_order
             ->groupStart()
             ->where('sc.no_model', $model)
             ->orWhere('mo.no_model', $model)
@@ -271,9 +286,7 @@ class PengeluaranModel extends Model
             ->orWhere('m.kode_warna', $kode_warna)
             ->groupEnd();
 
-        return $builder
-            ->get()
-            ->getResultArray();
+        return $builder->get()->getResultArray();
     }
 
     public function validateDeliveryData(array $data): array
@@ -296,7 +309,14 @@ class PengeluaranModel extends Model
             ->join('out_celup oc',                'oc.id_out_celup    = p.id_out_celup',            'left')
             ->join('schedule_celup sc',           'sc.id_celup        = oc.id_celup',               'left')
             ->join('pemesanan_spandex_karet psk', 'psk.id_psk         = p.id_psk',                 'left')
-            ->join('pemesanan pe',                'pe.id_total_pemesanan = psk.id_total_pemesanan', 'left')
+            ->join(
+                'pemesanan pe',
+                '(
+                pe.id_total_pemesanan = psk.id_total_pemesanan
+                OR pe.id_total_pemesanan = P.id_total_pemesanan
+            )',
+                'left'
+            )
             ->join('total_pemesanan tp',         'tp.id_total_pemesanan = p.id_total_pemesanan',   'left')
             ->join('material m',                  'm.id_material      = pe.id_material',            'left')
             ->join('master_material mm',          'mm.item_type     = m.item_type',             'left')

@@ -388,55 +388,57 @@ class PemesananController extends BaseController
 
     public function updateStatusKirim()
     {
-        // Ambil data POST sekaligus
-        $post    = $this->request->getPost();
-        $ids     = $post['id_pengeluaran'] ?? [];
-        $kgsList = $post['kgs_out']       ?? [];
-        $cnsList = $post['cns_out']       ?? [];
-        $lotList = $post['lot_out']       ?? [];
+        // Ambil dan validasi input
+        $post      = $this->request->getPost();
+        $ids       = array_filter(array_map('intval', $post['id_pengeluaran'] ?? []));
+        $kgsList   = $post['kgs_out']   ?? [];
+        $cnsList   = $post['cns_out']   ?? [];
+        $lotList   = $post['lot_out']   ?? [];
 
-        // Validasi id_pengeluaran harus array dan tidak kosong
-        if (empty($ids) || !is_array($ids)) {
-            return redirect()->back()->with('error', 'ID Pengeluaran tidak valid');
-        }
-
-        // Cast id ke integer dan filter nilai <= 0
-        $ids = array_filter(array_map('intval', $ids));
         if (empty($ids)) {
-            return redirect()->back()->with('error', 'Tidak ada ID Pengeluaran yang valid');
+            return redirect()->back()->with('error', 'Tidak ada pengeluaran valid.');
         }
 
-        $sessionUser = session('username');
+        $sessionUser  = session('username');
         $updatedCount = 0;
 
-        foreach ($ids as $i => $id) {
-            // Siapkan data update
+        foreach ($ids as $index => $id) {
+            $record = $this->pengeluaranModel->find($id);
+            if (!$record) {
+                continue;
+            }
+
+            // Jika diperlukan, abaikan atau perlakukan khusus untuk jenis tertentu
+            $jenis = $this->pemesananModel
+                ->getJenisPemesananbyIdTtlPesan($record['id_total_pemesanan']);
+            // Contoh: skip update untuk spandex/karet
+            // if (in_array(strtolower($jenis), ['spandex', 'karet'])) {
+            //     continue;
+            // }
+
+            // Persiapkan data update
             $data = [
                 'status' => 'Pengiriman Area',
                 'admin'  => $sessionUser,
             ];
 
-            // Tambahkan jika nilai tersedia dan bukan string kosong
-            if (!empty($kgsList[$i]) || $kgsList[$i] === '0') {
-                $data['kgs_out'] = floatval($kgsList[$i]);
+            if (isset($kgsList[$index]) && $kgsList[$index] !== '') {
+                $data['kgs_out'] = (float) $kgsList[$index];
             }
-            if (!empty($cnsList[$i]) || $cnsList[$i] === '0') {
-                $data['cns_out'] = floatval($cnsList[$i]);
+            if (isset($cnsList[$index]) && $cnsList[$index] !== '') {
+                $data['cns_out'] = (int) $cnsList[$index];
             }
-            if (isset($lotList[$i]) && $lotList[$i] !== '') {
-                $data['lot_out'] = $lotList[$i];
+            if (isset($lotList[$index]) && $lotList[$index] !== '') {
+                $data['lot_out'] = $lotList[$index];
             }
 
-            // Update dan hitung berhasilnya
             if ($this->pengeluaranModel->update($id, $data)) {
                 $updatedCount++;
             }
         }
 
-        // Hapus session manual delivery
+        // Bersihkan session dan set flashdata
         session()->remove('manual_delivery');
-
-        // Redirect dengan pesan
         if ($updatedCount > 0) {
             session()->setFlashdata('success', "{$updatedCount} status berhasil diperbarui");
         } else {
@@ -445,6 +447,7 @@ class PemesananController extends BaseController
 
         return redirect()->to(base_url("{$this->role}/pengiriman_area_manual"));
     }
+
 
 
 
