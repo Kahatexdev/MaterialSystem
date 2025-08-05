@@ -1678,7 +1678,7 @@ class ExcelController extends BaseController
         $tanggal_awal   = $this->request->getGet('tanggal_awal');
         $tanggal_akhir  = $this->request->getGet('tanggal_akhir');
         $data           = $this->pengeluaranModel->getFilterPengiriman($key, $tanggal_awal, $tanggal_akhir);
-
+        // dd($data);
         // 1. Kelompokkan data berdasarkan 'jenis'
         $grouped = [];
         foreach ($data as $item) {
