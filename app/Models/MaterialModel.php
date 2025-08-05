@@ -252,7 +252,7 @@ class MaterialModel extends Model
     }
     public function getStyleSizeByBb($noModel, $itemType, $kodeWarna)
     {
-        return $this->select('master_order.no_model, material.item_type, material.kode_warna, material.style_size, material.gw, material.composition, material.loss')
+        return $this->select('master_order.no_model, material.item_type, material.kode_warna, material.style_size, material.kgs, material.gw, material.composition, material.loss')
             ->join('master_order', 'master_order.id_order=material.id_order', 'left')
             ->where('master_order.no_model', $noModel)
             ->where('material.item_type', $itemType)
@@ -702,7 +702,7 @@ class MaterialModel extends Model
             ->join('master_material', 'master_material.item_type=material.item_type')
             ->where('master_order.no_model', $model)
             ->where('material.style_size', $styleSize)
-            ->where('material.area', $area)
+            // ->where('material.area', $area)
             ->like('material.item_type', '%JHT%')
             ->orderBy('master_material.jenis, material.item_type', 'ASC')
             ->findAll();
