@@ -216,7 +216,7 @@
                                                                         <label for="po"> PO</label>
                                                                         <select class="form-select po-select" name="po[]" required>
                                                                             <?php foreach ($scheduleData as $po): ?>
-                                                                                <option value="<?= $detail['no_model'] ?>" ?><?= $po['no_model'] ?></option>
+                                                                                <option value="<?= $po['no_model'] ?>" <?= ($po['no_model'] == $detail['no_model']) ? 'selected' : '' ?>><?= $po['no_model'] ?></option>
                                                                             <?php endforeach; ?>
                                                                         </select>
                                                                     </div>
