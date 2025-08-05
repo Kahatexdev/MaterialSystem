@@ -35,6 +35,7 @@ use PhpParser\Node\Stmt\Else_;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageMargins;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Color;
 use DateTime;
 
 class ExcelController extends BaseController
@@ -10955,6 +10956,7 @@ class ExcelController extends BaseController
         $tanggal = $data[0]['tgl_input'];
         $date = new DateTime($tanggal);
         $angkaBulan = (int) $date->format('m');
+        $angkaTahun = (int) $date->format('Y');
 
         $namaBulan = [
             1 => 'Januari',
@@ -10971,7 +10973,7 @@ class ExcelController extends BaseController
             12 => 'Desember'
         ];
 
-        $bulan = $namaBulan[$angkaBulan];
+        $bulan = $namaBulan[$angkaBulan] . ' ' . $angkaTahun;
 
         $groups = [
             'COTTON' => [],
@@ -11087,15 +11089,15 @@ class ExcelController extends BaseController
             $sheet->getColumnDimension('A')->setWidth(10);
             $sheet->getColumnDimension('D')->setWidth(15);
 
-            $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-            $drawing->setName('Logo');
-            $drawing->setDescription('Logo Perusahaan');
-            $drawing->setPath('assets/img/logo-kahatex.png');
-            $drawing->setCoordinates('C1');
-            $drawing->setHeight(25);
-            $drawing->setOffsetX(55);
-            $drawing->setOffsetY(10);
-            $drawing->setWorksheet($sheet);
+            // $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+            // $drawing->setName('Logo');
+            // $drawing->setDescription('Logo Perusahaan');
+            // $drawing->setPath('assets/img/logo-kahatex.png');
+            // $drawing->setCoordinates('C1');
+            // $drawing->setHeight(25);
+            // $drawing->setOffsetX(55);
+            // $drawing->setOffsetY(10);
+            // $drawing->setWorksheet($sheet);
             $sheet->mergeCells('A3:D3');
             $sheet->setCellValue('A3', 'PT. KAHATEX');
             $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -11210,6 +11212,7 @@ class ExcelController extends BaseController
                     $gw    = (float)$item['gw'];
                     $kgs_kirim    = (float)$item['kgs_kirim'];
                     $usd   = $kgs_kirim * (float)$item['harga'];
+                    $warnaDasar = $item['warna_dasar'] ?? null;
 
                     $sheet->setCellValue('A' . $row, $no++);
                     $sheet->setCellValue('B' . $row, $item['no_surat_jalan']);
@@ -11217,7 +11220,11 @@ class ExcelController extends BaseController
                     $sheet->setCellValue('D' . $row, $item['tgl_input']);
                     $sheet->setCellValue('E' . $row, $item['item_type']);
                     $sheet->setCellValue('F' . $row, $item['ukuran']);
-                    $sheet->setCellValue('G' . $row, $item['warna']);
+                    if ($title === 'COTTON') {
+                        $sheet->setCellValue('G' . $row, $item['warna'] . ' ' . ($item['kode_warna'] ?? ''));
+                    } else {
+                        $sheet->setCellValue('G' . $row, $item['warna']);
+                    }
                     $sheet->setCellValue('H' . $row, $item['kode_warna'] ?? '');
                     $sheet->setCellValue('I' . $row, $item['l_m_d']);
                     $sheet->setCellValue('J' . $row, $item['cones'] ?? 0);
@@ -11229,7 +11236,12 @@ class ExcelController extends BaseController
                     $sheet->setCellValue('P' . $row, $item['detail_sj']);
                     $sheet->setCellValue('Q' . $row, $item['jenis']);
                     $sheet->setCellValue('R' . $row, $item['ukuran'] ?? '');
-                    $sheet->setCellValue('S' . $row, $item['warna_dasar'] ?? '');
+                    if ($warnaDasar === null || $warnaDasar === 'Kode warna belum ada di database') {
+                        $sheet->setCellValue('S' . $row, 'Kode Warna Tidak Ada di Database');
+                        $sheet->getStyle('S' . $row)->getFont()->getColor()->setARGB(Color::COLOR_RED);
+                    } else {
+                        $sheet->setCellValue('S' . $row, $warnaDasar);
+                    }
                     $sheet->setCellValue('T' . $row, $kgsKirim ?? 0);
                     $row++;
 
