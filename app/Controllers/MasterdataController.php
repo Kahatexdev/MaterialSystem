@@ -196,11 +196,11 @@ class MasterdataController extends BaseController
                     }
                 }
 
-                if (is_array($validate) && isset($validate['area']) && $validate['area'] == 'Belum Ada Area') {
+                if (is_array($validate) && isset($validate['factory']) && $validate['factory'] == 'Belum Ada Area') {
                     $unit = 'Belum di Assign';
-                } elseif (is_array($validate) && isset($validate['area']) && strpos($validate['area'], 'GEDUNG') !== false) {
+                } elseif (is_array($validate) && isset($validate['factory']) && strpos($validate['factory'], 'GEDUNG') !== false) {
                     $unit = 'MAJALAYA';
-                } elseif (is_array($validate) && isset($validate['area']) && strpos($validate['area'], 'KK') !== false) {
+                } elseif (is_array($validate) && isset($validate['factory']) && strpos($validate['factory'], 'KK') !== false) {
                     $unit = 'CIJERAH';
                 } else {
                     $unit = 'Belum di Assign';

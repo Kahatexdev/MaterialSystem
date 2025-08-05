@@ -27,6 +27,7 @@ use App\Models\PoTambahanModel;
 use App\Models\HistoryStock;
 use App\Models\PemesananSpandexKaretModel;
 use App\Models\WarehouseBBModel;
+use App\Models\MasterWarnaBenangModel;
 use PhpOffice\PhpSpreadsheet\Style\{Border, Alignment, Fill};
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
@@ -34,6 +35,7 @@ use PhpParser\Node\Stmt\Else_;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageMargins;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Color;
 use DateTime;
 
 class ExcelController extends BaseController
@@ -62,6 +64,7 @@ class ExcelController extends BaseController
     protected $historyStock;
     protected $pemesananSpandexKaretModel;
     protected $warehouseBBModel;
+    protected $masterWarnaBenangModel;
 
     public function __construct()
     {
@@ -85,6 +88,7 @@ class ExcelController extends BaseController
         $this->historyStock = new HistoryStock();
         $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
         $this->warehouseBBModel = new WarehouseBBModel();
+        $this->masterWarnaBenangModel = new MasterWarnaBenangModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -1670,95 +1674,134 @@ class ExcelController extends BaseController
 
     public function exportPengiriman()
     {
-        $key = $this->request->getGet('key');
-        $tanggal_awal = $this->request->getGet('tanggal_awal');
-        $tanggal_akhir = $this->request->getGet('tanggal_akhir');
-        $data = $this->pengeluaranModel->getFilterPengiriman($key, $tanggal_awal, $tanggal_akhir);
-
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        // Judul
-        $sheet->mergeCells('A1:O1');
-        $sheet->setCellValue('A1', 'REPORT PENGIRIMAN AREA');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        //
-        $sheet->setCellValue('A2', 'Tanggal Awal');
-        $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(11);
-        $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-
-        $sheet->setCellValue('C2', ': ' . $tanggal_awal);
-        $sheet->getStyle('C2')->getFont()->setBold(true)->setSize(11);
-        $sheet->getStyle('C2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-
-        $sheet->setCellValue('N2', 'Tanggal Akhir');
-        $sheet->getStyle('N2')->getFont()->setBold(true)->setSize(11);
-        $sheet->getStyle('N2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-
-        $sheet->setCellValue('O2', ': ' . $tanggal_akhir);
-        $sheet->getStyle('O2')->getFont()->setBold(true)->setSize(11);
-        $sheet->getStyle('O2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-
-        // Header
-        $headers = ['No', 'No Model', 'Area', 'Delivery Awal', 'Delivery Akhir', 'Item Type', 'Kode Warna', 'Warna', 'Kgs Pesan', 'Tanggal Keluar', 'Kgs Kirim', 'Cones Kirim', 'Karung Kirim', 'Lot Kirim', 'Nama Cluster'];
-        $col = 'A';
-        foreach ($headers as $header) {
-            $sheet->setCellValue($col . '3', $header);
-            $sheet->getStyle($col . '3')->getFont()->setBold(true);
-            $col++;
-        }
-
-        // Data
-        $row = 4;
-        $no = 1;
+        $key            = $this->request->getGet('key');
+        $tanggal_awal   = $this->request->getGet('tanggal_awal');
+        $tanggal_akhir  = $this->request->getGet('tanggal_akhir');
+        $data           = $this->pengeluaranModel->getFilterPengiriman($key, $tanggal_awal, $tanggal_akhir);
+        // dd($data);
+        // 1. Kelompokkan data berdasarkan 'jenis'
+        $grouped = [];
         foreach ($data as $item) {
-            $sheet->setCellValue('A' . $row, $no++);
-            $sheet->setCellValue('B' . $row, $item['no_model']);
-            $sheet->setCellValue('C' . $row, $item['area_out']);
-            $sheet->setCellValue('D' . $row, $item['delivery_awal']);
-            $sheet->setCellValue('E' . $row, $item['delivery_akhir']);
-            $sheet->setCellValue('F' . $row, $item['item_type']);
-            $sheet->setCellValue('G' . $row, $item['kode_warna']);
-            $sheet->setCellValue('H' . $row, $item['warna']);
-            $sheet->setCellValue('I' . $row, $item['ttl_kg']);
-            $sheet->setCellValue('J' . $row, $item['tgl_out']);
-            $sheet->setCellValue('K' . $row, $item['kgs_out']);
-            $sheet->setCellValue('L' . $row, $item['cns_out']);
-            $sheet->setCellValue('M' . $row, $item['krg_out']);
-            $sheet->setCellValue('N' . $row, $item['lot_out']);
-            $sheet->setCellValue('O' . $row, $item['nama_cluster']);
-            $row++;
+            $jenis = $item['jenis'] ?? 'Undefined';
+            $grouped[$jenis][] = $item;
         }
 
-        // Border
-        $lastRow = $row - 1;
-        $styleArray = [
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => ['argb' => 'FF000000'],
-                ],
-            ],
+        // 2. Inisialisasi Spreadsheet
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+
+        // Header kolom static
+        $headers = [
+            'No',
+            'No Model',
+            'Area',
+            'Delivery Awal',
+            'Delivery Akhir',
+            'Item Type',
+            'Kode Warna',
+            'Warna',
+            'Kgs Pesan',
+            'Tanggal Keluar',
+            'Kgs Kirim',
+            'Cones Kirim',
+            'Karung Kirim',
+            'Lot Kirim',
+            'Nama Cluster',
+            'Keterangan GBN',
+            'Admin'
         ];
-        $sheet->getStyle("A3:O{$lastRow}")->applyFromArray($styleArray);
 
-        // Auto-size
-        foreach (range('A', 'O') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
+        $sheetIndex = 0;
+        foreach ($grouped as $jenis => $rows) {
+            // Pilih atau buat sheet baru
+            if ($sheetIndex === 0) {
+                $sheet = $spreadsheet->getActiveSheet();
+            } else {
+                $sheet = $spreadsheet->createSheet();
+            }
+            // Rename sheet
+            $sheet->setTitle(substr($jenis, 0, 31)); // batas 31 karakter
+
+            // -- Judul --
+            $sheet->mergeCells('A1:Q1');
+            $sheet->setCellValue('A1', "REPORT PENGIRIMAN AREA - {$jenis}");
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+            $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            // -- Tanggal Awal/Akhir --
+            $sheet->setCellValue('A2', 'Tanggal Awal');
+            $sheet->setCellValue('C2', ": {$tanggal_awal}");
+            $sheet->setCellValue('N2', 'Tanggal Akhir');
+            $sheet->setCellValue('Q2', ": {$tanggal_akhir}");
+            foreach (['A2', 'C2', 'N2', 'Q2'] as $cell) {
+                $sheet->getStyle($cell)->getFont()->setBold(true)->setSize(11);
+                $sheet->getStyle($cell)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+            }
+
+            // -- Header Kolom --
+            $col = 'A';
+            foreach ($headers as $header) {
+                $sheet->setCellValue($col . '3', $header);
+                $sheet->getStyle($col . '3')->getFont()->setBold(true);
+                $col++;
+            }
+
+            // -- Isi Data --
+            $rowNum = 4;
+            $no = 1;
+            foreach ($rows as $item) {
+                $sheet->setCellValue("A{$rowNum}", $no++);
+                $sheet->setCellValue("B{$rowNum}", $item['no_model']);
+                $sheet->setCellValue("C{$rowNum}", $item['area_out']);
+                $sheet->setCellValue("D{$rowNum}", $item['delivery_awal']);
+                $sheet->setCellValue("E{$rowNum}", $item['delivery_akhir']);
+                $sheet->setCellValue("F{$rowNum}", $item['item_type']);
+                $sheet->setCellValue("G{$rowNum}", $item['kode_warna']);
+                $sheet->setCellValue("H{$rowNum}", $item['color']);
+                $sheet->setCellValue("I{$rowNum}", $item['ttl_kg']);
+                $sheet->setCellValue("J{$rowNum}", $item['tgl_out']);
+                $sheet->setCellValue("K{$rowNum}", $item['kgs_out']);
+                $sheet->setCellValue("L{$rowNum}", $item['cns_out']);
+                $sheet->setCellValue("M{$rowNum}", $item['krg_out']);
+                $sheet->setCellValue("N{$rowNum}", $item['lot_out']);
+                $sheet->setCellValue("O{$rowNum}", $item['nama_cluster']);
+                $sheet->setCellValue("P{$rowNum}", $item['keterangan_gbn']);
+                $sheet->setCellValue("Q{$rowNum}", $item['admin']);
+                $rowNum++;
+            }
+
+            // -- Border Tabel --
+            $lastRow = $rowNum - 1;
+            $sheet->getStyle("A3:Q{$lastRow}")
+                ->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color'       => ['argb' => 'FF000000'],
+                        ],
+                    ],
+                ]);
+
+            // -- Auto-size Kolom --
+            foreach (range('A', 'Q') as $c) {
+                $sheet->getColumnDimension($c)->setAutoSize(true);
+            }
+
+            $sheetIndex++;
         }
 
-        // Download
-        $filename = 'Report_Pengiriman_Area' . '.xlsx';
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-        header('Cache-Control: max-age=0');
+        // Kembalikan ke sheet pertama sebelum download
+        $spreadsheet->setActiveSheetIndex(0);
 
+        // Download seperti biasa
+        $filename = 'Report_Pengiriman_Area.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"{$filename}\"");
+        header('Cache-Control: max-age=0');
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
     }
+
 
     public function exportGlobalReport()
     {
@@ -10908,11 +10951,12 @@ class ExcelController extends BaseController
             $tglAwal   = date('Y-m-01', $timestamp);
             $tglAkhir  = date('Y-m-t', $timestamp);
         }
-        // dd($tglAwal, $tglAkhir);
+
         $data = $this->pemasukanModel->getFilterBenang($tglAwal, $tglAkhir);
         $tanggal = $data[0]['tgl_input'];
         $date = new DateTime($tanggal);
         $angkaBulan = (int) $date->format('m');
+        $angkaTahun = (int) $date->format('Y');
 
         $namaBulan = [
             1 => 'Januari',
@@ -10929,9 +10973,10 @@ class ExcelController extends BaseController
             12 => 'Desember'
         ];
 
-        $bulan = $namaBulan[$angkaBulan];
+        $bulan = $namaBulan[$angkaBulan] . ' ' . $angkaTahun;
 
         $groups = [
+            'COTTON' => [],
             'ACRYLIC' => [],
             'SPUN POLYESTER'   => [],
             'COTTON X LUREX'   => [],
@@ -10940,44 +10985,89 @@ class ExcelController extends BaseController
         ];
 
         foreach ($data as $row) {
-            // Bikin uppercase sekali agar pengecekan case-insensitive
-            $it = strtoupper($row['item_type']);
-            $ds = strtoupper($row['detail_sj'] ?? '');
+            $it = strtoupper($row['item_type']);        // bahan_baku.jenis
+            $sj = strtoupper($row['no_surat_jalan']);   // datang.no_suratjalan
 
-            // 1. COTTON X LUREX: ada LUREX + (CTN atau COTTON)
+            // 1) Surat Jalan Tidak Masuk
+            // jenis BUKAN Acrylic, BUKAN Lurex; SJ tidak diawali KWS, bukan '', bukan SL*, bukan SC*
             if (
-                strpos($it, 'LUREX') !== false
-                && (strpos($it, 'CTN') !== false || strpos($it, 'COTTON') !== false)
-            ) {
-                $groups['COTTON X LUREX'][] = $row;
-
-                // 2. ACRYLIC X LUREX: ada LUREX + (ACR atau ACRYLIC)
-            } elseif (
-                strpos($it, 'LUREX') !== false
-                && (strpos($it, 'ACR') !== false)
-            ) {
-                $groups['ACRYLIC X LUREX'][] = $row;
-
-                // 3. SPUN POLYESTER: ada SPUN + POLYESTER
-            } elseif (
-                strpos($it, 'SPUN') !== false
-                && strpos($it, 'POLYESTER') !== false
-            ) {
-                $groups['SPUN POLYESTER'][] = $row;
-
-                // 4. ACRYLIC (tanpa LUREX)
-            } elseif (strpos($it, 'ACRYLIC') !== false) {
-                $groups['ACRYLIC'][] = $row;
-
-                // 5. Lain‐lain ⇒ Surat Jalan Tidak Masuk (kecuali detail_sj = KHTEX/PO(+))
-            } elseif (
-                $ds !== 'KHTEX'
-                && strpos($ds, 'PO(+)') === false
+                stripos($it, 'ACRYLIC') === false
+                && stripos($it, 'LUREX') === false
+                && stripos($sj, 'KWS') !== 0
+                && $sj !== ''
+                && stripos($sj, 'SL') !== 0
+                && stripos($sj, 'SC') !== 0
             ) {
                 $groups['Surat Jalan Tidak Masuk'][] = $row;
-
-                // 6. Kalau detail_sj KHTEX atau PO(+), kita skip
+                continue;
             }
+
+            // 2) Cotton
+            // bukan Lurex, bukan Polyester, bukan Spun, bukan ACR; SJ diawali KWS atau ''
+            if (
+                stripos($it, 'LUREX') === false
+                && stripos($it, 'POLYESTER') === false
+                && stripos($it, 'SPUN') === false
+                && stripos($it, 'ACR') === false
+                && (stripos($sj, 'KWS') === 0 || $sj === '')
+            ) {
+                $groups['COTTON'][] = $row;
+                continue;
+            }
+
+            // 3) Acrylic
+            // mengandung ACR; bukan Spun, bukan Polyester, bukan pola Lurex-Acr/Lurex-Acrylic
+            if (
+                stripos($it, 'ACR') !== false
+                && stripos($sj, 'KWS') !== false
+                && stripos($it, 'SPUN') === false
+                && stripos($it, 'POLYESTER') === false
+                && stripos($it, 'LUREX ACR') === false
+                && stripos($it, 'ACRYLIC LUREX') === false
+                && stripos($it, 'ACR LUREX') === false
+            ) {
+                $groups['ACRYLIC'][] = $row;
+                continue;
+            }
+
+            // 4) Spun Polyester
+            // bukan ACR, bukan Lurex; mengandung SPUN atau POLYESTER; SJ diawali KWS atau ''
+            if (
+                stripos($it, 'ACR') === false
+                && stripos($it, 'LUREX') === false
+                && (stripos($it, 'SPUN') !== false || stripos($it, 'POLYESTER') !== false)
+                && (stripos($sj, 'KWS') === 0 || $sj === '')
+            ) {
+                $groups['SPUN POLYESTER'][] = $row;
+                continue;
+            }
+
+            // 5) Cotton X Lurex
+            // bukan ACR; mengandung LUREX
+            if (
+                stripos($it, 'ACR') === false
+                && stripos($it, 'LUREX') !== false
+            ) {
+                $groups['COTTON X LUREX'][] = $row;
+                continue;
+            }
+
+            // 6) Acrylic X Lurex
+            // mengandung "ACRYLIC LUREX" atau "LUREX ACR"; SJ diawali KWS atau '' atau mengandung LRX
+            if (
+                (stripos($it, 'LUREX') !== false
+                    || stripos($it, 'LUREX ACR') !== false)
+                && (
+                    stripos($sj, 'KWS') === 0
+                    || $sj === ''
+                    || stripos($sj, 'LRX') !== false
+                )
+            ) {
+                $groups['ACRYLIC X LUREX'][] = $row;
+                continue;
+            }
+
+            // kalau tidak masuk salah satu, bisa skip atau taruh di default
         }
 
         $spreadsheet = new Spreadsheet();
@@ -10999,15 +11089,15 @@ class ExcelController extends BaseController
             $sheet->getColumnDimension('A')->setWidth(10);
             $sheet->getColumnDimension('D')->setWidth(15);
 
-            $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-            $drawing->setName('Logo');
-            $drawing->setDescription('Logo Perusahaan');
-            $drawing->setPath('assets/img/logo-kahatex.png');
-            $drawing->setCoordinates('C1');
-            $drawing->setHeight(25);
-            $drawing->setOffsetX(55);
-            $drawing->setOffsetY(10);
-            $drawing->setWorksheet($sheet);
+            // $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+            // $drawing->setName('Logo');
+            // $drawing->setDescription('Logo Perusahaan');
+            // $drawing->setPath('assets/img/logo-kahatex.png');
+            // $drawing->setCoordinates('C1');
+            // $drawing->setHeight(25);
+            // $drawing->setOffsetX(55);
+            // $drawing->setOffsetY(10);
+            // $drawing->setWorksheet($sheet);
             $sheet->mergeCells('A3:D3');
             $sheet->setCellValue('A3', 'PT. KAHATEX');
             $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -11122,6 +11212,7 @@ class ExcelController extends BaseController
                     $gw    = (float)$item['gw'];
                     $kgs_kirim    = (float)$item['kgs_kirim'];
                     $usd   = $kgs_kirim * (float)$item['harga'];
+                    $warnaDasar = $item['warna_dasar'] ?? null;
 
                     $sheet->setCellValue('A' . $row, $no++);
                     $sheet->setCellValue('B' . $row, $item['no_surat_jalan']);
@@ -11129,19 +11220,28 @@ class ExcelController extends BaseController
                     $sheet->setCellValue('D' . $row, $item['tgl_input']);
                     $sheet->setCellValue('E' . $row, $item['item_type']);
                     $sheet->setCellValue('F' . $row, $item['ukuran']);
-                    $sheet->setCellValue('G' . $row, $item['warna']);
+                    if ($title === 'COTTON') {
+                        $sheet->setCellValue('G' . $row, $item['warna'] . ' ' . ($item['kode_warna'] ?? ''));
+                    } else {
+                        $sheet->setCellValue('G' . $row, $item['warna']);
+                    }
                     $sheet->setCellValue('H' . $row, $item['kode_warna'] ?? '');
                     $sheet->setCellValue('I' . $row, $item['l_m_d']);
                     $sheet->setCellValue('J' . $row, $item['cones'] ?? 0);
-                    $sheet->setCellValue('K' . $row, $item['gw']);
-                    $sheet->setCellValue('L' . $row, $kgsKirim);
-                    $sheet->setCellValue('M' . $row, $harga);
-                    $sheet->setCellValue('N' . $row, $totalUsd);
+                    $sheet->setCellValue('K' . $row, number_format($item['gw'], 2));
+                    $sheet->setCellValue('L' . $row, number_format($kgsKirim, 2));
+                    $sheet->setCellValue('M' . $row, number_format($harga, 2));
+                    $sheet->setCellValue('N' . $row, number_format($totalUsd, 2));
                     $sheet->setCellValue('O' . $row, ''); // Keterangan
                     $sheet->setCellValue('P' . $row, $item['detail_sj']);
                     $sheet->setCellValue('Q' . $row, $item['jenis']);
                     $sheet->setCellValue('R' . $row, $item['ukuran'] ?? '');
-                    $sheet->setCellValue('S' . $row, $item['warna'] ?? '');
+                    if ($warnaDasar === null || $warnaDasar === 'Kode warna belum ada di database') {
+                        $sheet->setCellValue('S' . $row, 'Kode Warna Tidak Ada di Database');
+                        $sheet->getStyle('S' . $row)->getFont()->getColor()->setARGB(Color::COLOR_RED);
+                    } else {
+                        $sheet->setCellValue('S' . $row, $warnaDasar);
+                    }
                     $sheet->setCellValue('T' . $row, $kgsKirim ?? 0);
                     $row++;
 
@@ -11157,9 +11257,9 @@ class ExcelController extends BaseController
                 $sheet->setCellValue("A{$row}", "TOTAL");
                 $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                 $sheet->setCellValue("J{$row}", $subtotal['cones']);
-                $sheet->setCellValue("K{$row}", $subtotal['gw']);
-                $sheet->setCellValue("L{$row}", $subtotal['kgs_kirim']);
-                $sheet->setCellValue("N{$row}", $subtotal['usd']);
+                $sheet->setCellValue("K{$row}", number_format($subtotal['gw'], 2));
+                $sheet->setCellValue("L{$row}", number_format($subtotal['kgs_kirim'], 2));
+                $sheet->setCellValue("N{$row}", number_format($subtotal['usd'], 2));
                 $row++;
             }
 

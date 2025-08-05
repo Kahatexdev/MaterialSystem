@@ -216,7 +216,7 @@
                                                                         <label for="po"> PO</label>
                                                                         <select class="form-select po-select" name="po[]" required>
                                                                             <?php foreach ($scheduleData as $po): ?>
-                                                                                <option value="<?= $detail['no_model'] ?>" ?><?= $po['no_model'] ?></option>
+                                                                                <option value="<?= $po['no_model'] ?>" <?= ($po['no_model'] == $detail['no_model']) ? 'selected' : '' ?>><?= $po['no_model'] ?></option>
                                                                             <?php endforeach; ?>
                                                                         </select>
                                                                     </div>
@@ -635,7 +635,7 @@
                     const warna = document.querySelector("input[name='warna']").value;
                     const idIndukValue = itemTypeSelect.selectedOptions[0]?.getAttribute("data-id-induk") || 0;
                     if (poSelect.value && itemTypeValue && kodeWarnaValue) {
-                        fetchQtyAndKebutuhanPO(kodeWarnaValue, tr, warna, itemTypeValue, idIndukValue);
+                        fetchQtyAndKebutuhanPO(poSelect.value, kodeWarnaValue, tr, warna, itemTypeValue, idIndukValue);
                         fetchPODetails(poSelect.value, tr, itemTypeValue, kodeWarnaValue);
                     } else {
                         resetPODetails(tr);
@@ -647,7 +647,7 @@
 
         // Fungsi Fetch Detail PO untuk update data schedule dan qty_po
         function fetchPODetails(poNo, tr, itemType, kodeWarna) {
-            const url = `<?= base_url(session('role') . "/schedule/getPODetails") ?>?id_order=${poNo}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}`;
+            const url = `<?= base_url(session('role') . "/schedule/getPODetails") ?>?no_model=${poNo}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}`;
             fetch(url)
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
@@ -670,10 +670,10 @@
         }
 
         // Fungsi untuk memanggil getQtyPO dan mengupdate qty_po_plus, KG Kebutuhan, serta sisa jatah
-        function fetchQtyAndKebutuhanPO(kodeWarna, tr, warna, itemType, idInduk) {
+        function fetchQtyAndKebutuhanPO(noModel, kodeWarna, tr, warna, itemType, idInduk) {
             const itemTypeEncoded = encodeURIComponent(itemType);
             idInduk = idInduk || 0;
-            const url = `<?= base_url(session('role') . "/schedule/getQtyPO") ?>?kode_warna=${kodeWarna}&color=${warna}&item_type=${itemTypeEncoded}&id_induk=${idInduk}`;
+            const url = `<?= base_url(session('role') . "/schedule/getQtyPO") ?>?no_model=${noModel}&kode_warna=${kodeWarna}&color=${warna}&item_type=${itemTypeEncoded}&id_induk=${idInduk}`;
             console.log("Request URL:", url);
             fetch(url)
                 .then(response => {

@@ -26,6 +26,7 @@ use App\Models\OtherBonModel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpParser\Node\Expr\FuncCall;
 
 class WarehouseController extends BaseController
 {
@@ -1724,17 +1725,19 @@ class WarehouseController extends BaseController
             foreach ($pemasukanData as $pemasukan) {
                 // Ambil data tabel out_celup terkait
                 $outCelup = $this->outCelupModel->find($pemasukan['id_out_celup']);
+                $other = $this->otherOutModel->getQty($pemasukan['id_out_celup'], $pemasukan['nama_cluster']);
+                $outByCns = $this->pengeluaranModel->getQtyOutByCns($pemasukan['id_out_celup']);
                 // jika kgs manual kosong maka
-                $rawKgsManual = $data['kgs_out_manual'][$pemasukan['id_pemasukan']] ?? '';
-                $rawCnsManual = $data['cns_out_manual'][$pemasukan['id_pemasukan']] ?? 0;
+                $rawKgsManual = $data['kgs_out'][$pemasukan['id_pemasukan']] ?? '';
+                $rawCnsManual = $data['cns_out'][$pemasukan['id_pemasukan']] ?? 0;
 
                 if ($rawKgsManual !== '' || $rawKgsManual > 0) {
                     $kgsOut =  floatval($rawKgsManual);
                     $cnsOut = floatval($rawCnsManual);
                     $krgOut = 0;
                 } else {
-                    $kgsOut = $pemasukan['kgs_kirim'];
-                    $cnsOut = $pemasukan['cones_kirim'];
+                    $kgsOut = round($pemasukan['kgs_kirim'] - ($other[0]['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0), 2);
+                    $cnsOut = $pemasukan['cones_kirim'] - ($other[0]['cns_other_out'] ?? 0) - ($outByCns['cns_out'] ?? 0);
                     $krgOut = 1;
                     $this->pemasukanModel->update($pemasukan['id_pemasukan'], ['out_jalur' => "1"]);
                 }
@@ -2931,19 +2934,36 @@ class WarehouseController extends BaseController
     }
     public function getKeteranganDatang()
     {
-        $idBonCelup = $this->request->getGet('id_bon_celup');
+        $idBon = $this->request->getGet('id_bon');
         $idOtherBon = $this->request->getGet('id_other_bon');
 
         $data = [];
 
-        if ($idBonCelup) {
-            $data = $this->bonCelupModel->where('id_bon_celup', $idBonCelup)->first();
+        if ($idBon) {
+            $data = $this->bonCelupModel->where('id_bon', $idBon)->first();
         } elseif ($idOtherBon) {
             $data = $this->otherBonModel->where('id_other_bon', $idOtherBon)->first();
         }
 
         return $this->response->setJSON([
             'keterangan' => $data['keterangan'] ?? ''
+        ]);
+    }
+    public function updateKeteranganDatang()
+    {
+        $idBon = $this->request->getPost('id_bon');
+        $idOtherBon = $this->request->getPost('id_other_bon');
+        $keterangan = $this->request->getPost('keterangan');
+
+        if ($idBon) {
+            $this->bonCelupModel->update($idBon, ['keterangan' => $keterangan]);
+        } elseif ($idOtherBon) {
+            $this->otherBonModel->update($idOtherBon, ['keterangan' => $keterangan]);
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            // 'message' => 'Keterangan berhasil diperbarui.'
         ]);
     }
 }

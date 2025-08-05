@@ -29,6 +29,9 @@
     }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
 <div class="container-fluid py-4">
     <!-- alert swal -->
     <?php if (session()->getFlashdata('success')): ?>
@@ -136,9 +139,9 @@
                                     <td><?= esc(isset($row['kode_warna']) ? $row['kode_warna'] : '') ?></td>
                                     <td><?= esc(isset($row['warna']) ? $row['warna'] : '') ?></td>
                                     <td><?= esc(isset($row['area_out']) ? $row['area_out'] : '') ?></td>
-                                    <?php if (isset($row['jenis']) && (strtolower($row['jenis']) === 'spandex' || strtolower($row['jenis']) === 'karet')): ?>
+
                                         <td>
-                                            <input type="text" name="lot_out[<?= $i ?>]" class="form-control" value="<?= esc(isset($row['lot_out']) ? $row['lot_out'] : '') ?>">
+                                            <textarea name="lot_out[<?= $i ?>]" class="form-control"><?= esc(isset($row['lot_out']) ? $row['lot_out'] : '') ?></textarea>
                                         </td>
                                         <td>
                                             <input type="number" name="kgs_out[<?= $i ?>]" class="form-control kgs-val" value="<?= esc(isset($row['kgs_out']) ? $row['kgs_out'] : '') ?>" step="0.01" min="0">
@@ -146,11 +149,6 @@
                                         <td>
                                             <input type="number" name="cns_out[<?= $i ?>]" class="form-control cns-val" value="<?= esc(isset($row['cns_out']) ? $row['cns_out'] : '') ?>" step="1" min="0">
                                         </td>
-                                    <?php else: ?>
-                                        <td><?= esc(isset($row['lot_out']) ? $row['lot_out'] : '') ?></td>
-                                        <td class="kgs-val"><?= esc(isset($row['kgs_out']) ? $row['kgs_out'] : '') ?></td>
-                                        <td class="cns-val"><?= esc(isset($row['cns_out']) ? $row['cns_out'] : '') ?></td>
-                                    <?php endif; ?>
                                     <td>
                                         <button type="button" class="btn btn-danger btn-remove" data-index="<?= $i ?>"><i class="fas fa-trash"></i></button>
                                     </td>
@@ -258,26 +256,36 @@
         // Button Cari Order
         $('#btn-saveSession').on('click', function() {
             let params = $('#filter-form').serialize();
-            // save session data
             $.post('<?= base_url($role . "/pengiriman/saveSessionDeliveryArea") ?>', params, function(response) {
-                if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Sukses',
-                        text: 'Data berhasil disimpan ke session.',
-                    }).then(() => {
-                        location.reload();
-                    });
-                } else {
+                    // Update totals setelah data session berubah
+                    updateTotals();
+
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sukses',
+                            text: 'Data berhasil disimpan ke session.',
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: response.message,
+                        });
+                    }
+                }, 'json')
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    // Tangani gagal request (misal server 500, network error)
                     Swal.fire({
                         icon: 'error',
-                        title: 'Gagal',
-                        text: response.message,
+                        title: 'Error',
+                        text: 'Terjadi kesalahan: ' + textStatus
                     });
-                }
-            }, 'json');
-            updateTotals();
+                });
         });
+
 
         // Hapus baris dan session
         $(document).on('click', '.btn-remove', function() {

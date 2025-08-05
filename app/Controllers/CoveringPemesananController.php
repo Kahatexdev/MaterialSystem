@@ -82,13 +82,14 @@ class CoveringPemesananController extends BaseController
         foreach ($listPemesanan as $key => $value) {
             $history = $this->pengeluaranModel
                 ->where('id_total_pemesanan', $value['id_total_pemesanan'])
+                ->where('status', 'Pengeluaran Jalur')
                 ->first();
 
             if (!empty($history)) {
                 // Jika di‐history sudah ada record, disable tombol
-                $listPemesanan[$key]['button'] = 'disable';
-            } else {
                 $listPemesanan[$key]['button'] = 'enable';
+            } else {
+                $listPemesanan[$key]['button'] = 'disable';
             }
         }
 
@@ -230,6 +231,7 @@ class CoveringPemesananController extends BaseController
             $this->pengeluaranModel->insert([
                 'id_psk' => $idPsk,
                 'id_total_pemesanan' => $dataPemesanan['id_total_pemesanan'],
+                'status' => 'Pengeluaran Jalur',
                 'admin' => session()->get('username'),
                 'created_at' => date('Y-m-d H:i:s'),
             ]);

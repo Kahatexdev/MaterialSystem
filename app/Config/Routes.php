@@ -86,13 +86,19 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('import/mu', 'MasterdataController::importMU');
     $routes->post('revise/mu', 'MasterdataController::reviseMU');
 
-
     $routes->get('masterMaterial', 'MastermaterialController::index');
     $routes->post('tampilMasterMaterial', 'MastermaterialController::tampilMasterMaterial');
     $routes->get('getMasterMaterialDetails', 'MastermaterialController::getMasterMaterialDetails');
     $routes->post('updateMasterMaterial', 'MastermaterialController::updateMasterMaterial');
     $routes->post('saveMasterMaterial', 'MastermaterialController::saveMasterMaterial');
     $routes->get('deleteMasterMaterial', 'MastermaterialController::deleteMasterMaterial');
+
+    $routes->get('masterWarnaBenang', 'MasterWarnaBenangController::index');
+    $routes->post('getMasterWarnaBenang', 'MasterWarnaBenangController::getMasterWarnaBenang');
+    $routes->get('getMasterWarnaBenangDetails', 'MasterWarnaBenangController::getMasterWarnaBenangDetails');
+    $routes->post('updateMasterWarnaBenang', 'MasterWarnaBenangController::updateMasterWarnaBenang');
+    $routes->post('saveMasterWarnaBenang', 'MasterWarnaBenangController::saveMasterWarnaBenang');
+    $routes->get('deleteMasterWarnaBenang', 'MasterWarnaBenangController::deleteMasterWarnaBenang');
 
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
@@ -192,6 +198,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportDatangBenang', 'WarehouseController::reportDatangBenang');
     $routes->get('warehouse/filterDatangBenang', 'WarehouseController::filterDatangBenang');
     $routes->get('warehouse/exportDatangBenang', 'ExcelController::exportDatangBenang');
+    $routes->get('warehouse/getKeteranganDatang', 'WarehouseController::getKeteranganDatang');
+    $routes->post('warehouse/updateKeteranganDatang', 'WarehouseController::updateKeteranganDatang');
     $routes->get('warehouse/exportExcel', 'ExcelController::excelStockMaterial');
     $routes->get('warehouse/reportPengiriman', 'WarehouseController::reportPengiriman');
     $routes->get('warehouse/filterPengiriman', 'WarehouseController::filterPengiriman');
@@ -601,8 +609,6 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('warehouse/exportPoBenang', 'ExcelController::exportPoBenang');
     $routes->get('warehouse/reportDatangBenang', 'WarehouseController::reportDatangBenang');
     $routes->get('warehouse/filterDatangBenang', 'WarehouseController::filterDatangBenang');
-    $routes->get('warehouse/getKeteranganDatang', 'WarehouseController::getKeteranganDatang');
-    $routes->get('warehouse/updateKeteranganDatang', 'WarehouseController::updateKeteranganDatang');
     $routes->get('warehouse/exportDatangBenang', 'ExcelController::exportDatangBenang');
     $routes->get('warehouse/exportExcel', 'ExcelController::excelStockMaterial');
     $routes->get('warehouse/reportPengiriman', 'WarehouseController::reportPengiriman');
@@ -696,6 +702,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     // god routes
     $routes->get('importStock', 'GodController::index');
     $routes->post('importStock/upload', 'GodController::importStock');
+    $routes->get('masterWarnaBenang', 'GodController::masterWarnaBenang');
+    $routes->post('importMasterWarnaBenang/upload', 'GodController::importMasterWarnaBenang');
 });
 
 $routes->options('(:any)', function () {
