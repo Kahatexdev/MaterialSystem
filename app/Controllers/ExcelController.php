@@ -2925,7 +2925,7 @@ class ExcelController extends BaseController
                                 $dataRow['actual_celup'] ?? '',
                                 $startMc ?? '',
                                 date('d-M', strtotime($dataRow['delivery_awal'])) ?? '',
-                                $dataRow['ket_celup'] ?? ''
+                                $dataRow['ket_schedule'] ?? ''
                             ];
                         } else {
                             // Jika tidak ada data, tetap isi dengan placeholder jumlah kolom = count($headers)
