@@ -8,6 +8,7 @@ use App\Libraries\DompdfService;
 use App\Models\BonCelupModel;
 use App\Models\OutCelupModel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
+use Dompdf\Options;
 
 class DomPdfController extends BaseController
 {
@@ -47,11 +48,11 @@ class DomPdfController extends BaseController
         $dompdf = new DompdfService();
         $dataBon = $this->bonCelupModel->getDataById($idBon);
         $detailBon = $this->outCelupModel->getDetailBonByIdBon($idBon);
-        $path = FCPATH . 'assets/img/logo-kahatex.png';
+        $path = FCPATH . 'assets/img/logo-kahatexbw.png';
         $type = pathinfo($path, PATHINFO_EXTENSION);
         $data = file_get_contents($path);
         $img = 'data:image/' . $type . ';base64,' . base64_encode($data);
-
+        $option = new Options();
         $generator = new BarcodeGeneratorPNG();
         $barcodeImages = [];
         foreach ($detailBon as $i => &$row) {
@@ -79,8 +80,8 @@ class DomPdfController extends BaseController
 
         $dompdf->loadHtml($html);
         $dompdf->setPaper('10cm', '10cm');
+        $option->set('dpi', 203);
         $dompdf->render();
-
         return $dompdf->stream("Barcode_$idBon.pdf", ['Attachment' => false]);
     }
 
