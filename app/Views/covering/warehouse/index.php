@@ -82,7 +82,7 @@
     ?>
 
     <!-- Summary Cards -->
-    <div class="row mb-4">
+    <div class="row mb-2">
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card summary-card h-100 py-2">
                 <div class="card-body">
@@ -143,7 +143,7 @@
         <div class="card-body">
             <div class="row mt-2 align-items-end">
                 <div class="col-md-5">
-                    <h5 class="card-title mb-3">Warehouse Barang Jadi Covering</h5>
+                    <h5 class="font-weight-bolder mb-3">STOCK BARANG COVERING</h5>
 
                 </div>
                 <div class="col-md-7 d-flex justify-content-center align-items-center gap-2">
@@ -164,8 +164,77 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-xl-4 col-sm-6 mb-xl-0 mb-4 mt-2">
+            <a href="<?= base_url($role . '/warehouse/nylon') ?>">
+                <div class="card summary-card">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="numbers">
+                                    <h5 class="font-weight-bolder mb-0">NYLON
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+
+                                    <i class="fas fa-folder text-lg opacity-10" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-4 col-sm-6 mb-xl-0 mb-4 mt-2">
+            <a href="<?= base_url($role . '/warehouse/polyester') ?>">
+                <div class="card summary-card">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="numbers">
+                                    <h5 class="font-weight-bolder mb-0">POLYESTER
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+
+                                    <i class="fas fa-folder text-lg opacity-10" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-4 col-sm-6 mb-xl-0 mb-4 mt-2">
+            <a href="<?= base_url($role . '/warehouse/recycled') ?>">
+                <div class="card summary-card">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="numbers">
+                                    <h5 class="font-weight-bolder mb-0">RECYCLED
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+
+                                    <i class="fas fa-folder text-lg opacity-10" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
     <!-- Filter Section -->
-    <div class="card mb-4">
+    <!-- <div class="card mb-4 mt-4">
         <div class="card-body">
             <form method="get" class="row g-2 align-items-end">
                 <div class="col-md-3">
@@ -255,7 +324,7 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </div> -->
 
 
 
@@ -365,7 +434,7 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        
+
                         <div class="mb-3"><label class="form-label">Jenis Benang</label><select class="form-select" name="jenis_benang">
                                 <option value="">Semua</option>
                                 <option value="NYLON">NYLON</option>
@@ -374,7 +443,7 @@
                                 <option value="RECYCLED">RECYCLED</option>
                             </select>
                         </div>
-                        
+
                         <div class="mb-3"><label class="form-label">Jenis Cover</label><select class="form-select" name="jenis_cover">
                                 <option value="">Semua</option>
                                 <option value="SINGLE">SINGLE</option>

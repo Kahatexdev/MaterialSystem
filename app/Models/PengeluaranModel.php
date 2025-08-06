@@ -101,6 +101,7 @@ class PengeluaranModel extends Model
     }
     public function getFilterPengiriman($key = null, $tanggal_awal = null, $tanggal_akhir = null)
     {
+        // 1) Siapkan keempat builder tanpa filter tanggal
         // -- Subquery 1: pengeluaran --
         $b1 = $this->db->table('pengeluaran')
             ->select([
@@ -108,6 +109,10 @@ class PengeluaranModel extends Model
                 'material.item_type',
                 'material.kode_warna',
                 'material.color',
+                'material.loss',
+            // 'po_tambahan.no_po',
+                // 'NULL AS qty_po_plus',
+                'pemesanan.tgl_pakai',
                 'pengeluaran.tgl_out',
                 'pengeluaran.nama_cluster',
                 'pengeluaran.area_out',
@@ -123,27 +128,34 @@ class PengeluaranModel extends Model
                 'master_order.unit',
                 'master_order.delivery_awal',
                 'master_order.delivery_akhir',
-                'total_pemesanan.ttl_kg',
+                'total_pemesanan.ttl_kg AS kgs_pesan',
                 'total_pemesanan.ttl_cns',
                 'master_material.jenis',
+                'open_po.created_at AS tgl_po',
             ])
-            ->join('pemesanan_spandex_karet psk',    'psk.id_psk = pengeluaran.id_psk',                                 'left')
-            ->join('total_pemesanan',                'total_pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left')
-            ->join('pemesanan',                      'pemesanan.id_total_pemesanan = psk.id_total_pemesanan', 'left')
-            ->join('material',                       'material.id_material = pemesanan.id_material',                    'left')
-            ->join('master_material',                'master_material.item_type = material.item_type',                 'left')
-            ->join('master_order',                   'master_order.id_order = material.id_order',                       'left')
+            ->join('pemesanan_spandex_karet psk',    'psk.id_psk = pengeluaran.id_psk',                                        'left')
+            ->join('total_pemesanan',                'total_pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan',    'left')
+            ->join('pemesanan',                      'pemesanan.id_total_pemesanan = psk.id_total_pemesanan',                 'left')
+            ->join('material',                       'material.id_material = pemesanan.id_material',                           'left')
+            // ->join('po_tambahan',                   'po_tambahan.id_material = material.id_material',                        'left')
+            ->join('master_material',                'master_material.item_type = material.item_type',                         'left')
+            ->join('master_order',                   'master_order.id_order = material.id_order',                              'left')
+            ->join('open_po',                        'open_po.no_model = master_order.no_model AND open_po.item_type = material.item_type AND open_po.kode_warna = material.kode_warna', 'left')
+            ->where('open_po.id_induk IS NOT NULL')
             ->where('pengeluaran.status', 'Pengiriman Area')
-            ->where('pengeluaran.id_out_celup IS NULL') // Ensure we only get valid out_celup
-            ->where('pengeluaran.id_psk IS NOT NULL') // Ensure we only get valid schedule_celup
+            ->where('pengeluaran.id_out_celup IS NULL')
+            ->where('pengeluaran.id_psk IS NOT NULL')
             ->groupBy('pengeluaran.id_pengeluaran');
 
+        // -- Subquery 2: pengeluaran via out_celup/schedule_celup --
         $b2 = $this->db->table('pengeluaran')
             ->select([
-                'schedule_celup.no_model',
-                'schedule_celup.item_type',
-                'schedule_celup.kode_warna',
-                'schedule_celup.warna AScolor',
+                'master_order.no_model',
+                'material.item_type',
+                'material.kode_warna',
+                'material.color',
+                'material.loss',
+                'pemesanan.tgl_pakai',
                 'pengeluaran.tgl_out',
                 'pengeluaran.nama_cluster',
                 'pengeluaran.area_out',
@@ -153,39 +165,44 @@ class PengeluaranModel extends Model
                 'pengeluaran.lot_out',
                 'pengeluaran.keterangan_gbn',
                 'pengeluaran.admin',
+                // 'NULL AS qty_po_plus',
                 'master_order.foll_up',
                 'master_order.no_order',
                 'master_order.buyer',
                 'master_order.unit',
                 'master_order.delivery_awal',
                 'master_order.delivery_akhir',
-                'total_pemesanan.ttl_kg',
+                'total_pemesanan.ttl_kg AS kgs_pesan',
                 'total_pemesanan.ttl_cns',
                 'master_material.jenis',
+                'open_po.created_at AS tgl_po',
             ])
-            ->join('out_celup',                      'out_celup.id_out_celup = pengeluaran.id_out_celup',             'left')
-            ->join('schedule_celup',                 'schedule_celup.id_celup = out_celup.id_celup',                     'left')
-            ->join('pemesanan',                      'pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left')
-            ->join('total_pemesanan',                'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
-            ->join('material',                       'material.id_material = pemesanan.id_material',                    'left')
-            ->join('master_material',                'master_material.item_type = material.item_type',                 'left')
-            ->join('master_order',                   'master_order.id_order = material.id_order',                       'left')
+            ->join('out_celup',      'out_celup.id_out_celup = pengeluaran.id_out_celup',                   'left')
+            ->join('schedule_celup', 'schedule_celup.id_celup     = out_celup.id_celup',                 'left')
+            ->join('open_po',       'open_po.no_model = schedule_celup.no_model AND open_po.item_type = schedule_celup.item_type AND open_po.kode_warna = schedule_celup.kode_warna', 'left')
+            ->join('pemesanan',      'pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan',      'left')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
+            ->join('material',       'material.id_material = pemesanan.id_material',                       'left')
+            ->join('master_material', 'master_material.item_type = material.item_type',     'left')
+            ->join('master_order',   'master_order.id_order = material.id_order',                          'left')
             ->where('pengeluaran.status', 'Pengiriman Area')
-            ->where('pengeluaran.id_out_celup IS NOT NULL') // Ensure we only get valid out_celup
-            ->where('pengeluaran.id_psk IS NULL') // Ensure we only get valid schedule_celup
+            ->where('pengeluaran.id_out_celup IS NOT NULL')
+            ->where('pengeluaran.id_psk IS NULL')
             ->groupBy('pengeluaran.id_pengeluaran');
 
-
-        // -- Subquery 2: other_out via schedule_celup --
+        // -- Subquery 3: other_out via schedule_celup --
         $b3 = $this->db->table('other_out')
             ->select([
-                'schedule_celup.no_model',
-                'schedule_celup.item_type',
-                'schedule_celup.kode_warna',
-                'schedule_celup.warna AS color',
-                'other_out.tgl_other_out AS tgl_out',
+                'master_order.no_model',
+                'material.item_type',
+                'material.kode_warna',
+                'material.color',
+                'material.loss',
+                'NULL AS tgl_pakai',
+                // 'NULL AS qty_po_plus',
+                'other_out.tgl_other_out   AS tgl_out',
                 'other_out.nama_cluster',
-                'NULL          AS area_out',
+                'NULL                      AS area_out',
                 'other_out.kgs_other_out   AS kgs_out',
                 'other_out.cns_other_out   AS cns_out',
                 'other_out.krg_other_out   AS krg_out',
@@ -198,29 +215,41 @@ class PengeluaranModel extends Model
                 'master_order.unit',
                 'master_order.delivery_awal',
                 'master_order.delivery_akhir',
-                'NULL          AS ttl_kg',
-                'NULL          AS ttl_cns',
+                // 'material.loss',
+                'NULL                       AS kgs_pesan',
+                'NULL                      AS ttl_cns',
                 'master_material.jenis     AS jenis',
+                'open_po.created_at AS tgl_po',
             ])
-            ->join('out_celup',      'out_celup.id_out_celup = other_out.id_out_celup',         'left')
-            ->join('schedule_celup', 'schedule_celup.id_celup     = out_celup.id_celup',   'left')
-            ->join('material',       'material.item_type          = schedule_celup.item_type', 'left')
-            ->join('master_material', 'master_material.item_type   = schedule_celup.item_type', 'left')
-            ->join('master_order',   'master_order.id_order       = material.id_order',       'left')
-            ->where('out_celup.id_celup IS NOT NULL') // Ensure we only get valid out_celup
-            ->where('out_celup.id_other_bon IS NULL') // Ensure we only get valid schedule_celup
+            ->join('out_celup',      'out_celup.id_out_celup = other_out.id_out_celup',                      'left')
+            ->join('schedule_celup', 'schedule_celup.id_celup     = out_celup.id_celup',                'left')
+            ->join('open_po',       'open_po.no_model = schedule_celup.no_model AND open_po.item_type = schedule_celup.item_type AND open_po.kode_warna = schedule_celup.kode_warna', 'left')
+            ->join(
+                'material',
+                'material.item_type = schedule_celup.item_type 
+       AND material.kode_warna = schedule_celup.kode_warna',
+                'left'
+            )
+
+            ->join('master_material', 'master_material.item_type   = schedule_celup.item_type',            'left')
+            ->join('master_order',   'master_order.id_order       = material.id_order',                       'left')
+            ->where('out_celup.id_celup IS NOT NULL')
+            ->where('out_celup.id_other_bon IS NULL')
             ->groupBy('other_out.id_other_out');
 
-        // -- Subquery 3: other_out via other_bon --
+        // -- Subquery 4: other_out via other_bon --
         $b4 = $this->db->table('other_out')
             ->select([
                 'other_bon.no_model',
                 'other_bon.item_type',
                 'other_bon.kode_warna',
                 'other_bon.warna AS color',
-                'other_out.tgl_other_out AS tgl_out',
+                'material.loss',
+                // 'NULL AS qty_po_plus',
+                'NULL AS tgl_pakai',
+                'other_out.tgl_other_out   AS tgl_out',
                 'other_out.nama_cluster',
-                'NULL          AS area_out',
+                'NULL                      AS area_out',
                 'other_out.kgs_other_out   AS kgs_out',
                 'other_out.cns_other_out   AS cns_out',
                 'other_out.krg_other_out   AS krg_out',
@@ -233,51 +262,60 @@ class PengeluaranModel extends Model
                 'master_order.unit',
                 'master_order.delivery_awal',
                 'master_order.delivery_akhir',
-                'NULL          AS ttl_kg',
-                'NULL          AS ttl_cns',
+                // 'material.loss',
+                'NULL                      AS kgs_pesan',
+                'NULL                      AS ttl_cns',
                 'master_material.jenis     AS jenis',
+                'NULL                      AS tgl_po',
             ])
-            ->join('out_celup',      'out_celup.id_out_celup = other_out.id_out_celup',       'left')
-            ->join('other_bon',      'other_bon.id_other_bon = out_celup.id_other_bon',       'left')
-            ->join('material',       'material.item_type          = other_bon.item_type',    'left')
-            ->join('master_material', 'master_material.item_type   = other_bon.item_type',    'left')
-            ->join('master_order',   'master_order.id_order       = material.id_order',       'left')
-            ->where('out_celup.id_other_bon IS NOT NULL') // Ensure we only get valid other_bon
-            ->where('out_celup.id_celup IS NULL') // Ensure we only get valid other_out
+            ->join('out_celup',      'out_celup.id_out_celup = other_out.id_out_celup',                      'left')
+            ->join('other_bon',      'other_bon.id_other_bon = out_celup.id_other_bon',                      'left')
+            ->join('material',       'material.item_type          = other_bon.item_type AND other_bon.kode_warna = material.kode_warna', 'left')
+            ->join('master_material', 'master_material.item_type   = other_bon.item_type',               'left')
+            ->join('master_order',   'master_order.id_order       = material.id_order',                       'left')
+            ->where('out_celup.id_other_bon IS NOT NULL')
+            ->where('out_celup.id_celup IS NULL')
             ->groupBy('other_out.id_other_out');
 
-        // -- Keyword filtering on each part --
-        if (! empty($key)) {
-            foreach ([$b1, $b2, $b3,$b4] as $sub) {
+        // 2) Jika ada keyword, apply LIKE di tiap builder
+        if (!empty($key)) {
+            foreach ([$b1, $b2, $b3, $b4] as $sub) {
                 $sub->groupStart()
-                    ->like('no_model',   $key)
+                    ->like('no_model', $key)
                     ->orLike('item_type', $key)
                     ->orLike('kode_warna', $key)
-                    ->orLike('color',     $key)
+                    ->orLike('color', $key)
                     ->groupEnd();
             }
         }
 
-        // -- Build the UNION of all three queries --
-        $union = $b1
-            ->union($b2, true)  // true = union ALL
-            ->union($b3, true)
-            ->union($b4, true);
+        // 3) Compile masing-masing subquery & bangun UNION ALL di dalam derived table
+        $sqlUnion  = '(' . $b1->getCompiledSelect() . ') UNION ALL '
+            . '(' . $b2->getCompiledSelect() . ') UNION ALL '
+            . '(' . $b3->getCompiledSelect() . ') UNION ALL '
+            . '(' . $b4->getCompiledSelect() . ')';
 
-        // -- Date filters on the unified 'tgl_out' column --
-        if (! empty($tanggal_awal)) {
-            $union->where('tgl_out >=', $tanggal_awal);
-        }
-        if (! empty($tanggal_akhir)) {
-            $union->where('tgl_out <=', $tanggal_akhir);
-        }
+        $sql = "SELECT * 
+            FROM ( $sqlUnion ) AS all_data";
 
-        // -- Final sorting & execute --
-        return $union
-            ->orderBy('tgl_out', 'DESC')
-            ->get()
-            ->getResultArray();
+        // 4) Terapkan filter tanggal pada derived table, dan urutkan
+        $wheres = [];
+        if (!empty($tanggal_awal))  $wheres[] = "all_data.tgl_out >= '{$tanggal_awal}'";
+        if (!empty($tanggal_akhir)) $wheres[] = "all_data.tgl_out <= '{$tanggal_akhir}'";
+
+        if (count($wheres)) {
+            $sql .= ' WHERE ' . implode(' AND ', $wheres);
+        }
+        $sql .= ' ORDER BY all_data.tgl_out DESC';
+
+        // 5) Eksekusi dan return
+        $result = $this->db->query($sql);
+
+
+        // dd($this->db->getLastQuery());
+        return $result->getResultArray();
     }
+
 
 
 

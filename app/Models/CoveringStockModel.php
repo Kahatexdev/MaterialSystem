@@ -107,4 +107,9 @@ class CoveringStockModel extends Model
             ->orderBy('dr', 'ASC')
             ->findAll();
     }
+
+    public function getStockByJenis($jenis)
+    {
+        return $this->where('jenis_benang', $jenis)->findAll();
+    }
 }
