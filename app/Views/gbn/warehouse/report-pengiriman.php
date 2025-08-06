@@ -12,7 +12,7 @@
             <div class="row mt-2">
                 <div class="col-md-3">
                     <label for="">Key</label>
-                    <input type="text" class="form-control">
+                    <input type="text" class="form-control" placeholder="PDK / Item Type / Kode Warna dan Warna">
                 </div>
                 <div class="col-md-3">
                     <label for="">Tanggal Awal (Tanggal Keluar)</label>
@@ -118,12 +118,12 @@
                                 item.item_type,
                                 item.kode_warna,
                                 item.color,
-                                item.ttl_kg,
+                                item.kgs_pesan,
                                 item.tgl_out,
-                                item.kgs_out,
-                                item.cns_out,
-                                item.krg_out,
-                                item.lot_out,
+                                item.kgs_pakai,
+                                item.cones_pakai,
+                                item.krg_pakai,
+                                item.lot_pakai,
                                 item.nama_cluster,
                                 item.keterangan_gbn,
                                 item.admin
