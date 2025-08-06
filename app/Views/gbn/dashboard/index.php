@@ -2,18 +2,19 @@
 <?php $this->section('content'); ?>
 
 <style>
+    /* ===== CELL STYLING ===== */
     .cell {
         border: none;
         padding: 8px 12px;
         margin: 2px;
         border-radius: 8px;
-        /* Membuat tombol rounded */
         font-weight: bold;
         cursor: pointer;
-        transition: 0.3s;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    /* Warna cell */
+    /* Cell Colors */
     .gray-cell {
         background-color: #b0b0b0;
         color: white;
@@ -34,16 +35,114 @@
         color: white;
     }
 
-    /* Hover effect */
+    /* Hover Effects */
     .cell:hover {
         opacity: 0.8;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
 
-    /* Styling table */
+    /* ===== TABLE STYLING ===== */
     .table-bordered th,
     .table-bordered td {
         border: 2px solid #dee2e6;
         text-align: center;
+        vertical-align: middle;
+    }
+
+    .table-bordered th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    /* ===== MODAL ENHANCEMENTS ===== */
+    .modal-header {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        border-bottom: none;
+    }
+
+    .modal-header .btn-close {
+        filter: invert(1);
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-body p {
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+    }
+
+    .modal-body p strong {
+        color: #495057;
+        min-width: 120px;
+        display: inline-block;
+    }
+
+    .modal-body p span {
+        color: #007bff;
+        font-weight: 500;
+    }
+
+    /* ===== KARUNG LIST STYLING ===== */
+    #modalKarungList {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        padding: 1.25rem;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        position: relative;
+        overflow: hidden;
+    }
+
+    #modalKarungList ul {
+        margin-bottom: 0;
+        padding-left: 1.5rem;
+    }
+
+    #modalKarungList li {
+        margin-bottom: 0.5rem;
+        color: #495057;
+    }
+
+    #modalKarungList em {
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    /* ===== RESPONSIVE IMPROVEMENTS ===== */
+    @media (max-width: 768px) {
+        .modal-dialog {
+            margin: 0.5rem;
+        }
+
+        .modal-body {
+            padding: 1rem;
+        }
+
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+    }
+
+    /* ===== LOADING ANIMATION ===== */
+    .fade-in {
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 
@@ -199,37 +298,64 @@
 <div class="modal fade" id="modalDetail" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="detailModalLabel">Detail Cluster</h5>
+            <!-- Modal Header -->
+            <div class="modal-header text-white">
+                <h5 class="modal-title d-flex align-items-center" id="detailModalLabel">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Detail Cluster
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
+            <!-- Modal Body -->
             <div class="modal-body">
-                <p><strong>Nama Cluster:</strong> <span id="modalNamaCluster"></span></p>
-                <p><strong>Kapasitas:</strong> <span id="modalKapasitas"></span> kg</p>
-                <p><strong>Total Terisi:</strong> <span id="modalTotalQty"></span> kg</p>
-                <p><strong>Sisa Kapasitas:</strong> <span id="modalSisaKapasitas"></span> kg</p>
+                <!-- Cluster Information -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <p><strong>Nama Cluster:</strong> <span id="modalNamaCluster"></span></p>
+                        <p><strong>Kapasitas:</strong> <span id="modalKapasitas"></span> kg</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Total Terisi:</strong> <span id="modalTotalQty"></span> kg</p>
+                        <p><strong>Sisa Kapasitas:</strong> <span id="modalSisaKapasitas"></span> kg</p>
+                    </div>
+                </div>
+
+                <!-- Detail Table -->
                 <div class="table-responsive">
-                    <table class="table table-bordered">
+                    <table class="table table-bordered table-hover">
                         <thead>
                             <tr>
-                                <th>No Model</th>
-                                <th>Kode Warna</th>
-                                <th>Foll Up</th>
-                                <th>Delivery</th>
-                                <th>Kapasitas Terpakai</th>
+                                <th><i class="fas fa-hashtag me-1"></i>No Model</th>
+                                <th><i class="fas fa-palette me-1"></i>Kode Warna</th>
+                                <th><i class="fas fa-calendar me-1"></i>Foll Up</th>
+                                <th><i class="fas fa-truck me-1"></i>Delivery</th>
+                                <th><i class="fas fa-weight me-1"></i>Kapasitas Terpakai</th>
+                                <th><i class="fas fa-eye me-1"></i>Detail</th>
                             </tr>
                         </thead>
-                        <tbody id="modalDetailTableBody"></tbody>
+                        <tbody id="modalDetailTableBody">
+                            <!-- Content will be populated by JavaScript -->
+                        </tbody>
                     </table>
                 </div>
+
+                <!-- Karung List -->
+                <div id="modalKarungList" class="mt-3">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
             </div>
+
+            <!-- Modal Footer -->
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>
+                    Tutup
+                </button>
             </div>
         </div>
     </div>
 </div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
@@ -266,34 +392,86 @@
     });
 </script>
 <script>
-    // Script untuk menangani klik button dan menampilkan modal
+    // ===== MODAL DETAIL HANDLER =====
     document.addEventListener("DOMContentLoaded", function() {
-        let modalDetail = document.getElementById("modalDetail");
-        modalDetail.addEventListener("show.bs.modal", function(event) {
-            let button = event.relatedTarget;
-            let kapasitas = button.getAttribute("data-kapasitas");
-            let total_qty = button.getAttribute("data-total_qty");
-            let nama_cluster = button.getAttribute("data-nama_cluster");
-            let detailData = JSON.parse(button.getAttribute("data-detail"));
+        const modalDetail = document.getElementById("modalDetail");
 
+        // Modal show event handler
+        modalDetail.addEventListener("show.bs.modal", function(event) {
+            const button = event.relatedTarget;
+            const kapasitas = button.getAttribute("data-kapasitas");
+            const total_qty = button.getAttribute("data-total_qty");
+            const nama_cluster = button.getAttribute("data-nama_cluster");
+            const detailData = JSON.parse(button.getAttribute("data-detail"));
+            const detailKarung = JSON.parse(button.getAttribute("data-karung"));
+
+            // console.log(detailKarung);
+
+            // Populate modal data
             document.getElementById("modalKapasitas").textContent = kapasitas;
             document.getElementById("modalTotalQty").textContent = total_qty;
             document.getElementById("modalNamaCluster").textContent = nama_cluster;
             document.getElementById("modalSisaKapasitas").textContent = kapasitas - total_qty;
+            document.getElementById("modalKarungList").innerHTML = "";
 
-            let tableBody = document.getElementById("modalDetailTableBody");
+            // Populate table
+            const tableBody = document.getElementById("modalDetailTableBody");
             tableBody.innerHTML = "";
 
             detailData.forEach((item) => {
-                let row = `<tr>
-                <td>${item.no_model || ''}</td>
-                <td>${item.kode_warna || ''}</td>
-                <td>${item.foll_up || ''}</td>
-                <td>${item.delivery || ''}</td>
-                <td>${item.qty || ''} kg</td>
-            </tr>`;
+                const karungForThis = detailKarung.filter(k => k.no_model === item.no_model);
+                const karungJSON = JSON.stringify(karungForThis);
+
+                console.log(karungForThis);
+
+                const row = `
+                    <tr class="fade-in">
+                        <td>${item.no_model || ''}</td>
+                        <td>${item.kode_warna || ''}</td>
+                        <td>${item.foll_up || ''}</td>
+                        <td>${item.delivery || ''}</td>
+                        <td>${item.qty || ''} kg</td>
+                        <td>
+                            <button class="btn btn-info btn-sm show-karung" data-karung='${karungJSON}'>
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+
                 tableBody.innerHTML += row;
             });
+        });
+
+        // Karung detail click handler
+        modalDetail.addEventListener("click", function(e) {
+            const btn = e.target.closest(".show-karung");
+            if (!btn) return;
+
+            // Parse array no_karung
+            const list = JSON.parse(btn.getAttribute("data-karung"));
+            const karungListElement = document.getElementById("modalKarungList");
+
+            if (list.length === 0) {
+                karungListElement.innerHTML = `
+                    <em><i class="fas fa-info-circle me-1"></i>Tidak ada karung untuk baris ini.</em>
+                `;
+            } else {
+                // Generate karung list HTML
+                const items = list.map(k =>
+                    `<li><i class="fas fa-box me-1"></i>No Karung ${k.no_karung} = ${k.kgs_kirim} kg</li>`
+                ).join("");
+
+                const modelName = btn.closest("tr").children[0].textContent;
+
+                karungListElement.innerHTML = `
+                    <strong><i class="fas fa-list me-1"></i>Daftar No. Karung untuk ${modelName}:</strong>
+                    <ul class="mt-2">${items}</ul>
+                `;
+            }
+
+            // Add fade-in animation
+            karungListElement.classList.add('fade-in');
         });
     });
 </script>

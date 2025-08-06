@@ -124,7 +124,7 @@
                                             <div class="row g-3 mt-3">
                                                 <div class="col-md-4">
                                                     <label>LMD</label>
-                                                    <select class="form-control" name="l_m_d" id="l_m_d" placeholder="L/M/D" required>
+                                                    <select class="form-control" name="l_m_d" id="l_m_d" placeholder="L/M/D">
                                                         <option value="">Pilih LMD</option>
                                                         <option value="L">L</option>
                                                         <option value="M">M</option>
