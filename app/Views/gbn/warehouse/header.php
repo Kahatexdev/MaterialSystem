@@ -103,6 +103,12 @@
                 </nav>
                 <div class="d-flex align-items-center">
                     <ul class="navbar-nav justify-content-end">
+                        <li class="nav-item d-flex align-items-center">
+                            <a href="<?= base_url($role . '/warehouse/listOtherBarcode') ?>" class="nav-link text-body font-weight-bold px-2">
+                                <i class="fas fa-barcode"></i>
+                                <span class="d-lg-inline-block d-none ms-1">Other Barcode</span>
+                            </a>
+                        </li>
                         <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-arrow-down"></i>

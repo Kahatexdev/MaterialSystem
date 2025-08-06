@@ -2967,4 +2967,30 @@ class WarehouseController extends BaseController
             // 'message' => 'Keterangan berhasil diperbarui.'
         ]);
     }
+
+    public function listOtherBarcode()
+    {
+        $listBarcode = $this->pemasukanModel->listOtherBarcode();
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "List Other Barcode",
+            'listBarcode' => $listBarcode,
+        ];
+
+        return view($this->role . '/warehouse/list-other-barcode', $data);
+    }
+
+    public function detailOtherBarcode($tglDatang)
+    {
+        $detailOtherBarcode = $this->pemasukanModel->detailOtherBarcode($tglDatang);
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "Detail Other Barcode",
+            'detailOtherBarcode' => $detailOtherBarcode,
+            'tglDatang' => $tglDatang
+        ];
+        return view($this->role . '/retur/detail-other-barcode', $data);
+    }
 }
