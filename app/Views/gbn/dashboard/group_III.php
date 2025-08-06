@@ -110,6 +110,7 @@
                                                         data-kapasitas="<?= $clusterA['kapasitas'] ?? '' ?>"
                                                         data-total_qty="<?= $clusterA['total_qty'] ?? '' ?>"
                                                         data-nama_cluster="<?= $clusterA['nama_cluster'] ?? '' ?>"
+                                                        data-karung='<?= $clusterA['detail_karung'] ?? '[]' ?>'
                                                         data-detail='[<?= $clusterA['detail_data'] ?? '' ?>]'>
                                                         <?= $clusterA ? $clusterA['simbol_cluster'] : '-' ?>
                                                     </button>
@@ -119,6 +120,7 @@
                                                         data-kapasitas="<?= $clusterB['kapasitas'] ?? '' ?>"
                                                         data-total_qty="<?= $clusterB['total_qty'] ?? '' ?>"
                                                         data-nama_cluster="<?= $clusterB['nama_cluster'] ?? '' ?>"
+                                                        data-karung='<?= $clusterB['detail_karung'] ?? '[]' ?>'
                                                         data-detail='[<?= $clusterB['detail_data'] ?? '' ?>]'>
                                                         <?= $clusterB ? $clusterB['simbol_cluster'] : '-' ?>
                                                     </button>
