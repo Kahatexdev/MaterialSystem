@@ -122,7 +122,7 @@ class PemesananModel extends Model
             ->join('material m', 'm.id_material = p.id_material', 'left')
             ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
             ->join('master_material mm', 'mm.item_type = m.item_type', 'left')
-            ->where('m.area', $area)
+            ->where('p.admin', $area)
             ->where('mm.jenis', $jenis)
             ->where('p.tgl_pakai', $filterDate)
             ->groupBy('p.tgl_pakai, m.area, m.item_type')
