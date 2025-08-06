@@ -1076,9 +1076,10 @@ class WarehouseController extends BaseController
     {
         $noModelOld = $this->request->getVar('noModelOld');
         $kodeWarna = $this->request->getVar('kodeWarna');
+        $term = $this->request->getVar('term');
         // var_dump($kodeWarna);
         // log_message('debug', 'Fetching no_model for kode_warna: ' . $kodeWarna);
-        $results = $this->materialModel->getNoModel($noModelOld, $kodeWarna);
+        $results = $this->materialModel->getNoModel($noModelOld, $kodeWarna, $term);
         // last query
         // log_message('debug', 'Last Query: ' . $this->db->getLastQuery());
         $resultsArray = json_decode(json_encode($results), true);
@@ -2150,7 +2151,7 @@ class WarehouseController extends BaseController
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
         $data = $this->pengeluaranModel->getFilterPengiriman($key, $tanggalAwal, $tanggalAkhir);
-        dd ($data);
+        dd($data);
         // return $this->response->setJSON($data);
     }
     public function reportGlobal()
