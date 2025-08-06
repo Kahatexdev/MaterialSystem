@@ -97,7 +97,7 @@ class DomPdfController extends BaseController
         $type = pathinfo($path, PATHINFO_EXTENSION);
         $data = file_get_contents($path);
         $img = 'data:image/' . $type . ';base64,' . base64_encode($data);
-
+        $option = new Options();
         $generator = new BarcodeGeneratorPNG();
         $barcodeImages = [];
         foreach ($dataList as $i => &$row) {
@@ -117,6 +117,7 @@ class DomPdfController extends BaseController
         $dompdf->loadHtml($html);
         $dompdf->setPaper('10cm', '10cm');
         $dompdf->render();
+        $option->set('dpi', 203);
 
         return $dompdf->stream("Barcode_$tglRetur.pdf", ['Attachment' => false]);
     }

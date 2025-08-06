@@ -146,7 +146,7 @@
                     <div class="modal-body p-0">
                         <div class="card card-plain">
                             <div class="card-body">
-                                <div class="mb-3">
+                                <div class="mb-2">
                                     <label for="ModelSelect" class="form-label">Pilih No Model</label>
                                     <select id="ModelSelect" class="form-select" style="width: 100%"></select>
                                 </div>
@@ -154,10 +154,19 @@
                                 <div class="row g-3" id="pindahOrderContainer">
                                     <!-- Isi kartu akan di‑inject via JS -->
                                 </div>
-                                <div class="mb-3 d-flex justify-content-between">
-                                    <input type="text" class="form-control me-2" name="ttl_kgs" readonly placeholder="Total Kgs">
-                                    <input type="text" class="form-control mx-2" name="ttl_cns" readonly placeholder="Total Cns">
-                                    <input type="text" class="form-control ms-2" name="ttl_krg" readonly placeholder="Total Krg">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3 mt-2">
+                                        <label for="">Total Kgs</label>
+                                        <input type="text" class="form-control me-2" name="ttl_kgs" readonly placeholder="0">
+                                    </div>
+                                    <div class="col-md-4 mb-3 mt-2">
+                                        <label for="">Total Cones</label>
+                                        <input type="text" class="form-control mx-2" name="ttl_cns" readonly placeholder="0">
+                                    </div>
+                                    <div class="col-md-4 mb-3 mt-2">
+                                        <label for="">Total Karung</label>
+                                        <input type="text" class="form-control ms-2" name="ttl_krg" readonly placeholder="0">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -301,6 +310,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
 <script>
+    let currentNoModelOld = '';
+    let currentKodeWarna = '';
+
     $(document).ready(function() {
         $('#filter_data').click(function(e) {
             e.preventDefault();
@@ -397,6 +409,45 @@
             window.location.href = "<?= base_url(session()->get('role') . '/warehouse/exportExcel') ?>" + query;
         });
 
+        // Inisialisasi Select2 (jalankan sekali saja, misalnya di document.ready)
+        $('#ModelSelect').select2({
+            placeholder: 'Ketik untuk cari Model Tujuan',
+            allowClear: true,
+            width: '100%',
+            dropdownParent: $('#modalPindahOrder'),
+
+            // Mulai cari setelah minimal 1 karakter
+            minimumInputLength: 1,
+
+            ajax: {
+                url: '<?= base_url() ?>/<?= session()->get('role') ?>/warehouse/getNoModel',
+                dataType: 'json',
+                delay: 250, // debounce 250ms
+                data: function(params) {
+                    // kirim term pencarian + parameter tambahan
+                    return {
+                        term: params.term, // kata yang diketikan user
+                        noModelOld: currentNoModelOld,
+                        kodeWarna: currentKodeWarna
+                    };
+                },
+                processResults: function(res) {
+                    // map server response ke format Select2
+                    if (!res.success) {
+                        return {
+                            results: []
+                        };
+                    }
+                    return {
+                        results: res.data.map(d => ({
+                            id: `${d.no_model}|${d.item_type}|${d.kode_warna}|${d.color}`,
+                            text: `${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.color}`
+                        }))
+                    };
+                },
+                cache: true
+            }
+        });
     });
 
     // modal pindah order
@@ -405,34 +456,39 @@
         const idStock = $(this).data('id');
         const base = '<?= base_url() ?>';
         const role = '<?= session()->get('role') ?>';
-        const noModelOld = $(this).data('no-model-old');
-        const kodeWarna = $(this).data('kode-warna');
+        currentNoModelOld = $(this).data('no-model-old');
+        currentKodeWarna = $(this).data('kode-warna');
 
+        $('#ModelSelect')
+            .val(null) // kosongkan pilihan
+            .trigger('change');
         $('#modalPindahOrder').modal('show');
-        const $select = $('#ModelSelect').prop('disabled', true).empty().append('<option>Loading…</option>');
+        // const $select = $('#ModelSelect').prop('disabled', true).empty().append('<option>Loading…</option>');
         const $container = $('#pindahOrderContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i></div>');
 
+
+
         // Fetch model tujuan
-        $.getJSON(`${base}/${role}/warehouse/getNoModel`, {
-            noModelOld,
-            kodeWarna
-        }, res => {
-            $select.empty();
-            if (res.success && res.data.length) {
-                $select.append('<option></option>');
-                res.data.forEach(d => {
-                    $select.append(`<option value="${d.no_model}|${d.item_type}|${d.kode_warna}|${d.color}">${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.color}</option>`);
-                });
-            } else {
-                $select.append('<option>Tidak ada model</option>');
-            }
-            $select.prop('disabled', false).select2({
-                placeholder: 'Pilih Model Tujuan',
-                allowClear: true,
-                width: '100%',
-                dropdownParent: $('#modalPindahOrder')
-            });
-        });
+        // $.getJSON(`${base}/${role}/warehouse/getNoModel`, {
+        //     noModelOld,
+        //     kodeWarna
+        // }, res => {
+        //     $select.empty();
+        //     if (res.success && res.data.length) {
+        //         $select.append('<option></option>');
+        //         res.data.forEach(d => {
+        //             $select.append(`<option value="${d.no_model}|${d.item_type}|${d.kode_warna}|${d.color}">${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.color}</option>`);
+        //         });
+        //     } else {
+        //         $select.append('<option>Tidak ada model</option>');
+        //     }
+        //     $select.prop('disabled', false).select2({
+        //         placeholder: 'Pilih Model Tujuan',
+        //         allowClear: true,
+        //         width: '100%',
+        //         dropdownParent: $('#modalPindahOrder')
+        //     });
+        // });
 
         // Fetch detail order
         $.post(`${base}/${role}/warehouse/getPindahOrder`, {

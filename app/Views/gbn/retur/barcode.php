@@ -127,7 +127,7 @@
     </style>
 </head>
 
-<?php foreach ($detailBon as $i => $row): ?>
+<?php foreach ($dataList as $i => $row): ?>
 
     <body>
         <div class="label-container">
