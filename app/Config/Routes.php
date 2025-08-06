@@ -492,6 +492,11 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('warehouseBB/deleteBahanBakuCov/(:num)', 'CoveringWarehouseBBController::deleteBahanBakuCov/$1');
     $routes->post('warehouse/importStokBahanBakuJenis', 'CoveringWarehouseBBController::importStokBahanBakuJenis');
     $routes->post('warehouse/importStokBahanBaku', 'CoveringWarehouseBBController::importStokBahanBaku');
+    $routes->get('warehouseBB/nylon', 'CoveringWarehouseBBController::nylon');
+    $routes->get('warehouseBB/polyester', 'CoveringWarehouseBBController::polyester');
+    $routes->get('warehouseBB/recycledPolyester', 'CoveringWarehouseBBController::recycledPolyester');
+    $routes->get('warehouseBB/spandex', 'CoveringWarehouseBBController::spandex');
+    $routes->get('warehouseBB/rubber', 'CoveringWarehouseBBController::rubber');
 
     //Pemesanan
     $routes->get('pemesanan', 'CoveringPemesananController::index');

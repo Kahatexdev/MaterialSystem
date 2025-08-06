@@ -77,4 +77,66 @@ class WarehouseBBModel extends Model
             ->get()
             ->getRowArray();
     }
+
+    public function getTotalJenis()
+    {
+        return $this->select('COUNT(jenis_benang) AS total_jenis')
+            ->first();
+    }
+
+    public function getTotalStockWarehouseBB()
+    {
+        return $this->select('SUM(kg) AS total_kg')
+            ->first();
+    }
+
+    public function getJenisBenangTersedia()
+    {
+        return $this->select('COUNT(jenis_benang) AS jenis_benang_tersedia')
+            ->where('kg >', 0)
+            ->first();
+    }
+
+    public function getJenisBenangKosong()
+    {
+        return $this->select('COUNT(jenis_benang) AS jenis_benang_kosong')
+            ->where('kg <=', 0)
+            ->first();
+    }
+
+    public function getNylonBB()
+    {
+        return $this->select('stock_bb_covering.*, IF(stock_bb_covering.kg > 0, "ada", "habis") AS status')
+            ->where('jenis_benang', 'NYLON')
+            ->orderBy('kg', 'DESC')
+            ->findAll();
+    }
+    public function getPolyesterBB()
+    {
+        return $this->select('stock_bb_covering.*, IF(stock_bb_covering.kg > 0, "ada", "habis") AS status')
+            ->where('jenis_benang', 'POLYESTER')
+            ->orderBy('kg', 'DESC')
+            ->findAll();
+    }
+    public function getRecycledPolyesterBB()
+    {
+        return $this->select('stock_bb_covering.*, IF(stock_bb_covering.kg > 0, "ada", "habis") AS status')
+            ->like('jenis_benang', 'RECYCLED POLYESTER')
+            ->orderBy('kg', 'DESC')
+            ->findAll();
+    }
+    public function getSpandexBB()
+    {
+        return $this->select('stock_bb_covering.*, IF(stock_bb_covering.kg > 0, "ada", "habis") AS status')
+            ->where('jenis_benang', 'SPANDEX')
+            ->orderBy('kg', 'DESC')
+            ->findAll();
+    }
+    public function getRubberBB()
+    {
+        return $this->select('stock_bb_covering.*, IF(stock_bb_covering.kg > 0, "ada", "habis") AS status')
+            ->where('jenis_benang', 'RUBBER')
+            ->orderBy('kg', 'DESC')
+            ->findAll();
+    }
 }
