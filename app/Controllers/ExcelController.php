@@ -1793,17 +1793,17 @@ class ExcelController extends BaseController
                 $sheet->setCellValue("H{$rowNum}", $item['item_type'] ?? '-');
                 $sheet->setCellValue("I{$rowNum}", $item['color'] ?? '-');
                 $sheet->setCellValue("J{$rowNum}", $item['kode_warna'] ?? '-');
-                $sheet->setCellValue("K{$rowNum}", $item['kgs_pesan'] ?? '-');
-                $sheet->setCellValue("L{$rowNum}", $item['loss'] ?? '-');
-                $sheet->setCellValue("M{$rowNum}", $item['qty_po_plus'] ?? '-');
-                $sheet->setCellValue("N{$rowNum}", $item['qty_stock_awal'] ?? '-');
+                $sheet->setCellValue("K{$rowNum}", $item['kgs_pesan'] ?? '0');
+                $sheet->setCellValue("L{$rowNum}", $item['loss'] ?? '0');
+                $sheet->setCellValue("M{$rowNum}", $item['qty_po_plus'] ?? '0');
+                $sheet->setCellValue("N{$rowNum}", $item['kgs_stock_awal'] ?? '0');
                 $sheet->setCellValue("O{$rowNum}", $item['lot_awal'] ?? '-');
-                $sheet->setCellValue("P{$rowNum}", $item['qty_stock_opname'] ?? '-');
-                $sheet->setCellValue("Q{$rowNum}", $item['lot_opname'] ?? '-');
+                $sheet->setCellValue("P{$rowNum}", $item['kgs_in_out'] ?? '0');
+                $sheet->setCellValue("Q{$rowNum}", $item['lot_stock'] ?? '-');
                 $sheet->setCellValue("R{$rowNum}", $item['area_out'] ?? '-');
                 $sheet->setCellValue("S{$rowNum}", $item['tgl_pakai'] ?? '-');
-                $sheet->setCellValue("T{$rowNum}", $item['kgs_pakai'] ?? '-');
-                $sheet->setCellValue("U{$rowNum}", $item['cones_pakai'] ?? '-');
+                $sheet->setCellValue("T{$rowNum}", $item['kgs_pakai'] ?? '0');
+                $sheet->setCellValue("U{$rowNum}", $item['cones_pakai'] ?? '0');
                 $sheet->setCellValue("V{$rowNum}", $item['lot_pakai'] ?? '-');
                 $sheet->setCellValue("W{$rowNum}", $item['keterangan_gbn'] ?? '-');
                 $sheet->setCellValue("X{$rowNum}", $item['admin'] ?? '-');
@@ -3311,7 +3311,7 @@ class ExcelController extends BaseController
 
         // Urutkan data berdasarkan jenis (denier)
         usort($data, function ($a, $b) {
-            return strcmp($a['jenis'], $b['jenis']);
+            return strcmp($a['jenis_benang'], $b['jenis_benang']);
         });
 
         $groupStartRow = $row;     // baris data pertama dari grup

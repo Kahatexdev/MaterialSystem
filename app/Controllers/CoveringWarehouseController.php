@@ -806,7 +806,7 @@ class CoveringWarehouseController extends BaseController
 
     public function templateStokBarangJadi()
     {
-        $stok = $this->coveringStockModel->findAll();
+        $stok = $this->coveringStockModel->orderBy('jenis_benang ASC')->orderBy('dr ASC')->findAll();
         // Define headings based on mapping
         $headers = [
             'A' => 'JENIS BARANG',

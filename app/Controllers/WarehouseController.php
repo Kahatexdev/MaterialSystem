@@ -2151,8 +2151,8 @@ class WarehouseController extends BaseController
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
         $data = $this->pengeluaranModel->getFilterPengiriman($key, $tanggalAwal, $tanggalAkhir);
-        dd($data);
-        // return $this->response->setJSON($data);
+        // dd($data);
+        return $this->response->setJSON($data);
     }
     public function reportGlobal()
     {

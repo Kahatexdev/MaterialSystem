@@ -97,6 +97,46 @@
             </table>
         </div>
     </div>
+    <!-- Edit Item Modal -->
+    <div class="modal fade" id="editStockModal" tabindex="-1" aria-labelledby="editStockModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Detail Barang</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editStockForm">
+                        <input type="hidden" id="editStockItemId" name="id_covering_stock">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3"><label class="form-label">Jenis Barang</label><input type="text" class="form-control" id="editJenis" name="jenis" required></div>
+                                <div class="mb-3"><label class="form-label">Jenis Mesin</label><input type="text" class="form-control" id="editJenisMesin" name="jenis_mesin"></div>
+                                <div class="mb-3"><label class="form-label">DR (Daurasio)</label><input type="text" class="form-control" id="editDr" name="dr"></div>
+                                <div class="mb-3"><label class="form-label">Jenis Cover</label><select class="form-select" id="editJenisCover" name="jenis_cover" required>
+                                        <option value="">Pilih...</option>
+                                        <option value="SINGLE">SINGLE</option>
+                                        <option value="DOUBLE">DOUBLE</option>
+                                    </select></div>
+                                <div class="mb-3"><label class="form-label">Jenis Benang</label><input type="text" class="form-control" id="editJenisBenang" name="jenis_benang" required></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3"><label class="form-label">Warna</label><input type="text" class="form-control" id="editColor" name="color" required></div>
+                                <div class="mb-3"><label class="form-label">Kode</label><input type="text" class="form-control" id="editCode" name="code" required></div>
+                                <div class="mb-3"><label class="form-label">Stok (Kg)</label><input type="number" class="form-control" id="editTtlKg" readonly></div>
+                                <div class="mb-3"><label class="form-label">Cones</label><input type="number" class="form-control" id="editTtlCns" readonly></div>
+                                <div class="mb-3"><label class="form-label">LMD</label><br>
+                                    <div class="form-check form-check-inline"><input type="checkbox" class="form-check-input" id="editLmd1" name="lmd[]" value="L"><label>L</label></div>
+                                    <div class="form-check form-check-inline"><input type="checkbox" class="form-check-input" id="editLmd2" name="lmd[]" value="M"><label>M</label></div>
+                                    <div class="form-check form-check-inline"><input type="checkbox" class="form-check-input" id="editLmd3" name="lmd[]" value="D"><label>D</label></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer"><button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn bg-gradient-info">Simpan Perubahan</button></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.21.1/dist/bootstrap-table.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
