@@ -413,103 +413,157 @@
         const $container = $('#pindahOrderContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i></div>');
 
         // Fetch model tujuan
-        // $.getJSON(`${base}/${role}/warehouse/getNoModel`, {
-        //     noModelOld,
-        //     kodeWarna
-        // }, res => {
-        //     $select.empty();
-        //     if (res.success && res.data.length) {
-        //         $select.append('<option></option>');
-        //         res.data.forEach(d => {
-        //             $select.append(`<option value="${d.no_model}|${d.item_type}|${d.kode_warna}|${d.color}">${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.color}</option>`);
-        //         });
-        //     } else {
-        //         $select.append('<option>Tidak ada model</option>');
-        //     }
-        //     $select.prop('disabled', false).select2({
-        //         placeholder: 'Pilih Model Tujuan',
-        //         allowClear: true,
-        //         width: '100%',
-        //         dropdownParent: $('#modalPindahOrder')
-        //     });
-        // });
+        $.getJSON(`${base}/${role}/warehouse/getNoModel`, {
+            noModelOld,
+            kodeWarna
+        }, res => {
+            $select.empty();
+            if (res.success && res.data.length) {
+                $select.append('<option></option>');
+                res.data.forEach(d => {
+                    $select.append(`<option value="${d.no_model}|${d.item_type}|${d.kode_warna}|${d.color}">${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.color}</option>`);
+                });
+            } else {
+                $select.append('<option>Tidak ada model</option>');
+            }
+            $select.prop('disabled', false).select2({
+                placeholder: 'Pilih Model Tujuan',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('#modalPindahOrder')
+            });
+        });
 
-        // // Fetch detail order
-        // $.post(`${base}/${role}/warehouse/getPindahOrder`, {
-        //     id_stock: idStock
-        // }, res => {
-        //     $container.empty();
-        //     if (!res.success || !res.data.length) {
-        //         return $container.html('<div class="alert alert-warning text-center">Data tidak ditemukan</div>');
-        //     }
+        // Fetch detail order
+        $.post(`${base}/${role}/warehouse/getPindahOrder`, {
+            id_stock: idStock
+        }, res => {
+            $container.empty();
+            if (!res.success || !res.data.length) {
+                return $container.html('<div class="alert alert-warning text-center">Data tidak ditemukan</div>');
+            }
 
-        //     res.data.forEach(d => {
-        //         const lot = d.lot_stock || d.lot_awal;
-        //         $container.append(`
-        //             <div class="col-md-12">
-        //                 <div class="card result-card h-100">
-        //                     <div class="form-check">
-        //                         <input class="form-check-input row-check" type="checkbox" name="pindah[]" value="${d.id_out_celup}" id="chk${d.id_out_celup}">
-        //                         <label class="form-check-label fw-bold" for="chk${d.id_out_celup}">
-        //                             ${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.warna}
-        //                         </label>
-        //                         <input type="hidden" name="id_stock[]" value="${d.id_stock}">
-        //                     </div>
-        //                     <div class="card-body row">
-        //                         <div class="col-md-6">
-        //                             <p><strong>Kode Warna:</strong> ${d.kode_warna}</p>
-        //                             <p><strong>Warna:</strong> ${d.warna}</p>
-        //                             <p><strong>Lot Jalur:</strong> ${lot}</p>
-        //                         </div>
-        //                         <div class="col-md-6">
-        //                             <p><strong>No Karung:</strong> ${d.no_karung}</p>
-        //                             <p><strong>Total Kgs:</strong> ${parseFloat(d.kgs_kirim || 0).toFixed(2)} KG</p>
-        //                             <p><strong>Cones:</strong> ${d.cones_kirim} Cns</p>
-        //                         </div>
-        //                     </div>
-        //                 </div>
-        //             </div>
-        //         `);
-        //     });
+            res.data.forEach(d => {
+                const lot = d.lot_stock || d.lot_awal;
+                $container.append(`
+                    <div class="col-md-12">
+                        <div class="card result-card h-100">
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- Kiri: detail label -->
+                                    <div class="col-md-6">
+                                        <h5><strong>Pindah Per Karung</strong></h5>
+                                        <div class="form-check">
+                                            <input class="form-check-input row-check" type="checkbox" name="pindah[]" value="${d.id_out_celup}" id="chk${d.id_out_celup}">
+                                            <label class="form-check-label fw-bold" for="chk${d.id_out_celup}">
+                                                <strong>No Model:</strong> ${d.no_model}<br>
+                                                <strong>Item Type:</strong> ${d.item_type}<br>
+                                                <strong>Kode Warna:</strong> ${d.kode_warna}<br>
+                                                <strong>Warna:</strong> ${d.warna}<br>
+                                                <strong>Lot Jalur:</strong> ${lot}<br>
+                                                <strong>No Karung:</strong> ${d.no_karung}<br>
+                                                <strong>Total Kgs:</strong> ${parseFloat(d.kgs_kirim || 0).toFixed(2)} KG<br>
+                                                <strong>Cones:</strong> ${d.cones_kirim} Cns
+                                            </label>
+                                            <input type="hidden" name="id_stock[]" value="${d.id_stock}">
+                                        </div>
+                                    </div>
 
-        //     $container.on('change', '.row-check', function() {
-        //         let totalKgs = 0,
-        //             totalCns = 0,
-        //             totalKrg = 0;
+                                    <!-- Kanan: input manual -->
+                                    <div class="col-md-6">
+                                        <h5><strong>Pindah Perkones</strong></h5>
+                                        <div class="row gx-2">
+                                            <div class="col-6">
+                                                <label for="kgs_out_${d.id_out_celup}" class="form-label small mb-1">Kg Out Manual</label>
+                                                <input type="number"
+                                                    step="0.01"
+                                                    class="form-control form-control-sm"
+                                                    name="kgs_out[${d.id_out_celup}]"
+                                                    id="kgs_out_${d.id_out_celup}"
+                                                    placeholder="Kg"
+                                                    disabled>
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="cns_out_${d.id_out_celup}" class="form-label small mb-1">Cones Out Manual</label>
+                                                <input type="number"
+                                                    step="1"
+                                                    class="form-control form-control-sm"
+                                                    name="cns_out[${d.id_out_celup}]"
+                                                    id="cns_out_${d.id_out_celup}"
+                                                    placeholder="CNS"
+                                                    disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            });
 
-        //         // Hitung total Kgs, Cns, dan Krg untuk yang dipilih
-        //         $container.find('.row-check:checked').each(function() {
-        //             const id = $(this).val(); // Dapatkan id_out_celup dari checkbox yang dipilih
-        //             const selectedData = res.data.find(d => d.id_out_celup == id); // Temukan data berdasarkan id_out_celup
+            //  Event ketika checkbox diubah
+            $container.on('change', '.row-check', function() {
+                let totalKgs = 0,
+                    totalCns = 0,
+                    totalKrg = 0;
 
-        //             if (selectedData) {
-        //                 totalKgs += parseFloat(selectedData.kgs_kirim || 0);
-        //                 totalCns += parseInt(selectedData.cones_kirim || 0); // Pastikan cones_kirim adalah integer
-        //                 totalKrg += 1; // Anda bisa mengganti dengan data yang sesuai untuk Krg
-        //             }
-        //         });
+                $container.find('.row-check:checked, .row-check:not(:checked)').each(function() {
+                    const id = $(this).val();
+                    const isChecked = $(this).is(':checked');
 
-        //         // Perbarui nilai total Kgs, Cns, dan Krg di input
-        //         $('input[name="ttl_kgs"]').val(totalKgs.toFixed(2));
-        //         $('input[name="ttl_cns"]').val(totalCns);
-        //         $('input[name="ttl_krg"]').val(totalKrg);
+                    // Aktifkan/Nonaktifkan input manual
+                    $(`#kgs_out_${id}, #cns_out_${id}, #keterangan_${id}`).prop('disabled', !isChecked);
+                });
 
-        //         // Simpan cluster yang saat ini dipilih
-        //         const selectedClusterValue = $select.val();
+                // Loop setiap baris yang dipilih
+                $container.find('.row-check:checked').each(function() {
+                    const id = $(this).val();
+                    const selectedData = res.data.find(d => d.id_out_celup == id);
 
-        //         // Aktifkan atau nonaktifkan dropdown berdasarkan total
-        //         if (totalKgs > 0) {
-        //             fetchClusters(totalKgs, selectedClusterValue); // Ambil cluster sesuai totalKgs
-        //             $select.prop('disabled', false);
-        //         } else {
-        //             $select.prop('disabled', true).empty();
-        //             $('#SisaKapasitas').val('');
-        //         }
-        //     });
+                    if (selectedData) {
+                        // Ambil nilai dari input manual
+                        const rawManualKgs = $(`#kgs_out_${id}`).val().replace(',', '.').trim();
+                        const rawManualCns = $(`#cns_out_${id}`).val().trim();
 
-        // }).fail((_, __, err) => {
-        //     $container.html(`<div class="alert alert-danger text-center">Error: ${err}</div>`);
-        // });
+                        const useManualKgs = rawManualKgs !== '';
+                        // const useManualCns = rawManualCns !== '';
+
+                        const manualKgs = parseFloat(rawManualKgs) || 0;
+                        const manualCns = parseInt(rawManualCns) || 0;
+
+                        // Pakai input manual jika diisi, kalau tidak pakai data asli
+                        totalKgs += useManualKgs ? manualKgs : parseFloat(selectedData.kgs_kirim || 0);
+                        totalCns += useManualKgs ? manualCns : parseInt(selectedData.cones_kirim || 0);
+                        totalKrg += useManualKgs ? 0 : 1;
+                    }
+                });
+
+                // Tampilkan total ke input
+                $('input[name="ttl_kgs"]').val(totalKgs.toFixed(2));
+                $('input[name="ttl_cns"]').val(totalCns);
+                $('input[name="ttl_krg"]').val(totalKrg);
+
+                // Dropdown cluster
+                const selectedClusterValue = $select.val();
+
+                if (totalKgs > 0) {
+                    fetchClusters(totalKgs, selectedClusterValue);
+                    $select.prop('disabled', false);
+                } else {
+                    $select.prop('disabled', true).empty();
+                    $('#SisaKapasitas').val('');
+                }
+            });
+
+            // Event ketika input manual diubah
+            $container.on('input', 'input[name^="kgs_out"], input[name^="cns_out"]', function() {
+                $container.find('.row-check:checked').trigger('change');
+            });
+
+        }).fail((_, __, err) => {
+            $container.html(`<div class="alert alert-danger text-center">Error: ${err}</div>`);
+        });
     });
 
     // Reset total fields when modal is closed
