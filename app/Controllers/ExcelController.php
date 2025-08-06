@@ -1674,104 +1674,148 @@ class ExcelController extends BaseController
 
     public function exportPengiriman()
     {
-        $key            = $this->request->getGet('key');
-        $tanggal_awal   = $this->request->getGet('tanggal_awal');
-        $tanggal_akhir  = $this->request->getGet('tanggal_akhir');
-        $data           = $this->pengeluaranModel->getFilterPengiriman($key, $tanggal_awal, $tanggal_akhir);
-        // dd($data);
-        // 1. Kelompokkan data berdasarkan 'jenis'
+        // Ambil parameter filter
+        $key           = $this->request->getGet('key');
+        $tanggal_awal  = $this->request->getGet('tanggal_awal');
+        $tanggal_akhir = $this->request->getGet('tanggal_akhir');
+
+        // Ambil data
+        $data = $this->pengeluaranModel
+            ->getFilterPengiriman($key, $tanggal_awal, $tanggal_akhir);
+
+        // Grouping per jenis
         $grouped = [];
         foreach ($data as $item) {
             $jenis = $item['jenis'] ?? 'Undefined';
             $grouped[$jenis][] = $item;
         }
 
-        // 2. Inisialisasi Spreadsheet
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        // Inisialisasi Spreadsheet
+        $spreadsheet = new Spreadsheet();
 
-        // Header kolom static
+        // Header kolom
         $headers = [
-            'No',
-            'No Model',
-            'Area',
-            'Delivery Awal',
-            'Delivery Akhir',
-            'Item Type',
-            'Kode Warna',
-            'Warna',
-            'Kgs Pesan',
-            'Tanggal Keluar',
-            'Kgs Kirim',
-            'Cones Kirim',
-            'Karung Kirim',
-            'Lot Kirim',
-            'Nama Cluster',
-            'Keterangan GBN',
-            'Admin'
+            'NO',
+            'TGL PO',
+            'FOLL UP',
+            'NO MODEL',
+            'DELIVERY AWAL',
+            'DELIVERY AKHIR',
+            'NO ORDER',
+            'JENIS',
+            'WARNA',
+            'KODE BENANG',
+            'KGS PESAN',
+            'LOSS',
+            'QTY PO(+) GBN',
+            'QTY STOCK AWAL',
+            'LOT AWAL',
+            'QTY STOCK OPNAME',
+            'LOT OPNAME',
+            'AREA',
+            'TANGGAL PAKAI',
+            'KGS PAKAI',
+            'CONES PAKAI',
+            'LOT PAKAI',
+            'KET GBN PAKAI',
+            'ADMIN',
         ];
+
+        // Teks footer
+        $footerText = 'FOR-KK-151/TGL_REV_15_03_21/REV_00/HAL_/_';
 
         $sheetIndex = 0;
         foreach ($grouped as $jenis => $rows) {
-            // Pilih atau buat sheet baru
+            // Pilih atau buat sheet
             if ($sheetIndex === 0) {
                 $sheet = $spreadsheet->getActiveSheet();
             } else {
                 $sheet = $spreadsheet->createSheet();
             }
-            // Rename sheet
-            $sheet->setTitle(substr($jenis, 0, 31)); // batas 31 karakter
 
-            // -- Judul --
-            $sheet->mergeCells('A1:Q1');
-            $sheet->setCellValue('A1', "REPORT PENGIRIMAN AREA - {$jenis}");
+            // Setup Page
+            $ps = $sheet->getPageSetup();
+            $ps->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
+                ->setPaperSize(PageSetup::PAPERSIZE_A4)
+                ->setFitToWidth(1)
+                ->setFitToHeight(0)
+                ->setFitToPage(true);
+
+            // Print area
+            // nanti setelah data terisi kita override print area kembali
+
+            // Repeat header row
+            $ps->setRowsToRepeatAtTopByStartAndEnd(3, 3);
+
+            // Center saat print
+            $ps->setHorizontalCentered(true)
+                ->setVerticalCentered(false);
+
+            // Footer
+            $hf = $sheet->getHeaderFooter();
+            $hf->setOddFooter('&C&"Arial,Bold"' . $footerText);
+            $hf->setEvenFooter('&C&"Arial,Bold"' . $footerText);
+
+            // Margins
+            $m = $sheet->getPageMargins();
+            $m->setTop(0.75)->setBottom(0.75)->setLeft(0.7)->setRight(0.7);
+
+            // Ganti judul sheet (maks 31 char)
+            $sheet->setTitle(substr($jenis, 0, 31));
+
+            // Judul di A1:X1
+            $sheet->mergeCells('A1:X1');
+            $sheet->setCellValue('A1', "DATA PEMAKAIAN AREA {$jenis} {$key}");
             $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-            $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('A1')
+                ->getAlignment()
+                ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-            // -- Tanggal Awal/Akhir --
-            $sheet->setCellValue('A2', 'Tanggal Awal');
-            $sheet->setCellValue('C2', ": {$tanggal_awal}");
-            $sheet->setCellValue('N2', 'Tanggal Akhir');
-            $sheet->setCellValue('Q2', ": {$tanggal_akhir}");
-            foreach (['A2', 'C2', 'N2', 'Q2'] as $cell) {
-                $sheet->getStyle($cell)->getFont()->setBold(true)->setSize(11);
-                $sheet->getStyle($cell)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
-            }
-
-            // -- Header Kolom --
+            // Header kolom di baris 3
             $col = 'A';
-            foreach ($headers as $header) {
-                $sheet->setCellValue($col . '3', $header);
+            foreach ($headers as $h) {
+                $sheet->setCellValue($col . '3', $h);
                 $sheet->getStyle($col . '3')->getFont()->setBold(true);
                 $col++;
             }
 
-            // -- Isi Data --
+            // Isi data mulai row 4
             $rowNum = 4;
             $no = 1;
             foreach ($rows as $item) {
                 $sheet->setCellValue("A{$rowNum}", $no++);
-                $sheet->setCellValue("B{$rowNum}", $item['no_model']);
-                $sheet->setCellValue("C{$rowNum}", $item['area_out']);
-                $sheet->setCellValue("D{$rowNum}", $item['delivery_awal']);
-                $sheet->setCellValue("E{$rowNum}", $item['delivery_akhir']);
-                $sheet->setCellValue("F{$rowNum}", $item['item_type']);
-                $sheet->setCellValue("G{$rowNum}", $item['kode_warna']);
-                $sheet->setCellValue("H{$rowNum}", $item['color']);
-                $sheet->setCellValue("I{$rowNum}", $item['ttl_kg']);
-                $sheet->setCellValue("J{$rowNum}", $item['tgl_out']);
-                $sheet->setCellValue("K{$rowNum}", $item['kgs_out']);
-                $sheet->setCellValue("L{$rowNum}", $item['cns_out']);
-                $sheet->setCellValue("M{$rowNum}", $item['krg_out']);
-                $sheet->setCellValue("N{$rowNum}", $item['lot_out']);
-                $sheet->setCellValue("O{$rowNum}", $item['nama_cluster']);
-                $sheet->setCellValue("P{$rowNum}", $item['keterangan_gbn']);
-                $sheet->setCellValue("Q{$rowNum}", $item['admin']);
+                $sheet->setCellValue("B{$rowNum}", $item['tgl_po'] ?? '-');
+                $sheet->setCellValue("C{$rowNum}", $item['foll_up'] ?? '-');
+                $sheet->setCellValue("D{$rowNum}", $item['no_model'] ?? '-');
+                $sheet->setCellValue("E{$rowNum}", $item['delivery_awal'] ?? '-');
+                $sheet->setCellValue("F{$rowNum}", $item['delivery_akhir'] ?? '-');
+                $sheet->setCellValue("G{$rowNum}", $item['no_order'] ?? '-');
+                $sheet->setCellValue("H{$rowNum}", $item['item_type'] ?? '-');
+                $sheet->setCellValue("I{$rowNum}", $item['color'] ?? '-');
+                $sheet->setCellValue("J{$rowNum}", $item['kode_warna'] ?? '-');
+                $sheet->setCellValue("K{$rowNum}", $item['kgs_pesan'] ?? '-');
+                $sheet->setCellValue("L{$rowNum}", $item['loss'] ?? '-');
+                $sheet->setCellValue("M{$rowNum}", $item['qty_po_plus'] ?? '-');
+                $sheet->setCellValue("N{$rowNum}", $item['qty_stock_awal'] ?? '-');
+                $sheet->setCellValue("O{$rowNum}", $item['lot_awal'] ?? '-');
+                $sheet->setCellValue("P{$rowNum}", $item['qty_stock_opname'] ?? '-');
+                $sheet->setCellValue("Q{$rowNum}", $item['lot_opname'] ?? '-');
+                $sheet->setCellValue("R{$rowNum}", $item['area_out'] ?? '-');
+                $sheet->setCellValue("S{$rowNum}", $item['tgl_pakai'] ?? '-');
+                $sheet->setCellValue("T{$rowNum}", $item['kgs_pakai'] ?? '-');
+                $sheet->setCellValue("U{$rowNum}", $item['cones_pakai'] ?? '-');
+                $sheet->setCellValue("V{$rowNum}", $item['lot_pakai'] ?? '-');
+                $sheet->setCellValue("W{$rowNum}", $item['keterangan_gbn'] ?? '-');
+                $sheet->setCellValue("X{$rowNum}", $item['admin'] ?? '-');
                 $rowNum++;
             }
 
-            // -- Border Tabel --
+            // Tentukan print area sekarang data sudah terisi
             $lastRow = $rowNum - 1;
-            $sheet->getStyle("A3:Q{$lastRow}")
+            $ps->setPrintArea("A1:X{$lastRow}");
+
+            // Border + alignment
+            $sheet->getStyle("A3:X{$lastRow}")
                 ->applyFromArray([
                     'borders' => [
                         'allBorders' => [
@@ -1779,25 +1823,30 @@ class ExcelController extends BaseController
                             'color'       => ['argb' => 'FF000000'],
                         ],
                     ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    ],
                 ]);
 
-            // -- Auto-size Kolom --
-            foreach (range('A', 'Q') as $c) {
+            // Auto–size kolom
+            foreach (range('A', 'X') as $c) {
                 $sheet->getColumnDimension($c)->setAutoSize(true);
             }
 
             $sheetIndex++;
         }
 
-        // Kembalikan ke sheet pertama sebelum download
+        // Kembali ke sheet pertama
         $spreadsheet->setActiveSheetIndex(0);
 
-        // Download seperti biasa
-        $filename = 'Report_Pengiriman_Area.xlsx';
+        // Output file
+        $filename = 'PEMAKAIAN_AREA_BENANG.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"{$filename}\"");
         header('Cache-Control: max-age=0');
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+        $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
     }
@@ -2925,7 +2974,7 @@ class ExcelController extends BaseController
                                 $dataRow['actual_celup'] ?? '',
                                 $startMc ?? '',
                                 date('d-M', strtotime($dataRow['delivery_awal'])) ?? '',
-                                $dataRow['ket_celup'] ?? ''
+                                $dataRow['ket_schedule'] ?? ''
                             ];
                         } else {
                             // Jika tidak ada data, tetap isi dengan placeholder jumlah kolom = count($headers)

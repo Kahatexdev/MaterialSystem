@@ -925,4 +925,18 @@ class CoveringWarehouseController extends BaseController
             ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
     }
 
+    public function getStockByJenis($jenis)
+    {
+        $stok = $this->coveringStockModel->getStockByJenis($jenis);
+
+        $data = [
+            'role' => $this->role,
+            'title' => 'Stock ' . ucfirst($jenis),
+            'active' => $this->active,
+            'jenis' => $jenis,
+            'stok' => $stok
+        ];
+        return view($this->role . '/warehouse/stock-' . $jenis, $data);
+    }
+
 }

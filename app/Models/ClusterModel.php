@@ -99,6 +99,19 @@ class ClusterModel extends Model
         return $this->select('cluster.kapasitas,         
                           ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, 
                           cluster.nama_cluster, 
+                            CONCAT(
+                                "[", 
+                                GROUP_CONCAT(
+                                    DISTINCT CONCAT(
+                                        \'{"no_model":"\', out_celup.no_model,
+                                        \'","no_karung":"\', out_celup.no_karung,
+                                        \'","kgs_kirim":"\', out_celup.kgs_kirim,
+                                        \'"}\'
+                                    )
+                                    ORDER BY out_celup.no_karung SEPARATOR ","
+                                ),
+                                "]"
+                            ) AS detail_karung,
                           RIGHT(cluster.nama_cluster, 3) AS simbol_cluster,
                           GROUP_CONCAT(DISTINCT 
                               JSON_OBJECT(
@@ -111,6 +124,7 @@ class ClusterModel extends Model
                           ) AS detail_data')
             ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
             ->join('master_order', 'master_order.no_model = stock.no_model', 'left')
+            ->join('out_celup', 'out_celup.no_model = stock.no_model', 'left')
             ->groupStart()
             ->groupStart()
             ->like('cluster.nama_cluster', 'I.%.09.%', 'after')
@@ -138,7 +152,19 @@ class ClusterModel extends Model
         return $this->select('cluster.kapasitas, 
         ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, 
         cluster.nama_cluster,
-
+        CONCAT(
+                                "[", 
+                                GROUP_CONCAT(
+                                    DISTINCT CONCAT(
+                                        \'{"no_model":"\', out_celup.no_model,
+                                        \'","no_karung":"\', out_celup.no_karung,
+                                        \'","kgs_kirim":"\', out_celup.kgs_kirim,
+                                        \'"}\'
+                                    )
+                                    ORDER BY out_celup.no_karung SEPARATOR ","
+                                ),
+                                "]"
+                            ) AS detail_karung,
         CASE 
             -- Format untuk cluster dengan angka 10-16 dan huruf A atau B
             WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11|12|13|14|15|16)\\.[AB]$" 
@@ -164,6 +190,7 @@ class ClusterModel extends Model
         ) AS detail_data')
             ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
             ->join('master_order', 'master_order.no_model = stock.no_model', 'left')
+            ->join('out_celup', 'out_celup.no_model = stock.no_model', 'left')
             ->GroupStart()
             ->like('cluster.nama_cluster', 'II.%.01.%', 'after')
             ->orLike('cluster.nama_cluster', 'II.%.02.%', 'after')
@@ -192,6 +219,19 @@ class ClusterModel extends Model
             'cluster.kapasitas, 
                       ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, 
                       cluster.nama_cluster, 
+                      CONCAT(
+                                "[", 
+                                GROUP_CONCAT(
+                                    DISTINCT CONCAT(
+                                        \'{"no_model":"\', out_celup.no_model,
+                                        \'","no_karung":"\', out_celup.no_karung,
+                                        \'","kgs_kirim":"\', out_celup.kgs_kirim,
+                                        \'"}\'
+                                    )
+                                    ORDER BY out_celup.no_karung SEPARATOR ","
+                                ),
+                                "]"
+                            ) AS detail_karung,
                       CASE
                       WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11|12|13|14|15|16)\\.[AB]$" 
                       THEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2)
@@ -209,6 +249,7 @@ class ClusterModel extends Model
         )
             ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
             ->join('master_order', 'master_order.no_model = stock.no_model', 'left')
+            ->join('out_celup', 'out_celup.no_model = stock.no_model', 'left')
             ->GroupStart()
             ->like('cluster.nama_cluster', 'III.%.01.%', 'after')
             ->orLike('cluster.nama_cluster', 'III.%.02.%', 'after')
@@ -248,6 +289,19 @@ class ClusterModel extends Model
             'cluster.kapasitas, 
                       ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, 
                       cluster.nama_cluster, 
+                      CONCAT(
+                                "[", 
+                                GROUP_CONCAT(
+                                    DISTINCT CONCAT(
+                                        \'{"no_model":"\', out_celup.no_model,
+                                        \'","no_karung":"\', out_celup.no_karung,
+                                        \'","kgs_kirim":"\', out_celup.kgs_kirim,
+                                        \'"}\'
+                                    )
+                                    ORDER BY out_celup.no_karung SEPARATOR ","
+                                ),
+                                "]"
+                            ) AS detail_karung,
                       CASE
                       WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11|12|13|14|15|16|17|18|19|20|21|22)\\.[ABCD]$" 
                       THEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2)
@@ -265,6 +319,7 @@ class ClusterModel extends Model
         )
             ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
             ->join('master_order', 'master_order.no_model = stock.no_model', 'left')
+            ->join('out_celup', 'out_celup.no_model = stock.no_model', 'left')
             ->where('cluster.group', 'NYLON')
             ->groupBy('cluster.nama_cluster')
             ->findAll();
