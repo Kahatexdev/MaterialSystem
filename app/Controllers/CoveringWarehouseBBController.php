@@ -31,12 +31,20 @@ class CoveringWarehouseBBController extends BaseController
     public function index()
     {
         $warehouseBB  = $this->warehouseBBModel->getWarehouseBB();
-
+        $totalJenis = $this->warehouseBBModel->getTotalJenis();
+        $totalKg = $this->warehouseBBModel->getTotalStockWarehouseBB();
+        $tersedia = $this->warehouseBBModel->getJenisBenangTersedia();
+        $kosong = $this->warehouseBBModel->getJenisBenangKosong();
+        // dd($totalKg, $tersedia, $kosong);
         $data = [
             'title' => 'Warehouse Bahan Baku Covering',
             'active' => $this->active,
             'role' => $this->role,
-            'warehouseBB' => $warehouseBB
+            'warehouseBB' => $warehouseBB,
+            'totalJenis' => $totalJenis,
+            'totalKg' => $totalKg,
+            'tersedia' => $tersedia,
+            'kosong' => $kosong,
         ];
         return view($this->role . '/warehousebb/index', $data);
     }
@@ -546,7 +554,7 @@ class CoveringWarehouseBBController extends BaseController
                 $this->historyStockBBModel->insertBatch($historyData);
             }
         }
-        
+
         $db->transComplete();
 
         // persiapkan flash message
@@ -676,5 +684,69 @@ class CoveringWarehouseBBController extends BaseController
             ->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
             ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+    }
+
+    public function nylon()
+    {
+        $nylonBB  = $this->warehouseBBModel->getNylonBB();
+
+        $data = [
+            'title' => 'Stock Bahan Baku Nylon',
+            'active' => $this->active,
+            'role' => $this->role,
+            'nylonBB' => $nylonBB,
+        ];
+        return view($this->role . '/warehousebb/stock-bb-nylon', $data);
+    }
+
+    public function polyester()
+    {
+        $polyesterBB  = $this->warehouseBBModel->getPolyesterBB();
+
+        $data = [
+            'title' => 'Stock Bahan Baku Polyester',
+            'active' => $this->active,
+            'role' => $this->role,
+            'polyesterBB' => $polyesterBB,
+        ];
+        return view($this->role . '/warehousebb/stock-bb-polyester', $data);
+    }
+
+    public function recycledPolyester()
+    {
+        $recycledPolyesterBB  = $this->warehouseBBModel->getRecycledPolyesterBB();
+
+        $data = [
+            'title' => 'Stock Bahan Baku Recycled Polyester',
+            'active' => $this->active,
+            'role' => $this->role,
+            'recycledPolyesterBB' => $recycledPolyesterBB,
+        ];
+        return view($this->role . '/warehousebb/stock-bb-recycled-polyester', $data);
+    }
+
+    public function spandex()
+    {
+        $spandexBB  = $this->warehouseBBModel->getSpandexBB();
+
+        $data = [
+            'title' => 'Stock Bahan Baku Spandex',
+            'active' => $this->active,
+            'role' => $this->role,
+            'spandexBB' => $spandexBB,
+        ];
+        return view($this->role . '/warehousebb/stock-bb-spandex', $data);
+    }
+    public function rubber()
+    {
+        $rubberBB  = $this->warehouseBBModel->getRubberBB();
+
+        $data = [
+            'title' => 'Stock Bahan Baku Rubber',
+            'active' => $this->active,
+            'role' => $this->role,
+            'rubberBB' => $rubberBB,
+        ];
+        return view($this->role . '/warehousebb/stock-bb-rubber', $data);
     }
 }
