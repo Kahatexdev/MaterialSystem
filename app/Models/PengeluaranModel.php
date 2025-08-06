@@ -110,7 +110,7 @@ class PengeluaranModel extends Model
                 'material.kode_warna',
                 'material.color',
                 'material.loss',
-            // 'po_tambahan.no_po',
+                // 'po_tambahan.no_po',
                 // 'NULL AS qty_po_plus',
                 'pemesanan.tgl_pakai',
                 'pengeluaran.tgl_out',
@@ -396,28 +396,28 @@ class PengeluaranModel extends Model
 
     public function getKodeWarna($model, $item_type): array
     {
-    $builder = $this->db
-        ->table('pengeluaran')
-        ->distinct()
-        ->select('COALESCE(sc.kode_warna, m.kode_warna) AS kode_warna')
-        ->join('out_celup oc', 'oc.id_out_celup = pengeluaran.id_out_celup', 'left')
-        // Gabungkan schedule_celup
-        ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup', 'left')
-        // Gabungkan pemesanan_spandex_karet
-        ->join('pemesanan_spandex_karet psk', 'psk.id_psk = pengeluaran.id_psk', 'left')
-        // Gabungkan pemesanan dengan kondisi OR di ON clause
-        ->join(
-            'pemesanan pe',
-            '(
+        $builder = $this->db
+            ->table('pengeluaran')
+            ->distinct()
+            ->select('COALESCE(sc.kode_warna, m.kode_warna) AS kode_warna')
+            ->join('out_celup oc', 'oc.id_out_celup = pengeluaran.id_out_celup', 'left')
+            // Gabungkan schedule_celup
+            ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup', 'left')
+            // Gabungkan pemesanan_spandex_karet
+            ->join('pemesanan_spandex_karet psk', 'psk.id_psk = pengeluaran.id_psk', 'left')
+            // Gabungkan pemesanan dengan kondisi OR di ON clause
+            ->join(
+                'pemesanan pe',
+                '(
                 pe.id_total_pemesanan = psk.id_total_pemesanan
                 OR pe.id_total_pemesanan = pengeluaran.id_total_pemesanan
             )',
-            'left'
-        )
-        ->join('material m', 'm.id_material = pe.id_material', 'left')
-        ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
-        ->where('pengeluaran.status', 'Pengeluaran Jalur')
-            -> groupStart()
+                'left'
+            )
+            ->join('material m', 'm.id_material = pe.id_material', 'left')
+            ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
+            ->where('pengeluaran.status', 'Pengeluaran Jalur')
+            ->groupStart()
             ->where('sc.no_model', $model)
             ->orWhere('mo.no_model', $model)
             ->groupEnd()
@@ -426,7 +426,7 @@ class PengeluaranModel extends Model
             ->orWhere('m.item_type', $item_type)
             ->groupEnd();
 
-    return $builder->get()->getResultArray();
+        return $builder->get()->getResultArray();
     }
 
     public function getWarna($model, $item_type, $kode_warna): array

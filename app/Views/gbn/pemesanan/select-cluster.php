@@ -797,6 +797,10 @@
                         function loadDetailPinjamOrder() {
                             const noModel = $('#noModelSelect').val();
                             const cluster = $('#clusterSelect').val();
+                            // Ambil ulang item_type dan kode_warna dari selected option
+                            const selectedOption = $('#noModelSelect option:selected');
+                            const itemTypePinjam = selectedOption.data('item_type');
+                            const kodeWarnaPinjam = selectedOption.data('kode_warna');
 
                             // Kalau salah satu kosong, clear detail
                             if (!noModel || !cluster) {
@@ -804,7 +808,7 @@
                                 return;
                             }
 
-                            fetch(`<?= base_url('/gbn/pemasukan/getDataByCluster') ?>?no_model=${encodeURIComponent(noModel)}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}&cluster=${encodeURIComponent(cluster)}`)
+                            fetch(`<?= base_url('/gbn/pemasukan/getDataByCluster') ?>?no_model=${encodeURIComponent(noModel)}&item_type=${encodeURIComponent(itemTypePinjam)}&kode_warna=${encodeURIComponent(kodeWarnaPinjam)}&cluster=${encodeURIComponent(cluster)}`)
                                 .then(response => response.json())
                                 .then(data => {
                                     document.getElementById('formDetailPinjamOrder').innerHTML = '';
