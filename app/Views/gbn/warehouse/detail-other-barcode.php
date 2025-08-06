@@ -9,10 +9,10 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="numbers">
                             <p class="text-sm mb-0 text-capitalize font-weight-bold">Material System</p>
-                            <h5 class="font-weight-bolder mb-0">Data <?= $title ?></h5>
+                            <h5 class="font-weight-bolder mb-0">Data <?= $title . ' ' . $detailOtherBarcode[0]['tgl_datang'] ?></h5>
                         </div>
                         <div>
-                            <a href="<?= base_url($role . '/retur/generateBarcodeRetur/' . $detailRetur[0]['tgl_retur']) ?>" class="btn btn-info">
+                            <a href="<?= base_url($role . '/warehouse/generateOtherBarcode/' . $detailOtherBarcode[0]['tgl_datang']) ?>" class="btn btn-info">
                                 Generate <i class="fas fa-barcode ms-2"></i>
                             </a>
                         </div>
@@ -27,31 +27,33 @@
             <div class="card">
                 <div class="card-body p-3">
                     <div class="table-responsive">
-                        <table id="listBarcodeRetur" class="table table-striped table-bordered table-hover" style="width:100%">
+                        <table id="listOtherBarcode" class="table table-striped table-bordered table-hover" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>No</th>
+                                    <th>No SJ</th>
                                     <th>No Model</th>
                                     <th>Item Type</th>
                                     <th>Kode Warna</th>
                                     <th>Warna</th>
                                     <th>Lot</th>
-                                    <th>Kgs Retur</th>
-                                    <th>Cones Retur</th>
+                                    <th>Kgs Kirim</th>
+                                    <th>Cones Kirim</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php $no = 1; ?>
-                                <?php foreach ($detailRetur as $retur) : ?>
+                                <?php foreach ($detailOtherBarcode as $other) : ?>
                                     <tr>
                                         <td><?= $no++ ?></td>
-                                        <td><?= $retur['no_model'] ?></td>
-                                        <td><?= $retur['item_type'] ?></td>
-                                        <td><?= $retur['kode_warna'] ?></td>
-                                        <td><?= $retur['warna'] ?></td>
-                                        <td><?= $retur['lot_retur'] ?></td>
-                                        <td><?= $retur['kgs_retur'] ?></td>
-                                        <td><?= $retur['cns_retur'] ?></td>
+                                        <td><?= $other['no_surat_jalan'] ?></td>
+                                        <td><?= $other['no_model'] ?></td>
+                                        <td><?= $other['item_type'] ?></td>
+                                        <td><?= $other['kode_warna'] ?></td>
+                                        <td><?= $other['warna'] ?></td>
+                                        <td><?= $other['lot_kirim'] ?></td>
+                                        <td><?= $other['kgs_kirim'] ?></td>
+                                        <td><?= $other['cones_kirim'] ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -65,7 +67,7 @@
 
 <script>
     $(document).ready(function() {
-        $('#listBarcodeRetur').DataTable();
+        $('#listOtherBarcode').DataTable();
     });
 </script>
 <?php $this->endSection(); ?>

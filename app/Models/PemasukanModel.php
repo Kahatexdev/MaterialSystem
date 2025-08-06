@@ -389,7 +389,9 @@ class PemasukanModel extends Model
     public function detailOtherBarcode($tgl_datang)
     {
         return $this->db->table('pemasukan')
-            ->select('out_celup.id_out_celup, out_celup.no_model, other_bon.item_type, other_bon.kode_warna, other_bon.warna, out_celup.lot_kirim, out_celup.kgs_kirim, out_celup.cns_kirim, other_bon.tgl_datang')
+            ->select('out_celup.id_out_celup, out_celup.no_model, other_bon.item_type, other_bon.kode_warna, other_bon.warna, other_bon.no_surat_jalan, out_celup.lot_kirim, out_celup.kgs_kirim, out_celup.cones_kirim, other_bon.tgl_datang')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->join('other_bon', 'other_bon.id_other_bon = out_celup.id_other_bon', 'left')
             ->where('other_bon.tgl_datang', $tgl_datang)
             ->where('out_celup.id_other_bon IS NOT NULL')
             ->get()
