@@ -404,14 +404,16 @@
             const nama_cluster = button.getAttribute("data-nama_cluster");
             const detailData = JSON.parse(button.getAttribute("data-detail"));
             const detailKarung = JSON.parse(button.getAttribute("data-karung"));
-
-            // console.log(detailKarung);
+            const totalTerisi = detailData.reduce((sum, item) => {
+                return sum + (Number(item.qty) || 0);
+            }, 0);
+            const sisa = (Number(kapasitas) || 0) - totalTerisi;
 
             // Populate modal data
             document.getElementById("modalKapasitas").textContent = kapasitas;
-            document.getElementById("modalTotalQty").textContent = total_qty;
+            document.getElementById("modalTotalQty").textContent = totalTerisi;
             document.getElementById("modalNamaCluster").textContent = nama_cluster;
-            document.getElementById("modalSisaKapasitas").textContent = kapasitas - total_qty;
+            document.getElementById("modalSisaKapasitas").textContent = sisa.toFixed(2);
             document.getElementById("modalKarungList").innerHTML = "";
 
             // Populate table
@@ -421,8 +423,6 @@
             detailData.forEach((item) => {
                 const karungForThis = detailKarung.filter(k => k.no_model === item.no_model);
                 const karungJSON = JSON.stringify(karungForThis);
-
-                console.log(karungForThis);
 
                 const row = `
                     <tr class="fade-in">
