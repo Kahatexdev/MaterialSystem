@@ -3311,7 +3311,7 @@ class ExcelController extends BaseController
 
         // Urutkan data berdasarkan jenis (denier)
         usort($data, function ($a, $b) {
-            return strcmp($a['jenis'], $b['jenis']);
+            return strcmp($a['jenis_benang'], $b['jenis_benang']);
         });
 
         $groupStartRow = $row;     // baris data pertama dari grup
