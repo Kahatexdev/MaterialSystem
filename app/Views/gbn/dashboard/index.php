@@ -57,12 +57,6 @@
     }
 
     /* ===== MODAL ENHANCEMENTS ===== */
-    .modal-header {
-        background: linear-gradient(135deg, #007bff, #0056b3);
-        color: white;
-        border-bottom: none;
-    }
-
     .modal-header .btn-close {
         filter: invert(1);
     }
