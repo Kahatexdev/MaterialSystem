@@ -261,14 +261,28 @@ class MaterialModel extends Model
             ->findAll();
     }
 
-    public function getNoModel($noModelOld, $kodeWarna)
+    public function getNoModel($noModelOld, $kodeWarna, $term = null)
     {
-        return $this->select('material.item_type, material.kode_warna, master_order.no_model, material.color')
+        $builder =  $this->select('material.item_type, material.kode_warna, master_order.no_model, material.color')
             ->join('master_order', 'master_order.id_order = material.id_order')
             ->where('master_order.no_model !=', $noModelOld)
             // ->where('material.kode_warna', $kodeWarna)
-            ->groupBy('material.item_type, material.kode_warna, master_order.no_model')
-            ->findAll();
+            ->groupBy('material.item_type, material.kode_warna, master_order.no_model');
+
+        if ($term) {
+            $builder->groupStart()
+                ->like('master_order.no_model',   $term)
+                ->orLike('material.kode_warna', $term)
+                ->groupEnd();
+        }
+        $builder->groupBy([
+            'material.item_type',
+            'material.kode_warna',
+            'master_order.no_model',
+            'material.color',
+        ]);
+
+        return $builder->get()->getResultArray();
     }
     public function MaterialPerStyle($model, $style)
     {

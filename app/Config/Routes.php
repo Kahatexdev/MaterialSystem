@@ -240,6 +240,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportBenangBulanan', 'WarehouseController::reportBenangBulanan');
     $routes->get('warehouse/filterBenangBulanan', 'WarehouseController::filterBenangBulanan');
     $routes->get('warehouse/exportReportBenangBulanan', 'ExcelController::exportReportBenang');
+    $routes->get('warehouse/listOtherBarcode', 'WarehouseController::listOtherBarcode');
+    $routes->get('warehouse/detailOtherBarcode/(:any)', 'WarehouseController::detailOtherBarcode/$1');
+    $routes->get('warehouse/generateOtherBarcode/(:any)', 'DomPdfController::generateOtherBarcode/$1');
 
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');
