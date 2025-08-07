@@ -114,6 +114,8 @@ class CoveringStockModel extends Model
 
     public function getStockByJenis($jenis)
     {
-        return $this->where('jenis_benang', $jenis)->findAll();
+        return $this->where('jenis_benang', $jenis)->orderBy('jenis_benang', 'ASC')
+            ->orderBy('dr', 'ASC')
+            ->findAll();
     }
 }
