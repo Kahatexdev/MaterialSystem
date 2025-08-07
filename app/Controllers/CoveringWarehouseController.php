@@ -939,4 +939,17 @@ class CoveringWarehouseController extends BaseController
         return view($this->role . '/warehouse/stock-' . $jenis, $data);
     }
 
+    public function getStockByMesin($mesin)
+    {
+        $stok = $this->coveringStockModel->getStockByMesin($mesin);
+
+        $data = [
+            'role' => $this->role,
+            'title' => 'Stock ' . ucfirst($mesin),
+            'active' => $this->active,
+            'mesin' => $mesin,
+            'stok' => $stok
+        ];
+        return view($this->role . '/warehouse/stockpermesin', $data);
+    }
 }
