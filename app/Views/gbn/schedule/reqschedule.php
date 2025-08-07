@@ -258,6 +258,9 @@
                                 <td><?= $data['no_mesin']; ?></td>
                                 <?php
                                 $poFull = $data['no_model'];
+                                if (isset($data['po_plus']) && $data['po_plus'] == 1) {
+                                    $poFull = '(+) ' . $poFull;
+                                }
                                 $poDisplay = strlen($poFull) > 27 ? substr($poFull, 0, 27) . '...' : $poFull;
                                 ?>
                                 <td><?= $poDisplay ?></td>
