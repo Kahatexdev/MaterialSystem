@@ -373,4 +373,28 @@ class PemasukanModel extends Model
 
         return $merged;
     }
+
+    public function listOtherBarcode()
+    {
+        return $this->db->table('pemasukan')
+            ->select('tgl_masuk')
+            ->join('out_celup', 'pemasukan.id_out_celup = out_celup.id_out_celup')
+            ->where('out_celup.id_other_bon IS NOT NULL')
+            ->groupBy('tgl_masuk')
+            ->orderBy('tgl_masuk', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
+    public function detailOtherBarcode($tgl_datang)
+    {
+        return $this->db->table('pemasukan')
+            ->select('out_celup.id_out_celup, out_celup.no_model, other_bon.item_type, other_bon.kode_warna, other_bon.warna, other_bon.no_surat_jalan, out_celup.lot_kirim, out_celup.kgs_kirim, out_celup.cones_kirim, other_bon.tgl_datang')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->join('other_bon', 'other_bon.id_other_bon = out_celup.id_other_bon', 'left')
+            ->where('other_bon.tgl_datang', $tgl_datang)
+            ->where('out_celup.id_other_bon IS NOT NULL')
+            ->get()
+            ->getResultArray();
+    }
 }

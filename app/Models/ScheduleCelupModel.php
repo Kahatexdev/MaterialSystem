@@ -674,6 +674,23 @@ class ScheduleCelupModel extends Model
             ->groupBy(['id_order', 'item_type', 'kode_warna', 'color'])
             ->getCompiledSelect(false);  // false = no trailing semicolon
 
+        $datangSub = $db->table('pemasukan')
+            ->select("
+            pemasukan.id_out_celup,
+            out_celup.no_model,
+            schedule_celup.item_type,
+            schedule_celup.kode_warna,
+            SUM(out_celup.kgs_kirim) AS kgs_datang
+        ")
+            ->join('out_celup',     'out_celup.id_out_celup = pemasukan.id_out_celup')
+            ->join('schedule_celup', 'schedule_celup.id_celup   = out_celup.id_celup')
+            ->groupBy([
+                'out_celup.no_model',
+                'schedule_celup.item_type',
+                'schedule_celup.kode_warna'
+            ])
+            ->getCompiledSelect(false);
+
         // 3) Main query on schedule_celup
         $builder = $db->table('schedule_celup')
             ->select([
@@ -684,10 +701,13 @@ class ScheduleCelupModel extends Model
                 'mesin_celup.ket_mesin',
                 'master_material.jenis',
                 'material_summary.total_kgs',
+                'datang_sub.kgs_datang',
+                'datang_sub.id_out_celup',
             ])
             ->join('master_order',    'master_order.no_model       = schedule_celup.no_model')
             ->join('master_material', 'master_material.item_type   = schedule_celup.item_type')
             ->join('mesin_celup',     'mesin_celup.id_mesin        = schedule_celup.id_mesin')
+            ->join('out_celup',     'out_celup.id_celup        = schedule_celup.id_celup')
             // manual derived‐table join:
             ->join(
                 "({$materialSub}) AS material_summary",
@@ -695,6 +715,11 @@ class ScheduleCelupModel extends Model
              AND material_summary.kode_warna = schedule_celup.kode_warna
              AND material_summary.color      = schedule_celup.warna
              AND material_summary.id_order   = master_order.id_order',
+                'left'
+            )
+            ->join(
+                "({$datangSub}) AS datang_sub",
+                'datang_sub.id_out_celup = out_celup.id_out_celup',
                 'left'
             )
             ->where('master_material.jenis',      'BENANG')

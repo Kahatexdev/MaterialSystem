@@ -444,7 +444,7 @@ class PemesananController extends BaseController
 
             foreach ($validDatas as $idx => $row) {
                 // Pastikan semua field kunci tersedia
-                if (! isset($row['id_out_celup'], $row['area_out'], $row['tgl_out'])) {
+                if (! isset($row['id_pengeluaran'], $row['id_total_pemesanan'], $row['area_out'])) {
                     log_message('error', "[saveSessionDeliveryArea] Row ke-$idx missing key fields: " . json_encode($row));
                     continue;
                 }
@@ -452,9 +452,9 @@ class PemesananController extends BaseController
                 // Cek duplikasi berdasarkan id_out_celup + area + tanggal
                 $isDuplicate = array_filter($manualDelivery, function ($item) use ($row) {
                     return
-                        $item['id_out_celup'] == $row['id_out_celup']
-                        && $item['area_out']  == $row['area_out']
-                        && $item['tgl_out']   == $row['tgl_out'];
+                        $item['id_pengeluaran'] == $row['id_pengeluaran']
+                        && $item['id_total_pemesanan']  == $row['id_total_pemesanan']
+                        && $item['area_out']   == $row['area_out'];
                 });
 
                 if ($isDuplicate) {

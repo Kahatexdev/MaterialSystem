@@ -59,13 +59,13 @@
                             <div class="card card-plain mt-8">
                                 <div class="card-header pb-0 text-left bg-transparent">
                                     <h2 class="font-weight-bolder text-info text-gradient"> Material System </h2>
-                                    <p class="mb-0">Silahkan Masukan Email dan Password Anda</p>
+                                    <p class="mb-0">Silahkan Masukan Username dan Password Anda</p>
                                 </div>
                                 <div class="card-body">
                                     <form role="form" action="<?= base_url('authverify') ?>" method="POST">
-                                        <label>Email</label>
+                                        <label>Username</label>
                                         <div class="mb-3">
-                                            <input type="text" class="form-control" placeholder="Email" aria-label="Email" aria-describedby="email-addon" name="username">
+                                            <input type="text" class="form-control" placeholder="Username" aria-label="Email" aria-describedby="email-addon" name="username">
                                         </div>
                                         <label>Password</label>
                                         <div class="mb-3">

@@ -344,4 +344,13 @@ class OutCelupModel extends Model
             ->first();
         return $pengeluaran;
     }
+
+    public function getDataOtherBarcode($tglDatang)
+    {
+        return $this->select('out_celup.*, other_bon.no_model, other_bon.item_type, other_bon.kode_warna, other_bon.warna, other_bon.no_surat_jalan')
+            ->join('other_bon', 'other_bon.id_other_bon = out_celup.id_other_bon')
+            ->where('other_bon.tgl_datang', $tglDatang)
+            ->orderBy('out_celup.id_out_celup', 'ASC')
+            ->findAll();
+    }
 }

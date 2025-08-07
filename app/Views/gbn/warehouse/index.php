@@ -411,13 +411,13 @@
 
         // Inisialisasi Select2 (jalankan sekali saja, misalnya di document.ready)
         $('#ModelSelect').select2({
-            placeholder: 'Ketik untuk cari Model Tujuan',
+            placeholder: 'Cari No Model atau Kode Warna',
             allowClear: true,
             width: '100%',
             dropdownParent: $('#modalPindahOrder'),
 
-            // Mulai cari setelah minimal 1 karakter
-            minimumInputLength: 1,
+            // Mulai cari setelah minimal 3 karakter
+            minimumInputLength: 3,
 
             ajax: {
                 url: '<?= base_url() ?>/<?= session()->get('role') ?>/warehouse/getNoModel',
@@ -465,30 +465,6 @@
         $('#modalPindahOrder').modal('show');
         // const $select = $('#ModelSelect').prop('disabled', true).empty().append('<option>Loading…</option>');
         const $container = $('#pindahOrderContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i></div>');
-
-
-
-        // Fetch model tujuan
-        // $.getJSON(`${base}/${role}/warehouse/getNoModel`, {
-        //     noModelOld,
-        //     kodeWarna
-        // }, res => {
-        //     $select.empty();
-        //     if (res.success && res.data.length) {
-        //         $select.append('<option></option>');
-        //         res.data.forEach(d => {
-        //             $select.append(`<option value="${d.no_model}|${d.item_type}|${d.kode_warna}|${d.color}">${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.color}</option>`);
-        //         });
-        //     } else {
-        //         $select.append('<option>Tidak ada model</option>');
-        //     }
-        //     $select.prop('disabled', false).select2({
-        //         placeholder: 'Pilih Model Tujuan',
-        //         allowClear: true,
-        //         width: '100%',
-        //         dropdownParent: $('#modalPindahOrder')
-        //     });
-        // });
 
         // Fetch detail order
         $.post(`${base}/${role}/warehouse/getPindahOrder`, {
@@ -600,20 +576,46 @@
                 $('input[name="ttl_cns"]').val(totalCns);
                 $('input[name="ttl_krg"]').val(totalKrg);
 
-                // Dropdown cluster
-                const selectedClusterValue = $select.val();
-
-                if (totalKgs > 0) {
-                    fetchClusters(totalKgs, selectedClusterValue);
-                    $select.prop('disabled', false);
-                } else {
-                    $select.prop('disabled', true).empty();
-                    $('#SisaKapasitas').val('');
-                }
             });
 
             // Event ketika input manual diubah
             $container.on('input', 'input[name^="kgs_out"], input[name^="cns_out"]', function() {
+                const el = $(this);
+                const id = this.id.split('_')[2]; // ambil id_out_celup
+                const d = res.data.find(x => x.id_out_celup == id);
+                if (!d) return; // safety
+
+                // Batas maksimum
+                const maxKgs = parseFloat(d.kgs_kirim || 0);
+                const maxCns = parseInt(d.cones_kirim || 0, 10);
+
+                // Kalau ini input Kgs
+                if (this.name.startsWith('kgs_out')) {
+                    let raw = el.val().replace(',', '.').trim();
+                    let v = parseFloat(raw) || 0;
+                    if (v > maxKgs) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Nilai Terlalu Besar',
+                            text: `Kg Out Manual tidak boleh lebih dari ${maxKgs.toFixed(2)} KG`
+                        });
+                        el.val(maxKgs.toFixed(2));
+                    }
+                }
+                // Kalau ini input Cones
+                else {
+                    let raw = el.val().trim();
+                    let v = parseInt(raw, 10) || 0;
+                    if (v > maxCns) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Nilai Terlalu Besar',
+                            text: `Cones Out Manual tidak boleh lebih dari ${maxCns} Cns`
+                        });
+                        el.val(maxCns);
+                    }
+                }
+                // setelah validasi, hitung ulang totals
                 $container.find('.row-check:checked').trigger('change');
             });
 

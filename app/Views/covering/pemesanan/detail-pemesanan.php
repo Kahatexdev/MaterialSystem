@@ -123,13 +123,20 @@
                                         <i class="fas fa-box"></i> Stock Terkirim
                                     </button>
                                 <?php else : ?>
-                                    <button
+                                    <!-- <button
                                         type="button"
                                         class="btn bg-gradient-info"
                                         data-bs-toggle="modal"
                                         data-bs-target="#editModal<?= esc($list['id_psk']) ?>">
                                         <i class="fas fa-paper-plane"></i> Kirim Stock
-                                    </button>
+                                    </button> -->
+                                    <form action="<?= base_url("$role/updatePemesanan/{$list['id_psk']}") ?>" method="POST">
+                                        <!-- Hidden values for reference -->
+                                        <input type="hidden" name="id_psk" value="<?= esc($list['id_psk']) ?>">
+                                        <input type="hidden" name="jenis" value="<?= esc($list['jenis']) ?>">
+                                        <input type="hidden" name="tgl_pakai" value="<?= esc($list['tgl_pakai']) ?>">
+                                        <button type="submit" class="btn bg-gradient-info"><i class="fas fa-paper-plane"></i> Kirim Stock</button>
+                                    </form>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -294,7 +301,7 @@
             console.log("Item Type:", itemType);
             // AJAX untuk mendapatkan list kode warna dari controller
             $.ajax({
-            url: '<?= base_url("$role/getCodePemesanan") ?>',
+                url: '<?= base_url("$role/getCodePemesanan") ?>',
                 type: 'GET',
                 data: {
                     item_type: itemType
