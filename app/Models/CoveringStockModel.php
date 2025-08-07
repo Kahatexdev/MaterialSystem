@@ -118,4 +118,12 @@ class CoveringStockModel extends Model
             ->orderBy('dr', 'ASC')
             ->findAll();
     }
+
+    public function getStockByMesin($mesin)
+    {
+        return $this->where('jenis_mesin', $mesin)
+            ->orderBy('jenis_benang', 'ASC')
+            ->orderBy('dr', 'ASC')
+            ->findAll();
+    }
 }

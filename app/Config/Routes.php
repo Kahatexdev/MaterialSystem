@@ -481,7 +481,7 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('warehouse/templateStokBarangJadi', 'CoveringWarehouseController::templateStokBarangJadi');
     $routes->get('warehouse/templateStokBahanBaku', 'CoveringWarehouseBBController::templateStokBahanBaku');
 
-    $routes->get('warehouse/(:any)', 'CoveringWarehouseController::getStockByJenis/$1');
+    $routes->get('warehouse/(:any)', 'CoveringWarehouseController::getStockByMesin/$1');
 
 
     // warehouse bahan baku
