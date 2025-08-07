@@ -30,6 +30,9 @@ class PemesananModel extends Model
         'id_retur',
         'status_kirim',
         'admin',
+        'additional_time',
+        'keterangan_gbn',
+        'hak_akses',
         'created_at',
         'updated_at',
     ];

@@ -393,6 +393,13 @@ class PengeluaranModel extends Model
             ->where('status', 'Pengeluaran Jalur')
             ->first();
     }
+    public function getKgPengiriman($id_total_pemesanan)
+    {
+        return $this->select('SUM(kgs_out) AS kgs_out')
+            ->where('id_total_pemesanan', $id_total_pemesanan)
+            ->where('status', 'Pengiriman Area')
+            ->first();
+    }
 
     public function getItemTypes(string $no_model): array
     {

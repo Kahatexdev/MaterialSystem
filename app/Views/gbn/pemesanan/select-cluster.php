@@ -306,25 +306,42 @@
 
             <!-- Grid Cards -->
             <div class="row g-2">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
                         <h6 class="text-muted mb-1 small">Kg Pesan</h6>
                         <h4 class="fw-semibold mb-0"><?= number_format($KgsPesan, 2) ?> Kg</h4>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
                         <h6 class="text-muted mb-1 small">Cns Pesan</h6>
                         <h4 class="fw-semibold mb-0"><?= $CnsPesan ?> Cns</h4>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
                         <h6 class="text-muted mb-1 small">Kg Persiapan</h6>
                         <h4 class="fw-semibold mb-0"><?= $kgPersiapan ? number_format($kgPersiapan, 2) : '0' ?> Kg</h4>
                     </div>
                 </div>
+                <div class="col-md-3">
+                    <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
+                        <h6 class="text-muted mb-1 small">Kg Pengiriman</h6>
+                        <h4 class="fw-semibold mb-0"><?= $kgPengiriman ? number_format($kgPengiriman, 2) : '0' ?> Kg</h4>
+                    </div>
+                </div>
             </div>
+            <!-- Grid Cards -->
+            <div class="row g-2">
+                <div class="col-md-12 mt-4">
+                    <!-- Button untuk membuka modal -->
+                    <button type="button" class="btn w-100 p-2 border rounded-3 bg-gradient-light shadow-sm text-center"
+                        data-bs-toggle="modal" data-bs-target="#keteranganModal">
+                        <h4 class="fw-semibold mb-0">Keterangan Pemesanan</h4>
+                    </button>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -335,7 +352,7 @@
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <span class="d-flex align-items-center">
                             <i class="fas fa-warehouse me-2 text-white"></i>
-                            Cluster <?= esc($item['nama_cluster']); ?> (<?= (number_format($item['total_kgs'], 2) . ' Kg / ' . $item['total_krg'] . ' Krg'); ?>)
+                            Cluster <?= esc($item['nama_cluster']); ?> (<?= (number_format($item['total_kgs'], 2) . ' Kg / ' . $item['total_krg'] . ' Krg / ' . $item['lot_final']); ?>)
                         </span>
                     </div>
                 </div>
@@ -351,6 +368,37 @@
                     <i class="fas fa-warehouse me-2 text-white"></i>
                     Pinjam Order
                 </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- modal isi keterangan pemesanan -->
+<div class="modal fade" id="keteranganModal" tabindex="-1" aria-labelledby="keteranganModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="w-100">
+                    <h5 class="modal-title text-white mb-2" id="keteranganModalLabel">Input Keterangan</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formKeterangan">
+                    <div id="formKeteranganContent">
+                        <!-- Konten form -->
+                        <div class="mb-3">
+                            <label for="keterangan_gbn" class="form-label">Keterangan</label>
+                            <textarea name="keterangan_gbn" id="keterangan_gbn" class="form-control" rows="4" placeholder="Tulis keterangan di sini..."><?= $ketGbn ?></textarea>
+                        </div>
+                        <input type="hidden" name="id_total_pemesanan" value="<?= $id ?>">
+                    </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="submit" class="btn btn-primary btn-submit">
+                            <i class="bi bi-check-circle me-1"></i> Simpan
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -448,6 +496,43 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        $('#formKeterangan').on('submit', function(e) {
+            e.preventDefault(); // cegah form submit normal
+
+            let formData = $(this).serialize();
+
+            $.ajax({
+                url: '<?= base_url($role . '/pemesanan/saveKetGbnInPemesanan') ?>', // sesuaikan
+                method: 'POST',
+                data: formData,
+                success: function(response) {
+                    // SweetAlert Success
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: 'Keterangan berhasil disimpan.',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        willClose: () => {
+                            location.reload(); // reload halaman setelah alert ditutup
+                        }
+                    });
+
+                    // tutup modal
+                    $('#keteranganModal').modal('hide');
+                    // reset form
+                    $('#formKeterangan')[0].reset();
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: 'Terjadi kesalahan saat menyimpan keterangan.',
+                    });
+                    console.error(xhr.responseText);
+                }
+            });
+        });
         // Card click event
         const cards = document.querySelectorAll('.stock-card');
         cards.forEach(card => {
@@ -580,7 +665,7 @@
                                 </div>
                             </div>
                             <div class="mt-2">
-                                <label for="keterangan_${item.id_pemasukan}" class="form-label small">Keterangan</label>
+                                <label for="keterangan_${item.id_pemasukan}" class="form-label small">Keterangan Pengeluaran</label>
                                 <textarea class="form-control form-control-sm"
                                     name="keterangan[${item.id_pemasukan}]"
                                     id="keterangan_${item.id_pemasukan}"
@@ -902,7 +987,7 @@
                                                                 </div>
                                                             </div>
                                                             <div class="mt-2">
-                                                                <label for="keterangan_${item.id_pemasukan}" class="form-label small">Keterangan</label>
+                                                                <label for="keterangan_${item.id_pemasukan}" class="form-label small">Keterangan Pengeluaran</label>
                                                                 <textarea class="form-control form-control-sm"
                                                                     name="keterangan[${item.id_pemasukan}]"
                                                                     id="keterangan_${item.id_pemasukan}"
@@ -980,5 +1065,6 @@
         });
     });
 </script>
+
 
 <?php $this->endSection(); ?>
