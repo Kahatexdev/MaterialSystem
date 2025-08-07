@@ -87,6 +87,20 @@ class PengeluaranModel extends Model
             ->get()
             ->getResultArray();
     }
+    public function searchPengiriman2($noModel)
+    {
+        return $this->db->table('pengeluaran')
+            ->select('pengeluaran.*, SUM(pengeluaran.kgs_out) AS kgs_out, pengeluaran.lot_out AS lot_kirim, master_order.no_model, material.kode_warna, material.color AS warna, material.item_type')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan')
+            ->join('pemesanan', 'pemesanan.id_total_pemesanan = total_pemesanan.id_total_pemesanan')
+            ->join('material', 'material.id_material = pemesanan.id_material')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('master_order.no_model', $noModel)
+            ->where('pengeluaran.status', 'Pengiriman Area')
+            ->groupBy('master_order.no_model, material.kode_warna, material.color, material.item_type')
+            ->get()
+            ->getResultArray();
+    }
     public function getTotalPengiriman($data)
     {
         return $this->select('SUM(pengeluaran.kgs_out) AS kgs_out')
