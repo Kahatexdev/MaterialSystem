@@ -128,7 +128,7 @@ class PemesananModel extends Model
             ->where('p.admin', $area)
             ->where('mm.jenis', $jenis)
             ->where('p.tgl_pakai', $filterDate)
-            ->groupBy('p.tgl_pakai, p.admin, m.item_type')
+            ->groupBy('p.tgl_pakai')
             ->get();
 
         if (!$query) {
