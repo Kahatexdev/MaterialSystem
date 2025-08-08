@@ -55,7 +55,7 @@
                                 <td class="text-center">
                                     <a href="<?= base_url($role . '/detailPemesanan/' . $dp['jenis'] . '/' . $dp['tgl_pakai']) ?>" class="btn btn-sm
                                     btn-info">Detail</a>
-                                    <a href="<?= base_url($role . '/generatePengeluaranSpandexKaretCovering/' . $dp['jenis'] . '/' . $dp['tgl_pakai']) ?>" class="btn btn-sm btn-success">Export</a>
+                                    <!-- <a href="<?= base_url($role . '/generatePengeluaranSpandexKaretCovering/' . $dp['jenis'] . '/' . $dp['tgl_pakai']) ?>" class="btn btn-sm btn-success">Export</a> -->
                                 </td>
                             </tr>
                         <?php endforeach; ?>

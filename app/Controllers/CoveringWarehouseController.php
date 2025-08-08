@@ -632,7 +632,7 @@ class CoveringWarehouseController extends BaseController
                     'keterangan' => "{$nowLabel} [{$sheetName}]",
                     'created_at' => "{$tanggal} 00:00:00",
                 ];
-
+                // dd ($record);
                 foreach ($rawHeader as $col => $heading) {
                     if (!isset($mapping[$heading])) continue;
                     $key = $mapping[$heading];
@@ -644,7 +644,7 @@ class CoveringWarehouseController extends BaseController
 
                     $record[$key] = $val;
                 }
-
+                // dd ($record);
                 // Validate required fields
                 if (empty($record['jenis']) || empty($record['code'])) {
                     $errors[] = "Sheet {$sheetName} baris {$rowIndex}: 'jenis' atau 'code' kosong.";
@@ -705,7 +705,7 @@ class CoveringWarehouseController extends BaseController
                 'ttl_cns'           => $newCns,
             ];
         }
-
+        // dd ($history);
         // Database transaction
         $db = \Config\Database::connect();
         $db->transStart();
@@ -806,7 +806,7 @@ class CoveringWarehouseController extends BaseController
 
     public function templateStokBarangJadi()
     {
-        $stok = $this->coveringStockModel->findAll();
+        $stok = $this->coveringStockModel->orderBy('jenis_benang ASC')->orderBy('dr ASC')->findAll();
         // Define headings based on mapping
         $headers = [
             'A' => 'JENIS BARANG',
@@ -925,4 +925,31 @@ class CoveringWarehouseController extends BaseController
             ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
     }
 
+    public function getStockByJenis($jenis)
+    {
+        $stok = $this->coveringStockModel->getStockByJenis($jenis);
+
+        $data = [
+            'role' => $this->role,
+            'title' => 'Stock ' . ucfirst($jenis),
+            'active' => $this->active,
+            'jenis' => $jenis,
+            'stok' => $stok
+        ];
+        return view($this->role . '/warehouse/stock-' . $jenis, $data);
+    }
+
+    public function getStockByMesin($mesin)
+    {
+        $stok = $this->coveringStockModel->getStockByMesin($mesin);
+
+        $data = [
+            'role' => $this->role,
+            'title' => 'Stock ' . ucfirst($mesin),
+            'active' => $this->active,
+            'mesin' => $mesin,
+            'stok' => $stok
+        ];
+        return view($this->role . '/warehouse/stockpermesin', $data);
+    }
 }

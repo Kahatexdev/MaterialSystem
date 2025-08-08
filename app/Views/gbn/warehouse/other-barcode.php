@@ -127,7 +127,7 @@
     </style>
 </head>
 
-<?php foreach ($dataList as $i => $row): ?>
+<?php foreach ($dataList as $i => $row) : ?>
 
     <body>
         <div class="label-container">
@@ -152,9 +152,6 @@
                             <div class="data-section">
                                 <div>Item : <?= $row['item_type'] ?></div>
                                 <div>Kode : <?= $row['kode_warna'] ?>/ <?= $row['warna'] ?></div>
-                                <!-- <div class="nums">GW : <?= $row['gw_kirim'] ?> kg</div>
-                                <div class="nums">NW : <?= $row['kgs_kirim'] ?> kg</div>
-                                <div class="nums">Cones : <?= $row['cones_kirim'] ?></div> -->
                             </div>
                         </td>
                     </tr>
@@ -175,7 +172,7 @@
                     <div class="footer-right">
                         No Karung
                         <div class="no-karung-value"><?= htmlspecialchars($row['no_karung'] ?? '-', ENT_QUOTES) ?></div>
-                        <div class="operator-info">Retur : <?= $row['kategori'] ?? '-' ?></div>
+                        <div class="operator-info">No SJ : <?= $row['no_surat_jalan'] ?? '-' ?></div>
 
                     </div>
                 </div>

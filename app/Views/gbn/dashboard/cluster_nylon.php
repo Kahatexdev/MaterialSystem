@@ -108,6 +108,7 @@
                                     data-kapasitas="<?= $cluster['kapasitas'] ?>"
                                     data-total_qty="<?= $cluster['total_qty'] ?>"
                                     data-nama_cluster="<?= $cluster['nama_cluster'] ?>"
+                                    data-karung='<?= $cluster['detail_karung'] ?? '[]' ?>'
                                     data-detail='[<?= $cluster['detail_data'] ?>]'>
                                     <?= $cluster['simbol_cluster'] ?>
                                 </button>

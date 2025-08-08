@@ -135,174 +135,184 @@
 
     <div id="result"></div>
     <!-- Modal pindah order -->
-    <div class="modal fade" id="modalPindahOrder" tabindex="-1" aria-labelledby="modalPindahOrderLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-            <form id="formPindahOrder" class="needs-validation" novalidate>
-                <div class="modal-content">
-                    <!-- Header -->
-                    <div class="modal-header bg-info text-white border-0">
-                        <h5 class="modal-title text-white" id="modalPindahOrderLabel">Pindah Order</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <!-- Body -->
-                    <div class="modal-body">
-                        <!-- SELECT2 FILTER -->
-                        <div class="mb-3">
-                            <label for="ModelSelect" class="form-label">Pilih No Model</label>
-                            <select id="ModelSelect" class="form-select" style="width: 100%"></select>
-                        </div>
+    <div class="modal fade" id="modalPindahOrder" tabindex="-1" role="dialog" aria-labelledby="modal-form" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white border-0">
+                    <h5 class="modal-title text-white" id="modalPindahOrderLabel">Pindah Order</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formPindahOrder">
+                    <div class="modal-body p-0">
+                        <div class="card card-plain">
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <label for="ModelSelect" class="form-label">Pilih No Model</label>
+                                    <select id="ModelSelect" class="form-select" style="width: 100%"></select>
+                                </div>
 
-                        <div class="row g-3" id="pindahOrderContainer">
-                            <!-- Isi kartu akan di‑inject via JS -->
-                        </div>
-                        <div class="mb-3 d-flex justify-content-between">
-                            <input type="text" class="form-control me-2" name="ttl_kgs" readonly placeholder="Total Kgs">
-                            <input type="text" class="form-control mx-2" name="ttl_cns" readonly placeholder="Total Cns">
-                            <input type="text" class="form-control ms-2" name="ttl_krg" readonly placeholder="Total Krg">
+                                <div class="row g-3" id="pindahOrderContainer">
+                                    <!-- Isi kartu akan di‑inject via JS -->
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3 mt-2">
+                                        <label for="">Total Kgs</label>
+                                        <input type="text" class="form-control me-2" name="ttl_kgs" readonly placeholder="0">
+                                    </div>
+                                    <div class="col-md-4 mb-3 mt-2">
+                                        <label for="">Total Cones</label>
+                                        <input type="text" class="form-control mx-2" name="ttl_cns" readonly placeholder="0">
+                                    </div>
+                                    <div class="col-md-4 mb-3 mt-2">
+                                        <label for="">Total Karung</label>
+                                        <input type="text" class="form-control ms-2" name="ttl_krg" readonly placeholder="0">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <!-- Footer -->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                         <button type="submit" class="btn btn-info">Simpan Perubahan</button>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
     <!-- modal pindah order end -->
     <!-- modal Pindah Cluster -->
-    <div class="modal fade" id="modalPindahCluster" tabindex="-1" aria-labelledby="modalPindahClusterLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <form id="formPindahCluster" class="needs-validation" novalidate>
-                <div class="modal-content">
-                    <!-- Header -->
-                    <div class="modal-header bg-info text-white border-0">
-                        <h5 class="modal-title text-white" id="modalPindahClusterLabel"></h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <!-- Body -->
-                    <div class="modal-body">
-                        <div class="row g-3" id="PindahClusterContainer">
-                            <!-- Isi kartu akan di‑inject via JS -->
-                        </div>
-                        <div class="mb-3 d-flex justify-content-between">
-                            <input type="text" class="form-control me-2" name="ttl_kgs_pindah" readonly placeholder="Total Kgs">
-                            <input type="text" class="form-control mx-2" name="ttl_cns_pindah" readonly placeholder="Total Cns">
-                            <input type="text" class="form-control ms-2" name="ttl_krg_pindah" readonly placeholder="Total Krg">
-                        </div>
-                        <!-- SELECT2 FILTER -->
-                        <div class="mb-3 row">
-                            <!-- Kolom Pilih Cluster -->
-                            <div class="col-md-8">
-                                <label for="ClusterSelect" class="form-label">Pilih Cluster</label>
-                                <select id="ClusterSelect" class="form-select" style="width: 100%" required></select>
+    <div class="modal fade" id="modalPindahCluster" tabindex="-1" role="dialog" aria-labelledby="modal-form" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white border-0">
+                    <h5 class="modal-title text-white" id="modalPindahClusterLabel">Pindah Cluster</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formPindahCluster">
+                    <div class="modal-body p-0">
+                        <div class="card card-plain">
+                            <div class="card-body">
+                                <div class="row g-3" id="PindahClusterContainer">
+                                    <!-- Isi kartu akan di‑inject via JS -->
+                                </div>
+                                <div class="mb-3 d-flex justify-content-between">
+                                    <input type="text" class="form-control me-2" name="ttl_kgs_pindah" readonly placeholder="Total Kgs">
+                                    <input type="text" class="form-control mx-2" name="ttl_cns_pindah" readonly placeholder="Total Cns">
+                                    <input type="text" class="form-control ms-2" name="ttl_krg_pindah" readonly placeholder="Total Krg">
+                                </div>
+                                <!-- SELECT2 FILTER -->
+                                <div class="mb-3 row">
+                                    <!-- Kolom Pilih Cluster -->
+                                    <div class="col-md-8">
+                                        <label for="ClusterSelect" class="form-label">Pilih Cluster</label>
+                                        <select id="ClusterSelect" class="form-select" style="width: 100%" required></select>
+                                    </div>
+                                    <!-- Kolom Sisa Kapasitas -->
+                                    <div class="col-md-4">
+                                        <label for="SisaKapasitas" class="form-label">Sisa Kapasitas</label>
+                                        <input type="text" class="form-control" id="SisaKapasitas" required>
+                                    </div>
+                                </div>
                             </div>
-                            <!-- Kolom Sisa Kapasitas -->
-                            <div class="col-md-4">
-                                <label for="SisaKapasitas" class="form-label">Sisa Kapasitas</label>
-                                <input type="text" class="form-control" id="SisaKapasitas" required>
-                            </div>
                         </div>
                     </div>
-                    <!-- Footer -->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                         <button type="submit" class="btn btn-info">Pindah</button>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
     <!-- Modal Pengeluaran Selain Order -->
-    <div class="modal fade" id="pengeluaranSelainOrder" tabindex="-1" aria-labelledby="pengeluaranSelainOrderLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-            <form id="formpengeluaranSelainOrder" class="needs-validation" novalidate>
-                <div class="modal-content">
-                    <!-- Header -->
-                    <div class="modal-header bg-secondary text-white border-0">
-                        <h5 class="modal-title text-white" id="modalPengeluaranSelainOrderLabel"></h5>
-                        <!-- <h5 class="modal-title" id="modalPindahOrderLabel">Pengeluaran Selain Order </h5> -->
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal fade" id="pengeluaranSelainOrder" tabindex="-1" role="dialog" aria-labelledby="modal-form" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white border-0">
+                    <h5 class="modal-title text-white" id="modalPengeluaranSelainOrderLabel"></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formpengeluaranSelainOrder">
+                    <div class="modal-body p-0">
+                        <div class="card card-plain">
+                            <div class="card-body">
+                                <!-- Select Kategori -->
+                                <div class="mb-3">
+                                    <input type="text" name="nama_cluster" id="inputNamaCluster" hidden>
+                                    <input type="text" id="id_stock" hidden>
+                                    <label for="kategoriSelect" class="form-label">Pilih Kategori</label>
+                                    <select id="kategoriSelect" class="form-select" style="width: 100%">
+                                        <option value="">Pilih Kategori</option>
+                                        <option value="Untuk Majalaya">Untuk Majalaya</option>
+                                        <option value="Untuk Cover Lurex">Untuk Cover Lurex</option>
+                                        <option value="Untuk Cover Lurex Majalaya">Untuk Cover Lurex Majalaya</option>
+                                        <option value="Untuk Lokal">Untuk Lokal</option>
+                                        <option value="Untuk Twist">Untuk Twist</option>
+                                        <option value="Untuk Rosso">Untuk Rosso</option>
+                                        <option value="Untuk Cover Spandex">Untuk Cover Spandex</option>
+                                        <option value="Untuk Sample">Untuk Sample</option>
+                                        <option value="Acrylic Kincir Cijerah">Acrylic Kincir Cijerah</option>
+                                        <option value="Untuk Tali Ukur Elastik">Untuk Tali Ukur Elastik</option>
+                                        <option value="Perbaikan Data Acrylic">Perbaikan Data Acrylic</option>
+                                        <option value="Order Program">Order Program</option>
+                                        <option value="Perbaikan Data Menumpuk">Perbaikan Data Menumpuk</option>
+                                        <option value="Rombak Cylinder">Rombak Cylinder MC Area</option>
+                                        <option value="Untuk Kelos Warna">Untuk Kelos Warna</option>
+                                    </select>
+                                </div>
+
+                                <!-- Container Data -->
+                                <div class="row g-3" id="pengeluaranSelainOrderContainer">
+                                    <!-- Data akan di-inject JS -->
+                                </div>
+
+                                <!-- Display Total dari Checkbox -->
+                                <div class="row mt-3">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" name="ttl_kgs" readonly placeholder="Total Kgs Terpilih" disabled>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" name="ttl_cns" readonly placeholder="Total Cns Terpilih" disabled>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" name="ttl_krg" readonly placeholder="Total Krg Terpilih" disabled>
+                                    </div>
+                                </div>
+
+                                <!-- Input Total -->
+                                <div class="row mt-4">
+                                    <div class="col-md-4">
+                                        <label for="inputKgs" class="form-label">Total Kgs</label>
+                                        <input type="number" step="0.01" class="form-control" id="inputKgs" name="input_kgs" placeholder="Masukkan Kgs" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="inputCns" class="form-label">Total Cns</label>
+                                        <input type="number" class="form-control" id="inputCns" name="input_cns" placeholder="Masukkan Cns" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="inputKrg" class="form-label">Total Krg</label>
+                                        <input type="number" class="form-control" id="inputKrg" name="input_krg" placeholder="Masukkan Krg" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
-                    <!-- Body -->
-                    <div class="modal-body">
-                        <!-- Select Kategori -->
-                        <div class="mb-3">
-                            <input type="text" name="nama_cluster" id="inputNamaCluster" hidden>
-                            <input type="text" id="id_stock" hidden>
-                            <label for="kategoriSelect" class="form-label">Pilih Kategori</label>
-                            <select id="kategoriSelect" class="form-select" style="width: 100%">
-                                <option value="">Pilih Kategori</option>
-                                <option value="Untuk Majalaya">Untuk Majalaya</option>
-                                <option value="Untuk Cover Lurex">Untuk Cover Lurex</option>
-                                <option value="Untuk Cover Lurex Majalaya">Untuk Cover Lurex Majalaya</option>
-                                <option value="Untuk Lokal">Untuk Lokal</option>
-                                <option value="Untuk Twist">Untuk Twist</option>
-                                <option value="Untuk Rosso">Untuk Rosso</option>
-                                <option value="Untuk Cover Spandex">Untuk Cover Spandex</option>
-                                <option value="Untuk Sample">Untuk Sample</option>
-                                <option value="Acrylic Kincir Cijerah">Acrylic Kincir Cijerah</option>
-                                <option value="Untuk Tali Ukur Elastik">Untuk Tali Ukur Elastik</option>
-                                <option value="Perbaikan Data Acrylic">Perbaikan Data Acrylic</option>
-                                <option value="Order Program">Order Program</option>
-                                <option value="Perbaikan Data Menumpuk">Perbaikan Data Menumpuk</option>
-                                <option value="Rombak Cylinder">Rombak Cylinder MC Area</option>
-                                <option value="Untuk Kelos Warna">Untuk Kelos Warna</option>
-                            </select>
-                        </div>
-
-                        <!-- Container Data -->
-                        <div class="row g-3" id="pengeluaranSelainOrderContainer">
-                            <!-- Data akan di-inject JS -->
-                        </div>
-
-                        <!-- Display Total dari Checkbox -->
-                        <div class="row mt-3">
-                            <div class="col-md-4">
-                                <input type="text" class="form-control" name="ttl_kgs" readonly placeholder="Total Kgs Terpilih" disabled>
-                            </div>
-                            <div class="col-md-4">
-                                <input type="text" class="form-control" name="ttl_cns" readonly placeholder="Total Cns Terpilih" disabled>
-                            </div>
-                            <div class="col-md-4">
-                                <input type="text" class="form-control" name="ttl_krg" readonly placeholder="Total Krg Terpilih" disabled>
-                            </div>
-                        </div>
-
-                        <!-- Input Total -->
-                        <div class="row mt-4">
-                            <div class="col-md-4">
-                                <label for="inputKgs" class="form-label">Total Kgs</label>
-                                <input type="number" step="0.01" class="form-control" id="inputKgs" name="input_kgs" placeholder="Masukkan Kgs" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="inputCns" class="form-label">Total Cns</label>
-                                <input type="number" class="form-control" id="inputCns" name="input_cns" placeholder="Masukkan Cns" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="inputKrg" class="form-label">Total Krg</label>
-                                <input type="number" class="form-control" id="inputKrg" name="input_krg" placeholder="Masukkan Krg" required>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <!-- Footer -->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                         <button type="submit" class="btn btn-info">Simpan</button>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
     <!-- modal Pengeluaran Selain Order end -->
-
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
 <script>
+    let currentNoModelOld = '';
+    let currentKodeWarna = '';
+
     $(document).ready(function() {
         $('#filter_data').click(function(e) {
             e.preventDefault();
@@ -399,6 +409,45 @@
             window.location.href = "<?= base_url(session()->get('role') . '/warehouse/exportExcel') ?>" + query;
         });
 
+        // Inisialisasi Select2 (jalankan sekali saja, misalnya di document.ready)
+        $('#ModelSelect').select2({
+            placeholder: 'Cari No Model atau Kode Warna',
+            allowClear: true,
+            width: '100%',
+            dropdownParent: $('#modalPindahOrder'),
+
+            // Mulai cari setelah minimal 3 karakter
+            minimumInputLength: 3,
+
+            ajax: {
+                url: '<?= base_url() ?>/<?= session()->get('role') ?>/warehouse/getNoModel',
+                dataType: 'json',
+                delay: 250, // debounce 250ms
+                data: function(params) {
+                    // kirim term pencarian + parameter tambahan
+                    return {
+                        term: params.term, // kata yang diketikan user
+                        noModelOld: currentNoModelOld,
+                        kodeWarna: currentKodeWarna
+                    };
+                },
+                processResults: function(res) {
+                    // map server response ke format Select2
+                    if (!res.success) {
+                        return {
+                            results: []
+                        };
+                    }
+                    return {
+                        results: res.data.map(d => ({
+                            id: `${d.no_model}|${d.item_type}|${d.kode_warna}|${d.color}`,
+                            text: `${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.color}`
+                        }))
+                    };
+                },
+                cache: true
+            }
+        });
     });
 
     // modal pindah order
@@ -407,34 +456,15 @@
         const idStock = $(this).data('id');
         const base = '<?= base_url() ?>';
         const role = '<?= session()->get('role') ?>';
-        const noModelOld = $(this).data('no-model-old');
-        const kodeWarna = $(this).data('kode-warna');
+        currentNoModelOld = $(this).data('no-model-old');
+        currentKodeWarna = $(this).data('kode-warna');
 
+        $('#ModelSelect')
+            .val(null) // kosongkan pilihan
+            .trigger('change');
         $('#modalPindahOrder').modal('show');
-        const $select = $('#ModelSelect').prop('disabled', true).empty().append('<option>Loading…</option>');
+        // const $select = $('#ModelSelect').prop('disabled', true).empty().append('<option>Loading…</option>');
         const $container = $('#pindahOrderContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i></div>');
-
-        // Fetch model tujuan
-        $.getJSON(`${base}/${role}/warehouse/getNoModel`, {
-            noModelOld,
-            kodeWarna
-        }, res => {
-            $select.empty();
-            if (res.success && res.data.length) {
-                $select.append('<option></option>');
-                res.data.forEach(d => {
-                    $select.append(`<option value="${d.no_model}|${d.item_type}|${d.kode_warna}|${d.color}">${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.color}</option>`);
-                });
-            } else {
-                $select.append('<option>Tidak ada model</option>');
-            }
-            $select.prop('disabled', false).select2({
-                placeholder: 'Pilih Model Tujuan',
-                allowClear: true,
-                width: '100%',
-                dropdownParent: $('#modalPindahOrder')
-            });
-        });
 
         // Fetch detail order
         $.post(`${base}/${role}/warehouse/getPindahOrder`, {
@@ -450,23 +480,53 @@
                 $container.append(`
                     <div class="col-md-12">
                         <div class="card result-card h-100">
-                            <div class="form-check">
-                                <input class="form-check-input row-check" type="checkbox" name="pindah[]" value="${d.id_out_celup}" id="chk${d.id_out_celup}">
-                                <label class="form-check-label fw-bold" for="chk${d.id_out_celup}">
-                                    ${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.warna}
-                                </label>
-                                <input type="hidden" name="id_stock[]" value="${d.id_stock}">
-                            </div>
-                            <div class="card-body row">
-                                <div class="col-md-6">
-                                    <p><strong>Kode Warna:</strong> ${d.kode_warna}</p>
-                                    <p><strong>Warna:</strong> ${d.warna}</p>
-                                    <p><strong>Lot Jalur:</strong> ${lot}</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <p><strong>No Karung:</strong> ${d.no_karung}</p>
-                                    <p><strong>Total Kgs:</strong> ${parseFloat(d.kgs_kirim || 0).toFixed(2)} KG</p>
-                                    <p><strong>Cones:</strong> ${d.cones_kirim} Cns</p>
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- Kiri: detail label -->
+                                    <div class="col-md-6">
+                                        <h5><strong>Pindah Per Karung</strong></h5>
+                                        <div class="form-check">
+                                            <input class="form-check-input row-check" type="checkbox" name="pindah[]" value="${d.id_out_celup}" id="chk${d.id_out_celup}">
+                                            <label class="form-check-label fw-bold" for="chk${d.id_out_celup}">
+                                                <strong>No Model:</strong> ${d.no_model}<br>
+                                                <strong>Item Type:</strong> ${d.item_type}<br>
+                                                <strong>Kode Warna:</strong> ${d.kode_warna}<br>
+                                                <strong>Warna:</strong> ${d.warna}<br>
+                                                <strong>Lot Jalur:</strong> ${lot}<br>
+                                                <strong>No Karung:</strong> ${d.no_karung}<br>
+                                                <strong>Total Kgs:</strong> ${parseFloat(d.kgs_kirim || 0).toFixed(2)} KG<br>
+                                                <strong>Cones:</strong> ${d.cones_kirim} Cns
+                                            </label>
+                                            <input type="hidden" name="id_stock[]" value="${d.id_stock}">
+                                        </div>
+                                    </div>
+
+                                    <!-- Kanan: input manual -->
+                                    <div class="col-md-6">
+                                        <h5><strong>Pindah Perkones</strong></h5>
+                                        <div class="row gx-2">
+                                            <div class="col-6">
+                                                <label for="kgs_out_${d.id_out_celup}" class="form-label small mb-1">Kg Out Manual</label>
+                                                <input type="number"
+                                                    step="0.01"
+                                                    class="form-control form-control-sm"
+                                                    name="kgs_out[${d.id_out_celup}]"
+                                                    id="kgs_out_${d.id_out_celup}"
+                                                    placeholder="Kg"
+                                                    disabled>
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="cns_out_${d.id_out_celup}" class="form-label small mb-1">Cones Out Manual</label>
+                                                <input type="number"
+                                                    step="1"
+                                                    class="form-control form-control-sm"
+                                                    name="cns_out[${d.id_out_celup}]"
+                                                    id="cns_out_${d.id_out_celup}"
+                                                    placeholder="CNS"
+                                                    disabled>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -474,39 +534,89 @@
                 `);
             });
 
+            //  Event ketika checkbox diubah
             $container.on('change', '.row-check', function() {
                 let totalKgs = 0,
                     totalCns = 0,
                     totalKrg = 0;
 
-                // Hitung total Kgs, Cns, dan Krg untuk yang dipilih
+                $container.find('.row-check:checked, .row-check:not(:checked)').each(function() {
+                    const id = $(this).val();
+                    const isChecked = $(this).is(':checked');
+
+                    // Aktifkan/Nonaktifkan input manual
+                    $(`#kgs_out_${id}, #cns_out_${id}, #keterangan_${id}`).prop('disabled', !isChecked);
+                });
+
+                // Loop setiap baris yang dipilih
                 $container.find('.row-check:checked').each(function() {
-                    const id = $(this).val(); // Dapatkan id_out_celup dari checkbox yang dipilih
-                    const selectedData = res.data.find(d => d.id_out_celup == id); // Temukan data berdasarkan id_out_celup
+                    const id = $(this).val();
+                    const selectedData = res.data.find(d => d.id_out_celup == id);
 
                     if (selectedData) {
-                        totalKgs += parseFloat(selectedData.kgs_kirim || 0);
-                        totalCns += parseInt(selectedData.cones_kirim || 0); // Pastikan cones_kirim adalah integer
-                        totalKrg += 1; // Anda bisa mengganti dengan data yang sesuai untuk Krg
+                        // Ambil nilai dari input manual
+                        const rawManualKgs = $(`#kgs_out_${id}`).val().replace(',', '.').trim();
+                        const rawManualCns = $(`#cns_out_${id}`).val().trim();
+
+                        const useManualKgs = rawManualKgs !== '';
+                        // const useManualCns = rawManualCns !== '';
+
+                        const manualKgs = parseFloat(rawManualKgs) || 0;
+                        const manualCns = parseInt(rawManualCns) || 0;
+
+                        // Pakai input manual jika diisi, kalau tidak pakai data asli
+                        totalKgs += useManualKgs ? manualKgs : parseFloat(selectedData.kgs_kirim || 0);
+                        totalCns += useManualKgs ? manualCns : parseInt(selectedData.cones_kirim || 0);
+                        totalKrg += useManualKgs ? 0 : 1;
                     }
                 });
 
-                // Perbarui nilai total Kgs, Cns, dan Krg di input
+                // Tampilkan total ke input
                 $('input[name="ttl_kgs"]').val(totalKgs.toFixed(2));
                 $('input[name="ttl_cns"]').val(totalCns);
                 $('input[name="ttl_krg"]').val(totalKrg);
 
-                // Simpan cluster yang saat ini dipilih
-                const selectedClusterValue = $select.val();
+            });
 
-                // Aktifkan atau nonaktifkan dropdown berdasarkan total
-                if (totalKgs > 0) {
-                    fetchClusters(totalKgs, selectedClusterValue); // Ambil cluster sesuai totalKgs
-                    $select.prop('disabled', false);
-                } else {
-                    $select.prop('disabled', true).empty();
-                    $('#SisaKapasitas').val('');
+            // Event ketika input manual diubah
+            $container.on('input', 'input[name^="kgs_out"], input[name^="cns_out"]', function() {
+                const el = $(this);
+                const id = this.id.split('_')[2]; // ambil id_out_celup
+                const d = res.data.find(x => x.id_out_celup == id);
+                if (!d) return; // safety
+
+                // Batas maksimum
+                const maxKgs = parseFloat(d.kgs_kirim || 0);
+                const maxCns = parseInt(d.cones_kirim || 0, 10);
+
+                // Kalau ini input Kgs
+                if (this.name.startsWith('kgs_out')) {
+                    let raw = el.val().replace(',', '.').trim();
+                    let v = parseFloat(raw) || 0;
+                    if (v > maxKgs) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Nilai Terlalu Besar',
+                            text: `Kg Out Manual tidak boleh lebih dari ${maxKgs.toFixed(2)} KG`
+                        });
+                        el.val(maxKgs.toFixed(2));
+                    }
                 }
+                // Kalau ini input Cones
+                else {
+                    let raw = el.val().trim();
+                    let v = parseInt(raw, 10) || 0;
+                    if (v > maxCns) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Nilai Terlalu Besar',
+                            text: `Cones Out Manual tidak boleh lebih dari ${maxCns} Cns`
+                        });
+                        el.val(maxCns);
+                    }
+                }
+                // setelah validasi, hitung ulang totals
+                $container.find('.row-check:checked').trigger('change');
             });
 
         }).fail((_, __, err) => {

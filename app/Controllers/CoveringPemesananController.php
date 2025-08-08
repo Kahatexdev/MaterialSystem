@@ -77,21 +77,23 @@ class CoveringPemesananController extends BaseController
         // Ambil daftar pemesanan (query dari model Anda)
         $listPemesanan = $this->pemesananSpandexKaretModel
             ->getListPemesananCovering($jenis, $tgl_pakai);
-
+        // dd ($listPemesanan);
         // Loop untuk men-set tombol enable/disable
         foreach ($listPemesanan as $key => $value) {
             $history = $this->pengeluaranModel
                 ->where('id_total_pemesanan', $value['id_total_pemesanan'])
                 ->where('status', 'Pengeluaran Jalur')
                 ->first();
-
+            // dd ($history);
             if (!empty($history)) {
-                // Jika di‐history sudah ada record, disable tombol
-                $listPemesanan[$key]['button'] = 'enable';
-            } else {
+                // kalau sudah pernah dikirim, tombol harus disable
                 $listPemesanan[$key]['button'] = 'disable';
+            } else {
+                // kalau belum, tombol enable
+                $listPemesanan[$key]['button'] = 'enable';
             }
         }
+        // dd ($listPemesanan);
 
         // Ambil daftar tipe (jenis) unik dari covering_stock untuk select “Jenis” di modal
         $selectOptionData = $this->coveringStockModel
@@ -231,7 +233,7 @@ class CoveringPemesananController extends BaseController
             $this->pengeluaranModel->insert([
                 'id_psk' => $idPsk,
                 'id_total_pemesanan' => $dataPemesanan['id_total_pemesanan'],
-                'status' => 'Pengeluaran Jalur',
+                // 'status' => 'Pengeluaran Jalur',
                 'admin' => session()->get('username'),
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
@@ -330,31 +332,32 @@ class CoveringPemesananController extends BaseController
     {
         // Ambil data POST dan user
         $post = $this->request->getPost();
+        // dd ($post);
         $admin = session('username');
 
         // Cari stock item
-        $stockItem = $this->coveringStockModel
-            ->select('id_covering_stock, jenis_cover, jenis_benang, lmd')
-            ->where([
-                'jenis'  => $post['itemtype'],
-                'code'   => $post['kode_warna'],
-                'color'  => $post['color'],
-            ])
-            ->first();
+        // $stockItem = $this->coveringStockModel
+        //     ->select('id_covering_stock, jenis_cover, jenis_benang, lmd')
+        //     ->where([
+        //         'jenis'  => $post['itemtype'],
+        //         'code'   => $post['kode_warna'],
+        //         'color'  => $post['color'],
+        //     ])
+        //     ->first();
 
-        if (!$stockItem) {
-            return redirect()->back()->with('error', 'Stock tidak ditemukan.');
-        }
+        // if (!$stockItem) {
+        //     return redirect()->back()->with('error', 'Stock tidak ditemukan.');
+        // }
 
-        $stockId = $stockItem['id_covering_stock'];
-        $oldStock = $this->coveringStockModel->find($stockId);
-        if (!$oldStock) {
-            return redirect()->back()->with('error', 'Data stock lama tidak ditemukan.');
-        }
+        // $stockId = $stockItem['id_covering_stock'];
+        // $oldStock = $this->coveringStockModel->find($stockId);
+        // if (!$oldStock) {
+        //     return redirect()->back()->with('error', 'Data stock lama tidak ditemukan.');
+        // }
 
-        // Hitung selisih
-        $conesDiff = floatval($oldStock['ttl_cns']) - floatval($post['total_cones']);
-        $kgDiff    = floatval($oldStock['ttl_kg'])  - floatval($post['total_pesan']);
+        // // Hitung selisih
+        // $conesDiff = floatval($oldStock['ttl_cns']) - floatval($post['total_cones']);
+        // $kgDiff    = floatval($oldStock['ttl_kg'])  - floatval($post['total_pesan']);
 
         // Update stock
         // $this->coveringStockModel->update($stockId, [

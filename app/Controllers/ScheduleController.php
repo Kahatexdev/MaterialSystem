@@ -1094,6 +1094,7 @@ class ScheduleController extends BaseController
                     'lot_urut' => $id['lot_urut'],
                     'tgl_schedule' => $id['tanggal_schedule'],
                     'last_status' => $id['last_status'],
+                    'po_plus' => $id['po_plus'],
                     'admin' => $id['user_cek_status']
                 ];
             }
@@ -1213,7 +1214,7 @@ class ScheduleController extends BaseController
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
         $data = $this->scheduleCelupModel->getFilterSchBenang($tanggalAwal, $tanggalAkhir, $key, $tanggalSch);
-        // dd ($data);
+        // dd($data);
         return $this->response->setJSON($data);
     }
 

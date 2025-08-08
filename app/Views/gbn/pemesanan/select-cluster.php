@@ -306,25 +306,42 @@
 
             <!-- Grid Cards -->
             <div class="row g-2">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
                         <h6 class="text-muted mb-1 small">Kg Pesan</h6>
                         <h4 class="fw-semibold mb-0"><?= number_format($KgsPesan, 2) ?> Kg</h4>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
                         <h6 class="text-muted mb-1 small">Cns Pesan</h6>
                         <h4 class="fw-semibold mb-0"><?= $CnsPesan ?> Cns</h4>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
                         <h6 class="text-muted mb-1 small">Kg Persiapan</h6>
                         <h4 class="fw-semibold mb-0"><?= $kgPersiapan ? number_format($kgPersiapan, 2) : '0' ?> Kg</h4>
                     </div>
                 </div>
+                <div class="col-md-3">
+                    <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
+                        <h6 class="text-muted mb-1 small">Kg Pengiriman</h6>
+                        <h4 class="fw-semibold mb-0"><?= $kgPengiriman ? number_format($kgPengiriman, 2) : '0' ?> Kg</h4>
+                    </div>
+                </div>
             </div>
+            <!-- Grid Cards -->
+            <div class="row g-2">
+                <div class="col-md-12 mt-4">
+                    <!-- Button untuk membuka modal -->
+                    <button type="button" class="btn w-100 p-2 border rounded-3 bg-gradient-light shadow-sm text-center"
+                        data-bs-toggle="modal" data-bs-target="#keteranganModal">
+                        <h4 class="fw-semibold mb-0">Keterangan Pemesanan</h4>
+                    </button>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -335,7 +352,7 @@
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <span class="d-flex align-items-center">
                             <i class="fas fa-warehouse me-2 text-white"></i>
-                            Cluster <?= esc($item['nama_cluster']); ?> (<?= (number_format($item['total_kgs'], 2) . ' Kg / ' . $item['total_krg'] . ' Krg'); ?>)
+                            Cluster <?= esc($item['nama_cluster']); ?> (<?= (number_format($item['total_kgs'], 2) . ' Kg / ' . $item['total_krg'] . ' Krg / ' . $item['lot_final']); ?>)
                         </span>
                     </div>
                 </div>
@@ -351,6 +368,37 @@
                     <i class="fas fa-warehouse me-2 text-white"></i>
                     Pinjam Order
                 </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- modal isi keterangan pemesanan -->
+<div class="modal fade" id="keteranganModal" tabindex="-1" aria-labelledby="keteranganModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="w-100">
+                    <h5 class="modal-title text-white mb-2" id="keteranganModalLabel">Input Keterangan</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formKeterangan">
+                    <div id="formKeteranganContent">
+                        <!-- Konten form -->
+                        <div class="mb-3">
+                            <label for="keterangan_gbn" class="form-label">Keterangan</label>
+                            <textarea name="keterangan_gbn" id="keterangan_gbn" class="form-control" rows="4" placeholder="Tulis keterangan di sini..."><?= $ketGbn ?></textarea>
+                        </div>
+                        <input type="hidden" name="id_total_pemesanan" value="<?= $id ?>">
+                    </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="submit" class="btn btn-primary btn-submit">
+                            <i class="bi bi-check-circle me-1"></i> Simpan
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -448,6 +496,43 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        $('#formKeterangan').on('submit', function(e) {
+            e.preventDefault(); // cegah form submit normal
+
+            let formData = $(this).serialize();
+
+            $.ajax({
+                url: '<?= base_url($role . '/pemesanan/saveKetGbnInPemesanan') ?>', // sesuaikan
+                method: 'POST',
+                data: formData,
+                success: function(response) {
+                    // SweetAlert Success
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: 'Keterangan berhasil disimpan.',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        willClose: () => {
+                            location.reload(); // reload halaman setelah alert ditutup
+                        }
+                    });
+
+                    // tutup modal
+                    $('#keteranganModal').modal('hide');
+                    // reset form
+                    $('#formKeterangan')[0].reset();
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: 'Terjadi kesalahan saat menyimpan keterangan.',
+                    });
+                    console.error(xhr.responseText);
+                }
+            });
+        });
         // Card click event
         const cards = document.querySelectorAll('.stock-card');
         cards.forEach(card => {
@@ -560,6 +645,7 @@
                                     <label for="kgs_out_${item.id_pemasukan}" class="form-label small mb-1">Kg Out Manual</label>
                                     <input type="number"
                                         step="0.01"
+                                        max="${item.kgs_kirim}"
                                         class="form-control form-control-sm"
                                         name="kgs_out[${item.id_pemasukan}]"
                                         id="kgs_out_${item.id_pemasukan}"
@@ -570,6 +656,7 @@
                                     <label for="cns_out_${item.id_pemasukan}" class="form-label small mb-1">Cones Out Manual</label>
                                     <input type="number"
                                         step="1"
+                                        max="${item.cones_kirim}"
                                         class="form-control form-control-sm"
                                         name="cns_out[${item.id_pemasukan}]"
                                         id="cns_out_${item.id_pemasukan}"
@@ -578,7 +665,7 @@
                                 </div>
                             </div>
                             <div class="mt-2">
-                                <label for="keterangan_${item.id_pemasukan}" class="form-label small">Keterangan</label>
+                                <label for="keterangan_${item.id_pemasukan}" class="form-label small">Keterangan Pengeluaran</label>
                                 <textarea class="form-control form-control-sm"
                                     name="keterangan[${item.id_pemasukan}]"
                                     id="keterangan_${item.id_pemasukan}"
@@ -591,6 +678,35 @@
                 </div>
             </div>
             `;
+            // Validasi KG manual
+            $(document).on('input', '[id^="kgs_out_"]', function() {
+                const max = parseFloat($(this).attr('max') || '0');
+                const val = parseFloat($(this).val() || '0');
+                console.log(val, max);
+                if (val > max) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Peringatan',
+                        text: `Kgs tidak boleh lebih dari ${max} CNS`,
+                    });
+                    $(this).val(0);
+                }
+            });
+
+            // Validasi Cones manual
+            $(document).on('input', '[id^="cns_out_"]', function() {
+                const max = parseInt($(this).attr('max') || '0');
+                const val = parseInt($(this).val() || '0');
+                if (val > max) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Peringatan',
+                        text: `Cones tidak boleh lebih dari ${max} CNS`,
+                    });
+                    $(this).val(0);
+                }
+            });
+
 
             // Tambahkan konten item ke dalam container
             document.getElementById('formPengeluaran').innerHTML += formPengeluaran;
@@ -797,6 +913,10 @@
                         function loadDetailPinjamOrder() {
                             const noModel = $('#noModelSelect').val();
                             const cluster = $('#clusterSelect').val();
+                            // Ambil ulang item_type dan kode_warna dari selected option
+                            const selectedOption = $('#noModelSelect option:selected');
+                            const itemTypePinjam = selectedOption.data('item_type');
+                            const kodeWarnaPinjam = selectedOption.data('kode_warna');
 
                             // Kalau salah satu kosong, clear detail
                             if (!noModel || !cluster) {
@@ -804,7 +924,7 @@
                                 return;
                             }
 
-                            fetch(`<?= base_url('/gbn/pemasukan/getDataByCluster') ?>?no_model=${encodeURIComponent(noModel)}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}&cluster=${encodeURIComponent(cluster)}`)
+                            fetch(`<?= base_url('/gbn/pemasukan/getDataByCluster') ?>?no_model=${encodeURIComponent(noModel)}&item_type=${encodeURIComponent(itemTypePinjam)}&kode_warna=${encodeURIComponent(kodeWarnaPinjam)}&cluster=${encodeURIComponent(cluster)}`)
                                 .then(response => response.json())
                                 .then(data => {
                                     document.getElementById('formDetailPinjamOrder').innerHTML = '';
@@ -817,7 +937,7 @@
                                                     <div class="row">
                                                         <!-- Kiri: detail label -->
                                                         <div class="col-md-6">
-                                                            <h5><strong>Pengeluaran Per Karung</strong></h5>
+                                                            <h5><strong>Pinjam Per Karung</strong></h5>
                                                             <div class="form-check">
                                                                 <input class="form-check-input"
                                                                     type="checkbox"
@@ -841,12 +961,13 @@
 
                                                         <!-- Kanan: input manual -->
                                                         <div class="col-md-6">
-                                                            <h5><strong>Pengeluaran Per Kones</strong></h5>
+                                                            <h5><strong>Pinjam Per Kones</strong></h5>
                                                             <div class="row gx-2">
                                                                 <div class="col-6">
                                                                     <label for="kgs_out_${item.id_pemasukan}" class="form-label small mb-1">Kg Out Manual</label>
                                                                     <input type="number"
                                                                         step="0.01"
+                                                                        max="${item.kgs_kirim}"
                                                                         class="form-control form-control-sm"
                                                                         name="kgs_out[${item.id_pemasukan}]"
                                                                         id="kgs_out_${item.id_pemasukan}"
@@ -857,6 +978,7 @@
                                                                     <label for="cns_out_${item.id_pemasukan}" class="form-label small mb-1">Cones Out Manual</label>
                                                                     <input type="number"
                                                                         step="1"
+                                                                        max="${item.cones_kirim}"
                                                                         class="form-control form-control-sm"
                                                                         name="cns_out[${item.id_pemasukan}]"
                                                                         id="cns_out_${item.id_pemasukan}"
@@ -865,7 +987,7 @@
                                                                 </div>
                                                             </div>
                                                             <div class="mt-2">
-                                                                <label for="keterangan_${item.id_pemasukan}" class="form-label small">Keterangan</label>
+                                                                <label for="keterangan_${item.id_pemasukan}" class="form-label small">Keterangan Pengeluaran</label>
                                                                 <textarea class="form-control form-control-sm"
                                                                     name="keterangan[${item.id_pemasukan}]"
                                                                     id="keterangan_${item.id_pemasukan}"
@@ -896,6 +1018,35 @@
                                 });
                         }
 
+                        // Validasi KG manual
+                        $(document).on('input', '[id^="kgs_out_"]', function() {
+                            const max = parseFloat($(this).attr('max') || '0');
+                            const val = parseFloat($(this).val() || '0');
+                            console.log(val, max);
+                            if (val > max) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Peringatan',
+                                    text: `Kgs tidak boleh lebih dari ${max} CNS`,
+                                });
+                                $(this).val(0);
+                            }
+                        });
+
+                        // Validasi Cones manual
+                        $(document).on('input', '[id^="cns_out_"]', function() {
+                            const max = parseInt($(this).attr('max') || '0');
+                            const val = parseInt($(this).val() || '0');
+                            if (val > max) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Peringatan',
+                                    text: `Cones tidak boleh lebih dari ${max} CNS`,
+                                });
+                                $(this).val(0);
+                            }
+                        });
+
                         $('#clusterSelect').on('change', loadDetailPinjamOrder);
                         // Tampilkan modal
                         const modal = new bootstrap.Modal(document.getElementById('pinjamOrderModal'));
@@ -914,5 +1065,6 @@
         });
     });
 </script>
+
 
 <?php $this->endSection(); ?>

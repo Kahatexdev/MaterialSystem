@@ -30,6 +30,9 @@ class PemesananModel extends Model
         'id_retur',
         'status_kirim',
         'admin',
+        'additional_time',
+        'keterangan_gbn',
+        'hak_akses',
         'created_at',
         'updated_at',
     ];
@@ -93,12 +96,12 @@ class PemesananModel extends Model
     public function getDataPemesananperTgl($area, $jenis)
     {
         $query = $this->db->table('pemesanan p')
-            ->select("p.id_pemesanan,mm.jenis, p.tgl_pakai, m.area, mo.no_model, m.item_type, m.kode_warna, m.color,  tp.ttl_jl_mc, tp.ttl_kg , tp.ttl_cns, CASE WHEN p.po_tambahan = '1' THEN 'YA' ELSE '' END AS po_tambahan")
+            ->select("p.id_pemesanan,mm.jenis, p.tgl_pakai, p.admin AS area, mo.no_model, m.item_type, m.kode_warna, m.color,  tp.ttl_jl_mc, tp.ttl_kg , tp.ttl_cns, CASE WHEN p.po_tambahan = '1' THEN 'YA' ELSE '' END AS po_tambahan")
             ->join('total_pemesanan tp', 'tp.id_total_pemesanan = p.id_total_pemesanan', 'left')
             ->join('material m', 'm.id_material = p.id_material', 'left')
             ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
             ->join('master_material mm', 'mm.item_type = m.item_type', 'left')
-            ->where('m.area', $area)
+            ->where('p.admin', $area)
             ->where('mm.jenis', $jenis)
             ->where('p.status_kirim', 'YA')
             ->groupBy('p.tgl_pakai')
@@ -115,26 +118,26 @@ class PemesananModel extends Model
 
     public function getDataPemesananfiltered($area, $jenis, $filterDate)
     {
-        log_message('debug', "Query Parameters - Area: {$area}, Jenis: {$jenis}, Tanggal: {$filterDate}");
+        // log_message('debug', "Query Parameters - Area: {$area}, Jenis: {$jenis}, Tanggal: {$filterDate}");
 
         $query = $this->db->table('pemesanan p')
-            ->select("p.id_pemesanan, p.tgl_pakai, m.area, m.item_type")
+            ->select("p.id_pemesanan, p.tgl_pakai, p.admin AS area, m.item_type")
             ->join('material m', 'm.id_material = p.id_material', 'left')
             ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
             ->join('master_material mm', 'mm.item_type = m.item_type', 'left')
             ->where('p.admin', $area)
             ->where('mm.jenis', $jenis)
             ->where('p.tgl_pakai', $filterDate)
-            ->groupBy('p.tgl_pakai, m.area, m.item_type')
+            ->groupBy('p.tgl_pakai')
             ->get();
 
         if (!$query) {
-            log_message('error', 'SQL Error: ' . json_encode($this->db->error()));
+            // log_message('error', 'SQL Error: ' . json_encode($this->db->error()));
             return [];
         }
 
         $result = $query->getResultArray();
-        log_message('debug', 'Query Result: ' . json_encode($result));
+        // log_message('debug', 'Query Result: ' . json_encode($result));
 
         return $result;
     }
@@ -370,10 +373,10 @@ class PemesananModel extends Model
 
     public function getFilterPemesananArea($key, $tanggal_awal, $tanggal_akhir)
     {
-        $this->select('pemesanan.*, master_order.foll_up, master_order.no_model, master_order.no_order, material.area, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, material.item_type, material.kode_warna, material.color')
+        $this->select('pemesanan.*,pemesanan.admin AS area, master_order.foll_up, master_order.no_model, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, material.item_type, material.kode_warna, material.color')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->where('pemesanan.status_kirim', '');
+            ->where('pemesanan.status_kirim', 'YA');
 
         // Cek apakah ada input key untuk pencarian
         if (!empty($key)) {
@@ -734,7 +737,7 @@ class PemesananModel extends Model
     {
         $this->select('master_order.no_model, material.item_type, material.kode_warna, material.color, MAX(material.loss) AS max_loss,pemesanan.tgl_pakai, total_pemesanan.id_total_pemesanan, total_pemesanan.ttl_jl_mc, total_pemesanan.ttl_kg, pemesanan.po_tambahan, IFNULL(p.kgs_out, 0) AS kgs_out, p.lot_out')
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
-            ->join('(SELECT id_total_pemesanan, SUM(kgs_out) AS kgs_out, GROUP_CONCAT(DISTINCT lot_out) AS lot_out FROM pengeluaran GROUP BY id_total_pemesanan) p', 'p.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
+            ->join('(SELECT id_total_pemesanan, SUM(kgs_out) AS kgs_out, GROUP_CONCAT(DISTINCT lot_out) AS lot_out FROM pengeluaran WHERE status="Pengiriman Area" GROUP BY id_total_pemesanan) p', 'p.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pemesanan.status_kirim', 'YA')

@@ -240,6 +240,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportBenangBulanan', 'WarehouseController::reportBenangBulanan');
     $routes->get('warehouse/filterBenangBulanan', 'WarehouseController::filterBenangBulanan');
     $routes->get('warehouse/exportReportBenangBulanan', 'ExcelController::exportReportBenang');
+    $routes->get('warehouse/listOtherBarcode', 'WarehouseController::listOtherBarcode');
+    $routes->get('warehouse/detailOtherBarcode/(:any)', 'WarehouseController::detailOtherBarcode/$1');
+    $routes->get('warehouse/generateOtherBarcode/(:any)', 'DomPdfController::generateOtherBarcode/$1');
 
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');
@@ -260,6 +263,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pemesananperarea/(:any)', 'PemesananController::pemesananPerArea/$1');
     $routes->get('detailpemesanan/(:any)/(:any)', 'PemesananController::detailPemesanan/$1/$2');
     $routes->get('selectClusterWarehouse/(:any)', 'PemesananController::selectClusterWarehouse/$1');
+    $routes->post('pemesanan/saveKetGbnInPemesanan', 'PemesananController::saveKetGbnInPemesanan');
     $routes->get('pinjamOrder', 'PemesananController::pinjamOrder');
     $routes->get('pinjamOrder/options', 'PemesananController::optionsPinjamOrder');
     $routes->get('pinjamOrder/getNoModel', 'PemesananController::getNoModelPinjamOrder');
@@ -361,6 +365,10 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('schedule/getScheduleDetails/(:any)/(:any)/(:any)', 'ScheduleController::getScheduleDetails/$1/$2/$3');
     $routes->get('schedule/editSchedule', 'ScheduleController::editSchedule');
     $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
+    //Report
+    $routes->get('schedule/reportSchWeekly', 'ScheduleController::reportSchWeekly');
+    $routes->get('schedule/filterSchWeekly', 'ScheduleController::filterSchWeekly');
+    $routes->get('schedule/exportScheduleWeekly', 'ExcelController::exportScheduleWeekly');
 
     $routes->get('outCelup', 'CelupController::outCelup');
     $routes->get('outCelup/getDetail/(:num)', 'CelupController::getDetail/$1');
@@ -478,6 +486,9 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('warehouse/templateStokBarangJadi', 'CoveringWarehouseController::templateStokBarangJadi');
     $routes->get('warehouse/templateStokBahanBaku', 'CoveringWarehouseBBController::templateStokBahanBaku');
 
+    $routes->get('warehouse/(:any)', 'CoveringWarehouseController::getStockByMesin/$1');
+
+
     // warehouse bahan baku
     $routes->get('warehouseBB', 'CoveringWarehouseBBController::index');
     $routes->post('warehouseBB/store', 'CoveringWarehouseBBController::store');
@@ -489,6 +500,11 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('warehouseBB/deleteBahanBakuCov/(:num)', 'CoveringWarehouseBBController::deleteBahanBakuCov/$1');
     $routes->post('warehouse/importStokBahanBakuJenis', 'CoveringWarehouseBBController::importStokBahanBakuJenis');
     $routes->post('warehouse/importStokBahanBaku', 'CoveringWarehouseBBController::importStokBahanBaku');
+    $routes->get('warehouseBB/nylon', 'CoveringWarehouseBBController::nylon');
+    $routes->get('warehouseBB/polyester', 'CoveringWarehouseBBController::polyester');
+    $routes->get('warehouseBB/recycledPolyester', 'CoveringWarehouseBBController::recycledPolyester');
+    $routes->get('warehouseBB/spandex', 'CoveringWarehouseBBController::spandex');
+    $routes->get('warehouseBB/rubber', 'CoveringWarehouseBBController::rubber');
 
     //Pemesanan
     $routes->get('pemesanan', 'CoveringPemesananController::index');

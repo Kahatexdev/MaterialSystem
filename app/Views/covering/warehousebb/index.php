@@ -70,6 +70,62 @@
         </div>
     <?php endif; ?>
 
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card summary-card h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Jenis Barang</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $totalJenis['total_jenis'] ?></div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-boxes fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card summary-card total-stock h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Stok (Kg)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= number_format($totalKg['total_kg'], 2) ?> Kg</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-weight-hanging fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card summary-card items-available h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Barang Tersedia</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $tersedia['jenis_benang_tersedia'] ?></div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-check-circle fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card summary-card items-out-of-stock h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Barang Habis</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $kosong['jenis_benang_kosong'] ?></div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-times-circle fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card card-frame">
         <div class="card-body">
             <div class="row align-items-center">
@@ -214,42 +270,118 @@
         </div>
     </div>
 
-    <div class="card px-3 py-3 mt-3">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table" id="stockTable" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Jenis</th>
-                            <th>Denier</th>
-                            <th>Warna</th>
-                            <th>Kode Warna</th>
-                            <th>Stock</th>
-                            <th>Keterangan</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php $no = 1; ?>
-                        <?php foreach ($warehouseBB as $bb) : ?>
-                            <tr>
-                                <td><?= $no++ ?></td>
-                                <td><?= $bb['jenis_benang'] ?></td>
-                                <td><?= $bb['denier'] ?></td>
-                                <td><?= $bb['warna'] ?></td>
-                                <td><?= $bb['kode'] ?></td>
-                                <td><?= $bb['kg'] ?> Kg</td>
-                                <td><?= $bb['keterangan'] ?></td>
-                                <td>
-                                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $bb['idstockbb'] ?>"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-danger btn-delete" data-id="<?= $bb['idstockbb'] ?>"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
+    <div class="row mt-4">
+        <div class="col-xl-4 col-sm-6 mb-xl-0 mb-4 mt-2">
+            <a href="<?= base_url($role . '/warehouseBB/nylon') ?>">
+                <div class="card summary-card">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="numbers">
+                                    <h5 class="font-weight-bolder mb-0">NYLON
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+
+                                    <i class="fas fa-folder text-lg opacity-10" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-4 col-sm-6 mb-xl-0 mb-4 mt-2">
+            <a href="<?= base_url($role . '/warehouseBB/polyester') ?>">
+                <div class="card summary-card">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="numbers">
+                                    <h5 class="font-weight-bolder mb-0">POLYESTER
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+
+                                    <i class="fas fa-folder text-lg opacity-10" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-4 col-sm-6 mb-xl-0 mb-4 mt-2">
+            <a href="<?= base_url($role . '/warehouseBB/recycledPolyester') ?>">
+                <div class="card summary-card">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="numbers">
+                                    <h5 class="font-weight-bolder mb-0">RECYCLED POLYESTER
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+
+                                    <i class="fas fa-folder text-lg opacity-10" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-xl-4 col-sm-6 mb-xl-0 mb-4 mt-2">
+            <a href="<?= base_url($role . '/warehouseBB/spandex') ?>">
+                <div class="card summary-card">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="numbers">
+                                    <h5 class="font-weight-bolder mb-0">SPANDEX
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+
+                                    <i class="fas fa-folder text-lg opacity-10" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-4 col-sm-6 mb-xl-0 mb-4 mt-2">
+            <a href="<?= base_url($role . '/warehouseBB/rubber') ?>">
+                <div class="card summary-card">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="numbers">
+                                    <h5 class="font-weight-bolder mb-0">RUBBER
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+
+                                    <i class="fas fa-folder text-lg opacity-10" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
         </div>
     </div>
 

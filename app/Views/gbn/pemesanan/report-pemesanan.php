@@ -119,7 +119,7 @@
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
-                    text: 'Apa yang mau dicari cuy?',
+                    text: 'Isi minimal salah satu filter untuk mencari data.',
                 });
                 return;
             }

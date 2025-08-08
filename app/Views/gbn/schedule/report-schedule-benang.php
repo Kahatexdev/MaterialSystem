@@ -75,6 +75,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Datang Solid</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Start Mc</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
@@ -146,6 +147,7 @@
                                 item.item_type,
                                 item.kode_warna,
                                 item.warna,
+                                parseFloat(item.kgs_datang ?? 0).toFixed(2),
                                 item.start_mc,
                                 item.delivery_awal,
                                 item.delivery_akhir,

@@ -438,7 +438,7 @@ class WarehouseController extends BaseController
 
         if ($update) {
             $existing = session()->get('dataOut') ?? [];
-            $filtered = array_filter($existing, fn($item) => ! in_array($item['id_out_celup'], $post['id_out_celup']));
+            $filtered = array_filter($existing, fn($item) => !in_array($item['id_out_celup'], $post['id_out_celup']));
             session()->set('dataOut', array_values($filtered));
         }
 
@@ -472,7 +472,7 @@ class WarehouseController extends BaseController
                 . '|' . $row['kode_warna']
                 . '|' . $row['warna'];
 
-            if (! isset($grouped[$key])) {
+            if (!isset($grouped[$key])) {
                 // pertama kali, simpan seluruh row
                 $grouped[$key] = $row;
             } else {
@@ -1076,9 +1076,10 @@ class WarehouseController extends BaseController
     {
         $noModelOld = $this->request->getVar('noModelOld');
         $kodeWarna = $this->request->getVar('kodeWarna');
+        $term = $this->request->getVar('term');
         // var_dump($kodeWarna);
         // log_message('debug', 'Fetching no_model for kode_warna: ' . $kodeWarna);
-        $results = $this->materialModel->getNoModel($noModelOld, $kodeWarna);
+        $results = $this->materialModel->getNoModel($noModelOld, $kodeWarna, $term);
         // last query
         // log_message('debug', 'Last Query: ' . $this->db->getLastQuery());
         $resultsArray = json_decode(json_encode($results), true);
@@ -2150,7 +2151,7 @@ class WarehouseController extends BaseController
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
         $data = $this->pengeluaranModel->getFilterPengiriman($key, $tanggalAwal, $tanggalAkhir);
-
+        // dd($data);
         return $this->response->setJSON($data);
     }
     public function reportGlobal()
@@ -2919,7 +2920,7 @@ class WarehouseController extends BaseController
     public function filterBenangBulanan()
     {
         $bulan = $this->request->getGet('bulan');
-        if (empty($bulan) || ! preg_match('/^\d{4}\-\d{2}$/', $bulan)) {
+        if (empty($bulan) || !preg_match('/^\d{4}\-\d{2}$/', $bulan)) {
             return $this->response
                 ->setStatusCode(400)
                 ->setJSON(['error' => 'Parameter “bulan” harus dalam format YYYY-MM']);
@@ -2965,5 +2966,31 @@ class WarehouseController extends BaseController
             'status' => 'success',
             // 'message' => 'Keterangan berhasil diperbarui.'
         ]);
+    }
+
+    public function listOtherBarcode()
+    {
+        $listBarcode = $this->pemasukanModel->listOtherBarcode();
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "List Other Barcode",
+            'listBarcode' => $listBarcode,
+        ];
+
+        return view($this->role . '/warehouse/list-other-barcode', $data);
+    }
+
+    public function detailOtherBarcode($tglDatang)
+    {
+        $detailOtherBarcode = $this->pemasukanModel->detailOtherBarcode($tglDatang);
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "Detail Other Barcode",
+            'detailOtherBarcode' => $detailOtherBarcode,
+            'tglDatang' => $tglDatang
+        ];
+        return view($this->role . '/warehouse/detail-other-barcode', $data);
     }
 }
