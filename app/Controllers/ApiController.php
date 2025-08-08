@@ -878,7 +878,8 @@ class ApiController extends ResourceController
     {
         $noModel = $this->request->getGet('noModel') ?? '';
         // $noModel = 'DB2501';
-        $results = $this->pengeluaranModel->searchPengiriman($noModel);
+        // $results = $this->pengeluaranModel->searchPengiriman($noModel);
+        $results = $this->pengeluaranModel->searchPengiriman2($noModel);
 
         // Konversi stdClass menjadi array
         $resultsArray = json_decode(json_encode($results), true);
