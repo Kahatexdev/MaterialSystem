@@ -646,7 +646,7 @@ class PemesananModel extends Model
                 x.lot_out
             ")
             ->groupBy('p.tgl_pesan, p.no_model, p.item_type, p.jenis, p.kode_warna, p.color')
-            ->orderBy('p.tgl_pesan', 'DESC')
+            // ->orderBy('p.tgl_pesan', 'DESC')
             ->orderBy('p.no_model, p.item_type, p.kode_warna, p.color', 'ASC');
 
         return $query->get()->getResultArray();
