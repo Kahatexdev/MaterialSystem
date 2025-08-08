@@ -118,26 +118,26 @@ class PemesananModel extends Model
 
     public function getDataPemesananfiltered($area, $jenis, $filterDate)
     {
-        log_message('debug', "Query Parameters - Area: {$area}, Jenis: {$jenis}, Tanggal: {$filterDate}");
+        // log_message('debug', "Query Parameters - Area: {$area}, Jenis: {$jenis}, Tanggal: {$filterDate}");
 
         $query = $this->db->table('pemesanan p')
-            ->select("p.id_pemesanan, p.tgl_pakai, m.area, m.item_type")
+            ->select("p.id_pemesanan, p.tgl_pakai, p.admin AS area, m.item_type")
             ->join('material m', 'm.id_material = p.id_material', 'left')
             ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
             ->join('master_material mm', 'mm.item_type = m.item_type', 'left')
             ->where('p.admin', $area)
             ->where('mm.jenis', $jenis)
             ->where('p.tgl_pakai', $filterDate)
-            ->groupBy('p.tgl_pakai, m.area, m.item_type')
+            ->groupBy('p.tgl_pakai, p.admin, m.item_type')
             ->get();
 
         if (!$query) {
-            log_message('error', 'SQL Error: ' . json_encode($this->db->error()));
+            // log_message('error', 'SQL Error: ' . json_encode($this->db->error()));
             return [];
         }
 
         $result = $query->getResultArray();
-        log_message('debug', 'Query Result: ' . json_encode($result));
+        // log_message('debug', 'Query Result: ' . json_encode($result));
 
         return $result;
     }
