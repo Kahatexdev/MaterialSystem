@@ -142,7 +142,7 @@
                                 item.lot_urut,
                                 item.no_model,
                                 item.tanggal_schedule,
-                                item.kg_celup,
+                                parseFloat(item.kg_celup).toFixed(2),
                                 item.item_type,
                                 item.kode_warna,
                                 item.warna,
