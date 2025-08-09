@@ -1170,10 +1170,10 @@ class ExcelController extends BaseController
                 $sheet->setCellValue('E' . $row, $data->lot_stock);
                 $sheet->setCellValue('F' . $row, $data->nama_cluster);
                 $sheet->setCellValue('G' . $row, $data->kapasitas);
-                $sheet->setCellValue('H' . $row, $data->Kgs);
+                $sheet->setCellValue('H' . $row, format_number($data->Kgs, 2));
                 $sheet->setCellValue('I' . $row, $data->Krg);
                 $sheet->setCellValue('J' . $row, $data->Cns);
-                $sheet->setCellValue('K' . $row, $data->KgsStockAwal);
+                $sheet->setCellValue('K' . $row, format_number($data->KgsStockAwal));
                 $sheet->setCellValue('L' . $row, $data->KrgStockAwal);
                 $sheet->setCellValue('M' . $row, $data->CnsStockAwal);
                 $sheet->setCellValue('N' . $row, $data->lot_awal);
@@ -2964,19 +2964,29 @@ class ExcelController extends BaseController
                             $startMc = (!empty($dataRow['start_mc']) && $dataRow['start_mc'] !== '0000-00-00 00:00:00')
                                 ? date('d-M', strtotime($dataRow['start_mc'])) : '';
 
+                            $deliveryRaw = $dataRow['delivery_awal'] ?? '';
+                            $delivery = ''; // default kosong
+
+                            if (!empty($deliveryRaw) && $deliveryRaw !== '0000-00-00' && $deliveryRaw !== '0000-00-00 00:00:00') {
+                                $ts = strtotime($deliveryRaw);
+                                if ($ts !== false && $ts > 0) {
+                                    $delivery = date('d-M', $ts);
+                                }
+                            }
+
                             $values = [
                                 $lot === 1 ? $kapasitas : '',
                                 $lot === 1 ? $noMesin : '',
                                 $lot,
                                 $dataRow['no_model'] ?? '',
                                 $dataRow['item_type'] ?? '',
-                                $dataRow['kg_celup'] ?? '',
+                                format_number($dataRow['kg_celup'] ?? '', 2),
                                 $dataRow['kode_warna'] ?? '',
                                 $dataRow['warna'] ?? '',
                                 $dataRow['lot_celup'] ?? '',
                                 $dataRow['actual_celup'] ?? '',
                                 $startMc ?? '',
-                                date('d-M', strtotime($dataRow['delivery_awal'])) ?? '',
+                                $delivery,
                                 $dataRow['ket_schedule'] ?? ''
                             ];
                         } else {
@@ -3455,7 +3465,7 @@ class ExcelController extends BaseController
             // kalau nggak ada, bisa ganti dengan strtok($item['jenis'], ' ')
             $mainJenis = $item['jenis_benang'];
             $kg       = $item['ttl_kg'];
-            if (! isset($totalPerBenang[$mainJenis])) {
+            if (!isset($totalPerBenang[$mainJenis])) {
                 $totalPerBenang[$mainJenis] = 0;
             }
             $totalPerBenang[$mainJenis] += $kg;
@@ -11013,7 +11023,7 @@ class ExcelController extends BaseController
         $tglAkhir = $this->request->getGet('tanggal_akhir');
         if (empty($tglAwal) && empty($tglAkhir)) {
             $bulan = $this->request->getGet('bulan');
-            if (empty($bulan) || ! preg_match('/^\d{4}\-\d{2}$/', $bulan)) {
+            if (empty($bulan) || !preg_match('/^\d{4}\-\d{2}$/', $bulan)) {
                 return $this->response
                     ->setStatusCode(400)
                     ->setJSON(['error' => 'Parameter “bulan” harus dalam format YYYY-MM']);
