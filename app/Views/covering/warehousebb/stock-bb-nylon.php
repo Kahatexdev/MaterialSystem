@@ -101,6 +101,66 @@
                 </table>
             </div>
         </div>
+
+        <!-- Edit Item Modal -->
+        <?php foreach ($nylonBB as $list) : ?>
+            <div class="modal fade" id="editModal<?= $list['idstockbb'] ?>" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header text-white">
+                            <h5 class="modal-title" id="editModalLabel">Update Stock Bahan Baku</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form action="<?= base_url($role . '/warehouseBB/update/' . $list['idstockbb']) ?>" method="POST">
+                            <?= csrf_field(); ?>
+                            <input type="hidden" step="0.01" class="form-control" name="kg" value="<?= $list['kg'] ?>" placeholder="Masukkan Stock (Kg)" required>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Jenis Benang</label>
+                                        <select class="form-select" name="jenis_benang" required>
+                                            <option value="NYLON" <?= $list['jenis_benang'] == 'NYLON' ? 'selected' : '' ?>>NYLON</option>
+                                            <option value="POLYESTER" <?= $list['jenis_benang'] == 'POLYESTER' ? 'selected' : '' ?>>POLYESTER</option>
+                                            <option value="SPANDEX" <?= $list['jenis_benang'] == 'SPANDEX' ? 'selected' : '' ?>>SPANDEX</option>
+                                            <option value="KARET" <?= $list['jenis_benang'] == 'KARET' ? 'selected' : '' ?>>KARET</option>
+                                            <option value="RECYCLED POLYESTER" <?= $list['jenis_benang'] == 'RECYCLED POLYESTER' ? 'selected' : '' ?>>RECYCLED POLYESTER</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Denier</label>
+                                        <input type="text" class="form-control" name="denier" value="<?= $list['denier'] ?>" placeholder="Masukkan Denier" required>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Warna</label>
+                                        <input type="text" class="form-control" name="warna" value="<?= $list['warna'] ?>" placeholder="Masukkan Warna" required>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Kode Warna</label>
+                                        <input type="text" class="form-control" name="kode" value="<?= $list['kode'] ?>" placeholder="Masukkan Kode Warna" required>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Stock (Kg)</label>
+                                        <input type="text" class="form-control" name="stock" value="<?= $list['kg'] ?>" placeholder="Masukkan Stock" required>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">Keterangan</label>
+                                        <textarea name="keterangan" id="" class="form-control" placeholder="Masukkan Keterangan"><?= $list['keterangan'] ?></textarea>
+                                    </div>
+
+                                    <!-- Hidden values for reference -->
+                                    <input type="hidden" name="idstockbb" value="<?= $list['idstockbb'] ?>">
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                                    <button type="submit" class="btn btn-info">Simpan</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.21.1/dist/bootstrap-table.min.js"></script>
