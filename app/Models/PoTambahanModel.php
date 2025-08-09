@@ -164,7 +164,7 @@ class PoTambahanModel extends Model
             ->groupBy('master_order.no_model, material.item_type, material.kode_warna')
             ->first();
     }
-    public function getDataPoPlus($tgl_po = null, $no_model = null, $kode_warna = null)
+    public function getDataPoPlus($tgl_po_dari = null, $tgl_po_sampai = null, $no_model = null, $area = null, $kode_warna = null)
     {
         $builder = $this->select('po_tambahan.id_po_tambahan, master_order.no_model, material.area, material.item_type, material.kode_warna, material.color, (SUM(po_tambahan.poplus_mc_kg) + SUM(po_tambahan.plus_pck_kg)) AS kg_poplus, (po_tambahan.poplus_mc_cns + po_tambahan.plus_pck_cns) AS cns_poplus, po_tambahan.status, DATE(po_tambahan.created_at) AS tgl_poplus, po_tambahan.admin, po_tambahan.keterangan, master_material.jenis')
             ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
@@ -177,16 +177,23 @@ class PoTambahanModel extends Model
             ->groupBy('po_tambahan.status')
             // ->where('DATE(po_tambahan.created_at)', $tgl_po)
             ->where('status', 'approved');
-        if (!empty($tgl_po)) {
-            $builder->where('DATE(po_tambahan.created_at)', $tgl_po);
+        if ($tgl_po_dari) {
+            $builder->where('po_tambahan.created_at >=', $tgl_po_dari . ' 00:00:00');
+        }
+        if ($tgl_po_sampai) {
+            $builder->where('po_tambahan.created_at <=', $tgl_po_sampai . ' 23:59:59');
         }
         if (!empty($no_model)) {
             $builder->where('master_order.no_model', $no_model);
         }
-        if (!empty($kodeWarna)) {
-            $builder->where('material.kode_warna', $kodeWarna);
+        if (!empty($area)) {
+            $builder->where('po_tambahan.admin', $area);
         }
-        return $builder->orderBy('po_tambahan.status', 'ASC')
+        if (!empty($kode_warna)) {
+            $builder->where('material.kode_warna', $kode_warna);
+        }
+        return
+            $builder->orderBy('po_tambahan.status', 'ASC')
             ->orderBy('po_tambahan.created_at', 'DESC')
             ->findAll();
     }

@@ -14,15 +14,23 @@
                     <label for="">No Model</label>
                     <input type="text" class="form-control" name="no_model" id="no_model">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    <label for="">Area</label>
+                    <input type="text" class="form-control" name="area" id="area">
+                </div>
+                <div class="col-md-2">
                     <label for="">Kode Warna</label>
                     <input type="text" class="form-control" name="kode_warna" id="kode_warna">
                 </div>
                 <div class="col-md-2">
-                    <label for="">Tanggal PO</label>
-                    <input type="date" class="form-control" name="tgl_po" id="tgl_po">
+                    <label for="">Tanggal PO Dari</label>
+                    <input type="date" class="form-control" name="tgl_po_dari" id="tgl_po_dari">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-2">
+                    <label for="">Tanggal PO Sampai</label>
+                    <input type="date" class="form-control" name="tgl_po_sampai" id="tgl_po_sampai">
+                </div>
+                <div class="col-md-2">
                     <label for="">Aksi</label><br>
                     <button class="btn btn-info btn-block" id="btnSearch"><i class="fas fa-search"></i></button>
                     <button class="btn btn-danger" id="btnReset"><i class="fas fa-redo-alt"></i></button>
@@ -105,18 +113,24 @@
 
         $('#btnExport').click(function() {
             const m = $('#no_model').val().trim();
+            const a = $('#area').val().trim();
             const k = $('#kode_warna').val().trim();
-            const t = $('#tgl_po').val().trim();
+            const td = $('#tgl_po_dari').val().trim();
+            const ts = $('#tgl_po_sampai').val().trim();
             window.location.href = "<?= base_url("$role/poplus/exportPoTambahan") ?>" +
                 "?model=" + encodeURIComponent(m) +
+                "&area=" + encodeURIComponent(a) +
                 "&kode_warna=" + encodeURIComponent(k) +
-                "&tgl_po=" + encodeURIComponent(t);
+                "&tgl_po_dari=" + encodeURIComponent(td) +
+                "&tgl_po_sampai=" + encodeURIComponent(ts);
         });
 
         $('#btnReset').click(function() {
             $('#no_model').val('');
+            $('#area').val('');
             $('#kode_warna').val('');
-            $('#tgl_po').val('');
+            $('#tgl_po_dari').val('');
+            $('#tgl_po_sampai').val('');
             $('input[type="date"]').val('');
 
             loadDefaultData();
@@ -127,10 +141,20 @@
 
         function loadData() {
             let no_model = $('input[name="no_model"]').val().trim();
+            let area = $('input[name="area"]').val().trim();
             let kode_warna = $('input[name="kode_warna"]').val().trim();
-            let tgl_po = $('input[name="tgl_po"]').val().trim();
+            let tgl_po_dari = $('input[name="tgl_po_dari"]').val().trim();
+            let tgl_po_sampai = $('input[name="tgl_po_sampai"]').val().trim();
 
-            if (no_model === '' && kode_warna === '' && tgl_po === '') {
+            console.log({
+                model: no_model,
+                area: area,
+                kode_warna: kode_warna,
+                tgl_po_dari: tgl_po_dari,
+                tgl_po_sampai: tgl_po_sampai
+            }); // DEBUG
+
+            if (no_model === '' && area === '' && kode_warna === '' && tgl_po_dari === '' && tgl_po_sampai === '') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
@@ -144,8 +168,10 @@
                 type: "POST",
                 data: {
                     model: no_model,
+                    area: area,
                     kode_warna: kode_warna,
-                    tgl_po: tgl_po
+                    tgl_po_dari: tgl_po_dari,
+                    tgl_po_sampai: tgl_po_sampai
                 },
                 dataType: "json",
                 success: function(response) {
@@ -182,6 +208,7 @@
                 type: "GET",
                 dataType: "json",
                 success: function(response) {
+                    console.log("RESPONSE:", response); // DEBUG
                     dataTable.clear().draw();
 
                     $.each(response, function(index, item) {
