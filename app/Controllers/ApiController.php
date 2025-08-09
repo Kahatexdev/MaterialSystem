@@ -206,7 +206,6 @@ class ApiController extends ResourceController
         return $this->respond($res, 200);
     }
 
-
     public function cekBahanBaku($model)
     {
         $search = '';
