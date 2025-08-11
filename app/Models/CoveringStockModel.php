@@ -92,7 +92,9 @@ class CoveringStockModel extends Model
                 return $query->where('jenis_cover', $jenisCover);
             })
             ->orderBy('jenis_benang', 'ASC')
+            ->orderBy('jenis', 'ASC')
             ->orderBy('dr', 'ASC')
+            ->orderBy('code', 'ASC')
             ->findAll();
     }
 
