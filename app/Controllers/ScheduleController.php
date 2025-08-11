@@ -634,7 +634,7 @@ class ScheduleController extends BaseController
             'warna' => $warna,
             'jmlLot' => $jmlLot,
         ];
-        // dd ($data);
+        // dd($data);
         return view($this->role . '/schedule/form-edit', $data);
     }
 
