@@ -1085,23 +1085,6 @@ class PemesananController extends BaseController
     }
     public function detailListBarangKeluar()
     {
-        $jenis = $this->request->getGet('jenis');
-        $tglPakai = $this->request->getGet('tgl_pakai');
-
-        $detail = $this->pengeluaranModel->getDataPemesananExport($jenis, $tglPakai);
-
-        $data = [
-            'active' => $this->active,
-            'title' => 'Material System',
-            'role' => $this->role,
-            'jenis' => $jenis,
-            'tglPakai' => $tglPakai,
-            'detail' => $detail,
-        ];
-        return view($this->role . '/pemesanan/detailPersiapanBarangPertgl', $data);
-    }
-    public function detailListBarangKeluar()
-    {
         $jenis    = $this->request->getGet('jenis');
         $tglPakai = $this->request->getGet('tglPakai');
 
