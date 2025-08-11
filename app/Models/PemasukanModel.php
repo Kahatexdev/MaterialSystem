@@ -377,11 +377,12 @@ class PemasukanModel extends Model
     public function listOtherBarcode()
     {
         return $this->db->table('pemasukan')
-            ->select('tgl_masuk')
+            ->select('other_bon.tgl_datang')
             ->join('out_celup', 'pemasukan.id_out_celup = out_celup.id_out_celup')
+            ->join('other_bon', 'other_bon.id_other_bon = out_celup.id_other_bon', 'left')
             ->where('out_celup.id_other_bon IS NOT NULL')
-            ->groupBy('tgl_masuk')
-            ->orderBy('tgl_masuk', 'DESC')
+            ->groupBy('other_bon.tgl_datang')
+            ->orderBy('other_bon.tgl_datang', 'DESC')
             ->get()
             ->getResultArray();
     }
