@@ -781,5 +781,7 @@ $routes->group(
         $routes->get('getMaterialByNoModel/(:any)', 'ApiController::getMaterialByNoModel/$1');
         $routes->get('getMUForRosso/(:any)/(:any)/(:any)', 'ApiController::getMaterialForPemesananRosso/$1/$2/$3');
         $routes->get('listExportRetur/(:any)', 'ApiController::listExportRetur/$1');
+        $routes->get('getGWAktual', 'ApiController::getGWAktual');
+        $routes->get('saveGWAktual', 'ApiController::saveGWAktual');
     }
 );

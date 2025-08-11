@@ -12,7 +12,7 @@ class MaterialModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id_material', 'id_order', 'style_size', 'area', 'inisial', 'color', 'item_type', 'kode_warna', 'composition', 'gw', 'qty_pcs', 'loss', 'kgs', 'admin', 'qty_cns', 'qty_berat_cns', 'created_at', 'updated_at'];
+    protected $allowedFields    = ['id_material', 'id_order', 'style_size', 'area', 'inisial', 'color', 'item_type', 'kode_warna', 'composition', 'gw', 'gw_aktual', 'qty_pcs', 'loss', 'kgs', 'admin', 'qty_cns', 'qty_berat_cns', 'created_at', 'updated_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -720,5 +720,30 @@ class MaterialModel extends Model
             ->like('material.item_type', '%JHT%')
             ->orderBy('master_material.jenis, material.item_type', 'ASC')
             ->findAll();
+    }
+
+    public function getGWAktual($noModel, $styleSize)
+    {
+        return $this->select('material.gw_aktual')
+            ->join('master_order', 'master_order.id_order=material.id_order')
+            ->where('master_order.no_model', $noModel)
+            ->where('material.style_size', $styleSize)
+            ->first();
+    }
+
+    public function getMaterialID($noModel, $styleSize)
+    {
+        return $this->select('material.id_material')
+            ->join('master_order', 'master_order.id_order=material.id_order')
+            ->where('master_order.no_model', $noModel)
+            ->where('material.style_size', $styleSize)
+            ->first();
+    }
+
+    public function updateGwAktual($idMaterial, $gwAktual)
+    {
+        return $this->set('gw_aktual', $gwAktual)
+            ->where('id_material', $idMaterial)
+            ->update();
     }
 }
