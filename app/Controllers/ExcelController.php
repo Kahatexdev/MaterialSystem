@@ -1142,38 +1142,39 @@ class ExcelController extends BaseController
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // === Header Kolom di Baris 2 === //
-        $sheet->setCellValue('A3', 'No Model');
-        $sheet->setCellValue('B3', 'Kode Warna');
-        $sheet->setCellValue('C3', 'Warna');
-        $sheet->setCellValue('D3', 'Item Type');
-        $sheet->setCellValue('E3', 'Lot Stock');
-        $sheet->setCellValue('F3', 'Nama Cluster');
-        $sheet->setCellValue('G3', 'Kapasitas');
-        $sheet->setCellValue('H3', 'Kgs');
-        $sheet->setCellValue('I3', 'Krg');
-        $sheet->setCellValue('J3', 'Cns');
-        $sheet->setCellValue('K3', 'Kgs Stock Awal');
-        $sheet->setCellValue('L3', 'Krg Stock Awal');
-        $sheet->setCellValue('M3', 'Cns Stock Awal');
+        $sheet->setCellValue('A3', 'Nama Cluster');
+        $sheet->setCellValue('B3', 'No Model');
+        $sheet->setCellValue('C3', 'Kode Warna');
+        $sheet->setCellValue('D3', 'Warna');
+        $sheet->setCellValue('E3', 'Item Type');
+        $sheet->setCellValue('F3', 'Kapasitas');
+        $sheet->setCellValue('G3', 'Kgs');
+        $sheet->setCellValue('H3', 'Krg');
+        $sheet->setCellValue('I3', 'Cns');
+        $sheet->setCellValue('J3', 'Kgs Stock Awal');
+        $sheet->setCellValue('K3', 'Krg Stock Awal');
+        $sheet->setCellValue('L3', 'Cns Stock Awal');
+        $sheet->setCellValue('M3', 'Lot Stock');
         $sheet->setCellValue('N3', 'Lot Awal');
+
 
         // === Isi Data mulai dari baris ke-3 === //
         $row = 4;
         foreach ($filteredData as $data) {
             if ($data->Kgs != 0 || $data->KgsStockAwal != 0) {
-                $sheet->setCellValue('A' . $row, $data->no_model);
-                $sheet->setCellValue('B' . $row, $data->kode_warna);
-                $sheet->setCellValue('C' . $row, $data->warna);
-                $sheet->setCellValue('D' . $row, $data->item_type);
-                $sheet->setCellValue('E' . $row, $data->lot_stock);
-                $sheet->setCellValue('F' . $row, $data->nama_cluster);
-                $sheet->setCellValue('G' . $row, $data->kapasitas);
-                $sheet->setCellValue('H' . $row, $data->Kgs);
-                $sheet->setCellValue('I' . $row, $data->Krg);
-                $sheet->setCellValue('J' . $row, $data->Cns);
-                $sheet->setCellValue('K' . $row, $data->KgsStockAwal);
-                $sheet->setCellValue('L' . $row, $data->KrgStockAwal);
-                $sheet->setCellValue('M' . $row, $data->CnsStockAwal);
+                $sheet->setCellValue('A' . $row, $data->nama_cluster);
+                $sheet->setCellValue('B' . $row, $data->no_model);
+                $sheet->setCellValue('C' . $row, $data->kode_warna);
+                $sheet->setCellValue('D' . $row, $data->warna);
+                $sheet->setCellValue('E' . $row, $data->item_type);
+                $sheet->setCellValue('F' . $row, $data->kapasitas);
+                $sheet->setCellValue('G' . $row, $data->Kgs);
+                $sheet->setCellValue('H' . $row, $data->Krg);
+                $sheet->setCellValue('I' . $row, $data->Cns);
+                $sheet->setCellValue('J' . $row, $data->KgsStockAwal);
+                $sheet->setCellValue('K' . $row, $data->KrgStockAwal);
+                $sheet->setCellValue('L' . $row, $data->CnsStockAwal);
+                $sheet->setCellValue('M' . $row, $data->lot_stock);
                 $sheet->setCellValue('N' . $row, $data->lot_awal);
                 $row++;
             }
