@@ -111,6 +111,7 @@
 
                     <div class="mb-3">
                         <label for="itemType">Item Type</label>
+                        <input type="hidden" value="" name="old_item" id="old_item">
                         <select id="add_item_type" name="item_type" required>
                             <option value=""><?= $openPo['item_type'] ?? 'Pilih Item Type' ?></option>
 
@@ -251,6 +252,7 @@
                     $('#id_po').val(response.id_po);
                     $('#no_model').val(response.no_model);
                     $('#add_item_type').val(response.item_type);
+                    $('#old_item').val(response.item_type);
                     $('#kode_warna').val(response.kode_warna);
                     $('#color').val(response.color);
                     $('#kg_po').val(response.kg_po);
