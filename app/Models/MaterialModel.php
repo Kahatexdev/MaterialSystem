@@ -12,7 +12,7 @@ class MaterialModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id_material', 'id_order', 'style_size', 'area', 'inisial', 'color', 'item_type', 'kode_warna', 'composition', 'gw', 'qty_pcs', 'loss', 'kgs', 'admin', 'qty_cns', 'qty_berat_cns', 'created_at', 'updated_at'];
+    protected $allowedFields    = ['id_material', 'id_order', 'style_size', 'area', 'inisial', 'color', 'item_type', 'kode_warna', 'composition', 'gw', 'qty_pcs', 'loss', 'kgs', 'admin', 'created_at', 'updated_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -235,7 +235,8 @@ class MaterialModel extends Model
     }
     public function getMaterialForPemesanan($model, $styleSize, $area)
     {
-        return $this->select('master_material.jenis, material.*')
+        return $this->select('master_material.jenis, material.*, IFNULL(kebutuhan_cones.qty_cns, 0) AS qty_cns, IFNULL(kebutuhan_cones.qty_berat_cns, 0) AS qty_berat_cns')
+            ->join('(SELECT id_material, qty_cns, qty_berat_cns FROM kebutuhan_cones WHERE area=' . $area . ') AS kebutuhan_cones', 'material.id_material=kebutuhan_cones.id_material', 'left')
             ->join('master_order', 'master_order.id_order=material.id_order')
             ->join('master_material', 'master_material.item_type=material.item_type')
             ->where('master_order.no_model', $model)

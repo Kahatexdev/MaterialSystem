@@ -217,11 +217,12 @@ class PemesananModel extends Model
                 material.kode_warna,
                 material.color,
                 material.style_size,
-                material.qty_cns,
-                material.qty_berat_cns,
+                IFNULL(kebutuhan_cones.qty_cns, 0) AS qty_cns,
+                IFNULL(kebutuhan_cones.qty_berat_cns, 0) AS qty_berat_cns,
                 pemesanan.*
                 ')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('kebutuhan_cones', 'material.id_material = kebutuhan_cones.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pemesanan.admin', $data['area'])
             ->where('pemesanan.tgl_pakai', $data['tgl_pakai'])

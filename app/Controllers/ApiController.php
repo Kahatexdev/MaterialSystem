@@ -24,6 +24,7 @@ use App\Models\ReturModel;
 use App\Models\KategoriReturModel;
 use App\Models\PoTambahanModel;
 use App\Models\TrackingPoCovering;
+use App\Models\KebutuhanCones;
 use PHPUnit\Framework\Attributes\IgnoreFunctionForCodeCoverage;
 
 class ApiController extends ResourceController
@@ -51,6 +52,7 @@ class ApiController extends ResourceController
     protected $kategoriReturModel;
     protected $poTambahanModel;
     protected $trackingPoCovering;
+    protected $kebutuhanCones;
 
 
     public function __construct()
@@ -74,6 +76,7 @@ class ApiController extends ResourceController
         $this->kategoriReturModel = new KategoriReturModel();
         $this->poTambahanModel = new PoTambahanModel();
         $this->trackingPoCovering = new TrackingPoCovering();
+        $this->kebutuhanCones = new KebutuhanCones();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -309,64 +312,77 @@ class ApiController extends ResourceController
             ], 400);
         }
 
-        // Loop melalui data untuk pembaruan
-        foreach ($data['items'] as $item) {
-            if (!is_array($item)) {
-                log_message('error', 'Invalid item structure: ' . json_encode($item));
-                continue; // Lewati jika struktur tidak sesuai
-            }
+        $db = \Config\Database::connect();
 
-            foreach ($item as $row) {
-                // Validasi setiap row
-                if (empty($row['id_material']) || empty($row['qty_cns']) || empty($row['qty_berat_cns'])) {
-                    log_message('error', 'Invalid row data: ' . json_encode($row));
-                    continue; // Lewati jika data tidak lengkap
+        $db->transStart();
+
+        try {
+            foreach ($data['items'] as $item) {
+                if (!is_array($item)) {
+                    log_message('error', 'Invalid item structure: ' . json_encode($item));
+                    continue;
                 }
-                // Ambil data berdasarkan id_material
-                $existingData = $this->materialModel->find($row['id_material']);
-                log_message('debug', 'Existing data: ' . json_encode($existingData));
 
-                // Siapkan data untuk pembaruan
-                $updateData = [
-                    'qty_cns'       => $row['qty_cns'],
-                    'qty_berat_cns' => $row['qty_berat_cns'],
-                ];
+                foreach ($item as $row) {
+                    // if (empty($row['id_material']) || empty($row['qty_cns']) || empty($row['qty_berat_cns'])) {
+                    //     log_message('error', 'Invalid row data: ' . json_encode($row));
+                    //     continue;
+                    // }
 
-                // Periksa jika ada perubahan sebelum melakukan update
-                if (
-                    $existingData['qty_cns'] != $updateData['qty_cns'] ||
-                    $existingData['qty_berat_cns'] != $updateData['qty_berat_cns']
-                ) {
-                    try {
-                        // Gunakan model untuk melakukan update
-                        $update = $this->materialModel->update($row['id_material'], [
-                            'qty_cns'       => $updateData['qty_cns'],
-                            'qty_berat_cns' => $updateData['qty_berat_cns'],
+                    // Cek apakah data sudah ada
+                    $existingData = $this->kebutuhanCones
+                        ->where('id_material', $row['id_material'])
+                        ->countAllResults();
+
+                    if ($existingData > 0) {
+                        // Update
+                        $this->kebutuhanCones
+                            ->where('id_material', $row['id_material'])
+                            ->set([
+                                'qty_cns'       => $row['qty_cns'],
+                                'qty_berat_cns' => $row['qty_berat_cns'],
+                                'area'          => $data['area'],
+                                'updated_at'    => date('Y-m-d H:i:s')
+                            ])
+                            ->update();
+                        $updateCount++;
+                    } else {
+                        // Insert
+                        $this->kebutuhanCones->insert([
+                            'id_material'   => $row['id_material'],
+                            'qty_cns'       => $row['qty_cns'],
+                            'qty_berat_cns' => $row['qty_berat_cns'],
+                            'area'          => $data['area'],
+                            'created_at'    => date('Y-m-d H:i:s')
                         ]);
-
-                        if ($update) {
-                            $updateCount++;
-                            log_message('error', 'Update successful for id_material: ' . $row['id_material']);
-                        } else {
-                            return $this->respond([
-                                'status'  => 'error',
-                                'message' => $row['id_material'] . " data gagal diperbarui",
-                            ], 500);
-                            log_message('error', 'Update failed for id_material: ' . $row['id_material']);
-                        }
-                    } catch (\Exception $e) {
-                        log_message('critical', 'Exception during update: ' . $e->getMessage());
                     }
-                } else {
-                    log_message('error', 'No changes needed for id_material: ' . $row['id_material']);
+                    log_message('info', $existingData);
                 }
             }
+
+            // Commit transaksi jika semua OK
+            if ($db->transStatus() === FALSE) {
+                $db->transRollback();
+                return $this->respond([
+                    'status'  => 'error',
+                    'message' => 'Terjadi kesalahan saat menyimpan data',
+                ], 500);
+            } else {
+                $db->transCommit();
+                return $this->respond([
+                    'status'  => 'success',
+                    'message' => "$updateCount data berhasil diperbarui",
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            // Rollback jika ada exception
+            $db->transRollback();
+            log_message('error', 'Transaction failed: ' . $e->getMessage());
+            return $this->respond([
+                'status'  => 'error',
+                'message' => 'Gagal menyimpan data: ' . $e->getMessage(),
+            ], 500);
         }
-        // Kembalikan respon setelah seluruh loop selesai
-        return $this->respond([
-            'status'  => 'success',
-            'message' => "$updateCount data berhasil diperbarui",
-        ], 200);
     }
     public function saveListPemesanan()
     {

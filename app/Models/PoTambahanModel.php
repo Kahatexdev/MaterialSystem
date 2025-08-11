@@ -132,8 +132,9 @@ class PoTambahanModel extends Model
     }
     public function getMuPoTambahan($no_model, $style_size, $area)
     {
-        return $this->select(' master_material.jenis, material.*, SUM(po_tambahan.poplus_mc_kg+po_tambahan.plus_pck_kg) AS ttl_keb')
+        return $this->select(' master_material.jenis, material.*, SUM(po_tambahan.poplus_mc_kg+po_tambahan.plus_pck_kg) AS ttl_keb, IFNULL(kebutuhan_cones.qty_cns, 0) AS qty_cns, IFNULL(kebutuhan_cones.qty_berat_cns, 0) AS qty_berat_cns')
             ->join('material', 'material.id_material=po_tambahan.id_material', 'left')
+            ->join('kebutuhan_cones', 'material.id_material=kebutuhan_cones.id_material', 'left')
             ->join('master_material', 'master_material.item_type=material.item_type', 'left')
             ->join('master_order', 'master_order.id_order=material.id_order', 'left')
             ->where('po_tambahan.admin', $area)
