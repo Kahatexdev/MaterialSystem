@@ -251,11 +251,13 @@ class PoTambahanController extends BaseController
     public function reportPoTambahan()
     {
         $noModel   = $this->request->getPost('model')     ?? '';
+        $area   = $this->request->getPost('area')     ?? '';
         $kodeWarna = $this->request->getPost('kode_warna') ?? '';
-        $tglPo = $this->request->getPost('tgl_po') ?? '';
+        $tglPoDari = $this->request->getPost('tgl_po_dari') ?? '';
+        $tglPoSampai = $this->request->getPost('tgl_po_sampai') ?? '';
 
         // 1) Ambil data
-        $dataPoPlus = $this->poTambahanModel->getDataPoPlus($tglPo, $noModel, $kodeWarna);
+        $dataPoPlus = $this->poTambahanModel->getDataPoPlus($tglPoDari, $tglPoSampai, $noModel, $area, $kodeWarna);
 
         // 4) Response
         if ($this->request->isAJAX()) {

@@ -632,7 +632,7 @@ class CoveringWarehouseController extends BaseController
                     'keterangan' => "{$nowLabel} [{$sheetName}]",
                     'created_at' => "{$tanggal} 00:00:00",
                 ];
-
+                // dd ($record);
                 foreach ($rawHeader as $col => $heading) {
                     if (!isset($mapping[$heading])) continue;
                     $key = $mapping[$heading];
@@ -644,7 +644,7 @@ class CoveringWarehouseController extends BaseController
 
                     $record[$key] = $val;
                 }
-
+                // dd ($record);
                 // Validate required fields
                 if (empty($record['jenis']) || empty($record['code'])) {
                     $errors[] = "Sheet {$sheetName} baris {$rowIndex}: 'jenis' atau 'code' kosong.";
@@ -705,7 +705,7 @@ class CoveringWarehouseController extends BaseController
                 'ttl_cns'           => $newCns,
             ];
         }
-
+        // dd ($history);
         // Database transaction
         $db = \Config\Database::connect();
         $db->transStart();

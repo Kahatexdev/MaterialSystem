@@ -727,7 +727,7 @@ class ScheduleCelupModel extends Model
             ->where('schedule_celup.start_mc <=', $tanggal_akhir);
 
         // 4) Optional keyword filter
-        if (! empty($key)) {
+        if (!empty($key)) {
             $builder->groupStart()
                 ->like('schedule_celup.no_model',    $key)
                 ->orLike('schedule_celup.kode_warna', $key)
@@ -735,7 +735,7 @@ class ScheduleCelupModel extends Model
         }
 
         // 5) Optional exact schedule-date filter
-        if (! empty($tanggal_schedule)) {
+        if (!empty($tanggal_schedule)) {
             $builder->where('schedule_celup.tanggal_schedule', $tanggal_schedule);
         }
 
@@ -853,17 +853,37 @@ class ScheduleCelupModel extends Model
 
     public function getFilterSchWeekly($tglAwal, $tglAkhir, $jenis)
     {
-        $builder = $this->select('schedule_celup.id_celup, schedule_celup.id_mesin, schedule_celup.id_bon, schedule_celup.no_po, GROUP_CONCAT(schedule_celup.no_model) AS no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.start_mc, schedule_celup.kg_celup, schedule_celup.lot_urut, schedule_celup.lot_celup, schedule_celup.tanggal_schedule, schedule_celup.po_plus, SUM(schedule_celup.kg_celup) AS kg_celup, schedule_celup.ket_schedule, mesin_celup.no_mesin, mesin_celup.min_caps, mesin_celup.max_caps, master_material.jenis, master_order.delivery_awal')
+        $builder = $this->select('schedule_celup.id_celup, schedule_celup.id_mesin, schedule_celup.id_bon, schedule_celup.no_po, GROUP_CONCAT(DISTINCT schedule_celup.no_model) AS no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.start_mc, schedule_celup.lot_urut, schedule_celup.lot_celup, schedule_celup.tanggal_schedule, schedule_celup.po_plus, SUM(schedule_celup.kg_celup) AS kg_celup, schedule_celup.ket_schedule, mesin_celup.no_mesin, mesin_celup.min_caps, mesin_celup.max_caps, master_material.jenis, MAX(COALESCE(master_order.delivery_awal, parent_master.delivery_awal)) AS delivery_awal')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-            ->join('open_po', 'open_po.no_model = schedule_celup.no_model AND open_po.item_type = schedule_celup.item_type AND open_po.kode_warna = schedule_celup.kode_warna')
-            ->join('master_material', 'master_material.item_type = schedule_celup.item_type')
-            ->join('master_order', 'master_order.no_model = schedule_celup.no_model')
-            // ->where('mesin_celup.ket_mesin !=', 'ACRYLIC')
+            // join open_po child: match no_model plus either kode_warna OR item_type (toleran jika salah satunya berubah)
+            ->join(
+                'open_po open_po_child',
+                "open_po_child.no_model = schedule_celup.no_model 
+             AND (
+                 open_po_child.kode_warna = schedule_celup.kode_warna
+                 OR open_po_child.item_type = schedule_celup.item_type
+             )",
+                'left'
+            )
+            // ambil parent PO berdasarkan id_induk dari child (jika ada)
+            ->join('open_po op_parent', 'op_parent.id_po = open_po_child.id_induk', 'left')
+            ->join('master_material', 'master_material.item_type = schedule_celup.item_type', 'left')
+            // jalur normal: master_order langsung matching schedule no_model (kalau ada)
+            ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
+            // jalur induk: match parent no_model (POCOVERING)
+            ->join(
+                "master_order parent_master",
+                "(
+                parent_master.no_model = TRIM(REPLACE(op_parent.no_model, 'POCOVERING ', ''))
+                OR parent_master.no_model = TRIM(SUBSTRING_INDEX(op_parent.no_model, ' ', -1))
+                OR parent_master.no_model = TRIM(op_parent.no_model)
+            )",
+                'left'
+            )
             ->where('schedule_celup.tanggal_schedule >=', $tglAwal)
             ->where('schedule_celup.tanggal_schedule <=', $tglAkhir)
             ->orderBy('schedule_celup.tanggal_schedule', 'ASC')
             ->orderBy('mesin_celup.no_mesin', 'ASC');
-
 
         if (!empty($jenis)) {
             $builder->where('mesin_celup.ket_mesin', $jenis);
@@ -879,7 +899,9 @@ class ScheduleCelupModel extends Model
             $builder->where('mesin_celup.no_mesin >=', 1)
                 ->where('mesin_celup.no_mesin <=', 43);
         }
+
         $builder->groupBy('schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.tanggal_schedule, mesin_celup.id_mesin');
+
         return $builder->findAll();
     }
 

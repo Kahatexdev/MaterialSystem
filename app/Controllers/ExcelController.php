@@ -36,6 +36,8 @@ use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageMargins;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Color;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use DateTime;
 
 class ExcelController extends BaseController
@@ -2963,19 +2965,29 @@ class ExcelController extends BaseController
                             $startMc = (!empty($dataRow['start_mc']) && $dataRow['start_mc'] !== '0000-00-00 00:00:00')
                                 ? date('d-M', strtotime($dataRow['start_mc'])) : '';
 
+                            $deliveryRaw = $dataRow['delivery_awal'] ?? '';
+                            $delivery = ''; // default kosong
+
+                            if (!empty($deliveryRaw) && $deliveryRaw !== '0000-00-00' && $deliveryRaw !== '0000-00-00 00:00:00') {
+                                $ts = strtotime($deliveryRaw);
+                                if ($ts !== false && $ts > 0) {
+                                    $delivery = date('d-M', $ts);
+                                }
+                            }
+
                             $values = [
                                 $lot === 1 ? $kapasitas : '',
                                 $lot === 1 ? $noMesin : '',
                                 $lot,
                                 $dataRow['no_model'] ?? '',
                                 $dataRow['item_type'] ?? '',
-                                $dataRow['kg_celup'] ?? '',
+                                format_number($dataRow['kg_celup'] ?? '', 2),
                                 $dataRow['kode_warna'] ?? '',
                                 $dataRow['warna'] ?? '',
                                 $dataRow['lot_celup'] ?? '',
                                 $dataRow['actual_celup'] ?? '',
                                 $startMc ?? '',
-                                date('d-M', strtotime($dataRow['delivery_awal'])) ?? '',
+                                $delivery,
                                 $dataRow['ket_schedule'] ?? ''
                             ];
                         } else {
@@ -3198,6 +3210,21 @@ class ExcelController extends BaseController
         exit;
     }
 
+    private function cleanNumber($value, $decimals = 2)
+    {
+        // pastikan numeric (jika dari DB kadang string dengan koma)
+        $v = (string)$value;
+        $v = str_replace(',', '.', $v); // jika ada koma desimal dalam string
+        $num = (float)$v;
+        // round ke jumlah desimal yang diinginkan
+        $num = round($num, $decimals);
+        // jika hampir nol -> set nol (menghindari 4e-16)
+        if (abs($num) < pow(10, -$decimals)) {
+            $num = 0.0;
+        }
+        return $num;
+    }
+
     public function exportStock()
     {
         // Ambil input
@@ -3371,20 +3398,21 @@ class ExcelController extends BaseController
                 $sheet->setBreak("A{$row}", Worksheet::BREAK_ROW);
             }
 
-
+            $ttlCns = $this->cleanNumber($item['ttl_cns'], 0); // jika cones integer
+            $ttlKg  = $this->cleanNumber($item['ttl_kg'], 2); // kg 2 desimal
             // Isi data
             $sheet->setCellValue("A{$row}", strtoupper($item['jenis']) . ' DR ' . strtoupper($item['dr']));
             $sheet->setCellValue("B{$row}", $item['color']);
             $sheet->setCellValue("C{$row}", $item['code']);
             $sheet->setCellValue("D{$row}", $item['lmd']);
-            $sheet->setCellValue("E{$row}", $item['ttl_cns']);
-            $sheet->setCellValue("G{$row}", $item['ttl_kg']);
+            $sheet->setCellValue("E{$row}", $ttlCns);
+            $sheet->setCellValue("G{$row}", $ttlKg);
             $sheet->setCellValue("J{$row}", $item['ttl_kg'] > 0 ? '✓' : '');
             $sheet->setCellValue("K{$row}", $item['ttl_kg'] <= 0 ? '✓' : '');
 
             // Akumulasi subtotal
-            $subtotalCones += $item['ttl_cns'];
-            $subtotalKg += $item['ttl_kg'];
+            $subtotalCones += $ttlCns;
+            $subtotalKg += $ttlKg;
 
             // Style data
             $sheet->getStyle("A{$row}:Q" . ($row + 1))->applyFromArray([
@@ -3400,7 +3428,10 @@ class ExcelController extends BaseController
             ]);
             // sheet A wraptext
             $sheet->getStyle("A{$row}")->getAlignment()->setWrapText(true);
-
+            $sheet->getStyle("E{$row}")->getNumberFormat()
+                ->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $sheet->getStyle("G{$row}")->getNumberFormat()
+                ->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $row++;
         }
 
@@ -3435,7 +3466,7 @@ class ExcelController extends BaseController
             // kalau nggak ada, bisa ganti dengan strtok($item['jenis'], ' ')
             $mainJenis = $item['jenis_benang'];
             $kg       = $item['ttl_kg'];
-            if (! isset($totalPerBenang[$mainJenis])) {
+            if (!isset($totalPerBenang[$mainJenis])) {
                 $totalPerBenang[$mainJenis] = 0;
             }
             $totalPerBenang[$mainJenis] += $kg;
@@ -3484,6 +3515,7 @@ class ExcelController extends BaseController
         $writer->save('php://output');
         exit;
     }
+
 
     public function exportListPemesananSpdxKaretPertgl()
     {
@@ -10992,7 +11024,7 @@ class ExcelController extends BaseController
         $tglAkhir = $this->request->getGet('tanggal_akhir');
         if (empty($tglAwal) && empty($tglAkhir)) {
             $bulan = $this->request->getGet('bulan');
-            if (empty($bulan) || ! preg_match('/^\d{4}\-\d{2}$/', $bulan)) {
+            if (empty($bulan) || !preg_match('/^\d{4}\-\d{2}$/', $bulan)) {
                 return $this->response
                     ->setStatusCode(400)
                     ->setJSON(['error' => 'Parameter “bulan” harus dalam format YYYY-MM']);

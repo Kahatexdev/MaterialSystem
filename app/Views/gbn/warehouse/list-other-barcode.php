@@ -37,8 +37,8 @@
                                 <?php foreach ($listBarcode as $list) : ?>
                                     <tr>
                                         <td class="text-center"><?= $no++ ?></td>
-                                        <td class="text-center"><?= $list['tgl_masuk'] ?></td>
-                                        <td class="text-center"><a href="<?= base_url($role . '/warehouse/detailOtherBarcode/' . $list['tgl_masuk']) ?>" class="btn btn-info btn-sm">Detail</i></a></td>
+                                        <td class="text-center"><?= $list['tgl_datang'] ?></td>
+                                        <td class="text-center"><a href="<?= base_url($role . '/warehouse/detailOtherBarcode/' . $list['tgl_datang']) ?>" class="btn btn-info btn-sm">Detail</i></a></td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>

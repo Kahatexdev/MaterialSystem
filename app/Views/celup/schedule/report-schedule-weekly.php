@@ -132,6 +132,7 @@
                 dataType: "json",
                 success: function(response) {
                     dataTable.clear().draw();
+
                     if (response.length > 0) {
                         $.each(response, function(index, item) {
                             dataTable.row.add([

@@ -88,8 +88,8 @@ class ApiController extends ResourceController
     public function statusbahanbaku($noModel)
     {
         $search = $this->request->getGet('search');
-        // $rows   = $this->materialModel->MaterialPDK($noModel);
-        $rows   = $this->openPoModel->MaterialPDK($noModel);
+        $rows   = $this->materialModel->MaterialPDK($noModel);
+        // $rows   = $this->openPoModel->MaterialPDK($noModel);
         $res    = [];
 
         // Field‑field schedule yang ingin di-merge (tidak termasuk 'qty_po'!)
@@ -123,6 +123,7 @@ class ApiController extends ResourceController
             'updated_at',
             'kg_stock',
         ];
+        log_message('debug', 'Isi $rows: ' . json_encode($rows));
 
         foreach ($rows as $row) {
             $jenis = strtoupper($row['jenis']);
@@ -204,7 +205,6 @@ class ApiController extends ResourceController
         }
         return $this->respond($res, 200);
     }
-
 
     public function cekBahanBaku($model)
     {
@@ -876,7 +876,8 @@ class ApiController extends ResourceController
     // get data pengiriman
     public function getPengirimanArea()
     {
-        $noModel = $this->request->getGet('noModel') ?? '';
+        // $noModel = $this->request->getGet('noModel') ?? '';
+        $noModel = 'L25067';
         // $noModel = 'DB2501';
         // $results = $this->pengeluaranModel->searchPengiriman($noModel);
         $results = $this->pengeluaranModel->searchPengiriman2($noModel);
