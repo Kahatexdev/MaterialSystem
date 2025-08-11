@@ -581,12 +581,10 @@ class CoveringWarehouseController extends BaseController
             return redirect()->back()->with('error', 'Format file harus .xls atau .xlsx');
         }
 
-        // Load spreadsheet
-        $reader      = ($ext === 'xlsx') ? new \PhpOffice\PhpSpreadsheet\Reader\Xlsx()
+        $reader = ($ext === 'xlsx') ? new \PhpOffice\PhpSpreadsheet\Reader\Xlsx()
             : new \PhpOffice\PhpSpreadsheet\Reader\Xls();
         $spreadsheet = $reader->load($file->getTempName());
 
-        // Define header mapping
         $headerRow = 3;
         $mapping   = [
             'JENIS BARANG' => 'jenis',
@@ -605,125 +603,136 @@ class CoveringWarehouseController extends BaseController
         $admin     = session()->get('username') ?? session()->get('email');
         $nowLabel  = 'Import ' . date('Y-m-d H:i:s');
         $errors    = [];
-        $agg       = [];
+        $updates   = [];
         $history   = [];
         $tanggal   = null;
 
-        foreach ($spreadsheet->getSheetNames() as $sheetName) {
-            $sheet      = $spreadsheet->getSheetByName($sheetName);
-            $multiplier = (strtoupper($sheetName) === 'PENGELUARAN') ? -1 : 1;
-            if (!$sheet) continue;
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheetName = $sheet->getTitle();
 
-            // Capture import date
-            if (empty($tanggal)) {
-                $rawDate = trim($sheet->getCell('B2')->getValue());
-                $tanggal = $this->parseDate($rawDate, $errors, $sheetName);
-                if (!$tanggal) break;
-            }
+        // Capture import date
+        $rawDate = trim((string)$sheet->getCell('B2')->getValue());
+        $tanggal = $this->parseDate($rawDate, $errors, $sheetName);
+        if (!$tanggal) {
+            return redirect()->back()->with('error', 'Tanggal tidak valid di sheet aktif.');
+        }
 
-            $rows      = $sheet->toArray(null, true, true, true);
-            $rawHeader = $this->normalizeHeader($rows[$headerRow]);
+        $rows = $sheet->toArray(null, true, true, true);
 
-            foreach ($rows as $rowIndex => $row) {
-                if ($rowIndex <= $headerRow || empty(array_filter($row))) continue;
+        if (!isset($rows[$headerRow])) {
+            return redirect()->back()->with('error', "Header tidak ditemukan di baris {$headerRow}.");
+        }
 
-                $record = [
-                    'admin'      => $admin,
-                    'keterangan' => "{$nowLabel} [{$sheetName}]",
-                    'created_at' => "{$tanggal} 00:00:00",
-                ];
+        $rawHeader = $this->normalizeHeader($rows[$headerRow]);
 
-                foreach ($rawHeader as $col => $heading) {
-                    if (!isset($mapping[$heading])) continue;
-                    $key = $mapping[$heading];
-                    $val = $row[$col];
-
-                    if (in_array($key, ['ttl_kg', 'ttl_cns'], true)) {
-                        $val = $this->parseNumber($val);
-                    }
-
-                    $record[$key] = $val;
-                }
-
-                // Validate required fields
-                if (empty($record['jenis']) || empty($record['code'])) {
-                    $errors[] = "Sheet {$sheetName} baris {$rowIndex}: 'jenis' atau 'code' kosong.";
-                    continue;
-                }
-
-                // Fetch existing stock
-                $stock = $this->coveringStockModel
-                    ->where($this->buildWhereClause($record))
-                    ->first();
-
-                if (!$stock) {
-                    $errors[] = "Sheet {$sheetName} baris {$rowIndex}: Stok tidak ditemukan untuk jenis '{$record['jenis']}', color '{$record['color']}', code '{$record['code']}'.";
-                    continue;
-                }
-
-                $id        = $stock['id_covering_stock'];
-                $deltaKg   = $multiplier * abs($record['ttl_kg'] ?? 0);
-                $deltaCns  = $multiplier * abs($record['ttl_cns'] ?? 0);
-
-                // Aggregate deltas
-                if (!isset($agg[$id])) {
-                    $agg[$id] = [
-                        'origKg'   => $stock['ttl_kg'] ?? 0,
-                        'origCns'  => $stock['ttl_cns'] ?? 0,
-                        'deltaKg'  => 0,
-                        'deltaCns' => 0,
-                    ];
-                }
-
-                $agg[$id]['deltaKg']  += $deltaKg;
-                $agg[$id]['deltaCns'] += $deltaCns;
-
-                // Prepare history entry jika deltaKg (ttl_kg) tidak nol
-                if ($deltaKg != 0) {
-                    $history[] = array_merge($record, [
-                        'ttl_kg'  => $deltaKg,
-                        'ttl_cns' => $deltaCns,
-                    ]);
-                }
+        // Build header index => key mapping (so 'KETERANGAN' dapat diambil dinamis)
+        $colToKey = [];
+        foreach ($rawHeader as $col => $heading) {
+            if (isset($mapping[$heading])) {
+                $colToKey[$col] = $mapping[$heading];
             }
         }
 
-        // Build batch update data
-        $updates = [];
-        foreach ($agg as $id => $data) {
-            $newKg  = $data['origKg'] + $data['deltaKg'];
-            $newCns = $data['origCns'] + $data['deltaCns'];
+        foreach ($rows as $rowIndex => $row) {
+            if ($rowIndex <= $headerRow) continue;
+            if (empty(array_filter($row))) continue; // skip empty row
+            // dd($row);
+            if ($row['J'] == 0) continue; // skip if ttl_kg is 0
+            // Build parsed record (new totals from file)
+            $new = [
+                'admin'      => $admin,
+                'created_at' => "{$tanggal} 00:00:00",
+            ];
 
-            if ($newKg < 0 || $newCns < 0) {
-                $errors[] = "Stok tidak mencukupi untuk sheet {$sheetName} baris {$rowIndex}.";
+            foreach ($colToKey as $col => $key) {
+                $val = $row[$col] ?? null;
+                if (in_array($key, ['ttl_kg', 'ttl_cns'], true)) {
+                    $new[$key] = $this->parseNumber($val);
+                } else {
+                    $new[$key] = is_null($val) ? null : trim((string)$val);
+                }
+            }
+
+            // Required fields
+            if (empty($new['jenis']) || empty($new['code']) || empty($new['dr'])) {
+                $errors[] = "Sheet {$sheetName} baris {$rowIndex}: 'jenis' atau 'code' atau 'dr' kosong.";
                 continue;
             }
 
+            // Build where clause WITHOUT ttl_kg/ttl_cns
+            $where = $this->buildWhereClause($new);
+
+            // Debug log untuk mempermudah troubleshooting (hapus/disable setelah oke)
+            log_message('debug', "IMPORT COVERING: mencari stok (sheet {$sheetName} row {$rowIndex}) where=" . json_encode($where));
+
+            // Cari stok (matching berdasarkan identity fields saja)
+            $stock = $this->coveringStockModel->where($where)->first();
+
+            if (!$stock) {
+                // log data file supaya bisa dilihat perbedaan
+                log_message('debug', "IMPORT COVERING: Tidak ditemukan stok untuk baris {$rowIndex}. data file=" . json_encode($new));
+                $errors[] = "Sheet {$sheetName} baris {$rowIndex}: Tidak ada stok yang cocok.";
+                continue;
+            }
+
+            $id = $stock['id_covering_stock'];
+            $old_kg = (float) $stock['ttl_kg'];
+            $old_cns = (float) $stock['ttl_cns'];
+            $new_kg = (float) ($new['ttl_kg'] ?? 0);
+            $new_cns = (float) ($new['ttl_cns'] ?? 0);
+
+            // jika tidak ada perubahan skip
+            if ($new_kg == $old_kg && $new_cns == $old_cns) {
+                continue;
+            }
+
+            $delta_kg = $new_kg - $old_kg;
+            $delta_cns = $new_cns - $old_cns;
+
+            // Siapkan record update (set totals terbaru)
             $updates[] = [
                 'id_covering_stock' => $id,
-                'ttl_kg'            => $newKg,
-                'ttl_cns'           => $newCns,
+                'ttl_kg'  => $new_kg,
+                'ttl_cns' => $new_cns,
             ];
+
+            // Siapkan history: pisahkan masuk / keluar
+            $h = [
+                'no_model' => NULL,
+                'jenis' => $new['jenis'],
+                'jenis_benang' => $new['jenis_benang'] ?? NULL,
+                'jenis_cover' => $new['jenis_cover'] ?? NULL,
+                'color' => $new['color'] ?? NULL,
+                'code' => $new['code'],
+                'lmd' => $new['lmd'] ?? NULL,
+                'ttl_cns' => $delta_cns,
+                'ttl_kg' => $delta_kg,
+                'admin' => $admin,
+                'keterangan' => $new['keterangan'] ?? '',
+                'created_at' => "{$tanggal} 00:00:00",
+            ];
+
+            $history[] = $h;
         }
 
-        // Database transaction
+        // DB transaction
         $db = \Config\Database::connect();
         $db->transStart();
 
-        if ($updates) {
+        if (!empty($updates)) {
             $this->coveringStockModel->updateBatch($updates, 'id_covering_stock');
-            if ($history) {
-                $this->historyCoveringStockModel->insertBatch($history);
-            }
+        }
+        if (!empty($history)) {
+            $this->historyCoveringStockModel->insertBatch($history);
         }
 
         $db->transComplete();
 
-        // Handle response
         if ($db->transStatus() === false) {
             return redirect()->back()->with('error', 'Gagal menyimpan data.');
         }
 
+        // Response: kalau ada errors tetap tampilkan sebagai warning (tapi proses sukses untuk yg lain)
         if ($errors) {
             $msgType = empty($updates) ? 'error' : 'warning';
             return redirect()->back()->with($msgType, implode('<br>', $errors));
@@ -733,31 +742,59 @@ class CoveringWarehouseController extends BaseController
             ->with('success', 'Data berhasil diimpor.');
     }
 
+    /* Helper yang diperbarui */
     private function normalizeHeader(array $row): array
     {
         return array_map(function ($h) {
-            return strtoupper(trim($h));
+            return strtoupper(trim((string)$h));
         }, $row);
     }
 
     private function parseNumber($value)
     {
-        $num = str_replace(',', '.', $value);
-        return is_numeric($num) ? (float) $num : 0;
+        if ($value === null || $value === '') return 0;
+
+        $s = trim((string)$value);
+        $s = str_replace(' ', '', $s); // hapus spasi
+
+        // Jika format "1.234,56" -> hapus titik ribuan lalu ganti koma jadi titik
+        if (substr_count($s, '.') > 0 && strpos($s, ',') !== false) {
+            $s = str_replace('.', '', $s);
+            $s = str_replace(',', '.', $s);
+        } else {
+            // jika hanya pakai koma sebagai desimal "0,69"
+            if (strpos($s, ',') !== false && strpos($s, '.') === false) {
+                $s = str_replace(',', '.', $s);
+            }
+            // kalau hanya titik, biarkan (1.5)
+        }
+
+        return is_numeric($s) ? (float)$s : 0;
     }
 
     private function parseDate($raw, array &$errors, string $sheet)
     {
+        $raw = trim((string)$raw);
         // Try dd/mm/yyyy
         $dt = \DateTime::createFromFormat('d/m/Y', $raw);
         if ($dt) {
             return $dt->format('Y-m-d');
         }
 
+        // Try yyyy-mm-dd
+        $dt = \DateTime::createFromFormat('Y-m-d', $raw);
+        if ($dt) {
+            return $dt->format('Y-m-d');
+        }
+
         // Try Excel timestamp
         if (is_numeric($raw)) {
-            return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($raw)
-                ->format('Y-m-d');
+            try {
+                return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($raw)
+                    ->format('Y-m-d');
+            } catch (\Exception $e) {
+                // continue to error
+            }
         }
 
         $errors[] = "Sheet {$sheet}: Tanggal import tidak valid (B2).";
@@ -766,18 +803,26 @@ class CoveringWarehouseController extends BaseController
 
     private function buildWhereClause(array $rec): array
     {
+        $normalize = function ($v) {
+            if (is_null($v)) return null;
+            $s = trim((string)$v);
+            return $s === '' ? null : $s;
+        };
+
         return array_filter([
-            'jenis'        => $rec['jenis'],
-            'color'        => $rec['color'] ?? null,
-            'code'         => $rec['code'],
-            'jenis_cover'  => $rec['jenis_cover'] ?? null,
-            'jenis_benang' => $rec['jenis_benang'] ?? null,
-            'jenis_mesin'  => $rec['jenis_mesin'] ?? null,
-            'dr'           => $rec['dr'] ?? null,
-        ], function ($v) {
-            return $v !== null && $v !== '';
+            'jenis'        => $normalize($rec['jenis']),
+            'color'        => $normalize($rec['color']),
+            'code'         => $normalize($rec['code']),
+            'jenis_cover'  => $normalize($rec['jenis_cover']),
+            'jenis_benang' => $normalize($rec['jenis_benang']),
+            'jenis_mesin'  => $normalize($rec['jenis_mesin']),
+            'dr'           => $normalize($rec['dr']),
+            // jangan sertakan ttl_kg / ttl_cns
+        ], function ($value) {
+            return !is_null($value) && $value !== '';
         });
     }
+
 
     public function deleteStokBarangJadi($id)
     {
@@ -824,15 +869,10 @@ class CoveringWarehouseController extends BaseController
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
 
-        // PEMASUKAN sheet dengan data stok
+        // STOCK sheet dengan data stok
         $sheetIn = $spreadsheet->getActiveSheet();
-        $sheetIn->setTitle('PEMASUKAN');
+        $sheetIn->setTitle('STOCK');
         $this->applyTemplateFormat($sheetIn, $headers, $stok);
-
-        // PENGELUARAN sheet juga menampilkan data stok
-        $sheetOut = $spreadsheet->createSheet();
-        $sheetOut->setTitle('PENGELUARAN');
-        $this->applyTemplateFormat($sheetOut, $headers, $stok);
 
         // Prepare download
         $filename = 'TEMPLATE_IMPORT_STOK_COVERING_' . date('Ymd_His') . '.xlsx';
@@ -851,7 +891,7 @@ class CoveringWarehouseController extends BaseController
     protected function applyTemplateFormat($sheet, array $headers, array $data)
     {
         // Instruction and date
-        $sheet->setCellValue('A1', 'TEMPLATE DATA STOK BARANG JADI UNTUK ' . strtoupper($sheet->getTitle()));
+        $sheet->setCellValue('A1', 'TEMPLATE DATA STOK BARANG JADI (COVERING)');
         $sheet->mergeCells('A1:L1');
         $sheet->setCellValue('A2', 'Tanggal Import (dd/mm/yyyy):');
         $sheet->setCellValue('B2', date('d/m/Y'));
@@ -918,7 +958,7 @@ class CoveringWarehouseController extends BaseController
             ->getBorders()
             ->getAllBorders()
             ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-            // set alignment center for all cells in range
+        // set alignment center for all cells in range
         $sheet->getStyle($fullRange)
             ->getAlignment()
             ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)

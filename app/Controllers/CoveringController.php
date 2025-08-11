@@ -96,7 +96,7 @@ class CoveringController extends BaseController
             }
             $expenseData[$date] += $row['ttl_kg'];
         }
-        
+
 
         $incomeDataFinal = [];
         $expenseDataFinal = [];
@@ -494,10 +494,10 @@ class CoveringController extends BaseController
             foreach ($data['detail'] as $row) {
                 $this->openPoModel->save([
                     'id_induk'        => $row['id_induk'],
-                    'no_model'        => $data['no_model'],
-                    'item_type'       => $row['item_type'],
-                    'kode_warna'      => $row['kode_warna'],
-                    'color'           => $row['color'],
+                    'no_model'        => trim($data['no_model']),
+                    'item_type'       => trim($row['item_type']),
+                    'kode_warna'      => trim($row['kode_warna']),
+                    'color'           => trim($row['color']),
                     'kg_po'           => $row['kg_po'] ?? null,
                     'bentuk_celup'    => $data['bentuk_celup'] ?? null,
                     'jenis_produksi'  => $data['jenis_produksi'] ?? null,

@@ -96,12 +96,12 @@ class PemesananModel extends Model
     public function getDataPemesananperTgl($area, $jenis)
     {
         $query = $this->db->table('pemesanan p')
-            ->select("p.id_pemesanan,mm.jenis, p.tgl_pakai, m.area, mo.no_model, m.item_type, m.kode_warna, m.color,  tp.ttl_jl_mc, tp.ttl_kg , tp.ttl_cns, CASE WHEN p.po_tambahan = '1' THEN 'YA' ELSE '' END AS po_tambahan")
+            ->select("p.id_pemesanan,mm.jenis, p.tgl_pakai, p.admin AS area, mo.no_model, m.item_type, m.kode_warna, m.color,  tp.ttl_jl_mc, tp.ttl_kg , tp.ttl_cns, CASE WHEN p.po_tambahan = '1' THEN 'YA' ELSE '' END AS po_tambahan")
             ->join('total_pemesanan tp', 'tp.id_total_pemesanan = p.id_total_pemesanan', 'left')
             ->join('material m', 'm.id_material = p.id_material', 'left')
             ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
             ->join('master_material mm', 'mm.item_type = m.item_type', 'left')
-            ->where('m.area', $area)
+            ->where('p.admin', $area)
             ->where('mm.jenis', $jenis)
             ->where('p.status_kirim', 'YA')
             ->groupBy('p.tgl_pakai')
@@ -118,26 +118,26 @@ class PemesananModel extends Model
 
     public function getDataPemesananfiltered($area, $jenis, $filterDate)
     {
-        log_message('debug', "Query Parameters - Area: {$area}, Jenis: {$jenis}, Tanggal: {$filterDate}");
+        // log_message('debug', "Query Parameters - Area: {$area}, Jenis: {$jenis}, Tanggal: {$filterDate}");
 
         $query = $this->db->table('pemesanan p')
-            ->select("p.id_pemesanan, p.tgl_pakai, m.area, m.item_type")
+            ->select("p.id_pemesanan, p.tgl_pakai, p.admin AS area, m.item_type")
             ->join('material m', 'm.id_material = p.id_material', 'left')
             ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
             ->join('master_material mm', 'mm.item_type = m.item_type', 'left')
             ->where('p.admin', $area)
             ->where('mm.jenis', $jenis)
             ->where('p.tgl_pakai', $filterDate)
-            ->groupBy('p.tgl_pakai, m.area, m.item_type')
+            ->groupBy('p.tgl_pakai')
             ->get();
 
         if (!$query) {
-            log_message('error', 'SQL Error: ' . json_encode($this->db->error()));
+            // log_message('error', 'SQL Error: ' . json_encode($this->db->error()));
             return [];
         }
 
         $result = $query->getResultArray();
-        log_message('debug', 'Query Result: ' . json_encode($result));
+        // log_message('debug', 'Query Result: ' . json_encode($result));
 
         return $result;
     }
@@ -374,7 +374,7 @@ class PemesananModel extends Model
 
     public function getFilterPemesananArea($key, $tanggal_awal, $tanggal_akhir)
     {
-        $this->select('pemesanan.*, master_order.foll_up, master_order.no_model, master_order.no_order, material.area, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, material.item_type, material.kode_warna, material.color')
+        $this->select('pemesanan.*,pemesanan.admin AS area, master_order.foll_up, master_order.no_model, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, material.item_type, material.kode_warna, material.color')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pemesanan.status_kirim', 'YA');
@@ -647,7 +647,7 @@ class PemesananModel extends Model
                 x.lot_out
             ")
             ->groupBy('p.tgl_pesan, p.no_model, p.item_type, p.jenis, p.kode_warna, p.color')
-            ->orderBy('p.tgl_pesan', 'DESC')
+            // ->orderBy('p.tgl_pesan', 'DESC')
             ->orderBy('p.no_model, p.item_type, p.kode_warna, p.color', 'ASC');
 
         return $query->get()->getResultArray();

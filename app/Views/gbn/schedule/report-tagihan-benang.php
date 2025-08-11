@@ -46,11 +46,11 @@
                     <input type="date" class="form-control" id="deliveryAkhir">
                 </div>
                 <div class="col-md-6">
-                    <label for="startMcFrom">Tgl Start MC Dari</label>
+                    <label for="startMcFrom">Tgl Start MC (Awal)</label>
                     <input type="date" class="form-control" id="startMcFrom">
                 </div>
                 <div class="col-md-6">
-                    <label for="startMcTo">Tgl Start MC Sampai</label>
+                    <label for="startMcTo">Tgl Start MC (Akhir)</label>
                     <input type="date" class="form-control" id="startMcTo">
                 </div>
                 <div class="col-12">

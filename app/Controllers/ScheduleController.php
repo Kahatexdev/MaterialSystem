@@ -634,7 +634,7 @@ class ScheduleController extends BaseController
             'warna' => $warna,
             'jmlLot' => $jmlLot,
         ];
-        // dd ($data);
+        // dd($data);
         return view($this->role . '/schedule/form-edit', $data);
     }
 
@@ -1258,7 +1258,6 @@ class ScheduleController extends BaseController
         $tglAkhir = $this->request->getGet('tanggal_akhir');
         $jenis = $this->request->getGet('jenis') ?? 'all';
         $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir, $jenis);
-        // dd($data);
 
         return $this->response->setJSON($data);
     }

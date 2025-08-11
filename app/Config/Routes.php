@@ -366,6 +366,10 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('schedule/getScheduleDetails/(:any)/(:any)/(:any)', 'ScheduleController::getScheduleDetails/$1/$2/$3');
     $routes->get('schedule/editSchedule', 'ScheduleController::editSchedule');
     $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
+    //Report
+    $routes->get('schedule/reportSchWeekly', 'ScheduleController::reportSchWeekly');
+    $routes->get('schedule/filterSchWeekly', 'ScheduleController::filterSchWeekly');
+    $routes->get('schedule/exportScheduleWeekly', 'ExcelController::exportScheduleWeekly');
 
     $routes->get('outCelup', 'CelupController::outCelup');
     $routes->get('outCelup/getDetail/(:num)', 'CelupController::getDetail/$1');
