@@ -44,38 +44,52 @@
                         <table class="table  align-items-center">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Pakai</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Color</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">No Karung</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Kgs</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Cns</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Lot</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Nama Cluster</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center" colspan="2">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="pemesananTable">
-                                <?php foreach ($tglPakai as $tgl) : ?>
+                                <?php foreach ($detail as $id) : ?>
                                     <tr>
                                         <td>
                                             <p class="text-sm font-weight-bold mb-0"><?= $tgl['tgl_pakai'] ?></p>
                                         </td>
-                                        <td class="text-center">
-                                            <?php if ($jenis === 'SPANDEX' || $jenis === 'KARET') : ?>
-                                        <td class="text-center">
-                                            <a href="<?= base_url($role . '/pemesanan/exportListPemesananSpdxKaretPertgl?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
-                                                <i class="fas fa-file-excel fa-2x"></i>
-                                            </a>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['no_model'] ?></p>
                                         </td>
-                                    <?php else : ?>
-                                        <td class="text-center">
-                                            <a href="<?= base_url($role . '/pemesanan/detailListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-info" target="_blank">
-                                                <i class="fas fa-eye fa-2x"></i>
-                                            </a>
-                                            <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
-                                                <i class="fas fa-file-excel fa-2x"></i>
-                                            </a>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['item_type'] ?></p>
                                         </td>
-                                    <?php endif; ?>
-                                    <!-- <td class="text-center">
-                                            <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar/' . $tgl['tgl_pakai'] . '/' . $jenis) ?>" class="btn btn-success btn-xs">
-                                                <i class="fa fa-file-excel fa-xl" style="font-size: 16px !important;"></i> Excel
-                                            </a>
-                                        </td> -->
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['color'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['no_karung'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['kgs_out'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['cns_out'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['lot_out'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['nama_cluster'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['nama_cluster'] ?></p>
+                                        </td>
                                     </tr>
 
                                 <?php endforeach; ?>
@@ -88,7 +102,7 @@
     </div>
 </div>
 
-<script>
+<!-- <script>
     document.getElementById('filterButton').addEventListener('click', function() {
         const filterDate = document.getElementById('filter_date').value;
 
@@ -148,6 +162,6 @@
             })
             .catch(error => console.error('Fetch Error:', error));
     });
-</script>
+</script> -->
 
 <?php $this->endSection(); ?>
