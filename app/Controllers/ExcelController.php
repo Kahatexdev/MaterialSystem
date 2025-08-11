@@ -5657,10 +5657,12 @@ class ExcelController extends BaseController
     {
         $noModel   = $this->request->getGet('model')     ?? '';
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
-        $tglPo = $this->request->getGet('tgl_po') ?? date('Y-m-d', strtotime('-1 day'));
+        $tglPoDari = $this->request->getGet('tgl_po_dari') ?? '';
+        $tglPoSampai = $this->request->getGet('tgl_po_sampai') ?? '';
+        $area = $this->request->getGet('area') ?? '';
 
         // 1) Ambil data
-        $dataPoPlus = $this->poPlusModel->getDataPoPlus($tglPo, $noModel, $kodeWarna);
+        $dataPoPlus = $this->poPlusModel->getDataPoPlus($tglPoDari, $tglPoSampai, $noModel, $area, $kodeWarna);
 
         // Buat spreadsheet
         $spreadsheet = new Spreadsheet();
@@ -5694,22 +5696,32 @@ class ExcelController extends BaseController
             ],
         ];
 
+        // Buat teks tanggal filter
+        $tanggalFilter = '';
+        if (!empty($tglPoDari) && !empty($tglPoSampai)) {
+            $tanggalFilter = $tglPoDari . ' s/d ' . $tglPoSampai;
+        } elseif (!empty($tglPoDari)) {
+            $tanggalFilter = $tglPoDari;
+        } elseif (!empty($tglPoSampai)) {
+            $tanggalFilter = $tglPoSampai;
+        }
+
         $dataFilter = '';
 
-        if (!empty($noModel) && !empty($kodeWarna) && !empty($tglPo)) {
-            $dataFilter = ' NOMOR MODEL ' . $noModel . ' KODE WARNA ' . $kodeWarna . ' TANGGAL PO ' . $tglPo;
+        if (!empty($noModel) && !empty($kodeWarna) && !empty($tanggalFilter)) {
+            $dataFilter = ' NOMOR MODEL ' . $noModel . ' KODE WARNA ' . $kodeWarna . ' TANGGAL PO ' . $tanggalFilter;
         } elseif (!empty($noModel) && !empty($kodeWarna)) {
             $dataFilter = ' NOMOR MODEL ' . $noModel . ' KODE WARNA ' . $kodeWarna;
-        } elseif (!empty($noModel) && !empty($tglPo)) {
-            $dataFilter = ' NOMOR MODEL ' . $noModel . ' TANGGAL PO ' . $tglPo;
-        } elseif (!empty($kodeWarna) && !empty($tglPo)) {
-            $dataFilter = ' KODE WARNA ' . $kodeWarna . ' TANGGAL PO ' . $tglPo;
+        } elseif (!empty($noModel) && !empty($tanggalFilter)) {
+            $dataFilter = ' NOMOR MODEL ' . $noModel . ' TANGGAL PO ' . $tanggalFilter;
+        } elseif (!empty($kodeWarna) && !empty($tanggalFilter)) {
+            $dataFilter = ' KODE WARNA ' . $kodeWarna . ' TANGGAL PO ' . $tanggalFilter;
         } elseif (!empty($noModel)) {
             $dataFilter = ' NOMOR MODEL ' . $noModel;
         } elseif (!empty($kodeWarna)) {
             $dataFilter = ' KODE WARNA ' . $kodeWarna;
-        } elseif (!empty($tglPo)) {
-            $dataFilter = ' TANGGAL PO ' . $tglPo;
+        } elseif (!empty($tanggalFilter)) {
+            $dataFilter = ' TANGGAL PO ' . $tanggalFilter;
         }
 
         // Judul
