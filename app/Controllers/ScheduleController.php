@@ -1258,7 +1258,6 @@ class ScheduleController extends BaseController
         $tglAkhir = $this->request->getGet('tanggal_akhir');
         $jenis = $this->request->getGet('jenis') ?? 'all';
         $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir, $jenis);
-        // dd($data);
 
         return $this->response->setJSON($data);
     }
