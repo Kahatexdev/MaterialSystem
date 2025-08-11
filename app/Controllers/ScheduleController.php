@@ -634,7 +634,7 @@ class ScheduleController extends BaseController
             'warna' => $warna,
             'jmlLot' => $jmlLot,
         ];
-        // dd ($data);
+        // dd($data);
         return view($this->role . '/schedule/form-edit', $data);
     }
 
@@ -1372,9 +1372,7 @@ class ScheduleController extends BaseController
                     'qty_pcs' => 0,
                     'loss' => 0,
                     'kgs' => $scheduleData['qty_po'][$index],
-                    'admin' => session()->get('username'),
-                    'qty_cns' => 0,
-                    'qty_berat_cns' => 0
+                    'admin' => session()->get('username')
                 ]);
             }
             // data untuk insert ke po

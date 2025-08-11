@@ -107,6 +107,7 @@ class TotalPemesananModel extends Model
         ')
             ->join('pemesanan', 'pemesanan.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('kebutuhan_cones', 'material.id_material = kebutuhan_cones.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('total_pemesanan.id_total_pemesanan', $id)
             ->first();

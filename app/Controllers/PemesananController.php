@@ -549,6 +549,7 @@ class PemesananController extends BaseController
             if (!$record) {
                 continue;
             }
+            $stok = $this->stockModel->find($record['id_stock']);
 
             // Jika diperlukan, abaikan atau perlakukan khusus untuk jenis tertentu
             $jenis = $this->pemesananModel
@@ -566,15 +567,17 @@ class PemesananController extends BaseController
 
             if (isset($kgsList[$index]) && $kgsList[$index] !== '') {
                 $data['kgs_out'] = (float) $kgsList[$index];
+                $kgsStokNew = ($stok['kgs_in_out'] + $record['kgs_out']) - $kgsList[$index];
             }
             if (isset($cnsList[$index]) && $cnsList[$index] !== '') {
                 $data['cns_out'] = (int) $cnsList[$index];
+                $cnsStokNew = ($stok['cns_in_out'] + $record['cns_out']) - $cnsList[$index];
             }
             if (isset($lotList[$index]) && $lotList[$index] !== '') {
                 $data['lot_out'] = $lotList[$index];
             }
-
             if ($this->pengeluaranModel->update($id, $data)) {
+                $this->stockModel->update($record['id_stock'], ['kgs_in_out' => $kgsStokNew, 'cns_in_out' => $cnsStokNew]);
                 $updatedCount++;
             }
         }
@@ -1079,6 +1082,23 @@ class PemesananController extends BaseController
             'tglPakai' => $tglPakai,
         ];
         return view($this->role . '/pemesanan/persiapanBarangPertgl', $data);
+    }
+    public function detailListBarangKeluar()
+    {
+        $jenis = $this->request->getGet('jenis');
+        $tglPakai = $this->request->getGet('tgl_pakai');
+
+        $detail = $this->pengeluaranModel->getDataPemesananExport($jenis, $tglPakai);
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'jenis' => $jenis,
+            'tglPakai' => $tglPakai,
+            'detail' => $detail,
+        ];
+        return view($this->role . '/pemesanan/detailPersiapanBarangPertgl', $data);
     }
     public function detailListBarangKeluar()
     {

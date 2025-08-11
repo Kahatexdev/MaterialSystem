@@ -1044,4 +1044,13 @@ class ScheduleCelupModel extends Model
             ->first();
         return $data['tanggal_schedule'] ?? null;
     }
+    public function getIdSch($data)
+    {
+        return $this->select('id_celup')
+            ->where('no_model', $data['no_model'])
+            ->where('item_type', $data['item_type'])
+            ->where('kode_warna', $data['kode_warna'])
+            ->where('warna', $data['color'])
+            ->first();
+    }
 }
