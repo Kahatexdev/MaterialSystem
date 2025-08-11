@@ -364,7 +364,7 @@ class MaterialController extends BaseController
         $keterangan = $this->request->getPost('keterangan');
         $poData = $this->openPoModel->find($idPo);
         $idSch = $this->scheduleCelupModel->getIdSch($poData)['id_celup'] ?? null;
-        // dd($idSch);
+
         $data = [
             'item_type'  => $this->request->getPost('item_type'),
             'kode_warna' => $this->request->getPost('kode_warna'),
@@ -373,6 +373,7 @@ class MaterialController extends BaseController
             'ket_celup'  => $this->request->getPost('ket_celup'),
         ];
         $sch = [
+            'no_model'   => $this->request->getPost('no_model'),
             'item_type'  => $this->request->getPost('item_type'),
             'kode_warna' => $this->request->getPost('kode_warna'),
             'warna'      => $this->request->getPost('color'),

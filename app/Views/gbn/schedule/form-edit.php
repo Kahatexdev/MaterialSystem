@@ -94,43 +94,6 @@
     /* input[type="radio"] {
         margin-right: 5px;
     } */
-
-    .suggestions-box {
-        position: absolute;
-        border: 1px solid #ccc;
-        background-color: #fff;
-        max-height: 150px;
-        overflow-y: auto;
-        width: calc(100% - 30px);
-        /* Mengurangi lebar agar tidak melebihi parent-nya */
-        z-index: 1000;
-        box-sizing: border-box;
-        /* Memastikan padding dan border termasuk dalam lebar */
-        margin-top: 5px;
-        /* Jarak antara input dan kotak saran */
-        border-radius: 4px;
-        /* Memberikan sudut yang sedikit melengkung */
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        /* Menambahkan shadow untuk efek elevasi */
-        left: 15px;
-        /* Menyesuaikan posisi agar sejajar dengan input */
-        right: 15px;
-        /* Menyesuaikan posisi agar sejajar dengan input */
-    }
-
-    .suggestions-box div {
-        padding: 8px;
-        cursor: pointer;
-        font-size: 14px;
-        /* Ukuran font yang sesuai */
-        color: #333;
-        /* Warna teks yang mudah dibaca */
-    }
-
-    .suggestions-box div:hover {
-        background-color: #f0f0f0;
-        /* Warna latar saat hover */
-    }
 </style>
 <div class="container-fluid">
     <div class="row">
@@ -202,19 +165,14 @@
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="kode_warna" class="form-label">Kode Warna</label>
-                                        <input type="text" class="form-control" id="kode_warna" name="kode_warna" value="<?= $kode_warna ?>" required>
+                                        <input type="text" class="form-control" id="kode_warna" name="kode_warna" value="<?= $kode_warna ?>" required readonly>
                                         <div id="suggestionsKWarna" class="suggestions-box" style="display: none;"></div>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="warna" class="form-label">Warna</label>
-                                        <!-- <input type="text" class="form-control" id="warna" name="warna" value="<?= $warna ?>" maxlength="32" required> -->
-                                        <select name="warna" id="warna" class="form-select">
-                                            <?php foreach ($scheduleData as $item): ?>
-                                                <option value="<?= $item['warna'] ?>" <?= ($item['warna'] == $warna) ? 'selected' : '' ?>><?= $item['warna'] ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
+                                        <input type="text" class="form-control" id="warna" name="warna" value="<?= $warna ?>" maxlength="32" required readonly>
                                     </div>
                                 </div>
                             </div>
@@ -258,7 +216,7 @@
                                                                         <label for="po"> PO</label>
                                                                         <select class="form-select po-select" name="po[]" required>
                                                                             <?php foreach ($scheduleData as $po): ?>
-                                                                                <option value="<?= $po['no_model'] ?>" <?= ($po['no_model'] == $detail['no_model']) ? 'selected' : '' ?>><?= $po['no_model'] ?></option>
+                                                                                <option value="<?= $detail['no_model'] ?>" ?><?= $po['no_model'] ?></option>
                                                                             <?php endforeach; ?>
                                                                         </select>
                                                                     </div>
@@ -455,9 +413,6 @@
         const warnaInput = document.getElementById('warna');
         const poTable = document.getElementById("poTable");
         const lot = document.getElementById("lot_urut");
-        const warnaSelect = document.getElementById('warna');
-        let debounceTimer;
-        let suggestionSelected = false;
 
         // Inisialisasi locked statuses (status yang mengunci input)
         const lockedStatuses = ['bon', 'celup', 'bongkar', 'press', 'oven', 'tl', 'rajut', 'acc', 'done', 'reject', 'perbaikan', 'sent'];
@@ -475,34 +430,6 @@
                 });
             }
         });
-
-        kodeWarna.addEventListener('input', function() {
-            if (suggestionSelected) {
-                suggestionSelected = false;
-                return;
-            }
-            clearTimeout(debounceTimer);
-            const query = kodeWarna.value;
-            debounceTimer = setTimeout(() => {
-                fetchKodeWarnaSuggestions(query);
-            }, 300);
-        });
-
-        function fetchKodeWarnaSuggestions(query) {
-            if (query.length < 2) {
-                suggestionsBoxKWarna.style.display = 'none';
-                return;
-            }
-            fetch('<?= base_url(session('role') . "/schedule/getKodeWarna") ?>?query=' + encodeURIComponent(query))
-                .then(response => response.json())
-                .then(data => {
-                    const kodeWarnaSuggestions = data.map(item => item.kode_warna);
-                    displayKodeWarnaSuggestions(kodeWarnaSuggestions);
-                })
-                .catch(error => {
-                    console.error('Error fetching kode warna suggestions:', error);
-                });
-        }
 
         // Event delegation untuk tombol Edit (modal edit)
         document.addEventListener('click', function(e) {
@@ -552,29 +479,29 @@
         });
 
         // Event handler untuk input kode warna
-        // if (kodeWarna) {
-        //     kodeWarna.addEventListener('input', function() {
-        //         const query = kodeWarna.value.trim();
-        //         if (query.length >= 3) {
-        //             fetchData('getKodeWarna', {
-        //                 query
-        //             }, displayKodeWarnaSuggestions);
-        //             fetchData('getWarna', {
-        //                 kode_warna: query
-        //             }, (data) => {
-        //                 if (data.length > 0) {
-        //                     warnaInput.value = data[0].color;
-        //                     // Update semua dropdown item-type jika ada lebih dari satu
-        //                     document.querySelectorAll('.item-type').forEach(select => {
-        //                         fetchItemType(query, data[0].color, select);
-        //                     });
-        //                 }
-        //             });
-        //         } else {
-        //             suggestionsBoxKWarna.style.display = 'none';
-        //         }
-        //     });
-        // }
+        if (kodeWarna) {
+            kodeWarna.addEventListener('input', function() {
+                const query = kodeWarna.value.trim();
+                if (query.length >= 3) {
+                    fetchData('getKodeWarna', {
+                        query
+                    }, displayKodeWarnaSuggestions);
+                    fetchData('getWarna', {
+                        kode_warna: query
+                    }, (data) => {
+                        if (data.length > 0) {
+                            warnaInput.value = data[0].color;
+                            // Update semua dropdown item-type jika ada lebih dari satu
+                            document.querySelectorAll('.item-type').forEach(select => {
+                                fetchItemType(query, data[0].color, select);
+                            });
+                        }
+                    });
+                } else {
+                    suggestionsBoxKWarna.style.display = 'none';
+                }
+            });
+        }
 
         // Fungsi utilitas untuk fetching data dengan URL building
         function fetchData(endpoint, params, callback) {
@@ -598,10 +525,8 @@
                     const suggestionDiv = document.createElement('div');
                     suggestionDiv.textContent = suggestion;
                     suggestionDiv.addEventListener('click', () => {
-                        suggestionSelected = true;
                         kodeWarna.value = suggestion;
                         suggestionsBoxKWarna.style.display = 'none';
-                        loadWarnaOptions(suggestion);
                     });
                     suggestionsBoxKWarna.appendChild(suggestionDiv);
                 });
@@ -609,35 +534,6 @@
                 suggestionsBoxKWarna.style.display = 'none';
             }
         }
-
-        function loadWarnaOptions(kode) {
-            fetch('<?= base_url(session('role') . "/schedule/getWarna") ?>?kode_warna=' + encodeURIComponent(kode))
-                .then(res => res.json())
-                .then(data => {
-                    warnaSelect.innerHTML = '<option value="">Pilih Warna</option>';
-                    if (data.length) {
-                        data.forEach(item => {
-                            const opt = document.createElement('option');
-                            opt.value = item.color;
-                            opt.textContent = item.color;
-                            opt.dataset.idInduk = item.id_induk || '';
-                            warnaSelect.appendChild(opt);
-                        });
-                    } else {
-                        warnaSelect.innerHTML += '<option value="">Tidak ada warna</option>';
-                    }
-                })
-                .catch(err => console.error(err));
-        }
-
-        warnaSelect.addEventListener('change', function() {
-            const selected = warnaSelect.options[warnaSelect.selectedIndex];
-            const color = selected.value;
-            const idInduk = selected.dataset.idInduk;
-            if (color) {
-                fetchItemType(kodeWarna.value, color, idInduk);
-            }
-        });
 
         // Fungsi fetch item type untuk mengisi dropdown targetSelect
         function fetchItemType(kodeWarna, warna, targetSelect) {
