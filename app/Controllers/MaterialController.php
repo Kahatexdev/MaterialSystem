@@ -8,6 +8,8 @@ use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
 use App\Models\MasterOrderModel;
 use App\Models\OpenPoModel;
+use App\Models\ScheduleCelupModel;
+use PhpParser\Node\Stmt\Else_;
 
 class MaterialController extends BaseController
 {
@@ -18,6 +20,7 @@ class MaterialController extends BaseController
     protected $masterOrderModel;
     protected $masterMaterialModel;
     protected $openPoModel;
+    protected $scheduleCelupModel;
 
     public function __construct()
     {
@@ -25,6 +28,7 @@ class MaterialController extends BaseController
         $this->masterMaterialModel = new MasterMaterialModel();
         $this->masterOrderModel = new MasterOrderModel();
         $this->openPoModel = new OpenPoModel();
+        $this->scheduleCelupModel = new ScheduleCelupModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -356,7 +360,10 @@ class MaterialController extends BaseController
     {
         $idPo = $this->request->getPost('id_po');
         $noModel   = $this->request->getPost('no_model');
+        $oldItem   = $this->request->getPost('old_item');
         $keterangan = $this->request->getPost('keterangan');
+        $poData = $this->openPoModel->find($idPo);
+        $idSch = $this->scheduleCelupModel->getIdSch($poData)['id_celup'] ?? null;
 
         $data = [
             'item_type'  => $this->request->getPost('item_type'),
@@ -365,24 +372,27 @@ class MaterialController extends BaseController
             'kg_po'      => $this->request->getPost('kg_po'),
             'ket_celup'  => $this->request->getPost('ket_celup'),
         ];
+        $sch = [
+            'no_model'   => $this->request->getPost('no_model'),
+            'item_type'  => $this->request->getPost('item_type'),
+            'kode_warna' => $this->request->getPost('kode_warna'),
+            'warna'      => $this->request->getPost('color'),
+        ];
+        // $db = db_connect();
+        // $db->transStart();
 
-        $db = db_connect();
-        $db->transStart();
-
-        $this->openPoModel->update($idPo, $data);
-
-        $builder = $db->table($this->openPoModel->table);
-        $builder
-            ->where('no_model', $noModel)
-            ->update(['keterangan' => $keterangan]);
-
-        $db->transComplete();
-
-        if ($db->transStatus()) {
+        $po = $this->openPoModel->update($idPo, $data);
+        if ($po) {
+            $updateSch = $this->scheduleCelupModel->where('id_celup', $idSch)->set($sch)->update();
+            $this->openPoModel->where('id_po', $idPo)->set('keterangan', $keterangan)->update();
             return redirect()->back()->with('success', 'Data berhasil diperbarui.');
         } else {
             return redirect()->back()->with('error', 'Update gagal. Silakan coba lagi.');
         }
+
+        // $db->transComplete();
+
+
     }
 
     public function deletePo($id)

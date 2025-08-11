@@ -34,10 +34,8 @@
                     <label for="">Aksi</label><br>
                     <button class="btn btn-info btn-block" id="btnSearch"><i class="fas fa-search"></i></button>
                     <button class="btn btn-danger" id="btnReset"><i class="fas fa-redo-alt"></i></button>
-                    <!-- selalu tampil -->
-                    <!-- <button id="btnExportAll" class="btn btn-success btn-block"><i class="fas fa-file-excel"></i> Export All</button> -->
-                    <button class="btn btn-primary" id="btnExportAll"><i class="fas fa-file-excel"></i></button>
-                    <button class="btn btn-primary d-none" id="btnExport"><i class="fas fa-file-excel"></i></button>
+
+                    <button class="btn btn-primary" id="btnExport"><i class="fas fa-file-excel"></i></button>
                 </div>
             </div>
         </div>
@@ -105,10 +103,6 @@
 
         $('#btnSearch').click(function() {
             loadData();
-        });
-
-        $('#btnExportAll').click(function() {
-            window.location.href = "<?= base_url("$role/poplus/exportPoTambahan") ?>";
         });
 
         $('#btnExport').click(function() {
@@ -181,7 +175,7 @@
                         dataTable.row.add([
                             index + 1,
                             item.tgl_poplus || '-',
-                            item.area,
+                            item.admin,
                             item.no_model,
                             item.item_type || '-',
                             item.kode_warna || '-',
@@ -215,7 +209,7 @@
                         dataTable.row.add([
                             index + 1,
                             item.tgl_poplus || '-',
-                            item.area,
+                            item.admin || '-',
                             item.no_model,
                             item.item_type || '-',
                             item.kode_warna || '-',
