@@ -300,6 +300,7 @@ class MasterdataController extends BaseController
                     'kode_warna' => $sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue(),
                     'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(),
                     'gw'         => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
+                    'gw_aktual'  => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(), // Asumsikan gw_aktual sama dengan gw
                     'qty_pcs'    => $qty_pcs, // Menggunakan variabel yang telah diproses
                     'loss'       => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue() ?? 0,
                     'kgs'        => number_format($kgs, 2, '.', ''),
@@ -536,6 +537,7 @@ class MasterdataController extends BaseController
                     'kode_warna'  => $kode_warna,
                     'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(),
                     'gw'          => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
+                    'gw_aktual'   => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(), // Asumsikan gw_aktual sama dengan gw
                     'qty_pcs'     => $qty_pcs,
                     'loss'        => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue() ?? 0,
                     'kgs'         => $sheet->getCell($headerMap['Kgs'] . $rowIndex)->getValue(),

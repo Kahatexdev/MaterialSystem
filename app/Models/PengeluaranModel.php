@@ -368,9 +368,9 @@ class PengeluaranModel extends Model
 
 
 
-    public function getDataPemesananExport($jenis, $tglPakai)
+    public function getDataPemesananExport($jenis, $tglPakai, $noModel = null)
     {
-        return $this->select("
+        $builder = $this->select("
             pemesanan.tgl_pakai,
             pengeluaran.area_out,
             master_order.no_model,
@@ -393,7 +393,11 @@ class PengeluaranModel extends Model
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('master_material.jenis', $jenis)
-            ->where('pemesanan.tgl_pakai', $tglPakai)
+            ->where('pemesanan.tgl_pakai', $tglPakai);
+        if (!empty($noModel)) {
+            $builder->where('master_order.no_model', $noModel);
+        }
+        return $builder
             ->where('pengeluaran.status', 'Pengeluaran Jalur')
             ->groupBy('pengeluaran.id_pengeluaran')
             ->orderBy('pengeluaran.nama_cluster, pengeluaran.area_out', 'ASC')
@@ -585,6 +589,19 @@ class PengeluaranModel extends Model
         return $this->select('SUM(kgs_out) AS kgs_out, SUM(cns_out) AS cns_out')
             ->where('id_out_celup', $id_out_celup)
             ->where('krg_out', 0)
+            ->first();
+    }
+    public function getTtlPersiapan($jenis, $tglPakai)
+    {
+        return $this->select('SUM(pengeluaran.kgs_out) AS kgs_out, SUM(pengeluaran.cns_out) AS cns_out')
+            ->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
+            ->join('master_material', 'master_material.item_type=stock.item_type', 'left')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan=pengeluaran.id_total_pemesanan', 'left')
+            ->join('pemesanan', 'total_pemesanan.id_total_pemesanan=pemesanan.id_total_pemesanan', 'left')
+            ->where('master_material.jenis', $jenis)
+            ->where('pemesanan.tgl_pakai', $tglPakai)
+            ->where('pengeluaran.status', 'Pengeluaran Jalur')
+            ->groupBy('master_material.jenis')
             ->first();
     }
 }

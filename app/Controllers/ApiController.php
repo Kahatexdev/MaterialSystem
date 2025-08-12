@@ -1227,4 +1227,42 @@ class ApiController extends ResourceController
         $listRetur = $this->returModel->filterData($area, $tglBuat, $noModel);
         return $this->response->setJSON($listRetur);
     }
+
+    public function getGWAktual()
+    {
+        $no_model = $this->request->getGet('pdk');
+        $style_size = $this->request->getGet('size');
+
+        $data = $this->materialModel->getGWAktual($no_model, $style_size);
+
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($data);
+    }
+
+    public function saveGWAktual()
+    {
+        $data = $this->request->getGet();
+        $no_model = $data['pdk'];
+        $style_size = $data['size'];
+        $gwAktual = $data['gw_aktual'];
+        
+        // Validasi input
+        $idMaterial = $this->materialModel->getMaterialID($no_model, $style_size);
+
+        if($idMaterial)
+        {
+            $updated = $this->materialModel->updateGwAktual($idMaterial, $gwAktual);
+        }
+
+        if ($updated) {
+            return $this->response
+                ->setStatusCode(200)
+                ->setJSON(['status' => 'success', 'message' => 'GW aktual berhasil diupdate.']);
+        } else {
+            return $this->response
+                ->setStatusCode(500)
+                ->setJSON(['status' => 'error', 'message' => 'Gagal mengupdate GW aktual.']);
+        }
+    }
 }
