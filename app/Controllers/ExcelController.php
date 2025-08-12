@@ -2782,7 +2782,7 @@ class ExcelController extends BaseController
         $jenis = $this->request->getGet('jenis');
 
         $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir, $jenis);
-
+        // dd($data);
         $getMesin = $this->mesinCelupModel
             ->orderBy('no_mesin', 'ASC')
             ->findAll();
@@ -2937,9 +2937,10 @@ class ExcelController extends BaseController
         $groupedData = [];
         foreach ($data as $d) {
             $keyTgl = date('d/m/Y', strtotime($d['tanggal_schedule']));
-            $groupedData[$keyTgl][$d['id_mesin']][$d['lot_urut']] = $d;
+            // $groupedData[$keyTgl][$d['id_mesin']][$d['lot_urut']] = $d;
+            $groupedData[$keyTgl][$d['id_mesin']][$d['lot_urut']][] = $d;
         }
-
+        // dd($groupedData);
         // Hitung kolom awal per tanggal
         $dateColStartIndexes = [];
         foreach ($dates as $i => $tgl) {
@@ -2957,41 +2958,58 @@ class ExcelController extends BaseController
                 for ($lot = 1; $lot <= 3; $lot++) {
                     foreach ($dates as $i => $tgl) {
                         $colStartIndex = 1 + ($i * count($headers));
-                        $dataRow = $groupedData[$tgl][$idMesin][$lot] ?? null;
+                        $dataRow = $groupedData[$tgl][$idMesin][$lot] ?? [];
 
-                        if ($dataRow) {
+                        if (!empty($dataRow)) {
+                            // gabungkan no_model unik
+                            $noModels = array_unique(array_map(fn ($r) => $r['no_model'] ?? '', $dataRow));
+                            $no_model_str = implode(', ', array_filter($noModels));
 
-                            //Ubah format tanggal start mc
-                            $startMc = (!empty($dataRow['start_mc']) && $dataRow['start_mc'] !== '0000-00-00 00:00:00')
-                                ? date('d-M', strtotime($dataRow['start_mc'])) : '';
+                            // gabungkan item_type unik (pakai separator jika banyak)
+                            $itemTypes = array_unique(array_map(fn ($r) => $r['item_type'] ?? '', $dataRow));
+                            $item_type_str = implode(' | ', array_filter($itemTypes));
 
-                            $deliveryRaw = $dataRow['delivery_awal'] ?? '';
-                            $delivery = ''; // default kosong
+                            // jumlahkan kg_celup
+                            $kg_total = 0;
+                            foreach ($dataRow as $r) {
+                                $kg_total += floatval($r['kg_celup'] ?? 0);
+                            }
+                            $kg_total = format_number($kg_total, 2);
 
+                            // gabungkan kode_warna dan warna unik
+                            $kodeWarna = array_unique(array_map(fn ($r) => $r['kode_warna'] ?? '', $dataRow));
+                            $kode_warna_str = implode(', ', array_filter($kodeWarna));
+                            $warna = array_unique(array_map(fn ($r) => $r['warna'] ?? '', $dataRow));
+                            $warna_str = implode(', ', array_filter($warna));
+
+                            // ambil start_mc/delivery/ket dari baris pertama (atau kamu bisa ambil min/max sesuai rules)
+                            $first = $dataRow[0];
+                            $startMc = (!empty($first['start_mc']) && $first['start_mc'] !== '0000-00-00 00:00:00') ? date('d-M', strtotime($first['start_mc'])) : '';
+
+                            $deliveryRaw = $first['delivery_awal'] ?? '';
+                            $delivery = '';
                             if (!empty($deliveryRaw) && $deliveryRaw !== '0000-00-00' && $deliveryRaw !== '0000-00-00 00:00:00') {
                                 $ts = strtotime($deliveryRaw);
-                                if ($ts !== false && $ts > 0) {
-                                    $delivery = date('d-M', $ts);
-                                }
+                                if ($ts !== false && $ts > 0) $delivery = date('d-M', $ts);
                             }
 
                             $values = [
                                 $lot === 1 ? $kapasitas : '',
                                 $lot === 1 ? $noMesin : '',
                                 $lot,
-                                $dataRow['no_model'] ?? '',
-                                $dataRow['item_type'] ?? '',
-                                format_number($dataRow['kg_celup'] ?? '', 2),
-                                $dataRow['kode_warna'] ?? '',
-                                $dataRow['warna'] ?? '',
-                                $dataRow['lot_celup'] ?? '',
-                                $dataRow['actual_celup'] ?? '',
-                                $startMc ?? '',
+                                $no_model_str,
+                                $item_type_str,
+                                $kg_total,
+                                $kode_warna_str,
+                                $warna_str,
+                                $first['lot_celup'] ?? '',
+                                $first['actual_celup'] ?? '',
+                                $startMc,
                                 $delivery,
-                                $dataRow['ket_schedule'] ?? ''
+                                $first['ket_schedule'] ?? ''
                             ];
                         } else {
-                            // Jika tidak ada data, tetap isi dengan placeholder jumlah kolom = count($headers)
+                            // placeholder sama seperti sekarang
                             $values = [
                                 $lot === 1 ? $kapasitas : '',
                                 $lot === 1 ? $noMesin : '',
@@ -3001,6 +3019,50 @@ class ExcelController extends BaseController
                                 $values[] = '';
                             }
                         }
+                        // $dataRow = $groupedData[$tgl][$idMesin][$lot] ?? [];
+
+                        // if ($dataRow) {
+
+                        //     //Ubah format tanggal start mc
+                        //     $startMc = (!empty($dataRow['start_mc']) && $dataRow['start_mc'] !== '0000-00-00 00:00:00')
+                        //         ? date('d-M', strtotime($dataRow['start_mc'])) : '';
+
+                        //     $deliveryRaw = $dataRow['delivery_awal'] ?? '';
+                        //     $delivery = ''; // default kosong
+
+                        //     if (!empty($deliveryRaw) && $deliveryRaw !== '0000-00-00' && $deliveryRaw !== '0000-00-00 00:00:00') {
+                        //         $ts = strtotime($deliveryRaw);
+                        //         if ($ts !== false && $ts > 0) {
+                        //             $delivery = date('d-M', $ts);
+                        //         }
+                        //     }
+
+                        //     $values = [
+                        //         $lot === 1 ? $kapasitas : '',
+                        //         $lot === 1 ? $noMesin : '',
+                        //         $lot,
+                        //         $dataRow['no_model'] ?? '',
+                        //         $dataRow['item_type'] ?? '',
+                        //         format_number($dataRow['kg_celup'] ?? '', 2),
+                        //         $dataRow['kode_warna'] ?? '',
+                        //         $dataRow['warna'] ?? '',
+                        //         $dataRow['lot_celup'] ?? '',
+                        //         $dataRow['actual_celup'] ?? '',
+                        //         $startMc ?? '',
+                        //         $delivery,
+                        //         $dataRow['ket_schedule'] ?? ''
+                        //     ];
+                        // } else {
+                        //     // Jika tidak ada data, tetap isi dengan placeholder jumlah kolom = count($headers)
+                        //     $values = [
+                        //         $lot === 1 ? $kapasitas : '',
+                        //         $lot === 1 ? $noMesin : '',
+                        //         $lot
+                        //     ];
+                        //     for ($k = 3; $k < count($headers); $k++) {
+                        //         $values[] = '';
+                        //     }
+                        // }
 
                         foreach ($values as $j => $val) {
                             $col = Coordinate::stringFromColumnIndex($colStartIndex + $j);

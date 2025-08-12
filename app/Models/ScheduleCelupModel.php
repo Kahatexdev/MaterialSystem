@@ -877,7 +877,7 @@ class ScheduleCelupModel extends Model
         ")
             ->where('s.tanggal_schedule >=', $tglAwal)
             ->where('s.tanggal_schedule <=', $tglAkhir)
-            ->groupBy('s.item_type, s.kode_warna, s.warna, s.tanggal_schedule, s.id_mesin')
+            ->groupBy('s.item_type, s.kode_warna, s.warna, s.tanggal_schedule, s.id_mesin, s.lot_urut')
             ->getCompiledSelect();
 
         $builder = $db->table("({$sub}) AS schedule_celup")
@@ -928,7 +928,7 @@ class ScheduleCelupModel extends Model
                 ->where('mesin_celup.no_mesin <=', 43);
         }
 
-        $builder->groupBy('schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.tanggal_schedule, mesin_celup.id_mesin');
+        $builder->groupBy('schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.tanggal_schedule, mesin_celup.id_mesin, schedule_celup.lot_urut');
 
         return $builder->get()->getResultArray();
     }
