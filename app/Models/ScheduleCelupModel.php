@@ -707,7 +707,7 @@ class ScheduleCelupModel extends Model
             ->join('master_order',    'master_order.no_model       = schedule_celup.no_model')
             ->join('master_material', 'master_material.item_type   = schedule_celup.item_type')
             ->join('mesin_celup',     'mesin_celup.id_mesin        = schedule_celup.id_mesin')
-            ->join('out_celup',     'out_celup.id_celup        = schedule_celup.id_celup')
+            ->join('out_celup',     'out_celup.id_celup        = schedule_celup.id_celup', 'left')
             // manual derived‐table join:
             ->join(
                 "({$materialSub}) AS material_summary",
@@ -722,14 +722,12 @@ class ScheduleCelupModel extends Model
                 'datang_sub.id_out_celup = out_celup.id_out_celup',
                 'left'
             )
-            ->where('master_material.jenis',      'BENANG')
-            ->where('schedule_celup.start_mc >=', $tanggal_awal)
-            ->where('schedule_celup.start_mc <=', $tanggal_akhir);
+            ->where('master_material.jenis', 'BENANG');
 
         // 4) Optional keyword filter
         if (!empty($key)) {
             $builder->groupStart()
-                ->like('schedule_celup.no_model',    $key)
+                ->like('schedule_celup.no_model', $key)
                 ->orLike('schedule_celup.kode_warna', $key)
                 ->groupEnd();
         }
@@ -739,9 +737,13 @@ class ScheduleCelupModel extends Model
             $builder->where('schedule_celup.tanggal_schedule', $tanggal_schedule);
         }
 
+        if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
+            $builder->where("schedule_celup.start_mc >=", $tanggal_awal)
+                ->where("schedule_celup.start_mc <=", $tanggal_akhir);
+        }
+
         return $builder->get()->getResult();
     }
-
 
 
     public function getFilterSchNylon($tanggal_awal, $tanggal_akhir, $key = null, $tanggal_schedule = null)
