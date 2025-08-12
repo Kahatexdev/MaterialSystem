@@ -289,7 +289,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pemesanan/exportPemesananArea', 'ExcelController::excelPemesananArea');
     $routes->post('pemesanan/listBarangKeluarPertgl', 'PemesananController::listBarangKeluarPertgl');
     $routes->get('pemesanan/detailListBarangKeluar', 'PemesananController::detailListBarangKeluar');
-    $routes->get('pemesanan/exportListBarangKeluar', 'ExcelController::exportListBarangKeluar');
+    $routes->get('pemesanan/detailListBarangKeluar', 'PemesananController::detailListBarangKeluar');
+    $routes->get('pemesanan/detailListBarangKeluar', 'PemesananController::detailListBarangKeluar');
+    $routes->post('pemesanan/exportListBarangKeluar', 'ExcelController::exportListBarangKeluar');
     $routes->post('pemesanan/listPemesananSpandexKaretPertgl', 'PemesananController::listPemesananSpandexKaretPertgl');
     $routes->get('pemesanan/exportListPemesananSpdxKaretPertgl', 'ExcelController::exportListPemesananSpdxKaretPertgl');
     $routes->get('pemesanan/sisaKebutuhanArea', 'PemesananController::sisaKebutuhanArea');
@@ -782,5 +784,7 @@ $routes->group(
         $routes->get('getMaterialByNoModel/(:any)', 'ApiController::getMaterialByNoModel/$1');
         $routes->get('getMUForRosso/(:any)/(:any)/(:any)', 'ApiController::getMaterialForPemesananRosso/$1/$2/$3');
         $routes->get('listExportRetur/(:any)', 'ApiController::listExportRetur/$1');
+        $routes->get('getGWAktual', 'ApiController::getGWAktual');
+        $routes->get('saveGWAktual', 'ApiController::saveGWAktual');
     }
 );
