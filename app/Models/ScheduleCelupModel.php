@@ -707,7 +707,7 @@ class ScheduleCelupModel extends Model
             ->join('master_order',    'master_order.no_model       = schedule_celup.no_model')
             ->join('master_material', 'master_material.item_type   = schedule_celup.item_type')
             ->join('mesin_celup',     'mesin_celup.id_mesin        = schedule_celup.id_mesin')
-            ->join('out_celup',     'out_celup.id_celup        = schedule_celup.id_celup')
+            ->join('out_celup',     'out_celup.id_celup        = schedule_celup.id_celup', 'left')
             // manual derived‐table join:
             ->join(
                 "({$materialSub}) AS material_summary",
@@ -722,14 +722,12 @@ class ScheduleCelupModel extends Model
                 'datang_sub.id_out_celup = out_celup.id_out_celup',
                 'left'
             )
-            ->where('master_material.jenis',      'BENANG')
-            ->where('schedule_celup.start_mc >=', $tanggal_awal)
-            ->where('schedule_celup.start_mc <=', $tanggal_akhir);
+            ->where('master_material.jenis', 'BENANG');
 
         // 4) Optional keyword filter
         if (!empty($key)) {
             $builder->groupStart()
-                ->like('schedule_celup.no_model',    $key)
+                ->like('schedule_celup.no_model', $key)
                 ->orLike('schedule_celup.kode_warna', $key)
                 ->groupEnd();
         }
@@ -739,9 +737,13 @@ class ScheduleCelupModel extends Model
             $builder->where('schedule_celup.tanggal_schedule', $tanggal_schedule);
         }
 
+        if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
+            $builder->where("schedule_celup.start_mc >=", $tanggal_awal)
+                ->where("schedule_celup.start_mc <=", $tanggal_akhir);
+        }
+
         return $builder->get()->getResult();
     }
-
 
 
     public function getFilterSchNylon($tanggal_awal, $tanggal_akhir, $key = null, $tanggal_schedule = null)
@@ -853,7 +855,33 @@ class ScheduleCelupModel extends Model
 
     public function getFilterSchWeekly($tglAwal, $tglAkhir, $jenis)
     {
-        $builder = $this->select('schedule_celup.id_celup, schedule_celup.id_mesin, schedule_celup.id_bon, schedule_celup.no_po, GROUP_CONCAT(DISTINCT schedule_celup.no_model) AS no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.start_mc, schedule_celup.lot_urut, schedule_celup.lot_celup, schedule_celup.tanggal_schedule, schedule_celup.po_plus, SUM(schedule_celup.kg_celup) AS kg_celup, schedule_celup.ket_schedule, mesin_celup.no_mesin, mesin_celup.min_caps, mesin_celup.max_caps, master_material.jenis, MAX(COALESCE(master_order.delivery_awal, parent_master.delivery_awal)) AS delivery_awal')
+        $db = \Config\Database::connect();
+        $sub = $db->table('schedule_celup s')
+            ->select("
+            s.item_type,
+            s.kode_warna,
+            s.warna,
+            s.tanggal_schedule,
+            s.id_mesin,
+            s.id_bon,
+            s.no_po,
+            s.lot_urut,
+            s.lot_celup,
+            s.start_mc,
+            s.po_plus,
+            s.ket_schedule,
+            SUM(s.kg_celup) AS kg_celup,
+            GROUP_CONCAT(DISTINCT s.no_model ORDER BY s.no_model SEPARATOR ', ') AS no_model,
+            COUNT(*) AS cnt,
+            MIN(s.id_celup) AS id_celup
+        ")
+            ->where('s.tanggal_schedule >=', $tglAwal)
+            ->where('s.tanggal_schedule <=', $tglAkhir)
+            ->groupBy('s.item_type, s.kode_warna, s.warna, s.tanggal_schedule, s.id_mesin')
+            ->getCompiledSelect();
+
+        $builder = $db->table("({$sub}) AS schedule_celup")
+            ->select('schedule_celup.id_celup, schedule_celup.id_mesin, schedule_celup.id_bon, schedule_celup.no_po, GROUP_CONCAT(DISTINCT schedule_celup.no_model) AS no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.start_mc, schedule_celup.lot_urut, schedule_celup.lot_celup, schedule_celup.tanggal_schedule, schedule_celup.po_plus, schedule_celup.kg_celup, schedule_celup.ket_schedule, mesin_celup.no_mesin, mesin_celup.min_caps, mesin_celup.max_caps, master_material.jenis, MAX(COALESCE(master_order.delivery_awal, parent_master.delivery_awal)) AS delivery_awal')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             // join open_po child: match no_model plus either kode_warna OR item_type (toleran jika salah satunya berubah)
             ->join(
@@ -902,7 +930,7 @@ class ScheduleCelupModel extends Model
 
         $builder->groupBy('schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.tanggal_schedule, mesin_celup.id_mesin');
 
-        return $builder->findAll();
+        return $builder->get()->getResultArray();
     }
 
     public function getSchBenangNylon()
@@ -1047,6 +1075,7 @@ class ScheduleCelupModel extends Model
     public function getIdSch($data)
     {
         return $this->select('id_celup')
+            ->where('no_model', $data['no_model'])
             ->where('item_type', $data['item_type'])
             ->where('kode_warna', $data['kode_warna'])
             ->where('warna', $data['color'])

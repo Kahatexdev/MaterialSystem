@@ -265,10 +265,10 @@ class MasterdataController extends BaseController
                 }
 
                 $validate = $this->validateWithAPI($no_model, $style_size);
-                if (!$validate) {
-                    $invalidRows[] = $rowIndex;
-                    continue;
-                }
+
+                $final_style_size = $validate['size'] ?? $style_size;
+                $final_area       = $validate['area'] ?? null;
+                $final_inisial    = $validate['inisial'] ?? null;
 
                 // Ambil dan sanitasi item type
                 $item_type = trim($sheet->getCell($headerMap['Item Type'] . $rowIndex)->getValue());
@@ -280,7 +280,7 @@ class MasterdataController extends BaseController
                 // Cek apakah item type ada di database
                 $checkItemType = $masterMaterialModel->checkItemType($item_type);
                 if (!$checkItemType) {
-                    return redirect()->back()->with('error', $item_type . ' tidak ada di database pada baris ' . $rowIndex);
+                    continue;
                 }
 
                 // Ambil nilai qty_pcs dan bersihkan dari pemisah ribuan
@@ -292,14 +292,15 @@ class MasterdataController extends BaseController
                 // Siapkan data material
                 $validDataMaterial[] = [
                     'id_order'   => $id_order,
-                    'style_size' => $validate['size'] ?? strtoupper(trim($style_size)),
-                    'area'       => $validate['area'] ?? NULL,
-                    'inisial'    => $validate['inisial'] ?? NULL,
+                    'style_size' => $final_style_size,
+                    'area'       => $final_area,
+                    'inisial'    => $final_inisial,
                     'color'      => $sheet->getCell($headerMap['Color'] . $rowIndex)->getValue(),
                     'item_type'  => htmlspecialchars_decode($item_type),
                     'kode_warna' => $sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue(),
                     'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(),
                     'gw'         => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
+                    'gw_aktual'  => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(), // Asumsikan gw_aktual sama dengan gw
                     'qty_pcs'    => $qty_pcs, // Menggunakan variabel yang telah diproses
                     'loss'       => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue() ?? 0,
                     'kgs'        => number_format($kgs, 2, '.', ''),
@@ -307,6 +308,7 @@ class MasterdataController extends BaseController
                     'created_at' => date('Y-m-d H:i:s'),
                 ];
             }
+            // dd($validDataMaterial);
             // ================================================
             // VALIDASI DI AKHIR SEBELUM INSERT MATERIAL
             // ================================================
@@ -536,6 +538,7 @@ class MasterdataController extends BaseController
                     'kode_warna'  => $kode_warna,
                     'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(),
                     'gw'          => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
+                    'gw_aktual'   => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(), // Asumsikan gw_aktual sama dengan gw
                     'qty_pcs'     => $qty_pcs,
                     'loss'        => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue() ?? 0,
                     'kgs'         => $sheet->getCell($headerMap['Kgs'] . $rowIndex)->getValue(),

@@ -107,8 +107,21 @@ class TotalPemesananModel extends Model
         ')
             ->join('pemesanan', 'pemesanan.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('kebutuhan_cones', 'material.id_material = kebutuhan_cones.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('total_pemesanan.id_total_pemesanan', $id)
+            ->first();
+    }
+    public function getTtlPesan($jenis, $tglPakai)
+    {
+        return $this->select('SUM(total_pemesanan.ttl_kg) AS ttl_pesan_kg, SUM(total_pemesanan.ttl_cns) AS ttl_pesan_cns')
+            ->join('pemesanan', 'pemesanan.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
+            ->join('material', 'material.id_material=pemesanan.id_material', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type')
+            ->where('master_material.jenis', $jenis)
+            ->where('pemesanan.tgl_pakai', $tglPakai)
+            ->where('pemesanan.status_kirim', 'YA')
+            ->groupBy('master_material.jenis')
             ->first();
     }
 }

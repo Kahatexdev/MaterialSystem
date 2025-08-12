@@ -599,7 +599,7 @@
                             title: 'Nilai Terlalu Besar',
                             text: `Kg Out Manual tidak boleh lebih dari ${maxKgs.toFixed(2)} KG`
                         });
-                        el.val(maxKgs.toFixed(2));
+                        el.val(0);
                     }
                 }
                 // Kalau ini input Cones
@@ -612,7 +612,7 @@
                             title: 'Nilai Terlalu Besar',
                             text: `Cones Out Manual tidak boleh lebih dari ${maxCns} Cns`
                         });
-                        el.val(maxCns);
+                        el.val(0);
                     }
                 }
                 // setelah validasi, hitung ulang totals
@@ -649,10 +649,24 @@
             text: 'Pilih minimal satu order!'
         });
 
+        // Ambil nilai manual (jika ada) untuk setiap id yang diceklis
+        const kgsOut = {};
+        const cnsOut = {};
+
+        orders.forEach(id => {
+            const rawKgs = $(`#kgs_out_${id}`).val()?.replace(',', '.')?.trim() || '0';
+            const rawCns = $(`#cns_out_${id}`).val()?.trim() || '0';
+
+            kgsOut[id] = parseFloat(rawKgs);
+            cnsOut[id] = parseInt(rawCns, 10);
+        });
+
         $.post(`${base}/${role}/warehouse/savePindahOrder`, {
             no_model_tujuan: model,
             idOutCelup: orders,
-            id_stock: stock
+            id_stock: stock,
+            kgs_out: kgsOut,
+            cns_out: cnsOut
         }, res => {
             if (res.success) {
                 Swal.fire({

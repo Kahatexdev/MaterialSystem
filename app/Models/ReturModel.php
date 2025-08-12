@@ -277,8 +277,23 @@ class ReturModel extends Model
     }
     public function filterData($area, $tglBuat, $noModel = null)
     {
-        $builder = $this->select("retur.kgs_retur, retur.cns_retur, retur.krg_retur, retur.lot_retur, retur.kategori, retur.keterangan_gbn, retur.admin,
-        IF(po_tambahan.status = 'approved', po_tambahan.terima_kg, 0) AS terima_kg,
+        $db = \Config\Database::connect();
+
+        // Subquery SUM pengeluaran
+        $subPengeluaran = $db->table('pengeluaran')
+            ->select('stock.id_stock, SUM(pengeluaran.kgs_out) AS terima_kg')
+            ->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
+            ->groupBy('stock.no_model, stock.item_type, stock.kode_warna');
+
+        // Subquery SUM material
+        $subMaterial = $db->table('material')
+            ->select('material.id_material, SUM(material.kgs) AS kgs_sum, SUM(material.qty_pcs) AS qty_pcs_sum')
+            ->groupBy('material.id_order, material.item_type, material.kode_warna');
+
+        $builder = $this->select("
+        retur.kgs_retur, retur.cns_retur, retur.krg_retur, retur.lot_retur,
+        retur.kategori, retur.keterangan_gbn, retur.admin,
+        peng.terima_kg,
         IF(po_tambahan.status = 'approved', po_tambahan.sisa_bb_mc, 0) AS sisa_bb_mc,
         IF(po_tambahan.status = 'approved', po_tambahan.sisa_order_pcs, 0) AS sisa_order_pcs,
         IF(po_tambahan.status = 'approved', po_tambahan.poplus_mc_kg, 0) AS poplus_mc_kg,
@@ -287,16 +302,26 @@ class ReturModel extends Model
         IF(po_tambahan.status = 'approved', po_tambahan.plus_pck_kg, 0) AS plus_pck_kg,
         IF(po_tambahan.status = 'approved', po_tambahan.plus_pck_cns, 0) AS plus_pck_cns,
         IF(po_tambahan.status = 'approved', po_tambahan.lebih_pakai_kg, 0) AS lebih_pakai_kg, 
-        master_order.no_model, master_order.delivery_akhir, material.item_type, material.kode_warna, material.color, material.style_size, SUM(material.kgs) AS kgs, material.composition, material.gw, SUM(material.qty_pcs) AS qty_pcs, material.loss")
+        master_order.no_model, master_order.delivery_akhir, material.item_type,
+        material.kode_warna, material.color, material.style_size,
+        mat.kgs_sum AS kgs,
+        material.composition, material.gw,
+        mat.qty_pcs_sum AS qty_pcs,
+        material.loss
+    ")
             ->join('master_order', 'retur.no_model = master_order.no_model', 'left')
             ->join('material', 'master_order.id_order = material.id_order AND retur.item_type = material.item_type AND retur.kode_warna = material.kode_warna', 'left')
             ->join('po_tambahan', 'po_tambahan.id_material = material.id_material', 'left')
+            ->join('stock', 'master_order.no_model = stock.no_model AND material.item_type = stock.item_type AND material.kode_warna = stock.kode_warna', 'left')
+            ->join("({$subPengeluaran->getCompiledSelect()}) peng", 'peng.id_stock = stock.id_stock', 'left')
+            ->join("({$subMaterial->getCompiledSelect()}) mat", 'mat.id_material = material.id_material', 'left')
             ->where('retur.area_retur', $area)
             ->where('retur.tgl_retur', $tglBuat);
-        // Cek apakah tglBuat diisi, baru apply filter
+
         if (!empty($noModel)) {
             $builder->where('master_order.no_model', $noModel);
         }
+
         return $builder
             ->groupBy('retur.id_retur')
             ->orderBy('master_order.no_model', 'ASC')

@@ -293,8 +293,8 @@ class OpenPoModel extends Model
         return $this->db->table('open_po AS anak')
             ->select('anak.*, anak.no_model AS anak_no_model, master_material.jenis, master_material.ukuran, induk.no_model AS induk_no_model, master_order.buyer, master_order.delivery_awal, master_order.no_order') // ← ambil no_model dari induk
             ->join('open_po AS induk', 'induk.id_po = anak.id_induk') // ← self join
-            ->join('master_material', 'master_material.item_type = anak.item_type', 'left')
-            ->join('master_order', 'master_order.no_model = REPLACE(induk.no_model, "POCOVERING ", "")', 'left')
+            ->join('master_material', 'master_material.item_type = TRIM(REPLACE(REPLACE(anak.item_type, CHAR(9), ""), CHAR(160), ""))', 'left', false)
+            ->join('master_order', 'master_order.no_model = REPLACE(induk.no_model, "POCOVERING ", "")', 'left', false)
             ->where('anak.id_induk IS NOT NULL')
             ->where('anak.penerima', 'Retno')
             ->where('anak.penanggung_jawab', 'Paryanti')

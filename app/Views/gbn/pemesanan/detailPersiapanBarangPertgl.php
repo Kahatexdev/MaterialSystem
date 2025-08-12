@@ -1,0 +1,187 @@
+<?php $this->extend($role . '/pemesanan/header'); ?>
+<?php $this->section('content'); ?>
+<div class="container-fluid py-4">
+    <div class="row my-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold"><?= $title; ?></p>
+                            <h5 class="font-weight-bolder mb-0">
+                                Data Persiapan Pengeluaran Barang <?= $jenis ?>
+                            </h5>
+                        </div>
+                        <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+                            <i class="ni ni-chart-bar-32 text-lg opacity-10" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                    <!-- Sub Title -->
+                    <h5 class="text-bold fw-semibold mb-3">📦 Informasi Pemesanan</h5>
+
+                    <!-- Grid Cards -->
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
+                                <h6 class="text-muted mb-1 small">Kg Pesan</h6>
+                                <h4 class="fw-semibold mb-0"> <?= number_format($ttlPesan['ttl_pesan_kg'], 2) ?? 0 ?>Kg</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
+                                <h6 class="text-muted mb-1 small">Cns Pesan</h6>
+                                <h4 class="fw-semibold mb-0"><?= $ttlPesan['ttl_pesan_cns'] ?> Cns</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
+                                <h6 class="text-muted mb-1 small">Kg Persiapan</h6>
+                                <h4 class="fw-semibold mb-0"><?= number_format($ttlPersiapan['kgs_out'], 2) ?? 0 ?> Kg</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
+                                <h6 class="text-muted mb-1 small">Cns Persiapan</h6>
+                                <h4 class="fw-semibold mb-0"><?= $ttlPersiapan['cns_out'] ?> Kg</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h6 class="mb-0"></h6>
+                </div>
+                <div class="card-body">
+                    <form class="row g-3">
+                        <div class="col-md-10">
+                            <label for="filter_model" class="form-label">No Model</label>
+                            <input type="text" id="filter_model" name="filter_model" class="form-control">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button id="filterButton" type="button" class="btn bg-gradient-info w-100">
+                                <i class="fas fa-filter"></i>
+                                Filter
+                            </button>
+                        </div>
+                    </form>
+                    <div class="table-responsive mt-4">
+                        <table class="table  align-items-center">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Color</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">No Karung</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Kgs</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Cns</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Lot</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Nama Cluster</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pemesananTable">
+                                <?php foreach ($detail as $id) : ?>
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['tgl_pakai'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['no_model'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['item_type'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['kode_warna'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['color'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['no_karung'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['kgs_out'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['cns_out'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['lot_out'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['nama_cluster'] ?></p>
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                        </td>
+                                    </tr>
+
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('filterButton').addEventListener('click', function() {
+        const filterModel = document.getElementById('filter_model').value;
+
+        if (!filterModel) {
+            alert('Nomodel filter tidak boleh kosong.');
+            return;
+        }
+
+        fetch(`<?= base_url($role . "/pemesanan/detailListBarangKeluar?jenis={$jenis}&tglPakai={$tglPakai}") ?>&noModel=${encodeURIComponent(filterModel)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest' // <— penting untuk CI4
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const tableBody = document.getElementById('pemesananTable');
+                tableBody.innerHTML = ''; // Clear isi tabel sebelum render ulang
+
+                data.forEach(id => {
+                    const row = `
+            <tr>
+                <td><p class="text-sm font-weight-bold mb-0">${id.tgl_pakai}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.no_model}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.item_type}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.kode_warna}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.color}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.no_karung}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.kgs_out}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.cns_out}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.lot_out}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.nama_cluster}</p></td>
+                <td><a class="btn btn-danger"><i class="fas fa-trash"></i></a></td>
+            </tr>
+        `;
+                    tableBody.insertAdjacentHTML('beforeend', row);
+                });
+            })
+            .catch(error => console.error('Fetch Error:', error));
+    });
+</script>
+
+<?php $this->endSection(); ?>

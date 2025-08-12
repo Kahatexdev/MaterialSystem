@@ -5657,10 +5657,12 @@ class ExcelController extends BaseController
     {
         $noModel   = $this->request->getGet('model')     ?? '';
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
-        $tglPo = $this->request->getGet('tgl_po') ?? date('Y-m-d', strtotime('-1 day'));
+        $tglPoDari = $this->request->getGet('tgl_po_dari') ?? '';
+        $tglPoSampai = $this->request->getGet('tgl_po_sampai') ?? '';
+        $area = $this->request->getGet('area') ?? '';
 
         // 1) Ambil data
-        $dataPoPlus = $this->poPlusModel->getDataPoPlus($tglPo, $noModel, $kodeWarna);
+        $dataPoPlus = $this->poPlusModel->getDataPoPlus($tglPoDari, $tglPoSampai, $noModel, $area, $kodeWarna);
 
         // Buat spreadsheet
         $spreadsheet = new Spreadsheet();
@@ -5694,22 +5696,32 @@ class ExcelController extends BaseController
             ],
         ];
 
+        // Buat teks tanggal filter
+        $tanggalFilter = '';
+        if (!empty($tglPoDari) && !empty($tglPoSampai)) {
+            $tanggalFilter = $tglPoDari . ' s/d ' . $tglPoSampai;
+        } elseif (!empty($tglPoDari)) {
+            $tanggalFilter = $tglPoDari;
+        } elseif (!empty($tglPoSampai)) {
+            $tanggalFilter = $tglPoSampai;
+        }
+
         $dataFilter = '';
 
-        if (!empty($noModel) && !empty($kodeWarna) && !empty($tglPo)) {
-            $dataFilter = ' NOMOR MODEL ' . $noModel . ' KODE WARNA ' . $kodeWarna . ' TANGGAL PO ' . $tglPo;
+        if (!empty($noModel) && !empty($kodeWarna) && !empty($tanggalFilter)) {
+            $dataFilter = ' NOMOR MODEL ' . $noModel . ' KODE WARNA ' . $kodeWarna . ' TANGGAL PO ' . $tanggalFilter;
         } elseif (!empty($noModel) && !empty($kodeWarna)) {
             $dataFilter = ' NOMOR MODEL ' . $noModel . ' KODE WARNA ' . $kodeWarna;
-        } elseif (!empty($noModel) && !empty($tglPo)) {
-            $dataFilter = ' NOMOR MODEL ' . $noModel . ' TANGGAL PO ' . $tglPo;
-        } elseif (!empty($kodeWarna) && !empty($tglPo)) {
-            $dataFilter = ' KODE WARNA ' . $kodeWarna . ' TANGGAL PO ' . $tglPo;
+        } elseif (!empty($noModel) && !empty($tanggalFilter)) {
+            $dataFilter = ' NOMOR MODEL ' . $noModel . ' TANGGAL PO ' . $tanggalFilter;
+        } elseif (!empty($kodeWarna) && !empty($tanggalFilter)) {
+            $dataFilter = ' KODE WARNA ' . $kodeWarna . ' TANGGAL PO ' . $tanggalFilter;
         } elseif (!empty($noModel)) {
             $dataFilter = ' NOMOR MODEL ' . $noModel;
         } elseif (!empty($kodeWarna)) {
             $dataFilter = ' KODE WARNA ' . $kodeWarna;
-        } elseif (!empty($tglPo)) {
-            $dataFilter = ' TANGGAL PO ' . $tglPo;
+        } elseif (!empty($tanggalFilter)) {
+            $dataFilter = ' TANGGAL PO ' . $tanggalFilter;
         }
 
         // Judul
@@ -6578,7 +6590,6 @@ class ExcelController extends BaseController
             session()->setFlashdata('error', 'PO Tidak Ditemukan. Open PO Terlebih Dahulu');
             return redirect()->back();
         }
-
         // Hilangkan kata POCOVERING pada induk_no_model
         foreach ($poCovering as $i => $row) {
             $poCovering[$i]->induk_no_model = preg_replace('/POCOVERING\s*/i', '', $row->induk_no_model);
@@ -11278,7 +11289,7 @@ class ExcelController extends BaseController
             $no = 1;
             $groupTanggal = [];
             foreach ($rows as $item) {
-                $tgl = $item['tgl_masuk'];
+                $tgl = $item['tgl_datang'];
                 $groupTanggal[$tgl][] = $item;
             }
 
@@ -11290,7 +11301,7 @@ class ExcelController extends BaseController
                     $harga = $item['harga'];
                     $totalUsd = $kgsKirim * $harga;
 
-                    $tgl = $item['tgl_masuk'];
+                    $tgl = $item['tgl_datang'];
                     $cones = (float)$item['cones'];
                     $gw    = (float)$item['gw'];
                     $kgs_kirim    = (float)$item['kgs_kirim'];
@@ -11299,7 +11310,7 @@ class ExcelController extends BaseController
 
                     $sheet->setCellValue('A' . $row, $no++);
                     $sheet->setCellValue('B' . $row, $item['no_surat_jalan']);
-                    $sheet->setCellValue('C' . $row, $item['tgl_masuk']);
+                    $sheet->setCellValue('C' . $row, $item['tgl_datang']);
                     $sheet->setCellValue('D' . $row, $item['tgl_input']);
                     $sheet->setCellValue('E' . $row, $item['item_type']);
                     $sheet->setCellValue('F' . $row, $item['ukuran']);
