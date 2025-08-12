@@ -236,7 +236,7 @@ class MaterialModel extends Model
     public function getMaterialForPemesanan($model, $styleSize, $area)
     {
         return $this->select('master_material.jenis, material.*, IFNULL(kebutuhan_cones.qty_cns, 0) AS qty_cns, IFNULL(kebutuhan_cones.qty_berat_cns, 0) AS qty_berat_cns')
-            ->join('(SELECT id_material, qty_cns, qty_berat_cns FROM kebutuhan_cones WHERE area=' . $area . ') AS kebutuhan_cones', 'material.id_material=kebutuhan_cones.id_material', 'left')
+            ->join('(SELECT id_material, qty_cns, qty_berat_cns FROM kebutuhan_cones WHERE area="' . $area . '") AS kebutuhan_cones', 'material.id_material=kebutuhan_cones.id_material', 'left')
             ->join('master_order', 'master_order.id_order=material.id_order')
             ->join('master_material', 'master_material.item_type=material.item_type')
             ->where('master_order.no_model', $model)
