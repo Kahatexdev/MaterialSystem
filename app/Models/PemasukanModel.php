@@ -326,36 +326,36 @@ class PemasukanModel extends Model
     {
         // Query 1: Untuk data yang punya id_other_bon (other_bon)
         $builder1 = $this->db->table('pemasukan')
-            ->select('COUNT(out_celup.id_out_celup) AS total_karung, out_celup.id_other_bon, out_celup.l_m_d, out_celup.harga, out_celup.no_karung, SUM(out_celup.gw_kirim) AS gw, SUM(out_celup.kgs_kirim) AS kgs_kirim, SUM(out_celup.cones_kirim) AS cones, other_bon.item_type, other_bon.kode_warna, other_bon.warna, other_bon.no_surat_jalan, other_bon.detail_sj, pemasukan.tgl_masuk, DATE(pemasukan.created_at) AS tgl_input, master_material.jenis, master_material.ukuran, master_warna_benang.warna_dasar')
+            ->select('COUNT(out_celup.id_out_celup) AS total_karung, out_celup.id_other_bon, out_celup.l_m_d, out_celup.harga, out_celup.no_karung, SUM(out_celup.gw_kirim) AS gw, SUM(out_celup.kgs_kirim) AS kgs_kirim, SUM(out_celup.cones_kirim) AS cones, other_bon.item_type, other_bon.kode_warna, other_bon.warna, other_bon.no_surat_jalan, other_bon.detail_sj, other_bon.tgl_datang, DATE(pemasukan.created_at) AS tgl_input, master_material.jenis, master_material.ukuran, master_warna_benang.warna_dasar,pemasukan.tgl_masuk')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
             ->join('other_bon', 'other_bon.id_other_bon = out_celup.id_other_bon')
             ->join('master_material', 'master_material.item_type = other_bon.item_type')
             ->join('master_warna_benang', 'master_warna_benang.kode_warna = other_bon.kode_warna', 'left')
             ->where('out_celup.id_other_bon IS NOT NULL')
             ->where('master_material.jenis', 'BENANG')
-            ->groupBy('pemasukan.tgl_masuk, other_bon.item_type, other_bon.no_surat_jalan');
+            ->groupBy('other_bon.tgl_datang, other_bon.item_type, other_bon.no_surat_jalan');
 
         $builder2 = $this->db->table('pemasukan')
-            ->select('schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, SUM(out_celup.kgs_kirim) AS kgs_kirim, SUM(out_celup.gw_kirim) AS gw, pemasukan.tgl_masuk, COUNT(pemasukan.id_out_celup) AS total_karung, out_celup.l_m_d, out_celup.harga, SUM(out_celup.cones_kirim) AS cones, bon_celup.no_surat_jalan, master_material.jenis, master_material.ukuran, DATE(pemasukan.created_at) AS tgl_input, bon_celup.detail_sj, master_warna_benang.warna_dasar')
+            ->select('schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, SUM(out_celup.kgs_kirim) AS kgs_kirim, SUM(out_celup.gw_kirim) AS gw, bon_celup.tgl_datang, COUNT(pemasukan.id_out_celup) AS total_karung, out_celup.l_m_d, out_celup.harga, SUM(out_celup.cones_kirim) AS cones, bon_celup.no_surat_jalan, master_material.jenis, master_material.ukuran, DATE(pemasukan.created_at) AS tgl_input, bon_celup.detail_sj, master_warna_benang.warna_dasar,pemasukan.tgl_masuk')
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
             ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup')
             ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
             ->join('master_material', 'master_material.item_type = schedule_celup.item_type')
             ->join('master_warna_benang', 'master_warna_benang.kode_warna = schedule_celup.kode_warna', 'left')
             ->where('master_material.jenis', 'BENANG')
-            ->groupBy('pemasukan.tgl_masuk, schedule_celup.item_type, bon_celup.no_surat_jalan');
+            ->groupBy('bon_celup.tgl_datang, schedule_celup.item_type, bon_celup.no_surat_jalan');
 
         // Filter tanggal (berlaku di kedua query)
         if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
             if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
-                $builder1->where('pemasukan.tgl_masuk >=', $tanggal_awal)->where('pemasukan.tgl_masuk <=', $tanggal_akhir);
-                $builder2->where('pemasukan.tgl_masuk >=', $tanggal_awal)->where('pemasukan.tgl_masuk <=', $tanggal_akhir);
+                $builder1->where('other_bon.tgl_datang >=', $tanggal_awal)->where('other_bon.tgl_datang <=', $tanggal_akhir);
+                $builder2->where('bon_celup.tgl_datang >=', $tanggal_awal)->where('bon_celup.tgl_datang <=', $tanggal_akhir);
             } elseif (!empty($tanggal_awal)) {
-                $builder1->where('pemasukan.tgl_masuk >=', $tanggal_awal);
-                $builder2->where('pemasukan.tgl_masuk >=', $tanggal_awal);
+                $builder1->where('other_bon.tgl_datang >=', $tanggal_awal);
+                $builder2->where('bon_celup.tgl_datang >=', $tanggal_awal);
             } elseif (!empty($tanggal_akhir)) {
-                $builder1->where('pemasukan.tgl_masuk <=', $tanggal_akhir);
-                $builder2->where('pemasukan.tgl_masuk <=', $tanggal_akhir);
+                $builder1->where('other_bon.tgl_datang <=', $tanggal_akhir);
+                $builder2->where('bon_celup.tgl_datang <=', $tanggal_akhir);
             }
         }
 
@@ -368,7 +368,7 @@ class PemasukanModel extends Model
 
         // Urutkan berdasarkan tgl_masuk
         usort($merged, function ($a, $b) {
-            return strtotime($a['tgl_masuk']) - strtotime($b['tgl_masuk']);
+            return strtotime($a['tgl_datang']) - strtotime($b['tgl_datang']);
         });
 
         return $merged;

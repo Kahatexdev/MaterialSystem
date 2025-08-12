@@ -11290,7 +11290,7 @@ class ExcelController extends BaseController
             $no = 1;
             $groupTanggal = [];
             foreach ($rows as $item) {
-                $tgl = $item['tgl_masuk'];
+                $tgl = $item['tgl_datang'];
                 $groupTanggal[$tgl][] = $item;
             }
 
@@ -11302,7 +11302,7 @@ class ExcelController extends BaseController
                     $harga = $item['harga'];
                     $totalUsd = $kgsKirim * $harga;
 
-                    $tgl = $item['tgl_masuk'];
+                    $tgl = $item['tgl_datang'];
                     $cones = (float)$item['cones'];
                     $gw    = (float)$item['gw'];
                     $kgs_kirim    = (float)$item['kgs_kirim'];
@@ -11311,7 +11311,7 @@ class ExcelController extends BaseController
 
                     $sheet->setCellValue('A' . $row, $no++);
                     $sheet->setCellValue('B' . $row, $item['no_surat_jalan']);
-                    $sheet->setCellValue('C' . $row, $item['tgl_masuk']);
+                    $sheet->setCellValue('C' . $row, $item['tgl_datang']);
                     $sheet->setCellValue('D' . $row, $item['tgl_input']);
                     $sheet->setCellValue('E' . $row, $item['item_type']);
                     $sheet->setCellValue('F' . $row, $item['ukuran']);
