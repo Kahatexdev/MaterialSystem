@@ -231,6 +231,7 @@ class PemesananModel extends Model
             ->where('material.kode_warna', $data['kode_warna'])
             ->where('material.color', $data['color'])
             ->where('pemesanan.po_tambahan', $data['po_tambahan'])
+            ->where('pemesanan.status_kirim', '')
             ->groupBy('pemesanan.id_pemesanan')
             ->orderBy('pemesanan.id_pemesanan');
         return $data->get()->getResultArray();
@@ -239,7 +240,7 @@ class PemesananModel extends Model
     {
         // Langkah 1: Ambil semua data yang relevan dengan JOIN
         $data = $this->db->table('pemesanan')
-            ->select('pemesanan.id_pemesanan, pemesanan.jl_mc, pemesanan.ttl_berat_cones, pemesanan.ttl_qty_cones, pemesanan.sisa_kgs_mc, pemesanan.sisa_cones_mc')
+            ->select('master_order.no_model, material.item_type, material.kode_Warna, material.color, pemesanan.id_pemesanan, pemesanan.jl_mc, pemesanan.ttl_berat_cones, pemesanan.ttl_qty_cones, pemesanan.sisa_kgs_mc, pemesanan.sisa_cones_mc')
             ->join('material', 'pemesanan.id_material = material.id_material')
             ->join('master_order', 'master_order.id_order = material.id_order')
             ->where('master_order.no_model', $id['no_model'])
@@ -248,6 +249,7 @@ class PemesananModel extends Model
             ->where('material.color', $id['color'])
             ->where('pemesanan.tgl_pakai', $id['tgl_pakai'])
             ->where('pemesanan.po_tambahan', $id['po_tambahan'])
+            ->where('pemesanan.status_kirim', '')
             ->get()
             ->getResultArray(); // Ambil semua baris sebagai array
 
@@ -271,17 +273,38 @@ class PemesananModel extends Model
             'ttl_cns'   => $totalQtyCones - $sisaConesMc,
         ];
 
-        // Langkah 3: Insert ke tabel baru
-        $insert = $this->db->table('total_pemesanan')->insert($totalData);
+        // Langkah 4: Cek Apakah sebelumnya sudah ada pemesann yg di kirim
+        $existing = $this->db->table('pemesanan')
+            ->select('total_pemesanan.id_total_pemesanan')
+            ->join('material', 'pemesanan.id_material = material.id_material')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
+            ->where('master_order.no_model', $id['no_model'])
+            ->where('material.item_type', $id['item_type'])
+            ->where('material.kode_warna', $id['kode_warna'])
+            ->where('material.color', $id['color'])
+            ->where('pemesanan.tgl_pakai', $id['tgl_pakai'])
+            ->where('pemesanan.po_tambahan', $id['po_tambahan'])
+            ->limit(1)
+            ->get()
+            ->getRowArray();
 
-        if (!$insert) {
-            return [
-                'status'  => 'error',
-                'message' => 'Gagal menyimpan data total',
-            ];
+        // Kalau sudah ada, ambil ID-nya
+        if ($existing && !empty($existing['id_total_pemesanan'])) {
+            $idTotalPemesanan = $existing['id_total_pemesanan'];
+
+            // Update nilai total dengan penambahan
+            $this->db->table('total_pemesanan')
+                ->set('ttl_jl_mc', 'ttl_jl_mc + ' . (int) $totalData['ttl_jl_mc'], false)
+                ->set('ttl_kg', 'ttl_kg + ' . (float) $totalData['ttl_kg'], false)
+                ->set('ttl_cns', 'ttl_cns + ' . (float) $totalData['ttl_cns'], false)
+                ->where('id_total_pemesanan', $idTotalPemesanan)
+                ->update();
+        } else {
+            // Insert baru kalau belum ada
+            $this->db->table('total_pemesanan')->insert($totalData);
+            $idTotalPemesanan = $this->db->insertID();
         }
-        // Ambil ID total pemesanan yang baru saja diinsert
-        $idTotalPemesanan = $this->db->insertID();
 
         // Langkah 4: Update data di tabel pemesanan
         $success = 0;
