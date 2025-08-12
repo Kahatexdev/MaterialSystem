@@ -1085,18 +1085,44 @@ class PemesananController extends BaseController
     }
     public function detailListBarangKeluar()
     {
-        $jenis = $this->request->getGet('jenis');
-        $tglPakai = $this->request->getGet('tgl_pakai');
+        $jenis    = $this->request->getGet('jenis');
+        $tglPakai = $this->request->getGet('tglPakai');
 
-        $detail = $this->pengeluaranModel->getDataPemesananExport($jenis, $tglPakai);
+        $ttlPesan = $this->totalPemesananModel->getTtlPesan($jenis, $tglPakai);
+        $ttlPersiapan = $this->pengeluaranModel->getTtlPersiapan($jenis, $tglPakai);
+        // dd($ttlPesan, $ttlPersiapan);
 
+        // Ambil noModel sesuai jenis request
+        if ($this->request->isAJAX()) {
+            // Kalau dari fetch POST JSON
+            if ($this->request->getMethod() === 'post') {
+                $noModel = $this->request->getJSON()->noModel ?? null;
+            } else {
+                // Kalau dari fetch GET query string
+                $noModel = $this->request->getGet('noModel');
+            }
+        } else {
+            // Normal GET request biasa
+            $noModel = $this->request->getGet('noModel');
+        }
+
+        $detail = $this->pengeluaranModel->getDataPemesananExport($jenis, $tglPakai, $noModel);
+
+        if ($this->request->isAJAX()) {
+            // Return JSON kalau dari AJAX
+            return $this->response->setJSON($detail);
+        }
+
+        // Return view kalau akses normal
         $data = [
-            'active' => $this->active,
-            'title' => 'Material System',
-            'role' => $this->role,
-            'jenis' => $jenis,
+            'active'   => $this->active,
+            'title'    => 'Material System',
+            'role'     => $this->role,
+            'jenis'    => $jenis,
             'tglPakai' => $tglPakai,
-            'detail' => $detail,
+            'detail'   => $detail,
+            'ttlPesan' => $ttlPesan,
+            'ttlPersiapan' => $ttlPersiapan
         ];
         return view($this->role . '/pemesanan/detailPersiapanBarangPertgl', $data);
     }

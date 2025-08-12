@@ -338,10 +338,10 @@ class ApiController extends ResourceController
                         // Update
                         $this->kebutuhanCones
                             ->where('id_material', $row['id_material'])
+                            ->where('area', $data['area'])
                             ->set([
                                 'qty_cns'       => $row['qty_cns'],
                                 'qty_berat_cns' => $row['qty_berat_cns'],
-                                'area'          => $data['area'],
                                 'updated_at'    => date('Y-m-d H:i:s')
                             ])
                             ->update();
@@ -892,9 +892,7 @@ class ApiController extends ResourceController
     // get data pengiriman
     public function getPengirimanArea()
     {
-        // $noModel = $this->request->getGet('noModel') ?? '';
-        $noModel = 'L25067';
-        // $noModel = 'DB2501';
+        $noModel = $this->request->getGet('noModel') ?? '';
         // $results = $this->pengeluaranModel->searchPengiriman($noModel);
         $results = $this->pengeluaranModel->searchPengiriman2($noModel);
 

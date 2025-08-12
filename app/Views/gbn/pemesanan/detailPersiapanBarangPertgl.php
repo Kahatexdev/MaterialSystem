@@ -16,6 +16,36 @@
                             <i class="ni ni-chart-bar-32 text-lg opacity-10" aria-hidden="true"></i>
                         </div>
                     </div>
+                    <!-- Sub Title -->
+                    <h5 class="text-bold fw-semibold mb-3">📦 Informasi Pemesanan</h5>
+
+                    <!-- Grid Cards -->
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
+                                <h6 class="text-muted mb-1 small">Kg Pesan</h6>
+                                <h4 class="fw-semibold mb-0"> <?= number_format($ttlPesan['ttl_pesan_kg'], 2) ?? 0 ?>Kg</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
+                                <h6 class="text-muted mb-1 small">Cns Pesan</h6>
+                                <h4 class="fw-semibold mb-0"><?= $ttlPesan['ttl_pesan_cns'] ?> Cns</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
+                                <h6 class="text-muted mb-1 small">Kg Persiapan</h6>
+                                <h4 class="fw-semibold mb-0"><?= number_format($ttlPersiapan['kgs_out'], 2) ?? 0 ?> Kg</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
+                                <h6 class="text-muted mb-1 small">Cns Persiapan</h6>
+                                <h4 class="fw-semibold mb-0"><?= $ttlPersiapan['cns_out'] ?> Kg</h4>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -30,8 +60,8 @@
                 <div class="card-body">
                     <form class="row g-3">
                         <div class="col-md-10">
-                            <label for="filter_date" class="form-label">Tanggal Pakai</label>
-                            <input type="date" id="filter_date" name="filter_date" class="form-control">
+                            <label for="filter_model" class="form-label">No Model</label>
+                            <input type="text" id="filter_model" name="filter_model" class="form-control">
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
                             <button id="filterButton" type="button" class="btn bg-gradient-info w-100">
@@ -54,41 +84,44 @@
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Cns</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Lot</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Nama Cluster</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center" colspan="2">Action</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="pemesananTable">
                                 <?php foreach ($detail as $id) : ?>
                                     <tr>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['tgl_pakai'] ?></p>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['tgl_pakai'] ?></p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['no_model'] ?></p>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['no_model'] ?></p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['item_type'] ?></p>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['item_type'] ?></p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['color'] ?></p>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['kode_warna'] ?></p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['no_karung'] ?></p>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['color'] ?></p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['kgs_out'] ?></p>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['no_karung'] ?></p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['cns_out'] ?></p>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['kgs_out'] ?></p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['lot_out'] ?></p>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['cns_out'] ?></p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['nama_cluster'] ?></p>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['lot_out'] ?></p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['nama_cluster'] ?></p>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['nama_cluster'] ?></p>
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
                                         </td>
                                     </tr>
 
@@ -102,23 +135,21 @@
     </div>
 </div>
 
-<!-- <script>
+<script>
     document.getElementById('filterButton').addEventListener('click', function() {
-        const filterDate = document.getElementById('filter_date').value;
+        const filterModel = document.getElementById('filter_model').value;
 
-        if (!filterDate) {
-            alert('Tanggal filter tidak boleh kosong.');
+        if (!filterModel) {
+            alert('Nomodel filter tidak boleh kosong.');
             return;
         }
 
-        fetch('<?= base_url($role . "/otherIn/listBarcode/filter") ?>', {
-                method: 'POST',
+        fetch(`<?= base_url($role . "/pemesanan/detailListBarangKeluar?jenis={$jenis}&tglPakai={$tglPakai}") ?>&noModel=${encodeURIComponent(filterModel)}`, {
+                method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    filter_date: filterDate
-                })
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest' // <— penting untuk CI4
+                }
             })
             .then(response => {
                 if (!response.ok) {
@@ -128,40 +159,29 @@
             })
             .then(data => {
                 const tableBody = document.getElementById('pemesananTable');
-                tableBody.innerHTML = ''; // Clear existing table rows
+                tableBody.innerHTML = ''; // Clear isi tabel sebelum render ulang
 
-                if (data.length > 0) {
-                    data.forEach(psn => {
-                        const row = document.createElement('tr');
-
-                        const tglPakaiCell = document.createElement('td');
-                        tglPakaiCell.innerHTML = `<p class="text-sm font-weight-bold mb-0">${psn.tgl_datang}</p>`;
-                        row.appendChild(tglPakaiCell);
-
-                        const actionCell = document.createElement('td');
-                        actionCell.classList.add('text-center');
-                        actionCell.innerHTML = `
-                    <a href="<?= base_url($role . '/otherIn/detailListBarcode') ?>/${psn.tgl_datang}" class="btn bg-gradient-info">
-                        <i class="fas fa-eye"></i>
-                        Detail
-                    </a>
-                `;
-                        row.appendChild(actionCell);
-
-                        tableBody.appendChild(row);
-                    });
-                } else {
-                    const row = document.createElement('tr');
-                    const noDataCell = document.createElement('td');
-                    noDataCell.setAttribute('colspan', '2');
-                    noDataCell.classList.add('text-center');
-                    noDataCell.textContent = 'Tidak ada data yang ditemukan.';
-                    row.appendChild(noDataCell);
-                    tableBody.appendChild(row);
-                }
+                data.forEach(id => {
+                    const row = `
+            <tr>
+                <td><p class="text-sm font-weight-bold mb-0">${id.tgl_pakai}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.no_model}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.item_type}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.kode_warna}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.color}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.no_karung}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.kgs_out}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.cns_out}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.lot_out}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.nama_cluster}</p></td>
+                <td><a class="btn btn-danger"><i class="fas fa-trash"></i></a></td>
+            </tr>
+        `;
+                    tableBody.insertAdjacentHTML('beforeend', row);
+                });
             })
             .catch(error => console.error('Fetch Error:', error));
     });
-</script> -->
+</script>
 
 <?php $this->endSection(); ?>
