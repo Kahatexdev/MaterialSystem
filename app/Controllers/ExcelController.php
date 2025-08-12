@@ -6590,7 +6590,6 @@ class ExcelController extends BaseController
             session()->setFlashdata('error', 'PO Tidak Ditemukan. Open PO Terlebih Dahulu');
             return redirect()->back();
         }
-
         // Hilangkan kata POCOVERING pada induk_no_model
         foreach ($poCovering as $i => $row) {
             $poCovering[$i]->induk_no_model = preg_replace('/POCOVERING\s*/i', '', $row->induk_no_model);
