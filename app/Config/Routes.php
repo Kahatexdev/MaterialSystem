@@ -348,6 +348,10 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
 
     $routes->get('statusBahanBaku', 'ScheduleController::statusBahanBaku');
     $routes->get('filterstatusbahanbaku/(:any)', 'ScheduleController::filterstatusbahanbaku/$1');
+
+
+    // pengaduan
+    $routes->get('pengaduan', 'PengaduanController::Apipengaduan/$1/$2');
 });
 
 // celup routes

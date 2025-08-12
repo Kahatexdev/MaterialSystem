@@ -2694,7 +2694,7 @@ class WarehouseController extends BaseController
 
         // 2) Siapkan HTTP client
         $client = \Config\Services::curlrequest([
-            'baseURI' => 'http://172.23.39.116/CapacityApps/public/api/',
+            'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
             'timeout' => 5
         ]);
 
