@@ -855,7 +855,7 @@ class ScheduleCelupModel extends Model
 
     public function getFilterSchWeekly($tglAwal, $tglAkhir, $jenis)
     {
-        $builder = $this->select('schedule_celup.id_celup, schedule_celup.id_mesin, schedule_celup.id_bon, schedule_celup.no_po, GROUP_CONCAT(DISTINCT schedule_celup.no_model) AS no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.start_mc, schedule_celup.lot_urut, schedule_celup.lot_celup, schedule_celup.tanggal_schedule, schedule_celup.po_plus, SUM(schedule_celup.kg_celup) AS kg_celup, schedule_celup.ket_schedule, mesin_celup.no_mesin, mesin_celup.min_caps, mesin_celup.max_caps, master_material.jenis, MAX(COALESCE(master_order.delivery_awal, parent_master.delivery_awal)) AS delivery_awal')
+        $builder = $this->select('schedule_celup.id_celup, schedule_celup.id_mesin, schedule_celup.id_bon, schedule_celup.no_po, GROUP_CONCAT(DISTINCT schedule_celup.no_model) AS no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.start_mc, schedule_celup.lot_urut, schedule_celup.lot_celup, schedule_celup.tanggal_schedule, schedule_celup.po_plus, schedule_celup.kg_celup, schedule_celup.ket_schedule, mesin_celup.no_mesin, mesin_celup.min_caps, mesin_celup.max_caps, master_material.jenis, MAX(COALESCE(master_order.delivery_awal, parent_master.delivery_awal)) AS delivery_awal')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             // join open_po child: match no_model plus either kode_warna OR item_type (toleran jika salah satunya berubah)
             ->join(
