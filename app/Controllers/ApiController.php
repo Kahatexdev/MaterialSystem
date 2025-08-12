@@ -1213,4 +1213,32 @@ class ApiController extends ResourceController
         $listRetur = $this->returModel->filterData($area, $tglBuat, $noModel);
         return $this->response->setJSON($listRetur);
     }
+    public function getpengaduan()
+    {
+        $username = session()->get('username');
+        $role     = session()->get('role');
+        $url      = 'http://172.23.44.14/CapacityApps/public/api/pengaduan/' . $username . '/' . $role;
+
+        try {
+            $json = @file_get_contents($url);
+            if ($json === false) {
+                throw new \Exception('Gagal mengambil data dari API');
+            }
+
+            $response = json_decode($json, true);
+            $data = [
+                'pengaduan' => $response['pengaduan'] ?? [],
+                'replies'   => $response['replies'] ?? [],
+                'role' => $role,
+                'title' => 'Pengaduan',
+                'active' => $this->active
+            ];
+            return view($role . '/pengaduan/index', $data);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => $e->getMessage(),
+            ])->setStatusCode(500);
+        }
+    }
 }
