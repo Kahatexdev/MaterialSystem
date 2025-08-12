@@ -1248,12 +1248,11 @@ class ApiController extends ResourceController
         $no_model = $data['pdk'];
         $style_size = $data['size'];
         $gwAktual = $data['gw_aktual'];
-        
+
         // Validasi input
         $idMaterial = $this->materialModel->getMaterialID($no_model, $style_size);
 
-        if($idMaterial)
-        {
+        if ($idMaterial) {
             $updated = $this->materialModel->updateGwAktual($idMaterial, $gwAktual);
         }
 
