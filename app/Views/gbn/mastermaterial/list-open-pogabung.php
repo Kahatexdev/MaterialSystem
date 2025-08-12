@@ -54,6 +54,7 @@
                 <table id="dataTable" class="display text-uppercase text-xs font-bolder text-center" style="width:100%">
                     <thead>
                         <tr>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal PO</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
@@ -69,6 +70,7 @@
                     <tbody>
                         <?php foreach ($openPoGabung as $data): ?>
                             <tr>
+                                <td><?= $data['tgl_po'] ?></td>
                                 <td><?= $data['no_model'] ?></td>
                                 <td><?= $data['item_type'] ?></td>
                                 <td><?= $data['kode_warna'] ?></td>
@@ -233,10 +235,13 @@
         </div>
     </div>
 </div>
-</div>
 
 <script>
     $(document).ready(function() {
+        $('#dataTable').DataTable({
+            "pageLength": 35,
+            "order": []
+        });
         $('.btn-edit').on('click', function() {
             const id = $(this).data('id');
             $.ajax({

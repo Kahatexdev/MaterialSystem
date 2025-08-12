@@ -332,16 +332,17 @@ class ApiController extends ResourceController
                     // Cek apakah data sudah ada
                     $existingData = $this->kebutuhanCones
                         ->where('id_material', $row['id_material'])
+                        ->where('area', $data['area'])
                         ->countAllResults();
 
                     if ($existingData > 0) {
                         // Update
                         $this->kebutuhanCones
                             ->where('id_material', $row['id_material'])
+                            ->where('area', $data['area'])
                             ->set([
                                 'qty_cns'       => $row['qty_cns'],
                                 'qty_berat_cns' => $row['qty_berat_cns'],
-                                'area'          => $data['area'],
                                 'updated_at'    => date('Y-m-d H:i:s')
                             ])
                             ->update();
@@ -407,8 +408,24 @@ class ApiController extends ResourceController
 
         $length = count($data['id_material']); // Ambil panjang array
         $result = [];
+        $lastGroupKey = null;
 
         for ($i = 0; $i < $length; $i++) {
+            // Buat groupKey sesuai data kamu (misalnya no_model + item_type + kode_warna)
+            $groupKey = ($data['no_model'][$i] ?? '') . '-' . ($data['item_type'][$i] ?? '') . '-' . ($data['kode_warna'][$i] ?? '');
+
+            // Cek apakah ini baris pertama group
+            if ($groupKey !== $lastGroupKey) {
+                $sisaKgs  = $data['stock_kg'][$i] ?? 0;
+                $sisaCns  = $data['stock_cns'][$i] ?? 0;
+                $keterangan      = $data['keterangan'][$i] ?? 0;
+                $lastGroupKey = $groupKey;
+            } else {
+                $sisaKgs = 0;
+                $sisaCns = 0;
+                $keterangan = "";
+            }
+
             $resultItem = [
                 'id_material'     => $data['id_material'][$i] ?? null,
                 'tgl_list'        => date('Y-m-d'),
@@ -423,6 +440,11 @@ class ApiController extends ResourceController
                 'item_type'       => $data['item_type'][$i] ?? null,
                 'kode_warna'      => $data['kode_warna'][$i] ?? null,
                 'warna'           => $data['warna'][$i] ?? null,
+                'keterangan'      => $keterangan,
+                'lot'             => $data['lot'][$i] ?? null,
+                'sisa_kgs_mc'     => $sisaKgs,
+                'sisa_cones_mc'   => $sisaCns,
+                'lot'             => $data['lot'][$i] ?? null,
                 'created_at'      => date('Y-m-d H:i:s'),
             ];
 
@@ -690,12 +712,15 @@ class ApiController extends ResourceController
             $totalTtlBeratCns += (float) $ttlBeratCns;
 
             // Lakukan operasi sesuai kebutuhan, contoh update data
-            $materialUpdate = [
-                'qty_cns'       => $qtyCns,
-                'qty_berat_cns' => $qtyBeratCns,
-            ];
-
-            $updateMaterial = $this->materialModel->update($idMaterial, $materialUpdate);
+            $updateMaterial = $this->kebutuhanCones
+                ->where('id_material', $idMaterial)
+                ->where('area', $data['area']) // tambah filter area
+                ->set([
+                    'qty_cns'       => $qtyCns,
+                    'qty_berat_cns' => $qtyBeratCns,
+                    'updated_at'    => date('Y-m-d H:i:s'),
+                ])
+                ->update();
 
             if (!$updateMaterial) {
                 log_message('error', "Gagal update material untuk id_material: {$idMaterial}");
@@ -723,12 +748,9 @@ class ApiController extends ResourceController
                     'jl_mc'             => $jalanMc,
                     'ttl_qty_cones'     => $ttlQtyCns,
                     'ttl_berat_cones'   => $ttlBeratCns,
-                    'lot'               => $data['lot'],
-                    'keterangan'        => $data['keterangan'],
                     'updated_at'        => date('Y-m-d H:i:s'),
                 ];
             }
-
 
             $updatePemesanan = $this->pemesananModel->update($idPemesanan, $pemesananUpdate);
 
@@ -741,33 +763,33 @@ class ApiController extends ResourceController
             }
         }
         // Setelah semua item diproses, update total_pemesanan
-        $sisaKg  = isset($data['sisa_kg']) ? (float) $data['sisa_kg'] : 0;
-        $sisaCns = isset($data['sisa_cns']) ? (float) $data['sisa_cns'] : 0;
+        // $sisaKg  = isset($data['sisa_kg']) ? (float) $data['sisa_kg'] : 0;
+        // $sisaCns = isset($data['sisa_cns']) ? (float) $data['sisa_cns'] : 0;
 
-        $ttlKgBaru  = $totalTtlBeratCns - $sisaKg;
-        $ttlCnsBaru = $totalTtlQtyCns - $sisaCns;
+        // $ttlKgBaru  = $totalTtlBeratCns - $sisaKg;
+        // $ttlCnsBaru = $totalTtlQtyCns - $sisaCns;
 
-        // Ambil id_total_pemesanan dari item pertama
-        $idTotalPemesanan = $data['items'][0]['id_total_pemesanan'] ?? null;
+        // // Ambil id_total_pemesanan dari item pertama
+        // $idTotalPemesanan = $data['items'][0]['id_total_pemesanan'] ?? null;
 
-        if ($idTotalPemesanan) {
-            $updateTotalPemesanan = [
-                'ttl_jl_mc'   => $totalJalanMc,
-                'ttl_kg'      => $ttlKgBaru,
-                'ttl_cns'     => $ttlCnsBaru,
-                'updated_at'  => date('Y-m-d H:i:s'),
-            ];
+        // if ($idTotalPemesanan) {
+        //     $updateTotalPemesanan = [
+        //         'ttl_jl_mc'   => $totalJalanMc,
+        //         'ttl_kg'      => $ttlKgBaru,
+        //         'ttl_cns'     => $ttlCnsBaru,
+        //         'updated_at'  => date('Y-m-d H:i:s'),
+        //     ];
 
-            $updateResult = $this->totalPemesananModel->update($idTotalPemesanan, $updateTotalPemesanan);
+        //     $updateResult = $this->totalPemesananModel->update($idTotalPemesanan, $updateTotalPemesanan);
 
-            if (!$updateResult) {
-                log_message('error', "Gagal update total_pemesanan untuk id: {$idTotalPemesanan}");
-                return $this->respond([
-                    'status'  => 'error',
-                    'message' => "Gagal update total_pemesanan untuk id: {$idTotalPemesanan}",
-                ], 400);
-            }
-        }
+        //     if (!$updateResult) {
+        //         log_message('error', "Gagal update total_pemesanan untuk id: {$idTotalPemesanan}");
+        //         return $this->respond([
+        //             'status'  => 'error',
+        //             'message' => "Gagal update total_pemesanan untuk id: {$idTotalPemesanan}",
+        //         ], 400);
+        //     }
+        // }
 
 
         // Jika semua data berhasil diperbarui
@@ -892,9 +914,7 @@ class ApiController extends ResourceController
     // get data pengiriman
     public function getPengirimanArea()
     {
-        // $noModel = $this->request->getGet('noModel') ?? '';
-        $noModel = 'L25067';
-        // $noModel = 'DB2501';
+        $noModel = $this->request->getGet('noModel') ?? '';
         // $results = $this->pengeluaranModel->searchPengiriman($noModel);
         $results = $this->pengeluaranModel->searchPengiriman2($noModel);
 

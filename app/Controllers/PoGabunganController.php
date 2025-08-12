@@ -382,7 +382,7 @@ class PoGabunganController extends BaseController
                 'jenis' => $jenis,
                 'jenis2' => $jenis2
             ];
-        // dd($tujuan, $jenis, $jenis2);
+        // dd($tujuan, $jenis, $jenis2, $data);
         return view($this->role . '/mastermaterial/list-open-pogabung', $data);
     }
 

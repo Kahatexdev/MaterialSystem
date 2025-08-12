@@ -637,7 +637,7 @@ class CoveringWarehouseController extends BaseController
             if ($rowIndex <= $headerRow) continue;
             if (empty(array_filter($row))) continue; // skip empty row
             // dd($row);
-            if ($row['J'] == 0) continue; // skip if ttl_kg is 0
+            // if ($row['J'] == 0) continue; // skip if ttl_kg is 0
             // Build parsed record (new totals from file)
             $new = [
                 'admin'      => $admin,
