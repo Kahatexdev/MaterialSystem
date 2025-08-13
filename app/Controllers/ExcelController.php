@@ -5878,10 +5878,20 @@ class ExcelController extends BaseController
             ? $this->openPoModel->getDataPo($no_model, $jenis, $jenis2)
             : $this->openPoModel->getDataPoPlus($no_model, $jenis, $jenis2);
 
-        $noModel =  $result[0]['no_model'] ?? '';
-        $kodeBuyer =  $result[0]['buyer'] ?? '';
+        $noModel   = $result[0]['no_model'] ?? '';
+        $kodeBuyer = $result[0]['buyer'] ?? '';
 
-        $buyerName = $this->masterBuyerModel->getNamaBuyerByKodeBuyer($kodeBuyer);
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+
+        // Ambil data dari API
+        $buyerName = file_get_contents($apiUrl); // atau pakai curl/guzzle kalau perlu
+        $buyerName = trim($buyerName);
+
+        // Kalau API tidak mengembalikan nama buyer, ambil dari database
+        if (empty($buyerName)) {
+            $buyerName = $this->masterBuyerModel->getNamaBuyerByKodeBuyer($kodeBuyer);
+        }
+
 
         $groups = [
             'RECYCLE' => [],  // semua yang mengandung RECY/RECYCLE/RECYCLED
