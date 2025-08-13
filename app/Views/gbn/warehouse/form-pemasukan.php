@@ -543,7 +543,7 @@
             $(document).on("change", "#cluster", function() {
                 var sisaKapasitas = $(this).find("option:selected").attr("data-sisa_kapasitas") || "";
                 console.log("Sisa Kapasitas:", sisaKapasitas);
-                $(".sisa_kapasitas").val(sisaKapasitas);
+                $(".sisa_kapasitas").val(parseFloat(sisaKapasitas).toFixed(2));
             });
         });
     </script>
@@ -759,8 +759,8 @@
             // Event listener saat cluster dipilih
             $(document).on("change", ".cluster", function() {
                 var sisaKapasitas = $(this).find("option:selected").attr("data-sisa_kapasitas") || "";
-                console.log("Sisa Kapasitas:", sisaKapasitas);
-                $("#sisa_kapasitas").val(sisaKapasitas);
+                console.log("Sisa Kapasitas:", (sisaKapasitas).toFixed(2));
+                $("#sisa_kapasitas").val(parseFloat(sisaKapasitas).toFixed(2));
             });
         });
 

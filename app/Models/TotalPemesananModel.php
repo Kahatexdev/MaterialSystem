@@ -101,8 +101,8 @@ class TotalPemesananModel extends Model
             material.kode_warna,
             material.color,
             material.style_size,
-            material.qty_cns,
-            material.qty_berat_cns,
+            kebutuhan_cones.qty_cns,
+            kebutuhan_cones.qty_berat_cns,
             master_order.no_model
         ')
             ->join('pemesanan', 'pemesanan.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')

@@ -598,6 +598,7 @@ class PemesananModel extends Model
             ->where('admin', $area)
             ->where('tgl_pakai >=', $tgl_awal)
             ->where('tgl_pakai <=', $tgl_akhir)
+            ->where('status_kirim', 'YA')
             ->findAll();
     }
     public function getreportPemesanan($area, $jenis, $tgl_pakai)
@@ -605,7 +606,9 @@ class PemesananModel extends Model
         $subPemesanan = $this->db->table('pemesanan')
             ->select("
                 pemesanan.tgl_pesan,
+                pemesanan.tgl_pakai,
                 pemesanan.id_total_pemesanan,
+                pemesanan.po_tambahan,
                 master_order.no_model,
                 material.item_type,
                 master_material.jenis,
@@ -613,17 +616,20 @@ class PemesananModel extends Model
                 material.color,
                 total_pemesanan.ttl_jl_mc AS jl_mc,
                 total_pemesanan.ttl_cns AS cns_pesan,
-                total_pemesanan.ttl_kg AS qty_pesan
+                total_pemesanan.ttl_kg AS qty_pesan,
+                GROUP_CONCAT(DISTINCT pemesanan.lot) AS lot_pesan,
+                GROUP_CONCAT(DISTINCT pemesanan.keterangan) AS ket_area,
+                GROUP_CONCAT(DISTINCT pemesanan.keterangan_gbn) AS ket_gbn,
             ")
             ->join('total_pemesanan', 'pemesanan.id_total_pemesanan=total_pemesanan.id_total_pemesanan', 'left')
             ->join('material',       'material.id_material = pemesanan.id_material', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
-            ->join('master_order',   'master_order.id_order    = material.id_order',  'left')
+            ->join('master_order',   'master_order.id_order = material.id_order',  'left')
             ->where('pemesanan.admin',     $area)
-            ->where('tgl_pakai', $tgl_pakai)
+            ->where('pemesanan.tgl_pakai', $tgl_pakai)
             ->where('master_material.jenis', $jenis)
-            ->where('tgl_pesan IS NOT NULL', null, false)
-            ->groupBy('pemesanan.tgl_pesan, pemesanan.id_total_pemesanan, master_order.no_model, material.item_type, material.kode_warna, material.color')
+            ->where('pemesanan.status_kirim', 'YA')
+            ->groupBy('pemesanan.tgl_pakai, pemesanan.id_total_pemesanan, master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.po_tambahan')
             ->getCompiledSelect();
 
         $subPengeluaran = $this->db->table('pengeluaran')
@@ -632,7 +638,7 @@ class PemesananModel extends Model
                 SUM(kgs_out) AS kgs_out,
                 SUM(cns_out) AS cns_out,
                 SUM(krg_out) AS krg_out,
-                lot_out
+                GROUP_CONCAT(DISTINCT lot_out) AS lot_out
             ")
             ->groupBy('id_total_pemesanan')
             ->getCompiledSelect();
@@ -652,6 +658,7 @@ class PemesananModel extends Model
             )
             ->select("
                 p.tgl_pesan,
+                p.tgl_pakai,
                 p.no_model,
                 p.item_type,
                 p.jenis,
@@ -660,8 +667,10 @@ class PemesananModel extends Model
                 p.jl_mc,
                 p.cns_pesan,
                 p.qty_pesan,
-                MAX(pem.lot) AS lot_pesan,
-                MAX(pem.keterangan) AS ket_area,
+                P.po_tambahan,
+                p.lot_pesan,
+                p.ket_gbn,
+                p.ket_area,
                 MAX(pem.status_kirim) AS status_kirim,
                 MAX(pem.additional_time) AS additional_time,
                 COALESCE(x.kgs_out, 0) AS kgs_out,
