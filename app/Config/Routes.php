@@ -351,6 +351,10 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
 
     $routes->get('statusBahanBaku', 'ScheduleController::statusBahanBaku');
     $routes->get('filterstatusbahanbaku/(:any)', 'ScheduleController::filterstatusbahanbaku/$1');
+
+
+    // pengaduan
+    $routes->get('pengaduan', 'ApiController::getpengaduan');
 });
 
 // celup routes
@@ -391,6 +395,8 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('printBarcode/(:num)', 'DomPdfController::printBarcode/$1');
     $routes->get('printBon/(:num)', 'PdfController::printBon/$1');
     $routes->get('generate/(:num)', 'CelupController::generateBarcode/$1');
+    // pengaduan
+    $routes->get('pengaduan', 'ApiController::getpengaduan');
 });
 
 
@@ -525,6 +531,8 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('generatePengeluaranSpandexKaretCovering/(:any)/(:any)', 'PdfController::generatePengeluaranSpandexKaretCovering/$1/$2');
     $routes->get('getCodePemesanan', 'CoveringPemesananController::getCodePemesanan');
     $routes->get('getColorPemesanan', 'CoveringPemesananController::getColorPemesanan');
+    // pengaduan
+    $routes->get('pengaduan', 'ApiController::getpengaduan');
 });
 
 
@@ -723,6 +731,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('importStock/upload', 'GodController::importStock');
     $routes->get('masterWarnaBenang', 'GodController::masterWarnaBenang');
     $routes->post('importMasterWarnaBenang/upload', 'GodController::importMasterWarnaBenang');
+    // pengaduan
+    $routes->get('pengaduan', 'ApiController::getpengaduan');
 });
 
 $routes->options('(:any)', function () {

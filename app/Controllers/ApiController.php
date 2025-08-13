@@ -416,14 +416,16 @@ class ApiController extends ResourceController
 
             // Cek apakah ini baris pertama group
             if ($groupKey !== $lastGroupKey) {
-                $sisaKgs  = $data['stock_kg'][$i] ?? 0;
-                $sisaCns  = $data['stock_cns'][$i] ?? 0;
-                $keterangan      = $data['keterangan'][$i] ?? 0;
-                $lastGroupKey = $groupKey;
+                $sisaKgs        = $data['stock_kg'][$i] ?? 0;
+                $sisaCns        = $data['stock_cns'][$i] ?? 0;
+                $keterangan     = $data['keterangan'][$i] ?? 0;
+                $lot            = $data['lot'][$i] ?? 0;
+                $lastGroupKey   = $groupKey;
             } else {
-                $sisaKgs = 0;
-                $sisaCns = 0;
-                $keterangan = "";
+                $sisaKgs        = 0;
+                $sisaCns        = 0;
+                $keterangan     = "";
+                $lot            = "";
             }
 
             $resultItem = [
@@ -441,7 +443,7 @@ class ApiController extends ResourceController
                 'kode_warna'      => $data['kode_warna'][$i] ?? null,
                 'warna'           => $data['warna'][$i] ?? null,
                 'keterangan'      => $keterangan,
-                'lot'             => $data['lot'][$i] ?? null,
+                'lot'             => $lot,
                 'sisa_kgs_mc'     => $sisaKgs,
                 'sisa_cones_mc'   => $sisaCns,
                 'lot'             => $data['lot'][$i] ?? null,
@@ -468,7 +470,7 @@ class ApiController extends ResourceController
             if ($existingData) {
                 return $this->respond([
                     'status'  => 'error',
-                    'message' => "Data pemesanan sudah ada. " . $resultItem['po_tambahan'],
+                    'message' => "Data pemesanan sudah ada.",
                     'debug'   => $existingData,
                 ], 400);
             }
@@ -595,12 +597,15 @@ class ApiController extends ResourceController
             $ttlBeratCns = $item['ttl_berat_cns'];
 
             // Lakukan operasi sesuai kebutuhan, contoh update data
-            $materialUpdate = [
-                'qty_cns'       => $qtyCns,
-                'qty_berat_cns' => $qtyBeratCns,
-            ];
-
-            $updateMaterial = $this->materialModel->update($idMaterial, $materialUpdate);
+            $updateMaterial = $this->kebutuhanCones
+                ->where('id_material', $idMaterial)
+                ->where('area', $data['area']) // tambah filter area
+                ->set([
+                    'qty_cns'       => $qtyCns,
+                    'qty_berat_cns' => $qtyBeratCns,
+                    'updated_at'    => date('Y-m-d H:i:s'),
+                ])
+                ->update();
 
             if (!$updateMaterial) {
                 log_message('error', "Gagal update material untuk id_material: {$idMaterial}");
@@ -633,7 +638,6 @@ class ApiController extends ResourceController
                     'updated_at'        => date('Y-m-d H:i:s'),
                 ];
             }
-
 
             $updatePemesanan = $this->pemesananModel->update($idPemesanan, $pemesananUpdate);
 
@@ -763,33 +767,33 @@ class ApiController extends ResourceController
             }
         }
         // Setelah semua item diproses, update total_pemesanan
-        // $sisaKg  = isset($data['sisa_kg']) ? (float) $data['sisa_kg'] : 0;
-        // $sisaCns = isset($data['sisa_cns']) ? (float) $data['sisa_cns'] : 0;
+        $sisaKg  = isset($data['sisa_kg']) ? (float) $data['sisa_kg'] : 0;
+        $sisaCns = isset($data['sisa_cns']) ? (float) $data['sisa_cns'] : 0;
 
-        // $ttlKgBaru  = $totalTtlBeratCns - $sisaKg;
-        // $ttlCnsBaru = $totalTtlQtyCns - $sisaCns;
+        $ttlKgBaru  = $totalTtlBeratCns - $sisaKg;
+        $ttlCnsBaru = $totalTtlQtyCns - $sisaCns;
 
-        // // Ambil id_total_pemesanan dari item pertama
-        // $idTotalPemesanan = $data['items'][0]['id_total_pemesanan'] ?? null;
+        // Ambil id_total_pemesanan dari item pertama
+        $idTotalPemesanan = $data['items'][0]['id_total_pemesanan'] ?? null;
 
-        // if ($idTotalPemesanan) {
-        //     $updateTotalPemesanan = [
-        //         'ttl_jl_mc'   => $totalJalanMc,
-        //         'ttl_kg'      => $ttlKgBaru,
-        //         'ttl_cns'     => $ttlCnsBaru,
-        //         'updated_at'  => date('Y-m-d H:i:s'),
-        //     ];
+        if ($idTotalPemesanan) {
+            $updateTotalPemesanan = [
+                'ttl_jl_mc'   => $totalJalanMc,
+                'ttl_kg'      => $ttlKgBaru,
+                'ttl_cns'     => $ttlCnsBaru,
+                'updated_at'  => date('Y-m-d H:i:s'),
+            ];
 
-        //     $updateResult = $this->totalPemesananModel->update($idTotalPemesanan, $updateTotalPemesanan);
+            $updateResult = $this->totalPemesananModel->update($idTotalPemesanan, $updateTotalPemesanan);
 
-        //     if (!$updateResult) {
-        //         log_message('error', "Gagal update total_pemesanan untuk id: {$idTotalPemesanan}");
-        //         return $this->respond([
-        //             'status'  => 'error',
-        //             'message' => "Gagal update total_pemesanan untuk id: {$idTotalPemesanan}",
-        //         ], 400);
-        //     }
-        // }
+            if (!$updateResult) {
+                log_message('error', "Gagal update total_pemesanan untuk id: {$idTotalPemesanan}");
+                return $this->respond([
+                    'status'  => 'error',
+                    'message' => "Gagal update total_pemesanan untuk id: {$idTotalPemesanan}",
+                ], 400);
+            }
+        }
 
 
         // Jika semua data berhasil diperbarui
@@ -1284,6 +1288,34 @@ class ApiController extends ResourceController
             return $this->response
                 ->setStatusCode(500)
                 ->setJSON(['status' => 'error', 'message' => 'Gagal mengupdate GW aktual.']);
+        }
+    }
+    public function getpengaduan()
+    {
+        $username = urlencode(session()->get('username'));
+        $role     = session()->get('role');
+        $url      = 'http://172.23.44.14/CapacityApps/public/api/pengaduan/' . $username . '/' . $role;
+
+        try {
+            $json = @file_get_contents($url);
+            if ($json === false) {
+                throw new \Exception('Gagal mengambil data dari API');
+            }
+
+            $response = json_decode($json, true);
+            $data = [
+                'pengaduan' => $response['pengaduan'] ?? [],
+                'replies'   => $response['replies'] ?? [],
+                'role' => $role,
+                'title' => 'Pengaduan',
+                'active' => $this->active
+            ];
+            return view($role . '/pengaduan/index', $data);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => $e->getMessage(),
+            ])->setStatusCode(500);
         }
     }
     public function filterDatangBenang()
