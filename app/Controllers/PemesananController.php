@@ -1664,6 +1664,7 @@ class PemesananController extends BaseController
         $this->pemesananModel
             ->where('id_total_pemesanan', $id)
             ->set('keterangan_gbn', $ket)
+            ->set('hak_akses', session()->get('username'))
             ->update();
 
         return $this->response->setJSON(['status' => 'success', 'message' => 'Keterangan berhasil disimpan']);
