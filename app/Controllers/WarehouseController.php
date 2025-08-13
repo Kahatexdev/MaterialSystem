@@ -2993,4 +2993,62 @@ class WarehouseController extends BaseController
         ];
         return view($this->role . '/warehouse/detail-other-barcode', $data);
     }
+
+    public function hapusPengeluaranJalur()
+    {
+        $idPengeluaran = $this->request->getPost('id_pengeluaran');
+        $idOutCelup    = $this->request->getPost('id_out_celup');
+        $idStock       = $this->request->getPost('id_stock');
+        $kgsOut        = (float) $this->request->getPost('kgs_out');
+        $cnsOut        = (float) $this->request->getPost('cns_out');
+        $krgOut        = (float) $this->request->getPost('krg_out');
+
+        if ($idPengeluaran && $idOutCelup && $idStock) {
+            $this->db->transStart();
+
+            $this->pengeluaranModel
+                ->where('status', 'Pengeluaran Jalur')
+                ->where('id_pengeluaran', $idPengeluaran)
+                ->delete();
+
+            if ($krgOut > 0) {
+                $this->pemasukanModel
+                    ->where('id_out_celup', $idOutCelup)
+                    ->set('out_jalur', '0')
+                    ->update();
+            }
+
+            $select = $this->stockModel
+                ->select('kgs_in_out, cns_in_out, krg_in_out')
+                ->where('id_stock', $idStock)
+                ->first();
+
+            if ($select) {
+                $this->stockModel
+                    ->where('id_stock', $idStock)
+                    ->set([
+                        'kgs_in_out' => $select['kgs_in_out'] + $kgsOut,
+                        'cns_in_out' => $select['cns_in_out'] + $cnsOut,
+                        'krg_in_out' => $select['krg_in_out'] + $krgOut
+                    ])
+                    ->update();
+            }
+
+            $this->db->transComplete();
+
+            if ($this->db->transStatus() === false) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Gagal menghapus data.'
+                ]);
+            } else {
+                return $this->response->setJSON([
+                    'status' => 'success',
+                    'message' => 'Data pengeluaran jalur berhasil dihapus.'
+                ]);
+            }
+        }
+
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak lengkap']);
+    }
 }

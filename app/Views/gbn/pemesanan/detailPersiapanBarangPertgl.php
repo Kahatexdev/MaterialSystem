@@ -1,5 +1,29 @@
 <?php $this->extend($role . '/pemesanan/header'); ?>
 <?php $this->section('content'); ?>
+<?php if (session()->getFlashdata('success')) : ?>
+    <script>
+        $(document).ready(function() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '<?= session()->getFlashdata('success') ?>',
+                confirmButtonColor: '#4a90e2'
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if (session()->getFlashdata('error')) : ?>
+    <script>
+        $(document).ready(function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: '<?= session()->getFlashdata('error') ?>',
+                confirmButtonColor: '#4a90e2'
+            });
+        });
+    </script>
+<?php endif; ?>
 <div class="container-fluid py-4">
     <div class="row my-4">
         <div class="col-12">
@@ -24,25 +48,29 @@
                         <div class="col-md-3">
                             <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
                                 <h6 class="text-muted mb-1 small">Kg Pesan</h6>
-                                <h4 class="fw-semibold mb-0"> <?= number_format($ttlPesan['ttl_pesan_kg'], 2) ?? 0 ?>Kg</h4>
+                                <?php $kgPesan = isset($ttlPesan['ttl_pesan_kg']) ? $ttlPesan['ttl_pesan_kg'] : 0; ?>
+                                <h4 class="fw-semibold mb-0"> <?= number_format($kgPesan, 2) ?? 0 ?>Kg</h4>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
                                 <h6 class="text-muted mb-1 small">Cns Pesan</h6>
-                                <h4 class="fw-semibold mb-0"><?= $ttlPesan['ttl_pesan_cns'] ?> Cns</h4>
+                                <?php $cnsPesan = isset($ttlPesan['ttl_pesan_cns']) ? $ttlPesan['ttl_pesan_cns'] : 0; ?>
+                                <h4 class="fw-semibold mb-0"><?= $cnsPesan ?> Cns</h4>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
                                 <h6 class="text-muted mb-1 small">Kg Persiapan</h6>
-                                <h4 class="fw-semibold mb-0"><?= number_format($ttlPersiapan['kgs_out'], 2) ?? 0 ?> Kg</h4>
+                                <?php $kgPersiapan = isset($ttlPersiapan['kgs_out']) ? $ttlPersiapan['kgs_out'] : 0; ?>
+                                <h4 class="fw-semibold mb-0"><?= number_format($kgPersiapan, 2) ?? 0 ?> Kg</h4>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
                                 <h6 class="text-muted mb-1 small">Cns Persiapan</h6>
-                                <h4 class="fw-semibold mb-0"><?= $ttlPersiapan['cns_out'] ?> Kg</h4>
+                                <?php $cnsPersiapan = isset($ttlPersiapan['cns_out']) ? $ttlPersiapan['cns_out'] : 0; ?>
+                                <h4 class="fw-semibold mb-0"><?= $cnsPersiapan ?> Kg</h4>
                             </div>
                         </div>
                     </div>
@@ -74,6 +102,7 @@
                         <table class="table  align-items-center">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Tgl Pakai</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
@@ -92,6 +121,9 @@
                                     <tr>
                                         <td>
                                             <p class="text-sm font-weight-bold mb-0"><?= $id['tgl_pakai'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['area_out'] ?></p>
                                         </td>
                                         <td>
                                             <p class="text-sm font-weight-bold mb-0"><?= $id['no_model'] ?></p>
@@ -121,7 +153,9 @@
                                             <p class="text-sm font-weight-bold mb-0"><?= $id['nama_cluster'] ?></p>
                                         </td>
                                         <td>
-                                            <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            <button type="button" class="btn btn-danger btn-hapus" data-id="<?= $id['id_pengeluaran'] ?>" data-id-out-celup="<?= $id['id_out_celup'] ?>" data-id-stock="<?= $id['id_stock'] ?>" data-kgs-out="<?= $id['kgs_out'] ?>" data-cns-out="<?= $id['cns_out'] ?>" data-krg-out="<?= $id['krg_out'] ?>">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         </td>
                                     </tr>
 
@@ -134,6 +168,24 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="modalHapus" tabindex="-1" aria-labelledby="modalHapusLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient-info text-white">
+                <h5 class="modal-title" id="modalHapusLabel">Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Apakah Anda yakin ingin menghapus data ini?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmHapus">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
     document.getElementById('filterButton').addEventListener('click', function() {
@@ -165,6 +217,7 @@
                     const row = `
             <tr>
                 <td><p class="text-sm font-weight-bold mb-0">${id.tgl_pakai}</p></td>
+                <td><p class="text-sm font-weight-bold mb-0">${id.area_out}</p></td>
                 <td><p class="text-sm font-weight-bold mb-0">${id.no_model}</p></td>
                 <td><p class="text-sm font-weight-bold mb-0">${id.item_type}</p></td>
                 <td><p class="text-sm font-weight-bold mb-0">${id.kode_warna}</p></td>
@@ -181,6 +234,62 @@
                 });
             })
             .catch(error => console.error('Fetch Error:', error));
+    });
+
+    let idPengeluaran = null;
+    let idOutCelup = null;
+    let idStock = null;
+    let kgsOut = null;
+    let cnsOut = null;
+    let krgOut = null;
+    const BASE_URL = "<?= base_url(); ?>";
+    const role = "<?= $role ?>";
+
+    $(document).on('click', '.btn-hapus', function() {
+        idPengeluaran = $(this).data('id');
+        idOutCelup = $(this).data('id-out-celup');
+        idStock = $(this).data('id-stock');
+        kgsOut = $(this).data('kgs-out');
+        cnsOut = $(this).data('cns-out');
+        krgOut = $(this).data('krg-out');
+
+        $('#modalHapus').modal('show');
+    });
+
+    $('#btnConfirmHapus').on('click', function() {
+        console.log('Tombol hapus diklik');
+        if (idPengeluaran && idOutCelup && idStock) {
+            $.ajax({
+                url: `${BASE_URL}${role}/hapusPengeluaranJalur`, // Ganti sesuai route kamu
+                type: 'POST',
+                data: {
+                    id_pengeluaran: idPengeluaran,
+                    id_out_celup: idOutCelup,
+                    id_stock: idStock,
+                    kgs_out: kgsOut,
+                    cns_out: cnsOut,
+                    krg_out: krgOut,
+                },
+                success: function(res) {
+                    $('#modalHapus').modal('hide');
+                    if (res.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: res.message
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: res.message
+                        });
+                    }
+                }
+            });
+        }
     });
 </script>
 

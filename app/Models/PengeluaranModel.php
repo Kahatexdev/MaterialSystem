@@ -379,8 +379,12 @@ class PengeluaranModel extends Model
             material.kode_warna,
             material.color,
             out_celup.no_karung,
+            pengeluaran.id_pengeluaran,
+            pengeluaran.id_stock,
+            pengeluaran.id_out_celup,
             pengeluaran.kgs_out,
             pengeluaran.cns_out,
+            pengeluaran.krg_out,
             pengeluaran.lot_out,
             pengeluaran.nama_cluster,
             cluster.group
