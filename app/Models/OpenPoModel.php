@@ -188,7 +188,7 @@ class OpenPoModel extends Model
         // 2) Ambil PO
         $poRow = $this->db
             ->table('open_po')
-            ->select('kg_po')
+            ->select('kg_po, po_plus')
             ->where('no_model',   $noModel)
             ->where('item_type',  $itemType)
             ->where('kode_warna', $kodeWarna)
@@ -197,6 +197,7 @@ class OpenPoModel extends Model
             ->getRowArray();
 
         $kgPo = (float) ($poRow['kg_po'] ?? 0);
+        $poPlus = (float) ($poRow['po_plus'] ?? '0');
 
         // 3) Return struktur yang sama
         return [
@@ -206,6 +207,7 @@ class OpenPoModel extends Model
             'kg_po'           => $kgPo,
             'total_kg_celup'  => $total,
             'sisa_kg_po'      => $kgPo - $total,
+            'poPlus'          => $poPlus,
         ];
     }
 
