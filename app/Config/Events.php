@@ -33,7 +33,7 @@ Events::on('pre_system', static function (): void {
             ob_end_flush();
         }
 
-        ob_start(static fn ($buffer) => $buffer);
+        ob_start(static fn($buffer) => $buffer);
     }
 
     /*
@@ -52,4 +52,17 @@ Events::on('pre_system', static function (): void {
             });
         }
     }
+    Events::on('post_controller_constructor', function () {
+        $renderer = Services::renderer();
+        $role = session()->get('role');
+        $url = 'http://172.23.44.14/CapacityApps/public/api/getNotif/' . $role;
+
+        try {
+            $json = @file_get_contents($url);
+            $response = json_decode($json, true);
+            $renderer->setVar('countNotif', $response);
+        } catch (\Exception $e) {
+            $renderer->setVar('countNotif',  0);
+        }
+    });
 });
