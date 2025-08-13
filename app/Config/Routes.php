@@ -796,5 +796,6 @@ $routes->group(
         $routes->get('listExportRetur/(:any)', 'ApiController::listExportRetur/$1');
         $routes->get('getGWAktual', 'ApiController::getGWAktual');
         $routes->get('saveGWAktual', 'ApiController::saveGWAktual');
+        $routes->get('filterDatangBenang', 'ApiController::filterDatangBenang');
     }
 );
