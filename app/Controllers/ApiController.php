@@ -1292,7 +1292,7 @@ class ApiController extends ResourceController
     }
     public function getpengaduan()
     {
-        $username = session()->get('username');
+        $username = urlencode(session()->get('username'));
         $role     = session()->get('role');
         $url      = 'http://172.23.44.14/CapacityApps/public/api/pengaduan/' . $username . '/' . $role;
 
