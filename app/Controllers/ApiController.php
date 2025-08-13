@@ -1286,4 +1286,14 @@ class ApiController extends ResourceController
                 ->setJSON(['status' => 'error', 'message' => 'Gagal mengupdate GW aktual.']);
         }
     }
+    public function filterDatangBenang()
+    {
+        $key = $this->request->getGet('key');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemasukanModel->getFilterDatangBenang($key, $tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
+    }
 }
