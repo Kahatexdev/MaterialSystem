@@ -19,6 +19,13 @@
                                 Master Material</span>
                         </a>
                     </li>
+                    <li class="nav-item d-flex align-items-center px-1">
+                        <a href="<?= base_url(session()->get('role')) . '/masterBuyer' ?>" class="nav-link text-body font-weight-bold px-2">
+                            <i class="fas fa-database"></i>
+                            <span class="d-lg-inline-block d-none ms-1">
+                                Master Buyer</span>
+                        </a>
+                    </li>
                     <li class="nav-item d-flex align-items-center">
                         <a href="" data-bs-toggle="modal" data-bs-target="#LogoutModal" class=" nav-link text-body font-weight-bold px-0">
                             <i class="fa fa-user me-sm-1"></i>

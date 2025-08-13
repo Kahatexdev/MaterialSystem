@@ -67,8 +67,8 @@
                 </div>
                 <div class="col-md-6">
                     <div class="d-flex justify-content-md-end gap-2">
-                        <input type="date" id="start_date" class="form-control" placeholder="Start Date">
-                        <input type="date" id="end_date" class="form-control" placeholder="End Date">
+                        <input type="date" id="start_date" class="form-control" placeholder="Start Date" value="<?= esc($filter['start_date'] ?? '') ?>">
+                        <input type="date" id="end_date" class="form-control" placeholder="End Date" value="<?= esc($filter['end_date'] ?? '') ?>">
                         <button class="btn btn-filter" id="filter_date_range">
                             <i class="bi bi-funnel me-2"></i>Filter
                         </button>

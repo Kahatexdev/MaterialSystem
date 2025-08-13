@@ -25,6 +25,7 @@ use App\Models\MesinCelupModel;
 use App\Models\CoveringStockModel;
 use App\Models\PoTambahanModel;
 use App\Models\HistoryStock;
+use App\Models\MasterBuyerModel;
 use App\Models\PemesananSpandexKaretModel;
 use App\Models\WarehouseBBModel;
 use App\Models\MasterWarnaBenangModel;
@@ -67,6 +68,7 @@ class ExcelController extends BaseController
     protected $pemesananSpandexKaretModel;
     protected $warehouseBBModel;
     protected $masterWarnaBenangModel;
+    protected $masterBuyerModel;
 
     public function __construct()
     {
@@ -91,6 +93,7 @@ class ExcelController extends BaseController
         $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
         $this->warehouseBBModel = new WarehouseBBModel();
         $this->masterWarnaBenangModel = new MasterWarnaBenangModel();
+        $this->masterBuyerModel = new MasterBuyerModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -1170,7 +1173,7 @@ class ExcelController extends BaseController
                 $sheet->setCellValue('D' . $row, $data->warna);
                 $sheet->setCellValue('E' . $row, $data->item_type);
                 $sheet->setCellValue('F' . $row, $data->kapasitas);
-                $sheet->setCellValue('G' . $row, $data->Kgs);
+                $sheet->setCellValue('G' . $row, number_format($data->Kgs, 2));
                 $sheet->setCellValue('H' . $row, $data->Krg);
                 $sheet->setCellValue('I' . $row, $data->Cns);
                 $sheet->setCellValue('J' . $row, $data->KgsStockAwal);
@@ -2782,7 +2785,7 @@ class ExcelController extends BaseController
         $jenis = $this->request->getGet('jenis');
 
         $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir, $jenis);
-        // dd($data);
+
         $getMesin = $this->mesinCelupModel
             ->orderBy('no_mesin', 'ASC')
             ->findAll();
@@ -2940,7 +2943,7 @@ class ExcelController extends BaseController
             // $groupedData[$keyTgl][$d['id_mesin']][$d['lot_urut']] = $d;
             $groupedData[$keyTgl][$d['id_mesin']][$d['lot_urut']] = $d;
         }
-        // dd($groupedData);
+
         // Hitung kolom awal per tanggal
         $dateColStartIndexes = [];
         foreach ($dates as $i => $tgl) {
@@ -3022,7 +3025,8 @@ class ExcelController extends BaseController
                         $dataRow = $groupedData[$tgl][$idMesin][$lot] ?? null;
 
                         if ($dataRow) {
-
+                            // dd($dataRow);
+                            // dd($noModel);
                             //Ubah format tanggal start mc
                             $startMc = (!empty($dataRow['start_mc']) && $dataRow['start_mc'] !== '0000-00-00 00:00:00')
                                 ? date('d-M', strtotime($dataRow['start_mc'])) : '';
@@ -3041,7 +3045,7 @@ class ExcelController extends BaseController
                                 $lot === 1 ? $kapasitas : '',
                                 $lot === 1 ? $noMesin : '',
                                 $lot,
-                                $dataRow['no_model'] ?? '',
+                                $dataRow['no_model_detail'] ?? '',
                                 $dataRow['item_type'] ?? '',
                                 format_number($dataRow['kg_celup'] ?? '', 2),
                                 $dataRow['kode_warna'] ?? '',
@@ -5874,6 +5878,23 @@ class ExcelController extends BaseController
             ? $this->openPoModel->getDataPo($no_model, $jenis, $jenis2)
             : $this->openPoModel->getDataPoPlus($no_model, $jenis, $jenis2);
 
+        $noModel   = $result[0]['no_model'] ?? '';
+        $kodeBuyer = $result[0]['buyer'] ?? '';
+
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+
+        $buyerName = '';
+        $response   = @file_get_contents($apiUrl);
+
+        if ($response !== false) {
+            $buyerName = trim($response);
+        }
+
+        if (empty($buyerName)) {
+            $buyerName = $this->masterBuyerModel->getNamaBuyerByKodeBuyer($kodeBuyer);
+        }
+
+
         $groups = [
             'RECYCLE' => [],  // semua yang mengandung RECY/RECYCLE/RECYCLED
             'OTHER'   => [],  // sisanya
@@ -5888,8 +5909,6 @@ class ExcelController extends BaseController
             }
         }
 
-        $noModel =  $result[0]['no_model'] ?? '';
-
         $unit = $this->masterOrderModel->getUnit($no_model);
         $rawUnit = $unit['unit'];
         $rawUnit = strtoupper(trim($rawUnit));
@@ -5900,8 +5919,7 @@ class ExcelController extends BaseController
         }
 
         // Ambil buyer dari API
-        $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
-        $buyerName = json_decode(file_get_contents($buyerApiUrl), true);
+        // $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
 
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';
@@ -6388,7 +6406,7 @@ class ExcelController extends BaseController
                 }
 
                 if ($firstRow) {
-                    $buyerDisplay   = $row['buyer'] . ' (' . ($buyerName['kd_buyer_order'] ?? '') . ')';
+                    $buyerDisplay   = $row['buyer'] . ' (' . ($buyerName['nama_buyer'] ?? '') . ')';
                     $noOrderDisplay = $row['no_order'];
                     $deliveryDisplay = $delivery;
                     $firstRow = false; // reset flag setelah baris pertama
