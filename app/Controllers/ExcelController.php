@@ -2938,7 +2938,7 @@ class ExcelController extends BaseController
         foreach ($data as $d) {
             $keyTgl = date('d/m/Y', strtotime($d['tanggal_schedule']));
             // $groupedData[$keyTgl][$d['id_mesin']][$d['lot_urut']] = $d;
-            $groupedData[$keyTgl][$d['id_mesin']][$d['lot_urut']][] = $d;
+            $groupedData[$keyTgl][$d['id_mesin']][$d['lot_urut']] = $d;
         }
         // dd($groupedData);
         // Hitung kolom awal per tanggal
