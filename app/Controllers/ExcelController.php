@@ -2782,7 +2782,7 @@ class ExcelController extends BaseController
         $jenis = $this->request->getGet('jenis');
 
         $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir, $jenis);
-        // dd($data);
+
         $getMesin = $this->mesinCelupModel
             ->orderBy('no_mesin', 'ASC')
             ->findAll();
@@ -2940,7 +2940,7 @@ class ExcelController extends BaseController
             // $groupedData[$keyTgl][$d['id_mesin']][$d['lot_urut']] = $d;
             $groupedData[$keyTgl][$d['id_mesin']][$d['lot_urut']] = $d;
         }
-        // dd($groupedData);
+
         // Hitung kolom awal per tanggal
         $dateColStartIndexes = [];
         foreach ($dates as $i => $tgl) {
@@ -3022,7 +3022,8 @@ class ExcelController extends BaseController
                         $dataRow = $groupedData[$tgl][$idMesin][$lot] ?? null;
 
                         if ($dataRow) {
-
+                            // dd($dataRow);
+                            // dd($noModel);
                             //Ubah format tanggal start mc
                             $startMc = (!empty($dataRow['start_mc']) && $dataRow['start_mc'] !== '0000-00-00 00:00:00')
                                 ? date('d-M', strtotime($dataRow['start_mc'])) : '';
@@ -3041,7 +3042,7 @@ class ExcelController extends BaseController
                                 $lot === 1 ? $kapasitas : '',
                                 $lot === 1 ? $noMesin : '',
                                 $lot,
-                                $dataRow['no_model'] ?? '',
+                                $dataRow['no_model_detail'] ?? '',
                                 $dataRow['item_type'] ?? '',
                                 format_number($dataRow['kg_celup'] ?? '', 2),
                                 $dataRow['kode_warna'] ?? '',
