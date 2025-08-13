@@ -7,7 +7,7 @@ use CodeIgniter\Model;
 class MasterBuyerModel extends Model
 {
     protected $table            = 'master_buyer';
-    protected $primaryKey       = 'kode_buyer';
+    protected $primaryKey       = 'id_buyer';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;

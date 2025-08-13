@@ -577,6 +577,13 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('saveMasterMaterial', 'MastermaterialController::saveMasterMaterial');
     $routes->get('deleteMasterMaterial', 'MastermaterialController::deleteMasterMaterial');
 
+    $routes->get('masterBuyer', 'MasterBuyerController::index');
+    $routes->post('tampilMasterBuyer', 'MasterBuyerController::tampilMasterBuyer');
+    $routes->get('getMasterBuyerDetails', 'MasterBuyerController::getMasterBuyerDetails');
+    $routes->post('updateMasterBuyer', 'MasterBuyerController::updateMasterBuyer');
+    $routes->post('saveMasterBuyer', 'MasterBuyerController::saveMasterBuyer');
+    $routes->get('deleteMasterBuyer', 'MasterBuyerController::deleteMasterBuyer');
+
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
     $routes->get('schedule/nylon', 'ScheduleController::nylon');
