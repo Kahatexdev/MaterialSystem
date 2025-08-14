@@ -246,16 +246,16 @@
                                                                 <div class="col-4">
                                                                     <div class="form-group">
                                                                         <label for="qty_po"> Qty PO</label>
-                                                                        <input type="number" class="form-control" name="qty_po[]" value="<?= number_format($detail['qty_po'], 2) ?>" readonly>
+                                                                        <input type="number" class="form-control" name="qty_po[]" value="<?= ($detail['po_plus'] === '0' || $detail['po_plus'] === '' || is_null($detail['po_plus'])) ? number_format($detail['qty_po'], 2) : '' ?>" readonly>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-4">
                                                                     <div class="form-group">
                                                                         <label for="qty_po_plus"> Qty PO (+)</label>
-                                                                        <input type="number" class="form-control" name="qty_po_plus[]" value="" readonly>
+                                                                        <input type="number" class="form-control" name="qty_po_plus[]" value="<?= $detail['po_plus'] == '1' ? number_format($detail['qty_po'], 2) : '' ?>" readonly>
                                                                     </div>
                                                                 </div>
-                                                                <div class="col-4">
+                                                                <div class=" col-4">
                                                                     <label for="qty_celup">Qty Celup</label>
                                                                     <input type="number" class="form-control" step="0.01" min="0.01" name="qty_celup[]" value="<?= number_format($detail['qty_celup'], 2) ?>" required>
                                                                 </div>
@@ -308,7 +308,7 @@
                                                                             <div>
                                                                                 <input type="radio" id="po_plus" name="po_plus[]" value="1" <?= isset($detail['po_plus']) && $detail['po_plus'] == 1 ? 'checked' : '' ?>>
                                                                                 <label for="iya">Iya</label>
-                                                                                <input type="radio" id="po_plus" name="po_plus[]" value="0" <?= isset($detail['po_plus']) && $detail['po_plus'] == 0 ? 'checked' : '' ?>>
+                                                                                <input type="radio" id="po_plus" name="po_plus[]" value="0" <?= isset($detail['po_plus']) && $detail['po_plus'] == 0 || $detail['po_plus'] == '' ? 'checked' : '' ?>>
                                                                                 <label for="tidak">Tidak</label>
                                                                             </div>
                                                                         </fieldset>

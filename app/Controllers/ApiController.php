@@ -418,8 +418,8 @@ class ApiController extends ResourceController
             if ($groupKey !== $lastGroupKey) {
                 $sisaKgs        = $data['stock_kg'][$i] ?? 0;
                 $sisaCns        = $data['stock_cns'][$i] ?? 0;
-                $keterangan     = $data['keterangan'][$i] ?? 0;
-                $lot            = $data['lot'][$i] ?? 0;
+                $keterangan     = $data['keterangan'][$i] ?? '';
+                $lot            = $data['lot'][$i] ?? '';
                 $lastGroupKey   = $groupKey;
             } else {
                 $sisaKgs        = 0;
@@ -446,7 +446,7 @@ class ApiController extends ResourceController
                 'lot'             => $lot,
                 'sisa_kgs_mc'     => $sisaKgs,
                 'sisa_cones_mc'   => $sisaCns,
-                'lot'             => $data['lot'][$i] ?? null,
+                // 'lot'             => $data['lot'][$i] ?? null,
                 'created_at'      => date('Y-m-d H:i:s'),
             ];
 

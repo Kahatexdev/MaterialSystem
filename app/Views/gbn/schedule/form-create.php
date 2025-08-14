@@ -592,8 +592,14 @@
                         const qtyPOPlus = tr.querySelector("input[name='qty_po_plus[]']");
                         const kgKebutuhan = tr.querySelector(".kg_kebutuhan");
                         const tagihan = tr.querySelector(".tagihan");
-                        qtyPO.value = parseFloat(data.kg_po).toFixed(2);
-                        qtyPOPlus.value = parseFloat(data.qty_po_plus).toFixed(2) || '';
+                        const poPlus = data.poPlus || '0';
+
+                        if (poPlus === '0') {
+                            qtyPO.value = parseFloat(data.kg_po).toFixed(2) || '';
+                        } else {
+                            qtyPOPlus.value = parseFloat(data.kg_po).toFixed(2) || '';
+                        }
+
                         kgKebutuhan.textContent = parseFloat(data.kg_po).toFixed(2) || '0.00';
                         tagihan.textContent = parseFloat(data.sisa_kg_po).toFixed(2) || '0.00';
                     } else {
