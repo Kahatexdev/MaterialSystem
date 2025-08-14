@@ -3051,4 +3051,25 @@ class WarehouseController extends BaseController
 
         return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak lengkap']);
     }
+
+    public function reportDatangNylon()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Report Datang Nylon',
+            'active' => $this->active
+        ];
+        return view($this->role . '/warehouse/report-datang-nylon', $data);
+    }
+
+    public function filterDatangNylon()
+    {
+        $key = $this->request->getGet('key');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemasukanModel->getFilterDatangNylon($key, $tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
+    }
 }
