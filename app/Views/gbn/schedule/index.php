@@ -397,13 +397,19 @@
                         if (index < tes.length - 1) {
                             htmlContent += `<div class="modal-footer"></div>`;
                         }
+                        // Jika last_status = 'done', tampilkan tombol "Tambah Jadwal"
+                        if (item.last_status && item.last_status.trim().toLowerCase() === 'done') {
+                           
+                        } else {
+                            htmlContent += `
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-info" id="editSchedule">Edit Jadwal</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>`;
+                        }
                     });
 
-                    htmlContent += `
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-info" id="editSchedule">Edit Jadwal</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>`;
+
 
                     modalBody.innerHTML = htmlContent;
                     // 💥 clean up before showing
