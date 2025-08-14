@@ -308,7 +308,7 @@ class OpenPoModel extends Model
     public function
     getQtyPOForCvr($noModel, $itemType, $kodeWarna)
     {
-        return $this->select('sum(kg_po) as qty_po')
+        return $this->select('sum(kg_po) as qty_po, po_plus')
             ->where('open_po.no_model', $noModel)
             ->where('open_po.item_type', $itemType)
             ->where('open_po.kode_warna', $kodeWarna)

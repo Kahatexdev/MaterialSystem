@@ -583,7 +583,9 @@ class ScheduleController extends BaseController
             // $jenis = $this->masterMaterialModel->getJenisByitemType($itemType);
             // Ambil data order dan validasi
 
-            $Order = $this->materialModel->getQtyPOByNoModel($noModel, $itemType, $kodeWarna);
+            // $Order = $this->materialModel->getQtyPOByNoModel($noModel, $itemType, $kodeWarna);
+            $Order = $this->openPoModel->getQtyPOForCvr($noModel, $itemType, $kodeWarna);
+            // dd($Order);
             $id_induk = $this->openPoModel->getIdInduk($noModel, $itemType, $kodeWarna);
             if ($id_induk) {
                 $id_po = $this->openPoModel->find($id_induk['id_induk']);
@@ -593,7 +595,7 @@ class ScheduleController extends BaseController
                     $itemTypeCovering  = $id_po['item_type'];
                     // dd ($kodeWarnaCovering, $warnaCovering, $itemTypeCovering); 
                     $deliv = $this->openPoModel->getFilteredPO($kodeWarnaCovering, $warnaCovering, $itemTypeCovering);
-                    $Order = $this->openPoModel->getQtyPOForCvr($noModel, $itemType, $kodeWarna);
+                    // $Order = $this->openPoModel->getQtyPOForCvr($noModel, $itemType, $kodeWarna);
                     // $Order['delivery_awal'] = $deliv[0]['delivery_awal'];
                     // $Order['delivery_akhir'] = $deliv[0]['delivery_akhir'];
                 } else {
@@ -607,7 +609,7 @@ class ScheduleController extends BaseController
             // $row['delivery_awal'] = $Order['delivery_awal'] ?? null;
             // $row['delivery_akhir'] = $Order['delivery_akhir'] ?? null;
             $row['qty_po'] = $Order['qty_po'] ?? 0;
-
+            // dd($row);
             // Pastikan 'kg_po' ada di $kg_kebutuhan
             $kg_po = isset($kg_kebutuhan['kg_po']) ? (float) $kg_kebutuhan['kg_po'] : 0;
             $row['kg_kebutuhan'] = $kg_po;
@@ -615,7 +617,7 @@ class ScheduleController extends BaseController
             $row['sisa_jatah'] = $tagihan['sisa_kg_po'] ?? 0;
         }
         unset($row);
-        // dd ($scheduleData);
+        // dd($scheduleData);
         // Persiapkan data untuk view
         $data = [
             'active' => $this->active,
@@ -634,7 +636,7 @@ class ScheduleController extends BaseController
             'warna' => $warna,
             'jmlLot' => $jmlLot,
         ];
-        // dd($data);
+
         return view($this->role . '/schedule/form-edit', $data);
     }
 
