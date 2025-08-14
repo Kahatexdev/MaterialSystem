@@ -2181,6 +2181,34 @@ class WarehouseController extends BaseController
 
         return $this->response->setJSON($data);
     }
+    public function reportGlobalNylon()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Report Global',
+            'active' => $this->active
+        ];
+        return view($this->role . '/warehouse/report-global-nylon', $data);
+    }
+    public function filterReportGlobalNylon()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = 'NYLON';
+        log_message('debug', 'Received key: ' . $key);  // Log key yang diterima
+        if (empty($key)) {
+            return $this->response->setJSON(['error' => 'Key is missing']);
+        }
+
+        $data = $this->masterOrderModel->getFilterReportGlobal($key, $jenis);
+        // Log data yang diterima dari model
+        log_message('debug', 'Query result: ' . print_r($data, true));
+
+        if (empty($data)) {
+            return $this->response->setJSON(['error' => 'No data found']);
+        }
+
+        return $this->response->setJSON($data);
+    }
     public function savePengeluaranSelainOrder()
     {
         // Pastikan ini adalah request AJAX / POST
@@ -2539,8 +2567,10 @@ class WarehouseController extends BaseController
     public function filterReportGlobalBenang()
     {
         $key = $this->request->getGet('key');
+        $jenis = 'BENANG';
 
-        $data = $this->stockModel->getFilterReportGlobalBenang($key);
+        // $data = $this->stockModel->getFilterReportGlobalBenang($key);
+        $data = $this->masterOrderModel->getFilterReportGlobal($key, $jenis);
         // dd($data);
         return $this->response->setJSON($data);
     }
