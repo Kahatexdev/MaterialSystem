@@ -65,7 +65,7 @@ class ReturModel extends Model
     public function getFilteredData($filters)
     {
         $builder = $this->db->table('retur');
-        $builder->select('retur.*, master_material.jenis');
+        $builder->select('retur.id_retur, retur.no_model, retur.item_type, retur.kode_warna, retur.warna, retur.area_retur, retur.tgl_retur, SUM(retur.kgs_retur) AS kgs_retur, SUM(retur.cns_retur) AS cns_retur, COUNT(retur.krg_retur) AS total_karung, retur.lot_retur, retur.kategori, retur.keterangan_area, retur.keterangan_gbn, retur.waktu_acc_retur, retur.admin, master_material.jenis');
         $builder->join('master_material', 'master_material.item_type = retur.item_type', 'left');
 
         // Apply filters
@@ -89,6 +89,7 @@ class ReturModel extends Model
         }
 
         $builder->where('retur.waktu_acc_retur IS NULL');
+        $builder->groupBy('retur.no_model, retur.item_type, retur.kode_warna, retur.warna, retur.area_retur, retur.tgl_retur, retur.lot_retur, retur.kategori');
         $builder->orderBy('retur.tgl_retur', 'DESC');
 
         return $builder->get()->getResultArray();

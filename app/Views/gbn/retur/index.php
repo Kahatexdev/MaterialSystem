@@ -120,7 +120,7 @@
                                                         <?= $row['warna'] ?>
                                                     </div>
                                                 </td>
-                                                <td><?= $row['kgs_retur'] ?></td>
+                                                <td><?= number_format($row['kgs_retur'], 2) ?></td>
                                                 <td><?= $row['cns_retur'] ?></td>
                                                 <td><?= $row['area_retur'] ?></td>
                                                 <td><?= date('d-m-Y', strtotime($row['tgl_retur'])) ?></td>
