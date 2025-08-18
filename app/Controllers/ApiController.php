@@ -1349,12 +1349,13 @@ class ApiController extends ResourceController
     public function filterReportGlobal()
     {
         $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis');
         log_message('debug', 'Received key: ' . $key);  // Log key yang diterima
         if (empty($key)) {
             return $this->response->setJSON(['error' => 'Key is missing']);
         }
 
-        $data = $this->masterOrderModel->getFilterReportGlobal($key);
+        $data = $this->masterOrderModel->getFilterReportGlobal($key, $jenis);
         // Log data yang diterima dari model
         log_message('debug', 'Query result: ' . print_r($data, true));
 
@@ -1401,6 +1402,7 @@ class ApiController extends ResourceController
         $delivery = $this->request->getGet('delivery');
         $noModel = $this->request->getGet('no_model');
         $kodeWarna = $this->request->getGet('kode_warna');
+        $jenis = $this->request->getGet('jenis');
         $bulanMap = [
             'Januari' => 1,
             'Februari' => 2,
@@ -1416,7 +1418,7 @@ class ApiController extends ResourceController
             'Desember' => 12
         ];
         $bulan = $bulanMap[$delivery] ?? null;
-        $data = $this->stockModel->getFilterSisaPakaiBenang($bulan, $noModel, $kodeWarna);
+        $data = $this->stockModel->getFilterSisaPakaiBenang($jenis, $bulan, $noModel, $kodeWarna);
 
         return $this->response->setJSON($data);
     }
