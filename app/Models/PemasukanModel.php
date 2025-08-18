@@ -217,6 +217,8 @@ class PemasukanModel extends Model
                 ->like('other_bon.no_model', $key)
                 ->orLike('other_bon.item_type', $key)
                 ->orLike('other_bon.kode_warna', $key)
+                ->orLike('other_bon.warna', $key)
+                ->orLike('other_bon.tgl_datang', $key)
                 ->groupEnd();
 
             // builder2 untuk pencarian di kolom schedule_celup
@@ -225,6 +227,7 @@ class PemasukanModel extends Model
                 ->orLike('schedule_celup.item_type', $key)
                 ->orLike('schedule_celup.kode_warna', $key)
                 ->orLike('schedule_celup.warna', $key)
+                ->orLike('bon_celup.tgl_datang', $key)
                 ->groupEnd();
         }
 
