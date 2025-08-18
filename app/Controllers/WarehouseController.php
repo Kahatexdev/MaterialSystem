@@ -2585,11 +2585,12 @@ class WarehouseController extends BaseController
         return view($this->role . '/warehouse/report-sisa-pakai-benang', $data);
     }
 
-    public function filterSisaPakaiBenang()
+    public function filterSisaPakai()
     {
         $delivery = $this->request->getGet('delivery');
         $noModel = $this->request->getGet('no_model');
         $kodeWarna = $this->request->getGet('kode_warna');
+        $jenis = $this->request->getGet('jenis');
         $bulanMap = [
             'Januari' => 1,
             'Februari' => 2,
@@ -2605,7 +2606,8 @@ class WarehouseController extends BaseController
             'Desember' => 12
         ];
         $bulan = $bulanMap[$delivery] ?? null;
-        $data = $this->stockModel->getFilterSisaPakaiBenang($bulan, $noModel, $kodeWarna);
+        // $data = $this->stockModel->getFilterSisaPakaiBenang($bulan, $noModel, $kodeWarna);
+        $data = $this->materialModel->getFilterSisaPakai($jenis, $bulan, $noModel, $kodeWarna);
 
         return $this->response->setJSON($data);
     }

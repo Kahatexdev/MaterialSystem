@@ -218,7 +218,8 @@ class MasterOrderModel extends Model
 
         -- total po tambahan
         (
-            SELECT SUM(COALESCE(pt.poplus_mc_kg, 0) + COALESCE(pt.plus_pck_kg, 0))
+            SELECT 
+            SUM(COALESCE(pt.poplus_mc_kg, 0) + COALESCE(pt.plus_pck_kg, 0))
             FROM po_tambahan pt
             WHERE pt.id_material = material.id_material
             AND pt.status = 'approved'
@@ -258,26 +259,26 @@ class MasterOrderModel extends Model
 
         -- datang solid
         (
-            SELECT SUM(COALESCE(oc.kgs_kirim, 0))
+            SELECT 
+            SUM(CASE WHEN COALESCE(sc.po_plus,0) = 0 THEN oc.kgs_kirim ELSE 0 END)
             FROM pemasukan p
             JOIN out_celup oc ON p.id_out_celup = oc.id_out_celup
             JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
             WHERE sc.no_model = master_order.no_model
             AND sc.kode_warna = material.kode_warna
             AND sc.item_type = material.item_type
-            AND sc.po_plus <> 1
         ) AS datang_solid,
 
         -- plus datang solid
         (
-            SELECT SUM(COALESCE(oc.kgs_kirim, 0))
+            SELECT 
+            SUM(CASE WHEN COALESCE(sc.po_plus,0) = 1 THEN oc.kgs_kirim ELSE 0 END)
             FROM pemasukan p
             JOIN out_celup oc ON p.id_out_celup = oc.id_out_celup
             JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
             WHERE sc.no_model = master_order.no_model
             AND sc.kode_warna = material.kode_warna
             AND sc.item_type = material.item_type
-            AND sc.po_plus = 1
         ) AS plus_datang_solid,
 
         -- ganti retur
