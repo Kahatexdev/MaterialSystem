@@ -83,24 +83,37 @@
                                             <div class="row g-3">
                                                 <div class="col-md-4">
                                                     <label>No Model</label>
-                                                    <select class="form-control" id="id_order" name="id_order" required>
-                                                        <option value="">Pilih No Model </option>
+                                                    <!-- Input dengan datalist -->
+                                                    <input class="form-control" list="noModelOptions" id="no_model_input" placeholder="Ketik / pilih No Model">
+                                                    <datalist id="noModelOptions">
                                                         <?php foreach ($no_model as $item): ?>
-                                                            <option value="<?= $item['id_order'] ?>"><?= $item['no_model'] ?></option>
+                                                            <option data-id="<?= $item['id_order'] ?>" value="<?= $item['no_model'] ?>"></option>
                                                         <?php endforeach; ?>
-                                                    </select>
-                                                    <input type="text" class="form-control" id="no_model" name="no_model" hidden>
+                                                    </datalist>
+
+                                                    <!-- hidden input buat simpan id_order -->
+                                                    <input type="hidden" name="id_order" id="id_order">
+                                                    <input type="hidden" id="no_model" name="no_model">
                                                 </div>
+
                                                 <div class="col-md-4">
                                                     <label>Item Type</label>
-                                                    <select class="form-select" name="item_type" id="item_type" required>
-                                                    </select>
+                                                    <input class="form-control" list="itemTypeOptions" id="item_type_input" placeholder="Pilih / ketik Item Type">
+                                                    <datalist id="itemTypeOptions"></datalist>
+
+                                                    <!-- hidden buat simpan value pasti -->
+                                                    <input type="hidden" name="item_type" id="item_type">
                                                 </div>
+
                                                 <div class="col-md-4">
                                                     <label>Kode Warna</label>
-                                                    <select class="form-select" name="kode_warna" id="kode_warna" required>
-                                                    </select>
+                                                    <input class="form-control" list="kodeWarnaOptions" id="kode_warna_input" placeholder="Pilih / ketik Kode Warna">
+                                                    <datalist id="kodeWarnaOptions"></datalist>
+
+                                                    <!-- hidden buat simpan value pasti -->
+                                                    <input type="hidden" name="kode_warna" id="kode_warna">
                                                 </div>
+
 
                                             </div>
 
@@ -108,8 +121,13 @@
                                             <div class="row g-3 mt-3">
                                                 <div class="col-md-4">
                                                     <label>Warna</label>
-                                                    <input type="text" class="form-control" name="warna" id="warna" required placeholder="Warna" readonly>
+                                                    <input class="form-control" list="warnaOptions" id="warna_input" placeholder="Pilih / ketik Warna">
+                                                    <datalist id="warnaOptions"></datalist>
+
+                                                    <!-- hidden buat simpan value pasti -->
+                                                    <input type="hidden" name="warna" id="warna">
                                                 </div>
+
 
                                                 <div class="col-md-4">
                                                     <label>Harga</label>
@@ -182,7 +200,7 @@
                                                                 <td><input type="number" step="0.01" class="form-control kgs" name="kgs[0]" required></td>
                                                                 <td><input type="number" step="0.01" class="form-control cones" name="cones[0]" required></td>
                                                                 <td style="width: 180px;">
-                                                                    <select class="form-control cluster" name="cluster[0]" required>
+                                                                    <select class="form-control cluster" name="cluster[0]">
                                                                     </select>
                                                                 </td>
                                                                 <td><input type="text" class="form-control kapasitas" name="kapasitas[0]" data-sisa_kapasitas="" readonly></td>
@@ -248,121 +266,125 @@
 
     <script>
         $(document).ready(function() {
-            $('#id_order').select2();
-            $('#id_order').on("select2:select", function() {
-                let id_order = $(this).val(); // Ambil value yang dipilih di select2
-                let no_model = $('#id_order option:selected').text(); // Ambil teks (No Model) dari opsi yang dipilih
+            // Saat user ketik atau pilih no_model
+            // Utility → sinkron input → hidden
+            function syncInputToHidden(inputId, hiddenId, optionsId) {
+                $(inputId).on('input', function() {
+                    let val = $(this).val();
+                    $(hiddenId).val(val);
 
-                // Isi nilai No Model ke input
-                $('#no_model').val(no_model);
+                    let exists = $(optionsId + ' option').filter(function() {
+                        return $(this).val() === val;
+                    }).length > 0;
 
-                // Ambil item type berdasarkan id_order
+                    if (!exists) {
+                        $(hiddenId).val(val); // tetap simpan manual input
+                    }
+                });
+            }
+
+            // Step 1: pilih Model → load Item Type
+            $('#no_model_input').on('input', function() {
+                let val = $(this).val();
+                $('#no_model').val(val);
+
+                let id_order = null; // Cari option di datalist yang cocok dengan input
+                $('#noModelOptions option').each(function() {
+                    if ($(this).val() === val) {
+                        id_order = $(this).data('id');
+                    }
+                });
+                // Set hidden input id_order
+                $('#id_order').val(id_order || '');
+
                 $.ajax({
                     url: "<?= base_url($role . '/otherIn/getItemTypeForOtherIn/') ?>" + id_order,
                     type: "GET",
                     dataType: "json",
                     success: function(data) {
-                        console.log(data);
-                        // Kosongkan opsi sebelumnya
-                        $('#item_type').empty();
-
-                        // Tambahkan opsi default
-                        $('#item_type').append('<option value="">-- Pilih Item Type --</option>');
-
-                        // Iterasi data untuk menambahkan opsi
-                        if (data && data.length > 0) {
-                            data.forEach(function(item) {
-                                $('#item_type').append(
-                                    '<option value="' + item.item_type + '">' + item.item_type + '</option>'
-                                );
-                            });
-                        } else {
-                            $('#item_type').append('<option value="">Tidak ada item tersedia</option>');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error:', error);
-                        alert('Terjadi kesalahan saat mengambil data Item Type.');
+                        let $dl = $('#itemTypeOptions').empty();
+                        data.forEach(item => {
+                            $dl.append('<option value="' + item.item_type + '"></option>');
+                        });
+                        $('#item_type_input, #kode_warna_input, #warna_input').val('');
+                        $('#item_type, #kode_warna, #warna').val('');
+                        $('#kodeWarnaOptions, #warnaOptions').empty();
                     }
                 });
             });
 
-            // Event listener untuk mendapatkan kode warna saat item type dipilih
-            $('#item_type').on("change", function() {
-                let id_order = $('#id_order').val(); // Pastikan id_order masih sama
-                let item_type = $(this).val(); // Ambil nilai item type yang dipilih
+            // Step 2: pilih Item Type → load Kode Warna
+            $('#item_type_input').on('input', function() {
+                let val = $(this).val();
+                $('#item_type').val(val);
 
-                // Ambil kode warna berdasarkan id_order dan item_type
-                if (item_type) {
-                    $.ajax({
-                        url: "<?= base_url($role . '/otherIn/getKodeWarnaForOtherIn') ?>",
-                        type: "POST",
-                        data: {
-                            id_order: id_order,
-                            item_type: item_type,
-                        },
-                        dataType: "json",
-                        success: function(data) {
-                            console.log(data);
-                            // Kosongkan opsi sebelumnya
-                            $('#kode_warna').empty();
+                $.ajax({
+                    url: "<?= base_url($role . '/otherIn/getKodeWarnaForOtherIn') ?>",
+                    type: "POST",
+                    data: {
+                        id_order: $('#id_order').val(),
+                        item_type: val
+                    },
+                    dataType: "json",
+                    success: function(data) {
+                        let $dl = $('#kodeWarnaOptions').empty();
+                        data.forEach(item => {
+                            $dl.append('<option value="' + item.kode_warna + '"></option>');
+                        });
+                        $('#kode_warna_input, #warna_input').val('');
+                        $('#kode_warna, #warna').val('');
+                        $('#warnaOptions').empty();
+                    }
+                });
+            });
 
-                            // Tambahkan opsi default
-                            $('#kode_warna').append('<option value="">-- Pilih Kode Warna --</option>');
+            // Step 3: pilih Kode Warna → load Warna
+            $('#kode_warna_input').on('input', function() {
+                let val = $(this).val();
+                $('#kode_warna').val(val);
 
-                            // Iterasi data untuk menambahkan opsi
-                            if (data && data.length > 0) {
-                                data.forEach(function(item) {
+                $.ajax({
+                    url: "<?= base_url($role . '/otherIn/getWarnaForOtherIn') ?>",
+                    type: "POST",
+                    data: {
+                        id_order: $('#id_order').val(),
+                        item_type: $('#item_type').val(),
+                        kode_warna: val
+                    },
+                    dataType: "json",
+                    success: function(data) {
+                        let $dl = $('#warnaOptions').empty();
+                        let warnaVal = '';
 
-                                    $('#kode_warna').append(
-                                        '<option value="' + item.kode_warna + '">' + item.kode_warna + '</option>'
-                                    );
-                                });
-                            } else {
-                                $('#kode_warna').append('<option value="">Tidak ada kode warna tersedia</option>');
+                        if (Array.isArray(data)) {
+                            data.forEach(item => {
+                                $dl.append('<option value="' + item.color + '"></option>');
+                            });
+                            if (data.length === 1) {
+                                warnaVal = data[0].color; // kalau cuma satu, isi otomatis
                             }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error:', error);
-                            alert('Terjadi kesalahan saat mengambil data Kode Warna.');
+                        } else if (data && data.color) {
+                            $dl.append('<option value="' + data.color + '"></option>');
+                            warnaVal = data.color; // object tunggal
                         }
-                    });
-                } else {
-                    // Kosongkan dropdown jika tidak ada item type yang dipilih
-                    $('#kode_warna').empty();
-                    $('#kode_warna').append('<option value="">-- Pilih Kode Warna --</option>');
-                }
-            });
-            // Event listener untuk mendapatkan kode warna saat item type dipilih
-            $('#kode_warna').on("change", function() {
-                let id_order = $('#id_order').val(); // Pastikan id_order masih sama
-                let item_type = $('#item_type').val(); // Pastikan id_order masih sama
-                let kode_warna = $(this).val(); // Ambil nilai item type yang dipilih
 
-                // Ambil kode warna berdasarkan id_order dan item_type
-                if (item_type) {
-                    $.ajax({
-                        url: "<?= base_url($role . '/otherIn/getWarnaForOtherIn') ?>",
-                        type: "POST",
-                        data: {
-                            id_order: id_order,
-                            item_type: item_type,
-                            kode_warna: kode_warna,
-                        },
-                        dataType: "json",
-                        success: function(data) {
-                            $('#warna').val(data.color); // Ambil warna dari respons
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error:', error);
-                            alert('Terjadi kesalahan saat mengambil data Kode Warna.');
+                        if (warnaVal) {
+                            $('#warna_input').val(warnaVal);
+                            $('#warna').val(warnaVal);
+                        } else {
+                            // kalau ada banyak pilihan → kosongkan, biar user pilih manual
+                            $('#warna_input').val('');
+                            $('#warna').val('');
                         }
-                    });
-                } else {
-                    // Kosongkan dropdown jika tidak ada item type yang dipilih
-                    $('#warna').empty();
-                }
+                    }
+                });
             });
+
+            // Step 4: sinkron manual input → hidden
+            syncInputToHidden('#no_model_input', '#no_model', '#noModelOptions');
+            syncInputToHidden('#item_type_input', '#item_type', '#itemTypeOptions');
+            syncInputToHidden('#kode_warna_input', '#kode_warna', '#kodeWarnaOptions');
+            syncInputToHidden('#warna_input', '#warna', '#warnaOptions');
         });
 
 
