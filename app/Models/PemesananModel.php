@@ -231,7 +231,7 @@ class PemesananModel extends Model
             ->where('material.kode_warna', $data['kode_warna'])
             ->where('material.color', $data['color'])
             ->where('pemesanan.po_tambahan', $data['po_tambahan'])
-            ->where('pemesanan.status_kirim', '')
+            ->where('pemesanan.status_kirim!=', 'YA')
             ->groupBy('pemesanan.id_pemesanan')
             ->orderBy('pemesanan.id_pemesanan');
         return $data->get()->getResultArray();
@@ -619,7 +619,7 @@ class PemesananModel extends Model
                 total_pemesanan.ttl_kg AS qty_pesan,
                 GROUP_CONCAT(DISTINCT pemesanan.lot) AS lot_pesan,
                 GROUP_CONCAT(DISTINCT pemesanan.keterangan) AS ket_area,
-                GROUP_CONCAT(DISTINCT pemesanan.keterangan_gbn) AS ket_gbn,
+                GROUP_CONCAT(DISTINCT pemesanan.keterangan_gbn) AS ket_gbn
             ")
             ->join('total_pemesanan', 'pemesanan.id_total_pemesanan=total_pemesanan.id_total_pemesanan', 'left')
             ->join('material',       'material.id_material = pemesanan.id_material', 'left')
@@ -643,45 +643,41 @@ class PemesananModel extends Model
             ->groupBy('id_total_pemesanan')
             ->getCompiledSelect();
 
-        $query = $this->db->table("({$subPemesanan}) AS p")
-            // join keterangan/lot/status dari tabel pemesanan (ambil 1 saja)
+        $query = $this->db->table("({$subPemesanan}) p")
             ->join(
                 'pemesanan pem',
                 'pem.id_total_pemesanan = p.id_total_pemesanan AND pem.tgl_pesan = p.tgl_pesan',
                 'left'
             )
-            // join sub‐query pengeluaran
             ->join(
-                "({$subPengeluaran}) AS x",
+                "({$subPengeluaran}) x",
                 'x.id_total_pemesanan = p.id_total_pemesanan',
                 'left'
             )
             ->select("
-                p.tgl_pesan,
-                p.tgl_pakai,
-                p.no_model,
-                p.item_type,
-                p.jenis,
-                p.kode_warna,
-                p.color,
-                p.jl_mc,
-                p.cns_pesan,
-                p.qty_pesan,
-                P.po_tambahan,
-                p.lot_pesan,
-                p.ket_gbn,
-                p.ket_area,
-                MAX(pem.status_kirim) AS status_kirim,
-                MAX(pem.additional_time) AS additional_time,
-                COALESCE(x.kgs_out, 0) AS kgs_out,
-                COALESCE(x.cns_out, 0) AS cns_out,
-                COALESCE(x.krg_out, 0) AS krg_out,
-                x.lot_out
-            ")
+        p.tgl_pesan,
+        p.tgl_pakai,
+        p.no_model,
+        p.item_type,
+        p.jenis,
+        p.kode_warna,
+        p.color,
+        p.jl_mc,
+        p.cns_pesan,
+        p.qty_pesan,
+        p.po_tambahan,
+        p.lot_pesan,
+        p.ket_gbn,
+        p.ket_area,
+        MAX(pem.status_kirim) AS status_kirim,
+        MAX(pem.additional_time) AS additional_time,
+        COALESCE(x.kgs_out, 0) AS kgs_out,
+        COALESCE(x.cns_out, 0) AS cns_out,
+        COALESCE(x.krg_out, 0) AS krg_out,
+        x.lot_out
+    ")
             ->groupBy('p.tgl_pesan, p.no_model, p.item_type, p.jenis, p.kode_warna, p.color')
-            // ->orderBy('p.tgl_pesan', 'DESC')
             ->orderBy('p.no_model, p.item_type, p.kode_warna, p.color', 'ASC');
-
         return $query->get()->getResultArray();
     }
     public function getDataPemesananCovering($tanggal_pakai, $jenis)
