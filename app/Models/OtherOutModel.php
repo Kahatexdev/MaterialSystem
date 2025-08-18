@@ -57,11 +57,11 @@ class OtherOutModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
-    public function getQty($id, $namaCluster)
+    public function getQty($id, $namaCluster = null)
     {
         return $this->select('SUM(kgs_other_out) AS kgs_other_out, SUM(cns_other_out) AS cns_other_out, SUM(krg_other_out) AS krg_other_out')
             ->where('id_out_celup', $id)
-            ->where('nama_cluster', $namaCluster)
+            // ->where('nama_cluster', $namaCluster)
             ->findAll();
     }
 }
