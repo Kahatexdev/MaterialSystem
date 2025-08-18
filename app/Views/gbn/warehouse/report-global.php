@@ -116,7 +116,7 @@
                             const gantiRetur = Number(item.ganti_retur) || 0;
                             const datangLurex = Number(item.datang_lurex) || 0;
                             const plusDatangLurex = Number(item.plus_datang_lurex) || 0;
-                            const returPbGbn = Number(item.retur_pb_area) || 0;
+                            const returPbGbn = Number(item.retur_pb_gbn) || 0;
                             const returPbArea = Number(item.retur_pb_area) || 0;
                             const pakaiArea = Number(item.pakai_area) || 0;
                             const stockAkhir = Number(item.stock_akhir) || 0;

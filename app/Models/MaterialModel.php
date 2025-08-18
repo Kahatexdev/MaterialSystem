@@ -747,4 +747,152 @@ class MaterialModel extends Model
             ->where('id_material', $idMaterial)
             ->update();
     }
+
+    // public function getFilterSisaPakai($jenis, $bulan = null, $noModel = null, $kodeWarna = null)
+    // {
+    //     $builder =  $this->db->table('material m')->select('
+    //         mo.no_model, m.item_type, m.kode_warna, m.color, s.kgs_stock_awal, s.lot_awal,
+    //         mo.lco_date, mo.foll_up, mo.no_order, mo.buyer, mo.delivery_awal, mo.delivery_akhir, mo.unit,
+    //         p.area_out, p.kgs_out,
+    //         op.kg_po,
+    //         r.kgs_retur, r.lot_retur,
+    //         mm.jenis
+    //     ')
+    //         ->join('master_order mo', 'mo.id_order = m.id_order')
+    //         ->join('stock s', 'mo.no_model = s.no_model')
+    //         ->join('master_material mm', 'mm.item_type = m.item_type')
+    //         ->join('pengeluaran p', 'p.id_stock = s.id_stock AND p.lot_out = s.lot_stock AND p.nama_cluster = s.nama_cluster', 'left')
+    //         ->join('open_po op', 'op.no_model = mo.no_model AND op.item_type = m.item_type AND op.kode_warna = m.kode_warna', 'left')
+    //         ->join('retur r', 'r.no_model = mo.no_model AND r.item_type = m.item_type AND r.kode_warna = m.kode_warna', 'left')
+    //         ->where('mm.jenis', $jenis)
+    //         ->groupBy('mo.no_model')
+    //         ->groupBy('m.item_type')
+    //         ->groupBy('m.kode_warna');
+
+    //     if (!empty($noModel)) {
+    //         $builder->where('mo.no_model', $noModel);
+    //     }
+
+    //     if (!empty($kodeWarna)) {
+    //         $builder->where('m.kode_warna', $kodeWarna);
+    //     }
+
+    //     if (!empty($bulan)) {
+    //         $builder->where('MONTH(mo.delivery_awal)', $bulan);
+    //     }
+
+    //     return $builder->get()->getResultArray();
+    // }
+    public function getFilterSisaPakai($jenis, $bulan = null, $noModel = null, $kodeWarna = null)
+    {
+        $builder = $this->db->table('material m')
+            ->select("
+            mo.no_model,
+            mo.buyer,
+            m.item_type,
+            m.kode_warna,
+            m.color,
+            mm.jenis,
+            mo.lco_date,
+            mo.foll_up,
+            mo.no_order,
+            mo.delivery_awal,
+            mo.delivery_akhir,
+            mo.unit,
+
+            -- stock awal
+            (
+                SELECT COALESCE(SUM(s.kgs_stock_awal), 0) + COALESCE(SUM(s.kgs_in_out), 0)
+                FROM stock s
+                WHERE s.no_model = mo.no_model
+                AND s.item_type = m.item_type
+                AND s.kode_warna = m.kode_warna
+            ) AS kgs_stock_awal,
+
+            (
+                SELECT GROUP_CONCAT(DISTINCT s.lot_stock)
+                FROM stock s
+                WHERE s.no_model = mo.no_model
+                AND s.item_type = m.item_type
+                AND s.kode_warna = m.kode_warna
+            ) AS lot_awal,
+
+            -- pengeluaran (pakai benang)
+            (
+                SELECT SUM(COALESCE(p.kgs_out, 0))
+                FROM pengeluaran p
+                JOIN stock s2 ON s2.id_stock = p.id_stock
+                WHERE s2.no_model = mo.no_model
+                AND s2.item_type = m.item_type
+                AND s2.kode_warna = m.kode_warna
+            ) AS kgs_out,
+
+            -- pengeluaran (area)
+            (
+                SELECT p.area_out
+                FROM pengeluaran p
+                JOIN stock s2 ON s2.id_stock = p.id_stock
+                WHERE s2.no_model = mo.no_model
+                AND s2.item_type = m.item_type
+                AND s2.kode_warna = m.kode_warna
+                LIMIT 1
+            ) AS area_out,
+
+            (
+                SELECT GROUP_CONCAT(DISTINCT p.lot_out)
+                FROM pengeluaran p
+                JOIN stock s2 ON s2.id_stock = p.id_stock
+                WHERE s2.no_model = mo.no_model
+                AND s2.item_type = m.item_type
+                AND s2.kode_warna = m.kode_warna
+            ) AS lot_out,
+
+            -- open po
+            (
+                SELECT SUM(COALESCE(op.kg_po, 0))
+                FROM open_po op
+                WHERE op.no_model = mo.no_model
+                AND op.item_type = m.item_type
+                AND op.kode_warna = m.kode_warna
+            ) AS kg_po,
+
+            -- retur
+            (
+                SELECT SUM(COALESCE(r.kgs_retur, 0))
+                FROM retur r
+                WHERE r.no_model = mo.no_model
+                AND r.item_type = m.item_type
+                AND r.kode_warna = m.kode_warna
+            ) AS kgs_retur,
+
+            (
+                SELECT GROUP_CONCAT(DISTINCT r.lot_retur)
+                FROM retur r
+                WHERE r.no_model = mo.no_model
+                AND r.item_type = m.item_type
+                AND r.kode_warna = m.kode_warna
+            ) AS lot_retur
+        ")
+            ->join('master_material mm', 'm.item_type = mm.item_type', 'left')
+            ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
+            ->where('mm.jenis', $jenis);
+
+        if (!empty($noModel)) {
+            $builder->where('mo.no_model', $noModel);
+        }
+
+        if (!empty($kodeWarna)) {
+            $builder->where('m.kode_warna', $kodeWarna);
+        }
+
+        if (!empty($bulan)) {
+            $builder->where('MONTH(mo.delivery_awal)', $bulan);
+        }
+        return $builder
+            ->groupBy('mo.no_model')
+            ->groupBy('m.item_type')
+            ->groupBy('m.kode_warna')
+            ->orderBy('m.item_type, m.kode_warna', 'ASC')
+            ->get()->getResultArray();
+    }
 }

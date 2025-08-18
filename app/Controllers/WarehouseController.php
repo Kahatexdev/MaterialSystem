@@ -2421,9 +2421,73 @@ class WarehouseController extends BaseController
     public function saveOtherIn()
     {
         $data = $this->request->getPost();
+        // dd($data);
         $db = \Config\Database::connect();
         $db->transBegin();  // Mulai transaksi
         // dd($data);
+        if(empty($data['id_order'])){
+            // prepare create new master order
+            $dataOrder = [
+                'no_model' => $data['no_model'],
+                'no_order' => '-',
+                'buyer' => '-',
+                'foll_up' => '-',
+                'lco_date' => '00/00/0000',
+                'admin' => session()->get('username')
+            ];
+            
+            // Insert new master order
+            $saveOrder = $this->masterOrderModel->insert($dataOrder);
+            $idOrder = $this->masterOrderModel->insertID();
+        } else {
+            $idOrder = $data['id_order'];
+        }
+        // === Cek master_material (wajib dicek selalu, meski order ada) ===
+        $masterMaterial = $this->masterMaterialModel
+            ->where('item_type', $data['item_type'])
+            ->first();
+
+        if (empty($masterMaterial)) {
+            $this->masterMaterialModel->insert([
+                'item_type' => $data['item_type'],
+                'deskripsi' => $data['item_type'],
+                'jenis'     => null
+            ]);
+        }
+
+        // === Cek material (per order + item_type + warna) ===
+        $material = $this->materialModel
+            ->where('id_order', $idOrder)
+            ->where('item_type', $data['item_type'])
+            ->where('kode_warna', $data['kode_warna'])
+            ->first();
+
+        if (empty($material)) {
+            $this->materialModel->insert([
+                'id_order'   => $idOrder,
+                'style_size' => '',
+                'area'       => '',
+                'color'      => $data['warna'],
+                'item_type'  => $data['item_type'],
+                'kode_warna' => $data['kode_warna'],
+                'composition' => '',
+                'gw'         => 0,
+                'qty_pcs'    => 0,
+                'loss'       => 0,
+                'kgs'        => $data['total_kgs'],
+                'admin'      => session()->get('username')
+            ]);
+        } else {
+            $newKgs = $material['kgs'] + $data['total_kgs'];
+            // Update material jika sudah ada
+            $this->materialModel->update($material['id_material'], [
+                'gw'         => 0,
+                'qty_pcs'    => 0,
+                'loss'       => 0,
+                'kgs'        => $newKgs,
+                'admin'      => session()->get('username')
+            ]);
+        }
         // 1) Insert Bon
         $dataOtherBon = [
             'no_model'       => $data['no_model'],
@@ -2438,9 +2502,9 @@ class WarehouseController extends BaseController
             'admin'          => session()->get('username'),
             'created_at'     => date('Y-m-d H:i:s'),
         ];
+        // dd($dataOtherBon);
         $saveBon = $this->otherBonModel->insert($dataOtherBon);
         $id_other_in = $this->otherBonModel->insertID();
-
         if (!$saveBon) {
             $db->transRollback();
             session()->setFlashdata('error', "Gagal menyimpan data Bon");
@@ -2612,11 +2676,12 @@ class WarehouseController extends BaseController
         return view($this->role . '/warehouse/report-sisa-pakai-benang', $data);
     }
 
-    public function filterSisaPakaiBenang()
+    public function filterSisaPakai()
     {
         $delivery = $this->request->getGet('delivery');
         $noModel = $this->request->getGet('no_model');
         $kodeWarna = $this->request->getGet('kode_warna');
+        $jenis = $this->request->getGet('jenis');
         $bulanMap = [
             'Januari' => 1,
             'Februari' => 2,
@@ -2632,7 +2697,8 @@ class WarehouseController extends BaseController
             'Desember' => 12
         ];
         $bulan = $bulanMap[$delivery] ?? null;
-        $data = $this->stockModel->getFilterSisaPakaiBenang($bulan, $noModel, $kodeWarna);
+        // $data = $this->stockModel->getFilterSisaPakaiBenang($bulan, $noModel, $kodeWarna);
+        $data = $this->materialModel->getFilterSisaPakai($jenis, $bulan, $noModel, $kodeWarna);
 
         return $this->response->setJSON($data);
     }
