@@ -3213,7 +3213,7 @@ class WarehouseController extends BaseController
     public function updateDatangBenang()
     {
         $data = $this->request->getPost();
-        log_message('info', 'Update Datang Benang: ' . json_encode($data));
+        // log_message('info', 'Update Datang Benang: ' . json_encode($data));
 
         if (empty($data['id_out_celup'])) {
             return $this->response->setJSON([
