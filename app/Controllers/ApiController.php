@@ -90,8 +90,12 @@ class ApiController extends ResourceController
     // v3
     public function statusbahanbaku($noModel)
     {
-        $search = $this->request->getGet('search');
+        $search = $this->request->getGet('search') ?? null;
         $rows   = $this->materialModel->MaterialPDK($noModel);
+        if (empty($rows)) {
+            log_message('error', "MaterialPDK kosong untuk model: $noModel");
+            return $this->respond([], 200);
+        }
         // $rows   = $this->openPoModel->MaterialPDK($noModel);
         $res    = [];
 

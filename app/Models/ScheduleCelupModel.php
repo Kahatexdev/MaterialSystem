@@ -554,9 +554,10 @@ class ScheduleCelupModel extends Model
             ->getCompiledSelect();
 
         // Subquery: Hitung po_tambahan per model/type/warna
-        $poTambahanSub = $db->table('po_tambahan pt')
-            ->select('mo.no_model, m.item_type, m.kode_warna, SUM(pt.pt.poplus_mc_kg+pt.plus_pck_kg) AS total_po_tambahan')
-            ->join('material m', 'm.id_material = pt.id_material')
+        // Subquery: po_tambahan
+        $poTambahanSub = $db->table('po_tambahan') // hilangkan alias pt di sini
+            ->select('mo.no_model, m.item_type, m.kode_warna, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS total_po_tambahan')
+            ->join('material m', 'm.id_material = po_tambahan.id_material')
             ->join('master_order mo', 'mo.id_order = m.id_order')
             ->groupBy(['mo.no_model', 'm.item_type', 'm.kode_warna'])
             ->getCompiledSelect();
@@ -612,7 +613,14 @@ class ScheduleCelupModel extends Model
         // Grouping agar tidak terjadi duplikasi id_celup
         $builder->groupBy('sc.id_celup');
 
-        return $builder->get()->getResultArray();
+        $query = $builder->get();
+
+        if (!$query) {
+            log_message('error', 'schedulePerArea query error: ' . $db->getLastQuery());
+            return [];
+        }
+
+        return $query->getResultArray();
     }
 
     public function getDataComplain()
