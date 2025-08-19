@@ -188,11 +188,12 @@ class OpenPoModel extends Model
         // 2) Ambil PO
         $poRow = $this->db
             ->table('open_po')
-            ->select('kg_po, po_plus')
-            ->where('no_model',   $noModel)
-            ->where('item_type',  $itemType)
-            ->where('kode_warna', $kodeWarna)
-            ->where('color',      $warna)
+            ->select('kg_po,po_plus, master_order.delivery_awal, master_order.delivery_akhir')
+            ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
+            ->where('open_po.no_model',   $noModel)
+            ->where('open_po.item_type',  $itemType)
+            ->where('open_po.kode_warna', $kodeWarna)
+            ->where('open_po.color',      $warna)
             ->get()
             ->getRowArray();
 
@@ -200,15 +201,31 @@ class OpenPoModel extends Model
         $poPlus = (float) ($poRow['po_plus'] ?? '0');
 
         // 3) Return struktur yang sama
-        return [
-            'item_type'       => $itemType,
-            'kode_warna'      => $kodeWarna,
-            'warna'           => $warna,
-            'kg_po'           => $kgPo,
-            'total_kg_celup'  => $total,
-            'sisa_kg_po'      => $kgPo - $total,
-            'poPlus'          => $poPlus,
-        ];
+        if ($poRow['po_plus'] == 1) {
+            return [
+                'item_type'       => $itemType,
+                'kode_warna'      => $kodeWarna,
+                'warna'           => $warna,
+                'kg_po'           => 0,
+                'qty_po_plus'           => $kgPo,
+                'total_kg_celup'  => $total,
+                'sisa_kg_po'      => $kgPo - $total,
+                'delivery_awal' => $poRow['delivery_awal'],
+                'delivery_akhir' => $poRow['delivery_akhir']
+            ];
+        } else {
+            return [
+                'item_type'       => $itemType,
+                'kode_warna'      => $kodeWarna,
+                'warna'           => $warna,
+                'kg_po'           => $kgPo,
+                'qty_po_plus'           => 0,
+                'total_kg_celup'  => $total,
+                'sisa_kg_po'      => $kgPo - $total,
+                'delivery_awal' => $poRow['delivery_awal'],
+                'delivery_akhir' => $poRow['delivery_akhir']
+            ];
+        }
     }
 
 
@@ -308,7 +325,7 @@ class OpenPoModel extends Model
     public function
     getQtyPOForCvr($noModel, $itemType, $kodeWarna)
     {
-        return $this->select('sum(kg_po) as qty_po, po_plus')
+        $res = $this->select('sum(kg_po) as kg_po,po_plus')
             ->where('open_po.no_model', $noModel)
             ->where('open_po.item_type', $itemType)
             ->where('open_po.kode_warna', $kodeWarna)
@@ -316,6 +333,17 @@ class OpenPoModel extends Model
             ->groupBy('open_po.item_type')
             ->groupBy('open_po.kode_warna')
             ->first();
+        if ($res['po_plus'] == 1) {
+            return [
+                'kg_po' => 0,
+                'qty_po_plus' => $res['kg_po']
+            ];
+        } else {
+            return [
+                'kg_po' => $res['kg_po'],
+                'qty_po_plus' => 0
+            ];
+        }
     }
     public function getIdInduk($noModel, $itemType, $kodeWarna)
     {
