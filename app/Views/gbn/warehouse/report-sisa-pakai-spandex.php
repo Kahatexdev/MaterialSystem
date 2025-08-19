@@ -135,6 +135,7 @@
             const delivery_awal = $('#delivery').val();
             const no_model = $('#no_model').val().trim();
             const kode_warna = $('#kode_warna').val().trim();
+            const jenis = 'SPANDEX';
 
             if (!delivery_awal && !no_model && !kode_warna) {
                 Swal.fire({
@@ -151,7 +152,8 @@
                 data: {
                     delivery: delivery_awal,
                     no_model: no_model,
-                    kode_warna: kode_warna
+                    kode_warna: kode_warna,
+                    jenis: jenis
 
                 },
                 dataType: "json",
@@ -183,16 +185,16 @@
                                     <td>${item.item_type || ''}</td>
                                     <td>${item.kode_warna || ''}</td>
                                     <td>${item.warna || ''}</td>
-                                    <td>${item.kgs_stock_awal || 0}</td>
+                                    <td>${(parseFloat(item.kgs_stock_awal) || 0).toFixed(2)}</td>
                                     <td>${item.lot_awal || ''}</td>
-                                    <td>${item.kg_po || 0}</td>
+                                    <td>${(parseFloat(item.kg_po) || 0).toFixed(2)}</td>
                                     <td>${item.tgl_terima_po_plus || ''}</td>
                                     <td>${item.tgl_po_plus_area || ''}</td>
                                     <td>${item.delivery_po_plus || ''}</td>
-                                    <td>${item.kg_po_plus || 0}</td>
-                                    <td>${item.kgs_out || 0}</td>
-                                    <td>${item.kgs_out_plus || 0}</td>
-                                    <td>${item.kgs_retur || 0}</td>
+                                    <td>${(parseFloat(item.kg_po_plus) || 0).toFixed(2)}</td>
+                                    <td>${(parseFloat(item.kgs_out) || 0).toFixed(2)}</td>
+                                    <td>${(parseFloat(item.kgs_out_plus) || 0).toFixed(2)}</td>
+                                    <td>${(parseFloat(item.kgs_retur) || 0).toFixed(2)}</td>
                                     <td>${item.lot_retur || ''}</td>
                                     <td>${sisa.toFixed(2)}</td>
                                 </tr>
@@ -228,10 +230,12 @@
             const delivery = $('#delivery').val();
             const no_model = $('#no_model').val().trim();
             const kode_warna = $('#kode_warna').val().trim();
+            const jenis = 'SPANDEX';
             const url = "<?= base_url($role . '/warehouse/exportReportSisaPakaiSpandex') ?>" +
                 "?delivery=" + encodeURIComponent(delivery) +
                 "&no_model=" + encodeURIComponent(no_model) +
-                "&kode_warna=" + encodeURIComponent(kode_warna);
+                "&kode_warna=" + encodeURIComponent(kode_warna) +
+                "&jenis=" + encodeURIComponent(jenis);
 
             window.location.href = url;
         });
