@@ -553,6 +553,14 @@ class ScheduleCelupModel extends Model
             ->groupBy(['no_model', 'item_type', 'kode_warna'])
             ->getCompiledSelect();
 
+        // Subquery: Hitung po_tambahan per model/type/warna
+        $poTambahanSub = $db->table('po_tambahan pt')
+            ->select('mo.no_model, m.item_type, m.kode_warna, SUM(pt.pt.poplus_mc_kg+pt.plus_pck_kg) AS total_po_tambahan')
+            ->join('material m', 'm.id_material = pt.id_material')
+            ->join('master_order mo', 'mo.id_order = m.id_order')
+            ->groupBy(['mo.no_model', 'm.item_type', 'm.kode_warna'])
+            ->getCompiledSelect();
+
         // Main query builder
         $builder = $db->table('schedule_celup AS sc')
             ->select([
@@ -581,9 +589,11 @@ class ScheduleCelupModel extends Model
                 'sc.ket_daily_cek',
                 'sc.po_plus',
                 'COALESCE(st.kg_stock, 0) AS kg_stock',
+                'COALESCE(pt.total_po_tambahan, 0) AS total_po_tambahan',
                 'mm.jenis'
             ])
             ->join("($stockSub) AS st", 'st.no_model = sc.no_model AND st.item_type = sc.item_type AND st.kode_warna = sc.kode_warna', 'left')
+            ->join("($poTambahanSub) AS pt", 'pt.no_model = sc.no_model AND pt.item_type = sc.item_type AND pt.kode_warna = sc.kode_warna', 'left')
             ->join('master_material AS mm', 'mm.item_type = sc.item_type', 'left')
             ->where('sc.no_model', $model)
             ->where('sc.item_type', $itemType)

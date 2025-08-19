@@ -227,6 +227,8 @@
                                 <th>Status Celup</th>
                                 <th>Qty PO</th>
                                 <th>Qty Celup</th>
+                                <th>Sisa Tagihan</th>
+                                <th>Qty PO(+)</th>
                                 <th>Lot Celup</th>
                                 <th>Tgl Schedule</th>
                                 <th>Tgl Bon</th>
@@ -298,6 +300,8 @@
     <td><span class="badge ${statusClass} px-3 py-2">${item.last_status || '-'}</span></td>
     <td class="text-end">${formatNumber(item.qty_po)}</td>
     <td class="text-end">${formatNumber(item.kg_celup)}</td>
+    <td class="text-end">${formatNumber(item.qty_po - item.kg_celup)}</td>
+    <td class="text-end">${formatNumber(item.total_po_tambahan)}</td>
     <td>${item.lot_celup || '-'}</td>
     <td>${formatDate(item.tanggal_schedule)}</td>
     <td>${formatDate(item.tanggal_bon)}</td>

@@ -125,6 +125,7 @@ class ApiController extends ResourceController
             'created_at',
             'updated_at',
             'kg_stock',
+            'total_po_tambahan'
         ];
         log_message('debug', 'Isi $rows: ' . json_encode($rows));
 
@@ -157,7 +158,7 @@ class ApiController extends ResourceController
                         }
 
                         $res[] = $newRow;
-                        dd($allSchedules);
+                        // dd($allSchedules);  
                     }
                 } else {
                     // Kalau gak ada schedule, tetap munculkan 1 baris dengan qty_po
