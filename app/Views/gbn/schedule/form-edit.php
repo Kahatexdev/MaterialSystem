@@ -474,7 +474,7 @@
                                                                             <label for="po"> PO</label>
                                                                             <select class="form-select po-select" name="po[]" required>
                                                                                 <?php foreach ($scheduleData as $po): ?>
-                                                                                    <option value="<?= $detail['no_model'] ?>" ?><?= $po['no_model'] ?></option>
+                                                                                    <option value="<?= $po['no_model'] ?>" <?= ($po['no_model'] == $detail['no_model']) ? 'selected' : '' ?>><?= $po['no_model'] ?></option>
                                                                                 <?php endforeach; ?>
                                                                             </select>
                                                                         </div>
@@ -564,10 +564,12 @@
                                                                             <fieldset>
                                                                                 <legend></legend>
                                                                                 <div>
-                                                                                    <input type="radio" id="po_plus" name="po_plus[]" value="1" <?= isset($detail['po_plus']) && $detail['po_plus'] == 1 ? 'checked' : '' ?>>
-                                                                                    <label for="iya">Iya</label>
-                                                                                    <input type="radio" id="po_plus" name="po_plus[]" value="0" <?= isset($detail['po_plus']) && $detail['po_plus'] == 0 || $detail['po_plus'] == '' ? 'checked' : '' ?>>
-                                                                                    <label for="tidak">Tidak</label>
+                                                                                    <?php $key = $detail['id_celup']; ?>
+                                                                                    <?php $val = isset($detail['po_plus']) ? (string)$detail['po_plus'] : ''; ?>
+                                                                                    <input type="radio" id="po_plus_yes_<?= $key ?>" name="po_plus[<?= $key ?>]" value="1" <?= ($val === '1') ? 'checked' : '' ?>>
+                                                                                    <label for="po_plus_yes_<?= $key ?>">Iya</label>
+                                                                                    <input type="radio" id="po_plus_no_<?= $key ?>" name="po_plus[<?= $key ?>]" value="0" <?= ($val === '0' || $val === '') ? 'checked' : '' ?>>
+                                                                                    <label for="po_plus_no_<?= $key ?>">Tidak</label>
                                                                                 </div>
                                                                             </fieldset>
                                                                         </div>
