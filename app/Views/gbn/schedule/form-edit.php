@@ -252,7 +252,7 @@
                                                                 <div class="col-4">
                                                                     <div class="form-group">
                                                                         <label for="qty_po_plus"> Qty PO (+)</label>
-                                                                        <input type="number" class="form-control" name="qty_po_plus[]" value="" readonly>
+                                                                        <input type="number" class="form-control" name="qty_po_plus[]" value="<?= number_format($detail['qty_po_plus'], 2) ?>" readonly>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-4">

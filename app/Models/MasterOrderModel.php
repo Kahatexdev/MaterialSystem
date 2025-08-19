@@ -375,4 +375,26 @@ class MasterOrderModel extends Model
             ->where('no_model', $noModel)
             ->first();
     }
+    public function getNullDeliv()
+    {
+        return $this->select('no_model')
+            ->where('delivery_awal', null)
+            ->where('delivery_akhir', null)
+            ->findAll();
+    }
+    public function updateDeliv($model, $body)
+    {
+        if ($body['unit'] == 'CJ') {
+            $unit = 'CIJERAH';
+        } elseif ($body['unit'] == 'MJ') {
+            $unit = 'CIJERAH';
+        } else {
+            $unit = 'Belum di Assign';
+        }
+        return  $this->where('no_model', $model)
+            ->set('delivery_awal', $body['delivery_awal'])
+            ->set('delivery_akhir', $body['delivery_akhir'])
+            ->set('unit', $unit)
+            ->update();
+    }
 }
