@@ -139,7 +139,6 @@ class ScheduleCelupModel extends Model
             ->where('lot_urut', $lot)
             ->groupStart() // buka grouping WHERE
             ->where('last_status', 'scheduled')
-            ->orWhere('last_status', 'celup')
             ->groupEnd() // tutup grouping WHERE
             ->groupBy('id_celup')
             ->findAll();
@@ -1195,7 +1194,7 @@ class ScheduleCelupModel extends Model
             ->where('tanggal_schedule', $date)
             ->where('id_mesin', $machine)
             ->where('lot_urut', $lot)
-            ->whereNotIn('last_status', ['scheduled', 'celup'])
+            ->where('last_status !=', 'scheduled')
             ->groupBy('id_celup')
             ->findAll();
     }
