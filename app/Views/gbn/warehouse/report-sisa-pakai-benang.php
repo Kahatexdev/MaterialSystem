@@ -230,10 +230,12 @@
             const delivery = $('#delivery').val();
             const no_model = $('#no_model').val().trim();
             const kode_warna = $('#kode_warna').val().trim();
+            const jenis = 'BENANG';
             const url = "<?= base_url($role . '/warehouse/exportReportSisaPakaiBenang') ?>" +
                 "?delivery=" + encodeURIComponent(delivery) +
                 "&no_model=" + encodeURIComponent(no_model) +
-                "&kode_warna=" + encodeURIComponent(kode_warna);
+                "&kode_warna=" + encodeURIComponent(kode_warna) +
+                "&jenis=" + encodeURIComponent(jenis);
 
             window.location.href = url;
         });
