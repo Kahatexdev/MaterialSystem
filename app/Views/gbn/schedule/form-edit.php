@@ -636,47 +636,58 @@
             </div>
         </div>
     <?php endif ?>
+    <?php if (!$history): ?>
+        <div class="row mt-3">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h6 class="card-title">no history</h6>
+                </div>
 
-    <div class="row mt-3">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="card-title">History Schedule</h4>
             </div>
-            <div class="card-body">
-                <div class="table">
-                    <table class="text-center">
-                        <thead>
-                            <tr>
-                                <th> Status</th>
-                                <th>Model</th>
-                                <th>Item Type</th>
-                                <th>Kode Warna</th>
-                                <th>Warna</th>
-                                <th>Qty Celup</th>
-                                <th>Ket Sch</th>
-                                <th>Update</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($history as $h): ?>
+        </div>
+    <?php else: ?>
+        <div class="row mt-3">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">History Schedule</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table">
+                        <table class="text-center">
+                            <thead>
                                 <tr>
-                                    <td> <span class="badge bg-info"><?= $h['last_status'] ?></span></td>
-                                    <td><?= $h['no_model'] ?></td>
-                                    <td><?= $h['item_type'] ?></td>
-                                    <td><?= $h['kode_warna'] ?></td>
-                                    <td><?= $h['warna'] ?></td>
-                                    <td><?= $h['qty_celup'] ?></td>
-                                    <td><?= $h['ket_schedule'] ?>
-                                    </td>
-                                    <td> <?= $h['admin'] ?> <br> <?= $h['last_update'] ?>||<?= $h['jam_update'] ?></td>
+                                    <th> Status</th>
+                                    <th>Model</th>
+                                    <th>Item Type</th>
+                                    <th>Kode Warna</th>
+                                    <th>Warna</th>
+                                    <th>Qty Celup</th>
+                                    <th>Ket Sch</th>
+                                    <th>Update</th>
                                 </tr>
-                            <?php endforeach ?>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($history as $h): ?>
+                                    <tr>
+                                        <td> <span class="badge bg-info"><?= $h['last_status'] ?></span></td>
+                                        <td><?= $h['no_model'] ?></td>
+                                        <td><?= $h['item_type'] ?></td>
+                                        <td><?= $h['kode_warna'] ?></td>
+                                        <td><?= $h['warna'] ?></td>
+                                        <td><?= $h['qty_celup'] ?></td>
+                                        <td><?= $h['ket_schedule'] ?>
+                                        </td>
+                                        <td> <?= $h['admin'] ?> <br> <?= $h['last_update'] ?>||<?= $h['jam_update'] ?></td>
+                                    </tr>
+                                <?php endforeach ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    <?php endif ?>
+
 </div>
 
 <!-- Modal Edit -->
