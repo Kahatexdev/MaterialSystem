@@ -278,13 +278,13 @@
                                                             <div class="col-4">
                                                                 <div class="form-group">
                                                                     <label for="qty_po">Qty PO</label>
-                                                                    <input type="number" class="form-control" name="qty_po[]" readonly>
+                                                                    <input type="number" step="0.01" class="form-control" name="qty_po[]" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="col-4">
                                                                 <div class="form-group">
                                                                     <label for="qty_po_plus">Qty PO (+)</label>
-                                                                    <input type="number" class="form-control" name="qty_po_plus[]" readonly>
+                                                                    <input type="number" step="0.01" class="form-control" name="qty_po_plus[]" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="col-4">
@@ -594,10 +594,20 @@
                         const tagihan = tr.querySelector(".tagihan");
                         const poPlus = data.poPlus || '0';
 
+                        if (qtyPO) qtyPO.value = '';
+                        if (qtyPOPlus) qtyPOPlus.value = '';
+
                         if (poPlus === '0') {
-                            qtyPO.value = parseFloat(data.kg_po).toFixed(2) || '';
+                            if (qtyPO) qtyPO.value = parseFloat(data.kg_po || 0).toFixed(2);
+                            if (qtyPO) qtyPO.readOnly = false;
+                            if (qtyPOPlus) qtyPOPlus.readOnly = true;
                         } else {
-                            qtyPOPlus.value = parseFloat(data.kg_po).toFixed(2) || '';
+
+
+                            if (qtyPOPlus) qtyPOPlus.value = parseFloat(data.kg_po || 0).toFixed(2);
+                            // nonaktifkan/readonly field normal
+                            if (qtyPO) qtyPO.readOnly = true;
+                            if (qtyPOPlus) qtyPOPlus.readOnly = false;
                         }
 
                         kgKebutuhan.textContent = parseFloat(data.kg_po).toFixed(2) || '0.00';
@@ -936,13 +946,13 @@
                     <div class="col-4">
                         <div class="form-group">
                             <label for="qty_po">Qty PO</label>
-                            <input type="number" class="form-control" name="qty_po[]" readonly>
+                            <input type="number" step="0.01" class="form-control" name="qty_po[]" readonly>
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="form-group">
                             <label for="qty_po_plus">Qty PO (+)</label>
-                            <input type="number" class="form-control" name="qty_po_plus[]" readonly>
+                            <input type="number" step="0.01" class="form-control" name="qty_po_plus[]" readonly>
                         </div>
                     </div>
                     <div class="col-4">
@@ -1038,6 +1048,44 @@
             newRow.querySelector("input[name='qty_celup[]']").addEventListener("input", function() {
                 calculateTotalAndRemainingCapacity();
             });
+
+            const rowIndex = tbody.querySelectorAll('tr').length - 1;
+
+            newRow.querySelectorAll('input[type="radio"]').forEach((r, i) => {
+                // unique name per-row so PHP menerima array: po_plus[0], po_plus[1], ...
+                r.name = `po_plus[${rowIndex}]`;
+                // unique id for label linking
+                const newId = `po_plus_${rowIndex}_${i}`;
+                r.id = newId;
+                // if label is next sibling, link it (keadaan markup kamu label ada setelah input)
+                const lbl = r.nextElementSibling;
+                if (lbl && lbl.tagName === 'LABEL') lbl.setAttribute('for', newId);
+
+                // simple change handler: toggle readOnly pada qty fields di baris ini
+                r.addEventListener('change', () => {
+                    const qtyPO = newRow.querySelector("input[name='qty_po[]']");
+                    const qtyPOPlus = newRow.querySelector("input[name='qty_po_plus[]']");
+                    if (r.value === '1') {
+                        if (qtyPO) {
+                            qtyPO.value = '';
+                            qtyPO.readOnly = true;
+                        }
+                        if (qtyPOPlus) qtyPOPlus.readOnly = false;
+                    } else {
+                        if (qtyPOPlus) {
+                            qtyPOPlus.value = '';
+                            qtyPOPlus.readOnly = true;
+                        }
+                        if (qtyPO) qtyPO.readOnly = false;
+                    }
+                });
+            });
+
+            // set default checked pada opsi kedua kalau belum ada (supaya selalu ada value)
+            const radiosForRow = newRow.querySelectorAll(`input[name='po_plus[${rowIndex}]']`);
+            if (radiosForRow.length && !Array.from(radiosForRow).some(r => r.checked)) {
+                radiosForRow[1] && (radiosForRow[1].checked = true);
+            }
         });
 
         function fetchItemTypeRow(kodeWarna, warna, itemTypeSelect) {
