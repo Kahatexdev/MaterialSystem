@@ -481,4 +481,17 @@ class PemasukanModel extends Model
 
         return $merged;
     }
+
+    public function getDetailDatangBenang($idOutCelup)
+    {
+        return $this->db->table('pemasukan')
+            ->select('pemasukan.*, out_celup.*,other_bon.*,stock.*,master_order.buyer,master_order.foll_up, master_order.no_order, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, other_bon.warna AS warna')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
+            ->join('other_bon', 'other_bon.id_other_bon = out_celup.id_other_bon', 'left')
+            ->join('master_order', 'master_order.no_model = other_bon.no_model', 'left')
+            ->join('stock', 'stock.id_stock = pemasukan.id_stock', 'left')
+            ->where('pemasukan.id_out_celup', $idOutCelup)
+            ->get()
+            ->getRowArray();
+    }
 }
