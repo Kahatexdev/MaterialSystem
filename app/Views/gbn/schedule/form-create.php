@@ -142,7 +142,7 @@
                     </div>
                     <div class="form-sample">
 
-                        <a class="btn btn-info btn-sm px-1 py-1" href="<?= base_url($role . '/schedule/formsample?no_mesin=' . $no_mesin . '&tanggal_schedule=' . $tanggal_schedule . '&lot_urut=' . $lot_urut) ?>" style=" font-size: 1rem;">
+                        <a class="btn btn-info btn-sm px-1 py-1" href="<?= base_url($role . '/schedule/formsample?no_mesin=' . $no_mesin . '&tanggal_schedule=' . $tanggal_schedule . '&lot_urut=' . $lot_urut . '&start_date=' . $start_date . '&end_date=' . $end_date) ?>" style=" font-size: 1rem;">
                             Mesin Untuk Sample
                         </a>
                     </div>
@@ -159,6 +159,8 @@
                                         <input type="text" class="form-control" id="no_mesin" name="no_mesin" value="<?= $no_mesin ?>" readonly>
                                         <input type="hidden" name="tanggal_schedule" value="<?= $tanggal_schedule ?>">
                                         <input type="hidden" name="lot_urut" value="<?= $lot_urut ?>">
+                                        <input type="hidden" name="start_date" value="<?= $start_date ?>">
+                                        <input type="hidden" name="end_date" value="<?= $end_date ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
