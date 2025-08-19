@@ -659,6 +659,7 @@ class ScheduleController extends BaseController
         // Ambil id_mesin berdasarkan no_mesin yang dikirimkan
         $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
         $poList = $scheduleData['po']; // Array po[]
+
         // dd ($scheduleData, $id_mesin, $poList);
 
         $dataBatch = []; // Untuk menyimpan batch data
@@ -668,6 +669,7 @@ class ScheduleController extends BaseController
         foreach ($poList as $key => $po) {
             // Dapatkan id_celup dari data (bisa null jika baris baru)
             $id_celup = $scheduleData['id_celup'][$i] ?? null;
+            $postedPoPlus = $scheduleData['po_plus'] ?? [];
 
             // Jika id_celup sudah ada, coba ambil data schedule dari database
             if (!empty($id_celup)) {
@@ -698,6 +700,15 @@ class ScheduleController extends BaseController
                 }
             }
 
+            $poPlusValue = '0';
+            if (!empty($id_celup) && isset($postedPoPlus[$id_celup])) {
+                $poPlusValue = (string)$postedPoPlus[$id_celup];
+            } elseif (isset($postedPoPlus[$i])) {
+                $poPlusValue = (string)$postedPoPlus[$i];
+            } elseif (is_array($postedPoPlus) && array_values($postedPoPlus) != $postedPoPlus && count($postedPoPlus) == 1) {
+                $poPlusValue = (string)reset($postedPoPlus);
+            }
+
             // Ambil nilai lainnya dengan menggunakan indeks counter $i
             $last_status    = $scheduleData['last_status'][$i] ?? 'scheduled';
             $start_mc       = $scheduleData['tgl_start_mc'][$i] ?? null;
@@ -714,7 +725,7 @@ class ScheduleController extends BaseController
                 'warna'            => $scheduleData['warna'] ?? null,
                 'start_mc'         => $start_mc,
                 'kg_celup'         => $scheduleData['qty_celup'][$i] ?? null,
-                'po_plus'          => $scheduleData['po_plus'][$i] ?? 0,
+                'po_plus'          => $poPlusValue,
                 'lot_urut'         => $scheduleData['lot_urut'] ?? null,
                 'tanggal_schedule' => $scheduleData['tanggal_schedule'] ?? null,
                 'ket_schedule'     => $scheduleData['ket_schedule'][$i] ?? null,
