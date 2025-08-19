@@ -2250,9 +2250,9 @@ class ExcelController extends BaseController
             $sheet->setCellValue('A2', 'PAKAI ' . $tglPakai);
 
             // Merge sel untuk teks di A1 dan A2
-            $sheet->mergeCells('A1:J1');
-            $sheet->mergeCells('A2:J2');
-            $sheet->getStyle('A1:J2')->applyFromArray($subHeaderStyle);
+            $sheet->mergeCells('A1:L1');
+            $sheet->mergeCells('A2:L2');
+            $sheet->getStyle('A1:L2')->applyFromArray($subHeaderStyle);
 
 
             // Set header
@@ -2265,26 +2265,28 @@ class ExcelController extends BaseController
                 'No Karung',
                 'Kgs',
                 'Cns',
+                'Krg',
                 'Lot',
                 'Nama Cluster',
+                'Keterangan',
             ];
             $sheet->fromArray($header, null, 'A3');
 
 
-            $sheet->getStyle('A3:J3')->applyFromArray($headerStyle);
+            $sheet->getStyle('A3:L3')->applyFromArray($headerStyle);
 
             // Tambahkan data
             $rowNumber = 4;
             foreach ($rows as $row) {
                 // Hapus kolom yang tidak ingin dimasukkan
-                unset($row['tgl_pakai'], $row['group'], $row['jenis']);
+                unset($row['tgl_pakai'], $row['jenis'], $row['id_pengeluaran'], $row['id_stock'], $row['id_out_celup'], $row['group'],);
 
                 $sheet->fromArray(array_values($row), null, "A$rowNumber");
                 $rowNumber++;
             }
             // Tambahkan border ke semua data
             $dataEndRow = $rowNumber - 1;
-            $sheet->getStyle("A3:J$dataEndRow")->applyFromArray([
+            $sheet->getStyle("A3:L$dataEndRow")->applyFromArray([
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -2293,7 +2295,7 @@ class ExcelController extends BaseController
             ]);
 
             // Atur lebar kolom otomatis
-            foreach (range('A', 'K') as $column) {
+            foreach (range('A', 'L') as $column) {
                 $sheet->getColumnDimension($column)->setAutoSize(true);
             }
         }

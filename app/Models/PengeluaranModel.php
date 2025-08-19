@@ -364,10 +364,6 @@ class PengeluaranModel extends Model
         // dd($this->db->getLastQuery());
         return $result->getResultArray();
     }
-
-
-
-
     public function getDataPemesananExport($jenis, $tglPakai, $noModel = null)
     {
         $builder = $this->select("
@@ -387,6 +383,7 @@ class PengeluaranModel extends Model
             pengeluaran.krg_out,
             pengeluaran.lot_out,
             pengeluaran.nama_cluster,
+            pengeluaran.keterangan_gbn,
             cluster.group
         ")
             ->join('out_celup', 'out_celup.id_out_celup = pengeluaran.id_out_celup', 'left')
