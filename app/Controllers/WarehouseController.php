@@ -3287,7 +3287,7 @@ class WarehouseController extends BaseController
                 'warna'        => $data['warna'],
                 'kgs_in_out'   => $kgsInout,
                 'cns_in_out' => $conesInout,
-                'lot_kirim'    => $lotInout
+                'lot_stock'    => $lotInout
             ];
 
             $this->outCelupModel->update($data['id_out_celup'], $dataOut);
