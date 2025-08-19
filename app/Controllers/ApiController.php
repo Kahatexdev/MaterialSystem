@@ -157,6 +157,7 @@ class ApiController extends ResourceController
                         }
 
                         $res[] = $newRow;
+                        dd($allSchedules);
                     }
                 } else {
                     // Kalau gak ada schedule, tetap munculkan 1 baris dengan qty_po

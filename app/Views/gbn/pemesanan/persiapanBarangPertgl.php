@@ -66,9 +66,9 @@
                                             <a href="<?= base_url($role . '/pemesanan/detailListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-info" target="_blank">
                                                 <i class="fas fa-eye fa-2x"></i>
                                             </a>
-                                            <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
+                                            <!-- <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
                                                 <i class="fas fa-file-excel fa-2x"></i>
-                                            </a>
+                                            </a> -->
                                         </td>
                                     <?php endif; ?>
                                     <!-- <td class="text-center">

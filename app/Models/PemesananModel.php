@@ -249,7 +249,7 @@ class PemesananModel extends Model
             ->where('material.color', $id['color'])
             ->where('pemesanan.tgl_pakai', $id['tgl_pakai'])
             ->where('pemesanan.po_tambahan', $id['po_tambahan'])
-            ->where('pemesanan.status_kirim', '')
+            ->where('pemesanan.status_kirim!=', 'YA')
             ->get()
             ->getResultArray(); // Ambil semua baris sebagai array
 

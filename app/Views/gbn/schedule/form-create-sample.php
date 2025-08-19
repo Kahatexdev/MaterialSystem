@@ -159,6 +159,8 @@
                                         <input type="text" class="form-control" id="no_mesin" name="no_mesin" value="<?= $no_mesin ?>" readonly>
                                         <input type="hidden" name="tanggal_schedule" value="<?= $tanggal_schedule ?>">
                                         <input type="hidden" name="lot_urut" value="<?= $lot_urut ?>">
+                                        <input type="hidden" name="start_date" value="<?= $start_date ?>">
+                                        <input type="hidden" name="end_date" value="<?= $end_date ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
