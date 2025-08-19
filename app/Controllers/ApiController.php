@@ -418,8 +418,8 @@ class ApiController extends ResourceController
             if ($groupKey !== $lastGroupKey) {
                 $sisaKgs        = $data['stock_kg'][$i] ?? 0;
                 $sisaCns        = $data['stock_cns'][$i] ?? 0;
-                $keterangan     = $data['keterangan'][$i] ?? 0;
-                $lot            = $data['lot'][$i] ?? 0;
+                $keterangan     = $data['keterangan'][$i] ?? '';
+                $lot            = $data['lot'][$i] ?? '';
                 $lastGroupKey   = $groupKey;
             } else {
                 $sisaKgs        = 0;
@@ -446,7 +446,7 @@ class ApiController extends ResourceController
                 'lot'             => $lot,
                 'sisa_kgs_mc'     => $sisaKgs,
                 'sisa_cones_mc'   => $sisaCns,
-                'lot'             => $data['lot'][$i] ?? null,
+                // 'lot'             => $data['lot'][$i] ?? null,
                 'created_at'      => date('Y-m-d H:i:s'),
             ];
 
@@ -1325,6 +1325,175 @@ class ApiController extends ResourceController
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
         $data = $this->pemasukanModel->getFilterDatangBenang($key, $tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
+    }
+    public function filterPoBenang()
+    {
+        $key = $this->request->getGet('key');
+
+        $data = $this->openPoModel->getFilterPoBenang($key);
+
+        return $this->response->setJSON($data);
+    }
+    public function filterPengiriman()
+    {
+        $key = $this->request->getGet('key');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pengeluaranModel->getFilterPengiriman($key, $tanggalAwal, $tanggalAkhir);
+        // dd($data);
+        return $this->response->setJSON($data);
+    }
+    public function filterReportGlobal()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis');
+        log_message('debug', 'Received key: ' . $key);  // Log key yang diterima
+        if (empty($key)) {
+            return $this->response->setJSON(['error' => 'Key is missing']);
+        }
+
+        $data = $this->masterOrderModel->getFilterReportGlobal($key, $jenis);
+        // Log data yang diterima dari model
+        log_message('debug', 'Query result: ' . print_r($data, true));
+
+        if (empty($data)) {
+            return $this->response->setJSON(['error' => 'No data found']);
+        }
+
+        return $this->response->setJSON($data);
+    }
+
+    public function filterReportGlobalBenang()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = 'BENANG';
+
+        // $data = $this->stockModel->getFilterReportGlobalBenang($key);
+        $data = $this->masterOrderModel->getFilterReportGlobal($key, $jenis);
+        // dd($data);
+        return $this->response->setJSON($data);
+    }
+
+    public function filterReportGlobalNylon()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = 'NYLON';
+        log_message('debug', 'Received key: ' . $key);  // Log key yang diterima
+        if (empty($key)) {
+            return $this->response->setJSON(['error' => 'Key is missing']);
+        }
+
+        $data = $this->masterOrderModel->getFilterReportGlobal($key, $jenis);
+        // Log data yang diterima dari model
+        log_message('debug', 'Query result: ' . print_r($data, true));
+
+        if (empty($data)) {
+            return $this->response->setJSON(['error' => 'No data found']);
+        }
+
+        return $this->response->setJSON($data);
+    }
+
+    public function filterSisaPakaiBenang()
+    {
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $jenis = $this->request->getGet('jenis');
+        $bulanMap = [
+            'Januari' => 1,
+            'Februari' => 2,
+            'Maret' => 3,
+            'April' => 4,
+            'Mei' => 5,
+            'Juni' => 6,
+            'Juli' => 7,
+            'Agustus' => 8,
+            'September' => 9,
+            'Oktober' => 10,
+            'November' => 11,
+            'Desember' => 12
+        ];
+        $bulan = $bulanMap[$delivery] ?? null;
+        $data = $this->stockModel->getFilterSisaPakaiBenang($jenis, $bulan, $noModel, $kodeWarna);
+
+        return $this->response->setJSON($data);
+    }
+
+    public function filterSisaPakaiNylon()
+    {
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $bulanMap = [
+            'Januari' => 1,
+            'Februari' => 2,
+            'Maret' => 3,
+            'April' => 4,
+            'Mei' => 5,
+            'Juni' => 6,
+            'Juli' => 7,
+            'Agustus' => 8,
+            'September' => 9,
+            'Oktober' => 10,
+            'November' => 11,
+            'Desember' => 12
+        ];
+        $bulan = $bulanMap[$delivery] ?? null;
+        $data = $this->stockModel->getFilterSisaPakaiNylon($bulan, $noModel, $kodeWarna);
+
+        return $this->response->setJSON($data);
+    }
+
+    public function filterSisaPakaiSpandex()
+    {
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $bulanMap = [
+            'Januari' => 1,
+            'Februari' => 2,
+            'Maret' => 3,
+            'April' => 4,
+            'Mei' => 5,
+            'Juni' => 6,
+            'Juli' => 7,
+            'Agustus' => 8,
+            'September' => 9,
+            'Oktober' => 10,
+            'November' => 11,
+            'Desember' => 12
+        ];
+        $bulan = $bulanMap[$delivery] ?? null;
+        $data = $this->stockModel->getFilterSisaPakaiSpandex($bulan, $noModel, $kodeWarna);
+
+        return $this->response->setJSON($data);
+    }
+
+    public function filterSisaPakaiKaret()
+    {
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $bulanMap = [
+            'Januari' => 1,
+            'Februari' => 2,
+            'Maret' => 3,
+            'April' => 4,
+            'Mei' => 5,
+            'Juni' => 6,
+            'Juli' => 7,
+            'Agustus' => 8,
+            'September' => 9,
+            'Oktober' => 10,
+            'November' => 11,
+            'Desember' => 12
+        ];
+        $bulan = $bulanMap[$delivery] ?? null;
+        $data = $this->stockModel->getFilterSisaPakaiKaret($bulan, $noModel, $kodeWarna);
 
         return $this->response->setJSON($data);
     }

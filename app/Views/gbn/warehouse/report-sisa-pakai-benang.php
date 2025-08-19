@@ -135,6 +135,7 @@
             const delivery_awal = $('#delivery').val();
             const no_model = $('#no_model').val().trim();
             const kode_warna = $('#kode_warna').val().trim();
+            const jenis = 'BENANG';
 
             if (!delivery_awal && !no_model && !kode_warna) {
                 Swal.fire({
@@ -151,7 +152,8 @@
                 data: {
                     delivery: delivery_awal,
                     no_model: no_model,
-                    kode_warna: kode_warna
+                    kode_warna: kode_warna,
+                    jenis: jenis
 
                 },
                 dataType: "json",
@@ -182,17 +184,17 @@
                                     <td>${item.unit || ''}</td>
                                     <td>${item.item_type || ''}</td>
                                     <td>${item.kode_warna || ''}</td>
-                                    <td>${item.warna || ''}</td>
-                                    <td>${item.kgs_stock_awal || 0}</td>
+                                    <td>${item.color || ''}</td>
+                                    <td>${(parseFloat(item.kgs_stock_awal) || 0).toFixed(2)}</td>
                                     <td>${item.lot_awal || ''}</td>
-                                    <td>${item.kg_po || 0}</td>
+                                    <td>${(parseFloat(item.kg_po) || 0).toFixed(2)}</td>
                                     <td>${item.tgl_terima_po_plus || ''}</td>
                                     <td>${item.tgl_po_plus_area || ''}</td>
                                     <td>${item.delivery_po_plus || ''}</td>
-                                    <td>${item.kg_po_plus || 0}</td>
-                                    <td>${item.kgs_out || 0}</td>
-                                    <td>${item.kgs_out_plus || 0}</td>
-                                    <td>${item.kgs_retur || 0}</td>
+                                    <td>${(parseFloat(item.kg_po_plus) || 0).toFixed(2)}</td>
+                                    <td>${(parseFloat(item.kgs_out) || 0).toFixed(2)}</td>
+                                    <td>${(parseFloat(item.kgs_out_plus) || 0).toFixed(2)}</td>
+                                    <td>${(parseFloat(item.kgs_retur) || 0).toFixed(2)}</td>
                                     <td>${item.lot_retur || ''}</td>
                                     <td>${sisa.toFixed(2)}</td>
                                 </tr>
@@ -201,7 +203,15 @@
                         $('#dataTable tbody').html(html);
                         $('#btnExport').removeClass('d-none');
                     } else {
-                        $('#dataTable tbody').html('<tr><td colspan="26" class="text-center">Tidak ada data</td></tr>');
+                        let colCount = $('#dataTable thead th').length;
+                        $('#dataTable tbody').html(`
+                            <tr>
+                                <td colspan="${colCount}" class="text-center text-danger font-weight-bold">
+                                    ⚠ Tidak ada data ditemukan
+                                </td>
+                            </tr>
+                        `);
+
                         $('#btnExport').addClass('d-none');
                     }
 

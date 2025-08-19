@@ -1862,7 +1862,8 @@ class ExcelController extends BaseController
     public function exportGlobalReport()
     {
         $key = $this->request->getGet('key');
-        $data = $this->masterOrderModel->getFilterReportGlobal($key);
+        $jenis = $this->request->getGet('jenis') ?? '';
+        $data = $this->masterOrderModel->getFilterReportGlobal($key, $jenis);
 
         $getDeliv = 'http://172.23.44.14/CapacityApps/public/api/getDeliv/' . $key;
         $response = file_get_contents($getDeliv);
@@ -1909,28 +1910,28 @@ class ExcelController extends BaseController
             $sheet->setCellValue('H' . $row, $item['color'] ?: '-'); // color
             $sheet->setCellValue('I' . $row, isset($item['loss']) ? number_format($item['loss'], 2, '.', '') : 0); // loss
             $sheet->setCellValue('J' . $row, isset($item['kgs']) ? number_format($item['kgs'], 2, '.', '') : 0); // qty po
-            $sheet->setCellValue('K' . $row, '-'); // qty po (+)
+            $sheet->setCellValue('K' . $row, isset($item['qty_poplus']) ? number_format($item['qty_poplus'], 2, '.', '') : 0); // qty po (+)
             $sheet->setCellValue('L' . $row, isset($item['kgs_stock_awal']) ? number_format($item['kgs_stock_awal'], 2, '.', '') : 0); // stock awal
             $sheet->setCellValue('M' . $row, '-'); // stock opname
-            $sheet->setCellValue('N' . $row, isset($item['kgs_kirim']) ? number_format($item['kgs_kirim'], 2, '.', '') : 0); // datan solid
-            $sheet->setCellValue('O' . $row, '-'); // (+) datang solid
-            $sheet->setCellValue('P' . $row, '-'); // ganti retur
-            $sheet->setCellValue('Q' . $row, '-'); // datang lurex
-            $sheet->setCellValue('R' . $row, '-'); // (+) datang lurex
-            $sheet->setCellValue('S' . $row, '-'); // retur pb gbn
-            $sheet->setCellValue('T' . $row, isset($item['kgs_retur']) ? number_format($item['kgs_retur'], 2, '.', '') : 0); // retur bp area
-            $sheet->setCellValue('U' . $row, isset($item['kgs_out']) ? number_format($item['kgs_out'], 2, '.', '') : 0); // pakai area
-            $sheet->setCellValue('V' . $row, '-'); // pakai lain-lain
+            $sheet->setCellValue('N' . $row, isset($item['datang_solid']) ? number_format($item['datang_solid'], 2, '.', '') : 0); // datan solid
+            $sheet->setCellValue('O' . $row, isset($item['plus_datang_solid']) ? number_format($item['plus_datang_solid'], 2, '.', '') : 0); // (+) datang solid
+            $sheet->setCellValue('P' . $row, isset($item['ganti_retur']) ? number_format($item['ganti_retur'], 2, '.', '') : 0); // ganti retur
+            $sheet->setCellValue('Q' . $row, isset($item['datang_lurex']) ? number_format($item['datang_lurex'], 2, '.', '') : 0); // datang lurex
+            $sheet->setCellValue('R' . $row, isset($item['plus_datang_lurex']) ? number_format($item['plus_datang_lurex'], 2, '.', '') : 0); // (+) datang lurex
+            $sheet->setCellValue('S' . $row, isset($item['retur_pb_gbn']) ? number_format($item['retur_pb_gbn'], 2, '.', '') : 0); // retur pb gbn
+            $sheet->setCellValue('T' . $row, isset($item['retur_pb_area']) ? number_format($item['retur_pb_area'], 2, '.', '') : 0); // retur bp area
+            $sheet->setCellValue('U' . $row, isset($item['pakai_area']) ? number_format($item['pakai_area'], 2, '.', '') : 0); // pakai area
+            $sheet->setCellValue('V' . $row, isset($item['kgs_other_out']) ? number_format($item['kgs_other_out'], 2, '.', '') : 0); // pakai lain-lain
             $sheet->setCellValue('W' . $row, '-'); // retur stock
             $sheet->setCellValue('X' . $row, '-'); // retur titip
             $sheet->setCellValue('Y' . $row, '-'); // dipinjam
             $sheet->setCellValue('Z' . $row, '-'); // pindah order
             $sheet->setCellValue('AA' . $row, '-'); // pindah ke stock mati
-            $sheet->setCellValue('AB' . $row, isset($item['kgs_in_out']) ? number_format($item['kgs_in_out'], 2, '.', '') : 0); // stock akhir
+            $sheet->setCellValue('AB' . $row, isset($item['stock_akhir']) ? number_format($item['stock_akhir'], 2, '.', '') : 0); // stock akhir
 
             // Tagihan GBN dan Jatah Area perhitungan
-            $tagihanGbn = isset($item['kgs']) ? $item['kgs'] - ($item['kgs_kirim'] + $item['kgs_stock_awal']) : 0;
-            $jatahArea = isset($item['kgs']) ? $item['kgs'] - $item['kgs_out'] : 0;
+            $tagihanGbn = isset($item['kgs']) ? $item['kgs'] + $item['qty_poplus'] - ($item['datang_solid'] + $item['plus_datang_solid'] + $item['stock_awal']) : 0;
+            $jatahArea = isset($item['kgs']) ? $item['kgs'] + $item['qty_poplus'] - $item['pakai_area'] : 0;
 
             // Format Tagihan GBN dan Jatah Area
             $sheet->setCellValue('AC' . $row, number_format($tagihanGbn, 2, '.', '')); // tagihan gbn
@@ -11466,6 +11467,93 @@ class ExcelController extends BaseController
         header('Cache-Control: max-age=0');
 
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function exportDatangNylon()
+    {
+        $key = $this->request->getGet('key');
+        $tanggal_awal = $this->request->getGet('tanggal_awal');
+        $tanggal_akhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemasukanModel->getFilterDatangNylon($key, $tanggal_awal, $tanggal_akhir);
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Judul
+        $sheet->setCellValue('A1', 'Datang Nylon');
+        $sheet->mergeCells('A1:U1'); // Menggabungkan sel untuk judul
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Header
+        $header = ["No", "Foll Up", "No Model", "No Order", "Buyer", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "KG Pesan", "Tanggal Datang", "Kgs Datang", "Cones Datang", "LOT Datang", "No Surat Jalan", "LMD", "GW", "Harga", "Nama Cluster"];
+        $sheet->fromArray([$header], NULL, 'A3');
+
+        // Styling Header
+        $sheet->getStyle('A3:U3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:U3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:U3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        // Data
+        $row = 4;
+        foreach ($data as $index => $item) {
+            $sheet->fromArray([
+                [
+                    $index + 1,
+                    $item['foll_up'],
+                    $item['no_model'],
+                    $item['no_order'],
+                    $item['buyer'],
+                    $item['delivery_awal'],
+                    $item['delivery_akhir'],
+                    $item['unit'],
+                    $item['item_type'],
+                    $item['kode_warna'],
+                    $item['warna'],
+                    number_format($item['kgs_material'], 2),
+                    $item['tgl_masuk'],
+                    number_format($item['kgs_kirim'], 2),
+                    $item['cones_kirim'],
+                    $item['lot_kirim'],
+                    $item['no_surat_jalan'],
+                    $item['l_m_d'],
+                    number_format($item['gw_kirim'], 2),
+                    number_format($item['harga'], 2),
+                    $item['nama_cluster']
+                ]
+            ], NULL, 'A' . $row);
+            $row++;
+        }
+
+        // Atur border untuk seluruh tabel
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle('A3:U' . ($row - 1))->applyFromArray($styleArray);
+
+        // Set auto width untuk setiap kolom
+        foreach (range('A', 'U') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set isi tabel agar rata tengah
+        $sheet->getStyle('A4:U' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:U' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Report_Datang_Nylon_' . date('Y-m-d') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
         $writer->save('php://output');
         exit;
     }

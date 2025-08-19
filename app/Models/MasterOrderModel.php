@@ -196,115 +196,194 @@ class MasterOrderModel extends Model
             ->first();
     }
 
-    public function getFilterReportGlobal($noModel)
+    public function getFilterReportGlobal($noModel, $jenis = null)
     {
-        return $this->select("
-            master_order.no_model,
-            master_order.buyer,
-            material.item_type,
-            material.kode_warna,
-            material.color,
-            material.loss,
-            material.area,
-            -- SUM material.kgs
-            (
-                SELECT SUM(COALESCE(m.kgs, 0))
-                FROM material m
-                WHERE m.id_order = master_order.id_order
-                AND m.item_type = material.item_type
-                AND m.kode_warna = material.kode_warna
-            ) AS kgs,
+        $builder = $this->select("
+        master_order.no_model,
+        master_order.buyer,
+        material.item_type,
+        material.kode_warna,
+        material.color,
+        material.loss,
+        material.area,
 
-            -- stock awal (tanpa duplikasi)
-            (
-                SELECT SUM(COALESCE(s.kgs_stock_awal, 0))
-                FROM stock s
-                WHERE s.id_stock IN (
-                    SELECT DISTINCT s2.id_stock
-                    FROM stock s2
-                    JOIN pemasukan p ON p.id_stock = s2.id_stock
-                    JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
-                    JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
-                    WHERE sc.no_model = master_order.no_model
-                    AND sc.kode_warna = material.kode_warna
-                    AND sc.item_type = material.item_type
-                )
-            ) AS kgs_stock_awal,
+        -- total kgs material
+        (
+            SELECT SUM(COALESCE(m.kgs, 0))
+            FROM material m
+            WHERE m.id_order = master_order.id_order
+            AND m.item_type = material.item_type
+            AND m.kode_warna = material.kode_warna
+        ) AS kgs,
 
-            -- kgs in-out
-            (
-                SELECT SUM(DISTINCT COALESCE(s.kgs_in_out, 0))
-                FROM stock s
-                WHERE EXISTS (
-                    SELECT 1
-                    FROM pemasukan p
-                    LEFT JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
-                    LEFT JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
-                    WHERE p.id_stock = s.id_stock
-                    AND sc.no_model = master_order.no_model
-                    AND sc.kode_warna = material.kode_warna
-                    AND sc.item_type = material.item_type
-                )
-            ) AS kgs_in_out,
+        -- total po tambahan
+        (
+            SELECT 
+            SUM(COALESCE(pt.poplus_mc_kg, 0) + COALESCE(pt.plus_pck_kg, 0))
+            FROM po_tambahan pt
+            WHERE pt.id_material = material.id_material
+            AND pt.status = 'approved'
+        ) AS qty_poplus,
 
-            -- kgs kirim
-            (
-                SELECT SUM(COALESCE(oc.kgs_kirim, 0))
-                FROM out_celup oc
-                JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
-                WHERE sc.no_model = master_order.no_model
-                AND sc.kode_warna = material.kode_warna
-                AND sc.item_type = material.item_type
-            ) AS kgs_kirim,
-
-            -- kgs retur
-            (
-                SELECT SUM(COALESCE(r.kgs_retur, 0))
-                FROM retur r
-                JOIN out_celup oc ON oc.id_retur = r.id_retur
-                JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
-                WHERE sc.no_model = master_order.no_model
-                AND sc.kode_warna = material.kode_warna
-                AND sc.item_type = material.item_type
-            ) AS kgs_retur,
-
-            -- kgs out
-            (
-                SELECT SUM(COALESCE(p.kgs_out, 0))
-                FROM pengeluaran p
+        -- stock awal tanpa duplikasi
+        (
+            SELECT SUM(COALESCE(s.kgs_stock_awal, 0))
+            FROM stock s
+            WHERE s.id_stock IN (
+                SELECT DISTINCT s2.id_stock
+                FROM stock s2
+                JOIN pemasukan p ON p.id_stock = s2.id_stock
                 JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
                 JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
                 WHERE sc.no_model = master_order.no_model
                 AND sc.kode_warna = material.kode_warna
                 AND sc.item_type = material.item_type
-            ) AS kgs_out,
+            )
+        ) AS stock_awal,
 
-            -- lot out
-            (
-                SELECT COALESCE(p.lot_out, 0)
-                FROM pengeluaran p
-                JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
-                JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
-                WHERE sc.no_model = master_order.no_model
+        -- stock akhir
+        (
+            SELECT SUM(COALESCE(s.kgs_in_out, 0))
+            FROM stock s
+            WHERE EXISTS (
+                SELECT 1
+                FROM pemasukan p
+                LEFT JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
+                LEFT JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+                WHERE p.id_stock = s.id_stock
+                AND sc.no_model = master_order.no_model
                 AND sc.kode_warna = material.kode_warna
                 AND sc.item_type = material.item_type
-                LIMIT 1
-            ) AS lot_out, 
+            )
+        ) AS stock_akhir,
 
-            -- kgs other out
-            (
-                SELECT SUM(COALESCE(oo.kgs_other_out, 0))
-                FROM other_out oo
-                JOIN out_celup oc ON oc.id_out_celup = oo.id_out_celup
-                JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
-                WHERE sc.no_model = master_order.no_model
-                AND sc.kode_warna = material.kode_warna
-                AND sc.item_type = material.item_type
-            ) AS kgs_other_out,
+        -- datang solid
+        (
+            SELECT 
+            SUM(CASE WHEN COALESCE(sc.po_plus,0) = 0 THEN oc.kgs_kirim ELSE 0 END)
+            FROM pemasukan p
+            JOIN out_celup oc ON p.id_out_celup = oc.id_out_celup
+            JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+            WHERE sc.no_model = master_order.no_model
+            AND sc.kode_warna = material.kode_warna
+            AND sc.item_type = material.item_type
+        ) AS datang_solid,
 
-        ")
+        -- plus datang solid
+        (
+            SELECT 
+            SUM(CASE WHEN COALESCE(sc.po_plus,0) = 1 THEN oc.kgs_kirim ELSE 0 END)
+            FROM pemasukan p
+            JOIN out_celup oc ON p.id_out_celup = oc.id_out_celup
+            JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+            WHERE sc.no_model = master_order.no_model
+            AND sc.kode_warna = material.kode_warna
+            AND sc.item_type = material.item_type
+        ) AS plus_datang_solid,
+
+        -- ganti retur
+        (
+            SELECT SUM(COALESCE(oc.kgs_kirim, 0))
+            FROM other_bon ob
+            JOIN out_celup oc ON ob.id_other_bon = oc.id_other_bon
+            JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+            WHERE sc.no_model = master_order.no_model
+            AND sc.kode_warna = material.kode_warna
+            AND sc.item_type = material.item_type
+            AND ob.ganti_retur = 1
+        ) AS ganti_retur,
+
+        -- datang lurex
+        (
+            SELECT SUM(COALESCE(oc.kgs_kirim, 0))
+            FROM other_bon ob
+            JOIN out_celup oc ON ob.id_other_bon = oc.id_other_bon
+            JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+            WHERE sc.no_model = master_order.no_model
+            AND sc.kode_warna = material.kode_warna
+            AND sc.item_type = material.item_type
+            AND ob.ganti_retur <> 1
+            AND ob.no_surat_jalan LIKE '%LRX%'
+        ) AS datang_lurex,
+
+        -- plus datang lurex
+        (
+            SELECT SUM(COALESCE(oc.kgs_kirim, 0))
+            FROM other_bon ob
+            JOIN out_celup oc ON ob.id_other_bon = oc.id_other_bon
+            JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+            WHERE sc.no_model = master_order.no_model
+            AND sc.kode_warna = material.kode_warna
+            AND sc.item_type = material.item_type
+            AND sc.po_plus = 1
+            AND ob.no_surat_jalan LIKE '%LRX%'
+        ) AS plus_datang_lurex,
+
+        -- retur pb gudang benang
+        (
+            SELECT SUM(COALESCE(r.kgs_retur, 0))
+            FROM retur r
+            JOIN kategori_retur kr ON r.kategori = kr.nama_kategori
+            WHERE r.no_model = master_order.no_model
+            AND r.kode_warna = material.kode_warna
+            AND r.item_type = material.item_type
+            AND r.area_retur = 'GUDANG BENANG'
+        ) AS retur_pb_gbn,
+
+        -- retur pb area
+        (
+            SELECT SUM(COALESCE(r.kgs_retur, 0))
+            FROM retur r
+            JOIN kategori_retur kr ON r.kategori = kr.nama_kategori
+            WHERE r.no_model = master_order.no_model
+            AND r.kode_warna = material.kode_warna
+            AND r.item_type = material.item_type
+            AND r.area_retur <> 'GUDANG BENANG'
+        ) AS retur_pb_area,
+
+        -- pakai area 
+        (
+            SELECT SUM(COALESCE(p.kgs_out, 0))
+            FROM pengeluaran p
+            JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
+            JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+            WHERE sc.no_model = master_order.no_model
+            AND sc.kode_warna = material.kode_warna
+            AND sc.item_type = material.item_type
+        ) AS pakai_area,
+
+        -- lot out
+        (
+            SELECT COALESCE(p.lot_out, 0)
+            FROM pengeluaran p
+            JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
+            JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+            WHERE sc.no_model = master_order.no_model
+            AND sc.kode_warna = material.kode_warna
+            AND sc.item_type = material.item_type
+            LIMIT 1
+        ) AS lot_out, 
+
+        -- kgs other out
+        (
+            SELECT SUM(COALESCE(oo.kgs_other_out, 0))
+            FROM other_out oo
+            JOIN out_celup oc ON oc.id_out_celup = oo.id_out_celup
+            JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+            WHERE sc.no_model = master_order.no_model
+            AND sc.kode_warna = material.kode_warna
+            AND sc.item_type = material.item_type
+        ) AS kgs_other_out
+    ")
             ->join('material', 'material.id_order = master_order.id_order', 'left')
-            ->where('master_order.no_model', $noModel)
+            ->join('master_material', 'material.item_type = master_material.item_type', 'left')
+            ->where('master_order.no_model', $noModel);
+
+        if (!empty($jenis)) {
+            $builder->where('master_material.jenis', $jenis);
+        }
+
+        return $builder
             ->groupBy('master_order.no_model')
             ->groupBy('material.item_type')
             ->groupBy('material.kode_warna')

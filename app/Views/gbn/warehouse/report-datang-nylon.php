@@ -7,7 +7,7 @@
     <div class="card card-frame">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 font-weight-bolder">Filter Datang Benang</h5>
+                <h5 class="mb-0 font-weight-bolder">Filter Datang Nylon</h5>
             </div>
             <div class="row mt-2">
                 <div class="col-md-3">
@@ -102,7 +102,7 @@
     $(document).ready(function() {
         let dataTable = $('#dataTable').DataTable({
             "paging": true,
-            "searching": true,
+            "searching": false,
             "ordering": true,
             "info": true,
             "responsive": true,
@@ -127,7 +127,7 @@
 
 
             $.ajax({
-                url: "<?= base_url($role . '/warehouse/filterDatangBenang') ?>",
+                url: "<?= base_url($role . '/warehouse/filterDatangNylon') ?>",
                 type: "GET",
                 data: {
                     key: key,
@@ -236,7 +236,7 @@
             let key = $('input[type="text"]').val();
             let tanggal_awal = $('input[type="date"]').eq(0).val();
             let tanggal_akhir = $('input[type="date"]').eq(1).val();
-            window.location.href = "<?= base_url($role . '/warehouse/exportDatangBenang') ?>?key=" + key + "&tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
+            window.location.href = "<?= base_url($role . '/warehouse/exportDatangNylon') ?>?key=" + key + "&tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
         });
 
         dataTable.clear().draw();

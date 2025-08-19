@@ -198,6 +198,7 @@ class OpenPoModel extends Model
             ->getRowArray();
 
         $kgPo = (float) ($poRow['kg_po'] ?? 0);
+        $poPlus = (float) ($poRow['po_plus'] ?? '0');
 
         // 3) Return struktur yang sama
         if ($poRow['po_plus'] == 1) {

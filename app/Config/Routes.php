@@ -208,11 +208,13 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportGlobal', 'WarehouseController::reportGlobal');
     $routes->get('warehouse/filterReportGlobal', 'WarehouseController::filterReportGlobal');
     $routes->get('warehouse/exportGlobalReport', 'ExcelController::exportGlobalReport');
+    $routes->get('warehouse/reportGlobalNylon', 'WarehouseController::reportGlobalNylon');
+    $routes->get('warehouse/filterReportGlobalNylon', 'WarehouseController::filterReportGlobalNylon');
     $routes->get('warehouse/reportGlobalStockBenang', 'WarehouseController::reportGlobalStockBenang');
     $routes->get('warehouse/filterReportGlobalBenang', 'WarehouseController::filterReportGlobalBenang');
     $routes->get('warehouse/exportReportGlobalBenang', 'ExcelController::exportReportGlobalBenang');
     $routes->get('warehouse/reportSisaPakaiBenang', 'WarehouseController::reportSisaPakaiBenang');
-    $routes->get('warehouse/filterSisaPakaiBenang', 'WarehouseController::filterSisaPakaiBenang');
+    $routes->get('warehouse/filterSisaPakaiBenang', 'WarehouseController::filterSisaPakai');
     $routes->get('warehouse/exportReportSisaPakaiBenang', 'ExcelController::exportReportSisaPakaiBenang');
     $routes->get('warehouse/reportSisaPakaiNylon', 'WarehouseController::reportSisaPakaiNylon');
     $routes->get('warehouse/filterSisaPakaiNylon', 'WarehouseController::filterSisaPakaiNylon');
@@ -244,6 +246,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/listOtherBarcode', 'WarehouseController::listOtherBarcode');
     $routes->get('warehouse/detailOtherBarcode/(:any)', 'WarehouseController::detailOtherBarcode/$1');
     $routes->get('warehouse/generateOtherBarcode/(:any)', 'DomPdfController::generateOtherBarcode/$1');
+    $routes->get('warehouse/reportDatangNylon', 'WarehouseController::reportDatangNylon');
+    $routes->get('warehouse/filterDatangNylon', 'WarehouseController::filterDatangNylon');
+    $routes->get('warehouse/exportDatangNylon', 'ExcelController::exportDatangNylon');
 
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');
@@ -804,6 +809,16 @@ $routes->group(
         $routes->get('listExportRetur/(:any)', 'ApiController::listExportRetur/$1');
         $routes->get('getGWAktual', 'ApiController::getGWAktual');
         $routes->get('saveGWAktual', 'ApiController::saveGWAktual');
+
         $routes->get('filterDatangBenang', 'ApiController::filterDatangBenang');
+        $routes->get('filterPoBenang', 'ApiController::filterPoBenang');
+        $routes->get('filterPengiriman', 'ApiController::filterPengiriman');
+        $routes->get('filterReportGlobal', 'ApiController::filterReportGlobal');
+        $routes->get('filterReportGlobalBenang', 'ApiController::filterReportGlobalBenang');
+        $routes->get('filterReportGlobalNylon', 'ApiController::filterReportGlobalNylon');
+        $routes->get('filterSisaPakaiBenang', 'ApiController::filterSisaPakaiBenang');
+        $routes->get('filterSisaPakaiNylon', 'ApiController::filterSisaPakaiNylon');
+        $routes->get('filterSisaPakaiSpandex', 'ApiController::filterSisaPakaiSpandex');
+        $routes->get('filterSisaPakaiKaret', 'ApiController::filterSisaPakaiKaret');
     }
 );

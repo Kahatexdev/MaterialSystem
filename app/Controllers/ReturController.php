@@ -94,54 +94,151 @@ class ReturController extends BaseController
 
     public function approve()
     {
-        $id = $this->request->getPost('id_retur');
-        $approve = $this->request->getPost('catatan');
-        $text = 'Approve: ' . $approve;
-        $data = [
-            'keterangan_gbn' => $text,
-            'waktu_acc_retur' => date('Y-m-d H:i:s'),
-            'admin' => session()->get('username')
-        ];
-        $this->returModel->update($id, $data);
-        // log_message('info', 'Data update retur: ' . json_encode($data));
-        $dataRetur = $this->returModel->find($id);
-        $idCelup = $this->scheduleCelupModel->getIdCelups($dataRetur);
-        $barcodeNew = [
-            'id_retur'       => $dataRetur['id_retur'],
-            'id_celup'       => $idCelup,
-            'no_model'       => $dataRetur['no_model'],
-            'no_karung'     => (int)$dataRetur['krg_retur'] ?? 0,
-            'kgs_kirim'          => (float)$dataRetur['kgs_retur'],
-            'cones_kirim'      => (int)$dataRetur['cns_retur'],
-            'lot_kirim'      => $dataRetur['lot_retur'],
-            'admin'      => session()->get('username')
-        ];
+        $post = $this->request->getPost();
+        $data = $this->returModel->find($post['id_retur']);
 
-        // log_message('info', 'Data barcodeNew: ' . json_encode($barcodeNew));
-        // dd ($barcodeNew);
-        $this->outCelupModel->insert($barcodeNew);
+        $no_model   = $data['no_model'] ?? null;
+        $item_type  = $data['item_type'] ?? null;
+        $kode_warna = $data['kode_warna'] ?? null;
+        $warna      = $data['warna'] ?? null;
+        $area       = $data['area_retur'] ?? null;
+        $tgl_retur  = $data['tgl_retur'] ?? null;
+        $lot_retur  = $data['lot_retur'] ?? null;
+        $kategori   = $data['kategori'] ?? null;
+        $catatan    = $post['catatan'] ?? '';
 
-        // dd ($dataPemasukan);
-        // flashdata
-        session()->setFlashdata('success', 'Data berhasil di update.');
+        // ambil semua retur matching yang belum di-acc
+        $builder = $this->returModel->table('retur');
+        $builder->where('no_model', $no_model)
+            ->where('item_type', $item_type)
+            ->where('kode_warna', $kode_warna)
+            ->where('warna', $warna)
+            ->where('area_retur', $area)
+            ->where('tgl_retur', $tgl_retur)
+            ->where('lot_retur', $lot_retur)
+            ->where('kategori', $kategori)
+            ->where('waktu_acc_retur IS NULL', null, false);
+
+        $rows = $builder->get()->getResultArray();
+
+        if (empty($rows)) {
+            session()->setFlashdata('error', 'Tidak ada retur yang harus di-approve pada grup ini.');
+            return redirect()->back();
+        }
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        foreach ($rows as $r) {
+
+            try {
+                $idCelup = $this->scheduleCelupModel->getIdCelups($r);
+            } catch (\Throwable $e) {
+                log_message('error', 'getIdCelups error: ' . $e->getMessage());
+                $idCelup = null;
+            }
+
+            $outData = [
+                'id_retur'    => $r['id_retur'],
+                'id_celup'    => $idCelup ?? null,
+                'no_model'    => $r['no_model'],
+                'l_m_d'       => '',
+                'no_karung'   => $r['krg_retur'],
+                'kgs_kirim'   => (float)$r['kgs_retur'],
+                'cones_kirim' => (int)$r['cns_retur'],
+                'lot_kirim'   => $r['lot_retur'],
+                'admin'       => session()->get('username'),
+                'created_at'  => date('Y-m-d H:i:s')
+            ];
+
+            // insert ke out celup
+            $this->outCelupModel->insert($outData);
+
+            // update retur
+            $updateRetur = [
+                'keterangan_gbn' => 'Approve: ' . $catatan,
+                'waktu_acc_retur' => date('Y-m-d H:i:s'),
+                'admin'          => session()->get('username'),
+            ];
+            $this->returModel->update($r['id_retur'], $updateRetur);
+        }
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            log_message('error', 'Transaksi approve per-row gagal untuk grup: ' . json_encode([
+                'group' => [$no_model, $item_type, $kode_warna, $lot_retur, $area]
+            ]));
+            session()->setFlashdata('error', 'Gagal meng-approve retur (transaksi gagal).');
+            return redirect()->back();
+        }
+
+        session()->setFlashdata('success', 'Data berhasil di approve ' . count($rows));
         return redirect()->to(base_url(session()->get('role') . '/retur'));
     }
 
     public function reject()
     {
-        $id = $this->request->getPost('id_retur');
-        $reject = $this->request->getPost('catatan');
+        $post = $this->request->getPost();
+        $reject = $post['catatan'] ?? '';
         $text = 'Reject: ' . $reject;
-        $data = [
-            'keterangan_gbn' => $text,
-            'waktu_acc_retur' => date('Y-m-d H:i:s'),
-            'admin' => session()->get('username')
-        ];
-        $this->returModel->update($id, $data);
-        // flashdata
-        session()->setFlashdata('success', 'Data berhasil di update.');
+
+        // ambil baris referensi
+        $data = $this->returModel->find($post['id_retur']);
+
+        // ambil key grup dari baris referensi
+        $no_model   = $data['no_model'] ?? null;
+        $item_type  = $data['item_type'] ?? null;
+        $kode_warna = $data['kode_warna'] ?? null;
+        $warna      = $data['warna'] ?? null;
+        $area       = $data['area_retur'] ?? null;
+        $tgl_retur  = $data['tgl_retur'] ?? null;
+        $lot_retur  = $data['lot_retur'] ?? null;
+        $kategori   = $data['kategori'] ?? null;
+
+        // cari semua retur matching grup yang belum di-acc
+        $builder = $this->returModel->table('retur');
+        $builder->where('no_model', $no_model)
+            ->where('item_type', $item_type)
+            ->where('kode_warna', $kode_warna)
+            ->where('warna', $warna)
+            ->where('area_retur', $area)
+            ->where('tgl_retur', $tgl_retur)
+            ->where('lot_retur', $lot_retur)
+            ->where('kategori', $kategori)
+            ->where('waktu_acc_retur IS NULL', null, false);
+
+        $rows = $builder->get()->getResultArray();
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        foreach ($rows as $r) {
+            $updateRetur = [
+                'keterangan_gbn'  => $text,
+                'waktu_acc_retur' => date('Y-m-d H:i:s'),
+                'admin'           => session()->get('username'),
+            ];
+
+            $returBuilder = $db->table('retur');
+            $returBuilder->where('id_retur', $r['id_retur'])->update($updateRetur);
+        }
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            log_message('error', 'Transaksi reject gagal untuk grup: ' . json_encode([
+                'group' => [$no_model, $item_type, $kode_warna, $lot_retur, $area]
+            ]));
+            session()->setFlashdata('error', 'Gagal memproses reject (transaksi gagal).');
+            return redirect()->back();
+        }
+
+        session()->setFlashdata('success', 'Data Berhasil Di Reject');
         return redirect()->to(base_url(session()->get('role') . '/retur'));
     }
+
+
     public function returArea()
     {
         $data = $this->kategoriReturModel->getKategoriRetur();
