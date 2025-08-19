@@ -60,11 +60,31 @@ class ScheduleController extends BaseController
         $startDate = $this->request->getGet('start_date');
         $endDate = $this->request->getGet('end_date');
 
-        if ($startDate == null && $endDate == null) {
-            // Jika startdate tidak tersedia, gunakan tanggal 3 hari ke belakang
+        // if ($startDate == null && $endDate == null) {
+        //     // Jika startdate tidak tersedia, gunakan tanggal 3 hari ke belakang
+        //     $startDate = date('Y-m-d', strtotime('+5 days'));
+        //     // end date 7 hari ke depan
+        //     $endDate = date('Y-m-d', strtotime('+14 days'));
+        // }
+
+        if ($startDate && $endDate) {
+            // Kalau ada dari GET → simpan ke session
+            session()->set('start_date', $startDate);
+            session()->set('end_date', $endDate);
+        } else {
+            // Kalau tidak ada GET → coba ambil dari session
+            $startDate = session()->get('start_date');
+            $endDate   = session()->get('end_date');
+        }
+
+        // Kalau session juga kosong → baru pakai default
+        if (!$startDate || !$endDate) {
             $startDate = date('Y-m-d', strtotime('+5 days'));
-            // end date 7 hari ke depan
-            $endDate = date('Y-m-d', strtotime('+14 days'));
+            $endDate   = date('Y-m-d', strtotime('+14 days'));
+
+            // simpan default ke session
+            session()->set('start_date', $startDate);
+            session()->set('end_date', $endDate);
         }
 
         // Konversi tanggal ke format DateTime jika tersedia
