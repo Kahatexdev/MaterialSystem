@@ -583,9 +583,8 @@ class ScheduleController extends BaseController
             // $jenis = $this->masterMaterialModel->getJenisByitemType($itemType);
             // Ambil data order dan validasi
 
-            // $Order = $this->materialModel->getQtyPOByNoModel($noModel, $itemType, $kodeWarna);
-            $Order = $this->openPoModel->getQtyPOForCvr($noModel, $itemType, $kodeWarna);
-            // dd($Order);
+            $Order = $this->materialModel->getQtyPOByNoModel($noModel, $itemType, $kodeWarna);
+            $qtyPO = $this->openPoModel->getQtyPO($noModel, $kodeWarna, $warna, $itemType);
             $id_induk = $this->openPoModel->getIdInduk($noModel, $itemType, $kodeWarna);
             if ($id_induk) {
                 $id_po = $this->openPoModel->find($id_induk['id_induk']);
@@ -595,7 +594,7 @@ class ScheduleController extends BaseController
                     $itemTypeCovering  = $id_po['item_type'];
                     // dd ($kodeWarnaCovering, $warnaCovering, $itemTypeCovering); 
                     $deliv = $this->openPoModel->getFilteredPO($kodeWarnaCovering, $warnaCovering, $itemTypeCovering);
-                    // $Order = $this->openPoModel->getQtyPOForCvr($noModel, $itemType, $kodeWarna);
+                    $qtyPO = $this->openPoModel->getQtyPOForCvr($noModel, $itemType, $kodeWarna);
                     // $Order['delivery_awal'] = $deliv[0]['delivery_awal'];
                     // $Order['delivery_akhir'] = $deliv[0]['delivery_akhir'];
                 } else {
@@ -608,8 +607,9 @@ class ScheduleController extends BaseController
             $kg_kebutuhan = $this->openPoModel->getKgKebutuhan($noModel, $itemType, $kodeWarna);
             // $row['delivery_awal'] = $Order['delivery_awal'] ?? null;
             // $row['delivery_akhir'] = $Order['delivery_akhir'] ?? null;
-            $row['qty_po'] = $Order['qty_po'] ?? 0;
-            // dd($row);
+            $row['qty_po'] = $qtyPO['kg_po'] ?? 0;
+            $row['qty_po_plus'] = $qtyPO['qty_po_plus'] ?? 0;
+
             // Pastikan 'kg_po' ada di $kg_kebutuhan
             $kg_po = isset($kg_kebutuhan['kg_po']) ? (float) $kg_kebutuhan['kg_po'] : 0;
             $row['kg_kebutuhan'] = $kg_po;
@@ -617,6 +617,8 @@ class ScheduleController extends BaseController
             $row['sisa_jatah'] = $tagihan['sisa_kg_po'] ?? 0;
         }
         unset($row);
+        $historySch = $this->scheduleCelupModel->getHistorySch($id_mesin, $tanggal_schedule, $lot_urut);
+        // dd($historySch);
         // dd($scheduleData);
         // Persiapkan data untuk view
         $data = [
@@ -635,6 +637,7 @@ class ScheduleController extends BaseController
             'kode_warna' => $kodeWarna,
             'warna' => $warna,
             'jmlLot' => $jmlLot,
+            'history' => $historySch
         ];
 
         return view($this->role . '/schedule/form-edit', $data);
@@ -1112,7 +1115,30 @@ class ScheduleController extends BaseController
                 ];
             }
         }
-        // dd($uniqueData);
+        // fetching delivery
+        $listPdk = $this->masterOrderModel->getNullDeliv() ?? null;
+        if ($listPdk) {
+            $client = \Config\Services::curlrequest([
+                'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
+                'timeout' => 5
+            ]);
+
+            // 3) Loop dan merge API result
+            foreach ($listPdk as &$row) {
+                try {
+                    $res = $client->get('getDeliveryAwalAkhir', [
+                        'query' => ['model' => $row['no_model']]
+                    ]);
+                    $body = json_decode($res->getBody(), true);
+                    $this->masterOrderModel->updateDeliv($row['no_model'], $body);
+                    continue;
+                } catch (\Exception $e) {
+                    continue;
+                }
+            }
+        }
+
+
         $data = [
             'active' => $this->active,
             'title' => 'Schedule',
