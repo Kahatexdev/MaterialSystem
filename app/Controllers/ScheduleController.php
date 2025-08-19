@@ -617,6 +617,8 @@ class ScheduleController extends BaseController
             $row['sisa_jatah'] = $tagihan['sisa_kg_po'] ?? 0;
         }
         unset($row);
+        $historySch = $this->scheduleCelupModel->getHistorySch($id_mesin, $tanggal_schedule, $lot_urut);
+        // dd($historySch);
         // dd($scheduleData);
         // Persiapkan data untuk view
         $data = [
@@ -635,6 +637,7 @@ class ScheduleController extends BaseController
             'kode_warna' => $kodeWarna,
             'warna' => $warna,
             'jmlLot' => $jmlLot,
+            'history' => $historySch
         ];
 
         return view($this->role . '/schedule/form-edit', $data);
