@@ -26,8 +26,8 @@
         background-color: var(--card-background);
         border-radius: 15px;
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        padding: 2rem;
-        margin-bottom: 2rem;
+        /* padding: 0.1rem; */
+        margin-bottom: 1rem;
     }
 
     /* .form-control {
@@ -81,6 +81,17 @@
         border-radius: 20px;
         font-size: 0.9rem;
     }
+
+    .custom-dropdown-wide {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr);
+        gap: .2rem .2rem;
+        min-width: 400px !important;
+    }
+
+    .custom-dropdown-wide .dropdown-item {
+        box-sizing: border-box;
+    }
 </style>
 <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
     <!-- Navbar -->
@@ -93,34 +104,59 @@
                 <div class="d-flex align-items-center">
                     <ul class="navbar-nav justify-content-end">
                         <li class="nav-item d-flex align-items-center">
-                            <a href="<?= base_url($role . '/pemasukan') ?>" class="nav-link text-body font-weight-bold px-2" title="Pemasukan" data-bs-toggle="tooltip" data-bs-placement="bottom">
-                                <i class="fas fa-arrow-down"></i>
-                                <span class="d-lg-inline-block d-none ms-1">Pemasukan</span>
-                            </a>
-                        </li>
-                        <li class="nav-item d-flex align-items-center">
-                            <a href="<?= base_url($role . '/pengeluaran') ?>" class="nav-link text-body font-weight-bold px-2" title="Pengeluaran" data-bs-toggle="tooltip" data-bs-placement="bottom">
-                                <i class="fas fa-arrow-up"></i>
-                                <span class="d-lg-inline-block d-none ms-1">Pengeluaran</span>
+                            <a href="<?= base_url($role . '/warehouse/listOtherBarcode') ?>" class="nav-link text-body font-weight-bold px-2">
+                                <i class="fas fa-barcode"></i>
+                                <span class="d-lg-inline-block d-none ms-1">Other Barcode</span>
                             </a>
                         </li>
                         <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-file-alt"></i>
-                                <span class="d-lg-inline-block d-none ms-1">Report</span>
+                                <i class="fas fa-arrow-down"></i>
+                                <span class="d-lg-inline-block d-none ms-1">Pemasukan</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownMenuLink">
-                                <li><a href="<?= base_url($role . '/warehouse/reportPoBenang') ?>" class="dropdown-item" href="#">PO Benang</a></li>
-                                <li><a href="<?= base_url($role . '/warehouse/reportDatangBenang') ?>" class="dropdown-item" href="#">Datang Benang</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/pemasukan') ?>">Pemasukan</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/otherIn') ?>">Pemasukan Lain-lain</a></li>
+                            </ul>
+                            <!-- <a href="" class="nav-link text-body font-weight-bold px-2" title="Pemasukan" data-bs-toggle="tooltip" data-bs-placement="bottom">
+                                <i class="fas fa-arrow-down"></i>
+                                <span class="d-lg-inline-block d-none ms-1">Pemasukan</span>
+                            </a> -->
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-arrow-up"></i>
+                                <span class="d-lg-inline-block d-none ms-1">Pengeluaran</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownMenuLink">
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/pengiriman_area') ?>">Pengiriman Area</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-file-alt"></i>
+                                <span class="d-lg-inline-block d-none ms-1">Reports</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4 custom-dropdown-wide" aria-labelledby="navbarDropdownMenuLink">
+                                <li><a href="<?= base_url($role . '/warehouse/reportPoBenang') ?>" class="dropdown-item">PO Benang</a></li>
+                                <li><a href="<?= base_url($role . '/warehouse/reportDatangBenang') ?>" class="dropdown-item">Datang Benang</a></li>
+                                <li><a href="<?= base_url($role . '/warehouse/reportDatangNylon') ?>" class="dropdown-item">Datang Nylon</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportPengiriman') ?>">Report Pengiriman</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobal') ?>">Report Global All BB</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobal') ?>">Report Global Nylon</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobalNylon') ?>">Report Global Nylon</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobalStockBenang') ?>">Report Global Benang</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaPakaiBenang') ?>">Report Sisa Pakai Benang</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaPakaiNylon') ?>">Report Sisa Pakai Nylon</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaPakaiSpandex') ?>">Report Sisa Pakai Spandex</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaPakaiKaret') ?>">Report Sisa Pakai Karet</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/otherIn/listBarcode') ?>">List Barcode</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/historyPindahOrder') ?>">Report History Pindah Order</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaDatangBenang') ?>">Report Sisa Datang Benang</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaDatangNylon') ?>">Report Sisa Datang Nylon</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaDatangSpandex') ?>">Report Sisa Datang Spandex</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaDatangKaret') ?>">Report Sisa Datang Karet</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportBenangMingguan') ?>">Report Benang Mingguan</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportBenangBulanan') ?>">Report Benang Bulanan</a></li>
                             </ul>
                         </li>
                         <li class="nav-item d-flex align-items-center">

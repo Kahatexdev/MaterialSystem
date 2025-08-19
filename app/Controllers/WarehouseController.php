@@ -3195,4 +3195,113 @@ class WarehouseController extends BaseController
 
         return $this->response->setJSON($data);
     }
+
+    public function detailDatangBenang($idOutCelup)
+    {
+        $detailDatangBenang = $this->pemasukanModel->getDetailDatangBenang($idOutCelup);
+        // dd($detailDatangBenang);
+        if (empty($detailDatangBenang)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Data tidak ditemukan.'
+            ]);
+        }
+
+        return $this->response->setJSON($detailDatangBenang);
+    }
+
+    public function updateDatangBenang()
+    {
+        $data = $this->request->getPost();
+        // log_message('info', 'Update Datang Benang: ' . json_encode($data));
+
+        if (empty($data['id_out_celup'])) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Data tidak lengkap.'
+            ]);
+        }
+
+        // Cek apakah id_out_celup ada
+        $idCek = $this->outCelupModel
+            ->where('id_out_celup', $data['id_out_celup'])
+            ->first();
+
+        if (!$idCek) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Data out celup tidak ditemukan.'
+            ]);
+        }
+
+        // Kalau sudah ada keterkaitan dengan other_bon
+        if (!empty($idCek['id_other_bon'])) {
+            $idPemasukan = $this->pemasukanModel
+                ->where('id_out_celup', $data['id_out_celup'])
+                ->first();
+
+            if (!$idPemasukan) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Data pemasukan tidak ditemukan.'
+                ]);
+            }
+
+            $idStock = $this->stockModel
+                ->where('id_stock', $idPemasukan['id_stock'])
+                ->first();
+
+            if (!$idStock) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Data stock tidak ditemukan.'
+                ]);
+            }
+
+            // Hitung ulang kgs & cones
+            if ($data['kgs_kirim'] != $idStock['kgs_in_out']) {
+                $kgsInout   = ($idStock['kgs_in_out'] - $idCek['kgs_kirim']) + $data['kgs_kirim'];
+                $conesInout = ($idStock['cns_in_out'] - $idCek['cones_kirim']) + $data['cones_kirim'];
+            } else {
+                $kgsInout   = $data['kgs_kirim'];
+                $conesInout = $data['cones_kirim'];
+            }
+
+            $lotInout = $data['lot_kirim'];
+
+            // Data untuk update out_celup
+            $dataOut = [
+                'no_model'   => $data['no_model'],
+                'kgs_kirim'  => $data['kgs_kirim'],
+                'cones_kirim' => $data['cones_kirim'],
+                'lot_kirim'  => $lotInout,
+                'harga'      => $data['harga'],
+                'gw_kirim'   => $data['gw_kirim']
+            ];
+
+            // Data untuk update stock
+            $stock = [
+                'no_model'     => $data['no_model'],
+                'item_type'    => $data['item_type'],
+                'kode_warna'   => $data['kode_warna'],
+                'warna'        => $data['warna'],
+                'kgs_in_out'   => $kgsInout,
+                'cns_in_out' => $conesInout,
+                'lot_stock'    => $lotInout
+            ];
+
+            $this->outCelupModel->update($data['id_out_celup'], $dataOut);
+            $this->stockModel->update($idStock['id_stock'], $stock);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Data tidak dapat dirubah karena tidak valid.'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Data berhasil diperbarui.'
+        ]);
+    }
 }

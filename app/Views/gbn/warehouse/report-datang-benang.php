@@ -2,6 +2,113 @@
 <?php $this->section('content'); ?>
 
 <div class="container-fluid py-4">
+    <style>
+        /* Overlay transparan */
+        #loadingOverlay {
+            display: none;
+            position: fixed;
+            z-index: 99999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.35);
+        }
+
+        .loader-wrap {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-card {
+            background: rgba(0, 0, 0, 0.75);
+            padding: 20px 30px;
+            border-radius: 12px;
+            text-align: center;
+            width: 260px;
+            /* kecilkan modal */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .loader-text {
+            margin-top: 8px;
+            color: #fff;
+            font-weight: 500;
+            font-size: 12px;
+        }
+
+
+        #loadingOverlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 10px;
+            position: relative;
+        }
+
+        .loader:after {
+            content: "";
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 6px solid #fff;
+            border-color: #fff transparent #fff transparent;
+            animation: loader-dual-ring 1.2s linear infinite;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes loader-dual-ring {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+
+        @keyframes shine {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        .progress {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .progress-bar {
+            transition: width .3s ease;
+        }
+    </style>
+
+    <!-- overlay -->
+    <div id="loadingOverlay">
+        <div class="loader-wrap">
+            <div class="loading-card">
+                <div class="loader" role="status" aria-hidden="true"></div>
+                <div class="loader-text">Memuat data...</div>
+
+                <!-- Progress bar -->
+                <div class="progress mt-3" style="height: 6px; border-radius: 6px;">
+                    <div id="progressBar"
+                        class="progress-bar progress-bar-striped progress-bar-animated bg-info"
+                        role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    </div>
+                </div>
+                <small id="progressText" class="text-white mt-1 d-block">0%</small>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Button Filter -->
     <div class="card card-frame">
@@ -60,8 +167,6 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">GW</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Harga</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Nama Cluster</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Update</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,42 +178,44 @@
     </div>
 </div>
 
-<!-- modal update keterangan bon -->
-<div class="modal fade" id="modalUpdate" tabindex="-1" aria-labelledby="modalUpdateLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalUpdateLabel">Update Keterangan Datang</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="modalIdBon">
-                <input type="hidden" id="modalIdOther">
 
-                <div class="mb-3">
-                    <label for="keteranganDatang" class="form-label">Keterangan Datang</label>
-                    <textarea class="form-control" id="keteranganDatang" rows="4" placeholder="Tulis keterangan datang..."></textarea>
-                </div>
-
-                <div class="d-flex justify-content-end">
-                    <button type="button" class="btn btn-primary" id="btnSubmitKeterangan">Simpan</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <script>
     $(document).ready(function() {
         let dataTable = $('#dataTable').DataTable({
             "paging": true,
-            "searching": true,
+            "searching": false,
             "ordering": true,
             "info": true,
             "responsive": true,
-            "processing": true,
+            "processing": false, // <- ubah jadi false
             "serverSide": false
         });
+
+        function showLoading() {
+            $('#loadingOverlay').addClass('active');
+            $('#btnSearch').prop('disabled', true);
+            // show DataTables processing indicator if available
+            try {
+                dataTable.processing(true);
+            } catch (e) {}
+        }
+
+        function hideLoading() {
+            $('#loadingOverlay').removeClass('active');
+            $('#btnSearch').prop('disabled', false);
+            try {
+                dataTable.processing(false);
+            } catch (e) {}
+        }
+
+        function updateProgress(percent) {
+            $('#progressBar')
+                .css('width', percent + '%')
+                .attr('aria-valuenow', percent);
+            $('#progressText').text(percent + '%');
+        }
+
 
         function loadData() {
             let key = $('input[type="text"]').val().trim();
@@ -125,7 +232,6 @@
                 return;
             }
 
-
             $.ajax({
                 url: "<?= base_url($role . '/warehouse/filterDatangBenang') ?>",
                 type: "GET",
@@ -135,98 +241,77 @@
                     tanggal_akhir: tanggal_akhir
                 },
                 dataType: "json",
-                success: function(response) {
-                    console.log(response);
-                    dataTable.clear().draw();
+                beforeSend: function() {
+                    showLoading();
+                    updateProgress(0);
+                },
+                xhr: function() {
+                    let xhr = new window.XMLHttpRequest();
 
-                    if (response.length > 0) {
+                    // progress download data dari server
+                    xhr.addEventListener("progress", function(evt) {
+                        if (evt.lengthComputable) {
+                            let percentComplete = Math.round((evt.loaded / evt.total) * 100);
+                            updateProgress(percentComplete);
+                        }
+                    }, false);
+
+                    return xhr;
+                },
+                success: function(response) {
+                    dataTable.clear();
+
+                    if (Array.isArray(response) && response.length > 0) {
+                        let rows = [];
                         $.each(response, function(index, item) {
-                            dataTable.row.add([
+                            rows.push([
                                 index + 1,
-                                item.foll_up,
-                                item.no_model,
-                                item.no_order,
-                                item.buyer,
-                                item.delivery_awal,
-                                item.delivery_akhir,
-                                item.unit,
-                                item.item_type,
-                                item.kode_warna,
-                                item.warna,
-                                parseFloat(item.kgs_material ?? 0).toFixed(2),
-                                item.tgl_masuk,
-                                parseFloat(item.kgs_kirim ?? 0).toFixed(2),
-                                item.cones_kirim,
-                                item.lot_kirim,
-                                item.no_surat_jalan,
-                                item.l_m_d,
-                                item.gw_kirim,
-                                item.harga,
-                                item.nama_cluster,
-                                item.keterangan,
-                                `<button class="btn btn-warning btn-update" 
-                                    data-id_bon="${item.id_bon || ''}" 
-                                    data-id_other="${item.id_other_bon || ''}" 
-                                    title="Update">
-                                    <i class="fa fa-edit"></i>
-                                </button>`
-                            ]).draw(false);
+                                item.foll_up || '',
+                                item.no_model || '',
+                                item.no_order || '',
+                                item.buyer || '',
+                                item.delivery_awal || '',
+                                item.delivery_akhir || '',
+                                item.unit || '',
+                                item.item_type || '',
+                                item.kode_warna || '',
+                                item.warna || '',
+                                (item.kg_po ? parseFloat(item.kg_po).toFixed(2) : ''),
+                                item.tgl_masuk || '',
+                                (item.kgs_kirim ? parseFloat(item.kgs_kirim).toFixed(2) : ''),
+                                item.cones_kirim || '',
+                                item.lot_kirim || '',
+                                item.no_surat_jalan || '',
+                                item.l_m_d || '',
+                                (item.gw_kirim ? parseFloat(item.gw_kirim).toFixed(2) : ''),
+                                item.harga || '',
+                                item.nama_cluster || '',
+                            ]);
                         });
 
-                        $('#btnExport').removeClass('d-none'); // Munculkan tombol Export Excel
+                        dataTable.rows.add(rows).draw(false);
+                        $('#btnExport').removeClass('d-none');
                     } else {
-                        let colCount = $('#dataTable thead th').length;
-                        $('#dataTable tbody').html(`
-                            <tr>
-                                <td colspan="${colCount}" class="text-center text-danger font-weight-bold">
-                                    ⚠ Tidak ada data ditemukan
-                                </td>
-                            </tr>
-                        `);
-
-                        $('#btnExport').addClass('d-none'); // Sembunyikan jika tidak ada data
+                        // kosongkan tabel jika tidak ada data
+                        dataTable.rows().remove().draw(false);
+                        $('#btnExport').addClass('d-none');
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error("Error:", error);
+                    // bisa tampilkan notifikasi kalau perlu
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Terjadi kesalahan',
+                        text: 'Gagal mendapatkan data. Coba lagi.',
+                    });
+                },
+                complete: function() {
+                    updateProgress(100); // pastikan full
+                    setTimeout(() => hideLoading(), 400); // kasih jeda biar animasi progress keliatan
                 }
             });
         }
-        $('#dataTable').on('click', '.btn-update', function() {
-            const idBon = $(this).data('id_bon');
-            const idOther = $(this).data('id_other');
-
-            console.log('INI' + idBon);
-
-            // Masukkan ke input hidden
-            $('#modalIdBon').val(idBon);
-            $('#modalIdOther').val(idOther);
-
-            // Kosongkan sementara textarea
-            $('#keteranganDatang').val('');
-
-            // AJAX untuk ambil keterangan sebelumnya
-            $.ajax({
-                url: '<?= base_url($role . "/warehouse/getKeteranganDatang") ?>',
-                type: 'GET',
-                data: {
-                    id_bon: idBon,
-                    id_other_bon: idOther
-                },
-                dataType: 'json',
-                success: function(response) {
-                    $('#keteranganDatang').val(response.keterangan ?? '');
-                    $('#modalUpdate').modal('show');
-                },
-                error: function() {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal!',
-                        text: 'Gagal mengambil data keterangan.'
-                    });
-                }
-            });
-        });
 
         $('#btnSearch').click(function() {
             loadData();
@@ -236,57 +321,25 @@
             let key = $('input[type="text"]').val();
             let tanggal_awal = $('input[type="date"]').eq(0).val();
             let tanggal_akhir = $('input[type="date"]').eq(1).val();
-            window.location.href = "<?= base_url($role . '/warehouse/exportDatangBenang') ?>?key=" + key + "&tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
+            window.location.href = "<?= base_url($role . '/warehouse/exportDatangBenang') ?>?key=" + encodeURIComponent(key) + "&tanggal_awal=" + encodeURIComponent(tanggal_awal) + "&tanggal_akhir=" + encodeURIComponent(tanggal_akhir);
         });
 
+        // inisialisasi kosong
         dataTable.clear().draw();
     });
 
-    // Fitur Reset
+    // Fitur Reset (tetap di luar document.ready atau pindahkan ke dalam jika mau)
     $('#btnReset').click(function() {
         // Kosongkan input
         $('input[type="text"]').val('');
         $('input[type="date"]').val('');
 
         // Kosongkan tabel hasil pencarian
-        $('#dataTable tbody').html('');
+        $('#dataTable').DataTable().clear().draw();
 
         // Sembunyikan tombol Export Excel
         $('#btnExport').addClass('d-none');
     });
-    $('#btnSubmitKeterangan').on('click', function() {
-        const idBon = $('#modalIdBon').val();
-        const idOther = $('#modalIdOther').val();
-        const keterangan = $('#keteranganDatang').val();
-
-        $.ajax({
-            url: '<?= base_url($role . "/warehouse/updateKeteranganDatang") ?>',
-            type: 'POST',
-            data: {
-                id_bon: idBon,
-                id_other_bon: idOther,
-                keterangan: keterangan
-            },
-            success: function(res) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: 'Keterangan berhasil diperbarui.'
-                });
-
-                $('#modalUpdate').modal('hide');
-                loadData(); // Reload tabel
-            },
-            error: function(xhr) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal!',
-                    text: 'Terjadi kesalahan saat menyimpan.'
-                });
-            }
-        });
-    });
 </script>
-
 
 <?php $this->endSection(); ?>

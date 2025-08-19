@@ -148,15 +148,15 @@ class CelupController extends BaseController
             $nomodel = $id['no_model'];
             $itemtype = $id['item_type'];
             $kodewarna = $id['kode_warna'];
-
+            $warna = $id['warna'];
             // Debug untuk memastikan parameter tidak null
             if (empty($nomodel) || empty($itemtype) || empty($kodewarna)) {
                 log_message('error', "Parameter null: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
                 continue; // Skip data jika ada parameter kosong
             }
-
+            // dd($sch);
             // Panggil fungsi model untuk mendapatkan qty_po dan warna
-            $pdk = $this->materialModel->getQtyPOForCelup($nomodel, $itemtype, $kodewarna);
+            $pdk = $this->openPoModel->getQtyPO($nomodel,  $kodewarna, $warna, $itemtype);
             // dd ($pdk);
             if (!$pdk) {
                 $id_induk = $this->openPoModel->getIdInduk($nomodel, $itemtype, $kodewarna);
@@ -194,8 +194,8 @@ class CelupController extends BaseController
                     'start_mc' => $id['start_mc'],
                     'del_awal' => $pdk['delivery_awal'] ?? null,
                     'del_akhir' => $pdk['delivery_akhir'] ?? null,
-                    'qty_po' => $pdk['qty_po'] ?? null,
-                    'qty_po_plus' => 0,
+                    'qty_po' => $pdk['kg_po'] ?? null,
+                    'qty_po_plus' =>  $pdk['qty_po_plus'] ?? null,
                     'qty_celup' => $id['qty_celup'],
                     'no_mesin' => $id['no_mesin'],
                     'id_celup' => $id['id_celup'],
