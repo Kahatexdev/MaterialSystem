@@ -554,12 +554,12 @@ class PemesananController extends BaseController
 
             if (is_array($resultJenis)) {
                 // misalnya return ['jenis' => 'spandex']
-                $jenis = strtolower($resultJenis['jenis'] ?? '');
+                $jenis = strtolower($resultJenis[$index]['jenis'] ?? '');
             } else {
                 // kalau return string langsung
                 $jenis = strtolower((string) $resultJenis);
             }
-
+            
 
             // Data update untuk pengeluaran
             $data = [
