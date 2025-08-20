@@ -181,7 +181,7 @@ class ApiController extends ResourceController
                         $row['kode_warna'],
                         $search
                     );
-
+                    // dd($allCoverings);
                 if (! empty($allCoverings)) {
                     foreach ($allCoverings as $coverData) {
                         $newRow = $row;

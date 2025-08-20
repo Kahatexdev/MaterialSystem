@@ -68,18 +68,17 @@ class TrackingPoCovering extends Model
                 tracking_po_covering.status,
                 tracking_po_covering.keterangan,
                 tracking_po_covering.admin,
-                anak.no_model AS no_model_anak,
-                anak.item_type,
-                anak.kode_warna,
-                anak.color,
-                anak.kg_po,
-                anak.created_at
+                induk.no_model AS no_model_anak,
+                induk.item_type,
+                induk.kode_warna,
+                induk.color,
+                induk.kg_po,
+                induk.created_at
             ')
-            ->join('open_po AS induk', 'tracking_po_covering.id_po_gbn = induk.id_po')
-            ->join('open_po AS anak', 'anak.id_induk = induk.id_po')
-            ->where('DATE(anak.created_at)', $date)
-            ->where('anak.penerima', 'Retno')
-            ->where('anak.penanggung_jawab', 'Paryanti')
+            ->join('open_po AS induk', 'tracking_po_covering.id_po_gbn = induk.id_induk')
+            ->where('DATE(induk.created_at)', $date)
+            ->where('induk.penerima', 'Retno')
+            ->where('induk.penanggung_jawab', 'Paryanti')
             ->get()
             ->getResultArray();
     }
@@ -87,8 +86,8 @@ class TrackingPoCovering extends Model
     public function statusBahanBaku($model, $itemType, $kodeWarna, $search = null)
     {
         $builder = $this->select([
-            'open_po.item_type',
-            'open_po.kode_warna',
+            'induk.item_type',
+            'induk.kode_warna',
             'tracking_po_covering.id_po_gbn',
             'tracking_po_covering.status',
             'tracking_po_covering.keterangan',
@@ -96,19 +95,44 @@ class TrackingPoCovering extends Model
             'tracking_po_covering.created_at',
             'tracking_po_covering.updated_at'
         ])
-            ->join('open_po', 'open_po.id_po = tracking_po_covering.id_po_gbn', 'left')
-            ->like('open_po.no_model',   $model)
-            ->where('open_po.item_type',  $itemType)
-            ->where('open_po.kode_warna', $kodeWarna);
+            ->join('open_po AS induk', 'tracking_po_covering.id_po_gbn = induk.id_po', 'left')
+            ->join('open_po', 'open_po.id_induk = tracking_po_covering.id_po_gbn', 'left')
+            ->like('induk.no_model',   $model)
+            ->where('induk.item_type',  $itemType)
+            ->where('induk.kode_warna', $kodeWarna);
 
         if (!empty($search)) {
             $builder->groupStart()
-                ->like('open_po.no_model', $search)
-                ->orLike('open_po.item_type', $search)
-                ->orLike('open_po.kode_warna', $search)
+                ->like('induk.no_model', $search)
+                ->orLike('induk.item_type', $search)
+                ->orLike('induk.kode_warna', $search)
                 ->groupEnd();
         }
-
+        // dd($builder->getCompiledSelect());
         return $builder->findAll();
+    }
+
+    public function dailyUpdateTrackingPO()
+    {
+        return $this->db->table('tracking_po_covering')
+            ->select('
+                tracking_po_covering.id_tpc,
+                tracking_po_covering.status,
+                tracking_po_covering.keterangan,
+                tracking_po_covering.admin,
+                induk.no_model AS no_model_anak,
+                induk.item_type,
+                induk.kode_warna,
+                induk.color,
+                induk.kg_po,
+                induk.created_at
+            ')
+            ->join('open_po AS induk', 'tracking_po_covering.id_po_gbn = induk.id_induk')
+            ->where('induk.created_at >=', date('Y-m-01', strtotime('-1 month')))
+            ->where('induk.created_at <', date('Y-m-01', strtotime('+2 month')))
+            ->where('induk.penerima', 'Retno')
+            ->where('induk.penanggung_jawab', 'Paryanti')
+            ->get()
+            ->getResultArray();
     }
 }
