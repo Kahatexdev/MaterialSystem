@@ -25,6 +25,8 @@ class PoTambahanModel extends Model
         'plus_pck_kg',
         'plus_pck_cns',
         'lebih_pakai_kg',
+        'delivery_po_plus',
+        'tanggal_approve',
         'keterangan',
         'ket_gbn',
         'status',
