@@ -530,12 +530,11 @@ class PemesananController extends BaseController
 
     public function updateStatusKirim()
     {
-        // Ambil dan validasi input
         $post      = $this->request->getPost();
         $ids       = array_filter(array_map('intval', $post['id_pengeluaran'] ?? []));
-        $kgsList   = $post['kgs_out']   ?? [];
-        $cnsList   = $post['cns_out']   ?? [];
-        $lotList   = $post['lot_out']   ?? [];
+        $kgsList   = $post['kgs_out'] ?? [];
+        $cnsList   = $post['cns_out'] ?? [];
+        $lotList   = $post['lot_out'] ?? [];
 
         if (empty($ids)) {
             return redirect()->back()->with('error', 'Tidak ada pengeluaran valid.');
@@ -549,17 +548,20 @@ class PemesananController extends BaseController
             if (!$record) {
                 continue;
             }
-            $stok = $this->stockModel->find($record['id_stock']);
 
-            // Jika diperlukan, abaikan atau perlakukan khusus untuk jenis tertentu
-            $jenis = $this->pemesananModel
-                ->getJenisPemesananbyIdTtlPesan($record['id_total_pemesanan']);
-            // Contoh: skip update untuk spandex/karet
-            // if (in_array(strtolower($jenis), ['spandex', 'karet'])) {
-            //     continue;
-            // }
+            $resultJenis = $this->pemesananModel->getJenisPemesananbyIdTtlPesan($record['id_total_pemesanan']);
+            $jenis = '';
 
-            // Persiapkan data update
+            if (is_array($resultJenis)) {
+                // misalnya return ['jenis' => 'spandex']
+                $jenis = strtolower($resultJenis[$index]['jenis'] ?? '');
+            } else {
+                // kalau return string langsung
+                $jenis = strtolower((string) $resultJenis);
+            }
+            
+
+            // Data update untuk pengeluaran
             $data = [
                 'status' => 'Pengiriman Area',
                 'admin'  => $sessionUser,
@@ -567,31 +569,54 @@ class PemesananController extends BaseController
 
             if (isset($kgsList[$index]) && $kgsList[$index] !== '') {
                 $data['kgs_out'] = (float) $kgsList[$index];
-                $kgsStokNew = ($stok['kgs_in_out'] + $record['kgs_out']) - $kgsList[$index];
             }
             if (isset($cnsList[$index]) && $cnsList[$index] !== '') {
                 $data['cns_out'] = (int) $cnsList[$index];
-                $cnsStokNew = ($stok['cns_in_out'] + $record['cns_out']) - $cnsList[$index];
             }
             if (isset($lotList[$index]) && $lotList[$index] !== '') {
                 $data['lot_out'] = $lotList[$index];
             }
+
+            // Update pengeluaran
             if ($this->pengeluaranModel->update($id, $data)) {
-                $this->stockModel->update($record['id_stock'], ['kgs_in_out' => $kgsStokNew, 'cns_in_out' => $cnsStokNew]);
+
+                // Kalau jenis BUKAN spandex/karet → update stock
+                if (!in_array($jenis, ['spandex', 'karet'])) {
+                    $stok = $this->stockModel->find($record['id_stock']);
+                    if ($stok) {
+                        $kgsStokNew = $stok['kgs_in_out'];
+                        $cnsStokNew = $stok['cns_in_out'];
+
+                        if (isset($kgsList[$index]) && $kgsList[$index] !== '') {
+                            $kgsStokNew = ($stok['kgs_in_out'] + $record['kgs_out']) - $kgsList[$index];
+                        }
+                        if (isset($cnsList[$index]) && $cnsList[$index] !== '') {
+                            $cnsStokNew = ($stok['cns_in_out'] + $record['cns_out']) - $cnsList[$index];
+                        }
+
+                        $this->stockModel->update($record['id_stock'], [
+                            'kgs_in_out' => $kgsStokNew,
+                            'cns_in_out' => $cnsStokNew,
+                        ]);
+                    }
+                }
+
                 $updatedCount++;
             }
         }
 
-        // Bersihkan session dan set flashdata
         session()->remove('manual_delivery');
-        if ($updatedCount > 0) {
-            session()->setFlashdata('success', "{$updatedCount} status berhasil diperbarui");
-        } else {
-            session()->setFlashdata('error', 'Gagal memperbarui status atau data out tidak ada');
-        }
+        session()->setFlashdata(
+            $updatedCount > 0 ? 'success' : 'error',
+            $updatedCount > 0
+                ? "{$updatedCount} status berhasil diperbarui"
+                : 'Gagal memperbarui status atau data out tidak ada'
+        );
 
         return redirect()->to(base_url("{$this->role}/pengiriman_area_manual"));
     }
+
+
 
 
 
