@@ -960,6 +960,23 @@ class MaterialModel extends Model
             ->groupBy('item_type, kode_warna, warna')
             ->getCompiledSelect(false);
 
+        $subPoPlus = $db->table('po_tambahan')
+            ->select('
+                po_tambahan.id_material, 
+                SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, 
+                po_tambahan.tanggal_approve, 
+                DATE(po_tambahan.created_at) AS tgl_po_plus_area, 
+                po_tambahan.delivery_po_plus,
+                material.item_type,
+                material.kode_warna,
+                material.color
+            ')
+            ->join('material', 'material.id_material = po_tambahan.id_material', 'left')
+            ->where('po_tambahan.tanggal_approve IS NOT NULL')
+            ->where('po_tambahan.status', 'approved')
+            ->groupBy('po_tambahan.tanggal_approve, material.item_type, material.kode_warna, material.color')
+            ->getCompiledSelect(false);
+        // dd($subPoPlus);
         // 4) Query utama
         $builder = $db->table('material')
             ->select("
@@ -982,7 +999,11 @@ class MaterialModel extends Model
             material.created_at AS tgl_input,
             material.admin,
             COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock,
-            COALESCE(lotSub.lot_stock, '-') AS lot_stock
+            COALESCE(lotSub.lot_stock, '-') AS lot_stock,
+            COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus,
+            plusSub.tgl_po_plus_area,
+            plusSub.delivery_po_plus,
+            plusSub.tanggal_approve
         ")
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
@@ -998,6 +1019,14 @@ class MaterialModel extends Model
                 'lotSub.item_type = material.item_type 
              AND lotSub.kode_warna = material.kode_warna 
              AND lotSub.warna = material.color',
+                'left'
+            )
+            ->join(
+                "({$subPoPlus}) AS plusSub",
+                'plusSub.id_material = material.id_material',
+                'plusSub.item_type = material.item_type',
+                'plusSub.kode_warna = material.kode_warna',
+                'plusSub.color = material.color',
                 'left'
             )
             ->where('master_material.jenis', 'BENANG');

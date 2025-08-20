@@ -78,7 +78,7 @@
     $(document).ready(function() {
         let dataTable = $('#dataTable').DataTable({
             "paging": true,
-            "searching": false,
+            "searching": true,
             "ordering": true,
             "info": true,
             "responsive": true,
@@ -133,10 +133,10 @@
                                 item.lot_stock || '',
                                 parseFloat(item.kg_po).toFixed(2) || '',
                                 item.loss + '%' || '',
-                                item.tgl_terima_po_plus || '',
+                                item.tanggal_approve || '',
                                 item.tgl_po_plus_area || '',
                                 item.delivery_po_plus || '',
-                                item.kg_po_plus || '',
+                                parseFloat(item.kg_po_plus || 0).toFixed(2) || '',
                                 item.admin || '',
                             ]).draw(false);
                         });
