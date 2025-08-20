@@ -540,12 +540,8 @@ class PemesananController extends BaseController
             return redirect()->back()->with('error', 'Tidak ada pengeluaran valid.');
         }
 
-        $db          = \Config\Database::connect();
-        $sessionUser = session('username');
+        $sessionUser  = session('username');
         $updatedCount = 0;
-
-        // Mulai transaksi
-        $db->transStart();
 
         foreach ($ids as $index => $id) {
             $record = $this->pengeluaranModel->find($id);
@@ -553,9 +549,17 @@ class PemesananController extends BaseController
                 continue;
             }
 
-            // Ambil jenis (default kosong kalau null)
-            $jenis = strtolower((string) $this->pemesananModel
-                ->getJenisPemesananbyIdTtlPesan($record['id_total_pemesanan']));
+            $resultJenis = $this->pemesananModel->getJenisPemesananbyIdTtlPesan($record['id_total_pemesanan']);
+            $jenis = '';
+
+            if (is_array($resultJenis)) {
+                // misalnya return ['jenis' => 'spandex']
+                $jenis = strtolower($resultJenis[$index]['jenis'] ?? '');
+            } else {
+                // kalau return string langsung
+                $jenis = strtolower((string) $resultJenis);
+            }
+            
 
             // Data update untuk pengeluaran
             $data = [
@@ -601,24 +605,17 @@ class PemesananController extends BaseController
             }
         }
 
-        // Selesaikan transaksi
-        $db->transComplete();
-
-        // Jika ada error di salah satu query → rollback otomatis
-        if ($db->transStatus() === false) {
-            session()->setFlashdata('error', 'Terjadi kesalahan saat memperbarui data, semua perubahan dibatalkan.');
-        } else {
-            session()->setFlashdata(
-                $updatedCount > 0 ? 'success' : 'error',
-                $updatedCount > 0
-                    ? "{$updatedCount} status berhasil diperbarui"
-                    : 'Gagal memperbarui status atau data out tidak ada'
-            );
-        }
-
         session()->remove('manual_delivery');
+        session()->setFlashdata(
+            $updatedCount > 0 ? 'success' : 'error',
+            $updatedCount > 0
+                ? "{$updatedCount} status berhasil diperbarui"
+                : 'Gagal memperbarui status atau data out tidak ada'
+        );
+
         return redirect()->to(base_url("{$this->role}/pengiriman_area_manual"));
     }
+
 
 
 
