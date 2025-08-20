@@ -1686,8 +1686,8 @@ class WarehouseController extends BaseController
     {
         $key = $this->request->getGet('key');
 
-        $data = $this->openPoModel->getFilterPoBenang($key);
-
+        $data = $this->materialModel->getFilterPoBenang($key);
+        // dd($data);
         return $this->response->setJSON($data);
     }
 
@@ -2425,7 +2425,7 @@ class WarehouseController extends BaseController
         $db = \Config\Database::connect();
         $db->transBegin();  // Mulai transaksi
         // dd($data);
-        if(empty($data['id_order'])){
+        if (empty($data['id_order'])) {
             // prepare create new master order
             $dataOrder = [
                 'no_model' => $data['no_model'],
@@ -2435,7 +2435,7 @@ class WarehouseController extends BaseController
                 'lco_date' => '00/00/0000',
                 'admin' => session()->get('username')
             ];
-            
+
             // Insert new master order
             $saveOrder = $this->masterOrderModel->insert($dataOrder);
             $idOrder = $this->masterOrderModel->insertID();

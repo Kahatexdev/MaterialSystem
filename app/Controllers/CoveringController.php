@@ -699,7 +699,7 @@ class CoveringController extends BaseController
     public function saveOpenPOCovering()
     {
         $data = $this->request->getPost();
-
+        // dd($data);
         if (isset($data['detail']) && is_array($data['detail'])) {
             foreach ($data['detail'] as $row) {
                 $this->openPoModel->save([
@@ -712,6 +712,7 @@ class CoveringController extends BaseController
                     'bentuk_celup'    => $data['bentuk_celup'] ?? null,
                     'jenis_produksi'  => $data['jenis_produksi'] ?? null,
                     'ket_celup'       => $data['ket_celup'] ?? null,
+                    'po_plus'         => $data['po_plus'] ?? null,
                     'penerima'        => 'Retno',
                     'penanggung_jawab' => 'Paryanti',
                     'admin'           => session()->get('username') ?? '',
