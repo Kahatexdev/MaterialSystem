@@ -895,4 +895,130 @@ class MaterialModel extends Model
             ->orderBy('m.item_type, m.kode_warna', 'ASC')
             ->get()->getResultArray();
     }
+
+    // public function getFilterPoBenang($key)
+    // {
+    //     $this->select('master_order.no_model, master_order.foll_up, master_order.lco_date, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.memo, master_order.unit, master_material.jenis, material.area, material.item_type, material.kode_warna, material.color, SUM(material.kgs) AS kg_po, material.created_at AS tgl_input, material.admin, SUM(COALESCE(stock.kgs_stock_awal,0) + COALESCE(stock.kgs_in_out,0)) AS kgs_stock, GROUP_CONCAT(DISTINCT COALESCE(stock.lot_stock, stock.lot_awal) SEPARATOR ', ') AS lot_stock')
+    //         ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+    //         ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+    //         ->join('stock', 'stock.item_type = material.item_type AND stock.kode_warna = material.kode_warna AND stock.warna = material.color', 'left')
+    //         ->where('master_material.jenis', 'BENANG')
+    //         ->groupBy('material.item_type, material.kode_warna, material.color');
+
+    //     // Cek apakah ada input key untuk pencarian
+    //     if (!empty($key)) {
+    //         $this->groupStart()
+    //             ->like('master_order.no_model', $key)
+    //             ->orLike('material.item_type', $key)
+    //             ->orLike('material.kode_warna', $key)
+    //             ->orLike('material.color', $key)
+    //             ->groupEnd();
+    //     }
+
+    //     return $this->findAll();
+    // }
+    public function getFilterPoBenang($key = null)
+    {
+        $db = \Config\Database::connect();
+
+        // 1) Subquery KGS (aggregate sekali per kombinasi)
+        $stockKgs = $db->table('stock')
+            ->select("
+            item_type,
+            kode_warna,
+            warna,
+            SUM(COALESCE(kgs_stock_awal,0) + COALESCE(kgs_in_out,0)) AS kgs_stock
+        ")
+            ->groupBy('item_type, kode_warna, warna')
+            ->getCompiledSelect(false);
+
+        // 2) Subqueries untuk LOT dengan filter yang lebih ketat
+        $subLot1 = $db->table('stock')
+            ->select("item_type, kode_warna, warna, lot_stock AS lot")
+            ->where('lot_stock IS NOT NULL')
+            ->where('lot_stock !=', '')
+            ->where('TRIM(lot_stock) !=', '')
+            ->getCompiledSelect(false);
+
+        $subLot2 = $db->table('stock')
+            ->select("item_type, kode_warna, warna, lot_awal AS lot")
+            ->where('lot_awal IS NOT NULL')
+            ->where('lot_awal !=', '')
+            ->where('TRIM(lot_awal) !=', '')
+            ->getCompiledSelect(false);
+
+        // 3) Gabungkan dengan UNION ALL dan aggregate
+        $unionLots = "({$subLot1} UNION ALL {$subLot2})";
+
+        $stockLots = $db->table("({$unionLots}) AS u_lots")
+            ->select("
+            item_type,
+            kode_warna,
+            warna,
+            GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR ', ') AS lot_stock
+        ")
+            ->groupBy('item_type, kode_warna, warna')
+            ->getCompiledSelect(false);
+
+        // 4) Query utama
+        $builder = $db->table('material')
+            ->select("
+            master_order.no_model,
+            master_order.foll_up,
+            master_order.lco_date,
+            master_order.no_order,
+            master_order.buyer,
+            master_order.delivery_awal,
+            master_order.delivery_akhir,
+            master_order.memo,
+            master_order.unit,
+            master_material.jenis,
+            material.area,
+            material.item_type,
+            material.kode_warna,
+            material.color,
+            material.loss,
+            SUM(material.kgs) AS kg_po,
+            material.created_at AS tgl_input,
+            material.admin,
+            COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock,
+            COALESCE(lotSub.lot_stock, '-') AS lot_stock
+        ")
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->join(
+                "({$stockKgs}) AS stockKgs",
+                'stockKgs.item_type = material.item_type 
+             AND stockKgs.kode_warna = material.kode_warna 
+             AND stockKgs.warna = material.color',
+                'left'
+            )
+            ->join(
+                "({$stockLots}) AS lotSub",
+                'lotSub.item_type = material.item_type 
+             AND lotSub.kode_warna = material.kode_warna 
+             AND lotSub.warna = material.color',
+                'left'
+            )
+            ->where('master_material.jenis', 'BENANG');
+
+        // Filter pencarian
+        if (!empty($key)) {
+            $builder->groupStart()
+                ->like('master_order.no_model', $key)
+                ->orLike('material.item_type', $key)
+                ->orLike('material.kode_warna', $key)
+                ->orLike('material.color', $key)
+                ->groupEnd();
+        }
+
+        // Group by yang lebih lengkap
+        $builder->groupBy([
+            'material.item_type',
+            'material.kode_warna',
+            'material.color'
+        ]);
+
+        return $builder->get()->getResultArray();
+    }
 }
