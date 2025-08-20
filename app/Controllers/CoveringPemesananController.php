@@ -417,6 +417,13 @@ class CoveringPemesananController extends BaseController
             'admin'  => $admin,
         ]);
 
+        // update trackingpocovering
+        $this->trackingPoCoveringModel->update($id_psk, [
+            'status' => 'Pengeluaran Jalur',
+            'admin'  => $admin,
+        ]);
+
+
         return redirect()->back()->with('success', 'Status pemesanan berhasil diperbarui.');
     }
 }

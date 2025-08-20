@@ -1,4 +1,8 @@
-<?php $this->extend($role . '/schedule/header'); ?>
+<?php
+
+use PhpParser\Node\Stmt\Echo_;
+
+$this->extend($role . '/schedule/header'); ?>
 <?php $this->section('content'); ?>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
@@ -264,6 +268,9 @@
 
 
 <script>
+    const startDate = "<?= $filter['start_date'] ?>"
+    const endDate = "<?= $filter['end_date'] ?>"
+
     function toggleFullscreen() {
         const card = document.getElementById('myCard');
         card.classList.toggle('fullscreen');
@@ -463,13 +470,13 @@
 
         // Fungsi untuk redirect ke halaman tambah jadwal
         function redirectToAddSchedule(machine, date, lotUrut) {
-            const url = `<?= base_url($role . '/schedule/form') ?>?no_mesin=${machine}&tanggal_schedule=${date}&lot_urut=${lotUrut}`;
+            const url = `<?= base_url($role . '/schedule/form') ?>?no_mesin=${machine}&tanggal_schedule=${date}&lot_urut=${lotUrut}&start_date=${startDate}&end_date=${endDate}`;
             window.location.href = url;
         }
 
         // Fungsi untuk redirect ke halaman edit jadwal
         function redirectToEditSchedule(machine, date, lotUrut) {
-            const url = `<?= base_url($role . '/schedule/editSchedule') ?>?no_mesin=${machine}&tanggal_schedule=${date}&lot_urut=${lotUrut}`;
+            const url = `<?= base_url($role . '/schedule/editSchedule') ?>?no_mesin=${machine}&tanggal_schedule=${date}&lot_urut=${lotUrut}&start_date=${startDate}&end_date=${endDate}`;
             window.location.href = url;
         }
 

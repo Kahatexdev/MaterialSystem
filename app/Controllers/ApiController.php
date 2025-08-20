@@ -90,8 +90,12 @@ class ApiController extends ResourceController
     // v3
     public function statusbahanbaku($noModel)
     {
-        $search = $this->request->getGet('search');
+        $search = $this->request->getGet('search') ?? null;
         $rows   = $this->materialModel->MaterialPDK($noModel);
+        if (empty($rows)) {
+            log_message('error', "MaterialPDK kosong untuk model: $noModel");
+            return $this->respond([], 200);
+        }
         // $rows   = $this->openPoModel->MaterialPDK($noModel);
         $res    = [];
 
@@ -125,6 +129,7 @@ class ApiController extends ResourceController
             'created_at',
             'updated_at',
             'kg_stock',
+            'total_po_tambahan'
         ];
         log_message('debug', 'Isi $rows: ' . json_encode($rows));
 
@@ -157,7 +162,7 @@ class ApiController extends ResourceController
                         }
 
                         $res[] = $newRow;
-                        dd($allSchedules);
+                        // dd($allSchedules);  
                     }
                 } else {
                     // Kalau gak ada schedule, tetap munculkan 1 baris dengan qty_po
@@ -176,7 +181,7 @@ class ApiController extends ResourceController
                         $row['kode_warna'],
                         $search
                     );
-
+                    // dd($allCoverings);
                 if (! empty($allCoverings)) {
                     foreach ($allCoverings as $coverData) {
                         $newRow = $row;
@@ -1398,7 +1403,7 @@ class ApiController extends ResourceController
         return $this->response->setJSON($data);
     }
 
-    public function filterSisaPakaiBenang()
+    public function filterSisaPakai()
     {
         $delivery = $this->request->getGet('delivery');
         $noModel = $this->request->getGet('no_model');
@@ -1419,82 +1424,95 @@ class ApiController extends ResourceController
             'Desember' => 12
         ];
         $bulan = $bulanMap[$delivery] ?? null;
-        $data = $this->stockModel->getFilterSisaPakaiBenang($jenis, $bulan, $noModel, $kodeWarna);
+        $data = $this->materialModel->getFilterSisaPakai($jenis, $bulan, $noModel, $kodeWarna);
 
         return $this->response->setJSON($data);
     }
 
-    public function filterSisaPakaiNylon()
+    public function historyPindahOrder()
+    {
+        $noModel   = $this->request->getGet('model')     ?? '';
+        $kodeWarna = $this->request->getGet('kode_warna') ?? '';
+
+        // 1) Ambil data
+        $dataPindah = $this->historyStock->getHistoryPindahOrder($noModel, $kodeWarna);
+
+        // 4) Response
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON($dataPindah);
+        }
+    }
+
+    public function reportSisaDatangBenang()
     {
         $delivery = $this->request->getGet('delivery');
         $noModel = $this->request->getGet('no_model');
         $kodeWarna = $this->request->getGet('kode_warna');
-        $bulanMap = [
-            'Januari' => 1,
-            'Februari' => 2,
-            'Maret' => 3,
-            'April' => 4,
-            'Mei' => 5,
-            'Juni' => 6,
-            'Juli' => 7,
-            'Agustus' => 8,
-            'September' => 9,
-            'Oktober' => 10,
-            'November' => 11,
-            'Desember' => 12
-        ];
-        $bulan = $bulanMap[$delivery] ?? null;
-        $data = $this->stockModel->getFilterSisaPakaiNylon($bulan, $noModel, $kodeWarna);
 
+        $getFilterData = $this->materialModel->getFilterSisaDatangBenang($delivery, $noModel, $kodeWarna);
+        // dd($getFilterData);
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($getFilterData);
+    }
+
+    public function reportSisaDatangNylon()
+    {
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+
+        $getFilterData = $this->materialModel->getFilterSisaDatangNylon($delivery, $noModel, $kodeWarna);
+
+        // set header JSON dan langsung echo data
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($getFilterData);
+    }
+
+    public function reportSisaDatangSpandex()
+    {
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+
+        $getFilterData = $this->materialModel->getFilterSisaDatangSpandex($delivery, $noModel, $kodeWarna);
+
+        // set header JSON dan langsung echo data
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($getFilterData);
+    }
+
+    public function reportSisaDatangKaret()
+    {
+        $delivery = $this->request->getGet('delivery');
+        $noModel = $this->request->getGet('no_model');
+        $kodeWarna = $this->request->getGet('kode_warna');
+
+        $getFilterData = $this->materialModel->getFilterSisaDatangKaret($delivery, $noModel, $kodeWarna);
+
+        // set header JSON dan langsung echo data
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON($getFilterData);
+    }
+
+    public function filterBenangMingguan()
+    {
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemasukanModel->getFilterBenang($tanggalAwal, $tanggalAkhir);
         return $this->response->setJSON($data);
     }
 
-    public function filterSisaPakaiSpandex()
+    public function filterBenangBulanan()
     {
-        $delivery = $this->request->getGet('delivery');
-        $noModel = $this->request->getGet('no_model');
-        $kodeWarna = $this->request->getGet('kode_warna');
-        $bulanMap = [
-            'Januari' => 1,
-            'Februari' => 2,
-            'Maret' => 3,
-            'April' => 4,
-            'Mei' => 5,
-            'Juni' => 6,
-            'Juli' => 7,
-            'Agustus' => 8,
-            'September' => 9,
-            'Oktober' => 10,
-            'November' => 11,
-            'Desember' => 12
-        ];
-        $bulan = $bulanMap[$delivery] ?? null;
-        $data = $this->stockModel->getFilterSisaPakaiSpandex($bulan, $noModel, $kodeWarna);
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
-        return $this->response->setJSON($data);
-    }
-
-    public function filterSisaPakaiKaret()
-    {
-        $delivery = $this->request->getGet('delivery');
-        $noModel = $this->request->getGet('no_model');
-        $kodeWarna = $this->request->getGet('kode_warna');
-        $bulanMap = [
-            'Januari' => 1,
-            'Februari' => 2,
-            'Maret' => 3,
-            'April' => 4,
-            'Mei' => 5,
-            'Juni' => 6,
-            'Juli' => 7,
-            'Agustus' => 8,
-            'September' => 9,
-            'Oktober' => 10,
-            'November' => 11,
-            'Desember' => 12
-        ];
-        $bulan = $bulanMap[$delivery] ?? null;
-        $data = $this->stockModel->getFilterSisaPakaiKaret($bulan, $noModel, $kodeWarna);
+        $data = $this->pemasukanModel->getFilterBenang($tanggalAwal, $tanggalAkhir);
 
         return $this->response->setJSON($data);
     }

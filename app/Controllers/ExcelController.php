@@ -2250,9 +2250,9 @@ class ExcelController extends BaseController
             $sheet->setCellValue('A2', 'PAKAI ' . $tglPakai);
 
             // Merge sel untuk teks di A1 dan A2
-            $sheet->mergeCells('A1:J1');
-            $sheet->mergeCells('A2:J2');
-            $sheet->getStyle('A1:J2')->applyFromArray($subHeaderStyle);
+            $sheet->mergeCells('A1:L1');
+            $sheet->mergeCells('A2:L2');
+            $sheet->getStyle('A1:L2')->applyFromArray($subHeaderStyle);
 
 
             // Set header
@@ -2265,26 +2265,28 @@ class ExcelController extends BaseController
                 'No Karung',
                 'Kgs',
                 'Cns',
+                'Krg',
                 'Lot',
                 'Nama Cluster',
+                'Keterangan',
             ];
             $sheet->fromArray($header, null, 'A3');
 
 
-            $sheet->getStyle('A3:J3')->applyFromArray($headerStyle);
+            $sheet->getStyle('A3:L3')->applyFromArray($headerStyle);
 
             // Tambahkan data
             $rowNumber = 4;
             foreach ($rows as $row) {
                 // Hapus kolom yang tidak ingin dimasukkan
-                unset($row['tgl_pakai'], $row['group'], $row['jenis']);
+                unset($row['tgl_pakai'], $row['jenis'], $row['id_pengeluaran'], $row['id_stock'], $row['id_out_celup'], $row['group'],);
 
                 $sheet->fromArray(array_values($row), null, "A$rowNumber");
                 $rowNumber++;
             }
             // Tambahkan border ke semua data
             $dataEndRow = $rowNumber - 1;
-            $sheet->getStyle("A3:J$dataEndRow")->applyFromArray([
+            $sheet->getStyle("A3:L$dataEndRow")->applyFromArray([
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -2293,7 +2295,7 @@ class ExcelController extends BaseController
             ]);
 
             // Atur lebar kolom otomatis
-            foreach (range('A', 'K') as $column) {
+            foreach (range('A', 'L') as $column) {
                 $sheet->getColumnDimension($column)->setAutoSize(true);
             }
         }
@@ -3800,11 +3802,12 @@ class ExcelController extends BaseController
         exit;
     }
 
-    public function exportReportSisaPakaiBenang()
+    public function exportReportSisaPakai()
     {
         $delivery = $this->request->getGet('delivery');
         $noModel = $this->request->getGet('no_model');
         $kodeWarna = $this->request->getGet('kode_warna');
+        $jenis = $this->request->getGet('jenis');
         $bulanMap = [
             'Januari' => 1,
             'Februari' => 2,
@@ -3820,14 +3823,16 @@ class ExcelController extends BaseController
             'Desember' => 12
         ];
         $bulan = $bulanMap[$delivery] ?? null;
-        $data = $this->stockModel->getFilterSisaPakaiBenang($bulan, $noModel, $kodeWarna);
+        // $data = $this->stockModel->getFilterSisaPakaiBenang($bulan, $noModel, $kodeWarna);
+        $data = $this->materialModel->getFilterSisaPakai($jenis, $bulan, $noModel, $kodeWarna);
+
         // dd($data);
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
         $sheet->mergeCells('A1:Z1');
-        $sheet->setCellValue('A1', 'REPORT SISA PAKAI BENANG');
+        $sheet->setCellValue('A1', 'REPORT SISA PAKAI ' . $jenis);
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
         $sheet->getStyle('A1')->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -3924,7 +3929,7 @@ class ExcelController extends BaseController
             $sheet->setCellValue('K' . $row, $item['unit']);
             $sheet->setCellValue('L' . $row, $item['item_type']);
             $sheet->setCellValue('M' . $row, $item['kode_warna']);
-            $sheet->setCellValue('N' . $row, $item['warna']);
+            $sheet->setCellValue('N' . $row, $item['color']);
             $sheet->setCellValue('O' . $row, $item['kgs_stock_awal']);
             $sheet->setCellValue('P' . $row, $item['lot_awal']);
             $sheet->setCellValue('Q' . $row, $item['kg_po']);
@@ -3966,7 +3971,7 @@ class ExcelController extends BaseController
         }
 
         // Download
-        $filename = 'Report Sisa Pakai Benang' . '.xlsx';
+        $filename = 'Report Sisa Pakai ' . $jenis . '.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"$filename\"");
         header('Cache-Control: max-age=0');

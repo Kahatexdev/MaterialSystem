@@ -23,6 +23,7 @@ class TrackingPoCoveringController extends BaseController
     public function listTrackingPo()
     {
         $trackingData = $this->trackingPoCoveringModel->trackingData();
+        // dd($trackingData);
 
         $data = [
             'title' => 'Tracking PO Covering',

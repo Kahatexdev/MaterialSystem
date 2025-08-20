@@ -87,7 +87,7 @@
                 </div>
                 <div class="card-body">
                     <form class="row g-3">
-                        <div class="col-md-10">
+                        <div class="col-md-8">
                             <label for="filter_model" class="form-label">No Model</label>
                             <input type="text" id="filter_model" name="filter_model" class="form-control">
                         </div>
@@ -96,6 +96,12 @@
                                 <i class="fas fa-filter"></i>
                                 Filter
                             </button>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tglPakai) ?>"
+                                class="btn bg-gradient-success w-100" target="_blank">
+                                <i class="fas fa-file-excel"></i> Export
+                            </a>
                         </div>
                     </form>
                     <div class="table-responsive mt-4">

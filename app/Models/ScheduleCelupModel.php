@@ -553,6 +553,15 @@ class ScheduleCelupModel extends Model
             ->groupBy(['no_model', 'item_type', 'kode_warna'])
             ->getCompiledSelect();
 
+        // Subquery: Hitung po_tambahan per model/type/warna
+        // Subquery: po_tambahan
+        $poTambahanSub = $db->table('po_tambahan') // hilangkan alias pt di sini
+            ->select('mo.no_model, m.item_type, m.kode_warna, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS total_po_tambahan')
+            ->join('material m', 'm.id_material = po_tambahan.id_material')
+            ->join('master_order mo', 'mo.id_order = m.id_order')
+            ->groupBy(['mo.no_model', 'm.item_type', 'm.kode_warna'])
+            ->getCompiledSelect();
+
         // Main query builder
         $builder = $db->table('schedule_celup AS sc')
             ->select([
@@ -581,9 +590,11 @@ class ScheduleCelupModel extends Model
                 'sc.ket_daily_cek',
                 'sc.po_plus',
                 'COALESCE(st.kg_stock, 0) AS kg_stock',
+                'COALESCE(pt.total_po_tambahan, 0) AS total_po_tambahan',
                 'mm.jenis'
             ])
             ->join("($stockSub) AS st", 'st.no_model = sc.no_model AND st.item_type = sc.item_type AND st.kode_warna = sc.kode_warna', 'left')
+            ->join("($poTambahanSub) AS pt", 'pt.no_model = sc.no_model AND pt.item_type = sc.item_type AND pt.kode_warna = sc.kode_warna', 'left')
             ->join('master_material AS mm', 'mm.item_type = sc.item_type', 'left')
             ->where('sc.no_model', $model)
             ->where('sc.item_type', $itemType)
@@ -602,7 +613,14 @@ class ScheduleCelupModel extends Model
         // Grouping agar tidak terjadi duplikasi id_celup
         $builder->groupBy('sc.id_celup');
 
-        return $builder->get()->getResultArray();
+        $query = $builder->get();
+
+        if (!$query) {
+            log_message('error', 'schedulePerArea query error: ' . $db->getLastQuery());
+            return [];
+        }
+
+        return $query->getResultArray();
     }
 
     public function getDataComplain()

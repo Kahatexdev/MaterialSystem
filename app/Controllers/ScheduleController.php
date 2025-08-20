@@ -146,11 +146,12 @@ class ScheduleController extends BaseController
         $lot_urut = $this->request->getGet('lot_urut');
         $no_model = $this->request->getGet('no_model');
 
+
         // $jenis_bahan_baku = $this->masterMaterialModel->getJenisBahanBaku();
         $item_type = $this->masterMaterialModel->getItemType();
         $min = $this->mesinCelupModel->getMinCaps($no_mesin);
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
-        $po = $this->openPoModel->getNomorModel();
+        // $po = $this->openPoModel->getNomorModel();
         // dd($jenis_bahan_baku, $item_type);
         // Jika data tidak ditemukan, kembalikan ke halaman sebelumnya
         if (!$no_mesin || !$tanggal_schedule || !$lot_urut) {
@@ -168,7 +169,9 @@ class ScheduleController extends BaseController
             'item_type' => $item_type,
             'min_caps' => $min['min_caps'],
             'max_caps' => $max['max_caps'],
-            'po' => $po,
+            'po' => '',
+            'start_date' => $this->request->getGet('start_date'),
+            'end_date' =>  $this->request->getGet('end_date')
         ];
         // dd($data);
 
@@ -186,7 +189,7 @@ class ScheduleController extends BaseController
         $item_type = $this->masterMaterialModel->getItemType();
         $min = $this->mesinCelupModel->getMinCaps($no_mesin);
         $max = $this->mesinCelupModel->getMaxCaps($no_mesin);
-        $po = $this->openPoModel->getNomorModel();
+
         // dd($jenis_bahan_baku, $item_type);
         // Jika data tidak ditemukan, kembalikan ke halaman sebelumnya
         if (!$no_mesin || !$tanggal_schedule || !$lot_urut) {
@@ -204,7 +207,9 @@ class ScheduleController extends BaseController
             'item_type' => $item_type,
             'min_caps' => $min['min_caps'],
             'max_caps' => $max['max_caps'],
-            'po' => $po,
+
+            'start_date' => $this->request->getGet('start_date'),
+            'end_date' =>  $this->request->getGet('end_date')
         ];
         // dd($data);
 
@@ -528,10 +533,11 @@ class ScheduleController extends BaseController
         ];
         $ket   = strtoupper($mesin['ket_mesin']);
         $view  = $mapping[$ket] ?? 'index';
-
+        $start_date = $this->request->getPost('start_date');
+        $end_date = $this->request->getPost('end_date');
         // Cek apakah data berhasil disimpan
         if ($result) {
-            return redirect()->to(session()->get('role') . '/schedule')->with('success', 'Jadwal berhasil disimpan!');
+            return redirect()->to(session()->get('role') . '/schedule?start_date=' . $start_date . '&end_date=' . $end_date)->with('success', 'Jadwal berhasil disimpan!');
         } else {
             return redirect()->back()->with('error', 'Gagal menyimpan jadwal!');
         }
@@ -657,7 +663,9 @@ class ScheduleController extends BaseController
             'kode_warna' => $kodeWarna,
             'warna' => $warna,
             'jmlLot' => $jmlLot,
-            'history' => $historySch
+            'history' => $historySch,
+            'start_date' => $this->request->getGet('start_date'),
+            'end_date' =>  $this->request->getGet('end_date')
         ];
 
         return view($this->role . '/schedule/form-edit', $data);
@@ -806,8 +814,10 @@ class ScheduleController extends BaseController
 
         // Setelah proses selesai, Anda bisa mengembalikan response atau redirect sesuai kebutuhan
         // Contoh:
+        $start_date = $this->request->getPost('start_date');
+        $end_date = $this->request->getPost('end_date');
         if ($updateMessage) {
-            return redirect()->to(session()->get('role') . '/schedule')->with('success', $updateMessage);
+            return redirect()->to(session()->get('role') . '/schedule?start_date=' . $start_date . '&end_date=' . $end_date)->with('success', $updateMessage);
         } else {
             return redirect()->back()->with('info', 'Tidak ada perubahan yang disimpan.');
         }
@@ -1479,10 +1489,11 @@ class ScheduleController extends BaseController
         ];
         $ket   = strtoupper($mesin['ket_mesin']);
         $view  = $mapping[$ket] ?? 'index';
-
+        $start_date = $this->request->getPost('start_date');
+        $end_date = $this->request->getPost('end_date');
         // Cek apakah data berhasil disimpan
         if ($result) {
-            return redirect()->to(session()->get('role') . '/schedule')->with('success', 'Jadwal berhasil disimpan!');
+            return redirect()->to(session()->get('role') . '/schedule?start_date=' . $start_date . '&end_date=' . $end_date)->with('success', 'Jadwal berhasil disimpan!');
         } else {
             return redirect()->back()->with('error', 'Gagal menyimpan jadwal!');
         }
@@ -1509,10 +1520,10 @@ class ScheduleController extends BaseController
         $search = $this->request->getGet('search');
         // Jika search ada, panggil API eksternal dengan query parameter 'search'
         $apiUrl = 'http://172.23.44.14/MaterialSystem/public/api/statusbahanbaku/' . $model . '?search=' . urlencode($search);
-
         // Mengambil data dari API eksternal
         $response = file_get_contents($apiUrl);
         $status = json_decode($response, true);
+        // dd($response);
         // Filter data berdasarkan 'no_model' jika ada keyword 'search'
         if ($search) {
             $status = array_filter($status, function ($item) use ($search) {
