@@ -110,6 +110,7 @@ class PoTambahanController extends BaseController
         $kodeWarna = $this->request->getPost('kode_warna');
         $status = $this->request->getPost('status');
         $area = $this->request->getPost('area');
+        $tglApprove = date('Y-m-d');
 
         $validate = [
             'no_model'   => $noModel,
@@ -132,7 +133,10 @@ class PoTambahanController extends BaseController
             ->where('status', $status)
             ->like('created_at', $tglPo, 'after');
 
-        $updated = $builder->update(['status' => 'approved']);
+        $updated = $builder->update([
+            'status' => 'approved',
+            'tanggal_approve' => $tglApprove
+        ]);
 
         if ($updated) {
             return redirect()->to(base_url($this->role . '/poplus'))->with('success', 'Data Po Tambahan Berhasil disetujui.');

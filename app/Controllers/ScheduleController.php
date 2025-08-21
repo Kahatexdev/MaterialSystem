@@ -1520,10 +1520,10 @@ class ScheduleController extends BaseController
         $search = $this->request->getGet('search');
         // Jika search ada, panggil API eksternal dengan query parameter 'search'
         $apiUrl = 'http://172.23.44.14/MaterialSystem/public/api/statusbahanbaku/' . $model . '?search=' . urlencode($search);
-
         // Mengambil data dari API eksternal
         $response = file_get_contents($apiUrl);
         $status = json_decode($response, true);
+        // dd($response);
         // Filter data berdasarkan 'no_model' jika ada keyword 'search'
         if ($search) {
             $status = array_filter($status, function ($item) use ($search) {

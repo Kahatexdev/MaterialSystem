@@ -93,8 +93,12 @@ class ApiController extends ResourceController
     // v3
     public function statusbahanbaku($noModel)
     {
-        $search = $this->request->getGet('search');
+        $search = $this->request->getGet('search') ?? null;
         $rows   = $this->materialModel->MaterialPDK($noModel);
+        if (empty($rows)) {
+            log_message('error', "MaterialPDK kosong untuk model: $noModel");
+            return $this->respond([], 200);
+        }
         // $rows   = $this->openPoModel->MaterialPDK($noModel);
         $res    = [];
 
@@ -128,6 +132,7 @@ class ApiController extends ResourceController
             'created_at',
             'updated_at',
             'kg_stock',
+            'total_po_tambahan'
         ];
         log_message('debug', 'Isi $rows: ' . json_encode($rows));
 
@@ -160,7 +165,7 @@ class ApiController extends ResourceController
                         }
 
                         $res[] = $newRow;
-                        dd($allSchedules);
+                        // dd($allSchedules);  
                     }
                 } else {
                     // Kalau gak ada schedule, tetap munculkan 1 baris dengan qty_po
@@ -179,7 +184,7 @@ class ApiController extends ResourceController
                         $row['kode_warna'],
                         $search
                     );
-
+                // dd($allCoverings);
                 if (! empty($allCoverings)) {
                     foreach ($allCoverings as $coverData) {
                         $newRow = $row;
@@ -528,6 +533,12 @@ class ApiController extends ResourceController
     public function listPemesanan($area)
     {
         $dataList = $this->pemesananModel->getListPemesananByArea($area);
+
+        return $this->respond($dataList, 200);
+    }
+    public function listReportPemesanan($area)
+    {
+        $dataList = $this->pemesananModel->getListReportPemesananByArea($area);
 
         return $this->respond($dataList, 200);
     }

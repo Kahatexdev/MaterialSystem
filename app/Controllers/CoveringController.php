@@ -13,6 +13,7 @@ use App\Models\OutCelupModel;
 use App\Models\BonCelupModel;
 use App\Models\MesinCelupModel;
 use App\Models\HistoryStockCoveringModel;
+use App\Models\TrackingPoCovering;
 
 class CoveringController extends BaseController
 {
@@ -29,6 +30,7 @@ class CoveringController extends BaseController
     protected $outCelupModel;
     protected $bonCelupModel;
     protected $HistoryStockCoveringModel;
+    protected $trackingPoCoveringModel;
 
     public function __construct()
     {
@@ -41,6 +43,7 @@ class CoveringController extends BaseController
         $this->outCelupModel = new OutCelupModel();
         $this->bonCelupModel = new BonCelupModel();
         $this->HistoryStockCoveringModel = new HistoryStockCoveringModel();
+        $this->trackingPoCoveringModel = new TrackingPoCovering();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -55,6 +58,202 @@ class CoveringController extends BaseController
             return redirect()->to(base_url('/login'));
         }
     }
+
+    /**
+     * Private: sinkron tracking PO covering dari data schedule
+     * @param array $trackingData
+     * @param array $scheduleData
+     * @return array summary (rows_total_tracking, rows_matched, rows_updated, details)
+     */
+    private function syncTrackingFromSchedule(array $trackingData, array $scheduleData): array
+    {
+        // helper normalisasi (hapus non-alphanum + lowercase)
+        $normalize = function ($v) {
+            return $v;
+        };
+
+        // 1) build schedule map (simpan entri terbaru per key)
+        $scheduleMap = [];
+        foreach ($scheduleData as $s) {
+            $model = isset($s['no_model']) ? trim($s['no_model']) : '';
+            $kode  = isset($s['kode_warna']) ? trim($s['kode_warna']) : '';
+            $it    = isset($s['item_type']) ? trim($s['item_type']) : '';
+            if ($kode === '') continue;
+
+            $normModel = $normalize($model);
+            $normKode  = $normalize($kode);
+            $normIt    = $normalize($it);
+
+            // pilih timestamp yang tersedia
+            $ts = '1970-01-01 00:00:00';
+            if (!empty($s['updated_at']) && $s['updated_at'] !== '0000-00-00 00:00:00') $ts = $s['updated_at'];
+            elseif (!empty($s['created_at']) && $s['created_at'] !== '0000-00-00 00:00:00') $ts = $s['created_at'];
+
+            // keys: prefer more specific first
+            $keys = [];
+            if ($normModel !== '' && $normIt !== '') $keys[] = $normModel . '||' . $normKode . '||' . $normIt; // model||kode||it
+            if ($normIt !== '')                           $keys[] = $normKode . '||' . $normIt;                  // kode||it
+            if ($normModel !== '')                        $keys[] = $normModel . '||' . $normKode;              // model||kode
+            $keys[] = $normKode;                                                       // kode
+
+            foreach ($keys as $k) {
+                // menyimpan seluruh row plus metadata
+                $payload = array_merge($s, [
+                    '_ts' => $ts,
+                    '_norm_kode' => $normKode,
+                    '_norm_it' => $normIt,
+                    '_norm_model' => $normModel,
+                ]);
+
+                if (!isset($scheduleMap[$k]) || strtotime($ts) > strtotime($scheduleMap[$k]['_ts'])) {
+                    $scheduleMap[$k] = $payload;
+                }
+            }
+        }
+
+        // 2) loop trackingData dan cari match, update via model
+        $rowsMatched = 0;
+        $rowsUpdated = 0;
+        $details = [];
+
+        foreach ($trackingData as $t) {
+            $id    = $t['id_tpc'] ?? null; // ubah kalau pk beda
+            $modelT = trim($t['no_model_anak'] ?? $t['no_model'] ?? '');
+            $kodeT  = trim($t['kode_warna'] ?? '');
+            $itT    = trim($t['item_type'] ?? '');
+
+            if ($kodeT === '') {
+                $details[] = ['id_tpc' => $id, 'no_model' => $modelT, 'kode_warna' => $kodeT, 'matched' => false, 'reason' => 'no kode_warna'];
+                continue;
+            }
+
+            $normModelT = $normalize($modelT);
+            $normKodeT  = $normalize($kodeT);
+            $normItT    = $normalize($itT);
+            $found = null;
+            $matchedKey = null;
+
+            // 1) exact model||kode||item_type
+            if ($normModelT !== '' && $normItT !== '') {
+                $k = $normModelT . '||' . $normKodeT . '||' . $normItT;
+                if (isset($scheduleMap[$k])) {
+                    $found = $scheduleMap[$k];
+                    $matchedKey = $k;
+                }
+            }
+
+            // 2) exact kode||item_type
+            if (!$found && $normItT !== '') {
+                $k = $normKodeT . '||' . $normItT;
+                if (isset($scheduleMap[$k])) {
+                    $found = $scheduleMap[$k];
+                    $matchedKey = $k;
+                }
+            }
+
+            // 3) exact model||kode
+            if (!$found && $normModelT !== '') {
+                $k = $normModelT . '||' . $normKodeT;
+                if (isset($scheduleMap[$k])) {
+                    $found = $scheduleMap[$k];
+                    $matchedKey = $k;
+                }
+            }
+
+            // 4) exact kode
+            if (!$found && isset($scheduleMap[$normKodeT])) {
+                $found = $scheduleMap[$normKodeT];
+                $matchedKey = $normKodeT;
+            }
+
+            // 5) fallback: partial match (konservatif)
+            if (!$found) {
+                foreach ($scheduleMap as $k => $s) {
+                    if (empty($s['_norm_kode'])) continue;
+                    if (strpos($s['_norm_kode'], $normKodeT) !== false || strpos($normKodeT, $s['_norm_kode']) !== false) {
+                        // jika both punya item_type, prefer sama item_type
+                        if ($normItT !== '' && !empty($s['_norm_it'])) {
+                            if ($s['_norm_it'] === $normItT) {
+                                $found = $s;
+                                $matchedKey = $k;
+                                break;
+                            } else {
+                                // beda item_type → skip
+                                continue;
+                            }
+                        } else {
+                            // terima meski item_type kosong pada salah satu sisi
+                            $found = $s;
+                            $matchedKey = $k;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if ($found) {
+                $rowsMatched++;
+                $newStatus = $found['last_status'] ?? null;
+                $newKet    = $found['ket_daily_cek'] ?? null;
+
+                if ($newStatus === null && $newKet === null) {
+                    $details[] = [
+                        'id_tpc' => $id,
+                        'no_model' => $modelT,
+                        'kode_warna' => $kodeT,
+                        'matched' => true,
+                        'updated' => false,
+                        'matched_with' => $matchedKey,
+                        'reason' => 'no status/ket in schedule',
+                    ];
+                    continue;
+                }
+
+                $updateData = [
+                    'status' => '(CELUP - ' . $newStatus . ')',
+                    'keterangan' => '(CELUP - ' . $newKet . ')',
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ];
+
+                if ($id) {
+                    // update by primary key via model
+                    $this->trackingPoCoveringModel->update($id, $updateData);
+                } else {
+                    // update by where (hati-hati: bisa update banyak baris)
+                    $where = ['kode_warna' => $kodeT];
+                    if ($itT !== '') $where['item_type'] = $itT;
+                    $this->trackingPoCoveringModel->where($where)->set($updateData)->update();
+                }
+
+                $rowsUpdated++;
+                $details[] = [
+                    'id_tpc' => $id,
+                    'no_model' => $modelT,
+                    'kode_warna' => $kodeT,
+                    'matched_with' => $matchedKey . ' (model:' . ($found['_norm_model'] ?? '') . ', kode:' . ($found['_norm_kode'] ?? '') . ')',
+                    'status_after' => $newStatus,
+                    'keterangan_after' => $newKet,
+                    'updated' => true,
+                ];
+            } else {
+                $details[] = [
+                    'id_tpc' => $id,
+                    'no_model' => $modelT,
+                    'kode_warna' => $kodeT,
+                    'matched' => false,
+                ];
+            }
+        }
+
+        return [
+            'rows_total_tracking' => count($trackingData),
+            'rows_matched' => $rowsMatched,
+            'rows_updated' => $rowsUpdated,
+            'details' => $details,
+        ];
+    }
+
+
     public function index()
     {
 
@@ -130,6 +329,17 @@ class CoveringController extends BaseController
             }
         }
 
+
+        // fetch data automatically from database for tracking po covering
+        // panggil private function untuk sinkronisasi
+        $trackingData = $this->trackingPoCoveringModel->dailyUpdateTrackingPO();
+        $scheduleData = $this->scheduleCelupModel->where('tanggal_schedule >=', date('Y-m-01', strtotime('-1 month')))
+            ->where('tanggal_schedule <', date('Y-m-01', strtotime('+2 month')))
+            ->findAll();
+        $summary = $this->syncTrackingFromSchedule($trackingData, $scheduleData);
+
+        // debug / inspect: ganti dengan return view/json jika perlu
+        // dd($summary);
 
         $data = [
             'active' =>  $this->active,
@@ -489,7 +699,7 @@ class CoveringController extends BaseController
     public function saveOpenPOCovering()
     {
         $data = $this->request->getPost();
-
+        // dd($data);
         if (isset($data['detail']) && is_array($data['detail'])) {
             foreach ($data['detail'] as $row) {
                 $this->openPoModel->save([
@@ -502,6 +712,7 @@ class CoveringController extends BaseController
                     'bentuk_celup'    => $data['bentuk_celup'] ?? null,
                     'jenis_produksi'  => $data['jenis_produksi'] ?? null,
                     'ket_celup'       => $data['ket_celup'] ?? null,
+                    'po_plus'         => $data['po_plus'] ?? null,
                     'penerima'        => 'Retno',
                     'penanggung_jawab' => 'Paryanti',
                     'admin'           => session()->get('username') ?? '',
