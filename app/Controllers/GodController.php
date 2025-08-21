@@ -126,7 +126,7 @@ class GodController extends BaseController
                 $map = [
                     'COTTON'  => 'CTN',
                     'ORGANIC' => 'ORG',
-                    'SPNDX' => 'SPD',
+                    'SPNDX' => 'SPDX',
                     // tambahkan mapping lain kalau perlu
                 ];
                 // lakukan penggantian untuk setiap mapping
@@ -192,6 +192,7 @@ class GodController extends BaseController
 
                     // cek material
                     $material = $this->materialModel
+                        ->where('id_order', $masterOrder['id_order'])
                         ->where('item_type', $normalizedType)
                         ->where('kode_warna', $kodeWarna)
                         ->first();
