@@ -9091,7 +9091,7 @@ class ExcelController extends BaseController
         $delivery = $this->request->getGet('delivery');
         $materialType = $this->request->getGet('material_type');
         $result = $this->openPoModel->getPoManualByNoModel($noModel);
-
+        // dd($result);
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';
         } else {

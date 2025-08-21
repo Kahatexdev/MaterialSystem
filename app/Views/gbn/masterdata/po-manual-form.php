@@ -241,41 +241,109 @@
     </div>
 </div>
 
-<!-- Pastikan jQuery load pertama -->
 <script>
     $(document).ready(function() {
         $('#no_model').select2({
-            placeholder: "Pilih No Model",
-            allowClear: true
+            placeholder: "Pilih No Model atau Ketik No Model Baru...",
+            allowClear: true,
+            tags: true, // <-- ENABLE free input
+            createTag: function(params) {
+                var term = $.trim(params.term);
+                if (term === '') {
+                    return null;
+                }
+                // tandai tag baru agar mudah dideteksi
+                return {
+                    id: term,
+                    text: term,
+                    newTag: true // custom flag
+                };
+            },
+            templateResult: function(data) {
+                // tampilkan (baru) pada opsi yang dibuat user
+                if (data.newTag) {
+                    return data.text + " (baru)";
+                }
+                return data.text;
+            }
+        });
+
+        // Ketika user memilih / memasukkan no_model
+        $('#no_model').on('select2:select', function(e) {
+            var data = e.params.data;
+            var selectedModel = data.id; // id sama dengan text karena kita pakai tags
+            if (data.newTag) {
+                // Jika opsi baru dibuat oleh user
+                $('#no_order').val(''); // kosongkan no_order
+                $('#no_order').prop('readonly', false); // optional: beri kebebasan edit
+                $('#no_order').focus();
+            } else {
+                // opsi dari data lama -> AJAX cari no_order
+                $('#no_order').prop('readonly', true);
+                $.ajax({
+                    url: '<?= base_url($role . "/masterdata/poManual/getNoOrderByModel") ?>',
+                    type: 'GET',
+                    data: {
+                        no_model: selectedModel
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response && response.no_order) {
+                            $('#no_order').val(response.no_order);
+                        } else {
+                            $('#no_order').val(''); // tidak ketemu
+                            $('#no_order').prop('readonly', false); // biarkan user isi kalau perlu
+                        }
+                    },
+                    error: function() {
+                        $('#no_order').val('');
+                        $('#no_order').prop('readonly', false);
+                    }
+                });
+            }
+        });
+
+        // Jika user meng-clear selection
+        $('#no_model').on('select2:clear', function() {
+            $('#no_order').val('');
+            $('#no_order').prop('readonly', true);
         });
     });
-    // Isi otomatis No Order saat No Model berubah
-    $('#no_model').on('change', function() {
-        var selectedModel = $(this).val();
-        if (selectedModel) {
-            // AJAX ke backend untuk ambil no_order berdasarkan no_model
-            $.ajax({
-                url: '<?= base_url($role . "/masterdata/poManual/getNoOrderByModel") ?>',
-                type: 'GET',
-                data: {
-                    no_model: selectedModel
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response && response.no_order) {
-                        $('#no_order').val(response.no_order);
-                    } else {
-                        $('#no_order').val('');
-                    }
-                },
-                error: function() {
-                    $('#no_order').val('');
-                }
-            });
-        } else {
-            $('#no_order').val('');
-        }
-    });
+
+    // $(document).ready(function() {
+    //     $('#no_model').select2({
+    //         placeholder: "Pilih No Model",
+    //         allowClear: true,
+    //         tags: true
+    //     });
+    // });
+    // // Isi otomatis No Order saat No Model berubah
+    // $('#no_model').on('change', function() {
+    //     var selectedModel = $(this).val();
+    //     if (selectedModel) {
+    //         // AJAX ke backend untuk ambil no_order berdasarkan no_model
+    //         $.ajax({
+    //             url: '<?= base_url($role . "/masterdata/poManual/getNoOrderByModel") ?>',
+    //             type: 'GET',
+    //             data: {
+    //                 no_model: selectedModel
+    //             },
+    //             dataType: 'json',
+    //             success: function(response) {
+    //                 if (response && response.no_order) {
+    //                     $('#no_order').val(response.no_order);
+    //                 } else {
+    //                     $('#no_order').val('');
+    //                 }
+    //             },
+    //             error: function() {
+    //                 $('#no_order').val('');
+    //             }
+    //         });
+    //     } else {
+    //         $('#no_order').val('');
+    //     }
+    // });
 </script>
 <script>
     $(function() {

@@ -99,6 +99,29 @@ class PoManualController extends BaseController
         $buyer = $buyerRow ? $buyerRow->buyer : null;
         // dd($buyer);
         // $noModel = $post['no_model'] ?? [];
+
+        // Jika tidak ditemukan di master_order -> tambahkan record master_order
+        if (!$buyerRow) {
+            try {
+                // Siapkan data insert; gunakan buyer dari $post jika ada, atau null
+                $insertMaster = [
+                    'no_model' => $noModel,
+                    'buyer'    => $post['buyer'] ?? '',
+                    'no_order'    => $post['no_order'] ?? '',
+                    'admin'    => session()->get('username'),
+                    'created_at'    => date('Y-m-d H:i:s'),
+                    'updated_at'    => date('Y-m-d H:i:s'),
+                ];
+                //Insert ke master_order
+                $builder->insert($insertMaster);
+
+                // set $buyer supaya dipakai saat insert open PO
+                $buyer = $insertMaster['buyer'];
+            } catch (\Exception $e) {
+                log_message('error', 'Gagal insert master_order untuk no_model ' . $noModel . ': ' . $e->getMessage());
+            }
+        }
+
         $items = $post['items'] ?? [];
 
         foreach ($items as $idx => $item) {
