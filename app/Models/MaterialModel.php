@@ -1023,10 +1023,10 @@ class MaterialModel extends Model
             )
             ->join(
                 "({$subPoPlus}) AS plusSub",
-                'plusSub.id_material = material.id_material',
-                'plusSub.item_type = material.item_type',
-                'plusSub.kode_warna = material.kode_warna',
-                'plusSub.color = material.color',
+                'plusSub.id_material = material.id_material 
+             AND plusSub.item_type = material.item_type 
+             AND plusSub.kode_warna = material.kode_warna 
+             AND plusSub.color = material.color',
                 'left'
             )
             ->where('master_material.jenis', 'BENANG');
