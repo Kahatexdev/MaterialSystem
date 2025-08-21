@@ -19,6 +19,7 @@ use App\Models\TotalPemesananModel;
 use App\Models\StockModel;
 use App\Models\HistoryPindahPalet;
 use App\Models\HistoryPindahOrder;
+use App\Models\HistoryStock;
 use App\Models\PengeluaranModel;
 use App\Models\ReturModel;
 use App\Models\KategoriReturModel;
@@ -47,6 +48,7 @@ class ApiController extends ResourceController
     protected $totalPemesananModel;
     protected $historyPindahPalet;
     protected $historyPindahOrder;
+    protected $historyStock;
     protected $pengeluaranModel;
     protected $returModel;
     protected $kategoriReturModel;
@@ -71,6 +73,7 @@ class ApiController extends ResourceController
         $this->totalPemesananModel = new TotalPemesananModel();
         $this->historyPindahPalet = new HistoryPindahPalet();
         $this->historyPindahOrder = new HistoryPindahOrder();
+        $this->historyStock = new HistoryStock();
         $this->pengeluaranModel = new PengeluaranModel();
         $this->returModel = new ReturModel();
         $this->kategoriReturModel = new KategoriReturModel();
@@ -1443,10 +1446,7 @@ class ApiController extends ResourceController
         // 1) Ambil data
         $dataPindah = $this->historyStock->getHistoryPindahOrder($noModel, $kodeWarna);
 
-        // 4) Response
-        if ($this->request->isAJAX()) {
-            return $this->response->setJSON($dataPindah);
-        }
+        return $this->response->setJSON($dataPindah);
     }
 
     public function reportSisaDatangBenang()

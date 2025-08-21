@@ -826,5 +826,6 @@ $routes->group(
         $routes->get('reportSisaDatangKaret', 'ApiController::reportSisaDatangKaret');
         $routes->get('filterBenangMingguan', 'ApiController::filterBenangMingguan');
         $routes->get('filterBenangBulanan', 'ApiController::filterBenangBulanan');
+        $routes->get('historyPindahOrder', 'ApiController::historyPindahOrder');
     }
 );

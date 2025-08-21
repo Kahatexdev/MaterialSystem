@@ -122,6 +122,9 @@
                             const stockAkhir = Number(item.stock_akhir) || 0;
                             const kgsOtherOut = Number(item.kgs_other_out) || 0;
                             const loss = Number(item.loss) || 0;
+                            const returStock = Number(item.retur_stock) || 0;
+                            const returTitip = Number(item.retur_titip) || 0;
+                            const dipinjam = Number(item.dipinjam) || 0;
 
                             // perhitungan
                             const tagihanGbn = kgs - (datangSolid + plusDatangSolid + kgsStockAwal);
@@ -150,9 +153,9 @@
                                 fmt(returPbArea), // retur pb area
                                 fmt(pakaiArea), // pakai area 
                                 fmt(kgsOtherOut), // pakai lain-lain
-                                '-', // retur stock
-                                '-', // retur titip
-                                '-', // dipinjam
+                                fmt(returStock), // retur stock
+                                fmt(returTitip), // retur titip
+                                fmt(dipinjam), // dipinjam
                                 '-', // pindah order
                                 '-', // pindah ke stock mati
                                 fmt(stockAkhir), // stock akhir
