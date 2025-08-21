@@ -181,7 +181,7 @@ class ApiController extends ResourceController
                         $row['kode_warna'],
                         $search
                     );
-                    // dd($allCoverings);
+                // dd($allCoverings);
                 if (! empty($allCoverings)) {
                     foreach ($allCoverings as $coverData) {
                         $newRow = $row;
@@ -530,6 +530,12 @@ class ApiController extends ResourceController
     public function listPemesanan($area)
     {
         $dataList = $this->pemesananModel->getListPemesananByArea($area);
+
+        return $this->respond($dataList, 200);
+    }
+    public function listReportPemesanan($area)
+    {
+        $dataList = $this->pemesananModel->getListReportPemesananByArea($area);
 
         return $this->respond($dataList, 200);
     }
