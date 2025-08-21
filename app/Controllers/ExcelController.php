@@ -9138,7 +9138,7 @@ class ExcelController extends BaseController
         // Buat Excel
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Open PO Manual ' . $noModel);
+        $sheet->setTitle('Open PO Manual');
         $spreadsheet->getDefaultStyle()->getFont()->setName('Arial');
         $spreadsheet->getDefaultStyle()->getFont()->setSize(16);
 
