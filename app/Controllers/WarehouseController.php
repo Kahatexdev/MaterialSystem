@@ -1685,10 +1685,38 @@ class WarehouseController extends BaseController
     public function filterPoBenang()
     {
         $key = $this->request->getGet('key');
-
         $data = $this->materialModel->getFilterPoBenang($key);
-        // dd($data);
-        return $this->response->setJSON($data);
+
+        $startMc = [];
+        $result = [];
+
+        foreach ($data as $row) {
+            $model = isset($row['no_model']) ? $row['no_model'] : '';
+
+            if ($model === '') {
+                $row['start_mc'] = 'Belum Ada Start Mc';
+                $result[] = $row;
+                continue;
+            }
+
+            // getStartMc
+            if (!isset($startMc[$model])) {
+                $url = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . urlencode($model);
+                $resp = @file_get_contents($url);
+                if ($resp !== false) {
+                    $json = json_decode($resp, true);
+                    $startMc[$model] = $json['start_mc'] ?? 'Belum Ada Start Mc';
+                } else {
+                    // fallback jika API error / tidak dapat diakses
+                    $startMc[$model] = 'Belum Ada Start Mc';
+                }
+            }
+
+            $row['start_mc'] = $startMc[$model];
+            $result[] = $row;
+        }
+
+        return $this->response->setJSON($result);
     }
 
     public function reportDatangBenang()

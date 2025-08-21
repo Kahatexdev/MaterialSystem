@@ -976,7 +976,7 @@ class MaterialModel extends Model
             ->where('po_tambahan.status', 'approved')
             ->groupBy('po_tambahan.tanggal_approve, material.item_type, material.kode_warna, material.color')
             ->getCompiledSelect(false);
-        // dd($subPoPlus);
+
         // 4) Query utama
         $builder = $db->table('material')
             ->select("

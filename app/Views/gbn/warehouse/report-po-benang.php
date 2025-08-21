@@ -122,7 +122,7 @@
                                 item.area,
                                 item.memo,
                                 item.buyer,
-                                item.start_mc || '',
+                                item.start_mc,
                                 item.delivery_awal,
                                 item.delivery_akhir,
                                 item.unit || '',
