@@ -1058,6 +1058,19 @@ class WarehouseController extends BaseController
         $idStock = $this->request->getPost('id_stock');
         $data = $this->stockModel->getStockInPemasukanById($idStock);
         $dataArray = json_decode(json_encode($data), true);
+        foreach ($dataArray as &$id) {
+            $other = $this->otherOutModel->getQty($id['id_out_celup']);
+            $outByCns = $this->pengeluaranModel->getQtyOutByCns($id['id_out_celup']);
+
+            $kgsOther = !empty($other) ? (float) $other[0]['kgs_other_out'] : 0;
+            $kgsOutByCns = !empty($outByCns) ? (float) $outByCns['kgs_out'] : 0;
+            $cnsOther = !empty($other) ? (int) $other[0]['cns_other_out'] : 0;
+            $cnsOutByCns = !empty($outByCns) ? (int) $outByCns['cns_out'] : 0;
+
+            // kurangi other out & pengeluaran by cones
+            $id['kgs_kirim'] = round((float) $id['kgs_kirim'] - $kgsOther - $kgsOutByCns, 2);
+            $id['cones_kirim'] = (int) $id['cones_kirim'] - $cnsOther - $cnsOutByCns;
+        }
         // var_dump($dataArray);
         // log_message('debug', 'Data Stock: ' . print_r($dataArray, true));
         if (empty($dataArray)) {
@@ -1995,6 +2008,20 @@ class WarehouseController extends BaseController
         $idStock = $this->request->getPost('id_stock');
         $data = $this->stockModel->getStockInPemasukanById($idStock);
         $dataArray = json_decode(json_encode($data), true);
+        foreach ($dataArray as &$id) {
+            $other = $this->otherOutModel->getQty($id['id_out_celup']);
+            $outByCns = $this->pengeluaranModel->getQtyOutByCns($id['id_out_celup']);
+
+            $kgsOther = !empty($other) ? (float) $other[0]['kgs_other_out'] : 0;
+            $kgsOutByCns = !empty($outByCns) ? (float) $outByCns['kgs_out'] : 0;
+            $cnsOther = !empty($other) ? (int) $other[0]['cns_other_out'] : 0;
+            $cnsOutByCns = !empty($outByCns) ? (int) $outByCns['cns_out'] : 0;
+
+            // kurangi other out & pengeluaran by cones
+            $id['kgs_kirim'] = round((float) $id['kgs_kirim'] - $kgsOther - $kgsOutByCns, 2);
+            $id['cones_kirim'] = (int) $id['cones_kirim'] - $cnsOther - $cnsOutByCns;
+        }
+
         // var_dump($dataArray);
         // log_message('debug', 'Data Stock: ' . print_r($dataArray, true));
         if (empty($dataArray)) {
