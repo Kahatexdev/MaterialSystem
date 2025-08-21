@@ -368,25 +368,25 @@ class OpenPoModel extends Model
             ->kg_po ?? 0;
     }
 
-    public function getFilterPoBenang($key)
-    {
-        $this->select('open_po.created_at, DATE(open_po.created_at) as tgl_po, master_order.foll_up, open_po.no_model, master_order.no_order, open_po.keterangan, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, open_po.item_type, master_material.jenis, open_po.kode_warna, open_po.color, open_po.kg_po')
-            ->join('master_order', 'master_order.no_model = open_po.no_model')
-            ->join('master_material', 'master_material.item_type = open_po.item_type')
-            ->where('id_induk', null);
+    // public function getFilterPoBenang($key)
+    // {
+    //     $this->select('open_po.created_at, DATE(open_po.created_at) as tgl_po, master_order.foll_up, open_po.no_model, master_order.no_order, open_po.keterangan, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, open_po.item_type, master_material.jenis, open_po.kode_warna, open_po.color, open_po.kg_po')
+    //         ->join('master_order', 'master_order.no_model = open_po.no_model')
+    //         ->join('master_material', 'master_material.item_type = open_po.item_type')
+    //         ->where('id_induk', null);
 
-        // Cek apakah ada input key untuk pencarian
-        if (!empty($key)) {
-            $this->groupStart()
-                ->like('open_po.no_model', $key)
-                ->orLike('open_po.item_type', $key)
-                ->orLike('open_po.kode_warna', $key)
-                ->orLike('open_po.color', $key)
-                ->groupEnd();
-        }
+    //     // Cek apakah ada input key untuk pencarian
+    //     if (!empty($key)) {
+    //         $this->groupStart()
+    //             ->like('open_po.no_model', $key)
+    //             ->orLike('open_po.item_type', $key)
+    //             ->orLike('open_po.kode_warna', $key)
+    //             ->orLike('open_po.color', $key)
+    //             ->groupEnd();
+    //     }
 
-        return $this->findAll();
-    }
+    //     return $this->findAll();
+    // }
 
     // public function listOpenPo($no_model, $jenis, $jenis2, $penerima)
     // {

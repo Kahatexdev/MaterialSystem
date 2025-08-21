@@ -39,10 +39,20 @@
         <div class="card-body">
             <form action="<?= base_url($role . '/po/saveOpenPOCovering') ?>" method="post">
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label>No PO</label>
                             <input type="text" class="form-control" name="no_model" value="" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Po Tambahan</label>
+                            <select class="form-select" name="po_plus" id="po_plus">
+                                <option value="">Pilih</option>
+                                <option value="1">YA</option>
+                                <option value="0">TIDAK</option>
+                            </select>
                         </div>
                     </div>
                 </div>

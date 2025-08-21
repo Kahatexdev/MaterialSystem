@@ -157,9 +157,9 @@
                                                         <thead>
                                                             <tr>
                                                                 <th width=100 class="text-center">No Karung</th>
+                                                                <th class="text-center">Cones Kirim</th>
                                                                 <th class="text-center">GW Kirim</th>
                                                                 <th class="text-center">NW Kirim</th>
-                                                                <th class="text-center">Cones Kirim</th>
                                                                 <th class="text-center">Lot Kirim</th>
                                                                 <th class="text-center">Operator Packing</th>
                                                                 <th class="text-center">Shift</th>
@@ -173,9 +173,9 @@
                                                         <tbody>
                                                             <tr>
                                                                 <td><input type="text" class="form-control text-center" name="no_karung[0][0]" value="1" readonly></td>
+                                                                <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[0][0]" required></td>
                                                                 <td><input type="number" step="0.01" class="form-control gw_kirim_input" name="gw_kirim[0][0]" required></td>
                                                                 <td><input type="number" step="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[0][0]" required></td>
-                                                                <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[0][0]" required></td>
                                                                 <td><input type="text" class="form-control lot_celup_input" name="items[0][lot_celup]" id="lot_celup" required></td>
                                                                 <td><input type="text" class="form-control operator_packing_input" name="operator_packing[0][0]" id="operator_packing" required></td>
                                                                 <td><select class="form-control" name="shift[0][0]" id="shift" required>
@@ -195,17 +195,17 @@
                                                         <tfoot>
                                                             <tr>
                                                                 <th class="text-center">Total Karung</th>
+                                                                <th class="text-center">Total Cones</th>
                                                                 <th class="text-center">Total GW</th>
                                                                 <th class="text-center">Total NW</th>
-                                                                <th class="text-center">Total Cones</th>
                                                                 <th class="text-center">Total Lot</th>
                                                                 <th></th>
                                                             </tr>
                                                             <tr>
                                                                 <td><input type="number" class="form-control" id="total_karung" name="total_karung" placeholder="Total Karung" readonly></td>
+                                                                <td><input type="float" class="form-control" id="total_cones_kirim" name="total_cones_kirim" placeholder="Cones" readonly></td>
                                                                 <td><input type="float" class="form-control" id="total_gw_kirim" name="total_gw_kirim" placeholder="GW" readonly></td>
                                                                 <td><input type="float" class="form-control" id="total_kgs_kirim" name="total_kgs_kirim" placeholder="NW" readonly></td>
-                                                                <td><input type="float" class="form-control" id="total_cones_kirim" name="total_cones_kirim" placeholder="Cones" readonly></td>
                                                                 <td><input type="float" class="form-control" id="total_lot_kirim" name="total_lot_kirim" placeholder="Lot" readonly></td>
                                                                 <td></td>
                                                             </tr>
@@ -446,9 +446,9 @@
                                                     <thead>
                                                         <tr>
                                                             <th width=100 class="text-center">No</th>
+                                                            <th class="text-center">Cones Kirim</th>
                                                             <th class="text-center">GW Kirim</th>
                                                             <th class="text-center">Kgs Kirim</th>
-                                                            <th class="text-center">Cones Kirim</th>
                                                             <th class="text-center">Lot Kirim</th>
                                                             <th class="text-center">Operator Packing</th>
                                                             <th class="text-center">Shift</th>
@@ -462,9 +462,9 @@
                                                     <tbody>
                                                         <tr>
                                                             <td><input type="text" class="form-control text-center" name="no_karung[${tabIndex - 1}][0]" value="1" readonly></td>
+                                                            <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex - 1}][0]" required></td>
                                                             <td><input type="number" step="0.01" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex - 1}][0]" required></td>
                                                             <td><input type="number" step="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex - 1}][0]" required></td>
-                                                            <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex - 1}][0]" required></td>
                                                             <td><input type="text" class="form-control lot_celup_input" name="items[${tabIndex - 1}][lot_celup]" id="${lotCelupId}" required></td>
                                                             <td><input type="text" class="form-control operator_packing_input" name="operator_packing[${tabIndex - 1}][0]" required></td>
                                                                 <td><select class="form-control" name="shift[${tabIndex - 1}][0]" id="shift" required>
@@ -484,17 +484,17 @@
                                                     <tfoot>
                                                         <tr>
                                                             <th class="text-center">Total Karung</th>
+                                                            <th class="text-center">Total Cones</th>
                                                             <th class="text-center">Total GW</th>
                                                             <th class="text-center">Total NW</th>
-                                                            <th class="text-center">Total Cones</th>
                                                             <th class="text-center">Total Lot</th>
                                                             <th></th>
                                                         </tr>
                                                          <tr>
                                                             <td><input type="number" class="form-control" id="${totalKarungId}" readonly></td>
+                                                            <td><input type="float" class="form-control" id="${totalConesId}" readonly></td>
                                                             <td><input type="float" class="form-control" id="${totalGwId}" readonly></td>
                                                             <td><input type="float" class="form-control" id="${totalKgsId}" readonly></td>
-                                                            <td><input type="float" class="form-control" id="${totalConesId}" readonly></td>
                                                             <td><input type="text" class="form-control" id="${totalLotId}" readonly></td>
                                                             <td></td>
                                                         </tr>

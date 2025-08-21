@@ -1685,10 +1685,38 @@ class WarehouseController extends BaseController
     public function filterPoBenang()
     {
         $key = $this->request->getGet('key');
+        $data = $this->materialModel->getFilterPoBenang($key);
 
-        $data = $this->openPoModel->getFilterPoBenang($key);
+        $startMc = [];
+        $result = [];
 
-        return $this->response->setJSON($data);
+        foreach ($data as $row) {
+            $model = isset($row['no_model']) ? $row['no_model'] : '';
+
+            if ($model === '') {
+                $row['start_mc'] = 'Belum Ada Start Mc';
+                $result[] = $row;
+                continue;
+            }
+
+            // getStartMc
+            if (!isset($startMc[$model])) {
+                $url = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . urlencode($model);
+                $resp = @file_get_contents($url);
+                if ($resp !== false) {
+                    $json = json_decode($resp, true);
+                    $startMc[$model] = $json['start_mc'] ?? 'Belum Ada Start Mc';
+                } else {
+                    // fallback jika API error / tidak dapat diakses
+                    $startMc[$model] = 'Belum Ada Start Mc';
+                }
+            }
+
+            $row['start_mc'] = $startMc[$model];
+            $result[] = $row;
+        }
+
+        return $this->response->setJSON($result);
     }
 
     public function reportDatangBenang()
@@ -2425,7 +2453,7 @@ class WarehouseController extends BaseController
         $db = \Config\Database::connect();
         $db->transBegin();  // Mulai transaksi
         // dd($data);
-        if(empty($data['id_order'])){
+        if (empty($data['id_order'])) {
             // prepare create new master order
             $dataOrder = [
                 'no_model' => $data['no_model'],
@@ -2435,7 +2463,7 @@ class WarehouseController extends BaseController
                 'lco_date' => '00/00/0000',
                 'admin' => session()->get('username')
             ];
-            
+
             // Insert new master order
             $saveOrder = $this->masterOrderModel->insert($dataOrder);
             $idOrder = $this->masterOrderModel->insertID();
