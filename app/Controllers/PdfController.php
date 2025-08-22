@@ -827,6 +827,7 @@ class PdfController extends BaseController
                 $groupedDetails[$key] = [
                     'no_model' => $detail['no_model'],
                     'item_type' => $detail['item_type'],
+                    'spesifikasi_benang' => $detail['spesifikasi_benang'],
                     'kode_warna' => $detail['kode_warna'],
                     'warna' => $detail['warna'],
                     'buyer' => $detail['buyer'],
@@ -1056,7 +1057,7 @@ class PdfController extends BaseController
                 $y2 = $pdf->GetY();
 
                 // MultiCell untuk kolom item_type (tinggi fleksibel)
-                $pdf->MultiCell(22, 3, $bon['item_type'], 1, 'C', false);
+                $pdf->MultiCell(22, 3, $bon['item_type'] . ' ' . $bon['spesifikasi_benang'], 1, 'C', false);
                 // Kembalikan posisi untuk kolom berikutnya
                 $pdf->SetXY($x2 + 22, $y2);
 
