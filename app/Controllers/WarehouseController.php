@@ -1684,12 +1684,13 @@ class WarehouseController extends BaseController
         return redirect()->to($this->role . '/pemasukan');
     }
 
-    public function reportPoBenang()
+    public function reportPoBenang($jenis = null)
     {
         $data = [
             'role' => $this->role,
             'title' => 'Report PO Benang',
-            'active' => $this->active
+            'active' => $this->active,
+            'jenis' => $jenis
         ];
 
         return view($this->role . '/warehouse/report-po-benang', $data);
@@ -1698,7 +1699,8 @@ class WarehouseController extends BaseController
     public function filterPoBenang()
     {
         $key = $this->request->getGet('key');
-        $data = $this->materialModel->getFilterPoBenang($key);
+        $jenis = $this->request->getGet('jenis') ?? null;
+        $data = $this->materialModel->getFilterPoBenang($key, $jenis);
 
         $startMc = [];
         $result = [];

@@ -7,7 +7,7 @@
     <div class="card card-frame">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 font-weight-bolder">Filter PO Benang</h5>
+                <h5 class="mb-0 font-weight-bolder">Filter PO <?= $jenis ?></h5>
             </div>
             <div class="row mt-2">
                 <div class="col-md-9">
@@ -88,6 +88,7 @@
 
         function loadData() {
             let key = $('input[type="text"]').val().trim();
+            const jenis = "<?= $jenis ?>";
 
             // Validasi
             if (key === '') {
@@ -104,7 +105,8 @@
                 url: "<?= base_url($role . '/warehouse/filterPoBenang') ?>",
                 type: "GET",
                 data: {
-                    key: key
+                    key: key,
+                    jenis: jenis
                 },
                 dataType: "json",
                 success: function(response) {
@@ -167,7 +169,8 @@
 
         $('#btnExport').click(function() {
             let key = $('input[type="text"]').val();
-            window.location.href = "<?= base_url($role . '/warehouse/exportPoBenang') ?>?key=" + key;
+            const jenis = "<?= $jenis ?>";
+            window.location.href = "<?= base_url($role . '/warehouse/exportPoBenang') ?>?key=" + key + "&jenis=" + jenis;
         });
 
         dataTable.clear().draw();

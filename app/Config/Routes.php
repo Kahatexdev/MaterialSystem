@@ -193,7 +193,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('warehouse/savePindahCluster', 'WarehouseController::savePindahCluster');
     $routes->post('warehouse/getPindahCluster', 'WarehouseController::getPindahCluster');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
-    $routes->get('warehouse/reportPoBenang', 'WarehouseController::reportPoBenang');
+    // $routes->get('warehouse/reportPoBenang', 'WarehouseController::reportPoBenang');
+    $routes->get('warehouse/reportPo/(:any)', 'WarehouseController::reportPoBenang/$1');
     $routes->get('warehouse/filterPoBenang', 'WarehouseController::filterPoBenang');
     $routes->get('warehouse/exportPoBenang', 'ExcelController::exportPoBenang');
     $routes->get('warehouse/reportDatangBenang', 'WarehouseController::reportDatangBenang');
@@ -644,7 +645,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('warehouse/updateCluster', 'WarehouseController::updateCluster');
     $routes->post('warehouse/getNoModel/(:any)', 'WarehouseController::getNoModel/$1');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
-    $routes->get('warehouse/reportPoBenang', 'WarehouseController::reportPoBenang');
+    // $routes->get('warehouse/reportPoBenang', 'WarehouseController::reportPoBenang');
+    $routes->get('warehouse/reportPo/(:any)', 'WarehouseController::reportPoBenang/$1');
     $routes->get('warehouse/filterPoBenang', 'WarehouseController::filterPoBenang');
     $routes->get('warehouse/exportPoBenang', 'ExcelController::exportPoBenang');
     $routes->get('warehouse/reportDatangBenang', 'WarehouseController::reportDatangBenang');
