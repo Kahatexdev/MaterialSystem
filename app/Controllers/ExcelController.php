@@ -885,47 +885,70 @@ class ExcelController extends BaseController
     public function exportPoBenang()
     {
         $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? 'BENANG';
 
-        $data = $this->openPoModel->getFilterPoBenang($key);
+        $data = $this->materialModel->getFilterPoBenang($key, $jenis);
+
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
         // Judul
-        $sheet->setCellValue('A1', 'Report PO Benang');
+        $sheet->setCellValue('A1', 'Report PO ' . $jenis);
         $sheet->mergeCells('A1:P1'); // Menggabungkan sel untuk judul
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["No", "Waktu Input", "Tanggal PO", "Foll Up", "No Model", "No Order", "Keterangan", "Buyer", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Jenis", "Kode Warna", "Warna", "KG Pesan"];
+        $header = ["No", "Waktu Input", "Tanggal PO", "Foll Up", "No Model", "No Order", "Area", "Memo", "Buyer", "Start Mc", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "Kg (Stock Awal)", "Lot (Stock Awal)", "Kg Pesan", "Loss Pesan", "Tgl Terima Po(+) Gbn", "Tgl Po(+) Area", "Delivery Po(+) Area", "Kg Po(+)", "Admin"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
-        $sheet->getStyle('A3:P3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:P3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A3:P3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3:Y3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:Y3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:Y3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         // Data
         $row = 4;
         foreach ($data as $index => $item) {
+            $model = $item['no_model'];
+            // Ambil data dari API getStartMc
+            $getStartMcUrl = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . $model;
+            $getStartMcResponse = file_get_contents($getStartMcUrl);
+            $getStartMc = json_decode($getStartMcResponse, true);
+
+            // Return data JSON jika request via AJAX
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON($getStartMc);
+            }
+            $startMc = $getStartMc['start_mc'] ?? 'Belum Ada Start Mc';
+
             $sheet->fromArray([
                 [
                     $index + 1,
-                    $item['created_at'],
-                    $item['tgl_po'],
+                    $item['tgl_input'],
+                    $item['lco_date'],
                     $item['foll_up'],
                     $item['no_model'],
                     $item['no_order'],
-                    $item['keterangan'],
+                    $item['area'],
+                    $item['memo'],
                     $item['buyer'],
+                    $startMc,
                     $item['delivery_awal'],
                     $item['delivery_akhir'],
                     $item['unit'],
                     $item['item_type'],
-                    $item['jenis'],
                     $item['kode_warna'],
                     $item['color'],
-                    $item['kg_po'],
+                    format_number($item['kgs_stock'], 2) ?? 0,
+                    $item['lot_stock'],
+                    format_number($item['kg_po'], 2) ?? 0,
+                    $item['loss'] . '%',
+                    $item['tanggal_approve'] ?? '',
+                    $item['tgl_po_plus_area'] ?? '',
+                    $item['delivery_po_plus'] ?? '',
+                    format_number($item['kg_po_plus'], 2) ?? 0,
+                    $item['admin'] ?? ''
                 ]
             ], NULL, 'A' . $row);
             $row++;
@@ -940,16 +963,16 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle('A3:P' . ($row - 1))->applyFromArray($styleArray);
+        $sheet->getStyle('A3:Y' . ($row - 1))->applyFromArray($styleArray);
 
         // Set auto width untuk setiap kolom
-        foreach (range('A', 'P') as $column) {
+        foreach (range('A', 'Y') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Set isi tabel agar rata tengah
-        $sheet->getStyle('A4:P' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A4:P' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A4:Y' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:Y' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
         $fileName = 'Report_Po_Benang_' . date('Y-m-d') . '.xlsx';
@@ -9069,7 +9092,7 @@ class ExcelController extends BaseController
         $delivery = $this->request->getGet('delivery');
         $materialType = $this->request->getGet('material_type');
         $result = $this->openPoModel->getPoManualByNoModel($noModel);
-
+        // dd($result);
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';
         } else {
@@ -9116,7 +9139,7 @@ class ExcelController extends BaseController
         // Buat Excel
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Open PO Manual ' . $noModel);
+        $sheet->setTitle('Open PO Manual');
         $spreadsheet->getDefaultStyle()->getFont()->setName('Arial');
         $spreadsheet->getDefaultStyle()->getFont()->setSize(16);
 

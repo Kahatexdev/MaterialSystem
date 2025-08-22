@@ -1058,6 +1058,19 @@ class WarehouseController extends BaseController
         $idStock = $this->request->getPost('id_stock');
         $data = $this->stockModel->getStockInPemasukanById($idStock);
         $dataArray = json_decode(json_encode($data), true);
+        foreach ($dataArray as &$id) {
+            $other = $this->otherOutModel->getQty($id['id_out_celup']);
+            $outByCns = $this->pengeluaranModel->getQtyOutByCns($id['id_out_celup']);
+
+            $kgsOther = !empty($other) ? (float) $other[0]['kgs_other_out'] : 0;
+            $kgsOutByCns = !empty($outByCns) ? (float) $outByCns['kgs_out'] : 0;
+            $cnsOther = !empty($other) ? (int) $other[0]['cns_other_out'] : 0;
+            $cnsOutByCns = !empty($outByCns) ? (int) $outByCns['cns_out'] : 0;
+
+            // kurangi other out & pengeluaran by cones
+            $id['kgs_kirim'] = round((float) $id['kgs_kirim'] - $kgsOther - $kgsOutByCns, 2);
+            $id['cones_kirim'] = (int) $id['cones_kirim'] - $cnsOther - $cnsOutByCns;
+        }
         // var_dump($dataArray);
         // log_message('debug', 'Data Stock: ' . print_r($dataArray, true));
         if (empty($dataArray)) {
@@ -1671,12 +1684,13 @@ class WarehouseController extends BaseController
         return redirect()->to($this->role . '/pemasukan');
     }
 
-    public function reportPoBenang()
+    public function reportPoBenang($jenis = null)
     {
         $data = [
             'role' => $this->role,
             'title' => 'Report PO Benang',
-            'active' => $this->active
+            'active' => $this->active,
+            'jenis' => $jenis
         ];
 
         return view($this->role . '/warehouse/report-po-benang', $data);
@@ -1685,10 +1699,39 @@ class WarehouseController extends BaseController
     public function filterPoBenang()
     {
         $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? null;
+        $data = $this->materialModel->getFilterPoBenang($key, $jenis);
 
-        $data = $this->materialModel->getFilterPoBenang($key);
-        // dd($data);
-        return $this->response->setJSON($data);
+        $startMc = [];
+        $result = [];
+
+        foreach ($data as $row) {
+            $model = isset($row['no_model']) ? $row['no_model'] : '';
+
+            if ($model === '') {
+                $row['start_mc'] = 'Belum Ada Start Mc';
+                $result[] = $row;
+                continue;
+            }
+
+            // getStartMc
+            if (!isset($startMc[$model])) {
+                $url = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . urlencode($model);
+                $resp = @file_get_contents($url);
+                if ($resp !== false) {
+                    $json = json_decode($resp, true);
+                    $startMc[$model] = $json['start_mc'] ?? 'Belum Ada Start Mc';
+                } else {
+                    // fallback jika API error / tidak dapat diakses
+                    $startMc[$model] = 'Belum Ada Start Mc';
+                }
+            }
+
+            $row['start_mc'] = $startMc[$model];
+            $result[] = $row;
+        }
+
+        return $this->response->setJSON($result);
     }
 
     public function reportDatangBenang()
@@ -1967,6 +2010,20 @@ class WarehouseController extends BaseController
         $idStock = $this->request->getPost('id_stock');
         $data = $this->stockModel->getStockInPemasukanById($idStock);
         $dataArray = json_decode(json_encode($data), true);
+        foreach ($dataArray as &$id) {
+            $other = $this->otherOutModel->getQty($id['id_out_celup']);
+            $outByCns = $this->pengeluaranModel->getQtyOutByCns($id['id_out_celup']);
+
+            $kgsOther = !empty($other) ? (float) $other[0]['kgs_other_out'] : 0;
+            $kgsOutByCns = !empty($outByCns) ? (float) $outByCns['kgs_out'] : 0;
+            $cnsOther = !empty($other) ? (int) $other[0]['cns_other_out'] : 0;
+            $cnsOutByCns = !empty($outByCns) ? (int) $outByCns['cns_out'] : 0;
+
+            // kurangi other out & pengeluaran by cones
+            $id['kgs_kirim'] = round((float) $id['kgs_kirim'] - $kgsOther - $kgsOutByCns, 2);
+            $id['cones_kirim'] = (int) $id['cones_kirim'] - $cnsOther - $cnsOutByCns;
+        }
+
         // var_dump($dataArray);
         // log_message('debug', 'Data Stock: ' . print_r($dataArray, true));
         if (empty($dataArray)) {

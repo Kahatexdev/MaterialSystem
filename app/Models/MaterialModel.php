@@ -917,7 +917,7 @@ class MaterialModel extends Model
 
     //     return $this->findAll();
     // }
-    public function getFilterPoBenang($key = null)
+    public function getFilterPoBenang($key = null, $jenis = 'BENANG')
     {
         $db = \Config\Database::connect();
 
@@ -976,7 +976,7 @@ class MaterialModel extends Model
             ->where('po_tambahan.status', 'approved')
             ->groupBy('po_tambahan.tanggal_approve, material.item_type, material.kode_warna, material.color')
             ->getCompiledSelect(false);
-        // dd($subPoPlus);
+
         // 4) Query utama
         $builder = $db->table('material')
             ->select("
@@ -1023,13 +1023,13 @@ class MaterialModel extends Model
             )
             ->join(
                 "({$subPoPlus}) AS plusSub",
-                'plusSub.id_material = material.id_material',
-                'plusSub.item_type = material.item_type',
-                'plusSub.kode_warna = material.kode_warna',
-                'plusSub.color = material.color',
+                'plusSub.id_material = material.id_material 
+             AND plusSub.item_type = material.item_type 
+             AND plusSub.kode_warna = material.kode_warna 
+             AND plusSub.color = material.color',
                 'left'
             )
-            ->where('master_material.jenis', 'BENANG');
+            ->where('master_material.jenis', $jenis);
 
         // Filter pencarian
         if (!empty($key)) {

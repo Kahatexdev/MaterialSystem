@@ -827,6 +827,7 @@ class PdfController extends BaseController
                 $groupedDetails[$key] = [
                     'no_model' => $detail['no_model'],
                     'item_type' => $detail['item_type'],
+                    'spesifikasi_benang' => $detail['spesifikasi_benang'],
                     'kode_warna' => $detail['kode_warna'],
                     'warna' => $detail['warna'],
                     'buyer' => $detail['buyer'],
@@ -1046,6 +1047,17 @@ class PdfController extends BaseController
                     $counter[$key]++;
                 }
 
+                $itemTypeAsli = $bon['item_type'];
+                $ukuranBenang = strtoupper($bon['ukuran']);
+                $itemTypeBaru = '';
+
+                // Jika $ukuranBenang ada di $itemTypeAsli, hapus dan simpan hasilnya di $itemTypeBaru
+                if (!empty($ukuranBenang) && strpos($itemTypeAsli, $ukuranBenang) !== false) {
+                    $itemTypeBaru = trim(str_replace($ukuranBenang, '', $itemTypeAsli));
+                } else {
+                    $itemTypeBaru = $itemTypeAsli;
+                }
+
                 // Hitung jumlah detail untuk grup saat ini
                 $jmlDetail = count($bon['detailPengiriman']);
                 // $jmlBaris = ($jmlDetail === 1) ? 3 : 2;
@@ -1054,9 +1066,8 @@ class PdfController extends BaseController
                 $pdf->Cell(18, 3, $bon['no_model'], 1, 0, 'C');
                 $x2 = $pdf->GetX();
                 $y2 = $pdf->GetY();
-
                 // MultiCell untuk kolom item_type (tinggi fleksibel)
-                $pdf->MultiCell(22, 3, $bon['item_type'], 1, 'C', false);
+                $pdf->MultiCell(22, 3, $itemTypeBaru . ' ' . $bon['spesifikasi_benang'], 1, 'C', false);
                 // Kembalikan posisi untuk kolom berikutnya
                 $pdf->SetXY($x2 + 22, $y2);
 

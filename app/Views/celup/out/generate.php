@@ -312,7 +312,7 @@
                                 }
                             ?>
                                 <td class="text-center"><?= $bon['no_model'] ?></td>
-                                <td class="text-center"><?= $bon['item_type'] ?></td>
+                                <td class="text-center"><?= $bon['item_type'] . ' ' . $bon['spesifikasi_benang'] ?></td>
                                 <td class="text-center"><?= $bon['ukuran'] ?></td>
                                 <td class="text-center"><?= $bon['kode_warna'] ?></td>
                                 <td class="text-center"><?= $bon['warna'] ?></td>
