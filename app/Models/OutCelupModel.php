@@ -135,7 +135,7 @@ class OutCelupModel extends Model
         }
 
         // Ambil data lengkap dari out_celup dan gabungkan manual ke buyer, ukuran, dll
-        $data = $this->select('
+        return $this->select('
             out_celup.*, 
             schedule_celup.item_type, 
             schedule_celup.kode_warna, 
@@ -151,7 +151,6 @@ class OutCelupModel extends Model
             ->where('out_celup.id_bon', $id)
             ->groupBy('id_out_celup')
             ->findAll();
-        dd($data);
     }
 
     public function getDataOut($id)
