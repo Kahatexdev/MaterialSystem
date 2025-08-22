@@ -797,9 +797,8 @@ class CelupController extends BaseController
             }
         }
 
-
         $dataBon['groupedDetails'] = array_values($groupedDetails);
-        dd($dataBon);
+
         $data = [
             'role' => $this->role,
             'active' => $this->active,
@@ -808,7 +807,7 @@ class CelupController extends BaseController
             'dataBon' => $dataBon,
             'img' => $img
         ];
-        // dd($data);
+
         return view($this->role . '/out/generate', $data);
     }
 
