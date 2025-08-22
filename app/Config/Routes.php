@@ -194,6 +194,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('warehouse/getPindahCluster', 'WarehouseController::getPindahCluster');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
     $routes->get('warehouse/reportPoBenang', 'WarehouseController::reportPoBenang');
+    $routes->get('warehouse/reportPo/(:any)', 'WarehouseController::reportPoBenang/$1');
     $routes->get('warehouse/filterPoBenang', 'WarehouseController::filterPoBenang');
     $routes->get('warehouse/exportPoBenang', 'ExcelController::exportPoBenang');
     $routes->get('warehouse/reportDatangBenang', 'WarehouseController::reportDatangBenang');
