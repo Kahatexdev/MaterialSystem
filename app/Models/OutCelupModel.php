@@ -147,6 +147,7 @@ class OutCelupModel extends Model
             ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
             ->join('master_material', 'master_material.item_type = schedule_celup.item_type', 'left')
             ->join('master_order', 'master_order.no_model = out_celup.no_model', 'left')
+            ->join('open_po', 'open_po.no_model = schedule_celup.no_model AND open_po.item_type = schedule_celup.item_type AND open_po.kode_warna = schedule_celup.kode_warna', 'left')
             ->join('master_buyer', 'master_order.buyer = master_buyer.kode_buyer', 'left')
             ->where('out_celup.id_bon', $id)
             ->groupBy('id_out_celup')
