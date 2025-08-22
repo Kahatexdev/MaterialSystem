@@ -885,14 +885,15 @@ class ExcelController extends BaseController
     public function exportPoBenang()
     {
         $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? 'BENANG';
 
-        $data = $this->materialModel->getFilterPoBenang($key);
+        $data = $this->materialModel->getFilterPoBenang($key, $jenis);
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
         // Judul
-        $sheet->setCellValue('A1', 'Report PO Benang');
+        $sheet->setCellValue('A1', 'Report PO ' . $jenis);
         $sheet->mergeCells('A1:P1'); // Menggabungkan sel untuk judul
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);

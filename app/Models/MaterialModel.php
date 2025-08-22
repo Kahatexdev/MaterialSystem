@@ -917,7 +917,7 @@ class MaterialModel extends Model
 
     //     return $this->findAll();
     // }
-    public function getFilterPoBenang($key = null)
+    public function getFilterPoBenang($key = null, $jenis = 'BENANG')
     {
         $db = \Config\Database::connect();
 
@@ -1029,7 +1029,7 @@ class MaterialModel extends Model
              AND plusSub.color = material.color',
                 'left'
             )
-            ->where('master_material.jenis', 'BENANG');
+            ->where('master_material.jenis', $jenis);
 
         // Filter pencarian
         if (!empty($key)) {

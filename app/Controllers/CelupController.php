@@ -702,22 +702,34 @@ class CelupController extends BaseController
 
     public function generateBarcode($idBon)
     {
-        $path = FCPATH . 'assets/img/logo-kahatex.png';
+        $path = FCPATH . 'assets/img/logo-kahatexbw.png';
         $type = pathinfo($path, PATHINFO_EXTENSION);
         $data = file_get_contents($path);
         $img = 'data:image/' . $type . ';base64,' . base64_encode($data);
         // data ALL BON
         $dataBon = $this->bonCelupModel->getDataById($idBon); // get data by id_bon
         $detailBon = $this->outCelupModel->getDetailBonByIdBon($idBon); // get data detail bon by id_bon
+
         $groupedDetails = [];
         foreach ($detailBon as $detail) {
             $key = $detail['no_model'] . '|' . $detail['item_type'] . '|' . $detail['kode_warna'];
+            $itemTypeAsli = $detail['item_type'];
+            $ukuranBenang = strtoupper($detail['ukuran']);
+            $itemTypeBaru = '';
+
+            // Jika $ukuranBenang ada di $itemTypeAsli, hapus dan simpan hasilnya di $itemTypeBaru
+            if (!empty($ukuranBenang) && strpos($itemTypeAsli, $ukuranBenang) !== false) {
+                $itemTypeBaru = trim(str_replace($ukuranBenang, '', $itemTypeAsli));
+            } else {
+                $itemTypeBaru = $itemTypeAsli;
+            }
 
             $gantiRetur = ($detail['ganti_retur'] == 1) ? ' / Ganti Retur' : '';
             if (!isset($groupedDetails[$key])) {
                 $groupedDetails[$key] = [
                     'no_model' => $detail['no_model'],
-                    'item_type' => $detail['item_type'],
+                    'item_type' => $itemTypeBaru,
+                    'spesifikasi_benang' => $detail['spesifikasi_benang'],
                     'kode_warna' => $detail['kode_warna'],
                     'warna' => $detail['warna'],
                     'buyer' => $detail['buyer'],
@@ -785,7 +797,6 @@ class CelupController extends BaseController
             }
         }
 
-
         $dataBon['groupedDetails'] = array_values($groupedDetails);
 
         $data = [
@@ -796,7 +807,7 @@ class CelupController extends BaseController
             'dataBon' => $dataBon,
             'img' => $img
         ];
-        // dd($data);
+
         return view($this->role . '/out/generate', $data);
     }
 
