@@ -125,6 +125,7 @@
                             const returStock = Number(item.retur_stock) || 0;
                             const returTitip = Number(item.retur_titip) || 0;
                             const dipinjam = Number(item.dipinjam) || 0;
+                            const pindahOrder = Number(item.pindah_order) || 0;
 
                             // perhitungan
                             const tagihanGbn = kgs - (datangSolid + plusDatangSolid + kgsStockAwal);
@@ -156,7 +157,7 @@
                                 fmt(returStock), // retur stock
                                 fmt(returTitip), // retur titip
                                 fmt(dipinjam), // dipinjam
-                                '-', // pindah order
+                                fmt(pindahOrder), // pindah order
                                 '-', // pindah ke stock mati
                                 fmt(stockAkhir), // stock akhir
                                 fmt(tagihanGbn), // tagihan gbn
