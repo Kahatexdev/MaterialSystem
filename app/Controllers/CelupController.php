@@ -702,7 +702,7 @@ class CelupController extends BaseController
 
     public function generateBarcode($idBon)
     {
-        $path = FCPATH . 'assets/img/logo-kahatex.png';
+        $path = FCPATH . 'assets/img/logo-kahatexbw.png';
         $type = pathinfo($path, PATHINFO_EXTENSION);
         $data = file_get_contents($path);
         $img = 'data:image/' . $type . ';base64,' . base64_encode($data);
@@ -797,7 +797,6 @@ class CelupController extends BaseController
             }
         }
 
-
         $dataBon['groupedDetails'] = array_values($groupedDetails);
 
         $data = [
@@ -808,7 +807,7 @@ class CelupController extends BaseController
             'dataBon' => $dataBon,
             'img' => $img
         ];
-        // dd($data);
+
         return view($this->role . '/out/generate', $data);
     }
 

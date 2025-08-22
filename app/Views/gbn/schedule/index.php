@@ -438,7 +438,7 @@ $this->extend($role . '/schedule/header'); ?>
                     console.error("Error fetching data:", error);
                     // Jika data tidak ditemukan, tambahkan tombol "Tambah Jadwal"
                     modalBody.innerHTML = `
-                <div class="text-center text-danger">${error.message}</div>
+                <div class="text-center text-danger"></div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-info" id="addSchedule">Tambah Jadwal</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>

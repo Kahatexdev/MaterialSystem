@@ -352,17 +352,15 @@ class MasterOrderModel extends Model
             AND sc.item_type = material.item_type
         ) AS pakai_area,
 
-        -- lot out
+        -- lot
         (
-            SELECT COALESCE(p.lot_out, 0)
-            FROM pengeluaran p
-            JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
-            JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
-            WHERE sc.no_model = master_order.no_model
-            AND sc.kode_warna = material.kode_warna
-            AND sc.item_type = material.item_type
+            SELECT COALESCE(s.lot_stock, 0)
+            FROM stock s
+            WHERE s.no_model = master_order.no_model
+            AND s.kode_warna = material.kode_warna
+            AND s.item_type = material.item_type
             LIMIT 1
-        ) AS lot_out, 
+        ) AS lot, 
 
         -- kgs other out
         (
@@ -405,8 +403,85 @@ class MasterOrderModel extends Model
             WHERE s.no_model = master_order.no_model
             AND s.kode_warna = material.kode_warna
             AND s.item_type = material.item_type
-            AND hs.keterangan = 'Pindah Order'
+            AND hs.keterangan = 'Pinjam Order'
         ) AS dipinjam,
+
+        -- pindah order
+        (
+            SELECT SUM(COALESCE(hs.kgs, 0))
+            FROM history_stock hs
+            JOIN stock s ON hs.id_stock_old = s.id_stock
+            WHERE s.no_model = master_order.no_model
+            AND s.kode_warna = material.kode_warna
+            AND s.item_type = material.item_type
+            AND hs.keterangan = 'Pindah Order'
+        ) AS pindah_order,
+
+        -- cns pindah order
+        (
+            SELECT SUM(COALESCE(hs.cns, 0))
+            FROM history_stock hs
+            JOIN stock s ON hs.id_stock_old = s.id_stock
+            WHERE s.no_model = master_order.no_model
+            AND s.kode_warna = material.kode_warna
+            AND s.item_type = material.item_type
+            AND hs.keterangan = 'Pindah Order'
+        ) AS cns_pindah_order,
+
+        -- cluster
+        (
+            SELECT COALESCE(s.nama_cluster, 0)
+            FROM stock s
+            WHERE s.no_model = master_order.no_model
+            AND s.kode_warna = material.kode_warna
+            AND s.item_type = material.item_type
+            LIMIT 1
+        ) AS cluster, 
+
+        -- tgl pindah
+        (
+            SELECT COALESCE(DATE(hs.created_at), 0)
+            FROM history_stock hs
+            JOIN stock s ON hs.id_stock_old = s.id_stock
+            WHERE s.no_model = master_order.no_model
+            AND s.kode_warna = material.kode_warna
+            AND s.item_type = material.item_type
+            LIMIT 1
+        ) AS tgl_pindah,
+         
+        -- ket pindah
+        (
+            SELECT COALESCE(hs.keterangan, 0)
+            FROM history_stock hs
+            JOIN stock s ON hs.id_stock_old = s.id_stock
+            WHERE s.no_model = master_order.no_model
+            AND s.kode_warna = material.kode_warna
+            AND s.item_type = material.item_type
+            LIMIT 1
+        ) AS ket_pindah,
+
+        -- nomodel new pindah order
+        (
+            SELECT COALESCE(s_new.no_model, 0)
+            FROM history_stock hs
+            JOIN stock s_old ON s_old.id_stock = hs.id_stock_old   -- stock lama
+            JOIN stock s_new ON s_new.id_stock = hs.id_stock_new   -- stock baru
+            WHERE s_old.no_model = master_order.no_model
+            AND s_old.kode_warna = material.kode_warna
+            AND s_old.item_type = material.item_type
+            LIMIT 1
+        ) AS nomodel_new,
+
+        -- admin pindah
+        (
+            SELECT COALESCE(hs.admin, 0)
+            FROM history_stock hs
+            JOIN stock s ON hs.id_stock_old = s.id_stock
+            WHERE s.no_model = master_order.no_model
+            AND s.kode_warna = material.kode_warna
+            AND s.item_type = material.item_type
+            LIMIT 1
+        ) AS admin_pindah,
     ")
             ->join('material', 'material.id_order = master_order.id_order', 'left')
             ->join('master_material', 'material.item_type = master_material.item_type', 'left')

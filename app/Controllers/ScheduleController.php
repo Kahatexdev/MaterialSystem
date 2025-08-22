@@ -146,7 +146,7 @@ class ScheduleController extends BaseController
         $lot_urut = $this->request->getGet('lot_urut');
         $no_model = $this->request->getGet('no_model');
 
-
+        $id_mesin = $this->mesinCelupModel->select('id_mesin')->where('no_mesin', $no_mesin)->first();
         // $jenis_bahan_baku = $this->masterMaterialModel->getJenisBahanBaku();
         $item_type = $this->masterMaterialModel->getItemType();
         $min = $this->mesinCelupModel->getMinCaps($no_mesin);
@@ -157,6 +157,7 @@ class ScheduleController extends BaseController
         if (!$no_mesin || !$tanggal_schedule || !$lot_urut) {
             return redirect()->back();
         }
+        $historySch = $this->scheduleCelupModel->getHistorySch($id_mesin, $tanggal_schedule, $lot_urut);
 
         $data = [
             'active' => $this->active,
@@ -171,7 +172,8 @@ class ScheduleController extends BaseController
             'max_caps' => $max['max_caps'],
             'po' => '',
             'start_date' => $this->request->getGet('start_date'),
-            'end_date' =>  $this->request->getGet('end_date')
+            'end_date' =>  $this->request->getGet('end_date'),
+            'history' => $historySch
         ];
         // dd($data);
 
@@ -644,6 +646,9 @@ class ScheduleController extends BaseController
         }
         unset($row);
         $historySch = $this->scheduleCelupModel->getHistorySch($id_mesin, $tanggal_schedule, $lot_urut);
+        if (empty($historySch)) {
+            $this->create();
+        }
         // dd($historySch);
         // dd($scheduleData);
         // Persiapkan data untuk view
