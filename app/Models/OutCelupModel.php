@@ -135,7 +135,7 @@ class OutCelupModel extends Model
         }
 
         // Ambil data lengkap dari out_celup dan gabungkan manual ke buyer, ukuran, dll
-        return $this->select('
+        $data = $this->select('
             out_celup.*, 
             schedule_celup.item_type, 
             schedule_celup.kode_warna, 
@@ -145,11 +145,12 @@ class OutCelupModel extends Model
         ')
             ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
             ->join('master_material', 'master_material.item_type = schedule_celup.item_type', 'left')
-            ->join('open_po', 'open_po.no_model = schedule_celup.no_model', 'left')
-            ->join('master_buyer', 'open_po.buyer = master_buyer.kode_buyer', 'left')
+            ->join('master_order', 'master_order.no_model = out_celup.no_model', 'left')
+            ->join('master_buyer', 'master_order.buyer = master_buyer.kode_buyer', 'left')
             ->where('out_celup.id_bon', $id)
             ->groupBy('id_out_celup')
             ->findAll();
+        dd($data);
     }
 
     public function getDataOut($id)
