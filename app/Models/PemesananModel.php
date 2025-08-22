@@ -171,7 +171,41 @@ class PemesananModel extends Model
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pemesanan.admin', $area)
-            ->where('pemesanan.status_kirim=', 'YA')
+            ->where('pemesanan.status_kirim!=', 'YA')
+            ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')
+            ->orderBy('pemesanan.tgl_pakai', 'DESC')
+            ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
+        return $query->get()->getResultArray();
+    }
+    public function getListReportPemesananByArea($area)
+    {
+        $query = $this->db->table('pemesanan')
+            ->select("
+                pemesanan.admin,
+                pemesanan.tgl_pakai,
+                master_order.no_model,
+                material.item_type,
+                master_material.jenis,
+                material.kode_warna,
+                material.color,
+                SUM(material.kgs) AS kgs,
+                SUM(pemesanan.jl_mc) AS jl_mc,
+                SUM(pemesanan.ttl_qty_cones) AS cns_pesan,
+                SUM(pemesanan.ttl_berat_cones) AS qty_pesan,
+                SUM(pemesanan.sisa_kgs_mc) AS qty_sisa,
+                SUM(pemesanan.sisa_cones_mc) AS cns_sisa,
+                pemesanan.lot,
+                pemesanan.keterangan,
+                pemesanan.status_kirim,
+                pemesanan.additional_time,
+                pemesanan.po_tambahan
+            ")
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('pemesanan.admin', $area)
+            ->where('pemesanan.status_kirim', 'YA')
             ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')
             ->orderBy('pemesanan.tgl_pakai', 'DESC')
             ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
@@ -675,7 +709,7 @@ class PemesananModel extends Model
             x.lot_out,
             x.status
         ")
-            ->where('x.status IS NOT NULL')
+            // ->where('x.status IS NOT NULL')
             ->orderBy('p.no_model, p.item_type, p.kode_warna, p.color', 'ASC');
 
         return $query->get()->getResultArray();

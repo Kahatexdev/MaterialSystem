@@ -373,7 +373,40 @@ class MasterOrderModel extends Model
             WHERE sc.no_model = master_order.no_model
             AND sc.kode_warna = material.kode_warna
             AND sc.item_type = material.item_type
-        ) AS kgs_other_out
+        ) AS kgs_other_out,
+         
+        -- retur stock
+        (
+            SELECT SUM(COALESCE(r.kgs_retur, 0))
+            FROM retur r
+            JOIN kategori_retur kr ON r.kategori = kr.nama_kategori
+            WHERE r.no_model = master_order.no_model
+            AND r.kode_warna = material.kode_warna
+            AND r.item_type = material.item_type
+            AND kr.tipe_kategori = 'SIMPAN ULANG'
+        ) AS retur_stock,
+
+        -- retur titip
+        (
+            SELECT SUM(COALESCE(r.kgs_retur, 0))
+            FROM retur r
+            JOIN kategori_retur kr ON r.kategori = kr.nama_kategori
+            WHERE r.no_model = master_order.no_model
+            AND r.kode_warna = material.kode_warna
+            AND r.item_type = material.item_type
+            AND kr.tipe_kategori = 'BAHAN BAKU TITIP'
+        ) AS retur_titip,
+
+        -- dipinjam
+        (
+            SELECT SUM(COALESCE(hs.kgs, 0))
+            FROM history_stock hs
+            JOIN stock s ON hs.id_stock_old = s.id_stock
+            WHERE s.no_model = master_order.no_model
+            AND s.kode_warna = material.kode_warna
+            AND s.item_type = material.item_type
+            AND hs.keterangan = 'Pindah Order'
+        ) AS dipinjam,
     ")
             ->join('material', 'material.id_order = master_order.id_order', 'left')
             ->join('master_material', 'material.item_type = master_material.item_type', 'left')

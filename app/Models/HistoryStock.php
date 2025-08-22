@@ -67,7 +67,8 @@ class HistoryStock extends Model
             ->where('keterangan', 'Pindah Order');
 
         if (!empty($noModel)) {
-            $builder->where('s_new.no_model', $noModel);
+            $builder->where('s_new.no_model', $noModel)
+                ->orWhere('s_old.no_model', $noModel);
         }
         if (!empty($kodeWarna)) {
             $builder->where('s_new.kode_warna', $kodeWarna);
