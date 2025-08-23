@@ -1895,6 +1895,8 @@ class ExcelController extends BaseController
 
         $dataStockAwal = $this->historyStock->getDataStockAwal($key, $jenis);
         $dataDatangSolid = $this->pemasukanModel->getDatangSolid($key, $jenis);
+        $dataPlusDatangSolid = $this->pemasukanModel->getPlusDatangSolid($key, $jenis);
+        // dd($key, $jenis, $dataDatangSolid, $dataPlusDatangSolid);
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -2068,7 +2070,7 @@ class ExcelController extends BaseController
                     $newSheet->getColumnDimension($col)->setAutoSize(true);
                 }
 
-                $footerRow = $row + 1;
+                $footerRow = $lastRow + 2;
                 //Footer
                 $newSheet->mergeCells("A{$footerRow}:K{$footerRow}");
                 $newSheet->setCellValue("A{$footerRow}", 'REPORT HISTORY PINDAH ORDER');
@@ -2085,7 +2087,7 @@ class ExcelController extends BaseController
                 $newSheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 // Header
-                $headerDatangSolid = ['No', 'No Model', 'Item Type', 'Kode Warna', 'Warna', 'Tgl Datang', 'Nama Cluster', 'Qty Datang', 'Cones Datang', 'Lot Datang', 'Tgl Penerimaan', 'No SJ', 'L/M/D', 'Ket Datang', 'Admin'];
+                $headerDatangSolid = ['NO', 'NO MODEL', 'ITEM TYPE', 'KODE WARNA', 'WARNA', 'TGL DATANG', 'NAMA CLUSTER', 'QTY DATANG', 'CONES DATANG', 'LOT DATANG', 'TGL PENERIMAAN', 'NO SJ', 'L/M/D', 'KET DATANG', 'ADMIN'];
                 $col = 'A';
                 foreach ($headerDatangSolid as $header) {
                     $newSheet->setCellValue($col . '3', $header);
@@ -2102,6 +2104,55 @@ class ExcelController extends BaseController
                         ],
                     ],
                 ]);
+
+                // Data
+                $row = 4;
+                $no = 1;
+                $delIndex = 0;
+                foreach ($dataDatangSolid as $item) {
+                    // Format setiap nilai untuk memastikan nilai 0 dan angka dengan dua desimal
+                    $newSheet->setCellValue('A' . $row, $no++);
+                    $newSheet->setCellValue('B' . $row, $item['no_model'] ?: '-'); // no model
+                    $newSheet->setCellValue('C' . $row, $item['item_type'] ?: '-'); // item type
+                    $newSheet->setCellValue('D' . $row, $item['kode_warna'] ?: '-'); //kode warna
+                    $newSheet->setCellValue('E' . $row, $item['warna'] ?: '-'); // color
+                    $newSheet->setCellValue('F' . $row, $item['tgl_datang']); // tgl datang
+                    $newSheet->setCellValue('G' . $row, $item['nama_cluster']); // nama cluster
+                    $newSheet->setCellValue('H' . $row, isset($item['qty_datang']) ? number_format($item['qty_datang'], 2, '.', '') : 0); // qty datang
+                    $newSheet->setCellValue('I' . $row, isset($item['cns_datang']) ? number_format($item['cns_datang'], 2, '.', '') : 0); // cns datang
+                    $newSheet->setCellValue('J' . $row, $item['lot_datang'] ?: '-'); // lot
+                    $newSheet->setCellValue('K' . $row, $item['tgl_terima'] ?: '-'); // tgl terima
+                    $newSheet->setCellValue('L' . $row, $item['no_surat_jalan'] ?: '-'); // no sj
+                    $newSheet->setCellValue('M' . $row, $item['l_m_d'] ?: '-'); // lmd
+                    $newSheet->setCellValue('N' . $row, $item['keterangan']); // keterangan
+                    $newSheet->setCellValue('O' . $row, $item['admin'] ?: '-'); // admin
+
+                    $row++;
+                }
+
+                // Border
+                $lastRow = $row - 1;
+                $styleArray = [
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => 'FF000000'],
+                        ],
+                    ],
+                ];
+                $newSheet->getStyle("A3:O{$lastRow}")->applyFromArray($styleArray);
+
+                // Auto-size
+                foreach (range('A', 'Z') as $col) {
+                    $newSheet->getColumnDimension($col)->setAutoSize(true);
+                }
+
+                $footerRow = $lastRow + 2;
+                //Footer
+                $newSheet->mergeCells("A{$footerRow}:O{$footerRow}");
+                $newSheet->setCellValue("A{$footerRow}", 'REPORT DATANG SOLID');
+                $newSheet->getStyle("A{$footerRow}")->getFont()->setBold(true)->setSize(10);
+                $newSheet->getStyle("A{$footerRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             }
 
             // Hanya atur judul dan header jika nama sheet mengandung '(+) DATANG SOLID'
@@ -2113,9 +2164,9 @@ class ExcelController extends BaseController
                 $newSheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 // Header
-                $headerStockAwal = ['No', 'No Model', 'Item Type', 'Kode Warna', 'Warna', 'PO (+)', 'Tgl Datang', 'Nama Cluster', 'Qty Datang', 'Cones Datang', 'Lot Datang', 'Tgl Penerimaan', 'No SJ', 'L/M/D', 'Ket Datang', 'Admin'];
+                $headerPlusDatangSolid = ['No', 'No Model', 'Item Type', 'Kode Warna', 'Warna', 'PO (+)', 'Tgl Datang', 'Nama Cluster', 'Qty Datang', 'Cones Datang', 'Lot Datang', 'Tgl Penerimaan', 'No SJ', 'L/M/D', 'Ket Datang', 'Admin'];
                 $col = 'A';
-                foreach ($headerStockAwal as $header) {
+                foreach ($headerPlusDatangSolid as $header) {
                     $newSheet->setCellValue($col . '3', $header);
                     $newSheet->getStyle($col . '3')->getFont()->setBold(true);
                     $col++;
@@ -2130,6 +2181,56 @@ class ExcelController extends BaseController
                         ],
                     ],
                 ]);
+
+                // Data
+                $row = 4;
+                $no = 1;
+                $delIndex = 0;
+                foreach ($dataPlusDatangSolid as $item) {
+                    // Format setiap nilai untuk memastikan nilai 0 dan angka dengan dua desimal
+                    $newSheet->setCellValue('A' . $row, $no++);
+                    $newSheet->setCellValue('B' . $row, $item['no_model'] ?: '-'); // no model
+                    $newSheet->setCellValue('C' . $row, $item['item_type'] ?: '-'); // item type
+                    $newSheet->setCellValue('D' . $row, $item['kode_warna'] ?: '-'); //kode warna
+                    $newSheet->setCellValue('E' . $row, $item['warna'] ?: '-'); // color
+                    $newSheet->setCellValue('F' . $row, $item['warna'] ?: '-'); // po(+)
+                    $newSheet->setCellValue('G' . $row, $item['tgl_datang'] ?: '-'); // tgl datang
+                    $newSheet->setCellValue('H' . $row, $item['nama_cluster']); // nama cluster
+                    $newSheet->setCellValue('I' . $row, isset($item['qty_datang']) ? number_format($item['qty_datang'], 2, '.', '') : 0); // qty datang
+                    $newSheet->setCellValue('J' . $row, isset($item['cns_datang']) ? number_format($item['cns_datang'], 2, '.', '') : 0); // cns datang
+                    $newSheet->setCellValue('K' . $row, $item['lot_datang'] ?: '-'); // lot
+                    $newSheet->setCellValue('L' . $row, $item['tgl_terima'] ?: '-'); // tgl terima
+                    $newSheet->setCellValue('M' . $row, $item['no_surat_jalan'] ?: '-'); // no sj
+                    $newSheet->setCellValue('N' . $row, $item['l_m_d'] ?: '-'); // lmd
+                    $newSheet->setCellValue('O' . $row, $item['keterangan'] ?: '-'); // keterangan
+                    $newSheet->setCellValue('P' . $row, $item['admin'] ?: '-'); // admin
+
+                    $row++;
+                }
+
+                $lastRow = $row - 1;
+                // Border
+                $styleArray = [
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => 'FF000000'],
+                        ],
+                    ],
+                ];
+                $newSheet->getStyle("A3:O{$lastRow}")->applyFromArray($styleArray);
+
+                // Auto-size
+                foreach (range('A', 'Z') as $col) {
+                    $newSheet->getColumnDimension($col)->setAutoSize(true);
+                }
+
+                //Footer
+                $footerRow = $lastRow + 2;
+                $newSheet->mergeCells("A{$footerRow}:P{$footerRow}");
+                $newSheet->setCellValue("A{$footerRow}", 'REPORT (+)DATANG SOLID');
+                $newSheet->getStyle("A{$footerRow}")->getFont()->setBold(true)->setSize(10);
+                $newSheet->getStyle("A{$footerRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             }
 
             // Hanya atur judul dan header jika nama sheet mengandung 'GANTI RETUR'

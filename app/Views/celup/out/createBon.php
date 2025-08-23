@@ -85,7 +85,7 @@
                                                     <select class="form-control" id="add_item" name="add_item" required>
                                                         <option value="">Pilih Item </option>
                                                         <?php foreach ($no_model as $item): ?>
-                                                            <option value="<?= $item['id_celup'] ?>"><?= $item['no_model'] ?> | <?= $item['item_type'] ?> |<?= $item['kode_warna'] ?> | <?= $item['warna'] ?></option>
+                                                            <option value="<?= $item['id_celup'] ?>"><?= $item['no_model'] ?> | <?= $item['item_type'] ?> |<?= $item['kode_warna'] ?> | <?= $item['warna']  ?> | Lot <?= $item['lot_celup'] ?> | <?= $item['kg_celup'] ?>kg</option>
                                                         <?php endforeach; ?>
                                                     </select>
                                                 </div>

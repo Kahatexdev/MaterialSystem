@@ -695,6 +695,7 @@ class CelupController extends BaseController
     public function deleteBon($id)
     {
         $this->scheduleCelupModel->where('id_bon', $id)->set(['id_bon' => null])->update();
+        $this->outCelupModel->where('id_bon', $id)->delete();
         $this->bonCelupModel->delete($id);
         return $this->response->setJSON(['success' => true]);
     }

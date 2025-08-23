@@ -770,4 +770,16 @@ class CoveringController extends BaseController
             return redirect()->back()->with('error', 'Gagal menghapus data PO Covering.');
         }
     }
+
+    public function deleteMultipleDetailPoCovering()
+    {
+        $ids = $this->request->getGet('ids');
+        $idArray = explode(',', $ids);
+
+        if (!empty($idArray)) {
+            $this->openPoModel->whereIn('id_po', $idArray)->delete();
+        }
+
+        return redirect()->back()->with('success', 'Data terpilih berhasil dihapus');
+    }
 }
