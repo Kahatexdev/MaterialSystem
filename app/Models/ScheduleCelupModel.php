@@ -380,7 +380,10 @@ class ScheduleCelupModel extends Model
     }
     public function getScheduleBon($id_bon)
     {
-        return $this->where('id_bon', $id_bon)
+        return $this->select('schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.id_celup')
+            ->join('out_celup', 'out_celup.id_celup=schedule_celup.id_celup')
+            ->where('out_celup.id_bon', $id_bon)
+            ->groupBy('schedule_celup.id_celup')
             ->findAll();
     }
     public function schedulePerArea($model, $itemType, $kodeWarna, $search)

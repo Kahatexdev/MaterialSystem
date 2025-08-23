@@ -575,9 +575,9 @@
 
                     newRow.innerHTML = `
                     <td><input type="text" class="form-control text-center" name="no_karung[${tabIndex-2}][${rowCount-1}]" value="${rowCount}" readonly></td>
+                    <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
                     <td><input type="number" step="0.01" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
                     <td><input type="number" step="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
-                    <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
                     <td><input type="text" class="form-control lot_celup_input" name="lot_celup[${tabIndex-2}][${rowCount-1}]" value="${valueLot}" id="${lotCelupId}" required></td>
                     <td><input type="text" class="form-control operator_packing_input" name="operator_packing[${tabIndex-2}][${rowCount-1}]" required></td>
                         <td><select class="form-control" name="shift[${tabIndex-2}][${rowCount-1}]" id="shift" required>
@@ -697,9 +697,9 @@
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
             <td><input type="text" class="form-control text-center" name="no_karung[0][${rowCount-1}]" value="${rowCount}" readonly></td>
+            <td><input type="number" step="0.01" class="form-control" name="cones_kirim[0][${rowCount-1}]" required></td>
             <td><input type="number" step="0.01" class="form-control" name="gw_kirim[0][${rowCount-1}]" required></td>
             <td><input type="number" step="0.01" class="form-control" name="kgs_kirim[0][${rowCount-1}]" required></td>
-            <td><input type="number" step="0.01" class="form-control" name="cones_kirim[0][${rowCount-1}]" required></td>
             <td><input type="text" class="form-control lot_celup_input" name="items[0][lot_celup]" id="lot_celup" value="${lotCelupValue}" required></td>
             <td><input type="text" class="form-control" name="operator_packing[0][${rowCount - 1}]" required></td>
             <td><select class="form-control" name="shift[0][${rowCount - 1}]" id="shift" required>

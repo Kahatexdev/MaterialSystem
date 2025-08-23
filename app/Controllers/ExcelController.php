@@ -1893,6 +1893,9 @@ class ExcelController extends BaseController
         $delivery = json_decode($response, true);
         $totalDel  = count($delivery);
 
+        $dataStockAwal = $this->historyStock->getDataStockAwal($key, $jenis);
+        $dataDatangSolid = $this->pemasukanModel->getDatangSolid($key, $jenis);
+
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('GLOBAL ALL ' . $key);
@@ -1904,11 +1907,13 @@ class ExcelController extends BaseController
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $headers = ['No', 'Buyer', 'No Model', 'Delivery', 'Area', 'Item Type', 'Kode Warna', 'Warna', 'Loss', 'Qty PO', 'Qty PO(+)', 'Stock Awal', 'Stock Opname', 'Datang Solid', '(+) Datang Solid', 'Ganti Retur', 'Datang Lurex', '(+)Datang Lurex', 'Datang PB GBN', 'Retur PB Area', 'Pakai Area', 'Pakai Lain-Lain', 'Retur Stock', 'Retur Titip', 'Dipinjam', 'Pindah Order', 'Pindah Ke Stock Mati', 'Stock Akhir', 'Tagihan GBN', 'Jatah Area'];
+        $headers = ['NO', 'NO MODEL', 'ITEM TYPE', 'KODE WARNA', 'WARNA', 'LOSS', 'QTY PO', 'QTY PO(+)', 'STOCK AWAL', 'STOCK OPNAME', 'DATANG SOLID', '(+) DATANG SOLID', 'GANTI RETUR', 'DATANG LUREX', '(+)DATANG LUREX', 'RETUR PB GBN', 'RETUR PB AREA', 'PAKAI AREA', 'PAKAI LAIN-LAIN', 'RETUR STOCK AREA', 'DIPINJAM', 'PINDAH ORDER', 'PINDAH KE STOCK MATI', 'STOCK AKHIR ORDER', 'TAGIHAN GBN', 'JATAH AREA'];
         $col = 'A';
         foreach ($headers as $header) {
             $sheet->setCellValue($col . '3', $header);
             $sheet->getStyle($col . '3')->getFont()->setBold(true);
+            $sheet->getStyle($col . '3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle($col . '3')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
             $col++;
         }
 
@@ -1919,46 +1924,42 @@ class ExcelController extends BaseController
         foreach ($data as $item) {
             // Format setiap nilai untuk memastikan nilai 0 dan angka dengan dua desimal
             $sheet->setCellValue('A' . $row, $no++);
-            $sheet->setCellValue('B' . $row, $item['buyer'] ?: '-'); // no model
-            $sheet->setCellValue('C' . $row, $item['no_model'] ?: '-'); // no model
-            if ($delIndex < $totalDel) {
-                $sheet->setCellValue('D' . $row, $delivery[$delIndex]['delivery']);
-                $delIndex++;
-            } else {
-                $sheet->setCellValue('D' . $row, '');  // atau '-' sesuai preferensi
-            }
-            $sheet->setCellValue('E' . $row, $item['area'] ?: '-');
-            $sheet->setCellValue('F' . $row, $item['item_type'] ?: '-'); // item type
-            $sheet->setCellValue('G' . $row, $item['kode_warna'] ?: '-'); //kode warna
-            $sheet->setCellValue('H' . $row, $item['color'] ?: '-'); // color
-            $sheet->setCellValue('I' . $row, isset($item['loss']) ? number_format($item['loss'], 2, '.', '') : 0); // loss
-            $sheet->setCellValue('J' . $row, isset($item['kgs']) ? number_format($item['kgs'], 2, '.', '') : 0); // qty po
-            $sheet->setCellValue('K' . $row, isset($item['qty_poplus']) ? number_format($item['qty_poplus'], 2, '.', '') : 0); // qty po (+)
-            $sheet->setCellValue('L' . $row, isset($item['kgs_stock_awal']) ? number_format($item['kgs_stock_awal'], 2, '.', '') : 0); // stock awal
-            $sheet->setCellValue('M' . $row, '-'); // stock opname
-            $sheet->setCellValue('N' . $row, isset($item['datang_solid']) ? number_format($item['datang_solid'], 2, '.', '') : 0); // datan solid
-            $sheet->setCellValue('O' . $row, isset($item['plus_datang_solid']) ? number_format($item['plus_datang_solid'], 2, '.', '') : 0); // (+) datang solid
-            $sheet->setCellValue('P' . $row, isset($item['ganti_retur']) ? number_format($item['ganti_retur'], 2, '.', '') : 0); // ganti retur
-            $sheet->setCellValue('Q' . $row, isset($item['datang_lurex']) ? number_format($item['datang_lurex'], 2, '.', '') : 0); // datang lurex
-            $sheet->setCellValue('R' . $row, isset($item['plus_datang_lurex']) ? number_format($item['plus_datang_lurex'], 2, '.', '') : 0); // (+) datang lurex
-            $sheet->setCellValue('S' . $row, isset($item['retur_pb_gbn']) ? number_format($item['retur_pb_gbn'], 2, '.', '') : 0); // retur pb gbn
-            $sheet->setCellValue('T' . $row, isset($item['retur_pb_area']) ? number_format($item['retur_pb_area'], 2, '.', '') : 0); // retur bp area
-            $sheet->setCellValue('U' . $row, isset($item['pakai_area']) ? number_format($item['pakai_area'], 2, '.', '') : 0); // pakai area
-            $sheet->setCellValue('V' . $row, isset($item['kgs_other_out']) ? number_format($item['kgs_other_out'], 2, '.', '') : 0); // pakai lain-lain
-            $sheet->setCellValue('W' . $row, '-'); // retur stock
-            $sheet->setCellValue('X' . $row, '-'); // retur titip
-            $sheet->setCellValue('Y' . $row, '-'); // dipinjam
-            $sheet->setCellValue('Z' . $row, '-'); // pindah order
-            $sheet->setCellValue('AA' . $row, '-'); // pindah ke stock mati
-            $sheet->setCellValue('AB' . $row, isset($item['stock_akhir']) ? number_format($item['stock_akhir'], 2, '.', '') : 0); // stock akhir
+            $sheet->setCellValue('B' . $row, $item['no_model'] ?: '-'); // no model
+            $sheet->setCellValue('C' . $row, $item['item_type'] ?: '-'); // item type
+            $sheet->setCellValue('D' . $row, $item['kode_warna'] ?: '-'); //kode warna
+            $sheet->setCellValue('E' . $row, $item['color'] ?: '-'); // color
+            $sheet->setCellValue('F' . $row, isset($item['loss']) ? number_format($item['loss'], 2, '.', '') : 0); // loss
+            $sheet->setCellValue('G' . $row, isset($item['kgs']) ? number_format($item['kgs'], 2, '.', '') : 0); // qty po
+            $sheet->setCellValue('H' . $row, isset($item['qty_poplus']) ? number_format($item['qty_poplus'], 2, '.', '') : 0); // qty po (+)
+            $sheet->setCellValue('I' . $row, isset($item['kgs_stock_awal']) ? number_format($item['kgs_stock_awal'], 2, '.', '') : 0); // stock awal
+            $sheet->setCellValue('J' . $row, '-'); // stock opname
+            $sheet->setCellValue('K' . $row, isset($item['datang_solid']) ? number_format($item['datang_solid'], 2, '.', '') : 0); // datan solid
+            $sheet->setCellValue('L' . $row, isset($item['plus_datang_solid']) ? number_format($item['plus_datang_solid'], 2, '.', '') : 0); // (+) datang solid
+            $sheet->setCellValue('M' . $row, isset($item['ganti_retur']) ? number_format($item['ganti_retur'], 2, '.', '') : 0); // ganti retur
+            $sheet->setCellValue('N' . $row, isset($item['datang_lurex']) ? number_format($item['datang_lurex'], 2, '.', '') : 0); // datang lurex
+            $sheet->setCellValue('O' . $row, isset($item['plus_datang_lurex']) ? number_format($item['plus_datang_lurex'], 2, '.', '') : 0); // (+) datang lurex
+            $sheet->setCellValue('P' . $row, isset($item['retur_pb_gbn']) ? number_format($item['retur_pb_gbn'], 2, '.', '') : 0); // retur pb gbn
+            $sheet->setCellValue('Q' . $row, isset($item['retur_pb_area']) ? number_format($item['retur_pb_area'], 2, '.', '') : 0); // retur bp area
+            $sheet->setCellValue('R' . $row, isset($item['pakai_area']) ? number_format($item['pakai_area'], 2, '.', '') : 0); // pakai area
+            $sheet->setCellValue('S' . $row, isset($item['kgs_other_out']) ? number_format($item['kgs_other_out'], 2, '.', '') : 0); // pakai lain-lain
+            $sheet->setCellValue('T' . $row, isset($item['retur_stock']) ? number_format($item['retur_stock'], 2, '.', '') : 0); // retur stock
+            $sheet->setCellValue('U' . $row, isset($item['dipinjam']) ? number_format($item['dipinjam'], 2, '.', '') : 0); // dipinjam
+            $sheet->setCellValue('V' . $row, isset($item['pindah_order']) ? number_format($item['pindah_order'], 2, '.', '') : 0); // pindah order
+            $sheet->setCellValue('W' . $row, '-'); // pindah ke stock mati
+            $sheet->setCellValue('X' . $row, isset($item['stock_akhir']) ? number_format($item['stock_akhir'], 2, '.', '') : 0); // stock akhir
 
             // Tagihan GBN dan Jatah Area perhitungan
             $tagihanGbn = isset($item['kgs']) ? $item['kgs'] + $item['qty_poplus'] - ($item['datang_solid'] + $item['plus_datang_solid'] + $item['stock_awal']) : 0;
             $jatahArea = isset($item['kgs']) ? $item['kgs'] + $item['qty_poplus'] - $item['pakai_area'] : 0;
 
             // Format Tagihan GBN dan Jatah Area
-            $sheet->setCellValue('AC' . $row, number_format($tagihanGbn, 2, '.', '')); // tagihan gbn
-            $sheet->setCellValue('AD' . $row, number_format($jatahArea, 2, '.', '')); // jatah area
+            $sheet->setCellValue('Y' . $row, number_format($tagihanGbn, 2, '.', '')); // tagihan gbn
+            $sheet->setCellValue('Z' . $row, number_format($jatahArea, 2, '.', '')); // jatah area
+
+            // Biar semua isi rata tengah
+            $sheet->getStyle("A{$row}:Z{$row}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle("A{$row}:Z{$row}")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
             $row++;
         }
 
@@ -1975,7 +1976,7 @@ class ExcelController extends BaseController
         $sheet->getStyle("A3:AD{$lastRow}")->applyFromArray($styleArray);
 
         // Auto-size
-        foreach (range('A', 'AD') as $col) {
+        foreach (range('A', 'Z') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
@@ -2005,12 +2006,12 @@ class ExcelController extends BaseController
             if (strpos($name, 'STOCK AWAL') !== false) {
                 // Judul
                 $newSheet->mergeCells('A1:K1');
-                $newSheet->setCellValue('A1', 'REPORT STOCK AWAL ' . $key);
+                $newSheet->setCellValue('A1', 'REPORT HISTORY PINDAH ORDER KE ' . $key);
                 $newSheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
                 $newSheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 // Header
-                $headerStockAwal = ['No', 'No Model', 'Delivery', 'Item Type', 'Kode Warna', 'Warna', 'Qty', 'Cones', 'Lot', 'Cluster', 'Keterangan'];
+                $headerStockAwal = ['NO', 'NO MODEL', 'DELIVERY', 'ITEM TYPE', 'KODE WARNA', 'WARNA', 'QTY', 'CONES', 'LOT', 'CLUSTER', 'KETERANGAN'];
                 $col = 'A';
                 foreach ($headerStockAwal as $header) {
                     $newSheet->setCellValue($col . '3', $header);
@@ -2027,6 +2028,52 @@ class ExcelController extends BaseController
                         ],
                     ],
                 ]);
+
+                // Data
+                $row = 4;
+                $no = 1;
+                $delIndex = 0;
+                foreach ($dataStockAwal as $item) {
+                    // Format setiap nilai untuk memastikan nilai 0 dan angka dengan dua desimal
+                    $newSheet->setCellValue('A' . $row, $no++);
+                    $newSheet->setCellValue('B' . $row, $item['no_model_old'] ?: '-'); // no model
+                    $newSheet->setCellValue('C' . $row, '-'); // delivery
+                    $newSheet->setCellValue('D' . $row, $item['item_type'] ?: '-'); // item type
+                    $newSheet->setCellValue('E' . $row, $item['kode_warna'] ?: '-'); //kode warna
+                    $newSheet->setCellValue('F' . $row, $item['warna'] ?: '-'); // color
+                    $newSheet->setCellValue('G' . $row, isset($item['kgs']) ? number_format($item['kgs'], 2, '.', '') : 0); // qty
+                    $newSheet->setCellValue('H' . $row, isset($item['cns']) ? number_format($item['cns'], 2, '.', '') : 0); // cns pindah order
+                    $newSheet->setCellValue('I' . $row, $item['lot'] ?: '-'); // lot
+                    $newSheet->setCellValue('J' . $row, $item['nama_cluster'] ?: '-'); // cluster
+                    $keterangan = $item['tgl_pindah'] . ' ' . $item['keterangan'] . ' ke ' . $item['no_model_new'] . ' kode ' . $item['kode_warna'] . ' (' . $item['admin'] . ')';
+                    $newSheet->setCellValue('K' . $row, $keterangan ?: '-'); // keterangan
+
+                    $row++;
+                }
+
+                // Border
+                $lastRow = $row - 1;
+                $styleArray = [
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => 'FF000000'],
+                        ],
+                    ],
+                ];
+                $newSheet->getStyle("A3:K{$lastRow}")->applyFromArray($styleArray);
+
+                // Auto-size
+                foreach (range('A', 'Z') as $col) {
+                    $newSheet->getColumnDimension($col)->setAutoSize(true);
+                }
+
+                $footerRow = $row + 1;
+                //Footer
+                $newSheet->mergeCells("A{$footerRow}:K{$footerRow}");
+                $newSheet->setCellValue("A{$footerRow}", 'REPORT HISTORY PINDAH ORDER');
+                $newSheet->getStyle("A{$footerRow}")->getFont()->setBold(true)->setSize(10);
+                $newSheet->getStyle("A{$footerRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             }
 
             // Hanya atur judul dan header jika nama sheet mengandung 'DATANG SOLID'
@@ -2038,9 +2085,9 @@ class ExcelController extends BaseController
                 $newSheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 // Header
-                $headerStockAwal = ['No', 'No Model', 'Item Type', 'Kode Warna', 'Warna', 'Tgl Datang', 'Nama Cluster', 'Qty Datang', 'Cones Datang', 'Lot Datang', 'Tgl Penerimaan', 'No SJ', 'L/M/D', 'Ket Datang', 'Admin'];
+                $headerDatangSolid = ['No', 'No Model', 'Item Type', 'Kode Warna', 'Warna', 'Tgl Datang', 'Nama Cluster', 'Qty Datang', 'Cones Datang', 'Lot Datang', 'Tgl Penerimaan', 'No SJ', 'L/M/D', 'Ket Datang', 'Admin'];
                 $col = 'A';
-                foreach ($headerStockAwal as $header) {
+                foreach ($headerDatangSolid as $header) {
                     $newSheet->setCellValue($col . '3', $header);
                     $newSheet->getStyle($col . '3')->getFont()->setBold(true);
                     $col++;

@@ -575,23 +575,23 @@ class CelupController extends BaseController
                     ];
                 }
             }
+            // Debugging sebelum insert
+            $this->outCelupModel->insertBatch($saveDataOutCelup);
             // Perbarui total pengiriman dan status pada tabel schedule_celup
             $totalPengiriman = $this->scheduleCelupModel
                 ->select('COALESCE(SUM(out_celup.kgs_kirim), 0) as total_kirim, schedule_celup.kg_celup')
                 ->join('out_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
-                ->where('out_celup.id_celup', $id_celup)
+                ->where('schedule_celup.id_celup', $id_celup)
                 ->first();
-            if ($totalPengiriman && $totalPengiriman['total_kirim'] ?? 0 >= $totalPengiriman['kg_celup']) {
-                $this->scheduleCelupModel->update($id_celup, ['id_bon' => $id_bon, 'last_status' => 'sent']);
+            if (
+                $totalPengiriman && (($totalPengiriman['total_kirim'] ?? 0) >= $totalPengiriman['kg_celup'])
+            ) {
+                // $this->scheduleCelupModel->update($id_celup, ['id_bon' => $id_bon, 'last_status' => 'sent']);
+                $this->scheduleCelupModel->update($id_celup, ['last_status' => 'sent']);
             }
+            // dd($totalPengiriman, $totalPengiriman['total_kirim'], $totalPengiriman['kg_celup']);
         }
-
-
-        // Debugging sebelum insert
-        // dd($saveDataOutCelup);
-
-        $this->outCelupModel->insertBatch($saveDataOutCelup);
-
+        // dd($totalPengiriman, $totalPengiriman['kg_celup']);
         return redirect()->to(base_url($this->role . '/outCelup'))->with('success', 'BON Berhasil Di Simpan.');
     }
 
