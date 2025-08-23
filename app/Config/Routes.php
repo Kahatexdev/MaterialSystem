@@ -478,6 +478,7 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('po/detailPoCovering/(:any)', 'CoveringController::detailPoCovering/$1');
     $routes->post('po/updateDetailPoCovering/(:any)', 'CoveringController::updateDetailPoCovering/$1');
     $routes->get('po/deleteDetailPoCovering/(:num)', 'CoveringController::deleteDetailPoCovering/$1');
+    $routes->get('po/deleteMultipleDetailPoCovering', 'CoveringController::deleteMultipleDetailPoCovering/$1');
 
     // warehouse barang jadi
     $routes->get('warehouse', 'CoveringWarehouseController::index');
