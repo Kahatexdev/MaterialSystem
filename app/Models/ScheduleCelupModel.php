@@ -331,7 +331,7 @@ class ScheduleCelupModel extends Model
     public function getCelupDoneAndComplain()
     {
         return $this
-            ->select('id_celup,no_model, item_type, kode_warna, warna, lot_celup')
+            ->select('id_celup,no_model, item_type, kode_warna, warna, lot_celup, kg_celup')
             ->whereIn('last_status', ['done', 'complain'])
             ->groupBy('id_celup')
             ->findAll();
