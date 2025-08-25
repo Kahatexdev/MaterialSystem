@@ -490,6 +490,13 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('warehouse/excelPemasukanCovering', 'ExcelController::excelPemasukanCovering');
     $routes->get('warehouse/reportPengeluaran', 'CoveringWarehouseController::reportPengeluaran');
     $routes->get('warehouse/excelPengeluaranCovering', 'ExcelController::excelPengeluaranCovering');
+
+    // bahanbaku
+    $routes->get('warehouse/reportPemasukanBb', 'CoveringWarehouseBBController::reportPemasukanBb');
+    $routes->get('warehouse/excelPemasukanBb', 'ExcelController::excelPemasukanBb');
+    $routes->get('warehouse/reportPengeluaranBb', 'CoveringWarehouseBBController::reportPengeluaranBb');
+    $routes->get('warehouse/excelPengeluaranBb', 'ExcelController::excelPengeluaranBb');
+
     $routes->get('warehouse/pengeluaran_jalur', 'CoveringController::pengeluaranJalur');
     $routes->get('warehouse/pengiriman_area', 'CoveringController::pengirimanArea');
     $routes->post('warehouse/exportStock', 'ExcelController::exportStock');

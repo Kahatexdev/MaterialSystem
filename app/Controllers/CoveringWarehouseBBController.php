@@ -749,4 +749,49 @@ class CoveringWarehouseBBController extends BaseController
         ];
         return view($this->role . '/warehousebb/stock-bb-rubber', $data);
     }
+
+    public function reportPemasukanBb()
+    {
+        $selectedDate = $this->request->getGet('date'); // Ambil tanggal dari parameter GET
+        $selectedDate2 = $this->request->getGet('date2'); // Ambil tanggal dari parameter GET
+        $pemasukan = [];
+
+        if ($selectedDate && $selectedDate2) {
+            $pemasukan = $this->historyStockBBModel->getPemasukanByDate($selectedDate, $selectedDate2);
+        }
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Warehouse',
+            'role' => $this->role,
+            'pemasukan' => $pemasukan,
+            'selectedDate' => $selectedDate, // Kirim ke view untuk referensi
+            'selectedDate2' => $selectedDate2, // Kirim ke view untuk referensi
+        ];
+
+        return view($this->role . '/warehousebb/report-pemasukan', $data);
+    }
+
+
+    public function reportPengeluaranBb()
+    {
+        $selectedDate = $this->request->getGet('date'); // Ambil tanggal dari parameter GET
+        $selectedDate2 = $this->request->getGet('date2');
+        $pengeluaran = [];
+
+        if ($selectedDate) {
+            $pengeluaran = $this->historyStockBBModel->getPengeluaranByDate($selectedDate, $selectedDate2);
+        }
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Warehouse',
+            'role' => $this->role,
+            'pengeluaran' => $pengeluaran,
+            'selectedDate' => $selectedDate, // Kirim ke view untuk referensi
+            'selectedDate2' => $selectedDate2 // Kirim ke view untuk referensi
+        ];
+
+        return view($this->role . '/warehousebb/report-pengeluaran', $data);
+    }
 }
