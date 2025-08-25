@@ -21,6 +21,7 @@
     }
 </style>
 
+
 <div class="container-fluid py-4">
     <div class="card card-frame">
         <div class="card-body p-4">
@@ -30,7 +31,7 @@
             <div class="bg-light p-3 rounded mt-3">
                 <div class="text-dark">
                     <i class="fas fa-calendar-alt"></i>
-                    <span>Tanggal Pesan: <?= $hari . ', ' . $today ?></span>
+                    <span>Tanggal Pesan: <?= $today . ', ' . $date ?></span>
                 </div>
 
                 <div class="note-section">
@@ -48,35 +49,44 @@
                 <div class="">
                     <h5 class="font-weight-bolder"><i class="fas fa-calendar-alt me-2"></i>Tanggal Default Pemesanan Seluruh Area</h5>
                 </div>
-                <form action="<?= base_url($role . '/pemesanan/updateTglSeluruhArea') ?>" method="post">
+                <form action="<?= base_url($role . '/pemesanan/updateRangeSeluruhArea') ?>" method="post">
                     <div class="row">
                         <div class="col-md-2">
                             <label class="">Area</label>
-                            <input type="text" class="form-control " value="SELURUH AREA" readonly>
+                            <input type="text" class="form-control" value="SELURUH AREA" name="allArea" readonly>
                         </div>
                         <div class="col-md-2">
-                            <label class="">Tanggal Pemesanan</label>
-                            <input type="date" class="form-control " value="">
+                            <label class="">Hari Pemesanan</label>
+                            <select name="days" id="daysAllArea" class="form-select">
+                                <option value="">Pilih Hari</option>
+                                <option value="Monday" <?= (isset($day) && $day == 'Monday') ? 'selected' : '' ?>>Monday</option>
+                                <option value="Tuesday" <?= (isset($day) && $day == 'Tuesday') ? 'selected' : '' ?>>Tuesday</option>
+                                <option value="Wednesday" <?= (isset($day) && $day == 'Wednesday') ? 'selected' : '' ?>>Wednesday</option>
+                                <option value="Thursday" <?= (isset($day) && $day == 'Thursday') ? 'selected' : '' ?>>Thursday</option>
+                                <option value="Friday" <?= (isset($day) && $day == 'Friday') ? 'selected' : '' ?>>Friday</option>
+                                <option value="Saturday" <?= (isset($day) && $day == 'Saturday') ? 'selected' : '' ?>>Saturday</option>
+                                <option value="Sunday" <?= (isset($day) && $day == 'Sunday') ? 'selected' : '' ?>>Sunday</option>
+                            </select>
                         </div>
                         <div class="col-md-2">
-                            <label class="">Tanggal Pakai Spandex</label>
-                            <input type="date" class="form-control " value="">
+                            <label class="">Range Tanggal Spandex</label>
+                            <input type="number" class="form-control" name="range_spandex" value="<?= $rangeTgl['range_spandex'] ?? '' ?>">
                         </div>
                         <div class="col-md-2">
-                            <label class="">Tanggal Pakai Karet</label>
-                            <input type="date" class="form-control " value="">
+                            <label class="">Range Tanggal Karet</label>
+                            <input type="number" class="form-control" name="range_karet" value="<?= $rangeTgl['range_karet'] ?? '' ?>">
                         </div>
                         <div class="col-md-2">
-                            <label class="">Tanggal Pakai Benang</label>
-                            <input type="date" class="form-control " value="">
+                            <label class="">Range Tanggal Benang</label>
+                            <input type="number" class="form-control" name="range_benang" value="<?= $rangeTgl['range_benang'] ?? '' ?>">
                         </div>
                         <div class="col-md-2">
-                            <label class="">Tanggal Pakai Nylon</label>
-                            <input type="date" class="form-control " value="">
+                            <label class="">Range Tanggal Nylon</label>
+                            <input type="number" class="form-control" name="range_nylon" value="<?= $rangeTgl['range_nylon'] ?? '' ?>">
                         </div>
                     </div>
                     <div class="mt-4 d-flex justify-content-end align-items-end">
-                        <button class="btn btn-dark btn-lg" type="submit"><i class="fas fa-save me-1"></i>Simpan</button>
+                        <button class="btn btn-dark btn-lg" type="submit"><i class="fas fa-save me-1"></i>Update</button>
                     </div>
                 </form>
             </div>
@@ -85,42 +95,52 @@
                 <div class="">
                     <h5 class="font-weight-bolder"><i class="fas fa-edit me-2"></i>Mengubah Tanggal Pemesanan Area Tertentu</h5>
                 </div>
-                <form action="<?= base_url($role . '/pemesanan/updateTglAreaTertentu') ?>">
+                <form action="<?= base_url($role . '/pemesanan/updateRangeAreaTertentu') ?>" method="post">
                     <table id="table" class="table table-bordered">
                         <thead>
                             <tr>
                                 <th>Area</th>
-                                <th>Tanggal Pemesanan</th>
-                                <th>Tanggal Pakai Spandex</th>
-                                <th>Tanggal Pakai Karet</th>
-                                <th>Tanggal Pakai Benang</th>
-                                <th>Tanggal Pakai Nylon</th>
+                                <th>Hari Pemesanan</th>
+                                <th>Range Tanggal Spandex</th>
+                                <th>Range Tanggal Karet</th>
+                                <th>Range Tanggal Benang</th>
+                                <th>Range Tanggal Nylon</th>
                                 <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td>
-                                    <select name="area" id="" class="form-control">
+                                    <select name="area[]" id="" class="form-control">
                                         <option value="">Pilih Area</option>
-                                        <option value="">KK1A</option>
-                                        <option value="">KK1B</option>
+                                        <?php foreach ($listArea as $area) : ?>
+                                            <option value="<?= $area['area'] ?>"><?= $area['area'] ?></option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </td>
                                 <td>
-                                    <input type="date" class="form-control" value="">
+                                    <select name="days[]" id="daysAllArea" class="form-select">
+                                        <option value="">Pilih Hari</option>
+                                        <option value="Monday">Monday</option>
+                                        <option value="Tuesday">Tuesday</option>
+                                        <option value="Wednesday">Wednesday</option>
+                                        <option value="Thursday">Thursday</option>
+                                        <option value="Friday">Friday</option>
+                                        <option value="Saturday">Saturday</option>
+                                        <option value="Sunday">Sunday</option>
+                                    </select>
                                 </td>
                                 <td>
-                                    <input type="date" class="form-control" value="">
+                                    <input type="number" class="form-control" name="range_spandex[]">
                                 </td>
                                 <td>
-                                    <input type="date" class="form-control" value="">
+                                    <input type="number" class="form-control" name="range_karet[]">
                                 </td>
                                 <td>
-                                    <input type="date" class="form-control" value="">
+                                    <input type="number" class="form-control" name="range_benang[]">
                                 </td>
                                 <td>
-                                    <input type="date" class="form-control" value="">
+                                    <input type="number" class="form-control" name="range_nylon[]">
                                 </td>
                                 <td class="text-center">
                                     <button type="button" class="btn btn-info btn-md" id="addRow"><i class="fas fa-plus"></i></button>
@@ -145,17 +165,29 @@
             const newRow = table.insertRow();
             newRow.innerHTML = `
             <td>
-                <select name="area" class="form-control">
+                <select name="area[]" id="" class="form-control">
                     <option value="">Pilih Area</option>
-                    <option value="">KK1A</option>
-                    <option value="">KK1B</option>
+                    <?php foreach ($listArea as $area) : ?>
+                    <option value="<?= $area['area'] ?>"><?= $area['area'] ?></option>
+                    <?php endforeach; ?>
                 </select>
             </td>
-            <td><input type="date" class="form-control" value=""></td>
-            <td><input type="date" class="form-control" value=""></td>
-            <td><input type="date" class="form-control" value=""></td>
-            <td><input type="date" class="form-control" value=""></td>
-            <td><input type="date" class="form-control" value=""></td>
+            <td>
+                <select name="days[]" id="daysAllArea" class="form-select">
+                    <option value="">Pilih Hari</option>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
+            </td>
+            <td><input type="number" class="form-control" name="range_spandex[]"></td>
+            <td><input type="number" class="form-control" name="range_karet[]"></td>
+            <td><input type="number" class="form-control" name="range_benang[]"></td>
+            <td><input type="number" class="form-control" name="range_nylon[]"></td>
             <td class="text-center">
                 <button type="button" class="btn btn-danger btn-md remove-row"><i class="fas fa-minus"></i></button>
             </td>
@@ -174,5 +206,30 @@
         });
     });
 </script>
+
+<?php if (session()->getFlashdata('success')) : ?>
+    <script>
+        $(document).ready(function() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                html: '<?= session()->getFlashdata('success') ?>',
+                confirmButtonColor: '#4a90e2'
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if (session()->getFlashdata('error')) : ?>
+    <script>
+        $(document).ready(function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                html: '<?= session()->getFlashdata('error') ?>',
+                confirmButtonColor: '#4a90e2'
+            });
+        });
+    </script>
+<?php endif; ?>
 
 <?php $this->endSection(); ?>

@@ -726,6 +726,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('pemesanan/ubahJamPemesanan', 'PemesananController::ubahJamPemesanan');
     $routes->get('pemesanan/ubahTanggalPemesanan', 'PemesananController::ubahTanggalPemesanan');
     $routes->get('pemesanan/historyJadwalPemesanan', 'PemesananController::historyJadwalPemesanan');
+    $routes->post('pemesanan/updateRangeSeluruhArea', 'PemesananController::updateRangeSeluruhArea');
+    $routes->post('pemesanan/updateRangeAreaTertentu', 'PemesananController::updateRangeAreaTertentu');
 
     //Celup
     $routes->get('schedule', 'ScheduleController::index');
