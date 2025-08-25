@@ -559,7 +559,7 @@ class PemesananController extends BaseController
                 // kalau return string langsung
                 $jenis = strtolower((string) $resultJenis);
             }
-            
+
 
             // Data update untuk pengeluaran
             $data = [
@@ -1693,5 +1693,50 @@ class PemesananController extends BaseController
             ->update();
 
         return $this->response->setJSON(['status' => 'success', 'message' => 'Keterangan berhasil disimpan']);
+    }
+
+    public function ubahJamPemesanan()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/pemesanan/ubah-jam-pemesanan', $data);
+    }
+
+    public function ubahTanggalPemesanan()
+    {
+        $today = DATE('Y-m-d');
+        $hari = date('l');
+        $hariList = [
+            'Sunday'    => 'Minggu',
+            'Monday'    => 'Senin',
+            'Tuesday'   => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday'  => 'Kamis',
+            'Friday'    => 'Jumat',
+            'Saturday'  => 'Sabtu',
+        ];
+        $hariIndo = $hariList[$hari] ?? $hari;
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'today' => $today,
+            'hari'  => $hariIndo,
+        ];
+        return view($this->role . '/pemesanan/ubah-tgl-pemesanan', $data);
+    }
+
+    public function historyJadwalPemesanan()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/pemesanan/history-jadwal-pemesanan', $data);
     }
 }
