@@ -53,4 +53,29 @@ class HistoryStockBBModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    public function getPemasukanByDate($date, $date2)
+    {
+        return $this->db->table('history_stockbb')
+            ->select('*')
+            ->where('DATE(created_at) >=', $date) // Filter berdasarkan tanggal
+            ->where('DATE(created_at) <=', $date2) // Filter berdasarkan tanggal
+            ->where('ttl_kg >=', 0)
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
+
+    public function getPengeluaranByDate($date, $date2)
+    {
+        return $this->db->table('history_stockbb')
+            ->select('*')
+            ->where('DATE(created_at) >=', $date)
+            ->where('DATE(created_at) <=', $date2) // Filter berdasarkan tanggal
+            ->where('ttl_kg <=', 0)
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
 }
