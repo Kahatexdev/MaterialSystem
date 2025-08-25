@@ -830,5 +830,6 @@ $routes->group(
         $routes->get('filterBenangMingguan', 'ApiController::filterBenangMingguan');
         $routes->get('filterBenangBulanan', 'ApiController::filterBenangBulanan');
         $routes->get('historyPindahOrder', 'ApiController::historyPindahOrder');
+        $routes->get('getMasterRangePemesanan', 'ApiController::getMasterRangePemesanan');
     }
 );
