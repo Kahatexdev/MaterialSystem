@@ -9,7 +9,18 @@ class TabelMasterRangePemesanan extends Migration
     public function up()
     {
         $this->forge->addField([
+            'id' => [
+                'type'           => 'INT',
+                'constraint'     => 11,
+                'unsigned'       => true,
+                'auto_increment' => true,
+            ],
             'days' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+                'null'       => false,
+            ],
+            'area' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 50,
                 'null'       => false,
@@ -37,7 +48,7 @@ class TabelMasterRangePemesanan extends Migration
         ]);
 
         // Primary key
-        $this->forge->addKey('days', true);
+        $this->forge->addKey('id', true);
 
         // Create table
         $this->forge->createTable('master_range_pemesanan');
