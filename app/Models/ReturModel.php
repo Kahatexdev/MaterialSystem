@@ -330,4 +330,40 @@ class ReturModel extends Model
             ->orderBy('material.kode_warna', 'ASC')
             ->findAll();
     }
+    public function getDataReturGbn($key, $jenis = null)
+    {
+        $builder = $this->db->table('retur')
+            ->select('retur.*')
+            ->join('master_material mm', 'mm.item_type = retur.item_type')
+            ->where('retur.no_model', $key)
+            ->where('retur.area_retur', 'GUDANG BENANG');
+
+        if (!empty($jenis)) {
+            $builder->where('mm.jenis', $jenis);
+        }
+
+        return $builder
+            ->groupBy('retur.id_retur')
+            ->orderBy('retur.item_type, retur.kode_warna', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
+    public function getDataReturArea($key, $jenis = null)
+    {
+        $builder = $this->db->table('retur')
+            ->select('retur.*')
+            ->join('master_material mm', 'mm.item_type = retur.item_type')
+            ->where('retur.no_model', $key)
+            ->where('retur.area_retur <>', 'GUDANG BENANG');
+
+        if (!empty($jenis)) {
+            $builder->where('mm.jenis', $jenis);
+        }
+
+        return $builder
+            ->groupBy('retur.id_retur')
+            ->orderBy('retur.item_type, retur.kode_warna', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
 }

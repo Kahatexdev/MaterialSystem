@@ -605,4 +605,22 @@ class PengeluaranModel extends Model
             ->groupBy('master_material.jenis')
             ->first();
     }
+    public function getPakaiArea($key, $jenis = null)
+    {
+        $builder = $this->db->table('pengeluaran')
+            ->select('pengeluaran.*, stock.item_type, stock.kode_warna, stock.warna, mm.jenis')
+            ->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
+            ->join('master_material mm', 'stock.item_type = mm.item_type', 'left')
+            ->where('stock.no_model', $key);
+
+        if (!empty($jenis)) {
+            $builder->where('mm.jenis', $jenis);
+        }
+
+        return $builder
+            ->groupBy('pengeluaran.id_pengeluaran')
+            ->orderBy('pengeluaran.tgl_out, stock.item_type, stock.kode_warna', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
 }

@@ -505,6 +505,8 @@ class PemasukanModel extends Model
             ->join('other_bon ob', 'oc.id_other_bon = ob.id_other_bon', 'left')
             ->join('master_material mm', 'sc.item_type = mm.item_type', 'left')
             ->where('oc.no_model', $key)
+            ->notLike('sc.item_type', '%LUREX%')
+            ->where('oc.ganti_retur <>', '1')
             ->where('sc.po_plus <>', '1');
         if (!empty($jenis)) {
             $builder->where('mm.jenis', $jenis);
@@ -519,6 +521,70 @@ class PemasukanModel extends Model
     public function getPlusDatangSolid($key, $jenis = null)
     {
         $builder = $this->db->table('pemasukan p')
+            ->select("p.created_at as tgl_terima, p.nama_cluster, oc.no_model, sc.item_type, sc.kode_warna, sc.warna, oc.kgs_kirim as qty_datang, oc.cones_kirim as cones_datang, oc.lot_kirim as lot_datang, COALESCE(bc.no_surat_jalan, ob.no_surat_jalan) as no_surat_jalan, oc.l_m_d, COALESCE(bc.tgl_datang, ob.tgl_datang) as tgl_datang, COALESCE(bc.keterangan, ob.keterangan) as keterangan, p.admin,
+            -- Subquery qty_poplus
+              (
+                SELECT SUM(COALESCE(pt.poplus_mc_kg, 0) + COALESCE(pt.plus_pck_kg, 0))
+                FROM po_tambahan pt
+                WHERE pt.id_material = m.id_material
+                AND pt.status = 'approved'
+              ) AS qty_poplus
+            ")
+            ->join('out_celup oc', 'oc.id_out_celup = p.id_out_celup', 'left')
+            ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup', 'left')
+            ->join('bon_celup bc', 'oc.id_bon = bc.id_bon', 'left')
+            ->join('other_bon ob', 'oc.id_other_bon = ob.id_other_bon', 'left')
+            ->join('master_material mm', 'sc.item_type = mm.item_type', 'left')
+            ->join('master_order mo', 'sc.no_model = mo.no_model', 'left')
+            ->join('material m', 'sc.item_type = m.item_type AND mo.id_order = m.id_order AND sc.kode_warna = m.kode_warna', 'left')
+            ->where('oc.no_model', $key)
+            ->notLike('sc.item_type', '%LUREX%')
+            ->where('oc.ganti_retur <>', '1')
+            ->where('sc.po_plus', '1');
+        if (!empty($jenis)) {
+            $builder->where('mm.jenis', $jenis);
+        }
+
+        return $builder->groupBy('p.created_at')
+            ->orderBy('sc.item_type, sc.kode_warna, sc.warna', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
+
+    public function getGantiRetur($key, $jenis = null)
+    {
+        $builder = $this->db->table('pemasukan p')
+            ->select("p.created_at as tgl_terima, p.nama_cluster, oc.no_model, sc.item_type, sc.kode_warna, sc.warna, oc.kgs_kirim as qty_datang, oc.cones_kirim as cones_datang, oc.lot_kirim as lot_datang, COALESCE(bc.no_surat_jalan, ob.no_surat_jalan) as no_surat_jalan, oc.l_m_d, COALESCE(bc.tgl_datang, ob.tgl_datang) as tgl_datang, COALESCE(bc.keterangan, ob.keterangan) as keterangan, p.admin,
+            -- Subquery qty_poplus
+              (
+                SELECT SUM(COALESCE(pt.poplus_mc_kg, 0) + COALESCE(pt.plus_pck_kg, 0))
+                FROM po_tambahan pt
+                WHERE pt.id_material = m.id_material
+                AND pt.status = 'approved'
+              ) AS qty_poplus
+            ")
+            ->join('out_celup oc', 'oc.id_out_celup = p.id_out_celup', 'left')
+            ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup', 'left')
+            ->join('bon_celup bc', 'oc.id_bon = bc.id_bon', 'left')
+            ->join('other_bon ob', 'oc.id_other_bon = ob.id_other_bon', 'left')
+            ->join('master_material mm', 'sc.item_type = mm.item_type', 'left')
+            ->join('master_order mo', 'sc.no_model = mo.no_model', 'left')
+            ->join('material m', 'sc.item_type = m.item_type AND mo.id_order = m.id_order AND sc.kode_warna = m.kode_warna', 'left')
+            ->where('oc.no_model', $key)
+            ->where('oc.ganti_retur', '1');
+        if (!empty($jenis)) {
+            $builder->where('mm.jenis', $jenis);
+        }
+
+        return $builder->groupBy('p.created_at')
+            ->orderBy('sc.item_type, sc.kode_warna, sc.warna', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
+
+    public function getDatangLurex($key, $jenis = null)
+    {
+        $builder = $this->db->table('pemasukan p')
             ->select('p.created_at as tgl_terima, p.nama_cluster, oc.no_model, sc.item_type, sc.kode_warna, sc.warna, oc.kgs_kirim as qty_datang, oc.cones_kirim as cones_datang, oc.lot_kirim as lot_datang, COALESCE(bc.no_surat_jalan, ob.no_surat_jalan) as no_surat_jalan, oc.l_m_d, COALESCE(bc.tgl_datang, ob.tgl_datang) as tgl_datang, COALESCE(bc.keterangan, ob.keterangan) as keterangan, p.admin')
             ->join('out_celup oc', 'oc.id_out_celup = p.id_out_celup', 'left')
             ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup', 'left')
@@ -526,6 +592,41 @@ class PemasukanModel extends Model
             ->join('other_bon ob', 'oc.id_other_bon = ob.id_other_bon', 'left')
             ->join('master_material mm', 'sc.item_type = mm.item_type', 'left')
             ->where('oc.no_model', $key)
+            ->like('sc.item_type', '%LUREX%')
+            ->where('oc.ganti_retur <>', '1')
+            ->where('sc.po_plus <>', '1');
+        if (!empty($jenis)) {
+            $builder->where('mm.jenis', $jenis);
+        }
+
+        return $builder->groupBy('p.created_at')
+            ->orderBy('sc.item_type, sc.kode_warna, sc.warna', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
+
+    public function getPlusDatangLurex($key, $jenis = null)
+    {
+        $builder = $this->db->table('pemasukan p')
+            ->select("p.created_at as tgl_terima, p.nama_cluster, oc.no_model, sc.item_type, sc.kode_warna, sc.warna, oc.kgs_kirim as qty_datang, oc.cones_kirim as cones_datang, oc.lot_kirim as lot_datang, COALESCE(bc.no_surat_jalan, ob.no_surat_jalan) as no_surat_jalan, oc.l_m_d, COALESCE(bc.tgl_datang, ob.tgl_datang) as tgl_datang, COALESCE(bc.keterangan, ob.keterangan) as keterangan, p.admin,
+            -- Subquery qty_poplus
+              (
+                SELECT SUM(COALESCE(pt.poplus_mc_kg, 0) + COALESCE(pt.plus_pck_kg, 0))
+                FROM po_tambahan pt
+                WHERE pt.id_material = m.id_material
+                AND pt.status = 'approved'
+              ) AS qty_poplus
+            ")
+            ->join('out_celup oc', 'oc.id_out_celup = p.id_out_celup', 'left')
+            ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup', 'left')
+            ->join('bon_celup bc', 'oc.id_bon = bc.id_bon', 'left')
+            ->join('other_bon ob', 'oc.id_other_bon = ob.id_other_bon', 'left')
+            ->join('master_material mm', 'sc.item_type = mm.item_type', 'left')
+            ->join('master_order mo', 'sc.no_model = mo.no_model', 'left')
+            ->join('material m', 'sc.item_type = m.item_type AND mo.id_order = m.id_order AND sc.kode_warna = m.kode_warna', 'left')
+            ->where('oc.no_model', $key)
+            ->like('sc.item_type', '%LUREX%')
+            ->where('oc.ganti_retur <>', '1')
             ->where('sc.po_plus', '1');
         if (!empty($jenis)) {
             $builder->where('mm.jenis', $jenis);
