@@ -490,6 +490,13 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
     $routes->get('warehouse/excelPemasukanCovering', 'ExcelController::excelPemasukanCovering');
     $routes->get('warehouse/reportPengeluaran', 'CoveringWarehouseController::reportPengeluaran');
     $routes->get('warehouse/excelPengeluaranCovering', 'ExcelController::excelPengeluaranCovering');
+
+    // bahanbaku
+    $routes->get('warehouse/reportPemasukanBb', 'CoveringWarehouseBBController::reportPemasukanBb');
+    $routes->get('warehouse/excelPemasukanBb', 'ExcelController::excelPemasukanBb');
+    $routes->get('warehouse/reportPengeluaranBb', 'CoveringWarehouseBBController::reportPengeluaranBb');
+    $routes->get('warehouse/excelPengeluaranBb', 'ExcelController::excelPengeluaranBb');
+
     $routes->get('warehouse/pengeluaran_jalur', 'CoveringController::pengeluaranJalur');
     $routes->get('warehouse/pengiriman_area', 'CoveringController::pengirimanArea');
     $routes->post('warehouse/exportStock', 'ExcelController::exportStock');
@@ -716,6 +723,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('pemesanan/reportPemesananArea', 'PemesananController::reportPemesananArea');
     $routes->get('pemesanan/filterPemesananArea', 'PemesananController::filterPemesananArea');
     $routes->get('pemesanan/exportPemesananArea', 'ExcelController::excelPemesananArea');
+    $routes->get('pemesanan/ubahJamPemesanan', 'PemesananController::ubahJamPemesanan');
+    $routes->get('pemesanan/ubahTanggalPemesanan', 'PemesananController::ubahTanggalPemesanan');
+    $routes->get('pemesanan/historyJadwalPemesanan', 'PemesananController::historyJadwalPemesanan');
 
     //Celup
     $routes->get('schedule', 'ScheduleController::index');
