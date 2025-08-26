@@ -815,7 +815,6 @@ class PdfController extends BaseController
         // data ALL BON
         $dataBon = $this->bonCelupModel->getDataById($idBon); // get data by id_bon
         $detailBon = $this->outCelupModel->getDetailBonByIdBon($idBon); // get data detail bon by id_bon
-        // dd($detailBon);
 
         // Mengelompokkan data detailBon berdasarkan no_model, item_type, dan kode_warna
         $groupedDetails = [];
@@ -1035,6 +1034,8 @@ class PdfController extends BaseController
             $currentRow = 0; // Variabel untuk menghitung jumlah baris yang sudah tercetak
 
             foreach ($dataBon['groupedDetails'] as $bon) {
+                $getDeskripsi = $this->masterMaterialModel->where('item_type', $bon['item_type'])->select('deskripsi')->first();
+                // dd($getDeskripsi);
                 $pdf->SetFont('Arial', '', 6);
                 // Mengelompokkan berdasarkan no_model, item_type, dan kode_warna
                 $key = $bon['no_model'] . '_' . $bon['item_type'] . '_' . $bon['kode_warna'];
@@ -1048,14 +1049,30 @@ class PdfController extends BaseController
                 }
 
                 $itemTypeAsli = $bon['item_type'];
+                $deskripsiItemType = $getDeskripsi['deskripsi'];
+                // $deskripsiItemType = ;
                 $ukuranBenang = strtoupper($bon['ukuran']);
                 $itemTypeBaru = '';
 
                 // Jika $ukuranBenang ada di $itemTypeAsli, hapus dan simpan hasilnya di $itemTypeBaru
-                if (!empty($ukuranBenang) && strpos($itemTypeAsli, $ukuranBenang) !== false) {
-                    $itemTypeBaru = trim(str_replace($ukuranBenang, '', $itemTypeAsli));
+                if (!empty($ukuranBenang) && strpos($deskripsiItemType, $ukuranBenang) !== false) {
+                    $itemTypeBaru = trim(str_replace($ukuranBenang, '', $deskripsiItemType));
                 } else {
-                    $itemTypeBaru = $itemTypeAsli;
+                    $itemTypeBaru = $deskripsiItemType;
+                }
+                // dd($itemTypeBaru);
+                // Mapping singkatan ke bentuk lengkap
+                $mapItemType = [
+                    'CTN' => 'COTTON',
+                    'CD'  => 'COMBED',
+                    'ORG' => 'ORGANIC',
+                    'CB'  => 'COMBED',
+                    'SPDX'  => 'SPANDEX'
+                ];
+
+                // Replace jika ada singkatan menjadi bentuk lengkap
+                foreach ($mapItemType as $singkatan => $lengkap) {
+                    $itemTypeBaru = preg_replace('/\b' . preg_quote($singkatan, '/') . '\b/i', $lengkap, $itemTypeBaru);
                 }
 
                 // Hitung jumlah detail untuk grup saat ini
@@ -1139,14 +1156,15 @@ class PdfController extends BaseController
                 $pdf->Cell(9, 3, $bon['harga'], 1, 0, 'C');
                 foreach ($bon['detailPengiriman'] as $detail) {
                     // var_dump($row);
+                    // dd($detail);
                     $row++;
                     if ($counter[$key] == 1) {
                         $pdf->Cell(8, 3, $detail['cones_kirim'], 1, 0, 'C');
-                        $pdf->Cell(9, 3, $detail['gw_kirim'], 1, 0, 'C');
-                        $pdf->Cell(9, 3, $detail['kgs_kirim'], 1, 0, 'C');
+                        $pdf->Cell(9, 3, number_format((float)($detail['gw_kirim'] ?? 0), 2), 1, 0, 'C');
+                        $pdf->Cell(9, 3, number_format((float)($detail['kgs_kirim'] ?? 0), 2), 1, 0, 'C');
                         $pdf->Cell(9, 3, $bon['totals']['cones_kirim'], 1, 0, 'C');
-                        $pdf->Cell(9, 3, $bon['totals']['gw_kirim'], 1, 0, 'C');
-                        $pdf->Cell(9, 3, $bon['totals']['kgs_kirim'], 1, 0, 'C');
+                        $pdf->Cell(9, 3, number_format((float)($bon['totals']['gw_kirim'] ?? 0), 2), 1, 0, 'C');
+                        $pdf->Cell(9, 3, number_format((float)($bon['totals']['kgs_kirim'] ?? 0), 2), 1, 0, 'C');
                         $xKet = $pdf->GetX();
                         $yKet = $pdf->GetY();
                         $pdf->MultiCell(22, 3, $bon['jmlKarung'] . " KARUNG" . $bon['ganti_retur'], 1, 'L', false);
@@ -1156,11 +1174,11 @@ class PdfController extends BaseController
                     } else {
                         if ($row == 1) {
                             $pdf->Cell(8, 3, $detail['cones_kirim'], 1, 0, 'C');
-                            $pdf->Cell(9, 3, $detail['gw_kirim'], 1, 0, 'C');
-                            $pdf->Cell(9, 3, $detail['kgs_kirim'], 1, 0, 'C');
+                            $pdf->Cell(9, 3, number_format((float)($detail['gw_kirim'] ?? 0), 2), 1, 0, 'C');
+                            $pdf->Cell(9, 3, number_format((float)($detail['kgs_kirim'] ?? 0), 2), 1, 0, 'C');
                             $pdf->Cell(9, 3, $bon['totals']['cones_kirim'], 1, 0, 'C');
-                            $pdf->Cell(9, 3, $bon['totals']['gw_kirim'], 1, 0, 'C');
-                            $pdf->Cell(9, 3, $bon['totals']['kgs_kirim'], 1, 0, 'C');
+                            $pdf->Cell(9, 3, number_format((float)($bon['totals']['gw_kirim'] ?? 0), 2), 1, 0, 'C');
+                            $pdf->Cell(9, 3, number_format((float)($bon['totals']['kgs_kirim'] ?? 0), 2), 1, 0, 'C');
                             // MultiCell untuk 'jmlKarung' dan 'ganti_retur'
                             $xKet = $pdf->GetX();
                             $yKet = $pdf->GetY();
@@ -1181,8 +1199,8 @@ class PdfController extends BaseController
                             $pdf->Cell(7, 3, '', 1, 0, 'C');
                             $pdf->Cell(9, 3, '', 1, 0, 'C');
                             $pdf->Cell(8, 3, $detail['cones_kirim'], 1, 0, 'C');
-                            $pdf->Cell(9, 3, $detail['gw_kirim'], 1, 0, 'C');
-                            $pdf->Cell(9, 3, $detail['kgs_kirim'], 1, 0, 'C');
+                            $pdf->Cell(9, 3, number_format((float)($detail['gw_kirim'] ?? 0), 2), 1, 0, 'C');
+                            $pdf->Cell(9, 3, number_format((float)($detail['kgs_kirim'] ?? 0), 2), 1, 0, 'C');
                             $pdf->Cell(9, 3, '', 1, 0, 'C');
                             $pdf->Cell(9, 3, '', 1, 0, 'C');
                             $pdf->Cell(9, 3, '', 1, 0, 'C');
@@ -1191,11 +1209,11 @@ class PdfController extends BaseController
                         }
                     }
                 }
-                // dd($row);
+                // dd($maxLines);
 
                 if ($row <= $maxLines) {
                     $emptyLines = $maxLines - $row;
-                    for ($i = 0; $i <= $emptyLines; $i++) {
+                    for ($i = 0; $i < $emptyLines; $i++) {
                         $pdf->SetX(4); // Pastikan posisi X sejajar margin
                         $pdf->Cell(18, 3, '', 1, 0, 'C');
                         $pdf->Cell(22, 3, '', 1, 0, 'C');
@@ -1216,6 +1234,7 @@ class PdfController extends BaseController
                     }
                 }
 
+
                 if (
                     $prevNoModel === null || // artinya data pertama
                     ($bon['no_model'] !== $prevNoModel) ||
@@ -1223,7 +1242,7 @@ class PdfController extends BaseController
                     ($bon['kode_warna'] !== $prevKodeWarna)
                 ) {
                     // Tentukan jumlah baris kosong yang ingin ditambahkan
-                    for ($i = 0; $i <= 2; $i++) {
+                    for ($i = 0; $i < 2; $i++) {
                         $pdf->SetX(4);
                         // Cetak baris kosong dengan format sel yang sesuai
                         $pdf->Cell(18, 3, '', 1, 0, 'C');
@@ -1288,7 +1307,7 @@ class PdfController extends BaseController
                 $pdf->Cell(18, 3, ($key == "KETERANGAN :") ? $key : '', 0, 0, 'L'); // Kolom pertama (key)
                 $pdf->Cell(37, 3, $value, 0, 0, 'L'); // Kolom kedua (value)
                 $pdf->Cell(72, 3, '', 0, 0, 'L'); // Kosong
-                $pdf->Cell(17, 3, $key === 'KETERANGAN :' ? 'PENGIRIM' : ($key === 4 ? $username : ''), 0, 0, 'C');
+                $pdf->Cell(17, 3, $key === 'KETERANGAN :' ? 'PENGIRIM' : ($key === 4 ? $detailBon[0]['admin'] : ''), 0, 0, 'C');
                 $pdf->Cell(23, 3, '', 0, 0, 'L'); // Kosong
                 $pdf->Cell(17, 3, $key === 'KETERANGAN :' ? 'PENERIMA' : '', 0, 0, 'C'); // Hanya baris pertama ada "PENERIMA"
                 $pdf->Cell(18, 3, '', 0, 1, 'L'); // Kolom terakhir kosong

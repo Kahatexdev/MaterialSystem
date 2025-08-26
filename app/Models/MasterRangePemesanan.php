@@ -12,7 +12,7 @@ class MasterRangePemesanan extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [];
+    protected $allowedFields    = ['days', 'area', 'range_spandex', 'range_karet', 'range_benang', 'range_nylon'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -43,4 +43,15 @@ class MasterRangePemesanan extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    public function getRangeByDay($day)
+    {
+        return $this->select('range_spandex, range_karet, range_benang, range_nylon')
+            ->where('days', $day)->first();
+    }
+
+    public function getArea()
+    {
+        return $this->select('area')->groupBy('area')->findAll();
+    }
 }

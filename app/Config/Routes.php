@@ -723,9 +723,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('pemesanan/reportPemesananArea', 'PemesananController::reportPemesananArea');
     $routes->get('pemesanan/filterPemesananArea', 'PemesananController::filterPemesananArea');
     $routes->get('pemesanan/exportPemesananArea', 'ExcelController::excelPemesananArea');
-    $routes->get('pemesanan/ubahJamPemesanan', 'PemesananController::ubahJamPemesanan');
     $routes->get('pemesanan/ubahTanggalPemesanan', 'PemesananController::ubahTanggalPemesanan');
-    $routes->get('pemesanan/historyJadwalPemesanan', 'PemesananController::historyJadwalPemesanan');
+    $routes->post('pemesanan/updateRangeSeluruhArea', 'PemesananController::updateRangeSeluruhArea');
+    $routes->post('pemesanan/updateRangeAreaTertentu', 'PemesananController::updateRangeAreaTertentu');
 
     //Celup
     $routes->get('schedule', 'ScheduleController::index');
@@ -759,6 +759,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('importStock/upload', 'GodController::importStock');
     $routes->get('masterWarnaBenang', 'GodController::masterWarnaBenang');
     $routes->post('importMasterWarnaBenang/upload', 'GodController::importMasterWarnaBenang');
+
+    $routes->get('pengeluaranSementara', 'GodController::pengeluaranSementara');
+    $routes->post('pengeluaranSementara/upload', 'GodController::uploadPengeluaranSementara');
     // pengaduan
     $routes->get('pengaduan', 'ApiController::getpengaduan');
 });

@@ -1329,12 +1329,25 @@ class ApiController extends ResourceController
                 'title' => 'Pengaduan',
                 'active' => $this->active
             ];
+
+            // Check if $role is not empty and view file exists
+            $viewPath = APPPATH . 'Views/' . $role . '/pengaduan/index.php';
+            if (empty($role) || !is_file($viewPath)) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Role is empty or view file does not exist: ' . $viewPath,
+                ])->setStatusCode(500);
+            }
+
             return view($role . '/pengaduan/index', $data);
         } catch (\Exception $e) {
-            return $this->response->setJSON([
-                'status'  => 'error',
+            $data = [
                 'message' => $e->getMessage(),
-            ])->setStatusCode(500);
+                'role'    => $role,
+                'title'   => 'Pengaduan',
+                'active'  => $this->active
+            ];
+            return view($role . '/pengaduan/index', $data);
         }
     }
     public function filterDatangBenang()
