@@ -17,6 +17,10 @@ use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\ClusterModel;
 use App\Models\MasterWarnaBenangModel;
+use App\Models\MasterMaterialModel;
+use App\Models\OtherBonModel;
+
+
 
 class GodController extends BaseController
 {
@@ -32,6 +36,8 @@ class GodController extends BaseController
     protected $clusterModel;
     protected $masterWarnaBenangModel;
     protected $request;
+    protected $masterMaterialModel;
+    protected $otherBonModel;
 
 
     public function __construct()
@@ -45,6 +51,8 @@ class GodController extends BaseController
         $this->materialModel = new MaterialModel();
         $this->clusterModel = new ClusterModel();
         $this->masterWarnaBenangModel = new MasterWarnaBenangModel();
+        $this->masterMaterialModel = new MasterMaterialModel();
+        $this->otherBonModel = new OtherBonModel();
         $this->request = \Config\Services::request();
 
         $this->role = session()->get('role');
@@ -774,14 +782,14 @@ class GodController extends BaseController
         $failed  = [];
 
         // Mulai dari baris ke-18 (melewati header)
-        foreach (array_slice($sheetArr, 17, null, true) as $rowNum => $row) {
-
+        foreach (array_slice($sheetArr, 3, null, true) as $rowNum => $row) {
+            // dd($row);
             // Mapping kolom
             $namaCluster = trim((string)($row['J'] ?? ''));
             $noModel     = trim((string)($row['K'] ?? ''));
             $itemType    = trim((string)($row['L'] ?? ''));
             $kodeWarna   = trim((string)($row['M'] ?? ''));
-            $warna       = trim((string)($row['N'] ?? ''));
+            // $warna       = trim((string)($row['N'] ?? ''));
             $lot         = trim((string)($row['O'] ?? ''));
             $kgsMasuk    = $toFloat($row['P'] ?? 0);
             $cnsMasuk    = $toInt($row['Q'] ?? 0);
@@ -790,13 +798,13 @@ class GodController extends BaseController
             // Log raw ringkas (hindari membludak)
             log_message(
                 'debug',
-                "[{$batchId}] Row {row} raw: no_model={no_model}, item_type={item_type}, k_warna={kode_warna}, warna={warna}, cluster={cluster}, lot={lot}, kgs={kgs}, cns={cns}, krg={krg}",
+                "[{$batchId}] Row {row} raw: no_model={no_model}, item_type={item_type}, k_warna={kode_warna}, cluster={cluster}, lot={lot}, kgs={kgs}, cns={cns}, krg={krg}",
                 [
                     'row'        => $rowNum,
                     'no_model'   => $noModel,
                     'item_type'  => $itemType,
                     'kode_warna' => $kodeWarna,
-                    'warna'      => $warna,
+                    // 'warna'      => $warna,
                     'cluster'    => $namaCluster,
                     'lot'        => $lot,
                     'kgs'        => $kgsMasuk,
@@ -847,12 +855,13 @@ class GodController extends BaseController
 
                 // 2) Upsert master_material
                 $mm = $this->masterMaterialModel->where('item_type', $itemType)->first();
+                // dd($mm);
                 if (!$mm) {
                     $this->masterMaterialModel->insert([
                         'item_type'  => $itemType,
                         'deskripsi'  => $itemType,
                         'jenis'      => null,
-                        'created_at' => date('Y-m-d H:i:s'),
+                        'ukuran'      => null,
                     ]);
                     log_message('info', "[{$batchId}] Row {row} master_material INSERT item_type={it}", ['row' => $rowNum, 'it' => $itemType]);
                 }
@@ -864,28 +873,16 @@ class GodController extends BaseController
                     ->where('kode_warna', $kodeWarna)
                     ->first();
 
-                if ($material) {
-                    $newKgs = (float)($material['kgs'] ?? 0) + $kgsMasuk;
-                    $this->materialModel->update($material['id_material'], [
-                        'color'      => $warna,
-                        'kgs'        => $newKgs,
-                        'admin'      => $admin,
-                        'updated_at' => date('Y-m-d H:i:s'),
-                    ]);
-                    log_message(
-                        'debug',
-                        "[{$batchId}] Row {row} material UPDATE id={id} new_kgs={kgs}",
-                        ['row' => $rowNum, 'id' => $material['id_material'], 'kgs' => $newKgs]
-                    );
-                } else {
+                if (!empty($material)) {
                     $this->materialModel->insert([
                         'id_order'    => $idOrder,
                         'style_size'  => '',
                         'area'        => '',
-                        'color'       => $warna,
+                        // 'color'       => $warna,
+                        'color'       => '',
                         'item_type'   => $itemType,
                         'kode_warna'  => $kodeWarna,
-                        'composition' => '',
+                        'composition' => 0,
                         'gw'          => 0,
                         'qty_pcs'     => 0,
                         'loss'        => 0,
@@ -905,10 +902,11 @@ class GodController extends BaseController
                     'no_model'       => $noModel,
                     'item_type'      => $itemType,
                     'kode_warna'     => $kodeWarna,
-                    'warna'          => $warna ?: null,
+                    // 'warna'          => $warna ?: null,
+                    'warna'          => $material['color'],
                     'tgl_datang'     => date('Y-m-d'),
-                    'no_surat_jalan' => null,
-                    'detail_sj'      => null,
+                    'no_surat_jalan' => 'STOK IMPORT',
+                    'detail_sj'      => '',
                     'keterangan'     => 'Import XLS',
                     'ganti_retur'    => '0',
                     'admin'          => $admin,
@@ -928,7 +926,7 @@ class GodController extends BaseController
                     'no_model'     => $noModel,
                     'l_m_d'        => '',
                     'harga'        => 0,
-                    'no_karung'    => $rowNum + 1,
+                    'no_karung'    => null,
                     'gw_kirim'     => 0,
                     'kgs_kirim'    => $kgsMasuk,
                     'cones_kirim'  => $cnsMasuk,
@@ -955,10 +953,14 @@ class GodController extends BaseController
 
                 if ($existingStock) {
                     $upd = [
-                        'kgs_in_out' => (float)$existingStock['kgs_in_out'] + $kgsMasuk,
-                        'cns_in_out' => (int)$existingStock['cns_in_out'] + $cnsMasuk,
-                        'krg_in_out' => (int)$existingStock['krg_in_out'] + max(1, $krgMasuk),
-                        'updated_at' => date('Y-m-d H:i:s'),
+                        'kgs_in_out'     => $kgsMasuk != 0 ? (float)$kgsMasuk : (float)($existingStock['kgs_in_out'] ?? 0),
+                        'cns_in_out'     => $cnsMasuk != 0 ? (int)$cnsMasuk : (int)($existingStock['cns_in_out'] ?? 0),
+                        'krg_in_out'     => $krgMasuk != 0 ? (int)$krgMasuk : (int)($existingStock['krg_in_out'] ?? 0),
+                        'kgs_stock_awal' => $kgsMasuk == 0 ? (float)$kgsMasuk : (float)($existingStock['kgs_stock_awal'] ?? 0),
+                        'cns_stock_awal' => $cnsMasuk == 0 ? (int)$cnsMasuk : (int)($existingStock['cns_stock_awal'] ?? 0),
+                        'krg_stock_awal' => $krgMasuk == 0 ? (int)$krgMasuk : (int)($existingStock['krg_stock_awal'] ?? 0),
+                        'lot_stock'      => isset($lot) && $lot !== '' ? $lot : ($existingStock['lot_stock'] ?? ($existingStock['lot_awal'] ?? null)),
+                        'updated_at'     => date('Y-m-d H:i:s'),
                     ];
                     $this->stockModel->update($existingStock['id_stock'], $upd);
                     $idStok = (int)$existingStock['id_stock'];
@@ -972,11 +974,16 @@ class GodController extends BaseController
                         'no_model'     => $noModel,
                         'item_type'    => $itemType,
                         'kode_warna'   => $kodeWarna,
+                        'warna'        => $material['color'],
                         'nama_cluster' => $namaCluster,
-                        'lot_stock'    => $lot,
-                        'kgs_in_out'   => $kgsMasuk,
-                        'cns_in_out'   => $cnsMasuk,
-                        'krg_in_out'   => max(1, $krgMasuk),
+                        'lot_stock'    => '',
+                        'lot_awal'     => $lot,
+                        'kgs_stock_awal' => $kgsMasuk,
+                        'cns_stock_awal' => $cnsMasuk,
+                        'krg_stock_awal' => max(1, $krgMasuk),
+                        'kgs_in_out'   => 0,
+                        'cns_in_out'   => 0,
+                        'krg_in_out'   => 0,
                         'admin'        => $admin,
                         'created_at'   => date('Y-m-d H:i:s'),
                     ]);
@@ -1038,7 +1045,7 @@ class GodController extends BaseController
                             'no_model' => $noModel,
                             'item_type' => $itemType,
                             'kode_warna' => $kodeWarna,
-                            'warna' => $warna,
+                            'warna' => $material['color'] ?? '',
                             'cluster' => $namaCluster,
                             'lot' => $lot,
                             'kgs' => $kgsMasuk,
