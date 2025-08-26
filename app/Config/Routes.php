@@ -756,6 +756,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('importStock/upload', 'GodController::importStock');
     $routes->get('masterWarnaBenang', 'GodController::masterWarnaBenang');
     $routes->post('importMasterWarnaBenang/upload', 'GodController::importMasterWarnaBenang');
+
+    $routes->get('pengeluaranSementara', 'GodController::pengeluaranSementara');
+    $routes->post('pengeluaranSementara/upload', 'GodController::uploadPengeluaranSementara');
     // pengaduan
     $routes->get('pengaduan', 'ApiController::getpengaduan');
 });
