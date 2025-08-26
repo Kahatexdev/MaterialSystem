@@ -5972,3 +5972,1403 @@ DEBUG - 2025-08-26 16:51:39 --> [IMP-20250826-165133-65dfbc] Row 2007 raw: no_mo
 DEBUG - 2025-08-26 16:51:39 --> [IMP-20250826-165133-65dfbc] Row 2007 di-skip (kosong).
 WARNING - 2025-08-26 16:51:39 --> [IMP-20250826-165133-65dfbc] DONE partial success=0 failed=1988
 DEBUG - 2025-08-26 16:51:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:00:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:02:03 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:02:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:03:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:03:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:03:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:04:18 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:04:43 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:05:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:05:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2025-08-26 18:06:16 --> mysqli_sql_exception: Unknown column 'po_tambahan.tanggal_approve' in 'field list' in C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `master_...', 0)
+#1 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `master_...')
+#2 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `master_...')
+#3 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `master_...', Array, false)
+#4 C:\xampp\htdocs\MaterialSystem\app\Models\MaterialModel.php(1051): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\MaterialSystem\app\Controllers\WarehouseController.php(1703): App\Models\MaterialModel->getFilterPoBenang('LN2421', 'NYLON')
+#6 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\WarehouseController->filterPoBenang()
+#7 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\WarehouseController))
+#8 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Boot.php(334): CodeIgniter\CodeIgniter->run()
+#10 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\xampp\htdocs\MaterialSystem\public\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#13 {main}
+CRITICAL - 2025-08-26 18:06:16 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'po_tambahan.tanggal_approve' in 'field list'
+[Method: GET, Route: gbn/warehouse/filterPoBenang]
+in SYSTEMPATH\Database\BaseConnection.php on line 692.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = :master_material.jenis:
+AND   (
+`master_order`.`no_model` LIKE :master_order.no_model: ESCAPE \'!\'
+OR  `material`.`item_type` LIKE :material.item_type: ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE :material.kode_warna: ESCAPE \'!\'
+OR  `material`.`color` LIKE :material.color: ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`', [...], false)
+ 2 APPPATH\Models\MaterialModel.php(1051): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\WarehouseController.php(1703): App\Models\MaterialModel->getFilterPoBenang('LN2421', 'NYLON')
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\WarehouseController->filterPoBenang()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\WarehouseController))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+10 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\MaterialSystem\\public\\index.php')
+CRITICAL - 2025-08-26 18:06:16 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'po_tambahan.tanggal_approve' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = \'NYLON\'
+AND   (
+`master_order`.`no_model` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`item_type` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`color` LIKE \'%LN2421%\' ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`')
+ 2 SYSTEMPATH\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = \'NYLON\'
+AND   (
+`master_order`.`no_model` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`item_type` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`color` LIKE \'%LN2421%\' ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = :master_material.jenis:
+AND   (
+`master_order`.`no_model` LIKE :master_order.no_model: ESCAPE \'!\'
+OR  `material`.`item_type` LIKE :material.item_type: ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE :material.kode_warna: ESCAPE \'!\'
+OR  `material`.`color` LIKE :material.color: ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`', [...], false)
+ 4 APPPATH\Models\MaterialModel.php(1051): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\WarehouseController.php(1703): App\Models\MaterialModel->getFilterPoBenang('LN2421', 'NYLON')
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\WarehouseController->filterPoBenang()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\WarehouseController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\MaterialSystem\\public\\index.php')
+CRITICAL - 2025-08-26 18:06:16 --> [Caused by] mysqli_sql_exception: Unknown column 'po_tambahan.tanggal_approve' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = \'NYLON\'
+AND   (
+`master_order`.`no_model` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`item_type` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`color` LIKE \'%LN2421%\' ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = \'NYLON\'
+AND   (
+`master_order`.`no_model` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`item_type` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`color` LIKE \'%LN2421%\' ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`')
+ 3 SYSTEMPATH\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = \'NYLON\'
+AND   (
+`master_order`.`no_model` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`item_type` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`color` LIKE \'%LN2421%\' ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = :master_material.jenis:
+AND   (
+`master_order`.`no_model` LIKE :master_order.no_model: ESCAPE \'!\'
+OR  `material`.`item_type` LIKE :material.item_type: ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE :material.kode_warna: ESCAPE \'!\'
+OR  `material`.`color` LIKE :material.color: ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`', [...], false)
+ 5 APPPATH\Models\MaterialModel.php(1051): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\WarehouseController.php(1703): App\Models\MaterialModel->getFilterPoBenang('LN2421', 'NYLON')
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\WarehouseController->filterPoBenang()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\WarehouseController))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+13 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\MaterialSystem\\public\\index.php')
+DEBUG - 2025-08-26 18:06:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:06:46 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2025-08-26 18:07:07 --> mysqli_sql_exception: Unknown column 'po_tambahan.tanggal_approve' in 'field list' in C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `master_...', 0)
+#1 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `master_...')
+#2 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `master_...')
+#3 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `master_...', Array, false)
+#4 C:\xampp\htdocs\MaterialSystem\app\Models\MaterialModel.php(1051): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\MaterialSystem\app\Controllers\WarehouseController.php(1703): App\Models\MaterialModel->getFilterPoBenang('LN2421', 'NYLON')
+#6 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\WarehouseController->filterPoBenang()
+#7 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\WarehouseController))
+#8 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Boot.php(334): CodeIgniter\CodeIgniter->run()
+#10 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\xampp\htdocs\MaterialSystem\public\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#13 {main}
+CRITICAL - 2025-08-26 18:07:07 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'po_tambahan.tanggal_approve' in 'field list'
+[Method: GET, Route: gbn/warehouse/filterPoBenang]
+in SYSTEMPATH\Database\BaseConnection.php on line 692.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = :master_material.jenis:
+AND   (
+`master_order`.`no_model` LIKE :master_order.no_model: ESCAPE \'!\'
+OR  `material`.`item_type` LIKE :material.item_type: ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE :material.kode_warna: ESCAPE \'!\'
+OR  `material`.`color` LIKE :material.color: ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`', [...], false)
+ 2 APPPATH\Models\MaterialModel.php(1051): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\WarehouseController.php(1703): App\Models\MaterialModel->getFilterPoBenang('LN2421', 'NYLON')
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\WarehouseController->filterPoBenang()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\WarehouseController))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+10 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\MaterialSystem\\public\\index.php')
+CRITICAL - 2025-08-26 18:07:07 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'po_tambahan.tanggal_approve' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = \'NYLON\'
+AND   (
+`master_order`.`no_model` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`item_type` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`color` LIKE \'%LN2421%\' ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`')
+ 2 SYSTEMPATH\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = \'NYLON\'
+AND   (
+`master_order`.`no_model` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`item_type` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`color` LIKE \'%LN2421%\' ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = :master_material.jenis:
+AND   (
+`master_order`.`no_model` LIKE :master_order.no_model: ESCAPE \'!\'
+OR  `material`.`item_type` LIKE :material.item_type: ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE :material.kode_warna: ESCAPE \'!\'
+OR  `material`.`color` LIKE :material.color: ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`', [...], false)
+ 4 APPPATH\Models\MaterialModel.php(1051): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\WarehouseController.php(1703): App\Models\MaterialModel->getFilterPoBenang('LN2421', 'NYLON')
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\WarehouseController->filterPoBenang()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\WarehouseController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\MaterialSystem\\public\\index.php')
+CRITICAL - 2025-08-26 18:07:07 --> [Caused by] mysqli_sql_exception: Unknown column 'po_tambahan.tanggal_approve' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = \'NYLON\'
+AND   (
+`master_order`.`no_model` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`item_type` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`color` LIKE \'%LN2421%\' ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = \'NYLON\'
+AND   (
+`master_order`.`no_model` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`item_type` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`color` LIKE \'%LN2421%\' ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`')
+ 3 SYSTEMPATH\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = \'NYLON\'
+AND   (
+`master_order`.`no_model` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`item_type` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE \'%LN2421%\' ESCAPE \'!\'
+OR  `material`.`color` LIKE \'%LN2421%\' ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = :master_material.jenis:
+AND   (
+`master_order`.`no_model` LIKE :master_order.no_model: ESCAPE \'!\'
+OR  `material`.`item_type` LIKE :material.item_type: ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE :material.kode_warna: ESCAPE \'!\'
+OR  `material`.`color` LIKE :material.color: ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`', [...], false)
+ 5 APPPATH\Models\MaterialModel.php(1051): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\WarehouseController.php(1703): App\Models\MaterialModel->getFilterPoBenang('LN2421', 'NYLON')
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\WarehouseController->filterPoBenang()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\WarehouseController))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+13 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\MaterialSystem\\public\\index.php')
+DEBUG - 2025-08-26 18:07:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2025-08-26 18:08:10 --> mysqli_sql_exception: Unknown column 'po_tambahan.tanggal_approve' in 'field list' in C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `master_...', 0)
+#1 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `master_...')
+#2 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `master_...')
+#3 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `master_...', Array, false)
+#4 C:\xampp\htdocs\MaterialSystem\app\Models\MaterialModel.php(1051): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\MaterialSystem\app\Controllers\WarehouseController.php(1703): App\Models\MaterialModel->getFilterPoBenang('NYLON 70D/2', 'NYLON')
+#6 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\WarehouseController->filterPoBenang()
+#7 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\WarehouseController))
+#8 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Boot.php(334): CodeIgniter\CodeIgniter->run()
+#10 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\xampp\htdocs\MaterialSystem\public\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#13 {main}
+CRITICAL - 2025-08-26 18:08:10 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'po_tambahan.tanggal_approve' in 'field list'
+[Method: GET, Route: gbn/warehouse/filterPoBenang]
+in SYSTEMPATH\Database\BaseConnection.php on line 692.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = :master_material.jenis:
+AND   (
+`master_order`.`no_model` LIKE :master_order.no_model: ESCAPE \'!\'
+OR  `material`.`item_type` LIKE :material.item_type: ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE :material.kode_warna: ESCAPE \'!\'
+OR  `material`.`color` LIKE :material.color: ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`', [...], false)
+ 2 APPPATH\Models\MaterialModel.php(1051): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\WarehouseController.php(1703): App\Models\MaterialModel->getFilterPoBenang('NYLON 70D/2', 'NYLON')
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\WarehouseController->filterPoBenang()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\WarehouseController))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+10 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\MaterialSystem\\public\\index.php')
+CRITICAL - 2025-08-26 18:08:10 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'po_tambahan.tanggal_approve' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = \'NYLON\'
+AND   (
+`master_order`.`no_model` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+OR  `material`.`item_type` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+OR  `material`.`color` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`')
+ 2 SYSTEMPATH\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = \'NYLON\'
+AND   (
+`master_order`.`no_model` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+OR  `material`.`item_type` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+OR  `material`.`color` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = :master_material.jenis:
+AND   (
+`master_order`.`no_model` LIKE :master_order.no_model: ESCAPE \'!\'
+OR  `material`.`item_type` LIKE :material.item_type: ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE :material.kode_warna: ESCAPE \'!\'
+OR  `material`.`color` LIKE :material.color: ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`', [...], false)
+ 4 APPPATH\Models\MaterialModel.php(1051): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\WarehouseController.php(1703): App\Models\MaterialModel->getFilterPoBenang('NYLON 70D/2', 'NYLON')
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\WarehouseController->filterPoBenang()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\WarehouseController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\MaterialSystem\\public\\index.php')
+CRITICAL - 2025-08-26 18:08:10 --> [Caused by] mysqli_sql_exception: Unknown column 'po_tambahan.tanggal_approve' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = \'NYLON\'
+AND   (
+`master_order`.`no_model` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+OR  `material`.`item_type` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+OR  `material`.`color` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = \'NYLON\'
+AND   (
+`master_order`.`no_model` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+OR  `material`.`item_type` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+OR  `material`.`color` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`')
+ 3 SYSTEMPATH\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = \'NYLON\'
+AND   (
+`master_order`.`no_model` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+OR  `material`.`item_type` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+OR  `material`.`color` LIKE \'%NYLON 70D/2%\' ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `master_order`.`no_model`, `master_order`.`foll_up`, `master_order`.`lco_date`, `master_order`.`no_order`, `master_order`.`buyer`, `master_order`.`delivery_awal`, `master_order`.`delivery_akhir`, `master_order`.`memo`, `master_order`.`unit`, `master_material`.`jenis`, `material`.`area`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`, `material`.`loss`, SUM(material.kgs) AS kg_po, `material`.`created_at` AS `tgl_input`, `material`.`admin`, COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock, COALESCE(lotSub.lot_stock, \'-\') AS lot_stock, COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus, `plusSub`.`tgl_po_plus_area`, `plusSub`.`delivery_po_plus`, `plusSub`.`tanggal_approve`
+FROM `material`
+LEFT JOIN `master_order` ON `master_order`.`id_order` = `material`.`id_order`
+LEFT JOIN `master_material` ON `master_material`.`item_type` = `material`.`item_type`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, SUM(COALESCE(kgs_stock_awal, 0) + COALESCE(kgs_in_out, 0)) AS kgs_stock
+FROM `stock`
+GROUP BY `item_type`, `kode_warna`, `warna`) AS stockKgs ON `stockKgs`.`item_type` = `material`.`item_type` AND `stockKgs`.`kode_warna` = `material`.`kode_warna` AND `stockKgs`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `item_type`, `kode_warna`, `warna`, GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR \', \') AS lot_stock
+FROM ((SELECT `item_type`, `kode_warna`, `warna`, `lot_stock` AS `lot`
+FROM `stock`
+WHERE `lot_stock` IS NOT NULL
+AND `lot_stock` != \'\'
+AND TRIM(lot_stock) != \'\' UNION ALL SELECT `item_type`, `kode_warna`, `warna`, `lot_awal` AS `lot`
+FROM `stock`
+WHERE `lot_awal` IS NOT NULL
+AND `lot_awal` != \'\'
+AND TRIM(lot_awal) != \'\')) AS u_lots
+GROUP BY `item_type`, `kode_warna`, `warna`) AS lotSub ON `lotSub`.`item_type` = `material`.`item_type` AND `lotSub`.`kode_warna` = `material`.`kode_warna` AND `lotSub`.`warna` = `material`.`color`
+LEFT JOIN (SELECT `po_tambahan`.`id_material`, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, `po_tambahan`.`tanggal_approve`, DATE(po_tambahan.created_at) AS tgl_po_plus_area, `po_tambahan`.`delivery_po_plus`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`
+FROM `po_tambahan`
+LEFT JOIN `material` ON `material`.`id_material` = `po_tambahan`.`id_material`
+WHERE `po_tambahan`.`tanggal_approve` IS NOT NULL
+AND `po_tambahan`.`status` = \'approved\'
+GROUP BY `po_tambahan`.`tanggal_approve`, `material`.`item_type`, `material`.`kode_warna`, `material`.`color`) AS plusSub ON `plusSub`.`id_material` = `material`.`id_material` AND `plusSub`.`item_type` = `material`.`item_type` AND `plusSub`.`kode_warna` = `material`.`kode_warna` AND `plusSub`.`color` = `material`.`color`
+WHERE `master_material`.`jenis` = :master_material.jenis:
+AND   (
+`master_order`.`no_model` LIKE :master_order.no_model: ESCAPE \'!\'
+OR  `material`.`item_type` LIKE :material.item_type: ESCAPE \'!\'
+OR  `material`.`kode_warna` LIKE :material.kode_warna: ESCAPE \'!\'
+OR  `material`.`color` LIKE :material.color: ESCAPE \'!\'
+ )
+GROUP BY `material`.`item_type`, `material`.`kode_warna`, `material`.`color`', [...], false)
+ 5 APPPATH\Models\MaterialModel.php(1051): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\WarehouseController.php(1703): App\Models\MaterialModel->getFilterPoBenang('NYLON 70D/2', 'NYLON')
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\WarehouseController->filterPoBenang()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\WarehouseController))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+13 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\MaterialSystem\\public\\index.php')
+DEBUG - 2025-08-26 18:08:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:08:43 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:09:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:09:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:10:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:35:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:36:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:47:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:48:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 18:52:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 19:29:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 19:45:22 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 19:46:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 19:49:16 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 19:49:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 19:50:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 19:50:49 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 19:51:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 19:54:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 19:54:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 19:55:05 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 19:55:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 19:55:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 19:58:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 19:58:46 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 20:08:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 20:08:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 20:11:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 20:12:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 20:12:22 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2025-08-26 20:12:45 --> mysqli_sql_exception: MySQL server has gone away in C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cluster...', 0)
+#1 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cluster...')
+#2 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cluster...')
+#3 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cluster...', Array, false)
+#4 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\BaseModel.php(679): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\MaterialSystem\app\Models\ClusterModel.php(213): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\MaterialSystem\app\Controllers\DashboardGbnController.php(61): App\Models\ClusterModel->getClusterGroupII()
+#8 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\DashboardGbnController->index()
+#9 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\DashboardGbnController))
+#10 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#11 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Boot.php(334): CodeIgniter\CodeIgniter->run()
+#12 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#13 C:\xampp\htdocs\MaterialSystem\public\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#14 C:\xampp\htdocs\MaterialSystem\vendor\codeigniter4\framework\system\rewrite.php(44): require_once('C:\\xampp\\htdocs...')
+#15 {main}
+CRITICAL - 2025-08-26 20:12:45 --> CodeIgniter\Database\Exceptions\DatabaseException: MySQL server has gone away
+[Method: GET, Route: gbn]
+in SYSTEMPATH\Database\BaseConnection.php on line 692.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cluster`.`kapasitas`, ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, `cluster`.`nama_cluster`, CONCAT(
+                                "[", GROUP_CONCAT(
+                                    DISTINCT CONCAT(
+                                        \'{"no_model":"\', `out_celup`.`no_model`, \'", "no_karung":"\', `out_celup`.`no_karung`, \'", "kgs_kirim":"\', `out_celup`.`kgs_kirim`, \'"}\'
+                                    )
+                                    ORDER BY out_celup.no_karung SEPARATOR ", "
+                                ), "]"
+                            ) AS detail_karung, CASE 
+            -- Format untuk cluster dengan angka 10-16 dan huruf A atau B
+            WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11|12|13|14|15|16)\\.[AB]$" 
+            THEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2)
+
+            -- Format untuk cluster dengan format II.B.10.B.XX sampai II.B.16.B.XX → b.XX
+            WHEN cluster.nama_cluster REGEXP "^II\\.B\\.(10|11|12|13|14|15|16)\\.B\\.[0-9]{2}$" 
+            THEN CONCAT("b.", SUBSTRING_INDEX(cluster.nama_cluster, ".", -1))
+
+            -- Format default, ambil 3 karakter terakhir
+            ELSE RIGHT(cluster.nama_cluster, 3) 
+        END AS simbol_cluster, -- Menggabungkan detail data menjadi JSON
+        GROUP_CONCAT(DISTINCT 
+            JSON_OBJECT(
+                "no_model", `stock`.`no_model`, "kode_warna", `stock`.`kode_warna`, "foll_up", `master_order`.`foll_up`, "delivery", `master_order`.`delivery_awal`, "qty", ROUND(stock.kgs_stock_awal + stock.kgs_in_out, 2)
+            ) ORDER BY stock.no_model SEPARATOR ", "
+        ) AS detail_data
+FROM `cluster`
+LEFT JOIN `stock` ON `stock`.`nama_cluster` = `cluster`.`nama_cluster`
+LEFT JOIN `master_order` ON `master_order`.`no_model` = `stock`.`no_model`
+LEFT JOIN `out_celup` ON `out_celup`.`no_model` = `stock`.`no_model`
+WHERE   (
+`cluster`.`nama_cluster` LIKE :cluster.nama_cluster: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.12: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.13: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.14: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.15: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.16: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.17: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.18: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.19: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.20: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.21: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.22: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.23: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.24: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.25: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.26: ESCAPE \'!\'
+ )
+GROUP BY `cluster`.`nama_cluster`', [...], false)
+ 2 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 3 SYSTEMPATH\BaseModel.php(679): CodeIgniter\Model->doFindAll(0, 0)
+ 4 APPPATH\Models\ClusterModel.php(213): CodeIgniter\BaseModel->findAll()
+ 5 APPPATH\Controllers\DashboardGbnController.php(61): App\Models\ClusterModel->getClusterGroupII()
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\DashboardGbnController->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\DashboardGbnController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+12 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\MaterialSystem\\public\\index.php')
+CRITICAL - 2025-08-26 20:12:45 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: MySQL server has gone away
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cluster`.`kapasitas`, ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, `cluster`.`nama_cluster`, CONCAT(
+                                "[", GROUP_CONCAT(
+                                    DISTINCT CONCAT(
+                                        \'{"no_model":"\', `out_celup`.`no_model`, \'", "no_karung":"\', `out_celup`.`no_karung`, \'", "kgs_kirim":"\', `out_celup`.`kgs_kirim`, \'"}\'
+                                    )
+                                    ORDER BY out_celup.no_karung SEPARATOR ", "
+                                ), "]"
+                            ) AS detail_karung, CASE 
+            -- Format untuk cluster dengan angka 10-16 dan huruf A atau B
+            WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11|12|13|14|15|16)\\.[AB]$" 
+            THEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2)
+
+            -- Format untuk cluster dengan format II.B.10.B.XX sampai II.B.16.B.XX → b.XX
+            WHEN cluster.nama_cluster REGEXP "^II\\.B\\.(10|11|12|13|14|15|16)\\.B\\.[0-9]{2}$" 
+            THEN CONCAT("b.", SUBSTRING_INDEX(cluster.nama_cluster, ".", -1))
+
+            -- Format default, ambil 3 karakter terakhir
+            ELSE RIGHT(cluster.nama_cluster, 3) 
+        END AS simbol_cluster, -- Menggabungkan detail data menjadi JSON
+        GROUP_CONCAT(DISTINCT 
+            JSON_OBJECT(
+                "no_model", `stock`.`no_model`, "kode_warna", `stock`.`kode_warna`, "foll_up", `master_order`.`foll_up`, "delivery", `master_order`.`delivery_awal`, "qty", ROUND(stock.kgs_stock_awal + stock.kgs_in_out, 2)
+            ) ORDER BY stock.no_model SEPARATOR ", "
+        ) AS detail_data
+FROM `cluster`
+LEFT JOIN `stock` ON `stock`.`nama_cluster` = `cluster`.`nama_cluster`
+LEFT JOIN `master_order` ON `master_order`.`no_model` = `stock`.`no_model`
+LEFT JOIN `out_celup` ON `out_celup`.`no_model` = `stock`.`no_model`
+WHERE   (
+`cluster`.`nama_cluster` LIKE \'II.%.01.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.02.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.03.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.04.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.05.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.06.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.07.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.08.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.09.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.10.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.11.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.12.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.13.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.14.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.15.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.16.%%\' ESCAPE \'!\'
+ )
+GROUP BY `cluster`.`nama_cluster`')
+ 2 SYSTEMPATH\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cluster`.`kapasitas`, ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, `cluster`.`nama_cluster`, CONCAT(
+                                "[", GROUP_CONCAT(
+                                    DISTINCT CONCAT(
+                                        \'{"no_model":"\', `out_celup`.`no_model`, \'", "no_karung":"\', `out_celup`.`no_karung`, \'", "kgs_kirim":"\', `out_celup`.`kgs_kirim`, \'"}\'
+                                    )
+                                    ORDER BY out_celup.no_karung SEPARATOR ", "
+                                ), "]"
+                            ) AS detail_karung, CASE 
+            -- Format untuk cluster dengan angka 10-16 dan huruf A atau B
+            WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11|12|13|14|15|16)\\.[AB]$" 
+            THEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2)
+
+            -- Format untuk cluster dengan format II.B.10.B.XX sampai II.B.16.B.XX → b.XX
+            WHEN cluster.nama_cluster REGEXP "^II\\.B\\.(10|11|12|13|14|15|16)\\.B\\.[0-9]{2}$" 
+            THEN CONCAT("b.", SUBSTRING_INDEX(cluster.nama_cluster, ".", -1))
+
+            -- Format default, ambil 3 karakter terakhir
+            ELSE RIGHT(cluster.nama_cluster, 3) 
+        END AS simbol_cluster, -- Menggabungkan detail data menjadi JSON
+        GROUP_CONCAT(DISTINCT 
+            JSON_OBJECT(
+                "no_model", `stock`.`no_model`, "kode_warna", `stock`.`kode_warna`, "foll_up", `master_order`.`foll_up`, "delivery", `master_order`.`delivery_awal`, "qty", ROUND(stock.kgs_stock_awal + stock.kgs_in_out, 2)
+            ) ORDER BY stock.no_model SEPARATOR ", "
+        ) AS detail_data
+FROM `cluster`
+LEFT JOIN `stock` ON `stock`.`nama_cluster` = `cluster`.`nama_cluster`
+LEFT JOIN `master_order` ON `master_order`.`no_model` = `stock`.`no_model`
+LEFT JOIN `out_celup` ON `out_celup`.`no_model` = `stock`.`no_model`
+WHERE   (
+`cluster`.`nama_cluster` LIKE \'II.%.01.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.02.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.03.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.04.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.05.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.06.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.07.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.08.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.09.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.10.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.11.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.12.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.13.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.14.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.15.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.16.%%\' ESCAPE \'!\'
+ )
+GROUP BY `cluster`.`nama_cluster`')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cluster`.`kapasitas`, ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, `cluster`.`nama_cluster`, CONCAT(
+                                "[", GROUP_CONCAT(
+                                    DISTINCT CONCAT(
+                                        \'{"no_model":"\', `out_celup`.`no_model`, \'", "no_karung":"\', `out_celup`.`no_karung`, \'", "kgs_kirim":"\', `out_celup`.`kgs_kirim`, \'"}\'
+                                    )
+                                    ORDER BY out_celup.no_karung SEPARATOR ", "
+                                ), "]"
+                            ) AS detail_karung, CASE 
+            -- Format untuk cluster dengan angka 10-16 dan huruf A atau B
+            WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11|12|13|14|15|16)\\.[AB]$" 
+            THEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2)
+
+            -- Format untuk cluster dengan format II.B.10.B.XX sampai II.B.16.B.XX → b.XX
+            WHEN cluster.nama_cluster REGEXP "^II\\.B\\.(10|11|12|13|14|15|16)\\.B\\.[0-9]{2}$" 
+            THEN CONCAT("b.", SUBSTRING_INDEX(cluster.nama_cluster, ".", -1))
+
+            -- Format default, ambil 3 karakter terakhir
+            ELSE RIGHT(cluster.nama_cluster, 3) 
+        END AS simbol_cluster, -- Menggabungkan detail data menjadi JSON
+        GROUP_CONCAT(DISTINCT 
+            JSON_OBJECT(
+                "no_model", `stock`.`no_model`, "kode_warna", `stock`.`kode_warna`, "foll_up", `master_order`.`foll_up`, "delivery", `master_order`.`delivery_awal`, "qty", ROUND(stock.kgs_stock_awal + stock.kgs_in_out, 2)
+            ) ORDER BY stock.no_model SEPARATOR ", "
+        ) AS detail_data
+FROM `cluster`
+LEFT JOIN `stock` ON `stock`.`nama_cluster` = `cluster`.`nama_cluster`
+LEFT JOIN `master_order` ON `master_order`.`no_model` = `stock`.`no_model`
+LEFT JOIN `out_celup` ON `out_celup`.`no_model` = `stock`.`no_model`
+WHERE   (
+`cluster`.`nama_cluster` LIKE :cluster.nama_cluster: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.12: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.13: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.14: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.15: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.16: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.17: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.18: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.19: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.20: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.21: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.22: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.23: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.24: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.25: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.26: ESCAPE \'!\'
+ )
+GROUP BY `cluster`.`nama_cluster`', [...], false)
+ 4 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 5 SYSTEMPATH\BaseModel.php(679): CodeIgniter\Model->doFindAll(0, 0)
+ 6 APPPATH\Models\ClusterModel.php(213): CodeIgniter\BaseModel->findAll()
+ 7 APPPATH\Controllers\DashboardGbnController.php(61): App\Models\ClusterModel->getClusterGroupII()
+ 8 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\DashboardGbnController->index()
+ 9 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\DashboardGbnController))
+10 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+14 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\MaterialSystem\\public\\index.php')
+CRITICAL - 2025-08-26 20:12:45 --> [Caused by] mysqli_sql_exception: MySQL server has gone away
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cluster`.`kapasitas`, ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, `cluster`.`nama_cluster`, CONCAT(
+                                "[", GROUP_CONCAT(
+                                    DISTINCT CONCAT(
+                                        \'{"no_model":"\', `out_celup`.`no_model`, \'", "no_karung":"\', `out_celup`.`no_karung`, \'", "kgs_kirim":"\', `out_celup`.`kgs_kirim`, \'"}\'
+                                    )
+                                    ORDER BY out_celup.no_karung SEPARATOR ", "
+                                ), "]"
+                            ) AS detail_karung, CASE 
+            -- Format untuk cluster dengan angka 10-16 dan huruf A atau B
+            WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11|12|13|14|15|16)\\.[AB]$" 
+            THEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2)
+
+            -- Format untuk cluster dengan format II.B.10.B.XX sampai II.B.16.B.XX → b.XX
+            WHEN cluster.nama_cluster REGEXP "^II\\.B\\.(10|11|12|13|14|15|16)\\.B\\.[0-9]{2}$" 
+            THEN CONCAT("b.", SUBSTRING_INDEX(cluster.nama_cluster, ".", -1))
+
+            -- Format default, ambil 3 karakter terakhir
+            ELSE RIGHT(cluster.nama_cluster, 3) 
+        END AS simbol_cluster, -- Menggabungkan detail data menjadi JSON
+        GROUP_CONCAT(DISTINCT 
+            JSON_OBJECT(
+                "no_model", `stock`.`no_model`, "kode_warna", `stock`.`kode_warna`, "foll_up", `master_order`.`foll_up`, "delivery", `master_order`.`delivery_awal`, "qty", ROUND(stock.kgs_stock_awal + stock.kgs_in_out, 2)
+            ) ORDER BY stock.no_model SEPARATOR ", "
+        ) AS detail_data
+FROM `cluster`
+LEFT JOIN `stock` ON `stock`.`nama_cluster` = `cluster`.`nama_cluster`
+LEFT JOIN `master_order` ON `master_order`.`no_model` = `stock`.`no_model`
+LEFT JOIN `out_celup` ON `out_celup`.`no_model` = `stock`.`no_model`
+WHERE   (
+`cluster`.`nama_cluster` LIKE \'II.%.01.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.02.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.03.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.04.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.05.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.06.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.07.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.08.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.09.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.10.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.11.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.12.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.13.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.14.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.15.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.16.%%\' ESCAPE \'!\'
+ )
+GROUP BY `cluster`.`nama_cluster`', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cluster`.`kapasitas`, ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, `cluster`.`nama_cluster`, CONCAT(
+                                "[", GROUP_CONCAT(
+                                    DISTINCT CONCAT(
+                                        \'{"no_model":"\', `out_celup`.`no_model`, \'", "no_karung":"\', `out_celup`.`no_karung`, \'", "kgs_kirim":"\', `out_celup`.`kgs_kirim`, \'"}\'
+                                    )
+                                    ORDER BY out_celup.no_karung SEPARATOR ", "
+                                ), "]"
+                            ) AS detail_karung, CASE 
+            -- Format untuk cluster dengan angka 10-16 dan huruf A atau B
+            WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11|12|13|14|15|16)\\.[AB]$" 
+            THEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2)
+
+            -- Format untuk cluster dengan format II.B.10.B.XX sampai II.B.16.B.XX → b.XX
+            WHEN cluster.nama_cluster REGEXP "^II\\.B\\.(10|11|12|13|14|15|16)\\.B\\.[0-9]{2}$" 
+            THEN CONCAT("b.", SUBSTRING_INDEX(cluster.nama_cluster, ".", -1))
+
+            -- Format default, ambil 3 karakter terakhir
+            ELSE RIGHT(cluster.nama_cluster, 3) 
+        END AS simbol_cluster, -- Menggabungkan detail data menjadi JSON
+        GROUP_CONCAT(DISTINCT 
+            JSON_OBJECT(
+                "no_model", `stock`.`no_model`, "kode_warna", `stock`.`kode_warna`, "foll_up", `master_order`.`foll_up`, "delivery", `master_order`.`delivery_awal`, "qty", ROUND(stock.kgs_stock_awal + stock.kgs_in_out, 2)
+            ) ORDER BY stock.no_model SEPARATOR ", "
+        ) AS detail_data
+FROM `cluster`
+LEFT JOIN `stock` ON `stock`.`nama_cluster` = `cluster`.`nama_cluster`
+LEFT JOIN `master_order` ON `master_order`.`no_model` = `stock`.`no_model`
+LEFT JOIN `out_celup` ON `out_celup`.`no_model` = `stock`.`no_model`
+WHERE   (
+`cluster`.`nama_cluster` LIKE \'II.%.01.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.02.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.03.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.04.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.05.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.06.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.07.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.08.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.09.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.10.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.11.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.12.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.13.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.14.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.15.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.16.%%\' ESCAPE \'!\'
+ )
+GROUP BY `cluster`.`nama_cluster`')
+ 3 SYSTEMPATH\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cluster`.`kapasitas`, ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, `cluster`.`nama_cluster`, CONCAT(
+                                "[", GROUP_CONCAT(
+                                    DISTINCT CONCAT(
+                                        \'{"no_model":"\', `out_celup`.`no_model`, \'", "no_karung":"\', `out_celup`.`no_karung`, \'", "kgs_kirim":"\', `out_celup`.`kgs_kirim`, \'"}\'
+                                    )
+                                    ORDER BY out_celup.no_karung SEPARATOR ", "
+                                ), "]"
+                            ) AS detail_karung, CASE 
+            -- Format untuk cluster dengan angka 10-16 dan huruf A atau B
+            WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11|12|13|14|15|16)\\.[AB]$" 
+            THEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2)
+
+            -- Format untuk cluster dengan format II.B.10.B.XX sampai II.B.16.B.XX → b.XX
+            WHEN cluster.nama_cluster REGEXP "^II\\.B\\.(10|11|12|13|14|15|16)\\.B\\.[0-9]{2}$" 
+            THEN CONCAT("b.", SUBSTRING_INDEX(cluster.nama_cluster, ".", -1))
+
+            -- Format default, ambil 3 karakter terakhir
+            ELSE RIGHT(cluster.nama_cluster, 3) 
+        END AS simbol_cluster, -- Menggabungkan detail data menjadi JSON
+        GROUP_CONCAT(DISTINCT 
+            JSON_OBJECT(
+                "no_model", `stock`.`no_model`, "kode_warna", `stock`.`kode_warna`, "foll_up", `master_order`.`foll_up`, "delivery", `master_order`.`delivery_awal`, "qty", ROUND(stock.kgs_stock_awal + stock.kgs_in_out, 2)
+            ) ORDER BY stock.no_model SEPARATOR ", "
+        ) AS detail_data
+FROM `cluster`
+LEFT JOIN `stock` ON `stock`.`nama_cluster` = `cluster`.`nama_cluster`
+LEFT JOIN `master_order` ON `master_order`.`no_model` = `stock`.`no_model`
+LEFT JOIN `out_celup` ON `out_celup`.`no_model` = `stock`.`no_model`
+WHERE   (
+`cluster`.`nama_cluster` LIKE \'II.%.01.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.02.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.03.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.04.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.05.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.06.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.07.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.08.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.09.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.10.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.11.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.12.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.13.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.14.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.15.%%\' ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE \'II.%.16.%%\' ESCAPE \'!\'
+ )
+GROUP BY `cluster`.`nama_cluster`')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cluster`.`kapasitas`, ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, `cluster`.`nama_cluster`, CONCAT(
+                                "[", GROUP_CONCAT(
+                                    DISTINCT CONCAT(
+                                        \'{"no_model":"\', `out_celup`.`no_model`, \'", "no_karung":"\', `out_celup`.`no_karung`, \'", "kgs_kirim":"\', `out_celup`.`kgs_kirim`, \'"}\'
+                                    )
+                                    ORDER BY out_celup.no_karung SEPARATOR ", "
+                                ), "]"
+                            ) AS detail_karung, CASE 
+            -- Format untuk cluster dengan angka 10-16 dan huruf A atau B
+            WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11|12|13|14|15|16)\\.[AB]$" 
+            THEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2)
+
+            -- Format untuk cluster dengan format II.B.10.B.XX sampai II.B.16.B.XX → b.XX
+            WHEN cluster.nama_cluster REGEXP "^II\\.B\\.(10|11|12|13|14|15|16)\\.B\\.[0-9]{2}$" 
+            THEN CONCAT("b.", SUBSTRING_INDEX(cluster.nama_cluster, ".", -1))
+
+            -- Format default, ambil 3 karakter terakhir
+            ELSE RIGHT(cluster.nama_cluster, 3) 
+        END AS simbol_cluster, -- Menggabungkan detail data menjadi JSON
+        GROUP_CONCAT(DISTINCT 
+            JSON_OBJECT(
+                "no_model", `stock`.`no_model`, "kode_warna", `stock`.`kode_warna`, "foll_up", `master_order`.`foll_up`, "delivery", `master_order`.`delivery_awal`, "qty", ROUND(stock.kgs_stock_awal + stock.kgs_in_out, 2)
+            ) ORDER BY stock.no_model SEPARATOR ", "
+        ) AS detail_data
+FROM `cluster`
+LEFT JOIN `stock` ON `stock`.`nama_cluster` = `cluster`.`nama_cluster`
+LEFT JOIN `master_order` ON `master_order`.`no_model` = `stock`.`no_model`
+LEFT JOIN `out_celup` ON `out_celup`.`no_model` = `stock`.`no_model`
+WHERE   (
+`cluster`.`nama_cluster` LIKE :cluster.nama_cluster: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.12: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.13: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.14: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.15: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.16: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.17: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.18: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.19: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.20: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.21: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.22: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.23: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.24: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.25: ESCAPE \'!\'
+OR  `cluster`.`nama_cluster` LIKE :cluster.nama_cluster.26: ESCAPE \'!\'
+ )
+GROUP BY `cluster`.`nama_cluster`', [...], false)
+ 5 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 6 SYSTEMPATH\BaseModel.php(679): CodeIgniter\Model->doFindAll(0, 0)
+ 7 APPPATH\Models\ClusterModel.php(213): CodeIgniter\BaseModel->findAll()
+ 8 APPPATH\Controllers\DashboardGbnController.php(61): App\Models\ClusterModel->getClusterGroupII()
+ 9 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\DashboardGbnController->index()
+10 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\DashboardGbnController))
+11 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+15 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\MaterialSystem\\public\\index.php')
+DEBUG - 2025-08-26 20:13:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 20:13:28 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 20:13:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 20:14:22 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-08-26 20:14:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.

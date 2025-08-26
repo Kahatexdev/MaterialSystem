@@ -438,7 +438,7 @@ class WarehouseController extends BaseController
 
         if ($update) {
             $existing = session()->get('dataOut') ?? [];
-            $filtered = array_filter($existing, fn($item) => !in_array($item['id_out_celup'], $post['id_out_celup']));
+            $filtered = array_filter($existing, fn ($item) => !in_array($item['id_out_celup'], $post['id_out_celup']));
             session()->set('dataOut', array_values($filtered));
         }
 
@@ -1474,7 +1474,7 @@ class WarehouseController extends BaseController
         }
         //update tabel pemasukan
         if (!empty($checkedIds)) {
-            $whereIds = array_map(fn($index) => $idOutCelup[$index] ?? null, $checkedIds);
+            $whereIds = array_map(fn ($index) => $idOutCelup[$index] ?? null, $checkedIds);
             $whereIds = array_filter($whereIds); // Hapus nilai NULL jika ada
 
             if (!empty($whereIds)) {
@@ -3370,5 +3370,24 @@ class WarehouseController extends BaseController
             'role' => $this->role,
         ];
         return view($this->role . '/warehouse/import-pemasukan', $data);
+    }
+
+    public function reportPemakaianNylon()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Report Pemakaian Nylon',
+            'active' => $this->active
+        ];
+        return view($this->role . '/warehouse/report-pemakaian-nylon', $data);
+    }
+
+    public function filterPemakaianNylon()
+    {
+        $buyer = $this->request->getGet('buyer');
+
+        $data = $this->pengeluaranModel->getFilterPemakaianNylonByBuyer($buyer);
+        // dd($data);
+        return $this->response->setJSON($data);
     }
 }

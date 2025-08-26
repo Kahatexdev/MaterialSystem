@@ -624,4 +624,27 @@ class PengeluaranModel extends Model
             ->get()
             ->getResultArray();
     }
+
+    public function getFilterPemakaianNylonByBuyer($buyer = null)
+    {
+        $builder = $this->select('
+            master_order.buyer,
+            master_material.jenis,
+            SUM(pengeluaran.kgs_out) AS pemakaian_kgs, 
+            SUM(pengeluaran.cns_out) AS pemakaian_cns, 
+            SUM(pengeluaran.krg_out) AS pemakaian_krg
+        ')
+            ->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
+            ->join('master_order', 'master_order.no_model = stock.no_model', 'left')
+            ->join('master_material', 'master_material.item_type = stock.item_type', 'left')
+            ->where('pengeluaran.status', 'Pengiriman Area')
+            ->where('master_material.jenis', 'NYLON');
+
+        if (!empty($buyer)) {
+            $builder->where('master_order.buyer', $buyer);
+        }
+
+        return $builder->groupBy(['master_order.buyer', 'master_material.jenis'])
+            ->findAll();
+    }
 }
