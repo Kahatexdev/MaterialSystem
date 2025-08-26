@@ -784,7 +784,7 @@ class CelupController extends BaseController
         // data ALL BON
         $dataBon = $this->bonCelupModel->getDataById($idBon); // get data by id_bon
         $detailBon = $this->outCelupModel->getDetailBonByIdBon($idBon); // get data detail bon by id_bon
-
+        // dd($detailBon);
         $groupedDetails = [];
         foreach ($detailBon as $detail) {
             $key = $detail['no_model'] . '|' . $detail['item_type'] . '|' . $detail['kode_warna'];
@@ -817,7 +817,7 @@ class CelupController extends BaseController
                         'cones_kirim' => 0,
                         'gw_kirim' => 0,
                         'kgs_kirim' => 0,
-                        'admin' => $detail['admin'],
+                        'operator_packing' => $detail['operator_packing'],
                     ],
                     'ganti_retur' => $gantiRetur,
                     'jmlKarung' => 0,
@@ -850,6 +850,7 @@ class CelupController extends BaseController
 
         // Hasilkan barcode untuk setiap ID outCelup di grup
         foreach ($groupedDetails as &$group) {
+            // dd($group);
             foreach ($group['detailPengiriman'] as $outCelup => $id) {
                 // Hasilkan barcode dan encode sebagai base64
                 // $id_out_celup = str_pad($id['id_out_celup'], 12, '0', STR_PAD_LEFT);
@@ -866,7 +867,7 @@ class CelupController extends BaseController
                     'cones' => $id['cones_kirim'],
                     'lot' => $id['lot_kirim'],
                     'no_karung' => $id['no_karung'],
-                    'admin' => $group['totals']['admin'],
+                    'operator_packing' => $group['totals']['operator_packing'],
                     'barcode' => 'data:image/png;base64,' . base64_encode($barcode),
                 ];
             }

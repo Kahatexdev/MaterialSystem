@@ -515,7 +515,7 @@
                                                     <div class="footer-right" style="text-align:right; font-weight:600; font-weight: bold; color: #000;">
                                                         No Karung
                                                         <div class="no-karung-value" style="font-size:14px; margin-top:3px; font-weight: bold; color: #000;"><?= htmlspecialchars($barcode['no_karung'] ?? '-', ENT_QUOTES) ?></div>
-                                                        <?= htmlspecialchars($barcode['admin'] ?? '-', ENT_QUOTES) ?> | Shift <?= htmlspecialchars($barcode['shift'] ?? 'A', ENT_QUOTES) ?>
+                                                        <?= htmlspecialchars($barcode['operator_packing'] ?? '-', ENT_QUOTES) ?> | Shift <?= htmlspecialchars($barcode['shift'] ?? 'A', ENT_QUOTES) ?>
                                                     </div>
                                                 </div>
                                             </div>
