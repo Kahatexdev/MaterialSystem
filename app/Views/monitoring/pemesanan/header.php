@@ -14,6 +14,15 @@
                 <ul class="navbar-nav  justify-content-end">
                     <li class="nav-item dropdown">
                         <a href="#" class="nav-link text-body font-weight-bold px-2" id="navbarDropdownReports" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-clock"></i>
+                            <span class="d-lg-inline-block d-none ms-1">Batas Waktu<i class="bi bi-caret-down-fill"></i></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownReports">
+                            <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/ubahTanggalPemesanan') ?>">Ubah Tanggal Pemesanan</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link text-body font-weight-bold px-2" id="navbarDropdownReports" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-file-alt"></i>
                             <span class="d-lg-inline-block d-none ms-1">Report <i class="bi bi-caret-down-fill"></i></span>
                         </a>

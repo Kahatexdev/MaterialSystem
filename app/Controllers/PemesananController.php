@@ -25,6 +25,7 @@ use App\Models\PemesananSpandexKaretModel;
 use App\Models\ReturModel;
 use App\Models\PoTambahanModel;
 use App\Models\HistoryStock;
+use App\Models\MasterRangePemesanan;
 use CodeIgniter\API\ResponseTrait;
 
 
@@ -55,6 +56,7 @@ class PemesananController extends BaseController
     protected $poTambahanModel;
     protected $returModel;
     protected $historyStock;
+    protected $masterRangePemesanan;
 
     public function __construct()
     {
@@ -78,6 +80,7 @@ class PemesananController extends BaseController
         $this->poTambahanModel = new PoTambahanModel();
         $this->returModel = new ReturModel();
         $this->historyStock = new HistoryStock();
+        $this->masterRangePemesanan = new MasterRangePemesanan();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -559,7 +562,7 @@ class PemesananController extends BaseController
                 // kalau return string langsung
                 $jenis = strtolower((string) $resultJenis);
             }
-            
+
 
             // Data update untuk pengeluaran
             $data = [
@@ -1693,5 +1696,127 @@ class PemesananController extends BaseController
             ->update();
 
         return $this->response->setJSON(['status' => 'success', 'message' => 'Keterangan berhasil disimpan']);
+    }
+
+    public function ubahTanggalPemesanan()
+    {
+        $listArea = $this->masterRangePemesanan->getArea();
+        $sort = ['KK1A', 'KK1B', 'KK2A', 'KK2B', 'KK2C', 'KK5G', 'KK7K', 'KK7L', 'KK8D', 'KK8F', 'KK8J', 'KK9D', 'KK10', 'KK11M'];
+        usort($listArea, function ($a, $b) use ($sort) {
+            $posA = array_search($a['area'], $sort);
+            $posB = array_search($b['area'], $sort);
+
+            $posA = $posA === false ? PHP_INT_MAX : $posA;
+            $posB = $posB === false ? PHP_INT_MAX : $posB;
+
+            return $posA <=> $posB;
+        });
+
+        $date = DATE('Y-m-d');
+        $day = date('l');
+        $dayList = [
+            'Sunday'    => 'Minggu',
+            'Monday'    => 'Senin',
+            'Tuesday'   => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday'  => 'Kamis',
+            'Friday'    => 'Jumat',
+            'Saturday'  => 'Sabtu',
+        ];
+        $today = $dayList[$day] ?? $day;
+
+        $rangeTgl = $this->masterRangePemesanan->getRangeByDay($day);
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'date' => $date,
+            'today'  => $today,
+            'day'  => $day,
+            'rangeTgl' => $rangeTgl,
+            'listArea' => $listArea,
+        ];
+        return view($this->role . '/pemesanan/ubah-tgl-pemesanan', $data);
+    }
+
+    public function updateRangeSeluruhArea()
+    {
+        $getPost = $this->request->getPost();
+        $day = $getPost['days'] ?? null;
+
+        if (!empty($getPost)) {
+            $updateData = [
+                'range_spandex' => $getPost['range_spandex'] ?? null,
+                'range_karet' => $getPost['range_karet'] ?? null,
+                'range_benang' => $getPost['range_benang'] ?? null,
+                'range_nylon' => $getPost['range_nylon'] ?? null,
+            ];
+
+            $this->masterRangePemesanan->where('days', $day)->set($updateData)->update();
+
+            return redirect()->back()->with('success', 'Range tanggal berhasil diperbarui.');
+        } else {
+            return redirect()->back()->with('error', 'Data tidak valid.');
+        }
+    }
+
+    public function updateRangeAreaTertentu()
+    {
+        $post = $this->request->getPost();
+
+        $areas      = (array) ($post['area'] ?? []);
+        $days       = (array) ($post['days'] ?? []);
+        $spandexArr = (array) ($post['range_spandex'] ?? []);
+        $karetArr   = (array) ($post['range_karet'] ?? []);
+        $benangArr  = (array) ($post['range_benang'] ?? []);
+        $nylonArr   = (array) ($post['range_nylon'] ?? []);
+
+        if (empty($areas) || empty($days)) {
+            return redirect()->back()->with('error', 'Area atau days kosong.');
+        }
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $totalUpdated = 0;
+        $count = max(count($areas), count($days));
+        for ($i = 0; $i < $count; $i++) {
+            $area = $areas[$i] ?? null;
+            $day  = $days[$i] ?? null;
+            if (!$area || !$day) continue; // skip pasangan tak lengkap
+
+            // Ambil nilai scalar untuk index ini (bisa null)
+            $updateData = [
+                'range_spandex' => $spandexArr[$i] ?? null,
+                'range_karet'   => $karetArr[$i] ?? null,
+                'range_benang'  => $benangArr[$i] ?? null,
+                'range_nylon'   => $nylonArr[$i] ?? null,
+            ];
+
+            // Pastikan semua value scalar (bukan array)
+            foreach ($updateData as $k => $v) {
+                if (is_array($v)) $updateData[$k] = null;
+            }
+
+            $this->masterRangePemesanan
+                ->where('days', $day)
+                ->where('area', $area)
+                ->set($updateData)
+                ->update();
+
+            // cek affectedRows (opsional)
+            if ($this->masterRangePemesanan->db->affectedRows() > 0) {
+                $totalUpdated++;
+            }
+        }
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->with('error', 'Gagal update, rollback.');
+        }
+
+        return redirect()->back()->with('success', "Selesai. Total terupdate: {$totalUpdated}.");
     }
 }

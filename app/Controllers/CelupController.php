@@ -575,26 +575,100 @@ class CelupController extends BaseController
                     ];
                 }
             }
-            // Debugging sebelum insert
-            $this->outCelupModel->insertBatch($saveDataOutCelup);
-            // Perbarui total pengiriman dan status pada tabel schedule_celup
-            $totalPengiriman = $this->scheduleCelupModel
-                ->select('COALESCE(SUM(out_celup.kgs_kirim), 0) as total_kirim, schedule_celup.kg_celup')
-                ->join('out_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
-                ->where('schedule_celup.id_celup', $id_celup)
-                ->first();
-            if (
-                $totalPengiriman && (($totalPengiriman['total_kirim'] ?? 0) >= $totalPengiriman['kg_celup'])
-            ) {
-                // $this->scheduleCelupModel->update($id_celup, ['id_bon' => $id_bon, 'last_status' => 'sent']);
-                $this->scheduleCelupModel->update($id_celup, ['last_status' => 'sent']);
-            }
-            // dd($totalPengiriman, $totalPengiriman['total_kirim'], $totalPengiriman['kg_celup']);
         }
-        // dd($totalPengiriman, $totalPengiriman['kg_celup']);
+
+        $this->outCelupModel->insertBatch($saveDataOutCelup);
+        // Perbarui total pengiriman dan status pada tabel schedule_celup
+        $totalPengiriman = $this->scheduleCelupModel
+            ->select('COALESCE(SUM(out_celup.kgs_kirim), 0) as total_kirim, schedule_celup.kg_celup')
+            ->join('out_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
+            ->where('schedule_celup.id_celup', $id_celup)
+            ->first();
+        if (
+            $totalPengiriman && (($totalPengiriman['total_kirim'] ?? 0) >= $totalPengiriman['kg_celup'])
+        ) {
+            // $this->scheduleCelupModel->update($id_celup, ['id_bon' => $id_bon, 'last_status' => 'sent']);
+            $this->scheduleCelupModel->update($id_celup, ['last_status' => 'sent']);
+        }
         return redirect()->to(base_url($this->role . '/outCelup'))->with('success', 'BON Berhasil Di Simpan.');
     }
 
+    // public function saveBon()
+    // {
+    //     $data = $this->request->getPost();
+
+    //     $saveDataBon = [
+    //         'detail_sj' => $data['detail_sj'],
+    //         'no_surat_jalan' => $data['no_surat_jalan'],
+    //         'tgl_datang' => $data['tgl_datang'],
+    //         'admin' => session()->get('username'),
+    //         'created_at' => date('Y-m-d H:i:s'),
+    //         'updated_at' => '',
+    //     ];
+
+    //     $this->bonCelupModel->insert($saveDataBon);
+
+    //     $id_bon = $this->bonCelupModel->insertID();
+
+    //     $noKarung = $data['no_karung'] ?? [];
+    //     // $gantiRetur = isset($data['ganti_retur']) ? '1' : '0';
+    //     $tab = count($data['harga']);
+
+
+    //     $saveDataOutCelup = [];
+
+    //     for ($h = 0; $h < $tab; $h++) {
+
+    //         $id_celup = $data['items'][$h]['id_celup'] ?? null;
+    //         $lot = $this->scheduleCelupModel->select('lot_celup')->where('id_celup', $id_celup)->first();
+    //         // dd($lot, $id_celup, $id_bon);
+
+    //         $gantiRetur = isset($data['ganti_retur'][$h]) ? $data['ganti_retur'][$h] : '0';
+    //         // Pastikan no_karung tidak kosong dan merupakan array
+    //         if (!empty($data['no_karung'][$h]) && is_array($data['no_karung'][$h])) {
+    //             $jmldatapertab = count($data['no_karung'][$h]); // Ambil jumlah data yang benar
+
+    //             for ($i = 0; $i < $jmldatapertab; $i++) {
+
+    //                 $saveDataOutCelup[] = [
+    //                     'id_bon' => $id_bon,
+    //                     'id_celup' => $id_celup ?? null,
+    //                     'no_model' => $data['items'][$h]['no_model'],
+    //                     'l_m_d' => $data['l_m_d'][$h] ?? null,
+    //                     'harga' => $data['harga'][$h] ?? null,
+    //                     'no_karung' => $data['no_karung'][$h][$i] ?? null, // Ambil dari indeks $i
+    //                     'gw_kirim' => $data['gw_kirim'][$h][$i] ?? null,
+    //                     'kgs_kirim' => $data['kgs_kirim'][$h][$i] ?? null,
+    //                     'cones_kirim' => $data['cones_kirim'][$h][$i] ?? null,
+    //                     'lot_kirim' => $lot['lot_celup'],
+    //                     'ganti_retur' => $gantiRetur,
+    //                     'operator_packing' => $data['operator_packing'][$h][$i] ?? null,
+    //                     'shift' => $data['shift'][$h][$i] ?? null,
+    //                     'admin' => session()->get('username'),
+    //                     'created_at' => date('Y-m-d H:i:s'),
+    //                     'updated_at' => '',
+    //                 ];
+    //             }
+    //         }
+    //         // Perbarui total pengiriman dan status pada tabel schedule_celup
+    //         $totalPengiriman = $this->scheduleCelupModel
+    //             ->select('COALESCE(SUM(out_celup.kgs_kirim), 0) as total_kirim, schedule_celup.kg_celup')
+    //             ->join('out_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
+    //             ->where('out_celup.id_celup', $id_celup)
+    //             ->first();
+    //         if ($totalPengiriman && $totalPengiriman['total_kirim'] ?? 0 >= $totalPengiriman['kg_celup']) {
+    //             $this->scheduleCelupModel->update($id_celup, ['id_bon' => $id_bon, 'last_status' => 'sent']);
+    //         }
+    //     }
+
+
+    //     // Debugging sebelum insert
+    //     // dd($saveDataOutCelup);
+
+    //     $this->outCelupModel->insertBatch($saveDataOutCelup);
+
+    //     return redirect()->to(base_url($this->role . '/outCelup'))->with('success', 'BON Berhasil Di Simpan.');
+    // }
     public function editBon($id_bon)
     {
         $bonData = $this->bonCelupModel->where('id_bon', $id_bon)->first();
@@ -710,7 +784,7 @@ class CelupController extends BaseController
         // data ALL BON
         $dataBon = $this->bonCelupModel->getDataById($idBon); // get data by id_bon
         $detailBon = $this->outCelupModel->getDetailBonByIdBon($idBon); // get data detail bon by id_bon
-
+        // dd($detailBon);
         $groupedDetails = [];
         foreach ($detailBon as $detail) {
             $key = $detail['no_model'] . '|' . $detail['item_type'] . '|' . $detail['kode_warna'];
@@ -743,7 +817,7 @@ class CelupController extends BaseController
                         'cones_kirim' => 0,
                         'gw_kirim' => 0,
                         'kgs_kirim' => 0,
-                        'admin' => $detail['admin'],
+                        'operator_packing' => $detail['operator_packing'],
                     ],
                     'ganti_retur' => $gantiRetur,
                     'jmlKarung' => 0,
@@ -776,6 +850,7 @@ class CelupController extends BaseController
 
         // Hasilkan barcode untuk setiap ID outCelup di grup
         foreach ($groupedDetails as &$group) {
+            // dd($group);
             foreach ($group['detailPengiriman'] as $outCelup => $id) {
                 // Hasilkan barcode dan encode sebagai base64
                 // $id_out_celup = str_pad($id['id_out_celup'], 12, '0', STR_PAD_LEFT);
@@ -792,7 +867,7 @@ class CelupController extends BaseController
                     'cones' => $id['cones_kirim'],
                     'lot' => $id['lot_kirim'],
                     'no_karung' => $id['no_karung'],
-                    'admin' => $group['totals']['admin'],
+                    'operator_packing' => $group['totals']['operator_packing'],
                     'barcode' => 'data:image/png;base64,' . base64_encode($barcode),
                 ];
             }

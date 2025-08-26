@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Database\Seeds\MasterRangePemesanan as SeedsMasterRangePemesanan;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
@@ -26,6 +27,7 @@ use App\Models\KategoriReturModel;
 use App\Models\PoTambahanModel;
 use App\Models\TrackingPoCovering;
 use App\Models\KebutuhanCones;
+use App\Models\MasterRangePemesanan;
 use PHPUnit\Framework\Attributes\IgnoreFunctionForCodeCoverage;
 
 class ApiController extends ResourceController
@@ -55,6 +57,7 @@ class ApiController extends ResourceController
     protected $poTambahanModel;
     protected $trackingPoCovering;
     protected $kebutuhanCones;
+    protected $masterRangePemesanan;
 
 
     public function __construct()
@@ -80,6 +83,7 @@ class ApiController extends ResourceController
         $this->poTambahanModel = new PoTambahanModel();
         $this->trackingPoCovering = new TrackingPoCovering();
         $this->kebutuhanCones = new KebutuhanCones();
+        $this->masterRangePemesanan = new MasterRangePemesanan();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -1533,6 +1537,14 @@ class ApiController extends ResourceController
 
         $data = $this->pemasukanModel->getFilterBenang($tanggalAwal, $tanggalAkhir);
 
+        return $this->response->setJSON($data);
+    }
+    public function getMasterRangePemesanan()
+    {
+        $day = $this->request->getGet('day');
+        $area = $this->request->getGet('area');
+
+        $data = $this->masterRangePemesanan->where('days', $day)->where('area', $area)->first();;
         return $this->response->setJSON($data);
     }
 }

@@ -374,7 +374,7 @@
                                                     <select class="form-control slc2" id="add_item_${tabIndex}" name="add_item" required>
                                                         <option value="">Pilih Item </option>
                                                         <?php foreach ($no_model as $item): ?>
-                                                            <option value="<?= $item['id_celup'] ?>"><?= $item['no_model'] ?> | <?= $item['item_type'] ?> |<?= $item['kode_warna'] ?> | <?= $item['warna'] ?></option>
+                                                             <option value="<?= $item['id_celup'] ?>"><?= $item['no_model'] ?> | <?= $item['item_type'] ?> |<?= $item['kode_warna'] ?> | <?= $item['warna']  ?> | Lot <?= $item['lot_celup'] ?> | <?= $item['kg_celup'] ?>kg</option>
                                                         <?php endforeach; ?>
                                                     </select>
                                                 </div>
@@ -462,9 +462,9 @@
                                                     <tbody>
                                                         <tr>
                                                             <td><input type="text" class="form-control text-center" name="no_karung[${tabIndex - 1}][0]" value="1" readonly></td>
-                                                            <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex - 1}][0]" required></td>
-                                                            <td><input type="number" step="0.01" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex - 1}][0]" required></td>
-                                                            <td><input type="number" step="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex - 1}][0]" required></td>
+                                                            <td><input type="number" step="0.01" min="0.01" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex - 1}][0]" required></td>
+                                                            <td><input type="number" step="0.01" min="0.01" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex - 1}][0]" required></td>
+                                                            <td><input type="number" step="0.01" min="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex - 1}][0]" required></td>
                                                             <td><input type="text" class="form-control lot_celup_input" name="items[${tabIndex - 1}][lot_celup]" id="${lotCelupId}" required></td>
                                                             <td><input type="text" class="form-control operator_packing_input" name="operator_packing[${tabIndex - 1}][0]" required></td>
                                                                 <td><select class="form-control" name="shift[${tabIndex - 1}][0]" id="shift" required>
@@ -769,6 +769,31 @@
                 tfoot.querySelector("input[id^='total_lot_kirim']").value = totalRows;
             }
         }
+
+        document.querySelector("form").addEventListener("submit", function(e) {
+            let valid = true;
+            let message = "";
+
+            // ambil semua input di dalam #poTable
+            document.querySelectorAll("#poTable .cones_kirim_input, #poTable .gw_kirim_input, #poTable .kgs_kirim_input").forEach(input => {
+                let val = parseFloat(input.value);
+                if (isNaN(val) || val <= 0) {
+                    valid = false;
+                    message = "Cones, GW, dan NW harus lebih dari 0!";
+                    input.focus();
+                }
+            });
+
+            if (!valid) {
+                e.preventDefault(); // stop submit
+                Swal.fire({
+                    icon: "error",
+                    title: "Validasi Gagal",
+                    text: message,
+                    confirmButtonColor: "#d33"
+                });
+            }
+        });
 
         document.addEventListener("DOMContentLoaded", function() {
             // Untuk tab pertama
