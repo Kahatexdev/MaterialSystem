@@ -18,9 +18,7 @@
                             <span class="d-lg-inline-block d-none ms-1">Batas Waktu<i class="bi bi-caret-down-fill"></i></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownReports">
-                            <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/ubahJamPemesanan') ?>">Ubah Jam Pemesanan</a></li>
                             <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/ubahTanggalPemesanan') ?>">Ubah Tanggal Pemesanan</a></li>
-                            <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/historyJadwalPemesanan') ?>">History Update Jadwal Pemesanan</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">

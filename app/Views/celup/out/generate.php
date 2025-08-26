@@ -468,62 +468,60 @@
                             $ukuran = $group['ukuran'] ?? '-';
                             ?>
                             <?php foreach ($group['barcodes'] as $barcode) { ?>
-                                <div class="col-md-4" style="margin-top: 10px;">
-                                    <table style="width: 9.9cm; height:4.7cm; border-collapse: collapse; border: 1px solid #000;">
-                                        <tr style=" border: 1px solid #000;">
-                                            <td colspan="3" class="label-header" style="text-align: center; font-size: 18px; font-weight: bold; color: #000;">
-                                                <img src="<?= $img ?>" alt="logo" width="17" style="vertical-align: middle; margin-right: 5px;">
-                                                PT. KAHATEX
-                                            </td>
-                                        </tr>
+                                <table style="width: 9.9cm; height:4.7cm; border-collapse: collapse; border: 1px solid #000; margin-top: 10px; margin-right:10px;">
+                                    <tr style=" border: 1px solid #000;">
+                                        <td colspan="3" class="label-header" style="text-align: center; font-size: 18px; font-weight: bold; color: #000;">
+                                            <img src="<?= $img ?>" alt="logo" width="17" style="vertical-align: middle; margin-right: 5px;">
+                                            PT. KAHATEX
+                                        </td>
+                                    </tr>
 
-                                        <tr>
-                                            <td colspan="3">
-                                                <div class="label-body" style="padding:6px;">
-                                                    <table style="width:100%; border: none;">
-                                                        <tr>
-                                                            <td colspan="3">
-                                                                <div class="barcode-section" style="text-align:center;">
-                                                                    <img src="<?= $barcode['barcode'] ?>" alt="barcode" style="max-width:100%; height:40px;">
-                                                                    <div style="font-weight: bold; color: #000; margin-top:1px;" class="l-header"><?= htmlspecialchars($barcode['no_model'] ?? '-', ENT_QUOTES) ?></div>
-                                                                    <div style="font-weight: bold; color: #000;" class="l-desc">Lot: <?= htmlspecialchars($barcode['lot'] ?? '-', ENT_QUOTES) ?></div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
+                                    <tr>
+                                        <td colspan="3">
+                                            <div class="label-body" style="padding:6px;">
+                                                <table style="width:100%; border: none;">
+                                                    <tr>
+                                                        <td colspan="3">
+                                                            <div class="barcode-section" style="text-align:center;">
+                                                                <img src="<?= $barcode['barcode'] ?>" alt="barcode" style="max-width:100%; height:40px;">
+                                                                <div style="font-weight: bold; color: #000; margin-top:1px;" class="l-header"><?= htmlspecialchars($barcode['no_model'] ?? '-', ENT_QUOTES) ?></div>
+                                                                <div style="font-weight: bold; color: #000;" class="l-desc">Lot: <?= htmlspecialchars($barcode['lot'] ?? '-', ENT_QUOTES) ?></div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
 
-                                                        <tr>
-                                                            <td colspan="3">
-                                                                <div class="data-section" style="font-size:13px; font-weight:600; margin-top:4px;">
-                                                                    <div style="font-weight: bold; color: #000;">Item : <?= htmlspecialchars($barcode['item_type'] . ' ' . $ukuran ?? '-', ENT_QUOTES) ?></div>
-                                                                    <div style="font-weight: bold; color: #000;">Kode : <?= htmlspecialchars($barcode['kode_warna'] ?? '-', ENT_QUOTES) ?> / <?= htmlspecialchars($barcode['warna'] ?? '-', ENT_QUOTES) ?></div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
+                                                    <tr>
+                                                        <td colspan="3">
+                                                            <div class="data-section" style="font-size:13px; font-weight:600; margin-top:4px;">
+                                                                <div style="font-weight: bold; color: #000;">Item : <?= htmlspecialchars($barcode['item_type'] . ' ' . $ukuran ?? '-', ENT_QUOTES) ?></div>
+                                                                <div style="font-weight: bold; color: #000;">Kode : <?= htmlspecialchars($barcode['kode_warna'] ?? '-', ENT_QUOTES) ?> / <?= htmlspecialchars($barcode['warna'] ?? '-', ENT_QUOTES) ?></div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
 
-                                                        <tr class="headerRow" style="font-weight:bold;">
-                                                            <td class="boxx" style="text-align:center; padding-top:6px; font-weight: bold; color: #000;">GW (kg)</td>
-                                                            <td class="boxx" style="text-align:center; font-weight: bold; color: #000;">NW (kg)</td>
-                                                            <td class="boxx" style="text-align:center; font-weight: bold; color: #000;">Cones</td>
-                                                        </tr>
-                                                        <tr class="headerRow">
-                                                            <td class="nums boxx" style="text-align:center; padding:6px; font-weight: bold; color: #000;"><?= htmlspecialchars($barcode['gw'] ?? '-', ENT_QUOTES) ?></td>
-                                                            <td class="nums boxx" style="text-align:center; font-weight: bold; color: #000;"><?= htmlspecialchars($barcode['kgs'] ?? '-', ENT_QUOTES) ?></td>
-                                                            <td class="nums boxx" style="text-align:center; font-weight: bold; color: #000;"><?= htmlspecialchars($barcode['cones'] ?? '-', ENT_QUOTES) ?></td>
-                                                        </tr>
-                                                    </table>
+                                                    <tr class="headerRow" style="font-weight:bold;">
+                                                        <td class="boxx" style="text-align:center; padding-top:6px; font-weight: bold; color: #000;">GW (kg)</td>
+                                                        <td class="boxx" style="text-align:center; font-weight: bold; color: #000;">NW (kg)</td>
+                                                        <td class="boxx" style="text-align:center; font-weight: bold; color: #000;">Cones</td>
+                                                    </tr>
+                                                    <tr class="headerRow">
+                                                        <td class="nums boxx" style="text-align:center; padding:6px; font-weight: bold; color: #000;"><?= htmlspecialchars($barcode['gw'] ?? '-', ENT_QUOTES) ?></td>
+                                                        <td class="nums boxx" style="text-align:center; font-weight: bold; color: #000;"><?= htmlspecialchars($barcode['kgs'] ?? '-', ENT_QUOTES) ?></td>
+                                                        <td class="nums boxx" style="text-align:center; font-weight: bold; color: #000;"><?= htmlspecialchars($barcode['cones'] ?? '-', ENT_QUOTES) ?></td>
+                                                    </tr>
+                                                </table>
 
-                                                    <div class="footer" style="display:flex; justify-content:flex-end; margin-top:6px;">
-                                                        <div class="footer-right" style="text-align:right; font-weight:600; font-weight: bold; color: #000;">
-                                                            No Karung
-                                                            <div class="no-karung-value" style="font-size:14px; margin-top:3px; font-weight: bold; color: #000;"><?= htmlspecialchars($barcode['no_karung'] ?? '-', ENT_QUOTES) ?></div>
-                                                            <?= htmlspecialchars($barcode['admin'] ?? '-', ENT_QUOTES) ?> | Shift <?= htmlspecialchars($barcode['shift'] ?? 'A', ENT_QUOTES) ?>
-                                                        </div>
+                                                <div class="footer" style="display:flex; justify-content:flex-end; margin-top:6px;">
+                                                    <div class="footer-right" style="text-align:right; font-weight:600; font-weight: bold; color: #000;">
+                                                        No Karung
+                                                        <div class="no-karung-value" style="font-size:14px; margin-top:3px; font-weight: bold; color: #000;"><?= htmlspecialchars($barcode['no_karung'] ?? '-', ENT_QUOTES) ?></div>
+                                                        <?= htmlspecialchars($barcode['admin'] ?? '-', ENT_QUOTES) ?> | Shift <?= htmlspecialchars($barcode['shift'] ?? 'A', ENT_QUOTES) ?>
                                                     </div>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
 
                             <?php } ?>
                         <?php } ?>
