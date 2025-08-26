@@ -69,19 +69,19 @@
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label class="">Range Tanggal Spandex</label>
+                            <label class="">Jumlah Tanggal Spandex</label>
                             <input type="number" class="form-control" name="range_spandex" value="<?= $rangeTgl['range_spandex'] ?? '' ?>">
                         </div>
                         <div class="col-md-2">
-                            <label class="">Range Tanggal Karet</label>
+                            <label class="">Jumlah Tanggal Karet</label>
                             <input type="number" class="form-control" name="range_karet" value="<?= $rangeTgl['range_karet'] ?? '' ?>">
                         </div>
                         <div class="col-md-2">
-                            <label class="">Range Tanggal Benang</label>
+                            <label class="">Jumlah Tanggal Benang</label>
                             <input type="number" class="form-control" name="range_benang" value="<?= $rangeTgl['range_benang'] ?? '' ?>">
                         </div>
                         <div class="col-md-2">
-                            <label class="">Range Tanggal Nylon</label>
+                            <label class="">Jumlah Tanggal Nylon</label>
                             <input type="number" class="form-control" name="range_nylon" value="<?= $rangeTgl['range_nylon'] ?? '' ?>">
                         </div>
                     </div>
@@ -101,10 +101,10 @@
                             <tr>
                                 <th>Area</th>
                                 <th>Hari Pemesanan</th>
-                                <th>Range Tanggal Spandex</th>
-                                <th>Range Tanggal Karet</th>
-                                <th>Range Tanggal Benang</th>
-                                <th>Range Tanggal Nylon</th>
+                                <th>Jumlah Tanggal Spandex</th>
+                                <th>Jumlah Tanggal Karet</th>
+                                <th>Jumlah Tanggal Benang</th>
+                                <th>Jumlah Tanggal Nylon</th>
                                 <th class="text-center">Aksi</th>
                             </tr>
                         </thead>

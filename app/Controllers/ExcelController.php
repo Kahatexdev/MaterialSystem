@@ -1027,12 +1027,12 @@ class ExcelController extends BaseController
                     $item->item_type,
                     $item->kode_warna,
                     $item->warna,
-                    $item->kgs_datang,
+                    number_format((float) $item->kgs_datang, 2, '.', ''),
                     $item->start_mc,
                     $item->delivery_awal,
                     $item->delivery_akhir,
                     $item->tanggal_schedule,
-                    $item->total_kgs,
+                    number_format((float) $item->total_kgs, 2, '.', ''),
                     $item->kg_celup,
                     $item->lot_celup,
                     $item->tanggal_celup,
@@ -1115,7 +1115,7 @@ class ExcelController extends BaseController
                     $item->delivery_awal,
                     $item->delivery_akhir,
                     $item->tanggal_schedule,
-                    $item->total_kgs,
+                    number_format((float) $item->total_kgs, 2, '.', ''),
                     $item->kg_celup,
                     $item->lot_celup,
                     $item->tanggal_celup,
@@ -1518,7 +1518,7 @@ class ExcelController extends BaseController
         $sheet->getStyle('A2:H2')->getBorders()->getBottom()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
         $sheet->getStyle('A2:H2')->getBorders()->getBottom()->getColor()->setARGB('FF000000');
         // Header
-        $headers = ['Denier','Jenis Benang', 'Warna', 'Kode', 'Total Cones', 'Total Kg', 'Keterangan', 'Tanggal'];
+        $headers = ['Denier', 'Jenis Benang', 'Warna', 'Kode', 'Total Cones', 'Total Kg', 'Keterangan', 'Tanggal'];
         $col = 'A';
         foreach ($headers as $header) {
             $sheet->setCellValue($col . '3', $header);
