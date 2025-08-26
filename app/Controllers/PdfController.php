@@ -1191,11 +1191,11 @@ class PdfController extends BaseController
                         }
                     }
                 }
-                // dd($row);
+                // dd($maxLines);
 
                 if ($row <= $maxLines) {
                     $emptyLines = $maxLines - $row;
-                    for ($i = 0; $i <= $emptyLines; $i++) {
+                    for ($i = 0; $i < $emptyLines; $i++) {
                         $pdf->SetX(4); // Pastikan posisi X sejajar margin
                         $pdf->Cell(18, 3, '', 1, 0, 'C');
                         $pdf->Cell(22, 3, '', 1, 0, 'C');
@@ -1216,6 +1216,7 @@ class PdfController extends BaseController
                     }
                 }
 
+
                 if (
                     $prevNoModel === null || // artinya data pertama
                     ($bon['no_model'] !== $prevNoModel) ||
@@ -1223,7 +1224,7 @@ class PdfController extends BaseController
                     ($bon['kode_warna'] !== $prevKodeWarna)
                 ) {
                     // Tentukan jumlah baris kosong yang ingin ditambahkan
-                    for ($i = 0; $i <= 2; $i++) {
+                    for ($i = 0; $i < 2; $i++) {
                         $pdf->SetX(4);
                         // Cetak baris kosong dengan format sel yang sesuai
                         $pdf->Cell(18, 3, '', 1, 0, 'C');
