@@ -1698,16 +1698,6 @@ class PemesananController extends BaseController
         return $this->response->setJSON(['status' => 'success', 'message' => 'Keterangan berhasil disimpan']);
     }
 
-    public function ubahJamPemesanan()
-    {
-        $data = [
-            'active' => $this->active,
-            'title' => 'Material System',
-            'role' => $this->role,
-        ];
-        return view($this->role . '/pemesanan/ubah-jam-pemesanan', $data);
-    }
-
     public function ubahTanggalPemesanan()
     {
         $listArea = $this->masterRangePemesanan->getArea();
@@ -1748,16 +1738,6 @@ class PemesananController extends BaseController
             'listArea' => $listArea,
         ];
         return view($this->role . '/pemesanan/ubah-tgl-pemesanan', $data);
-    }
-
-    public function historyJadwalPemesanan()
-    {
-        $data = [
-            'active' => $this->active,
-            'title' => 'Material System',
-            'role' => $this->role,
-        ];
-        return view($this->role . '/pemesanan/history-jadwal-pemesanan', $data);
     }
 
     public function updateRangeSeluruhArea()
