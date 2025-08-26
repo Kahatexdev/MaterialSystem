@@ -696,7 +696,6 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('otherIn/detailListBarcode/(:any)', 'WarehouseController::detailListBarcode/$1');
     $routes->get('otherIn/printBarcode/(:any)', 'PdfController::printBarcodeOtherBon/$1');
     $routes->get('importPemasukan', 'WarehouseController::importPemasukan');
-    $routes->post('prosesImportPemasukan', 'WarehouseController::prosesImportPemasukan');
 
     //Po Plus
     $routes->get('poplus', 'MasterdataController::poPlus');
@@ -764,6 +763,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
 
     $routes->get('pengeluaranSementara', 'GodController::pengeluaranSementara');
     $routes->post('pengeluaranSementara/upload', 'GodController::uploadPengeluaranSementara');
+
+    $routes->post('prosesImportPemasukan', 'GodController::prosesImportPemasukan');
+
     // pengaduan
     $routes->get('pengaduan', 'ApiController::getpengaduan');
 });

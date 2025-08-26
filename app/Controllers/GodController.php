@@ -698,4 +698,370 @@ class GodController extends BaseController
             'count'   => $count
         ]);
     }
+
+    public function prosesImportPemasukan()
+    {
+        ini_set('max_execution_time', 1000); // 1000 detik
+
+        $admin = session()->get('username') ?? 'system';
+        $file  = $this->request->getFile('fileImport');
+
+        // Buat batch ID supaya penelusuran log lebih gampang
+        try {
+            $batchId = 'IMP-' . date('Ymd-His') . '-' . bin2hex(random_bytes(3));
+        } catch (\Throwable $e) {
+            $batchId = 'IMP-' . date('Ymd-His') . '-RND';
+        }
+
+        if (!$file || !$file->isValid() || $file->hasMoved()) {
+            log_message(
+                'error',
+                "[{$batchId}] File tidak valid atau sudah dipindahkan. name={name} err={err}",
+                ['name' => $file ? $file->getClientName() : '(null)', 'err' => $file ? $file->getErrorString() : '(null)']
+            );
+            return redirect()->back()->with('error', 'File tidak valid atau sudah dipindahkan.');
+        }
+
+        $origName = $file->getClientName();
+        $newName  = $file->getRandomName();
+        $destDir  = WRITEPATH . 'uploads';
+        $file->move($destDir, $newName);
+        $filePath = rtrim($destDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $newName;
+
+        log_message(
+            'info',
+            "[{$batchId}] START import by={admin} orig={orig} tmp={tmp}",
+            ['admin' => $admin, 'orig' => $origName, 'tmp' => $filePath]
+        );
+
+        try {
+            $sheetArr = IOFactory::load($filePath)
+                ->getActiveSheet()
+                ->toArray(null, true, true, true);
+            log_message('info', "[{$batchId}] Excel loaded rows={rows}", ['rows' => count($sheetArr)]);
+        } catch (\Throwable $e) {
+            @unlink($filePath);
+            log_message('error', "[{$batchId}] Gagal membaca Excel: {msg}", ['msg' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Gagal membaca file Excel: ' . $e->getMessage());
+        }
+        @unlink($filePath);
+
+        // --- Helper angka ---
+        $toFloat = static function ($v) {
+            if ($v === null) return 0.0;
+            $s = trim((string)$v);
+            if ($s === '') return 0.0;
+            $s = preg_replace('/[^\d\-,.]/', '', $s);
+            if (strpos($s, ',') !== false && strpos($s, '.') !== false) {
+                $s = str_replace('.', '', $s);
+                $s = str_replace(',', '.', $s);
+            } else {
+                if (strpos($s, ',') !== false) {
+                    $s = str_replace(',', '.', $s);
+                }
+            }
+            return (float)$s;
+        };
+        $toInt = static function ($v) {
+            if ($v === null) return 0;
+            $s = preg_replace('/[^\d\-]/', '', (string)$v);
+            if ($s === '' || $s === '-') return 0;
+            return (int)$s;
+        };
+
+        $db = \Config\Database::connect();
+        $success = 0;
+        $failed  = [];
+
+        // Mulai dari baris ke-18 (melewati header)
+        foreach (array_slice($sheetArr, 17, null, true) as $rowNum => $row) {
+
+            // Mapping kolom
+            $namaCluster = trim((string)($row['J'] ?? ''));
+            $noModel     = trim((string)($row['K'] ?? ''));
+            $itemType    = trim((string)($row['L'] ?? ''));
+            $kodeWarna   = trim((string)($row['M'] ?? ''));
+            $warna       = trim((string)($row['N'] ?? ''));
+            $lot         = trim((string)($row['O'] ?? ''));
+            $kgsMasuk    = $toFloat($row['P'] ?? 0);
+            $cnsMasuk    = $toInt($row['Q'] ?? 0);
+            $krgMasuk    = max(1, $toInt($row['R'] ?? 1)); // minimal 1 karung
+
+            // Log raw ringkas (hindari membludak)
+            log_message(
+                'debug',
+                "[{$batchId}] Row {row} raw: no_model={no_model}, item_type={item_type}, k_warna={kode_warna}, warna={warna}, cluster={cluster}, lot={lot}, kgs={kgs}, cns={cns}, krg={krg}",
+                [
+                    'row'        => $rowNum,
+                    'no_model'   => $noModel,
+                    'item_type'  => $itemType,
+                    'kode_warna' => $kodeWarna,
+                    'warna'      => $warna,
+                    'cluster'    => $namaCluster,
+                    'lot'        => $lot,
+                    'kgs'        => $kgsMasuk,
+                    'cns'        => $cnsMasuk,
+                    'krg'        => $krgMasuk,
+                ]
+            );
+
+            // Skip baris kosong total
+            if ($noModel === '' && $itemType === '' && $kodeWarna === '' && $namaCluster === '') {
+                log_message('debug', "[{$batchId}] Row {row} di-skip (kosong).", ['row' => $rowNum]);
+                continue;
+            }
+
+            // Validasi kolom wajib
+            if ($noModel === '' || $itemType === '' || $kodeWarna === '' || $namaCluster === '') {
+                $msg = "Baris {$rowNum}: kolom wajib kosong (no_model/item_type/kode_warna/nama_cluster).";
+                $failed[] = $msg;
+                log_message('warning', "[{$batchId}] {msg}", ['msg' => $msg]);
+                continue;
+            }
+
+            try {
+                $db->transBegin();
+
+                // 1) Upsert master_order
+                $orderRow = $this->masterOrderModel
+                    ->select('id_order')
+                    ->where('no_model', $noModel)
+                    ->first();
+
+                if ($orderRow) {
+                    $idOrder = (int)$orderRow['id_order'];
+                    log_message('debug', "[{$batchId}] Row {row} master_order EXIST id={id}", ['row' => $rowNum, 'id' => $idOrder]);
+                } else {
+                    $this->masterOrderModel->insert([
+                        'no_model'   => $noModel,
+                        'no_order'   => '-',
+                        'buyer'      => '-',
+                        'foll_up'    => '-',
+                        'lco_date'   => date('Y-m-d'), // default hari ini
+                        'admin'      => $admin,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ]);
+                    $idOrder = (int)$this->masterOrderModel->insertID();
+                    log_message('info', "[{$batchId}] Row {row} master_order INSERT id={id}", ['row' => $rowNum, 'id' => $idOrder]);
+                }
+
+                // 2) Upsert master_material
+                $mm = $this->masterMaterialModel->where('item_type', $itemType)->first();
+                if (!$mm) {
+                    $this->masterMaterialModel->insert([
+                        'item_type'  => $itemType,
+                        'deskripsi'  => $itemType,
+                        'jenis'      => null,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ]);
+                    log_message('info', "[{$batchId}] Row {row} master_material INSERT item_type={it}", ['row' => $rowNum, 'it' => $itemType]);
+                }
+
+                // 3) Upsert material
+                $material = $this->materialModel
+                    ->where('id_order', $idOrder)
+                    ->where('item_type', $itemType)
+                    ->where('kode_warna', $kodeWarna)
+                    ->first();
+
+                if ($material) {
+                    $newKgs = (float)($material['kgs'] ?? 0) + $kgsMasuk;
+                    $this->materialModel->update($material['id_material'], [
+                        'color'      => $warna,
+                        'kgs'        => $newKgs,
+                        'admin'      => $admin,
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+                    log_message(
+                        'debug',
+                        "[{$batchId}] Row {row} material UPDATE id={id} new_kgs={kgs}",
+                        ['row' => $rowNum, 'id' => $material['id_material'], 'kgs' => $newKgs]
+                    );
+                } else {
+                    $this->materialModel->insert([
+                        'id_order'    => $idOrder,
+                        'style_size'  => '',
+                        'area'        => '',
+                        'color'       => $warna,
+                        'item_type'   => $itemType,
+                        'kode_warna'  => $kodeWarna,
+                        'composition' => '',
+                        'gw'          => 0,
+                        'qty_pcs'     => 0,
+                        'loss'        => 0,
+                        'kgs'         => $kgsMasuk,
+                        'admin'       => $admin,
+                        'created_at'  => date('Y-m-d H:i:s'),
+                    ]);
+                    log_message(
+                        'info',
+                        "[{$batchId}] Row {row} material INSERT (no prev) it={it} kw={kw}",
+                        ['row' => $rowNum, 'it' => $itemType, 'kw' => $kodeWarna]
+                    );
+                }
+
+                // 4) other_bon
+                $this->otherBonModel->insert([
+                    'no_model'       => $noModel,
+                    'item_type'      => $itemType,
+                    'kode_warna'     => $kodeWarna,
+                    'warna'          => $warna ?: null,
+                    'tgl_datang'     => date('Y-m-d'),
+                    'no_surat_jalan' => null,
+                    'detail_sj'      => null,
+                    'keterangan'     => 'Import XLS',
+                    'ganti_retur'    => '0',
+                    'admin'          => $admin,
+                    'created_at'     => date('Y-m-d H:i:s'),
+                ]);
+                $id_other_in = (int)$this->otherBonModel->insertID();
+                if ($id_other_in <= 0) {
+                    $dbErr = $db->error();
+                    log_message('error', "[{$batchId}] Row {row} other_bon INSERT gagal dbErr={err}", ['row' => $rowNum, 'err' => json_encode($dbErr)]);
+                    throw new \RuntimeException('Gagal insert other_bon');
+                }
+                log_message('debug', "[{$batchId}] Row {row} other_bon id={id}", ['row' => $rowNum, 'id' => $id_other_in]);
+
+                // 5) out_celup
+                $this->outCelupModel->insert([
+                    'id_other_bon' => $id_other_in,
+                    'no_model'     => $noModel,
+                    'l_m_d'        => '',
+                    'harga'        => 0,
+                    'no_karung'    => $rowNum + 1,
+                    'gw_kirim'     => 0,
+                    'kgs_kirim'    => $kgsMasuk,
+                    'cones_kirim'  => $cnsMasuk,
+                    'lot_kirim'    => $lot,
+                    'ganti_retur'  => '0',
+                    'admin'        => $admin,
+                    'created_at'   => date('Y-m-d H:i:s'),
+                ]);
+                $id_out_celup = (int)$this->outCelupModel->insertID();
+                if ($id_out_celup <= 0) {
+                    $dbErr = $db->error();
+                    log_message('error', "[{$batchId}] Row {row} out_celup INSERT gagal dbErr={err}", ['row' => $rowNum, 'err' => json_encode($dbErr)]);
+                    throw new \RuntimeException('Gagal insert out_celup');
+                }
+
+                // 6) stock
+                $existingStock = $this->stockModel
+                    ->where('no_model', $noModel)
+                    ->where('item_type', $itemType)
+                    ->where('kode_warna', $kodeWarna)
+                    ->where('nama_cluster', $namaCluster)
+                    ->where('lot_stock', $lot)
+                    ->first();
+
+                if ($existingStock) {
+                    $upd = [
+                        'kgs_in_out' => (float)$existingStock['kgs_in_out'] + $kgsMasuk,
+                        'cns_in_out' => (int)$existingStock['cns_in_out'] + $cnsMasuk,
+                        'krg_in_out' => (int)$existingStock['krg_in_out'] + max(1, $krgMasuk),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ];
+                    $this->stockModel->update($existingStock['id_stock'], $upd);
+                    $idStok = (int)$existingStock['id_stock'];
+                    log_message(
+                        'debug',
+                        "[{$batchId}] Row {row} stock UPDATE id={id} kgs+={kgs} cns+={cns} krg+={krg}",
+                        ['row' => $rowNum, 'id' => $idStok, 'kgs' => $kgsMasuk, 'cns' => $cnsMasuk, 'krg' => $krgMasuk]
+                    );
+                } else {
+                    $this->stockModel->insert([
+                        'no_model'     => $noModel,
+                        'item_type'    => $itemType,
+                        'kode_warna'   => $kodeWarna,
+                        'nama_cluster' => $namaCluster,
+                        'lot_stock'    => $lot,
+                        'kgs_in_out'   => $kgsMasuk,
+                        'cns_in_out'   => $cnsMasuk,
+                        'krg_in_out'   => max(1, $krgMasuk),
+                        'admin'        => $admin,
+                        'created_at'   => date('Y-m-d H:i:s'),
+                    ]);
+                    $idStok = (int)$this->stockModel->insertID();
+                    if ($idStok <= 0) {
+                        $dbErr = $db->error();
+                        log_message('error', "[{$batchId}] Row {row} stock INSERT gagal dbErr={err}", ['row' => $rowNum, 'err' => json_encode($dbErr)]);
+                        throw new \RuntimeException('Gagal insert stock');
+                    }
+                    log_message('debug', "[{$batchId}] Row {row} stock INSERT id={id}", ['row' => $rowNum, 'id' => $idStok]);
+                }
+
+                // 7) pemasukan
+                $this->pemasukanModel->insert([
+                    'id_out_celup' => $id_out_celup,
+                    'id_stock'     => $idStok,
+                    'tgl_masuk'    => date('Y-m-d'),
+                    'nama_cluster' => $namaCluster,
+                    'out_jalur'    => '0',
+                    'admin'        => $admin,
+                    'created_at'   => date('Y-m-d H:i:s'),
+                ]);
+                $idPemasukan = (int)$this->pemasukanModel->insertID();
+                if ($idPemasukan <= 0) {
+                    $dbErr = $db->error();
+                    log_message('error', "[{$batchId}] Row {row} pemasukan INSERT gagal dbErr={err}", ['row' => $rowNum, 'err' => json_encode($dbErr)]);
+                    throw new \RuntimeException('Gagal insert pemasukan');
+                }
+
+                if ($db->transStatus() === false) {
+                    $db->transRollback();
+                    $msg = "Baris {$rowNum}: Gagal menyimpan (status transaksi).";
+                    $failed[] = $msg;
+                    log_message('error', "[{$batchId}] {msg}", ['msg' => $msg]);
+                    continue;
+                }
+
+                $db->transCommit();
+                $success++;
+                log_message(
+                    'info',
+                    "[{$batchId}] Row {row} COMMIT ok (pemasukan_id={pid}, stock_id={sid}, out_celup_id={oid}, other_bon_id={bid})",
+                    ['row' => $rowNum, 'pid' => $idPemasukan, 'sid' => $idStok, 'oid' => $id_out_celup, 'bid' => $id_other_in]
+                );
+            } catch (\Throwable $e) {
+                if ($db->transStatus()) {
+                    $db->transRollback();
+                }
+                $msg = "Baris {$rowNum}: " . $e->getMessage();
+                $failed[] = $msg;
+                // Sertakan potongan data untuk diagnosis
+                log_message(
+                    'error',
+                    "[{$batchId}] EXCEPTION row={row} msg={msg} ctx={ctx}",
+                    [
+                        'row' => $rowNum,
+                        'msg' => $e->getMessage(),
+                        'ctx' => json_encode([
+                            'no_model' => $noModel,
+                            'item_type' => $itemType,
+                            'kode_warna' => $kodeWarna,
+                            'warna' => $warna,
+                            'cluster' => $namaCluster,
+                            'lot' => $lot,
+                            'kgs' => $kgsMasuk,
+                            'cns' => $cnsMasuk,
+                            'krg' => $krgMasuk,
+                        ], JSON_UNESCAPED_UNICODE)
+                    ]
+                );
+            }
+        }
+
+        if ($success > 0 && empty($failed)) {
+            session()->setFlashdata('success', "Import selesai. Berhasil: {$success} baris. Batch={$batchId}");
+            log_message('info', "[{$batchId}] DONE success={s} failed=0", ['s' => $success]);
+        } else {
+            $msg = "Import selesai parsial. Berhasil: {$success} baris; Gagal: " . count($failed) . " baris. Batch={$batchId}";
+            if (!empty($failed)) {
+                session()->setFlashdata('error_detail', implode("\n", $failed));
+            }
+            session()->setFlashdata('error', $msg);
+            log_message('warning', "[{$batchId}] DONE partial success={s} failed={f}", ['s' => $success, 'f' => count($failed)]);
+        }
+
+        return redirect()->to(base_url($this->role . "/importPemasukan"));
+    }
 }
