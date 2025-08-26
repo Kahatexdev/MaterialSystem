@@ -117,6 +117,7 @@
                             <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownMenuLink">
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/pemasukan') ?>">Pemasukan</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/otherIn') ?>">Pemasukan Lain-lain</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/importPemasukan') ?>">Import Pemasukan</a></li>
                             </ul>
                             <!-- <a href="" class="nav-link text-body font-weight-bold px-2" title="Pemasukan" data-bs-toggle="tooltip" data-bs-placement="bottom">
                                 <i class="fas fa-arrow-down"></i>

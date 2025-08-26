@@ -695,6 +695,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('otherIn/listBarcode/filter', 'WarehouseController::listBarcodeFilter');
     $routes->get('otherIn/detailListBarcode/(:any)', 'WarehouseController::detailListBarcode/$1');
     $routes->get('otherIn/printBarcode/(:any)', 'PdfController::printBarcodeOtherBon/$1');
+    $routes->get('importPemasukan', 'WarehouseController::importPemasukan');
+    $routes->post('prosesImportPemasukan', 'WarehouseController::prosesImportPemasukan');
 
     //Po Plus
     $routes->get('poplus', 'MasterdataController::poPlus');

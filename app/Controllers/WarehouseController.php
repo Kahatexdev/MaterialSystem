@@ -3361,4 +3361,65 @@ class WarehouseController extends BaseController
             'message' => 'Data berhasil diperbarui.'
         ]);
     }
+
+    public function importPemasukan()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/warehouse/import-pemasukan', $data);
+    }
+
+    public function prosesImportPemasukan()
+    {
+        ini_set('max_execution_time', 300);
+        $admin = session()->get('username');
+        $file  = $this->request->getFile('file');
+        $today = new \DateTime('now');
+
+        if (! $file || ! $file->isValid() || $file->hasMoved()) {
+            return redirect()->back()->with('error', 'File tidak valid.');
+        }
+
+        $filePath = WRITEPATH . 'uploads/' . $file->getName();
+        $file->move(WRITEPATH . 'uploads');
+        $sheetArr = IOFactory::load($filePath)
+            ->getActiveSheet()
+            ->toArray(null, true, true, true);
+        unlink($filePath);
+
+        $pointsRaw = [];
+        $failedRows = [];
+        $error = [];
+
+        foreach (array_slice($sheetArr, 17, null, true) as $idx => $row) {
+            $namaCluster  = trim($row['J'] ?? '');
+            $noModel = trim($row['K']  ?? '');
+            $itemType   = trim($row['L']  ?? '');
+            $kodeWarna = trim($row['M']  ?? '');
+            $lot = trim($row['O']  ?? '');
+            $kgsMasuk = trim($row['P']  ?? '');
+            $cnsMasuk = trim($row['Q']  ?? '');
+            $krgMasuk = trim($row['R']  ?? '');
+
+            //Mengambil id order
+            $dataOrder = $this->masterOrderModel
+                ->select('id_order')
+                ->where('no_model', $noModel)
+                ->first();
+            if (!$dataOrder) {
+                $failedRows[] = $idx + 1;
+                continue;
+            }
+        }
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/warehouse/import-pemasukan', $data);
+    }
 }
