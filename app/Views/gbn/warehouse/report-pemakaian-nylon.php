@@ -110,10 +110,7 @@
         });
 
         $('#btnExport').click(function() {
-            const delivery = $('#delivery').val();
-            const no_model = $('#no_model').val().trim();
-            const kode_warna = $('#kode_warna').val().trim();
-            const jenis = 'NYLON';
+            const buyer = $('#buyer').val().trim();
             const url = "<?= base_url($role . '/warehouse/exportPemakaianNylon') ?>" + "?buyer=" + encodeURIComponent(buyer);
 
             window.location.href = url;
@@ -127,8 +124,8 @@
         // Kosongkan input
         $('input[type="text"]').val('');
 
-        // Kosongkan delivery
-        $('#delivery').val('');
+        // Kosongkan buyer
+        $('#buyer').val('');
 
         // Kosongkan tabel hasil pencarian
         $('#dataTable tbody').html('');
