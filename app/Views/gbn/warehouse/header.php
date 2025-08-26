@@ -138,16 +138,17 @@
                                 <span class="d-lg-inline-block d-none ms-1">Reports</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4 custom-dropdown-wide" aria-labelledby="navbarDropdownMenuLink">
-                                <li><a href="<?= base_url($role . '/warehouse/reportPo/BENANG') ?>" class="dropdown-item">PO Benang</a></li>
-                                <li><a href="<?= base_url($role . '/warehouse/reportPo/NYLON') ?>" class="dropdown-item">PO Nylon</a></li>
-                                <li><a href="<?= base_url($role . '/warehouse/reportPo/SPANDEX') ?>" class="dropdown-item">PO Spandex</a></li>
-                                <li><a href="<?= base_url($role . '/warehouse/reportPo/KARET') ?>" class="dropdown-item">PO Karet</a></li>
-                                <li><a href="<?= base_url($role . '/warehouse/reportDatangBenang') ?>" class="dropdown-item">Datang Benang</a></li>
-                                <li><a href="<?= base_url($role . '/warehouse/reportDatangNylon') ?>" class="dropdown-item">Datang Nylon</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportPo/BENANG') ?>">PO Benang</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportPo/NYLON') ?>">PO Nylon</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportPo/SPANDEX') ?>">PO Spandex</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportPo/KARET') ?>">PO Karet</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportDatangBenang') ?>">Datang Benang</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportDatangNylon') ?>">Datang Nylon</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportPengiriman') ?>">Report Pengiriman</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobal') ?>">Report Global All BB</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobalNylon') ?>">Report Global Nylon</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportGlobalStockBenang') ?>">Report Global Benang</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportPemakaianNylon') ?>">Report Pemakaian Nylon</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaPakaiBenang') ?>">Report Sisa Pakai Benang</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaPakaiNylon') ?>">Report Sisa Pakai Nylon</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaPakaiSpandex') ?>">Report Sisa Pakai Spandex</a></li>

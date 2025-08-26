@@ -12425,4 +12425,74 @@ class ExcelController extends BaseController
         $writer->save('php://output');
         exit;
     }
+
+    public function exportPemakaianNylon()
+    {
+        $buyer = $this->request->getGet('buyer');
+
+        $data = $this->pengeluaranModel->getFilterPemakaianNylonByBuyer($buyer);
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Judul
+        $sheet->setCellValue('A1', 'Report Pemakaian Nylon');
+        $sheet->mergeCells('A1:F1'); // Menggabungkan sel untuk judul
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Header
+        $header = ["No", "Buyer", "Jenis Material", "Total Pemakaian Nylon", "Total Pemakaian Cones", "Total Pemakaian karung"];
+        $sheet->fromArray([$header], NULL, 'A3');
+
+        // Styling Header
+        $sheet->getStyle('A3:F3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:F3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:F3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        // Data
+        $row = 4;
+        foreach ($data as $index => $item) {
+            $sheet->fromArray([
+                [
+                    $index + 1,
+                    $item['buyer'],
+                    $item['jenis'],
+                    $item['pemakaian_kgs'],
+                    $item['pemakaian_cns'],
+                    $item['pemakaian_krg'],
+                ]
+            ], NULL, 'A' . $row);
+            $row++;
+        }
+
+        // Atur border untuk seluruh tabel
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle('A3:F3' . ($row - 1))->applyFromArray($styleArray);
+
+        // Set auto width untuk setiap kolom
+        foreach (range('A', 'F') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set isi tabel agar rata tengah
+        $sheet->getStyle('A4:F' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:F' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Report Pemakaian Nylon' . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
+    }
 }

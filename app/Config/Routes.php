@@ -250,6 +250,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportDatangNylon', 'WarehouseController::reportDatangNylon');
     $routes->get('warehouse/filterDatangNylon', 'WarehouseController::filterDatangNylon');
     $routes->get('warehouse/exportDatangNylon', 'ExcelController::exportDatangNylon');
+    $routes->get('warehouse/reportPemakaianNylon', 'WarehouseController::reportPemakaianNylon');
+    $routes->get('warehouse/filterPemakaianNylon', 'WarehouseController::filterPemakaianNylon');
+    $routes->get('warehouse/exportPemakaianNylon', 'ExcelController::exportPemakaianNylon');
 
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');
