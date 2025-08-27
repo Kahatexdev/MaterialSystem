@@ -127,4 +127,22 @@ class HistoryStock extends Model
             ->get()
             ->getResultArray();
     }
+
+    public function getDataDipinjam($key, $jenis = null)
+    {
+        $builder = $this->db->table('history_stock hs')
+            ->select('s_new.no_model as no_model_new, s_new.item_type, s_new.kode_warna, s_new.warna, hs.kgs, hs.cns, hs.lot, s_new.nama_cluster, DATE(hs.created_at) AS tgl_pindah, hs.keterangan, s_old.no_model as no_model_old, hs.admin')
+            ->join('stock s_old', 's_old.id_stock = hs.id_stock_old', 'left')
+            ->join('stock s_new', 's_new.id_stock = hs.id_stock_new', 'left')
+            ->join('master_material mm ', 'mm.item_type = s_new.item_type', 'left')
+            ->where('s_old.no_model', $key);
+
+        if (!empty($jenis)) {
+            $builder->where('mm.jenis', $jenis);
+        }
+        return $builder->groupBy('hs.id_history_pindah')
+            ->orderBy('s_old.no_model', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
 }

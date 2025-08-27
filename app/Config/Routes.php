@@ -250,6 +250,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportDatangNylon', 'WarehouseController::reportDatangNylon');
     $routes->get('warehouse/filterDatangNylon', 'WarehouseController::filterDatangNylon');
     $routes->get('warehouse/exportDatangNylon', 'ExcelController::exportDatangNylon');
+    $routes->get('warehouse/reportPemakaianNylon', 'WarehouseController::reportPemakaianNylon');
+    $routes->get('warehouse/filterPemakaianNylon', 'WarehouseController::filterPemakaianNylon');
+    $routes->get('warehouse/exportPemakaianNylon', 'ExcelController::exportPemakaianNylon');
 
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');
@@ -696,6 +699,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('otherIn/listBarcode/filter', 'WarehouseController::listBarcodeFilter');
     $routes->get('otherIn/detailListBarcode/(:any)', 'WarehouseController::detailListBarcode/$1');
     $routes->get('otherIn/printBarcode/(:any)', 'PdfController::printBarcodeOtherBon/$1');
+    $routes->get('importPemasukan', 'WarehouseController::importPemasukan');
 
     //Po Plus
     $routes->get('poplus', 'MasterdataController::poPlus');
@@ -760,6 +764,12 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('importStock/upload', 'GodController::importStock');
     $routes->get('masterWarnaBenang', 'GodController::masterWarnaBenang');
     $routes->post('importMasterWarnaBenang/upload', 'GodController::importMasterWarnaBenang');
+
+    $routes->get('pengeluaranSementara', 'GodController::pengeluaranSementara');
+    $routes->post('pengeluaranSementara/upload', 'GodController::uploadPengeluaranSementara');
+
+    $routes->post('prosesImportPemasukan', 'GodController::prosesImportPemasukan');
+
     // pengaduan
     $routes->get('pengaduan', 'ApiController::getpengaduan');
 });

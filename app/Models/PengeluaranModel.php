@@ -607,20 +607,44 @@ class PengeluaranModel extends Model
     }
     public function getPakaiArea($key, $jenis = null)
     {
-        $builder = $this->db->table('pengeluaran')
-            ->select('pengeluaran.*, stock.item_type, stock.kode_warna, stock.warna, mm.jenis')
-            ->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
-            ->join('master_material mm', 'stock.item_type = mm.item_type', 'left')
-            ->where('stock.no_model', $key);
+        $builder = $this->db->table('pengeluaran p')
+            ->select('p.*, oc.no_model, sc.item_type, sc.kode_warna, sc.warna, mm.jenis, sc.po_plus')
+            ->join('out_celup oc', 'oc.id_out_celup = p.id_out_celup', 'left')
+            ->join('schedule_celup sc', 'oc.id_celup = sc.id_celup', 'left')
+            ->join('master_material mm', 'sc.item_type = mm.item_type', 'left')
+            ->where('oc.no_model', $key);
 
         if (!empty($jenis)) {
             $builder->where('mm.jenis', $jenis);
         }
 
         return $builder
-            ->groupBy('pengeluaran.id_pengeluaran')
-            ->orderBy('pengeluaran.tgl_out, stock.item_type, stock.kode_warna', 'ASC')
+            ->groupBy('p.id_pengeluaran')
+            ->orderBy('p.tgl_out, sc.item_type, sc.kode_warna', 'ASC')
             ->get()
             ->getResultArray();
+    }
+
+    public function getFilterPemakaianNylonByBuyer($buyer = null)
+    {
+        $builder = $this->select('
+            master_order.buyer,
+            master_material.jenis,
+            SUM(pengeluaran.kgs_out) AS pemakaian_kgs, 
+            SUM(pengeluaran.cns_out) AS pemakaian_cns, 
+            SUM(pengeluaran.krg_out) AS pemakaian_krg
+        ')
+            ->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
+            ->join('master_order', 'master_order.no_model = stock.no_model', 'left')
+            ->join('master_material', 'master_material.item_type = stock.item_type', 'left')
+            ->where('pengeluaran.status', 'Pengiriman Area')
+            ->where('master_material.jenis', 'NYLON');
+
+        if (!empty($buyer)) {
+            $builder->where('master_order.buyer', $buyer);
+        }
+
+        return $builder->groupBy(['master_order.buyer', 'master_material.jenis'])
+            ->findAll();
     }
 }

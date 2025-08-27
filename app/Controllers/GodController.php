@@ -17,6 +17,10 @@ use App\Models\MasterOrderModel;
 use App\Models\MaterialModel;
 use App\Models\ClusterModel;
 use App\Models\MasterWarnaBenangModel;
+use App\Models\MasterMaterialModel;
+use App\Models\OtherBonModel;
+
+
 
 class GodController extends BaseController
 {
@@ -32,6 +36,8 @@ class GodController extends BaseController
     protected $clusterModel;
     protected $masterWarnaBenangModel;
     protected $request;
+    protected $masterMaterialModel;
+    protected $otherBonModel;
 
 
     public function __construct()
@@ -45,6 +51,8 @@ class GodController extends BaseController
         $this->materialModel = new MaterialModel();
         $this->clusterModel = new ClusterModel();
         $this->masterWarnaBenangModel = new MasterWarnaBenangModel();
+        $this->masterMaterialModel = new MasterMaterialModel();
+        $this->otherBonModel = new OtherBonModel();
         $this->request = \Config\Services::request();
 
         $this->role = session()->get('role');
@@ -406,5 +414,669 @@ class GodController extends BaseController
         }
 
         return redirect()->back()->with('success', 'Data berhasil diimport.');
+    }
+
+    public function pengeluaranSementara()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Pengeluaran Sementara',
+            'active' => $this->active,
+        ];
+        return view($this->role . '/god/pengeluaranSementara', $data);
+    }
+
+
+    // import sementara pengeluaran stok
+    // 1) Helper: normalizer generik (huruf besar, spasi, simbol seragam)
+    private function canon(string $s): string
+    {
+        $s = strtoupper(trim($s));
+        $s = preg_replace('/\s+/', ' ', $s);
+
+        // Hapus spasi SEBELUM persen, tapi pertahankan spasi SETELAH persen
+        $s = preg_replace('/\s+%/', '%', $s);
+        // Pastikan ada tepat satu spasi setelah % jika diikuti huruf (SSTR, SOFT, dll)
+        $s = preg_replace('/%\s*(?=[A-Z])/', '% ', $s);
+
+        // Seragamkan 'x' jadi ' X '
+        $s = preg_replace('/\s*[x×]\s*/', ' X ', $s);
+        // Seragamkan slash
+        if (!is_string($s)) {
+            $s = (string)$s;
+        }
+        $s = preg_replace('/\s*\/\s*/', '/', $s);
+
+        $s = preg_replace('/\s+/', ' ', $s);
+        return trim($s);
+    }
+
+
+    // LOT: hapus hanya leading ", " (boleh berulang). Selain itu jangan diubah.
+    private function normalizeLots(?string $raw): string
+    {
+        if ($raw === null) return '';
+        $s = (string)$raw;
+        // hapus satu atau lebih blok: (spasi)* , (spasi)* di AWAL string
+        $s = preg_replace('/^(?:\s*,\s*)+/u', '', $s);
+        // jangan trim; biarkan spasi/format lain tetap
+        return $s;
+    }
+
+    // 2) Helper: normalize item type via kamus
+    private function normalizeItemType(string $raw): string
+    {
+        // Pindahkan kamus ke luar loop supaya tidak dibuat berulang
+        static $map = null;
+        if ($map === null) {
+            $rawMap = [
+                'COTTON CD 20S ORG 100%' => 'CTN CD 20S ORG 100%',
+                'COTTON CD 20S ORG 100% SSTR' => 'CTN CD 20S ORG 100% SSTR',
+                'COTON CB 20S BCI SSTR' => 'CTN CB 20S BCI SSTR',
+                'COTTON CB 20S SSTR' => 'CTN CB 20S SSTR',
+                'COTTON CB 20S BCI SSTR' => 'CTN CB 20S BCI SSTR',
+                'COTTON CB 20S ORG 100% SSTR' => 'CTN CB 20S ORG 100% SSTR',
+                'COTTON CB 32S BCI SSTR' => 'CTN CB 32S BCI SSTR',
+                'COTTON CB 70/30 20S RECYCLED BCI' => 'CTN CB 20S 70/30 RECY BCI SOFT',
+                'COTTON CB 70/30 32S RECY BCI SOFT' => 'CTN CB 32S 70/30 RECY BCI SOFT',
+                'COTTON CB ECO CLMX 20S 55/30/15 BCI SSTR' => 'CTN CB ECO CLMX 20S 55/30/15 BCI SSTR SERAP AIR',
+                'COTTON CD 20S' => 'CTN CD 20S',
+                'COTTON CD 20S BCI' => 'CTN CD 20S BCI',
+                'COTTON CD 20S BCI SSTR' => 'CTN CD 20S BCI SSTR',
+                'COTTON CD 20S CVC 55/45' => 'CVC CD 20S 55/45',
+                'COTTON CD 20S ORG 100 %' => 'CTN CD 20S ORG 100%',
+                'COTTON CD 20S ORG 100% SSTR TWIST X2' => 'CTN CD 20S ORG SSTR TWIST X2',
+                'COTTON CD 32S BCI' => 'CTN CD 32S BCI',
+                'COTTON CD ORG 20S 100%' => 'CTN CD 20S ORG 100%',
+                'COTTON COMPACT CB 20S BCI SSTR' => 'CTN CB COMPACT 20S BCI SSTR',
+                'COTTON MISTY 20S' => 'CTN MISTY 20S',
+                'COTTON MISTY 20S ORG 100%' => 'CTN MISTY ORG 100% 20S',
+                'COTTON MISTY 20S ORG 100% ALOEVERA' => 'CTN MISTY ORG 20S 100% ALOE',
+                'COTTON MISTY 32S' => 'CTN MISTY 32S',
+                'COTTON MISTY 32S ANTI BACTERY' => 'CTN MISTY 32S ANTI BACTERY',
+                'COTTON MISTY ORG 20S 100%' => 'CTN MISTY ORG 100% 20S',
+                'COTTON MISTY ORGANIC 100% 20S' => 'CTN MISTY ORG 100% 20S',
+                'COTTON ORG SPDX LYCRA 20D/32S' => 'CTN ORG SPDX LYCRA 20D/32S',
+                'COTTON ORG SPNDX LYCRA 20D/32S' => 'CTN ORG SPDX LYCRA 20D/32S',
+                'LUREX 1/150 X COTTON CD 20S BCI' => 'LUREX 1/150 X CTN CD 20S BCI',
+                'LUREX 1/150 X COTTON CD 20S BCI SSTR' => 'LUREX 1/150 X CTN CD 20S BCI SSTR',
+                'LUREX 1/150 X COTTON CD 20S ORG 100% SSTR' => 'LUREX 1/150 X CTN CD 20S ORG 100% SSTR',
+                'LUREX 1/150 X COTTON CD 20S SSTR' => 'LUREX 1/150 X CTN CD 20S SSTR',
+                'MISTY CB 70/30 20S RECYCLE' => 'MISTY CB 20S 70/30 RECY',
+                'MISTY CB 70/30 32S RECYCLE' => 'MISTY CB 32S 70/30 RECY',
+                'MISTY ORG SPNDX LYCRA 20D/32S' => 'MISTY ORG SPD LYCRA 20D/32S',
+                'POLYESTER CLMX 20S SERAP AIR ANTI BACTERY' => 'POLY CLMX 20S SERAP AIR ANTI BACTERY',
+                'SPUN POLYESTER 20S' => 'SPUN POLY 20S',
+                'SPUN POLYESTER 32S' => 'SPUN POLY 32S',
+                'SPUN POLYESTER 32S RECY SSTR SERAP AIR' => 'SPUN POLYESTER 32S RECY SSTR SERAP AIR',
+                'SPUN POLYESTER 32S SERAP AIR SSTR' => 'SPUN POLYESTER 32S SSTR SERAP AIR',
+                'SPUN POLYESTER 32S TWIST X2' => 'SP 32S X MISTY TWIST X2',
+                'T/C RECY 65/35 CB 20S SSTR SERAP AIR' => 'T/C RECY 20S CB 65/35 BCI SSTR SERAP AIR',
+            ];
+            // Index-kan dengan kunci sudah dicannonize
+            $map = [];
+            foreach ($rawMap as $k => $v) {
+                $map[$this->canon($k)] = $this->canon($v);
+            }
+        }
+
+        $c = $this->canon($raw);
+        // kalau sudah dalam bentuk target (kanon) biarkan
+        if (in_array($c, $map, true)) return $c;
+        // kalau ada di sisi kiri, ganti ke target
+        if (isset($map[$c])) return $map[$c];
+        // default: pakai hasil canon tanpa mapping (biar tetap konsisten)
+        return $c;
+    }
+
+    // helper: hitung saldo tersedia berdasarkan skema "in_out = akumulasi KELUAR"
+    private function computeAvailability(array $row): array
+    {
+        $kgAwal   = (float)($row['kgs_stock_awal'] ?? 0);
+        $kgKeluar = (float)($row['kgs_in_out']     ?? 0);  // akumulasi keluar
+
+
+        $cnsAwal   = (int)($row['cns_stock_awal'] ?? 0);
+        $cnsKeluar = (int)($row['cns_in_out']     ?? 0);   // akumulasi keluar
+
+        $krgAwal   = (int)($row['krg_stock_awal'] ?? 0);
+        $krgKeluar = (int)($row['krg_in_out']     ?? 0);   // akumulasi keluar
+
+        $availKg  = max(0.0, $kgAwal  - $kgKeluar);
+        $availCns = max(0,   $cnsAwal - $cnsKeluar);
+        $availKrg = max(0,   $krgAwal - $krgKeluar);
+
+        return ['kg' => $availKg, 'cns' => $availCns, 'krg' => $availKrg];
+    }
+
+
+    public function uploadPengeluaranSementara()
+    {
+        $file = $this->request->getFile('fileExcel');
+        if (!$file || !$file->isValid() || $file->hasMoved()) {
+            return $this->response->setJSON([
+                'status'   => 'error',
+                'message'  => 'File tidak valid atau sudah dipindahkan.',
+                'errorMsg' => 'File tidak valid atau sudah dipindahkan.'
+            ]);
+        }
+
+        $newName = $file->getRandomName();
+        $file->move(WRITEPATH . 'uploads', $newName);
+        $path = WRITEPATH . 'uploads/' . $newName;
+
+        $rows     = IOFactory::load($path)->getActiveSheet()->toArray();
+        $stockMdl = $this->stockModel;
+
+        $count     = 0;
+        $errorLogs = [];
+
+        // --- DEFINISIKAN INDEX KOLUM (biar jelas & mudah diubah) ---
+        $idxCluster    = 1;   // nama_cluster
+        $idxItemType   = 9;   // item_type (mentah dari excel)
+        $idxNoModel    = 6;   // no_model
+        $idxKodeWarna  = 10;   // kode_warna
+        $idxWarna      = 11;  // warna
+        $idxLot        = 16;  // lot_stock
+        $idxKgKeluar   = 12;   // kg_keluar
+        $idxCnsKeluar  = 13;   // <-- PISAH dari no_model! (ganti sesuai file excel kamu)
+        $idxKrgKeluar  = 14;   // kg_keluar 
+
+        foreach (array_slice($rows, 3) as $i => $row) {
+            $line = $i + 3;
+
+            // Validasi minimal kolom wajib
+            if (!isset($row[$idxCluster], $row[$idxNoModel], $row[$idxItemType])) {
+                $msg = "Baris $line dilewati: kolom wajib tidak lengkap.";
+                log_message('warning', 'PengeluaranSementara: ' . $msg . ' Row=' . json_encode($row));
+                $errorLogs[] = $msg;
+                continue;
+            }
+            if (trim((string)$row[$idxCluster]) === '' || trim((string)$row[$idxNoModel]) === '') {
+                $msg = "Baris $line dilewati: nama_cluster/no_model kosong.";
+                log_message('warning', 'PengeluaranSementara: ' . $msg);
+                $errorLogs[] = $msg;
+                continue;
+            }
+
+            try {
+                // --- NORMALISASI FIELD KUNCI ---
+                $cluster   = $this->canon((string)$row[$idxCluster]);
+                $noModel   = $this->canon((string)$row[$idxNoModel]);
+                $itemType  = $this->normalizeItemType((string)$row[$idxItemType]); // <— POIN UTAMA
+                $kodeWarna = isset($row[$idxKodeWarna]) ? $this->canon((string)$row[$idxKodeWarna]) : '';
+                $warna     = isset($row[$idxWarna]) ? $this->canon((string)$row[$idxWarna]) : '';
+                // sebelumnya JANGAN pakai $this->canon(...) untuk lot
+                $lot = isset($row[$idxLot]) ? $this->normalizeLots($row[$idxLot]) : '';
+
+
+                if (preg_match('/LB\s\d+-[\d-]+$/', $kodeWarna)) {
+                    // Contoh: LB 123-456 jadi LB.00123-456
+                    $kodeWarna = preg_replace('/LB\s(\d+-[\d-]+)$/', 'LB.00$1', $kodeWarna);
+                }
+                if (preg_match('/^(LC|LCJ|KHT|KP|C|KPM)\s+[\d-]+(?:-[\d-]+)*$/', $kodeWarna)) {
+                    // Tangani LCJ 00130-1-1 dan variasi lain
+                    $kodeWarna = preg_replace('/^([A-Z]+)\s+(.+)$/', '$1.$2', $kodeWarna);
+                }
+                // Siapkan key stock yang sudah dinormalisasi
+                $stockKey = [
+                    'nama_cluster' => $cluster,
+                    'no_model'     => $noModel,
+                    'item_type'    => $itemType,
+                    'kode_warna'   => $kodeWarna,
+                    // 'warna'        => $warna,
+                    'lot_stock'    => $lot,
+                ];
+
+                // Ambil existing stok berdasar key normalized
+                $builder = $stockMdl->builder();
+                $builder->where('nama_cluster', $cluster)
+                    ->where('no_model', $noModel)
+                    ->where('item_type', $itemType);
+
+                if ($kodeWarna !== '') {
+                    $builder->where('kode_warna', $kodeWarna);
+                }
+                // if ($warna      !== '') {
+                //     $builder->where('warna', $warna);
+                // }
+                if ($lot        !== '') {
+                    $builder->where('lot_stock', $lot);
+                }
+
+                $existing = $builder->get()->getRowArray();
+
+                // Parse angka keluar
+                $kgKeluar  = isset($row[$idxKgKeluar])  ? (float)str_replace(',', '.', (string)$row[$idxKgKeluar]) : 0.0;
+                $cnsKeluar = isset($row[$idxCnsKeluar]) ? (int)preg_replace('/[^\d\-]/', '', (string)$row[$idxCnsKeluar]) : 0;
+                $krgKeluar = isset($row[$idxKrgKeluar]) ? (int)preg_replace('/[^\d\-]/', '', (string)$row[$idxKrgKeluar]) : 0;
+
+                // if ($kgKeluar < 0 && $cnsKeluar < 0) {
+                //     $msg = "Baris $line dilewati: kg_stok dan cns_stok harus > 0.";
+                //     log_message('warning', 'PengeluaranSementara: ' . $msg);
+                //     $errorLogs[] = $msg;
+                //     continue;
+                // }
+
+                if ($existing) {
+                    // 1) hitung saldo tersedia
+                    $avail = $this->computeAvailability($existing);
+
+                    // // 2) validasi cukup
+                    // if (empty($kgKeluar) && empty($cnsKeluar)) {
+                    //     $msg = "Baris $line: stok tidak cukup. Sisa KG={$avail['kg']}, CNS={$avail['cns']}, minta keluar KG={$kgKeluar}, CNS={$cnsKeluar}.";
+                    //     log_message('warning', 'PengeluaranSementara: ' . $msg);
+                    //     $errorLogs[] = $msg;
+                    //     continue;
+                    // }
+
+                    // 3) update akumulasi KELUAR (in_out += keluar)
+                    $this->stockModel->update($existing['id_stock'], [
+                        'kgs_in_out' => (float)($kgKeluar),
+                        'cns_in_out' => (int)  ($cnsKeluar),
+                        'krg_in_out' => (int)  ($krgKeluar),
+                    ]);
+                    $count++;
+                } else {
+                    $msg = "Baris $line: stok tidak ditemukan untuk key yang dinormalisasi.";
+                    log_message('warning', 'PengeluaranSementara: ' . $msg . ' Key=' . json_encode($stockKey));
+                    $errorLogs[] = $msg;
+                    continue;
+                }
+            } catch (\Throwable $e) {
+                log_message('error', 'PengeluaranSementara (baris ' . $line . '): ' . $e->getMessage());
+                $errorLogs[] = "Baris $line: " . $e->getMessage();
+            }
+        }
+
+        // Hapus file setelah diproses
+        @unlink($path);
+
+        if (!empty($errorLogs)) {
+            return $this->response->setJSON([
+                'status'    => 'error',
+                'message'   => 'Sebagian/semua baris gagal diproses. Pengeluaran sementara berhasil diproses.' . $count,
+                'errorLogs' => $errorLogs
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Pengeluaran sementara berhasil diproses.',
+            'count'   => $count
+        ]);
+    }
+
+    public function prosesImportPemasukan()
+    {
+        ini_set('max_execution_time', 1000); // 1000 detik
+
+        $admin = session()->get('username') ?? 'system';
+        $file  = $this->request->getFile('fileImport');
+
+        // Buat batch ID supaya penelusuran log lebih gampang
+        try {
+            $batchId = 'IMP-' . date('Ymd-His') . '-' . bin2hex(random_bytes(3));
+        } catch (\Throwable $e) {
+            $batchId = 'IMP-' . date('Ymd-His') . '-RND';
+        }
+
+        if (!$file || !$file->isValid() || $file->hasMoved()) {
+            log_message(
+                'error',
+                "[{$batchId}] File tidak valid atau sudah dipindahkan. name={name} err={err}",
+                ['name' => $file ? $file->getClientName() : '(null)', 'err' => $file ? $file->getErrorString() : '(null)']
+            );
+            return redirect()->back()->with('error', 'File tidak valid atau sudah dipindahkan.');
+        }
+
+        $origName = $file->getClientName();
+        $newName  = $file->getRandomName();
+        $destDir  = WRITEPATH . 'uploads';
+        $file->move($destDir, $newName);
+        $filePath = rtrim($destDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $newName;
+
+        log_message(
+            'info',
+            "[{$batchId}] START import by={admin} orig={orig} tmp={tmp}",
+            ['admin' => $admin, 'orig' => $origName, 'tmp' => $filePath]
+        );
+
+        try {
+            $sheetArr = IOFactory::load($filePath)
+                ->getActiveSheet()
+                ->toArray(null, true, true, true);
+            log_message('info', "[{$batchId}] Excel loaded rows={rows}", ['rows' => count($sheetArr)]);
+        } catch (\Throwable $e) {
+            @unlink($filePath);
+            log_message('error', "[{$batchId}] Gagal membaca Excel: {msg}", ['msg' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Gagal membaca file Excel: ' . $e->getMessage());
+        }
+        @unlink($filePath);
+
+        // --- Helper angka ---
+        $toFloat = static function ($v) {
+            if ($v === null) return 0.0;
+            $s = trim((string)$v);
+            if ($s === '') return 0.0;
+            $s = preg_replace('/[^\d\-,.]/', '', $s);
+            if (strpos($s, ',') !== false && strpos($s, '.') !== false) {
+                $s = str_replace('.', '', $s);
+                $s = str_replace(',', '.', $s);
+            } else {
+                if (strpos($s, ',') !== false) {
+                    $s = str_replace(',', '.', $s);
+                }
+            }
+            return (float)$s;
+        };
+        $toInt = static function ($v) {
+            if ($v === null) return 0;
+            $s = preg_replace('/[^\d\-]/', '', (string)$v);
+            if ($s === '' || $s === '-') return 0;
+            return (int)$s;
+        };
+
+        $db = \Config\Database::connect();
+        $success = 0;
+        $failed  = [];
+
+        // Mulai dari baris ke-18 (melewati header)
+        foreach (array_slice($sheetArr, 3, null, true) as $rowNum => $row) {
+            // dd($row);
+            // Mapping kolom
+            $namaCluster = trim((string)($row['J'] ?? ''));
+            $noModel     = trim((string)($row['K'] ?? ''));
+            $itemType    = trim((string)($row['L'] ?? ''));
+            $kodeWarna   = trim((string)($row['M'] ?? ''));
+            // $warna       = trim((string)($row['N'] ?? ''));
+            $lot         = trim((string)($row['O'] ?? ''));
+            $kgsMasuk    = $toFloat($row['P'] ?? 0);
+            $cnsMasuk    = $toInt($row['Q'] ?? 0);
+            $krgMasuk    = max(1, $toInt($row['R'] ?? 1)); // minimal 1 karung
+
+            // Log raw ringkas (hindari membludak)
+            log_message(
+                'debug',
+                "[{$batchId}] Row {row} raw: no_model={no_model}, item_type={item_type}, k_warna={kode_warna}, cluster={cluster}, lot={lot}, kgs={kgs}, cns={cns}, krg={krg}",
+                [
+                    'row'        => $rowNum,
+                    'no_model'   => $noModel,
+                    'item_type'  => $itemType,
+                    'kode_warna' => $kodeWarna,
+                    // 'warna'      => $warna,
+                    'cluster'    => $namaCluster,
+                    'lot'        => $lot,
+                    'kgs'        => $kgsMasuk,
+                    'cns'        => $cnsMasuk,
+                    'krg'        => $krgMasuk,
+                ]
+            );
+
+            // Skip baris kosong total
+            if ($noModel === '' && $itemType === '' && $kodeWarna === '' && $namaCluster === '') {
+                log_message('debug', "[{$batchId}] Row {row} di-skip (kosong).", ['row' => $rowNum]);
+                continue;
+            }
+
+            // Validasi kolom wajib
+            if ($noModel === '' || $itemType === '' || $kodeWarna === '' || $namaCluster === '') {
+                $msg = "Baris {$rowNum}: kolom wajib kosong (no_model/item_type/kode_warna/nama_cluster).";
+                $failed[] = $msg;
+                log_message('warning', "[{$batchId}] {msg}", ['msg' => $msg]);
+                continue;
+            }
+
+            try {
+                $db->transBegin();
+
+                // 1) Upsert master_order
+                $orderRow = $this->masterOrderModel
+                    ->select('id_order')
+                    ->where('no_model', $noModel)
+                    ->first();
+
+                if ($orderRow) {
+                    $idOrder = (int)$orderRow['id_order'];
+                    // log_message('debug', "[{$batchId}] Row {row} master_order EXIST id={id}", ['row' => $rowNum, 'id' => $idOrder]);
+                } else {
+                    $this->masterOrderModel->insert([
+                        'no_model'   => $noModel,
+                        'no_order'   => '-',
+                        'buyer'      => '-',
+                        'foll_up'    => '-',
+                        'lco_date'   => date('Y-m-d'), // default hari ini
+                        'admin'      => $admin,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ]);
+                    $idOrder = (int)$this->masterOrderModel->insertID();
+                    // log_message('info', "[{$batchId}] Row {row} master_order INSERT id={id}", ['row' => $rowNum, 'id' => $idOrder]);
+                }
+
+                // 2) Upsert master_material
+                $mm = $this->masterMaterialModel->where('item_type', $itemType)->first();
+                // dd($mm);
+                if (!$mm) {
+                    $this->masterMaterialModel->insert([
+                        'item_type'  => $itemType,
+                        'deskripsi'  => $itemType,
+                        'jenis'      => null,
+                        'ukuran'      => null,
+                    ]);
+                    // log_message('info', "[{$batchId}] Row {row} master_material INSERT item_type={it}", ['row' => $rowNum, 'it' => $itemType]);
+                }
+
+                // 3) Upsert material
+                $material = $this->materialModel
+                    ->where('id_order', $idOrder)
+                    ->where('item_type', $itemType)
+                    ->where('kode_warna', $kodeWarna)
+                    ->first();
+
+                if (empty($material)) {
+                    $this->materialModel->insert([
+                        'id_order'    => $idOrder,
+                        'style_size'  => '',
+                        'area'        => '',
+                        // 'color'       => $warna,
+                        'color'       => '',
+                        'item_type'   => $itemType,
+                        'kode_warna'  => $kodeWarna,
+                        'composition' => 0,
+                        'gw'          => 0,
+                        'qty_pcs'     => 0,
+                        'loss'        => 0,
+                        'kgs'         => $kgsMasuk,
+                        'admin'       => $admin,
+                        'created_at'  => date('Y-m-d H:i:s'),
+                    ]);
+
+                    $id_material = (int)$this->materialModel->insertID();
+
+                    // 3) Upsert material
+                    $material = $this->materialModel
+                        ->where('id_material', $id_material)
+                        ->first();
+
+                    // log_message(
+                    //     'info',
+                    //     "[{$batchId}] Row {row} material INSERT (no prev) it={it} kw={kw}",
+                    //     ['row' => $rowNum, 'it' => $itemType, 'kw' => $kodeWarna]
+                    // );
+                }
+
+                // 4) other_bon
+                $this->otherBonModel->insert([
+                    'no_model'       => $noModel,
+                    'item_type'      => $material['item_type'],
+                    'kode_warna'     => $material['kode_warna'],
+                    // 'warna'          => $warna ?: null,
+                    'warna'          => $material['color'],
+                    'tgl_datang'     => date('Y-m-d'),
+                    'no_surat_jalan' => 'STOK IMPORT',
+                    'detail_sj'      => '',
+                    'keterangan'     => 'Import XLS',
+                    'ganti_retur'    => '0',
+                    'admin'          => $admin,
+                    'created_at'     => date('Y-m-d H:i:s'),
+                ]);
+                $id_other_in = (int)$this->otherBonModel->insertID();
+                if ($id_other_in <= 0) {
+                    $dbErr = $db->error();
+                    log_message('error', "[{$batchId}] Row {row} other_bon INSERT gagal dbErr={err}", ['row' => $rowNum, 'err' => json_encode($dbErr)]);
+                    throw new \RuntimeException('Gagal insert other_bon');
+                }
+                // log_message('debug', "[{$batchId}] Row {row} other_bon id={id}", ['row' => $rowNum, 'id' => $id_other_in]);
+
+                // 5) out_celup
+                $this->outCelupModel->insert([
+                    'id_other_bon' => $id_other_in,
+                    'no_model'     => $noModel,
+                    'l_m_d'        => '',
+                    'harga'        => 0,
+                    'no_karung'    => null,
+                    'gw_kirim'     => 0,
+                    'kgs_kirim'    => $kgsMasuk,
+                    'cones_kirim'  => $cnsMasuk,
+                    'lot_kirim'    => $lot,
+                    'ganti_retur'  => '0',
+                    'admin'        => $admin,
+                    'created_at'   => date('Y-m-d H:i:s'),
+                ]);
+                $id_out_celup = (int)$this->outCelupModel->insertID();
+                if ($id_out_celup <= 0) {
+                    $dbErr = $db->error();
+                    log_message('error', "[{$batchId}] Row {row} out_celup INSERT gagal dbErr={err}", ['row' => $rowNum, 'err' => json_encode($dbErr)]);
+                    throw new \RuntimeException('Gagal insert out_celup');
+                }
+
+                // 6) stock
+                $existingStock = $this->stockModel
+                    ->where('no_model', $noModel)
+                    ->where('item_type', $material['item_type'])
+                    ->where('kode_warna', $material['kode_warna'])
+                    ->where('nama_cluster', $namaCluster)
+                    ->where('lot_stock', $lot)
+                    ->first();
+
+                if ($existingStock) {
+                    $upd = [
+                        'kgs_in_out'     => $kgsMasuk != 0 ? (float)$kgsMasuk : (float)($existingStock['kgs_in_out'] ?? 0),
+                        'cns_in_out'     => $cnsMasuk != 0 ? (int)$cnsMasuk : (int)($existingStock['cns_in_out'] ?? 0),
+                        'krg_in_out'     => $krgMasuk != 0 ? (int)$krgMasuk : (int)($existingStock['krg_in_out'] ?? 0),
+                        'kgs_stock_awal' => $kgsMasuk == 0 ? (float)$kgsMasuk : (float)($existingStock['kgs_stock_awal'] ?? 0),
+                        'cns_stock_awal' => $cnsMasuk == 0 ? (int)$cnsMasuk : (int)($existingStock['cns_stock_awal'] ?? 0),
+                        'krg_stock_awal' => $krgMasuk == 0 ? (int)$krgMasuk : (int)($existingStock['krg_stock_awal'] ?? 0),
+                        'lot_stock'      => isset($lot) && $lot !== '' ? $lot : ($existingStock['lot_stock'] ?? ($existingStock['lot_awal'] ?? null)),
+                        'updated_at'     => date('Y-m-d H:i:s'),
+                    ];
+                    $this->stockModel->update($existingStock['id_stock'], $upd);
+                    $idStok = (int)$existingStock['id_stock'];
+                    // log_message(
+                    //     'debug',
+                    //     "[{$batchId}] Row {row} stock UPDATE id={id} kgs+={kgs} cns+={cns} krg+={krg}",
+                    //     ['row' => $rowNum, 'id' => $idStok, 'kgs' => $kgsMasuk, 'cns' => $cnsMasuk, 'krg' => $krgMasuk]
+                    // );
+                } else {
+                    $this->stockModel->insert([
+                        'no_model'     => $noModel,
+                        'item_type'    => $material['item_type'],
+                        'kode_warna'   => $material['kode_warna'],
+                        'warna'        => $material['color'],
+                        'nama_cluster' => $namaCluster,
+                        'lot_stock'    => '',
+                        'lot_awal'     => $lot,
+                        'kgs_stock_awal' => $kgsMasuk,
+                        'cns_stock_awal' => $cnsMasuk,
+                        'krg_stock_awal' => max(1, $krgMasuk),
+                        'kgs_in_out'   => 0,
+                        'cns_in_out'   => 0,
+                        'krg_in_out'   => 0,
+                        'admin'        => $admin,
+                        'created_at'   => date('Y-m-d H:i:s'),
+                    ]);
+                    $idStok = (int)$this->stockModel->insertID();
+                    if ($idStok <= 0) {
+                        $dbErr = $db->error();
+                        log_message('error', "[{$batchId}] Row {row} stock INSERT gagal dbErr={err}", ['row' => $rowNum, 'err' => json_encode($dbErr)]);
+                        throw new \RuntimeException('Gagal insert stock');
+                    }
+                    // log_message('debug', "[{$batchId}] Row {row} stock INSERT id={id}", ['row' => $rowNum, 'id' => $idStok]);
+                }
+
+                // 7) pemasukan
+                $this->pemasukanModel->insert([
+                    'id_out_celup' => $id_out_celup,
+                    'id_stock'     => $idStok,
+                    'tgl_masuk'    => date('Y-m-d'),
+                    'nama_cluster' => $namaCluster,
+                    'out_jalur'    => '0',
+                    'admin'        => $admin,
+                    'created_at'   => date('Y-m-d H:i:s'),
+                ]);
+                $idPemasukan = (int)$this->pemasukanModel->insertID();
+                if ($idPemasukan <= 0) {
+                    $dbErr = $db->error();
+                    log_message('error', "[{$batchId}] Row {row} pemasukan INSERT gagal dbErr={err}", ['row' => $rowNum, 'err' => json_encode($dbErr)]);
+                    throw new \RuntimeException('Gagal insert pemasukan');
+                }
+
+                if ($db->transStatus() === false) {
+                    $db->transRollback();
+                    $msg = "Baris {$rowNum}: Gagal menyimpan (status transaksi).";
+                    $failed[] = $msg;
+                    log_message('error', "[{$batchId}] {msg}", ['msg' => $msg]);
+                    continue;
+                }
+
+                $db->transCommit();
+                $success++;
+                // log_message(
+                //     'info',
+                //     "[{$batchId}] Row {row} COMMIT ok (pemasukan_id={pid}, stock_id={sid}, out_celup_id={oid}, other_bon_id={bid})",
+                //     ['row' => $rowNum, 'pid' => $idPemasukan, 'sid' => $idStok, 'oid' => $id_out_celup, 'bid' => $id_other_in]
+                // );
+            } catch (\Throwable $e) {
+                if ($db->transStatus()) {
+                    $db->transRollback();
+                }
+                $msg = "Baris {$rowNum}: " . $e->getMessage();
+                $failed[] = $msg;
+                // Sertakan potongan data untuk diagnosis
+                log_message(
+                    'error',
+                    "[{$batchId}] EXCEPTION row={row} msg={msg} ctx={ctx}",
+                    [
+                        'row' => $rowNum,
+                        'msg' => $e->getMessage(),
+                        'ctx' => json_encode([
+                            'no_model' => $noModel,
+                            'item_type' => $material['item_type'],
+                            'kode_warna' => $material['kode_warna'],
+                            'warna' => $material['color'],
+                            'cluster' => $namaCluster,
+                            'lot' => $lot,
+                            'kgs' => $kgsMasuk,
+                            'cns' => $cnsMasuk,
+                            'krg' => $krgMasuk,
+                        ], JSON_UNESCAPED_UNICODE)
+                    ]
+                );
+            }
+        }
+
+        if ($success > 0 && empty($failed)) {
+            session()->setFlashdata('success', "Import selesai. Berhasil: {$success} baris. Batch={$batchId}");
+            // log_message('info', "[{$batchId}] DONE success={s} failed=0", ['s' => $success]);
+        } else {
+            $msg = "Import selesai parsial. Berhasil: {$success} baris; Gagal: " . count($failed) . " baris. Batch={$batchId}";
+            if (!empty($failed)) {
+                session()->setFlashdata('error_detail', implode("\n", $failed));
+            }
+            session()->setFlashdata('error', $msg);
+            log_message('warning', "[{$batchId}] DONE partial success={s} failed={f}", ['s' => $success, 'f' => count($failed)]);
+        }
+
+        return redirect()->to(base_url($this->role . "/importPemasukan"));
     }
 }

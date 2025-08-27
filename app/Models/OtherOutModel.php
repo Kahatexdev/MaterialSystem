@@ -64,4 +64,23 @@ class OtherOutModel extends Model
             // ->where('nama_cluster', $namaCluster)
             ->findAll();
     }
+    public function getPakaiLain($key, $jenis = null)
+    {
+        $builder = $this->db->table('other_out oo')
+            ->select('oo.*, oc.no_model, sc.item_type, sc.kode_warna, sc.warna, mm.jenis, sc.po_plus')
+            ->join('out_celup oc', 'oc.id_out_celup = oo.id_out_celup', 'left')
+            ->join('schedule_celup sc', 'oc.id_celup = sc.id_celup', 'left')
+            ->join('master_material mm', 'sc.item_type = mm.item_type', 'left')
+            ->where('oc.no_model', $key);
+
+        if (!empty($jenis)) {
+            $builder->where('mm.jenis', $jenis);
+        }
+
+        return $builder
+            ->groupBy('oo.id_other_out')
+            ->orderBy('oo.tgl_other_out, sc.item_type, sc.kode_warna', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
 }
