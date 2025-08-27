@@ -453,15 +453,67 @@ class GodController extends BaseController
 
 
     // LOT: hapus hanya leading ", " (boleh berulang). Selain itu jangan diubah.
+    // private function normalizeLots(?string $raw): string
+    // {
+    //     if ($raw === null) return '';
+    //     $s = (string)$raw;
+    //     // hapus satu atau lebih blok: (spasi)* , (spasi)* di AWAL string
+    //     $s = preg_replace('/^(?:\s*,\s*)+/u', '', $s);
+    //     // jangan trim; biarkan spasi/format lain tetap
+    //     return $s;
+    // }
+
     private function normalizeLots(?string $raw): string
     {
         if ($raw === null) return '';
         $s = (string)$raw;
-        // hapus satu atau lebih blok: (spasi)* , (spasi)* di AWAL string
-        $s = preg_replace('/^(?:\s*,\s*)+/u', '', $s);
-        // jangan trim; biarkan spasi/format lain tetap
-        return $s;
+
+        // Normalisasi whitespace aneh -> spasi biasa, dan samakan varian simbol
+        $s = str_replace(
+            [
+                "\xC2\xA0",        /* NBSP */
+                "\xE3\x80\x80",    /* ideographic space */
+                "\xEF\xBC\x8C",    /* full-width comma ， */
+                "\xEF\xBC\x8B"     /* full-width plus ＋ */
+            ],
+            [' ', ' ', ',', '+'],
+            $s
+        );
+        // Hapus zero-width & BOM
+        $s = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $s);
+
+        // Trim kiri–kanan (unicode-safe)
+        $s = preg_replace('/^\s+|\s+$/u', '', $s);
+
+        // Hapus blok koma di awal (", ", "， " dst)
+        $s = preg_replace('/^(?:[,]\s*)+/u', '', $s);
+
+        // Split oleh koma -> bersihkan token kosong
+        $parts = preg_split('/[,]+/u', $s, -1, PREG_SPLIT_NO_EMPTY);
+
+        $parts = array_values(array_filter(array_map(function ($t) {
+            // Trim tiap token
+            $t = preg_replace('/^\s+|\s+$/u', '', (string)$t);
+
+            // Hapus spasi di sekitar 'X' / 'x' / '×' diapit alnum ASCII
+            // "25E182 X 25E185" -> "25E182X25E185"
+            $t = preg_replace('/(?<=\w)\s*[x×]\s*(?=\w)/ui', 'X', $t);
+
+            // Hapus spasi di sekitar '+' diapit alnum ASCII
+            // "25F339 + 25F337" -> "25F339+25F337"
+            $t = preg_replace('/(?<=\w)\s*\+\s*(?=\w)/u', '+', $t);
+
+            // Rapikan spasi beruntun di dalam token (opsional)
+            $t = preg_replace('/[ \t]+/u', ' ', $t);
+
+            return $t === '' ? null : $t;
+        }, $parts)));
+
+        // Gabungkan lagi dalam format baku "A, B, C"
+        return implode(', ', $parts);
     }
+
+
 
     // 2) Helper: normalize item type via kamus
     private function normalizeItemType(string $raw): string
@@ -490,12 +542,12 @@ class GodController extends BaseController
                 'COTTON CD ORG 20S 100%' => 'CTN CD 20S ORG 100%',
                 'COTTON COMPACT CB 20S BCI SSTR' => 'CTN CB COMPACT 20S BCI SSTR',
                 'COTTON MISTY 20S' => 'CTN MISTY 20S',
-                'COTTON MISTY 20S ORG 100%' => 'CTN MISTY ORG 100% 20S',
+                'COTTON MISTY 20S ORG 100%' => 'CTN MISTY ORG 20S 100%',
                 'COTTON MISTY 20S ORG 100% ALOEVERA' => 'CTN MISTY ORG 20S 100% ALOE',
                 'COTTON MISTY 32S' => 'CTN MISTY 32S',
                 'COTTON MISTY 32S ANTI BACTERY' => 'CTN MISTY 32S ANTI BACTERY',
-                'COTTON MISTY ORG 20S 100%' => 'CTN MISTY ORG 100% 20S',
-                'COTTON MISTY ORGANIC 100% 20S' => 'CTN MISTY ORG 100% 20S',
+                'COTTON MISTY ORG 20S 100%' => 'CTN MISTY ORG 20S 100%',
+                'COTTON MISTY ORGANIC 100% 20S' => 'CTN MISTY ORG 20S 100%',
                 'COTTON ORG SPDX LYCRA 20D/32S' => 'CTN ORG SPDX LYCRA 20D/32S',
                 'COTTON ORG SPNDX LYCRA 20D/32S' => 'CTN ORG SPDX LYCRA 20D/32S',
                 'LUREX 1/150 X COTTON CD 20S BCI' => 'LUREX 1/150 X CTN CD 20S BCI',
@@ -550,6 +602,184 @@ class GodController extends BaseController
     }
 
 
+    // public function uploadPengeluaranSementara()
+    // {
+    //     $file = $this->request->getFile('fileExcel');
+    //     if (!$file || !$file->isValid() || $file->hasMoved()) {
+    //         return $this->response->setJSON([
+    //             'status'   => 'error',
+    //             'message'  => 'File tidak valid atau sudah dipindahkan.',
+    //             'errorMsg' => 'File tidak valid atau sudah dipindahkan.'
+    //         ]);
+    //     }
+
+    //     $newName = $file->getRandomName();
+    //     $file->move(WRITEPATH . 'uploads', $newName);
+    //     $path = WRITEPATH . 'uploads/' . $newName;
+
+    //     $rows     = IOFactory::load($path)->getActiveSheet()->toArray();
+    //     $stockMdl = $this->stockModel;
+
+    //     $count     = 0;
+    //     $errorLogs = [];
+
+    //     // --- DEFINISIKAN INDEX KOLUM (biar jelas & mudah diubah) ---
+    //     $idxCluster    = 1;   // nama_cluster
+    //     $idxItemType   = 9;   // item_type (mentah dari excel)
+    //     $idxNoModel    = 6;   // no_model
+    //     $idxKodeWarna  = 10;   // kode_warna
+    //     $idxWarna      = 11;  // warna
+    //     $idxLot        = 16;  // lot_stock
+    //     $idxKgKeluar   = 12;   // kg_keluar
+    //     $idxCnsKeluar  = 13;   // <-- PISAH dari no_model! (ganti sesuai file excel kamu)
+    //     $idxKrgKeluar  = 14;   // kg_keluar 
+
+    //     foreach (array_slice($rows, 3) as $i => $row) {
+    //         $line = $i + 3;
+
+    //         // Validasi minimal kolom wajib
+    //         if (!isset($row[$idxCluster], $row[$idxNoModel], $row[$idxItemType])) {
+    //             $msg = "Baris $line dilewati: kolom wajib tidak lengkap.";
+    //             log_message('warning', 'PengeluaranSementara: ' . $msg . ' Row=' . json_encode($row));
+    //             $errorLogs[] = $msg;
+    //             continue;
+    //         }
+    //         if (trim((string)$row[$idxCluster]) === '' || trim((string)$row[$idxNoModel]) === '') {
+    //             $msg = "Baris $line dilewati: nama_cluster/no_model kosong.";
+    //             log_message('warning', 'PengeluaranSementara: ' . $msg);
+    //             $errorLogs[] = $msg;
+    //             continue;
+    //         }
+
+    //         try {
+    //             // --- NORMALISASI FIELD KUNCI ---
+    //             $cluster   = $this->canon((string)$row[$idxCluster]);
+    //             $noModel   = $this->canon((string)$row[$idxNoModel]);
+    //             $itemType  = $this->normalizeItemType((string)$row[$idxItemType]); // <— POIN UTAMA
+    //             $kodeWarna = isset($row[$idxKodeWarna]) ? $this->canon((string)$row[$idxKodeWarna]) : '';
+    //             $warna     = isset($row[$idxWarna]) ? $this->canon((string)$row[$idxWarna]) : '';
+    //             // sebelumnya JANGAN pakai $this->canon(...) untuk lot
+    //             $lot = isset($row[$idxLot]) ? $this->normalizeLots($row[$idxLot]) : '';
+
+
+    //             if (preg_match('/LB\s\d+-[\d-]+$/', $kodeWarna)) {
+    //                 // Contoh: LB 123-456 jadi LB.00123-456
+    //                 $kodeWarna = preg_replace('/LB\s(\d+-[\d-]+)$/', 'LB.00$1', $kodeWarna);
+    //             }
+    //             if (preg_match('/^(LC|LCJ|KHT|KP|C|KPM)\s+[\d-]+(?:-[\d-]+)*$/', $kodeWarna)) {
+    //                 // Tangani LCJ 00130-1-1 dan variasi lain
+    //                 $kodeWarna = preg_replace('/^([A-Z]+)\s+(.+)$/', '$1.$2', $kodeWarna);
+    //             }
+    //             // Siapkan key stock yang sudah dinormalisasi
+    //             $stockKey = [
+    //                 'nama_cluster' => $cluster,
+    //                 'no_model'     => $noModel,
+    //                 'item_type'    => $itemType,
+    //                 'kode_warna'   => $kodeWarna,
+    //                 // 'warna'        => $warna,
+    //                 'lot_stock'    => $lot,
+    //             ];
+
+    //             // Ambil existing stok berdasar key normalized
+    //             $builder = $stockMdl->builder();
+    //             $builder->where('nama_cluster', $cluster)
+    //                 ->where('no_model', $noModel)
+    //                 ->where('item_type', $itemType);
+
+    //             if ($kodeWarna !== '') {
+    //                 $builder->where('kode_warna', $kodeWarna);
+    //             }
+    //             // if ($warna      !== '') {
+    //             //     $builder->where('warna', $warna);
+    //             // }
+    //             if ($lot        !== '') {
+    //                 $builder->where('lot_stock', $lot);
+    //             }
+
+    //             $existing = $builder->get()->getRowArray();
+
+    //             // Parse angka keluar
+    //             $kgKeluar  = isset($row[$idxKgKeluar])  ? (float)str_replace(',', '.', (string)$row[$idxKgKeluar]) : 0.0;
+    //             $cnsKeluar = isset($row[$idxCnsKeluar]) ? (int)preg_replace('/[^\d\-]/', '', (string)$row[$idxCnsKeluar]) : 0;
+    //             $krgKeluar = isset($row[$idxKrgKeluar]) ? (int)preg_replace('/[^\d\-]/', '', (string)$row[$idxKrgKeluar]) : 0;
+
+    //             // if ($kgKeluar < 0 && $cnsKeluar < 0) {
+    //             //     $msg = "Baris $line dilewati: kg_stok dan cns_stok harus > 0.";
+    //             //     log_message('warning', 'PengeluaranSementara: ' . $msg);
+    //             //     $errorLogs[] = $msg;
+    //             //     continue;
+    //             // }
+
+    //             if ($existing) {
+    //                 // 1) hitung saldo tersedia
+    //                 $avail = $this->computeAvailability($existing);
+
+    //                 // // 2) validasi cukup
+    //                 // if (empty($kgKeluar) && empty($cnsKeluar)) {
+    //                 //     $msg = "Baris $line: stok tidak cukup. Sisa KG={$avail['kg']}, CNS={$avail['cns']}, minta keluar KG={$kgKeluar}, CNS={$cnsKeluar}.";
+    //                 //     log_message('warning', 'PengeluaranSementara: ' . $msg);
+    //                 //     $errorLogs[] = $msg;
+    //                 //     continue;
+    //                 // }
+
+    //                 // 3) update akumulasi KELUAR (in_out += keluar)
+    //                 // Tentukan field mana yang diupdate: jika kgs_stock_awal > 0, update kgs_in_out (pengeluaran); jika kgs_stock_awal == 0, update kgs_stock_awal (pemasukan awal)
+    //                 if (isset($existing['kgs_stock_awal']) && (float)$existing['kgs_stock_awal'] > 0) {
+    //                     // Update akumulasi KELUAR (in_out += keluar)
+    //                     $newKg  = $kgKeluar;
+    //                     $newCns = $cnsKeluar;
+    //                     $newKrg = $krgKeluar;
+
+    //                     $this->stockModel->update($existing['id_stock'], [
+    //                         'kgs_in_out' => $newKg,
+    //                         'cns_in_out' => $newCns,
+    //                         'krg_in_out' => $newKrg,
+    //                         'updated_at' => date('Y-m-d H:i:s')
+    //                     ]);
+    //                 } else {
+    //                     // Jika belum ada stok awal, update kgs_stock_awal (pemasukan awal)
+    //                     $newKgAwal  = $kgKeluar;
+    //                     $newCnsAwal = $cnsKeluar;
+    //                     $newKrgAwal = $krgKeluar;
+
+    //                     $this->stockModel->update($existing['id_stock'], [
+    //                         'kgs_stock_awal' => $newKgAwal,
+    //                         'cns_stock_awal' => $newCnsAwal,
+    //                         'krg_stock_awal' => $newKrgAwal,
+    //                         'updated_at'     => date('Y-m-d H:i:s')
+    //                     ]);
+    //                 }
+    //                 $count++;
+    //             } else {
+    //                 $msg = "Baris $line: stok tidak ditemukan untuk key yang dinormalisasi.";
+    //                 log_message('warning', 'PengeluaranSementara: ' . $msg . ' Key=' . json_encode($stockKey));
+    //                 $errorLogs[] = $msg;
+    //                 continue;
+    //             }
+    //         } catch (\Throwable $e) {
+    //             log_message('error', 'PengeluaranSementara (baris ' . $line . '): ' . $e->getMessage());
+    //             $errorLogs[] = "Baris $line: " . $e->getMessage();
+    //         }
+    //     }
+
+    //     // Hapus file setelah diproses
+    //     @unlink($path);
+
+    //     if (!empty($errorLogs)) {
+    //         return $this->response->setJSON([
+    //             'status'    => 'error',
+    //             'message'   => 'Sebagian/semua baris gagal diproses. Pengeluaran sementara berhasil diproses.' . $count,
+    //             'errorLogs' => $errorLogs
+    //         ]);
+    //     }
+
+    //     return $this->response->setJSON([
+    //         'status'  => 'success',
+    //         'message' => 'Pengeluaran sementara berhasil diproses.',
+    //         'count'   => $count
+    //     ]);
+    // }
+
     public function uploadPengeluaranSementara()
     {
         $file = $this->request->getFile('fileExcel');
@@ -568,34 +798,43 @@ class GodController extends BaseController
         $rows     = IOFactory::load($path)->getActiveSheet()->toArray();
         $stockMdl = $this->stockModel;
 
-        $count     = 0;
-        $errorLogs = [];
+        $successCount = 0;
+        $failedCount  = 0;
+        $errorLogs    = [];
 
         // --- DEFINISIKAN INDEX KOLUM (biar jelas & mudah diubah) ---
         $idxCluster    = 1;   // nama_cluster
         $idxItemType   = 9;   // item_type (mentah dari excel)
         $idxNoModel    = 6;   // no_model
-        $idxKodeWarna  = 10;   // kode_warna
+        $idxKodeWarna  = 10;  // kode_warna
         $idxWarna      = 11;  // warna
         $idxLot        = 16;  // lot_stock
-        $idxKgKeluar   = 12;   // kg_keluar
-        $idxCnsKeluar  = 13;   // <-- PISAH dari no_model! (ganti sesuai file excel kamu)
-        $idxKrgKeluar  = 14;   // kg_keluar 
+        $idxKgKeluar   = 12;  // kg_keluar
+        $idxCnsKeluar  = 13;  // cns_keluar
+        $idxKrgKeluar  = 14;  // krg_keluar
 
+        // mulai data di baris ke-4 (index 3)
         foreach (array_slice($rows, 3) as $i => $row) {
-            $line = $i + 3;
+            $line = $i + 4; // nomor baris excel human friendly
+
+            // helper untuk push error terstruktur
+            $pushErr = function (string $reason, array $ctx = []) use (&$errorLogs, &$failedCount, $line) {
+                $failedCount++;
+                $payload = array_merge([
+                    'line'   => $line,
+                    'reason' => $reason,
+                ], $ctx);
+                $errorLogs[] = $payload;
+                log_message('warning', 'PengeluaranSementara: ' . $reason . ' | ctx=' . json_encode($payload, JSON_UNESCAPED_UNICODE));
+            };
 
             // Validasi minimal kolom wajib
             if (!isset($row[$idxCluster], $row[$idxNoModel], $row[$idxItemType])) {
-                $msg = "Baris $line dilewati: kolom wajib tidak lengkap.";
-                log_message('warning', 'PengeluaranSementara: ' . $msg . ' Row=' . json_encode($row));
-                $errorLogs[] = $msg;
+                $pushErr('Kolom wajib tidak lengkap', ['row_sample' => array_slice($row, 0, 18)]);
                 continue;
             }
             if (trim((string)$row[$idxCluster]) === '' || trim((string)$row[$idxNoModel]) === '') {
-                $msg = "Baris $line dilewati: nama_cluster/no_model kosong.";
-                log_message('warning', 'PengeluaranSementara: ' . $msg);
-                $errorLogs[] = $msg;
+                $pushErr('nama_cluster/no_model kosong', ['cluster' => $row[$idxCluster] ?? null, 'no_model' => $row[$idxNoModel] ?? null]);
                 continue;
             }
 
@@ -606,25 +845,21 @@ class GodController extends BaseController
                 $itemType  = $this->normalizeItemType((string)$row[$idxItemType]); // <— POIN UTAMA
                 $kodeWarna = isset($row[$idxKodeWarna]) ? $this->canon((string)$row[$idxKodeWarna]) : '';
                 $warna     = isset($row[$idxWarna]) ? $this->canon((string)$row[$idxWarna]) : '';
-                // sebelumnya JANGAN pakai $this->canon(...) untuk lot
-                $lot = isset($row[$idxLot]) ? $this->normalizeLots($row[$idxLot]) : '';
+                $lot       = isset($row[$idxLot]) ? $this->normalizeLots($row[$idxLot]) : '';
 
-
+                // Format khusus kode warna
                 if (preg_match('/LB\s\d+-[\d-]+$/', $kodeWarna)) {
-                    // Contoh: LB 123-456 jadi LB.00123-456
                     $kodeWarna = preg_replace('/LB\s(\d+-[\d-]+)$/', 'LB.00$1', $kodeWarna);
                 }
                 if (preg_match('/^(LC|LCJ|KHT|KP|C|KPM)\s+[\d-]+(?:-[\d-]+)*$/', $kodeWarna)) {
-                    // Tangani LCJ 00130-1-1 dan variasi lain
                     $kodeWarna = preg_replace('/^([A-Z]+)\s+(.+)$/', '$1.$2', $kodeWarna);
                 }
-                // Siapkan key stock yang sudah dinormalisasi
+
                 $stockKey = [
                     'nama_cluster' => $cluster,
                     'no_model'     => $noModel,
                     'item_type'    => $itemType,
                     'kode_warna'   => $kodeWarna,
-                    // 'warna'        => $warna,
                     'lot_stock'    => $lot,
                 ];
 
@@ -634,78 +869,84 @@ class GodController extends BaseController
                     ->where('no_model', $noModel)
                     ->where('item_type', $itemType);
 
-                if ($kodeWarna !== '') {
-                    $builder->where('kode_warna', $kodeWarna);
-                }
-                // if ($warna      !== '') {
-                //     $builder->where('warna', $warna);
-                // }
-                if ($lot        !== '') {
-                    $builder->where('lot_stock', $lot);
+                if ($kodeWarna !== '') $builder->where('kode_warna', $kodeWarna);
+                if ($lot !== '') {
+                    // Cari baik di lot_stock maupun lot_awal
+                    $builder->groupStart()
+                        ->where('lot_stock', $lot)
+                        ->orWhere('lot_awal', $lot)
+                    ->groupEnd();
                 }
 
                 $existing = $builder->get()->getRowArray();
-
+                // log_message('debug', 'PengeluaranSementara: mencari stok existing | key=' . json_encode($stockKey) . ' | found=' . ($existing ? 'YES' : 'NO'));
                 // Parse angka keluar
                 $kgKeluar  = isset($row[$idxKgKeluar])  ? (float)str_replace(',', '.', (string)$row[$idxKgKeluar]) : 0.0;
                 $cnsKeluar = isset($row[$idxCnsKeluar]) ? (int)preg_replace('/[^\d\-]/', '', (string)$row[$idxCnsKeluar]) : 0;
                 $krgKeluar = isset($row[$idxKrgKeluar]) ? (int)preg_replace('/[^\d\-]/', '', (string)$row[$idxKrgKeluar]) : 0;
 
-                // if ($kgKeluar < 0 && $cnsKeluar < 0) {
-                //     $msg = "Baris $line dilewati: kg_stok dan cns_stok harus > 0.";
-                //     log_message('warning', 'PengeluaranSementara: ' . $msg);
-                //     $errorLogs[] = $msg;
-                //     continue;
-                // }
-
-                if ($existing) {
-                    // 1) hitung saldo tersedia
-                    $avail = $this->computeAvailability($existing);
-
-                    // // 2) validasi cukup
-                    // if (empty($kgKeluar) && empty($cnsKeluar)) {
-                    //     $msg = "Baris $line: stok tidak cukup. Sisa KG={$avail['kg']}, CNS={$avail['cns']}, minta keluar KG={$kgKeluar}, CNS={$cnsKeluar}.";
-                    //     log_message('warning', 'PengeluaranSementara: ' . $msg);
-                    //     $errorLogs[] = $msg;
-                    //     continue;
-                    // }
-
-                    // 3) update akumulasi KELUAR (in_out += keluar)
-                    $this->stockModel->update($existing['id_stock'], [
-                        'kgs_in_out' => (float)($kgKeluar),
-                        'cns_in_out' => (int)  ($cnsKeluar),
-                        'krg_in_out' => (int)  ($krgKeluar),
-                    ]);
-                    $count++;
-                } else {
-                    $msg = "Baris $line: stok tidak ditemukan untuk key yang dinormalisasi.";
-                    log_message('warning', 'PengeluaranSementara: ' . $msg . ' Key=' . json_encode($stockKey));
-                    $errorLogs[] = $msg;
+                if (!$existing) {
+                    $pushErr('Stok tidak ditemukan (key normalisasi tidak match)', ['key' => $stockKey]);
                     continue;
                 }
+
+                // (Opsional) validasi angka negatif/aneh
+                // if ($kgKeluar < 0 || $cnsKeluar < 0 || $krgKeluar < 0) { ... }
+
+                // 1) hitung saldo tersedia
+                $avail = $this->computeAvailability($existing);
+
+                // 3) update akumulasi KELUAR (in_out += keluar) ATAU set stok_awal jika awal=0
+                if (isset($existing['kgs_stock_awal']) && (float)$existing['kgs_stock_awal'] > 0) {
+                    // Overwrite ke nilai keluar yang baru (sesuai kode asal); jika mau akumulatif: $existing['kgs_in_out'] + $kgKeluar
+                    $this->stockModel->update($existing['id_stock'], [
+                        'kgs_stock_awal' => (float)$kgKeluar,
+                        'cns_stock_awal' => (int)$cnsKeluar,
+                        'krg_stock_awal' => (int)$krgKeluar,
+                        'updated_at'     => date('Y-m-d H:i:s')
+                    ]);
+                    
+                } else {
+                    // Set stok awal jika awal masih 0
+                    $this->stockModel->update($existing['id_stock'], [
+                        'kgs_in_out' => (float)$kgKeluar,
+                        'cns_in_out' => (int)$cnsKeluar,
+                        'krg_in_out' => (int)$krgKeluar,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                }
+
+                $successCount++;
             } catch (\Throwable $e) {
-                log_message('error', 'PengeluaranSementara (baris ' . $line . '): ' . $e->getMessage());
-                $errorLogs[] = "Baris $line: " . $e->getMessage();
+                $pushErr('Exception: ' . $e->getMessage(), [
+                    'key'        => $stockKey ?? null,
+                    'row_sample' => array_slice($row, 0, 18)
+                ]);
+                continue;
             }
         }
 
         // Hapus file setelah diproses
         @unlink($path);
 
-        if (!empty($errorLogs)) {
+        if ($failedCount > 0) {
             return $this->response->setJSON([
-                'status'    => 'error',
-                'message'   => 'Sebagian/semua baris gagal diproses. Pengeluaran sementara berhasil diproses.' . $count,
-                'errorLogs' => $errorLogs
+                'status'         => 'error',
+                'message'        => "Sebagian/semua baris gagal diproses. Berhasil: {$successCount}, Gagal: {$failedCount}.",
+                'success_count'  => $successCount,
+                'failed_count'   => $failedCount,
+                'errorLogs'      => $errorLogs
             ]);
         }
 
+        // SUKSES PENUH → hanya tampilkan count sukses (tanpa errorLogs)
         return $this->response->setJSON([
-            'status'  => 'success',
-            'message' => 'Pengeluaran sementara berhasil diproses.',
-            'count'   => $count
+            'status' => 'success',
+            'count'  => $successCount,
+            'message' => "Pengeluaran sementara berhasil diproses ({$successCount} baris)."
         ]);
     }
+
 
     public function prosesImportPemasukan()
     {
