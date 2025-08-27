@@ -392,6 +392,7 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('outCelup/editBon/(:num)', 'CelupController::editBon/$1');
     $routes->post('outCelup/updateBon/(:num)', 'CelupController::updateBon/$1');
     $routes->delete('outCelup/deleteBon/(:num)', 'CelupController::deleteBon/$1');
+    $routes->get('outCelup/deleteKarung/(:num)', 'CelupController::deleteKarung/$1');
     // $routes->get('insertBon/(:num)', 'CelupController::insertBon/$1');
     $routes->get('createBon', 'CelupController::createBon');
     $routes->post('createBon/getItem/(:num)', 'CelupController::getItem/$1');

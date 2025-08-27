@@ -68,7 +68,7 @@
                                 <td class="text-center align-middle"><?= $out['no_surat_jalan'] ?></td>
                                 <td class="text-center align-middle"><?= $out['detail_sj'] ?></td>
                                 <td class="text-center align-middle">
-                                    <button class="btn bg-gradient-dark btn-detail" data-id="<?= $out['id_bon'] ?>" data-toggle="modal" data-target="#detailModal">Detail</button>
+                                    <button class="btn bg-gradient-dark btn-detail" data-id="<?= $out['id_bon'] ?>" data-id-celup="<?= $out['id_celup_list'] ?>" data-toggle="modal" data-target="#detailModal">Detail</button>
                                     <a href="<?= base_url($role . '/generate/' . $out['id_bon']) ?>" class="btn bg-gradient-info">Barcode</a>
                                 </td>
                             </tr>
@@ -132,7 +132,8 @@
         // Event listener untuk tombol detail
         $(document).on("click", ".btn-detail", function() {
             let id_bon = $(this).data("id");
-
+            let idCelup = $(this).data("id-celup");
+            console.log(idCelup);
             // Fetch data dari server
             $.ajax({
                 url: "<?= base_url($role . '/outCelup/getDetail/') ?>" + id_bon,
@@ -172,7 +173,7 @@
                     footerModal.append(`
                     <a type="button" href="<?= base_url($role . '/outCelup/editBon/') ?>${id_bon}" 
                         class="btn btn-warning btn-edit me-2">Edit</a>
-                    <button type="button" class="btn btn-danger btn-delete" data-id="${id_bon}">Delete</button>
+                    <button type="button" class="btn btn-danger btn-delete" data-id="${id_bon}" data-id-celup="${idCelup}">Delete</button>
                 `);
 
                     // Menampilkan modal setelah data di-load
@@ -189,6 +190,7 @@
     // Event listener untuk tombol delete (AJAX DELETE)
     $(document).on("click", ".btn-delete", function() {
         let id_bon = $(this).data("id");
+        let idCelup = $(this).data("id-celup");
 
         Swal.fire({
             title: "Apakah Anda yakin?",
@@ -202,7 +204,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: "<?= base_url($role . '/outCelup/deleteBon/') ?>" + id_bon,
+                    url: "<?= base_url($role . '/outCelup/deleteBon/') ?>" + id_bon + '?id_celup=' + encodeURIComponent(idCelup),
                     type: "DELETE",
                     success: function(response) {
                         Swal.fire({
