@@ -534,7 +534,7 @@ class GodController extends BaseController
     {
         $kgAwal   = (float)($row['kgs_stock_awal'] ?? 0);
         $kgKeluar = (float)($row['kgs_in_out']     ?? 0);  // akumulasi keluar
-        
+
 
         $cnsAwal   = (int)($row['cns_stock_awal'] ?? 0);
         $cnsKeluar = (int)($row['cns_in_out']     ?? 0);   // akumulasi keluar
@@ -695,7 +695,7 @@ class GodController extends BaseController
         if (!empty($errorLogs)) {
             return $this->response->setJSON([
                 'status'    => 'error',
-                'message'   => 'Sebagian/semua baris gagal diproses. Pengeluaran sementara berhasil diproses.' . $count ,
+                'message'   => 'Sebagian/semua baris gagal diproses. Pengeluaran sementara berhasil diproses.' . $count,
                 'errorLogs' => $errorLogs
             ]);
         }
@@ -838,7 +838,7 @@ class GodController extends BaseController
 
                 if ($orderRow) {
                     $idOrder = (int)$orderRow['id_order'];
-                    log_message('debug', "[{$batchId}] Row {row} master_order EXIST id={id}", ['row' => $rowNum, 'id' => $idOrder]);
+                    // log_message('debug', "[{$batchId}] Row {row} master_order EXIST id={id}", ['row' => $rowNum, 'id' => $idOrder]);
                 } else {
                     $this->masterOrderModel->insert([
                         'no_model'   => $noModel,
@@ -850,7 +850,7 @@ class GodController extends BaseController
                         'created_at' => date('Y-m-d H:i:s'),
                     ]);
                     $idOrder = (int)$this->masterOrderModel->insertID();
-                    log_message('info', "[{$batchId}] Row {row} master_order INSERT id={id}", ['row' => $rowNum, 'id' => $idOrder]);
+                    // log_message('info', "[{$batchId}] Row {row} master_order INSERT id={id}", ['row' => $rowNum, 'id' => $idOrder]);
                 }
 
                 // 2) Upsert master_material
@@ -863,7 +863,7 @@ class GodController extends BaseController
                         'jenis'      => null,
                         'ukuran'      => null,
                     ]);
-                    log_message('info', "[{$batchId}] Row {row} master_material INSERT item_type={it}", ['row' => $rowNum, 'it' => $itemType]);
+                    // log_message('info', "[{$batchId}] Row {row} master_material INSERT item_type={it}", ['row' => $rowNum, 'it' => $itemType]);
                 }
 
                 // 3) Upsert material
@@ -873,7 +873,7 @@ class GodController extends BaseController
                     ->where('kode_warna', $kodeWarna)
                     ->first();
 
-                if (!empty($material)) {
+                if (empty($material)) {
                     $this->materialModel->insert([
                         'id_order'    => $idOrder,
                         'style_size'  => '',
@@ -890,18 +890,26 @@ class GodController extends BaseController
                         'admin'       => $admin,
                         'created_at'  => date('Y-m-d H:i:s'),
                     ]);
-                    log_message(
-                        'info',
-                        "[{$batchId}] Row {row} material INSERT (no prev) it={it} kw={kw}",
-                        ['row' => $rowNum, 'it' => $itemType, 'kw' => $kodeWarna]
-                    );
+
+                    $id_material = (int)$this->materialModel->insertID();
+
+                    // 3) Upsert material
+                    $material = $this->materialModel
+                        ->where('id_material', $id_material)
+                        ->first();
+
+                    // log_message(
+                    //     'info',
+                    //     "[{$batchId}] Row {row} material INSERT (no prev) it={it} kw={kw}",
+                    //     ['row' => $rowNum, 'it' => $itemType, 'kw' => $kodeWarna]
+                    // );
                 }
 
                 // 4) other_bon
                 $this->otherBonModel->insert([
                     'no_model'       => $noModel,
-                    'item_type'      => $itemType,
-                    'kode_warna'     => $kodeWarna,
+                    'item_type'      => $material['item_type'],
+                    'kode_warna'     => $material['kode_warna'],
                     // 'warna'          => $warna ?: null,
                     'warna'          => $material['color'],
                     'tgl_datang'     => date('Y-m-d'),
@@ -918,7 +926,7 @@ class GodController extends BaseController
                     log_message('error', "[{$batchId}] Row {row} other_bon INSERT gagal dbErr={err}", ['row' => $rowNum, 'err' => json_encode($dbErr)]);
                     throw new \RuntimeException('Gagal insert other_bon');
                 }
-                log_message('debug', "[{$batchId}] Row {row} other_bon id={id}", ['row' => $rowNum, 'id' => $id_other_in]);
+                // log_message('debug', "[{$batchId}] Row {row} other_bon id={id}", ['row' => $rowNum, 'id' => $id_other_in]);
 
                 // 5) out_celup
                 $this->outCelupModel->insert([
@@ -945,8 +953,8 @@ class GodController extends BaseController
                 // 6) stock
                 $existingStock = $this->stockModel
                     ->where('no_model', $noModel)
-                    ->where('item_type', $itemType)
-                    ->where('kode_warna', $kodeWarna)
+                    ->where('item_type', $material['item_type'])
+                    ->where('kode_warna', $material['kode_warna'])
                     ->where('nama_cluster', $namaCluster)
                     ->where('lot_stock', $lot)
                     ->first();
@@ -964,16 +972,16 @@ class GodController extends BaseController
                     ];
                     $this->stockModel->update($existingStock['id_stock'], $upd);
                     $idStok = (int)$existingStock['id_stock'];
-                    log_message(
-                        'debug',
-                        "[{$batchId}] Row {row} stock UPDATE id={id} kgs+={kgs} cns+={cns} krg+={krg}",
-                        ['row' => $rowNum, 'id' => $idStok, 'kgs' => $kgsMasuk, 'cns' => $cnsMasuk, 'krg' => $krgMasuk]
-                    );
+                    // log_message(
+                    //     'debug',
+                    //     "[{$batchId}] Row {row} stock UPDATE id={id} kgs+={kgs} cns+={cns} krg+={krg}",
+                    //     ['row' => $rowNum, 'id' => $idStok, 'kgs' => $kgsMasuk, 'cns' => $cnsMasuk, 'krg' => $krgMasuk]
+                    // );
                 } else {
                     $this->stockModel->insert([
                         'no_model'     => $noModel,
-                        'item_type'    => $itemType,
-                        'kode_warna'   => $kodeWarna,
+                        'item_type'    => $material['item_type'],
+                        'kode_warna'   => $material['kode_warna'],
                         'warna'        => $material['color'],
                         'nama_cluster' => $namaCluster,
                         'lot_stock'    => '',
@@ -993,7 +1001,7 @@ class GodController extends BaseController
                         log_message('error', "[{$batchId}] Row {row} stock INSERT gagal dbErr={err}", ['row' => $rowNum, 'err' => json_encode($dbErr)]);
                         throw new \RuntimeException('Gagal insert stock');
                     }
-                    log_message('debug', "[{$batchId}] Row {row} stock INSERT id={id}", ['row' => $rowNum, 'id' => $idStok]);
+                    // log_message('debug', "[{$batchId}] Row {row} stock INSERT id={id}", ['row' => $rowNum, 'id' => $idStok]);
                 }
 
                 // 7) pemasukan
@@ -1023,11 +1031,11 @@ class GodController extends BaseController
 
                 $db->transCommit();
                 $success++;
-                log_message(
-                    'info',
-                    "[{$batchId}] Row {row} COMMIT ok (pemasukan_id={pid}, stock_id={sid}, out_celup_id={oid}, other_bon_id={bid})",
-                    ['row' => $rowNum, 'pid' => $idPemasukan, 'sid' => $idStok, 'oid' => $id_out_celup, 'bid' => $id_other_in]
-                );
+                // log_message(
+                //     'info',
+                //     "[{$batchId}] Row {row} COMMIT ok (pemasukan_id={pid}, stock_id={sid}, out_celup_id={oid}, other_bon_id={bid})",
+                //     ['row' => $rowNum, 'pid' => $idPemasukan, 'sid' => $idStok, 'oid' => $id_out_celup, 'bid' => $id_other_in]
+                // );
             } catch (\Throwable $e) {
                 if ($db->transStatus()) {
                     $db->transRollback();
@@ -1043,9 +1051,9 @@ class GodController extends BaseController
                         'msg' => $e->getMessage(),
                         'ctx' => json_encode([
                             'no_model' => $noModel,
-                            'item_type' => $itemType,
-                            'kode_warna' => $kodeWarna,
-                            'warna' => $material['color'] ?? '',
+                            'item_type' => $material['item_type'],
+                            'kode_warna' => $material['kode_warna'],
+                            'warna' => $material['color'],
                             'cluster' => $namaCluster,
                             'lot' => $lot,
                             'kgs' => $kgsMasuk,
@@ -1059,7 +1067,7 @@ class GodController extends BaseController
 
         if ($success > 0 && empty($failed)) {
             session()->setFlashdata('success', "Import selesai. Berhasil: {$success} baris. Batch={$batchId}");
-            log_message('info', "[{$batchId}] DONE success={s} failed=0", ['s' => $success]);
+            // log_message('info', "[{$batchId}] DONE success={s} failed=0", ['s' => $success]);
         } else {
             $msg = "Import selesai parsial. Berhasil: {$success} baris; Gagal: " . count($failed) . " baris. Batch={$batchId}";
             if (!empty($failed)) {

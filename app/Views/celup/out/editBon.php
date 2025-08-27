@@ -135,36 +135,55 @@
                             <hr>
                             <h5 class="mb-3">Data Karung</h5>
                             <?php foreach ($data['karung'] as $karungIndex => $karung): ?>
-                                <div class="row mb-3 ms-1 me-1 p-3 border rounded bg-light">
+                                <!-- Tambahkan class karung-row dan id unik untuk setiap karung -->
+                                <div class="row mb-3 ms-1 me-1 p-3 border rounded bg-light karung-row" id="karung-row-<?= $karung['id_out_celup'] ?>">
                                     <div class="col-12 mb-2">
                                         <small class="text-muted">Karung #<?= $karungIndex + 1 ?></small>
                                     </div>
 
                                     <input type="hidden" name="id_out_celup[<?= $index ?>][]" value="<?= $karung['id_out_celup'] ?>">
 
-                                    <div class="col-md-4 col-lg-2 mb-2">
+                                    <div class="col-md-2 mb-2">
                                         <label for="">No Karung</label>
                                         <input type="number" name="no_karung[<?= $index ?>][]" value="<?= $karung['no_karung'] ?>" class="form-control" readonly>
                                     </div>
-                                    <div class="col-md-4 col-lg-2 mb-2">
+                                    <div class="col-md-2 mb-2">
                                         <label for="">GW Kirim</label>
-                                        <input type="float" name="gw_kirim[<?= $index ?>][]" value="<?= $karung['gw_kirim'] ?>" class="form-control">
+                                        <input type="text" name="gw_kirim[<?= $index ?>][]" value="<?= $karung['gw_kirim'] ?>" class="form-control">
                                     </div>
-                                    <div class="col-md-4 col-lg-2 mb-2">
+                                    <div class="col-md-2 mb-2">
                                         <label for="">Kgs Kirim</label>
-                                        <input type="float" name="kgs_kirim[<?= $index ?>][]" value="<?= esc($karung['kgs_kirim']) ?>" class="form-control">
+                                        <input type="text" name="kgs_kirim[<?= $index ?>][]" value="<?= esc($karung['kgs_kirim']) ?>" class="form-control">
                                     </div>
-                                    <div class="col-md-4 col-lg-3 mb-2">
+                                    <div class="col-md-2 mb-2">
                                         <label for="">Cones Kirim</label>
-                                        <input type="float" name="cones_kirim[<?= $index ?>][]" value="<?= $karung['cones_kirim'] ?>" class="form-control">
+                                        <input type="text" name="cones_kirim[<?= $index ?>][]" value="<?= $karung['cones_kirim'] ?>" class="form-control">
                                     </div>
-                                    <div class="col-md-4 col-lg-3 mb-2">
+                                    <div class="col-md-2 mb-2">
                                         <label for="">Lot Kirim</label>
                                         <input type="text" name="lot_kirim[<?= $index ?>][]" value="<?= $karung['lot_kirim'] ?>" class="form-control">
                                     </div>
+
+                                    <?php $karungCount = is_array($data['karung']) ? count($data['karung']) : 0; ?>
+                                    <?php if ($karungCount > 1): ?>
+                                        <div class="col-md-2 mb-2 text-center">
+                                            <label for="">Aksi</label><br>
+                                            <!-- tombol tanpa id duplikat, pakai class .btn-delete -->
+                                            <button type="button"
+                                                class="btn btn-danger btn-md w-100 btn-delete"
+                                                data-id="<?= $karung['id_out_celup'] ?>"
+                                                data-id-bon="<?= $karung['id_bon'] ?>"
+                                                data-no="<?= esc($karung['no_karung']) ?>">
+                                                <i class="fas fa-trash me-1"></i>Hapus
+                                            </button>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="col-md-2 mb-2 text-center"></div>
+                                    <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
+
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -181,7 +200,7 @@
             <div class="col-12">
                 <div class="text-center">
                     <button type="submit" class="btn btn-info btn-lg px-5">
-                        <i class="fas fa-save me-2"></i>Save Changes
+                        <i class="fas fa-save me-2"></i>Simpan Perubahan
                     </button>
                 </div>
             </div>
@@ -194,5 +213,58 @@
 <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.all.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // Pastikan jQuery & Swal sudah ter-include sebelum ini script dijalankan.
+
+    function updateRemoveButtons() {
+        // Untuk setiap card (atau container item) cek berapa .karung-row di dalamnya
+        document.querySelectorAll('.card').forEach(function(card) {
+            const karungs = card.querySelectorAll('.karung-row');
+            const deleteButtons = card.querySelectorAll('.btn-delete');
+
+            if (karungs.length <= 1) {
+                // sembunyikan tombol hapus
+                deleteButtons.forEach(btn => btn.style.display = 'none');
+            } else {
+                // tampilkan tombol hapus
+                deleteButtons.forEach(btn => btn.style.display = '');
+            }
+        });
+
+        // Jika tidak pakai struktur .card, atau karung berada di luar .card,
+        // kamu bisa hitung global:
+        // const totalKarungs = document.querySelectorAll('.karung-row').length;
+    }
+
+    // Jalankan saat DOM ready (jQuery)
+    $(document).ready(function() {
+        updateRemoveButtons();
+    });
+
+    // Delegated event handler: lebih aman daripada mengikat ke id yang duplikat
+    $(document).on('click', '.btn-delete', function() {
+        const idOut = $(this).data('id');
+        const idBon = $(this).data('id-bon');
+        const noKarung = $(this).data('no') || '';
+        const confirmMsg = noKarung ? `Yakin hapus karung #${noKarung}?` : 'Yakin hapus karung ini?';
+
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data yang dihapus tidak dapat dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // redirect ke controller delete (GET)
+                window.location = '<?= base_url($role . "/outCelup/deleteKarung") ?>/' + idOut + '?id_bon=' + encodeURIComponent(idBon);
+            }
+        });
+    });
+</script>
+
 
 <?php $this->endSection(); ?>
