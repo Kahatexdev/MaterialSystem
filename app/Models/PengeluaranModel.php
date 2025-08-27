@@ -647,4 +647,27 @@ class PengeluaranModel extends Model
         return $builder->groupBy(['master_order.buyer', 'master_material.jenis'])
             ->findAll();
     }
+
+    public function getDataDipinjam($key, $jenis = null)
+    {
+        $builder = $this->db->table('pengeluaran p')
+            ->select('s.no_model as no_model_old, s.item_type, s.kode_warna, s.warna, p.kgs_out, p.cns_out, p.lot_out, p.nama_cluster, mo.no_model as no_model_new, p.admin, p.area_out, pm.tgl_pakai, pm.po_tambahan, hs.keterangan')
+            ->join('stock s', 's.id_stock = p.id_stock', 'left')
+            ->join('history_stock hs', 's.id_stock = hs.id_stock_old', 'left')
+            ->join('out_celup oc', 'p.id_out_celup = oc.id_out_celup', 'left')
+            ->join('pemesanan pm', 'p.id_total_pemesanan = pm.id_total_pemesanan', 'left')
+            ->join('material m', 'pm.id_material = pm.id_material', 'left')
+            ->join('master_order mo', 'm.id_order = mo.id_order', 'left')
+            ->join('master_material mm ', 'mm.item_type = s.item_type', 'left')
+            ->where('s.no_model', $key)
+            ->where('hs.keterangan', 'Pinjam Order');
+
+        if (!empty($jenis)) {
+            $builder->where('mm.jenis', $jenis);
+        }
+        return $builder->groupBy('hs.id_history_pindah')
+            ->orderBy('s.no_model', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
 }

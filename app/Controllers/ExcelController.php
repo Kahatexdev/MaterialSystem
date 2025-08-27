@@ -2061,6 +2061,8 @@ class ExcelController extends BaseController
         $dataPakaiLain = $this->otherOutModel->getPakaiLain($key, $jenis);
         $dataReturStock = $this->returModel->getDataReturStock($key, $jenis);
         $dataReturTitip = $this->returModel->getDataReturTitip($key, $jenis);
+        $dataOrderDipinjam = $this->pengeluaranModel->getDataDipinjam($key, $jenis);
+        $dataOrderDipindah = $this->historyStock->getDataDipindah($key, $jenis);
 
         // dd($key, $jenis, $dataDatangSolid, $dataPlusDatangSolid);
 
@@ -2978,7 +2980,7 @@ class ExcelController extends BaseController
                 $newSheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 // Header
-                $headerReturStock = ['NO', 'NO MODEL', 'ITEM TYPE', 'KODE WARNA', 'WARNA', 'AREA', 'TGL RETUR', 'NAMA CLUSTER', 'QTY RETUR', 'CONES RETUR', 'KRG/PACK RETUR', 'LOT RETUR', 'KATEGORI', 'KET AREA', 'KET GBN'];
+                $headerReturStock = ['NO', 'NO MODEL', 'ITEM TYPE', 'KODE WARNA', 'WARNA', 'AREA', 'TGL PAKAI', 'TAMBAHAN', 'NAMA CLUSTER', 'QTY PAKAI', 'CONES PAKAI', 'LOT PAKAI', 'KET GBN', 'ADMIN', 'NOTE'];
                 $col = 'A';
                 foreach ($headerReturStock as $header) {
                     $newSheet->setCellValue($col . '3', $header);
@@ -2997,22 +2999,22 @@ class ExcelController extends BaseController
 
                 $row = 4;
                 $no = 1;
-                foreach ($dataReturTitip as $item) {
+                foreach ($dataOrderDipinjam as $item) {
                     $newSheet->setCellValue('A' . $row, $no++);
-                    $newSheet->setCellValue('B' . $row, $item['no_model'] ?: '-');
+                    $newSheet->setCellValue('B' . $row, $item['no_model_new'] ?: '-');
                     $newSheet->setCellValue('C' . $row, $item['item_type'] ?: '-');
                     $newSheet->setCellValue('D' . $row, $item['kode_warna'] ?: '-');
                     $newSheet->setCellValue('E' . $row, $item['warna'] ?: '-');
-                    $newSheet->setCellValue('F' . $row, $item['area_retur']);
-                    $newSheet->setCellValue('G' . $row, $item['tgl_retur'] ?: '-');
-                    $newSheet->setCellValue('H' . $row, $item['nama_cluster']);
-                    $newSheet->setCellValue('I' . $row, isset($item['kgs_retur']) ? number_format($item['kgs_retur'], 2, '.', '') : 0);
-                    $newSheet->setCellValue('J' . $row, $item['cns_retur'] ?: 0);
-                    $newSheet->setCellValue('K' . $row, $item['krg_retur'] ?: 0);
-                    $newSheet->setCellValue('L' . $row, $item['lot_retur'] ?: '-');
-                    $newSheet->setCellValue('M' . $row, $item['kategori'] ?: '-');
-                    $newSheet->setCellValue('N' . $row, $item['keterangan_area'] ?: '-');
-                    $newSheet->setCellValue('O' . $row, $item['keterangan_gbn'] ?: '-');
+                    $newSheet->setCellValue('F' . $row, $item['area_out']);
+                    $newSheet->setCellValue('G' . $row, $item['tgl_pakai'] ?: '-');
+                    $newSheet->setCellValue('H' . $row, $item['po_tambahan'] == '1' ? 'YA' : '');
+                    $newSheet->setCellValue('I' . $row, $item['nama_cluster']);
+                    $newSheet->setCellValue('J' . $row, isset($item['kgs_out']) ? number_format($item['kgs_out'], 2, '.', '') : 0);
+                    $newSheet->setCellValue('K' . $row, $item['cns_out'] ?: 0);
+                    $newSheet->setCellValue('L' . $row, $item['lot_out'] ?: 0);
+                    $newSheet->setCellValue('M' . $row, 'Pinjem dari order ' . $item['no_model_old'] . ' kode ' . $item['kode_warna'] . ' ' . $item['kgs_out'] . ' kg');
+                    $newSheet->setCellValue('N' . $row, $item['admin'] ?: '-');
+                    $newSheet->setCellValue('O' . $row, $item['keterangan'] . ' dari ' . $item['no_model_old'] . ' kode ' . $item['kode_warna'] . ' untuk ' . $item['no_model_new']);
                     $row++;
                 }
 
@@ -3032,7 +3034,71 @@ class ExcelController extends BaseController
 
                 $footerRow = $lastRow + 2;
                 $newSheet->mergeCells("A{$footerRow}:O{$footerRow}");
-                $newSheet->setCellValue("A{$footerRow}", 'REPORT RETUR TITIP');
+                $newSheet->setCellValue("A{$footerRow}", 'REPORT ORDER DIPINJAM');
+                $newSheet->getStyle("A{$footerRow}")->getFont()->setBold(true)->setSize(10);
+                $newSheet->getStyle("A{$footerRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            }
+
+            // ========================= PINDAH ORDER =========================
+            if ($name === 'PINDAH ORDER ' . $key) {
+                // Judul
+                $newSheet->mergeCells('A1:K1');
+                $newSheet->setCellValue('A1', 'REPORT PINDAH ORDER ' . $key . ' KE ORDER LAIN');
+                $newSheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+                $newSheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                // Header
+                $headerReturStock = ['NO', 'NO MODEL', 'DELIVERY', 'ITEM TYPE', 'KODE WARNA', 'WARNA', 'QTY', 'CONES', 'LOT', 'CLUSTER', 'KETERANGAN'];
+                $col = 'A';
+                foreach ($headerReturStock as $header) {
+                    $newSheet->setCellValue($col . '3', $header);
+                    $newSheet->getStyle($col . '3')->getFont()->setBold(true);
+                    $col++;
+                }
+
+                $newSheet->getStyle('A3:K3')->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
+                ]);
+
+                $row = 4;
+                $no = 1;
+                foreach ($dataOrderDipindah as $item) {
+                    $newSheet->setCellValue('A' . $row, $no++);
+                    $newSheet->setCellValue('B' . $row, $item['no_model_old'] ?: '-');
+                    $newSheet->setCellValue('C' . $row, $delivery[0]['delivery'] ?: '-');
+                    $newSheet->setCellValue('D' . $row, $item['item_type'] ?: '-');
+                    $newSheet->setCellValue('E' . $row, $item['kode_warna'] ?: '-');
+                    $newSheet->setCellValue('F' . $row, $item['warna'] ?: '-');
+                    $newSheet->setCellValue('G' . $row, $item['kgs']);
+                    $newSheet->setCellValue('H' . $row, $item['cns']);
+                    $newSheet->setCellValue('I' . $row, $item['lot']);
+                    $newSheet->setCellValue('J' . $row, $item['nama_cluster']);
+                    $newSheet->setCellValue('K' . $row, $item['keterangan'] . ' dari ' . $item['no_model_old'] . ' kode ' . $item['kode_warna'] . ' untuk ' . $item['no_model_new']);
+                    $row++;
+                }
+
+                $lastRow = $row - 1;
+                $newSheet->getStyle("A3:K{$lastRow}")->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => 'FF000000'],
+                        ],
+                    ],
+                ]);
+
+                foreach (range('A', 'K') as $col) {
+                    $newSheet->getColumnDimension($col)->setAutoSize(true);
+                }
+
+                $footerRow = $lastRow + 2;
+                $newSheet->mergeCells("A{$footerRow}:O{$footerRow}");
+                $newSheet->setCellValue("A{$footerRow}", 'REPORT HISTORY PINDAH ORDER');
                 $newSheet->getStyle("A{$footerRow}")->getFont()->setBold(true)->setSize(10);
                 $newSheet->getStyle("A{$footerRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             }
