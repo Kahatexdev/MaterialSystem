@@ -147,6 +147,7 @@
                     <thead>
                         <tr>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Terima</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Foll Up</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Order</th>
@@ -266,6 +267,7 @@
                         $.each(response, function(index, item) {
                             rows.push([
                                 index + 1,
+                                item.tgl_masuk || '',
                                 item.foll_up || '',
                                 item.no_model || '',
                                 item.no_order || '',
@@ -276,8 +278,8 @@
                                 item.item_type || '',
                                 item.kode_warna || '',
                                 item.warna || '',
-                                (item.kg_po ? parseFloat(item.kg_po).toFixed(2) : ''),
-                                item.tgl_masuk || '',
+                                (item.kgs_material ? parseFloat(item.kgs_material).toFixed(2) : ''),
+                                item.tgl_datang || '',
                                 (item.kgs_kirim ? parseFloat(item.kgs_kirim).toFixed(2) : ''),
                                 item.cones_kirim || '',
                                 item.lot_kirim || '',

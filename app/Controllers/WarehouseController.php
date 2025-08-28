@@ -1752,7 +1752,7 @@ class WarehouseController extends BaseController
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
         $data = $this->pemasukanModel->getFilterDatangBenang($key, $tanggalAwal, $tanggalAkhir);
-
+        // dd($data);
         return $this->response->setJSON($data);
     }
 
