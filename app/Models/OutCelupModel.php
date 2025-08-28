@@ -234,6 +234,7 @@ class OutCelupModel extends Model
             ->where('out_celup.no_model', $no_model)
             ->where('schedule_celup.item_type', $item_type)
             ->where('schedule_celup.kode_warna', $kode_warna)
+            ->where('out_celup.no_karung IS NOT NULL')
             ->groupBy('schedule_celup.warna')
             ->distinct()
             ->get()
