@@ -132,6 +132,14 @@
             </div>
         </form>
     </div>
+    <!-- card loading -->
+    <div class="card loading" id="loadingCard" style="display: none;">
+        <div class="card-body text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
 
     <div id="result"></div>
     <!-- Modal pindah order -->
@@ -326,6 +334,20 @@
                 data: {
                     noModel,
                     warna
+                },
+                beforeSend: function() {
+                    $('#loadingCard').show();
+                    // disable btn
+                    $('#filter_data').prop('disabled', true);
+                    $('#reset_data').prop('disabled', true);
+                    $('#export_excel').prop('disabled', true);
+                },
+                complete: function() {
+                    $('#loadingCard').hide();
+                    // enable btn
+                    $('#filter_data').prop('disabled', false);
+                    $('#reset_data').prop('disabled', false);
+                    $('#export_excel').prop('disabled', false);
                 },
                 success: function(response) {
                     let output = "";
