@@ -55,17 +55,18 @@
             </div>
         </div>
     </div>
-    <!-- card loading -->
-    <div class="card loading" id="loadingCard" style="display: none;">
-        <div class="card-body text-center">
-            <div class="spinner-border" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
-    </div>
+
     <!-- Tabel Data -->
     <div class="card mt-4">
         <div class="card-body">
+            <!-- card loading -->
+            <div class="card loading" id="loadingCard" style="display: none;">
+                <div class="card-body text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>

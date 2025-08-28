@@ -199,11 +199,15 @@
                     $("#loadingCard").show(); // Tampilkan loading
                     // disable btn filter
                     $("#btnSearch").prop("disabled", true);
+                    $('#btnReset').prop('disabled', true);
+                    $('#btnExport').prop('disabled', true);
                 },
                 complete: function() {
                     $("#loadingCard").hide(); // Sembunyikan loading setelah selesai
                     // enable btn filter
                     $("#btnSearch").prop("disabled", false);
+                    $('#btnReset').prop('disabled', false);
+                    $('#btnExport').prop('disabled', false);
                 },
                 success: function(response) {
                     dataTable.clear().draw();

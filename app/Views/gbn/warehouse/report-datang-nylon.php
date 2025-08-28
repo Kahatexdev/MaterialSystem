@@ -239,7 +239,6 @@
             $('#progressText').text(percent + '%');
         }
 
-
         function loadData() {
             let key = $('input[type="text"]').val().trim();
             let tanggal_awal = $('input[type="date"]').eq(0).val().trim();
