@@ -1026,6 +1026,7 @@ class PdfController extends BaseController
 
 
             $counter = [];
+            $missing = [];
             $prevNoModel = null; // Variabel untuk menyimpan no_model sebelumnya
             $prevItemType = null; // Variabel untuk menyimpan item_type sebelumnya
             $prevKodeWarna = null; // Variabel untuk menyimpan kode_warna sebelumnya
@@ -1035,6 +1036,16 @@ class PdfController extends BaseController
 
             foreach ($dataBon['groupedDetails'] as $bon) {
                 $getDeskripsi = $this->masterMaterialModel->where('item_type', $bon['item_type'])->select('deskripsi')->first();
+                if (!$getDeskripsi || empty($getDeskripsi['deskripsi'] ?? '')) {
+                    $missing[] = $bon['item_type'];
+                }
+                if (!empty($missing)) {
+                    $msg = 'Tidak Ada Item Type: ' . implode(', ', $missing);
+                    session()->setFlashdata('deskripsi_missing', $msg);
+
+                    // hentikan proses selanjutnya dan kembalikan user
+                    return redirect()->back()->with('error', $msg);
+                }
 
                 $pdf->SetFont('Arial', '', 6);
                 // Mengelompokkan berdasarkan no_model, item_type, dan kode_warna
