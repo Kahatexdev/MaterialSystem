@@ -362,8 +362,9 @@ class OutCelupModel extends Model
     public function getNoKarung($id)
     {
         // Query ambil no karung
-        return $this->select('out_celup.no_karung, out_celup.gw_kirim, out_celup.kgs_kirim, out_celup.cones_kirim')
+        return $this->select('out_celup.no_karung, out_celup.gw_kirim, out_celup.kgs_kirim, out_celup.cones_kirim, bon_celup.no_surat_jalan')
             ->join('schedule_celup', 'schedule_celup.id_celup=out_celup.id_celup', 'left')
+            ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
             ->where('out_celup.no_model', $id['no_model'])
             ->where('schedule_celup.item_type', $id['item_type'])
             ->where('schedule_celup.kode_warna', $id['kode_warna'])

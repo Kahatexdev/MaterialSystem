@@ -276,7 +276,7 @@
                             <th class="sticky text-left align-middle" colspan="2">NAMA LANGGANAN</th>
                             <th class="sticky text-left align-middle" colspan="3">KAOS KAKI</th>
                             <th class="sticky text-left align-middle" colspan="6">NO SURAT JALAN : <?= $dataBon['no_surat_jalan'] ?></th>
-                            <th class="sticky text-left align-middle" colspan="4">TANGGAL : <?= $dataBon['tgl_datang'] ?></th>
+                            <th class="sticky text-left align-middle" colspan="4">TANGGAL : <?= date('d-m-Y', strtotime($dataBon['tgl_datang'])) ?></th>
                         </tr>
                         <tr>
                             <th class="sticky text-center align-middle" rowspan="2">NO PO</th>

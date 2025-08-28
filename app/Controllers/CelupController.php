@@ -520,11 +520,14 @@ class CelupController extends BaseController
     public function saveBon()
     {
         $data = $this->request->getPost();
-        // dd($data);
+        $tglDatang = $data['tgl_datang'];
+        list($d, $m, $y) = explode('-', $tglDatang);
+        $tglDatang = $y . '-' . $m . '-' . $d;
+
         $saveDataBon = [
             'detail_sj' => $data['detail_sj'],
             'no_surat_jalan' => $data['no_surat_jalan'],
-            'tgl_datang' => $data['tgl_datang'],
+            'tgl_datang' => $tglDatang,
             'admin' => session()->get('username'),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => '',

@@ -724,7 +724,7 @@
                         $karungSelect.empty().append('<option value="">Pilih No Karung</option>');
                         if (response.data && response.data.length > 0) {
                             $.each(response.data, function(index, k) {
-                                $karungSelect.append('<option value="' + k.no_karung + '">' + k.no_karung + ' (Gw:' + k.gw_kirim + ' / Kgs:' + k.kgs_kirim + ' / Cns:' + k.cones_kirim + ')</option>');
+                                $karungSelect.append('<option value="' + k.no_karung + '">' + k.no_karung + ' (Gw:' + k.gw_kirim + ' / Kgs:' + k.kgs_kirim + ' / Cns:' + k.cones_kirim + ' / SJ:' + k.no_surat_jalan + ')</option>');
                             });
 
                         } else {
