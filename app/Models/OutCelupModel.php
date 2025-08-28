@@ -367,7 +367,9 @@ class OutCelupModel extends Model
             ->where('schedule_celup.item_type', $id['item_type'])
             ->where('schedule_celup.kode_warna', $id['kode_warna'])
             ->where('out_celup.lot_kirim', $id['lot'])
+            ->where('out_celup.no_karung IS NOT NULL')
             ->groupBy('out_celup.id_out_celup')
+            ->orderBy('out_celup.id_bon, out_celup.no_karung', 'ASC')
             ->get()->getResultArray();
 
         return $result;
