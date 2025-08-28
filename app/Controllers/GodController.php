@@ -594,9 +594,27 @@ class GodController extends BaseController
         $krgAwal   = (int)($row['krg_stock_awal'] ?? 0);
         $krgKeluar = (int)($row['krg_in_out']     ?? 0);   // akumulasi keluar
 
-        $availKg  = max(0.0, $kgAwal  - $kgKeluar);
-        $availCns = max(0,   $cnsAwal - $cnsKeluar);
-        $availKrg = max(0,   $krgAwal - $krgKeluar);
+        if (!empty($row['kgs_stock_awal']) && (float)$row['kgs_stock_awal'] > 0) {
+            $availKg = (float)$row['kgs_stock_awal'];
+        } elseif (!empty($row['kgs_in_out']) && (float)$row['kgs_in_out'] > 0) {
+            $availKg = (float)$row['kgs_in_out'];
+        } else {
+            $availKg = 0.0;
+        }
+        if (!empty($row['cns_stock_awal']) && (int)$row['cns_stock_awal'] > 0) {
+            $availCns = (int)$row['cns_stock_awal'];
+        } elseif (!empty($row['cns_in_out']) && (int)$row['cns_in_out'] > 0) {
+            $availCns = (int)$row['cns_in_out'];
+        } else {
+            $availCns = 0;
+        }
+        if (!empty($row['krg_stock_awal']) && (int)$row['krg_stock_awal'] > 0) {
+            $availKrg = (int)$row['krg_stock_awal'];
+        } elseif (!empty($row['krg_in_out']) && (int)$row['krg_in_out'] > 0) {
+            $availKrg = (int)$row['krg_in_out'];
+        } else {
+            $availKrg = 0;
+        }
 
         return ['kg' => $availKg, 'cns' => $availCns, 'krg' => $availKrg];
     }
@@ -897,7 +915,7 @@ class GodController extends BaseController
                 $avail = $this->computeAvailability($existing);
 
                 // 3) update akumulasi KELUAR (in_out += keluar) ATAU set stok_awal jika awal=0
-                if (isset($existing['kgs_stock_awal']) && (float)$existing['kgs_stock_awal'] > 0) {
+                if (isset($existing['kgs_stock_awal']) && (float)$existing['kgs_stock_awal'] > 0 && $existing['cns_stock_awal'] > 0) {
                     // Overwrite ke nilai keluar yang baru (sesuai kode asal); jika mau akumulatif: $existing['kgs_in_out'] + $kgKeluar
                     $this->stockModel->update($existing['id_stock'], [
                         'kgs_stock_awal' => (float)$kgKeluar,
@@ -905,8 +923,8 @@ class GodController extends BaseController
                         'krg_stock_awal' => (int)$krgKeluar,
                         'updated_at'     => date('Y-m-d H:i:s')
                     ]);
-                    
-                } else {
+
+                } else if (isset($existing['kgs_in_out']) && (float)$existing['kgs_in_out'] > 0 && $existing['cns_in_out'] > 0) {
                     // Set stok awal jika awal masih 0
                     $this->stockModel->update($existing['id_stock'], [
                         'kgs_in_out' => (float)$kgKeluar,
@@ -914,6 +932,8 @@ class GodController extends BaseController
                         'krg_in_out' => (int)$krgKeluar,
                         'updated_at' => date('Y-m-d H:i:s')
                     ]);
+                } else {
+                    continue; // dilewati jika tidak ada stok awal maupun in_out
                 }
 
                 $successCount++;
