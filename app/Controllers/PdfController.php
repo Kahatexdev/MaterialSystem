@@ -1307,7 +1307,7 @@ class PdfController extends BaseController
                 $pdf->Cell(18, 3, ($key == "KETERANGAN :") ? $key : '', 0, 0, 'L'); // Kolom pertama (key)
                 $pdf->Cell(37, 3, $value, 0, 0, 'L'); // Kolom kedua (value)
                 $pdf->Cell(72, 3, '', 0, 0, 'L'); // Kosong
-                $pdf->Cell(17, 3, $key === 'KETERANGAN :' ? 'PENGIRIM' : ($key === 4 ? $detailBon[0]['admin'] : ''), 0, 0, 'C');
+                $pdf->Cell(17, 3, $key === 'KETERANGAN :' ? 'PENGIRIM' : ($key === 4 ? strtoupper($detailBon[0]['admin']) : ''), 0, 0, 'C');
                 $pdf->Cell(23, 3, '', 0, 0, 'L'); // Kosong
                 $pdf->Cell(17, 3, $key === 'KETERANGAN :' ? 'PENERIMA' : '', 0, 0, 'C'); // Hanya baris pertama ada "PENERIMA"
                 $pdf->Cell(18, 3, '', 0, 1, 'L'); // Kolom terakhir kosong
