@@ -333,7 +333,10 @@
                             <div class="col-6">
                                 <div class="form-group">
                                     <label for=""> No Karung:</label>
-                                    <input type="number" class="form-control" id="no_karung" name="no_karung" value="" required>
+                                    <!-- <input type="number" class="form-control" id="no_karung" name="no_karung" value="" required> -->
+                                    <select class="form-control no-karung" id="no_karung" name="no_karung" required>
+                                        <option value="">Pilih No Karung</option>
+                                    </select>
                                     <input type="hidden" id="id_out_celup" name="id_out_celup" value="">
                                 </div>
                             </div>
@@ -341,18 +344,24 @@
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
-                                    <label for=""> Kgs Kirim:</label>
+                                    <label for=""> Gw:</label>
+                                    <input type="number" class="form-control" name="gw_kirim" value="" readonly>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for=""> Kgs:</label>
                                     <input type="number" class="form-control" name="kgs_kirim" value="" readonly>
                                 </div>
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
                                     <label for="">Cones:</label>
                                     <input type="number" class="form-control" name="cns_kirim" value="" readonly>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
                                     <label for="">Cluster</label>
@@ -361,7 +370,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-6">
+                            <div class="col-12">
                                 <div class="form-group">
                                     <label for="">Sisa Kapasitas</label>
                                     <input type="number" class="form-control" name="sisa_kapasitas" id="sisa_kapasitas" value="" readonly>
@@ -674,6 +683,49 @@
             });
         });
 
+        $(document).ready(function() {
+            // Tambahan: ambil no karung saat lot berubah
+            $(document).on("change", ".lot-kirim", function() {
+                var $form = $(this).closest("form");
+                var noModel = $("#no_model").val().trim();
+                var itemType = $("#item_type").val().trim();
+                var kodeWarna = $form.find(".kode-warna").val().trim();
+                var lot = $(this).val();
+                var $karungSelect = $form.find(".no-karung"); // pastikan ada select/input untuk no karung
+                var retur = $('#retur').is(':checked') ? 1 : 0;
+
+                if (!noModel || !itemType || !kodeWarna || !lot) {
+                    console.warn("Data tidak lengkap untuk ambil no karung!");
+                    return;
+                }
+
+                var url = `<?= base_url($role . "/getNoKarung") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}&kodeWarna=${kodeWarna}&lot=${lot}&retur=${retur}`;
+                console.log("URL request no karung:", url);
+
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(response) {
+                        console.log("Respons no karung:", response);
+
+                        // $karungSelect.empty().append('<option value="">Pilih No Karung</option>');
+                        if (response.data && response.data.length > 0) {
+                            $.each(response.data, function(index, k) {
+                                $karungSelect.append('<option value="' + k.no_karung + '">' + k.no_karung + ' (Gw:' + k.gw_kirim + ' / Kgs:' + k.kgs_kirim + ' / Cns:' + k.cones_kirim + ')</option>');
+                            });
+                        } else {
+                            console.warn("No karung tidak ditemukan!");
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Terjadi kesalahan ambil no karung:", error);
+                        console.error("Respons yang diterima:", xhr.responseText);
+                    }
+                });
+            });
+        });
+
         // Fungsi untuk Load Kgs Kirim dan Cones Kirim
         $(document).ready(function() {
             $('#no_karung').change(function() {
@@ -700,10 +752,12 @@
                             console.log("Response dari server:", response); // Debug response
                             if (response.success) {
                                 $('input[name="id_out_celup"]').val(response.id_out_celup);
+                                $('input[name="gw_kirim"]').val(response.gw_kirim);
                                 $('input[name="kgs_kirim"]').val(response.kgs_kirim).trigger('change');
                                 $('input[name="cns_kirim"]').val(response.cones_kirim);
                             } else {
                                 $('input[name="id_out_celup"]').val('');
+                                $('input[name="gw_kirim"]').val(0);
                                 $('input[name="kgs_kirim"]').val(0).trigger('change');
                                 $('input[name="cns_kirim"]').val(0);
                                 alert("Data untuk nomor karung tersebut tidak ditemukan. Nilai Kgs dan CNS di-reset ke 0.");
@@ -759,7 +813,7 @@
             // Event listener saat cluster dipilih
             $(document).on("change", ".cluster", function() {
                 var sisaKapasitas = $(this).find("option:selected").attr("data-sisa_kapasitas") || "";
-                console.log("Sisa Kapasitas:", (sisaKapasitas).toFixed(2));
+                // console.log("Sisa Kapasitas:", (sisaKapasitas).toFixed(2));
                 $("#sisa_kapasitas").val(parseFloat(sisaKapasitas).toFixed(2));
             });
         });

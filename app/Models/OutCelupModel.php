@@ -206,7 +206,7 @@ class OutCelupModel extends Model
         return $this->db->table('out_celup')
             ->select('schedule_celup.item_type')
             ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup')
-            ->where('schedule_celup.no_model', $pdk)
+            ->where('out_celup.no_model', $pdk)
             ->groupBy('schedule_celup.no_model')
             ->groupBy('schedule_celup.item_type')
             ->distinct()
@@ -219,7 +219,7 @@ class OutCelupModel extends Model
         return $this->db->table('out_celup')
             ->select('schedule_celup.kode_warna')
             ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup')
-            ->where('schedule_celup.no_model', $no_model)
+            ->where('out_celup.no_model', $no_model)
             ->where('schedule_celup.item_type', $item_type)
             ->groupBy('schedule_celup.kode_warna')
             ->get()
@@ -231,7 +231,7 @@ class OutCelupModel extends Model
         $result = $this->db->table('out_celup')
             ->select('schedule_celup.warna')
             ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup')
-            ->where('schedule_celup.no_model', $no_model)
+            ->where('out_celup.no_model', $no_model)
             ->where('schedule_celup.item_type', $item_type)
             ->where('schedule_celup.kode_warna', $kode_warna)
             ->groupBy('schedule_celup.warna')
@@ -247,7 +247,7 @@ class OutCelupModel extends Model
         return $this->db->table('out_celup')
             ->select('out_celup.lot_kirim')
             ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup')
-            ->where('schedule_celup.no_model', $no_model)
+            ->where('out_celup.no_model', $no_model)
             ->where('schedule_celup.item_type', $item_type)
             ->where('schedule_celup.kode_warna', $kode_warna)
             ->groupBy('out_celup.lot_kirim')
@@ -259,9 +259,9 @@ class OutCelupModel extends Model
     public function getKgsDanCones($no_model, $item_type, $kode_warna, $lot_kirim, $no_karung)
     {
         $query = $this->db->table('out_celup oc')
-            ->select('oc.id_out_celup, oc.kgs_kirim, oc.cones_kirim')
+            ->select('oc.id_out_celup, oc.kgs_kirim, oc.cones_kirim, oc.gw_kirim')
             ->join('schedule_celup sc', 'oc.id_celup = sc.id_celup')
-            ->where('sc.no_model', $no_model)
+            ->where('oc.no_model', $no_model)
             ->where('sc.item_type', $item_type)
             ->where('sc.kode_warna', $kode_warna)
             ->where('oc.lot_kirim', $lot_kirim)
@@ -357,5 +357,19 @@ class OutCelupModel extends Model
             ->where('other_bon.tgl_datang', $tglDatang)
             ->orderBy('out_celup.id_out_celup', 'ASC')
             ->findAll();
+    }
+    public function getNoKarung($id)
+    {
+        // Query ambil no karung
+        return $this->select('out_celup.no_karung, out_celup.gw_kirim, out_celup.kgs_kirim, out_celup.cones_kirim')
+            ->join('schedule_celup', 'schedule_celup.id_celup=out_celup.id_celup', 'left')
+            ->where('out_celup.no_model', $id['no_model'])
+            ->where('schedule_celup.item_type', $id['item_type'])
+            ->where('schedule_celup.kode_warna', $id['kode_warna'])
+            ->where('out_celup.lot_kirim', $id['lot'])
+            ->groupBy('out_celup.id_out_celup')
+            ->get()->getResultArray();
+
+        return $result;
     }
 }
