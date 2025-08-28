@@ -151,6 +151,7 @@ class OutCelupModel extends Model
             ->join('master_buyer', 'master_order.buyer = master_buyer.kode_buyer', 'left')
             ->where('out_celup.id_bon', $id)
             ->groupBy('id_out_celup')
+            ->orderBy('id_celup,no_karung', 'ASC')
             ->findAll();
     }
 

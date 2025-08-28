@@ -1025,6 +1025,7 @@ class PdfController extends BaseController
 
 
             $counter = [];
+            $missing = [];
             $prevNoModel = null; // Variabel untuk menyimpan no_model sebelumnya
             $prevItemType = null; // Variabel untuk menyimpan item_type sebelumnya
             $prevKodeWarna = null; // Variabel untuk menyimpan kode_warna sebelumnya
@@ -1034,7 +1035,17 @@ class PdfController extends BaseController
 
             foreach ($dataBon['groupedDetails'] as $bon) {
                 $getDeskripsi = $this->masterMaterialModel->where('item_type', $bon['item_type'])->select('deskripsi')->first();
-                // dd($getDeskripsi);
+                if (!$getDeskripsi || empty($getDeskripsi['deskripsi'] ?? '')) {
+                    $missing[] = $bon['item_type'];
+                }
+                if (!empty($missing)) {
+                    $msg = 'Tidak Ada Item Type: ' . implode(', ', $missing);
+                    session()->setFlashdata('deskripsi_missing', $msg);
+
+                    // hentikan proses selanjutnya dan kembalikan user
+                    return redirect()->back()->with('error', $msg);
+                }
+
                 $pdf->SetFont('Arial', '', 6);
                 // Mengelompokkan berdasarkan no_model, item_type, dan kode_warna
                 $key = $bon['no_model'] . '_' . $bon['item_type'] . '_' . $bon['kode_warna'];
@@ -1049,6 +1060,7 @@ class PdfController extends BaseController
 
                 // $itemTypeAsli = $bon['item_type'];
                 $deskripsiItemType = $getDeskripsi['deskripsi'];
+                // dd($deskripsiItemType);
                 // $deskripsiItemType = ;
                 $ukuranBenang = strtoupper($bon['ukuran']);
                 $itemTypeBaru = '';
@@ -1325,7 +1337,7 @@ class PdfController extends BaseController
                 $pdf->Cell(18, 3, ($key == "KETERANGAN :") ? $key : '', 0, 0, 'L'); // Kolom pertama (key)
                 $pdf->Cell(37, 3, $value, 0, 0, 'L'); // Kolom kedua (value)
                 $pdf->Cell(72, 3, '', 0, 0, 'L'); // Kosong
-                $pdf->Cell(17, 3, $key === 'KETERANGAN :' ? 'PENGIRIM' : ($key === 4 ? $detailBon[0]['admin'] : ''), 0, 0, 'C');
+                $pdf->Cell(17, 3, $key === 'KETERANGAN :' ? 'PENGIRIM' : ($key === 4 ? strtoupper($detailBon[0]['admin']) : ''), 0, 0, 'C');
                 $pdf->Cell(23, 3, '', 0, 0, 'L'); // Kosong
                 $pdf->Cell(17, 3, $key === 'KETERANGAN :' ? 'PENERIMA' : '', 0, 0, 'C'); // Hanya baris pertama ada "PENERIMA"
                 $pdf->Cell(18, 3, '', 0, 1, 'L'); // Kolom terakhir kosong
