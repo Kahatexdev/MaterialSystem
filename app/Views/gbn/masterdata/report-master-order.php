@@ -55,7 +55,14 @@
             </div>
         </div>
     </div>
-
+    <!-- card loading -->
+    <div class="card loading" id="loadingCard" style="display: none;">
+        <div class="card-body text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
     <!-- Tabel Data -->
     <div class="card mt-4">
         <div class="card-body">
@@ -123,6 +130,20 @@
                     tanggal_akhir: tanggal_akhir
                 },
                 dataType: "json",
+                beforeSend: function() {
+                    $('#loadingCard').show();
+                    // disable btn
+                    $('#btnSearch').prop('disabled', true);
+                    $('#btnReset').prop('disabled', true);
+                    $('#btnExport').prop('disabled', true);
+                },
+                complete: function() {
+                    $('#loadingCard').hide();
+                    // enable btn
+                    $('#btnSearch').prop('disabled', false);
+                    $('#btnReset').prop('disabled', false);
+                    $('#btnExport').prop('disabled', false);
+                },
                 success: function(response) {
                     dataTable.clear().draw();
 
