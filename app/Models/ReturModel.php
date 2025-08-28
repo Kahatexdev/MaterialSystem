@@ -147,12 +147,12 @@ class ReturModel extends Model
 
     public function getKgsDanCones($no_model, $item_type, $kode_warna, $lot_kirim, $no_karung)
     {
-        $query = $this->select('out_celup.id_out_celup, retur.kgs_retur as kgs_kirim, retur.cns_retur as cones_kirim')
+        $query = $this->select('out_celup.id_out_celup, out_celup.kgs_kirim, out_celup.cones_kirim, out_celup.gw_kirim')
             ->join('out_celup', 'out_celup.id_retur = retur.id_retur')
-            ->where('retur.no_model', $no_model)
+            ->where('out_celup.no_model', $no_model)
             ->where('retur.item_type', $item_type)
             ->where('retur.kode_warna', $kode_warna)
-            ->where('retur.lot_retur', $lot_kirim)
+            ->where('out_celup.lot_kirim', $lot_kirim)
             ->where('out_celup.no_karung', $no_karung)
             ->get();
 
@@ -405,5 +405,15 @@ class ReturModel extends Model
             ->orderBy('retur.item_type, retur.kode_warna', 'ASC')
             ->get()
             ->getResultArray();
+    }
+    public function getNoKarung($id)
+    {
+        return $this->select('out_celup.no_karung, out_celup.gw_kirim, out_celup.cones_kirim')
+            ->join('retur', 'retur.id_retur=out_celup.id_retur')
+            ->where('out_celup.no_model', $id['no_mdoel'])
+            ->where('retur.item_type', $id['item_type'])
+            ->where('retur.kode_warna', $id['kode_warna'])
+            ->where('out_celup.lot_kirim', $id['lot'])
+            ->findAll();
     }
 }

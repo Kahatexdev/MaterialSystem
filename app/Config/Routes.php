@@ -163,6 +163,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('getItemTypeByModel/(:any)', 'WarehouseController::getItemTypeByModel/$1');
     $routes->get('getKodeWarnaByModelAndItemType', 'WarehouseController::getKodeWarna');
     $routes->get('getWarnaDanLot', 'WarehouseController::getWarnaDanLot');
+    $routes->get('getNoKarung', 'WarehouseController::getNoKarung');
     $routes->get('getKgsDanCones', 'WarehouseController::getKgsDanCones');
     $routes->post('getcluster', 'WarehouseController::getCluster');
     $routes->post('proses_pemasukan_manual', 'WarehouseController::prosesPemasukanManual');
@@ -642,6 +643,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('getItemTypeByModel/(:any)', 'WarehouseController::getItemTypeByModel/$1');
     $routes->get('getKodeWarnaByModelAndItemType', 'WarehouseController::getKodeWarna');
     $routes->get('getWarnaDanLot', 'WarehouseController::getWarnaDanLot');
+    $routes->get('getNoKarung', 'WarehouseController::getNoKarung');
     $routes->get('getKgsDanCones', 'WarehouseController::getKgsDanCones');
     $routes->post('getcluster', 'WarehouseController::getCluster');
     $routes->post('proses_pemasukan_manual', 'WarehouseController::prosesPemasukanManual');
