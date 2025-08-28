@@ -230,10 +230,6 @@
                 deleteButtons.forEach(btn => btn.style.display = '');
             }
         });
-
-        // Jika tidak pakai struktur .card, atau karung berada di luar .card,
-        // kamu bisa hitung global:
-        // const totalKarungs = document.querySelectorAll('.karung-row').length;
     }
 
     // Jalankan saat DOM ready (jQuery)

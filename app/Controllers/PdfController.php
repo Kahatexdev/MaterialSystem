@@ -1035,7 +1035,7 @@ class PdfController extends BaseController
 
             foreach ($dataBon['groupedDetails'] as $bon) {
                 $getDeskripsi = $this->masterMaterialModel->where('item_type', $bon['item_type'])->select('deskripsi')->first();
-                // dd($getDeskripsi);
+
                 $pdf->SetFont('Arial', '', 6);
                 // Mengelompokkan berdasarkan no_model, item_type, dan kode_warna
                 $key = $bon['no_model'] . '_' . $bon['item_type'] . '_' . $bon['kode_warna'];
@@ -1050,6 +1050,7 @@ class PdfController extends BaseController
 
                 $itemTypeAsli = $bon['item_type'];
                 $deskripsiItemType = $getDeskripsi['deskripsi'];
+                // dd($deskripsiItemType);
                 // $deskripsiItemType = ;
                 $ukuranBenang = strtoupper($bon['ukuran']);
                 $itemTypeBaru = '';

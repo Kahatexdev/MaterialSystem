@@ -520,7 +520,7 @@ class CelupController extends BaseController
     public function saveBon()
     {
         $data = $this->request->getPost();
-
+        // dd($data);
         $saveDataBon = [
             'detail_sj' => $data['detail_sj'],
             'no_surat_jalan' => $data['no_surat_jalan'],
@@ -538,36 +538,45 @@ class CelupController extends BaseController
         // $gantiRetur = isset($data['ganti_retur']) ? '1' : '0';
         $tab = count($data['harga']);
 
-
         $saveDataOutCelup = [];
         $idCelupList = [];
+        $operatorPacking = [];
+        $shift = [];
+
+        foreach ($data['operator_packing'] as $operator) {
+            $operatorPacking[] = is_array($operator) ? ($operator[0] ?? null) : $operator;
+        }
+
+        foreach ($data['shift'] as $s) {
+            $shift[] = is_array($s) ? ($s[0] ?? null) : $s;
+        }
 
         for ($h = 0; $h < $tab; $h++) {
-
             $id_celup = $data['items'][$h]['id_celup'] ?? null;
             $lot = $this->scheduleCelupModel->select('lot_celup')->where('id_celup', $id_celup)->first();
-            // dd($lot, $id_celup, $id_bon);
             $gantiRetur = isset($data['ganti_retur'][$h]) ? $data['ganti_retur'][$h] : '0';
-            // Pastikan no_karung tidak kosong dan merupakan array
+
+            $operatorPerTab = $operatorPacking[$h] ?? null;
+            $shiftPerTab    = $shift[$h] ?? null;
+
             if (!empty($data['no_karung'][$h]) && is_array($data['no_karung'][$h])) {
-                $jmldatapertab = count($data['no_karung'][$h]); // Ambil jumlah data yang benar
+                $jmldatapertab = count($data['no_karung'][$h]);
 
                 for ($i = 0; $i < $jmldatapertab; $i++) {
-
                     $saveDataOutCelup[] = [
                         'id_bon' => $id_bon,
                         'id_celup' => $id_celup ?? null,
                         'no_model' => $data['items'][$h]['no_model'],
                         'l_m_d' => $data['l_m_d'][$h] ?? null,
                         'harga' => $data['harga'][$h] ?? null,
-                        'no_karung' => $data['no_karung'][$h][$i] ?? null, // Ambil dari indeks $i
+                        'no_karung' => $data['no_karung'][$h][$i] ?? null,
                         'gw_kirim' => $data['gw_kirim'][$h][$i] ?? null,
                         'kgs_kirim' => $data['kgs_kirim'][$h][$i] ?? null,
                         'cones_kirim' => $data['cones_kirim'][$h][$i] ?? null,
                         'lot_kirim' => $lot['lot_celup'],
                         'ganti_retur' => $gantiRetur,
-                        'operator_packing' => $data['operator_packing'][$h][$i] ?? null,
-                        'shift' => $data['shift'][$h][$i] ?? null,
+                        'operator_packing' => $operatorPerTab,
+                        'shift' => $shiftPerTab,
                         'admin' => session()->get('username'),
                         'created_at' => date('Y-m-d H:i:s'),
                         'updated_at' => '',
@@ -579,6 +588,7 @@ class CelupController extends BaseController
                 }
             }
         }
+
         $this->outCelupModel->insertBatch($saveDataOutCelup);
         $uniqueIdCelup = array_values(array_unique($idCelupList));
 
