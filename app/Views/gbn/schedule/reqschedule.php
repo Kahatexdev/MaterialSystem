@@ -233,7 +233,7 @@
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table">
+                <table class="table" id="ReqScheduleTable">
                     <thead>
                         <tr>
                             <th class="sticky">No</th>
@@ -307,6 +307,11 @@
 
 
 <script>
+    $(document).ready(function() {
+        $('#ReqScheduleTable').DataTable({
+            "scrollX": true
+        });
+    });
     document.addEventListener("DOMContentLoaded", function() {
         var tooltipList = [].slice
             .call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
