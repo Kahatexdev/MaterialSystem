@@ -820,8 +820,7 @@ class PdfController extends BaseController
         $groupedDetails = [];
         foreach ($detailBon as $detail) {
             $key = $detail['no_model'] . '|' . $detail['item_type'] . '|' . $detail['kode_warna'];
-            $jmlKarung =
-                $gantiRetur = ($detail['ganti_retur'] == 1) ? ' / GANTI RETUR' : '';
+            $gantiRetur = ($detail['ganti_retur'] == 1) ? ' / GANTI RETUR' : '';
             if (!isset($groupedDetails[$key])) {
                 $groupedDetails[$key] = [
                     'no_model' => $detail['no_model'],
@@ -964,7 +963,7 @@ class PdfController extends BaseController
             $pdf->Cell(40, 3, 'NAMA LANGGANAN', 0, 0, 'L');
             $pdf->Cell(61, 3, 'KAOS KAKI', 0, 0, 'L');
             $pdf->Cell(62, 3, 'NO SURAT JALAN : ' . $dataBon['no_surat_jalan'], 0, 0, 'L');
-            $pdf->Cell(36, 3, 'TANGGAL : ' . $dataBon['tgl_datang'], 0, 1, 'L');
+            $pdf->Cell(36, 3, 'TANGGAL : ' . date('d-m-Y', strtotime($dataBon['tgl_datang'])), 0, 1, 'L');
 
             $pdf->SetX(4); // Pastikan posisi X sejajar margin
             $pdf->SetFont('Arial', '', 6);
@@ -1059,7 +1058,7 @@ class PdfController extends BaseController
                     $counter[$key]++;
                 }
 
-                $itemTypeAsli = $bon['item_type'];
+                // $itemTypeAsli = $bon['item_type'];
                 $deskripsiItemType = $getDeskripsi['deskripsi'];
                 // dd($deskripsiItemType);
                 // $deskripsiItemType = ;
@@ -1072,6 +1071,20 @@ class PdfController extends BaseController
                 } else {
                     $itemTypeBaru = $deskripsiItemType;
                 }
+
+                // Ambil isi dalam tanda kurung pertama (jika ada)
+                $ketLipatan = '';
+                if (preg_match('/\(([^)]*)\)/', $itemTypeBaru, $matches)) {
+                    $ketLipatan = trim($matches[1]); // hasil "KHUSUS LIPATAN"
+                }
+                // Hapus teks di dalam tanda kurung (beserta kurungnya)
+                $itemTypeBaru = preg_replace('/\([^)]*\)/', '', $itemTypeBaru);
+
+                // Hapus kata "LIPATAN" (case insensitive)
+                $itemTypeBaru = preg_replace('/\bLIPATAN\b/i', '', $itemTypeBaru);
+
+                // Rapikan spasi ganda jadi satu
+                $itemTypeBaru = trim(preg_replace('/\s+/', ' ', $itemTypeBaru));
                 // dd($itemTypeBaru);
                 // Mapping singkatan ke bentuk lengkap
                 $mapItemType = [
@@ -1087,6 +1100,8 @@ class PdfController extends BaseController
                     $itemTypeBaru = preg_replace('/\b' . preg_quote($singkatan, '/') . '\b/i', $lengkap, $itemTypeBaru);
                 }
 
+                $ket = $bon['jmlKarung'] . " KARUNG" . $bon['ganti_retur'] . (!empty($ketLipatan) ? ' / ' . $ketLipatan : "");
+
                 // Hitung jumlah detail untuk grup saat ini
                 $jmlDetail = count($bon['detailPengiriman']);
                 // $jmlBaris = ($jmlDetail === 1) ? 3 : 2;
@@ -1096,22 +1111,25 @@ class PdfController extends BaseController
                 // 1. Hitung kebutuhan baris tiap kolom
                 $noModelWidth = 18; // lebar kolom no_model
                 $itemTypeWidth = 22; // lebar kolom buyer
+                $ketWidth = 22; // lebar kolom buyer
 
                 // hitung panjang teks
                 $noModelTextWidth = $pdf->GetStringWidth($bon['no_model']);
                 $buyerTextWidth = $pdf->GetStringWidth($bon['buyer'] . ' KK');
                 $itemTypeTextWidth   = $pdf->GetStringWidth($itemTypeBaru);
+                $ketTextWidth   = $pdf->GetStringWidth($ket);
 
                 // kira-kira 1 baris = lebarnya kolom
                 $buyerLines   = ceil($buyerTextWidth / $itemTypeWidth);
-                $noModelLines = (ceil($noModelTextWidth / $noModelWidth));
+                $noModelLines = ceil($noModelTextWidth / $noModelWidth);
                 $itemTypeLines   = ceil($itemTypeTextWidth / $itemTypeWidth);
+                $ketLines   = ceil($ketTextWidth / $ketWidth);
 
                 // detail tetap dari jumlah data
                 $detailLines  = count($bon['detailPengiriman']);
 
                 // ambil baris paling banyak
-                $maxLines = max(($noModelLines + $buyerLines), $itemTypeLines, $detailLines);
+                $maxLines = max(($noModelLines + $buyerLines), $itemTypeLines, $detailLines, $ketLines);
 
                 // jumlah baris (ceil supaya dibulatkan ke atas)
                 $noModelHeight = $noModelLines * $lineHeight;
@@ -1179,7 +1197,7 @@ class PdfController extends BaseController
                         $pdf->Cell(9, 3, number_format((float)($bon['totals']['kgs_kirim'] ?? 0), 2), 1, 0, 'C');
                         $xKet = $pdf->GetX();
                         $yKet = $pdf->GetY();
-                        $pdf->MultiCell(22, 3, $bon['jmlKarung'] . " KARUNG" . $bon['ganti_retur'], 1, 'L', false);
+                        $pdf->MultiCell(22, 3, $ket, 1, 'L', false);
                         $pdf->SetY($yKet + 3); // Kembalikan posisi untuk kolom berikutnya
                         $currentRow++;
                         // baris baru
@@ -1194,7 +1212,7 @@ class PdfController extends BaseController
                             // MultiCell untuk 'jmlKarung' dan 'ganti_retur'
                             $xKet = $pdf->GetX();
                             $yKet = $pdf->GetY();
-                            $pdf->MultiCell(22, 3, $bon['jmlKarung'] . " KARUNG" . $bon['ganti_retur'], 1, 'L', false);
+                            $pdf->MultiCell(22, 3, $ket, 1, 'L', false);
 
                             // Kembali ke posisi X untuk melanjutkan dari bawah MultiCell
                             $pdf->SetXY($xKet, $yKet + 3);

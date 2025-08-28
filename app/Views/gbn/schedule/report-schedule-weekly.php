@@ -63,6 +63,14 @@
     <!-- Tabel Data -->
     <div class="card mt-4">
         <div class="card-body">
+            <!-- card loading -->
+            <div class="card loading" id="loadingCard" style="display: none;">
+                <div class="card-body text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>
@@ -130,6 +138,16 @@
                     jenis: jenis
                 },
                 dataType: "json",
+                beforeSend: function() {
+                    $("#loadingCard").show(); // Tampilkan loading
+                    // disable btn filter
+                    $("#btnSearch").prop("disabled", true);
+                },
+                complete: function() {
+                    $("#loadingCard").hide(); // Sembunyikan loading setelah selesai
+                    // enable btn filter
+                    $("#btnSearch").prop("disabled", false);
+                },
                 success: function(response) {
                     dataTable.clear().draw();
                     if (response.length > 0) {

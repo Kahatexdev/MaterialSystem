@@ -280,6 +280,14 @@
                         </div>
                         <button type="submit" class="btn btn-info w-100">Apply</button>
                     </form>
+                    <!-- card loading -->
+                    <div class="card loading" id="loadingCard" style="display: none;">
+                        <div class="card-body text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
                     <!-- Tempat untuk Menampilkan Tabel -->
                     <div id="groupTable"></div>
                 </div>
@@ -479,6 +487,13 @@
                 data: {
                     group: group
                 },
+                beforeSend: function() {
+                    $("#loadingCard").show(); // Tampilkan loading
+                    $("#groupTable").html(""); // Kosongkan tabel sebelum memuat data baru
+                },
+                complete: function() {
+                    $("#loadingCard").hide(); // Sembunyikan loading setelah selesai
+                },
                 success: function(response) {
                     $("#groupTable").html(response); // Masukkan data ke dalam div
                 },
@@ -496,7 +511,7 @@
         });
 
         // Load data default untuk Group I saat halaman pertama kali dibuka
-        loadGroupData("I");
+        // loadGroupData("I");
     });
 </script>
 <?php $this->endSection(); ?>

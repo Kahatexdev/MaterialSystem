@@ -366,7 +366,7 @@
                                 <div class="form-group">
                                     <label for="">Cluster</label>
                                     <select class="form-control cluster" id="cluster" name="cluster">
-                                        <option value="">Pilih Cluster</option>
+                                        <!-- <option value="">Pilih Cluster</option> -->
                                     </select>
                                 </div>
                             </div>
@@ -693,6 +693,18 @@
                 var lot = $(this).val();
                 var $karungSelect = $form.find(".no-karung"); // pastikan ada select/input untuk no karung
                 var retur = $('#retur').is(':checked') ? 1 : 0;
+                console.log(lot);
+
+                // kalau lot kosong → kosongkan dropdown no karung & keluar
+                if (!lot) {
+                    $karungSelect.empty().append('<option value="">Pilih No Karung</option>');
+                    $('input[name="id_out_celup"]').val('');
+                    $('input[name="gw_kirim"]').val(0);
+                    $('input[name="kgs_kirim"]').val(0).trigger('change');
+                    $('input[name="cns_kirim"]').val(0);
+                    $('input[name="sisa_kapasitas"]').val(0);
+                    return;
+                }
 
                 if (!noModel || !itemType || !kodeWarna || !lot) {
                     console.warn("Data tidak lengkap untuk ambil no karung!");
@@ -709,11 +721,12 @@
                     success: function(response) {
                         console.log("Respons no karung:", response);
 
-                        // $karungSelect.empty().append('<option value="">Pilih No Karung</option>');
+                        $karungSelect.empty().append('<option value="">Pilih No Karung</option>');
                         if (response.data && response.data.length > 0) {
                             $.each(response.data, function(index, k) {
                                 $karungSelect.append('<option value="' + k.no_karung + '">' + k.no_karung + ' (Gw:' + k.gw_kirim + ' / Kgs:' + k.kgs_kirim + ' / Cns:' + k.cones_kirim + ')</option>');
                             });
+
                         } else {
                             console.warn("No karung tidak ditemukan!");
                         }
