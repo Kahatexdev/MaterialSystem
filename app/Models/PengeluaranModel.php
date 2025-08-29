@@ -401,7 +401,7 @@ class PengeluaranModel extends Model
         return $builder
             ->where('pengeluaran.status', 'Pengeluaran Jalur')
             ->groupBy('pengeluaran.id_pengeluaran')
-            ->orderBy('pengeluaran.nama_cluster, pengeluaran.area_out', 'ASC')
+            ->orderBy('pengeluaran.area_out, pengeluaran.nama_cluster', 'ASC')
             ->get() // Dapatkan objek query
             ->getResultArray(); // Konversi ke array hasil
     }
