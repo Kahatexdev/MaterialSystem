@@ -4,6 +4,8 @@
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="<?= base_url('assets/css/flatpickr/flatpickr.min.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/js/plugins/flatpickr/style.css') ?>">
 <style>
     /* Auto Complete */
     .ui-state-active {
@@ -66,7 +68,7 @@
                                     </div>
                                     <div class="col-md-4">
                                         <label>Tanggal Kirim</label>
-                                        <input type="date" class="form-control" id="tgl_datang" name="tgl_datang" required>
+                                        <input type="text" class="form-control" id="tgl_datang" name="tgl_datang" required>
                                     </div>
                                 </div>
                                 <!--  -->
@@ -245,7 +247,16 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.all.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
+<script src="<?= base_url('assets/css/flatpickr/flatpickr.min.js') ?>"></script>
+<script src="<?= base_url('assets/js/plugins/flatpickr/index.js') ?>"></script>
+<script>
+    flatpickr("#tgl_datang", {
+        dateFormat: "d-m-Y",
+        altInput: true,
+        altFormat: "d-m-Y",
+        locale: "id" // Untuk bahasa Indonesia
+    });
+</script>
 <script>
     $(document).ready(function() {
 

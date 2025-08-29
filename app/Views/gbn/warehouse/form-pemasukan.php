@@ -724,14 +724,14 @@
                         $karungSelect.empty().append('<option value="">Pilih No Karung</option>');
                         if (response.data && response.data.length > 0) {
                             $.each(response.data, function(index, k) {
-                                // $karungSelect.append('<option value="' + k.no_karung + '">' + k.no_karung + ' (Gw:' + k.gw_kirim + ' / Kgs:' + k.kgs_kirim + ' / Cns:' + k.cones_kirim + ')</option>');
+                                // $karungSelect.append('<option value="' + k.no_karung + '">' + k.no_karung + ' (Gw:' + k.gw_kirim + ' / Kgs:' + k.kgs_kirim + ' / Cns:' + k.cones_kirim + ' / SJ:' + k.no_surat_jalan + ')</option>');
                                 $karungSelect.append(
                                     '<option value="' + k.no_karung + '" ' +
                                     'data-id_out_celup="' + k.id_out_celup + '" ' +
                                     'data-gw="' + k.gw_kirim + '" ' +
                                     'data-kgs="' + k.kgs_kirim + '" ' +
                                     'data-cns="' + k.cones_kirim + '">' +
-                                    k.no_karung + ' (Gw:' + k.gw_kirim + ' / Kgs:' + k.kgs_kirim + ' / Cns:' + k.cones_kirim + ')' +
+                                    k.no_karung + ' (Gw:' + k.gw_kirim + ' / Kgs:' + k.kgs_kirim + ' / Cns:' + k.cones_kirim + ' / SJ:' + k.no_surat_jalan + ')' +
                                     '</option>'
                                 );
                             });
