@@ -178,6 +178,30 @@
             serverSide: false
         });
 
+        function showLoading() {
+            $('#loadingOverlay').addClass('active');
+            $('#btnSearch').prop('disabled', true);
+            // show DataTables processing indicator if available
+            try {
+                dataTable.processing(true);
+            } catch (e) {}
+        }
+
+        function hideLoading() {
+            $('#loadingOverlay').removeClass('active');
+            $('#btnSearch').prop('disabled', false);
+            try {
+                dataTable.processing(false);
+            } catch (e) {}
+        }
+
+        function updateProgress(percent) {
+            $('#progressBar')
+                .css('width', percent + '%')
+                .attr('aria-valuenow', percent);
+            $('#progressText').text(percent + '%');
+        }
+
         // Ambil data awal pas page load
         loadDefaultData();
 

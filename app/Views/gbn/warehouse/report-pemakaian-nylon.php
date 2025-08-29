@@ -163,6 +163,30 @@
 
 <script>
     $(document).ready(function() {
+        function showLoading() {
+            $('#loadingOverlay').addClass('active');
+            $('#btnSearch').prop('disabled', true);
+            // show DataTables processing indicator if available
+            try {
+                dataTable.processing(true);
+            } catch (e) {}
+        }
+
+        function hideLoading() {
+            $('#loadingOverlay').removeClass('active');
+            $('#btnSearch').prop('disabled', false);
+            try {
+                dataTable.processing(false);
+            } catch (e) {}
+        }
+
+        function updateProgress(percent) {
+            $('#progressBar')
+                .css('width', percent + '%')
+                .attr('aria-valuenow', percent);
+            $('#progressText').text(percent + '%');
+        }
+
         function loadData() {
             const buyer = $('#buyer').val();
 
@@ -173,6 +197,23 @@
                     buyer: buyer
                 },
                 dataType: "json",
+                beforeSend: function() {
+                    showLoading();
+                    updateProgress(0);
+                },
+                xhr: function() {
+                    let xhr = new window.XMLHttpRequest();
+
+                    // progress download data dari server
+                    xhr.addEventListener("progress", function(evt) {
+                        if (evt.lengthComputable) {
+                            let percentComplete = Math.round((evt.loaded / evt.total) * 100);
+                            updateProgress(percentComplete);
+                        }
+                    }, false);
+
+                    return xhr;
+                },
                 beforeSend: function() {
                     showLoading();
                     updateProgress(0);
@@ -223,6 +264,10 @@
                 },
                 error: function(xhr, status, error) {
                     console.error("Error:", error);
+                },
+                complete: function() {
+                    updateProgress(100); // pastikan full
+                    setTimeout(() => hideLoading(), 400); // kasih jeda biar animasi progress keliatan
                 },
                 complete: function() {
                     updateProgress(100); // pastikan full
