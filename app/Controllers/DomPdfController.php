@@ -93,7 +93,7 @@ class DomPdfController extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException("Tidak ada retur pada tanggal {$tglRetur}");
         }
 
-        $path = FCPATH . 'assets/img/logo-kahatex.png';
+        $path = FCPATH . 'assets/img/logo-kahatexbw.png';
         $type = pathinfo($path, PATHINFO_EXTENSION);
         $data = file_get_contents($path);
         $img = 'data:image/' . $type . ';base64,' . base64_encode($data);

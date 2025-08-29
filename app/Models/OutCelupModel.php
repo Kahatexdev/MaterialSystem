@@ -376,4 +376,16 @@ class OutCelupModel extends Model
 
         return $result;
     }
+
+    public function cekNoKarung($idCelup, $noModel, $sj, $lot)
+    {
+        return $this->select('out_celup.no_model, MAX(out_celup.no_karung) AS max_no_karung, lot_kirim, bon_celup.no_surat_jalan, out_celup.id_celup')
+            ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
+            ->where('out_celup.no_karung IS NOT NULL')
+            ->where('out_celup.id_celup', $idCelup)
+            ->where('out_celup.no_model', $noModel)
+            ->where('bon_celup.no_surat_jalan', $sj)
+            ->where('out_celup.lot_kirim', $lot)
+            ->first();
+    }
 }
