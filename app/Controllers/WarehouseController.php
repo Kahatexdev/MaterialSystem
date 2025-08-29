@@ -3420,8 +3420,21 @@ class WarehouseController extends BaseController
             $data = $this->returModel->getNoKarung($id);
         }
 
+        // filter: buang id_out_celup yang sudah ada di tabel pemasukan
+        $filtered = [];
+        foreach ($data as $row) {
+            $exists = $this->db->table('pemasukan')
+                ->where('id_out_celup', $row['id_out_celup'])
+                ->where('out_jalur', 0)
+                ->countAllResults();
+
+            if ($exists == 0) { // kalau belum ada → simpan
+                $filtered[] = $row;
+            }
+        }
+
         return $this->response->setJSON([
-            'data' => $data
+            'data' => $filtered
         ]);
     }
 }

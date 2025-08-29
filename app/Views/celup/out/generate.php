@@ -349,7 +349,7 @@
                                         <td class="text-center"><?= $bon['totals']['cones_kirim'] ?></td>
                                         <td class="text-center"><?= $bon['totals']['gw_kirim'] ?></td>
                                         <td class="text-center"><?= $bon['totals']['kgs_kirim'] ?></td>
-                                        <td class="text-center"><?= $bon['jmlKarung'] . " KARUNG" . $bon['ganti_retur'] ?></td>
+                                        <td class="text-center"><?= $bon['ket'] ?></td>
                         </tr>
                         <tr>
                             <td class="text-center"><?= $bon['buyer'] ?> KK</td>
@@ -376,7 +376,7 @@
                             <td class="text-center"><?= $bon['totals']['cones_kirim'] ?></td>
                             <td class="text-center"><?= $bon['totals']['gw_kirim'] ?></td>
                             <td class="text-center"><?= $bon['totals']['kgs_kirim'] ?></td>
-                            <td class="text-center"><?= $bon['jmlKarung'] . " KARUNG" . $bon['ganti_retur'] ?></td>
+                            <td class="text-center"><?= $bon['ket'] ?></td>
                             </tr>
                         <?php } elseif ($row == 2) { ?>
                             <td class="text-center"><?= $bon['buyer'] ?> KK</td>
@@ -442,7 +442,7 @@
                         <tr>
                             <th class="sticky text-left align-middle"></th>
                             <th class="sticky text-left align-middle" colspan="8">D = DARK</th>
-                            <th class="sticky text-center align-middle" colspan="4"></th>
+                            <th class="sticky text-center align-middle" colspan="4"><?= $dataBon['admin'] ?></th>
                             <th class="sticky text-center align-middle" colspan="2"></th>
                         </tr>
                     </footer>

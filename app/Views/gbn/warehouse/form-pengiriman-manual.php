@@ -120,6 +120,7 @@
                                 <th>Kode Warna</th>
                                 <th>Warna</th>
                                 <th>Area</th>
+                                <th>No Karung</th>
                                 <th>Lot</th>
                                 <th>Kgs</th>
                                 <th>Cones</th>
@@ -139,16 +140,17 @@
                                     <td><?= esc(isset($row['kode_warna']) ? $row['kode_warna'] : '') ?></td>
                                     <td><?= esc(isset($row['warna']) ? $row['warna'] : '') ?></td>
                                     <td><?= esc(isset($row['area_out']) ? $row['area_out'] : '') ?></td>
+                                    <td><?= esc(isset($row['no_karung']) ? $row['no_karung'] : '') ?></td>
 
-                                        <td>
-                                            <textarea name="lot_out[<?= $i ?>]" class="form-control"><?= esc(isset($row['lot_out']) ? $row['lot_out'] : '') ?></textarea>
-                                        </td>
-                                        <td>
-                                            <input type="number" name="kgs_out[<?= $i ?>]" class="form-control kgs-val" value="<?= esc(isset($row['kgs_out']) ? $row['kgs_out'] : '') ?>" step="0.01" min="0">
-                                        </td>
-                                        <td>
-                                            <input type="number" name="cns_out[<?= $i ?>]" class="form-control cns-val" value="<?= esc(isset($row['cns_out']) ? $row['cns_out'] : '') ?>" step="1" min="0">
-                                        </td>
+                                    <td>
+                                        <textarea name="lot_out[<?= $i ?>]" class="form-control"><?= esc(isset($row['lot_out']) ? $row['lot_out'] : '') ?></textarea>
+                                    </td>
+                                    <td>
+                                        <input type="number" name="kgs_out[<?= $i ?>]" class="form-control kgs-val" value="<?= esc(isset($row['kgs_out']) ? $row['kgs_out'] : '') ?>" step="0.01" min="0">
+                                    </td>
+                                    <td>
+                                        <input type="number" name="cns_out[<?= $i ?>]" class="form-control cns-val" value="<?= esc(isset($row['cns_out']) ? $row['cns_out'] : '') ?>" step="1" min="0">
+                                    </td>
                                     <td>
                                         <button type="button" class="btn btn-danger btn-remove" data-index="<?= $i ?>"><i class="fas fa-trash"></i></button>
                                     </td>
