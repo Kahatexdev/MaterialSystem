@@ -571,6 +571,9 @@
         function loadItemTypes() {
             var noModel = $('#no_model').val().trim();
             var retur = $('#retur').is(':checked') ? 1 : 0; // karena checkbox
+            var $lotKirimSelect = $('.lot-kirim'); // langsung ambil select lot
+            var $karungSelect = $('.no-karung'); // langsung ambil select lot
+
             if (noModel) {
                 $.ajax({
                     url: '<?= base_url($role . "/getItemTypeByModel") ?>/' + encodeURIComponent(noModel) + '?retur=' + retur,
@@ -585,6 +588,15 @@
 
                         // Call loadKodeWarna after item types are loaded, in case it's the initial load
                         loadKodeWarna(); // Uncomment if you want to call after item types are loaded
+                        $lotKirimSelect.empty().append('<option value="">Pilih Lot</option>');
+                        $karungSelect.empty().append('<option value="">Pilih No Karung</option>');
+                        $('input[name="no_karung"]').val('');
+                        $('input[name="warna"]').val('');
+                        $('input[name="id_out_celup"]').val('');
+                        $('input[name="gw_kirim"]').val(0);
+                        $('input[name="kgs_kirim"]').val(0).trigger('change');
+                        $('input[name="cns_kirim"]').val(0);
+                        $('input[name="sisa_kapasitas"]').val(0);
                     },
                     error: function(xhr, status, error) {
                         console.error("Terjadi kesalahan: " + error);
@@ -599,6 +611,8 @@
             var noModel = $('#no_model').val().trim();
             var itemType = $('#item_type').val().trim(); // Dapatkan itemType dengan benar
             var retur = $('#retur').is(':checked') ? 1 : 0; // karena checkbox
+            var $lotKirimSelect = $('.lot-kirim'); // langsung ambil select lot
+            var $karungSelect = $('.no-karung'); // langsung ambil select lot
 
             if (noModel && itemType) {
                 var url = `<?= base_url($role . "/getKodeWarnaByModelAndItemType") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}&retur=${retur}`;
@@ -620,6 +634,15 @@
                 });
             } else {
                 $row.find('.kode-warna').empty().append('<option value="">Pilih Kode Warna</option>');
+                $lotKirimSelect.empty().append('<option value="">Pilih Lot</option>');
+                $karungSelect.empty().append('<option value="">Pilih No Karung</option>');
+                $('input[name="no_karung"]').val('');
+                $('input[name="warna"]').val('');
+                $('input[name="id_out_celup"]').val('');
+                $('input[name="gw_kirim"]').val(0);
+                $('input[name="kgs_kirim"]').val(0).trigger('change');
+                $('input[name="cns_kirim"]').val(0);
+                $('input[name="sisa_kapasitas"]').val(0);
             }
         }
 
@@ -633,6 +656,7 @@
                 var kodeWarna = $(this).val().trim();
                 var $warnaInput = $form.find('input[name="warna"]'); // Cari input warna di dalam form terkait
                 var $lotSelect = $form.find(".lot-kirim");
+                var $karungSelect = $form.find(".no-karung");
                 var retur = $('#retur').is(':checked') ? 1 : 0; // karena checkbox
 
                 console.log("No Model:", noModel);
@@ -641,6 +665,15 @@
 
                 if (!noModel || !itemType || !kodeWarna) {
                     console.warn("Pastikan no_model, item_type, dan kode_warna sudah dipilih!");
+                    $lotSelect.empty().append('<option value="">Pilih Lot</option>');
+                    $karungSelect.empty().append('<option value="">Pilih No Karung</option>');
+                    $('input[name="no_karung"]').val('');
+                    $('input[name="warna"]').val('');
+                    $('input[name="id_out_celup"]').val('');
+                    $('input[name="gw_kirim"]').val(0);
+                    $('input[name="kgs_kirim"]').val(0).trigger('change');
+                    $('input[name="cns_kirim"]').val(0);
+                    $('input[name="sisa_kapasitas"]').val(0);
                     return;
                 }
 
