@@ -30,6 +30,7 @@
                 <div class="card-body">
                     <form class="row g-3">
                         <div class="col-md-10">
+                            <input type="hidden" id="jenis" value="<?= $jenis ?>">
                             <label for="filter_date" class="form-label">Tanggal Pakai</label>
                             <input type="date" id="filter_date" name="filter_date" class="form-control">
                         </div>
@@ -54,24 +55,24 @@
                                         <td>
                                             <p class="text-sm font-weight-bold mb-0"><?= $tgl['tgl_pakai'] ?></p>
                                         </td>
-                                        <td class="text-center">
-                                            <?php if ($jenis === 'SPANDEX' || $jenis === 'KARET') : ?>
-                                        <td class="text-center">
-                                            <a href="<?= base_url($role . '/pemesanan/exportListPemesananSpdxKaretPertgl?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
-                                                <i class="fas fa-file-excel fa-2x"></i>
-                                            </a>
-                                        </td>
-                                    <?php else : ?>
-                                        <td class="text-center">
-                                            <a href="<?= base_url($role . '/pemesanan/detailListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-info" target="_blank">
-                                                <i class="fas fa-eye fa-2x"></i>
-                                            </a>
-                                            <!-- <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
+                                        <td class="text-center"></td>
+                                        <?php if ($jenis === 'SPANDEX' || $jenis === 'KARET') : ?>
+                                            <td class="text-center">
+                                                <a href="<?= base_url($role . '/pemesanan/exportListPemesananSpdxKaretPertgl?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
+                                                    <i class="fas fa-file-excel fa-2x"></i>
+                                                </a>
+                                            </td>
+                                        <?php else : ?>
+                                            <td class="text-center">
+                                                <a href="<?= base_url($role . '/pemesanan/detailListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-info" target="_blank">
+                                                    <i class="fas fa-eye fa-2x"></i>
+                                                </a>
+                                                <!-- <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
                                                 <i class="fas fa-file-excel fa-2x"></i>
                                             </a> -->
-                                        </td>
-                                    <?php endif; ?>
-                                    <!-- <td class="text-center">
+                                            </td>
+                                        <?php endif; ?>
+                                        <!-- <td class="text-center">
                                             <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar/' . $tgl['tgl_pakai'] . '/' . $jenis) ?>" class="btn btn-success btn-xs">
                                                 <i class="fa fa-file-excel fa-xl" style="font-size: 16px !important;"></i> Excel
                                             </a>
@@ -91,28 +92,25 @@
 <script>
     document.getElementById('filterButton').addEventListener('click', function() {
         const filterDate = document.getElementById('filter_date').value;
+        const jenis = document.getElementById('jenis').value;
 
-        if (!filterDate) {
-            alert('Tanggal filter tidak boleh kosong.');
-            return;
-        }
+        const formData = new FormData();
+        formData.append('jenis', jenis);
+        formData.append('filter_date', filterDate);
 
-        fetch('<?= base_url($role . "/otherIn/listBarcode/filter") ?>', {
+        // console.log("Data dikirim ke API:", {
+        //     jenis,
+        //     filterDate
+        // });
+
+        fetch('<?= base_url($role . "/pemesanan/filterListBarangKeluarPertgl") ?>', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    filter_date: filterDate
-                })
+                body: formData
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
+                // console.log("Response dari API:", data);
+
                 const tableBody = document.getElementById('pemesananTable');
                 tableBody.innerHTML = ''; // Clear existing table rows
 
@@ -121,17 +119,17 @@
                         const row = document.createElement('tr');
 
                         const tglPakaiCell = document.createElement('td');
-                        tglPakaiCell.innerHTML = `<p class="text-sm font-weight-bold mb-0">${psn.tgl_datang}</p>`;
+                        tglPakaiCell.innerHTML = `<p class="text-sm font-weight-bold mb-0">${psn.tgl_pakai}</p>`;
                         row.appendChild(tglPakaiCell);
 
                         const actionCell = document.createElement('td');
                         actionCell.classList.add('text-center');
                         actionCell.innerHTML = `
-                    <a href="<?= base_url($role . '/otherIn/detailListBarcode') ?>/${psn.tgl_datang}" class="btn bg-gradient-info">
-                        <i class="fas fa-eye"></i>
-                        Detail
-                    </a>
-                `;
+                            <a href="<?= base_url($role . '/pemesanan/detailListBarangKeluar?jenis' . $jenis) ?>&tglPakai=${psn.tgl_pakai}" class="btn bg-gradient-info">
+                                <i class="fas fa-eye"></i>
+                                Detail
+                            </a>
+                        `;
                         row.appendChild(actionCell);
 
                         tableBody.appendChild(row);
