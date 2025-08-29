@@ -1073,4 +1073,16 @@ class CelupController extends BaseController
             return redirect()->to(base_url($this->role . '/outCelup/editBon/' . $getIdBon))->with('error', 'Data gagal dihapus.');
         }
     }
+
+    public function cekNoKarung()
+    {
+        $idCelup = $this->request->getGet('id');
+        $noModel = $this->request->getGet('no_model');
+        $sj = $this->request->getGet('no_surat_jalan');
+        $lot = $this->request->getGet('lot_kirim');
+
+        $data = $this->outCelupModel->cekNoKarung($idCelup, $noModel, $sj, $lot);
+
+        return $this->response->setJSON($data);
+    }
 }

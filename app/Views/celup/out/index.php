@@ -64,7 +64,9 @@
                             <tr>
                                 <td class="text-center align-middle"><?= $no++ ?></td>
                                 <td class="text-center align-middle"><?= $out['no_model_list'] ?></td>
-                                <td class="text-center align-middle"><?= $out['tgl_datang'] ?></td>
+                                <td class="text-center align-middle">
+                                    <?= date('d-m-Y', strtotime($out['tgl_datang'])) ?>
+                                </td>
                                 <td class="text-center align-middle"><?= $out['no_surat_jalan'] ?></td>
                                 <td class="text-center align-middle"><?= $out['detail_sj'] ?></td>
                                 <td class="text-center align-middle">
