@@ -475,6 +475,7 @@ class PemesananController extends BaseController
                     'kode_warna'     => $row['kode_warna']  ?? '',
                     'warna'          => $row['warna']       ?? '',
                     'area_out'       => $row['area_out'],
+                    'no_karung'      => $row['no_karung'],
                     'tgl_out'        => $row['tgl_out'],
                     'kgs_out'        => $row['kgs_out']     ?? $row['ttl_kg'] ?? 0,
                     'cns_out'        => $row['cns_out']     ?? $row['ttl_cns'] ?? 0,
