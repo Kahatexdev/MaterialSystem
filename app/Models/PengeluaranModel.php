@@ -383,7 +383,7 @@ class PengeluaranModel extends Model
             pengeluaran.krg_out,
             pengeluaran.lot_out,
             pengeluaran.nama_cluster,
-            pengeluaran.keterangan_gbn,
+            GROUP_CONCAT(DISTINCT CONCAT(pengeluaran.keterangan_gbn, ' - ', pemesanan.keterangan_gbn)) AS keterangan_gbn,
             cluster.group
         ")
             ->join('out_celup', 'out_celup.id_out_celup = pengeluaran.id_out_celup', 'left')

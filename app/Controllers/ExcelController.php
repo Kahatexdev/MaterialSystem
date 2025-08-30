@@ -3179,9 +3179,9 @@ class ExcelController extends BaseController
             $sheet->setCellValue('A2', 'PAKAI ' . $tglPakai);
 
             // Merge sel untuk teks di A1 dan A2
-            $sheet->mergeCells('A1:L1');
-            $sheet->mergeCells('A2:L2');
-            $sheet->getStyle('A1:L2')->applyFromArray($subHeaderStyle);
+            $sheet->mergeCells('A1:N1');
+            $sheet->mergeCells('A2:N2');
+            $sheet->getStyle('A1:N2')->applyFromArray($subHeaderStyle);
 
 
             // Set header
@@ -3197,12 +3197,14 @@ class ExcelController extends BaseController
                 'Krg',
                 'Lot',
                 'Nama Cluster',
+                'Kgs Out',
+                'Cns Out',
                 'Keterangan',
             ];
             $sheet->fromArray($header, null, 'A3');
 
 
-            $sheet->getStyle('A3:L3')->applyFromArray($headerStyle);
+            $sheet->getStyle('A3:N3')->applyFromArray($headerStyle);
 
             // Tambahkan data
             $rowNumber = 4;
@@ -3210,12 +3212,18 @@ class ExcelController extends BaseController
                 // Hapus kolom yang tidak ingin dimasukkan
                 unset($row['tgl_pakai'], $row['jenis'], $row['id_pengeluaran'], $row['id_stock'], $row['id_out_celup'], $row['group'],);
 
-                $sheet->fromArray(array_values($row), null, "A$rowNumber");
+                $rowValues = array_values($row);
+
+                // Sisipkan 2 kolom kosong sebelum kolom terakhir
+                $last = array_pop($rowValues); // ambil kolom terakhir
+                array_push($rowValues, null, null, $last); // tambahkan null2 + kolom terakhir lagi
+
+                $sheet->fromArray($rowValues, null, "A$rowNumber");
                 $rowNumber++;
             }
             // Tambahkan border ke semua data
             $dataEndRow = $rowNumber - 1;
-            $sheet->getStyle("A3:L$dataEndRow")->applyFromArray([
+            $sheet->getStyle("A3:N$dataEndRow")->applyFromArray([
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,

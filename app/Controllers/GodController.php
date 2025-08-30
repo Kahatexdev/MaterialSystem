@@ -19,6 +19,8 @@ use App\Models\ClusterModel;
 use App\Models\MasterWarnaBenangModel;
 use App\Models\MasterMaterialModel;
 use App\Models\OtherBonModel;
+use App\Models\PemesananModel;
+use App\Models\TotalPemesananModel;
 
 
 
@@ -38,6 +40,8 @@ class GodController extends BaseController
     protected $request;
     protected $masterMaterialModel;
     protected $otherBonModel;
+    protected $pemesananModel;
+    protected $totalPemesananModel;
 
 
     public function __construct()
@@ -53,6 +57,8 @@ class GodController extends BaseController
         $this->masterWarnaBenangModel = new MasterWarnaBenangModel();
         $this->masterMaterialModel = new MasterMaterialModel();
         $this->otherBonModel = new OtherBonModel();
+        $this->pemesananModel = new PemesananModel();
+        $this->totalPemesananModel = new TotalPemesananModel();
         $this->request = \Config\Services::request();
 
         $this->role = session()->get('role');
@@ -893,7 +899,7 @@ class GodController extends BaseController
                     $builder->groupStart()
                         ->where('lot_stock', $lot)
                         ->orWhere('lot_awal', $lot)
-                    ->groupEnd();
+                        ->groupEnd();
                 }
 
                 $existing = $builder->get()->getRowArray();
@@ -923,7 +929,6 @@ class GodController extends BaseController
                         'krg_stock_awal' => (int)$krgKeluar,
                         'updated_at'     => date('Y-m-d H:i:s')
                     ]);
-
                 } else if (isset($existing['kgs_in_out']) && (float)$existing['kgs_in_out'] > 0 && $existing['cns_in_out'] > 0) {
                     // Set stok awal jika awal masih 0
                     $this->stockModel->update($existing['id_stock'], [
@@ -1339,5 +1344,254 @@ class GodController extends BaseController
         }
 
         return redirect()->to(base_url($this->role . "/importPemasukan"));
+    }
+
+    public function importPemesanan()
+    {
+        $data = [
+            'active' => 'importPemesanan',
+            'title'  => 'Import Pemesanan',
+            'role'   => $this->role,
+        ];
+
+        return view($this->role . '/god/importPemesanan', $data);
+    }
+
+    public function prosesImportPemesanan()
+    {
+        // ... ambil & validasi file (punya kamu) ...
+        // 1) Ambil file
+        $file = $this->request->getFile('fileImport');
+        if (!$file || !$file->isValid() || $file->hasMoved()) {
+            return redirect()->back()->with('error', 'File tidak valid atau sudah dipindahkan.');
+        }
+        $ext = strtolower($file->getExtension());
+        if (!in_array($ext, ['xlsx', 'xls', 'csv'])) {
+            return redirect()->back()->with('error', 'Format file harus .xlsx / .xls / .csv');
+        }
+
+        // 2) Simpan sementara
+        $newName = $file->getRandomName();
+        $destDir = WRITEPATH . 'uploads';
+        $file->move($destDir, $newName);
+        $path = rtrim($destDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $newName;
+
+        $spreadsheet = IOFactory::load($path);
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Ambil semua baris untuk baca kolom lain (string)
+        $rows  = $sheet->toArray(null, true, true, true);
+        if (empty($rows) || count($rows) < 2) {
+            return redirect()->back()->with('error', 'Tidak ada data (minimal header + 1 baris).');
+        }
+
+        // Map header
+        $headerRow = $rows[1];
+        $colMap = [];
+        foreach ($headerRow as $col => $title) {
+            $colMap[$col] = is_string($title) ? strtolower(trim($title)) : '';
+        }
+
+        $ok = 0;
+        $err = 0;
+        $errLogs = [];
+
+        // Mulai dari baris ke-2 (offset 1)
+        foreach (array_slice($rows, 1, null, true) as $rowNum => $row) {
+            $r = (int)$rowNum; // indeks baris asli di sheet
+
+            // --- ambil & normalisasi tanggal/jam pakai helper privat ---
+            $dt = $this->parseTanggalJam($sheet, $colMap, $r);
+            // $dt = ['tgl_list'=>?, 'jam_list'=>?, 'tgl_pesan'=>?, 'jam_pesan'=>?, 'tgl_pakai'=>?]
+
+            // Data kolom lain (string) dari $rows
+            $data = [];
+            foreach ($row as $col => $val) {
+                $key = $colMap[$col] ?? null;
+                if ($key) $data[$key] = trim((string)$val);
+            }
+
+            // Validasi material (punya kamu)
+            $idOrder = $this->masterOrderModel->select('id_order')
+                ->where('no_model', $data['no_model'] ?? '')
+                ->first();
+
+            $idMaterial = $this->materialModel->select('id_material')
+                ->where('id_order', $idOrder['id_order'] ?? '')
+                ->where('style_size', $data['style'] ?? '')
+                ->where('item_type',  $data['jenis'] ?? '')
+                ->where('kode_warna', $data['kode_warna'] ?? '')
+                ->first();
+
+            if (!$idMaterial) {
+                $err++;
+                $errLogs[] = "Baris $r: material tidak ditemukan untuk [no_model={$data['no_model']} / style={$data['style']} / jenis={$data['jenis']} / kode={$data['kode_warna']}]";
+                continue;
+            }
+
+            // Payload ke tabel pemesanan
+            $payload = [
+                'id_material'      => (int)$idMaterial['id_material'],
+                'tgl_list'         => $dt['tgl_list'],
+                'tgl_pesan'        => $dt['tgl_pesan'],
+                'tgl_pakai'        => $dt['tgl_pakai'],
+                'jl_mc'            => (int)($data['jl_mc'] ?? 0),
+                'ttl_qty_cones'    => (int)($data['ttl_qty_cones'] ?? 0),
+                'ttl_berat_cones'  => (float)($data['ttl_berat_cones'] ?? 0),
+                'sisa_kgs_mc'      => (float)($data['sisa_kgs_mc'] ?? 0),
+                'sisa_cones_mc'    => (int)($data['sisa_cns_mc'] ?? 0),
+                'lot'              => $data['lot'] ?? null,
+                'keterangan'       => $data['keterangan'] ?? null,
+                'po_tambahan'      => $data['po_tambahan'] ?? '0',
+                'status_kirim'     => strtoupper($data['kirim'] ?? ''),
+                'admin'            => $data['area'],
+                // simpan jam (kalau belum ada kolom khusus jam), pilih jam_pesan dulu baru jam_list
+                'additional_time'  => null,
+                'created_at'       => date('Y-m-d H:i:s'),
+            ];
+            // (opsional) jika kolom tgl_pesan kamu bertipe DATETIME dan ingin gabungkan dengan jam:
+            if ($dt['tgl_pesan'] && $dt['jam_pesan']) {
+                $payload['tgl_pesan'] = $dt['tgl_pesan'] . ' ' . $dt['jam_pesan'];
+            }
+            // dd($payload);
+            $this->pemesananModel->insert($payload);
+            $idPemesanan = (int)$this->pemesananModel->insertID();
+
+            // insert total_pemesanan
+            $this->totalPemesananModel->insert([
+                'id_pemesanan'     => $idPemesanan,
+                'total_qty'        => (int)($data['ttl_qty_cones'] ?? 0),
+                'total_berat'     => (float)($data['ttl_berat_cones'] ?? 0),
+            ]);
+
+            $ok++;
+        }
+
+        $msg = "Import selesai: OK=$ok | ERR=$err";
+        if ($err) $msg .= " | Detail: " . implode(' | ', $errLogs);
+        return redirect()->back()->with($err ? 'error' : 'success', $msg);
+    }
+
+    /**
+     * Cari huruf kolom dari nama header (case-insensitive),
+     * cocok pas, kalau tidak ada coba "contains".
+     */
+    private function pickCol(array $colMap, string $name): ?string
+    {
+        $name = strtolower($name);
+        foreach ($colMap as $col => $title) {
+            if ($title === $name) return $col;
+        }
+        foreach ($colMap as $col => $title) {
+            if ($title !== '' && strpos($title, $name) !== false) return $col;
+        }
+        return null;
+    }
+
+    /**
+     * Ambil & normalisasi waktu_list, tgl_pesan, jam_pesan, tgl_pakai dari baris $r.
+     * Kembalikan array: tgl_list (Y-m-d), jam_list (H:i:s), tgl_pesan, jam_pesan, tgl_pakai.
+     */
+    private function parseTanggalJam(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet, array $colMap, int $r): array
+    {
+        $out = ['tgl_list' => null, 'jam_list' => null, 'tgl_pesan' => null, 'jam_pesan' => null, 'tgl_pakai' => null];
+
+        $colWaktuList = $this->pickCol($colMap, 'waktu_list');
+        $colTglPesan  = $this->pickCol($colMap, 'tgl_pesan');
+        $colJamPesan  = $this->pickCol($colMap, 'jam_pesan');
+        $colTglPakai  = $this->pickCol($colMap, 'tgl_pakai');
+
+        if ($colWaktuList) {
+            $cell = $sheet->getCell($colWaktuList . $r);
+            $d = $this->parseCellDateTime($cell);
+            $out['tgl_list'] = $d['date'];
+            $out['jam_list'] = $d['time'];
+        }
+        if ($colTglPesan) {
+            $cell = $sheet->getCell($colTglPesan . $r);
+            $d = $this->parseCellDateTime($cell);
+            $out['tgl_pesan'] = $d['date'];
+        }
+        if ($colJamPesan) {
+            $cell = $sheet->getCell($colJamPesan . $r);
+            $d = $this->parseCellDateTime($cell);
+            $out['jam_pesan'] = $d['time'];
+        }
+        if ($colTglPakai) {
+            $cell = $sheet->getCell($colTglPakai . $r);
+            $d = $this->parseCellDateTime($cell);
+            $out['tgl_pakai'] = $d['date'];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Parse 1 cell jadi ['date'=>Y-m-d|null, 'time'=>H:i:s|null].
+     * Support:
+     * - Serial Excel (cell formatted as date/time)
+     * - "m/d/Y [H:i[:s]]"
+     * - "Y-m-d"
+     * - "YYYY年M月D日" (angka sampah di depan diabaikan)
+     * - "YYYYMMDD"
+     */
+    private function parseCellDateTime(\PhpOffice\PhpSpreadsheet\Cell\Cell $cell): array
+    {
+        $tz = new \DateTimeZone('Asia/Jakarta');
+        $val = $cell->getValue();
+
+        // Jika native date/time Excel
+        if (\PhpOffice\PhpSpreadsheet\Shared\Date::isDateTime($cell)) {
+            // excelToDateTimeObject lebih aman untuk berbagai versi
+            $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($val);
+            if ($dt instanceof \DateTimeInterface) {
+                $dt = (new \DateTime($dt->format('Y-m-d H:i:s')))->setTimezone($tz);
+                return ['date' => $dt->format('Y-m-d'), 'time' => $dt->format('H:i:s')];
+            }
+        }
+
+        $s = is_string($val) ? trim($val) : '';
+        if ($s === '') return ['date' => null, 'time' => null];
+
+        // bersihkan zero-width/BOM & whitespace
+        $s = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $s);
+        $s = preg_replace('/\s+/u', ' ', $s);
+
+        // Ambil time jika ada
+        $time = null;
+        if (preg_match('/\b(\d{1,2}):(\d{2})(?::(\d{2}))?\b/', $s, $m)) {
+            $h = str_pad((string)min(23, (int)$m[1]), 2, '0', STR_PAD_LEFT);
+            $i = str_pad((string)min(59, (int)$m[2]), 2, '0', STR_PAD_LEFT);
+            $sec = isset($m[3]) ? str_pad((string)min(59, (int)$m[3]), 2, '0', STR_PAD_LEFT) : '00';
+            $time = "$h:$i:$sec";
+        }
+
+        // 2025年6月30日 (abaikan angka di depan)
+        if (preg_match('/(20\d{2})\D+(\d{1,2})\D+(\d{1,2})/u', $s, $m)) {
+            $date = sprintf('%04d-%02d-%02d', (int)$m[1], max(1, min(12, (int)$m[2])), max(1, min(31, (int)$m[3])));
+            return ['date' => $date, 'time' => $time];
+        }
+
+        // m/d/Y
+        if (preg_match('/\b(\d{1,2})\/(\d{1,2})\/(\d{2,4})\b/', $s, $m)) {
+            $y = (int)$m[3];
+            if ($y < 100) $y += 2000;
+            $date = sprintf('%04d-%02d-%02d', $y, max(1, min(12, (int)$m[1])), max(1, min(31, (int)$m[2])));
+            return ['date' => $date, 'time' => $time];
+        }
+
+        // Y-m-d
+        if (preg_match('/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/', $s, $m)) {
+            $date = sprintf('%04d-%02d-%02d', (int)$m[1], max(1, min(12, (int)$m[2])), max(1, min(31, (int)$m[3])));
+            return ['date' => $date, 'time' => $time];
+        }
+
+        // YYYYMMDD
+        if (preg_match('/\b(20\d{2})(\d{2})(\d{2})\b/', $s, $m)) {
+            $date = sprintf('%04d-%02d-%02d', (int)$m[1], max(1, min(12, (int)$m[2])), max(1, min(31, (int)$m[3])));
+            return ['date' => $date, 'time' => $time];
+        }
+
+        return ['date' => null, 'time' => $time];
     }
 }
