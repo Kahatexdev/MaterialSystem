@@ -724,6 +724,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('excelPPHDays/(:any)/(:any)', 'ExcelController::excelPPHDays/$1/$2');
 
     $routes->get('pemesanan', 'PemesananController::pemesananArea');
+    $routes->get('importPemesanan', 'GodController::importPemesanan');
     $routes->get('filter_pemesananarea', 'PemesananController::pemesananArea');
     $routes->post('getUpdateListPemesanan', 'PemesananController::getUpdateListPemesanan');
     $routes->post('updateListPemesanan', 'ApiController::updatePemesananArea');
@@ -733,6 +734,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('pemesanan/ubahTanggalPemesanan', 'PemesananController::ubahTanggalPemesanan');
     $routes->post('pemesanan/updateRangeSeluruhArea', 'PemesananController::updateRangeSeluruhArea');
     $routes->post('pemesanan/updateRangeAreaTertentu', 'PemesananController::updateRangeAreaTertentu');
+
 
     //Celup
     $routes->get('schedule', 'ScheduleController::index');
@@ -771,6 +773,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('pengeluaranSementara/upload', 'GodController::uploadPengeluaranSementara');
 
     $routes->post('prosesImportPemasukan', 'GodController::prosesImportPemasukan');
+
+    $routes->post('prosesImportPemesanan', 'GodController::prosesImportPemesanan');
 
     // pengaduan
     $routes->get('pengaduan', 'ApiController::getpengaduan');

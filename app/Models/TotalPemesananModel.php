@@ -15,7 +15,6 @@ class TotalPemesananModel extends Model
     protected $allowedFields    = [
         'id_total_pemesanan',
         'ttl_jl_mc',
-        'id_material',
         'ttl_kg',
         'ttl_cns'
     ];
