@@ -605,18 +605,22 @@ class PemesananModel extends Model
     {
         return $this->where('id_total_pemesanan', $id)->first();
     }
-    public function getTglPemesananByJenis($jenis)
+    public function getTglPemesananByJenis($jenis, $tglPakai = null)
     {
-        $query = $this->db->table('pemesanan p')
+        $builder = $this->db->table('pemesanan p')
             ->select("p.tgl_pakai")
             ->join('total_pemesanan tp', 'tp.id_total_pemesanan = p.id_total_pemesanan', 'left')
             ->join('material m', 'm.id_material = p.id_material', 'left')
             ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
             ->join('master_material mm', 'mm.item_type = m.item_type', 'left')
             ->where('mm.jenis', $jenis)
-            ->where('p.status_kirim', 'YA')
-            ->groupBy('p.tgl_pakai')
-            ->get();
+            ->where('p.status_kirim', 'YA');
+        if (!empty($tglPakai)) {
+            $builder->where('p.tgl_pakai', $tglPakai);
+        }
+        $builder->groupBy('p.tgl_pakai')
+            ->orderBy('p.tgl_pakai', 'DESC');
+        $query = $builder->get();
         if (!$query) {
             // Cek error pada query
             print_r($this->db->error());

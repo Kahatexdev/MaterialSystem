@@ -520,11 +520,14 @@ class CelupController extends BaseController
     public function saveBon()
     {
         $data = $this->request->getPost();
-        // dd($data);
+        $tglDatang = $data['tgl_datang'];
+        list($d, $m, $y) = explode('-', $tglDatang);
+        $tglDatang = $y . '-' . $m . '-' . $d;
+
         $saveDataBon = [
             'detail_sj' => $data['detail_sj'],
             'no_surat_jalan' => $data['no_surat_jalan'],
-            'tgl_datang' => $data['tgl_datang'],
+            'tgl_datang' => $tglDatang,
             'admin' => session()->get('username'),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => '',
@@ -810,6 +813,59 @@ class CelupController extends BaseController
 
         // Hasilkan barcode untuk setiap ID outCelup di grup
         foreach ($groupedDetails as &$group) {
+            $getDeskripsi = $this->masterMaterialModel->where('item_type', $detail['item_type'])->select('deskripsi')->first();
+            if (!$getDeskripsi || empty($getDeskripsi['deskripsi'] ?? '')) {
+                $missing[] = $group['item_type'];
+            }
+            if (!empty($missing)) {
+                $msg = 'Tidak Ada Item Type: ' . implode(', ', $missing);
+                session()->setFlashdata('deskripsi_missing', $msg);
+
+                // hentikan proses selanjutnya dan kembalikan user
+                return redirect()->back()->with('error', $msg);
+            }
+            $deskripsiItemType = $getDeskripsi['deskripsi'];
+
+            // Jika $ukuranBenang ada di $itemTypeAsli, hapus dan simpan hasilnya di $itemTypeBaru
+            if (!empty($ukuranBenang) && strpos($deskripsiItemType, $ukuranBenang) !== false) {
+                $itemTypeBaru = trim(str_replace($ukuranBenang, '', $deskripsiItemType));
+            } else {
+                $itemTypeBaru = $deskripsiItemType;
+            }
+
+            // Ambil isi dalam tanda kurung pertama (jika ada)
+            $ketLipatan = '';
+            if (preg_match('/\(([^)]*)\)/', $itemTypeBaru, $matches)) {
+                $ketLipatan = trim($matches[1]); // hasil "KHUSUS LIPATAN"
+            }
+            // Hapus teks di dalam tanda kurung (beserta kurungnya)
+            $itemTypeBaru = preg_replace('/\([^)]*\)/', '', $itemTypeBaru);
+
+            // Hapus kata "LIPATAN" (case insensitive)
+            $itemTypeBaru = preg_replace('/\bLIPATAN\b/i', '', $itemTypeBaru);
+
+            // Rapikan spasi ganda jadi satu
+            $itemTypeBaru = trim(preg_replace('/\s+/', ' ', $itemTypeBaru));
+            // dd($itemTypeBaru);
+            // Mapping singkatan ke bentuk lengkap
+            $mapItemType = [
+                'CTN' => 'COTTON',
+                'CD'  => 'COMBED',
+                'ORG' => 'ORGANIC',
+                'CB'  => 'COMBED',
+                'SPDX'  => 'SPANDEX'
+            ];
+
+            // Replace jika ada singkatan menjadi bentuk lengkap
+            foreach ($mapItemType as $singkatan => $lengkap) {
+                $itemTypeBaru = preg_replace('/\b' . preg_quote($singkatan, '/') . '\b/i', $lengkap, $itemTypeBaru);
+            }
+
+            $ket = $group['jmlKarung'] . " KARUNG" . $group['ganti_retur'] . (!empty($ketLipatan) ? ' / ' . $ketLipatan : "");
+
+            $group['item_type'] = $itemTypeBaru;
+            $group['ket'] = $ket;
+
             // dd($group);
             foreach ($group['detailPengiriman'] as $outCelup => $id) {
                 // Hasilkan barcode dan encode sebagai base64
@@ -828,6 +884,7 @@ class CelupController extends BaseController
                     'lot' => $id['lot_kirim'],
                     'no_karung' => $id['no_karung'],
                     'operator_packing' => $group['totals']['operator_packing'],
+                    // 'ket' => $group['ket'],
                     'barcode' => 'data:image/png;base64,' . base64_encode($barcode),
                 ];
             }
@@ -1069,5 +1126,17 @@ class CelupController extends BaseController
         } else {
             return redirect()->to(base_url($this->role . '/outCelup/editBon/' . $getIdBon))->with('error', 'Data gagal dihapus.');
         }
+    }
+
+    public function cekNoKarung()
+    {
+        $idCelup = $this->request->getGet('id');
+        $noModel = $this->request->getGet('no_model');
+        $sj = $this->request->getGet('no_surat_jalan');
+        $lot = $this->request->getGet('lot_kirim');
+
+        $data = $this->outCelupModel->cekNoKarung($idCelup, $noModel, $sj, $lot);
+
+        return $this->response->setJSON($data);
     }
 }

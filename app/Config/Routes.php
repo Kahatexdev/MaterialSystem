@@ -299,8 +299,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pemesanan/filterPemesananArea', 'PemesananController::filterPemesananArea');
     $routes->get('pemesanan/exportPemesananArea', 'ExcelController::excelPemesananArea');
     $routes->post('pemesanan/listBarangKeluarPertgl', 'PemesananController::listBarangKeluarPertgl');
-    $routes->get('pemesanan/detailListBarangKeluar', 'PemesananController::detailListBarangKeluar');
-    $routes->get('pemesanan/detailListBarangKeluar', 'PemesananController::detailListBarangKeluar');
+    $routes->post('pemesanan/filterListBarangKeluarPertgl', 'PemesananController::filterListBarangKeluarPertgl');
     $routes->get('pemesanan/detailListBarangKeluar', 'PemesananController::detailListBarangKeluar');
     $routes->get('pemesanan/exportListBarangKeluar', 'ExcelController::exportListBarangKeluar');
     $routes->post('pemesanan/listPemesananSpandexKaretPertgl', 'PemesananController::listPemesananSpandexKaretPertgl');
@@ -397,6 +396,7 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     // $routes->get('insertBon/(:num)', 'CelupController::insertBon/$1');
     $routes->get('createBon', 'CelupController::createBon');
     $routes->post('createBon/getItem/(:num)', 'CelupController::getItem/$1');
+    $routes->get('createBon/cekNoKarung', 'CelupController::cekNoKarung');
 
     $routes->post('outCelup/saveBon/', 'CelupController::saveBon');
     $routes->get('retur', 'CelupController::retur');

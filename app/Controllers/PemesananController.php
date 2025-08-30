@@ -475,6 +475,7 @@ class PemesananController extends BaseController
                     'kode_warna'     => $row['kode_warna']  ?? '',
                     'warna'          => $row['warna']       ?? '',
                     'area_out'       => $row['area_out'],
+                    'no_karung'      => $row['no_karung'],
                     'tgl_out'        => $row['tgl_out'],
                     'kgs_out'        => $row['kgs_out']     ?? $row['ttl_kg'] ?? 0,
                     'cns_out'        => $row['cns_out']     ?? $row['ttl_cns'] ?? 0,
@@ -1098,9 +1099,13 @@ class PemesananController extends BaseController
     public function listBarangKeluarPertgl()
     {
         $jenis = $this->request->getPost('jenis');
+        $tglPakaiFilter = $this->request->getPost('filter_date') ?? '';
 
-        $tglPakai = $this->pemesananModel->getTglPemesananByJenis($jenis);
-        // dd($tglPakai);
+        $tglPakai = $this->pemesananModel->getTglPemesananByJenis($jenis, $tglPakaiFilter);
+
+        if ($this->request->getMethod() === 'post') {
+            return $this->response->setJSON($tglPakai);
+        }
 
         $data = [
             'active' => $this->active,
@@ -1110,6 +1115,20 @@ class PemesananController extends BaseController
             'tglPakai' => $tglPakai,
         ];
         return view($this->role . '/pemesanan/persiapanBarangPertgl', $data);
+    }
+    public function filterListBarangKeluarPertgl()
+    {
+        // $area = $this->request->getPost('area');
+        $jenis = $this->request->getPost('jenis');
+        $filterDate = $this->request->getPost('filter_date');
+
+        // log_message('debug', "Filter params: Area=$area, Jenis=$jenis, Tanggal=$filterDate");
+
+        $dataPemesanan = $this->pemesananModel->getTglPemesananByJenis($jenis, $filterDate);
+
+        // log_message('debug', 'Data retrieved: ' . json_encode($dataPemesanan));
+
+        return $this->response->setJSON($dataPemesanan);
     }
     public function detailListBarangKeluar()
     {

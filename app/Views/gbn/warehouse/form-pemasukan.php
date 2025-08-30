@@ -571,6 +571,9 @@
         function loadItemTypes() {
             var noModel = $('#no_model').val().trim();
             var retur = $('#retur').is(':checked') ? 1 : 0; // karena checkbox
+            var $lotKirimSelect = $('.lot-kirim'); // langsung ambil select lot
+            var $karungSelect = $('.no-karung'); // langsung ambil select lot
+
             if (noModel) {
                 $.ajax({
                     url: '<?= base_url($role . "/getItemTypeByModel") ?>/' + encodeURIComponent(noModel) + '?retur=' + retur,
@@ -585,6 +588,15 @@
 
                         // Call loadKodeWarna after item types are loaded, in case it's the initial load
                         loadKodeWarna(); // Uncomment if you want to call after item types are loaded
+                        $lotKirimSelect.empty().append('<option value="">Pilih Lot</option>');
+                        $karungSelect.empty().append('<option value="">Pilih No Karung</option>');
+                        $('input[name="no_karung"]').val('');
+                        $('input[name="warna"]').val('');
+                        $('input[name="id_out_celup"]').val('');
+                        $('input[name="gw_kirim"]').val(0);
+                        $('input[name="kgs_kirim"]').val(0).trigger('change');
+                        $('input[name="cns_kirim"]').val(0);
+                        $('input[name="sisa_kapasitas"]').val(0);
                     },
                     error: function(xhr, status, error) {
                         console.error("Terjadi kesalahan: " + error);
@@ -599,6 +611,8 @@
             var noModel = $('#no_model').val().trim();
             var itemType = $('#item_type').val().trim(); // Dapatkan itemType dengan benar
             var retur = $('#retur').is(':checked') ? 1 : 0; // karena checkbox
+            var $lotKirimSelect = $('.lot-kirim'); // langsung ambil select lot
+            var $karungSelect = $('.no-karung'); // langsung ambil select lot
 
             if (noModel && itemType) {
                 var url = `<?= base_url($role . "/getKodeWarnaByModelAndItemType") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}&retur=${retur}`;
@@ -620,6 +634,15 @@
                 });
             } else {
                 $row.find('.kode-warna').empty().append('<option value="">Pilih Kode Warna</option>');
+                $lotKirimSelect.empty().append('<option value="">Pilih Lot</option>');
+                $karungSelect.empty().append('<option value="">Pilih No Karung</option>');
+                $('input[name="no_karung"]').val('');
+                $('input[name="warna"]').val('');
+                $('input[name="id_out_celup"]').val('');
+                $('input[name="gw_kirim"]').val(0);
+                $('input[name="kgs_kirim"]').val(0).trigger('change');
+                $('input[name="cns_kirim"]').val(0);
+                $('input[name="sisa_kapasitas"]').val(0);
             }
         }
 
@@ -633,6 +656,7 @@
                 var kodeWarna = $(this).val().trim();
                 var $warnaInput = $form.find('input[name="warna"]'); // Cari input warna di dalam form terkait
                 var $lotSelect = $form.find(".lot-kirim");
+                var $karungSelect = $form.find(".no-karung");
                 var retur = $('#retur').is(':checked') ? 1 : 0; // karena checkbox
 
                 console.log("No Model:", noModel);
@@ -641,6 +665,15 @@
 
                 if (!noModel || !itemType || !kodeWarna) {
                     console.warn("Pastikan no_model, item_type, dan kode_warna sudah dipilih!");
+                    $lotSelect.empty().append('<option value="">Pilih Lot</option>');
+                    $karungSelect.empty().append('<option value="">Pilih No Karung</option>');
+                    $('input[name="no_karung"]').val('');
+                    $('input[name="warna"]').val('');
+                    $('input[name="id_out_celup"]').val('');
+                    $('input[name="gw_kirim"]').val(0);
+                    $('input[name="kgs_kirim"]').val(0).trigger('change');
+                    $('input[name="cns_kirim"]').val(0);
+                    $('input[name="sisa_kapasitas"]').val(0);
                     return;
                 }
 
@@ -724,7 +757,16 @@
                         $karungSelect.empty().append('<option value="">Pilih No Karung</option>');
                         if (response.data && response.data.length > 0) {
                             $.each(response.data, function(index, k) {
-                                $karungSelect.append('<option value="' + k.no_karung + '">' + k.no_karung + ' (Gw:' + k.gw_kirim + ' / Kgs:' + k.kgs_kirim + ' / Cns:' + k.cones_kirim + ')</option>');
+                                // $karungSelect.append('<option value="' + k.no_karung + '">' + k.no_karung + ' (Gw:' + k.gw_kirim + ' / Kgs:' + k.kgs_kirim + ' / Cns:' + k.cones_kirim + ' / SJ:' + k.no_surat_jalan + ')</option>');
+                                $karungSelect.append(
+                                    '<option value="' + k.no_karung + '" ' +
+                                    'data-id_out_celup="' + k.id_out_celup + '" ' +
+                                    'data-gw="' + k.gw_kirim + '" ' +
+                                    'data-kgs="' + k.kgs_kirim + '" ' +
+                                    'data-cns="' + k.cones_kirim + '">' +
+                                    k.no_karung + ' (Gw:' + k.gw_kirim + ' / Kgs:' + k.kgs_kirim + ' / Cns:' + k.cones_kirim + ' / SJ:' + k.no_surat_jalan + ')' +
+                                    '</option>'
+                                );
                             });
 
                         } else {
@@ -736,54 +778,69 @@
                         console.error("Respons yang diterima:", xhr.responseText);
                     }
                 });
+                $karungSelect.off("change").on("change", function() {
+                    var selected = $(this).find(":selected");
+                    var idOutCelup = selected.data("id_out_celup") || "";
+                    var gw = selected.data("gw") || 0;
+                    var kgs = selected.data("kgs") || 0;
+                    var cns = selected.data("cns") || 0;
+
+                    // isi ke input hidden
+                    $('input[name="id_out_celup"]').val(idOutCelup);
+                    $('input[name="gw_kirim"]').val(gw);
+                    $('input[name="kgs_kirim"]').val(kgs).trigger('change');
+                    $('input[name="cns_kirim"]').val(cns);
+                });
             });
         });
 
-        // Fungsi untuk Load Kgs Kirim dan Cones Kirim
-        $(document).ready(function() {
-            $('#no_karung').change(function() {
-                var noModel = $('#no_model').val();
-                var itemType = $('#item_type').val();
-                var kodeWarna = $('.kode-warna').val();
-                var lotKirim = $('#lot_kirim').val();
-                var noKarung = $(this).val();
-                var retur = $('#retur').is(':checked') ? 1 : 0; // karena checkbox
+        // // Fungsi untuk Load Kgs Kirim dan Cones Kirim
+        // $(document).ready(function() {
+        //     $('#no_karung').change(function() {
+        //         var noModel = $('#no_model').val();
+        //         var itemType = $('#item_type').val();
+        //         var kodeWarna = $('.kode-warna').val();
+        //         var lotKirim = $('#lot_kirim').val();
+        //         var noKarung = $(this).val();
+        //         var idOutCelup = $('#id_out_celup').val();
+        //         var retur = $('#retur').is(':checked') ? 1 : 0; // karena checkbox
 
-                console.log("No Model:", noModel);
-                console.log("Item Type:", itemType);
-                console.log("Kode Warna:", kodeWarna);
-                console.log("Lot Kirim:", lotKirim);
-                console.log("No Karung:", noKarung);
+        //         console.log("No Model:", noModel);
+        //         console.log("Item Type:", itemType);
+        //         console.log("Kode Warna:", kodeWarna);
+        //         console.log("Lot Kirim:", lotKirim);
+        //         console.log("No Karung:", noKarung);
 
-                if (lotKirim) {
-                    $.ajax({
+        //         if (lotKirim) {
+        //             $.ajax({
 
-                        url: `<?= base_url($role . "/getKgsDanCones") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}&kodeWarna=${kodeWarna}&lotKirim=${lotKirim}&noKarung=${noKarung}&retur=${retur}`,
-                        type: 'GET',
-                        dataType: 'json',
-                        success: function(response) {
-                            console.log("Response dari server:", response); // Debug response
-                            if (response.success) {
-                                $('input[name="id_out_celup"]').val(response.id_out_celup);
-                                $('input[name="gw_kirim"]').val(response.gw_kirim);
-                                $('input[name="kgs_kirim"]').val(response.kgs_kirim).trigger('change');
-                                $('input[name="cns_kirim"]').val(response.cones_kirim);
-                            } else {
-                                $('input[name="id_out_celup"]').val('');
-                                $('input[name="gw_kirim"]').val(0);
-                                $('input[name="kgs_kirim"]').val(0).trigger('change');
-                                $('input[name="cns_kirim"]').val(0);
-                                alert("Data untuk nomor karung tersebut tidak ditemukan. Nilai Kgs dan CNS di-reset ke 0.");
-                                console.log("Data tidak ditemukan");
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("AJAX Error: ", error);
-                        }
-                    });
-                }
-            });
-        });
+        //                 // url: `<?= base_url($role . "/getKgsDanCones") ?>?noModel=${noModel}&itemType=${encodeURIComponent(itemType)}&kodeWarna=${kodeWarna}&lotKirim=${lotKirim}&noKarung=${noKarung}&retur=${retur}`,
+        //                 url: `<?= base_url($role . "/getKgsDanCones") ?>?id_Out_celup=${idOutCelup}`,
+        //                 type: 'GET',
+        //                 dataType: 'json',
+        //                 success: function(response) {
+        //                     console.log("Response dari server:", response); // Debug response
+        //                     if (response.success) {
+        //                         $('input[name="id_out_celup"]').val(response.id_out_celup);
+        //                         $('input[name="gw_kirim"]').val(response.gw_kirim);
+        //                         $('input[name="kgs_kirim"]').val(response.kgs_kirim).trigger('change');
+        //                         $('input[name="cns_kirim"]').val(response.cones_kirim);
+        //                     } else {
+        //                         $('input[name="id_out_celup"]').val('');
+        //                         $('input[name="gw_kirim"]').val(0);
+        //                         $('input[name="kgs_kirim"]').val(0).trigger('change');
+        //                         $('input[name="cns_kirim"]').val(0);
+        //                         alert("Data untuk nomor karung tersebut tidak ditemukan. Nilai Kgs dan CNS di-reset ke 0.");
+        //                         console.log("Data tidak ditemukan");
+        //                     }
+        //                 },
+        //                 error: function(xhr, status, error) {
+        //                     console.error("AJAX Error: ", error);
+        //                 }
+        //             });
+        //         }
+        //     });
+        // });
         //fungsi untuk memilih cluster di modal
         $(document).ready(function() {
             $('input[name="kgs_kirim"]').on("change", function() {

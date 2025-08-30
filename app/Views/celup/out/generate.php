@@ -276,7 +276,7 @@
                             <th class="sticky text-left align-middle" colspan="2">NAMA LANGGANAN</th>
                             <th class="sticky text-left align-middle" colspan="3">KAOS KAKI</th>
                             <th class="sticky text-left align-middle" colspan="6">NO SURAT JALAN : <?= $dataBon['no_surat_jalan'] ?></th>
-                            <th class="sticky text-left align-middle" colspan="4">TANGGAL : <?= $dataBon['tgl_datang'] ?></th>
+                            <th class="sticky text-left align-middle" colspan="4">TANGGAL : <?= date('d-m-Y', strtotime($dataBon['tgl_datang'])) ?></th>
                         </tr>
                         <tr>
                             <th class="sticky text-center align-middle" rowspan="2">NO PO</th>
@@ -349,7 +349,7 @@
                                         <td class="text-center"><?= $bon['totals']['cones_kirim'] ?></td>
                                         <td class="text-center"><?= $bon['totals']['gw_kirim'] ?></td>
                                         <td class="text-center"><?= $bon['totals']['kgs_kirim'] ?></td>
-                                        <td class="text-center"><?= $bon['jmlKarung'] . " KARUNG" . $bon['ganti_retur'] ?></td>
+                                        <td class="text-center"><?= $bon['ket'] ?></td>
                         </tr>
                         <tr>
                             <td class="text-center"><?= $bon['buyer'] ?> KK</td>
@@ -376,7 +376,7 @@
                             <td class="text-center"><?= $bon['totals']['cones_kirim'] ?></td>
                             <td class="text-center"><?= $bon['totals']['gw_kirim'] ?></td>
                             <td class="text-center"><?= $bon['totals']['kgs_kirim'] ?></td>
-                            <td class="text-center"><?= $bon['jmlKarung'] . " KARUNG" . $bon['ganti_retur'] ?></td>
+                            <td class="text-center"><?= $bon['ket'] ?></td>
                             </tr>
                         <?php } elseif ($row == 2) { ?>
                             <td class="text-center"><?= $bon['buyer'] ?> KK</td>
@@ -442,7 +442,7 @@
                         <tr>
                             <th class="sticky text-left align-middle"></th>
                             <th class="sticky text-left align-middle" colspan="8">D = DARK</th>
-                            <th class="sticky text-center align-middle" colspan="4"></th>
+                            <th class="sticky text-center align-middle" colspan="4"><?= $dataBon['admin'] ?></th>
                             <th class="sticky text-center align-middle" colspan="2"></th>
                         </tr>
                     </footer>

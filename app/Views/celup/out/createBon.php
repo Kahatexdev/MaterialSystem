@@ -4,6 +4,8 @@
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="<?= base_url('assets/css/flatpickr/flatpickr.min.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/js/plugins/flatpickr/style.css') ?>">
 <style>
     /* Auto Complete */
     .ui-state-active {
@@ -66,7 +68,7 @@
                                     </div>
                                     <div class="col-md-4">
                                         <label>Tanggal Kirim</label>
-                                        <input type="date" class="form-control" id="tgl_datang" name="tgl_datang" required>
+                                        <input type="text" class="form-control" id="tgl_datang" name="tgl_datang" required placeholder="Pilih Tanggal">
                                     </div>
                                 </div>
                                 <!--  -->
@@ -245,7 +247,18 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.all.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
+<script src="<?= base_url('assets/css/flatpickr/flatpickr.min.js') ?>"></script>
+<script src="<?= base_url('assets/js/plugins/flatpickr/index.js') ?>"></script>
+<script>
+    flatpickr("#tgl_datang", {
+        dateFormat: "d-m-Y",
+        altInput: true,
+        altFormat: "d-m-Y",
+        locale: "id",
+        allowInput: true
+        // disableMobile: true
+    });
+</script>
 <script>
     $(document).ready(function() {
 
@@ -280,33 +293,6 @@
         let tabIndex = 2;
         let valueLot = "";
 
-        // Fungsi untuk memperbarui no karung berdasarkan urutan GW (tanpa mengubah posisi baris)
-        function updateNoKarungByGW(table) {
-            const rows = Array.from(table.querySelectorAll('tbody tr'));
-
-            // Buat array dengan data GW dan index asli
-            const gwData = rows.map((row, index) => {
-                const gwInput = row.querySelector('input[name*="gw_kirim"]');
-                const gwValue = parseFloat(gwInput.value) || 0;
-                return {
-                    gwValue,
-                    originalIndex: index,
-                    row
-                };
-            });
-
-            // Urutkan berdasarkan GW (dari kecil ke besar)
-            gwData.sort((a, b) => a.gwValue - b.gwValue);
-
-            // Update no karung berdasarkan urutan GW
-            gwData.forEach((data, sortedIndex) => {
-                const noKarungInput = data.row.querySelector('input[name*="no_karung"]');
-                if (noKarungInput) {
-                    noKarungInput.value = sortedIndex + 1;
-                }
-            });
-        }
-
         function updateTabNumbers() {
             // Update nomor pada setiap tab
             const tabButtons = navTab.querySelectorAll(".nav-link");
@@ -336,29 +322,7 @@
         function updateRowNumbers(table) {
             const rows = table.querySelectorAll("tbody tr");
             rows.forEach((row, index) => {
-                // Hanya update name attributes, tidak mengubah nilai no karung
-                const noKarungInput = row.querySelector("input[name^='no_karung']");
-                const conesInput = row.querySelector('input[name*="cones_kirim"]');
-                const gwInput = row.querySelector('input[name*="gw_kirim"]');
-                const kgsInput = row.querySelector('input[name*="kgs_kirim"]');
-
-                // Update name attributes sesuai dengan posisi baris yang baru
-                if (noKarungInput) {
-                    const tabIndexFromName = noKarungInput.name.match(/\[(\d+)\]/)[1];
-                    noKarungInput.name = `no_karung[${tabIndexFromName}][${index}]`;
-                }
-                if (conesInput) {
-                    const tabIndexFromName = conesInput.name.match(/\[(\d+)\]/)[1];
-                    conesInput.name = `cones_kirim[${tabIndexFromName}][${index}]`;
-                }
-                if (gwInput) {
-                    const tabIndexFromName = gwInput.name.match(/\[(\d+)\]/)[1];
-                    gwInput.name = `gw_kirim[${tabIndexFromName}][${index}]`;
-                }
-                if (kgsInput) {
-                    const tabIndexFromName = kgsInput.name.match(/\[(\d+)\]/)[1];
-                    kgsInput.name = `kgs_kirim[${tabIndexFromName}][${index}]`;
-                }
+                row.querySelector("input[name^='no_karung']").value = index + 1;
             });
         }
 
@@ -370,8 +334,6 @@
                 row.remove();
                 updateRowNumbers(table);
                 calculateTotals(table);
-                // Update no karung setelah menghapus baris
-                updateNoKarungByGW(table);
             }
         });
 
@@ -418,154 +380,154 @@
 
             // Tambahkan elemen `input-group` ke tab baru
             newTabPane.innerHTML = `
-        <div class="kebutuhan-item">
-                                    <div class="row g-3 mb-2">
-                                            <div class="col-md-12">
-                                                <label for="itemType">Done Celup</label>
-                                                <select class="form-control slc2" id="add_item_${tabIndex}" name="add_item" required>
-                                                    <option value="">Pilih Item </option>
-                                                    <?php foreach ($no_model as $item): ?>
-                                                         <option value="<?= $item['id_celup'] ?>"><?= $item['no_model'] ?> | <?= $item['item_type'] ?> |<?= $item['kode_warna'] ?> | <?= $item['warna']  ?> | Lot <?= $item['lot_celup'] ?> | <?= $item['kg_celup'] ?>kg</option>
-                                                    <?php endforeach; ?>
+            <div class="kebutuhan-item">
+                                        <div class="row g-3 mb-2">
+                                                <div class="col-md-12">
+                                                    <label for="itemType">Done Celup</label>
+                                                    <select class="form-control slc2" id="add_item_${tabIndex}" name="add_item" required>
+                                                        <option value="">Pilih Item </option>
+                                                        <?php foreach ($no_model as $item): ?>
+                                                            <option value="<?= $item['id_celup'] ?>"><?= $item['no_model'] ?> | <?= $item['item_type'] ?> |<?= $item['kode_warna'] ?> | <?= $item['warna'] ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                           <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <label>No Model</label>
+                                                <input type="text" class="form-control no-model" name="items[${tabIndex - 1}][id_celup]" id="${id_celup}" required placeholder="Pilih No Model" hidden>
+                                                <input type="text" class="form-control no-model" name="items[${tabIndex - 1}][no_model]" id="${newInputId}" required placeholder="Pilih No Model">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label>Item Type</label>
+                                                <select class="form-control item-type" name="items[${tabIndex - 1}][item_type]" id="${itemTypeId}" required>
+                                                    <option value="">Pilih Item Type</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label>Kode Warna</label>
+                                                <select class="form-control kode-warna" name="items[${tabIndex - 1}][kode_warna]" id="${kodeWarnaId}" required>
+                                                    <option value="">Pilih Kode Warna</option>
                                                 </select>
                                             </div>
                                         </div>
-                                       <div class="row g-3">
-                                        <div class="col-md-4">
-                                            <label>No Model</label>
-                                            <input type="text" class="form-control no-model" name="items[${tabIndex - 1}][id_celup]" id="${id_celup}" required placeholder="Pilih No Model" hidden>
-                                            <input type="text" class="form-control no-model" name="items[${tabIndex - 1}][no_model]" id="${newInputId}" required placeholder="Pilih No Model">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label>Item Type</label>
-                                            <select class="form-control item-type" name="items[${tabIndex - 1}][item_type]" id="${itemTypeId}" required>
-                                                <option value="">Pilih Item Type</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label>Kode Warna</label>
-                                            <select class="form-control kode-warna" name="items[${tabIndex - 1}][kode_warna]" id="${kodeWarnaId}" required>
-                                                <option value="">Pilih Kode Warna</option>
-                                            </select>
-                                        </div>
-                                    </div>
 
-                                    <!-- Surat Jalan Section -->
-                                    <div class="row g-3 mt-3">
-                                        <div class="col-md-4">
-                                            <label>Warna</label>
-                                               <select class="form-control kode-warna" name="items[${tabIndex - 1}][kode_warna]" id="${warnaId}" required>
-                                                <option value="">Pilih Kode Warna</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label>LMD</label>
-                                            <select class="form-control" name="l_m_d[${tabIndex - 1}]" id="l_m_d" required>
-                                                <option value="">Pilih LMD</option>
-                                                <option value="L">L</option>
-                                                <option value="M">M</option>
-                                                <option value="D">D</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label>Harga</label>
-                                            <input type="number" step="0.01" class="form-control" name="harga[${tabIndex - 1}]" id="harga" required>
-                                        </div>
-                                        <div class="col-md-1">
-                                            <label for="ganti-retur" class="text-center">Ganti Retur</label>
-                                            <div class="row">
-                                                <div class="col-md-3">
-                                                    <label>
-                                                        <input type="hidden" name="ganti_retur[${tabIndex - 1}]" value="0">
-                                                        <input type="checkbox" name="ganti_retur[${tabIndex - 1}]" value="1">
-                                                    </label>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="">Ya</label>
+                                        <!-- Surat Jalan Section -->
+                                        <div class="row g-3 mt-3">
+                                            <div class="col-md-4">
+                                                <label>Warna</label>
+                                                   <select class="form-control kode-warna" name="items[${tabIndex - 1}][kode_warna]" id="${warnaId}" required>
+                                                    <option value="">Pilih Kode Warna</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label>LMD</label>
+                                                <select class="form-control" name="l_m_d[${tabIndex - 1}]" id="l_m_d" required>
+                                                    <option value="">Pilih LMD</option>
+                                                    <option value="L">L</option>
+                                                    <option value="M">M</option>
+                                                    <option value="D">D</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label>Harga</label>
+                                                <input type="number" step="0.01" class="form-control" name="harga[${tabIndex - 1}]" id="harga" required>
+                                            </div>
+                                            <div class="col-md-1">
+                                                <label for="ganti-retur" class="text-center">Ganti Retur</label>
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <label>
+                                                            <input type="hidden" name="ganti_retur[${tabIndex - 1}]" value="0">
+                                                            <input type="checkbox" name="ganti_retur[${tabIndex - 1}]" value="1">
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label for="">Ya</label>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="mt-5">
-                                        <h3>Form Input Data Karung</h3>
-                                    </div>
+                                        <div class="mt-5">
+                                            <h3>Form Input Data Karung</h3>
+                                        </div>
 
-                                    <!-- Out Celup Section -->
-                                    <div class="row g-3 mt-3">
-                                        <div class="table-responsive">
-                                            <table id="${newPoTableId}" class="table table-bordered table-striped">
-                                                <thead>
-                                                    <tr>
-                                                        <th width=100 class="text-center">No</th>
-                                                        <th class="text-center">Cones Kirim</th>
-                                                        <th class="text-center">GW Kirim</th>
-                                                        <th class="text-center">Kgs Kirim</th>
-                                                        <th class="text-center">Lot Kirim</th>
-                                                        <th class="text-center">Operator Packing</th>
-                                                        <th class="text-center">Shift</th>
-                                                        <th class="text-center">
-                                                            <button type="button" class="btn btn-info" id="addRow">
-                                                                <i class="fas fa-plus"></i>
-                                                            </button>
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td><input type="text" class="form-control text-center" name="no_karung[${tabIndex - 1}][0]" value="1" readonly></td>
-                                                        <td><input type="number" step="0.01" min="0.01" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex - 1}][0]" required></td>
-                                                        <td><input type="number" step="0.01" min="0.01" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex - 1}][0]" required></td>
-                                                        <td><input type="number" step="0.01" min="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex - 1}][0]" required></td>
-                                                        <td><input type="text" class="form-control lot_celup_input" name="items[${tabIndex - 1}][lot_celup]" id="${lotCelupId}" required></td>
-                                                        <td><input type="text" class="form-control operator_packing_input" name="operator_packing[${tabIndex - 1}][0]" required></td>
-                                                            <td><select class="form-control" name="shift[${tabIndex - 1}][0]" id="shift" required>
-                                                                    <option value="">Pilih Shift</option>
-                                                                    <option value="SHIFT A">Shift A</option>
-                                                                    <option value="SHIFT B">Shift B</option>
-                                                                    <option value="SHIFT C">Shift C</option>
-                                                                </select></td>
-                                                        <td class="text-center">
-                                                            <!-- <button type="button" class="btn btn-danger removeRow">
-                                                                    <i class="fas fa-trash"></i>
-                                                                </button> -->
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                                <!-- Baris Total -->
-                                                <tfoot>
-                                                    <tr>
-                                                        <th class="text-center">Total Karung</th>
-                                                        <th class="text-center">Total Cones</th>
-                                                        <th class="text-center">Total GW</th>
-                                                        <th class="text-center">Total NW</th>
-                                                        <th class="text-center">Total Lot</th>
-                                                        <th></th>
-                                                    </tr>
-                                                     <tr>
-                                                        <td><input type="number" class="form-control" id="${totalKarungId}" readonly></td>
-                                                        <td><input type="float" class="form-control" id="${totalConesId}" readonly></td>
-                                                        <td><input type="float" class="form-control" id="${totalGwId}" readonly></td>
-                                                        <td><input type="float" class="form-control" id="${totalKgsId}" readonly></td>
-                                                        <td><input type="text" class="form-control" id="${totalLotId}" readonly></td>
-                                                        <td></td>
-                                                    </tr>
-                                                </tfoot>
-                                            </table>
+                                        <!-- Out Celup Section -->
+                                        <div class="row g-3 mt-3">
+                                            <div class="table-responsive">
+                                                <table id="${newPoTableId}" class="table table-bordered table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th width=100 class="text-center">No</th>
+                                                            <th class="text-center">Cones Kirim</th>
+                                                            <th class="text-center">GW Kirim</th>
+                                                            <th class="text-center">Kgs Kirim</th>
+                                                            <th class="text-center">Lot Kirim</th>
+                                                            <th class="text-center">Operator Packing</th>
+                                                            <th class="text-center">Shift</th>
+                                                            <th class="text-center">
+                                                                <button type="button" class="btn btn-info" id="addRow">
+                                                                    <i class="fas fa-plus"></i>
+                                                                </button>
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td><input type="text" class="form-control text-center" name="no_karung[${tabIndex - 1}][0]" value="1" readonly></td>
+                                                            <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex - 1}][0]" required></td>
+                                                            <td><input type="number" step="0.01" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex - 1}][0]" required></td>
+                                                            <td><input type="number" step="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex - 1}][0]" required></td>
+                                                            <td><input type="text" class="form-control lot_celup_input" name="items[${tabIndex - 1}][lot_celup]" id="${lotCelupId}" required></td>
+                                                            <td><input type="text" class="form-control operator_packing_input" name="operator_packing[${tabIndex - 1}][0]" required></td>
+                                                                <td><select class="form-control" name="shift[${tabIndex - 1}][0]" id="shift" required>
+                                                                        <option value="">Pilih Shift</option>
+                                                                        <option value="SHIFT A">Shift A</option>
+                                                                        <option value="SHIFT B">Shift B</option>
+                                                                        <option value="SHIFT C">Shift C</option>
+                                                                    </select></td>
+                                                            <td class="text-center">
+                                                                <!-- <button type="button" class="btn btn-danger removeRow">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </button> -->
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                    <!-- Baris Total -->
+                                                    <tfoot>
+                                                        <tr>
+                                                            <th class="text-center">Total Karung</th>
+                                                            <th class="text-center">Total Cones</th>
+                                                            <th class="text-center">Total GW</th>
+                                                            <th class="text-center">Total NW</th>
+                                                            <th class="text-center">Total Lot</th>
+                                                            <th></th>
+                                                        </tr>
+                                                         <tr>
+                                                            <td><input type="number" class="form-control" id="${totalKarungId}" readonly></td>
+                                                            <td><input type="float" class="form-control" id="${totalConesId}" readonly></td>
+                                                            <td><input type="float" class="form-control" id="${totalGwId}" readonly></td>
+                                                            <td><input type="float" class="form-control" id="${totalKgsId}" readonly></td>
+                                                            <td><input type="text" class="form-control" id="${totalLotId}" readonly></td>
+                                                            <td></td>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <!-- Buttons -->
+                                        <div class="row mt-3">
+                                            <div class="col-12 text-center mt-2">
+                                                <button class="btn btn-icon btn-3 btn-outline-info add-more" type="button">
+                                                    <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
+                                                </button>
+                                                <button class="btn btn-icon btn-3 btn-outline-danger remove-tab" type="button">
+                                                    <span class="btn-inner--icon"><i class="fas fa-trash"></i></span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                    <!-- Buttons -->
-                                    <div class="row mt-3">
-                                        <div class="col-12 text-center mt-2">
-                                            <button class="btn btn-icon btn-3 btn-outline-info add-more" type="button">
-                                                <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
-                                            </button>
-                                            <button class="btn btn-icon btn-3 btn-outline-danger remove-tab" type="button">
-                                                <span class="btn-inner--icon"><i class="fas fa-trash"></i></span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-        `;
+            `;
 
             navTabContent.appendChild(newTabPane);
             document.getElementById(newContentId).querySelectorAll('.slc2').forEach(el => {
@@ -608,46 +570,39 @@
             newTabPane.querySelector(".remove-tab").addEventListener("click", function() {
                 removeTab(newTabButton, newTabPane);
             });
-
-            // Pasang event listener pada input baru dengan GW sorting
+            // Pasang event listener pada input baru
             newTabPane.querySelectorAll("input").forEach(input => {
                 input.addEventListener("input", () => {
-                    const table = newTabPane.querySelector(`#${newPoTableId}`);
-                    calculateTotals(table);
-                    // Jika yang berubah adalah input GW, update no karung berdasarkan GW
-                    if (input.name.includes('gw_kirim')) {
-                        updateNoKarungByGW(table);
-                    }
+                    calculateTotals(newTabPane.querySelector(`#${newPoTableId}`));
                 });
             });
-
             // Add row functionality
             const addRowButton = newTabPane.querySelector("#addRow");
+            const removeRowButton = newTabPane.querySelector("#removeRow");
             const newPoTable = newTabPane.querySelector(`#${newPoTableId}`);
             const makan = tabIndex - 1;
             console.log(makan);
-
             addRowButton.addEventListener("click", function() {
                 const rowCount = newPoTable.querySelectorAll("tbody tr").length + 1;
                 const newRow = document.createElement("tr");
 
                 newRow.innerHTML = `
-                <td><input type="text" class="form-control text-center" name="no_karung[${tabIndex-2}][${rowCount-1}]" value="${rowCount}" readonly></td>
-                <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
-                <td><input type="number" step="0.01" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
-                <td><input type="number" step="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
-                <td><input type="text" class="form-control lot_celup_input" name="lot_celup[${tabIndex-2}][${rowCount-1}]" value="${valueLot}" id="${lotCelupId}" required></td>
-                <td><input type="text" class="form-control operator_packing_input" name="operator_packing[${tabIndex-2}][${rowCount-1}]" disabled></td>
-                    <td><select class="form-control" name="shift[${tabIndex-2}][${rowCount-1}]" id="shift" disabled>
-                    <option value=""></option>
-                    <option value="SHIFT A">Shift A</option>
-                    <option value="SHIFT B">Shift B</option>
-                    <option value="SHIFT C">Shift C</option>
-                    </select></td>
-                <td class="text-center">
-                <button type="button" class="btn btn-danger removeRow"><i class="fas fa-trash"></i></button>
-                </td>
-                `;
+                    <td><input type="text" class="form-control text-center" name="no_karung[${tabIndex-2}][${rowCount-1}]" value="${rowCount}" readonly></td>
+                    <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
+                    <td><input type="number" step="0.01" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
+                    <td><input type="number" step="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
+                    <td><input type="text" class="form-control lot_celup_input" name="lot_celup[${tabIndex-2}][${rowCount-1}]" value="${valueLot}" id="${lotCelupId}" required></td>
+                    <td><input type="text" class="form-control operator_packing_input" name="operator_packing[${tabIndex-2}][${rowCount-1}]" disabled></td>
+                        <td><select class="form-control" name="shift[${tabIndex-2}][${rowCount-1}]" id="shift" disabled>
+                        <option value=""></option>
+                        <option value="SHIFT A">Shift A</option>
+                        <option value="SHIFT B">Shift B</option>
+                        <option value="SHIFT C">Shift C</option>
+                        </select></td>
+                    <td class="text-center">
+                    <button type="button" class="btn btn-danger removeRow"><i class="fas fa-trash"></i></button>
+                    </td>
+                    `;
 
                 newPoTable.querySelector("tbody").appendChild(newRow);
 
@@ -655,39 +610,31 @@
                 newRow.querySelector(".removeRow").addEventListener("click", function() {
                     newRow.remove();
                     updateRowNumbers(newPoTable);
-                    calculateTotals(newPoTable);
-                    // Update no karung setelah menghapus baris
-                    updateNoKarungByGW(newPoTable);
+                    calculateTotals(newPoTable); // Perbarui total setelah baris dihapus
                 });
-
-                // Event listener untuk input baru dengan GW sorting
+                // Recalculate totals when new row is added
                 newRow.querySelectorAll('input').forEach(input => {
                     input.addEventListener('input', function() {
                         calculateTotals(newPoTable);
-                        // Jika yang berubah adalah input GW, update no karung berdasarkan GW
-                        if (input.name.includes('gw_kirim')) {
-                            updateNoKarungByGW(newPoTable);
-                        }
                     });
                 });
-
+                // calculateTotals(newPoTable);
                 calculateTotals(newTabPane.querySelector(`#${newPoTableId}`));
             });
 
-            // Event listeners for existing input changes with GW sorting
+            // Event listeners for input changes
             newPoTable.querySelectorAll('input').forEach(input => {
                 input.addEventListener('input', function() {
                     calculateTotals(newPoTable);
-                    // Jika yang berubah adalah input GW, update no karung berdasarkan GW
-                    if (input.name.includes('gw_kirim')) {
-                        updateNoKarungByGW(newPoTable);
-                    }
                 });
             });
+
+
 
             tabIndex++;
             calculateTotals(newPoTable);
         }
+
 
         function removeTab(tabButton, tabPane) {
             if (navTab.children.length > 1) {
@@ -715,7 +662,6 @@
             const firstTabPane = navTabContent.querySelector(".tab-pane");
             removeTab(firstTabButton, firstTabPane);
         });
-
         updateTabNumbers();
     });
 
@@ -727,60 +673,8 @@
         poTable.querySelectorAll('tbody input').forEach(input => {
             input.addEventListener('input', () => {
                 calculateTotals(poTable);
-                // Jika yang berubah adalah input GW, update no karung berdasarkan GW
-                if (input.name.includes('gw_kirim')) {
-                    updateNoKarungByGW(poTable);
-                }
             });
         });
-
-        // Fungsi untuk memperbarui no karung berdasarkan urutan GW (tanpa mengubah posisi baris)
-        function updateNoKarungByGW(table) {
-            const rows = Array.from(table.querySelectorAll('tbody tr'));
-
-            // Buat array dengan data GW dan index asli
-            const gwData = rows.map((row, index) => {
-                const gwInput = row.querySelector('input[name*="gw_kirim"]');
-                const gwValue = parseFloat(gwInput.value) || 0;
-                return {
-                    gwValue,
-                    originalIndex: index,
-                    row
-                };
-            });
-
-            // Urutkan berdasarkan GW (dari kecil ke besar)
-            gwData.sort((a, b) => a.gwValue - b.gwValue);
-
-            // Update no karung berdasarkan urutan GW
-            gwData.forEach((data, sortedIndex) => {
-                const noKarungInput = data.row.querySelector('input[name*="no_karung"]');
-                if (noKarungInput) {
-                    noKarungInput.value = sortedIndex + 1;
-                }
-            });
-        }
-
-        // Fungsi untuk memperbarui nomor baris (hanya untuk name attributes)
-        function updateRowNumbers(table) {
-            const rows = table.querySelectorAll("tbody tr");
-            rows.forEach((row, index) => {
-                // Update name attributes untuk input
-                const noKarungInput = row.querySelector('input[name*="no_karung"]');
-                const conesInput = row.querySelector('input[name*="cones_kirim"]');
-                const gwInput = row.querySelector('input[name*="gw_kirim"]');
-                const kgsInput = row.querySelector('input[name*="kgs_kirim"]');
-                const operatorInput = row.querySelector('input[name*="operator_packing"]');
-                const shiftSelect = row.querySelector('select[name*="shift"]');
-
-                if (noKarungInput) noKarungInput.name = `no_karung[0][${index}]`;
-                if (conesInput) conesInput.name = `cones_kirim[0][${index}]`;
-                if (gwInput) gwInput.name = `gw_kirim[0][${index}]`;
-                if (kgsInput) kgsInput.name = `kgs_kirim[0][${index}]`;
-                if (operatorInput) operatorInput.name = `operator_packing[0][${index}]`;
-                if (shiftSelect) shiftSelect.name = `shift[0][${index}]`;
-            });
-        }
 
         // Event listener untuk select2
         $(document).ready(function() {
@@ -820,8 +714,8 @@
             <td><input type="number" step="0.01" class="form-control" name="gw_kirim[0][${rowCount-1}]" required></td>
             <td><input type="number" step="0.01" class="form-control" name="kgs_kirim[0][${rowCount-1}]" required></td>
             <td><input type="text" class="form-control lot_celup_input" name="items[0][lot_celup]" id="lot_celup" value="${lotCelupValue}" required></td>
-            <td><input type="text" class="form-control" name="operator_packing[0][${rowCount-1}]" disabled></td>
-            <td><select class="form-control" name="shift[0][${rowCount-1}]" id="shift" disabled>
+            <td><input type="text" class="form-control" name="operator_packing[0][${rowCount - 1}]" disabled></td>
+            <td><select class="form-control" name="shift[0][${rowCount - 1}]" id="shift" disabled>
                 <option value=""></option>
                 <option value="SHIFT A">Shift A</option>
                 <option value="SHIFT B">Shift B</option>
@@ -840,10 +734,6 @@
             newRow.querySelectorAll('input').forEach(input => {
                 input.addEventListener('input', () => {
                     calculateTotals(poTable);
-                    // Jika yang berubah adalah input GW, update no karung berdasarkan GW
-                    if (input.name.includes('gw_kirim')) {
-                        updateNoKarungByGW(poTable);
-                    }
                 });
             });
 
@@ -892,31 +782,6 @@
             tfoot.querySelector("input[id^='total_lot_kirim']").value = totalRows;
         }
     }
-
-    document.querySelector("form").addEventListener("submit", function(e) {
-        let valid = true;
-        let message = "";
-
-        // ambil semua input di dalam #poTable
-        document.querySelectorAll("#poTable .cones_kirim_input, #poTable .gw_kirim_input, #poTable .kgs_kirim_input").forEach(input => {
-            let val = parseFloat(input.value);
-            if (isNaN(val) || val <= 0) {
-                valid = false;
-                message = "Cones, GW, dan NW harus lebih dari 0!";
-                input.focus();
-            }
-        });
-
-        if (!valid) {
-            e.preventDefault(); // stop submit
-            Swal.fire({
-                icon: "error",
-                title: "Validasi Gagal",
-                text: message,
-                confirmButtonColor: "#d33"
-            });
-        }
-    });
 
     document.addEventListener("DOMContentLoaded", function() {
         // Untuk tab pertama
