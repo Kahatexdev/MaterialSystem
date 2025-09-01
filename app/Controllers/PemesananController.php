@@ -825,90 +825,90 @@ class PemesananController extends BaseController
         return redirect()->to($this->role . '/pengiriman_area');
     }
 
-    public function selectClusterWarehouse($id)
-    {
-        $KgsPesan = $this->request->getGet('KgsPesan');
-        $CnsPesan = $this->request->getGet('CnsPesan');
-        $getPemesanan = $this->totalPemesananModel->getDataPemesananbyId($id);
-        $getPersiapanPengeluaran = $this->pengeluaranModel->getKgPersiapanPengeluaran($getPemesanan['id_total_pemesanan']);
-        $getPengiriman = $this->pengeluaranModel->getKgPengiriman($getPemesanan['id_total_pemesanan']);
-        $cluster = $this->stockModel->getDataCluster($getPemesanan['no_model'], $getPemesanan['item_type'], $getPemesanan['kode_warna'], $getPemesanan['color']);
-        $ketPemesanan = $this->pemesananModel->select('id_total_pemesanan, GROUP_CONCAT(DISTINCT keterangan_gbn) AS ket_gbn')
-            ->where('id_total_pemesanan', $id)
-            ->first();
-
-        $data = [
-            'active' => $this->active,
-            'title' => 'Material System',
-            'role' => $this->role,
-            'cluster' => $cluster,
-            'noModel' => $getPemesanan['no_model'],
-            'itemType' => $getPemesanan['item_type'],
-            'kodeWarna' => $getPemesanan['kode_warna'],
-            'noModel' => $getPemesanan['no_model'],
-            'area' => $getPemesanan['admin'],
-            'id' => $id,
-            'ketGbn' => $ketPemesanan['ket_gbn'] ?? '',
-            'KgsPesan' => $KgsPesan,
-            'CnsPesan' => $CnsPesan,
-            'kgPersiapan' => $getPersiapanPengeluaran['kgs_out'],
-            'kgPengiriman' => $getPengiriman['kgs_out'],
-        ];
-
-        // dd ($data);
-        return view($this->role . '/pemesanan/select-cluster', $data);
-    }
-
-    // public function selectClusterWarehouse(int $id)
+    // public function selectClusterWarehouse($id)
     // {
-    //     // Ambil kebutuhan dari query string (opsional)
-    //     $KgsPesan = (float)($this->request->getGet('KgsPesan') ?? 0);
-    //     $CnsPesan = (int)($this->request->getGet('CnsPesan') ?? 0);
-
-    //     // 1 query detail pemesanan (hanya kolom yang dipakai)
-    //     $pemesanan = $this->totalPemesananModel->findWithDetails($id);
-    //     if (!$pemesanan) {
-    //         return redirect()->back()->with('error', 'Data pemesanan tidak ditemukan.');
-    //     }
-
-    //     // 1 query agregat untuk dua status sekaligus
-    //     $agg = $this->pengeluaranModel->sumKgsByStatus($id);
-    //     $kgPersiapan = (float)($agg['kgs_persiapan'] ?? 0);
-    //     $kgPengiriman = (float)($agg['kgs_pengiriman'] ?? 0);
-
-    //     // 1 query cluster (grouping)
-    //     $clusterRows = $this->stockModel->listCluster(
-    //         $pemesanan['no_model'],
-    //         $pemesanan['item_type'],
-    //         $pemesanan['kode_warna'],
-    //         $pemesanan['color']
-    //     );
-    //     // dd($clusterRows);
-    //     // keterangan gabungan (tetap 1 query ringan)
-    //     $ket = $this->pemesananModel
-    //         ->select('GROUP_CONCAT(DISTINCT keterangan_gbn) AS ket_gbn')
+    //     $KgsPesan = $this->request->getGet('KgsPesan');
+    //     $CnsPesan = $this->request->getGet('CnsPesan');
+    //     $getPemesanan = $this->totalPemesananModel->getDataPemesananbyId($id);
+    //     $getPersiapanPengeluaran = $this->pengeluaranModel->getKgPersiapanPengeluaran($getPemesanan['id_total_pemesanan']);
+    //     $getPengiriman = $this->pengeluaranModel->getKgPengiriman($getPemesanan['id_total_pemesanan']);
+    //     $cluster = $this->stockModel->getDataCluster($getPemesanan['no_model'], $getPemesanan['item_type'], $getPemesanan['kode_warna'], $getPemesanan['color']);
+    //     $ketPemesanan = $this->pemesananModel->select('id_total_pemesanan, GROUP_CONCAT(DISTINCT keterangan_gbn) AS ket_gbn')
     //         ->where('id_total_pemesanan', $id)
     //         ->first();
 
     //     $data = [
-    //         'active'        => $this->active,
-    //         'title'         => 'Material System',
-    //         'role'          => $this->role,
-    //         'cluster'       => $clusterRows,
-    //         'noModel'       => $pemesanan['no_model'],
-    //         'itemType'      => $pemesanan['item_type'],
-    //         'kodeWarna'     => $pemesanan['kode_warna'],
-    //         'area'          => $pemesanan['admin'],
-    //         'id'            => $id,
-    //         'ketGbn'        => $ket['ket_gbn'] ?? '',
-    //         'KgsPesan'      => $KgsPesan,
-    //         'CnsPesan'      => $CnsPesan,
-    //         'kgPersiapan'   => $kgPersiapan,
-    //         'kgPengiriman'  => $kgPengiriman,
+    //         'active' => $this->active,
+    //         'title' => 'Material System',
+    //         'role' => $this->role,
+    //         'cluster' => $cluster,
+    //         'noModel' => $getPemesanan['no_model'],
+    //         'itemType' => $getPemesanan['item_type'],
+    //         'kodeWarna' => $getPemesanan['kode_warna'],
+    //         'noModel' => $getPemesanan['no_model'],
+    //         'area' => $getPemesanan['admin'],
+    //         'id' => $id,
+    //         'ketGbn' => $ketPemesanan['ket_gbn'] ?? '',
+    //         'KgsPesan' => $KgsPesan,
+    //         'CnsPesan' => $CnsPesan,
+    //         'kgPersiapan' => $getPersiapanPengeluaran['kgs_out'],
+    //         'kgPengiriman' => $getPengiriman['kgs_out'],
     //     ];
 
+    //     // dd ($data);
     //     return view($this->role . '/pemesanan/select-cluster', $data);
     // }
+
+    public function selectClusterWarehouse(int $id)
+    {
+        // Ambil kebutuhan dari query string (opsional)
+        $KgsPesan = (float)($this->request->getGet('KgsPesan') ?? 0);
+        $CnsPesan = (int)($this->request->getGet('CnsPesan') ?? 0);
+
+        // 1 query detail pemesanan (hanya kolom yang dipakai)
+        $pemesanan = $this->totalPemesananModel->findWithDetails($id);
+        if (!$pemesanan) {
+            return redirect()->back()->with('error', 'Data pemesanan tidak ditemukan.');
+        }
+
+        // 1 query agregat untuk dua status sekaligus
+        $agg = $this->pengeluaranModel->sumKgsByStatus($id);
+        $kgPersiapan = (float)($agg['kgs_persiapan'] ?? 0);
+        $kgPengiriman = (float)($agg['kgs_pengiriman'] ?? 0);
+
+        // 1 query cluster (grouping)
+        $clusterRows = $this->stockModel->listCluster(
+            $pemesanan['no_model'],
+            $pemesanan['item_type'],
+            $pemesanan['kode_warna'],
+            $pemesanan['color']
+        );
+        // dd($clusterRows);
+        // keterangan gabungan (tetap 1 query ringan)
+        $ket = $this->pemesananModel
+            ->select('GROUP_CONCAT(DISTINCT keterangan_gbn) AS ket_gbn')
+            ->where('id_total_pemesanan', $id)
+            ->first();
+
+        $data = [
+            'active'        => $this->active,
+            'title'         => 'Material System',
+            'role'          => $this->role,
+            'cluster'       => $clusterRows,
+            'noModel'       => $pemesanan['no_model'],
+            'itemType'      => $pemesanan['item_type'],
+            'kodeWarna'     => $pemesanan['kode_warna'],
+            'area'          => $pemesanan['admin'],
+            'id'            => $id,
+            'ketGbn'        => $ket['ket_gbn'] ?? '',
+            'KgsPesan'      => $KgsPesan,
+            'CnsPesan'      => $CnsPesan,
+            'kgPersiapan'   => $kgPersiapan,
+            'kgPengiriman'  => $kgPengiriman,
+        ];
+
+        return view($this->role . '/pemesanan/select-cluster', $data);
+    }
 
 
     public function getDataByIdStok($id)
@@ -985,6 +985,8 @@ class PemesananController extends BaseController
             ];
         }
         // Debugging
+        // dd($data);
+
         return $this->response->setJSON($data);
     }
 
