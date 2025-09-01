@@ -859,6 +859,58 @@ class PemesananController extends BaseController
         return view($this->role . '/pemesanan/select-cluster', $data);
     }
 
+    // public function selectClusterWarehouse(int $id)
+    // {
+    //     // Ambil kebutuhan dari query string (opsional)
+    //     $KgsPesan = (float)($this->request->getGet('KgsPesan') ?? 0);
+    //     $CnsPesan = (int)($this->request->getGet('CnsPesan') ?? 0);
+
+    //     // 1 query detail pemesanan (hanya kolom yang dipakai)
+    //     $pemesanan = $this->totalPemesananModel->findWithDetails($id);
+    //     if (!$pemesanan) {
+    //         return redirect()->back()->with('error', 'Data pemesanan tidak ditemukan.');
+    //     }
+
+    //     // 1 query agregat untuk dua status sekaligus
+    //     $agg = $this->pengeluaranModel->sumKgsByStatus($id);
+    //     $kgPersiapan = (float)($agg['kgs_persiapan'] ?? 0);
+    //     $kgPengiriman = (float)($agg['kgs_pengiriman'] ?? 0);
+
+    //     // 1 query cluster (grouping)
+    //     $clusterRows = $this->stockModel->listCluster(
+    //         $pemesanan['no_model'],
+    //         $pemesanan['item_type'],
+    //         $pemesanan['kode_warna'],
+    //         $pemesanan['color']
+    //     );
+    //     // dd($clusterRows);
+    //     // keterangan gabungan (tetap 1 query ringan)
+    //     $ket = $this->pemesananModel
+    //         ->select('GROUP_CONCAT(DISTINCT keterangan_gbn) AS ket_gbn')
+    //         ->where('id_total_pemesanan', $id)
+    //         ->first();
+
+    //     $data = [
+    //         'active'        => $this->active,
+    //         'title'         => 'Material System',
+    //         'role'          => $this->role,
+    //         'cluster'       => $clusterRows,
+    //         'noModel'       => $pemesanan['no_model'],
+    //         'itemType'      => $pemesanan['item_type'],
+    //         'kodeWarna'     => $pemesanan['kode_warna'],
+    //         'area'          => $pemesanan['admin'],
+    //         'id'            => $id,
+    //         'ketGbn'        => $ket['ket_gbn'] ?? '',
+    //         'KgsPesan'      => $KgsPesan,
+    //         'CnsPesan'      => $CnsPesan,
+    //         'kgPersiapan'   => $kgPersiapan,
+    //         'kgPengiriman'  => $kgPengiriman,
+    //     ];
+
+    //     return view($this->role . '/pemesanan/select-cluster', $data);
+    // }
+
+
     public function getDataByIdStok($id)
     {
         // $data = $this->stockModel->getDataByIdStok($id);
@@ -890,8 +942,23 @@ class PemesananController extends BaseController
 
     public function getDataByCluster()
     {
-        // $data = $this->stockModel->getDataByIdStok($id);
-        $data = $this->request->getGet();
+        $dataRaw = $this->request->getGet();
+        log_message('debug', 'ini data cluster : ' . json_encode($dataRaw, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
+        // normalize $data (trim + bersihkan whitespace aneh + samakan slash)
+        $data = array_map(static function ($v) {
+            if (!is_string($v)) return $v;
+            // hapus zero-width & BOM
+            $v = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $v);
+            // ganti NBSP dan full-width slash -> normal
+            $v = str_replace(["\xC2\xA0", "／"], [' ', '/'], $v);
+            // trim unicode-safe
+            $v = preg_replace('/^\s+|\s+$/u', '', $v);
+            return $v;
+        }, $dataRaw);
+
+        log_message('debug', 'ini trim data : ' . json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
         $stock = $this->pemasukanModel->getDataByCluster($data);
         log_message('debug', 'ini : ' . json_encode($stock));
 

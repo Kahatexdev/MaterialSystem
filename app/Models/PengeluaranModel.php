@@ -671,4 +671,14 @@ class PengeluaranModel extends Model
             ->get()
             ->getResultArray();
     }
+
+    public function sumKgsByStatus(int $id_total_pemesanan): array
+    {
+        return (array) $this->select("
+            SUM(CASE WHEN status = 'Pengeluaran Jalur' THEN kgs_out ELSE 0 END) AS kgs_persiapan,
+            SUM(CASE WHEN status = 'Pengiriman Area' THEN kgs_out ELSE 0 END)    AS kgs_pengiriman
+        ")
+            ->where('id_total_pemesanan', $id_total_pemesanan)
+            ->first();
+    }
 }

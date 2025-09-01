@@ -348,7 +348,11 @@
     <div class="card-container">
         <?php if (!empty($cluster)): ?>
             <?php foreach ($cluster as $item): ?>
-                <div class="stock-card" data-id-stok="<?= esc($item['id_stock']); ?>" data-nama-cluster="<?= $item['nama_cluster']; ?>" data-no-model="<?= $item['no_model']; ?>" data-item-type="<?= $item['item_type']; ?>" data-kode-warna="<?= $item['kode_warna']; ?>">
+                <div class="stock-card" data-id-stok="<?= esc($item['id_stock'], 'attr'); ?>"
+                    data-nama-cluster="<?= esc($item['nama_cluster'], 'attr'); ?>"
+                    data-no-model="<?= esc($item['no_model'], 'attr'); ?>"
+                    data-item-type="<?= esc($item['item_type'], 'attr'); ?>"
+                    data-kode-warna="<?= esc($item['kode_warna'], 'attr'); ?>">
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <span class="d-flex align-items-center">
                             <i class="fas fa-warehouse me-2 text-white"></i>
@@ -542,12 +546,13 @@
                 const noModel = this.getAttribute('data-no-model');
                 const itemType = this.getAttribute('data-item-type');
                 const kodeWarna = this.getAttribute('data-kode-warna');
+                // console.log(noModel, itemType, kodeWarna, cluster, idStok);
                 document.getElementById('idStok').value = idStok;
                 // Reset form
                 // document.getElementById('usageForm').reset();
 
                 // Fetch data
-                fetch(`<?= base_url('/gbn/pemasukan/getDataByCluster') ?>?no_model=${encodeURIComponent(noModel)}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}&cluster=${encodeURIComponent(cluster)}`)
+                fetch(`<?= base_url('/gbn/pemasukan/getDataByCluster') ?>?id_stok=${idStok}&no_model=${noModel}&item_type=${itemType}&kode_warna=${kodeWarna}&cluster=${cluster}`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Network response was not ok');

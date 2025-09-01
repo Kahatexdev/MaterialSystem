@@ -287,14 +287,18 @@ class PemasukanModel extends Model
     public function getDataByCluster($data)
     {
         return $this->select('
-                COALESCE(schedule_celup.no_model, retur.no_model) AS no_model,
-                COALESCE(schedule_celup.item_type, retur.item_type) AS item_type,
-                COALESCE(schedule_celup.kode_warna, retur.kode_warna) AS kode_warna,
-                COALESCE(schedule_celup.warna, retur.warna) AS warna,
+                COALESCE(schedule_celup.no_model, retur.no_model, stock.no_model) AS no_model,
+                COALESCE(schedule_celup.item_type, retur.item_type, stock.item_type) AS item_type,
+                COALESCE(schedule_celup.kode_warna, retur.kode_warna, stock.kode_warna) AS kode_warna,
+                COALESCE(schedule_celup.warna, retur.warna, stock.warna) AS warna,
                 pemasukan.*,
-                out_celup.no_karung, out_celup.lot_kirim, out_celup.kgs_kirim, out_celup.cones_kirim,
+                out_celup.no_karung, 
+                COALESCE(stock.lot_awal, stock.lot_stock) AS lot_kirim,
+                COALESCE(stock.kgs_stock_awal, stock.kgs_in_out) AS kgs_kirim,
+                COALESCE(stock.cns_stock_awal, stock.cns_in_out) AS cones_kirim,
                 stock.nama_cluster AS cluster_real
-            ')
+                ')
+                // out_celup.lot_kirim, out_celup.kgs_kirim, out_celup.cones_kirim,
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
             ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
             ->join('retur', 'retur.id_retur = out_celup.id_retur', 'left')

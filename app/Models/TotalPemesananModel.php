@@ -123,4 +123,35 @@ class TotalPemesananModel extends Model
             ->groupBy('master_material.jenis')
             ->first();
     }
+
+    public function findWithDetails(int $id): ?array
+    {
+        return $this->select('
+            total_pemesanan.id_total_pemesanan,
+            total_pemesanan.ttl_jl_mc,
+            total_pemesanan.ttl_kg,
+            total_pemesanan.ttl_cns,
+            pemesanan.id_pemesanan,
+            pemesanan.tgl_pakai,
+            pemesanan.lot,
+            pemesanan.keterangan,
+            pemesanan.po_tambahan,
+            pemesanan.status_kirim,
+            pemesanan.admin,
+            material.id_material,
+            material.item_type,
+            material.kode_warna,
+            material.color,
+            material.style_size,
+            kebutuhan_cones.qty_cns,
+            kebutuhan_cones.qty_berat_cns,
+            master_order.no_model
+        ')
+            ->join('pemesanan', 'pemesanan.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('kebutuhan_cones', 'kebutuhan_cones.id_material = material.id_material', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('total_pemesanan.id_total_pemesanan', $id)
+            ->first();
+    }
 }
