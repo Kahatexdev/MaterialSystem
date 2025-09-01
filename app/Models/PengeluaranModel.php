@@ -383,7 +383,7 @@ class PengeluaranModel extends Model
             pengeluaran.krg_out,
             pengeluaran.lot_out,
             pengeluaran.nama_cluster,
-            pengeluaran.keterangan_gbn,
+            GROUP_CONCAT(DISTINCT CONCAT(pengeluaran.keterangan_gbn, ' - ', pemesanan.keterangan_gbn)) AS keterangan_gbn,
             cluster.group
         ")
             ->join('out_celup', 'out_celup.id_out_celup = pengeluaran.id_out_celup', 'left')
@@ -670,5 +670,15 @@ class PengeluaranModel extends Model
             ->orderBy('s.no_model', 'ASC')
             ->get()
             ->getResultArray();
+    }
+
+    public function sumKgsByStatus(int $id_total_pemesanan): array
+    {
+        return (array) $this->select("
+            SUM(CASE WHEN status = 'Pengeluaran Jalur' THEN kgs_out ELSE 0 END) AS kgs_persiapan,
+            SUM(CASE WHEN status = 'Pengiriman Area' THEN kgs_out ELSE 0 END)    AS kgs_pengiriman
+        ")
+            ->where('id_total_pemesanan', $id_total_pemesanan)
+            ->first();
     }
 }

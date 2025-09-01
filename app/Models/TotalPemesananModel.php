@@ -15,7 +15,6 @@ class TotalPemesananModel extends Model
     protected $allowedFields    = [
         'id_total_pemesanan',
         'ttl_jl_mc',
-        'id_material',
         'ttl_kg',
         'ttl_cns'
     ];
@@ -56,7 +55,7 @@ class TotalPemesananModel extends Model
             ->select("tp.id_total_pemesanan, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, p.id_pemesanan, p.tgl_pakai, p.admin AS area, mm.jenis,mo.no_model, m.item_type, m.kode_warna, m.color, GROUP_CONCAT(DISTINCT p.lot) AS lot_pesan, GROUP_CONCAT(DISTINCT p.keterangan) ket_pesan, GROUP_CONCAT(DISTINCT p.keterangan_gbn) ket_gbn, SUM(CASE WHEN pp.status = 'Pengiriman Area' THEN pp.kgs_out ELSE 0 END) AS kg_kirim, 
         COUNT(CASE WHEN pp.status = 'Pengiriman Area' THEN pp.id_pengeluaran ELSE NULL END) AS krg_kirim, 
         GROUP_CONCAT(DISTINCT CASE WHEN pp.status = 'Pengiriman Area' THEN pp.lot_out ELSE NULL END) AS lot_kirim, 
-        GROUP_CONCAT(DISTINCT CASE WHEN pp.status = 'Pengiriman Area' THEN pp.nama_cluster ELSE NULL END) AS cluster_kirim, CASE WHEN p.po_tambahan = '1' THEN 'YA' ELSE '' END AS po_tambahan")
+        GROUP_CONCAT(DISTINCT CASE WHEN pp.status = 'Pengiriman Area' THEN pp.nama_cluster ELSE NULL END) AS cluster_kirim, CASE WHEN p.po_tambahan = '1' THEN 'YA' ELSE '' END AS po_tambahan, pp.admin")
             ->join('pengeluaran pp', 'pp.id_total_pemesanan = tp.id_total_pemesanan', 'left')
             ->join('pemesanan p', 'p.id_total_pemesanan = tp.id_total_pemesanan', 'left')
             ->join('material m', 'm.id_material = p.id_material', 'left')
@@ -122,6 +121,37 @@ class TotalPemesananModel extends Model
             ->where('pemesanan.tgl_pakai', $tglPakai)
             ->where('pemesanan.status_kirim', 'YA')
             ->groupBy('master_material.jenis')
+            ->first();
+    }
+
+    public function findWithDetails(int $id): ?array
+    {
+        return $this->select('
+            total_pemesanan.id_total_pemesanan,
+            total_pemesanan.ttl_jl_mc,
+            total_pemesanan.ttl_kg,
+            total_pemesanan.ttl_cns,
+            pemesanan.id_pemesanan,
+            pemesanan.tgl_pakai,
+            pemesanan.lot,
+            pemesanan.keterangan,
+            pemesanan.po_tambahan,
+            pemesanan.status_kirim,
+            pemesanan.admin,
+            material.id_material,
+            material.item_type,
+            material.kode_warna,
+            material.color,
+            material.style_size,
+            kebutuhan_cones.qty_cns,
+            kebutuhan_cones.qty_berat_cns,
+            master_order.no_model
+        ')
+            ->join('pemesanan', 'pemesanan.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('kebutuhan_cones', 'kebutuhan_cones.id_material = material.id_material', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('total_pemesanan.id_total_pemesanan', $id)
             ->first();
     }
 }

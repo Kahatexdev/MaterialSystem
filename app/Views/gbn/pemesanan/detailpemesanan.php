@@ -79,6 +79,7 @@
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Lot Kirim</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cluster Out</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan Gbn</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Admin</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cluster</th>
                             </tr>
                         </thead>
@@ -105,6 +106,7 @@
                                         <td><?= $data['lot_kirim'] ?></td>
                                         <td><?= $data['cluster_kirim'] ?></td>
                                         <td><?= $data['ket_gbn'] ?></td>
+                                        <td><?= $data['admin'] ?></td>
                                         <td>
 
                                             <!-- button pesan ke covering -->

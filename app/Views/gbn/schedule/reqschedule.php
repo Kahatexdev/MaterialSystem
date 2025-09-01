@@ -245,6 +245,7 @@
                             <th class="sticky">Warna</th>
                             <th class="sticky">Start Mc</th>
                             <th class="sticky">Tanggal Schedule</th>
+                            <th class="sticky">Last Status</th>
                             <th class="sticky">Action</th>
                         </tr>
                     </thead>
@@ -270,6 +271,7 @@
                                 <td><?= $data['warna']; ?></td>
                                 <td><?= $data['start_mc']; ?></td>
                                 <td><?= $data['tgl_schedule']; ?></td>
+                                <td><?= $data['last_status']; ?></td>
                                 <?php if ($data['last_status'] != 'complain') { ?>
                                     <td>
                                         <a href="<?= base_url($role . '/schedule/reqschedule/show/' . $data['id_celup']) ?>" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Detail">
