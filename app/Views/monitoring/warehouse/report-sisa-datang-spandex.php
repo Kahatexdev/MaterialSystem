@@ -1,95 +1,94 @@
 <?php $this->extend($role . '/warehouse/header'); ?>
 <?php $this->section('content'); ?>
 
-<style>
-    /* Overlay transparan */
-    #loadingOverlay {
-        display: none;
-        position: fixed;
-        z-index: 99999;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.35);
-    }
-
-    .loader-wrap {
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .loading-card {
-        background: rgba(0, 0, 0, 0.75);
-        padding: 20px 30px;
-        border-radius: 12px;
-        text-align: center;
-        width: 260px;
-        /* kecilkan modal */
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    .loader-text {
-        margin-top: 8px;
-        color: #fff;
-        font-weight: 500;
-        font-size: 12px;
-    }
-
-
-    #loadingOverlay.active {
-        display: block;
-        opacity: 1;
-    }
-
-    .loader {
-        width: 50px;
-        height: 50px;
-        margin: 0 auto 10px;
-        position: relative;
-    }
-
-    .loader:after {
-        content: "";
-        display: block;
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        border: 6px solid #fff;
-        border-color: #fff transparent #fff transparent;
-        animation: loader-dual-ring 1.2s linear infinite;
-        box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
-    }
-
-    @keyframes loader-dual-ring {
-        0% {
-            transform: rotate(0deg);
-        }
-
-        100% {
-            transform: rotate(360deg);
-        }
-    }
-
-
-    @keyframes shine {
-        to {
-            background-position: 200% center;
-        }
-    }
-
-    .progress {
-        background-color: rgba(255, 255, 255, 0.15);
-    }
-
-    .progress-bar {
-        transition: width .3s ease;
-    }
-</style>
-
 <div class="container-fluid py-4">
+    <style>
+        /* Overlay transparan */
+        #loadingOverlay {
+            display: none;
+            position: fixed;
+            z-index: 99999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.35);
+        }
+
+        .loader-wrap {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-card {
+            background: rgba(0, 0, 0, 0.75);
+            padding: 20px 30px;
+            border-radius: 12px;
+            text-align: center;
+            width: 260px;
+            /* kecilkan modal */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .loader-text {
+            margin-top: 8px;
+            color: #fff;
+            font-weight: 500;
+            font-size: 12px;
+        }
+
+
+        #loadingOverlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 10px;
+            position: relative;
+        }
+
+        .loader:after {
+            content: "";
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 6px solid #fff;
+            border-color: #fff transparent #fff transparent;
+            animation: loader-dual-ring 1.2s linear infinite;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes loader-dual-ring {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+
+        @keyframes shine {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        .progress {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .progress-bar {
+            transition: width .3s ease;
+        }
+    </style>
     <!-- overlay -->
     <div id="loadingOverlay">
         <div class="loader-wrap">
@@ -108,11 +107,12 @@
             </div>
         </div>
     </div>
+
     <!-- Button Filter -->
     <div class="card card-frame">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 font-weight-bolder">Filter Sisa Pakai Karet</h5>
+                <h5 class="mb-0 font-weight-bolder">Filter Sisa Datang Spandex</h5>
                 <button class="btn btn-secondary btn-block" id="btnInfo" style="padding: 5px 12px; font-size: 12px;" data-bs-toggle="modal" data-bs-target="#infoModal">
                     <i class="fas fa-info"></i>
                 </button>
@@ -159,7 +159,7 @@
     <!-- Tabel Data -->
     <div class="card mt-4">
         <div class="card-body">
-            <h5 class="mb-3 font-weight-bolder">Tabel Sisa Pakai Karet</h5>
+            <h5 class="mb-3 font-weight-bolder">Tabel Sisa Datang Spandex</h5>
             <div class="table-responsive">
                 <table id="dataTable" class="table table-bordered table-hover text-center text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>
@@ -181,9 +181,10 @@
                             <th colspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Stock Awal</th>
                             <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Pesan Kg</th>
                             <th colspan="4" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Po Tambahan Gbn</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Pakai</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">(+) Pakai</th>
-                            <th colspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Retur</th>
+                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Datang</th>
+                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">(+) Datang</th>
+                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Ganti Retur</th>
+                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Retur</th>
                             <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Sisa</th>
                         </tr>
                         <tr>
@@ -197,9 +198,6 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Po(+)</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kg Po (+)</th>
 
-                            <!-- Sub-header Retur -->
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Lot</th>
                         </tr>
                     </thead>
 
@@ -220,11 +218,24 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p><strong>Note:</strong> Rumus Sisa Pakai Karet</p>
+                <p><strong>Note:</strong> Untuk rumus Sisa Tagihan GBN:</p>
+
                 <div class="mb-3">
+                    <p>Apabila qty ganti retur > 0 maka:</p>
                     <div class="border p-2">
-                        ((Pakai + (+)Pakai) - Retur - (Pesan + PO(+)))
+                        Tagihan GBN = (Stock Awal + Stock Opname + Total Qty Datang + Retur Stock + Qty Ganti Retur) - Qty PO - Qty PO(+) - Retur Belang GBN - Retur Belang Area
                     </div>
+                </div>
+
+                <div class="mb-3">
+                    <p>Jika qty ganti retur = 0, maka:</p>
+                    <div class="border p-2">
+                        Tagihan GBN = (Stock Awal + Stock Opname + Total Qty Datang + Retur Stock) - Qty PO - Qty PO(+)
+                    </div>
+                </div>
+
+                <div class="border p-2 mt-3">
+                    <strong>KHUSUS BAHAN BAKU LUREX:</strong> Pengurangan datang diambil dari kolom DTG LUREX / (+) DTG LUREX
                 </div>
             </div>
             <div class="modal-footer">
@@ -264,7 +275,6 @@
             const delivery_awal = $('#delivery').val();
             const no_model = $('#no_model').val().trim();
             const kode_warna = $('#kode_warna').val().trim();
-            const jenis = 'KARET';
 
             if (!delivery_awal && !no_model && !kode_warna) {
                 Swal.fire({
@@ -276,33 +286,14 @@
             }
 
             $.ajax({
-                url: "<?= base_url($role . '/warehouse/filterSisaPakaiKaret') ?>",
+                url: "<?= base_url($role . '/warehouse/reportSisaDatangSpandex') ?>",
                 type: "GET",
                 data: {
                     delivery: delivery_awal,
                     no_model: no_model,
-                    kode_warna: kode_warna,
-                    jenis: jenis
-
+                    kode_warna: kode_warna
                 },
                 dataType: "json",
-                beforeSend: function() {
-                    showLoading();
-                    updateProgress(0);
-                },
-                xhr: function() {
-                    let xhr = new window.XMLHttpRequest();
-
-                    // progress download data dari server
-                    xhr.addEventListener("progress", function(evt) {
-                        if (evt.lengthComputable) {
-                            let percentComplete = Math.round((evt.loaded / evt.total) * 100);
-                            updateProgress(percentComplete);
-                        }
-                    }, false);
-
-                    return xhr;
-                },
                 beforeSend: function() {
                     showLoading();
                     updateProgress(0);
@@ -324,13 +315,20 @@
                     let html = '';
                     if (response.length > 0) {
                         $.each(response, function(index, item) {
-                            const pakai = parseFloat(item.kgs_out) || 0;
-                            const pakaiPlus = parseFloat(item.kgs_out_plus) || 0;
-                            const retur = parseFloat(item.kgs_retur) || 0;
-                            const pesan = parseFloat(item.kg_po) || 0;
-                            const poPlus = parseFloat(item.kg_po_plus) || 0;
-
-                            const sisa = (pakai + pakaiPlus) - retur - (pesan + poPlus);
+                            // console.log(item);
+                            const kgsAwal = parseFloat(item.kgs_stock_awal) || 0;
+                            const kgsDatang = parseFloat(item.kgs_datang) || 0;
+                            const kgsTambahanDatang = parseFloat(item.kgs_datang_plus) || 0;
+                            const gantiRetur = parseFloat(item.kgs_retur) || 0;
+                            const kgPo = parseFloat(item.kg_po) || 0;
+                            const kgPoPlus = parseFloat(item.kg_po_plus) || 0;
+                            const qtyRetur = parseFloat(item.qty_retur) || 0;
+                            let sisa = 0;
+                            if (gantiRetur > 0) {
+                                sisa = (kgsAwal + kgsDatang + kgsTambahanDatang + gantiRetur) - (kgPo - kgPoPlus - qtyRetur);
+                            } else {
+                                sisa = (kgsAwal + kgsDatang + kgsTambahanDatang) - (kgPo - kgPoPlus);
+                            }
 
                             html += `
                                 <tr>
@@ -339,7 +337,7 @@
                                     <td>${item.foll_up || ''}</td>
                                     <td>${item.no_model || ''}</td>
                                     <td>${item.no_order || ''}</td>
-                                    <td>${item.area_out || ''}</td>
+                                    <td>${item.area || ''}</td>
                                     <td>${item.buyer || ''}</td>
                                     <td>${item.start_mc || ''}</td>
                                     <td>${item.delivery_awal || ''}</td>
@@ -347,18 +345,18 @@
                                     <td>${item.unit || ''}</td>
                                     <td>${item.item_type || ''}</td>
                                     <td>${item.kode_warna || ''}</td>
-                                    <td>${item.warna || ''}</td>
-                                    <td>${(parseFloat(item.kgs_stock_awal) || 0).toFixed(2)}</td>
+                                    <td>${item.color || ''}</td>
+                                    <td>${item.kgs_stock_awal || 0}</td>
                                     <td>${item.lot_awal || ''}</td>
                                     <td>${(parseFloat(item.kg_po) || 0).toFixed(2)}</td>
                                     <td>${item.tgl_terima_po_plus || ''}</td>
                                     <td>${item.tgl_po_plus_area || ''}</td>
                                     <td>${item.delivery_po_plus || ''}</td>
-                                    <td>${(parseFloat(item.kg_po_plus) || 0).toFixed(2)}</td>
-                                    <td>${(parseFloat(item.kgs_out) || 0).toFixed(2)}</td>
-                                    <td>${(parseFloat(item.kgs_out_plus) || 0).toFixed(2)}</td>
-                                    <td>${(parseFloat(item.kgs_retur) || 0).toFixed(2)}</td>
-                                    <td>${item.lot_retur || ''}</td>
+                                    <td>${item.kg_po_plus || 0}</td>
+                                    <td>${(parseFloat(item.kgs_datang) || 0).toFixed(2)}</td>
+                                    <td>${item.kgs_datang_plus || 0}</td>
+                                    <td>${item.kgs_retur || 0}</td>
+                                    <td>${item.qty_retur || 0}</td>
                                     <td>${sisa.toFixed(2)}</td>
                                 </tr>
                             `;
@@ -385,10 +383,6 @@
                 complete: function() {
                     updateProgress(100); // pastikan full
                     setTimeout(() => hideLoading(), 400); // kasih jeda biar animasi progress keliatan
-                },
-                complete: function() {
-                    updateProgress(100); // pastikan full
-                    setTimeout(() => hideLoading(), 400); // kasih jeda biar animasi progress keliatan
                 }
             });
         }
@@ -401,12 +395,10 @@
             const delivery = $('#delivery').val();
             const no_model = $('#no_model').val().trim();
             const kode_warna = $('#kode_warna').val().trim();
-            const jenis = 'KARET';
-            const url = "<?= base_url($role . '/warehouse/exportReportSisaPakaiKaret') ?>" +
+            const url = "<?= base_url($role . '/warehouse/exportReportSisaDatangSpandex') ?>" +
                 "?delivery=" + encodeURIComponent(delivery) +
                 "&no_model=" + encodeURIComponent(no_model) +
-                "&kode_warna=" + encodeURIComponent(kode_warna) +
-                "&jenis=" + encodeURIComponent(jenis);
+                "&kode_warna=" + encodeURIComponent(kode_warna);
 
             window.location.href = url;
         });
@@ -439,30 +431,6 @@
             }
         });
     });
-
-    function showLoading() {
-        $('#loadingOverlay').addClass('active');
-        $('#btnSearch').prop('disabled', true);
-        // show DataTables processing indicator if available
-        try {
-            dataTable.processing(true);
-        } catch (e) {}
-    }
-
-    function hideLoading() {
-        $('#loadingOverlay').removeClass('active');
-        $('#btnSearch').prop('disabled', false);
-        try {
-            dataTable.processing(false);
-        } catch (e) {}
-    }
-
-    function updateProgress(percent) {
-        $('#progressBar')
-            .css('width', percent + '%')
-            .attr('aria-valuenow', percent);
-        $('#progressText').text(percent + '%');
-    }
 </script>
 
 <?php $this->endSection(); ?>
