@@ -57,11 +57,6 @@ class DashboardGbnController extends BaseController
         $schedule = $this->scheduleCelupModel->countStatusDone();
         $pemasukan = $this->pemasukanModel->getTotalKarungMasuk();
         $pengeluaran = $this->pemasukanModel->getTotalKarungKeluar();
-        $groupI = $this->clusterModel->getClusterGroupI();
-        $groupII = $this->clusterModel->getClusterGroupII();
-        $groupIII = $this->clusterModel->getClusterGroupIII();
-        $nylon = $this->clusterModel->getClusterNylon();
-        $cov = $this->clusterModel->getClusterCov();
 
         $data = [
             'active' => $this->active,
@@ -71,11 +66,6 @@ class DashboardGbnController extends BaseController
             'schedule' => $schedule,
             'pemasukan' => $pemasukan,
             'pengeluaran' => $pengeluaran,
-            'groupI' => $groupI,
-            'groupII' => $groupII,
-            'groupIII' => $groupIII,
-            'nylon' => $nylon,
-            'cov' => $cov,
         ];
         return view($this->role . '/dashboard/index', $data);
     }
@@ -97,7 +87,6 @@ class DashboardGbnController extends BaseController
                 return view($this->role . '/dashboard/group_III', ['groupData' => $groupData, 'group' => $group]);
             case 'nylon':
                 $groupData = $this->clusterModel->getClusterNylon();
-                // dd($groupData);
                 return view($this->role . '/dashboard/cluster_nylon', ['groupData' => $groupData, 'group' => $group]);
             case 'covering':
                 $groupData = $this->clusterModel->getClusterCov();

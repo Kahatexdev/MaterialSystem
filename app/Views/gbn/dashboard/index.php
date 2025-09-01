@@ -461,7 +461,7 @@
             } else {
                 // Generate karung list HTML
                 const items = list.map(k =>
-                    `<li><i class="fas fa-box me-1"></i>No Karung ${k.no_karung} = ${k.kgs_kirim} kg</li>`
+                    `<li><i class="fas fa-box me-1"></i>No Karung ${k.no_karung} = ${k.kgs_kirim} kg | Lot = ${k.lot_kirim}</li>`
                 ).join("");
 
                 const modelName = btn.closest("tr").children[0].textContent;
