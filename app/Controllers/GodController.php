@@ -21,6 +21,7 @@ use App\Models\MasterMaterialModel;
 use App\Models\OtherBonModel;
 use App\Models\PemesananModel;
 use App\Models\TotalPemesananModel;
+use App\Models\PengeluaranModel;
 
 
 
@@ -42,6 +43,7 @@ class GodController extends BaseController
     protected $otherBonModel;
     protected $pemesananModel;
     protected $totalPemesananModel;
+    protected $pengeluaranModel;
 
 
     public function __construct()
@@ -59,6 +61,7 @@ class GodController extends BaseController
         $this->otherBonModel = new OtherBonModel();
         $this->pemesananModel = new PemesananModel();
         $this->totalPemesananModel = new TotalPemesananModel();
+        $this->pengeluaranModel = new PengeluaranModel();
         $this->request = \Config\Services::request();
 
         $this->role = session()->get('role');
@@ -1152,7 +1155,7 @@ class GodController extends BaseController
                         'gw'          => 0,
                         'qty_pcs'     => 0,
                         'loss'        => 0,
-                        'kgs'         => $kgsMasuk,
+                        'kgs'         => 0,
                         'admin'       => $admin,
                         'created_at'  => date('Y-m-d H:i:s'),
                     ]);
@@ -1359,118 +1362,146 @@ class GodController extends BaseController
 
     public function prosesImportPemesanan()
     {
-        // ... ambil & validasi file (punya kamu) ...
-        // 1) Ambil file
-        $file = $this->request->getFile('fileImport');
-        if (!$file || !$file->isValid() || $file->hasMoved()) {
-            return redirect()->back()->with('error', 'File tidak valid atau sudah dipindahkan.');
-        }
-        $ext = strtolower($file->getExtension());
-        if (!in_array($ext, ['xlsx', 'xls', 'csv'])) {
-            return redirect()->back()->with('error', 'Format file harus .xlsx / .xls / .csv');
-        }
+        $db = \Config\Database::connect();
+        $db->transBegin(); // mulai transaksi
 
-        // 2) Simpan sementara
-        $newName = $file->getRandomName();
-        $destDir = WRITEPATH . 'uploads';
-        $file->move($destDir, $newName);
-        $path = rtrim($destDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $newName;
-
-        $spreadsheet = IOFactory::load($path);
-        $sheet = $spreadsheet->getActiveSheet();
-
-        // Ambil semua baris untuk baca kolom lain (string)
-        $rows  = $sheet->toArray(null, true, true, true);
-        if (empty($rows) || count($rows) < 2) {
-            return redirect()->back()->with('error', 'Tidak ada data (minimal header + 1 baris).');
-        }
-
-        // Map header
-        $headerRow = $rows[1];
-        $colMap = [];
-        foreach ($headerRow as $col => $title) {
-            $colMap[$col] = is_string($title) ? strtolower(trim($title)) : '';
-        }
-
-        $ok = 0;
-        $err = 0;
-        $errLogs = [];
-
-        // Mulai dari baris ke-2 (offset 1)
-        foreach (array_slice($rows, 1, null, true) as $rowNum => $row) {
-            $r = (int)$rowNum; // indeks baris asli di sheet
-
-            // --- ambil & normalisasi tanggal/jam pakai helper privat ---
-            $dt = $this->parseTanggalJam($sheet, $colMap, $r);
-            // $dt = ['tgl_list'=>?, 'jam_list'=>?, 'tgl_pesan'=>?, 'jam_pesan'=>?, 'tgl_pakai'=>?]
-
-            // Data kolom lain (string) dari $rows
-            $data = [];
-            foreach ($row as $col => $val) {
-                $key = $colMap[$col] ?? null;
-                if ($key) $data[$key] = trim((string)$val);
+        try {
+            // --- bagian validasi & baca file tetap sama ---
+            $file = $this->request->getFile('fileImport');
+            if (!$file || !$file->isValid() || $file->hasMoved()) {
+                return redirect()->back()->with('error', 'File tidak valid atau sudah dipindahkan.');
+            }
+            $ext = strtolower($file->getExtension());
+            if (!in_array($ext, ['xlsx', 'xls', 'csv'])) {
+                return redirect()->back()->with('error', 'Format file harus .xlsx / .xls / .csv');
             }
 
-            // Validasi material (punya kamu)
-            $idOrder = $this->masterOrderModel->select('id_order')
-                ->where('no_model', $data['no_model'] ?? '')
-                ->first();
+            $newName = $file->getRandomName();
+            $destDir = WRITEPATH . 'uploads';
+            $file->move($destDir, $newName);
+            $path = rtrim($destDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $newName;
 
-            $idMaterial = $this->materialModel->select('id_material')
-                ->where('id_order', $idOrder['id_order'] ?? '')
-                ->where('style_size', $data['style'] ?? '')
-                ->where('item_type',  $data['jenis'] ?? '')
-                ->where('kode_warna', $data['kode_warna'] ?? '')
-                ->first();
+            $spreadsheet = IOFactory::load($path);
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows  = $sheet->toArray(null, true, true, true);
 
-            if (!$idMaterial) {
-                $err++;
-                $errLogs[] = "Baris $r: material tidak ditemukan untuk [no_model={$data['no_model']} / style={$data['style']} / jenis={$data['jenis']} / kode={$data['kode_warna']}]";
-                continue;
+            if (empty($rows) || count($rows) < 2) {
+                return redirect()->back()->with('error', 'Tidak ada data (minimal header + 1 baris).');
             }
 
-            // Payload ke tabel pemesanan
-            $payload = [
-                'id_material'      => (int)$idMaterial['id_material'],
-                'tgl_list'         => $dt['tgl_list'],
-                'tgl_pesan'        => $dt['tgl_pesan'],
-                'tgl_pakai'        => $dt['tgl_pakai'],
-                'jl_mc'            => (int)($data['jl_mc'] ?? 0),
-                'ttl_qty_cones'    => (int)($data['ttl_qty_cones'] ?? 0),
-                'ttl_berat_cones'  => (float)($data['ttl_berat_cones'] ?? 0),
-                'sisa_kgs_mc'      => (float)($data['sisa_kgs_mc'] ?? 0),
-                'sisa_cones_mc'    => (int)($data['sisa_cns_mc'] ?? 0),
-                'lot'              => $data['lot'] ?? null,
-                'keterangan'       => $data['keterangan'] ?? null,
-                'po_tambahan'      => $data['po_tambahan'] ?? '0',
-                'status_kirim'     => strtoupper($data['kirim'] ?? ''),
-                'admin'            => $data['area'],
-                // simpan jam (kalau belum ada kolom khusus jam), pilih jam_pesan dulu baru jam_list
-                'additional_time'  => null,
-                'created_at'       => date('Y-m-d H:i:s'),
-            ];
-            // (opsional) jika kolom tgl_pesan kamu bertipe DATETIME dan ingin gabungkan dengan jam:
-            if ($dt['tgl_pesan'] && $dt['jam_pesan']) {
-                $payload['tgl_pesan'] = $dt['tgl_pesan'] . ' ' . $dt['jam_pesan'];
+            $headerRow = $rows[1];
+            $colMap = [];
+            foreach ($headerRow as $col => $title) {
+                $colMap[$col] = is_string($title) ? strtolower(trim($title)) : '';
             }
-            // dd($payload);
-            $this->pemesananModel->insert($payload);
-            $idPemesanan = (int)$this->pemesananModel->insertID();
 
-            // insert total_pemesanan
-            $this->totalPemesananModel->insert([
-                'id_pemesanan'     => $idPemesanan,
-                'total_qty'        => (int)($data['ttl_qty_cones'] ?? 0),
-                'total_berat'     => (float)($data['ttl_berat_cones'] ?? 0),
-            ]);
+            $ok = 0;
+            $err = 0;
+            $errLogs = [];
 
-            $ok++;
+            foreach (array_slice($rows, 1, null, true) as $rowNum => $row) {
+                $r = (int)$rowNum;
+
+                $dt = $this->parseTanggalJam($sheet, $colMap, $r);
+                $data = [];
+                foreach ($row as $col => $val) {
+                    $key = $colMap[$col] ?? null;
+                    if ($key) $data[$key] = trim((string)$val);
+                }
+
+                $idOrder = $this->masterOrderModel->select('id_order')
+                    ->where('no_model', $data['no_model'] ?? '')
+                    ->first();
+
+                $idMaterial = $this->materialModel->select('id_material')
+                    ->where('id_order', $idOrder['id_order'] ?? '')
+                    ->where('item_type',  $data['jenis'] ?? '')
+                    ->where('kode_warna', $data['kode_warna'] ?? '')
+                    ->first();
+
+                if (!$idMaterial) {
+                    $err++;
+                    $errLogs[] = "Baris $r: material tidak ditemukan untuk [no_model={$data['no_model']} / jenis={$data['jenis']} / kode={$data['kode_warna']}]";
+                    continue;
+                }
+
+                $payload = [
+                    'id_material'      => (int)$idMaterial['id_material'],
+                    'tgl_list'         => $dt['tgl_pesan'],
+                    'tgl_pesan'        => $dt['tgl_pesan'],
+                    'tgl_pakai'        => $dt['tgl_pakai'],
+                    'jl_mc'            => (int)($data['jl_mc'] ?? 0),
+                    'ttl_qty_cones'    => (int)($data['ttl_qty_cones'] ?? 0),
+                    'ttl_berat_cones'  => (float)($data['ttl_berat_cones'] ?? 0),
+                    'sisa_kgs_mc'      => (float)($data['sisa_kgs_mc'] ?? 0),
+                    'sisa_cones_mc'    => (int)($data['sisa_cns_mc'] ?? 0),
+                    'lot'              => $data['lot'] ?? null,
+                    'keterangan'       => $data['keterangan'] ?? null,
+                    'po_tambahan'      => $data['po_tambahan'] ?? '0',
+                    'status_kirim'     => 'YA',
+                    'admin'            => $data['area'],
+                    'additional_time'  => null,
+                    'created_at'       => date('Y-m-d H:i:s'),
+                ];
+
+                if ($dt['tgl_pesan'] && $dt['jam_pesan']) {
+                    $payload['tgl_pesan'] = $dt['tgl_pesan'] . ' ' . $dt['jam_pesan'];
+                }
+
+                $this->pemesananModel->insert($payload);
+                $idPemesanan = (int)$this->pemesananModel->insertID();
+
+                $this->totalPemesananModel->insert([
+                    'ttl_jl_mc'     => (int)($data['jl_mc'] ?? 0),
+                    'ttl_kg'        => (float)($data['ttl_berat_cones'] ?? 0),
+                    'ttl_cns'       => (float)($data['ttl_qty_cones'] ?? 0),
+                ]);
+                $idTtlPemesanan = (int)$this->totalPemesananModel->insertID();
+
+                $this->pemesananModel->update($idPemesanan, [
+                    'id_total_pemesanan' => $idTtlPemesanan
+                ]);
+
+                $pengeluaranData = [
+                    'id_total_pemesanan'    => $idTtlPemesanan,
+                    'area_out'              => $data['area'],
+                    'tgl_out'               => $dt['tgl_pakai'],
+                    'kgs_out'               => $data['kgs_pakai'],
+                    'cns_out'               => $data['cns_pakai'] ?? 0,
+                    'krg_out'               => $data['krg_pakai'] ?? 0,
+                    'lot_out'               => $data['lot'],
+                    'nama_cluster'          => (isset($data['jalur']) && trim($data['jalur']) !== '')
+                        ? strtoupper($data['jalur'])
+                        : NULL,
+                    'status'                => 'Pengiriman Area',
+                    'keterangan_gbn'        => $data['ket'],
+                    'admin'                 => session()->get('username'),
+                    'created_at'            => date('Y-m-d H:i:s'),
+                ];
+
+
+                $this->pengeluaranModel->insert($pengeluaranData);
+
+                $ok++;
+            }
+
+            // kalau ada error material tapi tetap mau commit hasil OK:
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+                return redirect()->back()->with('error', 'Terjadi error database saat import.');
+            } else {
+                $db->transCommit();
+            }
+
+            $msg = "Import selesai: OK=$ok | ERR=$err";
+            if ($err) $msg .= " | Detail: " . implode(' | ', $errLogs);
+            return redirect()->back()->with($err ? 'error' : 'success', $msg);
+        } catch (\Throwable $e) {
+            $db->transRollback();
+            return redirect()->back()->with('error', 'Exception: ' . $e->getMessage());
         }
-
-        $msg = "Import selesai: OK=$ok | ERR=$err";
-        if ($err) $msg .= " | Detail: " . implode(' | ', $errLogs);
-        return redirect()->back()->with($err ? 'error' : 'success', $msg);
     }
+
 
     /**
      * Cari huruf kolom dari nama header (case-insensitive),
@@ -1494,19 +1525,19 @@ class GodController extends BaseController
      */
     private function parseTanggalJam(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet, array $colMap, int $r): array
     {
-        $out = ['tgl_list' => null, 'jam_list' => null, 'tgl_pesan' => null, 'jam_pesan' => null, 'tgl_pakai' => null];
+        $out = ['tgl_pesan' => null, 'jam_pesan' => null, 'tgl_pakai' => null];
 
-        $colWaktuList = $this->pickCol($colMap, 'waktu_list');
+        // $colWaktuList = $this->pickCol($colMap, 'waktu_list');
         $colTglPesan  = $this->pickCol($colMap, 'tgl_pesan');
         $colJamPesan  = $this->pickCol($colMap, 'jam_pesan');
         $colTglPakai  = $this->pickCol($colMap, 'tgl_pakai');
 
-        if ($colWaktuList) {
-            $cell = $sheet->getCell($colWaktuList . $r);
-            $d = $this->parseCellDateTime($cell);
-            $out['tgl_list'] = $d['date'];
-            $out['jam_list'] = $d['time'];
-        }
+        // if ($colWaktuList) {
+        //     $cell = $sheet->getCell($colWaktuList . $r);
+        //     $d = $this->parseCellDateTime($cell);
+        //     $out['tgl_list'] = $d['date'];
+        //     $out['jam_list'] = $d['time'];
+        // }
         if ($colTglPesan) {
             $cell = $sheet->getCell($colTglPesan . $r);
             $d = $this->parseCellDateTime($cell);
