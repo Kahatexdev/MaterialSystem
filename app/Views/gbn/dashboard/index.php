@@ -408,7 +408,7 @@
             const detailKarung = JSON.parse(button.getAttribute("data-karung"));
             const totalTerisi = detailData.reduce((sum, item) => {
                 return sum + (Number(item.qty) || 0);
-            }, 0);
+            }, 0).toFixed(2);
             const sisa = (Number(kapasitas) || 0) - totalTerisi;
 
             // Populate modal data
