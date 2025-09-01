@@ -287,10 +287,10 @@ class PemasukanModel extends Model
     public function getDataByCluster($data)
     {
         return $this->select('
-                COALESCE(schedule_celup.no_model, retur.no_model) AS no_model,
-                COALESCE(schedule_celup.item_type, retur.item_type) AS item_type,
-                COALESCE(schedule_celup.kode_warna, retur.kode_warna) AS kode_warna,
-                COALESCE(schedule_celup.warna, retur.warna) AS warna,
+                COALESCE(schedule_celup.no_model, retur.no_model, other_bon.no_model) AS no_model,
+                COALESCE(schedule_celup.item_type, retur.item_type, other_bon.item_type) AS item_type,
+                COALESCE(schedule_celup.kode_warna, retur.kode_warna, other_bon.kode_warna) AS kode_warna,
+                COALESCE(schedule_celup.warna, retur.warna, other_bon.warna) AS warna,
                 pemasukan.*,
                 out_celup.no_karung, out_celup.lot_kirim, out_celup.kgs_kirim, out_celup.cones_kirim,
                 stock.nama_cluster AS cluster_real
@@ -298,6 +298,7 @@ class PemasukanModel extends Model
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
             ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
             ->join('retur', 'retur.id_retur = out_celup.id_retur', 'left')
+            ->join('other_bon', 'other_bon.id_other_bon = out_celup.id_other_bon', 'left') // tambahkan join
             ->join('stock', 'stock.id_stock=pemasukan.id_stock', 'left')
             ->where('stock.no_model', $data['no_model'])
             ->where('stock.item_type', $data['item_type'])
@@ -307,6 +308,27 @@ class PemasukanModel extends Model
             ->groupBy('out_celup.id_out_celup')
             ->get()
             ->getResultArray();
+        // $this->select('
+        //     COALESCE(schedule_celup.no_model, retur.no_model) AS no_model,
+        //     COALESCE(schedule_celup.item_type, retur.item_type) AS item_type,
+        //     COALESCE(schedule_celup.kode_warna, retur.kode_warna) AS kode_warna,
+        //     COALESCE(schedule_celup.warna, retur.warna) AS warna,
+        //     pemasukan.*,
+        //     out_celup.no_karung, out_celup.lot_kirim, out_celup.kgs_kirim, out_celup.cones_kirim,
+        //     stock.nama_cluster AS cluster_real
+        // ')
+        // ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+        // ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
+        // ->join('retur', 'retur.id_retur = out_celup.id_retur', 'left')
+        // ->join('stock', 'stock.id_stock=pemasukan.id_stock', 'left')
+        // ->where('stock.no_model', $data['no_model'])
+        // ->where('stock.item_type', $data['item_type'])
+        // ->where('stock.kode_warna', $data['kode_warna'])
+        // ->where('stock.nama_cluster', $data['cluster'])
+        // ->where('out_jalur', "0")
+        // ->groupBy('out_celup.id_out_celup')
+        // ->get()
+        // ->getResultArray();
     }
     public function getDataInput($idPemasukan)
     {
