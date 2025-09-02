@@ -574,6 +574,42 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('getOrderDetails/(:num)', 'MasterdataController::getOrderDetails/$1');
     $routes->post('updateOrder', 'MasterdataController::updateOrder');
     $routes->post('deleteOrder', 'MasterdataController::deleteOrder');
+    $routes->get('masterdata/reportMasterOrder', 'MasterdataController::reportMasterOrder');
+    $routes->get('masterdata/filterMasterOrder', 'MasterdataController::filterMasterOrder');
+    $routes->get('masterdata/excelMasterOrder', 'ExcelController::excelMasterOrder');
+    $routes->get('masterdata/poGabungan', 'PoGabunganController::index');
+    $routes->get('masterdata/poGabungan/(:any)', 'PoGabunganController::poGabungan/$1');
+    $routes->get('masterdata/poGabunganDetail/(:any)', 'PoGabunganController::poGabunganDetail/$1');
+    $routes->get('masterdata/poBooking', 'PoBookingController::index');
+    $routes->get('masterdata/poBooking/create', 'PoBookingController::create');
+    $routes->get('masterdata/poBooking/getItemType', 'PoBookingController::getItemType');
+    $routes->get('masterdata/poBooking/getKodeWarna', 'PoBookingController::getKodeWarna');
+    $routes->get('masterdata/poBooking/getColor', 'PoBookingController::getColor');
+    $routes->post('masterdata/poBooking/saveOpenPoBooking', 'PoBookingController::saveOpenPoBooking');
+    // $routes->get('masterdata/poBooking/exportPoBooking', 'PdfController::generateOpenPOBooking');
+    $routes->get('masterdata/poBooking/exportPoBooking', 'ExcelController::generateOpenPOBookingExcel');
+    $routes->get('masterdata/poBooking/detail', 'PoBookingController::detail');
+    $routes->post('masterdata/poBooking/updatePoBooking', 'PoBookingController::updatePoBooking');
+    $routes->post('masterdata/poBooking/deletePoBooking', 'PoBookingController::deletePoBooking');
+    $routes->get('masterdata/poManual', 'PoManualController::index');
+    $routes->get('masterdata/poManual/create', 'PoManualController::create');
+    $routes->get('masterdata/poManual/getNoOrderByModel', 'PoManualController::getNoOrderByModel');
+    $routes->post('masterdata/poManual/saveOpenPoManual', 'PoManualController::saveOpenPoManual');
+    $routes->get('masterdata/poManual/detail', 'PoManualController::detail');
+    $routes->post('masterdata/poManual/updatePoManual', 'PoManualController::updatePoManual');
+    $routes->post('masterdata/poManual/deletePoManual', 'PoManualController::deletePoManual');
+    // $routes->get('masterdata/poManual/exportPoManual', 'PdfController::generateOpenPOManual');
+    $routes->get('masterdata/poManual/exportPoManual', 'ExcelController::generateOpenPOManualExcel');
+    $routes->get('masterdata/cekStockOrder/(:any)/(:any)/(:any)', 'PoGabunganController::cekStockOrder/$1/$2/$3');
+    $routes->post('openPO/saveOpenPOGabungan', 'PoGabunganController::saveOpenPOGabungan');
+    $routes->get('listPoGabungan', 'PoGabunganController::listPoGabungan');
+    $routes->get('getPoGabungan/(:any)', 'PoGabunganController::getPoGabungan/$1');
+    $routes->post('updatePoGabungan', 'PoGabunganController::updatePoGabungan');
+    $routes->post('deletePoGabungan/(:num)', 'PoGabunganController::deletePoGabungan/$1');
+    // $routes->get('exportOpenPOGabung', 'PdfController::exportOpenPOGabung');
+    $routes->get('exportOpenPOGabung', 'ExcelController::exportOpenPOGabung');
+    $routes->post('exportPoNylon', 'ExcelController::generateOpenPONylon');
+    $routes->get('exportPoBoking', 'ExcelController::exportPoBooking');
 
     $routes->get('material/(:any)', 'MasterdataController::material/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');
@@ -626,10 +662,18 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('schedule/reqschedule', 'ScheduleController::reqschedule');
     $routes->post('schedule/reqschedule', 'ScheduleController::reqschedule');
     $routes->get('schedule/reqschedule/show/(:num)', 'ScheduleController::showschedule/$1');
-
+    $routes->get('schedule/reportSchBenang', 'ScheduleController::reportSchBenang');
+    $routes->get('schedule/filterSchBenang', 'ScheduleController::filterSchBenang');
+    $routes->get('schedule/exportScheduleBenang', 'ExcelController::exportScheduleBenang');
+    $routes->get('schedule/reportSchNylon', 'ScheduleController::reportSchNylon');
+    $routes->get('schedule/filterSchNylon', 'ScheduleController::filterSchNylon');
+    $routes->get('schedule/exportScheduleNylon', 'ExcelController::exportScheduleNylon');
     $routes->get('schedule/reportSchWeekly', 'ScheduleController::reportSchWeekly');
     $routes->get('schedule/filterSchWeekly', 'ScheduleController::filterSchWeekly');
     $routes->get('schedule/exportScheduleWeekly', 'ExcelController::exportScheduleWeekly');
+    $routes->get('schedule/reportDataTagihanBenang', 'ScheduleController::reportDataTagihanBenang');
+    $routes->get('schedule/filterTagihanBenang', 'ScheduleController::filterTagihanBenang');
+    $routes->get('schedule/exportTagihanBenang', 'ExcelController::exportTagihanBenang');
 
     $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
     $routes->post('mesin/saveDataMesin', 'MesinCelupController::saveDataMesin');
@@ -748,9 +792,13 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('importPemasukan', 'WarehouseController::importPemasukan');
 
     //Po Plus
-    $routes->get('poplus', 'MasterdataController::poPlus');
-    $routes->get('poplus/detail', 'MasterdataController::detailPoPlus');
-    $routes->post('approvePoPlusArea', 'MasterdataController::prosesApprovePoPlusArea');
+    $routes->get('poplus', 'PoTambahanController::index');
+    $routes->get('poplus/detail', 'PoTambahanController::detailPoPlus');
+    $routes->post('approvePoPlusArea', 'PoTambahanController::prosesApprovePoPlusArea');
+    $routes->post('rejectPoPlusArea', 'PoTambahanController::prosesRejectPoPlusArea');
+    $routes->get('poplus/reportPoTambahan', 'PoTambahanController::reportPoTambahan');
+    $routes->post('poplus/reportPoTambahan', 'PoTambahanController::reportPoTambahan');
+    $routes->get('poplus/exportPoTambahan', 'ExcelController::exportPoTambahan');
 
     // $routes->get('pph', 'PphController::index');
     $routes->get('pph', 'PphController::tampilPerModel');
@@ -800,9 +848,21 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('createBon', 'CelupController::createBon');
     $routes->post('createBon/getItem/(:num)', 'CelupController::getItem/$1');
 
-    // retur
+    //Retur
     $routes->get('retur', 'ReturController::returArea');
+    $routes->get('retur', 'ReturController::index');
+    $routes->post('retur/approve', 'ReturController::approve');
+    $routes->post('retur/reject', 'ReturController::reject');
+    $routes->get('retur/listBarcodeRetur', 'ReturController::listBarcodeRetur');
+    $routes->get('retur/detailBarcodeRetur/(:any)', 'ReturController::detailBarcodeRetur/$1');
+    $routes->get('retur/generateBarcodeRetur/(:any)', 'DomPdfController::generateBarcodeRetur/$1');
+    $routes->get('retur/reportReturArea', 'ReturController::reportReturArea');
+    $routes->get('retur/filterReturArea', 'ReturController::filterReturArea');
+    $routes->get('retur/exportReturArea', 'ExcelController::exportReturArea');
 
+    //Retur GBN
+    $routes->get('returGbn', 'MonitoringController::retur');
+    $routes->post('returGbn', 'MonitoringController::retur');
 
     $routes->post('outCelup/saveBon/', 'CelupController::saveBon');
     $routes->get('generate/(:num)', 'CelupController::generateBarcode/$1');

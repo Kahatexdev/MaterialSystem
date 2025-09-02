@@ -136,4 +136,82 @@ class MonitoringController extends BaseController
         $this->userModel->delete($id);
         return redirect()->to(base_url($this->role . '/user'))->with('success', 'Data berhasil dihapus.');
     }
+
+    public function retur()
+    {
+        $filterTglSch = $this->request->getPost('filter_tglsch');
+        $filterNoModel = $this->request->getPost('filter_nomodel');
+
+        $sch = $this->scheduleCelupModel->getDataComplain();
+
+        if ($filterTglSch && $filterNoModel) {
+            $sch = array_filter($sch, function ($data) use ($filterTglSch, $filterNoModel) {
+                return $data['tanggal_schedule'] === $filterTglSch &&
+                    (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
+            });
+        } elseif ($filterTglSch) {
+            // Filter berdasarkan tanggal saja
+            $sch = array_filter($sch, function ($data) use ($filterTglSch) {
+                return $data['tanggal_schedule'] === $filterTglSch;
+            });
+        } elseif ($filterNoModel) {
+            // Filter berdasarkan nomor model atau kode warna saja
+            $sch = array_filter($sch, function ($data) use ($filterNoModel) {
+                return (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
+            });
+        }
+
+
+        $uniqueData = [];
+        foreach ($sch as $key => $id) {
+            // Ambil parameter dari data schedule
+            $nomodel = $id['no_model'];
+            $itemtype = $id['item_type'];
+            $kodewarna = $id['kode_warna'];
+
+            // Debug untuk memastikan parameter tidak null
+            if (empty($nomodel) || empty($itemtype) || empty($kodewarna)) {
+                log_message('error', "Parameter null: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
+                continue; // Skip data jika ada parameter kosong
+            }
+
+            // Panggil fungsi model untuk mendapatkan qty_po dan warna
+            $pdk = $this->materialModel->getQtyPOForCelup($nomodel, $itemtype, $kodewarna);
+
+            if (!$pdk) {
+                log_message('error', "Data null dari model: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
+                continue; // Skip jika $pdk kosong
+            }
+
+            $keys = $id['no_model'] . '-' . $id['item_type'] . '-' . $id['kode_warna'];
+
+            // Pastikan key belum ada, jika belum maka tambahkan data
+            if (!isset($uniqueData[$key])) {
+
+                // Buat array data unik
+                $uniqueData[] = [
+                    'no_model' => $nomodel,
+                    'item_type' => $itemtype,
+                    'kode_warna' => $kodewarna,
+                    'warna' => $pdk['color'],
+                    'ket_daily_cek' => $id['ket_daily_cek'],
+                    'qty_celup' => $id['qty_celup'],
+                    'no_mesin' => $id['no_mesin'],
+                    'id_celup' => $id['id_celup'],
+                    'lot_celup' => $id['lot_celup'],
+                    'lot_urut' => $id['lot_urut'],
+                    'tgl_schedule' => $id['tanggal_schedule'],
+                ];
+            }
+        }
+
+        $data = [
+            'active' => $this->active,
+            'title' => 'Retur GBN',
+            'role' => $this->role,
+            'data_sch' => $sch,
+            'uniqueData' => $uniqueData,
+        ];
+        return view($this->role . '/retur/retur-gbn', $data);
+    }
 }

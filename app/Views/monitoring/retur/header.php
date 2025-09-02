@@ -13,6 +13,21 @@
                 <div class="d-flex align-items-center">
                     <ul class="navbar-nav justify-content-end">
                         <li class="nav-item d-flex align-items-center">
+                            <a href="<?= base_url($role . '/retur/listBarcodeRetur') ?>" class="nav-link text-body font-weight-bold px-2">
+                                <i class="fas fa-barcode"></i>
+                                <span class="d-lg-inline-block d-none ms-1">Barcode</span>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link text-body font-weight-bold px-2" id="navbarDropdownReports" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-file-alt"></i>
+                                <span class="d-lg-inline-block d-none ms-1">Report <i class="bi bi-caret-down-fill"></i></span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownReports">
+                                <li><a class="dropdown-item border-radius-md" href="<?= base_url($role . '/retur/reportReturArea') ?>">Report Area</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item d-flex align-items-center">
                             <a href="" data-bs-toggle="modal" data-bs-target="#LogoutModal" class="nav-link text-body font-weight-bold px-2">
                                 <i class="fa fa-user"></i>
                                 <span class="d-lg-inline-block d-none ms-1"><?= session()->get('username') ?></span>
