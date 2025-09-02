@@ -1063,9 +1063,9 @@ class WarehouseController extends BaseController
             $other = $this->otherOutModel->getQty($id['id_out_celup']);
             $outByCns = $this->pengeluaranModel->getQtyOutByCns($id['id_out_celup']);
 
-            $kgsOther = !empty($other) ? (float) $other[0]['kgs_other_out'] : 0;
+            $kgsOther = !empty($other) ? (float) $other['kgs_other_out'] : 0;
             $kgsOutByCns = !empty($outByCns) ? (float) $outByCns['kgs_out'] : 0;
-            $cnsOther = !empty($other) ? (int) $other[0]['cns_other_out'] : 0;
+            $cnsOther = !empty($other) ? (int) $other['cns_other_out'] : 0;
             $cnsOutByCns = !empty($outByCns) ? (int) $outByCns['cns_out'] : 0;
 
             // kurangi other out & pengeluaran by cones
@@ -1150,8 +1150,8 @@ class WarehouseController extends BaseController
             $other = $this->otherOutModel->getQty($d['id_out_celup']);
             $outByCns = $this->pengeluaranModel->getQtyOutByCns($d['id_out_celup']);
             // 
-            $kgs = round($d['kgs_kirim'] - ($other[0]['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0), 2);
-            $cns = $d['cones_kirim'] - ($other[0]['cns_other_out'] ?? 0) - ($outByCns['cns_out'] ?? 0);
+            $kgs = round($d['kgs_kirim'] - ($other['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0), 2);
+            $cns = $d['cones_kirim'] - ($other['cns_other_out'] ?? 0) - ($outByCns['cns_out'] ?? 0);
             $kgsOutByCns = $reqData['kgs_out'][$d['id_out_celup']] ?? 0;
             $cnsOutByCns = $reqData['cns_out'][$d['id_out_celup']] ?? 0;
 
@@ -1808,8 +1808,8 @@ class WarehouseController extends BaseController
                     $cnsOut = floatval($rawCnsManual);
                     $krgOut = 0;
                 } else {
-                    $kgsOut = round($pemasukan['kgs_kirim'] - ($other[0]['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0), 2);
-                    $cnsOut = $pemasukan['cones_kirim'] - ($other[0]['cns_other_out'] ?? 0) - ($outByCns['cns_out'] ?? 0);
+                    $kgsOut = round($pemasukan['kgs_kirim'] - ($other['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0), 2);
+                    $cnsOut = $pemasukan['cones_kirim'] - ($other['cns_other_out'] ?? 0) - ($outByCns['cns_out'] ?? 0);
                     $krgOut = 1;
                     $this->pemasukanModel->update($pemasukan['id_pemasukan'], ['out_jalur' => "1"]);
                 }
@@ -2015,9 +2015,9 @@ class WarehouseController extends BaseController
             $other = $this->otherOutModel->getQty($id['id_out_celup']);
             $outByCns = $this->pengeluaranModel->getQtyOutByCns($id['id_out_celup']);
 
-            $kgsOther = !empty($other) ? (float) $other[0]['kgs_other_out'] : 0;
+            $kgsOther = !empty($other) ? (float) $other['kgs_other_out'] : 0;
             $kgsOutByCns = !empty($outByCns) ? (float) $outByCns['kgs_out'] : 0;
-            $cnsOther = !empty($other) ? (int) $other[0]['cns_other_out'] : 0;
+            $cnsOther = !empty($other) ? (int) $other['cns_other_out'] : 0;
             $cnsOutByCns = !empty($outByCns) ? (int) $outByCns['cns_out'] : 0;
 
             // kurangi other out & pengeluaran by cones
@@ -3436,5 +3436,26 @@ class WarehouseController extends BaseController
         return $this->response->setJSON([
             'data' => $filtered
         ]);
+    }
+
+    public function reportOtherOut()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/warehouse/report-other-out', $data);
+    }
+
+    public function filterOtherOut()
+    {
+        $key = $this->request->getGet('key');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->otherOutModel->getFilterOtherOut($key, $tanggalAwal, $tanggalAkhir);
+        // dd($data);
+        return $this->response->setJSON($data);
     }
 }

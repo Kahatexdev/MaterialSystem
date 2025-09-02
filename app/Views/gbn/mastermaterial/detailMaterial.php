@@ -366,7 +366,12 @@
     </div>
     <div class="card mt-4" id="totalKebutuhan">
         <div class="card-body">
-            <h5> Total Kebutuhan Bahan Baku</h5>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">Total Kebutuhan Bahan Baku</h5>
+                <a href="<?= base_url($role . '/material/exportTotalKebutuhan/' . $id_order) ?>" class="btn btn-success">
+                    <i class="fas fa-file-excel me-2"></i>Excel
+                </a>
+            </div>
             <div class="table-responsive">
                 <table id="dataTable1" class="display text-uppercase text-xs font-bolder text-center" style="width:100%">
                     <thead>

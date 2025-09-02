@@ -12574,4 +12574,262 @@ class ExcelController extends BaseController
         $writer->save('php://output');
         exit;
     }
+    public function exportTotalKebutuhan($id)
+    {
+        $model = $this->masterOrderModel->select('no_model')->where('id_order', $id)->first();
+        $totalKebutuhan = $this->materialModel->getTotalKebutuhan($id);
+        if ($totalKebutuhan) {
+            foreach ($totalKebutuhan as &$keb) { // ← Pake referensi &
+                $tgl = $this->scheduleCelupModel->cekSch($model, $keb) ?? '-';
+                $keb['tanggal_schedule'] = $tgl;
+            }
+            unset($keb); // good practice setelah foreach by reference
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Judul
+        $sheet->setCellValue('A1', 'Total Kebutuhan ' . $model['no_model']);
+        $sheet->mergeCells('A1:G1'); // Menggabungkan sel untuk judul
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Header
+        $header = ["No", "No Model", "Item Type", "Kode Warna", "Color", "Total Kebutuhan", "Tanggal Sch"];
+        $sheet->fromArray([$header], NULL, 'A3');
+
+        // Styling Header
+        $sheet->getStyle('A3:G3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:G3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:G3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        // Data
+        $row = 4;
+        foreach ($totalKebutuhan as $index => $item) {
+            $sheet->fromArray([
+                [
+                    $index + 1,
+                    $model['no_model'],
+                    $item['item_type'],
+                    $item['kode_warna'],
+                    $item['color'],
+                    number_format($item['kebutuhan'], 2),
+                    $item['tanggal_schedule'],
+                ]
+            ], NULL, 'A' . $row);
+            $row++;
+        }
+
+        // Atur border untuk seluruh tabel
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle('A3:G' . ($row - 1))->applyFromArray($styleArray);
+
+        // Set auto width untuk setiap kolom
+        foreach (range('A', 'G') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set isi tabel agar rata tengah
+        $sheet->getStyle('A4:G' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:G' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Total Kebutuhan ' . $model['no_model'] . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function exportOtherOut()
+    {
+        // 1) Ambil parameter
+        $key           = $this->request->getGet('key') ?? '';
+        $tanggalAwal   = $this->request->getGet('tanggal_awal') ?: null;
+        $tanggalAkhir  = $this->request->getGet('tanggal_akhir') ?: null;
+
+        // 2) Ambil data dari model
+        $rows = $this->otherOutModel->getFilterOtherOut($key, $tanggalAwal, $tanggalAkhir);
+        // dd($rows);
+        // 3) Siapkan Spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Other Out');
+
+        // 3a) Judul (opsional)
+        $tanggalLabel = ($tanggalAwal || $tanggalAkhir)
+            ? sprintf('Tanggal: %s s.d %s', $tanggalAwal ?: '-', $tanggalAkhir ?: '-')
+            : 'Tanggal: Semua';
+        $sheet->setCellValue('A1', 'Laporan Other Out');
+        $sheet->setCellValue('A2', $tanggalLabel);
+        $sheet->mergeCells('A1:N1');
+        $sheet->mergeCells('A2:N2');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1:A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
+        // 4) Header kolom (baris 4 agar ada ruang judul)
+        $headerRow = 4;
+        $headers = [
+            'A' => 'No',
+            'B' => 'No Model',
+            'C' => 'Item Type',
+            'D' => 'Kode Warna',
+            'E' => 'Warna',
+            'F' => 'Kategori',
+            'G' => 'Tgl Other Out',
+            'H' => 'Kgs Other Out',     // kgs_otherout
+            'I' => 'Cones Other Out',   // cns_otherout
+            'J' => 'Krg Other Out',     // krg_otherout
+            'K' => 'Lot',
+            'L' => 'Cluster',
+            'M' => 'Admin',
+            'N' => 'Created At',
+        ];
+        foreach ($headers as $col => $text) {
+            $sheet->setCellValue($col . $headerRow, $text);
+        }
+        // dd($headers);
+        // Styling header
+        $sheet->getStyle("A{$headerRow}:N{$headerRow}")
+            ->getFont()->setBold(true);
+        $sheet->getStyle("A{$headerRow}:N{$headerRow}")
+            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("A{$headerRow}:N{$headerRow}")
+            ->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFEFEFEF');
+        $sheet->getStyle("A{$headerRow}:N{$headerRow}")
+            ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+        // 5) Isi data mulai baris 5
+        $startDataRow = $headerRow + 1;
+        $r = $startDataRow;
+        $no = 1;
+
+        // Agar format tanggal rapi: gunakan format tanggal excel standar
+        $dateCols = ['G', 'N'];
+        $intCols  = ['I', 'J'];       // cones, krg
+        $kgCols   = ['H'];                 // kgs (2 desimal)
+
+        if (!empty($rows)) {
+            foreach ($rows as $row) {
+                $sheet->setCellValue("A{$r}", $no++);
+                $sheet->setCellValue("B{$r}", $row['no_model'] ?? '');
+                $sheet->setCellValue("C{$r}", $row['item_type'] ?? '');
+                $sheet->setCellValue("D{$r}", $row['kode_warna'] ?? '');
+                $sheet->setCellValue("E{$r}", $row['warna'] ?? '');
+                $sheet->setCellValue("F{$r}", $row['kategori'] ?? '');
+
+                // Tanggal: konversi ke \DateTime untuk format excel
+                $tglOO = !empty($row['tgl_otherout']) ? date_create($row['tgl_otherout']) : null;
+                $crtAt = !empty($row['created_at_otherout']) ? date_create($row['created_at_otherout']) : null;
+                if ($tglOO) {
+                    $sheet->setCellValue("G{$r}", \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($tglOO));
+                } else {
+                    $sheet->setCellValue("G{$r}", null);
+                }
+
+                $sheet->setCellValue("H{$r}", (float)($row['kgs_otherout'] ?? 0));   // kgs
+                $sheet->setCellValue("I{$r}", (int)($row['cns_otherout'] ?? 0));     // cones
+                $sheet->setCellValue("J{$r}", (int)($row['krg_otherout'] ?? 0));     // krg
+                $sheet->setCellValue("K{$r}", $row['lot'] ?? '');
+                $sheet->setCellValue("L{$r}", $row['cluster'] ?? '');
+                $sheet->setCellValue("M{$r}", $row['admin'] ?? '');
+
+                if ($crtAt) {
+                    $sheet->setCellValue("N{$r}", \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($crtAt));
+                } else {
+                    $sheet->setCellValue("N{$r}", null);
+                }
+
+                // Border tipis per baris
+                $sheet->getStyle("A{$r}:N{$r}")
+                    ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_HAIR);
+
+                $r++;
+            }
+        } else {
+            // Jika tidak ada data, tetap beri 1 baris info
+            $sheet->setCellValue("A{$startDataRow}", 'Tidak ada data pada filter ini.');
+            $sheet->mergeCells("A{$startDataRow}:N{$startDataRow}");
+            $sheet->getStyle("A{$startDataRow}")
+                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $r = $startDataRow + 1;
+        }
+
+        $lastDataRow = $r - 1;
+
+        // 6) Format kolom (tanggal & angka)
+        // Bagian format tanggal
+        foreach ($dateCols as $col) {
+            $sheet->getStyle("{$col}{$startDataRow}:{$col}{$lastDataRow}")
+                ->getNumberFormat()->setFormatCode('dd-mm-yyyy');
+        }
+
+        foreach ($intCols as $col) {
+            $sheet->getStyle("{$col}{$startDataRow}:{$col}{$lastDataRow}")
+                ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        }
+        foreach ($kgCols as $col) {
+            $sheet->getStyle("{$col}{$startDataRow}:{$col}{$lastDataRow}")
+                ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+        }
+
+        // 7) Baris TOTAL (jika ada data)
+        if ($lastDataRow >= $startDataRow) {
+            $totalRow = $lastDataRow + 1;
+            $sheet->setCellValue("G{$totalRow}", 'TOTAL');
+            $sheet->setCellValue("H{$totalRow}", "=SUM(H{$startDataRow}:H{$lastDataRow})"); // cones
+            $sheet->setCellValue("I{$totalRow}", "=SUM(I{$startDataRow}:I{$lastDataRow})"); // kgs
+            $sheet->setCellValue("J{$totalRow}", "=SUM(J{$startDataRow}:J{$lastDataRow})"); // krg
+
+            $sheet->mergeCells("A{$totalRow}:F{$totalRow}");
+            $sheet->getStyle("A{$totalRow}:N{$totalRow}")->getFont()->setBold(true);
+            $sheet->getStyle("A{$totalRow}:N{$totalRow}")
+                ->getBorders()->getTop()->setBorderStyle(Border::BORDER_THIN);
+
+            // Format total angka
+            $sheet->getStyle("H{$totalRow}:J{$totalRow}")
+                ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+        }
+
+        // 8) Autofilter dan Freeze Pane
+        $sheet->setAutoFilter("A{$headerRow}:N{$headerRow}");
+        $sheet->freezePane("A" . ($headerRow + 1)); // freeze header
+
+        // 9) Autosize kolom
+        foreach (range('A', 'N') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // 10) Output sebagai unduhan
+        $safeAwal  = $tanggalAwal  ? str_replace(['/', ' '], '-', $tanggalAwal)  : 'ALL';
+        $safeAkhir = $tanggalAkhir ? str_replace(['/', ' '], '-', $tanggalAkhir) : 'ALL';
+        $filename = "OtherOut_{$safeAwal}_{$safeAkhir}_" . date('Ymd_His') . ".xlsx";
+
+        // Bersihkan buffer output agar tidak korup
+        if (ob_get_length()) {
+            ob_end_clean();
+        }
+
+        
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Pengeluaran_Lain_Lain_' . date('Ymd_His') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
+    }
 }
