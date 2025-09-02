@@ -1093,24 +1093,6 @@ class ScheduleController extends BaseController
         $filterNoModel = $this->request->getPost('filter_nomodel');
 
         $sch = $this->scheduleCelupModel->getSchedule($filterTglSch, $filterTglSchsampai, $filterNoModel);
-        // dd ($sch);
-        // if ($filterTglSch && $filterNoModel) {
-        //     $sch = array_filter($sch, function ($data) use ($filterTglSch, $filterNoModel) {
-        //         return $data['tanggal_schedule'] === $filterTglSch &&
-        //             (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
-        //     });
-        // } elseif ($filterTglSch) {
-        //     // Filter berdasarkan tanggal saja
-        //     $sch = array_filter($sch, function ($data) use ($filterTglSch) {
-        //         return $data['tanggal_schedule'] === $filterTglSch;
-        //     });
-        // } elseif ($filterNoModel) {
-        //     // Filter berdasarkan nomor model atau kode warna saja
-        //     $sch = array_filter($sch, function ($data) use ($filterNoModel) {
-        //         return (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
-        //     });
-        // }
-        // dd($sch);
 
         $uniqueData = [];
         foreach ($sch as $key => $id) {

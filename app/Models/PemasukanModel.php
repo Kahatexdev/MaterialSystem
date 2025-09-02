@@ -306,7 +306,9 @@ class PemasukanModel extends Model
             ->where("COALESCE(schedule_celup.item_type, retur.item_type, other_bon.item_type, stock.item_type) = ", $data['item_type'])
             ->where("COALESCE(schedule_celup.kode_warna, retur.kode_warna, other_bon.kode_warna, stock.kode_warna) = ", $data['kode_warna'])
             ->where('stock.nama_cluster', $data['cluster'])
-            ->where('out_jalur', "0")
+            ->where('pemasukan.out_jalur', '0')
+            // ->orWhere('stock.kgs_in_out >', 0)
+            // ->orWhere('stock.kgs_stock_awal >', 0)
             ->groupBy('out_celup.id_out_celup')
             ->get()
             ->getResultArray();
