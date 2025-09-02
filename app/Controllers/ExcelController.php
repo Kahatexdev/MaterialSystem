@@ -1001,7 +1001,7 @@ class ExcelController extends BaseController
         $data = $this->scheduleCelupModel->getFilterSchBenang($tanggal_awal, $tanggal_akhir, $key, $tanggal_schedule);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-
+        dd($data);
         // Judul
         $sheet->setCellValue('A1', 'Report Schedule Benang');
         $sheet->mergeCells('A1:V1'); // Menggabungkan sel untuk judul
@@ -1036,9 +1036,9 @@ class ExcelController extends BaseController
                     $item->delivery_akhir,
                     $item->tanggal_schedule,
                     number_format((float) ($item->total_kgs ?? 0), 2, '.', ''),
-                    number_format((float) ($item->qty_po_plus ?? 0), 2, '.', ''),
-                    number_format((float) ($item->stock_system ?? 0), 2, '.', ''),
-                    number_format((float) ($item->stock_lain ?? 0), 2, '.', ''),
+                    number_format((float) ($item->total_poplus ?? 0), 2, '.', ''),
+                    number_format((float) ($item->kgs_stock_awal ?? 0), 2, '.', ''),
+                    number_format((float) ($item->kgs_stock_opname ?? 0), 2, '.', ''),
                     $item->tgl_datang ?? '',
                     number_format((float) ($item->kgs_datang ?? 0), 2, '.', ''),
                     $item->kg_celup,
