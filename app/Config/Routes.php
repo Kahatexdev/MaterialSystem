@@ -256,6 +256,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/filterPemakaianNylon', 'WarehouseController::filterPemakaianNylon');
     $routes->get('warehouse/exportPemakaianNylon', 'ExcelController::exportPemakaianNylon');
 
+    $routes->get('warehouse/reportOtherOut', 'WarehouseController::reportOtherOut');
+    $routes->get('warehouse/filterOtherOut', 'WarehouseController::filterOtherOut');
+
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');
     $routes->post('otherIn/saveOtherIn', 'WarehouseController::saveOtherIn');
@@ -731,6 +734,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('warehouse/exportExcel', 'ExcelController::excelStockMaterial');
     $routes->get('warehouse/reportPengiriman', 'WarehouseController::reportPengiriman');
     $routes->get('warehouse/filterPengiriman', 'WarehouseController::filterPengiriman');
+    $routes->get('warehouse/reportOtherOut', 'WarehouseController::reportOtherOut');
+    $routes->get('warehouse/filterOtherOut', 'WarehouseController::filterOtherOut');
     $routes->get('warehouse/exportPengiriman', 'ExcelController::exportPengiriman');
     $routes->get('warehouse/reportGlobal', 'WarehouseController::reportGlobal');
     $routes->get('warehouse/filterReportGlobal', 'WarehouseController::filterReportGlobal');

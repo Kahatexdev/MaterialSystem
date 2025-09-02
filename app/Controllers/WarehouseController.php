@@ -3437,4 +3437,25 @@ class WarehouseController extends BaseController
             'data' => $filtered
         ]);
     }
+
+    public function reportOtherOut()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/warehouse/report-other-out', $data);
+    }
+
+    public function filterOtherOut()
+    {
+        $key = $this->request->getGet('key');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->otherOutModel->getFilterOtherOut($key, $tanggalAwal, $tanggalAkhir);
+        // dd($data);
+        return $this->response->setJSON($data);
+    }
 }

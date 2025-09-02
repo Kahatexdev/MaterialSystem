@@ -83,4 +83,82 @@ class OtherOutModel extends Model
             ->get()
             ->getResultArray();
     }
+
+    public function getFilterOtherOut($key, $tanggalAwal, $tanggalAkhir): array
+    {
+        // Normalisasi parameter
+        $key          = trim((string)($key ?? ''));
+        $tanggalAwal  = $tanggalAwal ? date('Y-m-d', strtotime($tanggalAwal)) : null;
+        $tanggalAkhir = $tanggalAkhir ? date('Y-m-d', strtotime($tanggalAkhir)) : null;
+
+        $builder = $this->db->table('other_out');
+
+        // Pilih kolom-kolom yang diminta.
+        // item_type/kode_warna/warna diambil dari schedule_celup jika ada,
+        // fallback ke retur/other_bon, dan terakhir ke out_celup.
+        $builder->select("
+        COALESCE(sc.no_model, r.no_model, ob.no_model, oc.no_model)                    AS no_model,
+        COALESCE(sc.item_type, r.item_type, ob.item_type)                               AS item_type,
+        COALESCE(sc.kode_warna, r.kode_warna, ob.kode_warna)                            AS kode_warna,
+        COALESCE(sc.warna, r.warna, ob.warna)                                           AS warna,
+
+        other_out.kategori                                                              AS kategori,
+        other_out.tgl_other_out                                                         AS tgl_otherout,
+        other_out.cns_other_out                                                         AS cns_otherout,
+        other_out.kgs_other_out                                                         AS kgs_otherout,
+        other_out.krg_other_out                                                         AS krg_otherout,
+        other_out.lot_other_out                                                         AS lot,
+        other_out.nama_cluster                                                          AS cluster,
+        other_out.admin                                                                 AS admin,
+        other_out.created_at                                                            AS created_at_otherout
+    ");
+
+        // Join
+        $builder->join('out_celup oc',       'oc.id_out_celup   = other_out.id_out_celup', 'left');
+        $builder->join('schedule_celup sc',  'sc.id_celup       = oc.id_celup',            'left');
+        $builder->join('retur r',            'r.id_retur        = oc.id_retur',            'left');
+        $builder->join('other_bon ob',       'ob.id_other_bon   = oc.id_other_bon',        'left');
+
+        // Filter tanggal (jika keduanya valid)
+        if ($tanggalAwal && $tanggalAkhir) {
+            $builder->where('other_out.tgl_other_out >=', $tanggalAwal)
+                ->where('other_out.tgl_other_out <=', $tanggalAkhir);
+        } elseif ($tanggalAwal) {
+            $builder->where('other_out.tgl_other_out >=', $tanggalAwal);
+        } elseif ($tanggalAkhir) {
+            $builder->where('other_out.tgl_other_out <=', $tanggalAkhir);
+        }
+
+        // Pencarian bebas ($key) di beberapa kolom umum
+        if ($key !== '') {
+            $builder->groupStart()
+                ->like('sc.no_model', $key)
+                ->orLike('r.no_model', $key)
+                ->orLike('ob.no_model', $key)
+                ->orLike('oc.no_model', $key)
+
+                ->orLike('sc.item_type', $key)
+                ->orLike('r.item_type', $key)
+                ->orLike('ob.item_type', $key)
+
+                ->orLike('sc.kode_warna', $key)
+                ->orLike('r.kode_warna', $key)
+                ->orLike('ob.kode_warna', $key)
+
+                ->orLike('sc.warna', $key)
+                ->orLike('r.warna', $key)
+                ->orLike('ob.warna', $key)
+
+                ->orLike('other_out.lot_other_out', $key)
+                ->orLike('other_out.nama_cluster', $key)
+                ->orLike('other_out.kategori', $key)
+                ->groupEnd();
+        }
+
+        // Urutan terbaru dulu
+        $builder->orderBy('other_out.tgl_other_out', 'DESC')
+            ->orderBy('other_out.created_at',    'DESC');
+
+        return $builder->get()->getResultArray();
+    }
 }
