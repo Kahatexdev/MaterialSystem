@@ -12569,4 +12569,81 @@ class ExcelController extends BaseController
         $writer->save('php://output');
         exit;
     }
+    public function exportTotalKebutuhan($id)
+    {
+        $model = $this->masterOrderModel->select('no_model')->where('id_order', $id)->first();
+        $totalKebutuhan = $this->materialModel->getTotalKebutuhan($id);
+        if ($totalKebutuhan) {
+            foreach ($totalKebutuhan as &$keb) { // ← Pake referensi &
+                $tgl = $this->scheduleCelupModel->cekSch($model, $keb) ?? '-';
+                $keb['tanggal_schedule'] = $tgl;
+            }
+            unset($keb); // good practice setelah foreach by reference
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Judul
+        $sheet->setCellValue('A1', 'Total Kebutuhan ' . $model['no_model']);
+        $sheet->mergeCells('A1:G1'); // Menggabungkan sel untuk judul
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Header
+        $header = ["No", "No Model", "Item Type", "Kode Warna", "Color", "Total Kebutuhan", "Tanggal Sch"];
+        $sheet->fromArray([$header], NULL, 'A3');
+
+        // Styling Header
+        $sheet->getStyle('A3:G3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:G3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:G3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        // Data
+        $row = 4;
+        foreach ($totalKebutuhan as $index => $item) {
+            $sheet->fromArray([
+                [
+                    $index + 1,
+                    $model['no_model'],
+                    $item['item_type'],
+                    $item['kode_warna'],
+                    $item['color'],
+                    number_format($item['kebutuhan'], 2),
+                    $item['tanggal_schedule'],
+                ]
+            ], NULL, 'A' . $row);
+            $row++;
+        }
+
+        // Atur border untuk seluruh tabel
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle('A3:G' . ($row - 1))->applyFromArray($styleArray);
+
+        // Set auto width untuk setiap kolom
+        foreach (range('A', 'G') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set isi tabel agar rata tengah
+        $sheet->getStyle('A4:G' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:G' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Total Kebutuhan ' . $model['no_model'] . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
+    }
 }

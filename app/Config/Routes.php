@@ -64,6 +64,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
 
     $routes->post('getMasterData', 'MasterdataController::getMasterData');
     $routes->get('material/(:num)', 'MasterdataController::material/$1');
+    $routes->get('material/exportTotalKebutuhan/(:num)', 'ExcelController::exportTotalKebutuhan/$1');
     $routes->post('tampilMaterial', 'MasterdataController::tampilMaterial');
     $routes->get('getMaterialDetails/(:num)', 'MasterdataController::getMaterialDetails/$1');
     $routes->post('tambahMaterial', 'MaterialController::tambahMaterial');
