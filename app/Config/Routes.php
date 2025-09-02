@@ -258,6 +258,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
 
     $routes->get('warehouse/reportOtherOut', 'WarehouseController::reportOtherOut');
     $routes->get('warehouse/filterOtherOut', 'WarehouseController::filterOtherOut');
+    $routes->get('warehouse/exportOtherOut', 'ExcelController::exportOtherOut');
 
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');
