@@ -247,7 +247,9 @@ class StockModel extends Model
                 'kode_warna' => $kodeWarna,
                 'warna'      => $warna,
             ])
-            ->groupBy('nama_cluster')
+            ->groupBy(['nama_cluster', 'no_model', 'item_type', 'kode_warna', 'warna'])
+            ->having('total_kgs >', 0, false)
+            ->orderBy('nama_cluster', 'ASC')
             ->get()
             ->getResultArray();
     }

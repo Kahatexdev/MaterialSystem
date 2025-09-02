@@ -221,6 +221,7 @@
                                 <li><a class="dropdown-item" href="#">Acrylic</a></li>
                                 <li><a class="dropdown-item" href="#">Benang</a></li>
                                 <li><a class="dropdown-item" href="#">Nylon</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/schedule/reportSchWeekly') ?>">Weekly Report</a></li>
                             </ul>
                         </li>
                         <li class="nav-item d-flex align-items-center">

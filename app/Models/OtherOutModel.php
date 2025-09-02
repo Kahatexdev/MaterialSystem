@@ -62,7 +62,7 @@ class OtherOutModel extends Model
         return $this->select('SUM(kgs_other_out) AS kgs_other_out, SUM(cns_other_out) AS cns_other_out, SUM(krg_other_out) AS krg_other_out')
             ->where('id_out_celup', $id)
             // ->where('nama_cluster', $namaCluster)
-            ->findAll();
+            ->first();
     }
     public function getPakaiLain($key, $jenis = null)
     {
