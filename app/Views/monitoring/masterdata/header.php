@@ -12,6 +12,26 @@
             <div class="collgbne navbar-collgbne mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
 
                 <ul class="navbar-nav  justify-content-end">
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-file-alt"></i>
+                            <span class="d-lg-inline-block d-none ms-1">Other PO</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownMenuLink">
+                            <li><a href="<?= base_url($role . '/masterdata/poGabungan') ?>" class="dropdown-item" href="#">PO Gabungan</a></li>
+                            <li><a href="<?= base_url($role . '/masterdata/poBooking') ?>" class="dropdown-item" href="#">PO Booking</a></li>
+                            <li><a href="<?= base_url($role . '/masterdata/poManual') ?>" class="dropdown-item" href="#">PO Manual</a></li>
+                            <li>
+                                <button
+                                    type="button"
+                                    class="dropdown-item"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalPoNylon">
+                                    PO Nylon
+                                </button>
+                            </li>
+                        </ul>
+                    </li>
                     <li class="nav-item d-flex align-items-center px-1">
                         <a href="<?= base_url(session()->get('role')) . '/masterMaterial' ?>" class="nav-link text-body font-weight-bold px-2">
                             <i class="fas fa-database"></i>
@@ -20,11 +40,27 @@
                         </a>
                     </li>
                     <li class="nav-item d-flex align-items-center px-1">
+                        <a href="<?= base_url(session()->get('role')) . '/masterWarnaBenang' ?>" class="nav-link text-body font-weight-bold px-2">
+                            <i class="fas fa-palette"></i>
+                            <span class="d-lg-inline-block d-none ms-1">
+                                Master Warna Benang</span>
+                        </a>
+                    </li>
+                    <li class="nav-item d-flex align-items-center px-1">
                         <a href="<?= base_url(session()->get('role')) . '/masterBuyer' ?>" class="nav-link text-body font-weight-bold px-2">
                             <i class="fas fa-database"></i>
                             <span class="d-lg-inline-block d-none ms-1">
                                 Master Buyer</span>
                         </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-file-alt"></i>
+                            <span class="d-lg-inline-block d-none ms-1">Reports</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownMenuLink">
+                            <li><a href="<?= base_url($role . '/masterdata/reportMasterOrder') ?>" class="dropdown-item">Master Order</a></li>
+                        </ul>
                     </li>
                     <li class="nav-item d-flex align-items-center">
                         <a href="" data-bs-toggle="modal" data-bs-target="#LogoutModal" class=" nav-link text-body font-weight-bold px-0">

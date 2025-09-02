@@ -256,7 +256,7 @@ class ReturController extends BaseController
 
         return view($this->role . '/retur/index', [
             'active'     => $this->active,
-            'title'      => 'PPH',
+            'title'      => 'Retur Area',
             'role'       => $this->role,
             'area'       => $area,
             'kategori' => $kategoriRetur,

@@ -46,7 +46,54 @@
             </table>
         </div>
     <?php endif; ?>
+    <div class="modal fade" id="modalPoNylon" tabindex="-1" aria-labelledby="modalPoNylonLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalPoNylonLabel">Export PO Nylon</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Konten form/modal kamu di sini -->
+                    <form action="<?= base_url($role . '/exportPoNylon') ?>" method="post">
+                        <div class="mb-3">
+                            <label for="nomorPo" class="form-label">Tujuan</label>
 
+                            <select class="form-control tujuan" name="tujuan" required>
+                                <option value="">Pilih Tujuan</option>
+                                <option value="CELUP">CELUP</option>
+                                <option value="COVERING">COVERING</option>
+                            </select>
+                            <label for="nomorPo" class="form-label">Tanggal Buka PO</label>
+                            <input type="date" class="form-control" id="tanggal" name="tanggal" required>
+                            <label for="season" class="form-label">Season</label>
+                            <input type="text" class="form-control" id="season" name="season">
+                            <label for="jenis" class="form-label">Material Type</label>
+                            <select name="material_type" id="material_type" class="form-control">
+                                <option value="">Pilih Material Type</option>
+                                <option value="OCS BLENDED">OCS BLENDED</option>
+                                <option value="GOTS">GOTS</option>
+                                <option value="RCS BLENDED POST-CONSUMER">RCS BLENDED POST-CONSUMER</option>
+                                <option value="BCI">BCI</option>
+                                <option value="BCI-7">BCI-7</option>
+                                <option value="BCI, ALOEVERA">BCI, ALOEVERA</option>
+                                <option value="OCS BLENDED, ALOEVERA">OCS BLENDED, ALOEVERA</option>
+                                <option value="GRS BLENDED POST-CONSUMER">GRS BLENDED POST-CONSUMER</option>
+                                <option value="ORGANIC IC2">ORGANIC IC2</option>
+                                <option value="RCS BLENDED PRE-CONSUMER">RCS BLENDED PRE-CONSUMER</option>
+                                <option value="GRS BLENDED PRE-CONSUMER">GRS BLENDED PRE-CONSUMER</option>
+                            </select>
+                        </div>
+                        <!-- Tambah field lain kalau perlu -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Modal untuk Upload File Excel -->
     <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
         <div class="modal-dialog">

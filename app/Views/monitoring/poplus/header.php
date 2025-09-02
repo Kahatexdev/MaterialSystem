@@ -17,7 +17,7 @@
                             <span class="d-lg-inline-block d-none ms-1">Reports</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownMenuLink">
-                            <li><a href="#" class="dropdown-item">PO Tambahan</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url($role . '/poplus/reportPoTambahan') ?>">PO Tambahan</a></li>
                         </ul>
                     </li>
                     <li class="nav-item d-flex align-items-center">
