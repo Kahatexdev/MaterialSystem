@@ -668,9 +668,9 @@ class ScheduleCelupModel extends Model
     public function getMesinKapasitasHariIni()
     {
         return $this->db->table('mesin_celup')
-            ->select('mesin_celup.no_mesin, mesin_celup.max_caps, COALESCE(SUM(schedule_celup.kg_celup), 0) as kapasitas_terpakai')
+            ->select('mesin_celup.no_mesin,  (mesin_celup.max_caps * mesin_celup.jml_lot) AS max_caps, COALESCE(SUM(schedule_celup.kg_celup), 0) as kapasitas_terpakai')
             ->join('schedule_celup', 'schedule_celup.id_mesin = mesin_celup.id_mesin AND schedule_celup.tanggal_schedule = CURDATE()', 'left')
-            ->groupBy('mesin_celup.no_mesin, mesin_celup.max_caps')
+            ->groupBy('mesin_celup.no_mesin, mesin_celup.max_caps,mesin_celup.jml_lot')
             ->get()->getResultArray();
     }
 
