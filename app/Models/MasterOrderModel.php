@@ -574,7 +574,7 @@ class MasterOrderModel extends Model
         if ($body['unit'] == 'CJ') {
             $unit = 'CIJERAH';
         } elseif ($body['unit'] == 'MJ') {
-            $unit = 'CIJERAH';
+            $unit = 'MAJALAYA';
         } else {
             $unit = 'Belum di Assign';
         }

@@ -721,6 +721,7 @@ class ScheduleCelupModel extends Model
                 'schedule_celup.*',
                 'master_order.delivery_awal',
                 'master_order.delivery_akhir',
+                'master_order.lco_date',
                 'mesin_celup.no_mesin',
                 'mesin_celup.ket_mesin',
                 'master_material.jenis',

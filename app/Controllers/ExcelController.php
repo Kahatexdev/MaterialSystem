@@ -1004,18 +1004,18 @@ class ExcelController extends BaseController
 
         // Judul
         $sheet->setCellValue('A1', 'Report Schedule Benang');
-        $sheet->mergeCells('A1:Q1'); // Menggabungkan sel untuk judul
+        $sheet->mergeCells('A1:V1'); // Menggabungkan sel untuk judul
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["No", "No Mesin", "Ket Mesin", "Lot Urut", "No Model", "Item Type", "Kode Warna", "Warna", "Total Datang Solid", "Start Mc", "Delivery Awal", "Delivery Akhir", "Tgl Schedule", "Qty PO", "Qty Celup", "LOT Sch", "Tgl Celup"];
+        $header = ["No", "No Mesin", "Ket Mesin", "Lot Urut", "Tgl PO", "No Model", "Item Type", "Kode Warna", "Warna", "Start Mc", "Delivery Awal", "Delivery Akhir", "Tgl Schedule", "Qty PO", "Qty PO(+)", "Stock System", "Stock Lain", "Rangkuman Tanggal Datang", "Total Qty Datang",  "Qty Celup", "LOT Celup", "Tgl Celup"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
-        $sheet->getStyle('A3:Q3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:Q3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A3:Q3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3:V3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:V3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:V3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         // Data
         $row = 4;
@@ -1026,16 +1026,21 @@ class ExcelController extends BaseController
                     $item->no_mesin,
                     $item->ket_mesin,
                     $item->lot_urut,
+                    $item->lco_date,
                     $item->no_model,
                     $item->item_type,
                     $item->kode_warna,
                     $item->warna,
-                    number_format((float) $item->kgs_datang, 2, '.', ''),
                     $item->start_mc,
                     $item->delivery_awal,
                     $item->delivery_akhir,
                     $item->tanggal_schedule,
-                    number_format((float) $item->total_kgs, 2, '.', ''),
+                    number_format((float) ($item->total_kgs ?? 0), 2, '.', ''),
+                    number_format((float) ($item->qty_po_plus ?? 0), 2, '.', ''),
+                    number_format((float) ($item->stock_system ?? 0), 2, '.', ''),
+                    number_format((float) ($item->stock_lain ?? 0), 2, '.', ''),
+                    $item->tgl_datang ?? '',
+                    number_format((float) ($item->kgs_datang ?? 0), 2, '.', ''),
                     $item->kg_celup,
                     $item->lot_celup,
                     $item->tanggal_celup,
@@ -1053,16 +1058,16 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle('A3:Q' . ($row - 1))->applyFromArray($styleArray);
+        $sheet->getStyle('A3:V' . ($row - 1))->applyFromArray($styleArray);
 
         // Set auto width untuk setiap kolom
-        foreach (range('A', 'Q') as $column) {
+        foreach (range('A', 'V') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Set isi tabel agar rata tengah
-        $sheet->getStyle('A4:Q' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A4:Q' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A4:V' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:V' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
         $fileName = 'Report_Schedule_Benang' . '.xlsx';
