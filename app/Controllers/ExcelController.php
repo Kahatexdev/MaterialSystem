@@ -1001,7 +1001,7 @@ class ExcelController extends BaseController
         $data = $this->scheduleCelupModel->getFilterSchBenang($tanggal_awal, $tanggal_akhir, $key, $tanggal_schedule);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        dd($data);
+        // dd($data);
         // Judul
         $sheet->setCellValue('A1', 'Report Schedule Benang');
         $sheet->mergeCells('A1:V1'); // Menggabungkan sel untuk judul
@@ -12821,7 +12821,7 @@ class ExcelController extends BaseController
             ob_end_clean();
         }
 
-        
+
         $writer = new Xlsx($spreadsheet);
         $fileName = 'Pengeluaran_Lain_Lain_' . date('Ymd_His') . '.xlsx';
 

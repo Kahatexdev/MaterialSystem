@@ -98,7 +98,7 @@ class ClusterModel extends Model
     {
         $detailKarungSub = "(
         SELECT GROUP_CONCAT(
-                   DISTINCT JSON_OBJECT(
+                JSON_OBJECT(
                        'no_model', oc.no_model,
                        'no_karung', oc.no_karung,
                        'kgs_kirim', oc.kgs_kirim,
@@ -239,7 +239,7 @@ class ClusterModel extends Model
     {
         $detailKarungSub = "(
         SELECT GROUP_CONCAT(
-                   DISTINCT JSON_OBJECT(
+                    JSON_OBJECT(
                        'no_model', oc.no_model,
                        'no_karung', oc.no_karung,
                        'kgs_kirim', oc.kgs_kirim,
@@ -326,7 +326,7 @@ class ClusterModel extends Model
     {
         $detailKarungSub = "(
         SELECT GROUP_CONCAT(
-                   DISTINCT JSON_OBJECT(
+                    JSON_OBJECT(
                        'no_model', oc.no_model,
                        'no_karung', oc.no_karung,
                        'kgs_kirim', oc.kgs_kirim,

@@ -708,7 +708,7 @@ class ScheduleCelupModel extends Model
             GROUP_CONCAT(DISTINCT DATE_FORMAT(bon_celup.tgl_datang, '%d-%m-%Y') ORDER BY bon_celup.tgl_datang SEPARATOR ' / ') AS tgl_datang
         ")
             ->join('out_celup',     'out_celup.id_out_celup = pemasukan.id_out_celup')
-            ->join('schedule_celup', 'schedule_celup.id_celup   = out_celup.id_celup')
+            ->join('schedule_celup', 'schedule_celup.id_celup   = out_celup.id_celup', 'left')
             ->join('bon_celup', 'bon_celup.id_bon   = out_celup.id_bon')
             ->groupBy([
                 'out_celup.no_model',
@@ -742,7 +742,6 @@ class ScheduleCelupModel extends Model
                 'master_material.jenis',
                 'material_summary.total_kgs',
                 'datang_sub.kgs_datang',
-                'datang_sub.id_out_celup',
                 'datang_sub.tgl_datang',
                 'po_plus_sub.total_poplus',
                 'stok_awal_sub.kgs_stock_awal',
@@ -750,7 +749,7 @@ class ScheduleCelupModel extends Model
             ->join('master_order',    'master_order.no_model       = schedule_celup.no_model')
             ->join('master_material', 'master_material.item_type   = schedule_celup.item_type')
             ->join('mesin_celup',     'mesin_celup.id_mesin        = schedule_celup.id_mesin')
-            ->join('out_celup',     'out_celup.id_celup        = schedule_celup.id_celup', 'left')
+            // ->join('out_celup',     'out_celup.id_celup        = schedule_celup.id_celup', 'left')
             // manual derived‐table join:
             ->join(
                 "({$materialSub}) AS material_summary",
@@ -762,7 +761,9 @@ class ScheduleCelupModel extends Model
             )
             ->join(
                 "({$datangSub}) AS datang_sub",
-                'datang_sub.id_out_celup = out_celup.id_out_celup',
+                'datang_sub.no_model = schedule_celup.no_model
+         AND datang_sub.item_type = schedule_celup.item_type
+         AND datang_sub.kode_warna = schedule_celup.kode_warna',
                 'left'
             )
             ->join(
