@@ -1090,6 +1090,7 @@
                             // Menutup modal dan reset form jika diperlukan
                             $('#pengeluaranSelainOrder').modal('hide');
                             $('#formpengeluaranSelainOrder')[0].reset();
+                            reloadSearchResult(); // refresh data stock tanpa reload page
                         }
                     });
                 } else {
@@ -1112,5 +1113,9 @@
             }
         });
     });
+
+    function reloadSearchResult() {
+        $('#filter_data').click(); // trigger ulang pencarian terakhir
+    }
 </script>
 <?php $this->endSection(); ?>

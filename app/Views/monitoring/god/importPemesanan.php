@@ -91,7 +91,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Success!',
-                    text: '<?= session()->getFlashdata('success') ?>',
+                    html: '<?= session()->getFlashdata('success') ?>',
                     confirmButtonColor: '#4a90e2'
                 });
             });
@@ -103,7 +103,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error!',
-                    text: '<?= session()->getFlashdata('error') ?>',
+                    html: '<?= session()->getFlashdata('error') ?>',
                     confirmButtonColor: '#4a90e2'
                 });
             });

@@ -1448,9 +1448,9 @@ class GodController extends BaseController
                     'sisa_cones_mc'    => (int)($data['sisa_cns_mc'] ?? 0),
                     'lot'              => $data['lot'] ?? null,
                     'keterangan'       => $data['keterangan'] ?? null,
-                    'po_tambahan'      => $data['po_tambahan'] ?? '0',
+                    'po_tambahan'      => (isset($data['po_tambahan']) && strtoupper(trim($data['po_tambahan'])) === 'YA') ? '1' : '0',
                     'status_kirim'     => 'YA',
-                    'admin'            => $data['area'],
+                    'admin'            => strtoupper($data['area']),
                     'additional_time'  => null,
                     'created_at'       => date('Y-m-d H:i:s'),
                 ];
@@ -1475,7 +1475,7 @@ class GodController extends BaseController
 
                 $pengeluaranData = [
                     'id_total_pemesanan'    => $idTtlPemesanan,
-                    'area_out'              => $data['area'],
+                    'area_out'              => strtoupper($data['area']),
                     'tgl_out'               => $dt['tgl_pakai'],
                     'kgs_out'               => $data['kgs_pakai'],
                     'cns_out'               => $data['cns_pakai'] ?? 0,
@@ -1503,7 +1503,13 @@ class GodController extends BaseController
             }
 
             $msg = "Import selesai: OK=$ok | ERR=$err";
-            if ($err) $msg .= " | Detail: " . implode(' | ', $errLogs);
+            if ($err) {
+                $msg .= " | Detail: <ul>";
+                foreach ($errLogs as $errLog) {
+                    $msg .= "<li>" . htmlspecialchars($errLog) . "</li>";
+                }
+                $msg .= "</ul>";
+            }
             return redirect()->back()->with($err ? 'error' : 'success', $msg);
         } catch (\Throwable $e) {
             $db->transRollback();

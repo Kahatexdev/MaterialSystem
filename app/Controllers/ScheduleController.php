@@ -1127,6 +1127,7 @@ class ScheduleController extends BaseController
                     'lot_urut' => $id['lot_urut'],
                     'tgl_schedule' => $id['tanggal_schedule'],
                     'last_status' => $id['last_status'],
+                    'ket_schedule' => $id['ket_schedule'],
                     'po_plus' => $id['po_plus'],
                     'admin' => $id['user_cek_status']
                 ];

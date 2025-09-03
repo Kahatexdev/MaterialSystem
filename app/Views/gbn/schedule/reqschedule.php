@@ -2,6 +2,8 @@
 <?php $this->section('content'); ?>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.0/css/responsive.dataTables.min.css">
+
 <style>
     .card {
         border-radius: 20px;
@@ -172,6 +174,21 @@
     .text-success {
         color: #43a047 !important;
     }
+
+    /* Default wrap semua cell */
+    #ReqScheduleTable td,
+    #ReqScheduleTable th {
+        white-space: normal !important;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* Batasi khusus kolom Keterangan (kolom ke-11) */
+    #ReqScheduleTable td:nth-child(11),
+    #ReqScheduleTable th:nth-child(11) {
+        max-width: 200px;
+        /* sesuaikan kebutuhan */
+    }
 </style>
 
 <div class="container-fluid py-4">
@@ -246,6 +263,7 @@
                             <th class="sticky">Start Mc</th>
                             <th class="sticky">Tanggal Schedule</th>
                             <th class="sticky">Last Status</th>
+                            <th class="sticky">Keterangan</th>
                             <th class="sticky">Action</th>
                         </tr>
                     </thead>
@@ -272,6 +290,7 @@
                                 <td><?= $data['start_mc']; ?></td>
                                 <td><?= $data['tgl_schedule']; ?></td>
                                 <td><?= $data['last_status']; ?></td>
+                                <td><?= $data['ket_schedule']; ?></td>
                                 <?php if ($data['last_status'] != 'complain') { ?>
                                     <td>
                                         <a href="<?= base_url($role . '/schedule/reqschedule/show/' . $data['id_celup']) ?>" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Detail">
@@ -307,11 +326,18 @@
     </div>
 </div>
 
-
+<script src="https://cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
 <script>
     $(document).ready(function() {
         $('#ReqScheduleTable').DataTable({
-            "scrollX": true
+            scrollX: true,
+            responsive: true,
+            autoWidth: false,
+            columnDefs: [{
+                targets: 10, // index kolom Keterangan (mulai 0)
+                width: "200px", // batasi lebar
+                className: "text-wrap"
+            }]
         });
     });
     document.addEventListener("DOMContentLoaded", function() {
