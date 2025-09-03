@@ -1439,7 +1439,7 @@ class GodController extends BaseController
                     'keterangan'       => $data['keterangan'] ?? null,
                     'po_tambahan'      => $data['po_tambahan'] ?? '0',
                     'status_kirim'     => 'YA',
-                    'admin'            => $data['area'],
+                    'admin'            => strtoupper($data['area']),
                     'additional_time'  => null,
                     'created_at'       => date('Y-m-d H:i:s'),
                 ];
@@ -1464,7 +1464,7 @@ class GodController extends BaseController
 
                 $pengeluaranData = [
                     'id_total_pemesanan'    => $idTtlPemesanan,
-                    'area_out'              => $data['area'],
+                    'area_out'              => strtoupper($data['area']),
                     'tgl_out'               => $dt['tgl_pakai'],
                     'kgs_out'               => $data['kgs_pakai'],
                     'cns_out'               => $data['cns_pakai'] ?? 0,
