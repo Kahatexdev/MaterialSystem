@@ -2357,6 +2357,14 @@ class WarehouseController extends BaseController
                     ->update();
             }
 
+            if ($krgOtherOut == 1) {
+                // Update data stok
+                $this->pemasukanModel->set('out_jalur', '1')
+                    ->where('id_out_celup', $idOutCelup)
+                    ->where('id_stock', $idStock)
+                    ->update();
+            }
+
             // Mengirim response JSON ke frontend
             return $this->response->setJSON([
                 'success' => true,
