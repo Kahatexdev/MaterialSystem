@@ -277,7 +277,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pemesanan/(:any)/(:any)', 'PemesananController::pemesanan/$1/$2');
     $routes->post('pemesanan/filter', 'PemesananController::filterPemesanan');
     $routes->get('pemesananperarea/(:any)', 'PemesananController::pemesananPerArea/$1');
-    $routes->get('detailpemesanan/(:any)/(:any)', 'PemesananController::detailPemesanan/$1/$2');
+    $routes->get('detailpemesanan/(:any)/(:any)/(:any)', 'PemesananController::detailPemesanan/$1/$2/$3');
     $routes->get('selectClusterWarehouse/(:any)', 'PemesananController::selectClusterWarehouse/$1');
     $routes->post('pemesanan/saveKetGbnInPemesanan', 'PemesananController::saveKetGbnInPemesanan');
     $routes->get('pinjamOrder', 'PemesananController::pinjamOrder');
