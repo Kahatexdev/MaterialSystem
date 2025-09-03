@@ -1408,6 +1408,10 @@ class GodController extends BaseController
                     $key = $colMap[$col] ?? null;
                     if ($key) $data[$key] = trim((string)$val);
                 }
+                
+                if(empty($data['id_bahan_baku'])) {
+                    continue;
+                }
 
                 $idOrder = $this->masterOrderModel->select('id_order')
                     ->where('no_model', $data['no_model'] ?? '')
@@ -1425,6 +1429,13 @@ class GodController extends BaseController
                     continue;
                 }
 
+                $jalur = $this->clusterModel->select('nama_cluster')
+                    ->where('nama_cluster', $data['jalur'] ?? '')
+                    ->first();
+                if(empty($jalur)){
+                    $jalur = NULL;
+                }
+                // dd($jalur);
                 $payload = [
                     'id_material'      => (int)$idMaterial['id_material'],
                     'tgl_list'         => $dt['tgl_pesan'],
@@ -1470,9 +1481,7 @@ class GodController extends BaseController
                     'cns_out'               => $data['cns_pakai'] ?? 0,
                     'krg_out'               => $data['krg_pakai'] ?? 0,
                     'lot_out'               => $data['lot'],
-                    'nama_cluster'          => (isset($data['jalur']) && trim($data['jalur']) !== '')
-                        ? strtoupper($data['jalur'])
-                        : NULL,
+                    'nama_cluster'          => $jalur,
                     'status'                => 'Pengiriman Area',
                     'keterangan_gbn'        => $data['ket'],
                     'admin'                 => session()->get('username'),

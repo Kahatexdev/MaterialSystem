@@ -88,6 +88,9 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tgl Sch</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty PO</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty PO(+)</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Stock Awal</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Stock Opname</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LOT Sch</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tgl Celup</th>
                         </tr>
@@ -173,7 +176,10 @@
                                 item.delivery_awal,
                                 item.delivery_akhir,
                                 item.tanggal_schedule,
-                                item.kg_celup,
+                                parseFloat(item.total_kgs ?? 0).toFixed(2),
+                                parseFloat(item.total_poplus ?? 0).toFixed(2),
+                                parseFloat(item.kgs_stock_awal ?? 0).toFixed(2),
+                                parseFloat(item.kgs_stock_opname ?? 0).toFixed(2),
                                 item.lot_celup,
                                 item.tanggal_celup,
                             ]).draw(false);
