@@ -1293,7 +1293,7 @@ class ScheduleController extends BaseController
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
         $data = $this->scheduleCelupModel->getFilterSchNylon($tanggalAwal, $tanggalAkhir, $key, $tanggalSch);
-
+        // dd($data);
         return $this->response->setJSON($data);
     }
 

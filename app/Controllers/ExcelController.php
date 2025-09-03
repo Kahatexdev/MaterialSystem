@@ -1001,7 +1001,7 @@ class ExcelController extends BaseController
         $data = $this->scheduleCelupModel->getFilterSchBenang($tanggal_awal, $tanggal_akhir, $key, $tanggal_schedule);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        // dd($data);
+
         // Judul
         $sheet->setCellValue('A1', 'Report Schedule Benang');
         $sheet->mergeCells('A1:V1'); // Menggabungkan sel untuk judul
@@ -1090,7 +1090,7 @@ class ExcelController extends BaseController
         $data = $this->scheduleCelupModel->getFilterSchNylon($tanggal_awal, $tanggal_akhir, $key, $tanggal_schedule);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-
+        dd($data);
         // Judul
         $sheet->setCellValue('A1', 'Report Schedule Nylon');
         $sheet->mergeCells('A1:P1'); // Menggabungkan sel untuk judul

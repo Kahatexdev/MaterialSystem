@@ -89,7 +89,12 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tgl Sch</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty PO</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LOT Sch</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty PO(+)</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Stock Awal</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Stock Opname</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Datang Solid</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty Schedule</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LOT Schedule</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tgl Celup</th>
                         </tr>
                     </thead>
@@ -160,12 +165,28 @@
 
                     if (response.length > 0) {
                         $.each(response, function(index, item) {
+                            // Tentukan no_model yang ditampilkan
+                            let noModel = item.no_model;
+                            if (noModel.startsWith("POGABUNGAN")) {
+                                // kalau pogabungan, tambahin anaknya kalau ada
+                                if (item.no_model_anak) {
+                                    // noModel = item.no_model_anak; // kalau mau ganti ke anak saja
+                                    noModel += " → " + item.no_model_anak;
+                                }
+                            }
+
+                            // Tentukan kg_celup yang dipakai
+                            let kgCelup = item.kg_celup;
+                            if (item.no_model.startsWith("POGABUNGAN")) {
+                                kgCelup = item.kg_po_anak ?? 0; // pakai kg_po_anak kalau pogabungan
+                            }
+
                             dataTable.row.add([
                                 index + 1,
                                 item.no_mesin,
                                 item.ket_mesin,
                                 item.lot_urut,
-                                item.no_model,
+                                noModel, // sudah ada tambahan anak kalau pogabungan
                                 item.item_type,
                                 item.kode_warna,
                                 item.warna,
@@ -173,11 +194,17 @@
                                 item.delivery_awal,
                                 item.delivery_akhir,
                                 item.tanggal_schedule,
-                                item.kg_celup,
+                                parseFloat(item.total_kgs ?? 0).toFixed(2),
+                                parseFloat(item.total_poplus ?? 0).toFixed(2),
+                                parseFloat(item.kgs_stock_awal ?? 0).toFixed(2),
+                                parseFloat(item.kgs_stock_opname ?? 0).toFixed(2),
+                                parseFloat(item.datang_solid ?? 0).toFixed(2),
+                                parseFloat(kgCelup ?? 0).toFixed(2), // pakai hasil kondisi
                                 item.lot_celup,
                                 item.tanggal_celup,
                             ]).draw(false);
                         });
+
 
                         $('#btnExport').removeClass('d-none'); // Munculkan tombol Export Excel
                     } else {
@@ -194,7 +221,6 @@
                 }
             });
         }
-
         $('#btnSearch').click(function() {
             loadData();
         });
