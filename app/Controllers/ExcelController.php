@@ -1090,32 +1090,48 @@ class ExcelController extends BaseController
         $data = $this->scheduleCelupModel->getFilterSchNylon($tanggal_awal, $tanggal_akhir, $key, $tanggal_schedule);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        dd($data);
+        // dd($data);
         // Judul
         $sheet->setCellValue('A1', 'Report Schedule Nylon');
-        $sheet->mergeCells('A1:P1'); // Menggabungkan sel untuk judul
+        $sheet->mergeCells('A1:V1'); // Menggabungkan sel untuk judul
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["No", "No Mesin", "Ket Mesin", "Lot Urut", "No Model", "Item Type", "Kode Warna", "Warna", "Start Mc", "Delivery Awal", "Delivery Akhir", "Tgl Schedule", "Qty PO", "Qty Celup", "LOT Sch", "Tgl Celup"];
+        $header = ["No", "No Mesin", "Ket Mesin", "Lot Urut", "Tgl PO", "No Model", "Item Type", "Kode Warna", "Warna", "Start Mc", "Delivery Awal", "Delivery Akhir", "Tgl Schedule", "Qty PO", "Qty PO(+)", "Stock System", "Stock Lain", "Rangkuman Tanggal Datang", "Total Qty Datang",  "Qty Celup", "LOT Celup", "Tgl Celup"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
-        $sheet->getStyle('A3:P3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:P3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A3:P3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3:V3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:V3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:V3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         // Data
         $row = 4;
         foreach ($data as $index => $item) {
+            // Format No Model
+            $noModel = $item->no_model;
+            if (!empty($item->no_model) && strpos($item->no_model, 'POGABUNGAN') === 0) {
+                if (!empty($item->no_model_anak)) {
+                    $noModel = $item->no_model . ' → ' . $item->no_model_anak;
+                }
+            }
+
+            // Tentukan kg_celup yang dipakai (pakai kg_po_anak kalau POGABUNGAN)
+            $kgCelup = $item->kg_celup ?? 0;
+            if (!empty($item->no_model) && strpos($item->no_model, 'POGABUNGAN') === 0) {
+                // pakai kg_po_anak kalau ada, fallback ke kg_celup atau 0
+                $kgCelup = isset($item->kg_po_anak) && $item->kg_po_anak !== '' ? (float) $item->kg_po_anak : (float) ($item->kg_celup ?? 0);
+            }
+
             $sheet->fromArray([
                 [
                     $index + 1,
                     $item->no_mesin,
                     $item->ket_mesin,
                     $item->lot_urut,
-                    $item->no_model,
+                    $item->lco_date,
+                    $noModel,
                     $item->item_type,
                     $item->kode_warna,
                     $item->warna,
@@ -1123,8 +1139,13 @@ class ExcelController extends BaseController
                     $item->delivery_awal,
                     $item->delivery_akhir,
                     $item->tanggal_schedule,
-                    number_format((float) $item->total_kgs, 2, '.', ''),
-                    $item->kg_celup,
+                    number_format((float) ($item->total_kgs ?? 0), 2, '.', ''),
+                    number_format((float) ($item->total_poplus ?? 0), 2, '.', ''),
+                    number_format((float) ($item->kgs_stock_awal ?? 0), 2, '.', ''),
+                    number_format((float) ($item->kgs_stock_opname ?? 0), 2, '.', ''),
+                    $item->tgl_datang ?? '',
+                    number_format((float) ($item->kgs_datang ?? 0), 2, '.', ''),
+                    $kgCelup,
                     $item->lot_celup,
                     $item->tanggal_celup,
                 ]
@@ -1141,16 +1162,16 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle('A3:P' . ($row - 1))->applyFromArray($styleArray);
+        $sheet->getStyle('A3:V' . ($row - 1))->applyFromArray($styleArray);
 
         // Set auto width untuk setiap kolom
-        foreach (range('A', 'P') as $column) {
+        foreach (range('A', 'V') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Set isi tabel agar rata tengah
-        $sheet->getStyle('A4:P' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A4:P' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A4:V' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:V' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
         $fileName = 'Report_Schedule_Nylon' . '.xlsx';
