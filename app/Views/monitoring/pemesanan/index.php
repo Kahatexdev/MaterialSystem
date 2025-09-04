@@ -159,8 +159,14 @@
 
                 <!-- Wrapper untuk input+button di kanan -->
                 <div class="d-flex">
-                    <input type="text" class="form-control form-control-sm me-2" id="no_model" placeholder="No Model">
-                    <input type="date" class="form-control form-control-sm me-2" id="tgl_pakai">
+                    <div class="form-group">
+                        <label for="tgl_pakai">No Model</label>
+                        <input type="text" class="form-control form-control-sm me-2" id="no_model" placeholder="No Model">
+                    </div>
+                    <div class="form-group">
+                        <label for="tgl_pakai">Tanggal Pakai</label>
+                        <input type="date" class="form-control form-control-sm me-2" id="tgl_pakai">
+                    </div>
                     <button class="btn btn-info btn-sm" id="btnFilter">
                         <i class="fa fa-search"></i> Search
                     </button>
@@ -390,8 +396,8 @@
         const noModel = document.getElementById('no_model').value.trim();
         const tglPakai = document.getElementById('tgl_pakai').value.trim();
 
-        if (noModel === '' && tglPakai === '') {
-            alert('Isi minimal No Model atau Tanggal Pakai untuk memfilter!');
+        if (tglPakai === '') {
+            alert('Tanggal Pakai harus diisi!');
             return;
         }
 

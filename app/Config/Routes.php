@@ -720,8 +720,13 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('warehouse/search', 'WarehouseController::search');
     $routes->post('warehouse/sisaKapasitas', 'WarehouseController::getSisaKapasitas');
     $routes->post('warehouse/getCluster', 'WarehouseController::getClusterbyId');
+    $routes->get('warehouse/getNamaCluster', 'WarehouseController::getNamaCluster');
     $routes->post('warehouse/updateCluster', 'WarehouseController::updateCluster');
-    $routes->post('warehouse/getNoModel/(:any)', 'WarehouseController::getNoModel/$1');
+    $routes->get('warehouse/getNoModel', 'WarehouseController::getNoModel');
+    $routes->post('warehouse/savePindahOrder', 'WarehouseController::savePindahOrder');
+    $routes->post('warehouse/getPindahOrder', 'WarehouseController::getPindahOrder');
+    $routes->post('warehouse/savePindahCluster', 'WarehouseController::savePindahCluster');
+    $routes->post('warehouse/getPindahCluster', 'WarehouseController::getPindahCluster');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
     // $routes->get('warehouse/reportPoBenang', 'WarehouseController::reportPoBenang');
     $routes->get('warehouse/reportPo/(:any)', 'WarehouseController::reportPoBenang/$1');
@@ -786,6 +791,10 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('warehouse/filterPemakaianNylon', 'WarehouseController::filterPemakaianNylon');
     $routes->get('warehouse/exportPemakaianNylon', 'ExcelController::exportPemakaianNylon');
 
+    $routes->get('warehouse/reportOtherOut', 'WarehouseController::reportOtherOut');
+    $routes->get('warehouse/filterOtherOut', 'WarehouseController::filterOtherOut');
+    $routes->get('warehouse/exportOtherOut', 'ExcelController::exportOtherOut');
+
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');
     $routes->post('otherIn/saveOtherIn', 'WarehouseController::saveOtherIn');
@@ -834,6 +843,19 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('pemesanan/updateRangeSeluruhArea', 'PemesananController::updateRangeSeluruhArea');
     $routes->post('pemesanan/updateRangeAreaTertentu', 'PemesananController::updateRangeAreaTertentu');
 
+    // tambahan waktu
+    $routes->get('pemesanan/requestAdditionalTime', 'PemesananController::requestAdditionalTime');
+    $routes->get('pemesanan/getCountStatusRequest', 'PemesananController::getCountStatusRequest');
+    $routes->post('pemesanan/additional-time/accept', 'PemesananController::additionalTimeAccept');
+    $routes->post('pemesanan/additional-time/reject', 'PemesananController::additionalTimeReject');
+
+    $routes->get('pemesanan/permintaanKaretCovering', 'PemesananController::permintaanKaretCovering');
+    $routes->get('pemesanan/permintaanSpandexCovering', 'PemesananController::permintaanSpandexCovering');
+    $routes->get('pemesanan/getFilterPemesananKaret', 'PemesananController::getFilterPemesananKaret');
+    $routes->get('pemesanan/getFilterPemesananSpandex', 'PemesananController::getFilterPemesananSpandex');
+    $routes->get('pemesanan/exportPermintaanKaret', 'ExcelController::exportPermintaanKaret');
+    $routes->get('pemesanan/exportPermintaanSpandex', 'ExcelController::exportPermintaanSpandex');
+    $routes->get('pemesanan/sisaKebutuhanArea', 'PemesananController::sisaKebutuhanArea');
 
     //Celup
     $routes->get('schedule', 'ScheduleController::index');

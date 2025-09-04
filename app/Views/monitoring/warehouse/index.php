@@ -442,7 +442,7 @@
             minimumInputLength: 3,
 
             ajax: {
-                url: '<?= base_url() ?>/<?= session()->get('role') ?>/warehouse/getNoModel',
+                url: '<?= base_url() ?><?= session()->get('role') ?>/warehouse/getNoModel',
                 dataType: 'json',
                 delay: 250, // debounce 250ms
                 data: function(params) {
@@ -489,7 +489,7 @@
         const $container = $('#pindahOrderContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i></div>');
 
         // Fetch detail order
-        $.post(`${base}/${role}/warehouse/getPindahOrder`, {
+        $.post(`${base}${role}/warehouse/getPindahOrder`, {
             id_stock: idStock
         }, res => {
             $container.empty();
@@ -683,7 +683,7 @@
             cnsOut[id] = parseInt(rawCns, 10);
         });
 
-        $.post(`${base}/${role}/warehouse/savePindahOrder`, {
+        $.post(`${base}${role}/warehouse/savePindahOrder`, {
             no_model_tujuan: model,
             idOutCelup: orders,
             id_stock: stock,
@@ -697,12 +697,16 @@
                     confirmButtonText: 'OK',
                     willClose: () => {
                         // Reload halaman setelah modal ditutup
-                        location.reload();
+                        $('#modalPindahOrder').modal('hide');
+                        $('#formPindahOrder')[0].reset();
+                        // location.reload();
+                        reloadSearchResult(); // refresh data stock tanpa reload page
                     }
-                }).then(() => {
-                    $('#modalPindahOrder').modal('hide');
-                    $('#filter_data').click(); // Reload data filter
-                });
+                })
+                // .then(() => {
+                //     $('#modalPindahOrder').modal('hide');
+                //     // $('#filter_data').click(); // Reload data filter
+                // });
             } else {
                 Swal.fire({
                     icon: 'error',
@@ -710,7 +714,10 @@
                     confirmButtonText: 'OK',
                     willClose: () => {
                         // Reload halaman setelah modal ditutup
-                        location.reload();
+                        $('#modalPindahOrder').modal('hide');
+                        $('#formPindahOrder')[0].reset();
+                        // location.reload();
+                        reloadSearchResult(); // refresh data stock tanpa reload page
                     }
                 });
             }
@@ -738,7 +745,7 @@
         const $container = $('#PindahClusterContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i></div>');
 
         // Fetch detail palet
-        $.post(`${base}/${role}/warehouse/getPindahCluster`, {
+        $.post(`${base}${role}/warehouse/getPindahCluster`, {
             id_stock: idStock
         }, res => {
             $container.empty();
@@ -827,7 +834,7 @@
                 namaCluster,
                 totalKgs,
             });
-            $.getJSON(`${base}/${role}/warehouse/getNamaCluster`, {
+            $.getJSON(`${base}${role}/warehouse/getNamaCluster`, {
                 namaCluster,
                 totalKgs,
             }, res => {
@@ -912,7 +919,7 @@
         }).get();
 
         // Sekarang kirim ke server
-        $.post(`${base}/${role}/warehouse/savePindahCluster`, {
+        $.post(`${base}${role}/warehouse/savePindahCluster`, {
                 cluster_tujuan: cluster,
                 detail: detail
             }, res => {
@@ -924,7 +931,10 @@
                     confirmButtonText: 'OK',
                     willClose: () => {
                         // Reload halaman setelah modal ditutup
-                        location.reload();
+                        $('#modalPindahCluster').modal('hide');
+                        $('#formPindahCluster')[0].reset();
+                        // location.reload();
+                        reloadSearchResult(); // refresh data stock tanpa reload page
                     }
                 });
             }, 'json')
@@ -937,7 +947,10 @@
                     confirmButtonText: 'OK',
                     willClose: () => {
                         // Reload halaman setelah modal ditutup
-                        location.reload();
+                        $('#modalPindahCluster').modal('hide');
+                        $('#formPindahCluster')[0].reset();
+                        // location.reload();
+                        reloadSearchResult(); // refresh data stock tanpa reload page
                     }
                 });
             });
@@ -959,7 +972,7 @@
             // Perbarui judul modal dengan nama cluster
             $('#modalPengeluaranSelainOrderLabel').text(`Pengeluaran Selain Order - ${namaCluster}`);
 
-            $.post(`${base}/${role}/warehouse/getPindahOrder`, {
+            $.post(`${base}${role}/warehouse/getPindahOrder`, {
                 id_stock: idStock
             }, res => {
                 $container.empty();
@@ -1090,6 +1103,7 @@
                             // Menutup modal dan reset form jika diperlukan
                             $('#pengeluaranSelainOrder').modal('hide');
                             $('#formpengeluaranSelainOrder')[0].reset();
+                            reloadSearchResult(); // refresh data stock tanpa reload page
                         }
                     });
                 } else {
@@ -1112,5 +1126,9 @@
             }
         });
     });
+
+    function reloadSearchResult() {
+        $('#filter_data').click(); // trigger ulang pencarian terakhir
+    }
 </script>
 <?php $this->endSection(); ?>
