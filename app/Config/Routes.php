@@ -79,7 +79,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('updatePo', 'MaterialController::updatePo');
     // $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
     $routes->get('exportOpenPO/(:any)', 'ExcelController::generateOpenPOExcel/$1');
-    $routes->post('exportPoNylon', 'ExcelController::generateOpenPONylon');
+    // $routes->post('exportPoNylon', 'ExcelController::generateOpenPONylon');
+    $routes->post('exportPoNylon', 'ExcelController::generateOpenPONylonNew');
     $routes->get('getPoDetails/(:num)', 'MaterialController::getPoDetails/$1');
     $routes->delete('deletePo/(:num)', 'MaterialController::deletePo/$1');
     $routes->post('splitMaterial', 'MaterialController::splitMaterial');
@@ -613,7 +614,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('deletePoGabungan/(:num)', 'PoGabunganController::deletePoGabungan/$1');
     // $routes->get('exportOpenPOGabung', 'PdfController::exportOpenPOGabung');
     $routes->get('exportOpenPOGabung', 'ExcelController::exportOpenPOGabung');
-    $routes->post('exportPoNylon', 'ExcelController::generateOpenPONylon');
+    // $routes->post('exportPoNylon', 'ExcelController::generateOpenPONylon');
+    $routes->post('exportPoNylon', 'ExcelController::generateOpenPONylonNew');
     $routes->get('exportPoBoking', 'ExcelController::exportPoBooking');
 
     $routes->get('material/(:any)', 'MasterdataController::material/$1');
