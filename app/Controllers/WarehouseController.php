@@ -2645,6 +2645,7 @@ class WarehouseController extends BaseController
                     'no_model'     => $data['no_model'],
                     'item_type'    => $data['item_type'],
                     'kode_warna'   => $data['kode_warna'],
+                    'warna'        => $data['warna'],
                     'nama_cluster' => $data['cluster'][$i],
                     'lot_stock'    => $data['lot'],
                     'kgs_in_out'   => $data['kgs'][$i],
