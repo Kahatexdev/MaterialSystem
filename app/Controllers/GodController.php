@@ -1383,7 +1383,9 @@ class GodController extends BaseController
 
             $spreadsheet = IOFactory::load($path);
             $sheet = $spreadsheet->getActiveSheet();
-            $rows  = $sheet->toArray(null, true, true, true);
+            //               null,  calcFormulas=false, formatData=false, returnCellRef=true
+            $rows = $sheet->toArray(null, false,        false,           true);
+
 
             if (empty($rows) || count($rows) < 2) {
                 return redirect()->back()->with('error', 'Tidak ada data (minimal header + 1 baris).');
