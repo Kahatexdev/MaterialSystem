@@ -697,12 +697,16 @@
                     confirmButtonText: 'OK',
                     willClose: () => {
                         // Reload halaman setelah modal ditutup
-                        location.reload();
+                        $('#modalPindahOrder').modal('hide');
+                        $('#formPindahOrder')[0].reset();
+                        // location.reload();
+                        reloadSearchResult(); // refresh data stock tanpa reload page
                     }
-                }).then(() => {
-                    $('#modalPindahOrder').modal('hide');
-                    $('#filter_data').click(); // Reload data filter
-                });
+                })
+                // .then(() => {
+                //     $('#modalPindahOrder').modal('hide');
+                //     $('#filter_data').click(); // Reload data filter
+                // });
             } else {
                 Swal.fire({
                     icon: 'error',
@@ -710,7 +714,10 @@
                     confirmButtonText: 'OK',
                     willClose: () => {
                         // Reload halaman setelah modal ditutup
-                        location.reload();
+                        $('#modalPindahOrder').modal('hide');
+                        $('#formPindahOrder')[0].reset();
+                        // location.reload();
+                        reloadSearchResult(); // refresh data stock tanpa reload page
                     }
                 });
             }
@@ -924,7 +931,10 @@
                     confirmButtonText: 'OK',
                     willClose: () => {
                         // Reload halaman setelah modal ditutup
-                        location.reload();
+                        $('#modalPindahCluster').modal('hide');
+                        $('#formPindahCluster')[0].reset();
+                        // location.reload();
+                        reloadSearchResult(); // refresh data stock tanpa reload page
                     }
                 });
             }, 'json')
@@ -937,7 +947,10 @@
                     confirmButtonText: 'OK',
                     willClose: () => {
                         // Reload halaman setelah modal ditutup
-                        location.reload();
+                        $('#modalPindahCluster').modal('hide');
+                        $('#formPindahCluster')[0].reset();
+                        // location.reload();
+                        reloadSearchResult(); // refresh data stock tanpa reload page
                     }
                 });
             });

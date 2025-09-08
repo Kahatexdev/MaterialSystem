@@ -37,6 +37,11 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownReports">
                             <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/reportPemesananArea') ?>">Pemesanan Area</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/permintaanKaretCovering') ?>">Permintaan Karet</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/permintaanSpandexCovering') ?>">Permintaan Spandex</a></li>
+                            <li><a class="dropdown-item" href="#" id="showModalButton">Persiapan Pengeluaran Barang</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/sisaKebutuhanArea') ?>" id="showModalButton">Sisa Kebutuhan Area</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url($role . '/pemesanan/historyPinjamOrder') ?>" id="showModalButton">History Pinjam Order</a></li>
                         </ul>
                     </li>
                     <li class="nav-item d-flex align-items-center">

@@ -829,6 +829,40 @@ class ScheduleCelupModel extends Model
             ->join('open_po induk', 'anak.id_induk = induk.id_po')
             ->getCompiledSelect(false);
 
+        $datangSub = $db->table('pemasukan')
+            ->select("
+        schedule_celup.no_model AS no_model_schedule,
+        out_celup.no_model AS no_model_out,
+        schedule_celup.item_type,
+        schedule_celup.kode_warna,
+        SUM(out_celup.kgs_kirim) AS kgs_datang,
+        GROUP_CONCAT(DISTINCT DATE_FORMAT(bon_celup.tgl_datang, '%d-%m-%Y') 
+            ORDER BY bon_celup.tgl_datang SEPARATOR ' / ') AS tgl_datang
+    ")
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
+            ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
+            ->groupBy([
+                'schedule_celup.no_model',
+                'out_celup.no_model',
+                'schedule_celup.item_type',
+                'schedule_celup.kode_warna'
+            ])
+            ->getCompiledSelect(false);
+
+        $poPlus = $db->table('po_tambahan')
+            ->select('SUM(COALESCE(po_tambahan.poplus_mc_kg,0) + COALESCE(po_tambahan.plus_pck_kg,0)) AS total_poplus, po_tambahan.id_material,
+             material.item_type, material.kode_warna, material.color, material.id_order')
+            ->join('material', 'material.id_material = po_tambahan.id_material')
+            ->where('po_tambahan.status', 'approved')
+            ->groupBy(['po_tambahan.id_material', 'po_tambahan.status', 'po_tambahan.admin', 'material.item_type', 'material.kode_warna', 'material.color', 'material.id_order'])
+            ->getCompiledSelect(false);
+
+        $stokAwal = $db->table('stock')
+            ->select('SUM(stock.kgs_stock_awal) AS kgs_stock_awal,stock.item_type, stock.kode_warna, stock.warna')
+            ->groupBy(['stock.item_type', 'stock.kode_warna', 'stock.warna'])
+            ->getCompiledSelect(false);
+
         // Main builder
         $builder = $db->table('schedule_celup')
             ->select([
@@ -841,7 +875,11 @@ class ScheduleCelupModel extends Model
                 'master_material.jenis',
                 'material_summary.total_kgs',
                 'open_po_anak.no_model AS no_model_anak',
-                'open_po_anak.kg_po AS kg_po_anak'
+                'open_po_anak.kg_po AS kg_po_anak',
+                'datang_sub.kgs_datang AS kgs_datang',
+                'datang_sub.tgl_datang',
+                'po_plus_sub.total_poplus',
+                'stok_awal_sub.kgs_stock_awal',
             ])
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->join('master_material', 'master_material.item_type = schedule_celup.item_type')
@@ -853,6 +891,29 @@ class ScheduleCelupModel extends Model
              AND material_summary.kode_warna = schedule_celup.kode_warna 
              AND material_summary.color = schedule_celup.warna 
              AND material_summary.id_order = master_order.id_order',
+                'left'
+            )
+            ->join(
+                "({$datangSub}) AS datang_sub",
+                "datang_sub.no_model_schedule = schedule_celup.no_model
+     AND datang_sub.item_type = schedule_celup.item_type
+     AND datang_sub.kode_warna = schedule_celup.kode_warna
+     AND datang_sub.no_model_out = COALESCE(open_po_anak.no_model, schedule_celup.no_model)",
+                'left'
+            )
+            ->join(
+                "({$poPlus}) AS po_plus_sub",
+                'po_plus_sub.item_type   = schedule_celup.item_type
+             AND po_plus_sub.kode_warna = schedule_celup.kode_warna
+             AND po_plus_sub.color      = schedule_celup.warna
+             AND po_plus_sub.id_order   = master_order.id_order',
+                'left'
+            )
+            ->join(
+                "({$stokAwal}) AS stok_awal_sub",
+                'stok_awal_sub.item_type = schedule_celup.item_type
+             AND stok_awal_sub.kode_warna = schedule_celup.kode_warna
+             AND stok_awal_sub.warna      = schedule_celup.warna',
                 'left'
             )
             ->where('master_material.jenis', 'NYLON');

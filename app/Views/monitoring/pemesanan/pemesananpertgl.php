@@ -115,7 +115,7 @@
                         <div>
                             <p class="text-sm mb-0 text-capitalize font-weight-bold"><?= $title; ?></p>
                             <h5 class="font-weight-bolder mb-0">
-                                Data Persiapan Pengeluaran Barang <?= $jenis ?>
+                                Data Pemesanan Berdasarkan Tanggal Pakai Area <?= $area ?>
                             </h5>
                         </div>
                         <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
@@ -131,13 +131,12 @@
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header">
-                    <h6 class="mb-0"></h6>
+                    <h6 class="mb-0">Data Pemesanan</h6>
                 </div>
                 <div class="card-body">
                     <form class="row g-3">
                         <div class="col-md-10">
-                            <input type="hidden" id="jenis" value="<?= $jenis ?>">
-                            <label for="filter_date" class="form-label">Tanggal Pakai</label>
+                            <label for="filter_date" class="form-label">Tanggal</label>
                             <input type="date" id="filter_date" name="filter_date" class="form-control">
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
@@ -156,38 +155,31 @@
                                 </tr>
                             </thead>
                             <tbody id="pemesananTable">
-                                <?php foreach ($tglPakai as $tgl) : ?>
+                                <?php foreach ($pemesananPertgl as $psn) : ?>
                                     <tr>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0"><?= $tgl['tgl_pakai'] ?></p>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $psn['tgl_pakai'] ?></p>
                                         </td>
-                                        <td class="text-center"></td>
-                                        <?php if ($jenis === 'SPANDEX' || $jenis === 'KARET') : ?>
-                                            <td class="text-center">
-                                                <a href="<?= base_url($role . '/pemesanan/exportListPemesananSpdxKaretPertgl?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
-                                                    <i class="fas fa-file-excel fa-2x"></i>
-                                                </a>
-                                            </td>
-                                        <?php else : ?>
-                                            <td class="text-center">
-                                                <a href="<?= base_url($role . '/pemesanan/detailListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-info" target="_blank">
-                                                    <i class="fas fa-eye fa-2x"></i>
-                                                </a>
-                                                <!-- <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
-                                                <i class="fas fa-file-excel fa-2x"></i>
-                                            </a> -->
-                                            </td>
-                                        <?php endif; ?>
-                                        <!-- <td class="text-center">
-                                            <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar/' . $tgl['tgl_pakai'] . '/' . $jenis) ?>" class="btn btn-success btn-xs">
-                                                <i class="fa fa-file-excel fa-xl" style="font-size: 16px !important;"></i> Excel
+                                        <td class="text-center">
+                                            <a href="<?= base_url($role . '/detailpemesanan/' . $area . '/' . $jenis . '/' . $psn['tgl_pakai']) ?>" class="btn bg-gradient-info me-2">
+                                                <i class="fas fa-eye"></i>
+                                                Detail
                                             </a>
-                                        </td> -->
+                                            <?php if ($jenis === 'SPANDEX' || $jenis === 'KARET') : ?>
+                                                <!-- btn export -->
+                                                <a href="<?= base_url($role . '/reportPermintaanBahanBaku?jenis=' . $jenis . '&area=' . $area . '&tgl=' . $psn['tgl_pakai']) ?>" class="btn bg-gradient-success">
+                                                    <i class="fas fa-file-export"></i>
+                                                    Export
+                                                </a>
+                                            <?php endif; ?>
+                                        </td>
                                     </tr>
 
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
+                        <input type="hidden" id="area" value="<?= $area ?>">
+                        <input type="hidden" id="jenis" value="<?= $jenis ?>">
                     </div>
                 </div>
             </div>
@@ -222,9 +214,11 @@
 
     document.getElementById('filterButton').addEventListener('click', function() {
         const filterDate = document.getElementById('filter_date').value;
+        const area = document.getElementById('area').value;
         const jenis = document.getElementById('jenis').value;
 
         const formData = new FormData();
+        formData.append('area', area);
         formData.append('jenis', jenis);
         formData.append('filter_date', filterDate);
 
@@ -232,11 +226,12 @@
         updateProgress(0);
 
         // console.log("Data dikirim ke API:", {
+        //     area,
         //     jenis,
         //     filterDate
         // });
 
-        fetch('<?= base_url($role . "/pemesanan/filterListBarangKeluarPertgl") ?>', {
+        fetch('<?= base_url($role . "/pemesanan/filter") ?>', {
                 method: 'POST',
                 body: formData
             })
@@ -258,7 +253,7 @@
                         const actionCell = document.createElement('td');
                         actionCell.classList.add('text-center');
                         actionCell.innerHTML = `
-                            <a href="<?= base_url($role . '/pemesanan/detailListBarangKeluar?jenis' . $jenis) ?>&tglPakai=${psn.tgl_pakai}" class="btn bg-gradient-info">
+                            <a href="<?= base_url($role . '/detailpemesanan/' . $area . '/' . $jenis) ?>/${psn.tgl_pakai}" class="btn bg-gradient-info">
                                 <i class="fas fa-eye"></i>
                                 Detail
                             </a>
@@ -285,7 +280,6 @@
             .finally(() => {
                 setTimeout(() => hideLoading(), 400); // jeda agar progress bar terlihat
             });
-
     });
 </script>
 

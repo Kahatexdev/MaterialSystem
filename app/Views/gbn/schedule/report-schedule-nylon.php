@@ -198,7 +198,7 @@
                                 parseFloat(item.total_poplus ?? 0).toFixed(2),
                                 parseFloat(item.kgs_stock_awal ?? 0).toFixed(2),
                                 parseFloat(item.kgs_stock_opname ?? 0).toFixed(2),
-                                parseFloat(item.datang_solid ?? 0).toFixed(2),
+                                parseFloat(item.kgs_datang ?? 0).toFixed(2),
                                 parseFloat(kgCelup ?? 0).toFixed(2), // pakai hasil kondisi
                                 item.lot_celup,
                                 item.tanggal_celup,
