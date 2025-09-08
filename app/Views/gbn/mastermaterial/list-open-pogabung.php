@@ -125,7 +125,7 @@
                         </div>
                         <div class="col-md-4">
                             <label for="edit_color" class="form-label">Kg Stock</label>
-                            <input type="text" class="form-control" name="kg_stock" id="edit_kg_stock">
+                            <input type="number" class="form-control" name="kg_stock" id="edit_kg_stock">
                         </div>
                         <div class="col-md-4">
                             <label for="edit_kg_percones" class="form-label">Permintaan Kelos (Kg)</label>
@@ -238,12 +238,16 @@
 
 <script>
     $(document).ready(function() {
-        $('#dataTable').DataTable({
-            "pageLength": 35,
+        var table = $('#dataTable').DataTable({
+            "pageLength": 10,
             "order": []
         });
-        $('.btn-edit').on('click', function() {
+
+        // delegated event: aman terhadap redraw/paging DataTables
+        $('#dataTable tbody').on('click', '.btn-edit', function(e) {
+            e.preventDefault();
             const id = $(this).data('id');
+
             $.ajax({
                 url: '<?= base_url("$role/getPoGabungan") ?>/' + id,
                 dataType: 'json',
@@ -278,7 +282,7 @@
                         $cont.append(field);
                     });
 
-                    $('#editModal').modal('show');
+                    $('#editModal').modal('show'); // pastikan Bootstrap JS ter-include
                 }
             });
         });
@@ -329,7 +333,7 @@
 <script>
     $(document).ready(function() {
         // Handler tombol delete
-        $('.btn-delete').on('click', function() {
+        $('#dataTable tbody').on('click', '.btn-delete', function(e) {
             const id = $(this).data('id');
 
             Swal.fire({

@@ -331,13 +331,15 @@ class PoGabunganController extends BaseController
         // dd($tujuan, $jenis, $jenis2);
 
         // Tentukan penerima berdasarkan tujuan
+        $penerima = null;
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';
-        } elseif ($tujuan == 'COVERING') {
-            $penerima = 'Paryanti';
-        } else {
-            return redirect()->back()->with('error', 'Tujuan tidak valid.');
         }
+        // elseif ($tujuan == 'COVERING') {
+        //     $penerima = 'Paryanti';
+        // } else {
+        //     return redirect()->back()->with('error', 'Tujuan tidak valid.');
+        // }
 
         $buyer = [];
         $openPoGabung = $this->openPoModel->listOpenPoGabung($jenis, $jenis2, $penerima);
