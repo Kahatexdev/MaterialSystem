@@ -1417,12 +1417,16 @@ class GodController extends BaseController
 
                 $idOrder = $this->masterOrderModel->select('id_order')
                     ->where('no_model', $data['no_model'] ?? '')
+                    // MAX(1) supaya kalau ada duplikat no_model, ambil yang terbaru
+                    ->orderBy('id_order', 'DESC')
                     ->first();
 
                 $idMaterial = $this->materialModel->select('id_material')
                     ->where('id_order', $idOrder['id_order'] ?? '')
                     ->where('item_type',  $data['jenis'] ?? '')
                     ->where('kode_warna', $data['kode_warna'] ?? '')
+                    // MAX(1) supaya kalau ada duplikat item_type + kode_warna, ambil yang terbaru
+                    ->orderBy('id_material', 'DESC')    
                     ->first();
 
                 if (!$idMaterial) {
