@@ -1415,19 +1415,28 @@ class GodController extends BaseController
                     continue;
                 }
 
-                $idOrder = $this->masterOrderModel->select('id_order')
-                    ->where('no_model', $data['no_model'] ?? '')
-                    // MAX(1) supaya kalau ada duplikat no_model, ambil yang terbaru
-                    ->orderBy('id_order', 'DESC')
+                $rowOrder = $this->masterOrderModel
+                    ->select('master_order.id_order, COUNT(material.id_material) AS jml_material')
+                    ->join('material', 'material.id_order = master_order.id_order', 'left')
+                    ->where('master_order.no_model', $data['no_model'] ?? '')
+                    ->groupBy('master_order.id_order')
+                    ->orderBy('jml_material', 'DESC')     // paling banyak material di atas
+                    ->orderBy('master_order.id_order', 'DESC') // tie-breaker: id_order terbaru
                     ->first();
 
-                $idMaterial = $this->materialModel->select('id_material')
-                    ->where('id_order', $idOrder['id_order'] ?? '')
-                    ->where('item_type',  $data['jenis'] ?? '')
+                $idOrder = $rowOrder['id_order'] ?? null;
+
+                // 2) Ambil id_material terbaru untuk kombinasi (id_order, item_type, kode_warna)
+                // Catatan: di Excel-mu kolom 'jenis' dipakai sebagai item_type (pastikan mappingnya benar).
+                $idMaterialRow = $this->materialModel
+                    ->select('id_material')
+                    ->where('id_order', $idOrder)
+                    ->where('item_type',  $data['jenis'] ?? '')      // <-- jika kolommu bernama 'item_type', pastikan $data['jenis'] benar
                     ->where('kode_warna', $data['kode_warna'] ?? '')
-                    // MAX(1) supaya kalau ada duplikat item_type + kode_warna, ambil yang terbaru
-                    ->orderBy('id_material', 'DESC')    
+                    ->orderBy('id_material', 'DESC')                 // ambil yang terbaru jika duplikat
                     ->first();
+
+                $idMaterial = $idMaterialRow['id_material'] ?? null;
 
                 if (!$idMaterial) {
                     $err++;
