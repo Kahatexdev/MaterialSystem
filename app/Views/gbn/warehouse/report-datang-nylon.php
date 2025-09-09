@@ -306,7 +306,7 @@
                                 item.lot_kirim,
                                 item.no_surat_jalan,
                                 item.l_m_d,
-                                item.gw_kirim,
+                                (item.gw_kirim ? parseFloat(item.gw_kirim).toFixed(2) : ''),
                                 item.harga,
                                 item.nama_cluster,
                                 item.keterangan,

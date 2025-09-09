@@ -628,6 +628,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('openPO/saveOpenPO/(:num)', 'MasterdataController::saveOpenPO/$1');
     $routes->post('updateArea/(:num)', 'MaterialController::updateArea/$1');
     $routes->get('exportOpenPO/(:any)', 'PdfController::generateOpenPO/$1');
+    $routes->post('splitMaterial', 'MaterialController::splitMaterial');
 
     $routes->post('import/mu', 'MasterdataController::importMU');
     $routes->post('revise/mu', 'MasterdataController::reviseMU');

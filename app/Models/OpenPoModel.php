@@ -276,7 +276,7 @@ class OpenPoModel extends Model
         return $this->select('open_po.id_po,open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, ROUND(SUM(kg_po), 2) as total_kg_po, open_po.keterangan,open_po.penerima, open_po.penanggung_jawab,open_po.admin, open_po.created_at,open_po.updated_at,open_po.id_induk')
             ->where('penerima', 'Paryanti')
             ->where('id_induk IS NOT NULL')
-            ->where('DATE(open_po.created_at)', $tgl_po)
+            ->where('DATE(open_po.updated_at)', $tgl_po)
             ->whereNotIn('kode_warna', ['DDBLK', 'RW'])
             ->groupBy('open_po.item_type, open_po.kode_warna, open_po.color')
             ->findAll();
@@ -438,7 +438,7 @@ class OpenPoModel extends Model
     }
     public function listOpenPoGabungbyDate($jenis, $jenis2, $penerima, $startDate, $endDate)
     {
-        return $this->select('DISTINCT open_po.id_po, open_po.no_model, open_po.item_type, open_po.spesifikasi_benang, open_po.kode_warna, open_po.color, open_po.kg_po, GROUP_CONCAT(DISTINCT open_po.keterangan) AS keterangan, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, open_po.bentuk_celup, open_po.kg_percones, open_po.jumlah_cones, open_po.jenis_produksi, open_po.ket_celup, open_po.admin, master_material.jenis, master_material.ukuran, material.kgs, stock.kgs_stock_awal', false)
+        return $this->select('DISTINCT open_po.id_po, open_po.no_model, open_po.item_type, open_po.spesifikasi_benang, open_po.kode_warna, open_po.color, open_po.kg_po, GROUP_CONCAT(DISTINCT open_po.keterangan) AS keterangan, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, open_po.bentuk_celup, open_po.kg_percones, open_po.jumlah_cones, open_po.jenis_produksi, open_po.ket_celup, open_po.admin, master_material.jenis, master_material.ukuran, material.kgs', false)
             ->like('open_po.no_model', 'POGABUNGAN')
             ->where('open_po.penerima', $penerima)
             ->where('DATE(open_po.created_at) >=', $startDate)
@@ -450,7 +450,7 @@ class OpenPoModel extends Model
             ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
             ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
             ->join('material', 'material.item_type=open_po.item_type', 'left')
-            ->join('stock', 'stock.no_model=open_po.no_model', 'left')
+            // ->join('stock', 'stock.no_model=open_po.no_model', 'left')
             ->groupBy('open_po.id_po, open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color')
             ->findAll();
     }
