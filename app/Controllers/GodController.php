@@ -1418,26 +1418,25 @@ class GodController extends BaseController
                 $rowOrder = $this->masterOrderModel
                     ->select('master_order.id_order, COUNT(material.id_material) AS jml_material')
                     ->join('material', 'material.id_order = master_order.id_order', 'left')
-                    ->where('master_order.no_model', $data['no_model'] ?? '')
+                    ->where('master_order.no_model', $data['no_model'])
                     ->groupBy('master_order.id_order')
                     ->orderBy('jml_material', 'DESC')     // paling banyak material di atas
                     ->orderBy('master_order.id_order', 'DESC') // tie-breaker: id_order terbaru
                     ->first();
 
                 $idOrder = $rowOrder['id_order'] ?? null;
-
                 // 2) Ambil id_material terbaru untuk kombinasi (id_order, item_type, kode_warna)
                 // Catatan: di Excel-mu kolom 'jenis' dipakai sebagai item_type (pastikan mappingnya benar).
                 $idMaterialRow = $this->materialModel
                     ->select('id_material')
                     ->where('id_order', $idOrder)
-                    ->where('item_type',  $data['jenis'] ?? '')      // <-- jika kolommu bernama 'item_type', pastikan $data['jenis'] benar
-                    ->where('kode_warna', $data['kode_warna'] ?? '')
+                    ->where('item_type',  $data['jenis'])      // <-- jika kolommu bernama 'item_type', pastikan $data['jenis'] benar
+                    ->where('kode_warna', $data['kode_warna'])
                     ->orderBy('id_material', 'DESC')                 // ambil yang terbaru jika duplikat
                     ->first();
 
                 $idMaterial = $idMaterialRow['id_material'] ?? null;
-
+                // dd ($idMaterialRow, $idMaterial);
                 if (!$idMaterial) {
                     $err++;
                     $errLogs[] = "Baris $r: material tidak ditemukan untuk [no_model={$data['no_model']} / jenis={$data['jenis']} / kode={$data['kode_warna']}]";
@@ -1452,7 +1451,7 @@ class GodController extends BaseController
                 }
                 // dd($jalur);
                 $payload = [
-                    'id_material'      => (int)$idMaterial['id_material'],
+                    'id_material'      => (int)$idMaterial,
                     'tgl_list'         => $dt['tgl_pesan'],
                     'tgl_pesan'        => $dt['tgl_pesan'],
                     'tgl_pakai'        => $dt['tgl_pakai'],
