@@ -88,6 +88,7 @@
                                     $clusterA = $clusterB = null;
 
                                     foreach ($groupData as $cluster) {
+                                        // dd($cluster);
                                         if ($cluster['nama_cluster'] == $namaA) $clusterA = $cluster;
                                         if ($cluster['nama_cluster'] == $namaB) $clusterB = $cluster;
                                     }
@@ -99,6 +100,7 @@
                                             data-kapasitas="<?= $cluster['kapasitas'] ?? '' ?>"
                                             data-total_qty="<?= $cluster['total_qty'] ?? '' ?>"
                                             data-nama_cluster="<?= $cluster['nama_cluster'] ?? '' ?>"
+                                            data-karung='<?= $cluster['detail_karung'] ?? '[]' ?>'
                                             data-detail='[<?= $cluster['detail_data'] ?? '' ?>]'>
                                             <?= $cluster ? $cluster['simbol_cluster'] : '-' ?>
                                         </button>

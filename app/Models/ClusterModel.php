@@ -493,24 +493,65 @@ class ClusterModel extends Model
     }
     public function getClusterCov()
     {
+        $detailKarungSub = "(
+        SELECT GROUP_CONCAT(
+                    JSON_OBJECT(
+                       'no_model', oc.no_model,
+                       'no_karung', oc.no_karung,
+                       'kgs_kirim', oc.kgs_kirim,
+                       'lot_kirim', oc.lot_kirim
+                   ) ORDER BY oc.no_karung SEPARATOR ','
+               )
+        FROM out_celup oc
+        JOIN pemasukan pm ON pm.id_out_celup = oc.id_out_celup
+        JOIN stock st2 ON st2.id_stock = pm.id_stock
+        WHERE st2.nama_cluster = cluster.nama_cluster
+        AND pm.out_jalur = '0'
+    )";
+        $totalQty = "ROUND(COALESCE(SUM(
+            CASE 
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM pemasukan pm2 
+                    WHERE pm2.id_stock = stock.id_stock 
+                    AND pm2.out_jalur = '0'
+                )
+                THEN (stock.kgs_stock_awal + stock.kgs_in_out)
+                ELSE 0
+            END
+        ), 0), 2) AS total_qty";
+
+        // Untuk detail_data: sertakan JSON_OBJECT hanya jika ada pemasukan out_jalur='0'
+        $detailData = "GROUP_CONCAT(DISTINCT
+            IF(
+                EXISTS (
+                    SELECT 1 FROM pemasukan pm3 
+                    WHERE pm3.id_stock = stock.id_stock 
+                      AND pm3.out_jalur = '0'
+                ),
+                JSON_OBJECT(
+                    'no_model', stock.no_model,
+                    'kode_warna', stock.kode_warna,
+                    'foll_up', master_order.foll_up,
+                    'delivery', master_order.delivery_awal,
+                    'qty', ROUND(stock.kgs_stock_awal + stock.kgs_in_out, 2)
+                ),
+                NULL
+            )
+            ORDER BY stock.no_model SEPARATOR ','
+        ) AS detail_data";
+
         return $this->select(
-            'cluster.kapasitas, 
-                      ROUND(COALESCE(SUM(stock.kgs_stock_awal + stock.kgs_in_out), 0), 2) AS total_qty, 
-                      cluster.nama_cluster, 
+            "cluster.kapasitas, 
+            cluster.nama_cluster, 
+            {$totalQty},
+            CONCAT('[', COALESCE({$detailKarungSub}, ''), ']') AS detail_karung,
                       CASE
-                      WHEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2) REGEXP "^(10|11)\\.[AB]$" 
-                      THEN SUBSTRING_INDEX(cluster.nama_cluster, ".", -2)
-                      ELSE RIGHT(cluster.nama_cluster, 3)
-                      END AS simbol_cluster,
-                      GROUP_CONCAT(DISTINCT 
-            JSON_OBJECT(
-                "no_model", stock.no_model,
-                "kode_warna", stock.kode_warna,
-                "foll_up", master_order.foll_up,
-                "delivery", master_order.delivery_awal,
-                "qty", ROUND(stock.kgs_stock_awal + stock.kgs_in_out, 2)
-            ) ORDER BY stock.no_model SEPARATOR ","
-        ) AS detail_data'
+                WHEN SUBSTRING_INDEX(cluster.nama_cluster, '.', -2) REGEXP '^(10|11)\\.[AB]$' 
+                THEN SUBSTRING_INDEX(cluster.nama_cluster, '.', -2)
+                ELSE RIGHT(cluster.nama_cluster, 3)
+            END AS simbol_cluster,
+          {$detailData}"
         )
             ->join('stock', 'stock.nama_cluster = cluster.nama_cluster', 'left')
             ->join('master_order', 'master_order.no_model = stock.no_model', 'left')
