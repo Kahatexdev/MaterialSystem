@@ -138,6 +138,145 @@
             transform: translateY(0);
         }
     }
+
+    .group-card {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .group-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #4b6cb7, #182848);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .group-card:hover {
+        border-color: #182848;
+        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .group-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .group-card.selected {
+        border-color: #007bff;
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.2);
+    }
+
+    .group-card.selected::before {
+        transform: scaleX(1);
+    }
+
+    .group-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .group-card:hover .group-icon {
+        transform: scale(1.1);
+    }
+
+    .group-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        transition: color 0.3s ease;
+    }
+
+    .group-description {
+        font-size: 0.9rem;
+        color: #6c757d;
+        line-height: 1.4;
+    }
+
+    .group-card.selected .group-title {
+        color: #0056b3;
+    }
+
+    .cards-container {
+        gap: 20px;
+    }
+
+    .apply-button {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 12px 30px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .apply-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+    }
+
+    .apply-button:active {
+        transform: translateY(0);
+    }
+
+    .capacity-legend .btn {
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        padding: 8px 16px;
+        margin: 0 2px;
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .capacity-legend .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .main-card {
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: none;
+    }
+
+    .main-card .card-body {
+        padding: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .cards-container {
+            flex-direction: column;
+        }
+
+        .capacity-legend .btn {
+            margin: 2px;
+            font-size: 0.8rem;
+            padding: 6px 12px;
+        }
+    }
 </style>
 
 <div class="container-fluid py-4">
@@ -255,31 +394,85 @@
 
     <div class="row mb-4 mt-3">
         <div class="col-md-12">
-            <div class="card">
-                <div class="mt-3 ms-3">
-                    <h4><strong>LAYOUT STOCK ORDER</strong></h4>
+            <div class="card main-card">
+                <div class="mt-3 ms-3 text-center">
+                    <h3><strong>LAYOUT STOCK ORDER</strong></h3>
                 </div>
-                <div class="card-body">
+                <div class="card mt-2">
                     <!-- Keterangan kapasitas -->
-                    <div class="mb-2 text-center">
-                        <button class="btn text-white w-10" style="background-color: #b0b0b0;" data-bs-toggle="tooltip" data-bs-placement="top" title="Stok Kosong">0%</button>
-                        <button class="btn text-white w-10" style="background-color: #007bff;" data-bs-toggle="tooltip" data-bs-placement="top" title="Stok Rendah">1-70%</button>
-                        <button class="btn text-white w-10" style="background-color: #ff851b;" data-bs-toggle="tooltip" data-bs-placement="top" title="Stok Sedang">71-99%</button>
-                        <button class="btn text-white w-10" style="background-color: #dc3545;" data-bs-toggle="tooltip" data-bs-placement="top" title="Stok Penuh">100%</button>
+                    <div class="mb-4 text-center capacity-legend">
+                        <button class="btn text-white" style="background-color: #b0b0b0;" data-bs-toggle="tooltip" data-bs-placement="top" title="Stok Kosong">0%</button>
+                        <button class="btn text-white" style="background-color: #007bff;" data-bs-toggle="tooltip" data-bs-placement="top" title="Stok Rendah">1-70%</button>
+                        <button class="btn text-white" style="background-color: #ff851b;" data-bs-toggle="tooltip" data-bs-placement="top" title="Stok Sedang">71-99%</button>
+                        <button class="btn text-white" style="background-color: #dc3545;" data-bs-toggle="tooltip" data-bs-placement="top" title="Stok Penuh">100%</button>
                     </div>
+
                     <form id="groupForm">
-                        <div class="mb-3">
-                            <label for="groupSelect" class="form-label">Select Group</label>
-                            <select class="form-select" id="groupSelect" name="group">
-                                <option value="I" selected>Group I</option>
-                                <option value="II">Group II</option>
-                                <option value="III">Group III</option>
-                                <option value="covering">Covering</option>
-                                <option value="nylon">Nylon</option>
-                            </select>
+                        <div class="mb-2">
+                            <!-- <h5 class="mb-3 text-center">Select Group</h5> -->
+                            <div class="row cards-container justify-content-center">
+                                <!-- Group I Card -->
+                                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                    <div class="group-card text-center p-3 h-100" data-value="I">
+                                        <div class="group-icon mx-auto" style="background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);">
+                                            <i class="fas fa-warehouse" style="font-size: 1.2rem;"></i>
+                                        </div>
+                                        <div class="group-title">Group I</div>
+                                    </div>
+                                </div>
+
+                                <!-- Group II Card -->
+                                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                    <div class="group-card text-center p-3 h-100" data-value="II">
+                                        <div class="group-icon mx-auto" style="background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);">
+                                            <i class="fas fa-warehouse" style="font-size: 1.2rem;"></i>
+                                        </div>
+                                        <div class="group-title">Group II</div>
+                                    </div>
+                                </div>
+
+                                <!-- Group III Card -->
+                                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                    <div class="group-card text-center p-3 h-100" data-value="III">
+                                        <div class="group-icon mx-auto" style="background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);">
+                                            <i class="fas fa-warehouse" style="font-size: 1.2rem;"></i>
+                                        </div>
+                                        <div class="group-title">Group III</div>
+                                    </div>
+                                </div>
+
+                                <!-- Covering Card -->
+                                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                    <div class="group-card text-center p-3 h-100" data-value="covering">
+                                        <div class="group-icon mx-auto" style="background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);">
+                                            <i class="fas fa-warehouse" style="font-size: 1.2rem;"></i>
+                                        </div>
+                                        <div class="group-title">Covering</div>
+                                    </div>
+                                </div>
+
+                                <!-- Nylon Card -->
+                                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                    <div class="group-card text-center p-3 h-100" data-value="nylon">
+                                        <div class="group-icon mx-auto" style="background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);">
+                                            <i class="fas fa-warehouse" style="font-size: 1.2rem;"></i>
+                                        </div>
+                                        <div class="group-title">Nylon</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hidden input to store selected value -->
+                            <input type="hidden" id="groupSelect" name="group" value="I">
                         </div>
-                        <button type="submit" class="btn btn-info w-100">Apply</button>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary apply-button">
+                                <i class="fas fa-check me-2"></i>Apply
+                            </button>
+                        </div>
                     </form>
+
                     <!-- card loading -->
                     <div class="card loading" id="loadingCard" style="display: none;">
                         <div class="card-body text-center">
@@ -288,8 +481,9 @@
                             </div>
                         </div>
                     </div>
+
                     <!-- Tempat untuk Menampilkan Tabel -->
-                    <div id="groupTable"></div>
+                    <div id="groupTable" class="mt-0 px-5"></div>
                 </div>
             </div>
         </div>
@@ -479,6 +673,30 @@
 </script>
 <script>
     $(document).ready(function() {
+        const cards = $('.group-card');
+        const hiddenInput = $('#groupSelect');
+
+        // Set default selection (Group I)
+        // cards.first().addClass('selected');
+
+        // Add click event listeners to cards
+        cards.on('click', function() {
+            // Remove selected class from all cards
+            cards.removeClass('selected');
+
+            // Add selected class to clicked card
+            $(this).addClass('selected');
+
+            // Update hidden input value
+            hiddenInput.val($(this).data('value'));
+        });
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
         // Fungsi untuk memuat data berdasarkan grup yang dipilih
         function loadGroupData(group) {
             $.ajax({
