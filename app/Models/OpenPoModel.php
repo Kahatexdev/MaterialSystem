@@ -354,15 +354,33 @@ class OpenPoModel extends Model
             ->first();
     }
 
-    public function poCoveringCount()
+    // public function poCoveringCount()
+    // {
+    //     return $this->where('penerima', 'Paryanti')->countAllResults();
+    // }
+
+    public function poCoveringCount(string $penerima = 'Paryanti'): int
     {
-        return $this->where('penerima', 'Paryanti')->countAllResults();
+        $start = date('Y-m-d 00:00:00');
+        $end   = date('Y-m-d 00:00:00', strtotime('+1 day'));
+
+        return $this->where('penerima', $penerima)
+            ->where('created_at >=', $start)
+            ->where('created_at <',  $end)
+            ->where('id_induk IS NOT NULL', null, false) // <— fix: pakai WHERE
+            ->countAllResults();
     }
 
     public function poCoveringQty()
     {
+        $start = date('Y-m-d 00:00:00');
+        $end   = date('Y-m-d 00:00:00', strtotime('+1 day'));
+
         return $this->selectSum('kg_po')
             ->where('penerima', 'Paryanti')
+            ->where('created_at >=', $start)
+            ->where('created_at <',  $end)
+            ->where('id_induk IS NOT NULL', null, false) // <— fix: pakai WHERE
             ->get()
             ->getRow()
             ->kg_po ?? 0;
