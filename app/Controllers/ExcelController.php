@@ -13499,7 +13499,7 @@ class ExcelController extends BaseController
         $dataPemesanan = [];
         $dataRetur     = [];
 
-        if ($area !== '' && $noModel !== '') {
+        if (!empty($area) && !empty($noModel)) {
             $dataPemesanan = $this->pemesananModel->getPemesananByAreaModel($area, $noModel);
             $dataRetur     = $this->returModel->getReturByAreaModel($area, $noModel);
         }
@@ -13530,15 +13530,25 @@ class ExcelController extends BaseController
                         'area'        => $area,
                     ])['ttl_keb_potambahan'] ?? 0
                 );
-
-                $kebutuhan = $qty > 0
-                    ? (($qty * $row['gw'] * ($row['composition'] / 100)) * (1 + ($row['loss'] / 100)) / 1000) + $kgPoTambahan
-                    : 0;
-
+                // dd($ttlKeb);
+                if ($qty > 0) {
+                    $kebutuhan = (($qty * $row['gw'] * ($row['composition'] / 100)) * (1 + ($row['loss'] / 100)) / 1000) + $kgPoTambahan;
+                    $p['ttl_keb'] = $ttlKeb;
+                }
                 $ttlKeb += $kebutuhan;
                 $ttlQty += $qty;
-            }
+                // dd($ttlKeb);
+                // $kebutuhan = $qty > 0
+                //     ? (($qty * $row['gw'] * ($row['composition'] / 100)) * (1 + ($row['loss'] / 100)) / 1000) + $kgPoTambahan
+                //     : 0;
+                // $p['ttl_keb'] = $ttlKeb;
 
+                // $ttlKeb += $kebutuhan;
+                // $ttlQty += $qty;
+            }
+            $p['qty']     = $ttlQty; // ttl qty pcs
+            $p['ttl_keb'] = $ttlKeb; // ttl kebutuhan bb
+            // dd($p);
             $mergedData[] = [
                 'tgl_update_gbn'     => $p['updated_at'] ?? null, // kalau ada
                 'tgl_pakai'          => $p['tgl_pakai'],
@@ -13561,6 +13571,7 @@ class ExcelController extends BaseController
                 'ket_gbn'            => $p['ket_gbn'] ?? '',
             ];
         }
+        // dd($mergedData);
 
         // ====== dari RETUR ======
         foreach ($dataRetur as $r) {
@@ -13686,7 +13697,7 @@ class ExcelController extends BaseController
             'ttl_keb'   => 0.0,
             'pesan_kg'  => 0.0,
             'pesan_cns' => 0.0,
-            'po_plus'   => 0.0,
+            'po_plus'   => 0,   // <= counter
             'kirim_kg'  => 0.0,
             'kirim_cns' => 0.0,
             'retur_kg'  => 0.0,
@@ -13700,7 +13711,7 @@ class ExcelController extends BaseController
             $sheet->setCellValue("K{$r}", $sub['ttl_keb']);
             $sheet->setCellValue("L{$r}", $sub['pesan_kg']);
             $sheet->setCellValue("M{$r}", $sub['pesan_cns']);
-            $sheet->setCellValue("N{$r}", $sub['po_plus']);
+            // $sheet->setCellValue("N{$r}", $sub['po_plus'] > 0 ? 'PO(+)' : '');
             $sheet->setCellValue("O{$r}", $sub['kirim_kg']);
             $sheet->setCellValue("P{$r}", $sub['kirim_cns']);
             $sheet->setCellValue("Q{$r}", $sub['retur_kg']);
@@ -13715,9 +13726,11 @@ class ExcelController extends BaseController
                 'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
             ]);
             // number format
-            foreach (['K','L','M','N','O','P','Q','R','U'] as $c) {
+            foreach (['K','L','M','O','P','Q','R','U'] as $c) {
                 $sheet->getStyle("{$c}{$r}:{$c}{$r}")->getNumberFormat()->setFormatCode('#,##0.00');
             }
+            // kolom N (teks) jangan diformat angka
+            $sheet->getStyle("N{$r}:N{$r}")->getNumberFormat()->setFormatCode('@');
         };
 
         foreach ($rows as $d) {
@@ -13728,8 +13741,12 @@ class ExcelController extends BaseController
                 $r++;
                 // reset subtotal
                 foreach ($sub as $k => $v) { $sub[$k] = 0.0; }
+                $no=1;
             }
-
+            // tentukan tampilan kolom N per-baris
+            $rawPo = strtoupper((string)($d['po_plus'] ?? ''));
+            $isPlus = in_array($rawPo, ['1', 'Y', 'YES', 'TRUE', 'PO(+)', 'PO_PLUS', 'YA'], true);
+            $showPo = $isPlus ? 'PO(+)' : '';
             // tulis detail
             $sheet->fromArray([ // A..U
                 $no,                                // NO
@@ -13745,7 +13762,7 @@ class ExcelController extends BaseController
                 '',                                 // TOTAL KEBUTUHAN (di subtotal)
                 $d['pesan_kg'],                     // PESAN (KG)
                 $d['pesan_cns'],                    // PESAN (CNS)
-                $d['po_plus'],                      // PO (+)
+                $showPo,                      // PO (+)
                 $d['kirim_kg'],                     // KIRIM (KG)
                 $d['kirim_cns'],                    // KIRIM (CNS)
                 $d['retur_kg'],                     // RETUR (KG)
@@ -13756,15 +13773,15 @@ class ExcelController extends BaseController
             ], null, "A{$r}");
 
             // format angka
-            foreach (['L','M','N','O','P','Q','R'] as $c) {
+            foreach (['L','M','O','P','Q','R'] as $c) {
                 $sheet->getStyle("{$c}{$r}:{$c}{$r}")->getNumberFormat()->setFormatCode('#,##0.00');
             }
-
+            $sheet->getStyle("N{$r}:N{$r}")->getNumberFormat()->setFormatCode('@');
             // akumulasi subtotal
             $sub['ttl_keb']   = ($sub['ttl_keb']   == 0.0) ? (float)$d['ttl_keb'] : $sub['ttl_keb']; // ambil sekali per grup
             $sub['pesan_kg']  += (float)$d['pesan_kg'];
             $sub['pesan_cns'] += (float)$d['pesan_cns'];
-            $sub['po_plus']   += (float)$d['po_plus'];
+            $sub['po_plus']   += $isPlus ? 1 : 0;   // <= ganti dari count(...)
             $sub['kirim_kg']  += (float)$d['kirim_kg'];
             $sub['kirim_cns'] += (float)$d['kirim_cns'];
             $sub['retur_kg']  += (float)$d['retur_kg'];
@@ -13780,6 +13797,7 @@ class ExcelController extends BaseController
 
         // subtotal terakhir
         if ($prevKey !== null) {
+            // $no=1;
             $writeSubtotal();
             $r++;
         }
