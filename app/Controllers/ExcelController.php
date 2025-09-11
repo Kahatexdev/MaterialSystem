@@ -31,6 +31,7 @@ use App\Models\WarehouseBBModel;
 use App\Models\MasterWarnaBenangModel;
 use App\Models\HistoryStockBBModel;
 use App\Models\OtherOutModel;
+
 use PhpOffice\PhpSpreadsheet\Style\{Border, Alignment, Fill};
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
@@ -73,6 +74,7 @@ class ExcelController extends BaseController
     protected $masterBuyerModel;
     protected $historyStockBBModel;
     protected $otherOutModel;
+    protected $poTambahanModel;
 
     public function __construct()
     {
@@ -100,6 +102,7 @@ class ExcelController extends BaseController
         $this->masterBuyerModel = new MasterBuyerModel();
         $this->historyStockBBModel = new HistoryStockBBModel();
         $this->otherOutModel = new OtherOutModel();
+        $this->poTambahanModel = new PoTambahanModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -13486,6 +13489,316 @@ class ExcelController extends BaseController
         $writer = new Xlsx($spreadsheet);
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"$filename\"");
+        $writer->save('php://output');
+        exit;
+    }
+
+    // ==== REUSE: builder data yang sama untuk view & export ====
+    private function buildSisaKebutuhanData(string $area, string $noModel): array
+    {
+        $dataPemesanan = [];
+        $dataRetur     = [];
+
+        if ($area !== '' && $noModel !== '') {
+            $dataPemesanan = $this->pemesananModel->getPemesananByAreaModel($area, $noModel);
+            $dataRetur     = $this->returModel->getReturByAreaModel($area, $noModel);
+        }
+
+        $mergedData = [];
+
+        // ====== dari PEMESANAN ======
+        foreach ($dataPemesanan as $p) {
+            $getStyle = $this->materialModel->getStyleSizeByBb($p['no_model'], $p['item_type'], $p['kode_warna']);
+
+            $ttlKeb = 0.0;
+            $ttlQty = 0;
+
+            foreach ($getStyle as $row) {
+                $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($p['no_model'])
+                        . '&style_size=' . urlencode($row['style_size'])
+                        . '&area=' . urlencode($area);
+
+                $qtyData = json_decode(@file_get_contents($urlQty) ?: '{}', true);
+                $qty     = intval($qtyData['qty'] ?? 0);
+
+                $kgPoTambahan = floatval(
+                    $this->poTambahanModel->getKgPoTambahan([
+                        'no_model'    => $p['no_model'],
+                        'item_type'   => $p['item_type'],
+                        'kode_warna'  => $p['kode_warna'],
+                        'style_size'  => $row['style_size'],
+                        'area'        => $area,
+                    ])['ttl_keb_potambahan'] ?? 0
+                );
+
+                $kebutuhan = $qty > 0
+                    ? (($qty * $row['gw'] * ($row['composition'] / 100)) * (1 + ($row['loss'] / 100)) / 1000) + $kgPoTambahan
+                    : 0;
+
+                $ttlKeb += $kebutuhan;
+                $ttlQty += $qty;
+            }
+
+            $mergedData[] = [
+                'tgl_update_gbn'     => $p['updated_at'] ?? null, // kalau ada
+                'tgl_pakai'          => $p['tgl_pakai'],
+                'tgl_retur'          => null,
+                'no_model'           => $p['no_model'],
+                'material_type'      => $p['material_type'] ?? '', // kalau ada kolom ini
+                'los'                => $p['max_loss'] ?? '',
+                'item_type'          => $p['item_type'],
+                'kode_warna'         => $p['kode_warna'],
+                'warna'              => $p['color'],
+                'ttl_keb'            => (float)$ttlKeb,
+                'pesan_kg'           => (float)($p['ttl_kg'] ?? 0),
+                'pesan_cns'          => (float)($p['ttl_cns'] ?? 0), // kalau tidak ada, biarkan 0
+                'po_plus'            => (int)($p['po_tambahan'] ?? 0),
+                'kirim_kg'           => (float)($p['kgs_out'] ?? 0),
+                'kirim_cns'          => (float)($p['cns_out'] ?? 0),
+                'retur_kg'           => 0.0,
+                'retur_cns'          => 0.0,
+                'lot'                => $p['lot_out'] ?? '',
+                'ket_gbn'            => $p['ket_gbn'] ?? '',
+            ];
+        }
+
+        // ====== dari RETUR ======
+        foreach ($dataRetur as $r) {
+            $getStyle = $this->materialModel->getStyleSizeByBb($r['no_model'], $r['item_type'], $r['kode_warna']);
+
+            $ttlKeb = 0.0;
+            $ttlQty = 0;
+
+            foreach ($getStyle as $row) {
+                $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($r['no_model'])
+                        . '&style_size=' . urlencode($row['style_size'])
+                        . '&area=' . urlencode($area);
+
+                $qtyData = json_decode(@file_get_contents($urlQty) ?: '{}', true);
+                $qty     = intval($qtyData['qty'] ?? 0);
+
+                $kgPoTambahan = floatval(
+                    $this->poTambahanModel->getKgPoTambahan([
+                        'no_model'    => $r['no_model'],
+                        'item_type'   => $r['item_type'],
+                        'kode_warna'  => $r['kode_warna'],
+                        'style_size'  => $row['style_size'],
+                        'area'        => $area,
+                    ])['ttl_keb_potambahan'] ?? 0
+                );
+
+                $kebutuhan = $qty > 0
+                    ? (($qty * $row['gw'] * ($row['composition'] / 100)) * (1 + ($row['loss'] / 100)) / 1000) + $kgPoTambahan
+                    : 0;
+
+                $ttlKeb += $kebutuhan;
+                $ttlQty += $qty;
+            }
+
+            $mergedData[] = [
+                'tgl_update_gbn'     => $r['updated_at'] ?? null,
+                'tgl_pakai'          => null,
+                'tgl_retur'          => $r['tgl_retur'],
+                'no_model'           => $r['no_model'],
+                'material_type'      => $r['material_type'] ?? '',
+                'los'                => '',
+                'item_type'          => $r['item_type'],
+                'kode_warna'         => $r['kode_warna'],
+                'warna'              => $r['warna'],
+                'ttl_keb'            => (float)$ttlKeb,
+                'pesan_kg'           => 0.0,
+                'pesan_cns'          => 0.0,
+                'po_plus'            => 0,
+                'kirim_kg'           => 0.0,
+                'kirim_cns'          => 0.0,
+                'retur_kg'           => (float)($r['kgs_retur'] ?? 0),
+                'retur_cns'          => (float)($r['cns_retur'] ?? 0),
+                'lot'                => $r['lot_retur'] ?? '',
+                'ket_gbn'            => $r['keterangan_gbn'] ?? '',
+            ];
+        }
+
+        // ====== sorting & grouping (ITEM TYPE + KODE WARNA + WARNA) ======
+        usort($mergedData, function ($a, $b) {
+            foreach (['item_type', 'kode_warna', 'warna'] as $k) {
+                $cmp = strcmp((string)$a[$k], (string)$b[$k]);
+                if ($cmp !== 0) return $cmp;
+            }
+            // tanggal desc (pakai tgl_pakai lalu fallback tgl_retur)
+            $ta = $a['tgl_pakai'] ?: $a['tgl_retur'];
+            $tb = $b['tgl_pakai'] ?: $b['tgl_retur'];
+            if (empty($ta) && !empty($tb)) return 1;
+            if (!empty($ta) && empty($tb)) return -1;
+            return strtotime((string)$tb) <=> strtotime((string)$ta);
+        });
+
+        return $mergedData;
+    }
+
+    // ==== EXPORT yang meniru file contoh ====
+    public function reportSisaKebutuhanArea()
+    {
+        $area    = trim($this->request->getGet('filter_area') ?? '');
+        $noModel = trim($this->request->getGet('filter_model') ?? '');
+
+        if ($area === '' || $noModel === '') {
+            return redirect()->back()->with('error', 'Area dan No Model wajib diisi untuk export.');
+        }
+
+        $rows = $this->buildSisaKebutuhanData($area, $noModel);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Report Sisa');
+
+        // === Title (C1, mirip contoh) ===
+        $sheet->setCellValue('C1', 'REPORT SISA KEBUTUHAN BAHAN BAKU');
+        $sheet->mergeCells('C1:G1');
+        $sheet->getStyle('C1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getRowDimension(1)->setRowHeight(22);
+
+        // === Header baris 3 (A..U) ===
+        $headers = [
+            'NO','TGL UPDATE GBN','TGL PAKAI','TGL RETUR','NO MODEL',
+            'MATERIAL TYPE','LOS','ITEM TYPE','KODE WARNA','WARNA',
+            'TOTAL KEBUTUHAN','PESAN (KG)','PESAN (CNS)','PO (+)',
+            'KIRIM (KG)','KIRIM (CNS)','RETUR (KG)','RETUR (CNS)',
+            'LOT','KET GBN','SISA'
+        ];
+        $sheet->fromArray($headers, null, 'A3');
+
+        // Header style
+        $sheet->getStyle('A3:U3')->applyFromArray([
+            'font' => ['bold' => true],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFEFEFEF']],
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+        ]);
+        $sheet->getRowDimension(3)->setRowHeight(28);
+        $sheet->freezePane('A4');
+
+        // === Data & Subtotal per grup ===
+        $r = 4; // start row for data
+        $no = 1;
+
+        $prevKey = null;
+        $sub = [
+            'ttl_keb'   => 0.0,
+            'pesan_kg'  => 0.0,
+            'pesan_cns' => 0.0,
+            'po_plus'   => 0.0,
+            'kirim_kg'  => 0.0,
+            'kirim_cns' => 0.0,
+            'retur_kg'  => 0.0,
+            'retur_cns' => 0.0,
+        ];
+
+        $writeSubtotal = function() use (&$sheet, &$r, &$sub) {
+            // "TOTAL KEBUTUHAN " merged A..J
+            $sheet->setCellValue("A{$r}", 'TOTAL KEBUTUHAN ');
+            $sheet->mergeCells("A{$r}:J{$r}");
+            $sheet->setCellValue("K{$r}", $sub['ttl_keb']);
+            $sheet->setCellValue("L{$r}", $sub['pesan_kg']);
+            $sheet->setCellValue("M{$r}", $sub['pesan_cns']);
+            $sheet->setCellValue("N{$r}", $sub['po_plus']);
+            $sheet->setCellValue("O{$r}", $sub['kirim_kg']);
+            $sheet->setCellValue("P{$r}", $sub['kirim_cns']);
+            $sheet->setCellValue("Q{$r}", $sub['retur_kg']);
+            $sheet->setCellValue("R{$r}", $sub['retur_cns']);
+            // SISA = K - O + Q (baris subtotal)
+            $sheet->setCellValue("U{$r}", "=K{$r}-O{$r}+Q{$r}");
+
+            // styling subtotal row
+            $sheet->getStyle("A{$r}:U{$r}")->applyFromArray([
+                'font' => ['bold' => true],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFF0F0F0']],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+            ]);
+            // number format
+            foreach (['K','L','M','N','O','P','Q','R','U'] as $c) {
+                $sheet->getStyle("{$c}{$r}:{$c}{$r}")->getNumberFormat()->setFormatCode('#,##0.00');
+            }
+        };
+
+        foreach ($rows as $d) {
+            $currentKey = $d['item_type'] . '|' . $d['kode_warna'] . '|' . $d['warna'];
+
+            if ($prevKey !== null && $currentKey !== $prevKey) {
+                $writeSubtotal();
+                $r++;
+                // reset subtotal
+                foreach ($sub as $k => $v) { $sub[$k] = 0.0; }
+            }
+
+            // tulis detail
+            $sheet->fromArray([ // A..U
+                $no,                                // NO
+                $d['tgl_update_gbn'] ?: '',         // TGL UPDATE GBN
+                $d['tgl_pakai'] ?: '',              // TGL PAKAI
+                $d['tgl_retur'] ?: '',              // TGL RETUR
+                $d['no_model'],                     // NO MODEL
+                $d['material_type'],                // MATERIAL TYPE
+                $d['los'],                          // LOS
+                $d['item_type'],                    // ITEM TYPE
+                $d['kode_warna'],                   // KODE WARNA
+                $d['warna'],                        // WARNA
+                '',                                 // TOTAL KEBUTUHAN (di subtotal)
+                $d['pesan_kg'],                     // PESAN (KG)
+                $d['pesan_cns'],                    // PESAN (CNS)
+                $d['po_plus'],                      // PO (+)
+                $d['kirim_kg'],                     // KIRIM (KG)
+                $d['kirim_cns'],                    // KIRIM (CNS)
+                $d['retur_kg'],                     // RETUR (KG)
+                $d['retur_cns'],                    // RETUR (CNS)
+                $d['lot'],                          // LOT
+                $d['ket_gbn'],                      // KET GBN
+                '',                                 // SISA (hanya di subtotal)
+            ], null, "A{$r}");
+
+            // format angka
+            foreach (['L','M','N','O','P','Q','R'] as $c) {
+                $sheet->getStyle("{$c}{$r}:{$c}{$r}")->getNumberFormat()->setFormatCode('#,##0.00');
+            }
+
+            // akumulasi subtotal
+            $sub['ttl_keb']   = ($sub['ttl_keb']   == 0.0) ? (float)$d['ttl_keb'] : $sub['ttl_keb']; // ambil sekali per grup
+            $sub['pesan_kg']  += (float)$d['pesan_kg'];
+            $sub['pesan_cns'] += (float)$d['pesan_cns'];
+            $sub['po_plus']   += (float)$d['po_plus'];
+            $sub['kirim_kg']  += (float)$d['kirim_kg'];
+            $sub['kirim_cns'] += (float)$d['kirim_cns'];
+            $sub['retur_kg']  += (float)$d['retur_kg'];
+            $sub['retur_cns'] += (float)$d['retur_cns'];
+
+            // border tipis tiap baris detail
+            $sheet->getStyle("A{$r}:U{$r}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+            $r++;
+            $no++;
+            $prevKey = $currentKey;
+        }
+
+        // subtotal terakhir
+        if ($prevKey !== null) {
+            $writeSubtotal();
+            $r++;
+        }
+
+        // AutoSize kolom
+        foreach (range('A', 'U') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Output
+        $filename = 'REPORT_SISA_BAHAN_BAKU_' . preg_replace('/\s+/', '_', $area) . '_' . preg_replace('/\s+/', '_', $noModel) . '_' . date('Ymd_His') . '.xlsx';
+
+        ob_end_clean();
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"{$filename}\"");
+        header('Cache-Control: max-age=0');
+
+        $writer = new Xlsx($spreadsheet);
+        // $writer->setPreCalculateFormulas(false); // bisa aktifkan jika dataset besar
         $writer->save('php://output');
         exit;
     }

@@ -104,13 +104,15 @@ class PengeluaranModel extends Model
     public function getTotalPengiriman($data)
     {
         return $this->select('SUM(pengeluaran.kgs_out) AS kgs_out')
-            ->join('out_celup', 'out_celup.id_out_celup = pengeluaran.id_out_celup', 'left')
-            ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup', 'left')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left')
+            ->join('pemesanan', 'pemesanan.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pengeluaran.area_out', $data['area'])
             ->where('pengeluaran.status', 'Pengiriman Area')
-            ->where('schedule_celup.no_model', $data['no_model'])
-            ->where('schedule_celup.item_type', $data['item_type'])
-            ->where('schedule_celup.kode_warna', $data['kode_warna'])
+            ->where('master_order.no_model', $data['no_model'])
+            ->where('material.item_type', $data['item_type'])
+            ->where('material.kode_warna', $data['kode_warna'])
             ->first();
     }
     public function getFilterPengiriman($key = null, $tanggal_awal = null, $tanggal_akhir = null)

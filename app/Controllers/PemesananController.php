@@ -1578,10 +1578,11 @@ class PemesananController extends BaseController
                     ])['ttl_keb_potambahan'] ?? 0
                 );
 
-                if ($qty > 0) {
+                if ($qty >= 0) {
                     $kebutuhan = (($qty * $data['gw'] * ($data['composition'] / 100)) * (1 + ($data['loss'] / 100)) / 1000) + $kgPoTambahan;
                     $pemesanan['ttl_keb'] = $ttlKeb;
                 }
+                // dd($kgPoTambahan);
                 $ttlKeb += $kebutuhan;
                 $ttlQty += $qty;
             }
@@ -1642,7 +1643,7 @@ class PemesananController extends BaseController
                     ])['ttl_keb_potambahan'] ?? 0
                 );
 
-                if ($qty > 0) {
+                if ($qty >= 0) {
                     $kebutuhan = (($qty * $data['gw'] * ($data['composition'] / 100)) * (1 + ($data['loss'] / 100)) / 1000) + $kgPoTambahan;
                     $retur['ttl_keb'] = $ttlKeb;
                 }

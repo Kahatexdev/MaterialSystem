@@ -163,6 +163,14 @@
                                 <i class="fas fa-sync-alt"></i>
                             </button>
                         </div>
+
+                        <div class="col-md-3 text-end">
+                            <label class="form-label d-block invisible">Export</label>
+                            <button type="button" class="btn btn-success w-100"
+                                onclick="window.location.href='<?= base_url($role . '/pemesanan/reportSisaKebutuhanArea') . '?filter_model=' . ($noModel ?? '') . '&filter_area=' . ($area ?? '') ?>'">
+                                <i class="fas fa-file-excel"></i> EXPORT EXCEL
+                            </button>
+                        </div>
                     </div>
                     <div class="table-responsive mt-4">
                         <table class="table align-items-center">
