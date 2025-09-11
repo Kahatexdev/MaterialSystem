@@ -191,7 +191,7 @@
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">QTY RETUR (KG)</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">LOT RETUR</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">KET GBN</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">SISA (KIRIM - KEBUTUHAN - RETUR)</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">SISA (KEBUTUHAN - KIRIM + RETUR)</th>
                                 </tr>
                             </thead>
                             <tbody id="sisaKebutuhanTable">

@@ -13515,8 +13515,8 @@ class ExcelController extends BaseController
 
             foreach ($getStyle as $row) {
                 $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($p['no_model'])
-                        . '&style_size=' . urlencode($row['style_size'])
-                        . '&area=' . urlencode($area);
+                    . '&style_size=' . urlencode($row['style_size'])
+                    . '&area=' . urlencode($area);
 
                 $qtyData = json_decode(@file_get_contents($urlQty) ?: '{}', true);
                 $qty     = intval($qtyData['qty'] ?? 0);
@@ -13531,7 +13531,7 @@ class ExcelController extends BaseController
                     ])['ttl_keb_potambahan'] ?? 0
                 );
 
-                $kebutuhan = $qty > 0
+                $kebutuhan = $qty >= 0
                     ? (($qty * $row['gw'] * ($row['composition'] / 100)) * (1 + ($row['loss'] / 100)) / 1000) + $kgPoTambahan
                     : 0;
 
@@ -13571,8 +13571,8 @@ class ExcelController extends BaseController
 
             foreach ($getStyle as $row) {
                 $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($r['no_model'])
-                        . '&style_size=' . urlencode($row['style_size'])
-                        . '&area=' . urlencode($area);
+                    . '&style_size=' . urlencode($row['style_size'])
+                    . '&area=' . urlencode($area);
 
                 $qtyData = json_decode(@file_get_contents($urlQty) ?: '{}', true);
                 $qty     = intval($qtyData['qty'] ?? 0);
@@ -13659,11 +13659,27 @@ class ExcelController extends BaseController
 
         // === Header baris 3 (A..U) ===
         $headers = [
-            'NO','TGL UPDATE GBN','TGL PAKAI','TGL RETUR','NO MODEL',
-            'MATERIAL TYPE','LOS','ITEM TYPE','KODE WARNA','WARNA',
-            'TOTAL KEBUTUHAN','PESAN (KG)','PESAN (CNS)','PO (+)',
-            'KIRIM (KG)','KIRIM (CNS)','RETUR (KG)','RETUR (CNS)',
-            'LOT','KET GBN','SISA'
+            'NO',
+            'TGL UPDATE GBN',
+            'TGL PAKAI',
+            'TGL RETUR',
+            'NO MODEL',
+            'MATERIAL TYPE',
+            'LOS',
+            'ITEM TYPE',
+            'KODE WARNA',
+            'WARNA',
+            'TOTAL KEBUTUHAN',
+            'PESAN (KG)',
+            'PESAN (CNS)',
+            'PO (+)',
+            'KIRIM (KG)',
+            'KIRIM (CNS)',
+            'RETUR (KG)',
+            'RETUR (CNS)',
+            'LOT',
+            'KET GBN',
+            'SISA'
         ];
         $sheet->fromArray($headers, null, 'A3');
 
@@ -13693,7 +13709,7 @@ class ExcelController extends BaseController
             'retur_cns' => 0.0,
         ];
 
-        $writeSubtotal = function() use (&$sheet, &$r, &$sub) {
+        $writeSubtotal = function () use (&$sheet, &$r, &$sub) {
             // "TOTAL KEBUTUHAN " merged A..J
             $sheet->setCellValue("A{$r}", 'TOTAL KEBUTUHAN ');
             $sheet->mergeCells("A{$r}:J{$r}");
@@ -13715,7 +13731,7 @@ class ExcelController extends BaseController
                 'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
             ]);
             // number format
-            foreach (['K','L','M','N','O','P','Q','R','U'] as $c) {
+            foreach (['K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'U'] as $c) {
                 $sheet->getStyle("{$c}{$r}:{$c}{$r}")->getNumberFormat()->setFormatCode('#,##0.00');
             }
         };
@@ -13727,7 +13743,9 @@ class ExcelController extends BaseController
                 $writeSubtotal();
                 $r++;
                 // reset subtotal
-                foreach ($sub as $k => $v) { $sub[$k] = 0.0; }
+                foreach ($sub as $k => $v) {
+                    $sub[$k] = 0.0;
+                }
             }
 
             // tulis detail
@@ -13756,7 +13774,7 @@ class ExcelController extends BaseController
             ], null, "A{$r}");
 
             // format angka
-            foreach (['L','M','N','O','P','Q','R'] as $c) {
+            foreach (['L', 'M', 'N', 'O', 'P', 'Q', 'R'] as $c) {
                 $sheet->getStyle("{$c}{$r}:{$c}{$r}")->getNumberFormat()->setFormatCode('#,##0.00');
             }
 
