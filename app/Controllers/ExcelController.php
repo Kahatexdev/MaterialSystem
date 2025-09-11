@@ -13508,6 +13508,7 @@ class ExcelController extends BaseController
 
         // ====== dari PEMESANAN ======
         foreach ($dataPemesanan as $p) {
+            // dd($p);
             $getStyle = $this->materialModel->getStyleSizeByBb($p['no_model'], $p['item_type'], $p['kode_warna']);
 
             $ttlKeb = 0.0;
@@ -13515,8 +13516,8 @@ class ExcelController extends BaseController
 
             foreach ($getStyle as $row) {
                 $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($p['no_model'])
-                        . '&style_size=' . urlencode($row['style_size'])
-                        . '&area=' . urlencode($area);
+                    . '&style_size=' . urlencode($row['style_size'])
+                    . '&area=' . urlencode($area);
 
                 $qtyData = json_decode(@file_get_contents($urlQty) ?: '{}', true);
                 $qty     = intval($qtyData['qty'] ?? 0);
@@ -13531,7 +13532,7 @@ class ExcelController extends BaseController
                     ])['ttl_keb_potambahan'] ?? 0
                 );
                 // dd($ttlKeb);
-                if ($qty > 0) {
+                if ($qty >= 0) {
                     $kebutuhan = (($qty * $row['gw'] * ($row['composition'] / 100)) * (1 + ($row['loss'] / 100)) / 1000) + $kgPoTambahan;
                     $p['ttl_keb'] = $ttlKeb;
                 }
@@ -13568,7 +13569,7 @@ class ExcelController extends BaseController
                 'retur_kg'           => 0.0,
                 'retur_cns'          => 0.0,
                 'lot'                => $p['lot_out'] ?? '',
-                'ket_gbn'            => $p['ket_gbn'] ?? '',
+                'ket_gbn'            => $p['keterangan_gbn'] ?? '',
             ];
         }
         // dd($mergedData);
@@ -13582,8 +13583,8 @@ class ExcelController extends BaseController
 
             foreach ($getStyle as $row) {
                 $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($r['no_model'])
-                        . '&style_size=' . urlencode($row['style_size'])
-                        . '&area=' . urlencode($area);
+                    . '&style_size=' . urlencode($row['style_size'])
+                    . '&area=' . urlencode($area);
 
                 $qtyData = json_decode(@file_get_contents($urlQty) ?: '{}', true);
                 $qty     = intval($qtyData['qty'] ?? 0);
@@ -13657,7 +13658,7 @@ class ExcelController extends BaseController
         }
 
         $rows = $this->buildSisaKebutuhanData($area, $noModel);
-
+        // dd($rows);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Report Sisa');
@@ -13670,11 +13671,27 @@ class ExcelController extends BaseController
 
         // === Header baris 3 (A..U) ===
         $headers = [
-            'NO','TGL UPDATE GBN','TGL PAKAI','TGL RETUR','NO MODEL',
-            'MATERIAL TYPE','LOS','ITEM TYPE','KODE WARNA','WARNA',
-            'TOTAL KEBUTUHAN','PESAN (KG)','PESAN (CNS)','PO (+)',
-            'KIRIM (KG)','KIRIM (CNS)','RETUR (KG)','RETUR (CNS)',
-            'LOT','KET GBN','SISA'
+            'NO',
+            'TGL UPDATE GBN',
+            'TGL PAKAI',
+            'TGL RETUR',
+            'NO MODEL',
+            'MATERIAL TYPE',
+            'LOS',
+            'ITEM TYPE',
+            'KODE WARNA',
+            'WARNA',
+            'TOTAL KEBUTUHAN',
+            'PESAN (KG)',
+            'PESAN (CNS)',
+            'PO (+)',
+            'KIRIM (KG)',
+            'KIRIM (CNS)',
+            'RETUR (KG)',
+            'RETUR (CNS)',
+            'LOT',
+            'KET GBN',
+            'SISA'
         ];
         $sheet->fromArray($headers, null, 'A3');
 
@@ -13704,7 +13721,7 @@ class ExcelController extends BaseController
             'retur_cns' => 0.0,
         ];
 
-        $writeSubtotal = function() use (&$sheet, &$r, &$sub) {
+        $writeSubtotal = function () use (&$sheet, &$r, &$sub) {
             // "TOTAL KEBUTUHAN " merged A..J
             $sheet->setCellValue("A{$r}", 'TOTAL KEBUTUHAN ');
             $sheet->mergeCells("A{$r}:J{$r}");
@@ -13726,7 +13743,7 @@ class ExcelController extends BaseController
                 'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
             ]);
             // number format
-            foreach (['K','L','M','O','P','Q','R','U'] as $c) {
+            foreach (['K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'U'] as $c) {
                 $sheet->getStyle("{$c}{$r}:{$c}{$r}")->getNumberFormat()->setFormatCode('#,##0.00');
             }
             // kolom N (teks) jangan diformat angka
@@ -13740,7 +13757,9 @@ class ExcelController extends BaseController
                 $writeSubtotal();
                 $r++;
                 // reset subtotal
-                foreach ($sub as $k => $v) { $sub[$k] = 0.0; }
+                foreach ($sub as $k => $v) {
+                    $sub[$k] = 0.0;
+                }
                 $no=1;
             }
             // tentukan tampilan kolom N per-baris
@@ -13773,7 +13792,7 @@ class ExcelController extends BaseController
             ], null, "A{$r}");
 
             // format angka
-            foreach (['L','M','O','P','Q','R'] as $c) {
+            foreach (['L', 'M', 'N', 'O', 'P', 'Q', 'R'] as $c) {
                 $sheet->getStyle("{$c}{$r}:{$c}{$r}")->getNumberFormat()->setFormatCode('#,##0.00');
             }
             $sheet->getStyle("N{$r}:N{$r}")->getNumberFormat()->setFormatCode('@');
