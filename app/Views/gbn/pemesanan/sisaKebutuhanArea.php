@@ -2,16 +2,39 @@
 <?php $this->section('content'); ?>
 <div class="container-fluid py-4">
     <style>
+        /* ===== Design Tokens (mudah ganti tema) ===== */
+        :root {
+            --bg: #0f172a;
+            /* slate-900 */
+            --card: #111827;
+            /* gray-900 */
+            --muted: #64748b;
+            /* slate-500 */
+            --text: #e5e7eb;
+            /* gray-200 */
+            --accent: #22d3ee;
+            /* cyan-400 */
+            --accent-strong: #06b6d4;
+            /* cyan-500 */
+            --success: #22c55e;
+            --danger: #ef4444;
+            --ring: rgba(34, 211, 238, 0.35);
+            --shadow: 0 10px 30px rgba(2, 8, 23, .45);
+            --radius: 16px;
+        }
+
         /* Overlay transparan */
         #loadingOverlay {
             display: none;
             position: fixed;
+            inset: 0;
             z-index: 99999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.35);
+            background: rgba(2, 6, 23, .55);
+            backdrop-filter: blur(6px);
+        }
+
+        #loadingOverlay.active {
+            display: block;
         }
 
         .loader-wrap {
@@ -22,87 +45,82 @@
         }
 
         .loading-card {
-            background: rgba(0, 0, 0, 0.75);
-            padding: 20px 30px;
-            border-radius: 12px;
+            width: 280px;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid rgba(255, 255, 255, .12);
+            border-radius: 16px;
+            padding: 20px;
             text-align: center;
-            width: 260px;
-            /* kecilkan modal */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--shadow);
         }
 
-        .loader-text {
-            margin-top: 8px;
-            color: #fff;
-            font-weight: 500;
-            font-size: 12px;
-        }
-
-
-        #loadingOverlay.active {
-            display: block;
-            opacity: 1;
-        }
-
-        .loader {
-            width: 50px;
-            height: 50px;
+        .spin {
+            width: 46px;
+            height: 46px;
             margin: 0 auto 10px;
-            position: relative;
-        }
-
-        .loader:after {
-            content: "";
-            display: block;
-            width: 100%;
-            height: 100%;
             border-radius: 50%;
-            border: 6px solid #fff;
-            border-color: #fff transparent #fff transparent;
-            animation: loader-dual-ring 1.2s linear infinite;
-            box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+            border: 3px solid rgba(255, 255, 255, .25);
+            border-top-color: var(--accent);
+            animation: r .9s linear infinite;
         }
 
-        @keyframes loader-dual-ring {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
+        @keyframes r {
+            to {
                 transform: rotate(360deg);
             }
         }
 
-
-        @keyframes shine {
-            to {
-                background-position: 200% center;
-            }
+        .loader-text {
+            color: var(--text);
+            font-size: 12px;
+            opacity: .9;
         }
 
         .progress {
-            background-color: rgba(255, 255, 255, 0.15);
+            height: 6px;
+            background: rgba(255, 255, 255, .12);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 10px;
         }
 
-        .progress-bar {
-            transition: width .3s ease;
+        .progress>div {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+            transition: width .25s ease;
+        }
+
+        /* ===== Small helpers ===== */
+        .icon-pill {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: radial-gradient(90px 90px at 10% 10%, rgba(34, 211, 238, .25), transparent), #0b1220;
+            border: 1px solid rgba(255, 255, 255, .06);
+        }
+
+        /* Respect reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+
+            .btn,
+            .progress>div {
+                transition: none !important;
+            }
         }
     </style>
-    <!-- overlay -->
-    <div id="loadingOverlay">
+    <!-- ===== Overlay ===== -->
+    <div id="loadingOverlay" aria-hidden="true">
         <div class="loader-wrap">
-            <div class="loading-card">
-                <div class="loader" role="status" aria-hidden="true"></div>
-                <div class="loader-text">Memuat data...</div>
-
-                <!-- Progress bar -->
-                <div class="progress mt-3" style="height: 6px; border-radius: 6px;">
-                    <div id="progressBar"
-                        class="progress-bar progress-bar-striped progress-bar-animated bg-info"
-                        role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                    </div>
+            <div class="loading-card" role="status" aria-live="polite">
+                <div class="spin" aria-hidden="true"></div>
+                <div class="loader-text">Memuat data…</div>
+                <div class="progress" aria-label="Progress">
+                    <div id="progressBar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
                 </div>
-                <small id="progressText" class="text-white mt-1 d-block">0%</small>
+                <small id="progressText" class="d-block mt-1" style="color:var(--accent-strong);">0%</small>
             </div>
         </div>
     </div>
@@ -159,7 +177,7 @@
                         <div class="col-md-1">
                             <label class="form-label d-block invisible">Refresh</label>
                             <button type="button" class="btn btn-secondary w-100"
-                                onclick="window.location.href='<?= base_url($role . 'pemesanan/sisaKebutuhanArea') ?>'">
+                                onclick="window.location.href='<?= base_url($role . '/pemesanan/sisaKebutuhanArea') ?>'">
                                 <i class="fas fa-sync-alt"></i>
                             </button>
                         </div>
@@ -185,10 +203,13 @@
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">WARNA</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">TOTAL KEBUTUHAN AREA</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">QTY PESAN (KG)</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">QTY PESAN (CNS)</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">PO TAMBAHAN</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">QTY KIRIM (KG)</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">QTY KIRIM (CNS)</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">LOT PAKAI</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">QTY RETUR (KG)</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">QTY RETUR (CNS)</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">LOT RETUR</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">KET GBN</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">SISA (KEBUTUHAN - KIRIM + RETUR)</th>
@@ -210,8 +231,11 @@
 
                                     $prevKey = null;
                                     $ttlKgPesan = 0;
+                                    $ttlCnsPesan = 0;
                                     $ttlKgOut = 0;
+                                    $ttlCnsOut = 0;
                                     $ttlKgRetur = 0;
+                                    $ttlCnsRetur = 0;
                                     $ttlKebTotal = 0;
                                     $sisa = 0;
 
@@ -225,25 +249,34 @@
                                                 <th colspan="7" class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">Total Kebutuhan</th>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKebTotal, 2) ?></th>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgPesan, 2) ?></th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= $ttlCnsPesan ?></th>
                                                 <th></th>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgOut, 2) ?></th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= $ttlCnsOut ?></th>
                                                 <th></th>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgRetur, 2) ?></th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= $ttlCnsRetur ?></th>
                                                 <th colspan="2"></th>
-                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center" style="color: <?= $color; ?>"><?= number_format($sisa, 2) ?></th>
+                                                <th class="text-uppercase text-xs font-weight-bolder text-center text-<?= $color; ?>"><?= number_format($sisa, 2) ?></th>
                                             </tr>
                                         <?php
                                             // Reset total untuk grup berikutnya
                                             $ttlKgPesan = 0;
+                                            $ttlCnsPesan = 0;
                                             $ttlKgOut = 0;
+                                            $ttlCnsOut = 0;
                                             $ttlKgRetur = 0;
+                                            $ttlCnsRetur = 0;
                                             $ttlKebTotal = 0;
                                             $sisa = 0;
                                         }
                                         // Hitung total sementara
                                         $ttlKgPesan += $id['ttl_kg'];
+                                        $ttlCnsPesan += $id['ttl_cns'];
                                         $ttlKgOut += $id['kg_out'];
+                                        $ttlCnsOut += $id['cns_out'];
                                         $ttlKgRetur += $id['kgs_retur'];
+                                        $ttlCnsRetur += $id['cns_retur'];
                                         // Ambil ttl_keb satu kali per grup
                                         if (!isset($shownKebutuhan[$currentKey])) {
                                             $ttlKebTotal = $id['ttl_keb']; // Ambil hanya sekali
@@ -251,25 +284,28 @@
                                         }
                                         $sisa = $ttlKebTotal - $ttlKgOut + $ttlKgRetur;
                                         if ($sisa < 0) {
-                                            $color = "red";
+                                            $color = "danger";
                                         } else {
-                                            $color = "green";
+                                            $color = "success";
                                         }
                                         ?>
                                         <tr>
                                             <td class="text-xs text-center"><?= $id['tgl_pakai']; ?></td>
                                             <td class="text-xs text-center"><?= $id['tgl_retur']; ?></td>
                                             <td class="text-xs text-center"><?= $id['no_model']; ?></td>
-                                            <td class="text-xs text-center"><?= $id['max_loss'] ?? ''; ?></td>
+                                            <td class="text-xs text-center"><?= $id['max_loss'] ?? ''; ?>%</td>
                                             <td class="text-xs text-center"><?= $id['item_type']; ?></td>
                                             <td class="text-xs text-center"><?= $id['kode_warna']; ?></td>
                                             <td class="text-xs text-center"><?= $id['color']; ?></td>
                                             <td></td>
                                             <td class="text-xs text-center"><?= number_format($id['ttl_kg'], 2) ?></td>
-                                            <td class="text-xs text-center"><?= $id['po_tambahan'] == 1 ? 'YA' : ''; ?></td>
+                                            <td class="text-xs text-center"><?= $id['ttl_cns']; ?></td>
+                                            <td class="text-xs text-center"><?= $id['po_tambahan'] == 1 ? 'PO(+)' : ''; ?></td>
                                             <td class="text-xs text-center"><?= number_format($id['kg_out'], 2) ?></td>
+                                            <td class="text-xs text-center"><?= $id['cns_out']; ?></td>
                                             <td class="text-xs text-center"><?= $id['lot_out']; ?></td>
                                             <td class="text-xs text-center"><?= number_format($id['kgs_retur'], 2) ?></td>
+                                            <td class="text-xs text-center"><?= $id['cns_retur']; ?></td>
                                             <td class="text-xs text-center"><?= $id['lot_retur']; ?></td>
                                             <td class="text-xs text-center"><?= $id['ket_gbn']; ?></td>
                                             <td></td>
@@ -285,12 +321,15 @@
                                             <th colspan="7" class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">Total Kebutuhan</th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKebTotal, 2) ?></th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgPesan, 2) ?></th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= $ttlCnsPesan ?></th>
                                             <th></th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgOut, 2) ?></th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= $ttlCnsOut ?></th>
                                             <th></th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgRetur, 2) ?></th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= $ttlCnsRetur ?></th>
                                             <th colspan="2"></th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center" style="color: <?= $color; ?>"><?= number_format($sisa, 2) ?></th>
+                                            <th class="text-uppercase text-xs font-weight-bolder text-center text-<?= $color; ?>"><?= number_format($sisa, 2) ?></th>
                                         </tr>
                                 <?php
                                     }
@@ -306,63 +345,69 @@
 </div>
 
 <script>
+    // ===== Loader helpers =====
     function showLoading() {
-        $('#loadingOverlay').addClass('active');
-        $('#btnSearch').prop('disabled', true);
-        // show DataTables processing indicator if available
+        document.getElementById('loadingOverlay').classList.add('active');
+        const btn = document.getElementById('filterButton');
+        if (btn) btn.disabled = true;
         try {
             dataTable.processing(true);
         } catch (e) {}
     }
 
     function hideLoading() {
-        $('#loadingOverlay').removeClass('active');
-        $('#btnSearch').prop('disabled', false);
+        document.getElementById('loadingOverlay').classList.remove('active');
+        const btn = document.getElementById('filterButton');
+        if (btn) btn.disabled = false;
         try {
             dataTable.processing(false);
         } catch (e) {}
     }
 
-    function updateProgress(percent) {
-        $('#progressBar')
-            .css('width', percent + '%')
-            .attr('aria-valuenow', percent);
-        $('#progressText').text(percent + '%');
+    function updateProgress(p) {
+        const bar = document.getElementById('progressBar');
+        const txt = document.getElementById('progressText');
+        if (bar) {
+            bar.style.width = p + '%';
+            bar.setAttribute('aria-valuenow', p);
+        }
+        if (txt) {
+            txt.textContent = p + '%';
+        }
     }
 
-    //Filter data pemesanan
+    // ===== Filter action =====
     document.getElementById('filterButton').addEventListener('click', function() {
         const filterArea = document.getElementById('filter_area').value.trim();
         const filterModel = document.getElementById('filter_model').value.trim();
 
-        // Validasi input
         if (!filterArea || !filterModel) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Input Tidak Lengkap',
                 text: 'Area dan No Model harus diisi!',
-                confirmButtonText: 'OK',
+                confirmButtonText: 'OK'
             });
-            return; // Hentikan eksekusi jika input kosong
+            return;
         }
 
-        showLoading();
-        updateProgress(30);
+        const url = '<?= base_url($role . '/pemesanan/sisaKebutuhanArea') ?>' +
+            '?filter_model=' + encodeURIComponent(filterModel) +
+            '&filter_area=' + encodeURIComponent(filterArea);
 
-        // Redirect ke controller dengan parameter
-        let url = '<?= base_url($role . '/pemesanan/sisaKebutuhanArea') ?>?filter_model=' + encodeURIComponent(filterModel) + '&filter_area=' + encodeURIComponent(filterArea);
-        window.location.href = url;
-        // animasi progress naik pelan → lalu redirect
-        let percent = 80;
-        let interval = setInterval(() => {
-            percent += 9;
-            if (percent >= 99) {
-                clearInterval(interval);
-                window.location.href = url; // redirect ketika progress sudah 90%
-            } else {
-                updateProgress(percent);
-            }
-        }, 100);
+        showLoading();
+        let p = 20;
+        updateProgress(p);
+        const tick = setInterval(() => {
+            p = Math.min(98, p + 8);
+            updateProgress(p);
+        }, 120);
+
+        // sedikit delay agar animasi terlihat
+        setTimeout(() => {
+            clearInterval(tick);
+            window.location.href = url;
+        }, 900);
     });
 </script>
 
