@@ -2345,16 +2345,32 @@ class WarehouseController extends BaseController
 
             // Pastikan stok ditemukan
             if ($selectStock) {
-                $kgsNew = $selectStock['kgs_in_out'] - $kgsOtherOut;
-                $cnsNew = $selectStock['cns_in_out'] - $cnsOtherOut;
-                $krgNew = $selectStock['krg_in_out'] - $krgOtherOut;
+                $kgsStockAwal = $selectStock['kgs_stock_awal'];
+                $kgsInOut = $selectStock['kgs_in_out'];
 
-                // Update data stok
-                $this->stockModel->set('kgs_in_out', $kgsNew)
-                    ->set('cns_in_out', $cnsNew)
-                    ->set('krg_in_out', $krgNew)
-                    ->where('id_stock', $idStock)
-                    ->update();
+                if ($kgsStockAwal >= $kgsOtherOut) {
+                    $kgsNew = $selectStock['kgs_stock_awal'] - $kgsOtherOut;
+                    $cnsNew = $selectStock['cns_stock_awal'] - $cnsOtherOut;
+                    $krgNew = $selectStock['krg_stock_awal'] - $krgOtherOut;
+
+                    // Update data stok
+                    $this->stockModel->set('kgs_stock_awal', $kgsNew)
+                        ->set('cns_stock_awal', $cnsNew)
+                        ->set('krg_stock_awal', $krgNew)
+                        ->where('id_stock', $idStock)
+                        ->update();
+                } elseif ($kgsInOut >= $kgsOtherOut) {
+                    $kgsNew = $selectStock['kgs_in_out'] - $kgsOtherOut;
+                    $cnsNew = $selectStock['cns_in_out'] - $cnsOtherOut;
+                    $krgNew = $selectStock['krg_in_out'] - $krgOtherOut;
+
+                    // Update data stok
+                    $this->stockModel->set('kgs_in_out', $kgsNew)
+                        ->set('cns_in_out', $cnsNew)
+                        ->set('krg_in_out', $krgNew)
+                        ->where('id_stock', $idStock)
+                        ->update();
+                }
             }
 
             if ($krgOtherOut == 1) {
