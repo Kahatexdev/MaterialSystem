@@ -932,7 +932,7 @@ class PemesananController extends BaseController
                     ])['ttl_keb_potambahan'] ?? 0
                 );
 
-                if ($qty > 0) {
+                if ($qty >= 0) {
                     $kebutuhan = (($qty * $data['gw'] * ($data['composition'] / 100)) * (1 + ($data['loss'] / 100)) / 1000) + $kgPoTambahan;
                     $pem['ttl_keb'] = $ttlKeb;
                 }
@@ -995,7 +995,7 @@ class PemesananController extends BaseController
                     ])['ttl_keb_potambahan'] ?? 0
                 );
 
-                if ($qty > 0) {
+                if ($qty >= 0) {
                     $kebutuhan = (($qty * $data['gw'] * ($data['composition'] / 100)) * (1 + ($data['loss'] / 100)) / 1000) + $kgPoTambahan;
                     $retur['ttl_keb'] = $ttlKeb;
                 }
@@ -1600,13 +1600,16 @@ class PemesananController extends BaseController
                 'id_total_pemesanan' => $pemesanan['id_total_pemesanan'],
                 'ttl_jl_mc'          => (int)($pemesanan['ttl_jl_mc'] ?? 0),
                 'ttl_kg'             => (float)($pemesanan['ttl_kg'] ?? 0),   // ← JANGAN number_format di sini
+                'ttl_cns'            => (int)($pemesanan['ttl_cns'] ?? 0),  // ← JANGAN number_format di sini
                 'po_tambahan'        => (int)($pemesanan['po_tambahan'] ?? 0),
                 'ttl_keb'            => (float)$ttlKeb,                       // ← hasil hitung, mentah
                 'kg_out'             => (float)($pemesanan['kgs_out'] ?? 0),  // ← mentah
+                'cns_out'            => (int)($pemesanan['cns_out'] ?? 0),  // ← mentah
                 'lot_out'            => $pemesanan['lot_out'],
                 // field retur kosong
                 'tgl_retur'          => null,
                 'kgs_retur'          => null,
+                'cns_retur'          => null,
                 'lot_retur'          => null,
                 'ket_gbn'            => null,
             ];
@@ -1664,12 +1667,15 @@ class PemesananController extends BaseController
                 'id_total_pemesanan' => null,
                 'ttl_jl_mc'          => null,
                 'ttl_kg'             => 0.0,                                   // ← angka 0
+                'ttl_cns'            => 0,                                     // ← angka 0
                 'po_tambahan'        => 0,
                 'ttl_keb'            => (float)$ttlKeb,                        // ← mentah
                 'kg_out'             => 0.0,                                   // ← angka 0
+                'cns_out'            => 0,                                     // ← angka 0
                 'lot_out'            => null,
                 'tgl_retur'          => $retur['tgl_retur'],
                 'kgs_retur'          => (float)($retur['kgs_retur'] ?? 0),     // ← mentah
+                'cns_retur'          => (int)($retur['cns_retur'] ?? 0),     // ← mentah
                 'lot_retur'          => $retur['lot_retur'],
                 'ket_gbn'            => $retur['keterangan_gbn'],
             ];

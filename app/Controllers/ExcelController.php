@@ -13500,7 +13500,7 @@ class ExcelController extends BaseController
         $dataPemesanan = [];
         $dataRetur     = [];
 
-        if ($area !== '' && $noModel !== '') {
+        if (!empty($area) && !empty($noModel)) {
             $dataPemesanan = $this->pemesananModel->getPemesananByAreaModel($area, $noModel);
             $dataRetur     = $this->returModel->getReturByAreaModel($area, $noModel);
         }
@@ -13509,6 +13509,7 @@ class ExcelController extends BaseController
 
         // ====== dari PEMESANAN ======
         foreach ($dataPemesanan as $p) {
+            // dd($p);
             $getStyle = $this->materialModel->getStyleSizeByBb($p['no_model'], $p['item_type'], $p['kode_warna']);
 
             $ttlKeb = 0.0;
@@ -13531,15 +13532,25 @@ class ExcelController extends BaseController
                         'area'        => $area,
                     ])['ttl_keb_potambahan'] ?? 0
                 );
-
-                $kebutuhan = $qty > 0
-                    ? (($qty * $row['gw'] * ($row['composition'] / 100)) * (1 + ($row['loss'] / 100)) / 1000) + $kgPoTambahan
-                    : 0;
-
+                // dd($ttlKeb);
+                if ($qty >= 0) {
+                    $kebutuhan = (($qty * $row['gw'] * ($row['composition'] / 100)) * (1 + ($row['loss'] / 100)) / 1000) + $kgPoTambahan;
+                    $p['ttl_keb'] = $ttlKeb;
+                }
                 $ttlKeb += $kebutuhan;
                 $ttlQty += $qty;
-            }
+                // dd($ttlKeb);
+                // $kebutuhan = $qty > 0
+                //     ? (($qty * $row['gw'] * ($row['composition'] / 100)) * (1 + ($row['loss'] / 100)) / 1000) + $kgPoTambahan
+                //     : 0;
+                // $p['ttl_keb'] = $ttlKeb;
 
+                // $ttlKeb += $kebutuhan;
+                // $ttlQty += $qty;
+            }
+            $p['qty']     = $ttlQty; // ttl qty pcs
+            $p['ttl_keb'] = $ttlKeb; // ttl kebutuhan bb
+            // dd($p);
             $mergedData[] = [
                 'tgl_update_gbn'     => $p['updated_at'] ?? null, // kalau ada
                 'tgl_pakai'          => $p['tgl_pakai'],
@@ -13552,16 +13563,17 @@ class ExcelController extends BaseController
                 'warna'              => $p['color'],
                 'ttl_keb'            => (float)$ttlKeb,
                 'pesan_kg'           => (float)($p['ttl_kg'] ?? 0),
-                'pesan_cns'          => (float)($p['ttl_cns'] ?? 0), // kalau tidak ada, biarkan 0
+                'pesan_cns'          => (int)($p['ttl_cns'] ?? 0), // kalau tidak ada, biarkan 0
                 'po_plus'            => (int)($p['po_tambahan'] ?? 0),
                 'kirim_kg'           => (float)($p['kgs_out'] ?? 0),
-                'kirim_cns'          => (float)($p['cns_out'] ?? 0),
+                'kirim_cns'          => (int)($p['cns_out'] ?? 0),
                 'retur_kg'           => 0.0,
-                'retur_cns'          => 0.0,
+                'retur_cns'          => 0,
                 'lot'                => $p['lot_out'] ?? '',
-                'ket_gbn'            => $p['ket_gbn'] ?? '',
+                'ket_gbn'            => $p['keterangan_gbn'] ?? '',
             ];
         }
+        // dd($mergedData);
 
         // ====== dari RETUR ======
         foreach ($dataRetur as $r) {
@@ -13608,12 +13620,12 @@ class ExcelController extends BaseController
                 'warna'              => $r['warna'],
                 'ttl_keb'            => (float)$ttlKeb,
                 'pesan_kg'           => 0.0,
-                'pesan_cns'          => 0.0,
+                'pesan_cns'          => 0,
                 'po_plus'            => 0,
                 'kirim_kg'           => 0.0,
-                'kirim_cns'          => 0.0,
+                'kirim_cns'          => 0,
                 'retur_kg'           => (float)($r['kgs_retur'] ?? 0),
-                'retur_cns'          => (float)($r['cns_retur'] ?? 0),
+                'retur_cns'          => (int)($r['cns_retur'] ?? 0),
                 'lot'                => $r['lot_retur'] ?? '',
                 'ket_gbn'            => $r['keterangan_gbn'] ?? '',
             ];
@@ -13647,7 +13659,7 @@ class ExcelController extends BaseController
         }
 
         $rows = $this->buildSisaKebutuhanData($area, $noModel);
-
+        // dd($rows);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Report Sisa');
@@ -13702,12 +13714,12 @@ class ExcelController extends BaseController
         $sub = [
             'ttl_keb'   => 0.0,
             'pesan_kg'  => 0.0,
-            'pesan_cns' => 0.0,
-            'po_plus'   => 0.0,
+            'pesan_cns' => 0,
+            'po_plus'   => 0,   // <= counter
             'kirim_kg'  => 0.0,
-            'kirim_cns' => 0.0,
+            'kirim_cns' => 0,
             'retur_kg'  => 0.0,
-            'retur_cns' => 0.0,
+            'retur_cns' => 0,
         ];
 
         $writeSubtotal = function () use (&$sheet, &$r, &$sub) {
@@ -13717,7 +13729,7 @@ class ExcelController extends BaseController
             $sheet->setCellValue("K{$r}", $sub['ttl_keb']);
             $sheet->setCellValue("L{$r}", $sub['pesan_kg']);
             $sheet->setCellValue("M{$r}", $sub['pesan_cns']);
-            $sheet->setCellValue("N{$r}", $sub['po_plus']);
+            // $sheet->setCellValue("N{$r}", $sub['po_plus'] > 0 ? 'PO(+)' : '');
             $sheet->setCellValue("O{$r}", $sub['kirim_kg']);
             $sheet->setCellValue("P{$r}", $sub['kirim_cns']);
             $sheet->setCellValue("Q{$r}", $sub['retur_kg']);
@@ -13730,11 +13742,14 @@ class ExcelController extends BaseController
                 'font' => ['bold' => true],
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFF0F0F0']],
                 'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
             ]);
             // number format
-            foreach (['K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'U'] as $c) {
+            foreach (['K', 'L', 'N', 'O', 'Q', 'U'] as $c) {
                 $sheet->getStyle("{$c}{$r}:{$c}{$r}")->getNumberFormat()->setFormatCode('#,##0.00');
             }
+            // kolom N (teks) jangan diformat angka
+            $sheet->getStyle("N{$r}:N{$r}")->getNumberFormat()->setFormatCode('@');
         };
 
         foreach ($rows as $d) {
@@ -13747,8 +13762,14 @@ class ExcelController extends BaseController
                 foreach ($sub as $k => $v) {
                     $sub[$k] = 0.0;
                 }
+                $no = 1;
             }
+            // tentukan tampilan kolom N per-baris
+            $rawPo = strtoupper((string)($d['po_plus'] ?? ''));
+            $isPlus = in_array($rawPo, ['1', 'Y', 'YES', 'TRUE', 'PO(+)', 'PO_PLUS', 'YA'], true);
+            $showPo = $isPlus ? 'PO(+)' : '';
 
+            $percenLoss = (is_numeric($d['los']) && (float)$d['los'] > 0.0) ? ('' . (float)$d['los'] . '%') : '';
             // tulis detail
             $sheet->fromArray([ // A..U
                 $no,                                // NO
@@ -13757,14 +13778,14 @@ class ExcelController extends BaseController
                 $d['tgl_retur'] ?: '',              // TGL RETUR
                 $d['no_model'],                     // NO MODEL
                 $d['material_type'],                // MATERIAL TYPE
-                $d['los'],                          // LOS
+                $percenLoss,                          // LOS
                 $d['item_type'],                    // ITEM TYPE
                 $d['kode_warna'],                   // KODE WARNA
                 $d['warna'],                        // WARNA
                 '',                                 // TOTAL KEBUTUHAN (di subtotal)
                 $d['pesan_kg'],                     // PESAN (KG)
                 $d['pesan_cns'],                    // PESAN (CNS)
-                $d['po_plus'],                      // PO (+)
+                $showPo,                      // PO (+)
                 $d['kirim_kg'],                     // KIRIM (KG)
                 $d['kirim_cns'],                    // KIRIM (CNS)
                 $d['retur_kg'],                     // RETUR (KG)
@@ -13778,19 +13799,20 @@ class ExcelController extends BaseController
             foreach (['L', 'M', 'N', 'O', 'P', 'Q', 'R'] as $c) {
                 $sheet->getStyle("{$c}{$r}:{$c}{$r}")->getNumberFormat()->setFormatCode('#,##0.00');
             }
-
+            $sheet->getStyle("N{$r}:N{$r}")->getNumberFormat()->setFormatCode('@');
             // akumulasi subtotal
             $sub['ttl_keb']   = ($sub['ttl_keb']   == 0.0) ? (float)$d['ttl_keb'] : $sub['ttl_keb']; // ambil sekali per grup
             $sub['pesan_kg']  += (float)$d['pesan_kg'];
-            $sub['pesan_cns'] += (float)$d['pesan_cns'];
-            $sub['po_plus']   += (float)$d['po_plus'];
+            $sub['pesan_cns'] += (int)$d['pesan_cns'];
+            $sub['po_plus']   += $isPlus ? 1 : 0;   // <= ganti dari count(...)
             $sub['kirim_kg']  += (float)$d['kirim_kg'];
-            $sub['kirim_cns'] += (float)$d['kirim_cns'];
+            $sub['kirim_cns'] += (int)$d['kirim_cns'];
             $sub['retur_kg']  += (float)$d['retur_kg'];
-            $sub['retur_cns'] += (float)$d['retur_cns'];
+            $sub['retur_cns'] += (int)$d['retur_cns'];
 
             // border tipis tiap baris detail
             $sheet->getStyle("A{$r}:U{$r}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $sheet->getStyle("A{$r}:U{$r}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
 
             $r++;
             $no++;
@@ -13799,6 +13821,7 @@ class ExcelController extends BaseController
 
         // subtotal terakhir
         if ($prevKey !== null) {
+            // $no=1;
             $writeSubtotal();
             $r++;
         }
