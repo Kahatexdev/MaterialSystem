@@ -386,6 +386,16 @@ $this->extend($role . '/schedule/header'); ?>
                                     <input type="text" class="form-control" id="last_status" value="${item.last_status}" readonly>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="delivery_awal" class="form-label">Delivery Awal</label>
+                                    <input type="date" class="form-control" id="delivery_awal" value="${item.delivery_awal}" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="delivery_akhir" class="form-label">Delivery Akhir</label>
+                                    <input type="date" class="form-control" id="delivery_akhir" value="${item.delivery_akhir}" readonly>
+                                </div>
+                            </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="keterangan" class="form-label">Keterangan</label>
