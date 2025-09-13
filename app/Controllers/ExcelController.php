@@ -3220,11 +3220,11 @@ class ExcelController extends BaseController
                 'Item Type',
                 'Kode Warna',
                 'Color',
+                'Lot',
                 'No Karung',
                 'Kgs',
                 'Cns',
                 'Krg',
-                'Lot',
                 'Nama Cluster',
                 'Kgs Out',
                 'Cns Out',
@@ -3238,6 +3238,7 @@ class ExcelController extends BaseController
             // Tambahkan data
             $rowNumber = 4;
             foreach ($rows as $row) {
+                // dd($row);
                 // Hapus kolom yang tidak ingin dimasukkan
                 unset($row['tgl_pakai'], $row['jenis'], $row['id_pengeluaran'], $row['id_stock'], $row['id_out_celup'], $row['group'],);
 
@@ -3261,7 +3262,7 @@ class ExcelController extends BaseController
             ]);
 
             // Atur lebar kolom otomatis
-            foreach (range('A', 'L') as $column) {
+            foreach (range('A', 'N') as $column) {
                 $sheet->getColumnDimension($column)->setAutoSize(true);
             }
         }
@@ -13761,7 +13762,7 @@ class ExcelController extends BaseController
                 foreach ($sub as $k => $v) {
                     $sub[$k] = 0.0;
                 }
-                $no=1;
+                $no = 1;
             }
             // tentukan tampilan kolom N per-baris
             $rawPo = strtoupper((string)($d['po_plus'] ?? ''));
@@ -13840,6 +13841,28 @@ class ExcelController extends BaseController
 
         $writer = new Xlsx($spreadsheet);
         // $writer->setPreCalculateFormulas(false); // bisa aktifkan jika dataset besar
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function exportReportIndri()
+    {
+        $buyer = $this->request->getGet('buyer');
+        $delivAwal = $this->request->getGet('delivery_awal');
+        $delivAkhir = $this->request->getGet('delivery_akhir');
+
+        $data = $this->materialModel->getReportIndri($buyer, $delivAwal, $delivAkhir);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Report Indri' . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
         $writer->save('php://output');
         exit;
     }

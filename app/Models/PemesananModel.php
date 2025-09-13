@@ -466,7 +466,7 @@ class PemesananModel extends Model
             JOIN master_material ON material.item_type = master_material.item_type 
             SET pemesanan.status_kirim = 'request' 
             WHERE pemesanan.admin = ? 
-              AND pemesanan.status_kirim = '' 
+              AND pemesanan.status_kirim != 'YA' 
               AND master_material.jenis = ? 
               AND pemesanan.tgl_pakai = ?";
 
