@@ -13866,4 +13866,82 @@ class ExcelController extends BaseController
         $writer->save('php://output');
         exit;
     }
+
+    public function exportReqSchedule()
+    {
+        $filterTglSch = $this->request->getGet('filter_tglsch');
+        $filterTglSchsampai = $this->request->getGet('filter_tglschsampai');
+        $filterNoModel = $this->request->getGet('filter_nomodel');
+
+        $sch = $this->scheduleCelupModel->getSchedule($filterTglSch, $filterTglSchsampai, $filterNoModel);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Judul
+        $sheet->setCellValue('A1', 'Report Request Schedule');
+        $sheet->mergeCells('A1:K1'); // Menggabungkan sel untuk judul
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Header
+        $header = ["No", "No Mc", "No Model", "Item Type", "Lot", "Kode Warna", "Warna", "Start Mc", "Tanggal Schedule", "Last Status", "Keterangan"];
+        $sheet->fromArray([$header], NULL, 'A3');
+
+        // Styling Header
+        $sheet->getStyle('A3:K3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:K3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:K3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        // Data
+        $row = 4;
+        foreach ($sch as $index => $item) {
+            $sheet->fromArray([
+                [
+                    $index + 1,
+                    $item['no_mesin'],
+                    $item['no_model'],
+                    $item['item_type'],
+                    $item['lot_celup'],
+                    $item['kode_warna'],
+                    $item['warna'],
+                    $item['start_mc'],
+                    $item['tanggal_schedule'],
+                    $item['last_status'],
+                    $item['ket_schedule'],
+                ]
+            ], NULL, 'A' . $row);
+            $row++;
+        }
+
+        // Atur border untuk seluruh tabel
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle('A3:K' . ($row - 1))->applyFromArray($styleArray);
+
+        // Set auto width untuk setiap kolom
+        foreach (range('A', 'K') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set isi tabel agar rata tengah
+        $sheet->getStyle('A4:K' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:K' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Report_Request_Schedule' . date('Y-m-d') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
+    }
 }
