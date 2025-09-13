@@ -164,6 +164,7 @@
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportBenangMingguan') ?>">Report Benang Mingguan</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportBenangBulanan') ?>">Report Benang Bulanan</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportOtherOut') ?>">Report Other Out</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportIndri') ?>">Report Indri</a></li>
                             </ul>
                         </li>
                         <li class="nav-item d-flex align-items-center">

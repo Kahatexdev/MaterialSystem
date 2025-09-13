@@ -376,6 +376,7 @@ class PengeluaranModel extends Model
             material.item_type,
             material.kode_warna,
             material.color,
+            pengeluaran.lot_out,
             out_celup.no_karung,
             pengeluaran.id_pengeluaran,
             pengeluaran.id_stock,
@@ -383,7 +384,6 @@ class PengeluaranModel extends Model
             pengeluaran.kgs_out,
             pengeluaran.cns_out,
             pengeluaran.krg_out,
-            pengeluaran.lot_out,
             pengeluaran.nama_cluster,
             GROUP_CONCAT(DISTINCT CONCAT(pengeluaran.keterangan_gbn, ' - ', pemesanan.keterangan_gbn)) AS keterangan_gbn,
             cluster.group

@@ -794,6 +794,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('warehouse/reportPemakaianNylon', 'WarehouseController::reportPemakaianNylon');
     $routes->get('warehouse/filterPemakaianNylon', 'WarehouseController::filterPemakaianNylon');
     $routes->get('warehouse/exportPemakaianNylon', 'ExcelController::exportPemakaianNylon');
+    $routes->get('warehouse/reportIndri', 'WarehouseController::reportIndri');
+    $routes->get('warehouse/filterReportIndri', 'WarehouseController::filterReportIndri');
+    $routes->get('warehouse/exportReportIndri', 'ExcelController::exportReportIndri');
 
     $routes->get('warehouse/reportOtherOut', 'WarehouseController::reportOtherOut');
     $routes->get('warehouse/filterOtherOut', 'WarehouseController::filterOtherOut');

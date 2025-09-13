@@ -3467,4 +3467,25 @@ class WarehouseController extends BaseController
         // dd($data);
         return $this->response->setJSON($data);
     }
+
+    public function reportIndri()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Report Indri',
+            'active' => $this->active
+        ];
+        return view($this->role . '/warehouse/report-indri', $data);
+    }
+
+    public function filterReportIndri()
+    {
+        $buyer = $this->request->getGet('buyer');
+        $deliveryAwal = $this->request->getGet('delivery_awal');
+        $deliveryAkhir = $this->request->getGet('delivery_akhir');
+        // dd($buyer, $deliveryAwal, $deliveryAkhir);
+        $data = $this->materialModel->getFilterReportIndri($buyer, $deliveryAwal, $deliveryAkhir);
+        // dd($data);
+        return $this->response->setJSON($data);
+    }
 }
