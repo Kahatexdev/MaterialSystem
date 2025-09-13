@@ -591,6 +591,7 @@ class ScheduleCelupModel extends Model
                 'sc.tanggal_teslab',
                 'sc.last_status',
                 'sc.ket_daily_cek',
+                'sc.ket_schedule',
                 'sc.po_plus',
                 'COALESCE(st.kg_stock, 0) AS kg_stock',
                 'COALESCE(pt.total_po_tambahan, 0) AS total_po_tambahan',

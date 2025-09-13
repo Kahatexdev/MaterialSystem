@@ -132,6 +132,7 @@ class ApiController extends ResourceController
             'id_po_gbn',
             'status',
             'keterangan',
+            'ket_schedule',
             'admin',
             'created_at',
             'updated_at',
