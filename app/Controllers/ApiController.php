@@ -1548,4 +1548,21 @@ class ApiController extends ResourceController
         $data = $this->masterRangePemesanan->where('days', $day)->where('area', $area)->first();;
         return $this->response->setJSON($data);
     }
+    public function getTotalRetur()
+    {
+        $area = $this->request->getGet('area') ?? '';
+        $no_model = $this->request->getGet('no_model') ?? '';
+        $item_type = $this->request->getGet('item_type') ?? '';
+        $kode_warna = $this->request->getGet('kode_warna') ?? '';
+        $data = [
+            'area' => $area,
+            'no_model' => $no_model,
+            'item_type' => $item_type,
+            'kode_warna' => $kode_warna,
+        ];
+
+        $totalRetur = $this->returModel->getTotalRetur($data);
+
+        return $this->respond($totalRetur, 200);
+    }
 }
