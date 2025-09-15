@@ -234,7 +234,7 @@
                                             <p class="text-sm font-weight-bold mb-0"><?= $id['tgl_pakai'] ?></p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0"><?= $id['area_out'] ?></p>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['admin'] ?></p>
                                         </td>
                                         <td>
                                             <p class="text-sm font-weight-bold mb-0"><?= $id['no_model'] ?></p>
