@@ -113,10 +113,17 @@
 
                                             <?php if ($data['jenis'] === 'SPANDEX' || $data['jenis'] === 'KARET'): ?>
                                                 <?php if (!$data['sudah_pesan_spandex']): ?>
-                                                    <a href="<?= base_url($role . '/pesanKeCovering/' . $data['id_total_pemesanan']) ?>"
-                                                        class="btn bg-gradient-info">
+                                                    <button
+                                                        type="button"
+                                                        class="btn bg-gradient-info btn-open-modal-pesan"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalPesan"
+                                                        data-id="<?= $data['id_total_pemesanan'] ?>"
+                                                        data-jenis="<?= $data['jenis'] ?>"
+                                                        data-ketGbn="<?= $data['ket_gbn'] ?>"
+                                                        data-action="<?= base_url($role . '/pesanKeCovering/' . $data['id_total_pemesanan']) ?>">
                                                         <i class="fas fa-layer-group"></i> Pesan <?= ucfirst($data['jenis']) ?>
-                                                    </a>
+                                                    </button>
                                                 <?php else: ?>
                                                     <span class="badge bg-info"><?= $data['status'] ?></span>
                                                 <?php endif; ?>
@@ -147,6 +154,48 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Pesan ke Covering -->
+<div class="modal fade" id="modalPesan" tabindex="-1" aria-labelledby="modalPesanLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalPesanLabel">Pesan ke Covering</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form id="formPesan" method="GET" action="<?= base_url($role . '/pesanKeCovering/'. $data['id_total_pemesanan']) ?>">
+                <?= csrf_field() ?>
+                <input type="hidden" name="id_total_pemesanan" id="pesan_id_total_pemesanan">
+                <input type="hidden" name="jenis" id="pesan_jenis">
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="pesan_keterangan_gbn" class="form-label">Keterangan GBN</label>
+                        <textarea class="form-control text-uppercase" id="pesan_keterangan_gbn" name="keterangan_gbn" rows="3" placeholder="Tulis keterangan GBN di sini..."></textarea>
+                    </div>
+
+                    <!-- (Opsional) tambahkan field lain kalau perlu -->
+                    <!--
+          <div class="mb-3">
+            <label class="form-label">PO Tambahan</label>
+            <input type="text" class="form-control" name="po_tambahan" placeholder="Contoh: PO-12345">
+          </div>
+          -->
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn bg-gradient-info">
+                        <i class="fas fa-paper-plane"></i> Kirim Pesanan
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script type="text/javascript">
     $('#dataTable').DataTable({
@@ -154,59 +203,32 @@
         "order": []
     });
 </script>
-
 <script>
-    // $(document).ready(function() {
-    //     $(".btn-detail").click(function() {
-    //         let no_model = $(this).data("no_model");
-    //         let item_type = $(this).data("item_type");
-    //         let kode_warna = $(this).data("kode_warna");
-    //         let warna = $(this).data("warna");
+    // ketika tombol "Pesan" diklik, set form modal
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-open-modal-pesan');
+        if (!btn) return;
 
-    //         $.ajax({
-    //             url: "<?= base_url($role . '/getStockByParams') ?>",
-    //             type: "POST",
-    //             data: {
-    //                 no_model: no_model,
-    //                 item_type: item_type,
-    //                 kode_warna: kode_warna,
-    //                 warna: warna
-    //             },
-    //             dataType: "json",
-    //             success: function(response) {
-    //                 let stockContainer = $("#stockData");
-    //                 stockContainer.empty();
+        const action = btn.getAttribute('data-action');
+        const id = btn.getAttribute('data-id');
+        const jenis = btn.getAttribute('data-jenis');
 
-    //                 if (response.length > 0) {
-    //                     $.each(response, function(index, stock) {
-    //                         stockContainer.append(`
-    //                                 <div class="col-6 border p-3">
-    //                                     <div class="form-check">
-    //                                         <input class="form-check-input" type="checkbox" name="selectedStock[]" value="${stock.id_stock}">
-    //                                         <label class="form-check-label">
-    //                                             <strong>No:</strong> ${index + 1} <br>
-    //                                             <strong>No Model:</strong> ${stock.no_model} <br>
-    //                                             <strong>Item Type:</strong> ${stock.item_type} <br>
-    //                                             <strong>Kode Warna:</strong> ${stock.kode_warna} <br>
-    //                                             <strong>Warna:</strong> ${stock.warna} <br>
-    //                                             <strong>Stok Kgs:</strong> ${stock.kgs_stock_awal} <br>
-    //                                             <strong>Stok Cns:</strong> ${stock.cns_stock_awal}
-    //                                         </label>
-    //                                     </div>
-    //                                 </div>
-    //                             `);
-    //                     });
-    //                 } else {
-    //                     stockContainer.append('<div class="col-12 text-center">Data stok tidak ditemukan</div>');
-    //                 }
-    //                 $("#modalStock").modal("show");
-    //             },
-    //             error: function() {
-    //                 alert("Gagal mengambil data stok");
-    //             }
-    //         });
-    //     });
-    // });
+        // set form action & hidden inputs
+        const form = document.getElementById('formPesan');
+        form.setAttribute('action', action);
+        document.getElementById('pesan_id_total_pemesanan').value = id;
+        document.getElementById('pesan_jenis').value = jenis;
+
+        // optional: reset textarea tiap buka
+        document.getElementById('pesan_keterangan_gbn').value = btn.getAttribute('data-ketGbn') || '';
+    });
+
+    // opsional: UX kecil saat submit
+    document.getElementById('formPesan').addEventListener('submit', function() {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Mengirim...';
+    });
 </script>
 
 

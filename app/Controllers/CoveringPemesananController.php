@@ -207,6 +207,7 @@ class CoveringPemesananController extends BaseController
 
     public function pesanKeCovering($id)
     {
+        $ketGbn = $this->request->getGet('keterangan_gbn'); // string (boleh kosong)
         try {
             // 1) Ambil data pemesanan master
             $dataPemesanan = $this->pemesananModel->getPemesananSpandex($id);
@@ -224,6 +225,11 @@ class CoveringPemesananController extends BaseController
             if (! $this->pemesananSpandexKaretModel->insert($dataSpandexKaret)) {
                 return redirect()->back()->with('error', 'Gagal menyimpan data pemesanan.');
             }
+
+            $this->pemesananModel
+                ->where('id_total_pemesanan', $dataPemesanan['id_total_pemesanan'])
+                ->set(['keterangan_gbn' => $ketGbn])
+                ->update();
 
             // 4) Ambil ID PK (id_psk) yang di‐generate
             $idPsk = $this->pemesananSpandexKaretModel->getInsertID();
