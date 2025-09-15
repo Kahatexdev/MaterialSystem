@@ -543,7 +543,9 @@ class ApiController extends ResourceController
     }
     public function listReportPemesanan($area)
     {
-        $dataList = $this->pemesananModel->getListReportPemesananByArea($area);
+        // today = date('Y-m-d');
+        $tgl_pakai = $this->request->getGet('tgl_pakai') ?? date('Y-m-d');
+        $dataList = $this->pemesananModel->getListReportPemesananByArea($area, $tgl_pakai);
 
         return $this->respond($dataList, 200);
     }

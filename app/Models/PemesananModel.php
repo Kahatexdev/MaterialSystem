@@ -178,7 +178,7 @@ class PemesananModel extends Model
             ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
         return $query->get()->getResultArray();
     }
-    public function getListReportPemesananByArea($area)
+    public function getListReportPemesananByArea($area, $tgl_pakai)
     {
         $query = $this->db->table('pemesanan')
             ->select("
@@ -206,10 +206,29 @@ class PemesananModel extends Model
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pemesanan.admin', $area)
-            ->where('pemesanan.status_kirim', 'YA')
-            ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')
+            ->where('pemesanan.status_kirim', 'YA');
+        // filter tgl_pakai kalau dikirim
+        if (!empty($tgl_pakai)) {
+            $query->where('pemesanan.tgl_pakai', $tgl_pakai);
+        }
+
+        $query->groupBy([
+            'master_order.no_model',
+            'material.item_type',
+            'material.kode_warna',
+            'material.color',
+            'pemesanan.tgl_pakai',
+            'pemesanan.po_tambahan'
+        ])
             ->orderBy('pemesanan.tgl_pakai', 'DESC')
-            ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
+            ->orderBy('master_order.no_model', 'ASC')
+            ->orderBy('material.item_type', 'ASC')
+            ->orderBy('material.kode_warna', 'ASC')
+            ->orderBy('material.color', 'ASC');
+            // ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')
+            // ->orderBy('pemesanan.tgl_pakai', 'DESC')
+            // ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
+            
         return $query->get()->getResultArray();
     }
 
