@@ -3228,7 +3228,7 @@ class ExcelController extends BaseController
                 'Nama Cluster',
                 'Kgs Out',
                 'Cns Out',
-                'Keterangan',
+                'Keterangan'
             ];
             $sheet->fromArray($header, null, 'A3');
 
