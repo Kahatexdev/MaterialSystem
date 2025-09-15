@@ -388,10 +388,11 @@ class PengeluaranModel extends Model
             GROUP_CONCAT(DISTINCT CONCAT(pengeluaran.keterangan_gbn, ' - ', pemesanan.keterangan_gbn)) AS keterangan_gbn,
             cluster.group
         ")
+            ->from('pemesanan')
             ->join('out_celup', 'out_celup.id_out_celup = pengeluaran.id_out_celup', 'left')
             ->join('cluster', 'cluster.nama_cluster=pengeluaran.nama_cluster')
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left')
-            ->join('pemesanan', 'pemesanan.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
+            // ->join('pemesanan', 'pemesanan.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
