@@ -368,9 +368,10 @@ class PengeluaranModel extends Model
     }
     public function getDataPemesananExport($jenis, $tglPakai, $noModel = null)
     {
-        $builder = $this->select("
+        $builder = $this->db->table('pemesanan');  // ini yang benar
+        $builder->select("
             pemesanan.tgl_pakai,
-            pengeluaran.area_out,
+            pemesanan.admin,
             master_order.no_model,
             master_material.jenis,
             material.item_type,
@@ -385,25 +386,31 @@ class PengeluaranModel extends Model
             pengeluaran.cns_out,
             pengeluaran.krg_out,
             pengeluaran.nama_cluster,
-            GROUP_CONCAT(DISTINCT CONCAT(pengeluaran.keterangan_gbn, ' - ', pemesanan.keterangan_gbn)) AS keterangan_gbn,
+            CONCAT(pengeluaran.keterangan_gbn, ' - ', pemesanan.keterangan_gbn) AS keterangan_gbn,
             cluster.group
         ")
-            ->from('pemesanan')
+            ->join('pengeluaran', 'pengeluaran.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('out_celup', 'out_celup.id_out_celup = pengeluaran.id_out_celup', 'left')
-            ->join('cluster', 'cluster.nama_cluster=pengeluaran.nama_cluster')
-            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left')
-            // ->join('pemesanan', 'pemesanan.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
+            ->join('cluster', 'cluster.nama_cluster = pengeluaran.nama_cluster', 'left')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('master_material.jenis', $jenis)
-            ->where('pemesanan.tgl_pakai', $tglPakai);
+            ->where('pemesanan.tgl_pakai', $tglPakai)
+            ->where('pemesanan.status_kirim', 'YA');
         if (!empty($noModel)) {
             $builder->where('master_order.no_model', $noModel);
         }
-        return $builder
+        $builder->groupStart()
             ->where('pengeluaran.status', 'Pengeluaran Jalur')
+            ->orWhere('pengeluaran.id_pengeluaran IS NULL', null, false)
+            ->groupEnd();
+        return $builder
+            // ->where('pengeluaran.status', 'Pengeluaran Jalur')
+            // ->where('pengeluaran.status = "Pengeluaran Jalur" OR pengeluaran.id_pengeluaran IS NULL')
             ->groupBy('pengeluaran.id_pengeluaran')
+            ->groupBy('pemesanan.id_total_pemesanan')
             ->orderBy('pengeluaran.area_out, pengeluaran.nama_cluster', 'ASC')
             ->get() // Dapatkan objek query
             ->getResultArray(); // Konversi ke array hasil
