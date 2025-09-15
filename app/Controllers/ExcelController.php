@@ -4703,23 +4703,28 @@ class ExcelController extends BaseController
                 $sheet->getStyle($col . '4')->getFont()->setBold(true);
                 $col++;
             }
-
+            // dd ($items);
             // --- Data baris ---
             $row = 5;
             $no  = 1;
             foreach ($items as $item) {
+                if($item['po_tambahan']) {
+                    $noModel = $item['no_model'] . ' (+)';
+                } else {
+                    $noModel = $item['no_model'];
+                }
                 $sheet->setCellValue('A' . $row, $no++);
                 $sheet->setCellValue('B' . $row, $item['jam_pesan'] ?: '-');
                 $sheet->setCellValue('C' . $row, $item['tgl_pesan'] ?: '-');
-                $sheet->setCellValue('D' . $row, $item['no_model'] ?: '-');
+                $sheet->setCellValue('D' . $row, $noModel ?: '-');
                 $sheet->setCellValue('E' . $row, $item['item_type'] ?: '-');
                 $sheet->setCellValue('F' . $row, $item['kode_warna'] ?: '-');
                 $sheet->setCellValue('G' . $row, $item['color'] ?: '-');
-                $sheet->setCellValue('H' . $row, '');
+                $sheet->setCellValue('H' . $row, $item['lot'] ?: '-');
                 $sheet->setCellValue('I' . $row, $item['ttl_jl_mc'] ?? 0);
                 $sheet->setCellValue('J' . $row, $item['ttl_kg']    ?? 0);
                 $sheet->setCellValue('K' . $row, $item['ttl_cns']   ?? 0);
-                $sheet->setCellValue('L' . $row, '');
+                $sheet->setCellValue('L' . $row, $item['keterangan_gbn'] ?: '-');
                 $sheet->setCellValue('M' . $row, '');
                 $sheet->setCellValue('N' . $row, '');
                 $sheet->setCellValue('O' . $row, '');
