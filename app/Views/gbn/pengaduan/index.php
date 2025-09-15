@@ -34,11 +34,16 @@
                     $displayRole = $roleMap[$p['target_role']] ?? $p['target_role'];
                     ?>
                     <div class="d-flex justify-content-between align-items-center">
+
                         <h6 class="mb-1">
                             <strong><?= esc($p['username']) ?></strong> →
                             <span class="badge bg-secondary"><?= esc($displayRole) ?></span>
                         </h6>
-                        <small class="text-muted"><?= $formattedDate ?></small>
+                        <div>
+
+                            <small class="text-muted"><?= $formattedDate ?></small>
+                            <button class="btn btn-info btn-print" data-idPengaduan="<?= $p['id_pengaduan']; ?>"> <i class="fas fa-print"></i></button>
+                        </div>
                     </div>
                     <p><?= nl2br(esc($p['isi'])) ?></p>
 
@@ -93,6 +98,8 @@
                         <option value="user">Area</option>
                         <option value="rosso">Rosso</option>
                         <option value="gbn">GBN</option>
+                        <option value="celup">celup cones</option>
+                        <option value="covering">Covering</option>
                         <option value="sudo">Monitoring Planning & Produksi</option>
                         <option value="monitoring">Monitoring Bahan Baku</option>
                     </select>
