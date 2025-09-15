@@ -389,6 +389,7 @@ class PengeluaranModel extends Model
             CONCAT(pengeluaran.keterangan_gbn, ' - ', pemesanan.keterangan_gbn) AS keterangan_gbn,
             cluster.group
         ")
+
             ->join('pengeluaran', 'pengeluaran.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('out_celup', 'out_celup.id_out_celup = pengeluaran.id_out_celup', 'left')
             ->join('cluster', 'cluster.nama_cluster = pengeluaran.nama_cluster', 'left')
