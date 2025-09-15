@@ -416,4 +416,14 @@ class ReturModel extends Model
             ->where('out_celup.lot_kirim', $id['lot'])
             ->findAll();
     }
+    public function getTotalRetur($data)
+    {
+        return $this->select('SUM(retur.kgs_retur) AS kgs_retur')
+            ->where('retur.area_retur', $data['area'])
+            ->where('retur.waktu_acc_retur IS NOT NULL')
+            ->where('retur.no_model', $data['no_model'])
+            ->where('retur.item_type', $data['item_type'])
+            ->where('retur.kode_warna', $data['kode_warna'])
+            ->first();
+    }
 }

@@ -1050,4 +1050,36 @@ class MaterialModel extends Model
 
         return $builder->get()->getResultArray();
     }
+
+    public function getFilterReportIndri($buyer = null, $deliveryAwal = null, $deliveryAkhir = null)
+    {
+        $builder = $this->select('
+            master_order.no_model,
+            master_order.buyer,
+            material.area,
+            material.item_type,
+            material.kode_warna,
+            material.color,
+            material.loss,
+            SUM(material.kgs) AS kg_po,
+         
+        ')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left');
+
+        if (!empty($buyer)) {
+            $builder->where('master_order.buyer', $buyer);
+        }
+
+        if (!empty($deliveryAwal)) {
+            $builder->where('master_order.delivery_awal >=', $deliveryAwal);
+        }
+
+        if (!empty($deliveryAkhir)) {
+            $builder->where('master_order.delivery_akhir <=', $deliveryAkhir);
+        }
+
+        return $builder
+            ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color')
+            ->findAll();
+    }
 }

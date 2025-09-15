@@ -31,6 +31,7 @@ class PemesananModel extends Model
         'status_kirim',
         'admin',
         'additional_time',
+        'alasan_tambahan_waktu',
         'keterangan_gbn',
         'hak_akses',
         'created_at',
@@ -465,16 +466,23 @@ class PemesananModel extends Model
         $sql = "UPDATE pemesanan 
             JOIN material ON material.id_material = pemesanan.id_material 
             JOIN master_material ON material.item_type = master_material.item_type 
-            SET pemesanan.status_kirim = 'request' 
+            SET pemesanan.status_kirim = 'request',
+                pemesanan.alasan_tambahan_waktu = ?
             WHERE pemesanan.admin = ? 
               AND pemesanan.status_kirim != 'YA' 
               AND master_material.jenis = ? 
               AND pemesanan.tgl_pakai = ?";
 
-        $result = $this->db->query($sql, [$data['area'], $data['jenis'], $data['tanggal_pakai']]);
+        $result = $this->db->query($sql, [
+            $data['alasan_tambahan_waktu'],
+            $data['area'],
+            $data['jenis'],
+            $data['tanggal_pakai']
+        ]);
 
         log_message('debug', "Rows affected: " . $this->db->affectedRows());
-        return $result ? $this->db->affectedRows() : false; // Kembalikan jumlah baris yang terpengaruh atau false jika gagal
+
+        return $result ? $this->db->affectedRows() : false;
     }
 
     public function getFilterPemesananKaret($tanggal_awal, $tanggal_akhir)
@@ -553,7 +561,7 @@ class PemesananModel extends Model
     }
     public function getStatusRequest()
     {
-        return $this->select('pemesanan.status_kirim, pemesanan.admin, pemesanan.tgl_pakai, master_material.jenis')
+        return $this->select('pemesanan.status_kirim, pemesanan.alasan_tambahan_waktu,pemesanan.admin, pemesanan.tgl_pakai, master_material.jenis')
             ->join('material', 'pemesanan.id_material = material.id_material')
             ->join('master_material', 'master_material.item_type = material.item_type')
             ->like('pemesanan.status_kirim', 'request')

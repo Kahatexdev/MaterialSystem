@@ -92,7 +92,7 @@ class ScheduleCelupModel extends Model
     public function getScheduleDetails($machine, $date, $lot)
     {
         return $this->table('schedule_celup')
-            ->select('schedule_celup.*, mesin_celup.no_mesin, sum(kg_celup) as total_kg, open_po.ket_celup, open_po.keterangan')
+            ->select('schedule_celup.*, mesin_celup.no_mesin, sum(kg_celup) as total_kg, open_po.ket_celup, open_po.keterangan, open_po.id_induk')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->join('open_po', 'open_po.no_model = schedule_celup.no_model AND open_po.item_type = schedule_celup.item_type AND open_po.kode_warna = schedule_celup.kode_warna', 'left')
             ->where('mesin_celup.no_mesin', $machine)
@@ -591,6 +591,7 @@ class ScheduleCelupModel extends Model
                 'sc.tanggal_teslab',
                 'sc.last_status',
                 'sc.ket_daily_cek',
+                'sc.ket_schedule',
                 'sc.po_plus',
                 'COALESCE(st.kg_stock, 0) AS kg_stock',
                 'COALESCE(pt.total_po_tambahan, 0) AS total_po_tambahan',

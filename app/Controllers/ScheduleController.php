@@ -94,7 +94,7 @@ class ScheduleController extends BaseController
         // Ambil data jadwal dari model (filter berdasarkan tanggal jika tersedia)
         $scheduleData = $this->scheduleCelupModel->getScheduleCelupbyDate($startDateObj, $endDateObj);
 
-        // dd ($scheduleData);
+        // dd($scheduleData);
         // Ambil data mesin celup
         $mesin_celup = $this->mesinCelupModel->getMesinCelupBenang();
 
@@ -131,6 +131,40 @@ class ScheduleController extends BaseController
     {
         // Get the schedule details from the model
         $scheduleDetails = $this->scheduleCelupModel->getScheduleDetails($no_mesin, $tanggal_schedule, $lot_urut);
+        if (!empty($scheduleDetails['id_induk'])) {
+        }
+        foreach ($scheduleDetails as &$item) {
+            if (empty($item['id_induk'])) {
+                // Tanpa induk: langsung pakai no_model anak
+                $masterOrder = $this->masterOrderModel
+                    ->where('no_model', $item['no_model'])
+                    ->first();
+
+                $item['delivery_awal']  = $masterOrder['delivery_awal'] ?? null;
+                $item['delivery_akhir'] = $masterOrder['delivery_akhir'] ?? null;
+            } else {
+                // Ada induk: ambil no_model induk terlebih dahulu
+                $parentPo = $this->openPoModel
+                    ->where('id_po', $item['id_induk'])
+                    ->first();
+
+                if ($parentPo) {
+                    // Bersihkan label "POCOVERING" dari no_model induk
+                    $noModelInduk = trim(str_replace('POCOVERING', '', $parentPo['no_model']));
+
+                    $masterOrder = $this->masterOrderModel
+                        ->where('no_model', $noModelInduk)
+                        ->first();
+
+                    $item['delivery_awal']  = $masterOrder['delivery_awal'] ?? null;
+                    $item['delivery_akhir'] = $masterOrder['delivery_akhir'] ?? null;
+                } else {
+                    // Induk tidak ditemukan
+                    $item['delivery_awal']  = null;
+                    $item['delivery_akhir'] = null;
+                }
+            }
+        }
         if ($scheduleDetails) {
             return response()->setJSON($scheduleDetails);
         } else {
@@ -1091,6 +1125,7 @@ class ScheduleController extends BaseController
         $filterTglSch = $this->request->getPost('filter_tglsch');
         $filterTglSchsampai = $this->request->getPost('filter_tglschsampai');
         $filterNoModel = $this->request->getPost('filter_nomodel');
+        $showExcel = (!empty($filterTglSch) || !empty($filterTglSchsampai) || !empty($filterNoModel));
 
         $sch = $this->scheduleCelupModel->getSchedule($filterTglSch, $filterTglSchsampai, $filterNoModel);
 
@@ -1163,6 +1198,10 @@ class ScheduleController extends BaseController
             'role' => $this->role,
             'data_sch' => $sch,
             'uniqueData' => $uniqueData,
+            'showExcel' => $showExcel,
+            'filterTglSch' => $filterTglSch,
+            'filterTglSchsampai' => $filterTglSchsampai,
+            'filterNoModel' => $filterNoModel,
         ];
         return view($this->role . '/schedule/reqschedule', $data);
     }

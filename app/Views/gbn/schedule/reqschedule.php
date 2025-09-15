@@ -240,6 +240,17 @@
                         <button class="btn btn-filter mt-md-4" id="btnReset">
                             <i class="fas fa-redo-alt"></i>
                         </button>
+                        <?php if (!empty($showExcel)): ?>
+                            <button type="button"
+                                class="btn btn-success mt-md-4"
+                                id="btnExcel"
+                                onclick="window.location.href='<?= base_url($role . '/schedule/exportReqSchedule')
+                                                                    . '?filter_tglsch=' . urlencode($filterTglSch)
+                                                                    . '&filter_tglschsampai=' . urlencode($filterTglSchsampai)
+                                                                    . '&filter_nomodel=' . urlencode($filterNoModel) ?>'">
+                                <i class="fas fa-file-excel"></i>
+                            </button>
+                        <?php endif; ?>
                     </div>
                 </div>
             </form>
@@ -551,4 +562,32 @@
         });
     });
 </script>
+<script>
+    $(document).ready(function() {
+        // Saat klik tombol Filter
+        $("#filter_date_range").on("click", function(e) {
+            e.preventDefault();
+
+            // Ambil value inputan
+            let tglAwal = $("#filter_tglsch").val();
+            let tglAkhir = $("#filter_tglschsampai").val();
+            let noModel = $("#filter_nomodel").val();
+
+            // Submit form filter
+            $(this).closest("form")[0].submit();
+
+            // Bikin URL export Excel sesuai parameter
+            let excelUrl = "<?= base_url($role . '/schedule/exportReqSchedule') ?>" +
+                "?filter_tglsch=" + encodeURIComponent(tglAwal) +
+                "&filter_tglschsampai=" + encodeURIComponent(tglAkhir) +
+                "&filter_nomodel=" + encodeURIComponent(noModel);
+
+            // Set atribut href pada tombol Excel
+            $("#btnExcel").removeClass("d-none").off("click").on("click", function() {
+                window.location.href = excelUrl;
+            });
+        });
+    });
+</script>
+
 <?php $this->endSection(); ?>
