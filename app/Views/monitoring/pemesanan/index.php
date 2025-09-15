@@ -246,18 +246,24 @@
                                         <button type="button" class="btn btn-warning update-btn" data-bs-toggle="modal" data-bs-target="#updateListModal" data-area="<?= $id['admin']; ?>" data-tgl="<?= $id['tgl_pakai']; ?>" data-model="<?= $id['no_model']; ?>" data-item="<?= $id['item_type']; ?>" data-kode="<?= $id['kode_warna']; ?>" data-color="<?= $id['color']; ?>" data-po-tambahan="<?= $id['po_tambahan']; ?>">
                                             <i class="fa fa-edit fa-lg"></i>
                                         </button>
-                                        <button type="button" id="sendBtn"
-                                            class="btn btn-info text-xs send-btn"
-                                            data-toggle="modal"
-                                            data-area="<?= $id['no_model']; ?>"
-                                            data-tgl="<?= $id['tgl_pakai']; ?>"
-                                            data-model="<?= $id['no_model']; ?>"
-                                            data-item="<?= $id['item_type']; ?>"
-                                            data-kode="<?= $id['kode_warna']; ?>"
-                                            data-color="<?= $id['color']; ?>"
-                                            data-po-tambahan="<?= $id['po_tambahan']; ?>">
-                                            <i class="fa fa-paper-plane fa-lg"></i>
-                                        </button>
+                                        <?php if ($id['status_kirim'] != 'YA') { ?>
+                                            <button type="button" id="sendBtn"
+                                                class="btn btn-info text-xs send-btn"
+                                                data-toggle="modal"
+                                                data-area="<?= $id['admin']; ?>"
+                                                data-tgl="<?= $id['tgl_pakai']; ?>"
+                                                data-model="<?= $id['no_model']; ?>"
+                                                data-item="<?= $id['item_type']; ?>"
+                                                data-kode="<?= $id['kode_warna']; ?>"
+                                                data-color="<?= $id['color']; ?>"
+                                                data-po-tambahan="<?= $id['po_tambahan']; ?>">
+                                                <i class="fa fa-paper-plane fa-lg"></i>
+                                            </button>
+
+                                        <?php } else { ?>
+                                            <span style="color: red;"></span>
+                                        <?php } ?>
+
                                     </td>
 
                                 </tr>
@@ -788,6 +794,74 @@
                     alert("Terjadi kesalahan saat mengirim data.");
                 });
         }
+    });
+
+    // PROSES KIRIM PEMESANAN DENGAN AJAX (id="sendBtn")
+    $(document).on('click', '.send-btn', function(e) {
+        e.preventDefault();
+
+        // Ambil data dari tombol
+        const button = $(this);
+        const data = {
+            area: button.data('area'),
+            tgl_pakai: button.data('tgl'),
+            no_model: button.data('model'),
+            item_type: button.data('item'),
+            kode_warna: button.data('kode'),
+            color: button.data('color'),
+            po_tambahan: String(button.data('po-tambahan'))
+        };
+
+        console.log(data); // Debug data yang akan dikirim
+        const baseUrl = "<?= base_url('/api/kirimPemesanan'); ?>";
+        Swal.fire({
+            title: 'Kirim Pemesanan?',
+            text: "Apakah Anda yakin ingin mengirim pemesanan ini?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Kirim!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Tampilkan loading
+                showLoading();
+
+                $.ajax({
+                    url: baseUrl,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function(response) {
+                        hideLoading();
+                        if (response.status === 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: response.message || 'Pemesanan berhasil dikirim.',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal!',
+                                text: response.message || 'Pemesanan gagal dikirim.'
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        hideLoading();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Terjadi kesalahan saat mengirim data.'
+                        });
+                    }
+                });
+            }
+        });
     });
 </script>
 <?php $this->endSection(); ?>
