@@ -225,10 +225,9 @@ class PemesananModel extends Model
             ->orderBy('material.item_type', 'ASC')
             ->orderBy('material.kode_warna', 'ASC')
             ->orderBy('material.color', 'ASC');
-            // ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')
-            // ->orderBy('pemesanan.tgl_pakai', 'DESC')
-            // ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
-            
+        // ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')
+        // ->orderBy('pemesanan.tgl_pakai', 'DESC')
+        // ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
         return $query->get()->getResultArray();
     }
 
@@ -482,26 +481,62 @@ class PemesananModel extends Model
     }
     public function reqAdditionalTime($data)
     {
+
+        // 1. Cari dulu apakah ada data
+        $checkSql = "SELECT pemesanan.id_pemesanan
+                FROM pemesanan
+                JOIN material ON material.id_material = pemesanan.id_material
+                JOIN master_material ON material.item_type = master_material.item_type
+                WHERE pemesanan.admin = ?
+                AND pemesanan.status_kirim != 'YA'
+                AND master_material.jenis = ?
+                AND pemesanan.tgl_pakai = ?";
+        $check = $this->db->query($checkSql, [$data['area'], $data['jenis'], $data['tanggal_pakai']])->getResultArray();
+
+        if (empty($check)) {
+            // Tidak ada data sama sekali
+            return false;
+        }
+
+        // 2. Kalau ada, baru update
         $sql = "UPDATE pemesanan 
             JOIN material ON material.id_material = pemesanan.id_material 
             JOIN master_material ON material.item_type = master_material.item_type 
             SET pemesanan.status_kirim = 'request',
-                pemesanan.alasan_tambahan_waktu = ?
+            pemesanan.alasan_tambahan_waktu = ?
             WHERE pemesanan.admin = ? 
               AND pemesanan.status_kirim != 'YA' 
               AND master_material.jenis = ? 
               AND pemesanan.tgl_pakai = ?";
 
-        $result = $this->db->query($sql, [
-            $data['alasan_tambahan_waktu'],
-            $data['area'],
-            $data['jenis'],
-            $data['tanggal_pakai']
-        ]);
+        $this->db->query($sql, [$data['alasan_tambahan_waktu'], $data['area'], $data['jenis'], $data['tanggal_pakai']]);
 
-        log_message('debug', "Rows affected: " . $this->db->affectedRows());
+        // 3. Hitung affectedRows
+        $affected = $this->db->affectedRows();
 
-        return $result ? $this->db->affectedRows() : false;
+        // Kalau 0 tapi data ada → tetap return 1 (anggap sukses)
+        return $affected > 0 ? $affected : 1;
+
+        // $sql = "UPDATE pemesanan 
+        //     JOIN material ON material.id_material = pemesanan.id_material 
+        //     JOIN master_material ON material.item_type = master_material.item_type 
+        //     SET pemesanan.status_kirim = 'request',
+        //         pemesanan.alasan_tambahan_waktu = ?
+        //     WHERE pemesanan.admin = ? 
+        //       AND pemesanan.status_kirim != 'YA' 
+        //       AND master_material.jenis = ? 
+        //       AND pemesanan.tgl_pakai = ?";
+
+        // $result = $this->db->query($sql, [
+        //     $data['alasan_tambahan_waktu'],
+        //     $data['area'],
+        //     $data['jenis'],
+        //     $data['tanggal_pakai']
+        // ]);
+
+        // log_message('debug', "Rows affected: " . $this->db->affectedRows());
+
+        // return $result ? $this->db->affectedRows() : false;
     }
 
     public function getFilterPemesananKaret($tanggal_awal, $tanggal_akhir)
@@ -598,9 +633,10 @@ class PemesananModel extends Model
             WHERE pemesanan.admin = ?
             AND pemesanan.tgl_pakai = ?
             AND master_material.jenis = ?
+            AND pemesanan.status = ?
         ";
 
-        $this->db->query($query, [$data['max_time'], $data['username'], $data['area'], $data['tgl_pakai'], $data['jenis']]);
+        $this->db->query($query, [$data['max_time'], $data['username'], $data['area'], $data['tgl_pakai'], $data['jenis']], 'request');
         return $this->db->affectedRows() > 0;
     }
     public function additionalTimeReject($area, $tgl_pakai, $jenis)
@@ -614,9 +650,10 @@ class PemesananModel extends Model
             WHERE pemesanan.admin = ?
             AND pemesanan.tgl_pakai = ?
             AND master_material.jenis = ?
+            AND pemesanan.status = ?
         ";
 
-        $this->db->query($query, [$area, $tgl_pakai, $jenis]);
+        $this->db->query($query, [$area, $tgl_pakai, $jenis, 'request']);
         return $this->db->affectedRows() > 0;
     }
 
@@ -792,7 +829,7 @@ class PemesananModel extends Model
         return $this->findAll();
     }
 
-    public function getDataPemesananArea($tglPakai, $noModel = null)
+    public function getDataPemesananArea($tglPakai, $noModel = null, $role)
     {
         $builder = $this->db->table('pemesanan')
             ->select("
@@ -818,10 +855,13 @@ class PemesananModel extends Model
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->where('pemesanan.status_kirim', 'YA')
+
             ->where('pemesanan.tgl_pakai', $tglPakai);
         if (!empty($noModel)) {
             $builder->where('master_order.no_model', $noModel);
+        }
+        if ($role != 'monitoring') {
+            $builder->where('pemesanan.status_kirim', 'YA');
         }
 
         $builder->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')

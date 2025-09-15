@@ -246,7 +246,20 @@
                                         <button type="button" class="btn btn-warning update-btn" data-bs-toggle="modal" data-bs-target="#updateListModal" data-area="<?= $id['admin']; ?>" data-tgl="<?= $id['tgl_pakai']; ?>" data-model="<?= $id['no_model']; ?>" data-item="<?= $id['item_type']; ?>" data-kode="<?= $id['kode_warna']; ?>" data-color="<?= $id['color']; ?>" data-po-tambahan="<?= $id['po_tambahan']; ?>">
                                             <i class="fa fa-edit fa-lg"></i>
                                         </button>
+                                        <button type="button" id="sendBtn"
+                                            class="btn btn-info text-xs send-btn"
+                                            data-toggle="modal"
+                                            data-area="<?= $id['no_model']; ?>"
+                                            data-tgl="<?= $id['tgl_pakai']; ?>"
+                                            data-model="<?= $id['no_model']; ?>"
+                                            data-item="<?= $id['item_type']; ?>"
+                                            data-kode="<?= $id['kode_warna']; ?>"
+                                            data-color="<?= $id['color']; ?>"
+                                            data-po-tambahan="<?= $id['po_tambahan']; ?>">
+                                            <i class="fa fa-paper-plane fa-lg"></i>
+                                        </button>
                                     </td>
+
                                 </tr>
                             <?php
                             } ?>
@@ -687,5 +700,94 @@
 
     });
     // END PROSES UPDATE PEMESANAN
+    // PROSES KIRIM PEMESANAN
+    document.addEventListener("click", function(e) {
+        if (e.target.matches(".send-btn") || e.target.closest(".send-btn")) {
+            const button = e.target.closest(".send-btn");
+            if (!button) return; // Jika bukan tombol, keluar
+            // Ambil waktu saat ini
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            // Ambil batas waktu dari data attribute tombol
+            const batasWaktu = button.getAttribute("data-waktu"); // Contoh: "08:30:00"
+
+            // Ubah batasWaktu yang didapat dari PHP menjadi jam dan menit
+            let [batasHour, batasMinute, batasSecond] = batasWaktu.split(':').map(Number);
+
+            if (currentHour > batasHour || (currentHour === batasHour && currentMinute > batasMinute)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Melebihi batas waktu sesuai bahan baku! ',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        location.reload();
+                    }
+                });
+                button
+                return;
+            }
+
+            // Ambil data dari tombol
+            const data = {
+                area: button.getAttribute("data-area"),
+                tgl_pakai: button.getAttribute("data-tgl"),
+                no_model: button.getAttribute("data-model"),
+                item_type: button.getAttribute("data-item"),
+                kode_warna: button.getAttribute("data-kode"),
+                color: button.getAttribute("data-color"),
+                po_tambahan: button.getAttribute("data-po-tambahan"),
+                waktu: batasWaktu,
+            };
+
+            // Kirim data ke server menggunakan AJAX
+            fetch("http://172.23.44.14/MaterialSystem/public/api/kirimPemesanan", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                })
+                .then((response) => response.json())
+                .then((result) => {
+                    if (result.status == "success") {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: result.message,
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Refresh halaman setelah tombol OK ditekan dengan membawa parameter filter
+                                const tglPakai = new URLSearchParams(window.location.search).get('tgl_pakai') || '';
+                                const searchPdk = new URLSearchParams(window.location.search).get('searchPdk') || '';
+                                const BASE_URL = "<?= base_url(); ?>";
+                                const area = button.getAttribute("data-area");
+                                window.location.href = `${BASE_URL}user/listPemesanan/${area}?tgl_pakai=${tglPakai}&searchPdk=${searchPdk}`;
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'result.message',
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Refresh halaman setelah tombol OK ditekan dengan membawa parameter filter
+                                const tglPakai = new URLSearchParams(window.location.search).get('tgl_pakai') || '';
+                                const searchPdk = new URLSearchParams(window.location.search).get('searchPdk') || '';
+                                const BASE_URL = "<?= base_url(); ?>";
+                                const area = button.getAttribute("data-area");
+                                window.location.href = `${BASE_URL}user/listPemesanan/${area}?tgl_pakai=${tglPakai}&searchPdk=${searchPdk}`;
+                            }
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                    alert("Terjadi kesalahan saat mengirim data.");
+                });
+        }
+    });
 </script>
 <?php $this->endSection(); ?>

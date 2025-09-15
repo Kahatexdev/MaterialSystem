@@ -1447,8 +1447,9 @@ class PemesananController extends BaseController
 
         $tglPakai = $this->request->getGet('tgl_pakai') ?? DATE('Y-m-d');
         $noModel = $this->request->getGet('model');
+        $role = session()->get('role');
         // dd($tglPakai);
-        $dataList = $this->pemesananModel->getDataPemesananArea($tglPakai, $noModel);
+        $dataList = $this->pemesananModel->getDataPemesananArea($tglPakai, $noModel, $role);
         // dd($dataList);
         foreach ($dataList as $key => $order) {
             $dataList[$key]['ttl_kebutuhan_bb'] = 0;
