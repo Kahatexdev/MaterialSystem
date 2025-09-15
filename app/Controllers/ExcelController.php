@@ -3153,11 +3153,15 @@ class ExcelController extends BaseController
         $tglPakai = $this->request->getGet('tglPakai');
 
         $dataPemesanan = $this->pengeluaranModel->getDataPemesananExport($jenis, $tglPakai);
+        // dd($dataPemesanan);
+
         // Kelompokkan data berdasarkan 'group'
         $groupedData = [];
         foreach ($dataPemesanan as $row) {
             $groupedData[$row['group']][] = $row;
         }
+
+        // dd($groupedData);
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -3228,7 +3232,7 @@ class ExcelController extends BaseController
                 'Nama Cluster',
                 'Kgs Out',
                 'Cns Out',
-                'Keterangan',
+                'Keterangan'
             ];
             $sheet->fromArray($header, null, 'A3');
 

@@ -228,7 +228,10 @@ class PemesananModel extends Model
         // ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')
         // ->orderBy('pemesanan.tgl_pakai', 'DESC')
         // ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1459fa354f876547f65252cbe10dd1e769c20f20
         return $query->get()->getResultArray();
     }
 
@@ -635,9 +638,10 @@ class PemesananModel extends Model
             WHERE pemesanan.status_kirim != 'YA' 
             AND pemesanan.tgl_pakai = ?
             AND master_material.jenis = ?
+            AND pemesanan.status = ?
         ";
 
-        $this->db->query($query, [$data['max_time'], $data['username'], $data['area'], $data['tgl_pakai'], $data['jenis']]);
+        $this->db->query($query, [$data['max_time'], $data['username'], $data['area'], $data['tgl_pakai'], $data['jenis']], 'request');
         return $this->db->affectedRows() > 0;
     }
     public function additionalTimeReject($area, $tgl_pakai, $jenis)
@@ -651,9 +655,10 @@ class PemesananModel extends Model
             WHERE pemesanan.admin = ?
             AND pemesanan.tgl_pakai = ?
             AND master_material.jenis = ?
+            AND pemesanan.status = ?
         ";
 
-        $this->db->query($query, [$area, $tgl_pakai, $jenis]);
+        $this->db->query($query, [$area, $tgl_pakai, $jenis, 'request']);
         return $this->db->affectedRows() > 0;
     }
 
