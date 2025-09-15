@@ -591,6 +591,7 @@ class PemesananModel extends Model
             }
             $this->groupEnd();
         }
+        $this->groupBy('tp.id_total_pemesanan');
 
         return $this->findAll();
     }
