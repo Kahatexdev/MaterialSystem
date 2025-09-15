@@ -303,7 +303,7 @@ class PemesananModel extends Model
             ->where('pemesanan.tgl_pakai', $id['tgl_pakai'])
             ->where('pemesanan.po_tambahan', $id['po_tambahan'])
             ->where('pemesanan.admin', $id['area'])
-            ->where('pemesanan.status_kirim!=', 'YA')
+            ->where('pemesanan.status_kirim !=', 'YA')
             ->get()
             ->getResultArray(); // Ambil semua baris sebagai array
 
@@ -632,13 +632,12 @@ class PemesananModel extends Model
             JOIN master_material ON master_material.item_type = material.item_type
             SET pemesanan.status_kirim = 'request accept', pemesanan.additional_time = ?, pemesanan.hak_akses = ?
             WHERE pemesanan.admin = ?
-            and pemesanan.status_kirim = 'request' 
+            AND pemesanan.status_kirim = 'request' 
             AND pemesanan.tgl_pakai = ?
             AND master_material.jenis = ?
-            AND pemesanan.status = ?
         ";
 
-        $this->db->query($query, [$data['max_time'], $data['username'], $data['area'], $data['tgl_pakai'], $data['jenis']], 'request');
+        $this->db->query($query, [$data['max_time'], $data['username'], $data['area'], $data['tgl_pakai'], $data['jenis']]);
         return $this->db->affectedRows() > 0;
     }
     public function additionalTimeReject($area, $tgl_pakai, $jenis)
@@ -652,12 +651,11 @@ class PemesananModel extends Model
             WHERE pemesanan.admin = ?
             AND pemesanan.tgl_pakai = ?
             AND master_material.jenis = ?
-            AND pemesanan.status = ?
             AND pemesanan.status_kirim = 'request' 
 
         ";
 
-        $this->db->query($query, [$area, $tgl_pakai, $jenis, 'request']);
+        $this->db->query($query, [$area, $tgl_pakai, $jenis]);
         return $this->db->affectedRows() > 0;
     }
 

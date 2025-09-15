@@ -3212,9 +3212,9 @@ class ExcelController extends BaseController
             $sheet->setCellValue('A2', 'PAKAI ' . $tglPakai);
 
             // Merge sel untuk teks di A1 dan A2
-            $sheet->mergeCells('A1:N1');
-            $sheet->mergeCells('A2:N2');
-            $sheet->getStyle('A1:N2')->applyFromArray($subHeaderStyle);
+            $sheet->mergeCells('A1:O1');
+            $sheet->mergeCells('A2:O2');
+            $sheet->getStyle('A1:O2')->applyFromArray($subHeaderStyle);
 
 
             // Set header
@@ -3224,6 +3224,7 @@ class ExcelController extends BaseController
                 'Item Type',
                 'Kode Warna',
                 'Color',
+                'Qty/Cns Pesan',
                 'Lot',
                 'No Karung',
                 'Kgs',
@@ -3237,7 +3238,7 @@ class ExcelController extends BaseController
             $sheet->fromArray($header, null, 'A3');
 
 
-            $sheet->getStyle('A3:N3')->applyFromArray($headerStyle);
+            $sheet->getStyle('A3:O3')->applyFromArray($headerStyle);
 
             // Tambahkan data
             $rowNumber = 4;
@@ -3257,7 +3258,7 @@ class ExcelController extends BaseController
             }
             // Tambahkan border ke semua data
             $dataEndRow = $rowNumber - 1;
-            $sheet->getStyle("A3:N$dataEndRow")->applyFromArray([
+            $sheet->getStyle("A3:O$dataEndRow")->applyFromArray([
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -3266,7 +3267,7 @@ class ExcelController extends BaseController
             ]);
 
             // Atur lebar kolom otomatis
-            foreach (range('A', 'N') as $column) {
+            foreach (range('A', 'O') as $column) {
                 $sheet->getColumnDimension($column)->setAutoSize(true);
             }
         }

@@ -377,6 +377,7 @@ class PengeluaranModel extends Model
             material.item_type,
             material.kode_warna,
             material.color,
+            CONCAT_WS('/', total_pemesanan.ttl_kg, total_pemesanan.ttl_cns) AS pesanan,
             pengeluaran.lot_out,
             out_celup.no_karung,
             pengeluaran.id_pengeluaran,
@@ -386,7 +387,9 @@ class PengeluaranModel extends Model
             pengeluaran.cns_out,
             pengeluaran.krg_out,
             pengeluaran.nama_cluster,
-            CONCAT(pengeluaran.keterangan_gbn, ' - ', pemesanan.keterangan_gbn) AS keterangan_gbn,
+            CONCAT(COALESCE(pengeluaran.keterangan_gbn, ''), 
+           CASE WHEN pengeluaran.keterangan_gbn IS NOT NULL THEN ' - ' ELSE '' END, 
+           pemesanan.keterangan_gbn) AS keterangan_gbn,
             cluster.group
         ")
 
