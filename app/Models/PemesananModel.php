@@ -463,26 +463,62 @@ class PemesananModel extends Model
     }
     public function reqAdditionalTime($data)
     {
+
+        // 1. Cari dulu apakah ada data
+        $checkSql = "SELECT pemesanan.id_pemesanan
+                FROM pemesanan
+                JOIN material ON material.id_material = pemesanan.id_material
+                JOIN master_material ON material.item_type = master_material.item_type
+                WHERE pemesanan.admin = ?
+                AND pemesanan.status_kirim != 'YA'
+                AND master_material.jenis = ?
+                AND pemesanan.tgl_pakai = ?";
+        $check = $this->db->query($checkSql, [$data['area'], $data['jenis'], $data['tanggal_pakai']])->getResultArray();
+
+        if (empty($check)) {
+            // Tidak ada data sama sekali
+            return false;
+        }
+
+        // 2. Kalau ada, baru update
         $sql = "UPDATE pemesanan 
             JOIN material ON material.id_material = pemesanan.id_material 
             JOIN master_material ON material.item_type = master_material.item_type 
             SET pemesanan.status_kirim = 'request',
-                pemesanan.alasan_tambahan_waktu = ?
+            pemesanan.alasan_tambahan_waktu = ?
             WHERE pemesanan.admin = ? 
               AND pemesanan.status_kirim != 'YA' 
               AND master_material.jenis = ? 
               AND pemesanan.tgl_pakai = ?";
 
-        $result = $this->db->query($sql, [
-            $data['alasan_tambahan_waktu'],
-            $data['area'],
-            $data['jenis'],
-            $data['tanggal_pakai']
-        ]);
+        $this->db->query($sql, [$data['alasan_tambahan_waktu'], $data['area'], $data['jenis'], $data['tanggal_pakai']]);
 
-        log_message('debug', "Rows affected: " . $this->db->affectedRows());
+        // 3. Hitung affectedRows
+        $affected = $this->db->affectedRows();
 
-        return $result ? $this->db->affectedRows() : false;
+        // Kalau 0 tapi data ada → tetap return 1 (anggap sukses)
+        return $affected > 0 ? $affected : 1;
+
+        // $sql = "UPDATE pemesanan 
+        //     JOIN material ON material.id_material = pemesanan.id_material 
+        //     JOIN master_material ON material.item_type = master_material.item_type 
+        //     SET pemesanan.status_kirim = 'request',
+        //         pemesanan.alasan_tambahan_waktu = ?
+        //     WHERE pemesanan.admin = ? 
+        //       AND pemesanan.status_kirim != 'YA' 
+        //       AND master_material.jenis = ? 
+        //       AND pemesanan.tgl_pakai = ?";
+
+        // $result = $this->db->query($sql, [
+        //     $data['alasan_tambahan_waktu'],
+        //     $data['area'],
+        //     $data['jenis'],
+        //     $data['tanggal_pakai']
+        // ]);
+
+        // log_message('debug', "Rows affected: " . $this->db->affectedRows());
+
+        // return $result ? $this->db->affectedRows() : false;
     }
 
     public function getFilterPemesananKaret($tanggal_awal, $tanggal_akhir)
