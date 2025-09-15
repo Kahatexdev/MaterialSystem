@@ -3146,6 +3146,29 @@ class ExcelController extends BaseController
         $writer->save('php://output');
         exit;
     }
+    private function mergeWithStyle($sheet, $startRow, $endRow, $cols = ['A', 'B', 'C', 'D', 'E', 'F'])
+    {
+        foreach ($cols as $col) {
+            $range = "$col$startRow:$col$endRow";
+
+            // merge cell
+            $sheet->mergeCells($range);
+
+            // style rata tengah & border
+            $sheet->getStyle($range)->applyFromArray([
+                'alignment' => [
+                    'vertical'   => Alignment::VERTICAL_CENTER,
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'wrapText'   => true,
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                    ],
+                ],
+            ]);
+        }
+    }
     public function exportListBarangKeluar()
     {
         // $area = $this->request->getGet('area');
@@ -3166,6 +3189,36 @@ class ExcelController extends BaseController
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
+        $mergeWithStyle = function ($sheet, $startRow, $endRow, $cols = ['A', 'B', 'C', 'D', 'E', 'F']) {
+            foreach ($cols as $col) {
+                $range = "$col$startRow:$col$endRow";
+                $sheet->mergeCells($range);
+                $sheet->getStyle($range)->applyFromArray([
+                    'alignment' => [
+                        'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'wrapText'   => true,
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        ],
+                    ],
+                ]);
+            }
+        };
+        // --- style default untuk cell biasa (non merge) ---
+        $cellStyle = [
+            'alignment' => [
+                'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                ],
+            ],
+        ];
         // Format header
         $subHeaderStyle = [
             'font' => [
@@ -3198,6 +3251,7 @@ class ExcelController extends BaseController
             ],
         ];
 
+        // dd($groupedData);
         foreach ($groupedData as $group => $rows) {
             // Buat sheet untuk setiap grup
             $sheet = $spreadsheet->createSheet();
@@ -3241,32 +3295,53 @@ class ExcelController extends BaseController
             $sheet->getStyle('A3:O3')->applyFromArray($headerStyle);
 
             // Tambahkan data
-            $rowNumber = 4;
+            // isi data ke excel
+            $rowNumber   = 4;
+            $mergeStart  = $rowNumber;
+            $prevTotalId = null;
+
             foreach ($rows as $row) {
-                // dd($row);
-                // Hapus kolom yang tidak ingin dimasukkan
-                unset($row['tgl_pakai'], $row['jenis'], $row['id_pengeluaran'], $row['id_stock'], $row['id_out_celup'], $row['group'],);
 
-                $rowValues = array_values($row);
+                $currentTotalId = $row['id_total_pemesanan'];
 
-                // Sisipkan 2 kolom kosong sebelum kolom terakhir
-                $last = array_pop($rowValues); // ambil kolom terakhir
-                array_push($rowValues, null, null, $last); // tambahkan null2 + kolom terakhir lagi
+                $sheet->setCellValue("A$rowNumber", $row['admin']);
+                $sheet->setCellValue("B$rowNumber", $row['no_model']);
+                $sheet->setCellValue("C$rowNumber", $row['item_type']);
+                $sheet->setCellValue("D$rowNumber", $row['kode_warna']);
+                $sheet->setCellValue("E$rowNumber", $row['color']);
+                $sheet->setCellValue("F$rowNumber", $row['pesanan']);
+                $sheet->setCellValue("G$rowNumber", $row['lot_out']);
+                $sheet->setCellValue("H$rowNumber", $row['no_karung']);
+                $sheet->setCellValue("I$rowNumber", $row['kgs_out']);
+                $sheet->setCellValue("J$rowNumber", $row['cns_out']);
+                $sheet->setCellValue("K$rowNumber", $row['krg_out']);
+                $sheet->setCellValue("L$rowNumber", $row['nama_cluster']);
+                $sheet->setCellValue("M$rowNumber", ''); // kgs_out tambahan?
+                $sheet->setCellValue("N$rowNumber", ''); // cns_out tambahan?
+                $sheet->setCellValue("O$rowNumber", $row['keterangan_gbn']);
 
-                $sheet->fromArray($rowValues, null, "A$rowNumber");
+                // cek id_total_pemesanan ganti
+                if ($prevTotalId !== null && $currentTotalId !== $prevTotalId) {
+                    if ($rowNumber - 1 > $mergeStart) {
+                        $mergeWithStyle($sheet, $mergeStart, $rowNumber - 1);
+                    }
+                    $mergeStart = $rowNumber;
+                }
+
+                $prevTotalId = $currentTotalId;
                 $rowNumber++;
             }
-            // Tambahkan border ke semua data
-            $dataEndRow = $rowNumber - 1;
-            $sheet->getStyle("A3:O$dataEndRow")->applyFromArray([
-                'borders' => [
-                    'allBorders' => [
-                        'borderStyle' => Border::BORDER_THIN,
-                    ],
-                ],
-            ]);
 
-            // Atur lebar kolom otomatis
+            // merge terakhir
+            if ($rowNumber - 1 > $mergeStart) {
+                $mergeWithStyle($sheet, $mergeStart, $rowNumber - 1);
+            }
+
+            // kasih style ke semua cell data
+            $dataEndRow = $rowNumber - 1;
+            $sheet->getStyle("A4:O{$dataEndRow}")->applyFromArray($cellStyle);
+
+            // atur lebar kolom
             foreach (range('A', 'O') as $column) {
                 $sheet->getColumnDimension($column)->setAutoSize(true);
             }
@@ -3283,8 +3358,6 @@ class ExcelController extends BaseController
 
         // Unduh file
         return $this->response->download($filePath, null)->setFileName($filename);
-
-        // dd($dataPemesanan);
     }
 
     public function exportPermintaanKaret()
@@ -4630,23 +4703,28 @@ class ExcelController extends BaseController
                 $sheet->getStyle($col . '4')->getFont()->setBold(true);
                 $col++;
             }
-
+            // dd ($items);
             // --- Data baris ---
             $row = 5;
             $no  = 1;
             foreach ($items as $item) {
+                if($item['po_tambahan']) {
+                    $noModel = $item['no_model'] . ' (+)';
+                } else {
+                    $noModel = $item['no_model'];
+                }
                 $sheet->setCellValue('A' . $row, $no++);
                 $sheet->setCellValue('B' . $row, $item['jam_pesan'] ?: '-');
                 $sheet->setCellValue('C' . $row, $item['tgl_pesan'] ?: '-');
-                $sheet->setCellValue('D' . $row, $item['no_model'] ?: '-');
+                $sheet->setCellValue('D' . $row, $noModel ?: '-');
                 $sheet->setCellValue('E' . $row, $item['item_type'] ?: '-');
                 $sheet->setCellValue('F' . $row, $item['kode_warna'] ?: '-');
                 $sheet->setCellValue('G' . $row, $item['color'] ?: '-');
-                $sheet->setCellValue('H' . $row, '');
+                $sheet->setCellValue('H' . $row, $item['lot'] ?: '-');
                 $sheet->setCellValue('I' . $row, $item['ttl_jl_mc'] ?? 0);
                 $sheet->setCellValue('J' . $row, $item['ttl_kg']    ?? 0);
                 $sheet->setCellValue('K' . $row, $item['ttl_cns']   ?? 0);
-                $sheet->setCellValue('L' . $row, '');
+                $sheet->setCellValue('L' . $row, $item['keterangan_gbn'] ?: '-');
                 $sheet->setCellValue('M' . $row, '');
                 $sheet->setCellValue('N' . $row, '');
                 $sheet->setCellValue('O' . $row, '');
