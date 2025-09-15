@@ -28,6 +28,7 @@ use App\Models\PoTambahanModel;
 use App\Models\TrackingPoCovering;
 use App\Models\KebutuhanCones;
 use App\Models\MasterRangePemesanan;
+use Dompdf\Dompdf;
 use PHPUnit\Framework\Attributes\IgnoreFunctionForCodeCoverage;
 
 class ApiController extends ResourceController
@@ -1547,5 +1548,32 @@ class ApiController extends ResourceController
 
         $data = $this->masterRangePemesanan->where('days', $day)->where('area', $area)->first();;
         return $this->response->setJSON($data);
+    }
+    public function pengaduanExport($idPengaduan)
+    {
+
+        // Ambil data dari API lokal
+        $client = service('curlrequest');
+        $response = $client->get("http://172.23.44.14/CapacityApps/public/api/ExportPengaduan/{$idPengaduan}");
+
+        $pengaduan = json_decode($response->getBody(), true);
+
+        if (!$pengaduan || !isset($pengaduan['id_pengaduan'])) {
+            return "Data tidak ditemukan.";
+        }
+
+        $data['pengaduan'] = $pengaduan;
+
+        // Render view jadi HTML
+        $html = view(session()->get('role') . '/pengaduan/pdf_view', $data);
+
+        // Inisialisasi Dompdf
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // Auto download
+        return $dompdf->stream('pengaduan_' . $idPengaduan . '.pdf', ["Attachment" => true]);
     }
 }

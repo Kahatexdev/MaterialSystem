@@ -933,6 +933,7 @@ $routes->options('(:any)', function () {
 $routes->group(
     'api',
     function ($routes) {
+        $routes->get('pengaduan/exportPdf/(:num)', 'ApiController::pengaduanExport/$1');
         $routes->get('statusbahanbaku/(:any)', 'ApiController::statusbahanbaku/$1');
         $routes->get('cekBahanBaku/(:any)', 'ApiController::cekBahanBaku/$1');
         $routes->get('cekStok/(:any)', 'ApiController::cekStok/$1');

@@ -4708,7 +4708,7 @@ class ExcelController extends BaseController
             $row = 5;
             $no  = 1;
             foreach ($items as $item) {
-                if($item['po_tambahan']) {
+                if ($item['po_tambahan']) {
                     $noModel = $item['no_model'] . ' (+)';
                 } else {
                     $noModel = $item['no_model'];

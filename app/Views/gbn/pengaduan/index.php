@@ -42,7 +42,11 @@
                         <div>
 
                             <small class="text-muted"><?= $formattedDate ?></small>
-                            <button class="btn btn-info btn-print" data-idPengaduan="<?= $p['id_pengaduan']; ?>"> <i class="fas fa-print"></i></button>
+                            <button onclick="window.location.href='<?= base_url('api/pengaduan/exportPdf/' . $p['id_pengaduan']) ?>'"
+                                class="btn btn-info">
+                                <i class="fas fa-file-pdf"></i> Export PDF
+                            </button>
+
                         </div>
                     </div>
                     <p><?= nl2br(esc($p['isi'])) ?></p>
