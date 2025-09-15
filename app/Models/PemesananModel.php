@@ -631,7 +631,7 @@ class PemesananModel extends Model
             JOIN master_material ON master_material.item_type = material.item_type
             SET pemesanan.status_kirim = 'request accept', pemesanan.additional_time = ?, pemesanan.hak_akses = ?
             WHERE pemesanan.admin = ?
-            WHERE pemesanan.status_kirim != 'YA' 
+            and pemesanan.status_kirim = 'request' 
             AND pemesanan.tgl_pakai = ?
             AND master_material.jenis = ?
             AND pemesanan.status = ?
@@ -652,6 +652,8 @@ class PemesananModel extends Model
             AND pemesanan.tgl_pakai = ?
             AND master_material.jenis = ?
             AND pemesanan.status = ?
+            AND pemesanan.status_kirim = 'request' 
+
         ";
 
         $this->db->query($query, [$area, $tgl_pakai, $jenis, 'request']);
