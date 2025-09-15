@@ -543,7 +543,9 @@ class ApiController extends ResourceController
     }
     public function listReportPemesanan($area)
     {
-        $dataList = $this->pemesananModel->getListReportPemesananByArea($area);
+        // today = date('Y-m-d');
+        $tgl_pakai = $this->request->getGet('tgl_pakai') ?? date('Y-m-d');
+        $dataList = $this->pemesananModel->getListReportPemesananByArea($area, $tgl_pakai);
 
         return $this->respond($dataList, 200);
     }
@@ -906,11 +908,13 @@ class ApiController extends ResourceController
     {
         $jenis = $this->request->getGet('jenis') ?? '';
         $tanggal_pakai = $this->request->getGet('tanggal_pakai') ?? '';
+        $alasan = $this->request->getGet('alasan') ?? '';
 
         $data = [
             'area' => $area,
             'jenis' => $jenis,
             'tanggal_pakai' => $tanggal_pakai,
+            'alasan_tambahan_waktu' => $alasan,
         ];
 
         $update = $this->pemesananModel->reqAdditionalTime($data);
@@ -1547,5 +1551,22 @@ class ApiController extends ResourceController
 
         $data = $this->masterRangePemesanan->where('days', $day)->where('area', $area)->first();;
         return $this->response->setJSON($data);
+    }
+    public function getTotalRetur()
+    {
+        $area = $this->request->getGet('area') ?? '';
+        $no_model = $this->request->getGet('no_model') ?? '';
+        $item_type = $this->request->getGet('item_type') ?? '';
+        $kode_warna = $this->request->getGet('kode_warna') ?? '';
+        $data = [
+            'area' => $area,
+            'no_model' => $no_model,
+            'item_type' => $item_type,
+            'kode_warna' => $kode_warna,
+        ];
+
+        $totalRetur = $this->returModel->getTotalRetur($data);
+
+        return $this->respond($totalRetur, 200);
     }
 }

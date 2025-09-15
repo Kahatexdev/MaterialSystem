@@ -1125,6 +1125,7 @@ class ScheduleController extends BaseController
         $filterTglSch = $this->request->getPost('filter_tglsch');
         $filterTglSchsampai = $this->request->getPost('filter_tglschsampai');
         $filterNoModel = $this->request->getPost('filter_nomodel');
+        $showExcel = (!empty($filterTglSch) || !empty($filterTglSchsampai) || !empty($filterNoModel));
 
         $sch = $this->scheduleCelupModel->getSchedule($filterTglSch, $filterTglSchsampai, $filterNoModel);
 
@@ -1197,6 +1198,10 @@ class ScheduleController extends BaseController
             'role' => $this->role,
             'data_sch' => $sch,
             'uniqueData' => $uniqueData,
+            'showExcel' => $showExcel,
+            'filterTglSch' => $filterTglSch,
+            'filterTglSchsampai' => $filterTglSchsampai,
+            'filterNoModel' => $filterNoModel,
         ];
         return view($this->role . '/schedule/reqschedule', $data);
     }

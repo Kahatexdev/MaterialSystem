@@ -65,6 +65,7 @@
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Pakai</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jenis</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Alasan</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder" colspan="2">Action</th>
                             </tr>
                         </thead>
@@ -77,6 +78,7 @@
                                     <td><?= $data['admin']; ?></td>
                                     <td><?= $data['tgl_pakai']; ?></td>
                                     <td><?= $data['jenis']; ?></td>
+                                    <td><?= $data['alasan_tambahan_waktu']; ?></td>
                                     <?php if ($data['status_kirim'] == "request") { ?>
                                         <td>
                                             <button type="button" class="btn btn-xs bg-gradient-success" data-bs-toggle="modal" data-bs-target="#acceptModal"

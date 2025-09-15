@@ -144,6 +144,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/reportDataTagihanBenang', 'ScheduleController::reportDataTagihanBenang');
     $routes->get('schedule/filterTagihanBenang', 'ScheduleController::filterTagihanBenang');
     $routes->get('schedule/exportTagihanBenang', 'ExcelController::exportTagihanBenang');
+    $routes->get('schedule/exportReqSchedule', 'ExcelController::exportReqSchedule');
     // $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJatah');
 
     $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
