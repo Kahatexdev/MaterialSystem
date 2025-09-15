@@ -10,6 +10,7 @@ use App\Models\PemesananSpandexKaretModel;
 use App\Models\CoveringStockModel;
 use App\Models\HistoryStockCoveringModel;
 use App\Models\PengeluaranModel;
+use App\Models\TrackingPoCovering;
 
 class CoveringPemesananController extends BaseController
 {
@@ -23,6 +24,7 @@ class CoveringPemesananController extends BaseController
     protected $coveringStockModel;
     protected $historyCoveringStockModel;
     protected $pengeluaranModel;
+    protected $trackingPoCoveringModel;
 
     public function __construct()
     {
@@ -32,6 +34,7 @@ class CoveringPemesananController extends BaseController
         $this->coveringStockModel = new CoveringStockModel();
         $this->historyCoveringStockModel = new HistoryStockCoveringModel();
         $this->pengeluaranModel = new PengeluaranModel();
+        $this->trackingPoCoveringModel = new TrackingPoCovering();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -226,14 +229,14 @@ class CoveringPemesananController extends BaseController
                 return redirect()->back()->with('error', 'Gagal menyimpan data pemesanan.');
             }
 
+            // 4) Ambil ID PK (id_psk) yang di‐generate
+            $idPsk = $this->pemesananSpandexKaretModel->getInsertID();
+            // dd ($idPsk);
+            // dd ($dataPemesanan, $dataSpandexKaret, $idPsk, $ketGbn);
             $this->pemesananModel
                 ->where('id_total_pemesanan', $dataPemesanan['id_total_pemesanan'])
                 ->set(['keterangan_gbn' => $ketGbn])
                 ->update();
-
-            // 4) Ambil ID PK (id_psk) yang di‐generate
-            $idPsk = $this->pemesananSpandexKaretModel->getInsertID();
-            // dd ($idPsk);
             // 5) Update tabel pengeluaran agar punya referensi id_psk
             //    (sesuaikan nama model & kolom WHERE dengan struktur Anda)
             $this->pengeluaranModel->insert([
