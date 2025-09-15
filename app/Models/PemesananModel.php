@@ -228,10 +228,6 @@ class PemesananModel extends Model
         // ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')
         // ->orderBy('pemesanan.tgl_pakai', 'DESC')
         // ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
-<<<<<<< HEAD
-
-=======
->>>>>>> 1459fa354f876547f65252cbe10dd1e769c20f20
         return $query->get()->getResultArray();
     }
 
