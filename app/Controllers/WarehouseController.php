@@ -2570,6 +2570,7 @@ class WarehouseController extends BaseController
                 'admin'      => session()->get('username')
             ]);
         }
+
         // 1) Insert Bon
         $dataOtherBon = [
             'no_model'       => $data['no_model'],
@@ -2581,6 +2582,7 @@ class WarehouseController extends BaseController
             'detail_sj'      => $data['detail_sj'],
             'keterangan'     => $data['keterangan'],
             'ganti_retur'    => $data['ganti_retur'],
+            'po_tambahan'    => ($data['detail_sj'] === "PO(+)") ? '1' : '0',
             'admin'          => session()->get('username'),
             'created_at'     => date('Y-m-d H:i:s'),
         ];
