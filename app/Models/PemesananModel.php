@@ -339,6 +339,7 @@ class PemesananModel extends Model
             ->where('material.color', $id['color'])
             ->where('pemesanan.tgl_pakai', $id['tgl_pakai'])
             ->where('pemesanan.po_tambahan', $id['po_tambahan'])
+            ->where('pemesanan.admin', $id['area'])
             ->limit(1)
             ->get()
             ->getRowArray();
@@ -883,6 +884,29 @@ class PemesananModel extends Model
             ->where('master_order.no_model', $model)
             ->groupBy('total_pemesanan.id_total_pemesanan')
             ->orderBy('material.item_type, material.kode_warna, pemesanan.tgl_pakai', 'ASC');
+
+        // jangan di hapus
+        // $this->select('master_order.no_model, material.item_type, material.kode_warna, material.color,  SUM(material.kgs) AS total_kgs, MAX(material.loss) AS max_loss,pemesanan.tgl_pakai, total_pemesanan.id_total_pemesanan, total_pemesanan.ttl_jl_mc, total_pemesanan.ttl_kg,total_pemesanan.ttl_cns, pemesanan.po_tambahan,pemesanan.keterangan_gbn, IFNULL(p.kgs_out, 0) AS kgs_out, IFNULL(p.cns_out,0) AS cns_out, p.lot_out')
+        //     ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
+        //     ->join('(SELECT id_total_pemesanan, SUM(kgs_out) AS kgs_out,SUM(cns_out) AS cns_out, GROUP_CONCAT(DISTINCT lot_out) AS lot_out FROM pengeluaran WHERE status="Pengiriman Area" GROUP BY id_total_pemesanan) p', 'p.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
+        //     ->join(
+        //         '(
+        //         SELECT id_order, item_type, kode_warna, color, SUM(kgs) AS total_kgs 
+        //         FROM material 
+        //         GROUP BY id_order, item_type, kode_warna, color
+        //         ) m',
+        //         'm.id_order = master_order.id_order 
+        //         AND m.item_type = material.item_type 
+        //         AND m.kode_warna = material.kode_warna 
+        //         AND m.color = material.color',
+        //         'left'
+        //     )
+        //     ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+        //     ->where('pemesanan.status_kirim', 'YA')
+        //     ->where('pemesanan.admin', $area)
+        //     ->where('master_order.no_model', $model)
+        //     ->groupBy('total_pemesanan.id_total_pemesanan')
+        //     ->orderBy('material.item_type, material.kode_warna, pemesanan.tgl_pakai', 'ASC');
 
         return $this->findAll();
     }
