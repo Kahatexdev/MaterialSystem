@@ -650,9 +650,10 @@ class PemesananModel extends Model
             WHERE pemesanan.admin = ?
             AND pemesanan.tgl_pakai = ?
             AND master_material.jenis = ?
+            AND pemesanan.status = ?
         ";
 
-        $this->db->query($query, [$area, $tgl_pakai, $jenis]);
+        $this->db->query($query, [$area, $tgl_pakai, $jenis, 'request']);
         return $this->db->affectedRows() > 0;
     }
 
