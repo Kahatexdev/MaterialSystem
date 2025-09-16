@@ -944,7 +944,7 @@ $routes->group(
         $routes->post('insertQtyCns', 'ApiController::insertQtyCns');
         $routes->post('saveListPemesanan', 'ApiController::saveListPemesanan');
         $routes->get('listPemesanan/(:any)', 'ApiController::listPemesanan/$1');
-        $routes->get('listReportPemesanan/(:any)', 'ApiController::listReportPemesanan/$1');
+        $routes->get('listReportPemesanan/(:any)/(:any)', 'ApiController::listReportPemesanan/$1/$2');
         $routes->post('getUpdateListPemesanan', 'ApiController::getUpdateListPemesanan');
         $routes->post('updateListPemesanan', 'ApiController::updateListPemesanan');
         $routes->post('kirimPemesanan', 'ApiController::kirimPemesanan');
