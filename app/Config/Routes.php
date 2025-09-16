@@ -839,9 +839,12 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('excelPPHInisial/(:any)/(:any)', 'ExcelController::excelPPHInisial/$1/$2');
     $routes->get('excelPPHDays/(:any)/(:any)', 'ExcelController::excelPPHDays/$1/$2');
 
-    $routes->get('pemesanan', 'PemesananController::pemesananArea');
     $routes->get('importPemesanan', 'GodController::importPemesanan');
-    $routes->get('filter_pemesananarea', 'PemesananController::pemesananArea');
+    // routes
+    $routes->get('pemesanan', 'PemesananController::pemesananArea');                 // view
+    $routes->get('filter_pemesananarea', 'PemesananController::pemesananArea');      // tetap untuk kompatibilitas
+    $routes->get('pemesanan/data', 'PemesananController::pemesananAreaData');        // endpoint DataTables (AJAX)
+
     $routes->post('getUpdateListPemesanan', 'PemesananController::getUpdateListPemesanan');
     $routes->post('updateListPemesanan', 'ApiController::updatePemesananArea');
     $routes->get('pemesanan/reportPemesananArea', 'PemesananController::reportPemesananArea');

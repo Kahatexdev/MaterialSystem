@@ -1425,89 +1425,217 @@ class PemesananController extends BaseController
         ];
         return view($this->role . '/pemesanan/detailPersiapanBarangPertgl', $data);
     }
+    // public function pemesananArea()
+    // {
+    //     function fetchApiData($url)
+    //     {
+    //         try {
+    //             $response = file_get_contents($url);
+    //             if ($response === false) {
+    //                 throw new \Exception("Error fetching data from $url");
+    //             }
+    //             $data = json_decode($response, true);
+    //             if (json_last_error() !== JSON_ERROR_NONE) {
+    //                 throw new \Exception("Invalid JSON response from $url");
+    //             }
+    //             return $data;
+    //         } catch (\Exception $e) {
+    //             error_log($e->getMessage());
+    //             return null;
+    //         }
+    //     }
+
+    //     $tglPakai = $this->request->getGet('tgl_pakai');
+    //     $noModel = $this->request->getGet('model');
+    //     $role = session()->get('role');
+    //     // dd($tglPakai);
+    //     if (!$tglPakai) {
+    //         $dataList = [];
+    //     } else {
+    //         $dataList = $this->pemesananModel->getDataPemesananArea($tglPakai, $noModel, $role);
+    //     }
+    //     // $dataList = [];
+    //     // dd($dataList);
+    //     foreach ($dataList as $key => $order) {
+    //         $dataList[$key]['ttl_kebutuhan_bb'] = 0;
+    //         $area = $order['admin'];
+    //         if (isset($order['no_model'], $order['item_type'], $order['kode_warna'])) {
+    //             $styleList = $this->materialModel->getStyleSizeByBb($order['no_model'], $order['item_type'], $order['kode_warna']);
+
+    //             if ($styleList) {
+    //                 $totalRequirement = 0;
+    //                 foreach ($styleList as $style) {
+    //                     if (isset($style['no_model'], $style['style_size'], $style['gw'], $style['composition'], $style['loss'])) {
+    //                         $orderApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model='
+    //                             . $order['no_model'] . '&style_size=' . urlencode($style['style_size']) . '&area=' . urlencode($area);
+
+    //                         // TAMBAHKAN INI UNTUK NAMPIL DI CONSOLE BROWSER
+    //                         echo "<script>console.log('API URL: " . htmlspecialchars($orderApiUrl) . "');</script>";
+
+    //                         $orderQty = fetchApiData($orderApiUrl);
+    //                         if (isset($orderQty['qty'])) {
+    //                             $requirement = $orderQty['qty'] * $style['gw'] * ($style['composition'] / 100) * (1 + ($style['loss'] / 100)) / 1000;
+    //                             $totalRequirement += $requirement;
+    //                             $dataList[$key]['qty'] = $orderQty['qty'];
+    //                         }
+    //                     }
+    //                 }
+    //                 $dataList[$key]['ttl_kebutuhan_bb'] = $totalRequirement;
+    //             }
+
+    //             $data = [
+    //                 'area' => $area,
+    //                 'no_model' => $order['no_model'],
+    //                 'item_type' => $order['item_type'],
+    //                 'kode_warna' => $order['kode_warna'],
+    //             ];
+
+    //             $pengiriman = $this->pengeluaranModel->getTotalPengiriman($data);
+    //             $dataList[$key]['ttl_pengiriman'] = $pengiriman['kgs_out'] ?? 0;
+
+    //             // Hitung sisa jatah
+    //             $dataList[$key]['sisa_jatah'] = $dataList[$key]['ttl_kebutuhan_bb'] - $dataList[$key]['ttl_pengiriman'];
+    //         }
+    //         // TAMPILKAN HASILNYA DI SINI
+    //         // dd($dataList[$key]['ttl_kebutuhan_bb']);
+    //     }
+
+    //     $data = [
+    //         'active' => $this->active,
+    //         'title' => 'Pemesanan',
+    //         'role' => $this->role,
+    //         'dataList' => $dataList,
+    //     ];
+    //     return view($this->role . '/pemesanan/index', $data);
+    // }
+
     public function pemesananArea()
     {
-        function fetchApiData($url)
-        {
-            try {
-                $response = file_get_contents($url);
-                if ($response === false) {
-                    throw new \Exception("Error fetching data from $url");
-                }
-                $data = json_decode($response, true);
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    throw new \Exception("Invalid JSON response from $url");
-                }
-                return $data;
-            } catch (\Exception $e) {
-                error_log($e->getMessage());
-                return null;
-            }
+        return view($this->role . '/pemesanan/index', [
+            'active' => $this->active,
+            'title'  => 'Pemesanan',
+            'role'   => $this->role,
+        ]);
+    }
+
+
+    public function pemesananAreaData()
+    {
+        // --- ambil parameter DataTables
+        $draw   = (int)($this->request->getGet('draw') ?? 1);
+        $start  = (int)($this->request->getGet('start') ?? 0);
+        $length = (int)($this->request->getGet('length') ?? 35);
+
+        $tglPakai = trim($this->request->getGet('tgl_pakai') ?? '');
+        $noModel  = trim($this->request->getGet('model') ?? '');
+        $area     = trim($this->request->getGet('area') ?? '');
+        $search   = trim($this->request->getGet('search')['value'] ?? '');
+        $role     = session()->get('role') ?? 'user';
+
+        // jika tgl_pakai kosong → kembalikan kosong (sesuai request sebelumnya)
+        if ($tglPakai === '') {
+            return $this->response->setJSON([
+                'draw' => $draw,
+                'recordsTotal' => 0,
+                'recordsFiltered' => 0,
+                'data' => []
+            ]);
         }
 
-        $tglPakai = $this->request->getGet('tgl_pakai');
-        $noModel = $this->request->getGet('model');
-        $role = session()->get('role');
-        // dd($tglPakai);
-        if (!$tglPakai) {
-            $dataList = [];
-        } else {
-            $dataList = $this->pemesananModel->getDataPemesananArea($tglPakai, $noModel, $role);
-        }
-        // $dataList = [];
-        // dd($dataList);
-        foreach ($dataList as $key => $order) {
-            $dataList[$key]['ttl_kebutuhan_bb'] = 0;
-            $area = $order['admin'];
+        // ambil data dasar (tanpa paging dulu)
+        $rows = $this->pemesananModel->getDataPemesananArea($tglPakai, $noModel, $role, $area, $search);
+
+        $recordsTotal    = $rows['meta']['total'] ?? count($rows['data']);
+        $recordsFiltered = $rows['meta']['filtered'] ?? count($rows['data']);
+        $dataList        = $rows['data'];
+
+        // H I T U N G  tambahan kebutuhan & pengiriman per baris
+        // (dipindah ke endpoint AJAX agar view ringan)
+        $enhanced = [];
+        foreach ($dataList as $order) {
+            $order['ttl_kebutuhan_bb'] = 0.0;
+            $areaRow = $order['admin'];
             if (isset($order['no_model'], $order['item_type'], $order['kode_warna'])) {
-                $styleList = $this->materialModel->getStyleSizeByBb($order['no_model'], $order['item_type'], $order['kode_warna']);
+                // ambil style size & parameter gw/composition/loss
+                $styleList = $this->materialModel->getStyleSizeByBb(
+                    $order['no_model'],
+                    $order['item_type'],
+                    $order['kode_warna']
+                );
 
                 if ($styleList) {
-                    $totalRequirement = 0;
+                    $totalRequirement = 0.0;
                     foreach ($styleList as $style) {
                         if (isset($style['no_model'], $style['style_size'], $style['gw'], $style['composition'], $style['loss'])) {
                             $orderApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model='
-                                . $order['no_model'] . '&style_size=' . urlencode($style['style_size']) . '&area=' . urlencode($area);
+                                . $order['no_model'] . '&style_size=' . urlencode($style['style_size']) . '&area=' . urlencode($areaRow);
 
-                            // TAMBAHKAN INI UNTUK NAMPIL DI CONSOLE BROWSER
-                            echo "<script>console.log('API URL: " . htmlspecialchars($orderApiUrl) . "');</script>";
-
-                            $orderQty = fetchApiData($orderApiUrl);
+                            // panggil helper lokal (tanpa echo di view)
+                            $orderQty = $this->fetchApiDataSilently($orderApiUrl);
                             if (isset($orderQty['qty'])) {
                                 $requirement = $orderQty['qty'] * $style['gw'] * ($style['composition'] / 100) * (1 + ($style['loss'] / 100)) / 1000;
                                 $totalRequirement += $requirement;
-                                $dataList[$key]['qty'] = $orderQty['qty'];
+                                $order['qty'] = $orderQty['qty'];
                             }
                         }
                     }
-                    $dataList[$key]['ttl_kebutuhan_bb'] = $totalRequirement;
+                    $order['ttl_kebutuhan_bb'] = $totalRequirement;
                 }
 
-                $data = [
-                    'area' => $area,
-                    'no_model' => $order['no_model'],
+                // total pengiriman aktual area
+                $reqPengiriman = [
+                    'area'      => $areaRow,
+                    'no_model'  => $order['no_model'],
                     'item_type' => $order['item_type'],
                     'kode_warna' => $order['kode_warna'],
                 ];
-
-                $pengiriman = $this->pengeluaranModel->getTotalPengiriman($data);
-                $dataList[$key]['ttl_pengiriman'] = $pengiriman['kgs_out'] ?? 0;
-
-                // Hitung sisa jatah
-                $dataList[$key]['sisa_jatah'] = $dataList[$key]['ttl_kebutuhan_bb'] - $dataList[$key]['ttl_pengiriman'];
+                $pengiriman = $this->pengeluaranModel->getTotalPengiriman($reqPengiriman);
+                $order['ttl_pengiriman'] = $pengiriman['kgs_out'] ?? 0;
+                $order['sisa_jatah']     = ($order['ttl_kebutuhan_bb'] ?? 0) - ($order['ttl_pengiriman'] ?? 0);
             }
-            // TAMPILKAN HASILNYA DI SINI
-            // dd($dataList[$key]['ttl_kebutuhan_bb']);
+
+            // kolom turunan
+            $ttl_kg_pesan  = (float)$order['qty_pesan'] - (float)$order['qty_sisa'];
+            $ttl_cns_pesan = (int)$order['cns_pesan'] - (int)$order['cns_sisa'];
+
+            $order['_ttl_kg_pesan']  = number_format($ttl_kg_pesan, 2);
+            $order['_ttl_cns_pesan'] = $ttl_cns_pesan;
+            $order['_ttl_pengiriman'] = number_format((float)$order['ttl_pengiriman'], 2);
+            $order['_sisa_jatah']    = number_format((float)$order['sisa_jatah'], 2);
+            $order['_status_jatah']  = ($order['sisa_jatah'] > 0)
+                ? (($ttl_kg_pesan >= $order['sisa_jatah']) ? 'Pemesanan Melebihi Jatah' : '')
+                : 'Habis Jatah';
+
+            $enhanced[] = $order;
         }
 
-        $data = [
-            'active' => $this->active,
-            'title' => 'Pemesanan',
-            'role' => $this->role,
-            'dataList' => $dataList,
-        ];
-        return view($this->role . '/pemesanan/index', $data);
+        // paging di level PHP (opsional, bisa juga dilakukan di query builder jika mau)
+        // $paged = array_slice($enhanced, $start, $length);
+
+        return $this->response->setJSON([
+            'draw' => $draw,
+            'recordsTotal'    => count($enhanced),   // opsional, biar konsisten
+            'recordsFiltered' => count($enhanced),
+            'data' => $enhanced,                     // kirim full
+        ]);
     }
+
+    /**
+     * Helper panggil API tanpa echo.
+     */
+    private function fetchApiDataSilently($url)
+    {
+        try {
+            $response = @file_get_contents($url);
+            if ($response === false) return [];
+            $data = json_decode($response, true);
+            return (json_last_error() === JSON_ERROR_NONE) ? $data : [];
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+
     public function getUpdateListPemesanan()
     {
         $data = $this->request->getPost([
