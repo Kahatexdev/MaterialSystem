@@ -2404,7 +2404,7 @@ class WarehouseController extends BaseController
             'no_model' => $no_model,
             'cluster' => $cluster
         ];
-        return view($this->role . '/warehouse/form-other-in', $data);
+        return view($this->role . '/warehouse/form-other-inNew', $data);
     }
     public function getItemTypeForOtherIn($idOrder)
     {
