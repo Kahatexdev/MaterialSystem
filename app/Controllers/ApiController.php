@@ -195,7 +195,7 @@ class ApiController extends ResourceController
                         $search
                     );
                 // dd($allCoverings);
-                if (! empty($allCoverings)) {
+                if (!empty($allCoverings)) {
                     foreach ($allCoverings as $coverData) {
                         $newRow = $row;
                         $newRow['qty_po'] = $masterQty;

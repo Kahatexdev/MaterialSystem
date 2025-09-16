@@ -83,7 +83,7 @@
                                             <label class="form-label">Kategori Retur</label>
                                             <select class="form-select select-kategori-retur" name="kategori_retur" required>
                                                 <option> Pilih Kategori</option>
-                                                <?php foreach ($kategori as $kt): ?>
+                                                <?php foreach ($kategori as $kt) : ?>
                                                     <option value="<?= $kt['nama_kategori'] ?>"> <?= $kt['nama_kategori'] ?> | <?= $kt['tipe_kategori'] ?></option>
 
                                                 <?php endforeach ?>
