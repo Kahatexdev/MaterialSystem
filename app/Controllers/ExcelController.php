@@ -3184,7 +3184,19 @@ class ExcelController extends BaseController
             $groupedData[$row['group']][] = $row;
         }
 
-        // dd($groupedData);
+        // Urutkan setiap group berdasarkan 'admin' (area) dan 'nama_cluster'
+        foreach ($groupedData as $group => &$rows) {
+            usort($rows, function ($a, $b) {
+                // urutkan berdasarkan admin dulu
+                $cmp = strcmp($a['admin'], $b['admin']);
+                if ($cmp === 0) {
+                    // kalau admin sama, urutkan nama_cluster
+                    return strcmp($a['nama_cluster'], $b['nama_cluster']);
+                }
+                return $cmp;
+            });
+        }
+        unset($rows); // biar reference aman
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
