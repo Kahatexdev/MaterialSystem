@@ -816,18 +816,18 @@ class ExcelController extends BaseController
 
         // Judul
         $sheet->setCellValue('A1', 'Datang Benang');
-        $sheet->mergeCells('A1:U1'); // Menggabungkan sel untuk judul
+        $sheet->mergeCells('A1:V1'); // Menggabungkan sel untuk judul
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["No", "Foll Up", "No Model", "No Order", "Buyer", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "KG Pesan", "Tanggal Datang", "Kgs Datang", "Cones Datang", "LOT Datang", "No Surat Jalan", "LMD", "GW", "Harga", "Nama Cluster"];
+        $header = ["No", "Foll Up", "No Model", "No Order", "Buyer", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "KG Pesan", "Tanggal Datang", "Kgs Datang", "Cones Datang", "LOT Datang", "No Surat Jalan", "LMD", "GW", "Harga", "Nama Cluster", "Admin"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
-        $sheet->getStyle('A3:U3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:U3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A3:U3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3:V3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:V3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:V3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         // Data
         $row = 4;
@@ -854,7 +854,8 @@ class ExcelController extends BaseController
                     $item['l_m_d'],
                     number_format($item['gw_kirim'], 2),
                     number_format($item['harga'], 2),
-                    $item['nama_cluster']
+                    $item['nama_cluster'],
+                    $item['admin']
                 ]
             ], NULL, 'A' . $row);
             $row++;
@@ -869,16 +870,16 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle('A3:U' . ($row - 1))->applyFromArray($styleArray);
+        $sheet->getStyle('A3:V' . ($row - 1))->applyFromArray($styleArray);
 
         // Set auto width untuk setiap kolom
-        foreach (range('A', 'U') as $column) {
+        foreach (range('A', 'V') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Set isi tabel agar rata tengah
-        $sheet->getStyle('A4:U' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A4:U' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A4:V' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:V' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
         $fileName = 'Report_Datang_Benang_' . date('Y-m-d') . '.xlsx';
@@ -3184,7 +3185,19 @@ class ExcelController extends BaseController
             $groupedData[$row['group']][] = $row;
         }
 
-        // dd($groupedData);
+        // Urutkan setiap group berdasarkan 'admin' (area) dan 'nama_cluster'
+        foreach ($groupedData as $group => &$rows) {
+            usort($rows, function ($a, $b) {
+                // urutkan berdasarkan admin dulu
+                $cmp = strcmp($a['admin'], $b['admin']);
+                if ($cmp === 0) {
+                    // kalau admin sama, urutkan nama_cluster
+                    return strcmp($a['nama_cluster'], $b['nama_cluster']);
+                }
+                return $cmp;
+            });
+        }
+        unset($rows); // biar reference aman
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -3401,7 +3414,7 @@ class ExcelController extends BaseController
             'KK2A',
             'KK2B',
             'KK2C',
-            'KK5',
+            'KK5G',
             'KK7K',
             'KK7L',
             'KK8D',
@@ -3423,19 +3436,68 @@ class ExcelController extends BaseController
             $col++;
         }
 
+        // --- Grouping data ---
+        $grouped = [];
+        foreach ($data as $item) {
+            $key = $item['tgl_pakai'] . '|' . $item['item_type'] . '|' . $item['kode_warna'];
+
+            $noModel = $item['no_model'];
+            if ($item['po_tambahan'] == '1') {
+                $noModel .= '(+)';
+            }
+
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'tgl_pakai'   => $item['tgl_pakai'],
+                    'item_type'   => $item['item_type'],
+                    'color'       => $item['color'],
+                    'kode_warna'  => $item['kode_warna'],
+                    'no_models'   => [$noModel],
+                    'ttl_jl_mc'   => (float) $item['ttl_jl_mc'],
+                    'ttl_kg'      => (float) $item['ttl_kg'],
+                    'ttl_cns'     => (float) $item['ttl_cns'],
+                    'admin'       => $item['admin'], // biar area tetap ikut
+                ];
+            } else {
+                $grouped[$key]['no_models'][] = $noModel;
+                $grouped[$key]['ttl_jl_mc']  += (float) $item['ttl_jl_mc'];
+                $grouped[$key]['ttl_kg']     += (float) $item['ttl_kg'];
+                $grouped[$key]['ttl_cns']    += (float) $item['ttl_cns'];
+            }
+        }
+
+        // --- Buat hasil final ---
+        $finalData = [];
+        foreach ($grouped as $g) {
+            // Hapus duplikat no_model
+            $uniqueNoModels = array_unique($g['no_models']);
+
+            $finalData[] = [
+                'tgl_pakai'  => $g['tgl_pakai'],
+                'item_type'  => $g['item_type'],
+                'color'      => $g['color'],
+                'kode_warna' => $g['kode_warna'],
+                'no_model'   => implode(', ', $uniqueNoModels),
+                'ttl_jl_mc'  => $g['ttl_jl_mc'],
+                'ttl_kg'     => $g['ttl_kg'],
+                'ttl_cns'    => $g['ttl_cns'],
+                'admin'      => $g['admin'],
+            ];
+        }
+
         // Menulis data
         $row = 4;
         // Controller export (cuplikan perubahan saja)
-        foreach ($data as $item) {
+        foreach ($finalData as $item) {
             // Row 1: JALAN MC
             $sheet->setCellValue('A' . $row, $item['tgl_pakai']);
             $sheet->setCellValue('B' . $row, $item['item_type']);
             $sheet->setCellValue('C' . $row, $item['color']);
             $sheet->setCellValue('D' . $row, $item['kode_warna']);
             // ganti ini:
-            // $sheet->setCellValue('E' . $row, $item['no_model']);
+            $sheet->setCellValue('E' . $row, $item['no_model']);
             // menjadi:
-            $sheet->setCellValue('E' . $row, $item['no_model_concat'] ?? '');
+            // $sheet->setCellValue('E' . $row, $item['no_model_concate'] ?? '');
 
             $sheet->setCellValue('F' . $row, 'Sum - JALAN MC:');
             $sheet->setCellValue('G' . $row, '=SUM(H' . $row . ':U' . $row . ')');
@@ -3578,7 +3640,7 @@ class ExcelController extends BaseController
             'KK2A',
             'KK2B',
             'KK2C',
-            'KK5',
+            'KK5G',
             'KK7K',
             'KK7L',
             'KK8D',
@@ -3600,25 +3662,77 @@ class ExcelController extends BaseController
             $col++;
         }
         // dd ($data);
+
+        // --- Grouping data ---
+        $grouped = [];
+        foreach ($data as $item) {
+            $key = $item['tgl_pakai'] . '|' . $item['item_type'] . '|' . $item['kode_warna'];
+
+            $noModel = $item['no_model'];
+            if ($item['po_tambahan'] == '1') {
+                $noModel .= '(+)';
+            }
+
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'tgl_pakai'   => $item['tgl_pakai'],
+                    'item_type'   => $item['item_type'],
+                    'color'       => $item['color'],
+                    'kode_warna'  => $item['kode_warna'],
+                    'no_models'   => [$noModel],
+                    'ttl_jl_mc'   => (float) $item['ttl_jl_mc'],
+                    'ttl_kg'      => (float) $item['ttl_kg'],
+                    'ttl_cns'     => (float) $item['ttl_cns'],
+                    'admin'       => $item['admin'], // biar area tetap ikut
+                ];
+            } else {
+                $grouped[$key]['no_models'][] = $noModel;
+                $grouped[$key]['ttl_jl_mc']  += (float) $item['ttl_jl_mc'];
+                $grouped[$key]['ttl_kg']     += (float) $item['ttl_kg'];
+                $grouped[$key]['ttl_cns']    += (float) $item['ttl_cns'];
+            }
+        }
+
+        // --- Buat hasil final ---
+        $finalData = [];
+        foreach ($grouped as $g) {
+            // Hapus duplikat no_model
+            $uniqueNoModels = array_unique($g['no_models']);
+
+            $finalData[] = [
+                'tgl_pakai'  => $g['tgl_pakai'],
+                'item_type'  => $g['item_type'],
+                'color'      => $g['color'],
+                'kode_warna' => $g['kode_warna'],
+                'no_model'   => implode(', ', $uniqueNoModels),
+                'ttl_jl_mc'  => $g['ttl_jl_mc'],
+                'ttl_kg'     => $g['ttl_kg'],
+                'ttl_cns'    => $g['ttl_cns'],
+                'admin'      => $g['admin'],
+            ];
+        }
+
         // Menulis data
         $row = 4;
-        foreach ($data as $item) {
+        // Controller export (cuplikan perubahan saja)
+        foreach ($finalData as $item) {
             // Row 1: JALAN MC
             $sheet->setCellValue('A' . $row, $item['tgl_pakai']);
             $sheet->setCellValue('B' . $row, $item['item_type']);
             $sheet->setCellValue('C' . $row, $item['color']);
             $sheet->setCellValue('D' . $row, $item['kode_warna']);
+            // ganti ini:
             $sheet->setCellValue('E' . $row, $item['no_model']);
+            // menjadi:
+            // $sheet->setCellValue('E' . $row, $item['no_model_concate'] ?? '');
+
             $sheet->setCellValue('F' . $row, 'Sum - JALAN MC:');
             $sheet->setCellValue('G' . $row, '=SUM(H' . $row . ':U' . $row . ')');
-            // Isi per area
+
+            // Isi per area mengikuti admin
             $col = 'H';
             foreach ($areaHeaders as $area) {
-                if ($item['admin'] == $area) {
-                    $sheet->setCellValue($col . $row, isset($item['ttl_jl_mc']) ? $item['ttl_jl_mc'] : 0);
-                } else {
-                    $sheet->setCellValue($col . $row, 0);
-                }
+                $sheet->setCellValue($col . $row, ($item['admin'] == $area) ? ($item['ttl_jl_mc'] ?? 0) : 0);
                 $col++;
             }
             $row++;
@@ -3628,11 +3742,7 @@ class ExcelController extends BaseController
             $sheet->setCellValue('G' . $row, '=SUM(H' . $row . ':U' . $row . ')');
             $col = 'H';
             foreach ($areaHeaders as $area) {
-                if ($item['admin'] == $area) {
-                    $sheet->setCellValue($col . $row, isset($item['ttl_kg']) ? $item['ttl_kg'] : 0);
-                } else {
-                    $sheet->setCellValue($col . $row, 0);
-                }
+                $sheet->setCellValue($col . $row, ($item['admin'] == $area) ? ($item['ttl_kg'] ?? 0) : 0);
                 $col++;
             }
             $row++;
@@ -3642,15 +3752,12 @@ class ExcelController extends BaseController
             $sheet->setCellValue('G' . $row, '=SUM(H' . $row . ':U' . $row . ')');
             $col = 'H';
             foreach ($areaHeaders as $area) {
-                if ($item['admin'] == $area) {
-                    $sheet->setCellValue($col . $row, isset($item['ttl_cns']) ? $item['ttl_cns'] : 0);
-                } else {
-                    $sheet->setCellValue($col . $row, 0);
-                }
+                $sheet->setCellValue($col . $row, ($item['admin'] == $area) ? ($item['ttl_cns'] ?? 0) : 0);
                 $col++;
             }
             $row++;
         }
+
 
         // Total global
         $sheet->mergeCells("A{$row}:F{$row}")->setCellValue("A{$row}", 'Total Sum - JALAN MC');
@@ -3678,12 +3785,13 @@ class ExcelController extends BaseController
             'CONES' => '*CONES*',
         ];
 
-        // Untuk setiap kategori, hitung total per area sesuai areaHeaders
         $row = $row - 3;
         foreach ($categories as $label => $keyword) {
+            // $sheet->mergeCells("A{$row}:F{$row}")->setCellValue("A{$row}", "Total Per Area - {$label}");
+            // $sheet->getStyle("A{$row}")->getFont()->setBold(true);
+
             $colLetter = 'H';
-            foreach ($areaHeaders as $area) {
-                // SUMIF untuk kolom area spesifik
+            foreach ($areaHeaders as $_) {
                 $formula = "=SUMIF(F{$totalRowStart}:F" . ($row - 1) . ",\"{$keyword}\",{$colLetter}{$totalRowStart}:{$colLetter}" . ($row - 1) . ")";
                 $sheet->setCellValue("{$colLetter}{$row}", $formula);
                 $sheet->getStyle("{$colLetter}{$row}")->getFont()->setBold(true);

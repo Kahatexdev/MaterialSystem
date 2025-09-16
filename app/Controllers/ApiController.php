@@ -909,11 +909,13 @@ class ApiController extends ResourceController
     {
         $jenis = $this->request->getGet('jenis') ?? '';
         $tanggal_pakai = $this->request->getGet('tanggal_pakai') ?? '';
+        $alasan = $this->request->getGet('alasan') ?? '';
 
         $data = [
             'area' => $area,
             'jenis' => $jenis,
             'tanggal_pakai' => $tanggal_pakai,
+            'alasan_tambahan_waktu' => $alasan,
         ];
 
         $update = $this->pemesananModel->reqAdditionalTime($data);
@@ -1572,7 +1574,7 @@ class ApiController extends ResourceController
         // Inisialisasi Dompdf
         $dompdf = new Dompdf();
         $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
 
         // Auto download
