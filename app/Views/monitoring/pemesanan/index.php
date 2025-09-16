@@ -773,7 +773,7 @@
             };
 
             // Kirim data ke server menggunakan AJAX
-            fetch("http://172.23.44.14/MaterialSystem/public/api/kirimPemesanan", {
+            fetch("http://192.168.44.14/MaterialSystem/public/api/kirimPemesanan", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

@@ -1717,7 +1717,7 @@ class WarehouseController extends BaseController
 
             // getStartMc
             if (!isset($startMc[$model])) {
-                $url = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . urlencode($model);
+                $url = 'http://192.168.44.14/CapacityApps/public/api/getStartMc/' . urlencode($model);
                 $resp = @file_get_contents($url);
                 if ($resp !== false) {
                     $json = json_decode($resp, true);
@@ -2404,7 +2404,7 @@ class WarehouseController extends BaseController
             'no_model' => $no_model,
             'cluster' => $cluster
         ];
-        return view($this->role . '/warehouse/form-other-in', $data);
+        return view($this->role . '/warehouse/form-other-inNew', $data);
     }
     public function getItemTypeForOtherIn($idOrder)
     {
@@ -2902,7 +2902,7 @@ class WarehouseController extends BaseController
 
         // 2) Siapkan HTTP client
         $client = \Config\Services::curlrequest([
-            'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
+            'baseURI' => 'http://192.168.44.14/CapacityApps/public/api/',
             'timeout' => 5
         ]);
 
