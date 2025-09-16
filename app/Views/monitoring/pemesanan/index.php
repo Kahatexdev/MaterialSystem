@@ -136,27 +136,27 @@
     <div class="card">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                    <div class="form-group me-2">
-                        <label>No Model</label>
-                        <input type="text" class="form-control form-control-sm" id="no_model" placeholder="No Model">
-                    </div>
-                    <div class="form-group me-2">
-                        <label>Area</label>
-                        <input type="text" class="form-control form-control-sm" id="area" placeholder="Area">
-                        <!-- kalau mau Select2, tinggal ganti input ini -->
-                    </div>
-                    <div class="form-group me-2">
-                        <label>Tanggal Pakai</label>
-                        <input type="date" class="form-control form-control-sm" id="tgl_pakai">
-                    </div>
-                    <div class="flex-grow-1"></div> <!-- spacer -->
-                    <button class="btn btn-secondary btn-sm align-self-end me-2" id="btnReset">
-                        <i class="fa fa-undo"></i> Reset
-                    </button>
+                <div class="form-group me-2">
+                    <label>No Model</label>
+                    <input type="text" class="form-control form-control-sm" id="no_model" placeholder="No Model">
+                </div>
+                <div class="form-group me-2">
+                    <label>Area</label>
+                    <input type="text" class="form-control form-control-sm" id="area" placeholder="Area">
+                    <!-- kalau mau Select2, tinggal ganti input ini -->
+                </div>
+                <div class="form-group me-2">
+                    <label>Tanggal Pakai</label>
+                    <input type="date" class="form-control form-control-sm" id="tgl_pakai">
+                </div>
+                <div class="flex-grow-1"></div> <!-- spacer -->
+                <button class="btn btn-secondary btn-sm align-self-end me-2" id="btnReset">
+                    <i class="fa fa-undo"></i> Reset
+                </button>
 
-                    <button class="btn btn-info btn-sm align-self-end" id="btnFilter">
-                        <i class="fa fa-search"></i> Search
-                    </button>
+                <button class="btn btn-info btn-sm align-self-end" id="btnFilter">
+                    <i class="fa fa-search"></i> Search
+                </button>
 
             </div>
         </div>

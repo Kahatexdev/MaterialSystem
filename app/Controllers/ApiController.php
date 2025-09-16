@@ -96,12 +96,14 @@ class ApiController extends ResourceController
     }
 
     // v3
-    public function statusbahanbaku($noModel)
+    public function statusbahanbaku()
     {
+        $model = $this->request->getGet('model') ?? null;
         $search = $this->request->getGet('search') ?? null;
-        $rows   = $this->materialModel->MaterialPDK($noModel);
+        $rows   = $this->materialModel->MaterialPDK($model, $search);
+
         if (empty($rows)) {
-            log_message('error', "MaterialPDK kosong untuk model: $noModel");
+            log_message('error', "MaterialPDK kosong untuk model: $model");
             return $this->respond([], 200);
         }
         // $rows   = $this->openPoModel->MaterialPDK($noModel);
@@ -109,7 +111,7 @@ class ApiController extends ResourceController
 
         // Field‑field schedule yang ingin di-merge (tidak termasuk 'qty_po'!)
         $fields = [
-            'jenis',
+
             'start_mc',
             'kg_celup',
             'lot_urut',
@@ -155,7 +157,7 @@ class ApiController extends ResourceController
                         $row['kode_warna'],
                         $search
                     );
-                // dd ($allSchedules);
+
                 if (! empty($allSchedules)) {
                     foreach ($allSchedules as $scheduleData) {
                         // Start dangan data master
@@ -178,8 +180,10 @@ class ApiController extends ResourceController
                     $newRow = $row;
                     $newRow['qty_po'] = $masterQty;
                     foreach ($fields as $f) {
+
                         $newRow[$f] = '';
                     }
+
                     $res[] = $newRow;
                 }
             } else if (in_array($jenis, ['KARET', 'SPANDEX'])) {
