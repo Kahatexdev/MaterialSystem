@@ -262,16 +262,49 @@
                     dataTable.clear().draw();
 
                     if (response.length > 0) {
+                        let grouped = {};
+
                         $.each(response, function(index, item) {
+                            let key = item.tgl_pakai + "|" + item.item_type + "|" + item.kode_warna;
+
+                            let noModel = item.no_model;
+                            if (item.po_tambahan === '1') {
+                                noModel += '(+)';
+                            }
+
+                            if (!grouped[key]) {
+                                grouped[key] = {
+                                    tgl_pakai: item.tgl_pakai,
+                                    item_type: item.item_type,
+                                    color: item.color,
+                                    kode_warna: item.kode_warna,
+                                    no_model: [noModel],
+                                    ttl_jl_mc: parseFloat(item.ttl_jl_mc) || 0,
+                                    ttl_kg: parseFloat(item.ttl_kg) || 0,
+                                    ttl_cns: parseFloat(item.ttl_cns) || 0
+                                };
+                            } else {
+                                grouped[key].no_model.push(noModel);
+                                grouped[key].ttl_jl_mc += parseFloat(item.ttl_jl_mc) || 0;
+                                grouped[key].ttl_kg += parseFloat(item.ttl_kg) || 0;
+                                grouped[key].ttl_cns += parseFloat(item.ttl_cns) || 0;
+                            }
+                        });
+
+                        // masukkan hasil grouping ke DataTable
+                        $.each(grouped, function(key, g) {
+                            // hapus duplikat no_model
+                            let uniqueNoModel = [...new Set(g.no_model)];
+
                             dataTable.row.add([
-                                item.tgl_pakai,
-                                item.item_type,
-                                item.color,
-                                item.kode_warna,
-                                item.no_model_concat,
-                                item.ttl_jl_mc,
-                                item.ttl_kg,
-                                item.ttl_cns
+                                g.tgl_pakai,
+                                g.item_type,
+                                g.color,
+                                g.kode_warna,
+                                uniqueNoModel.join(', '), // hanya tampil sekali
+                                g.ttl_jl_mc,
+                                g.ttl_kg,
+                                g.ttl_cns
                             ]).draw(false);
                         });
 
