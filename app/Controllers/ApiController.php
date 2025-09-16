@@ -1572,7 +1572,7 @@ class ApiController extends ResourceController
         // Inisialisasi Dompdf
         $dompdf = new Dompdf();
         $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
 
         // Auto download
