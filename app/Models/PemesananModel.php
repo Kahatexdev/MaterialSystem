@@ -561,18 +561,28 @@ class PemesananModel extends Model
         // return $result ? $this->db->affectedRows() : false;
     }
 
+    // Model (mis. PemesananModel.php)
     public function getFilterPemesananKaret($tanggal_awal, $tanggal_akhir)
     {
-        $this->select('pemesanan.*, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
+        $this->select("
+        pemesanan.tgl_pakai,
+        material.item_type,
+        material.color,
+        material.kode_warna,
+        pemesanan.admin,
+        GROUP_CONCAT(DISTINCT master_order.no_model ORDER BY master_order.no_model SEPARATOR ', ') AS no_model_concat,
+        SUM(COALESCE(tp.ttl_jl_mc,0)) AS ttl_jl_mc,
+        SUM(COALESCE(tp.ttl_kg,0))    AS ttl_kg,
+        SUM(COALESCE(tp.ttl_cns,0))   AS ttl_cns
+    ")
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            // ->where('tp.ttl_jl_mc >', 0)
             ->where('pemesanan.status_kirim', 'YA')
             ->where('master_material.jenis', 'KARET');
 
-        // Filter berdasarkan tanggal
+        // Filter tanggal pakai
         if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
             $this->groupStart();
             if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
@@ -580,14 +590,24 @@ class PemesananModel extends Model
                     ->where('pemesanan.tgl_pakai <=', $tanggal_akhir);
             } elseif (!empty($tanggal_awal)) {
                 $this->where('pemesanan.tgl_pakai >=', $tanggal_awal);
-            } elseif (!empty($tanggal_akhir)) {
+            } else { // hanya $tanggal_akhir
                 $this->where('pemesanan.tgl_pakai <=', $tanggal_akhir);
             }
             $this->groupEnd();
         }
-        $this->groupBy('tp.id_total_pemesanan');
+
+        // Penting: group by kunci penggabungan + admin (area)
+        $this->groupBy([
+            'pemesanan.tgl_pakai',
+            'material.item_type',
+            'material.kode_warna',
+            'material.color',
+            'pemesanan.admin',
+        ]);
+
         return $this->findAll();
     }
+
 
     public function getFilterPemesananSpandex($tanggal_awal, $tanggal_akhir)
     {
