@@ -538,7 +538,8 @@ class ApiController extends ResourceController
     }
     public function listPemesanan($area)
     {
-        $dataList = $this->pemesananModel->getListPemesananByArea($area);
+        $pdk = $this->request->getGet('searchPdk') ?? '';
+        $dataList = $this->pemesananModel->getListPemesananByArea($area, $pdk);
 
         return $this->respond($dataList, 200);
     }
