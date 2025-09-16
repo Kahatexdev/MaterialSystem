@@ -27,6 +27,67 @@
         top: 50%;
         transform: translateY(-50%);
     }
+
+    #manualTable th,
+    #manualTable td {
+        white-space: normal;
+        /* biar teks panjang bisa turun */
+        word-wrap: break-word;
+        /* pecah kata panjang */
+        vertical-align: middle;
+    }
+
+    #manualTable th:nth-child(2),
+    #manualTable td:nth-child(2) {
+        width: 50px;
+    }
+
+    #manualTable th:nth-child(3),
+    #manualTable td:nth-child(3) {
+        width: 50px;
+    }
+
+    #manualTable th:nth-child(4),
+    #manualTable td:nth-child(4) {
+        width: 60px;
+    }
+
+    #manualTable th:nth-child(5),
+    #manualTable td:nth-child(5) {
+        width: 60px;
+    }
+
+    #manualTable th:nth-child(6),
+    #manualTable td:nth-child(6) {
+        width: 50px;
+    }
+
+    #manualTable th:nth-child(7),
+    #manualTable td:nth-child(7) {
+        width: 30px;
+    }
+
+    #manualTable th:nth-child(8),
+    #manualTable td:nth-child(8) {
+        width: 30px;
+    }
+
+    #manualTable th:nth-child(9),
+    #manualTable td:nth-child(9) {
+        width: 30px;
+    }
+
+    #manualTable th:nth-child(10),
+    #manualTable td:nth-child(10) {
+        width: 150px;
+    }
+
+    #manualTable th:nth-child(11),
+    #manualTable td:nth-child(11) {
+        width: 100px;
+    }
+
+    /* Lot */
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
