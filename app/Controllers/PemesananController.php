@@ -933,7 +933,11 @@ class PemesananController extends BaseController
                 );
 
                 if ($qty >= 0) {
-                    $kebutuhan = (($qty * $data['gw'] * ($data['composition'] / 100)) * (1 + ($data['loss'] / 100)) / 1000) + $kgPoTambahan;
+                    if (isset($pemesanan['item_type']) && stripos($pemesanan['item_type'], 'JHT') !== false) {
+                        $kebutuhan = $data['kgs'] ?? 0;
+                    } else {
+                        $kebutuhan = (($qty * $data['gw'] * ($data['composition'] / 100)) * (1 + ($data['loss'] / 100)) / 1000) + $kgPoTambahan;
+                    }
                     $pem['ttl_keb'] = $ttlKeb;
                 }
                 $ttlKeb += $kebutuhan;
@@ -996,7 +1000,11 @@ class PemesananController extends BaseController
                 );
 
                 if ($qty >= 0) {
-                    $kebutuhan = (($qty * $data['gw'] * ($data['composition'] / 100)) * (1 + ($data['loss'] / 100)) / 1000) + $kgPoTambahan;
+                    if (isset($pemesanan['item_type']) && stripos($pemesanan['item_type'], 'JHT') !== false) {
+                        $kebutuhan = $data['kgs'] ?? 0;
+                    } else {
+                        $kebutuhan = (($qty * $data['gw'] * ($data['composition'] / 100)) * (1 + ($data['loss'] / 100)) / 1000) + $kgPoTambahan;
+                    }
                     $retur['ttl_keb'] = $ttlKeb;
                 }
                 $ttlKeb += $kebutuhan;
@@ -1585,7 +1593,11 @@ class PemesananController extends BaseController
                 );
 
                 if ($qty >= 0) {
-                    $kebutuhan = (($qty * $data['gw'] * ($data['composition'] / 100)) * (1 + ($data['loss'] / 100)) / 1000) + $kgPoTambahan;
+                    if (isset($pemesanan['item_type']) && stripos($pemesanan['item_type'], 'JHT') !== false) {
+                        $kebutuhan = $data['kgs'] ?? 0;
+                    } else {
+                        $kebutuhan = (($qty * $data['gw'] * ($data['composition'] / 100)) * (1 + ($data['loss'] / 100)) / 1000) + $kgPoTambahan;
+                    }
                     $pemesanan['ttl_keb'] = $ttlKeb;
                 }
                 // dd($kgPoTambahan);
@@ -1653,7 +1665,11 @@ class PemesananController extends BaseController
                 );
 
                 if ($qty >= 0) {
-                    $kebutuhan = (($qty * $data['gw'] * ($data['composition'] / 100)) * (1 + ($data['loss'] / 100)) / 1000) + $kgPoTambahan;
+                    if (isset($pemesanan['item_type']) && stripos($pemesanan['item_type'], 'JHT') !== false) {
+                        $kebutuhan = $data['kgs'] ?? 0;
+                    } else {
+                        $kebutuhan = (($qty * $data['gw'] * ($data['composition'] / 100)) * (1 + ($data['loss'] / 100)) / 1000) + $kgPoTambahan;
+                    }
                     $retur['ttl_keb'] = $ttlKeb;
                 }
                 $ttlKeb += $kebutuhan;
