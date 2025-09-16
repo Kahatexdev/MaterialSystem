@@ -543,9 +543,9 @@ class ApiController extends ResourceController
 
         return $this->respond($dataList, 200);
     }
-    public function listReportPemesanan($area)
+    public function listReportPemesanan($area, $tgl_pakai = null)
     {
-        $tgl_pakai = $this->request->getGet('tgl_pakai') ?? '';
+
         $dataList = $this->pemesananModel->getListReportPemesananByArea($area, $tgl_pakai);
 
         return $this->respond($dataList, 200);
