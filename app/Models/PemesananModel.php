@@ -570,10 +570,11 @@ class PemesananModel extends Model
         material.color,
         material.kode_warna,
         pemesanan.admin,
-        GROUP_CONCAT(DISTINCT master_order.no_model ORDER BY master_order.no_model SEPARATOR ', ') AS no_model_concat,
+        master_order.no_model,
         SUM(COALESCE(tp.ttl_jl_mc,0)) AS ttl_jl_mc,
         SUM(COALESCE(tp.ttl_kg,0))    AS ttl_kg,
-        SUM(COALESCE(tp.ttl_cns,0))   AS ttl_cns
+        SUM(COALESCE(tp.ttl_cns,0))   AS ttl_cns,
+        pemesanan.po_tambahan
     ")
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
@@ -599,6 +600,7 @@ class PemesananModel extends Model
         // Penting: group by kunci penggabungan + admin (area)
         $this->groupBy([
             'pemesanan.tgl_pakai',
+            'master_order.no_model',
             'material.item_type',
             'material.kode_warna',
             'material.color',
@@ -611,12 +613,22 @@ class PemesananModel extends Model
 
     public function getFilterPemesananSpandex($tanggal_awal, $tanggal_akhir)
     {
-        $this->select('pemesanan.*, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
+        $this->select("
+        pemesanan.tgl_pakai,
+        material.item_type,
+        material.color,
+        material.kode_warna,
+        pemesanan.admin,
+        master_order.no_model,
+        SUM(COALESCE(tp.ttl_jl_mc,0)) AS ttl_jl_mc,
+        SUM(COALESCE(tp.ttl_kg,0))    AS ttl_kg,
+        SUM(COALESCE(tp.ttl_cns,0))   AS ttl_cns,
+        pemesanan.po_tambahan
+    ")
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
-            // ->where('tp.ttl_jl_mc >', 0)
             ->where('pemesanan.status_kirim', 'YA')
             ->where('master_material.jenis', 'SPANDEX');
 
@@ -633,8 +645,17 @@ class PemesananModel extends Model
             }
             $this->groupEnd();
         }
-        $this->groupBy('tp.id_total_pemesanan');
-
+        // $this->groupBy('tp.id_total_pemesanan');
+        //ganti jadi:
+        // Penting: group by kunci penggabungan + admin (area)
+        $this->groupBy([
+            'pemesanan.tgl_pakai',
+            'master_order.no_model',
+            'material.item_type',
+            'material.kode_warna',
+            'material.color',
+            'pemesanan.admin',
+        ]);
         return $this->findAll();
     }
     public function countStatusRequest()
