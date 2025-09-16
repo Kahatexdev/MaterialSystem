@@ -268,7 +268,7 @@
                                 item.item_type,
                                 item.color,
                                 item.kode_warna,
-                                item.no_model,
+                                item.no_model_concat,
                                 item.ttl_jl_mc,
                                 item.ttl_kg,
                                 item.ttl_cns

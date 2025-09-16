@@ -3425,23 +3425,25 @@ class ExcelController extends BaseController
 
         // Menulis data
         $row = 4;
+        // Controller export (cuplikan perubahan saja)
         foreach ($data as $item) {
             // Row 1: JALAN MC
             $sheet->setCellValue('A' . $row, $item['tgl_pakai']);
             $sheet->setCellValue('B' . $row, $item['item_type']);
             $sheet->setCellValue('C' . $row, $item['color']);
             $sheet->setCellValue('D' . $row, $item['kode_warna']);
-            $sheet->setCellValue('E' . $row, $item['no_model']);
+            // ganti ini:
+            // $sheet->setCellValue('E' . $row, $item['no_model']);
+            // menjadi:
+            $sheet->setCellValue('E' . $row, $item['no_model_concat'] ?? '');
+
             $sheet->setCellValue('F' . $row, 'Sum - JALAN MC:');
             $sheet->setCellValue('G' . $row, '=SUM(H' . $row . ':U' . $row . ')');
-            // Isi per area
+
+            // Isi per area mengikuti admin
             $col = 'H';
             foreach ($areaHeaders as $area) {
-                if ($item['admin'] == $area) {
-                    $sheet->setCellValue($col . $row, isset($item['ttl_jl_mc']) ? $item['ttl_jl_mc'] : 0);
-                } else {
-                    $sheet->setCellValue($col . $row, 0);
-                }
+                $sheet->setCellValue($col . $row, ($item['admin'] == $area) ? ($item['ttl_jl_mc'] ?? 0) : 0);
                 $col++;
             }
             $row++;
@@ -3451,11 +3453,7 @@ class ExcelController extends BaseController
             $sheet->setCellValue('G' . $row, '=SUM(H' . $row . ':U' . $row . ')');
             $col = 'H';
             foreach ($areaHeaders as $area) {
-                if ($item['admin'] == $area) {
-                    $sheet->setCellValue($col . $row, isset($item['ttl_kg']) ? $item['ttl_kg'] : 0);
-                } else {
-                    $sheet->setCellValue($col . $row, 0);
-                }
+                $sheet->setCellValue($col . $row, ($item['admin'] == $area) ? ($item['ttl_kg'] ?? 0) : 0);
                 $col++;
             }
             $row++;
@@ -3465,15 +3463,12 @@ class ExcelController extends BaseController
             $sheet->setCellValue('G' . $row, '=SUM(H' . $row . ':U' . $row . ')');
             $col = 'H';
             foreach ($areaHeaders as $area) {
-                if ($item['admin'] == $area) {
-                    $sheet->setCellValue($col . $row, isset($item['ttl_cns']) ? $item['ttl_cns'] : 0);
-                } else {
-                    $sheet->setCellValue($col . $row, 0);
-                }
+                $sheet->setCellValue($col . $row, ($item['admin'] == $area) ? ($item['ttl_cns'] ?? 0) : 0);
                 $col++;
             }
             $row++;
         }
+
 
         // Total global
         $sheet->mergeCells("A{$row}:F{$row}")->setCellValue("A{$row}", 'Total Sum - JALAN MC');

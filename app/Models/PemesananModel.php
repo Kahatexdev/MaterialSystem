@@ -474,6 +474,7 @@ class PemesananModel extends Model
     public function getFilterPemesananArea($key, $tanggal_awal, $tanggal_akhir)
     {
         $this->select('pemesanan.*,pemesanan.admin AS area, master_order.foll_up, master_order.no_model, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, material.item_type, material.kode_warna, material.color')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pemesanan.status_kirim', 'YA');
@@ -498,6 +499,8 @@ class PemesananModel extends Model
             }
             $this->groupEnd();
         }
+
+        $this->groupBy('pemesanan.total_pemesanan');
 
         return $this->findAll();
     }
@@ -561,18 +564,28 @@ class PemesananModel extends Model
         // return $result ? $this->db->affectedRows() : false;
     }
 
+    // Model (mis. PemesananModel.php)
     public function getFilterPemesananKaret($tanggal_awal, $tanggal_akhir)
     {
-        $this->select('pemesanan.*, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
+        $this->select("
+        pemesanan.tgl_pakai,
+        material.item_type,
+        material.color,
+        material.kode_warna,
+        pemesanan.admin,
+        GROUP_CONCAT(DISTINCT master_order.no_model ORDER BY master_order.no_model SEPARATOR ', ') AS no_model_concat,
+        SUM(COALESCE(tp.ttl_jl_mc,0)) AS ttl_jl_mc,
+        SUM(COALESCE(tp.ttl_kg,0))    AS ttl_kg,
+        SUM(COALESCE(tp.ttl_cns,0))   AS ttl_cns
+    ")
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            // ->where('tp.ttl_jl_mc >', 0)
             ->where('pemesanan.status_kirim', 'YA')
             ->where('master_material.jenis', 'KARET');
 
-        // Filter berdasarkan tanggal
+        // Filter tanggal pakai
         if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
             $this->groupStart();
             if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
@@ -580,14 +593,24 @@ class PemesananModel extends Model
                     ->where('pemesanan.tgl_pakai <=', $tanggal_akhir);
             } elseif (!empty($tanggal_awal)) {
                 $this->where('pemesanan.tgl_pakai >=', $tanggal_awal);
-            } elseif (!empty($tanggal_akhir)) {
+            } else { // hanya $tanggal_akhir
                 $this->where('pemesanan.tgl_pakai <=', $tanggal_akhir);
             }
             $this->groupEnd();
         }
-        $this->groupBy('tp.id_total_pemesanan');
+
+        // Penting: group by kunci penggabungan + admin (area)
+        $this->groupBy([
+            'pemesanan.tgl_pakai',
+            'material.item_type',
+            'material.kode_warna',
+            'material.color',
+            'pemesanan.admin',
+        ]);
+
         return $this->findAll();
     }
+
 
     public function getFilterPemesananSpandex($tanggal_awal, $tanggal_akhir)
     {
@@ -891,8 +914,11 @@ class PemesananModel extends Model
         $builder->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')
             ->orderBy('pemesanan.tgl_pakai', 'DESC')
             ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
+
         return $builder->get()->getResultArray();
     }
+
+    
     public function getPemesananByAreaModel($area, $model)
     {
         $this->select('master_order.no_model, material.item_type, material.kode_warna, material.color, MAX(material.loss) AS max_loss,pemesanan.tgl_pakai, total_pemesanan.id_total_pemesanan, total_pemesanan.ttl_jl_mc, total_pemesanan.ttl_kg,total_pemesanan.ttl_cns, pemesanan.po_tambahan,pemesanan.keterangan_gbn, IFNULL(p.kgs_out, 0) AS kgs_out, IFNULL(p.cns_out,0) AS cns_out, p.lot_out')
