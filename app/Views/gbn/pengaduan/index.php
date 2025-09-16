@@ -13,12 +13,12 @@
     </div>
 
     <!-- Jika tidak ada pengaduan -->
-    <?php if (empty($pengaduan)): ?>
+    <?php if (empty($pengaduan)) : ?>
         <div class="alert alert-info text-center">
             Tidak ada pesan/aduan.
         </div>
-    <?php else: ?>
-        <?php foreach ($pengaduan as $p): ?>
+    <?php else : ?>
+        <?php foreach ($pengaduan as $p) : ?>
             <div class="card mb-3" id="listPengaduan">
                 <div class="card-body">
                     <?php
@@ -42,8 +42,7 @@
                         <div>
 
                             <small class="text-muted"><?= $formattedDate ?></small>
-                            <button onclick="window.location.href='<?= base_url('api/pengaduan/exportPdf/' . $p['id_pengaduan']) ?>'"
-                                class="btn btn-info">
+                            <button onclick="window.location.href='<?= base_url('api/pengaduan/exportPdf/' . $p['id_pengaduan']) ?>'" class="btn btn-info">
                                 <i class="fas fa-file-pdf"></i> Export PDF
                             </button>
 
@@ -55,15 +54,15 @@
                     <hr class="my-2">
 
                     <!-- Reply list -->
-                    <?php if (!empty($replies[$p['id_pengaduan']])): ?>
-                        <?php foreach ($replies[$p['id_pengaduan']] as $r): ?>
+                    <?php if (!empty($replies[$p['id_pengaduan']])) : ?>
+                        <?php foreach ($replies[$p['id_pengaduan']] as $r) : ?>
                             <div class="border-start ps-2 mb-2">
                                 <strong><?= esc($r['username']) ?></strong>:
                                 <?= nl2br(esc($r['isi'])) ?>
                                 <div><small class="text-muted"><?= $r['created_at'] ?></small></div>
                             </div>
                         <?php endforeach; ?>
-                    <?php else: ?>
+                    <?php else : ?>
                         <div class="text-muted small">Belum ada balasan.</div>
                     <?php endif; ?>
 

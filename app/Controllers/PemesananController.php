@@ -447,7 +447,7 @@ class PemesananController extends BaseController
 
             foreach ($validDatas as $idx => $row) {
                 // Pastikan semua field kunci tersedia
-                if (! isset($row['id_pengeluaran'], $row['id_total_pemesanan'], $row['area_out'])) {
+                if (!isset($row['id_pengeluaran'], $row['id_total_pemesanan'], $row['area_out'])) {
                     log_message('error', "[saveSessionDeliveryArea] Row ke-$idx missing key fields: " . json_encode($row));
                     continue;
                 }

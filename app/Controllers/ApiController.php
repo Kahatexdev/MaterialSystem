@@ -156,7 +156,7 @@ class ApiController extends ResourceController
                         $search
                     );
                 // dd ($allSchedules);
-                if (! empty($allSchedules)) {
+                if (!empty($allSchedules)) {
                     foreach ($allSchedules as $scheduleData) {
                         // Start dangan data master
                         $newRow = $row;
@@ -191,7 +191,7 @@ class ApiController extends ResourceController
                         $search
                     );
                 // dd($allCoverings);
-                if (! empty($allCoverings)) {
+                if (!empty($allCoverings)) {
                     foreach ($allCoverings as $coverData) {
                         $newRow = $row;
                         $newRow['qty_po'] = $masterQty;
