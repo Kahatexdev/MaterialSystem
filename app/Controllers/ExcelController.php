@@ -3444,6 +3444,7 @@ class ExcelController extends BaseController
                     'ttl_kg'      => (float) $item['ttl_kg'],
                     'ttl_cns'     => (float) $item['ttl_cns'],
                     'admin'       => $item['admin'], // biar area tetap ikut
+                    'keterangan'  => $item['keterangan'], // biar area tetap ikut
                 ];
             } else {
                 $grouped[$key]['no_models'][] = $noModel;
@@ -3463,7 +3464,9 @@ class ExcelController extends BaseController
                 'tgl_pakai'  => $g['tgl_pakai'],
                 'item_type'  => $g['item_type'],
                 'color'      => $g['color'],
-                'kode_warna' => $g['kode_warna'],
+                'kode_warna' => ($g['keterangan'] == 'KELOS 2X')
+                    ? $g['kode_warna'] . ' (' . $g['keterangan'] . ')'
+                    : $g['kode_warna'],
                 'no_model'   => implode(', ', $uniqueNoModels),
                 'ttl_jl_mc'  => $g['ttl_jl_mc'],
                 'ttl_kg'     => $g['ttl_kg'],
@@ -3474,15 +3477,67 @@ class ExcelController extends BaseController
 
         // Menulis data
         $row = 4;
+        $mergeStart = [
+            'tgl_pakai' => $row,
+            'item_type' => $row,
+            'color' => $row,
+            'kode_warna' => $row,
+            'no_model' => $row
+        ];
+
+        $prev = [
+            'tgl_pakai' => '',
+            'item_type' => '',
+            'color' => '',
+            'kode_warna' => '',
+            'no_model' => ''
+        ];
         // Controller export (cuplikan perubahan saja)
         foreach ($finalData as $item) {
-            // Row 1: JALAN MC
-            $sheet->setCellValue('A' . $row, $item['tgl_pakai']);
-            $sheet->setCellValue('B' . $row, $item['item_type']);
-            $sheet->setCellValue('C' . $row, $item['color']);
-            $sheet->setCellValue('D' . $row, $item['kode_warna']);
-            // ganti ini:
-            $sheet->setCellValue('E' . $row, $item['no_model']);
+            // Tanggal Pakai
+            if ($item['tgl_pakai'] != $prev['tgl_pakai']) {
+                if ($prev['tgl_pakai'] != '') {
+                    $sheet->mergeCells("A{$mergeStart['tgl_pakai']}:A" . ($row - 1));
+                }
+                $sheet->setCellValue("A{$row}", $item['tgl_pakai']);
+                $mergeStart['tgl_pakai'] = $row;
+            }
+
+            // Item Type
+            if ($item['item_type'] != $prev['item_type']) {
+                if ($prev['item_type'] != '') {
+                    $sheet->mergeCells("B{$mergeStart['item_type']}:B" . ($row - 1));
+                }
+                $sheet->setCellValue("B{$row}", $item['item_type']);
+                $mergeStart['item_type'] = $row;
+            }
+
+            // Warna
+            if ($item['color'] != $prev['color']) {
+                if ($prev['color'] != '') {
+                    $sheet->mergeCells("C{$mergeStart['color']}:C" . ($row - 1));
+                }
+                $sheet->setCellValue("C{$row}", $item['color']);
+                $mergeStart['color'] = $row;
+            }
+
+            // Kode Warna
+            if ($item['kode_warna'] != $prev['kode_warna']) {
+                if ($prev['kode_warna'] != '') {
+                    $sheet->mergeCells("D{$mergeStart['kode_warna']}:D" . ($row - 1));
+                }
+                $sheet->setCellValue("D{$row}", $item['kode_warna']);
+                $mergeStart['kode_warna'] = $row;
+            }
+
+            // No Model
+            if ($item['no_model'] != $prev['no_model']) {
+                if ($prev['no_model'] != '') {
+                    $sheet->mergeCells("E{$mergeStart['no_model']}:E" . ($row - 1));
+                }
+                $sheet->setCellValue("E{$row}", $item['no_model']);
+                $mergeStart['no_model'] = $row;
+            }
             // menjadi:
             // $sheet->setCellValue('E' . $row, $item['no_model_concate'] ?? '');
 
@@ -3515,8 +3570,38 @@ class ExcelController extends BaseController
                 $sheet->setCellValue($col . $row, ($item['admin'] == $area) ? ($item['ttl_cns'] ?? 0) : 0);
                 $col++;
             }
+
+            // Simpan nilai sebelumnya
+            $prev = $item;
             $row++;
         }
+
+        // merge terakhir
+        $sheet->mergeCells("A{$mergeStart['tgl_pakai']}:A" . ($row - 1));
+        $sheet->getStyle("A{$mergeStart['tgl_pakai']}:A" . ($row - 1))
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_TOP);
+        $sheet->mergeCells("B{$mergeStart['item_type']}:B" . ($row - 1));
+        $sheet->getStyle("B{$mergeStart['item_type']}:B" . ($row - 1))
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_TOP);
+        $sheet->mergeCells("C{$mergeStart['color']}:C" . ($row - 1));
+        $sheet->getStyle("C{$mergeStart['color']}:C" . ($row - 1))
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_TOP);
+        $sheet->mergeCells("D{$mergeStart['kode_warna']}:D" . ($row - 1));
+        $sheet->getStyle("D{$mergeStart['kode_warna']}:D" . ($row - 1))
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_TOP);
+        $sheet->mergeCells("E{$mergeStart['no_model']}:E" . ($row - 1));
+        $sheet->getStyle("E{$mergeStart['no_model']}:E" . ($row - 1))
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_TOP);
 
 
         // Total global
@@ -3671,6 +3756,7 @@ class ExcelController extends BaseController
                     'ttl_kg'      => (float) $item['ttl_kg'],
                     'ttl_cns'     => (float) $item['ttl_cns'],
                     'admin'       => $item['admin'], // biar area tetap ikut
+                    'keterangan'  => $item['keterangan'],
                 ];
             } else {
                 $grouped[$key]['no_models'][] = $noModel;
@@ -3690,7 +3776,9 @@ class ExcelController extends BaseController
                 'tgl_pakai'  => $g['tgl_pakai'],
                 'item_type'  => $g['item_type'],
                 'color'      => $g['color'],
-                'kode_warna' => $g['kode_warna'],
+                'kode_warna' => ($g['keterangan'] == 'KELOS 2X')
+                    ? $g['kode_warna'] . ' (' . $g['keterangan'] . ')'
+                    : $g['kode_warna'],
                 'no_model'   => implode(', ', $uniqueNoModels),
                 'ttl_jl_mc'  => $g['ttl_jl_mc'],
                 'ttl_kg'     => $g['ttl_kg'],
@@ -3701,15 +3789,67 @@ class ExcelController extends BaseController
 
         // Menulis data
         $row = 4;
+        $mergeStart = [
+            'tgl_pakai' => $row,
+            'item_type' => $row,
+            'color' => $row,
+            'kode_warna' => $row,
+            'no_model' => $row
+        ];
+
+        $prev = [
+            'tgl_pakai' => '',
+            'item_type' => '',
+            'color' => '',
+            'kode_warna' => '',
+            'no_model' => ''
+        ];
         // Controller export (cuplikan perubahan saja)
         foreach ($finalData as $item) {
-            // Row 1: JALAN MC
-            $sheet->setCellValue('A' . $row, $item['tgl_pakai']);
-            $sheet->setCellValue('B' . $row, $item['item_type']);
-            $sheet->setCellValue('C' . $row, $item['color']);
-            $sheet->setCellValue('D' . $row, $item['kode_warna']);
-            // ganti ini:
-            $sheet->setCellValue('E' . $row, $item['no_model']);
+            // Tanggal Pakai
+            if ($item['tgl_pakai'] != $prev['tgl_pakai']) {
+                if ($prev['tgl_pakai'] != '') {
+                    $sheet->mergeCells("A{$mergeStart['tgl_pakai']}:A" . ($row - 1));
+                }
+                $sheet->setCellValue("A{$row}", $item['tgl_pakai']);
+                $mergeStart['tgl_pakai'] = $row;
+            }
+
+            // Item Type
+            if ($item['item_type'] != $prev['item_type']) {
+                if ($prev['item_type'] != '') {
+                    $sheet->mergeCells("B{$mergeStart['item_type']}:B" . ($row - 1));
+                }
+                $sheet->setCellValue("B{$row}", $item['item_type']);
+                $mergeStart['item_type'] = $row;
+            }
+
+            // Warna
+            if ($item['color'] != $prev['color']) {
+                if ($prev['color'] != '') {
+                    $sheet->mergeCells("C{$mergeStart['color']}:C" . ($row - 1));
+                }
+                $sheet->setCellValue("C{$row}", $item['color']);
+                $mergeStart['color'] = $row;
+            }
+
+            // Kode Warna
+            if ($item['kode_warna'] != $prev['kode_warna']) {
+                if ($prev['kode_warna'] != '') {
+                    $sheet->mergeCells("D{$mergeStart['kode_warna']}:D" . ($row - 1));
+                }
+                $sheet->setCellValue("D{$row}", $item['kode_warna']);
+                $mergeStart['kode_warna'] = $row;
+            }
+
+            // No Model
+            if ($item['no_model'] != $prev['no_model']) {
+                if ($prev['no_model'] != '') {
+                    $sheet->mergeCells("E{$mergeStart['no_model']}:E" . ($row - 1));
+                }
+                $sheet->setCellValue("E{$row}", $item['no_model']);
+                $mergeStart['no_model'] = $row;
+            }
             // menjadi:
             // $sheet->setCellValue('E' . $row, $item['no_model_concate'] ?? '');
 
@@ -3742,8 +3882,38 @@ class ExcelController extends BaseController
                 $sheet->setCellValue($col . $row, ($item['admin'] == $area) ? ($item['ttl_cns'] ?? 0) : 0);
                 $col++;
             }
+
+            // Simpan nilai sebelumnya
+            $prev = $item;
             $row++;
         }
+
+        // merge terakhir
+        $sheet->mergeCells("A{$mergeStart['tgl_pakai']}:A" . ($row - 1));
+        $sheet->getStyle("A{$mergeStart['tgl_pakai']}:A" . ($row - 1))
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_TOP);
+        $sheet->mergeCells("B{$mergeStart['item_type']}:B" . ($row - 1));
+        $sheet->getStyle("B{$mergeStart['item_type']}:B" . ($row - 1))
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_TOP);
+        $sheet->mergeCells("C{$mergeStart['color']}:C" . ($row - 1));
+        $sheet->getStyle("C{$mergeStart['color']}:C" . ($row - 1))
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_TOP);
+        $sheet->mergeCells("D{$mergeStart['kode_warna']}:D" . ($row - 1));
+        $sheet->getStyle("D{$mergeStart['kode_warna']}:D" . ($row - 1))
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_TOP);
+        $sheet->mergeCells("E{$mergeStart['no_model']}:E" . ($row - 1));
+        $sheet->getStyle("E{$mergeStart['no_model']}:E" . ($row - 1))
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_TOP);
 
 
         // Total global

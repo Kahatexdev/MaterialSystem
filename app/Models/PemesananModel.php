@@ -473,7 +473,7 @@ class PemesananModel extends Model
 
     public function getFilterPemesananArea($key, $tanggal_awal, $tanggal_akhir)
     {
-        $this->select('pemesanan.*,pemesanan.admin AS area, master_order.foll_up, master_order.no_model, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, material.item_type, material.kode_warna, material.color')
+        $this->select('pemesanan.tgl_pakai, pemesanan.tgl_pesan, pemesanan.tgl_list, SUM(pemesanan.jl_mc) AS jl_mc, SUM(pemesanan.ttl_qty_cones) AS ttl_qty_cones, SUM(pemesanan.ttl_berat_cones) AS ttl_berat_cones, SUM(pemesanan.sisa_cones_mc) AS sisa_cones_mc, SUM(pemesanan.sisa_kgs_mc) AS sisa_kgs_mc, pemesanan.admin AS area, pemesanan.admin,  GROUP_CONCAT(DISTINCT pemesanan.keterangan SEPARATOR ", ") AS keterangan, GROUP_CONCAT(DISTINCT pemesanan.lot SEPARATOR ", ") AS lot, pemesanan.po_tambahan, master_order.foll_up, master_order.no_model, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, material.item_type, material.kode_warna, material.color')
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
@@ -500,7 +500,15 @@ class PemesananModel extends Model
             $this->groupEnd();
         }
 
-        $this->groupBy('pemesanan.total_pemesanan');
+        // $this->groupBy('pemesanan.id_total_pemesanan');
+        $this->groupBy([
+            'pemesanan.tgl_pakai',
+            'material.item_type',
+            'material.kode_warna',
+            'material.color',
+            'master_order.no_model',
+            'pemesanan.admin',
+        ]);
 
         return $this->findAll();
     }
@@ -577,7 +585,8 @@ class PemesananModel extends Model
         SUM(COALESCE(tp.ttl_jl_mc,0)) AS ttl_jl_mc,
         SUM(COALESCE(tp.ttl_kg,0))    AS ttl_kg,
         SUM(COALESCE(tp.ttl_cns,0))   AS ttl_cns,
-        pemesanan.po_tambahan
+        pemesanan.po_tambahan,
+        pemesanan.keterangan
     ")
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
@@ -603,10 +612,10 @@ class PemesananModel extends Model
         // Penting: group by kunci penggabungan + admin (area)
         $this->groupBy([
             'pemesanan.tgl_pakai',
-            'master_order.no_model',
             'material.item_type',
-            'material.kode_warna',
             'material.color',
+            'material.kode_warna',
+            'master_order.no_model',
             'pemesanan.admin',
         ]);
 
@@ -626,7 +635,8 @@ class PemesananModel extends Model
         SUM(COALESCE(tp.ttl_jl_mc,0)) AS ttl_jl_mc,
         SUM(COALESCE(tp.ttl_kg,0))    AS ttl_kg,
         SUM(COALESCE(tp.ttl_cns,0))   AS ttl_cns,
-        pemesanan.po_tambahan
+        pemesanan.po_tambahan,
+        pemesanan.keterangan
     ")
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
@@ -653,10 +663,10 @@ class PemesananModel extends Model
         // Penting: group by kunci penggabungan + admin (area)
         $this->groupBy([
             'pemesanan.tgl_pakai',
-            'master_order.no_model',
             'material.item_type',
-            'material.kode_warna',
             'material.color',
+            'material.kode_warna',
+            'master_order.no_model',
             'pemesanan.admin',
         ]);
         return $this->findAll();
@@ -939,7 +949,7 @@ class PemesananModel extends Model
         return $builder->get()->getResultArray();
     }
 
-    
+
     public function getPemesananByAreaModel($area, $model)
     {
         $this->select('master_order.no_model, material.item_type, material.kode_warna, material.color, MAX(material.loss) AS max_loss,pemesanan.tgl_pakai, total_pemesanan.id_total_pemesanan, total_pemesanan.ttl_jl_mc, total_pemesanan.ttl_kg,total_pemesanan.ttl_cns, pemesanan.po_tambahan,pemesanan.keterangan_gbn, IFNULL(p.kgs_out, 0) AS kgs_out, IFNULL(p.cns_out,0) AS cns_out, p.lot_out')
