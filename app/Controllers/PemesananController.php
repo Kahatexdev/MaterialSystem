@@ -1243,7 +1243,7 @@ class PemesananController extends BaseController
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
         $data = $this->pemesananModel->getFilterPemesananArea($key, $tanggalAwal, $tanggalAkhir);
-
+        // dd ($data);
         return $this->response->setJSON($data);
     }
     public function getCountStatusRequest()
@@ -1445,11 +1445,16 @@ class PemesananController extends BaseController
             }
         }
 
-        $tglPakai = $this->request->getGet('tgl_pakai') ?? DATE('Y-m-d');
+        $tglPakai = $this->request->getGet('tgl_pakai');
         $noModel = $this->request->getGet('model');
         $role = session()->get('role');
         // dd($tglPakai);
-        $dataList = $this->pemesananModel->getDataPemesananArea($tglPakai, $noModel, $role);
+        if (!$tglPakai) {
+            $dataList = [];
+        } else {
+            $dataList = $this->pemesananModel->getDataPemesananArea($tglPakai, $noModel, $role);
+        }
+        // $dataList = [];
         // dd($dataList);
         foreach ($dataList as $key => $order) {
             $dataList[$key]['ttl_kebutuhan_bb'] = 0;

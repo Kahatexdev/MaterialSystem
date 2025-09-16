@@ -272,15 +272,6 @@
                         </tbody>
                     </table>
                 </div>
-                <?php if (empty($dataPemesanan)) : ?>
-                    <div class="card-footer">
-                        <div class="row">
-                            <div class="col-lg-12 text-center">
-                                <p>No data available in the table.</p>
-                            </div>
-                        </div>
-                    </div>
-                <?php endif; ?>
             </div>
         </div>
     </div>
