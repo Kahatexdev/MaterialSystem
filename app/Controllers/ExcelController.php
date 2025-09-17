@@ -2073,7 +2073,6 @@ class ExcelController extends BaseController
         $key = $this->request->getGet('key');
         $jenis = $this->request->getGet('jenis') ?? '';
         $data = $this->masterOrderModel->getFilterReportGlobal($key, $jenis);
-172.23.44.14
         $getDeliv = 'http://127.0.0.1/CapacityApps/public/api/getDeliv/' . $key;
         $response = file_get_contents($getDeliv);
         $delivery = json_decode($response, true);
