@@ -846,7 +846,7 @@ class ExcelController extends BaseController
                     $item['kode_warna'],
                     $item['warna'],
                     number_format($item['kgs_material'], 2),
-                    $item['tgl_masuk'],
+                    $item['tgl_datang'],
                     number_format($item['kgs_kirim'], 2),
                     $item['cones_kirim'],
                     $item['lot_kirim'],
@@ -6635,7 +6635,7 @@ class ExcelController extends BaseController
         header('Cache-Control: max-age=0');
 
         // Tulis file excel ke output
-      $writer = new Xlsx($spreadsheet);
+        $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
     }
@@ -13665,7 +13665,7 @@ class ExcelController extends BaseController
             $sheet->getStyle('D1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
             $sheet->getStyle('D1')->getFill()->getStartColor()->setRGB('99FFFF');
             $sheet->mergeCells('D1:Q1');
-            $sheet->getStyle('D1')getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('D1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
             $sheet->mergeCells('D2:Q2');
             $sheet->setCellValue('D2', 'DEPARTEMEN CELUP CONES');
