@@ -489,7 +489,7 @@
         const $container = $('#pindahOrderContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i></div>');
 
         // Fetch detail order
-        $.post(`${base}${role}/warehouse/getPindahOrder`, {
+        $.post(`${base}${role}/warehouse/getPindahOrderTest`, {
             id_stock: idStock
         }, res => {
             $container.empty();
