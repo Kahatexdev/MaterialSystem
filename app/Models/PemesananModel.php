@@ -618,7 +618,7 @@ class PemesananModel extends Model
             // 'master_order.no_model',
             // 'pemesanan.tgl_pakai',
             'tp.id_total_pemesanan',
-            // 'pemesanan.admin',
+            'pemesanan.admin',
         ]);
 
         return $this->findAll();
@@ -669,8 +669,8 @@ class PemesananModel extends Model
             // 'material.color',
             // 'material.kode_warna',
             // 'master_order.no_model',
-            // 'pemesanan.admin',
             'tp.id_total_pemesanan',
+            'pemesanan.admin',
         ]);
         return $this->findAll();
     }
