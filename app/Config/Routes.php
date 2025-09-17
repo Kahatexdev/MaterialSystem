@@ -193,7 +193,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('warehouse/updateCluster', 'WarehouseController::updateCluster');
     $routes->get('warehouse/getNoModel', 'WarehouseController::getNoModel');
     $routes->post('warehouse/savePindahOrder', 'WarehouseController::savePindahOrder');
+    $routes->post('warehouse/savePindahOrderTest', 'WarehouseController::savePindahOrderTest');
     $routes->post('warehouse/getPindahOrder', 'WarehouseController::getPindahOrder');
+    $routes->post('warehouse/getPindahOrderTest', 'WarehouseController::getPindahOrderTest');
     $routes->post('warehouse/savePindahCluster', 'WarehouseController::savePindahCluster');
     $routes->post('warehouse/getPindahCluster', 'WarehouseController::getPindahCluster');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
@@ -839,9 +841,12 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('excelPPHInisial/(:any)/(:any)', 'ExcelController::excelPPHInisial/$1/$2');
     $routes->get('excelPPHDays/(:any)/(:any)', 'ExcelController::excelPPHDays/$1/$2');
 
-    $routes->get('pemesanan', 'PemesananController::pemesananArea');
     $routes->get('importPemesanan', 'GodController::importPemesanan');
-    $routes->get('filter_pemesananarea', 'PemesananController::pemesananArea');
+    // routes
+    $routes->get('pemesanan', 'PemesananController::pemesananArea');                 // view
+    $routes->get('filter_pemesananarea', 'PemesananController::pemesananArea');      // tetap untuk kompatibilitas
+    $routes->get('pemesanan/data', 'PemesananController::pemesananAreaData');        // endpoint DataTables (AJAX)
+
     $routes->post('getUpdateListPemesanan', 'PemesananController::getUpdateListPemesanan');
     $routes->post('updateListPemesanan', 'ApiController::updatePemesananArea');
     $routes->get('pemesanan/reportPemesananArea', 'PemesananController::reportPemesananArea');
@@ -934,7 +939,7 @@ $routes->group(
     'api',
     function ($routes) {
         $routes->get('pengaduan/exportPdf/(:num)', 'ApiController::pengaduanExport/$1');
-        $routes->get('statusbahanbaku/(:any)', 'ApiController::statusbahanbaku/$1');
+        $routes->get('statusbahanbaku', 'ApiController::statusbahanbaku');
         $routes->get('cekBahanBaku/(:any)', 'ApiController::cekBahanBaku/$1');
         $routes->get('cekStok/(:any)', 'ApiController::cekStok/$1');
         $routes->get('cekStokPerstyle/(:any)/(:any)', 'ApiController::cekStokPerstyle/$1/$2');

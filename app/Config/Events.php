@@ -42,7 +42,7 @@ Events::on('pre_system', static function (): void {
      * --------------------------------------------------------------------
      * If you delete, they will no longer be collected.
      */
-    if (CI_DEBUG && ! is_cli()) {
+    if (CI_DEBUG && !is_cli()) {
         Events::on('DBQuery', 'CodeIgniter\Debug\Toolbar\Collectors\Database::collect');
         service('toolbar')->respond();
         // Hot Reload route - for framework use on the hot reloader.
@@ -55,7 +55,7 @@ Events::on('pre_system', static function (): void {
     Events::on('post_controller_constructor', function () {
         $renderer = Services::renderer();
         $role = session()->get('role');
-        $url = 'http://127.0.0.1/CapacityApps/public/api/getNotif/' . $role;
+        $url = 'http://172.23.44.14/CapacityApps/public/api/getNotif/' . $role;
 
         try {
             $json = @file_get_contents($url);

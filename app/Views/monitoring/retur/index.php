@@ -83,7 +83,7 @@
                                             <label class="form-label">Kategori Retur</label>
                                             <select class="form-select select-kategori-retur" name="kategori_retur" required>
                                                 <option> Pilih Kategori</option>
-                                                <?php foreach ($kategori as $kt): ?>
+                                                <?php foreach ($kategori as $kt) : ?>
                                                     <option value="<?= $kt['nama_kategori'] ?>"> <?= $kt['nama_kategori'] ?> | <?= $kt['tipe_kategori'] ?></option>
 
                                                 <?php endforeach ?>
@@ -214,7 +214,7 @@
                 info.style.display = 'none';
 
                 $.ajax({
-                    url: "http://127.0.0.1/CapacityApps/public/api/filterRetur/" + area,
+                    url: "http://172.23.44.14/CapacityApps/public/api/filterRetur/" + area,
                     type: "GET",
                     data: {
                         model: model
@@ -244,7 +244,7 @@
             $('#modalPengajuanRetur').find('input[name="area"]').val(area);
 
             $.ajax({
-                url: "http://127.0.0.1/MaterialSystem/public/api/cekBahanBaku/" + model,
+                url: "http://172.23.44.14/MaterialSystem/public/api/cekBahanBaku/" + model,
                 type: "GET",
                 data: {
                     model: model
@@ -267,7 +267,7 @@
         function listRetur(model, area) {
             const rowbawah = document.getElementById('rowbawah')
             $.ajax({
-                url: "http://127.0.0.1/MaterialSystem/public/api/listRetur",
+                url: "http://172.23.44.14/MaterialSystem/public/api/listRetur",
                 type: "GET",
                 data: {
                     model: model,
@@ -289,7 +289,7 @@
 
         function fetchListRetur(data, model) {
             const tableBody = document.getElementById('bodyData2');
-            const baseUrl = "http://127.0.0.1/CapacityApps/public/user/retur/";
+            const baseUrl = "http://172.23.44.14/CapacityApps/public/user/retur/";
             tableBody.innerHTML = `
        <div class="d-flex align-items-center justify-content-between">
                     <h3 class="model-title mb-0">List Retur ${model}</h3>
@@ -385,7 +385,7 @@
         function fetchData(data, model, area) {
             const aggregateKeys = ["qty", "sisa", "bruto", "bs_setting", "bs_mesin"];
             const today = new Date();
-            const baseUrl = "http://127.0.0.1/CapacityApps/public/user/retur";
+            const baseUrl = "http://172.23.44.14/CapacityApps/public/user/retur";
             const headerContainer = document.getElementById('HeaderRow');
 
             headerContainer.innerHTML = `
@@ -457,7 +457,7 @@
                 option.appendChild(opt);
             }
             $.ajax({
-                url: "http://127.0.0.1/MaterialSystem/public/api/getPengirimanArea?noModel=" + model,
+                url: "http://172.23.44.14/MaterialSystem/public/api/getPengirimanArea?noModel=" + model,
                 type: "GET",
                 data: {
                     model: model

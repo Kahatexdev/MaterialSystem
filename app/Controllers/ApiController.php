@@ -96,12 +96,14 @@ class ApiController extends ResourceController
     }
 
     // v3
-    public function statusbahanbaku($noModel)
+    public function statusbahanbaku()
     {
+        $model = $this->request->getGet('model') ?? null;
         $search = $this->request->getGet('search') ?? null;
-        $rows   = $this->materialModel->MaterialPDK($noModel);
+        $rows   = $this->materialModel->MaterialPDK($model, $search);
+
         if (empty($rows)) {
-            log_message('error', "MaterialPDK kosong untuk model: $noModel");
+            log_message('error', "MaterialPDK kosong untuk model: $model");
             return $this->respond([], 200);
         }
         // $rows   = $this->openPoModel->MaterialPDK($noModel);
@@ -109,7 +111,7 @@ class ApiController extends ResourceController
 
         // Field‑field schedule yang ingin di-merge (tidak termasuk 'qty_po'!)
         $fields = [
-            'jenis',
+
             'start_mc',
             'kg_celup',
             'lot_urut',
@@ -155,7 +157,7 @@ class ApiController extends ResourceController
                         $row['kode_warna'],
                         $search
                     );
-                // dd ($allSchedules);
+
                 if (! empty($allSchedules)) {
                     foreach ($allSchedules as $scheduleData) {
                         // Start dangan data master
@@ -178,8 +180,10 @@ class ApiController extends ResourceController
                     $newRow = $row;
                     $newRow['qty_po'] = $masterQty;
                     foreach ($fields as $f) {
+
                         $newRow[$f] = '';
                     }
+
                     $res[] = $newRow;
                 }
             } else if (in_array($jenis, ['KARET', 'SPANDEX'])) {
@@ -191,7 +195,7 @@ class ApiController extends ResourceController
                         $search
                     );
                 // dd($allCoverings);
-                if (! empty($allCoverings)) {
+                if (!empty($allCoverings)) {
                     foreach ($allCoverings as $coverData) {
                         $newRow = $row;
                         $newRow['qty_po'] = $masterQty;
@@ -909,11 +913,13 @@ class ApiController extends ResourceController
     {
         $jenis = $this->request->getGet('jenis') ?? '';
         $tanggal_pakai = $this->request->getGet('tanggal_pakai') ?? '';
+        $alasan = $this->request->getGet('alasan') ?? '';
 
         $data = [
             'area' => $area,
             'jenis' => $jenis,
             'tanggal_pakai' => $tanggal_pakai,
+            'alasan_tambahan_waktu' => $alasan,
         ];
 
         $update = $this->pemesananModel->reqAdditionalTime($data);
@@ -1317,7 +1323,7 @@ class ApiController extends ResourceController
     {
         $username = urlencode(session()->get('username'));
         $role     = session()->get('role');
-        $url      = 'http://127.0.0.1/CapacityApps/public/api/pengaduan/' . $username . '/' . $role;
+        $url      = 'http://172.23.44.14/CapacityApps/public/api/pengaduan/' . $username . '/' . $role;
 
         try {
             $json = @file_get_contents($url);
@@ -1556,7 +1562,7 @@ class ApiController extends ResourceController
 
         // Ambil data dari API lokal
         $client = service('curlrequest');
-        $response = $client->get("http://127.0.0.1/CapacityApps/public/api/ExportPengaduan/{$idPengaduan}");
+        $response = $client->get("http://172.23.44.14/CapacityApps/public/api/ExportPengaduan/{$idPengaduan}");
 
         $pengaduan = json_decode($response->getBody(), true);
 
@@ -1572,7 +1578,7 @@ class ApiController extends ResourceController
         // Inisialisasi Dompdf
         $dompdf = new Dompdf();
         $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
 
         // Auto download

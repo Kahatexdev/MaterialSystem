@@ -168,6 +168,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">GW</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Harga</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Nama Cluster</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Admin</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -288,6 +289,7 @@
                                 (item.gw_kirim ? parseFloat(item.gw_kirim).toFixed(2) : ''),
                                 item.harga || '',
                                 item.nama_cluster || '',
+                                item.admin || '',
                             ]);
                         });
 
@@ -341,6 +343,13 @@
 
         // Sembunyikan tombol Export Excel
         $('#btnExport').addClass('d-none');
+    });
+
+    $('.form-control').on('keypress', function(e) {
+        if (e.which === 13) { // 13 = kode tombol enter
+            e.preventDefault(); // cegah form submit default
+            $('#btnSearch').click(); // jalankan klik tombol search
+        }
     });
 </script>
 

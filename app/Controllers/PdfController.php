@@ -109,7 +109,7 @@ class PdfController extends BaseController
         // dd($result);
         $noModel =  $result[0]['no_model'] ?? '';
 
-        $buyerApiUrl = 'http://127.0.0.1/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+        $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
 
         $buyerName = fetchApiData($buyerApiUrl);
         // dd($buyerName);
@@ -2775,7 +2775,7 @@ class PdfController extends BaseController
             // kalau nggak ada, bisa ganti dengan strtok($item['jenis'], ' ')
             $mainJenis = $item['jenis_benang'];
             $kg       = $item['ttl_kg'];
-            if (! isset($totalPerBenang[$mainJenis])) {
+            if (!isset($totalPerBenang[$mainJenis])) {
                 $totalPerBenang[$mainJenis] = 0;
             }
             $totalPerBenang[$mainJenis] += $kg;
