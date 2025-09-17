@@ -9997,6 +9997,8 @@ class ExcelController extends BaseController
 
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';
+        } else if ($tujuan == 'JS') {
+            $penerima = '';
         } else {
             $penerima = 'Paryanti';
         }
