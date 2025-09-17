@@ -274,6 +274,8 @@
                             <th class="sticky">Start Mc</th>
                             <th class="sticky">Tanggal Schedule</th>
                             <th class="sticky">Last Status</th>
+                            <th class="sticky">Kg Pesan</th>
+                            <th class="sticky">Kg Celup</th>
                             <th class="sticky">Keterangan</th>
                             <th class="sticky">Action</th>
                         </tr>
@@ -301,6 +303,8 @@
                                 <td><?= $data['start_mc']; ?></td>
                                 <td><?= $data['tgl_schedule']; ?></td>
                                 <td><?= $data['last_status']; ?></td>
+                                <td><?= $data['kg_po']; ?></td>
+                                <td><?= $data['kg_celup']; ?></td>
                                 <td><?= $data['ket_schedule']; ?></td>
                                 <?php if ($data['last_status'] != 'complain') { ?>
                                     <td>

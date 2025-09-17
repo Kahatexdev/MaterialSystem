@@ -342,6 +342,13 @@
         // Sembunyikan tombol Export Excel
         $('#btnExport').addClass('d-none');
     });
+
+    $('.form-control').on('keypress', function(e) {
+        if (e.which === 13) { // 13 = kode tombol enter
+            e.preventDefault(); // cegah form submit default
+            $('#btnSearch').click(); // jalankan klik tombol search
+        }
+    });
 </script>
 
 <?php $this->endSection(); ?>
