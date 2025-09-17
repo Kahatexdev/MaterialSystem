@@ -55,6 +55,7 @@
                                 <option value="">Pilih Tujuan</option>
                                 <option value="Celup Cones">Celup Cones</option>
                                 <option value="Covering">Covering</option>
+                                <option value="JS">JS</option>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -413,7 +414,11 @@
         // fungsi Tujuan → isi penerima
         window.tujuan = function() {
             const val = $('#selectTujuan').val();
-            $('#penerima').val(val === 'Covering' ? 'Paryanti' : 'Retno');
+            $('#penerima').val(
+                val === 'Covering' ? 'Paryanti' :
+                val === 'JS' ? '' :
+                'Retno'
+            );
         };
     });
 </script>
