@@ -447,7 +447,7 @@ class PemesananController extends BaseController
 
             foreach ($validDatas as $idx => $row) {
                 // Pastikan semua field kunci tersedia
-                if (! isset($row['id_pengeluaran'], $row['id_total_pemesanan'], $row['area_out'])) {
+                if (!isset($row['id_pengeluaran'], $row['id_total_pemesanan'], $row['area_out'])) {
                     log_message('error', "[saveSessionDeliveryArea] Row ke-$idx missing key fields: " . json_encode($row));
                     continue;
                 }
@@ -587,6 +587,7 @@ class PemesananController extends BaseController
                 // Kalau jenis BUKAN spandex/karet → update stock
                 if (!in_array($jenis, ['spandex', 'karet'])) {
                     $stok = $this->stockModel->find($record['id_stock']);
+                    // dd ($stok);
                     if ($stok) {
                         $kgsStokNew = $stok['kgs_in_out'];
                         $cnsStokNew = $stok['cns_in_out'];
@@ -1082,6 +1083,7 @@ class PemesananController extends BaseController
             'noModel'       => $noModel,
             'itemType'      => $pemesanan['item_type'],
             'kodeWarna'     => $pemesanan['kode_warna'],
+            'color'         => $pemesanan['color'],
             'area'          => $pemesanan['admin'],
             'id'            => $id,
             'ketGbn'        => $ket['ket_gbn'] ?? '',

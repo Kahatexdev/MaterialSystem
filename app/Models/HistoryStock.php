@@ -16,6 +16,7 @@ class HistoryStock extends Model
         'id_history_pindah',
         'id_stock_old',
         'id_stock_new',
+        'id_out_celup',
         'cluster_old',
         'cluster_new',
         'kgs',
@@ -167,5 +168,13 @@ class HistoryStock extends Model
             ->orderBy('s_old.no_model', 'ASC')
             ->get()
             ->getResultArray();
+    }
+
+    public function getKgsPindahOrder($idOutCelup)
+    {
+        return $this->select('SUM(kgs) AS kgs_pindah_order, SUM(cns) AS cns_pindah_order')
+            ->where('id_out_celup', $idOutCelup)
+            ->where('keterangan', 'Pindah Order')
+            ->first();
     }
 }

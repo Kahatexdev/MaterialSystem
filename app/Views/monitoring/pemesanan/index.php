@@ -122,9 +122,7 @@
 
                 <!-- Progress bar -->
                 <div class="progress mt-3" style="height: 6px; border-radius: 6px;">
-                    <div id="progressBar"
-                        class="progress-bar progress-bar-striped progress-bar-animated bg-info"
-                        role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                     </div>
                 </div>
                 <small id="progressText" class="text-white mt-1 d-block">0%</small>
@@ -136,27 +134,27 @@
     <div class="card">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                    <div class="form-group me-2">
-                        <label>No Model</label>
-                        <input type="text" class="form-control form-control-sm" id="no_model" placeholder="No Model">
-                    </div>
-                    <div class="form-group me-2">
-                        <label>Area</label>
-                        <input type="text" class="form-control form-control-sm" id="area" placeholder="Area">
-                        <!-- kalau mau Select2, tinggal ganti input ini -->
-                    </div>
-                    <div class="form-group me-2">
-                        <label>Tanggal Pakai</label>
-                        <input type="date" class="form-control form-control-sm" id="tgl_pakai">
-                    </div>
-                    <div class="flex-grow-1"></div> <!-- spacer -->
-                    <button class="btn btn-secondary btn-sm align-self-end me-2" id="btnReset">
-                        <i class="fa fa-undo"></i> Reset
-                    </button>
+                <div class="form-group me-2">
+                    <label>No Model</label>
+                    <input type="text" class="form-control form-control-sm" id="no_model" placeholder="No Model">
+                </div>
+                <div class="form-group me-2">
+                    <label>Area</label>
+                    <input type="text" class="form-control form-control-sm" id="area" placeholder="Area">
+                    <!-- kalau mau Select2, tinggal ganti input ini -->
+                </div>
+                <div class="form-group me-2">
+                    <label>Tanggal Pakai</label>
+                    <input type="date" class="form-control form-control-sm" id="tgl_pakai">
+                </div>
+                <div class="flex-grow-1"></div> <!-- spacer -->
+                <button class="btn btn-secondary btn-sm align-self-end me-2" id="btnReset">
+                    <i class="fa fa-undo"></i> Reset
+                </button>
 
-                    <button class="btn btn-info btn-sm align-self-end" id="btnFilter">
-                        <i class="fa fa-search"></i> Search
-                    </button>
+                <button class="btn btn-info btn-sm align-self-end" id="btnFilter">
+                    <i class="fa fa-search"></i> Search
+                </button>
 
             </div>
         </div>
