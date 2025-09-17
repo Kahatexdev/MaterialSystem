@@ -1717,7 +1717,7 @@ class WarehouseController extends BaseController
 
             // getStartMc
             if (!isset($startMc[$model])) {
-                $url = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . urlencode($model);
+                $url = 'http://127.0.0.1/CapacityApps/public/api/getStartMc/' . urlencode($model);
                 $resp = @file_get_contents($url);
                 if ($resp !== false) {
                     $json = json_decode($resp, true);
@@ -2902,7 +2902,7 @@ class WarehouseController extends BaseController
 
         // 2) Siapkan HTTP client
         $client = \Config\Services::curlrequest([
-            'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
+            'baseURI' => 'http://127.0.0.1/CapacityApps/public/api/',
             'timeout' => 5
         ]);
 

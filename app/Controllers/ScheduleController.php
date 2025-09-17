@@ -441,7 +441,7 @@ class ScheduleController extends BaseController
             $total_qty_po = $sisa_jatah;
         }
         // URL API untuk mengambil data start mesin
-        $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $no_model;
+        $reqStartMc = 'http://127.0.0.1/CapacityApps/public/api/reqstartmc/' . $no_model;
 
         try {
             // Fetch data dari API
@@ -1172,7 +1172,7 @@ class ScheduleController extends BaseController
         $listPdk = $this->masterOrderModel->getNullDeliv() ?? null;
         if ($listPdk) {
             $client = \Config\Services::curlrequest([
-                'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
+                'baseURI' => 'http://127.0.0.1/CapacityApps/public/api/',
                 'timeout' => 5
             ]);
 
@@ -1535,42 +1535,41 @@ class ScheduleController extends BaseController
         ]);
     }
 
-    public function filterstatusbahanbaku($model)
+    public function filterstatusbahanbaku()
     {
         // Mengambil data master
-        $masterApi = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . $model;
-        $masterResponse = file_get_contents($masterApi);
-        $master = json_decode($masterResponse, true);
+        $model = $this->request->getGet('model');
+        $search = $this->request->getGet('search');
+        if (!empty($model)) {
+            $masterApi = 'http://127.0.0.1/CapacityApps/public/api/getStartMc/' . $model;
+            $masterResponse = file_get_contents($masterApi);
+            $master = json_decode($masterResponse, true);
+        } else {
+            $master = [
+                'kd_buyer_order' => '-',
+                'no_model'       => '-',
+                'delivery_awal'  => '-',  // MIN dari apsperstyle.delivery
+                'delivery_akhir' => '-',  // MAX dari apsperstyle.delivery
+                'start_mc'       => '-' // MIN dari tanggal_planning.start_mesin
+            ];
+        }
 
 
         // Mengambil nilai 'search' yang dikirim oleh frontend
-        $search = $this->request->getGet('search');
         // Jika search ada, panggil API eksternal dengan query parameter 'search'
-        $apiUrl = 'http://172.23.44.14/MaterialSystem/public/api/statusbahanbaku/' . $model . '?search=' . urlencode($search);
+        $params = [
+            'model'  => $model ?? '',
+            'search' => $search ?? ''
+        ];
+
+        $apiUrl = 'http://172.23.44.14/MaterialSystem/public/api/statusbahanbaku/?' . http_build_query($params);
+
         // Mengambil data dari API eksternal
         $response = file_get_contents($apiUrl);
         $status = json_decode($response, true);
         // dd($response);
         // Filter data berdasarkan 'no_model' jika ada keyword 'search'
-        if ($search) {
-            $status = array_filter($status, function ($item) use ($search) {
-                // Cek apakah pencarian ada di no_model terlebih dahulu
-                if (isset($item['no_model']) && strpos(strtolower($item['no_model']), strtolower($search)) !== false) {
-                    return true;
-                }
-                // Lanjutkan pencarian ke kode_warna, lot_celup, dan tanggal_schedule jika no_model tidak cocok
-                if (isset($item['kode_warna']) && strpos(strtolower($item['kode_warna']), strtolower($search)) !== false) {
-                    return true;
-                }
-                if (isset($item['lot_celup']) && strpos(strtolower($item['lot_celup']), strtolower($search)) !== false) {
-                    return true;
-                }
-                if (isset($item['tanggal_schedule']) && strpos(strtolower($item['tanggal_schedule']), strtolower($search)) !== false) {
-                    return true;
-                }
-                return false;
-            });
-        }
+
         // Gabungkan data master dan status dalam satu array
         $responseData = [
             'master' => $master, // Data master dari getStartMc
