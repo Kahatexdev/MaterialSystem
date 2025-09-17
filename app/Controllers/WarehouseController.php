@@ -1803,7 +1803,7 @@ class WarehouseController extends BaseController
                 $rawKgsManual = $data['kgs_out'][$pemasukan['id_pemasukan']] ?? '';
                 $rawCnsManual = $data['cns_out'][$pemasukan['id_pemasukan']] ?? 0;
 
-                if ($rawKgsManual !== '' || $rawKgsManual > 0) {
+                if ($rawKgsManual !== '' || $rawKgsManual > 0 || $rawCnsManual > 0) {
                     $kgsOut =  floatval($rawKgsManual);
                     $cnsOut = floatval($rawCnsManual);
                     $krgOut = 0;
