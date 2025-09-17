@@ -846,7 +846,7 @@ class ExcelController extends BaseController
                     $item['kode_warna'],
                     $item['warna'],
                     number_format($item['kgs_material'], 2),
-                    $item['tgl_masuk'],
+                    $item['tgl_datang'],
                     number_format($item['kgs_kirim'], 2),
                     $item['cones_kirim'],
                     $item['lot_kirim'],
