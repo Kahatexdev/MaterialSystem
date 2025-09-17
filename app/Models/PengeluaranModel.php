@@ -551,6 +551,7 @@ class PengeluaranModel extends Model
             ->distinct()
             ->select([
                 'p.*',
+                'pe.tgl_pakai',
                 // jika ada di schedule_celup ambil sc.no_model, jika tidak ambil mo.no_model
                 'COALESCE(sc.no_model, mo.no_model) AS no_model',
                 'COALESCE(sc.item_type, m.item_type) AS item_type',

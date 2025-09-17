@@ -582,9 +582,9 @@ class PemesananModel extends Model
         material.kode_warna,
         pemesanan.admin,
         master_order.no_model,
-        SUM(COALESCE(tp.ttl_jl_mc,0)) AS ttl_jl_mc,
-        SUM(COALESCE(tp.ttl_kg,0))    AS ttl_kg,
-        SUM(COALESCE(tp.ttl_cns,0))   AS ttl_cns,
+        tp.ttl_jl_mc,
+        tp.ttl_kg,
+        tp.ttl_cns,
         pemesanan.po_tambahan,
         pemesanan.keterangan
     ")
@@ -611,11 +611,13 @@ class PemesananModel extends Model
 
         // Penting: group by kunci penggabungan + admin (area)
         $this->groupBy([
-            'pemesanan.tgl_pakai',
-            'material.item_type',
-            'material.color',
-            'material.kode_warna',
-            'master_order.no_model',
+            // 'pemesanan.tgl_pakai',
+            // 'material.item_type',
+            // 'material.color',
+            // 'material.kode_warna',
+            // 'master_order.no_model',
+            // 'pemesanan.tgl_pakai',
+            'tp.id_total_pemesanan',
             'pemesanan.admin',
         ]);
 
@@ -632,9 +634,9 @@ class PemesananModel extends Model
         material.kode_warna,
         pemesanan.admin,
         master_order.no_model,
-        SUM(COALESCE(tp.ttl_jl_mc,0)) AS ttl_jl_mc,
-        SUM(COALESCE(tp.ttl_kg,0))    AS ttl_kg,
-        SUM(COALESCE(tp.ttl_cns,0))   AS ttl_cns,
+        tp.ttl_jl_mc,
+        tp.ttl_kg,
+        tp.ttl_cns,
         pemesanan.po_tambahan,
         pemesanan.keterangan
     ")
@@ -662,11 +664,12 @@ class PemesananModel extends Model
         //ganti jadi:
         // Penting: group by kunci penggabungan + admin (area)
         $this->groupBy([
-            'pemesanan.tgl_pakai',
-            'material.item_type',
-            'material.color',
-            'material.kode_warna',
-            'master_order.no_model',
+            // 'pemesanan.tgl_pakai',
+            // 'material.item_type',
+            // 'material.color',
+            // 'material.kode_warna',
+            // 'master_order.no_model',
+            'tp.id_total_pemesanan',
             'pemesanan.admin',
         ]);
         return $this->findAll();
