@@ -587,6 +587,7 @@ class PemesananController extends BaseController
                 // Kalau jenis BUKAN spandex/karet → update stock
                 if (!in_array($jenis, ['spandex', 'karet'])) {
                     $stok = $this->stockModel->find($record['id_stock']);
+                    // dd ($stok);
                     if ($stok) {
                         $kgsStokNew = $stok['kgs_in_out'];
                         $cnsStokNew = $stok['cns_in_out'];
