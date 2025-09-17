@@ -414,7 +414,7 @@ class PemesananController extends BaseController
 
             // Validasi data yang diperlukan: bisa menghasilkan array of records
             $validDatas = $this->pengeluaranModel->validateDeliveryData($postData);
-
+            // var_dump ($validDatas);
             // Jika model men-set error, log dan kembalikan
             if ($errors = $this->pengeluaranModel->errors()) {
                 log_message('error', '[saveSessionDeliveryArea] Validasi model gagal: ' . json_encode($errors));
@@ -469,6 +469,7 @@ class PemesananController extends BaseController
                 $manualDelivery[] = [
                     'id_pengeluaran' => $row['id_pengeluaran'] ?? null,
                     'id_out_celup'   => $row['id_out_celup'],
+                    'tgl_pakai'      => $row['tgl_pakai'],
                     'no_model'       => $row['no_model']    ?? '',
                     'item_type'      => $row['item_type']   ?? '',
                     'jenis'          => $row['jenis']       ?? '',
