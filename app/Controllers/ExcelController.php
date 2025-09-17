@@ -130,7 +130,7 @@ class ExcelController extends BaseController
             $loss = $items['loss'];
             $gwpcs = ($gw * $comp) / 100;
             $styleSize = urlencode($styleSize);
-            $apiUrl  = 'http://192.168.1.3/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
+            $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
 
             $response = file_get_contents($apiUrl);
 
@@ -399,7 +399,7 @@ class ExcelController extends BaseController
             $loss = $items['loss'];
             $gwpcs = ($gw * $comp) / 100;
             $styleSize = urlencode($styleSize);
-            $apiUrl  = 'http://192.168.1.3/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
+            $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
 
             $response = file_get_contents($apiUrl);
 
@@ -606,7 +606,7 @@ class ExcelController extends BaseController
     }
     public function excelPPHDays($area, $tanggal)
     {
-        $apiUrl = 'http://192.168.1.3/CapacityApps/public/api/getPPhPerhari/' . $area . '/' . $tanggal;
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getPPhPerhari/' . $area . '/' . $tanggal;
 
         $response = file_get_contents($apiUrl);
         if ($response === false) {
@@ -921,8 +921,8 @@ class ExcelController extends BaseController
         $row = 4;
         foreach ($data as $index => $item) {
             $model = $item['no_model'];
-            // Ambil data dari API ge192.168.1.3
-            $getStartMcUrl = 'http://192.168.1.3/CapacityApps/public/api/getStartMc/' . $model;
+            // Ambil data dari API ge172.23.44.14
+            $getStartMcUrl = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . $model;
             $getStartMcResponse = file_get_contents($getStartMcUrl);
             $getStartMc = json_decode($getStartMcResponse, true);
 
@@ -2073,7 +2073,7 @@ class ExcelController extends BaseController
         $key = $this->request->getGet('key');
         $jenis = $this->request->getGet('jenis') ?? '';
         $data = $this->masterOrderModel->getFilterReportGlobal($key, $jenis);
-        $getDeliv = 'http://192.168.1.3/CapacityApps/public/api/getDeliv/' . $key;
+        $getDeliv = 'http://172.23.44.14/CapacityApps/public/api/getDeliv/' . $key;
         $response = file_get_contents($getDeliv);
         $delivery = json_decode($response, true);
         $totalDel  = count($delivery);
@@ -4151,7 +4151,7 @@ class ExcelController extends BaseController
         foreach ($categories as $label => $keyword) {
             $colLetter = 'H';
             foreach ($areaHeaders as $_) {
-                $formula = "192.168.1.3$dataStartRow}:F{$dataEndRow},\"{$keyword}\",{$colLetter}{$dataStartRow}:{$colLetter}{$dataEndRow})";
+                $formula = "172.23.44.14$dataStartRow}:F{$dataEndRow},\"{$keyword}\",{$colLetter}{$dataStartRow}:{$colLetter}{$dataEndRow})";
                 $sheet->setCellValue("{$colLetter}{$row}", $formula);
                 $sheet->getStyle("{$colLetter}{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
                 $sheet->getStyle("{$colLetter}{$row}")->getFont()->setBold(true);
@@ -4608,7 +4608,7 @@ class ExcelController extends BaseController
     public function exportReportGlobalBenang()
     {
         $key = $this->request->getGet('key');
-        $getDeliv = 'http://192.168.1.3/CapacityApps/public/api/getDeliv/' . $key;
+        $getDeliv = 'http://172.23.44.14/CapacityApps/public/api/getDeliv/' . $key;
         $response = file_get_contents($getDeliv);
 
         // $data = $this->stockModel->getFilterReportGlobalBenang($key);
@@ -5557,7 +5557,7 @@ class ExcelController extends BaseController
         $sheet->setCellValue('O4', 'KG');
         $sheet->setCellValue('P4', 'LOT');
 
-        // Po Tambahan Gbn: 192.168.1.3Sub-header
+        // Po Tambahan Gbn: 172.23.44.14Sub-header
         $sheet->mergeCells('R3:U3');
         $sheet->setCellValue('R3', 'PO TAMBAHAN GBN');
         $sheet->setCellValue('R4', 'TGL TERIMA PO(+) GBN');
@@ -6014,7 +6014,7 @@ class ExcelController extends BaseController
     {
         $data = $this->masterOrderModel->getFilterReportGlobal($key);
 
-        $getDeliv = 'http://192.168.1.3/CapacityApps/public/api/getDeliv/' . $key;
+        $getDeliv = 'http://172.23.44.14/CapacityApps/public/api/getDeliv/' . $key;
         $response = file_get_contents($getDeliv);
         $delivery = json_decode($response, true);
         $totalDel  = count($delivery);
@@ -7092,7 +7092,7 @@ class ExcelController extends BaseController
 
         // 2) Siapkan HTTP client
         $client = \Config\Services::curlrequest([
-            'baseURI' => 'http://192.168.1.3/CapacityApps/public/api/',
+            'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
             'timeout' => 5
         ]);
 
@@ -7393,7 +7393,7 @@ class ExcelController extends BaseController
         $noModel   = $result[0]['no_model'] ?? '';
         $kodeBuyer = $result[0]['buyer'] ?? '';
 
-        $apiUrl = 'http://192.168.1.3/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
 
         $buyerName = '';
         $response   = @file_get_contents($apiUrl);
@@ -7431,7 +7431,7 @@ class ExcelController extends BaseController
         }
 
         // Ambil buyer dari API
-        // $buyerApiUrl = 'http://192.168.1.3/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+        // $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
 
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';
@@ -9425,7 +9425,7 @@ class ExcelController extends BaseController
             }
 
             // API URL dari config
-            $apiUrl = 'http://192.168.1.3/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($res['no_model']);
+            $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($res['no_model']);
 
             // Pakai stream context untuk timeout dan error handling
             $context = stream_context_create(['http' => ['timeout' => 3]]); // 3 detik timeout
@@ -10010,7 +10010,7 @@ class ExcelController extends BaseController
         // $noModel =  $result[0]['no_model'] ?? '';
 
         // Ambil buyer dari API
-        // $buyerApiUrl = 'http://192.168.1.3/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+        // $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
         // $buyerName = json_decode(file_get_contents($buyerApiUrl), true);
 
         if ($tujuan == 'CELUP') {
@@ -10587,7 +10587,7 @@ class ExcelController extends BaseController
         // $noModel =  $result[0]['no_model'] ?? '';
 
         // Ambil buyer dari API
-        // $buyerApiUrl = 'http://192.168.1.3/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+        // $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
         // $buyerName = json_decode(file_get_contents($buyerApiUrl), true);
 
         if ($tujuan == 'CELUP') {
@@ -11156,7 +11156,7 @@ class ExcelController extends BaseController
 
         // // 2) Siapkan HTTP client
         // $client = \Config\Services::curlrequest([
-        //     'baseURI' => 'http://192.168.1.3/CapacityApps/public/api/',
+        //     'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
         //     'timeout' => 5
         // ]);
 
@@ -13424,7 +13424,7 @@ class ExcelController extends BaseController
             }
 
             // API URL dari config
-            $apiUrl = 'http://192.168.1.3/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($res['no_model']);
+            $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($res['no_model']);
 
             // Pakai stream context untuk timeout dan error handling
             $context = stream_context_create(['http' => ['timeout' => 3]]); // 3 detik timeout
@@ -14057,7 +14057,7 @@ class ExcelController extends BaseController
             $ttlQty = 0;
 
             foreach ($getStyle as $row) {
-                $urlQty = 'http://192.168.1.3/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($p['no_model'])
+                $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($p['no_model'])
                     . '&style_size=' . urlencode($row['style_size'])
                     . '&area=' . urlencode($area);
 
@@ -14124,7 +14124,7 @@ class ExcelController extends BaseController
             $ttlQty = 0;
 
             foreach ($getStyle as $row) {
-                $urlQty = 'http://192.168.1.3/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($r['no_model'])
+                $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($r['no_model'])
                     . '&style_size=' . urlencode($row['style_size'])
                     . '&area=' . urlencode($area);
 

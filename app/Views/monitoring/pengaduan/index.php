@@ -117,7 +117,7 @@
     /* ====== EMPTY STATE ====== */
     .empty-state {
         border: 0;
-        192.168.1.3 border-radius: 16px;
+        172.23.44.14 border-radius: 16px;
         box-shadow: var(--card-shadow);
     }
 
@@ -149,7 +149,7 @@
         align-items: center;
         justify-content: center;
         z-index: 9999;
-        192.168.1.3 backdrop-filter: blur(2px);
+        172.23.44.14 backdrop-filter: blur(2px);
     }
 
     .spinner {
@@ -335,7 +335,7 @@
         e.preventDefault();
         showLoading(true);
         $.ajax({
-            url: 'http://192.168.1.3/CapacityApps/public/api/pengaduan/create',
+            url: 'http://172.23.44.14/CapacityApps/public/api/pengaduan/create',
             method: 'POST',
             dataType: 'json',
             data: $(this).serialize(),
@@ -381,7 +381,7 @@
         const $form = $(this);
         showLoading(true);
         $.ajax({
-            url: 'http://192.168.1.3/CapacityApps/public/api/pengaduan/reply/' + id,
+            url: 'http://172.23.44.14/CapacityApps/public/api/pengaduan/reply/' + id,
             method: 'POST',
             data: $form.serialize(),
             success: function(res) {

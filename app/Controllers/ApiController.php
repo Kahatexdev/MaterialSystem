@@ -1323,7 +1323,7 @@ class ApiController extends ResourceController
     {
         $username = urlencode(session()->get('username'));
         $role     = session()->get('role');
-        $url      = 'http://192.168.1.3/CapacityApps/public/api/pengaduan/' . $username . '/' . $role;
+        $url      = 'http://172.23.44.14/CapacityApps/public/api/pengaduan/' . $username . '/' . $role;
 
         try {
             $json = @file_get_contents($url);
@@ -1562,7 +1562,7 @@ class ApiController extends ResourceController
 
         // Ambil data dari API lokal
         $client = service('curlrequest');
-        $response = $client->get("http://192.168.1.3/CapacityApps/public/api/ExportPengaduan/{$idPengaduan}");
+        $response = $client->get("http://172.23.44.14/CapacityApps/public/api/ExportPengaduan/{$idPengaduan}");
 
         $pengaduan = json_decode($response->getBody(), true);
 

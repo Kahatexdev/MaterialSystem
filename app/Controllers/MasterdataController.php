@@ -355,7 +355,7 @@ class MasterdataController extends BaseController
         $style_size_encoded = str_replace(' ', '%20', $style_size);
         $param = $no_model . '/' . $style_size_encoded;
 
-        $url = 'http://192.168.1.3/CapacityApps/public/api/orderMaterial/' . $param;
+        $url = 'http://172.23.44.14/CapacityApps/public/api/orderMaterial/' . $param;
 
         try {
             $json = @file_get_contents($url);
