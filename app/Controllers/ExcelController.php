@@ -846,7 +846,7 @@ class ExcelController extends BaseController
                     $item['kode_warna'],
                     $item['warna'],
                     number_format($item['kgs_material'], 2),
-                    $item['tgl_masuk'],
+                    $item['tgl_datang'],
                     number_format($item['kgs_kirim'], 2),
                     $item['cones_kirim'],
                     $item['lot_kirim'],
@@ -921,7 +921,7 @@ class ExcelController extends BaseController
         $row = 4;
         foreach ($data as $index => $item) {
             $model = $item['no_model'];
-            // Ambil data dari API getStartMc
+            // Ambil data dari API ge172.23.44.14
             $getStartMcUrl = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . $model;
             $getStartMcResponse = file_get_contents($getStartMcUrl);
             $getStartMc = json_decode($getStartMcResponse, true);
@@ -2073,7 +2073,6 @@ class ExcelController extends BaseController
         $key = $this->request->getGet('key');
         $jenis = $this->request->getGet('jenis') ?? '';
         $data = $this->masterOrderModel->getFilterReportGlobal($key, $jenis);
-
         $getDeliv = 'http://172.23.44.14/CapacityApps/public/api/getDeliv/' . $key;
         $response = file_get_contents($getDeliv);
         $delivery = json_decode($response, true);
@@ -4152,7 +4151,7 @@ class ExcelController extends BaseController
         foreach ($categories as $label => $keyword) {
             $colLetter = 'H';
             foreach ($areaHeaders as $_) {
-                $formula = "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"{$keyword}\",{$colLetter}{$dataStartRow}:{$colLetter}{$dataEndRow})";
+                $formula = "172.23.44.14$dataStartRow}:F{$dataEndRow},\"{$keyword}\",{$colLetter}{$dataStartRow}:{$colLetter}{$dataEndRow})";
                 $sheet->setCellValue("{$colLetter}{$row}", $formula);
                 $sheet->getStyle("{$colLetter}{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
                 $sheet->getStyle("{$colLetter}{$row}")->getFont()->setBold(true);
@@ -5558,7 +5557,7 @@ class ExcelController extends BaseController
         $sheet->setCellValue('O4', 'KG');
         $sheet->setCellValue('P4', 'LOT');
 
-        // Po Tambahan Gbn: Header + Sub-header
+        // Po Tambahan Gbn: 172.23.44.14Sub-header
         $sheet->mergeCells('R3:U3');
         $sheet->setCellValue('R3', 'PO TAMBAHAN GBN');
         $sheet->setCellValue('R4', 'TGL TERIMA PO(+) GBN');
