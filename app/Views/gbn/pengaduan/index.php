@@ -13,12 +13,12 @@
     </div>
 
     <!-- Jika tidak ada pengaduan -->
-    <?php if (empty($pengaduan)): ?>
+    <?php if (empty($pengaduan)) : ?>
         <div class="alert alert-info text-center">
             Tidak ada pesan/aduan.
         </div>
-    <?php else: ?>
-        <?php foreach ($pengaduan as $p): ?>
+    <?php else : ?>
+        <?php foreach ($pengaduan as $p) : ?>
             <div class="card mb-3" id="listPengaduan">
                 <div class="card-body">
                     <?php
@@ -34,11 +34,19 @@
                     $displayRole = $roleMap[$p['target_role']] ?? $p['target_role'];
                     ?>
                     <div class="d-flex justify-content-between align-items-center">
+
                         <h6 class="mb-1">
                             <strong><?= esc($p['username']) ?></strong> →
                             <span class="badge bg-secondary"><?= esc($displayRole) ?></span>
                         </h6>
-                        <small class="text-muted"><?= $formattedDate ?></small>
+                        <div>
+
+                            <small class="text-muted"><?= $formattedDate ?></small>
+                            <button onclick="window.location.href='<?= base_url('api/pengaduan/exportPdf/' . $p['id_pengaduan']) ?>'" class="btn btn-info">
+                                <i class="fas fa-file-pdf"></i> Export PDF
+                            </button>
+
+                        </div>
                     </div>
                     <p><?= nl2br(esc($p['isi'])) ?></p>
 
@@ -46,15 +54,15 @@
                     <hr class="my-2">
 
                     <!-- Reply list -->
-                    <?php if (!empty($replies[$p['id_pengaduan']])): ?>
-                        <?php foreach ($replies[$p['id_pengaduan']] as $r): ?>
+                    <?php if (!empty($replies[$p['id_pengaduan']])) : ?>
+                        <?php foreach ($replies[$p['id_pengaduan']] as $r) : ?>
                             <div class="border-start ps-2 mb-2">
                                 <strong><?= esc($r['username']) ?></strong>:
                                 <?= nl2br(esc($r['isi'])) ?>
                                 <div><small class="text-muted"><?= $r['created_at'] ?></small></div>
                             </div>
                         <?php endforeach; ?>
-                    <?php else: ?>
+                    <?php else : ?>
                         <div class="text-muted small">Belum ada balasan.</div>
                     <?php endif; ?>
 
@@ -93,6 +101,8 @@
                         <option value="user">Area</option>
                         <option value="rosso">Rosso</option>
                         <option value="gbn">GBN</option>
+                        <option value="celup">celup cones</option>
+                        <option value="covering">Covering</option>
                         <option value="sudo">Monitoring Planning & Produksi</option>
                         <option value="monitoring">Monitoring Bahan Baku</option>
                     </select>

@@ -144,40 +144,61 @@ class PemesananModel extends Model
     }
 
 
-    public function getListPemesananByArea($area)
+    // Model
+    public function getListPemesananByArea(string $area, ?string $pdk = null)
     {
-        $query = $this->db->table('pemesanan')
+        $builder = $this->db->table('pemesanan')
             ->select("
-                pemesanan.admin,
-                pemesanan.tgl_pakai,
-                master_order.no_model,
-                material.item_type,
-                master_material.jenis,
-                material.kode_warna,
-                material.color,
-                SUM(material.kgs) AS kgs,
-                SUM(pemesanan.jl_mc) AS jl_mc,
-                SUM(pemesanan.ttl_qty_cones) AS cns_pesan,
-                SUM(pemesanan.ttl_berat_cones) AS qty_pesan,
-                SUM(pemesanan.sisa_kgs_mc) AS qty_sisa,
-                SUM(pemesanan.sisa_cones_mc) AS cns_sisa,
-                pemesanan.lot,
-                pemesanan.keterangan,
-                pemesanan.status_kirim,
-                pemesanan.additional_time,
-                pemesanan.po_tambahan
-            ")
+            pemesanan.admin,
+            pemesanan.tgl_pakai,
+            master_order.no_model,
+            material.item_type,
+            master_material.jenis,
+            material.kode_warna,
+            material.color,
+            SUM(material.kgs) AS kgs,
+            SUM(pemesanan.jl_mc) AS jl_mc,
+            SUM(pemesanan.ttl_qty_cones) AS cns_pesan,
+            SUM(pemesanan.ttl_berat_cones) AS qty_pesan,
+            SUM(pemesanan.sisa_kgs_mc) AS qty_sisa,
+            SUM(pemesanan.sisa_cones_mc) AS cns_sisa,
+            pemesanan.lot,
+            pemesanan.keterangan,
+            pemesanan.status_kirim,
+            pemesanan.additional_time,
+            pemesanan.po_tambahan
+        ")
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pemesanan.admin', $area)
-            ->where('pemesanan.status_kirim!=', 'YA')
-            ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')
-            ->orderBy('pemesanan.tgl_pakai', 'DESC')
-            ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
-        return $query->get()->getResultArray();
+            // tidak termasuk yang sudah terkirim
+            ->where('pemesanan.status_kirim !=', 'YA');
+
+        // Filter no_model hanya jika $pdk TIDAK kosong
+        if (!empty($pdk)) {
+            $builder->where('master_order.no_model', $pdk);
+        }
+
+        $builder->groupBy([
+            'master_order.no_model',
+            'material.item_type',
+            'material.kode_warna',
+            'material.color',
+            'pemesanan.tgl_pakai',
+            'pemesanan.po_tambahan',
+        ]);
+
+        $builder->orderBy('pemesanan.tgl_pakai', 'DESC')
+            ->orderBy('master_order.no_model', 'ASC')
+            ->orderBy('material.item_type', 'ASC')
+            ->orderBy('material.kode_warna', 'ASC')
+            ->orderBy('material.color', 'ASC');
+
+        return $builder->get()->getResultArray();
     }
+
     public function getListReportPemesananByArea($area, $tgl_pakai)
     {
         $query = $this->db->table('pemesanan')
@@ -303,7 +324,7 @@ class PemesananModel extends Model
             ->where('pemesanan.tgl_pakai', $id['tgl_pakai'])
             ->where('pemesanan.po_tambahan', $id['po_tambahan'])
             ->where('pemesanan.admin', $id['area'])
-            ->where('pemesanan.status_kirim!=', 'YA')
+            ->where('pemesanan.status_kirim !=', 'YA')
             ->get()
             ->getResultArray(); // Ambil semua baris sebagai array
 
@@ -339,6 +360,7 @@ class PemesananModel extends Model
             ->where('material.color', $id['color'])
             ->where('pemesanan.tgl_pakai', $id['tgl_pakai'])
             ->where('pemesanan.po_tambahan', $id['po_tambahan'])
+            ->where('pemesanan.admin', $id['area'])
             ->limit(1)
             ->get()
             ->getRowArray();
@@ -451,7 +473,8 @@ class PemesananModel extends Model
 
     public function getFilterPemesananArea($key, $tanggal_awal, $tanggal_akhir)
     {
-        $this->select('pemesanan.*,pemesanan.admin AS area, master_order.foll_up, master_order.no_model, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, material.item_type, material.kode_warna, material.color')
+        $this->select('pemesanan.tgl_pakai, pemesanan.tgl_pesan, pemesanan.tgl_list, SUM(pemesanan.jl_mc) AS jl_mc, SUM(pemesanan.ttl_qty_cones) AS ttl_qty_cones, SUM(pemesanan.ttl_berat_cones) AS ttl_berat_cones, SUM(pemesanan.sisa_cones_mc) AS sisa_cones_mc, SUM(pemesanan.sisa_kgs_mc) AS sisa_kgs_mc, pemesanan.admin AS area, pemesanan.admin,  GROUP_CONCAT(DISTINCT pemesanan.keterangan SEPARATOR ", ") AS keterangan, GROUP_CONCAT(DISTINCT pemesanan.lot SEPARATOR ", ") AS lot, pemesanan.po_tambahan, master_order.foll_up, master_order.no_model, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, material.item_type, material.kode_warna, material.color')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pemesanan.status_kirim', 'YA');
@@ -476,6 +499,16 @@ class PemesananModel extends Model
             }
             $this->groupEnd();
         }
+
+        // $this->groupBy('pemesanan.id_total_pemesanan');
+        $this->groupBy([
+            'pemesanan.tgl_pakai',
+            'material.item_type',
+            'material.kode_warna',
+            'material.color',
+            'master_order.no_model',
+            'pemesanan.admin',
+        ]);
 
         return $this->findAll();
     }
@@ -539,18 +572,30 @@ class PemesananModel extends Model
         // return $result ? $this->db->affectedRows() : false;
     }
 
+    // Model (mis. PemesananModel.php)
     public function getFilterPemesananKaret($tanggal_awal, $tanggal_akhir)
     {
-        $this->select('pemesanan.*, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
+        $this->select("
+        pemesanan.tgl_pakai,
+        material.item_type,
+        material.color,
+        material.kode_warna,
+        pemesanan.admin,
+        master_order.no_model,
+        SUM(COALESCE(tp.ttl_jl_mc,0)) AS ttl_jl_mc,
+        SUM(COALESCE(tp.ttl_kg,0))    AS ttl_kg,
+        SUM(COALESCE(tp.ttl_cns,0))   AS ttl_cns,
+        pemesanan.po_tambahan,
+        pemesanan.keterangan
+    ")
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            // ->where('tp.ttl_jl_mc >', 0)
             ->where('pemesanan.status_kirim', 'YA')
             ->where('master_material.jenis', 'KARET');
 
-        // Filter berdasarkan tanggal
+        // Filter tanggal pakai
         if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
             $this->groupStart();
             if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
@@ -558,23 +603,45 @@ class PemesananModel extends Model
                     ->where('pemesanan.tgl_pakai <=', $tanggal_akhir);
             } elseif (!empty($tanggal_awal)) {
                 $this->where('pemesanan.tgl_pakai >=', $tanggal_awal);
-            } elseif (!empty($tanggal_akhir)) {
+            } else { // hanya $tanggal_akhir
                 $this->where('pemesanan.tgl_pakai <=', $tanggal_akhir);
             }
             $this->groupEnd();
         }
-        $this->groupBy('tp.id_total_pemesanan');
+
+        // Penting: group by kunci penggabungan + admin (area)
+        $this->groupBy([
+            'pemesanan.tgl_pakai',
+            'material.item_type',
+            'material.color',
+            'material.kode_warna',
+            'master_order.no_model',
+            'pemesanan.admin',
+        ]);
+
         return $this->findAll();
     }
 
+
     public function getFilterPemesananSpandex($tanggal_awal, $tanggal_akhir)
     {
-        $this->select('pemesanan.*, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
+        $this->select("
+        pemesanan.tgl_pakai,
+        material.item_type,
+        material.color,
+        material.kode_warna,
+        pemesanan.admin,
+        master_order.no_model,
+        SUM(COALESCE(tp.ttl_jl_mc,0)) AS ttl_jl_mc,
+        SUM(COALESCE(tp.ttl_kg,0))    AS ttl_kg,
+        SUM(COALESCE(tp.ttl_cns,0))   AS ttl_cns,
+        pemesanan.po_tambahan,
+        pemesanan.keterangan
+    ")
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
-            // ->where('tp.ttl_jl_mc >', 0)
             ->where('pemesanan.status_kirim', 'YA')
             ->where('master_material.jenis', 'SPANDEX');
 
@@ -591,8 +658,17 @@ class PemesananModel extends Model
             }
             $this->groupEnd();
         }
-        $this->groupBy('tp.id_total_pemesanan');
-
+        // $this->groupBy('tp.id_total_pemesanan');
+        //ganti jadi:
+        // Penting: group by kunci penggabungan + admin (area)
+        $this->groupBy([
+            'pemesanan.tgl_pakai',
+            'material.item_type',
+            'material.color',
+            'material.kode_warna',
+            'master_order.no_model',
+            'pemesanan.admin',
+        ]);
         return $this->findAll();
     }
     public function countStatusRequest()
@@ -831,46 +907,135 @@ class PemesananModel extends Model
         return $this->findAll();
     }
 
-    public function getDataPemesananArea($tglPakai, $noModel = null, $role)
+    // public function getDataPemesananArea($tglPakai, $noModel = null, $role)
+    // {
+    //     $builder = $this->db->table('pemesanan')
+    //         ->select("
+    //             pemesanan.admin,
+    //             pemesanan.tgl_pakai,
+    //             master_order.no_model,
+    //             material.item_type,
+    //             master_material.jenis,
+    //             material.kode_warna,
+    //             material.color,
+    //             SUM(pemesanan.jl_mc) AS jl_mc,
+    //             SUM(pemesanan.ttl_qty_cones) AS cns_pesan,
+    //             SUM(pemesanan.ttl_berat_cones) AS qty_pesan,
+    //             SUM(pemesanan.sisa_kgs_mc) AS qty_sisa,
+    //             SUM(pemesanan.sisa_cones_mc) AS cns_sisa,
+    //             pemesanan.lot,
+    //             pemesanan.keterangan,
+    //             pemesanan.status_kirim,
+    //             pemesanan.additional_time,
+    //             pemesanan.po_tambahan
+    //         ")
+    //         ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
+    //         ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+    //         ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+    //         ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+
+    //         ->where('pemesanan.tgl_pakai', $tglPakai);
+    //     if (!empty($noModel)) {
+    //         $builder->where('master_order.no_model', $noModel);
+    //     }
+    //     if ($role != 'monitoring') {
+    //         $builder->where('pemesanan.status_kirim', 'YA');
+    //     }
+
+    //     $builder->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')
+    //         ->orderBy('pemesanan.tgl_pakai', 'DESC')
+    //         ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
+
+    //     return $builder->get()->getResultArray();
+    // }
+
+    public function getDataPemesananArea($tglPakai, $noModel = null, $role = 'user', $area = '', $search = '')
     {
-        $builder = $this->db->table('pemesanan')
+        $base = $this->db->table('pemesanan')
             ->select("
-                pemesanan.admin,
-                pemesanan.tgl_pakai,
-                master_order.no_model,
-                material.item_type,
-                master_material.jenis,
-                material.kode_warna,
-                material.color,
-                SUM(pemesanan.jl_mc) AS jl_mc,
-                SUM(pemesanan.ttl_qty_cones) AS cns_pesan,
-                SUM(pemesanan.ttl_berat_cones) AS qty_pesan,
-                SUM(pemesanan.sisa_kgs_mc) AS qty_sisa,
-                SUM(pemesanan.sisa_cones_mc) AS cns_sisa,
-                pemesanan.lot,
-                pemesanan.keterangan,
-                pemesanan.status_kirim,
-                pemesanan.additional_time,
-                pemesanan.po_tambahan
-            ")
+            pemesanan.admin,
+            pemesanan.tgl_pakai,
+            master_order.no_model,
+            material.item_type,
+            master_material.jenis,
+            material.kode_warna,
+            material.color,
+            SUM(pemesanan.jl_mc) AS jl_mc,
+            SUM(pemesanan.ttl_qty_cones) AS cns_pesan,
+            SUM(pemesanan.ttl_berat_cones) AS qty_pesan,
+            SUM(pemesanan.sisa_kgs_mc) AS qty_sisa,
+            SUM(pemesanan.sisa_cones_mc) AS cns_sisa,
+            pemesanan.lot,
+            pemesanan.keterangan,
+            pemesanan.status_kirim,
+            pemesanan.additional_time,
+            pemesanan.po_tambahan
+        ")
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-
             ->where('pemesanan.tgl_pakai', $tglPakai);
+
         if (!empty($noModel)) {
-            $builder->where('master_order.no_model', $noModel);
+            $base->where('master_order.no_model', $noModel);
+        }
+        if (!empty($area)) {
+            $base->where('pemesanan.admin', $area);
         }
         if ($role != 'monitoring') {
-            $builder->where('pemesanan.status_kirim', 'YA');
+            $base->where('pemesanan.status_kirim', 'YA');
         }
 
-        $builder->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan')
-            ->orderBy('pemesanan.tgl_pakai', 'DESC')
+        // global search (opsional)
+        if ($search !== '') {
+            $base->groupStart()
+                ->like('pemesanan.admin', $search)
+                ->orLike('master_order.no_model', $search)
+                ->orLike('material.item_type', $search)
+                ->orLike('material.kode_warna', $search)
+                ->orLike('material.color', $search)
+                ->groupEnd();
+        }
+
+        // total & filtered (tanpa groupBy)
+        $forCount = clone $base;
+        $recordsFiltered = $forCount->countAllResults(false); // false agar builder tidak direset
+
+        $base->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan, pemesanan.admin');
+
+        // order
+        $base->orderBy('pemesanan.tgl_pakai', 'DESC')
             ->orderBy('master_order.no_model, material.item_type, material.kode_warna, material.color', 'ASC');
-        return $builder->get()->getResultArray();
+
+        $data = $base->get()->getResultArray();
+
+        // recordsTotal (tanpa search)
+        $baseNoSearch = $this->db->table('pemesanan')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('pemesanan.tgl_pakai', $tglPakai);
+
+        if (!empty($noModel)) $baseNoSearch->where('master_order.no_model', $noModel);
+        if (!empty($area))    $baseNoSearch->where('pemesanan.admin', $area);
+        if ($role != 'monitoring') $baseNoSearch->where('pemesanan.status_kirim', 'YA');
+
+        $baseNoSearch->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan, pemesanan.admin');
+        $recordsTotal = $baseNoSearch->get()->getNumRows();
+
+        return [
+            'meta' => [
+                'total'    => $recordsTotal,
+                'filtered' => $recordsFiltered,
+            ],
+            'data' => $data,
+        ];
     }
+
+
+
     public function getPemesananByAreaModel($area, $model)
     {
         $this->select('master_order.no_model, material.item_type, material.kode_warna, material.color, MAX(material.loss) AS max_loss,pemesanan.tgl_pakai, total_pemesanan.id_total_pemesanan, total_pemesanan.ttl_jl_mc, total_pemesanan.ttl_kg,total_pemesanan.ttl_cns, pemesanan.po_tambahan,pemesanan.keterangan_gbn, IFNULL(p.kgs_out, 0) AS kgs_out, IFNULL(p.cns_out,0) AS cns_out, p.lot_out')
@@ -883,6 +1048,29 @@ class PemesananModel extends Model
             ->where('master_order.no_model', $model)
             ->groupBy('total_pemesanan.id_total_pemesanan')
             ->orderBy('material.item_type, material.kode_warna, pemesanan.tgl_pakai', 'ASC');
+
+        // jangan di hapus
+        // $this->select('master_order.no_model, material.item_type, material.kode_warna, material.color,  SUM(material.kgs) AS total_kgs, MAX(material.loss) AS max_loss,pemesanan.tgl_pakai, total_pemesanan.id_total_pemesanan, total_pemesanan.ttl_jl_mc, total_pemesanan.ttl_kg,total_pemesanan.ttl_cns, pemesanan.po_tambahan,pemesanan.keterangan_gbn, IFNULL(p.kgs_out, 0) AS kgs_out, IFNULL(p.cns_out,0) AS cns_out, p.lot_out')
+        //     ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
+        //     ->join('(SELECT id_total_pemesanan, SUM(kgs_out) AS kgs_out,SUM(cns_out) AS cns_out, GROUP_CONCAT(DISTINCT lot_out) AS lot_out FROM pengeluaran WHERE status="Pengiriman Area" GROUP BY id_total_pemesanan) p', 'p.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
+        //     ->join(
+        //         '(
+        //         SELECT id_order, item_type, kode_warna, color, SUM(kgs) AS total_kgs 
+        //         FROM material 
+        //         GROUP BY id_order, item_type, kode_warna, color
+        //         ) m',
+        //         'm.id_order = master_order.id_order 
+        //         AND m.item_type = material.item_type 
+        //         AND m.kode_warna = material.kode_warna 
+        //         AND m.color = material.color',
+        //         'left'
+        //     )
+        //     ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+        //     ->where('pemesanan.status_kirim', 'YA')
+        //     ->where('pemesanan.admin', $area)
+        //     ->where('master_order.no_model', $model)
+        //     ->groupBy('total_pemesanan.id_total_pemesanan')
+        //     ->orderBy('material.item_type, material.kode_warna, pemesanan.tgl_pakai', 'ASC');
 
         return $this->findAll();
     }

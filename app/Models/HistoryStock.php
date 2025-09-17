@@ -16,6 +16,7 @@ class HistoryStock extends Model
         'id_history_pindah',
         'id_stock_old',
         'id_stock_new',
+        'id_out_celup',
         'cluster_old',
         'cluster_new',
         'kgs',

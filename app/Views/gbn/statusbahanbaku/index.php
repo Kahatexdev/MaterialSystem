@@ -172,9 +172,7 @@
 
                 <!-- Progress bar -->
                 <div class="progress mt-3" style="height: 6px; border-radius: 6px;">
-                    <div id="progressBar"
-                        class="progress-bar progress-bar-striped progress-bar-animated bg-info"
-                        role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                     </div>
                 </div>
                 <small id="progressText" class="text-white mt-1 d-block">0%</small>

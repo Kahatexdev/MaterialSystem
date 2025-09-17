@@ -2775,7 +2775,7 @@ class PdfController extends BaseController
             // kalau nggak ada, bisa ganti dengan strtok($item['jenis'], ' ')
             $mainJenis = $item['jenis_benang'];
             $kg       = $item['ttl_kg'];
-            if (! isset($totalPerBenang[$mainJenis])) {
+            if (!isset($totalPerBenang[$mainJenis])) {
                 $totalPerBenang[$mainJenis] = 0;
             }
             $totalPerBenang[$mainJenis] += $kg;

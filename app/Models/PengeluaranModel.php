@@ -383,6 +383,7 @@ class PengeluaranModel extends Model
             pengeluaran.id_pengeluaran,
             pengeluaran.id_stock,
             pengeluaran.id_out_celup,
+            total_pemesanan.id_total_pemesanan,
             pengeluaran.kgs_out,
             pengeluaran.cns_out,
             pengeluaran.krg_out,

@@ -122,9 +122,7 @@
 
                 <!-- Progress bar -->
                 <div class="progress mt-3" style="height: 6px; border-radius: 6px;">
-                    <div id="progressBar"
-                        class="progress-bar progress-bar-striped progress-bar-animated bg-info"
-                        role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                     </div>
                 </div>
                 <small id="progressText" class="text-white mt-1 d-block">0%</small>
@@ -132,149 +130,65 @@
         </div>
     </div>
 
-    <!-- Modal Detail Stok -->
-    <div class="modal fade" id="modalStock" tabindex="-1" aria-labelledby="modalStockLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalStockLabel">Detail Stok</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="stockForm">
-                        <div id="stockData" class="row g-3"></div>
-                        <button type="submit" class="btn bg-gradient-info mt-3 text-end">Pilih Stok</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Button Import -->
-    <div class="card card-frame">
+    <div class="card">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                <!-- Judul di kiri -->
-                <h5 class="mb-0 font-weight-bolder">Data Pemesanan Area</h5>
-
-                <!-- Wrapper untuk input+button di kanan -->
-                <div class="d-flex">
-                    <div class="form-group">
-                        <label for="tgl_pakai">No Model</label>
-                        <input type="text" class="form-control form-control-sm me-2" id="no_model" placeholder="No Model">
-                    </div>
-                    <div class="form-group">
-                        <label for="tgl_pakai">Tanggal Pakai</label>
-                        <input type="date" class="form-control form-control-sm me-2" id="tgl_pakai">
-                    </div>
-                    <button class="btn btn-info btn-sm" id="btnFilter">
-                        <i class="fa fa-search"></i> Search
-                    </button>
+                <div class="form-group me-2">
+                    <label>No Model</label>
+                    <input type="text" class="form-control form-control-sm" id="no_model" placeholder="No Model">
                 </div>
+                <div class="form-group me-2">
+                    <label>Area</label>
+                    <input type="text" class="form-control form-control-sm" id="area" placeholder="Area">
+                    <!-- kalau mau Select2, tinggal ganti input ini -->
+                </div>
+                <div class="form-group me-2">
+                    <label>Tanggal Pakai</label>
+                    <input type="date" class="form-control form-control-sm" id="tgl_pakai">
+                </div>
+                <div class="flex-grow-1"></div> <!-- spacer -->
+                <button class="btn btn-secondary btn-sm align-self-end me-2" id="btnReset">
+                    <i class="fa fa-undo"></i> Reset
+                </button>
+
+                <button class="btn btn-info btn-sm align-self-end" id="btnFilter">
+                    <i class="fa fa-search"></i> Search
+                </button>
+
             </div>
         </div>
 
         <!-- Tabel Data -->
-        <div class="card mt-4">
+        <div class="card">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
+                    <table id="dataTable" class="display non-wrap text-center text-uppercase text-xs font-bolder" style="width:100%">
                         <thead>
                             <tr>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Pakai</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kg Kebutuhan</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jalan Mc</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs Pesan</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cns Pesan</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Lot Pesan</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan Area</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">PO (+)</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Terima</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Retur</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Sisa Jatah</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Status Jatah</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Edit</th>
+                                <th>No</th>
+                                <th>Tanggal Pakai</th>
+                                <th>Area</th>
+                                <th>No Model</th>
+                                <th>Item Type</th>
+                                <th>Kode Warna</th>
+                                <th>Warna</th>
+                                <th>Kg Kebutuhan</th>
+                                <th>Jalan Mc</th>
+                                <th>Kgs Pesan</th>
+                                <th>Cns Pesan</th>
+                                <th>Lot Pesan</th>
+                                <th>Keterangan Area</th>
+                                <th>PO (+)</th>
+                                <th>Total Terima</th>
+                                <th>Total Retur</th>
+                                <th>Sisa Jatah</th>
+                                <th>Status Jatah</th>
+                                <th>Edit</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <?php
-                            $no = 1;
-                            foreach ($dataList as $key => $id) {
-                                $ttl_kg_pesan = number_format($id['qty_pesan'] - $id['qty_sisa'], 2);
-                                $ttl_cns_pesan = $id['cns_pesan'] - $id['cns_sisa'];
-                            ?>
-                                <tr>
-                                    <td class="text-xs text-start"><?= $no++; ?></td>
-                                    <td class="text-xs text-start"><?= $id['tgl_pakai']; ?></td>
-                                    <td class="text-xs text-start"><?= $id['admin']; ?></td>
-                                    <td class="text-xs text-start"><?= $id['no_model']; ?></td>
-                                    <td class="text-xs text-start"><?= $id['item_type']; ?></td>
-                                    <td class="text-xs text-start"><?= $id['kode_warna']; ?></td>
-                                    <td class="text-xs text-start"><?= $id['color']; ?></td>
-                                    <td class="text-xs text-start"><?= number_format($id['ttl_kebutuhan_bb'], 2); ?></td>
-                                    <td class="text-xs text-start"><?= $id['jl_mc']; ?></td>
-                                    <td class="text-xs text-start"><?= $ttl_kg_pesan; ?></td>
-                                    <td class="text-xs text-start"><?= $ttl_cns_pesan; ?></td>
-                                    <td class="text-xs text-start"><?= $id['lot']; ?></td>
-                                    <td class="text-xs text-start"><?= $id['keterangan']; ?></td>
-                                    <td class="text-xs text-start">
-                                        <?php if ($id['po_tambahan'] == 1): ?>
-                                            <span class="text-success fw-bold">✅</span>
-                                        <?php else: ?>
-                                            <!-- Biarkan kosong -->
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="text-xs text-start"><?= number_format($id['ttl_pengiriman'], 2); ?></td>
-                                    <td class="text-xs text-start"></td>
-                                    <td class="text-xs text-start" style="<?= $id['sisa_jatah'] < 0 ? 'color: red;' : ''; ?>"><?= number_format($id['sisa_jatah'], 2); ?></td>
-                                    <td class="text-xs text-start" style="<?= $id['sisa_jatah'] < 0 ? 'color: red;' : ''; ?>">
-                                        <?php if ($id['sisa_jatah'] > 0) {
-                                            if ($ttl_kg_pesan >= $id['sisa_jatah']) { ?>
-                                                <span style="color: red;">Pemesanan Melebihi Jatah</span>
-                                            <?php } ?>
-                                        <?php } else { ?>
-                                            <span style="color: red;">Habis Jatah</span>
-                                        <?php } ?>
-                                    </td>
-                                    <td class="text-xs text-start">
-                                        <button type="button" class="btn btn-warning update-btn" data-bs-toggle="modal" data-bs-target="#updateListModal" data-area="<?= $id['admin']; ?>" data-tgl="<?= $id['tgl_pakai']; ?>" data-model="<?= $id['no_model']; ?>" data-item="<?= $id['item_type']; ?>" data-kode="<?= $id['kode_warna']; ?>" data-color="<?= $id['color']; ?>" data-po-tambahan="<?= $id['po_tambahan']; ?>">
-                                            <i class="fa fa-edit fa-lg"></i>
-                                        </button>
-                                        <button type="button" id="sendBtn"
-                                            class="btn btn-info text-xs send-btn"
-                                            data-toggle="modal"
-                                            data-area="<?= $id['admin']; ?>"
-                                            data-tgl="<?= $id['tgl_pakai']; ?>"
-                                            data-model="<?= $id['no_model']; ?>"
-                                            data-item="<?= $id['item_type']; ?>"
-                                            data-kode="<?= $id['kode_warna']; ?>"
-                                            data-color="<?= $id['color']; ?>"
-                                            data-po-tambahan="<?= $id['po_tambahan']; ?>">
-                                            <i class="fa fa-paper-plane fa-lg"></i>
-                                        </button>
-                                    </td>
-
-                                </tr>
-                            <?php
-                            } ?>
-                        </tbody>
                     </table>
                 </div>
-                <?php if (empty($dataPemesanan)) : ?>
-                    <div class="card-footer">
-                        <div class="row">
-                            <div class="col-lg-12 text-center">
-                                <p>No data available in the table.</p>
-                            </div>
-                        </div>
-                    </div>
-                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -373,68 +287,183 @@
 </div>
 <!-- modal update list pemesanan end -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script type="text/javascript">
-    $('#dataTable').DataTable({
-        "pageLength": 35,
-        "order": []
-    });
+<script src="https://cdn.datatables.net/v/bs5/dt-2.1.3/r-3.0.2/datatables.min.js"></script>
+
+<script>
+    let dt;
 
     function showLoading() {
         $('#loadingOverlay').addClass('active');
-        $('#btnSearch').prop('disabled', true);
-        // show DataTables processing indicator if available
-        try {
-            dataTable.processing(true);
-        } catch (e) {}
     }
 
     function hideLoading() {
         $('#loadingOverlay').removeClass('active');
-        $('#btnSearch').prop('disabled', false);
-        try {
-            dataTable.processing(false);
-        } catch (e) {}
     }
 
-    function updateProgress(percent) {
-        $('#progressBar')
-            .css('width', percent + '%')
-            .attr('aria-valuenow', percent);
-        $('#progressText').text(percent + '%');
+    function updateProgress(p) {
+        $('#progressBar').css('width', p + '%').attr('aria-valuenow', p);
+        $('#progressText').text(p + '%');
     }
-</script>
-<script type="text/javascript">
-    //Filter data pemesanan
-    document.getElementById('btnFilter').addEventListener('click', function() {
-        const noModel = document.getElementById('no_model').value.trim();
-        const tglPakai = document.getElementById('tgl_pakai').value.trim();
 
-        if (tglPakai === '') {
-            alert('Tanggal Pakai harus diisi!');
-            return;
-        }
-
+    function reloadTable() {
+        if (!dt) return;
         showLoading();
         updateProgress(30);
+        dt.ajax.reload(() => {
+            updateProgress(100);
+            setTimeout(hideLoading, 300);
+        }, false);
+    }
 
-        // Redirect ke controller dengan parameter
-        let url = '<?= base_url($role . '/filter_pemesananarea') ?>?';
-        if (noModel) url += 'model=' + encodeURIComponent(noModel) + '&';
-        if (tglPakai) url += 'tgl_pakai=' + encodeURIComponent(tglPakai);
+    $(function() {
+        dt = $('#dataTable').DataTable({
+            processing: true,
+            serverSide: true, // tetap server-side, tapi tanpa paging
+            responsive: false,
+            deferRender: true,
+            paging: false, // <--- NO PAGING
+            info: false, // <--- sembunyikan info "Showing X of Y"
+            lengthChange: false, // <--- hilangkan dropdown page length
+            order: [],
+            ajax: {
+                url: "<?= base_url('monitoring/pemesanan/data'); ?>",
+                type: "GET",
+                data: function(d) {
+                    d.tgl_pakai = $('#tgl_pakai').val().trim();
+                    d.model = $('#no_model').val().trim();
+                    d.area = $('#area').val().trim();
+                    // paksa length besar agar server (kalau masih baca length) tetap kirim full
+                    d.start = 0;
+                    d.length = 1000000;
+                },
+                dataSrc: function(json) {
+                    // nomor urut manual
+                    let running = 1;
+                    return (json.data || []).map((row) => {
+                        row._rownum = running++;
+                        return row;
+                    });
+                },
+                beforeSend() {
+                    showLoading();
+                    updateProgress(50);
+                },
+                complete() {
+                    updateProgress(100);
+                    setTimeout(hideLoading, 300);
+                }
+            },
+            columns: [{
+                    data: '_rownum'
+                },
+                {
+                    data: 'tgl_pakai'
+                },
+                {
+                    data: 'admin'
+                },
+                {
+                    data: 'no_model'
+                },
+                {
+                    data: 'item_type'
+                },
+                {
+                    data: 'kode_warna'
+                },
+                {
+                    data: 'color'
+                },
+                {
+                    data: 'ttl_kebutuhan_bb',
+                    render: d => (parseFloat(d || 0)).toFixed(2)
+                },
+                {
+                    data: 'jl_mc'
+                },
+                {
+                    data: '_ttl_kg_pesan'
+                },
+                {
+                    data: '_ttl_cns_pesan'
+                },
+                {
+                    data: 'lot'
+                },
+                {
+                    data: 'keterangan'
+                },
+                {
+                    data: 'po_tambahan',
+                    render: d => (String(d) == '1' ? '✅' : '')
+                },
+                {
+                    data: '_ttl_pengiriman'
+                },
+                {
+                    data: null,
+                    defaultContent: ''
+                },
+                {
+                    data: '_sisa_jatah',
+                    render: (d, t, row) => {
+                        const neg = (parseFloat(row['sisa_jatah'] || 0) < 0);
+                        return `<span style="${neg?'color:red;':''}">${d}</span>`;
+                    }
+                },
+                {
+                    data: '_status_jatah',
+                    render: (d, t, row) => {
+                        const neg = (parseFloat(row['sisa_jatah'] || 0) <= 0) || (d === 'Pemesanan Melebihi Jatah');
+                        return `<span style="${neg?'color:red;':''}">${d||''}</span>`;
+                    }
+                },
+                {
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    render: (d, t, row) => {
+                        return `
+        <button type="button" class="btn btn-warning update-btn" data-bs-toggle="modal" data-bs-target="#updateListModal"
+          data-area="${row.admin}" data-tgl="${row.tgl_pakai}" data-model="${row.no_model}"
+          data-item="${row.item_type}" data-kode="${row.kode_warna}" data-color="${row.color}"
+          data-po-tambahan="${row.po_tambahan}">
+          <i class="fa fa-edit fa-lg"></i>
+        </button>
+        ${ row.status_kirim !== 'YA' ? `
+          <button type="button" class="btn btn-info text-xs send-btn"
+            data-area="${row.admin}" data-tgl="${row.tgl_pakai}" data-model="${row.no_model}"
+            data-item="${row.item_type}" data-kode="${row.kode_warna}" data-color="${row.color}"
+            data-po-tambahan="${row.po_tambahan}">
+            <i class="fa fa-paper-plane fa-lg"></i>
+          </button>` : `<span style="color:red;"></span>` }
+        `;
+                    }
+                },
+            ]
+        });
 
-        window.location.href = url;
 
-        // animasi progress naik pelan → lalu redirect
-        let percent = 80;
-        let interval = setInterval(() => {
-            percent += 9;
-            if (percent >= 99) {
-                clearInterval(interval);
-                window.location.href = url; // redirect ketika progress sudah 90%
-            } else {
-                updateProgress(percent);
+        // Search
+        $('#btnFilter').on('click', function() {
+            if (!$('#tgl_pakai').val()) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Tanggal Pakai harus diisi!'
+                });
+                return;
             }
-        }, 100);
+            reloadTable();
+        });
+
+        // Reset
+        $('#btnReset').on('click', function() {
+            $('#no_model').val('');
+            $('#area').val('');
+            $('#tgl_pakai').val('');
+            reloadTable(); // akan kembali kosong karena tgl_pakai kosong
+        });
+
     });
 
     // VIEW MODAL UPDATE PEMESANAN
@@ -803,7 +832,7 @@
             item_type: button.data('item'),
             kode_warna: button.data('kode'),
             color: button.data('color'),
-            po_tambahan: button.data('po-tambahan')
+            po_tambahan: String(button.data('po-tambahan'))
         };
 
         console.log(data); // Debug data yang akan dikirim
@@ -858,4 +887,5 @@
         });
     });
 </script>
+
 <?php $this->endSection(); ?>
