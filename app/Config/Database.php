@@ -162,7 +162,7 @@ class Database extends Config
      */
     public array $tests = [
         'DSN'         => '',
-        'hostname'    => '172.23.44.14',
+        'hostname'    => '192.168.1.3',
         'username'    => '',
         'password'    => '',
         'database'    => ':memory:',

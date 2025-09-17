@@ -1,5 +1,21 @@
 <?php $this->extend($role . '/pemesanan/header'); ?>
 <?php $this->section('content'); ?>
+<style>
+    #threadModal .modal-dialog {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 400px;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        background-color: #fff;
+        z-index: 1050;
+    }
+</style>
 <div class="container-fluid py-4">
     <div class="row my-4">
         <div class="col-xl-12 col-sm-12 mb-xl-0 mb-4">
@@ -27,8 +43,8 @@
 
     <!-- Thread type dropdown modal -->
     <div class="modal fade" id="threadModal" tabindex="-1" aria-labelledby="threadModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
+        <div class="modal-dialog modal-dialog-centeredmodal-dialog-centered">
+            <div class="modal-content text-center">
                 <div class="modal-header">
                     <h5 class="modal-title" id="threadModalLabel">Pilih Jenis Benang</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
