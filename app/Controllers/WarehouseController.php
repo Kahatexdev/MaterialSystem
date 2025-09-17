@@ -438,7 +438,7 @@ class WarehouseController extends BaseController
 
         if ($update) {
             $existing = session()->get('dataOut') ?? [];
-            $filtered = array_filter($existing, fn ($item) => !in_array($item['id_out_celup'], $post['id_out_celup']));
+            $filtered = array_filter($existing, fn($item) => !in_array($item['id_out_celup'], $post['id_out_celup']));
             session()->set('dataOut', array_values($filtered));
         }
 
@@ -1298,7 +1298,7 @@ class WarehouseController extends BaseController
             'krg'           => $totalKrgOut, // Total krg
             'lot'           => $idStockData[0]['lot_stock'], // Lot stok lama
             'keterangan'    => "Pindah Order", // Keterangan pemindahan
-            'admin'         => session()->role, // Admin yang melakukan
+            'admin'         => session()->get('username'), // Admin yang melakukan
             'created_at'    => date('Y-m-d H:i:s'), // Waktu pemindahan
             'updated_at'    => null, // Kolom updated_at bisa null karena belum ada perubahan
         ]);
@@ -1475,7 +1475,7 @@ class WarehouseController extends BaseController
         }
         //update tabel pemasukan
         if (!empty($checkedIds)) {
-            $whereIds = array_map(fn ($index) => $idOutCelup[$index] ?? null, $checkedIds);
+            $whereIds = array_map(fn($index) => $idOutCelup[$index] ?? null, $checkedIds);
             $whereIds = array_filter($whereIds); // Hapus nilai NULL jika ada
 
             if (!empty($whereIds)) {
@@ -2125,7 +2125,7 @@ class WarehouseController extends BaseController
                     'cns_in_out'        => $stock_awal == '' ? $data['cns'] : 0,
                     'krg_in_out'        => $stock_awal == '' ? $data['krg'] : 0,
                     'lot_stock'         => $stock_awal == '' ? $data['lot'] : '',
-                    'admin'             => session()->role,
+                    'admin'             => session()->get('username'),
                     'created_at'        => date('Y-m-d H:i:s'),
                     'updated_at'        => NULL,
                 ];
@@ -2203,7 +2203,7 @@ class WarehouseController extends BaseController
             'krg'           => $totalKrg, // Total krg
             'lot'           => $details[0]['lot'],
             'keterangan'    => "Pindah Cluster",
-            'admin'         => session()->role,
+            'admin'         => session()->get('username'),
             'created_at'    => date('Y-m-d H:i:s'),
             'updated_at'    => NULL,
         ];
@@ -3685,7 +3685,7 @@ class WarehouseController extends BaseController
             'krg'           => $totalKrgOut, // Total krg
             'lot'           => $idStockData[0]['lot_stock'], // Lot stok lama
             'keterangan'    => "Pindah Order", // Keterangan pemindahan
-            'admin'         => session()->role, // Admin yang melakukan
+            'admin'          => session()->get('username'), // Admin yang melakukan
             'created_at'    => date('Y-m-d H:i:s'), // Waktu pemindahan
             'updated_at'    => null, // Kolom updated_at bisa null karena belum ada perubahan
         ]);
