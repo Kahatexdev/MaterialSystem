@@ -611,12 +611,14 @@ class PemesananModel extends Model
 
         // Penting: group by kunci penggabungan + admin (area)
         $this->groupBy([
-            'pemesanan.tgl_pakai',
-            'material.item_type',
-            'material.color',
-            'material.kode_warna',
-            'master_order.no_model',
-            'pemesanan.admin',
+            // 'pemesanan.tgl_pakai',
+            // 'material.item_type',
+            // 'material.color',
+            // 'material.kode_warna',
+            // 'master_order.no_model',
+            // 'pemesanan.tgl_pakai',
+            'tp.id_total_pemesanan',
+            // 'pemesanan.admin',
         ]);
 
         return $this->findAll();
@@ -662,12 +664,13 @@ class PemesananModel extends Model
         //ganti jadi:
         // Penting: group by kunci penggabungan + admin (area)
         $this->groupBy([
-            'pemesanan.tgl_pakai',
-            'material.item_type',
-            'material.color',
-            'material.kode_warna',
-            'master_order.no_model',
-            'pemesanan.admin',
+            // 'pemesanan.tgl_pakai',
+            // 'material.item_type',
+            // 'material.color',
+            // 'material.kode_warna',
+            // 'master_order.no_model',
+            // 'pemesanan.admin',
+            'tp.id_total_pemesanan',
         ]);
         return $this->findAll();
     }

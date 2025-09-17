@@ -3691,7 +3691,7 @@ class ExcelController extends BaseController
 
         // Ambil data dari Model (sudah benar sesuai user)
         $data = $this->pemesananModel->getFilterPemesananKaret($tglAwal, $tglAkhir);
-
+        dd ($data);
         // Sort supaya merge blok rapi (tgl_pakai, item_type, color, kode_warna, no_model)
         usort($data, function ($a, $b) {
             return [$a['tgl_pakai'], $a['item_type'], $a['color'], $a['kode_warna'], $a['no_model']]
