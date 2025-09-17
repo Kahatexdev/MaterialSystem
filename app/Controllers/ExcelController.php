@@ -6635,7 +6635,7 @@ class ExcelController extends BaseController
         header('Cache-Control: max-age=0');
 
         // Tulis file excel ke output
-        $writer = new Xlsx($sprea172.23.44.14
+      $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
     }
@@ -6936,7 +6936,7 @@ class ExcelController extends BaseController
         // Tulis file excel ke output
         $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
-        exit;172.23.44.14
+        exit;
     }
 
     public function exportTagihanBenang()
@@ -6974,7 +6974,7 @@ class ExcelController extends BaseController
         $sheet->mergeCells('A1:R1');
         $sheet->setCellValue('A1', 'REPORT DATA TAGIHAN BENANG');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
-        $sheet->getStyle('A1')->ge172.23.44.14t()
+        $sheet->getStyle('A1')->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Buat header dengan sub-header
@@ -8968,7 +8968,7 @@ class ExcelController extends BaseController
                 ],
             ],
         ]);
-172.23.44.14
+
         // Double border baris 4 dan 5
         $sheet->getStyle('A4:Q4')->applyFromArray([
             'borders' => [
@@ -9551,7 +9551,7 @@ class ExcelController extends BaseController
                     'borderStyle' => Border::BORDER_THIN,
                     'color' => ['rgb' => '000000'],
                 ],
-            ],172.23.44.14
+            ],
         ]);
         $sheet->getStyle('N4:O4')->applyFromArray([
             'borders' => [
@@ -10128,7 +10128,7 @@ class ExcelController extends BaseController
         ]);
         $sheet->getStyle('N4:O4')->applyFromArray([
             'borders' => [
-                'left' => [172.23.44.14
+                'left' => [
                     'borderStyle' => Border::BORDER_THIN,
                     'color' => ['rgb' => '000000'],
                 ],
@@ -10697,7 +10697,7 @@ class ExcelController extends BaseController
         ]);
         $sheet->getStyle('C4')->applyFromArray([
             'borders' => [
-                'right' => [172.23.44.14
+                'right' => [
                     'borderStyle' => Border::BORDER_THIN,
                     'color' => ['rgb' => '000000'],
                 ],
@@ -12965,7 +12965,7 @@ class ExcelController extends BaseController
             foreach (range('A', 'T') as $col) {
                 $sheet->getColumnDimension($col)->setAutoSize(true);
             }
-        }172.23.44.14
+        }
 
         // Download
         if ($this->request->getGet('tanggal_awal') && $this->request->getGet('tanggal_akhir')) {
@@ -13598,7 +13598,7 @@ class ExcelController extends BaseController
                         'borderStyle' => Border::BORDER_THIN,
                         'color' => ['rgb' => '000000'],
                     ],
-                ],172.23.44.14
+                ],
             ]);
 
             // Atur lebar kolom dalam satuan pt
@@ -13665,7 +13665,7 @@ class ExcelController extends BaseController
             $sheet->getStyle('D1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
             $sheet->getStyle('D1')->getFill()->getStartColor()->setRGB('99FFFF');
             $sheet->mergeCells('D1:Q1');
-            $sheet->getStyle('D1')172.23.44.14nment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('D1')getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
             $sheet->mergeCells('D2:Q2');
             $sheet->setCellValue('D2', 'DEPARTEMEN CELUP CONES');
