@@ -2373,13 +2373,35 @@ class WarehouseController extends BaseController
                 }
             }
 
-            if ($krgOtherOut == 1) {
+            $selectOutCelup = $this->outCelupModel->where('id_out_celup', $idOutCelup)->first();
+            $totalPengeluaran = $this->pengeluaranModel
+                ->selectSum('kgs_out')
+                ->where('id_out_celup', $idOutCelup)
+                ->first();
+
+            $totalOtherOut = $this->otherOutModel
+                ->selectSum('kgs_other_out')
+                ->where('id_out_celup', $idOutCelup)
+                ->first();
+            $kgsMasuk = $selectOutCelup['kgs_kirim'];
+            $kgsKeluar = ($totalPengeluaran['kgs_out'] ?? 0) + ($totalOtherOut['kgs_other_out'] ?? 0);
+            // Debugging
+            // log_message('debug', 'kgsMasuk: ' . $kgsMasuk);
+            // log_message('debug', 'kgsKeluar: ' . $kgsKeluar);
+            if (round($kgsKeluar, 2) == round($kgsMasuk, 2)) {
                 // Update data stok
                 $this->pemasukanModel->set('out_jalur', '1')
                     ->where('id_out_celup', $idOutCelup)
                     ->where('id_stock', $idStock)
                     ->update();
             }
+            // if ($krgOtherOut == 1) {
+            //     // Update data stok
+            //     $this->pemasukanModel->set('out_jalur', '1')
+            //         ->where('id_out_celup', $idOutCelup)
+            //         ->where('id_stock', $idStock)
+            //         ->update();
+            // }
 
             // Mengirim response JSON ke frontend
             return $this->response->setJSON([
