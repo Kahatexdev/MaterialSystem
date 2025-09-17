@@ -582,9 +582,9 @@ class PemesananModel extends Model
         material.kode_warna,
         pemesanan.admin,
         master_order.no_model,
-        SUM(COALESCE(tp.ttl_jl_mc,0)) AS ttl_jl_mc,
-        SUM(COALESCE(tp.ttl_kg,0))    AS ttl_kg,
-        SUM(COALESCE(tp.ttl_cns,0))   AS ttl_cns,
+        tp.ttl_jl_mc,
+        tp.ttl_kg,
+        tp.ttl_cns,
         pemesanan.po_tambahan,
         pemesanan.keterangan
     ")
@@ -632,9 +632,9 @@ class PemesananModel extends Model
         material.kode_warna,
         pemesanan.admin,
         master_order.no_model,
-        SUM(COALESCE(tp.ttl_jl_mc,0)) AS ttl_jl_mc,
-        SUM(COALESCE(tp.ttl_kg,0))    AS ttl_kg,
-        SUM(COALESCE(tp.ttl_cns,0))   AS ttl_cns,
+        tp.ttl_jl_mc,
+        tp.ttl_kg,
+        tp.ttl_cns,
         pemesanan.po_tambahan,
         pemesanan.keterangan
     ")
