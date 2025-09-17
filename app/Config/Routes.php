@@ -195,6 +195,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('warehouse/savePindahOrder', 'WarehouseController::savePindahOrder');
     $routes->post('warehouse/savePindahOrderTest', 'WarehouseController::savePindahOrderTest');
     $routes->post('warehouse/getPindahOrder', 'WarehouseController::getPindahOrder');
+    $routes->post('warehouse/getPindahOrderTest', 'WarehouseController::getPindahOrderTest');
     $routes->post('warehouse/savePindahCluster', 'WarehouseController::savePindahCluster');
     $routes->post('warehouse/getPindahCluster', 'WarehouseController::getPindahCluster');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');

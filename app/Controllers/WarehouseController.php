@@ -438,7 +438,7 @@ class WarehouseController extends BaseController
 
         if ($update) {
             $existing = session()->get('dataOut') ?? [];
-            $filtered = array_filter($existing, fn ($item) => !in_array($item['id_out_celup'], $post['id_out_celup']));
+            $filtered = array_filter($existing, fn($item) => !in_array($item['id_out_celup'], $post['id_out_celup']));
             session()->set('dataOut', array_values($filtered));
         }
 
@@ -1298,7 +1298,7 @@ class WarehouseController extends BaseController
             'krg'           => $totalKrgOut, // Total krg
             'lot'           => $idStockData[0]['lot_stock'], // Lot stok lama
             'keterangan'    => "Pindah Order", // Keterangan pemindahan
-            'admin'         => session()->role, // Admin yang melakukan
+            'admin'         => session()->get('username'), // Admin yang melakukan
             'created_at'    => date('Y-m-d H:i:s'), // Waktu pemindahan
             'updated_at'    => null, // Kolom updated_at bisa null karena belum ada perubahan
         ]);
@@ -1475,7 +1475,7 @@ class WarehouseController extends BaseController
         }
         //update tabel pemasukan
         if (!empty($checkedIds)) {
-            $whereIds = array_map(fn ($index) => $idOutCelup[$index] ?? null, $checkedIds);
+            $whereIds = array_map(fn($index) => $idOutCelup[$index] ?? null, $checkedIds);
             $whereIds = array_filter($whereIds); // Hapus nilai NULL jika ada
 
             if (!empty($whereIds)) {
@@ -1800,10 +1800,10 @@ class WarehouseController extends BaseController
                 $other = $this->otherOutModel->getQty($pemasukan['id_out_celup'], $pemasukan['nama_cluster']);
                 $outByCns = $this->pengeluaranModel->getQtyOutByCns($pemasukan['id_out_celup']);
                 // jika kgs manual kosong maka
-                $rawKgsManual = $data['kgs_out'][$pemasukan['id_pemasukan']] ?? '';
+                $rawKgsManual = $data['kgs_out'][$pemasukan['id_pemasukan']] ?? 0;
                 $rawCnsManual = $data['cns_out'][$pemasukan['id_pemasukan']] ?? 0;
 
-                if ($rawKgsManual !== '' || $rawKgsManual > 0) {
+                if ($rawKgsManual > 0 || $rawCnsManual > 0) {
                     $kgsOut =  floatval($rawKgsManual);
                     $cnsOut = floatval($rawCnsManual);
                     $krgOut = 0;
@@ -2125,7 +2125,7 @@ class WarehouseController extends BaseController
                     'cns_in_out'        => $stock_awal == '' ? $data['cns'] : 0,
                     'krg_in_out'        => $stock_awal == '' ? $data['krg'] : 0,
                     'lot_stock'         => $stock_awal == '' ? $data['lot'] : '',
-                    'admin'             => session()->role,
+                    'admin'             => session()->get('username'),
                     'created_at'        => date('Y-m-d H:i:s'),
                     'updated_at'        => NULL,
                 ];
@@ -2203,7 +2203,7 @@ class WarehouseController extends BaseController
             'krg'           => $totalKrg, // Total krg
             'lot'           => $details[0]['lot'],
             'keterangan'    => "Pindah Cluster",
-            'admin'         => session()->role,
+            'admin'         => session()->get('username'),
             'created_at'    => date('Y-m-d H:i:s'),
             'updated_at'    => NULL,
         ];
@@ -3552,9 +3552,10 @@ class WarehouseController extends BaseController
         foreach ($dataOutCelup as $i => $d) {
             $other = $this->otherOutModel->getQty($d['id_out_celup']);
             $outByCns = $this->pengeluaranModel->getQtyOutByCns($d['id_out_celup']);
-            // 
-            $kgs = round($d['kgs_kirim'] - ($other['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0), 2);
-            $cns = $d['cones_kirim'] - ($other['cns_other_out'] ?? 0) - ($outByCns['cns_out'] ?? 0);
+            $pindahOrder = $this->historyStock->getKgsPindahOrder($d['id_out_celup']);
+
+            $kgs = round($d['kgs_kirim'] - ($other['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0) - ($pindahOrder['kgs_pindah_order'] ?? 0), 2);
+            $cns = $d['cones_kirim'] - ($other['cns_other_out'] ?? 0) - ($outByCns['cns_out'] ?? 0) - ($pindahOrder['cns_pindah_order'] ?? 0);
             $kgsOutByCns = $reqData['kgs_out'][$d['id_out_celup']] ?? 0;
             $cnsOutByCns = $reqData['cns_out'][$d['id_out_celup']] ?? 0;
 
@@ -3576,7 +3577,7 @@ class WarehouseController extends BaseController
             $totalKrgOut += $krgKirimOut; // untuk pengurangan stock pdk lama
             $totalKrgIn += $krgKirimIn; // Asumsikan setiap pemasukan hanya 1 kali
         }
-
+        log_message('info', "Total Kgs: $totalKgs, data pindah : " . json_encode($pindahOrder) . ", data kgs: " . json_encode($kgs));
         $db = \Config\Database::connect();
         $db->transStart();
 
@@ -3615,8 +3616,6 @@ class WarehouseController extends BaseController
                 ]);
                 $idOutCelupBaru[] = $this->outCelupModel->getInsertID();
             }
-
-
 
             // — update stok LAMA (kurangi sesuai tiap item)
             $newKgs = max(0, $idStockData[$i]['kgs_in_out']   -= $kgsKirim);
@@ -3671,8 +3670,6 @@ class WarehouseController extends BaseController
             $newStockId = $this->stockModel->getInsertID();
         }
 
-
-
         // insert data history
         $this->historyStock->insert([
             'id_stock_old'  => $idStockData[0]['id_stock'], // ID stok lama
@@ -3685,7 +3682,7 @@ class WarehouseController extends BaseController
             'krg'           => $totalKrgOut, // Total krg
             'lot'           => $idStockData[0]['lot_stock'], // Lot stok lama
             'keterangan'    => "Pindah Order", // Keterangan pemindahan
-            'admin'         => session()->role, // Admin yang melakukan
+            'admin'          => session()->get('username'), // Admin yang melakukan
             'created_at'    => date('Y-m-d H:i:s'), // Waktu pemindahan
             'updated_at'    => null, // Kolom updated_at bisa null karena belum ada perubahan
         ]);
@@ -3696,8 +3693,8 @@ class WarehouseController extends BaseController
 
         $totalKgsHistory = array_sum(array_column($dataHistory, 'kgs'));
 
-        log_message('debug', 'Data History: ' . print_r($dataHistory, true));
-        log_message('debug', 'Total Kgs History: ' . $totalKgsHistory);
+        // log_message('debug', 'Data History: ' . print_r($dataHistory, true));
+        // log_message('debug', 'Total Kgs History: ' . $totalKgsHistory);
 
         $dataOutCelupLama = $this->outCelupModel->find($oldIdOC);
         $kgsKirim = $dataOutCelupLama['kgs_kirim'];
@@ -3734,7 +3731,7 @@ class WarehouseController extends BaseController
             ]);
             $idPemasukanBaru[] = $this->pemasukanModel->getInsertID();
         }
-        log_message('debug', 'Data OutCelup Lama: ' . print_r($dataOutCelupLama, true));
+        // log_message('debug', 'Data OutCelup Lama: ' . print_r($dataOutCelupLama, true));
 
         // 6) Update semua pemasukan baru agar pakai stock yang sama
         foreach ($idPemasukanBaru as $pid) {
@@ -3750,10 +3747,46 @@ class WarehouseController extends BaseController
             ]);
         }
 
-
         return $this->response->setJSON([
             'success' => true,
             'message' => 'Data berhasil dipindahkan.'
         ]);
+    }
+
+    public function getPindahOrderTest()
+    {
+        $idStock = $this->request->getPost('id_stock');
+        $data = $this->stockModel->getStockInPemasukanById($idStock);
+        // dd($data);
+        $dataArray = json_decode(json_encode($data), true);
+        foreach ($dataArray as &$id) {
+            $other = $this->otherOutModel->getQty($id['id_out_celup']);
+            $outByCns = $this->pengeluaranModel->getQtyOutByCns($id['id_out_celup']);
+            $pindahOrder = $this->historyStock->getKgsPindahOrder($id['id_out_celup']);
+
+            $kgsOther = !empty($other) ? (float) $other['kgs_other_out'] : 0;
+            $kgsOutByCns = !empty($outByCns) ? (float) $outByCns['kgs_out'] : 0;
+            $kgsPindahOrder = !empty($pindahOrder) ? (float) $pindahOrder['kgs_pindah_order'] : 0;
+            $cnsOther = !empty($other) ? (int) $other['cns_other_out'] : 0;
+            $cnsOutByCns = !empty($outByCns) ? (int) $outByCns['cns_out'] : 0;
+            $cnsPindahOrder = !empty($pindahOrder) ? (int) $pindahOrder['cns_pindah_order'] : 0;
+
+            // kurangi other out & pengeluaran by cones
+            $id['kgs_kirim'] = round((float) $id['kgs_kirim'] - $kgsPindahOrder - $kgsOther - $kgsOutByCns, 2);
+            $id['cones_kirim'] = (int) $id['cones_kirim'] - $cnsOther - $cnsOutByCns - $cnsPindahOrder;
+        }
+        // var_dump($dataArray);
+        // log_message('debug', 'Data Stock: ' . print_r($dataArray, true));
+        // log_message('debug', 'pindah order: ' . print_r($kgsPindahOrder, true));
+        if (empty($dataArray)) {
+            return $this->response->setJSON(['error' => false, 'message' => 'Data tidak ditemukan']);
+        } else {
+            return $this->response->setJSON([
+                'success' => true,
+                'data' => $dataArray
+            ]);
+        }
+
+        return $this->response->setJSON($dataArray);
     }
 }

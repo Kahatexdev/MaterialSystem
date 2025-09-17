@@ -1083,6 +1083,7 @@ class PemesananController extends BaseController
             'noModel'       => $noModel,
             'itemType'      => $pemesanan['item_type'],
             'kodeWarna'     => $pemesanan['kode_warna'],
+            'color'         => $pemesanan['color'],
             'area'          => $pemesanan['admin'],
             'id'            => $id,
             'ketGbn'        => $ket['ket_gbn'] ?? '',

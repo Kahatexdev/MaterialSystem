@@ -218,8 +218,10 @@ class ScheduleCelupModel extends Model
             ->select('schedule_celup.*, schedule_celup.user_cek_status AS admin,
                   mesin_celup.no_mesin, 
                   IF(schedule_celup.po_plus = "0", schedule_celup.kg_celup, 0) AS qty_celup, 
-                  IF(schedule_celup.po_plus = "1", schedule_celup.kg_celup, 0) AS qty_celup_plus')
-            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin');
+                  IF(schedule_celup.po_plus = "1", schedule_celup.kg_celup, 0) AS qty_celup_plus,
+                  open_po.kg_po')
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->join('open_po', 'open_po.no_model = schedule_celup.no_model AND open_po.item_type = schedule_celup.item_type AND open_po.kode_warna = schedule_celup.kode_warna');
 
         // Filter berdasarkan tanggal jika ada
         if ($filterTglSch && !$filterTglSchsampai) {
