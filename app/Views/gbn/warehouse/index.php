@@ -683,7 +683,7 @@
             cnsOut[id] = parseInt(rawCns, 10);
         });
 
-        $.post(`${base}${role}/warehouse/savePindahOrder`, {
+        $.post(`${base}${role}/warehouse/savePindahOrderTest`, {
             no_model_tujuan: model,
             idOutCelup: orders,
             id_stock: stock,
