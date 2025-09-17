@@ -1800,10 +1800,10 @@ class WarehouseController extends BaseController
                 $other = $this->otherOutModel->getQty($pemasukan['id_out_celup'], $pemasukan['nama_cluster']);
                 $outByCns = $this->pengeluaranModel->getQtyOutByCns($pemasukan['id_out_celup']);
                 // jika kgs manual kosong maka
-                $rawKgsManual = $data['kgs_out'][$pemasukan['id_pemasukan']] ?? '';
+                $rawKgsManual = $data['kgs_out'][$pemasukan['id_pemasukan']] ?? 0;
                 $rawCnsManual = $data['cns_out'][$pemasukan['id_pemasukan']] ?? 0;
 
-                if ($rawKgsManual !== '' || $rawKgsManual > 0) {
+                if ($rawKgsManual > 0 || $rawCnsManual > 0) {
                     $kgsOut =  floatval($rawKgsManual);
                     $cnsOut = floatval($rawCnsManual);
                     $krgOut = 0;
