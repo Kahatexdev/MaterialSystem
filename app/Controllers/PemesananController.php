@@ -1599,7 +1599,7 @@ class PemesananController extends BaseController
             'tgl_pakai' => $tglPakai,
             'jenis' => $jenis,
             'max_time' => $maxTime,
-            'username' => session()->get('role'),
+            'username' => session()->get('username'),
         ];
 
         $success = $this->pemesananModel->additionalTimeAccept($data);
@@ -1616,8 +1616,9 @@ class PemesananController extends BaseController
         $area      = $this->request->getPost('admin');
         $tglPakai  = $this->request->getPost('tgl_pakai');
         $jenis     = $this->request->getPost('jenis');
+        $username  = session()->get('username');
 
-        $success = $this->pemesananModel->additionalTimeReject($area, $tglPakai, $jenis);
+        $success = $this->pemesananModel->additionalTimeReject($area, $tglPakai, $jenis, $username);
 
         return redirect()->to(base_url($this->role . '/pemesanan/requestAdditionalTime'))
             ->with(

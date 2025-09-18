@@ -66,7 +66,8 @@
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Pakai</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jenis</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Alasan</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder" colspan="2">Action</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Batas Waktu</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder" colspan="2">Action / Admin</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -79,6 +80,7 @@
                                     <td><?= $data['tgl_pakai']; ?></td>
                                     <td><?= $data['jenis']; ?></td>
                                     <td><?= $data['alasan_tambahan_waktu']; ?></td>
+                                    <td><?= $data['additional_time'] ?? '-'; ?></td>
                                     <?php if ($data['status_kirim'] == "request") { ?>
                                         <td>
                                             <button type="button" class="btn btn-xs bg-gradient-success" data-bs-toggle="modal" data-bs-target="#acceptModal"
@@ -126,8 +128,14 @@
                                             </form>
                                         </td>
                                     <?php } else { ?>
-                                        <td colspan="2"><strong><?= $data['status_kirim'] ?></strong></td>
-                                        <td></td>
+                                        <td><strong>
+                                                <?php if (empty($data['additional_time']) && !empty($data['alasan_tambahan_waktu'])): ?>
+                                                    <span style="color:red; font-weight:bold;">Reject</span>
+                                                <?php else: ?>
+                                                    <span style="color:green; font-weight:bold;">Accept</span>
+                                                <?php endif; ?>
+                                            </strong></td>
+                                        <td><strong><?= $data['hak_akses'] ?></strong></td>
                                     <?php } ?>
                                 </tr>
                             <?php
