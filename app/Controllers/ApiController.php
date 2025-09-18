@@ -765,6 +765,7 @@ class ApiController extends ResourceController
             // Kondisi untuk data pertama saja
             if ($index === 0) {
                 $pemesananUpdate = [
+                    'tgl_pakai'         => $data['tgl_pakai'],
                     'jl_mc'             => $jalanMc,
                     'ttl_qty_cones'     => $ttlQtyCns,
                     'ttl_berat_cones'   => $ttlBeratCns,
@@ -776,6 +777,7 @@ class ApiController extends ResourceController
                 ];
             } else {
                 $pemesananUpdate = [
+                    'tgl_pakai'         => $data['tgl_pakai'],
                     'jl_mc'             => $jalanMc,
                     'ttl_qty_cones'     => $ttlQtyCns,
                     'ttl_berat_cones'   => $ttlBeratCns,
