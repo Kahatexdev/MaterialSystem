@@ -811,6 +811,7 @@ class MaterialModel extends Model
             m.item_type,
             m.kode_warna,
             m.color,
+            m.area,
             mm.jenis,
             mo.lco_date,
             mo.foll_up,
@@ -818,6 +819,15 @@ class MaterialModel extends Model
             mo.delivery_awal,
             mo.delivery_akhir,
             mo.unit,
+
+            -- kg pesan
+            (
+                SELECT SUM(mat.kgs)
+                FROM material mat
+                WHERE mat.id_order = mo.id_order
+                AND mat.item_type = m.item_type
+                AND mat.kode_warna = m.kode_warna
+            ) AS kg_pesan,
 
             -- stock awal
             (

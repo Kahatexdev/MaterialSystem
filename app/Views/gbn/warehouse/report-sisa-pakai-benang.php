@@ -322,7 +322,7 @@
                                     <td>${item.foll_up || ''}</td>
                                     <td>${item.no_model || ''}</td>
                                     <td>${item.no_order || ''}</td>
-                                    <td>${item.area_out || ''}</td>
+                                    <td>${item.area || ''}</td>
                                     <td>${item.buyer || ''}</td>
                                     <td>${item.start_mc || ''}</td>
                                     <td>${item.delivery_awal || ''}</td>
@@ -333,7 +333,7 @@
                                     <td>${item.color || ''}</td>
                                     <td>${(parseFloat(item.kgs_stock_awal) || 0).toFixed(2)}</td>
                                     <td>${item.lot_awal || ''}</td>
-                                    <td>${(parseFloat(item.kg_po) || 0).toFixed(2)}</td>
+                                    <td>${(parseFloat(item.kg_pesan) || 0).toFixed(2)}</td>
                                     <td>${item.tgl_terima_po_plus || ''}</td>
                                     <td>${item.tgl_po_plus_area || ''}</td>
                                     <td>${item.delivery_po_plus || ''}</td>

@@ -250,7 +250,7 @@
                             dataTable.row.add([
                                 index + 1,
                                 item.no_surat_jalan ?? '',
-                                item.tgl_masuk ?? '',
+                                item.tgl_datang ?? '',
                                 item.tgl_input ?? '',
                                 item.item_type ?? '',
                                 item.ukuran ?? '',
