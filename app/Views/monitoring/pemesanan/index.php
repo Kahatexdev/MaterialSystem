@@ -214,7 +214,7 @@
                             </div>
                             <div class="col-lg-4">
                                 <label for="recipient-name" class="col-form-label text-center">Tgl Pakai</label>
-                                <input type="text" class="form-control" name="tgl_pakai" readonly>
+                                <input type="date" class="form-control" name="tgl_pakai">
                             </div>
                             <div class="col-lg-4">
                                 <label for="recipient-name" class="col-form-label text-center">No Model</label>

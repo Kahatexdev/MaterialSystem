@@ -195,6 +195,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('warehouse/savePindahOrder', 'WarehouseController::savePindahOrder');
     $routes->post('warehouse/savePindahOrderTest', 'WarehouseController::savePindahOrderTest');
     $routes->post('warehouse/getPindahOrder', 'WarehouseController::getPindahOrder');
+    $routes->post('warehouse/getPindahOrderTest', 'WarehouseController::getPindahOrderTest');
     $routes->post('warehouse/savePindahCluster', 'WarehouseController::savePindahCluster');
     $routes->post('warehouse/getPindahCluster', 'WarehouseController::getPindahCluster');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
@@ -369,7 +370,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pemesanan/exportPermintaanSpandex', 'ExcelController::exportPermintaanSpandex');
 
     $routes->get('statusBahanBaku', 'ScheduleController::statusBahanBaku');
-    $routes->get('filterstatusbahanbaku/(:any)', 'ScheduleController::filterstatusbahanbaku/$1');
+    $routes->get('filterstatusbahanbaku', 'ScheduleController::filterstatusbahanbaku');
 
 
     // pengaduan

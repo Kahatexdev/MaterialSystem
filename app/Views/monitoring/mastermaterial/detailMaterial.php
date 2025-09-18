@@ -269,7 +269,7 @@
 
                             <div class="mb-3">
                                 <label for="inisial" class="form-label">Inisial</label>
-                                <input type="text" class="form-control" id="inisial" name="inisial" required>
+                                <input type="text" class="form-control" id="inisial" name="inisial">
                             </div>
 
                             <div class="mb-3">

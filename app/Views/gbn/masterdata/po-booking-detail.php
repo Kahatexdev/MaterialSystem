@@ -119,6 +119,7 @@
                                 <option value="">Pilih Tujuan</option>
                                 <option value="CELUP">CELUP</option>
                                 <option value="COVERING">COVERING</option>
+                                <option value="JS">JS</option>
                             </select>
                         </div>
                         <div class="mb-3">

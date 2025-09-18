@@ -152,6 +152,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs Pesan</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Pakai</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Keluar</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs Kirim</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones Kirim</th>
@@ -264,6 +265,7 @@
                                 item.kode_warna,
                                 item.color,
                                 item.kgs_pesan,
+                                item.tgl_pakai,
                                 item.tgl_out,
                                 item.kgs_pakai,
                                 item.cones_pakai,

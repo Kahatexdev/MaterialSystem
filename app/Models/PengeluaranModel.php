@@ -314,6 +314,7 @@ class PengeluaranModel extends Model
             ->join('master_order',   'master_order.id_order       = material.id_order',                       'left')
             ->where('out_celup.id_other_bon IS NOT NULL')
             ->where('out_celup.id_celup IS NULL')
+            ->where('other_bon.kategori !=', 'Perbaikan Data Menumpuk')
             ->groupBy('other_out.id_other_out');
 
         // // 2) Jika ada keyword, apply LIKE di tiap builder
@@ -551,6 +552,7 @@ class PengeluaranModel extends Model
             ->distinct()
             ->select([
                 'p.*',
+                'pe.tgl_pakai',
                 // jika ada di schedule_celup ambil sc.no_model, jika tidak ambil mo.no_model
                 'COALESCE(sc.no_model, mo.no_model) AS no_model',
                 'COALESCE(sc.item_type, m.item_type) AS item_type',

@@ -582,9 +582,9 @@ class PemesananModel extends Model
         material.kode_warna,
         pemesanan.admin,
         master_order.no_model,
-        SUM(COALESCE(tp.ttl_jl_mc,0)) AS ttl_jl_mc,
-        SUM(COALESCE(tp.ttl_kg,0))    AS ttl_kg,
-        SUM(COALESCE(tp.ttl_cns,0))   AS ttl_cns,
+        tp.ttl_jl_mc,
+        tp.ttl_kg,
+        tp.ttl_cns,
         pemesanan.po_tambahan,
         pemesanan.keterangan
     ")
@@ -611,11 +611,13 @@ class PemesananModel extends Model
 
         // Penting: group by kunci penggabungan + admin (area)
         $this->groupBy([
-            'pemesanan.tgl_pakai',
-            'material.item_type',
-            'material.color',
-            'material.kode_warna',
-            'master_order.no_model',
+            // 'pemesanan.tgl_pakai',
+            // 'material.item_type',
+            // 'material.color',
+            // 'material.kode_warna',
+            // 'master_order.no_model',
+            // 'pemesanan.tgl_pakai',
+            'tp.id_total_pemesanan',
             'pemesanan.admin',
         ]);
 
@@ -632,9 +634,9 @@ class PemesananModel extends Model
         material.kode_warna,
         pemesanan.admin,
         master_order.no_model,
-        SUM(COALESCE(tp.ttl_jl_mc,0)) AS ttl_jl_mc,
-        SUM(COALESCE(tp.ttl_kg,0))    AS ttl_kg,
-        SUM(COALESCE(tp.ttl_cns,0))   AS ttl_cns,
+        tp.ttl_jl_mc,
+        tp.ttl_kg,
+        tp.ttl_cns,
         pemesanan.po_tambahan,
         pemesanan.keterangan
     ")
@@ -662,11 +664,12 @@ class PemesananModel extends Model
         //ganti jadi:
         // Penting: group by kunci penggabungan + admin (area)
         $this->groupBy([
-            'pemesanan.tgl_pakai',
-            'material.item_type',
-            'material.color',
-            'material.kode_warna',
-            'master_order.no_model',
+            // 'pemesanan.tgl_pakai',
+            // 'material.item_type',
+            // 'material.color',
+            // 'material.kode_warna',
+            // 'master_order.no_model',
+            'tp.id_total_pemesanan',
             'pemesanan.admin',
         ]);
         return $this->findAll();
@@ -692,11 +695,12 @@ class PemesananModel extends Model
     }
     public function getStatusRequest()
     {
-        return $this->select('pemesanan.status_kirim, pemesanan.alasan_tambahan_waktu,pemesanan.admin, pemesanan.tgl_pakai, master_material.jenis')
+        return $this->select('pemesanan.status_kirim, pemesanan.alasan_tambahan_waktu,pemesanan.admin, pemesanan.tgl_pakai, master_material.jenis, pemesanan.hak_akses, pemesanan.additional_time')
             ->join('material', 'pemesanan.id_material = material.id_material')
             ->join('master_material', 'master_material.item_type = material.item_type')
             ->like('pemesanan.status_kirim', 'request')
-            ->groupBy('pemesanan.admin, pemesanan.tgl_pakai, master_material.jenis')
+            ->orWhere('pemesanan.alasan_tambahan_waktu IS NOT NULL')
+            ->groupBy('pemesanan.admin, pemesanan.tgl_pakai, master_material.jenis, pemesanan.alasan_tambahan_waktu, pemesanan.additional_time')
             ->orderBy('pemesanan.tgl_pakai', 'DESC')
             ->findAll();
     }
@@ -716,14 +720,15 @@ class PemesananModel extends Model
         $this->db->query($query, [$data['max_time'], $data['username'], $data['area'], $data['tgl_pakai'], $data['jenis']]);
         return $this->db->affectedRows() > 0;
     }
-    public function additionalTimeReject($area, $tgl_pakai, $jenis)
+    public function additionalTimeReject($area, $tgl_pakai, $jenis, $username)
     {
 
         $query = "
             UPDATE pemesanan
             JOIN material ON material.id_material = pemesanan.id_material
             JOIN master_material ON master_material.item_type = material.item_type
-            SET pemesanan.status_kirim = 'request reject'
+            SET pemesanan.status_kirim = 'request reject', 
+                pemesanan.hak_akses = ?
             WHERE pemesanan.admin = ?
             AND pemesanan.tgl_pakai = ?
             AND master_material.jenis = ?
@@ -731,7 +736,7 @@ class PemesananModel extends Model
 
         ";
 
-        $this->db->query($query, [$area, $tgl_pakai, $jenis]);
+        $this->db->query($query, [$username, $area, $tgl_pakai, $jenis]);
         return $this->db->affectedRows() > 0;
     }
 

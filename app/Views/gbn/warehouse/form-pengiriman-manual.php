@@ -174,7 +174,7 @@
                     <table id="manualTable" class="table table-bordered table-striped table-hover">
                         <thead class="table-secondary">
                             <tr>
-                                <th>#</th>
+                                <th>Tgl Pakai</th>
                                 <th>Cluster</th>
                                 <th>Model</th>
                                 <th>Item Type</th>
@@ -192,7 +192,7 @@
                             <?php $sessionData = session()->get('manual_delivery') ?? []; ?>
                             <?php foreach ($sessionData as $i => $row): ?>
                                 <tr>
-                                    <td><?= $i + 1 ?></td>
+                                    <td><?= esc(isset($row['tgl_pakai']) ? $row['tgl_pakai'] : '') ?></td>
                                     <!-- hiden id_pengeluaran -->
                                     <input type="hidden" name="id_pengeluaran[]" value="<?= esc($row['id_pengeluaran']) ?>">
                                     <td><?= esc(isset($row['nama_cluster']) ? $row['nama_cluster'] : '') ?></td>

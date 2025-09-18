@@ -414,7 +414,7 @@ class PemesananController extends BaseController
 
             // Validasi data yang diperlukan: bisa menghasilkan array of records
             $validDatas = $this->pengeluaranModel->validateDeliveryData($postData);
-
+            // var_dump ($validDatas);
             // Jika model men-set error, log dan kembalikan
             if ($errors = $this->pengeluaranModel->errors()) {
                 log_message('error', '[saveSessionDeliveryArea] Validasi model gagal: ' . json_encode($errors));
@@ -469,6 +469,7 @@ class PemesananController extends BaseController
                 $manualDelivery[] = [
                     'id_pengeluaran' => $row['id_pengeluaran'] ?? null,
                     'id_out_celup'   => $row['id_out_celup'],
+                    'tgl_pakai'      => $row['tgl_pakai'],
                     'no_model'       => $row['no_model']    ?? '',
                     'item_type'      => $row['item_type']   ?? '',
                     'jenis'          => $row['jenis']       ?? '',
@@ -532,90 +533,398 @@ class PemesananController extends BaseController
         return $this->response->setJSON(['success' => false, 'message' => 'Index tidak ditemukan']);
     }
 
+    // public function updateStatusKirim()
+    // {
+    //     $post      = $this->request->getPost();
+    //     dd ($post);
+    //     $ids       = array_filter(array_map('intval', $post['id_pengeluaran'] ?? []));
+    //     $kgsList   = $post['kgs_out'] ?? [];
+    //     $cnsList   = $post['cns_out'] ?? [];
+    //     $lotList   = $post['lot_out'] ?? [];
+
+    //     if (empty($ids)) {
+    //         return redirect()->back()->with('error', 'Tidak ada pengeluaran valid.');
+    //     }
+
+    //     $sessionUser  = session('username');
+    //     $updatedCount = 0;
+
+    //     foreach ($ids as $index => $id) {
+    //         $record = $this->pengeluaranModel->find($id);
+    //         if (!$record) {
+    //             continue;
+    //         }
+
+    //         $resultJenis = $this->pemesananModel->getJenisPemesananbyIdTtlPesan($record['id_total_pemesanan']);
+    //         $jenis = '';
+
+    //         if (is_array($resultJenis)) {
+    //             // misalnya return ['jenis' => 'spandex']
+    //             $jenis = strtolower($resultJenis[$index]['jenis'] ?? '');
+    //         } else {
+    //             // kalau return string langsung
+    //             $jenis = strtolower((string) $resultJenis);
+    //         }
+
+
+    //         // Data update untuk pengeluaran
+    //         $data = [
+    //             'status' => 'Pengiriman Area',
+    //             'admin'  => $sessionUser,
+    //         ];
+
+    //         if (isset($kgsList[$index]) && $kgsList[$index] !== '') {
+    //             $data['kgs_out'] = (float) $kgsList[$index];
+    //         }
+    //         if (isset($cnsList[$index]) && $cnsList[$index] !== '') {
+    //             $data['cns_out'] = (int) $cnsList[$index];
+    //         }
+    //         if (isset($lotList[$index]) && $lotList[$index] !== '') {
+    //             $data['lot_out'] = $lotList[$index];
+    //         }
+
+    //         // Update pengeluaran
+    //         if ($this->pengeluaranModel->update($id, $data)) {
+
+    //             // Kalau jenis BUKAN spandex/karet → update stock
+    //             if (!in_array($jenis, ['spandex', 'karet'])) {
+    //                 $stok = $this->stockModel->find($record['id_stock']);
+    //                 // dd ($stok);
+    //                 if ($stok) {
+    //                     $kgsStokNew = $stok['kgs_in_out'];
+    //                     $cnsStokNew = $stok['cns_in_out'];
+
+    //                     if (isset($kgsList[$index]) && $kgsList[$index] !== '') {
+    //                         $kgsStokNew = ($stok['kgs_in_out'] + $record['kgs_out']) - $kgsList[$index];
+    //                     }
+    //                     if (isset($cnsList[$index]) && $cnsList[$index] !== '') {
+    //                         $cnsStokNew = ($stok['cns_in_out'] + $record['cns_out']) - $cnsList[$index];
+    //                     }
+
+    //                     $this->stockModel->update($record['id_stock'], [
+    //                         'kgs_in_out' => $kgsStokNew,
+    //                         'cns_in_out' => $cnsStokNew,
+    //                     ]);
+    //                 }
+    //             }
+
+    //             $updatedCount++;
+    //         }
+    //     }
+
+    //     session()->remove('manual_delivery');
+    //     session()->setFlashdata(
+    //         $updatedCount > 0 ? 'success' : 'error',
+    //         $updatedCount > 0
+    //             ? "{$updatedCount} status berhasil diperbarui"
+    //             : 'Gagal memperbarui status atau data out tidak ada'
+    //     );
+
+    //     return redirect()->to(base_url("{$this->role}/pengiriman_area_manual"));
+    // }
+
+    // public function updateStatusKirim()
+    // {
+    //     $post = $this->request->getPost();
+    //     // dd ($post);
+    //     $ids     = array_filter(array_map('intval', $post['id_pengeluaran'] ?? []));
+    //     // dd ($ids);
+    //     $kgsList = $post['kgs_out'] ?? [];
+    //     $cnsList = $post['cns_out'] ?? [];
+    //     $lotList = $post['lot_out'] ?? [];
+
+    //     if (empty($ids)) {
+    //         return redirect()->back()->with('error', 'Tidak ada pengeluaran valid.');
+    //     }
+
+    //     $sessionUser  = (string) session('username');
+    //     $updatedCount = 0;
+
+    //     foreach ($ids as $index => $id) {
+    //         $record = $this->pengeluaranModel->find($id);
+    //         // dd ($record);
+    //         if (!$record) continue;
+
+    //         // Ambil jenis (dipertahankan logic aslinya)
+    //         $resultJenis = $this->pemesananModel->getJenisPemesananbyIdTtlPesan($record['id_total_pemesanan']);
+    //         $jenis = is_array($resultJenis)
+    //             ? strtolower((string) ($resultJenis[$index]['jenis'] ?? ''))
+    //             : strtolower((string) $resultJenis);
+
+    //         // Data update pengeluaran
+    //         $data = [
+    //             'status' => 'Pengiriman Area',
+    //             'admin'  => $sessionUser,
+    //         ];
+    //         if (isset($kgsList[$index]) && $kgsList[$index] !== '') $data['kgs_out'] = (float) $kgsList[$index];
+    //         if (isset($cnsList[$index]) && $cnsList[$index] !== '') $data['cns_out'] = (int)   $cnsList[$index];
+    //         if (isset($lotList[$index]) && $lotList[$index] !== '') $data['lot_out'] = (string)$lotList[$index];
+
+    //         if (!$this->pengeluaranModel->update($id, $data)) continue;
+
+    //         // === PERUBAHAN: Tidak lagi mengecualikan spandex/karet.
+    //         // Selalu cek stok; jika ada, lakukan kalkulasi pengurangan sesuai rumus lama.
+    //         if($record['id_stock'] === null) {
+    //             $updatedCount++;
+    //             continue;
+    //         }
+    //         $stok = $this->stockModel->find($record['id_stock']);
+    //         // dd ($stok);
+    //         if ($stok) {
+    //             // Nilai OUT efektif (prioritas input baru; fallback ke nilai record lama)
+    //             $outKgsBaru = array_key_exists('kgs_out', $data) ? (float)$data['kgs_out'] : (float)$record['kgs_out'];
+    //             $outCnsBaru = array_key_exists('cns_out', $data) ? (int)  $data['cns_out'] : (int)  $record['cns_out'];
+    //             $outKrgBaru = array_key_exists('krg_out', $data) ? (int)  $data['krg_out'] : (int)  $record['krg_out'];
+    //             $lotBaru    = array_key_exists('lot_out', $data) ?        $data['lot_out'] :        $record['lot_out'];
+
+    //             // Default agar tidak undefined (tidak mengubah behavior)
+    //             $kgsAwalStokNew  = (float)($stok['kgs_stock_awal']);
+    //             $kgsInOutStokNew = (float)($stok['kgs_in_out']);
+    //             $cnsAwalStokNew  = (int)  ($stok['cns_stock_awal']);
+    //             $cnsInOutStokNew = (int)  ($stok['cns_in_out']);
+    //             $krgAwalStokNew  = (int)  ($stok['krg_stock_awal']);
+    //             $krgInOutStokNew = (int)  ($stok['krg_in_out']);
+    //             $lotAwalStokNew  = (string)($stok['lot_awal']  ?? '');
+    //             $lotInOutStokNew = (string)($stok['lot_stock'] ?? '');
+
+    //             // ===== Hitung KGS =====
+    //             if ($outKgsBaru !== 0.0) {
+    //                 if ((float)$stok['kgs_stock_awal'] > 0 && (float)$stok['kgs_in_out'] <= 0) {
+    //                     $kgsAwalStokNew = (float)$stok['kgs_stock_awal'] - $outKgsBaru;
+    //                 } else {
+    //                     $kgsInOutStokNew = (float)$stok['kgs_in_out'] - $outKgsBaru;
+    //                 }
+    //             }
+
+    //             // ===== Hitung CNS =====
+    //             if ($outCnsBaru !== 0) {
+    //                 if ((int)$stok['cns_stock_awal'] > 0 && (int)$stok['cns_in_out'] <= 0) {
+    //                     $cnsAwalStokNew = (int)$stok['cns_stock_awal'] - $outCnsBaru;
+    //                 } else {
+    //                     $cnsInOutStokNew = (int)$stok['cns_in_out'] - $outCnsBaru;
+    //                 }
+    //             }
+
+    //             // ===== Hitung KRG =====
+    //             if ($outKrgBaru !== 0) {
+    //                 if ((int)$stok['krg_stock_awal'] > 0 && (int)$stok['krg_in_out'] <= 0) {
+    //                     $krgAwalStokNew = (int)$stok['krg_stock_awal'] - $outKrgBaru;
+    //                 } else {
+    //                     $krgInOutStokNew = (int)$stok['krg_in_out'] - $outKrgBaru;
+    //                 }
+    //             }
+
+    //             // ===== Hitung LOT ===== (dipertahankan logika if-OR aslinya)
+    //             if ($lotBaru !== null && $lotBaru !== '') {
+    //                 if ((!empty($stok['lot_awal']) && $stok['lot_awal'] !== '') || (empty($stok['lot_stock']) && $stok['lot_stock'] === '')) {
+    //                     $lotAwalStokNew = (string)$lotBaru;
+    //                 } else {
+    //                     $lotInOutStokNew = (string)$lotBaru;
+    //                 }
+    //             }
+
+    //             // Validasi KGS tidak minus (mengikuti validasi asli)
+    //             $sisaKgsAwal  = (float)$stok['kgs_stock_awal'] - (float)$outKgsBaru;
+    //             // dd ($sisaKgsAwal);
+    //             $sisaKgsInOut = (float)$stok['kgs_in_out']     - (float)$outKgsBaru;
+    //             // dd ($sisaKgsInOut);
+    //             if ($sisaKgsAwal < 0 || $sisaKgsInOut < 0) {
+    //                 session()->setFlashdata('error', 'Stok KGS tidak mencukupi untuk Pengeluaran Tersebut. Silahkan Cek Kembali.');
+    //                 return redirect()->to(base_url("{$this->role}/pengiriman_area_manual"));
+    //             } else{
+    //                 // Update stok
+    //                 $this->stockModel->update($record['id_stock'], [
+    //                     'kgs_stock_awal' => $kgsAwalStokNew,
+    //                     'kgs_in_out'     => $kgsInOutStokNew,
+    //                     'cns_stock_awal' => $cnsAwalStokNew,
+    //                     'cns_in_out'     => $cnsInOutStokNew,
+    //                     'krg_stock_awal' => $krgAwalStokNew,
+    //                     'krg_in_out'     => $krgInOutStokNew,
+    //                     'lot_awal'       => $lotAwalStokNew,
+    //                     'lot_stock'      => $lotInOutStokNew,
+    //                 ]);
+    //             }
+    //         }
+    //         // Jika stok tidak ada (termasuk spandex/karet): tidak ada pengurangan, lanjutkan
+    //         $updatedCount++;
+    //     }
+
+    //     session()->remove('manual_delivery');
+    //     session()->setFlashdata(
+    //         $updatedCount > 0 ? 'success' : 'error',
+    //         $updatedCount > 0 ? "{$updatedCount} status berhasil diperbarui" : 'Gagal memperbarui status atau data out tidak ada'
+    //     );
+
+    //     return redirect()->to(base_url("{$this->role}/pengiriman_area_manual"));
+    // }
+
+
     public function updateStatusKirim()
     {
-        $post      = $this->request->getPost();
-        $ids       = array_filter(array_map('intval', $post['id_pengeluaran'] ?? []));
-        $kgsList   = $post['kgs_out'] ?? [];
-        $cnsList   = $post['cns_out'] ?? [];
-        $lotList   = $post['lot_out'] ?? [];
+        $this->db = \Config\Database::connect();
+        $post = $this->request->getPost();
 
+        // --- Ambil input keyed-by-id agar tidak tergantung index urutan
+        $ids = array_map('intval', $post['id_pengeluaran'] ?? []);
         if (empty($ids)) {
             return redirect()->back()->with('error', 'Tidak ada pengeluaran valid.');
         }
 
-        $sessionUser  = session('username');
-        $updatedCount = 0;
+        // Expect: kgs_out[ID] = val, cns_out[ID] = val, lot_out[ID] = val, (opsional) krg_out[ID] = val
+        $kgsById = $post['kgs_out'] ?? [];
+        $cnsById = $post['cns_out'] ?? [];
+        $krgById = $post['krg_out'] ?? []; // kalau tidak dipakai, hapus semua bagian KRG
+        $lotById = $post['lot_out'] ?? [];
 
-        foreach ($ids as $index => $id) {
+        $sessionUser  = (string) session('username');
+        $updatedCount = 0;
+        $errors       = [];
+
+        foreach ($ids as $id) {
             $record = $this->pengeluaranModel->find($id);
             if (!$record) {
+                $errors[] = "ID $id: pengeluaran tidak ditemukan.";
                 continue;
             }
 
-            $resultJenis = $this->pemesananModel->getJenisPemesananbyIdTtlPesan($record['id_total_pemesanan']);
-            $jenis = '';
-
-            if (is_array($resultJenis)) {
-                // misalnya return ['jenis' => 'spandex']
-                $jenis = strtolower($resultJenis[$index]['jenis'] ?? '');
-            } else {
-                // kalau return string langsung
-                $jenis = strtolower((string) $resultJenis);
-            }
-
-
-            // Data update untuk pengeluaran
-            $data = [
+            // Siapkan data update pengeluaran
+            $dataPengeluaran = [
                 'status' => 'Pengiriman Area',
                 'admin'  => $sessionUser,
             ];
+            if (isset($kgsById[$id]) && $kgsById[$id] !== '') $dataPengeluaran['kgs_out'] = (float) $kgsById[$id];
+            if (isset($cnsById[$id]) && $cnsById[$id] !== '') $dataPengeluaran['cns_out'] = (int)   $cnsById[$id];
+            if (isset($krgById[$id]) && $krgById[$id] !== '') $dataPengeluaran['krg_out'] = (int)   $krgById[$id];
+            if (isset($lotById[$id]) && $lotById[$id] !== '') $dataPengeluaran['lot_out'] = (string)$lotById[$id];
 
-            if (isset($kgsList[$index]) && $kgsList[$index] !== '') {
-                $data['kgs_out'] = (float) $kgsList[$index];
+            // Transaksi per-ROW agar atomik
+            $this->db->transStart();
+
+            if (!$this->pengeluaranModel->update($id, $dataPengeluaran)) {
+                $this->db->transRollback();
+                $errors[] = "ID $id: gagal update pengeluaran.";
+                continue;
             }
-            if (isset($cnsList[$index]) && $cnsList[$index] !== '') {
-                $data['cns_out'] = (int) $cnsList[$index];
+
+            // Jika tidak ada id_stock, cukup update pengeluaran saja
+            if (empty($record['id_stock'])) {
+                $this->db->transComplete();
+                if ($this->db->transStatus()) $updatedCount++;
+                else $errors[] = "ID $id: transaksi gagal.";
+                continue;
             }
-            if (isset($lotList[$index]) && $lotList[$index] !== '') {
-                $data['lot_out'] = $lotList[$index];
+
+            $stok = $this->stockModel->find($record['id_stock']);
+            if (!$stok) {
+                // stok tidak ditemukan: lanjut tanpa ubah stok
+                $this->db->transComplete();
+                if ($this->db->transStatus()) $updatedCount++;
+                else $errors[] = "ID $id: transaksi gagal (stok).";
+                continue;
             }
 
-            // Update pengeluaran
-            if ($this->pengeluaranModel->update($id, $data)) {
+            // Ambil nilai OUT efektif (prioritas input baru; fallback record lama)
+            $outKgs = array_key_exists('kgs_out', $dataPengeluaran) ? (float)$dataPengeluaran['kgs_out'] : (float)$record['kgs_out'];
+            $outCns = array_key_exists('cns_out', $dataPengeluaran) ? (int)$dataPengeluaran['cns_out']   : (int)$record['cns_out'];
+            $outKrg = array_key_exists('krg_out', $dataPengeluaran) ? (int)$dataPengeluaran['krg_out']   : (int)$record['krg_out'];
+            $lotBaru = array_key_exists('lot_out', $dataPengeluaran) ? (string)$dataPengeluaran['lot_out'] : (string)$record['lot_out'];
 
-                // Kalau jenis BUKAN spandex/karet → update stock
-                if (!in_array($jenis, ['spandex', 'karet'])) {
-                    $stok = $this->stockModel->find($record['id_stock']);
-                    if ($stok) {
-                        $kgsStokNew = $stok['kgs_in_out'];
-                        $cnsStokNew = $stok['cns_in_out'];
+            // Siapkan nilai baru (default = kondisi sekarang)
+            $new = [
+                'kgs_stock_awal' => (float)$stok['kgs_stock_awal'],
+                'kgs_in_out'     => (float)$stok['kgs_in_out'],
+                'cns_stock_awal' => (int)$stok['cns_stock_awal'],
+                'cns_in_out'     => (int)$stok['cns_in_out'],
+                'krg_stock_awal' => (int)$stok['krg_stock_awal'],
+                'krg_in_out'     => (int)$stok['krg_in_out'],
+                'lot_awal'       => (string)($stok['lot_awal'] ?? ''),
+                'lot_stock'      => (string)($stok['lot_stock'] ?? ''),
+            ];
 
-                        if (isset($kgsList[$index]) && $kgsList[$index] !== '') {
-                            $kgsStokNew = ($stok['kgs_in_out'] + $record['kgs_out']) - $kgsList[$index];
-                        }
-                        if (isset($cnsList[$index]) && $cnsList[$index] !== '') {
-                            $cnsStokNew = ($stok['cns_in_out'] + $record['cns_out']) - $cnsList[$index];
-                        }
-
-                        $this->stockModel->update($record['id_stock'], [
-                            'kgs_in_out' => $kgsStokNew,
-                            'cns_in_out' => $cnsStokNew,
-                        ]);
+            // ===== KGS: pilih ember yang dipakai & validasi ember itu saja
+            if ($outKgs != 0.0) {
+                if ($stok['kgs_stock_awal'] > 0 && $stok['kgs_in_out'] <= 0) {
+                    if ($stok['kgs_stock_awal'] - $outKgs < 0) {
+                        $this->db->transRollback();
+                        $errors[] = "ID $id: Stok KGS awal tidak cukup.";
+                        continue;
                     }
+                    $new['kgs_stock_awal'] = $stok['kgs_stock_awal'] - $outKgs;
+                } else {
+                    if ($stok['kgs_in_out'] - $outKgs < 0) {
+                        $this->db->transRollback();
+                        $errors[] = "ID $id: Stok KGS in/out tidak cukup.";
+                        continue;
+                    }
+                    $new['kgs_in_out'] = $stok['kgs_in_out'] - $outKgs;
                 }
-
-                $updatedCount++;
             }
+
+            // ===== CNS
+            if ($outCns != 0) {
+                if ($stok['cns_stock_awal'] > 0 && $stok['cns_in_out'] <= 0) {
+                    if ($stok['cns_stock_awal'] - $outCns < 0) {
+                        $this->db->transRollback();
+                        $errors[] = "ID $id: Stok CNS awal tidak cukup.";
+                        continue;
+                    }
+                    $new['cns_stock_awal'] = $stok['cns_stock_awal'] - $outCns;
+                } else {
+                    if ($stok['cns_in_out'] - $outCns < 0) {
+                        $this->db->transRollback();
+                        $errors[] = "ID $id: Stok CNS in/out tidak cukup.";
+                        continue;
+                    }
+                    $new['cns_in_out'] = $stok['cns_in_out'] - $outCns;
+                }
+            }
+
+            // ===== KRG (opsional)
+            if ($outKrg != 0) {
+                if ($stok['krg_stock_awal'] > 0 && $stok['krg_in_out'] <= 0) {
+                    if ($stok['krg_stock_awal'] - $outKrg < 0) {
+                        $this->db->transRollback();
+                        $errors[] = "ID $id: Stok KRG awal tidak cukup.";
+                        continue;
+                    }
+                    $new['krg_stock_awal'] = $stok['krg_stock_awal'] - $outKrg;
+                } else {
+                    if ($stok['krg_in_out'] - $outKrg < 0) {
+                        $this->db->transRollback();
+                        $errors[] = "ID $id: Stok KRG in/out tidak cukup.";
+                        continue;
+                    }
+                    $new['krg_in_out'] = $stok['krg_in_out'] - $outKrg;
+                }
+            }
+
+            // ===== LOT (sederhanakan aturan)
+            if ($lotBaru !== '') {
+                // Contoh aturan: kalau lot_awal kosong → isi lot_awal; else → isi lot_stock
+                if ($new['lot_awal'] === '') $new['lot_awal'] = $lotBaru;
+                else                         $new['lot_stock'] = $lotBaru;
+            }
+
+            if (!$this->stockModel->update($record['id_stock'], $new)) {
+                $this->db->transRollback();
+                $errors[] = "ID $id: gagal update stok.";
+                continue;
+            }
+
+            $this->db->transComplete();
+            if ($this->db->transStatus()) $updatedCount++;
+            else $errors[] = "ID $id: transaksi gagal.";
         }
 
         session()->remove('manual_delivery');
-        session()->setFlashdata(
-            $updatedCount > 0 ? 'success' : 'error',
-            $updatedCount > 0
-                ? "{$updatedCount} status berhasil diperbarui"
-                : 'Gagal memperbarui status atau data out tidak ada'
-        );
+
+        if ($updatedCount > 0 && empty($errors)) {
+            session()->setFlashdata('success', "{$updatedCount} status berhasil diperbarui");
+        } elseif ($updatedCount > 0 && !empty($errors)) {
+            session()->setFlashdata('success', "{$updatedCount} status berhasil diperbarui, namun ada sebagian gagal: " . implode(' | ', $errors));
+        } else {
+            session()->setFlashdata('error', 'Tidak ada yang diperbarui: ' . implode(' | ', $errors));
+        }
 
         return redirect()->to(base_url("{$this->role}/pengiriman_area_manual"));
     }
@@ -1290,7 +1599,7 @@ class PemesananController extends BaseController
             'tgl_pakai' => $tglPakai,
             'jenis' => $jenis,
             'max_time' => $maxTime,
-            'username' => session()->get('role'),
+            'username' => session()->get('username'),
         ];
 
         $success = $this->pemesananModel->additionalTimeAccept($data);
@@ -1307,8 +1616,9 @@ class PemesananController extends BaseController
         $area      = $this->request->getPost('admin');
         $tglPakai  = $this->request->getPost('tgl_pakai');
         $jenis     = $this->request->getPost('jenis');
+        $username  = session()->get('username');
 
-        $success = $this->pemesananModel->additionalTimeReject($area, $tglPakai, $jenis);
+        $success = $this->pemesananModel->additionalTimeReject($area, $tglPakai, $jenis, $username);
 
         return redirect()->to(base_url($this->role . '/pemesanan/requestAdditionalTime'))
             ->with(
