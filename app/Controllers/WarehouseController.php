@@ -93,6 +93,31 @@ class WarehouseController extends BaseController
     }
     public function index()
     {
+        $updateOrder = $this->masterOrderModel->getNullMc();
+
+        foreach ($updateOrder as $od) {
+            $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
+
+            try {
+                // Fetch data dari API
+                $json = file_get_contents($reqStartMc);
+                // Decode JSON response
+                $startMc = json_decode($json, true);
+                if (empty($startMc)) {
+                    log_message('error', 'pdk ' . $od['no_model'] . ' gaada start mc');
+                } else {
+                    $this->masterOrderModel->update(
+                        $od['id_order'],
+                        ['start_mc' => $startMc['start_mc']]
+                    );
+                }
+            } catch (\Exception $e) {
+
+                // Log error
+                log_message('error', 'Error fetching API data: ' . $e->getMessage());
+            }
+        }
+
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
@@ -438,7 +463,7 @@ class WarehouseController extends BaseController
 
         if ($update) {
             $existing = session()->get('dataOut') ?? [];
-            $filtered = array_filter($existing, fn($item) => !in_array($item['id_out_celup'], $post['id_out_celup']));
+            $filtered = array_filter($existing, fn ($item) => !in_array($item['id_out_celup'], $post['id_out_celup']));
             session()->set('dataOut', array_values($filtered));
         }
 
@@ -1475,7 +1500,7 @@ class WarehouseController extends BaseController
         }
         //update tabel pemasukan
         if (!empty($checkedIds)) {
-            $whereIds = array_map(fn($index) => $idOutCelup[$index] ?? null, $checkedIds);
+            $whereIds = array_map(fn ($index) => $idOutCelup[$index] ?? null, $checkedIds);
             $whereIds = array_filter($whereIds); // Hapus nilai NULL jika ada
 
             if (!empty($whereIds)) {

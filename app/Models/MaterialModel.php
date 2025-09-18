@@ -811,7 +811,6 @@ class MaterialModel extends Model
             m.item_type,
             m.kode_warna,
             m.color,
-            m.area,
             mm.jenis,
             mo.lco_date,
             mo.foll_up,
@@ -900,7 +899,48 @@ class MaterialModel extends Model
                 WHERE r.no_model = mo.no_model
                 AND r.item_type = m.item_type
                 AND r.kode_warna = m.kode_warna
-            ) AS lot_retur
+            ) AS lot_retur,
+
+            -- po tambahan
+            (
+                SELECT pp.tanggal_approve
+                FROM po_tambahan pp
+                JOIN material m2 ON m2.id_material = pp.id_material
+                WHERE m2.id_order = mo.id_order
+                AND m2.item_type = m.item_type
+                AND m2.kode_warna = m.kode_warna
+                GROUP BY m2.id_order, m2.item_type, m2.kode_warna
+            ) AS tgl_terima_po_plus,
+
+            (
+                SELECT DATE(pp.created_at)
+                FROM po_tambahan pp
+                JOIN material m2 ON m2.id_material = pp.id_material
+                WHERE m2.id_order = mo.id_order
+                AND m2.item_type = m.item_type
+                AND m2.kode_warna = m.kode_warna
+                GROUP BY m2.id_order, m2.item_type, m2.kode_warna
+            ) AS tgl_po_plus_area,
+
+            (
+                SELECT SUM(pp.poplus_mc_kg + pp.plus_pck_kg)
+                FROM po_tambahan pp
+                JOIN material m2 ON m2.id_material = pp.id_material
+                WHERE m2.id_order = mo.id_order
+                AND m2.item_type = m.item_type
+                AND m2.kode_warna = m.kode_warna
+                GROUP BY m2.id_order, m2.item_type, m2.kode_warna
+            ) AS kg_po_plus,
+
+            (
+                SELECT pp.delivery_po_plus
+                FROM po_tambahan pp
+                JOIN material m2 ON m2.id_material = pp.id_material
+                WHERE m2.id_order = mo.id_order
+                AND m2.item_type = m.item_type
+                AND m2.kode_warna = m.kode_warna
+                GROUP BY m2.id_order, m2.item_type, m2.kode_warna
+            ) AS delivery_po_plus
         ")
             ->join('master_material mm', 'm.item_type = mm.item_type', 'left')
             ->join('master_order mo', 'mo.id_order = m.id_order', 'left')

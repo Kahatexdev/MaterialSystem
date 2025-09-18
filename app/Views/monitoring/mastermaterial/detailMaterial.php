@@ -78,9 +78,10 @@
     <div class="card mt-4">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
+                <table id="dataTable" class="display text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>
                         <tr>
+                            <th class="text-center"></th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Style Size</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Inisial</th>
@@ -92,22 +93,25 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty(pcs)</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Loss</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($orderData as $data): ?>
                             <tr>
+                                <td>
+                                    <input type="checkbox" class="form-check delete-checkbox" data-id="<?= $data['id_material'] ?>">
+                                </td>
                                 <td><?= $data['style_size'] ?></td>
                                 <td><?= $data['area'] ?></td>
                                 <td><?= $data['inisial'] ?></td>
                                 <td><?= $data['item_type'] ?></td>
                                 <td><?= $data['kode_warna'] ?></td>
                                 <td><?= $data['color'] ?></td>
-                                <td><?= $data['composition'] ?> %</td>
-                                <td><?= $data['gw'] ?></td>
-                                <td><?= $data['qty_pcs'] ?></td>
-                                <td><?= $data['loss'] ?></td>
+                                <td><?= ($data['composition'] == 1) ? '-' : $data['composition'] . ' %' ?></td>
+                                <td><?= ($data['gw'] == 1) ? '-' : $data['gw'] ?></td>
+                                <td><?= ($data['qty_pcs'] == 1) ? '-' : $data['qty_pcs'] ?></td>
+                                <td><?= ($data['loss'] == 1) ? '-' : $data['loss'] ?></td>
                                 <td><?= $data['kgs'] ?></td>
                                 <td class="d-flex justify-content-start align-items-center gap-1">
                                     <button class="btn btn-warning btn-xs btn-edit" data-id="<?= $data['id_material'] ?>">
@@ -269,7 +273,7 @@
 
                             <div class="mb-3">
                                 <label for="inisial" class="form-label">Inisial</label>
-                                <input type="text" class="form-control" id="inisial" name="inisial">
+                                <input type="text" class="form-control" id="inisial" name="inisial" required>
                             </div>
 
                             <div class="mb-3">
@@ -321,20 +325,20 @@
                 </div>
             </div>
         </div>
-        <!-- Modal Export PO -->
-        <div class="modal fade" id="ExportModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+
+        <div class="modal fade" id="ListPoModal" tabindex="-1" aria-labelledby="ListPoModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="updateModalLabel">Update Data</h5>
+                        <h5 class="modal-title" id="ListPoModalLabel">List Buka PO</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
                     </div>
                     <div class="modal-body">
-                        <form action="<?= base_url($role . '/exportOpenPO/' . $no_model) ?>" method="get" target="_blank">
+                        <form action="<?= base_url($role . '/listOpenPO/' . $no_model) ?>" method="get" target="_blank">
                             <div class="mb-3">
                                 <label for="style_size" class="form-label">Tujuan</label>
                                 <select class="form-control tujuan" name="tujuan" required>
-                                    <option value="-">Pilih Tujuan</option>
+                                    <option value="">Pilih Tujuan</option>
                                     <option value="CELUP">CELUP</option>
                                     <option value="COVERING">COVERING</option>
                                 </select>
@@ -342,7 +346,7 @@
                             <div class="mb-3">
                                 <label for="style_size" class="form-label">Jenis Bahan Baku</label>
                                 <select class="form-control jenis" name="jenis" id="jenis" required>
-                                    <option value="-">Pilih Jenis</option>
+                                    <option value="">Pilih Jenis</option>
                                     <option value="BENANG">BENANG</option>
                                     <option value="NYLON">NYLON</option>
                                     <option value="SPANDEX">SPANDEX & KARET</option>
@@ -352,7 +356,7 @@
                             <!-- Button update dan batal di sebelah kanan -->
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                <button type="submit" class="btn btn-info">Generate</button>
+                                <button type="submit" class="btn btn-info">Submit</button>
                             </div>
 
                         </form>
@@ -360,205 +364,226 @@
                 </div>
             </div>
         </div>
-        <!-- Modal Ubah Semua Area -->
-        <div class="modal fade" id="ubahAreaModal" tabindex="-1" aria-labelledby="ubahAreaModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="ubahAreaModalLabel">Ubah Area</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form action="<?= base_url($role . '/updateArea/' . $id_order) ?>" method="post">
-                            <input type="hidden" name="id_order" value="<?= $id_order ?>">
-                            <div class="mb-3">
-                                <label for="area" class="form-label">Area</label>
-                                <select class="form-control" name="edit_all_area" id="edit_all_area">
-                                    <option value="">Pilih Area</option>
-                                    <?php
-                                    $areaList = ['KK1A', 'KK1B', 'KK2A', 'KK2B', 'KK2C', 'KK5G', 'KK7K', 'KK7L', 'KK8D', 'KK8F', 'KK8J', 'KK9', 'KK10', 'KK11M'];
+    </div>
+    <div class="card mt-4" id="totalKebutuhan">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">Total Kebutuhan Bahan Baku</h5>
+                <a href="<?= base_url($role . '/material/exportTotalKebutuhan/' . $id_order) ?>" class="btn btn-success">
+                    <i class="fas fa-file-excel me-2"></i>Excel
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table id="dataTable1" class="display text-uppercase text-xs font-bolder text-center" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Color</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Kebutuhan</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Sch</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($kebutuhan as $data1): ?>
+                            <tr>
+                                <td><?= $data1['item_type'] ?></td>
+                                <td><?= $data1['kode_warna'] ?></td>
+                                <td><?= $data1['color'] ?></td>
+                                <td><?= number_format($data1['kebutuhan'], 2) ?> kg</td>
+                                <td><?= $data1['tanggal_schedule'] ?></td>
 
-                                    foreach ($areaList as $areaOption) {
-                                        $selected = in_array($areaOption, $area) ? 'selected' : ''; // Cek apakah area ada di $areaData
-                                    ?>
-                                        <option value="<?= $areaOption ?>" <?= $selected ?>><?= $areaOption ?></option>
-                                    <?php } ?>
-                                </select>
-
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                <button type="submit" class="btn btn-info">Ubah</button>
-                            </div>
-                        </form>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php if (empty($kebutuhan)) : ?>
+                <div class=" card-footer">
+                    <div class="row">
+                        <div class="col-lg-12 text-center">
+                            <p>No data available in the table.</p>
+                        </div>
                     </div>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Modal Ubah Semua Area -->
+    <div class="modal fade" id="ubahAreaModal" tabindex="-1" aria-labelledby="ubahAreaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ubahAreaModalLabel">Ubah Area</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="<?= base_url($role . '/updateArea/' . $id_order) ?>" method="post">
+                        <input type="hidden" name="id_order" value="<?= $id_order ?>">
+                        <div class="mb-3">
+                            <label for="area" class="form-label">Area</label>
+                            <select class="form-control" name="edit_all_area" id="edit_all_area">
+                                <option value="">Pilih Area</option>
+                                <?php
+                                $areaList = ['KK1A', 'KK1B', 'KK2A', 'KK2B', 'KK2C', 'KK5G', 'KK7K', 'KK7L', 'KK8D', 'KK8F', 'KK8J', 'KK9', 'KK10', 'KK11M', 'Gedung 1', 'Gedung 2', 'MJ'];
+
+                                foreach ($areaList as $areaOption) {
+                                    $selected = in_array($areaOption, $area) ? 'selected' : ''; // Cek apakah area ada di $areaData
+                                ?>
+                                    <option value="<?= $areaOption ?>" <?= $selected ?>><?= $areaOption ?></option>
+                                <?php } ?>
+                            </select>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-info">Ubah</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-        <!-- Modal Delete Duplicate -->
-        <div class="modal fade" id="deleteDuplicateModal" tabindex="-1" aria-labelledby="deleteDuplicateModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteDuplicateModalLabel">Delete Duplicate Data</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
-                    </div>
-                    <div class="modal-body">
-                        <form action="<?= base_url($role . '/deleteDuplicate/mu/' . $id_order) ?>" method="get" target="_blank">
-                            <div class="mb-3">
-                                <span>Apakah anda yakin ingin menghapus data ini?</span>
-                            </div>
-                            <!-- Button update dan batal di sebelah kanan -->
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                <button type="submit" class="btn btn-danger">Hapus</button>
-                            </div>
+    </div>
 
-                        </form>
-                    </div>
+    <!-- Modal Split Qty -->
+    <div class="modal fade" id="modalSplitMaterial" tabindex="-1" aria-labelledby="modalSplitLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="splitQtyModalLabel">Split Qty</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
                 </div>
-            </div>
-        </div>
+                <div class="modal-body">
+                    <form id="splitForm" action="<?= base_url($role . '/splitMaterial') ?>" method="post">
+                        <input type="hidden" name="id_material" id="id_material_split">
+                        <input type="hidden" name="id_order" id="id_order_split">
+                        <input type="hidden" class="form-control" id="color_split" name="color" readonly>
+                        <input type="hidden" class="form-control" id="area_split" name="area" readonly>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="style_size" class="form-label">Style Size</label>
+                                    <input type="text" class="form-control" id="style_size_split" name="style_size" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="inisial" class="form-label">Inisial</label>
+                                    <input type="text" class="form-control" id="inisial_split" name="inisial" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="item_type" class="form-label">Item Type</label>
+                                    <input type="text" class="form-control" id="item_type_split" name="item_type" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="item_type" class="form-label">Kode Warna</label>
+                                    <input type="text" class="form-control" id="kode_warna_split" name="kode_warna" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="gw" class="form-label">GW</label>
+                                    <input type="text" class="form-control" id="gw_split" name="gw" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="composition" class="form-label">Composition</label>
+                                    <input type="text" class="form-control" id="composition_split" name="composition" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="loss" class="form-label">Loss</label>
+                                    <input type="number" class="form-control" id="loss_split" name="loss" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="area" class="form-label">Kgs Awal</label>
+                                    <input type="number" class="form-control" id="kgs_split" name="kgs_awal" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="item_type" class="form-label">Qty Awal</label>
+                                    <input type="number" class="form-control" id="qty_pcs_split" name="qty_pcs" readonly>
+                                </div>
+                            </div>
+                        </div>
 
-        <!-- Modal Split Qty -->
-        <div class="modal fade" id="modalSplitMaterial" tabindex="-1" aria-labelledby="modalSplitLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="splitQtyModalLabel">Split Qty</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="splitForm" action="<?= base_url($role . '/splitMaterial') ?>" method="post">
-                            <input type="hidden" name="id_material" id="id_material_split">
-                            <input type="hidden" name="id_order" id="id_order_split">
-                            <input type="hidden" class="form-control" id="color_split" name="color" readonly>
-                            <input type="hidden" class="form-control" id="area_split" name="area" readonly>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label for="style_size" class="form-label">Style Size</label>
-                                        <input type="text" class="form-control" id="style_size_split" name="style_size" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label for="inisial" class="form-label">Inisial</label>
-                                        <input type="text" class="form-control" id="inisial_split" name="inisial" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label for="item_type" class="form-label">Item Type</label>
-                                        <input type="text" class="form-control" id="item_type_split" name="item_type" readonly>
-                                    </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="area" class="form-label">Item Type 1</label>
+                                    <input type="text" class="form-control" id="item_type_split1" name="item_type" readonly>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label for="item_type" class="form-label">Kode Warna</label>
-                                        <input type="text" class="form-control" id="kode_warna_split" name="kode_warna" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label for="gw" class="form-label">GW</label>
-                                        <input type="text" class="form-control" id="gw_split" name="gw" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label for="composition" class="form-label">Composition</label>
-                                        <input type="text" class="form-control" id="composition_split" name="composition" readonly>
-                                    </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="inisial" class="form-label">Percentage 1</label>
+                                    <input type="number" step="0.01" class="form-control" id="percentage1" name="percentage1" required>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label for="loss" class="form-label">Loss</label>
-                                        <input type="number" class="form-control" id="loss_split" name="loss" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label for="area" class="form-label">Kgs Awal</label>
-                                        <input type="number" class="form-control" id="kgs_split" name="kgs_awal" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label for="item_type" class="form-label">Qty Awal</label>
-                                        <input type="number" class="form-control" id="qty_pcs_split" name="qty_pcs" readonly>
-                                    </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="color" class="form-label">Item Type 2</label>
+                                    <select name="item_type_split_2" id="item_type_split_2" class="" required>
+                                        <option value="">Pilih Item Type</option>
+                                        <?php foreach ($itemType as $item): ?>
+                                            <option value="<?= $item['item_type'] ?>"><?= $item['item_type'] ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </div>
                             </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="item_type" class="form-label">Percentage 2</label>
+                                    <input type="number" step="0.01" class="form-control" id="percentage2" name="percentage2" required>
+                                </div>
+                            </div>
+                        </div>
 
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label for="area" class="form-label">Item Type 1</label>
-                                        <input type="text" class="form-control" id="item_type_split1" name="item_type" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label for="inisial" class="form-label">Percentage 1</label>
-                                        <input type="number" step="0.01" class="form-control" id="percentage1" name="percentage1" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label for="color" class="form-label">Item Type 2</label>
-                                        <select name="item_type_split_2" id="item_type_split_2" class="" required>
-                                            <option value="">Pilih Item Type</option>
-                                            <?php foreach ($itemType as $item): ?>
-                                                <option value="<?= $item['item_type'] ?>"><?= $item['item_type'] ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label for="item_type" class="form-label">Percentage 2</label>
-                                        <input type="number" step="0.01" class="form-control" id="percentage2" name="percentage2" required>
-                                    </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="kgs1" class="form-label">Kgs Item Type 1</label>
+                                    <input type="number" step="0.01" class="form-control" id="kgs1" name="kgs_1" readonly>
                                 </div>
                             </div>
-
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label for="kgs1" class="form-label">Kgs Item Type 1</label>
-                                        <input type="number" step="0.01" class="form-control" id="kgs1" name="kgs_1" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label for="kgs1" class="form-label">Composition 1</label>
-                                        <input type="number" step="0.01" class="form-control" id="comp1" name="comp1" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label for="kgs2" class="form-label">Kgs Item Type 2</label>
-                                        <input type="number" step="0.01" class="form-control" id="kgs2" name="kgs_2" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label for="kgs1" class="form-label">Composition 2</label>
-                                        <input type="number" step="0.01" class="form-control" id="comp2" name="comp2" readonly>
-                                    </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="kgs1" class="form-label">Composition 1</label>
+                                    <input type="number" step="0.01" class="form-control" id="comp1" name="comp1" readonly>
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                <button type="submit" class="btn btn-info">Split</button>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="kgs2" class="form-label">Kgs Item Type 2</label>
+                                    <input type="number" step="0.01" class="form-control" id="kgs2" name="kgs_2" readonly>
+                                </div>
                             </div>
-                        </form>
-                    </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="kgs1" class="form-label">Composition 2</label>
+                                    <input type="number" step="0.01" class="form-control" id="comp2" name="comp2" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-info">Split</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -578,6 +603,10 @@
 
     $(document).ready(function() {
         $('#dataTable').DataTable({
+            "pageLength": 35,
+            "order": []
+        });
+        $('#dataTable1').DataTable({
             "pageLength": 35,
             "order": []
         });
@@ -612,9 +641,6 @@
                 }
             });
         });
-
-        // Event listener untuk submit form update
-
 
         // Event listener tombol Delete
         $('#dataTable').on('click', '.btn-delete', function() {
@@ -797,6 +823,160 @@
                 }
             });
         });
+
     });
 </script>
+<script>
+    document.getElementById('btn-delete-selected').addEventListener('click', function() {
+        const selected = Array.from(document.querySelectorAll('.delete-checkbox:checked'))
+            .map(cb => cb.getAttribute('data-id'));
+
+        if (selected.length === 0) {
+            Swal.fire('Peringatan', 'Tidak ada data yang dipilih.', 'warning');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Yakin ingin menghapus?',
+            text: `Menghapus ${selected.length} data terpilih.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('<?= base_url($role . '/material/deleteSelected') ?>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            ids: selected
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(response => {
+                        Swal.fire('Berhasil', response.message, 'success').then(() => {
+                            location.reload();
+                        });
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        Swal.fire('Error', 'Terjadi kesalahan saat menghapus.', 'error');
+                    });
+            }
+        });
+    });
+</script>
+
+<!-- <script>
+    $(document).ready(function() {
+        function hitungKgsSplit() {
+            let gw = parseFloat($('#gw_split').val()) || 0;
+            let comp = parseFloat($('#composition_split').val()) || 0; // Misal 85.95
+            let loss = parseFloat($('#loss_split').val()) || 0; // Misal 5
+            let qtyPcs = parseFloat($('#qty_pcs_split').val()) || 0;
+            let qty1 = parseFloat($('#qty1').val()) || 0;
+            let qty2 = parseFloat($('#qty2').val()) || 0;
+
+            // Hitung total Komposisi + Loss dengan konsep persen yang benar
+            let totalCompLoss = comp / 100 * (1 + loss / 100); // Menambahkan loss sebagai persen dari comp
+            let totalKgs = ((gw * totalCompLoss) * qtyPcs) / 1000;
+
+            // Bagi sesuai Qty Area 1 dan Area 2
+            let kgsArea1 = (totalKgs * qty1) / qtyPcs;
+            let kgsArea2 = (totalKgs * qty2) / qtyPcs;
+
+            $('#kgs1').val(kgsArea1.toFixed(2)); // Menampilkan hasil dengan 2 angka desimal
+            $('#kgs2').val(kgsArea2.toFixed(2)); // Menampilkan hasil dengan 2 angka desimal
+        }
+
+        // Panggil fungsi hitung otomatis saat modal dibuka
+        $(document).on('click', '.btn-split', function() {
+            let materialId = $(this).data('id');
+
+            $.ajax({
+                url: '<?= base_url($role . '/getMaterialDetails') ?>/' + materialId,
+                type: 'GET',
+                success: function(response) {
+                    $('#id_material_split').val(response.id_material);
+                    $('#id_order_split').val(response.id_order);
+                    $('#style_size_split').val(response.style_size);
+                    $('#inisial_split').val(response.inisial);
+                    $('#gw_split').val(response.gw);
+                    $('#loss_split').val(response.loss);
+                    $('#item_type_split').val(response.item_type);
+                    $('#item_type_split1').val(response.item_type);
+                    $('#qty_pcs_split').val(response.qty_pcs);
+                    $('#composition_split').val(response.composition);
+                    $('#kode_warna_split').val(response.kode_warna);
+                    $('#color_split').val(response.color);
+                    $('#kgs_split').val(response.kgs);
+
+                    hitungKgsSplit(); // Hitung otomatis setelah nilai dimasukkan
+
+                    // **Tambahkan kode ini untuk menampilkan modal**
+                    $('#modalSplitMaterial').modal('show');
+                },
+                error: function(xhr) {
+                    alert('Gagal mengambil data material.');
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+
+        // Hitung ulang saat qty area diubah
+        $('#qty1, #qty2').on('input', hitungKgsSplit);
+
+        // Validasi & Kirim Data Saat Split
+        $('#splitForm').on('submit', function(e) {
+            let qtyAwal = parseFloat($('#qty_pcs_split').val()) || 0;
+            let qty1 = parseFloat($('#qty1').val()) || 0;
+            let qty2 = parseFloat($('#qty2').val()) || 0;
+            let totalQty = qty1 + qty2;
+
+            if (totalQty !== qtyAwal) {
+                alert('Jumlah Qty Area 1 dan Area 2 harus sama dengan Qty Awal!');
+                e.preventDefault();
+                return;
+            }
+
+            // Kirim data ke backend untuk buat ID baru
+            $.ajax({
+                url: '<?= base_url($role . '/splitMaterial') ?>',
+                type: 'POST',
+                data: {
+                    id_material_old: $('#id_material_split').val(),
+                    id_order: $('#id_order_split').val(),
+                    style_size: $('#style_size_split').val(),
+                    inisial: $('#inisial_split').val(),
+                    gw: $('#gw_split').val(),
+                    loss: $('#loss_split').val(),
+                    item_type: $('#item_type_split').val(),
+                    composition: $('#composition_split').val(),
+                    kode_warna: $('#kode_warna_split').val(),
+                    color: $('#color_split').val(),
+                    qty_pcs_1: qty1,
+                    qty_pcs_2: qty2,
+                    kgs_1: $('#kgs1').val(),
+                    kgs_2: $('#kgs2').val(),
+                    split_area_1: $('#split_area_1').val(),
+                    split_area_2: $('#split_area_2').val()
+                },
+                success: function(response) {
+                    alert('Material berhasil di-split!');
+                    location.reload();
+                },
+                error: function(xhr) {
+                    alert('Terjadi kesalahan saat split data.');
+                    console.error(xhr.responseText);
+                }
+            });
+
+            e.preventDefault(); // Stop form dari submit default
+        });
+    });
+</script> -->
 <?php $this->endSection(); ?>
