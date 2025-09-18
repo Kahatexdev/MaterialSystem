@@ -2072,16 +2072,11 @@ class WarehouseController extends BaseController
 
             if ($cekStockBaru) {
                 // Update stok jika sudah ada
-                $updateDataIn = $stock_awal == '' ?
+                $updateDataIn =
                     [
                         'kgs_in_out' => $cekStockBaru['kgs_in_out'] + $data['kgs'],
                         'cns_in_out' => $cekStockBaru['cns_in_out'] + $data['cns'],
-                        'krg_in_out' => $cekStockBaru['krg_in_out'] + $data['krg'],
-                    ] :
-                    [
-                        'kgs_stock_awal' => $cekStockBaru['kgs_stock_awal'] + $data['kgs'],
-                        'cns_stock_awal' => $cekStockBaru['cns_stock_awal'] + $data['cns'],
-                        'krg_stock_awal' => $cekStockBaru['krg_stock_awal'] + $data['krg'],
+                        'krg_in_out' => $cekStockBaru['krg_in_out'] + $data['krg']
                     ];
 
                 $this->stockModel->update($cekStockBaru['id_stock'], $updateDataIn);

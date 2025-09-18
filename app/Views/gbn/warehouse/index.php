@@ -917,6 +917,7 @@
                 krg: $chk.data('krg')
             };
         }).get();
+        console.log(detail);
 
         // Sekarang kirim ke server
         $.post(`${base}${role}/warehouse/savePindahCluster`, {

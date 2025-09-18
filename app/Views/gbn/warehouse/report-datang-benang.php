@@ -168,7 +168,9 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">GW</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Harga</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Nama Cluster</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Admin</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Update Ket</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -289,8 +291,21 @@
                                 (item.gw_kirim ? parseFloat(item.gw_kirim).toFixed(2) : ''),
                                 item.harga || '',
                                 item.nama_cluster || '',
+                                item.keterangan || '',
                                 item.admin || '',
-                            ]);
+                                `<button class="btn btn-warning btn-update" 
+
+                                    data-id_bon="${item.id_bon || ''}" 
+
+                                    data-id_other="${item.id_other_bon || ''}" 
+
+                                    title="Update">
+
+                                    <i class="fa fa-edit"></i>
+
+                                </button>`
+                            ]).draw(false);
+                            // ]);
                         });
 
                         dataTable.rows.add(rows).draw(false);
