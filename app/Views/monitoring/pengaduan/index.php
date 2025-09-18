@@ -117,7 +117,7 @@
     /* ====== EMPTY STATE ====== */
     .empty-state {
         border: 0;
-        172.23.44.14 border-radius: 16px;
+        border-radius: 16px;
         box-shadow: var(--card-shadow);
     }
 
@@ -149,7 +149,7 @@
         align-items: center;
         justify-content: center;
         z-index: 9999;
-        172.23.44.14 backdrop-filter: blur(2px);
+        backdrop-filter: blur(2px);
     }
 
     .spinner {

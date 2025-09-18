@@ -20,6 +20,7 @@ class MasterOrderModel extends Model
         'foll_up',
         'lco_date',
         'memo',
+        'start_mc',
         'delivery_awal',
         'delivery_akhir',
         'unit',
@@ -583,5 +584,20 @@ class MasterOrderModel extends Model
             ->set('delivery_akhir', $body['delivery_akhir'])
             ->set('unit', $unit)
             ->update();
+    }
+    public function getNullMc()
+    {
+        return $this->select('master_order.id_order, no_model')
+            ->join('material', 'master_order.id_order =material.id_order ', 'left')
+            ->where('start_mc', null)
+            ->where('lco_date !=', '0000-00-00')
+            ->where('delivery_awal !=', null)
+            ->where('delivery_akhir >=', '2025-08-30')
+            ->notLike('material.area', 'Gedung')
+            ->where('LENGTH(no_model) <=', 6, false) // tambahin false biar ga di-escape
+            ->orderBy('RAND()')
+            ->groupBy('master_order.id_order, master_order.no_model')
+            ->limit(100)
+            ->findAll();
     }
 }

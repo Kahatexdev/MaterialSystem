@@ -157,6 +157,7 @@
                             <th>No Order</th>
                             <th>Buyer</th>
                             <th>Memo</th>
+                            <th>Start Mc</th>
                             <th>Delivery Awal</th>
                             <th>Delivery Akhir</th>
                             <th>Unit</th>
@@ -266,6 +267,9 @@
                 },
                 {
                     "data": "memo"
+                },
+                {
+                    "data": "start_mc"
                 },
                 {
                     "data": "delivery_awal"
