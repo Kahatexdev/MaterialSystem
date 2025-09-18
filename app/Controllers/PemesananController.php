@@ -273,23 +273,41 @@ class PemesananController extends BaseController
         return view($this->role . '/warehouse/form-pengiriman', $data);
     }
 
+
+    // jangan di hapus , ini untuk view yg lama
+    // public function pengirimanAreaManual()
+    // {
+    //     // Ambil current orders dari session, atau [] bila belum ada
+    //     $data['delivery_area'] = session()->get('manual_delivery') ?? [];
+    //     // dd ($data['delivery_area']);
+    //     // dd  ($data['delivery_area']);
+    //     // Ambil data dari database untuk dropdown
+    //     // $item_types = $this->pengeluaranModel->getItemTypes();
+    //     $data = [
+    //         'active' => $this->active,
+    //         'role' => $this->role,
+    //         'title' => 'Form Pengiriman Manual',
+    //         // 'item_types' => $item_types
+    //     ];
+
+    //     return view($this->role . '/warehouse/form-pengiriman-manual', $data);
+    // }
     public function pengirimanAreaManual()
     {
-        // Ambil current orders dari session, atau [] bila belum ada
-        $data['delivery_area'] = session()->get('manual_delivery') ?? [];
-        // dd ($data['delivery_area']);
-        // dd  ($data['delivery_area']);
-        // Ambil data dari database untuk dropdown
-        // $item_types = $this->pengeluaranModel->getItemTypes();
+        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $response = file_get_contents($apiUrl);
+        $area = json_decode($response, true);
+
         $data = [
             'active' => $this->active,
             'role' => $this->role,
             'title' => 'Form Pengiriman Manual',
-            // 'item_types' => $item_types
+            'area' => $area
         ];
 
-        return view($this->role . '/warehouse/form-pengiriman-manual', $data);
+        return view($this->role . '/warehouse/form-pengiriman-manual2', $data);
     }
+
 
     public function getItemTypes()
     {
@@ -323,6 +341,7 @@ class PemesananController extends BaseController
         }
     }
 
+    // novan
     // public function saveSessionDeliveryArea()
     // {
     //     // Ambil semua input POST
@@ -405,121 +424,205 @@ class PemesananController extends BaseController
     //         ]);
     // }
 
+    // alfa
+    // public function saveSessionDeliveryArea()
+    // {
+    //     try {
+    //         // Ambil semua input POST
+    //         $postData = $this->request->getPost();
 
+    //         // Validasi data yang diperlukan: bisa menghasilkan array of records
+    //         $validDatas = $this->pengeluaranModel->validateDeliveryData($postData);
+    //         // var_dump ($validDatas);
+    //         // Jika model men-set error, log dan kembalikan
+    //         if ($errors = $this->pengeluaranModel->errors()) {
+    //             log_message('error', '[saveSessionDeliveryArea] Validasi model gagal: ' . json_encode($errors));
+    //             return $this->response
+    //                 ->setStatusCode(422)
+    //                 ->setJSON([
+    //                     'success' => false,
+    //                     'message' => 'Validasi data gagal',
+    //                     'errors'  => $errors,
+    //                 ]);
+    //         }
+
+    //         // Jika tidak ada data valid, kembalikan error
+    //         if (empty($validDatas) || !is_array($validDatas)) {
+    //             return $this->response
+    //                 ->setStatusCode(400)
+    //                 ->setJSON([
+    //                     'success' => false,
+    //                     'message' => 'Tidak ada data baru atau data sudah dikirim sebelumnya'
+    //                 ]);
+    //         }
+
+    //         /** @var \CodeIgniter\Session\Session */
+    //         $session = session();
+
+    //         // Ambil data session manual_delivery (jika belum ada, inisialisasi array kosong)
+    //         $manualDelivery = $session->get('manual_delivery') ?? [];
+
+    //         $addedCount = 0;
+
+    //         foreach ($validDatas as $idx => $row) {
+    //             // Pastikan semua field kunci tersedia
+    //             if (!isset($row['id_pengeluaran'], $row['id_total_pemesanan'], $row['area_out'])) {
+    //                 log_message('error', "[saveSessionDeliveryArea] Row ke-$idx missing key fields: " . json_encode($row));
+    //                 continue;
+    //             }
+
+    //             // Cek duplikasi berdasarkan id_out_celup + area + tanggal
+    //             $isDuplicate = array_filter($manualDelivery, function ($item) use ($row) {
+    //                 return
+    //                     $item['id_pengeluaran'] == $row['id_pengeluaran']
+    //                     && $item['id_total_pemesanan']  == $row['id_total_pemesanan']
+    //                     && $item['area_out']   == $row['area_out'];
+    //             });
+
+    //             if ($isDuplicate) {
+    //                 // Lewati record yang sudah ada
+    //                 continue;
+    //             }
+
+    //             // Tambahkan ke array session
+    //             $manualDelivery[] = [
+    //                 'id_pengeluaran' => $row['id_pengeluaran'] ?? null,
+    //                 'id_out_celup'   => $row['id_out_celup'],
+    //                 'tgl_pakai'      => $row['tgl_pakai'],
+    //                 'no_model'       => $row['no_model']    ?? '',
+    //                 'item_type'      => $row['item_type']   ?? '',
+    //                 'jenis'          => $row['jenis']       ?? '',
+    //                 'kode_warna'     => $row['kode_warna']  ?? '',
+    //                 'warna'          => $row['warna']       ?? '',
+    //                 'area_out'       => $row['area_out'],
+    //                 'no_karung'      => $row['no_karung'],
+    //                 'tgl_out'        => $row['tgl_out'],
+    //                 'kgs_out'        => $row['kgs_out']     ?? $row['ttl_kg'] ?? 0,
+    //                 'cns_out'        => $row['cns_out']     ?? $row['ttl_cns'] ?? 0,
+    //                 'krg_out'        => 0, // asumsi default
+    //                 'lot_out'        => $row['lot_out']     ?? '',
+    //                 'nama_cluster'   => $row['nama_cluster'] ?? '',
+    //                 'admin'          => $session->get('username'),
+    //             ];
+
+    //             $addedCount++;
+    //         }
+
+    //         // Simpan kembali session
+    //         $session->set('manual_delivery', $manualDelivery);
+
+    //         if ($addedCount === 0) {
+    //             return $this->response
+    //                 ->setStatusCode(409)
+    //                 ->setJSON([
+    //                     'success' => false,
+    //                     'message' => 'Semua data sudah ada di session'
+    //                 ]);
+    //         }
+
+    //         return $this->response
+    //             ->setStatusCode(200)
+    //             ->setJSON([
+    //                 'success'   => true,
+    //                 'message'   => "{$addedCount} record berhasil ditambahkan"
+    //             ]);
+    //     } catch (\Throwable $e) {
+    //         // Tangani exception tak terduga
+    //         log_message('error', '[saveSessionDeliveryArea] Exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+    //         return $this->response
+    //             ->setStatusCode(500)
+    //             ->setJSON([
+    //                 'success' => false,
+    //                 'message' => 'Terjadi kesalahan server',
+    //                 'error'   => $e->getMessage(), // atau hilangkan di production
+    //             ]);
+    //     }
+    // }
+
+    // bira
     public function saveSessionDeliveryArea()
     {
-        try {
-            // Ambil semua input POST
-            $postData = $this->request->getPost();
+        // Ambil semua input POST
+        $postData = $this->request->getPost();
 
-            // Validasi data yang diperlukan: bisa menghasilkan array of records
-            $validDatas = $this->pengeluaranModel->validateDeliveryData($postData);
-            // var_dump ($validDatas);
-            // Jika model men-set error, log dan kembalikan
-            if ($errors = $this->pengeluaranModel->errors()) {
-                log_message('error', '[saveSessionDeliveryArea] Validasi model gagal: ' . json_encode($errors));
-                return $this->response
-                    ->setStatusCode(422)
-                    ->setJSON([
-                        'success' => false,
-                        'message' => 'Validasi data gagal',
-                        'errors'  => $errors,
-                    ]);
-            }
+        // Validasi data yang diperlukan: bisa menghasilkan array of records
+        $validDatas = $this->pengeluaranModel->validateDeliveryData($postData);
 
-            // Jika tidak ada data valid, kembalikan error
-            if (empty($validDatas) || !is_array($validDatas)) {
-                return $this->response
-                    ->setStatusCode(400)
-                    ->setJSON([
-                        'success' => false,
-                        'message' => 'Tidak ada data baru atau data sudah dikirim sebelumnya'
-                    ]);
-            }
-
-            /** @var \CodeIgniter\Session\Session */
-            $session = session();
-
-            // Ambil data session manual_delivery (jika belum ada, inisialisasi array kosong)
-            $manualDelivery = $session->get('manual_delivery') ?? [];
-
-            $addedCount = 0;
-
-            foreach ($validDatas as $idx => $row) {
-                // Pastikan semua field kunci tersedia
-                if (!isset($row['id_pengeluaran'], $row['id_total_pemesanan'], $row['area_out'])) {
-                    log_message('error', "[saveSessionDeliveryArea] Row ke-$idx missing key fields: " . json_encode($row));
-                    continue;
-                }
-
-                // Cek duplikasi berdasarkan id_out_celup + area + tanggal
-                $isDuplicate = array_filter($manualDelivery, function ($item) use ($row) {
-                    return
-                        $item['id_pengeluaran'] == $row['id_pengeluaran']
-                        && $item['id_total_pemesanan']  == $row['id_total_pemesanan']
-                        && $item['area_out']   == $row['area_out'];
-                });
-
-                if ($isDuplicate) {
-                    // Lewati record yang sudah ada
-                    continue;
-                }
-
-                // Tambahkan ke array session
-                $manualDelivery[] = [
-                    'id_pengeluaran' => $row['id_pengeluaran'] ?? null,
-                    'id_out_celup'   => $row['id_out_celup'],
-                    'tgl_pakai'      => $row['tgl_pakai'],
-                    'no_model'       => $row['no_model']    ?? '',
-                    'item_type'      => $row['item_type']   ?? '',
-                    'jenis'          => $row['jenis']       ?? '',
-                    'kode_warna'     => $row['kode_warna']  ?? '',
-                    'warna'          => $row['warna']       ?? '',
-                    'area_out'       => $row['area_out'],
-                    'no_karung'      => $row['no_karung'],
-                    'tgl_out'        => $row['tgl_out'],
-                    'kgs_out'        => $row['kgs_out']     ?? $row['ttl_kg'] ?? 0,
-                    'cns_out'        => $row['cns_out']     ?? $row['ttl_cns'] ?? 0,
-                    'krg_out'        => 0, // asumsi default
-                    'lot_out'        => $row['lot_out']     ?? '',
-                    'nama_cluster'   => $row['nama_cluster'] ?? '',
-                    'admin'          => $session->get('username'),
-                ];
-
-                $addedCount++;
-            }
-
-            // Simpan kembali session
-            $session->set('manual_delivery', $manualDelivery);
-
-            if ($addedCount === 0) {
-                return $this->response
-                    ->setStatusCode(409)
-                    ->setJSON([
-                        'success' => false,
-                        'message' => 'Semua data sudah ada di session'
-                    ]);
-            }
-
+        // Jika tidak ada data valid, kembalikan error
+        if (empty($validDatas) || !is_array($validDatas)) {
             return $this->response
-                ->setStatusCode(200)
-                ->setJSON([
-                    'success'   => true,
-                    'message'   => "{$addedCount} record berhasil ditambahkan"
-                ]);
-        } catch (\Throwable $e) {
-            // Tangani exception tak terduga
-            log_message('error', '[saveSessionDeliveryArea] Exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
-            return $this->response
-                ->setStatusCode(500)
+                ->setStatusCode(400)
                 ->setJSON([
                     'success' => false,
-                    'message' => 'Terjadi kesalahan server',
-                    'error'   => $e->getMessage(), // atau hilangkan di production
+                    'message' => 'Tidak ada data baru atau data sudah dikirim sebelumnya'
                 ]);
         }
-    }
 
+        /** @var \CodeIgniter\Session\Session */
+        $session = session();
+
+        // Ambil data session manual_delivery (jika belum ada, inisialisasi array kosong)
+        $manualDelivery = $session->get('manual_delivery') ?? [];
+
+        $addedCount = 0;
+
+        foreach ($validDatas as $row) {
+            // Cek duplikasi berdasarkan id_out_celup + area + tanggal
+            $isDuplicate = array_filter($manualDelivery, function ($item) use ($row) {
+                return
+                    $item['id_out_celup'] == $row['id_out_celup']
+                    && $item['area_out']  == $row['area_out']
+                    && $item['tgl_out']   == $row['tgl_out'];
+            });
+
+            if ($isDuplicate) {
+                // Lewati record yang sudah ada
+                continue;
+            }
+
+            // Tambahkan ke array session
+            $manualDelivery[] = [
+                'id_pengeluaran' => $row['id_pengeluaran'] ?? null,
+                'id_out_celup'   => $row['id_out_celup'],
+                'tgl_pakai'      => $row['tgl_pakai'],
+                'no_model'       => $row['no_model']    ?? '',
+                'item_type'      => $row['item_type']   ?? '',
+                'jenis'          => $row['jenis']       ?? '',
+                'kode_warna'     => $row['kode_warna']  ?? '',
+                'warna'          => $row['warna']       ?? '',
+                'area_out'       => $row['area_out'],
+                'no_karung'      => $row['no_karung'],
+                'tgl_out'        => $row['tgl_out'],
+                'kgs_out'        => $row['kgs_out']     ?? $row['ttl_kg'] ?? 0,
+                'cns_out'        => $row['cns_out']     ?? $row['ttl_cns'] ?? 0,
+                'krg_out'        => 0, // asumsi default
+                'lot_out'        => $row['lot_out']     ?? '',
+                'nama_cluster'   => $row['nama_cluster'] ?? '',
+                'admin'          => $session->get('username'),
+            ];
+
+            $addedCount++;
+        }
+
+        // Simpan kembali session
+        $session->set('manual_delivery', $manualDelivery);
+
+        if ($addedCount === 0) {
+            return $this->response
+                ->setStatusCode(409)
+                ->setJSON([
+                    'success' => false,
+                    'message' => 'Semua data sudah ada di session'
+                ]);
+        }
+
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON([
+                'success'   => true,
+                'message'   => "{$addedCount} record berhasil ditambahkan"
+            ]);
+    }
 
     public function removeSessionDelivery()
     {
