@@ -39,22 +39,22 @@
 
     #manualTable th:nth-child(1),
     #manualTable td:nth-child(1) {
-        width: 90px;
+        width: 20px;
     }
 
     #manualTable th:nth-child(2),
     #manualTable td:nth-child(2) {
-        width: 30px;
+        width: 0px;
     }
 
     #manualTable th:nth-child(3),
     #manualTable td:nth-child(3) {
-        width: 50px;
+        width: 30px;
     }
 
     #manualTable th:nth-child(4),
     #manualTable td:nth-child(4) {
-        width: 60px;
+        width: 50px;
     }
 
     #manualTable th:nth-child(5),
@@ -64,36 +64,41 @@
 
     #manualTable th:nth-child(6),
     #manualTable td:nth-child(6) {
-        width: 50px;
+        width: 60px;
     }
 
     #manualTable th:nth-child(7),
     #manualTable td:nth-child(7) {
-        width: 30px;
+        width: 50px;
     }
 
     #manualTable th:nth-child(8),
     #manualTable td:nth-child(8) {
-        width: 20px;
+        width: 30px;
     }
 
     #manualTable th:nth-child(9),
     #manualTable td:nth-child(9) {
-        width: 60px;
+        width: 9px;
     }
 
     #manualTable th:nth-child(10),
     #manualTable td:nth-child(10) {
-        width: 150px;
+        width: 60px;
     }
 
     #manualTable th:nth-child(11),
     #manualTable td:nth-child(11) {
-        width: 70px;
+        width: 150px;
     }
 
     #manualTable th:nth-child(12),
     #manualTable td:nth-child(12) {
+        width: 70px;
+    }
+
+    #manualTable th:nth-child(13),
+    #manualTable td:nth-child(13) {
         width: 50px;
     }
 
@@ -183,11 +188,14 @@
 
     <div class="card">
         <div class="card-body">
-            <form action="<?= base_url($role . '/updateStatusKirim') ?>" method="post">
+            <form action="<?= base_url($role . '/updateStatusKirim') ?>" method="post" id="statusKirim">
                 <div class="table-responsive">
                     <table id="manualTable" class="table table-bordered table-striped table-hover">
                         <thead class="table-secondary">
                             <tr>
+                                <th>
+                                    <input type="checkbox" id="checkAll">
+                                </th>
                                 <th>Tgl Pakai</th>
                                 <th>Area</th>
                                 <th>Model</th>
@@ -206,9 +214,12 @@
                             <?php $sessionData = session()->get('manual_delivery') ?? []; ?>
                             <?php foreach ($sessionData as $i => $row): ?>
                                 <tr>
+                                    <td>
+                                        <input type="checkbox" name="selected[]" value="<?= esc($row['id_pengeluaran']) ?>" class="row-check">
+                                    </td>
                                     <td><?= esc(isset($row['tgl_pakai']) ? $row['tgl_pakai'] : '') ?></td>
-                                    <!-- hiden id_pengeluaran -->
-                                    <input type="hidden" name="id_pengeluaran[]" value="<?= esc($row['id_pengeluaran']) ?>">
+                                    <!-- hiden kolom -->
+                                    <input type="hidden" name="jenis[]" value="<?= $row['jenis'] ?>">
                                     <td><?= esc(isset($row['area_out']) ? $row['area_out'] : '') ?></td>
                                     <td><?= esc(isset($row['no_model']) ? $row['no_model'] : '') ?></td>
                                     <td><?= esc(isset($row['item_type']) ? $row['item_type'] : '') ?></td>
@@ -235,17 +246,22 @@
                     </table>
                 </div>
                 <div class="row mt-3">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label for="ttl_kgs" class="form-label">Total Kgs:</label>
                         <input type="text" id="ttl_kgs" name="ttl_kgs" class="form-control" readonly>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label for="ttl_cns" class="form-label">Total Cones:</label>
                         <input type="text" id="ttl_cns" name="ttl_cns" class="form-control" readonly>
                     </div>
-                    <div class="col-md-4 d-flex align-items-end mt-3">
+                    <div class="col-md-3 d-flex align-items-end mt-3">
                         <button type="submit" class="btn bg-gradient-success w-100">
-                            <i class="fas fa-save"></i> Simpan Pengiriman
+                            <i class="fas fa-save"></i> Simpan Pengiriman Terpilih
+                        </button>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end mt-3">
+                        <button type="button" id="btnDeleteSelected" class="btn btn-danger w-100">
+                            <i class="fas fa-trash"></i> Hapus Terpilih
                         </button>
                     </div>
                 </div>
@@ -263,6 +279,29 @@
     $(function() {
         updateTotals();
         $('.select2').select2();
+
+        // Select/Deselect semua
+        $('#checkAll').on('click', function() {
+            $('.row-check').prop('checked', this.checked);
+        });
+
+        // Kalau salah satu uncheck -> header ikut update
+        $('.row-check').on('change', function() {
+            $('#checkAll').prop('checked', $('.row-check:checked').length === $('.row-check').length);
+        });
+
+        // Validasi: harus ada yg dipilih sebelum submit
+        $('#statusKirim').on('submit', function(e) {
+            if ($('.row-check:checked').length === 0) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Oops...',
+                    text: 'Pilih minimal 1 data untuk dikirim!',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
 
         // Button Cari Order
         $('#btn-saveSession').on('click', function() {
@@ -324,6 +363,54 @@
                 }
             }, 'json');
             updateTotals();
+        });
+
+        $('#btnDeleteSelected').on('click', function() {
+            let selected = [];
+            $('.row-check:checked').each(function() {
+                selected.push($(this).closest('tr').find('.btn-remove').data('index'));
+            });
+
+            if (selected.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Tidak ada data!',
+                    text: 'Pilih minimal 1 data untuk dihapus.'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Yakin?',
+                text: "Data terpilih akan dihapus!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('<?= base_url($role . "/pengiriman/removeSessionDelivery") ?>', {
+                        indexes: selected
+                    }, function(resp) {
+                        if (resp.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil',
+                                text: 'Data berhasil dihapus.',
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: resp.message
+                            });
+                        }
+                    }, 'json');
+                }
+            });
         });
 
         // Update total Kgs and Cones
