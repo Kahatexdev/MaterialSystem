@@ -334,8 +334,6 @@ class StockModel extends Model
     public function getDataClusterPindah($data)
     {
 
-        $lotColumn = $data['stock_awal'] == "" ? 'lot_stock' : 'lot_awal';
-
         return $this->select('stock.*')
             ->where([
                 'no_model'     => $data['no_model'],
@@ -343,8 +341,8 @@ class StockModel extends Model
                 'kode_warna'   => $data['kode_warna'],
                 'warna'        => $data['warna'],
                 'nama_cluster' => $data['nama_cluster'],
+                'lot_stock'    => $data['lot'],
             ])
-            ->where($lotColumn, $data['lot'])
             ->first();
 
         return $data;
