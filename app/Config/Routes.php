@@ -893,6 +893,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     //Retur
     $routes->get('retur', 'ReturController::returArea');
     $routes->get('retur', 'ReturController::index');
+    $routes->get('retur/listRetur', 'ReturController::listRetur');
+    $routes->get('retur/cekBahanBaku', 'ReturController::cekBahanBaku');
+    $routes->get('retur/getPengirimanArea', 'ReturController::getPengirimanArea');
     $routes->post('retur/approve', 'ReturController::approve');
     $routes->post('retur/reject', 'ReturController::reject');
     $routes->get('retur/listBarcodeRetur', 'ReturController::listBarcodeRetur');

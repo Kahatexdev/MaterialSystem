@@ -196,7 +196,6 @@ class PemasukanModel extends Model
             ->join('master_material', 'master_material.item_type = other_bon.item_type', 'left')
             ->where('out_celup.id_other_bon IS NOT NULL')
             ->where('master_material.jenis', 'BENANG')
-            ->orderBy('other_bon.no_surat_jalan', 'ASC')
             ->groupBy('other_bon.id_other_bon, other_bon.no_model, other_bon.item_type, other_bon.kode_warna');
         // Query 2: Untuk data pemasukan biasa dari schedule celup
         $builder2 = $this->db->table('pemasukan')
@@ -209,7 +208,6 @@ class PemasukanModel extends Model
             ->join("($subMaterial) m", "m.no_model  = schedule_celup.no_model AND m.item_type  = schedule_celup.item_type AND m.kode_warna = schedule_celup.kode_warna AND m.color = schedule_celup.warna", 'left')
             ->join('master_material', 'master_material.item_type = schedule_celup.item_type', 'left')
             ->where('master_material.jenis', 'BENANG')
-            ->orderBy('other_bon.no_surat_jalan', 'ASC')
             ->groupBy('bon_celup.id_bon, out_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna');
 
         // Cek apakah ada input key untuk pencarian
@@ -347,6 +345,7 @@ class PemasukanModel extends Model
             ->join('master_warna_benang', 'master_warna_benang.kode_warna = other_bon.kode_warna', 'left')
             ->where('out_celup.id_other_bon IS NOT NULL')
             ->where('master_material.jenis', 'BENANG')
+            ->orderBy('other_bon.no_surat_jalan', 'ASC')
             ->groupBy('other_bon.tgl_datang, other_bon.item_type, other_bon.no_surat_jalan');
 
         $builder2 = $this->db->table('pemasukan')
@@ -357,6 +356,7 @@ class PemasukanModel extends Model
             ->join('master_material', 'master_material.item_type = schedule_celup.item_type')
             ->join('master_warna_benang', 'master_warna_benang.kode_warna = schedule_celup.kode_warna', 'left')
             ->where('master_material.jenis', 'BENANG')
+            ->orderBy('bon_celup.no_surat_jalan', 'ASC')
             ->groupBy('bon_celup.tgl_datang, schedule_celup.item_type, bon_celup.no_surat_jalan');
 
         // Filter tanggal (berlaku di kedua query)
@@ -382,13 +382,13 @@ class PemasukanModel extends Model
 
         // Urutkan berdasarkan tgl_masuk
         usort($merged, function ($a, $b) {
-            // Urutkan dulu berdasarkan tgl_datang, lalu no_surat_jalan
-            $tglA = strtotime($a['tgl_datang']);
-            $tglB = strtotime($b['tgl_datang']);
-            if ($tglA === $tglB) {
-                return strcmp($a['no_surat_jalan'], $b['no_surat_jalan']);
+            // Urutkan dulu berdasarkan tgl_datang ASC
+            $tglCompare = strtotime($a['tgl_datang']) - strtotime($b['tgl_datang']);
+            if ($tglCompare !== 0) {
+                return $tglCompare;
             }
-            return $tglA - $tglB;
+            // Jika tgl_datang sama, urutkan berdasarkan no_surat_jalan ASC
+            return strcmp($a['no_surat_jalan'], $b['no_surat_jalan']);
         });
 
         return $merged;
