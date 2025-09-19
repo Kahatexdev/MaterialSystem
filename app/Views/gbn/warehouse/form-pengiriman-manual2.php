@@ -157,7 +157,7 @@
                         <select id="jenis" class="form-control select2" name="jenis" required>
                             <option value="">-- Pilih Jenis --</option>
                             <option value="BENANG">BENANG</option>
-                            <option value="NLON">NLON</option>
+                            <option value="NYLON">NYLON</option>
                             <option value="KARET">KARET</option>
                             <option value="SPANDEX">SPANDEX</option>
                         </select>
@@ -277,28 +277,44 @@
 
 <script>
     $(function() {
-        updateTotals();
         $('.select2').select2();
+        updateTotals();
 
         // Select/Deselect semua
-        $('#checkAll').on('click', function() {
-            $('.row-check').prop('checked', this.checked);
+        $('#checkAll').on('change', function() {
+            $('.row-check').prop('checked', this.checked).trigger('change');
         });
 
-        // Kalau salah satu uncheck -> header ikut update
-        $('.row-check').on('change', function() {
+        // Checkbox per-baris
+        $(document).on('change', '.row-check', function() {
             $('#checkAll').prop('checked', $('.row-check:checked').length === $('.row-check').length);
+            updateTotals();
         });
 
-        // Validasi: harus ada yg dipilih sebelum submit
+        // Perubahan angka Kgs/Cones
+        $('#manualTable').on('input change', '.kgs-val, .cns-val', function() {
+            updateTotals();
+        });
+
+        // Hapus baris -> hitung ulang setelah request (untuk UX langsung juga hitung dulu)
+        $(document).on('click', '.btn-remove', function() {
+            updateTotals();
+        });
+
+        // Tombol hapus terpilih -> setelah sukses akan reload; sebelum itu hitung ulang juga oke
+        $('#btnDeleteSelected').on('click', function() {
+            updateTotals();
+        });
+
+
+        // VALIDASI submit: wajib ada yang dipilih
         $('#statusKirim').on('submit', function(e) {
             if ($('.row-check:checked').length === 0) {
                 e.preventDefault();
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
-                    text: 'Pilih minimal 1 data untuk dikirim!',
-                    confirmButtonText: 'OK'
+                    text: 'Pilih minimal 1 data untuk dikirim!'
                 });
             }
         });
@@ -329,9 +345,9 @@
                 .fail(function(jqXHR, textStatus, errorThrown) {
                     // Tangani gagal request (misal server 500, network error)
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Terjadi kesalahan: ' + textStatus
+                        icon: 'warning',
+                        title: 'Warning',
+                        text: message = jqXHR.responseJSON && jqXHR.responseJSON.message ? jqXHR.responseJSON.message : 'Terjadi kesalahan saat menghubungi server: ' + textStatus
                     });
                 });
         });
@@ -418,13 +434,24 @@
             updateTotals();
         });
 
+        // === HANYA HITUNG YANG DICHECK ===
         function updateTotals() {
-            let totalKgs = 0,
-                totalCns = 0;
+            let totalKgs = 0;
+            let totalCns = 0;
+
             $('#manualTable tbody tr').each(function() {
-                totalKgs += parseFloat($(this).find('.kgs-val').text()) || parseFloat($(this).find('.kgs-val').val()) || 0;
-                totalCns += parseInt($(this).find('.cns-val').text()) || parseInt($(this).find('.cns-val').val()) || 0;
+                const $tr = $(this);
+                const checked = $tr.find('.row-check').is(':checked');
+                if (!checked) return; // skip baris yang tidak dipilih
+
+                // Ambil nilai dari input (fallback ke text kalau bukan input)
+                const kgs = parseFloat($tr.find('.kgs-val').val() ?? $tr.find('.kgs-val').text()) || 0;
+                const cns = parseInt($tr.find('.cns-val').val() ?? $tr.find('.cns-val').text()) || 0;
+
+                totalKgs += kgs;
+                totalCns += cns;
             });
+
             $('#ttl_kgs').val(totalKgs.toFixed(2));
             $('#ttl_cns').val(totalCns);
         }

@@ -549,14 +549,13 @@ class PemesananController extends BaseController
         $validDatas = $this->pengeluaranModel->validateDeliveryData($postData);
 
         // Jika tidak ada data valid, kembalikan error
-        if (empty($validDatas) || !is_array($validDatas)) {
-            return $this->response
-                ->setStatusCode(400)
-                ->setJSON([
-                    'success' => false,
-                    'message' => 'Tidak ada data baru atau data sudah dikirim sebelumnya'
-                ]);
+        if (!is_array($validDatas) || count($validDatas) === 0) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'success' => false,
+                'message' => 'Tidak ada data baru atau data sudah dikirim sebelumnya'
+            ]);
         }
+
 
         /** @var \CodeIgniter\Session\Session */
         $session = session();
