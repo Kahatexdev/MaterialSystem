@@ -556,6 +556,7 @@ class ApiController extends ResourceController
     }
     public function getUpdateListPemesanan()
     {
+        $role = session()->get('role');
         $data = $this->request->getPost([
             'area',
             'tgl_pakai',
@@ -566,7 +567,7 @@ class ApiController extends ResourceController
             'po_tambahan'
         ]);
 
-        $dataList = $this->pemesananModel->getListPemesananByUpdate($data);
+        $dataList = $this->pemesananModel->getListPemesananByUpdate($data, $role);
 
         return $this->respond([
             'status'  => 'success',
