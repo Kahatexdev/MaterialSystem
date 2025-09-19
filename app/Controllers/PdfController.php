@@ -3039,7 +3039,7 @@ class PdfController extends BaseController
         $jenis = $this->request->getGet('jenis');
 
         $data = $this->pemesananModel->getDataPemesananCovering($tglPakai, $jenis);
-
+        // dd ($data);
         // Inisialisasi FPDF (portrait A4)
         $pdf = new FPDF('P', 'mm', 'A4');
         $pdf->AddPage();

@@ -52,11 +52,43 @@ class TotalPemesananModel extends Model
     public function getDataPemesanan($area, $jenis, $tgl_pakai)
     {
         $query = $this->db->table('total_pemesanan tp')
-            ->select("tp.id_total_pemesanan, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, p.id_pemesanan, p.tgl_pakai, p.admin AS area, mm.jenis,mo.no_model, m.item_type, m.kode_warna, m.color, GROUP_CONCAT(DISTINCT p.lot) AS lot_pesan, GROUP_CONCAT(DISTINCT p.keterangan) ket_pesan, GROUP_CONCAT(DISTINCT p.keterangan_gbn) ket_gbn, SUM(CASE WHEN pp.status = 'Pengiriman Area' THEN pp.kgs_out ELSE 0 END) AS kg_kirim, 
-        COUNT(CASE WHEN pp.status = 'Pengiriman Area' THEN pp.id_pengeluaran ELSE NULL END) AS krg_kirim, 
-        GROUP_CONCAT(DISTINCT CASE WHEN pp.status = 'Pengiriman Area' THEN pp.lot_out ELSE NULL END) AS lot_kirim, 
-        GROUP_CONCAT(DISTINCT CASE WHEN pp.status = 'Pengiriman Area' THEN pp.nama_cluster ELSE NULL END) AS cluster_kirim, CASE WHEN p.po_tambahan = '1' THEN 'YA' ELSE '' END AS po_tambahan, pp.admin")
-            ->join('pengeluaran pp', 'pp.id_total_pemesanan = tp.id_total_pemesanan', 'left')
+            ->select("
+            tp.id_total_pemesanan, 
+            tp.ttl_jl_mc, 
+            tp.ttl_kg, 
+            tp.ttl_cns, 
+            p.id_pemesanan, 
+            p.tgl_pakai, 
+            p.admin AS area, 
+            mm.jenis,mo.no_model, 
+            m.item_type, 
+            m.kode_warna, 
+            m.color, 
+            GROUP_CONCAT(DISTINCT p.lot) AS lot_pesan, 
+            GROUP_CONCAT(DISTINCT p.keterangan) ket_pesan, 
+            GROUP_CONCAT(DISTINCT p.keterangan_gbn) ket_gbn, 
+            COALESCE(pp.kg_kirim, 0) AS kg_kirim, 
+            COALESCE(pp.krg_kirim, 0) AS krg_kirim, 
+            pp.lot_kirim, 
+            pp.cluster_kirim, 
+            CASE WHEN p.po_tambahan = '1' THEN 'YA' ELSE '' END AS po_tambahan, 
+            ppa.admin")
+            ->join(
+                '(SELECT id_total_pemesanan,
+                    SUM(kgs_out) AS kg_kirim,
+                    COUNT(id_pengeluaran) AS krg_kirim,
+                    GROUP_CONCAT(DISTINCT lot_out) AS lot_kirim,
+                    GROUP_CONCAT(DISTINCT nama_cluster) AS cluster_kirim,
+                    admin
+                    FROM pengeluaran
+                    WHERE status="Pengiriman Area"
+                    GROUP BY id_total_pemesanan
+                    ) pp',
+                'pp.id_total_pemesanan = tp.id_total_pemesanan',
+                'left'
+            )
+
+            ->join('pengeluaran ppa', 'ppa.id_total_pemesanan = tp.id_total_pemesanan', 'left')
             ->join('pemesanan p', 'p.id_total_pemesanan = tp.id_total_pemesanan', 'left')
             ->join('material m', 'm.id_material = p.id_material', 'left')
             ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
