@@ -158,7 +158,8 @@ class PemesananController extends BaseController
             $item['sudah_pesan_spandex'] = $cekSpandex ? true : false;
             $item['status'] = $cekSpandex ? $cekSpandex['status'] : 'BELUM PESAN';
         }
-        // dd ($dataPemesanan);
+        // dd($dataPemesanan);
+
         $listPemesanan = $this->pemesananSpandexKaretModel->getListPemesananSpandexKaret($area, $jenis, $tglPakai);
 
         $data = [
@@ -1906,7 +1907,7 @@ class PemesananController extends BaseController
             'kgPengiriman'  => $kgPengiriman,
             'sisaKebutuhan' => $sisa,
         ]);
-        
+
         // setelah view selesai dibuat → hapus cache terkait
         $cacheKeyQty = $this->makeCacheKey('qty_bulk', [$area, $noModel, implode(',', $styleSizes)]);
         cache()->delete($cacheKeyQty);

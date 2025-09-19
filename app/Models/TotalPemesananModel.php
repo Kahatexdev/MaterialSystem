@@ -72,7 +72,7 @@ class TotalPemesananModel extends Model
             pp.lot_kirim, 
             pp.cluster_kirim, 
             CASE WHEN p.po_tambahan = '1' THEN 'YA' ELSE '' END AS po_tambahan, 
-            pp.admin")
+            ppa.admin")
             ->join(
                 '(SELECT id_total_pemesanan,
                     SUM(kgs_out) AS kg_kirim,
@@ -87,6 +87,8 @@ class TotalPemesananModel extends Model
                 'pp.id_total_pemesanan = tp.id_total_pemesanan',
                 'left'
             )
+
+            ->join('pengeluaran ppa', 'ppa.id_total_pemesanan = tp.id_total_pemesanan', 'left')
             ->join('pemesanan p', 'p.id_total_pemesanan = tp.id_total_pemesanan', 'left')
             ->join('material m', 'm.id_material = p.id_material', 'left')
             ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
