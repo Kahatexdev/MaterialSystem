@@ -158,7 +158,7 @@ class ApiController extends ResourceController
                         $search
                     );
 
-                if (! empty($allSchedules)) {
+                if (!empty($allSchedules)) {
                     foreach ($allSchedules as $scheduleData) {
                         // Start dangan data master
                         $newRow = $row;

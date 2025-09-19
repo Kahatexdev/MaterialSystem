@@ -200,4 +200,34 @@ class PoTambahanModel extends Model
             ->orderBy('po_tambahan.created_at', 'DESC')
             ->findAll();
     }
+
+    public function getKgPoTambahanBulk(array $filter, array $styleSizes): array
+    {
+        $no_model   = $filter['no_model']   ?? null;
+        $item_type  = $filter['item_type']  ?? null;
+        $kode_warna = $filter['kode_warna'] ?? null;
+        $area       = $filter['area']       ?? null;
+
+        if (!$no_model || !$item_type || !$kode_warna || !$area || empty($styleSizes)) {
+            return [];
+        }
+
+        $rows = $this->select('material.style_size, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS ttl_keb_potambahan')
+            ->join('material', 'material.id_material=po_tambahan.id_material', 'left')
+            ->join('master_order', 'master_order.id_order=material.id_order', 'left')
+            ->where('po_tambahan.admin', $area)
+            ->where('master_order.no_model', $no_model)
+            ->where('material.item_type', $item_type)
+            ->where('material.kode_warna', $kode_warna)
+            ->where('po_tambahan.status', 'approved')
+            ->whereIn('material.style_size', $styleSizes)
+            ->groupBy('material.style_size')
+            ->findAll();
+
+        $map = [];
+        foreach ($rows as $r) {
+            $map[$r['style_size']] = (float) $r['ttl_keb_potambahan'];
+        }
+        return $map;
+    }
 }

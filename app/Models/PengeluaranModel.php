@@ -39,7 +39,7 @@ class PengeluaranModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = true;
+    protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -314,7 +314,7 @@ class PengeluaranModel extends Model
             ->join('master_order',   'master_order.id_order       = material.id_order',                       'left')
             ->where('out_celup.id_other_bon IS NOT NULL')
             ->where('out_celup.id_celup IS NULL')
-            ->where('other_bon.kategori !=', 'Perbaikan Data Menumpuk')
+            ->where('other_out.kategori !=', 'Perbaikan Data Menumpuk')
             ->groupBy('other_out.id_other_out');
 
         // // 2) Jika ada keyword, apply LIKE di tiap builder
@@ -545,6 +545,64 @@ class PengeluaranModel extends Model
         return $builder->get()->getResultArray();
     }
 
+    // public function validateDeliveryData(array $data): array
+    // {
+    //     $builder = $this->db
+    //         ->table('pengeluaran as p')
+    //         ->distinct()
+    //         ->select([
+    //             'p.*',
+    //             'pe.tgl_pakai',
+    //             // jika ada di schedule_celup ambil sc.no_model, jika tidak ambil mo.no_model
+    //             'COALESCE(sc.no_model, mo.no_model) AS no_model',
+    //             'COALESCE(sc.item_type, m.item_type) AS item_type',
+    //             'COALESCE(sc.kode_warna, m.kode_warna)    AS kode_warna',
+    //             'COALESCE(sc.warna, m.color)             AS warna',
+    //             'mm.jenis',
+    //             'tp.ttl_kg',
+    //             'tp.ttl_cns',
+    //             'oc.no_karung',
+    //         ])
+    //         // JOIN semua tabel
+    //         ->join('out_celup oc',                'oc.id_out_celup    = p.id_out_celup',            'left')
+    //         ->join('schedule_celup sc',           'sc.id_celup        = oc.id_celup',               'left')
+    //         ->join('pemesanan_spandex_karet psk', 'psk.id_psk         = p.id_psk',                 'left')
+    //         ->join(
+    //             'pemesanan pe',
+    //             '(
+    //             pe.id_total_pemesanan = psk.id_total_pemesanan
+    //             OR pe.id_total_pemesanan = p.id_total_pemesanan
+    //         )',
+    //             'left'
+    //         )
+    //         ->join('total_pemesanan tp',         'tp.id_total_pemesanan = p.id_total_pemesanan',   'left')
+    //         ->join('material m',                  'm.id_material      = pe.id_material',            'left')
+    //         ->join('master_material mm',          'mm.item_type     = m.item_type',             'left')
+    //         ->join('master_order mo',             'mo.id_order        = m.id_order',                'left')
+    //         // Filter status sebelum grouping
+    //         ->where('p.status', 'Pengeluaran Jalur')
+    //         // Filter no_model
+    //         ->groupStart()
+    //         ->where('sc.no_model', $data['no_model'])
+    //         ->orWhere('mo.no_model', $data['no_model'])
+    //         ->groupEnd()
+    //         // Filter item_type
+    //         ->groupStart()
+    //         ->where('sc.item_type', $data['item_type'])
+    //         ->orWhere('m.item_type', $data['item_type'])
+    //         ->groupEnd()
+    //         // Filter kode_warna
+    //         ->groupStart()
+    //         ->where('sc.kode_warna', $data['kode_warna'])
+    //         ->orWhere('m.kode_warna', $data['kode_warna'])
+    //         ->groupEnd()
+    //         // Group by id_pengeluaran untuk distinct
+    //         ->groupBy('p.id_pengeluaran');
+
+    //     return $builder
+    //         ->get()
+    //         ->getResultArray();
+    // }
     public function validateDeliveryData(array $data): array
     {
         $builder = $this->db
@@ -581,21 +639,24 @@ class PengeluaranModel extends Model
             ->join('master_order mo',             'mo.id_order        = m.id_order',                'left')
             // Filter status sebelum grouping
             ->where('p.status', 'Pengeluaran Jalur')
+            ->where('pe.tgl_pakai', $data['tgl_pakai'])
+            ->where('mm.jenis', $data['jenis'])
+            ->where('p.area_out', $data['area'])
             // Filter no_model
-            ->groupStart()
-            ->where('sc.no_model', $data['no_model'])
-            ->orWhere('mo.no_model', $data['no_model'])
-            ->groupEnd()
+            // ->groupStart()
+            // ->where('sc.no_model', $data['no_model'])
+            // ->orWhere('mo.no_model', $data['no_model'])
+            // ->groupEnd()d
             // Filter item_type
-            ->groupStart()
-            ->where('sc.item_type', $data['item_type'])
-            ->orWhere('m.item_type', $data['item_type'])
-            ->groupEnd()
-            // Filter kode_warna
-            ->groupStart()
-            ->where('sc.kode_warna', $data['kode_warna'])
-            ->orWhere('m.kode_warna', $data['kode_warna'])
-            ->groupEnd()
+            // ->groupStart()
+            // ->where('sc.item_type', $data['item_type'])
+            // ->orWhere('m.item_type', $data['item_type'])
+            // ->groupEnd()
+            // // Filter kode_warna
+            // ->groupStart()
+            // ->where('sc.kode_warna', $data['kode_warna'])
+            // ->orWhere('m.kode_warna', $data['kode_warna'])
+            // ->groupEnd()
             // Group by id_pengeluaran untuk distinct
             ->groupBy('p.id_pengeluaran');
 

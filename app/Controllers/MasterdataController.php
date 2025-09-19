@@ -1017,6 +1017,8 @@ class MasterdataController extends BaseController
         $totalFiltered = $this->masterOrderModel->countAllResults(false);
 
         $data = $this->masterOrderModel
+            ->where('no_order !=', null)
+            ->Where('no_order !=', '-')
             ->orderBy('id_order', 'DESC')
             ->findAll($length, $start);
         // dd($data);
@@ -1042,6 +1044,12 @@ class MasterdataController extends BaseController
                 'no_order' => "<span style='$style'>{$row['no_order']}</span>",
                 'buyer' => "<span style='$style'>{$row['buyer']}</span>",
                 'memo' => "<span style='$style'>{$row['memo']}</span>",
+                'start_mc' => "<span style='$style'>" .
+                    (!empty($row['start_mc']) && $row['start_mc'] !== '0000-00-00 00:00:00'
+                        ? date('d-m-Y', strtotime($row['start_mc']))
+                        : 'Belum update')
+                    . "</span>",
+
                 'delivery_awal' => "<span style='$style'>{$row['delivery_awal']}</span>",
                 'delivery_akhir' => "<span style='$style'>{$row['delivery_akhir']}</span>",
                 'unit' => "<span style='$style'>{$row['unit']}</span>",

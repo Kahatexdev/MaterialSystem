@@ -273,23 +273,41 @@ class PemesananController extends BaseController
         return view($this->role . '/warehouse/form-pengiriman', $data);
     }
 
+
+    // jangan di hapus , ini untuk view yg lama
+    // public function pengirimanAreaManual()
+    // {
+    //     // Ambil current orders dari session, atau [] bila belum ada
+    //     $data['delivery_area'] = session()->get('manual_delivery') ?? [];
+    //     // dd ($data['delivery_area']);
+    //     // dd  ($data['delivery_area']);
+    //     // Ambil data dari database untuk dropdown
+    //     // $item_types = $this->pengeluaranModel->getItemTypes();
+    //     $data = [
+    //         'active' => $this->active,
+    //         'role' => $this->role,
+    //         'title' => 'Form Pengiriman Manual',
+    //         // 'item_types' => $item_types
+    //     ];
+
+    //     return view($this->role . '/warehouse/form-pengiriman-manual', $data);
+    // }
     public function pengirimanAreaManual()
     {
-        // Ambil current orders dari session, atau [] bila belum ada
-        $data['delivery_area'] = session()->get('manual_delivery') ?? [];
-        // dd ($data['delivery_area']);
-        // dd  ($data['delivery_area']);
-        // Ambil data dari database untuk dropdown
-        // $item_types = $this->pengeluaranModel->getItemTypes();
+        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $response = file_get_contents($apiUrl);
+        $area = json_decode($response, true);
+
         $data = [
             'active' => $this->active,
             'role' => $this->role,
             'title' => 'Form Pengiriman Manual',
-            // 'item_types' => $item_types
+            'area' => $area
         ];
 
-        return view($this->role . '/warehouse/form-pengiriman-manual', $data);
+        return view($this->role . '/warehouse/form-pengiriman-manual2', $data);
     }
+
 
     public function getItemTypes()
     {
@@ -323,6 +341,7 @@ class PemesananController extends BaseController
         }
     }
 
+    // novan
     // public function saveSessionDeliveryArea()
     // {
     //     // Ambil semua input POST
@@ -405,132 +424,235 @@ class PemesananController extends BaseController
     //         ]);
     // }
 
+    // alfa
+    // public function saveSessionDeliveryArea()
+    // {
+    //     try {
+    //         // Ambil semua input POST
+    //         $postData = $this->request->getPost();
 
+    //         // Validasi data yang diperlukan: bisa menghasilkan array of records
+    //         $validDatas = $this->pengeluaranModel->validateDeliveryData($postData);
+    //         // var_dump ($validDatas);
+    //         // Jika model men-set error, log dan kembalikan
+    //         if ($errors = $this->pengeluaranModel->errors()) {
+    //             log_message('error', '[saveSessionDeliveryArea] Validasi model gagal: ' . json_encode($errors));
+    //             return $this->response
+    //                 ->setStatusCode(422)
+    //                 ->setJSON([
+    //                     'success' => false,
+    //                     'message' => 'Validasi data gagal',
+    //                     'errors'  => $errors,
+    //                 ]);
+    //         }
+
+    //         // Jika tidak ada data valid, kembalikan error
+    //         if (empty($validDatas) || !is_array($validDatas)) {
+    //             return $this->response
+    //                 ->setStatusCode(400)
+    //                 ->setJSON([
+    //                     'success' => false,
+    //                     'message' => 'Tidak ada data baru atau data sudah dikirim sebelumnya'
+    //                 ]);
+    //         }
+
+    //         /** @var \CodeIgniter\Session\Session */
+    //         $session = session();
+
+    //         // Ambil data session manual_delivery (jika belum ada, inisialisasi array kosong)
+    //         $manualDelivery = $session->get('manual_delivery') ?? [];
+
+    //         $addedCount = 0;
+
+    //         foreach ($validDatas as $idx => $row) {
+    //             // Pastikan semua field kunci tersedia
+    //             if (!isset($row['id_pengeluaran'], $row['id_total_pemesanan'], $row['area_out'])) {
+    //                 log_message('error', "[saveSessionDeliveryArea] Row ke-$idx missing key fields: " . json_encode($row));
+    //                 continue;
+    //             }
+
+    //             // Cek duplikasi berdasarkan id_out_celup + area + tanggal
+    //             $isDuplicate = array_filter($manualDelivery, function ($item) use ($row) {
+    //                 return
+    //                     $item['id_pengeluaran'] == $row['id_pengeluaran']
+    //                     && $item['id_total_pemesanan']  == $row['id_total_pemesanan']
+    //                     && $item['area_out']   == $row['area_out'];
+    //             });
+
+    //             if ($isDuplicate) {
+    //                 // Lewati record yang sudah ada
+    //                 continue;
+    //             }
+
+    //             // Tambahkan ke array session
+    //             $manualDelivery[] = [
+    //                 'id_pengeluaran' => $row['id_pengeluaran'] ?? null,
+    //                 'id_out_celup'   => $row['id_out_celup'],
+    //                 'tgl_pakai'      => $row['tgl_pakai'],
+    //                 'no_model'       => $row['no_model']    ?? '',
+    //                 'item_type'      => $row['item_type']   ?? '',
+    //                 'jenis'          => $row['jenis']       ?? '',
+    //                 'kode_warna'     => $row['kode_warna']  ?? '',
+    //                 'warna'          => $row['warna']       ?? '',
+    //                 'area_out'       => $row['area_out'],
+    //                 'no_karung'      => $row['no_karung'],
+    //                 'tgl_out'        => $row['tgl_out'],
+    //                 'kgs_out'        => $row['kgs_out']     ?? $row['ttl_kg'] ?? 0,
+    //                 'cns_out'        => $row['cns_out']     ?? $row['ttl_cns'] ?? 0,
+    //                 'krg_out'        => 0, // asumsi default
+    //                 'lot_out'        => $row['lot_out']     ?? '',
+    //                 'nama_cluster'   => $row['nama_cluster'] ?? '',
+    //                 'admin'          => $session->get('username'),
+    //             ];
+
+    //             $addedCount++;
+    //         }
+
+    //         // Simpan kembali session
+    //         $session->set('manual_delivery', $manualDelivery);
+
+    //         if ($addedCount === 0) {
+    //             return $this->response
+    //                 ->setStatusCode(409)
+    //                 ->setJSON([
+    //                     'success' => false,
+    //                     'message' => 'Semua data sudah ada di session'
+    //                 ]);
+    //         }
+
+    //         return $this->response
+    //             ->setStatusCode(200)
+    //             ->setJSON([
+    //                 'success'   => true,
+    //                 'message'   => "{$addedCount} record berhasil ditambahkan"
+    //             ]);
+    //     } catch (\Throwable $e) {
+    //         // Tangani exception tak terduga
+    //         log_message('error', '[saveSessionDeliveryArea] Exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+    //         return $this->response
+    //             ->setStatusCode(500)
+    //             ->setJSON([
+    //                 'success' => false,
+    //                 'message' => 'Terjadi kesalahan server',
+    //                 'error'   => $e->getMessage(), // atau hilangkan di production
+    //             ]);
+    //     }
+    // }
+
+    // bira
     public function saveSessionDeliveryArea()
     {
-        try {
-            // Ambil semua input POST
-            $postData = $this->request->getPost();
+        // Ambil semua input POST
+        $postData = $this->request->getPost();
 
-            // Validasi data yang diperlukan: bisa menghasilkan array of records
-            $validDatas = $this->pengeluaranModel->validateDeliveryData($postData);
-            // var_dump ($validDatas);
-            // Jika model men-set error, log dan kembalikan
-            if ($errors = $this->pengeluaranModel->errors()) {
-                log_message('error', '[saveSessionDeliveryArea] Validasi model gagal: ' . json_encode($errors));
-                return $this->response
-                    ->setStatusCode(422)
-                    ->setJSON([
-                        'success' => false,
-                        'message' => 'Validasi data gagal',
-                        'errors'  => $errors,
-                    ]);
+        // Validasi data yang diperlukan: bisa menghasilkan array of records
+        $validDatas = $this->pengeluaranModel->validateDeliveryData($postData);
+
+        // Jika tidak ada data valid, kembalikan error
+        if (!is_array($validDatas) || count($validDatas) === 0) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'success' => false,
+                'message' => 'Tidak ada data baru atau data sudah dikirim sebelumnya'
+            ]);
+        }
+
+
+        /** @var \CodeIgniter\Session\Session */
+        $session = session();
+
+        // Ambil data session manual_delivery (jika belum ada, inisialisasi array kosong)
+        $manualDelivery = $session->get('manual_delivery') ?? [];
+
+        $addedCount = 0;
+
+        foreach ($validDatas as $row) {
+            // Cek duplikasi berdasarkan id_out_celup + area + tanggal
+            $isDuplicate = array_filter($manualDelivery, function ($item) use ($row) {
+                return
+                    $item['id_out_celup'] == $row['id_out_celup']
+                    && $item['area_out']  == $row['area_out']
+                    && $item['tgl_out']   == $row['tgl_out'];
+            });
+
+            if ($isDuplicate) {
+                // Lewati record yang sudah ada
+                continue;
             }
 
-            // Jika tidak ada data valid, kembalikan error
-            if (empty($validDatas) || !is_array($validDatas)) {
-                return $this->response
-                    ->setStatusCode(400)
-                    ->setJSON([
-                        'success' => false,
-                        'message' => 'Tidak ada data baru atau data sudah dikirim sebelumnya'
-                    ]);
-            }
+            // Tambahkan ke array session
+            $manualDelivery[] = [
+                'id_pengeluaran' => $row['id_pengeluaran'] ?? null,
+                'id_out_celup'   => $row['id_out_celup'],
+                'tgl_pakai'      => $row['tgl_pakai'],
+                'no_model'       => $row['no_model']    ?? '',
+                'item_type'      => $row['item_type']   ?? '',
+                'jenis'          => $row['jenis']       ?? '',
+                'kode_warna'     => $row['kode_warna']  ?? '',
+                'warna'          => $row['warna']       ?? '',
+                'area_out'       => $row['area_out'],
+                'no_karung'      => $row['no_karung'],
+                'tgl_out'        => $row['tgl_out'],
+                'kgs_out'        => $row['kgs_out']     ?? $row['ttl_kg'] ?? 0,
+                'cns_out'        => $row['cns_out']     ?? $row['ttl_cns'] ?? 0,
+                'krg_out'        => 0, // asumsi default
+                'lot_out'        => $row['lot_out']     ?? '',
+                'nama_cluster'   => $row['nama_cluster'] ?? '',
+                'admin'          => $session->get('username'),
+                'jenis'          => $row['jenis'],
+            ];
 
-            /** @var \CodeIgniter\Session\Session */
-            $session = session();
+            $addedCount++;
+        }
 
-            // Ambil data session manual_delivery (jika belum ada, inisialisasi array kosong)
-            $manualDelivery = $session->get('manual_delivery') ?? [];
+        // Simpan kembali session
+        $session->set('manual_delivery', $manualDelivery);
 
-            $addedCount = 0;
-
-            foreach ($validDatas as $idx => $row) {
-                // Pastikan semua field kunci tersedia
-                if (!isset($row['id_pengeluaran'], $row['id_total_pemesanan'], $row['area_out'])) {
-                    log_message('error', "[saveSessionDeliveryArea] Row ke-$idx missing key fields: " . json_encode($row));
-                    continue;
-                }
-
-                // Cek duplikasi berdasarkan id_out_celup + area + tanggal
-                $isDuplicate = array_filter($manualDelivery, function ($item) use ($row) {
-                    return
-                        $item['id_pengeluaran'] == $row['id_pengeluaran']
-                        && $item['id_total_pemesanan']  == $row['id_total_pemesanan']
-                        && $item['area_out']   == $row['area_out'];
-                });
-
-                if ($isDuplicate) {
-                    // Lewati record yang sudah ada
-                    continue;
-                }
-
-                // Tambahkan ke array session
-                $manualDelivery[] = [
-                    'id_pengeluaran' => $row['id_pengeluaran'] ?? null,
-                    'id_out_celup'   => $row['id_out_celup'],
-                    'tgl_pakai'      => $row['tgl_pakai'],
-                    'no_model'       => $row['no_model']    ?? '',
-                    'item_type'      => $row['item_type']   ?? '',
-                    'jenis'          => $row['jenis']       ?? '',
-                    'kode_warna'     => $row['kode_warna']  ?? '',
-                    'warna'          => $row['warna']       ?? '',
-                    'area_out'       => $row['area_out'],
-                    'no_karung'      => $row['no_karung'],
-                    'tgl_out'        => $row['tgl_out'],
-                    'kgs_out'        => $row['kgs_out']     ?? $row['ttl_kg'] ?? 0,
-                    'cns_out'        => $row['cns_out']     ?? $row['ttl_cns'] ?? 0,
-                    'krg_out'        => 0, // asumsi default
-                    'lot_out'        => $row['lot_out']     ?? '',
-                    'nama_cluster'   => $row['nama_cluster'] ?? '',
-                    'admin'          => $session->get('username'),
-                ];
-
-                $addedCount++;
-            }
-
-            // Simpan kembali session
-            $session->set('manual_delivery', $manualDelivery);
-
-            if ($addedCount === 0) {
-                return $this->response
-                    ->setStatusCode(409)
-                    ->setJSON([
-                        'success' => false,
-                        'message' => 'Semua data sudah ada di session'
-                    ]);
-            }
-
+        if ($addedCount === 0) {
             return $this->response
-                ->setStatusCode(200)
-                ->setJSON([
-                    'success'   => true,
-                    'message'   => "{$addedCount} record berhasil ditambahkan"
-                ]);
-        } catch (\Throwable $e) {
-            // Tangani exception tak terduga
-            log_message('error', '[saveSessionDeliveryArea] Exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
-            return $this->response
-                ->setStatusCode(500)
+                ->setStatusCode(409)
                 ->setJSON([
                     'success' => false,
-                    'message' => 'Terjadi kesalahan server',
-                    'error'   => $e->getMessage(), // atau hilangkan di production
+                    'message' => 'Semua data sudah ada di session'
                 ]);
         }
-    }
 
+        return $this->response
+            ->setStatusCode(200)
+            ->setJSON([
+                'success'   => true,
+                'message'   => "{$addedCount} record berhasil ditambahkan"
+            ]);
+    }
 
     public function removeSessionDelivery()
     {
+        $indexes = $this->request->getPost('indexes'); // array
         $idx = $this->request->getPost('index');
+
         $session = session()->get('manual_delivery') ?? [];
-        if (isset($session[$idx])) {
-            array_splice($session, $idx, 1);
-            session()->set('manual_delivery', $session);
+
+        if ($idx !== null) {
+            if (isset($session[$idx])) {
+                array_splice($session, $idx, 1);
+                session()->set('manual_delivery', $session);
+                return $this->response->setJSON(['success' => true]);
+            }
+            return $this->response->setJSON(['success' => false, 'message' => 'Index tidak ditemukan']);
+        }
+
+        // kalau banyak index dikirim
+        if (!empty($indexes) && is_array($indexes)) {
+            // urutkan descending supaya tidak geser index
+            rsort($indexes);
+            foreach ($indexes as $i) {
+                if (isset($session[$i])) {
+                    array_splice($session, $i, 1);
+                }
+            }
+            session()->set('manual_delivery', array_values($session));
             return $this->response->setJSON(['success' => true]);
         }
-        return $this->response->setJSON(['success' => false, 'message' => 'Index tidak ditemukan']);
+        return $this->response->setJSON(['success' => false, 'message' => 'Tidak ada data terpilih']);
     }
 
     // public function updateStatusKirim()
@@ -759,15 +881,188 @@ class PemesananController extends BaseController
     // }
 
 
+    // public function updateStatusKirim()
+    // {
+    //     $this->db = \Config\Database::connect();
+    //     $post = $this->request->getPost();
+
+    //     // --- Ambil input keyed-by-id agar tidak tergantung index urutan
+    //     $ids = array_map('intval', $post['id_pengeluaran'] ?? []);
+    //     if (empty($ids)) {
+    //         return redirect()->back()->with('error', 'Tidak ada pengeluaran valid.');
+    //     }
+
+    //     // Expect: kgs_out[ID] = val, cns_out[ID] = val, lot_out[ID] = val, (opsional) krg_out[ID] = val
+    //     $kgsById = $post['kgs_out'] ?? [];
+    //     $cnsById = $post['cns_out'] ?? [];
+    //     $krgById = $post['krg_out'] ?? []; // kalau tidak dipakai, hapus semua bagian KRG
+    //     $lotById = $post['lot_out'] ?? [];
+
+    //     $sessionUser  = (string) session('username');
+    //     $updatedCount = 0;
+    //     $errors       = [];
+
+    //     foreach ($ids as $id) {
+    //         $record = $this->pengeluaranModel->find($id);
+    //         if (!$record) {
+    //             $errors[] = "ID $id: pengeluaran tidak ditemukan.";
+    //             continue;
+    //         }
+
+    //         // Siapkan data update pengeluaran
+    //         $dataPengeluaran = [
+    //             'status' => 'Pengiriman Area',
+    //             'admin'  => $sessionUser,
+    //         ];
+    //         if (isset($kgsById[$id]) && $kgsById[$id] !== '') $dataPengeluaran['kgs_out'] = (float) $kgsById[$id];
+    //         if (isset($cnsById[$id]) && $cnsById[$id] !== '') $dataPengeluaran['cns_out'] = (int)   $cnsById[$id];
+    //         if (isset($krgById[$id]) && $krgById[$id] !== '') $dataPengeluaran['krg_out'] = (int)   $krgById[$id];
+    //         if (isset($lotById[$id]) && $lotById[$id] !== '') $dataPengeluaran['lot_out'] = (string)$lotById[$id];
+
+    //         // Transaksi per-ROW agar atomik
+    //         $this->db->transStart();
+
+    //         if (!$this->pengeluaranModel->update($id, $dataPengeluaran)) {
+    //             $this->db->transRollback();
+    //             $errors[] = "ID $id: gagal update pengeluaran.";
+    //             continue;
+    //         }
+
+    //         // Jika tidak ada id_stock, cukup update pengeluaran saja
+    //         if (empty($record['id_stock'])) {
+    //             $this->db->transComplete();
+    //             if ($this->db->transStatus()) $updatedCount++;
+    //             else $errors[] = "ID $id: transaksi gagal.";
+    //             continue;
+    //         }
+
+    //         $stok = $this->stockModel->find($record['id_stock']);
+    //         if (!$stok) {
+    //             // stok tidak ditemukan: lanjut tanpa ubah stok
+    //             $this->db->transComplete();
+    //             if ($this->db->transStatus()) $updatedCount++;
+    //             else $errors[] = "ID $id: transaksi gagal (stok).";
+    //             continue;
+    //         }
+
+    //         // Ambil nilai OUT efektif (prioritas input baru; fallback record lama)
+    //         $outKgs = array_key_exists('kgs_out', $dataPengeluaran) ? (float)$dataPengeluaran['kgs_out'] : (float)$record['kgs_out'];
+    //         $outCns = array_key_exists('cns_out', $dataPengeluaran) ? (int)$dataPengeluaran['cns_out']   : (int)$record['cns_out'];
+    //         $outKrg = array_key_exists('krg_out', $dataPengeluaran) ? (int)$dataPengeluaran['krg_out']   : (int)$record['krg_out'];
+    //         $lotBaru = array_key_exists('lot_out', $dataPengeluaran) ? (string)$dataPengeluaran['lot_out'] : (string)$record['lot_out'];
+
+    //         // Siapkan nilai baru (default = kondisi sekarang)
+    //         $new = [
+    //             'kgs_stock_awal' => (float)$stok['kgs_stock_awal'],
+    //             'kgs_in_out'     => (float)$stok['kgs_in_out'],
+    //             'cns_stock_awal' => (int)$stok['cns_stock_awal'],
+    //             'cns_in_out'     => (int)$stok['cns_in_out'],
+    //             'krg_stock_awal' => (int)$stok['krg_stock_awal'],
+    //             'krg_in_out'     => (int)$stok['krg_in_out'],
+    //             'lot_awal'       => (string)($stok['lot_awal'] ?? ''),
+    //             'lot_stock'      => (string)($stok['lot_stock'] ?? ''),
+    //         ];
+
+    //         // ===== KGS: pilih ember yang dipakai & validasi ember itu saja
+    //         if ($outKgs != 0.0) {
+    //             if ($stok['kgs_stock_awal'] > 0 && $stok['kgs_in_out'] <= 0) {
+    //                 if ($stok['kgs_stock_awal'] - $outKgs < 0) {
+    //                     $this->db->transRollback();
+    //                     $errors[] = "ID $id: Stok KGS awal tidak cukup.";
+    //                     continue;
+    //                 }
+    //                 $new['kgs_stock_awal'] = $stok['kgs_stock_awal'] - $outKgs;
+    //             } else {
+    //                 if ($stok['kgs_in_out'] - $outKgs < 0) {
+    //                     $this->db->transRollback();
+    //                     $errors[] = "ID $id: Stok KGS in/out tidak cukup.";
+    //                     continue;
+    //                 }
+    //                 $new['kgs_in_out'] = $stok['kgs_in_out'] - $outKgs;
+    //             }
+    //         }
+
+    //         // ===== CNS
+    //         if ($outCns != 0) {
+    //             if ($stok['cns_stock_awal'] > 0 && $stok['cns_in_out'] <= 0) {
+    //                 if ($stok['cns_stock_awal'] - $outCns < 0) {
+    //                     $this->db->transRollback();
+    //                     $errors[] = "ID $id: Stok CNS awal tidak cukup.";
+    //                     continue;
+    //                 }
+    //                 $new['cns_stock_awal'] = $stok['cns_stock_awal'] - $outCns;
+    //             } else {
+    //                 if ($stok['cns_in_out'] - $outCns < 0) {
+    //                     $this->db->transRollback();
+    //                     $errors[] = "ID $id: Stok CNS in/out tidak cukup.";
+    //                     continue;
+    //                 }
+    //                 $new['cns_in_out'] = $stok['cns_in_out'] - $outCns;
+    //             }
+    //         }
+
+    //         // ===== KRG (opsional)
+    //         if ($outKrg != 0) {
+    //             if ($stok['krg_stock_awal'] > 0 && $stok['krg_in_out'] <= 0) {
+    //                 if ($stok['krg_stock_awal'] - $outKrg < 0) {
+    //                     $this->db->transRollback();
+    //                     $errors[] = "ID $id: Stok KRG awal tidak cukup.";
+    //                     continue;
+    //                 }
+    //                 $new['krg_stock_awal'] = $stok['krg_stock_awal'] - $outKrg;
+    //             } else {
+    //                 if ($stok['krg_in_out'] - $outKrg < 0) {
+    //                     $this->db->transRollback();
+    //                     $errors[] = "ID $id: Stok KRG in/out tidak cukup.";
+    //                     continue;
+    //                 }
+    //                 $new['krg_in_out'] = $stok['krg_in_out'] - $outKrg;
+    //             }
+    //         }
+
+    //         // ===== LOT (sederhanakan aturan)
+    //         if ($lotBaru !== '') {
+    //             // Contoh aturan: kalau lot_awal kosong → isi lot_awal; else → isi lot_stock
+    //             if ($new['lot_awal'] === '') $new['lot_awal'] = $lotBaru;
+    //             else                         $new['lot_stock'] = $lotBaru;
+    //         }
+
+    //         if (!$this->stockModel->update($record['id_stock'], $new)) {
+    //             $this->db->transRollback();
+    //             $errors[] = "ID $id: gagal update stok.";
+    //             continue;
+    //         }
+
+    //         $this->db->transComplete();
+    //         if ($this->db->transStatus()) $updatedCount++;
+    //         else $errors[] = "ID $id: transaksi gagal.";
+    //     }
+
+    //     session()->remove('manual_delivery');
+
+    //     if ($updatedCount > 0 && empty($errors)) {
+    //         session()->setFlashdata('success', "{$updatedCount} status berhasil diperbarui");
+    //     } elseif ($updatedCount > 0 && !empty($errors)) {
+    //         session()->setFlashdata('success', "{$updatedCount} status berhasil diperbarui, namun ada sebagian gagal: " . implode(' | ', $errors));
+    //     } else {
+    //         session()->setFlashdata('error', 'Tidak ada yang diperbarui: ' . implode(' | ', $errors));
+    //     }
+
+    //     return redirect()->to(base_url("{$this->role}/pengiriman_area_manual"));
+    // }
+
     public function updateStatusKirim()
     {
         $this->db = \Config\Database::connect();
         $post = $this->request->getPost();
+        // dd($post);
 
-        // --- Ambil input keyed-by-id agar tidak tergantung index urutan
-        $ids = array_map('intval', $post['id_pengeluaran'] ?? []);
-        if (empty($ids)) {
-            return redirect()->back()->with('error', 'Tidak ada pengeluaran valid.');
+        // ambil baris yang dipilih
+        $selectedIndexes = $post['selected'] ?? [];
+
+        // jika tidak ada data yg di pilih
+        if (empty($selectedIndexes)) {
+            return redirect()->back()->with('error', 'Tidak ada data yang dipilih.');
         }
 
         // Expect: kgs_out[ID] = val, cns_out[ID] = val, lot_out[ID] = val, (opsional) krg_out[ID] = val
@@ -775,147 +1070,118 @@ class PemesananController extends BaseController
         $cnsById = $post['cns_out'] ?? [];
         $krgById = $post['krg_out'] ?? []; // kalau tidak dipakai, hapus semua bagian KRG
         $lotById = $post['lot_out'] ?? [];
+        $jenisId = $post['jenis'] ?? [];
 
         $sessionUser  = (string) session('username');
         $updatedCount = 0;
         $errors       = [];
 
-        foreach ($ids as $id) {
-            $record = $this->pengeluaranModel->find($id);
+        foreach ($selectedIndexes as $index => $id) {
+            $id = (int) $id; // pastikan integer
+            $record = $this->pengeluaranModel->find($id); // get data pengeluaran
             if (!$record) {
                 $errors[] = "ID $id: pengeluaran tidak ditemukan.";
                 continue;
             }
-
             // Siapkan data update pengeluaran
             $dataPengeluaran = [
                 'status' => 'Pengiriman Area',
                 'admin'  => $sessionUser,
+                'updated_at'  => date('Y-m-d H:i:s'),
             ];
-            if (isset($kgsById[$id]) && $kgsById[$id] !== '') $dataPengeluaran['kgs_out'] = (float) $kgsById[$id];
-            if (isset($cnsById[$id]) && $cnsById[$id] !== '') $dataPengeluaran['cns_out'] = (int)   $cnsById[$id];
-            if (isset($krgById[$id]) && $krgById[$id] !== '') $dataPengeluaran['krg_out'] = (int)   $krgById[$id];
-            if (isset($lotById[$id]) && $lotById[$id] !== '') $dataPengeluaran['lot_out'] = (string)$lotById[$id];
 
-            // Transaksi per-ROW agar atomik
+            if (isset($kgsById[$index]) && $kgsById[$index] !== '') $dataPengeluaran['kgs_out'] = (float) $kgsById[$index];
+            if (isset($cnsById[$index]) && $cnsById[$index] !== '') $dataPengeluaran['cns_out'] = (int)   $cnsById[$index];
+            if (isset($krgById[$index]) && $krgById[$index] !== '') $dataPengeluaran['krg_out'] = (int)   $krgById[$index];
+            if (isset($lotById[$index]) && $lotById[$index] !== '') $dataPengeluaran['lot_out'] = (string)$lotById[$index];
+
             $this->db->transStart();
-
             if (!$this->pengeluaranModel->update($id, $dataPengeluaran)) {
                 $this->db->transRollback();
                 $errors[] = "ID $id: gagal update pengeluaran.";
                 continue;
             }
 
-            // Jika tidak ada id_stock, cukup update pengeluaran saja
-            if (empty($record['id_stock'])) {
-                $this->db->transComplete();
-                if ($this->db->transStatus()) $updatedCount++;
-                else $errors[] = "ID $id: transaksi gagal.";
-                continue;
-            }
+            // jika bb benang & nylon update stock
+            if ($jenisId[$index] == 'BENANG' || $jenisId[$index] == 'NYLON') {
+                // get data stock
+                $stock = $this->stockModel->find($record['id_stock']);
+                if ($stock) {
+                    // Nilai OUT efektif (prioritas input baru; fallback ke nilai record lama)
+                    $outKgsBaru = array_key_exists('kgs_out', $dataPengeluaran) ? (float)$dataPengeluaran['kgs_out'] : (float)$record['kgs_out'];
+                    $outCnsBaru = array_key_exists('cns_out', $dataPengeluaran) ? (int)  $dataPengeluaran['cns_out'] : (int)  $record['cns_out'];
+                    $outKrgBaru = array_key_exists('krg_out', $dataPengeluaran) ? (int)  $dataPengeluaran['krg_out'] : (int)  $record['krg_out'];
+                    $lotBaru    = array_key_exists('lot_out', $dataPengeluaran) ?        $dataPengeluaran['lot_out'] :        $record['lot_out'];
+                    // Default agar tidak undefined (tidak mengubah behavior)
+                    $kgsAwalStockNew  = (float)($stock['kgs_stock_awal']);
+                    $kgsInOutStockNew = (float)($stock['kgs_in_out']);
+                    $cnsAwalStockNew  = (int)  ($stock['cns_stock_awal']);
+                    $cnsInOutStockNew = (int)  ($stock['cns_in_out']);
+                    $krgAwalStockNew  = (int)  ($stock['krg_stock_awal']);
+                    $krgInOutStockNew = (int)  ($stock['krg_in_out']);
+                    $lotAwalStockNew  = (string)($stock['lot_awal']  ?? '');
+                    $lotInOutStockNew = (string)($stock['lot_stock'] ?? '');
+                    // cek apakah kgs & cones nya berubah
+                    if ($kgsById[$index] != $record['kgs_out'] || $cnsById[$index] != $record['cns_out']) {
+                        // jika berubah, update stock nya
+                        // ===== Hitung KGS =====
+                        if ($outKgsBaru != 0.0) {
+                            if ((float)$stock['kgs_stock_awal'] > 0) {
+                                $kgsAwalStockNew = (float)$stock['kgs_stock_awal'] + $record['kgs_out'] - $outKgsBaru;
+                            } else {
+                                $kgsInOutStockNew = (float)$stock['kgs_in_out'] + $record['kgs_out'] - $outKgsBaru;
+                            }
+                            if ($kgsAwalStockNew < 0 || $kgsInOutStockNew < 0) {
+                                $this->db->transRollback();
+                                $errors[] = "ID $id: Stok KGS tidak cukup.";
+                                continue;
+                            }
+                        }
+                        // ===== Hitung CNS =====
+                        if ($outCnsBaru !== 0) {
+                            if ((float)$stock['cns_stock_awal'] > 0) {
+                                $cnsAwalStockNew = (float)$stock['cns_stock_awal'] + $record['cns_out'] - $outCnsBaru;
+                            } else {
+                                $cnsInOutStockNew = (float)$stock['cns_in_out'] + $record['cns_out'] - $outCnsBaru;
+                            }
+                            $cnsAwalStockNew  = max(0, $cnsAwalStockNew);
+                            $cnsInOutStockNew = max(0, $cnsInOutStockNew);
+                        }
+                        // ===== Hitung KRG =====
+                        if ($outKrgBaru !== 0) {
+                            if ((int)$stock['krg_stock_awal'] > 0) {
+                                $krgAwalStockNew = (int)$stock['krg_stock_awal'] + $record['krg_out'] - $outKrgBaru;
+                            } else {
+                                $krgInOutStockNew = (int)$stock['krg_in_out'] + $record['krg_out'] - $outKrgBaru;
+                            }
+                        }
 
-            $stok = $this->stockModel->find($record['id_stock']);
-            if (!$stok) {
-                // stok tidak ditemukan: lanjut tanpa ubah stok
-                $this->db->transComplete();
-                if ($this->db->transStatus()) $updatedCount++;
-                else $errors[] = "ID $id: transaksi gagal (stok).";
-                continue;
-            }
+                        // ===== Hitung LOT ===== (dipertahankan logika if-OR aslinya)
+                        if ($lotBaru !== null && $lotBaru !== '') {
+                            if (!empty($stock['lot_awal']) && $stock['lot_awal'] !== '') {
+                                $lotAwalStockNew = (string)$lotBaru;
+                            } else {
+                                $lotInOutStockNew = (string)$lotBaru;
+                            }
+                        }
 
-            // Ambil nilai OUT efektif (prioritas input baru; fallback record lama)
-            $outKgs = array_key_exists('kgs_out', $dataPengeluaran) ? (float)$dataPengeluaran['kgs_out'] : (float)$record['kgs_out'];
-            $outCns = array_key_exists('cns_out', $dataPengeluaran) ? (int)$dataPengeluaran['cns_out']   : (int)$record['cns_out'];
-            $outKrg = array_key_exists('krg_out', $dataPengeluaran) ? (int)$dataPengeluaran['krg_out']   : (int)$record['krg_out'];
-            $lotBaru = array_key_exists('lot_out', $dataPengeluaran) ? (string)$dataPengeluaran['lot_out'] : (string)$record['lot_out'];
-
-            // Siapkan nilai baru (default = kondisi sekarang)
-            $new = [
-                'kgs_stock_awal' => (float)$stok['kgs_stock_awal'],
-                'kgs_in_out'     => (float)$stok['kgs_in_out'],
-                'cns_stock_awal' => (int)$stok['cns_stock_awal'],
-                'cns_in_out'     => (int)$stok['cns_in_out'],
-                'krg_stock_awal' => (int)$stok['krg_stock_awal'],
-                'krg_in_out'     => (int)$stok['krg_in_out'],
-                'lot_awal'       => (string)($stok['lot_awal'] ?? ''),
-                'lot_stock'      => (string)($stok['lot_stock'] ?? ''),
-            ];
-
-            // ===== KGS: pilih ember yang dipakai & validasi ember itu saja
-            if ($outKgs != 0.0) {
-                if ($stok['kgs_stock_awal'] > 0 && $stok['kgs_in_out'] <= 0) {
-                    if ($stok['kgs_stock_awal'] - $outKgs < 0) {
-                        $this->db->transRollback();
-                        $errors[] = "ID $id: Stok KGS awal tidak cukup.";
-                        continue;
+                        $this->stockModel->update($record['id_stock'], [
+                            'kgs_stock_awal' => $kgsAwalStockNew,
+                            'kgs_in_out'     => $kgsInOutStockNew,
+                            'cns_stock_awal' => $cnsAwalStockNew,
+                            'cns_in_out'     => $cnsInOutStockNew,
+                            'krg_stock_awal' => $krgAwalStockNew,
+                            'krg_in_out'     => $krgInOutStockNew,
+                            'lot_awal'       => $lotAwalStockNew,
+                            'lot_stock'      => $lotInOutStockNew,
+                        ]);
                     }
-                    $new['kgs_stock_awal'] = $stok['kgs_stock_awal'] - $outKgs;
-                } else {
-                    if ($stok['kgs_in_out'] - $outKgs < 0) {
-                        $this->db->transRollback();
-                        $errors[] = "ID $id: Stok KGS in/out tidak cukup.";
-                        continue;
-                    }
-                    $new['kgs_in_out'] = $stok['kgs_in_out'] - $outKgs;
                 }
             }
-
-            // ===== CNS
-            if ($outCns != 0) {
-                if ($stok['cns_stock_awal'] > 0 && $stok['cns_in_out'] <= 0) {
-                    if ($stok['cns_stock_awal'] - $outCns < 0) {
-                        $this->db->transRollback();
-                        $errors[] = "ID $id: Stok CNS awal tidak cukup.";
-                        continue;
-                    }
-                    $new['cns_stock_awal'] = $stok['cns_stock_awal'] - $outCns;
-                } else {
-                    if ($stok['cns_in_out'] - $outCns < 0) {
-                        $this->db->transRollback();
-                        $errors[] = "ID $id: Stok CNS in/out tidak cukup.";
-                        continue;
-                    }
-                    $new['cns_in_out'] = $stok['cns_in_out'] - $outCns;
-                }
-            }
-
-            // ===== KRG (opsional)
-            if ($outKrg != 0) {
-                if ($stok['krg_stock_awal'] > 0 && $stok['krg_in_out'] <= 0) {
-                    if ($stok['krg_stock_awal'] - $outKrg < 0) {
-                        $this->db->transRollback();
-                        $errors[] = "ID $id: Stok KRG awal tidak cukup.";
-                        continue;
-                    }
-                    $new['krg_stock_awal'] = $stok['krg_stock_awal'] - $outKrg;
-                } else {
-                    if ($stok['krg_in_out'] - $outKrg < 0) {
-                        $this->db->transRollback();
-                        $errors[] = "ID $id: Stok KRG in/out tidak cukup.";
-                        continue;
-                    }
-                    $new['krg_in_out'] = $stok['krg_in_out'] - $outKrg;
-                }
-            }
-
-            // ===== LOT (sederhanakan aturan)
-            if ($lotBaru !== '') {
-                // Contoh aturan: kalau lot_awal kosong → isi lot_awal; else → isi lot_stock
-                if ($new['lot_awal'] === '') $new['lot_awal'] = $lotBaru;
-                else                         $new['lot_stock'] = $lotBaru;
-            }
-
-            if (!$this->stockModel->update($record['id_stock'], $new)) {
-                $this->db->transRollback();
-                $errors[] = "ID $id: gagal update stok.";
-                continue;
-            }
-
             $this->db->transComplete();
             if ($this->db->transStatus()) $updatedCount++;
             else $errors[] = "ID $id: transaksi gagal.";
         }
-
         session()->remove('manual_delivery');
 
         if ($updatedCount > 0 && empty($errors)) {
@@ -928,14 +1194,6 @@ class PemesananController extends BaseController
 
         return redirect()->to(base_url("{$this->role}/pengiriman_area_manual"));
     }
-
-
-
-
-
-
-
-
 
     // public function pengirimanArea()
     // {
@@ -1168,6 +1426,7 @@ class PemesananController extends BaseController
     //     return view($this->role . '/pemesanan/select-cluster', $data);
     // }
 
+    // SELECT CLUSTER V2 BIRA
     public function selectClusterWarehouse(int $id)
     {
         // Ambil kebutuhan dari query string (opsional)
@@ -1404,6 +1663,239 @@ class PemesananController extends BaseController
 
         return view($this->role . '/pemesanan/select-cluster', $data);
     }
+
+
+    // SELECT CLUSTER V3 ALFA - dengan optimasi cache
+    // di dalam class PemesananController
+    // private function makeCacheKey(string $prefix, array $parts): string
+    // {
+    //     $raw = $prefix . '_' . implode('_', $parts);
+    //     return preg_replace('/[^A-Za-z0-9_]/', '_', $raw); // aman utk CI cache
+    // }
+
+
+    // public function selectClusterWarehouse(int $id)
+    // {
+    //     function safeCacheKey(string $prefix, array $parts): string
+    //     {
+    //         $raw = $prefix . '_' . implode('_', $parts);
+    //         // sisakan A-Z a-z 0-9 dan underscore; yang lain diubah jadi underscore
+    //         return preg_replace('/[^A-Za-z0-9_]/', '_', $raw);
+    //     }
+    //     $KgsPesan = (float)($this->request->getGet('KgsPesan') ?? 0);
+    //     $CnsPesan = (int)($this->request->getGet('CnsPesan') ?? 0);
+    //     $area     = $this->request->getGet('Area');
+
+    //     $pemesanan = $this->totalPemesananModel->findWithDetails($id);
+    //     if (!$pemesanan) {
+    //         return redirect()->back()->with('error', 'Data pemesanan tidak ditemukan.');
+    //     }
+
+    //     $noModel = $pemesanan['no_model'];
+
+    //     // --- agregat jalur/pengiriman (1 query) ---
+    //     $agg = $this->pengeluaranModel->sumKgsByStatus($id);
+    //     $kgPersiapan  = (float)($agg['kgs_persiapan'] ?? 0);
+    //     $kgPengiriman = (float)($agg['kgs_pengiriman'] ?? 0);
+
+    //     // --- cluster (1 query) ---
+    //     $clusterRows = $this->stockModel->listCluster(
+    //         $pemesanan['no_model'],
+    //         $pemesanan['item_type'],
+    //         $pemesanan['kode_warna'],
+    //         $pemesanan['color']
+    //     );
+
+    //     // --- keterangan gabungan (1 query ringan) ---
+    //     $ket = $this->pemesananModel->select('GROUP_CONCAT(DISTINCT keterangan_gbn) AS ket_gbn')
+    //         ->where('id_total_pemesanan', $id)->first();
+
+    //     $dataPemesanan = [];
+    //     $dataRetur = [];
+
+    //     if (!empty($area) && !empty($noModel)) {
+    //         $dataPemesanan = $this->pemesananModel->getPemesananByAreaModel($area, $noModel);
+    //         $dataRetur     = $this->returModel->getReturByAreaModel($area, $noModel);
+    //     }
+
+    //     // === PREFETCH semua style_size (sekali) utk kombinasi ini ===
+    //     $styleRows = $this->materialModel->getStyleSizeByBb(
+    //         $pemesanan['no_model'],
+    //         $pemesanan['item_type'],
+    //         $pemesanan['kode_warna']
+    //     );
+    //     $styleSizes = array_values(array_unique(array_column($styleRows, 'style_size')));
+
+    //     // === Ambil QTY Capacity BATCH ===
+    //     // cache 5 menit biar cepet kalo user bolak-balik
+    //     $cacheKeyQty = safeCacheKey('qty_bulk', [$area, $noModel, implode(',', $styleSizes)]);
+    //     // Ambil + cache 10 detik
+    //     $qtyMap = cache()->remember($cacheKeyQty, 10, function () use ($noModel, $area, $styleSizes) {
+    //         $client = service('curlrequest');
+    //         $query  = http_build_query([
+    //             'no_model'    => $noModel,
+    //             'area'        => $area,
+    //             'style_size' => implode(',', $styleSizes),
+    //         ]);
+    //         // dd ($query);
+    //         try {
+    //             $resp = $client->get("http://172.23.44.14/CapacityApps/public/api/getQtyOrderBulk?{$query}", [
+    //                 'timeout' => 3,
+    //                 'connect_timeout' => 1.5,
+    //             ]);
+    //             return json_decode($resp->getBody(), true) ?: [];
+    //         } catch (\Throwable $e) {
+    //             log_message('error', 'Bulk QTY API error: ' . $e->getMessage());
+    //             return []; // fallback
+    //         }
+    //     });
+
+    //     // === Ambil Po Tambahan BULK ===
+    //     $poTambahanMap = $this->poTambahanModel->getKgPoTambahanBulk([
+    //         'no_model'   => $pemesanan['no_model'],
+    //         'item_type'  => $pemesanan['item_type'],
+    //         'kode_warna' => $pemesanan['kode_warna'],
+    //         'area'       => $area,
+    //     ], $styleSizes);
+
+    //     // Helper hitung kebutuhan utk satu baris (reusable utk pemesanan & retur)
+    //     $hitungKebutuhan = function () use ($styleRows, $qtyMap, $poTambahanMap, $pemesanan) {
+    //         $ttlKeb = 0.0;
+    //         $ttlQty = 0;
+    //         $isJht  = isset($pemesanan['item_type']) && stripos($pemesanan['item_type'], 'JHT') !== false;
+
+    //         foreach ($styleRows as $sr) {
+    //             $sz   = $sr['style_size'];
+    //             $gw   = (float)($sr['gw'] ?? 0);
+    //             $comp = (float)($sr['composition'] ?? 0);
+    //             $loss = (float)($sr['loss'] ?? 0);
+    //             $kgs  = (float)($sr['kgs'] ?? 0);
+
+    //             $qty  = (int)($qtyMap[$sz]['qty'] ?? 0);
+    //             $kgPo = (float)($poTambahanMap[$sz] ?? 0);
+
+    //             if ($isJht) {
+    //                 // Khusus JHT: pakai kgs langsung
+    //                 $kebutuhan = $kgs + $kgPo;
+    //             } else {
+    //                 // rumus umum
+    //                 $kebutuhan = (($qty * $gw * ($comp / 100.0)) * (1.0 + ($loss / 100.0)) / 1000.0) + $kgPo;
+    //             }
+    //             $ttlKeb += $kebutuhan;
+    //             $ttlQty += $qty;
+    //         }
+    //         return [$ttlKeb, $ttlQty];
+    //     };
+
+    //     // === Bangun mergedData jauh lebih cepat (tanpa N+1) ===
+    //     $mergedData = [];
+
+    //     foreach ($dataPemesanan as $pem) {
+    //         [$ttlKeb, $ttlQty] = $hitungKebutuhan();
+
+    //         $mergedData[] = [
+    //             'no_model'           => $pem['no_model'],
+    //             'item_type'          => $pem['item_type'],
+    //             'kode_warna'         => $pem['kode_warna'],
+    //             'color'              => $pem['color'],
+    //             'max_loss'           => $pem['max_loss'],
+    //             'tgl_pakai'          => $pem['tgl_pakai'],
+    //             'id_total_pemesanan' => $pem['id_total_pemesanan'],
+    //             'ttl_jl_mc'          => (int)($pem['ttl_jl_mc'] ?? 0),
+    //             'ttl_kg'             => (float)($pem['ttl_kg'] ?? 0),
+    //             'po_tambahan'        => (int)($pem['po_tambahan'] ?? 0),
+    //             'ttl_keb'            => (float) $ttlKeb,
+    //             'kg_out'             => (float)($pem['kgs_out'] ?? 0),
+    //             'lot_out'            => $pem['lot_out'],
+    //             'tgl_retur'          => null,
+    //             'kgs_retur'          => 0.0,
+    //             'lot_retur'          => null,
+    //             'ket_gbn'            => null,
+    //         ];
+    //     }
+
+    //     foreach ($dataRetur as $retur) {
+    //         // NOTE: di kode lama kamu cek $pemesanan['item_type'] di loop retur — itu bug.
+    //         [$ttlKeb, $ttlQty] = $hitungKebutuhan();
+
+    //         $mergedData[] = [
+    //             'no_model'           => $retur['no_model'],
+    //             'item_type'          => $retur['item_type'],
+    //             'kode_warna'         => $retur['kode_warna'],
+    //             'color'              => $retur['warna'],
+    //             'max_loss'           => 0,
+    //             'tgl_pakai'          => null,
+    //             'id_total_pemesanan' => null,
+    //             'ttl_jl_mc'          => null,
+    //             'ttl_kg'             => 0.0,
+    //             'po_tambahan'        => 0,
+    //             'ttl_keb'            => (float) $ttlKeb,
+    //             'kg_out'             => 0.0,
+    //             'lot_out'            => null,
+    //             'tgl_retur'          => $retur['tgl_retur'],
+    //             'kgs_retur'          => (float)($retur['kgs_retur'] ?? 0),
+    //             'lot_retur'          => $retur['lot_retur'],
+    //             'ket_gbn'            => $retur['keterangan_gbn'],
+    //         ];
+    //     }
+
+    //     // (opsional) sorting seperti sebelumnya
+    //     if ($mergedData) {
+    //         usort($mergedData, function ($a, $b) {
+    //             $cmpItem  = strcmp($a['item_type'], $b['item_type']);
+    //             if ($cmpItem) return $cmpItem;
+    //             $cmpKode  = strcmp($a['kode_warna'], $b['kode_warna']);
+    //             if ($cmpKode) return $cmpKode;
+    //             $ta = $a['tgl_pakai'] ?: $a['tgl_retur'];
+    //             $tb = $b['tgl_pakai'] ?: $b['tgl_retur'];
+    //             if (empty($ta) && !empty($tb)) return 1;
+    //             if (!empty($ta) && empty($tb)) return -1;
+    //             return strtotime($tb) <=> strtotime($ta);
+    //         });
+    //     }
+
+    //     // === Hitung sisa (perbaiki precedence) ===
+    //     $sisa = 0.0;
+    //     foreach ($mergedData as $row) {
+    //         if (
+    //             $row['no_model']   === $pemesanan['no_model'] &&
+    //             $row['item_type']  === $pemesanan['item_type'] &&
+    //             $row['kode_warna'] === $pemesanan['kode_warna']
+    //         ) {
+
+    //             $sisa = ($row['ttl_keb'] - $row['kg_out'] + (float)($row['kgs_retur'] ?? 0));
+    //             break;
+    //         }
+    //     }
+
+    //     // render view dulu ke variabel
+    //     $html = view($this->role . '/pemesanan/select-cluster', [
+    //         'active'        => $this->active,
+    //         'title'         => 'Material System',
+    //         'role'          => $this->role,
+    //         'cluster'       => $clusterRows,
+    //         'noModel'       => $noModel,
+    //         'itemType'      => $pemesanan['item_type'],
+    //         'kodeWarna'     => $pemesanan['kode_warna'],
+    //         'color'         => $pemesanan['color'],
+    //         'area'          => $pemesanan['admin'],
+    //         'id'            => $id,
+    //         'ketGbn'        => $ket['ket_gbn'] ?? '',
+    //         'KgsPesan'      => $KgsPesan,
+    //         'CnsPesan'      => $CnsPesan,
+    //         'kgPersiapan'   => $kgPersiapan,
+    //         'kgPengiriman'  => $kgPengiriman,
+    //         'sisaKebutuhan' => $sisa,
+    //     ]);
+
+    //     // setelah view selesai dibuat → hapus cache terkait
+    //     $cacheKeyQty = $this->makeCacheKey('qty_bulk', [$area, $noModel, implode(',', $styleSizes)]);
+    //     cache()->delete($cacheKeyQty);
+
+    //     // lalu return hasil view
+    //     return $html;
+    // }
+
 
 
     public function getDataByIdStok($id)
