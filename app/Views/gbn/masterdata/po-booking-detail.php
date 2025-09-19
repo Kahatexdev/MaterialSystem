@@ -343,6 +343,7 @@
             var no_order = $('#no_order').val();
             let baseUrl = $(this).attr('action');
 
+            console.log('Tujuan:', tujuan);
             baseUrl += (baseUrl.indexOf('?') === -1 ? '?' : '&') +
                 'tujuan=' + encodeURIComponent(tujuan) +
                 '&delivery=' + encodeURIComponent(date) +

@@ -9995,6 +9995,7 @@ class ExcelController extends BaseController
 
         $result = $this->openPoModel->getPoBookingByNoModel($noModel);
 
+        dd($tujuan);
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';
         } else if ($tujuan == 'JS') {
@@ -10013,11 +10014,11 @@ class ExcelController extends BaseController
         // $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
         // $buyerName = json_decode(file_get_contents($buyerApiUrl), true);
 
-        if ($tujuan == 'CELUP') {
-            $penerima = 'Retno';
-        } else {
-            $penerima = 'Paryanti';
-        }
+        // if ($tujuan == 'CELUP') {
+        //     $penerima = 'Retno';
+        // } else {
+        //     $penerima = 'Paryanti';
+        // }
 
         // dd($result);
         if (!empty($delivery)) {
@@ -10533,6 +10534,11 @@ class ExcelController extends BaseController
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
         if ($tujuan == 'CELUP') {
             $sheet->setCellValue('J46', 'Celup Cones');
+            $sheet->mergeCells('J46:L46');
+            $sheet->getStyle('J46:L46')->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        } else if ($tujuan == 'JS') {
+            $sheet->setCellValue('J46', 'JS');
             $sheet->mergeCells('J46:L46');
             $sheet->getStyle('J46:L46')->getAlignment()
                 ->setHorizontal(Alignment::HORIZONTAL_CENTER);
