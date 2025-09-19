@@ -1779,7 +1779,7 @@ class ExcelController extends BaseController
             $sheet->setCellValue('D' . $row, $item['color']);
             $sheet->setCellValue('E' . $row, $item['kode_warna']);
             $sheet->setCellValue('F' . $row, $item['no_model']);
-            $sheet->setCellValue('G' . $row, $item['jl_mc']);
+            $sheet->setCellValue('G' . $row, $item['ttl_jl_mc']);
             $sheet->setCellValue('H' . $row, $item['ttl_kg']);
             $sheet->setCellValue('I' . $row, $item['ttl_cns']);
             $sheet->setCellValue('J' . $row, $item['admin']);
@@ -4151,7 +4151,7 @@ class ExcelController extends BaseController
         foreach ($categories as $label => $keyword) {
             $colLetter = 'H';
             foreach ($areaHeaders as $_) {
-                $formula = "172.23.44.14$dataStartRow}:F{$dataEndRow},\"{$keyword}\",{$colLetter}{$dataStartRow}:{$colLetter}{$dataEndRow})";
+                $formula = "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"{$keyword}\",{$colLetter}{$dataStartRow}:{$colLetter}{$dataEndRow})";
                 $sheet->setCellValue("{$colLetter}{$row}", $formula);
                 $sheet->getStyle("{$colLetter}{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
                 $sheet->getStyle("{$colLetter}{$row}")->getFont()->setBold(true);
@@ -9995,7 +9995,6 @@ class ExcelController extends BaseController
 
         $result = $this->openPoModel->getPoBookingByNoModel($noModel);
 
-        dd($tujuan);
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';
         } else if ($tujuan == 'JS') {

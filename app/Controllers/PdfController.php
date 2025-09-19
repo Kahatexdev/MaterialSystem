@@ -3150,7 +3150,7 @@ class PdfController extends BaseController
 
         for ($i = 0; $i < $jumlahBaris; $i++) {
             // Tabel Pertama (baris 0–24)
-            if ($i < 25) {
+            if ($i < 50) {
                 if ($dataIndex < $jumlahData) {
                     $row = $data[$dataIndex++];
                     $jenisItem = $row['item_type'];
@@ -3161,14 +3161,14 @@ class PdfController extends BaseController
                     }
 
                     // Hitung total kiri
-                    $totalJlMcKiri += $row['jl_mc'];
+                    $totalJlMcKiri += $row['ttl_jl_mc'];
                     $totalConesKiri += $row['ttl_cns'];
                     $totalKgKiri += $row['ttl_kg'];
 
                     $pdf->Cell(20, 4, $jenisItem, 1);
                     $pdf->Cell(15, 4, $row['color'], 1);
                     $pdf->Cell(15, 4, $row['kode_warna'], 1);
-                    $pdf->Cell(10, 4, $row['jl_mc'], 1);
+                    $pdf->Cell(10, 4, $row['ttl_jl_mc'], 1);
                     $pdf->Cell(10, 4, $row['ttl_cns'], 1);
                     $pdf->Cell(10, 4, $row['ttl_kg'], 1);
                     $pdf->Cell(10, 4, '', 1);
@@ -3216,14 +3216,14 @@ class PdfController extends BaseController
                     }
 
                     // Hitung total kanan
-                    $totalJlMcKanan += $row['jl_mc'];
+                    $totalJlMcKanan += $row['ttl_jl_mc'];
                     $totalConesKanan += $row['ttl_cns'];
                     $totalKgKanan += $row['ttl_kg'];
 
                     $pdf->Cell(20, 4, $jenisItem, 1);
                     $pdf->Cell(15, 4, $row['color'], 1);
                     $pdf->Cell(15, 4, $row['kode_warna'], 1);
-                    $pdf->Cell(10, 4, $row['jl_mc'], 1);
+                    $pdf->Cell(10, 4, $row['ttl_jl_mc'], 1);
                     $pdf->Cell(10, 4, $row['ttl_cns'], 1);
                     $pdf->Cell(10, 4, $row['ttl_kg'], 1);
                     $pdf->Cell(10, 4, '', 1);
