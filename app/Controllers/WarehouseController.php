@@ -93,30 +93,30 @@ class WarehouseController extends BaseController
     }
     public function index()
     {
-        $updateOrder = $this->masterOrderModel->getNullMc();
+        // $updateOrder = $this->masterOrderModel->getNullMc();
 
-        foreach ($updateOrder as $od) {
-            $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
+        // foreach ($updateOrder as $od) {
+        //     $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
 
-            try {
-                // Fetch data dari API
-                $json = file_get_contents($reqStartMc);
-                // Decode JSON response
-                $startMc = json_decode($json, true);
-                if (empty($startMc)) {
-                    log_message('error', 'pdk ' . $od['no_model'] . ' gaada start mc');
-                } else {
-                    $this->masterOrderModel->update(
-                        $od['id_order'],
-                        ['start_mc' => $startMc['start_mc']]
-                    );
-                }
-            } catch (\Exception $e) {
+        //     try {
+        //         // Fetch data dari API
+        //         $json = file_get_contents($reqStartMc);
+        //         // Decode JSON response
+        //         $startMc = json_decode($json, true);
+        //         if (empty($startMc)) {
+        //             log_message('error', 'pdk ' . $od['no_model'] . ' gaada start mc');
+        //         } else {
+        //             $this->masterOrderModel->update(
+        //                 $od['id_order'],
+        //                 ['start_mc' => $startMc['start_mc']]
+        //             );
+        //         }
+        //     } catch (\Exception $e) {
 
-                // Log error
-                log_message('error', 'Error fetching API data: ' . $e->getMessage());
-            }
-        }
+        //         // Log error
+        //         log_message('error', 'Error fetching API data: ' . $e->getMessage());
+        //     }
+        // }
 
         $data = [
             'active' => $this->active,
