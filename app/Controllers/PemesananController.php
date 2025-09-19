@@ -2468,6 +2468,7 @@ class PemesananController extends BaseController
 
     public function getUpdateListPemesanan()
     {
+        $role = session()->get('role');
         $data = $this->request->getPost([
             'area',
             'tgl_pakai',
@@ -2480,7 +2481,7 @@ class PemesananController extends BaseController
         // Log isi $data
         log_message('info', 'getUpdateListPemesanan → input data: ' . print_r($data, true));
 
-        $dataList = $this->pemesananModel->getListPemesananByUpdate($data);
+        $dataList = $this->pemesananModel->getListPemesananByUpdate($data, $role);
 
         // Cetak ke log (application/logs) dengan level INFO
         log_message('info', 'getUpdateListPemesanan → dataList: ' . print_r($dataList, true));
