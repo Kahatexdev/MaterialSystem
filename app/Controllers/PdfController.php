@@ -3150,7 +3150,7 @@ class PdfController extends BaseController
 
         for ($i = 0; $i < $jumlahBaris; $i++) {
             // Tabel Pertama (baris 0–24)
-            if ($i < 25) {
+            if ($i < 50) {
                 if ($dataIndex < $jumlahData) {
                     $row = $data[$dataIndex++];
                     $jenisItem = $row['item_type'];
