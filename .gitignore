@@ -41,6 +41,8 @@ $RECYCLE.BIN/
 #-------------------------
 # These should never be under version control,
 # as it poses a security risk.
+app/Config/App.php
+app/Config/Database.php
 .env
 .vagrant
 Vagrantfile

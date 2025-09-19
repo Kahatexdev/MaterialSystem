@@ -281,9 +281,9 @@ class PemesananModel extends Model
             ->where('DATE(pemesanan.tgl_pesan)', date('Y-m-d'))
             ->first();
     }
-    public function getListPemesananByUpdate($data)
+    public function getListPemesananByUpdate($data, $role)
     {
-        $data = $this->db->table('pemesanan')
+        $builder = $this->db->table('pemesanan')
             ->select('
                 master_order.no_model,
                 material.id_material,
@@ -294,7 +294,7 @@ class PemesananModel extends Model
                 IFNULL(kebutuhan_cones.qty_cns, 0) AS qty_cns,
                 IFNULL(kebutuhan_cones.qty_berat_cns, 0) AS qty_berat_cns,
                 pemesanan.*
-                ')
+            ')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('kebutuhan_cones', 'material.id_material = kebutuhan_cones.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
@@ -304,11 +304,19 @@ class PemesananModel extends Model
             ->where('material.item_type', $data['item_type'])
             ->where('material.kode_warna', $data['kode_warna'])
             ->where('material.color', $data['color'])
-            ->where('pemesanan.po_tambahan', $data['po_tambahan'])
-            ->where('pemesanan.status_kirim!=', 'YA')
-            ->groupBy('pemesanan.id_pemesanan')
+            ->where('pemesanan.po_tambahan', $data['po_tambahan']);
+
+        // Kondisi status_kirim berdasarkan role
+        if ($role === 'monitoring') {
+            $builder->where('pemesanan.status_kirim', 'YA');
+        } else {
+            $builder->where('pemesanan.status_kirim !=', 'YA');
+        }
+
+        $builder->groupBy('pemesanan.id_pemesanan')
             ->orderBy('pemesanan.id_pemesanan');
-        return $data->get()->getResultArray();
+
+        return $builder->get()->getResultArray();
     }
     public function kirimPemesanan($id)
     {
@@ -867,21 +875,49 @@ class PemesananModel extends Model
         return $query->get()->getResultArray();
     }
 
+    // public function getDataPemesananCovering($tanggal_pakai, $jenis)
+    // {
+    //     $this->select('pemesanan.*, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
+    //         ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+    //         ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
+    //         ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+    //         ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+    //         // ->where('tp.ttl_jl_mc >', 0)
+    //         ->where('pemesanan.status_kirim', 'YA')
+    //         ->where('pemesanan.tgl_pakai', $tanggal_pakai)
+    //         ->where('master_material.jenis', $jenis)
+    //         ->groupBy('pemesanan.tgl_pakai, material.item_type, material.kode_warna, pemesanan.admin');
+
+    //     return $this->findAll();
+    // }
+
     public function getDataPemesananCovering($tanggal_pakai, $jenis)
     {
-        $this->select('pemesanan.*, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
-            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
-            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
-            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->join('total_pemesanan tp', 'tp.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
-            // ->where('tp.ttl_jl_mc >', 0)
-            ->where('pemesanan.status_kirim', 'YA')
-            ->where('pemesanan.tgl_pakai', $tanggal_pakai)
-            ->where('master_material.jenis', $jenis)
-            ->groupBy('material.item_type, material.kode_warna');
-
-        return $this->findAll();
+        return $this->db->table('pemesanan p')
+            ->select('
+            p.*, 
+            tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, 
+            m.item_type, m.color, m.kode_warna, 
+            mo.no_model, 
+            mm.jenis
+        ')
+            ->join('material m', 'm.id_material = p.id_material', 'left')
+            ->join('total_pemesanan tp', 'tp.id_total_pemesanan = p.id_total_pemesanan', 'left')
+            ->join('master_material mm', 'mm.item_type = m.item_type', 'left')
+            ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
+            ->where('p.status_kirim', 'YA')
+            ->where('p.tgl_pakai', $tanggal_pakai)
+            ->where('mm.jenis', $jenis)
+            ->groupBy('
+            p.tgl_pakai, 
+            m.item_type, 
+            m.kode_warna, 
+            p.admin
+        ')
+            ->get()
+            ->getResultArray();
     }
+
     public function getDataPemesananCoveringPerArea($tanggal_pakai, $jenis)
     {
         $this->select('pemesanan.*, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, material.item_type, material.color, material.kode_warna, master_order.no_model, master_material.jenis')
