@@ -2039,15 +2039,18 @@ class WarehouseController extends BaseController
         foreach ($dataArray as &$id) {
             $other = $this->otherOutModel->getQty($id['id_out_celup']);
             $outByCns = $this->pengeluaranModel->getQtyOutByCns($id['id_out_celup']);
+            $pindahOrder = $this->historyStock->getKgsPindahOrder($id['id_out_celup']);
 
             $kgsOther = !empty($other) ? (float) $other['kgs_other_out'] : 0;
             $kgsOutByCns = !empty($outByCns) ? (float) $outByCns['kgs_out'] : 0;
+            $kgsPindahOrder = !empty($pindahOrder) ? (float) $pindahOrder['kgs_pindah_order'] : 0;
             $cnsOther = !empty($other) ? (int) $other['cns_other_out'] : 0;
             $cnsOutByCns = !empty($outByCns) ? (int) $outByCns['cns_out'] : 0;
+            $cnsPindahOrder = !empty($pindahOrder) ? (int) $pindahOrder['cns_pindah_order'] : 0;
 
             // kurangi other out & pengeluaran by cones
-            $id['kgs_kirim'] = round((float) $id['kgs_kirim'] - $kgsOther - $kgsOutByCns, 2);
-            $id['cones_kirim'] = (int) $id['cones_kirim'] - $cnsOther - $cnsOutByCns;
+            $id['kgs_kirim'] = round((float) $id['kgs_kirim'] - $kgsPindahOrder - $kgsOther - $kgsOutByCns, 2);
+            $id['cones_kirim'] = (int) $id['cones_kirim'] - $cnsOther - $cnsOutByCns - $cnsPindahOrder;
         }
 
         // var_dump($dataArray);
