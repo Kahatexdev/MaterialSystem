@@ -102,6 +102,7 @@ class TotalPemesananModel extends Model
             ->groupBy('m.item_type')
             ->groupBy('m.kode_warna')
             ->groupBy('p.po_tambahan')
+            ->groupBy('p.id_total_pemesanan') // nanti hapus lagi hari senin 21/09/25
             ->get();
         if (!$query) {
             // Cek error pada query
