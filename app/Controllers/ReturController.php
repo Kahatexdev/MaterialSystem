@@ -98,10 +98,10 @@ class ReturController extends BaseController
     public function listRetur()
     {
         $area = $this->request->getGet('area');
-        $noModel = $this->request->getGet('model') ?? '';
-        $tglBuat = $this->request->getGet('tglBuat') ?? '';
+        // $noModel = $this->request->getGet('model') ?? '';
+        // $tglBuat = $this->request->getGet('tglBuat') ?? '';
 
-        $listRetur = $this->returModel->getListRetur($area, $noModel, $tglBuat);
+        $listRetur = $this->returModel->getListRetur($area);
         return $this->response->setJSON($listRetur);
     }
 
