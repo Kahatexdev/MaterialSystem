@@ -28,6 +28,7 @@ use App\Models\PoTambahanModel;
 use App\Models\TrackingPoCovering;
 use App\Models\KebutuhanCones;
 use App\Models\MasterRangePemesanan;
+use App\Models\TotalPoTambahanModel;
 use Dompdf\Dompdf;
 use PHPUnit\Framework\Attributes\IgnoreFunctionForCodeCoverage;
 
@@ -59,6 +60,7 @@ class ApiController extends ResourceController
     protected $trackingPoCovering;
     protected $kebutuhanCones;
     protected $masterRangePemesanan;
+    protected $totalPoTambahanModel;
 
 
     public function __construct()
@@ -85,6 +87,7 @@ class ApiController extends ResourceController
         $this->trackingPoCovering = new TrackingPoCovering();
         $this->kebutuhanCones = new KebutuhanCones();
         $this->masterRangePemesanan = new MasterRangePemesanan();
+        $this->totalPoTambahanModel = new TotalPoTambahanModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -1094,18 +1097,64 @@ class ApiController extends ResourceController
             // getIdMaterial sekarang mengembalikan single id
             $item['id_material'] = $idMat;
 
-            // 2) Hapus field yang tidak ada di table po_tambahan
-            unset(
-                $item['area'],
-                $item['no_model'],
-                $item['item_type'],
-                $item['kode_warna'],
-                $item['color'],
-                $item['style_size']
-            );
+            // 2) Cek apakah sudah ada total_potambahan untuk kombinasi ini (per hari)
+            $today = date('Y-m-d');
+            $exist = $this->poTambahanModel
+                ->select('po_tambahan.id_total_potambahan')
+                ->join('material m', 'm.id_material = po_tambahan.id_material')
+                ->join('master_order mo', 'mo.id_order = m.id_order')
+                ->where('mo.no_model', $item['no_model'])
+                ->where('m.item_type', $item['item_type'])
+                ->where('m.kode_warna', $item['kode_warna'])
+                ->where('DATE(po_tambahan.created_at)', $today)
+                ->first();
 
-            // 3) Simpan
-            if ($this->poTambahanModel->insert($item)) {
+            if ($exist) {
+                // --- Update total_potambahan ---
+                $idTotal = $exist['id_total_potambahan'];
+
+                $this->totalPoTambahanModel->update($idTotal, [
+                    'ttl_terima_kg'    => $this->totalPoTambahanModel->select('ttl_terima_kg')->find($idTotal)['ttl_terima_kg'] + ($item['ttl_terima_kg'] ?? 0),
+                    'ttl_sisa_jatah'   => $this->totalPoTambahanModel->select('ttl_sisa_jatah')->find($idTotal)['ttl_sisa_jatah'] + ($item['ttl_sisa_jatah'] ?? 0),
+                    'ttl_sisa_bb_dimc' => $this->totalPoTambahanModel->select('ttl_sisa_bb_dimc')->find($idTotal)['ttl_sisa_bb_dimc'] + ($item['ttl_sisa_bb_dimc'] ?? 0),
+                    'ttl_tambahan_kg'  => $this->totalPoTambahanModel->select('ttl_tambahan_kg')->find($idTotal)['ttl_tambahan_kg'] + ($item['ttl_tambahan_kg'] ?? 0),
+                    'ttl_tambahan_cns' => $this->totalPoTambahanModel->select('ttl_tambahan_cns')->find($idTotal)['ttl_tambahan_cns'] + ($item['ttl_tambahan_cns'] ?? 0),
+                ]);
+            } else {
+                // --- Insert total_potambahan baru ---
+                $dataTotal = [
+                    'ttl_terima_kg'    => $item['ttl_terima_kg'] ?? 0,
+                    'ttl_sisa_jatah'   => $item['ttl_sisa_jatah'] ?? 0,
+                    'ttl_sisa_bb_dimc' => $item['ttl_sisa_bb_dimc'] ?? 0,
+                    'ttl_tambahan_kg'  => $item['ttl_tambahan_kg'] ?? 0,
+                    'ttl_tambahan_cns' => $item['ttl_tambahan_cns'] ?? 0,
+                    'keterangan'       => $item['keterangan'] ?? '',
+                    'created_at'       => date('Y-m-d H:i:s'),
+                ];
+
+                $this->totalPoTambahanModel->insert($dataTotal);
+                $idTotal = $this->totalPoTambahanModel->getInsertID();
+            }
+
+            // 3) Insert detail ke po_tambahan
+            $dataDetail = [
+                'id_material'       => $item['id_material'],
+                'id_total_potambahan' => $idTotal,
+                'sisa_order_pcs'    => $item['sisa_order_pcs'] ?? 0,
+                'bs_mesin_kg'       => $item['bs_mesin_kg'] ?? 0,
+                'bs_st_pcs'         => $item['bs_st_pcs'] ?? 0,
+                'poplus_mc_kg'      => $item['poplus_mc_kg'] ?? 0,
+                'poplus_mc_cns'     => $item['poplus_mc_cns'] ?? 0,
+                'plus_pck_pcs'      => $item['plus_pck_pcs'] ?? 0,
+                'plus_pck_kg'       => $item['plus_pck_kg'] ?? 0,
+                'plus_pck_cns'      => $item['plus_pck_cns'] ?? 0,
+                'lebih_pakai_kg'    => $item['lebih_pakai_kg'] ?? 0,
+                'delivery_po_plus'  => $item['delivery_po_plus'] ?? '',
+                'admin'             => $item['admin'] ?? session()->get('username'),
+                'created_at'        => date('Y-m-d H:i:s'),
+            ];
+
+            if ($this->poTambahanModel->insert($dataDetail)) {
                 $sukses++;
             } else {
                 $gagal++;

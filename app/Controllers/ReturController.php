@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
+use CodeIgniter\API\ResponseTrait;
 use App\Models\MasterOrderModel;
 use App\Models\MasterMaterialModel;
 use App\Models\MaterialModel;
@@ -17,6 +18,8 @@ use App\Models\ScheduleCelupModel;
 
 class ReturController extends BaseController
 {
+    use ResponseTrait;
+
     protected $role;
     protected $active;
     protected $filters;
@@ -90,6 +93,71 @@ class ReturController extends BaseController
         ];
 
         return view($data['role'] . '/retur/index', $data);
+    }
+
+    public function listRetur()
+    {
+        $area = $this->request->getGet('area');
+        // $noModel = $this->request->getGet('model') ?? '';
+        // $tglBuat = $this->request->getGet('tglBuat') ?? '';
+
+        $listRetur = $this->returModel->getListRetur($area);
+        return $this->response->setJSON($listRetur);
+    }
+
+    public function cekBahanBaku()
+    {
+        $model = $this->request->getGet('noModel') ?? '';
+
+        $search = '';
+        $material = $this->materialModel->MaterialPerOrder($model);
+        $res = [];
+        foreach ($material as &$row) {
+            $schedule = $this->scheduleCelupModel->schedulePerArea($row['no_model'], $row['item_type'], $row['kode_warna'], $search);
+
+            $scheduleData = !empty($schedule) ? $schedule[0] : [];
+
+            $fields = [
+                'start_mc',
+                'kg_celup',
+                'lot_urut',
+                'lot_celup',
+                'tanggal_schedule',
+                'tanggal_bon',
+                'tanggal_celup',
+                'tanggal_bongkar',
+                'tanggal_press',
+                'tanggal_oven',
+                'tanggal_tl',
+                'tanggal_rajut_pagi',
+                'tanggal_kelos',
+                'tanggal_acc',
+                'tanggal_reject',
+                'tanggal_perbaikan',
+                'last_status',
+                'ket_daily_cek',
+                'po_plus'
+            ];
+
+            foreach ($fields as $field) {
+                $row[$field] = $scheduleData[$field] ?? ''; // Isi dengan data jadwal atau kosong jika tidak ada
+            }
+
+            $res[] = $row;
+        }
+        return $this->respond($res, 200);
+    }
+
+    public function getPengirimanArea()
+    {
+        $noModel = $this->request->getGet('noModel') ?? '';
+        // $results = $this->pengeluaranModel->searchPengiriman($noModel);
+        $results = $this->pengeluaranModel->searchPengiriman2($noModel);
+
+        // Konversi stdClass menjadi array
+        $resultsArray = json_decode(json_encode($results), true);
+
+        return $this->respond($resultsArray, 200);
     }
 
     public function approve()

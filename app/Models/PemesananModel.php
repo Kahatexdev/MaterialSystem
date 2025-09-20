@@ -369,6 +369,7 @@ class PemesananModel extends Model
             ->where('pemesanan.tgl_pakai', $id['tgl_pakai'])
             ->where('pemesanan.po_tambahan', $id['po_tambahan'])
             ->where('pemesanan.admin', $id['area'])
+            ->where('pemesanan.status_kirim', 'YA')
             ->limit(1)
             ->get()
             ->getRowArray();
@@ -919,8 +920,12 @@ class PemesananModel extends Model
         // Penting: group by kunci penggabungan + admin (area)
         $this->groupBy([
             'tp.id_total_pemesanan',
-            'pemesanan.admin',
+            // 'pemesanan.admin',
         ]);
+        // Urutan tampil
+        $this->orderBy('material.item_type', 'ASC')
+            ->orderBy('material.kode_warna', 'ASC');
+        
 
         return $this->findAll();
     }

@@ -19,6 +19,8 @@ class App extends BaseConfig
 
     // public string $baseURL = 'http://localhost:8080';
     public string $baseURL = 'http://172.23.44.14/MaterialSystem/public/';
+    // public string $baseURL = 'http://localhost:8080/';
+
 
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.

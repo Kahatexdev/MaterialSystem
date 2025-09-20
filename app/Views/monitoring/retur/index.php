@@ -199,6 +199,9 @@
     </div>
     <script src="<?= base_url('assets/js/plugins/chartjs.min.js') ?>"></script>
     <script type="text/javascript">
+        const baseUrl = "<?= base_url() ?>";
+        const role = "<?= $role ?>";
+
         $(document).ready(function() {
             const btnSearch = document.getElementById('searchModel');
             const returbtn = document.getElementById('btn-retur');
@@ -244,7 +247,8 @@
             $('#modalPengajuanRetur').find('input[name="area"]').val(area);
 
             $.ajax({
-                url: "http://172.23.44.14/MaterialSystem/public/api/cekBahanBaku/" + model,
+                // url: "http://172.23.44.14/MaterialSystem/public/api/cekBahanBaku/" + model,
+                url: baseUrl + role + "/retur/cekBahanBaku",
                 type: "GET",
                 data: {
                     model: model
@@ -267,7 +271,8 @@
         function listRetur(model, area) {
             const rowbawah = document.getElementById('rowbawah')
             $.ajax({
-                url: "http://172.23.44.14/MaterialSystem/public/api/listRetur",
+                // url: "http://172.23.44.14/MaterialSystem/public/api/listRetur",
+                url: baseUrl + role + "/retur/listRetur",
                 type: "GET",
                 data: {
                     model: model,
@@ -275,7 +280,7 @@
                 },
                 dataType: "json",
                 success: function(response) {
-                    fetchListRetur(response, model);
+                    fetchListRetur(response, model, area);
 
                 },
                 error: function(xhr, status, error) {
@@ -287,12 +292,12 @@
             });
         }
 
-        function fetchListRetur(data, model) {
+        function fetchListRetur(data, model, area) {
             const tableBody = document.getElementById('bodyData2');
             const baseUrl = "http://172.23.44.14/CapacityApps/public/user/retur/";
             tableBody.innerHTML = `
-       <div class="d-flex align-items-center justify-content-between">
-                    <h3 class="model-title mb-0">List Retur ${model}</h3>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h3 class="model-title mb-0">List Retur ${area}</h3>
                     <div class="d-flex align-items-center gap-2">
                         <a href="${baseUrl}${area}/exportExcel" class="btn btn-success">
                             <i class="fas fa-file-excel"></i> Export Excel
@@ -300,37 +305,41 @@
                     
                     </div>
                 </div>
-        <div class="table-responsive">
-            <table class="display text-center text-uppercase text-xs font-bolder" id="dataTableRetur" style="width:100%">
-                <thead>
-                    <tr>
-                        <th class="text-center">No</th>
-                        <th class="text-center">Item Type</th>
-                        <th class="text-center">Kode Warna</th>
-                        <th class="text-center"> Warna</th>
-                        <th class="text-center">Lot Retur</th>
-                        <th class="text-center">KG Retur</th>
-                        <th class="text-center">Kategori</th>
-                        <th class="text-center">Keterangan GBN</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${data.map((item, index) => `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${item.item_type}</td>
-                            <td>${item.kode_warna}</td>
-                            <td>${item.warna}</td>
-                            <td>${item.lot_retur}</td>
-                            <td>${parseFloat(item.kgs_retur).toFixed(2)} kg</td>
-                            <td>${item.kategori}</td>
-                            <td>${item.keterangan_gbn}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
+                <div class="table-responsive">
+                    <table class="display text-center text-uppercase text-xs font-bolder" id="dataTableRetur" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th class="text-center">No</th>
+                                <th class="text-center">Tanggal Retur</th>
+                                <th class="text-center">No Model</th>
+                                <th class="text-center">Item Type</th>
+                                <th class="text-center">Kode Warna</th>
+                                <th class="text-center">Warna</th>
+                                <th class="text-center">Lot Retur</th>
+                                <th class="text-center">KG Retur</th>
+                                <th class="text-center">Kategori</th>
+                                <th class="text-center">Keterangan GBN</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.map((item, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${item.tgl_retur}</td>
+                                    <td>${item.no_model}</td>
+                                    <td>${item.item_type}</td>
+                                    <td>${item.kode_warna}</td>
+                                    <td>${item.warna}</td>
+                                    <td>${item.lot_retur}</td>
+                                    <td>${parseFloat(item.kgs_retur).toFixed(2)} kg</td>
+                                    <td>${item.kategori}</td>
+                                    <td>${item.keterangan_gbn}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
 
             // Inisialisasi DataTable
             $(document).ready(function() {
@@ -457,7 +466,8 @@
                 option.appendChild(opt);
             }
             $.ajax({
-                url: "http://172.23.44.14/MaterialSystem/public/api/getPengirimanArea?noModel=" + model,
+                // url: "http://172.23.44.14/MaterialSystem/public/api/getPengirimanArea?noModel=" + model,
+                url: baseUrl + role + "/retur/getPengirimanArea",
                 type: "GET",
                 data: {
                     model: model

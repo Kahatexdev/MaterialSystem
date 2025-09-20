@@ -1972,16 +1972,16 @@ class PemesananController extends BaseController
         $data = [];
         foreach ($stock as $dt) {
             $other = $this->otherOutModel->getQty($dt['id_out_celup'], $dt['nama_cluster']);
-            // log_message('info', 'ini other ' . json_encode($other));
             $outByCns = $this->pengeluaranModel->getQtyOutByCns($dt['id_out_celup']);
-            // log_message('info', 'ini outByCns ' . json_encode($outByCns));
-            $sisaKg  = round($dt['kgs_kirim'] - ($other['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0), 2);
-            $sisaCns = (int)$dt['cones_kirim'] - (int)($other['cns_other_out'] ?? 0) - (int)($outByCns['cns_out'] ?? 0);
+            $pindahOrder = $this->historyStock->getKgsPindahOrder($dt['id_out_celup']);
+            $sisaKg  = round($dt['kgs_kirim'] - ($other['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0) - ((float) $pindahOrder['kgs_pindah_order'] ?? 0), 2);
+            $sisaCns = (int)$dt['cones_kirim'] - (int)($other['cns_other_out'] ?? 0) - (int)($outByCns['cns_out'] ?? 0) - ((int) $pindahOrder['cns_pindah_order'] ?? 0);
             // log_message('info', "ini sisaKg $sisaKg, sisaCns $sisaCns");
             if ($sisaKg <= 0 && $sisaCns <= 0) {
                 // lewati baris ini; tidak layak tampil
                 continue;
             }
+
             $data[] = [
                 'id_pemasukan' => $dt['id_pemasukan'],
                 'no_karung' => $dt['no_karung'],
