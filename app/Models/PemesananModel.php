@@ -369,6 +369,7 @@ class PemesananModel extends Model
             ->where('pemesanan.tgl_pakai', $id['tgl_pakai'])
             ->where('pemesanan.po_tambahan', $id['po_tambahan'])
             ->where('pemesanan.admin', $id['area'])
+            ->where('pemesanan.status_kirim', 'YA')
             ->limit(1)
             ->get()
             ->getRowArray();
