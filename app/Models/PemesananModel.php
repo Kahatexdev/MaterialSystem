@@ -919,8 +919,12 @@ class PemesananModel extends Model
         // Penting: group by kunci penggabungan + admin (area)
         $this->groupBy([
             'tp.id_total_pemesanan',
-            'pemesanan.admin',
+            // 'pemesanan.admin',
         ]);
+        // Urutan tampil
+        $this->orderBy('material.item_type', 'ASC')
+            ->orderBy('material.kode_warna', 'ASC');
+        
 
         return $this->findAll();
     }
