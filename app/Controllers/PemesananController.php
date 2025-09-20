@@ -2073,7 +2073,25 @@ class PemesananController extends BaseController
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
         $data = $this->pemesananModel->getFilterPemesananArea($key, $tanggalAwal, $tanggalAkhir);
-        // dd ($data);
+        //Ambil dulu dari data kemudian ambil total pemesanan
+        // $tgl_pakai = [];
+        // $idTotalPemesanan = [];
+        // $idMaterial = [];
+        // $area = [];
+        // $id_order = [];
+        // $item_type = [];
+        // $kode_warna = [];
+        // foreach ($data as $dt) {
+        //     $tgl_pakai[] = $dt['tgl_pakai'];
+        //     $idTotalPemesanan[] = $dt['id_total_pemesanan'];
+        //     $idMaterial[] = $dt['id_material'];
+        //     $area[] = $dt['admin'];
+        // }
+        // dd($data, $tgl_pakai, $idTotalPemesanan, $idMaterial, $area);
+        // $material = $this->materialModel->find($idMaterial);
+        // $item_type = $this->materialModel->select('item_type')->whereIn('id_material', $idMaterial)->groupBy('item_type')->get()->getResultArray();
+        // dd($item_type);
+        // $totalPemesanan = $this->totalPemesananModel->getTotalPemesanan($area, $item_type, $kode_warna, $id_order, $tgl_pakai);
         return $this->response->setJSON($data);
     }
     public function getCountStatusRequest()

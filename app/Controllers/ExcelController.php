@@ -1274,6 +1274,7 @@ class ExcelController extends BaseController
 
     public function excelPemesananArea()
     {
+        //BENERIN DATA KGS CONES JL MC AMBIL DARI TABEL TOTAL PEMESANAN
         $key = $this->request->getGet('key');
         $tanggal_awal = $this->request->getGet('tanggal_awal');
         $tanggal_akhir = $this->request->getGet('tanggal_akhir');
@@ -1779,7 +1780,7 @@ class ExcelController extends BaseController
             $sheet->setCellValue('D' . $row, $item['color']);
             $sheet->setCellValue('E' . $row, $item['kode_warna']);
             $sheet->setCellValue('F' . $row, $item['no_model']);
-            $sheet->setCellValue('G' . $row, $item['ttl_jl_mc']);
+            $sheet->setCellValue('G' . $row, $item['jl_mc']);
             $sheet->setCellValue('H' . $row, $item['ttl_kg']);
             $sheet->setCellValue('I' . $row, $item['ttl_cns']);
             $sheet->setCellValue('J' . $row, $item['admin']);
@@ -4151,7 +4152,7 @@ class ExcelController extends BaseController
         foreach ($categories as $label => $keyword) {
             $colLetter = 'H';
             foreach ($areaHeaders as $_) {
-                $formula = "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"{$keyword}\",{$colLetter}{$dataStartRow}:{$colLetter}{$dataEndRow})";
+                $formula = "172.23.44.14$dataStartRow}:F{$dataEndRow},\"{$keyword}\",{$colLetter}{$dataStartRow}:{$colLetter}{$dataEndRow})";
                 $sheet->setCellValue("{$colLetter}{$row}", $formula);
                 $sheet->getStyle("{$colLetter}{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
                 $sheet->getStyle("{$colLetter}{$row}")->getFont()->setBold(true);
@@ -10013,11 +10014,11 @@ class ExcelController extends BaseController
         // $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
         // $buyerName = json_decode(file_get_contents($buyerApiUrl), true);
 
-        // if ($tujuan == 'CELUP') {
-        //     $penerima = 'Retno';
-        // } else {
-        //     $penerima = 'Paryanti';
-        // }
+        if ($tujuan == 'CELUP') {
+            $penerima = 'Retno';
+        } else {
+            $penerima = 'Paryanti';
+        }
 
         // dd($result);
         if (!empty($delivery)) {
@@ -10533,11 +10534,6 @@ class ExcelController extends BaseController
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
         if ($tujuan == 'CELUP') {
             $sheet->setCellValue('J46', 'Celup Cones');
-            $sheet->mergeCells('J46:L46');
-            $sheet->getStyle('J46:L46')->getAlignment()
-                ->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        } else if ($tujuan == 'JS') {
-            $sheet->setCellValue('J46', 'JS');
             $sheet->mergeCells('J46:L46');
             $sheet->getStyle('J46:L46')->getAlignment()
                 ->setHorizontal(Alignment::HORIZONTAL_CENTER);
