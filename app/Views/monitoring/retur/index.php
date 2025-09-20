@@ -297,7 +297,7 @@
             const baseUrl = "http://172.23.44.14/CapacityApps/public/user/retur/";
             tableBody.innerHTML = `
                 <div class="d-flex align-items-center justify-content-between">
-                    <h3 class="model-title mb-0">List Retur ${model}</h3>
+                    <h3 class="model-title mb-0">List Retur ${area}</h3>
                     <div class="d-flex align-items-center gap-2">
                         <a href="${baseUrl}${area}/exportExcel" class="btn btn-success">
                             <i class="fas fa-file-excel"></i> Export Excel
@@ -310,6 +310,8 @@
                         <thead>
                             <tr>
                                 <th class="text-center">No</th>
+                                <th class="text-center">Tanggal Retur</th>
+                                <th class="text-center">No Model</th>
                                 <th class="text-center">Item Type</th>
                                 <th class="text-center">Kode Warna</th>
                                 <th class="text-center">Warna</th>
@@ -323,6 +325,8 @@
                             ${data.map((item, index) => `
                                 <tr>
                                     <td>${index + 1}</td>
+                                    <td>${item.tgl_retur}</td>
+                                    <td>${item.no_model}</td>
                                     <td>${item.item_type}</td>
                                     <td>${item.kode_warna}</td>
                                     <td>${item.warna}</td>
