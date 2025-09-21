@@ -1362,6 +1362,8 @@ class GodController extends BaseController
 
     public function prosesImportPemesanan()
     {
+        ini_set('memory_limit', '1024M'); // atau 2048M jika perlu
+        set_time_limit(0);
         $db = \Config\Database::connect();
         $db->transBegin(); // mulai transaksi
 
