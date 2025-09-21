@@ -27,6 +27,7 @@ class PoTambahanModel extends Model
         'lebih_pakai_kg',
         'delivery_po_plus',
         'tanggal_approve',
+        'id_total_potambahan',
         'keterangan',
         'ket_gbn',
         'status',
