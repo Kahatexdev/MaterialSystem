@@ -2066,41 +2066,6 @@ class PemesananController extends BaseController
         return view($this->role . '/pemesanan/report-pemesanan', $data);
     }
 
-    // public function filterPemesananArea()
-    // {
-    //     $key = $this->request->getGet('key');
-    //     $tanggalAwal = $this->request->getGet('tanggal_awal');
-    //     $tanggalAkhir = $this->request->getGet('tanggal_akhir');
-
-    //     $data = $this->pemesananModel->getFilterPemesananArea($key, $tanggalAwal, $tanggalAkhir);
-    //     //Ambil dulu dari data kemudian ambil total pemesanan
-    //     // $tgl_pakai = [];
-    //     $idTotalPemesanan = [];
-    //     $idMaterial = [];
-    //     // $area = [];
-    //     // $id_order = [];
-    //     // $item_type = [];
-    //     // $kode_warna = [];
-    //     foreach ($data as $dt) {
-    //         $tgl_pakai[] = $dt['tgl_pakai'];
-    //         $idTotalPemesanan[] = $dt['id_total_pemesanan'];
-    //         $idMaterial[] = $dt['id_material'];
-    //         $area[] = $dt['admin'];
-    //     }
-    //     // dd($data, $tgl_pakai, $idTotalPemesanan, $idMaterial, $area);
-    //     $material = $this->materialModel->find($idMaterial);
-    //     $area = array_column($data, 'admin');
-    //     $item_type = array_column($data, 'item_type');
-    //     $kode_warna = array_column($data, 'kode_warna');
-    //     $id_order = array_column($data, 'id_order');
-    //     $tgl_pakai = array_column($data, 'tgl_pakai');
-    //     // $item_type = $this->materialModel->select('item_type')->whereIn('id_material', $idMaterial)->get()->getResultArray();
-    //     dd($area, $item_type, $id_order, $tgl_pakai);
-    //     $totalPemesanan = $this->pemesananModel->getTotalPemesanan($area, $item_type, $kode_warna, $id_order, $tgl_pakai);
-    //     dd($totalPemesanan);
-    //     return $this->response->setJSON($data);
-    // }
-
     public function filterPemesananArea()
     {
         $key = $this->request->getGet('key');
