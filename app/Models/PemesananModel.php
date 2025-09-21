@@ -482,7 +482,7 @@ class PemesananModel extends Model
 
     public function getFilterPemesananArea($key, $tanggal_awal, $tanggal_akhir)
     {
-        $this->select('pemesanan.tgl_pakai, pemesanan.tgl_pesan, pemesanan.tgl_list, SUM(pemesanan.jl_mc) AS jl_mc, SUM(pemesanan.ttl_qty_cones) AS ttl_qty_cones, SUM(pemesanan.ttl_berat_cones) AS ttl_berat_cones, SUM(pemesanan.sisa_cones_mc) AS sisa_cones_mc, SUM(pemesanan.sisa_kgs_mc) AS sisa_kgs_mc, pemesanan.admin AS area, pemesanan.admin,  GROUP_CONCAT(DISTINCT pemesanan.keterangan SEPARATOR ", ") AS keterangan, GROUP_CONCAT(DISTINCT pemesanan.lot SEPARATOR ", ") AS lot, pemesanan.po_tambahan, master_order.foll_up, master_order.no_model, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, material.item_type, material.kode_warna, material.color, total_pemesanan.id_total_pemesanan, pemesanan.id_material')
+        $this->select('pemesanan.tgl_pakai, pemesanan.tgl_pesan, pemesanan.tgl_list, SUM(pemesanan.sisa_cones_mc) AS sisa_cones_mc, SUM(pemesanan.sisa_kgs_mc) AS sisa_kgs_mc, pemesanan.admin AS area, GROUP_CONCAT(DISTINCT pemesanan.keterangan SEPARATOR ", ") AS keterangan, GROUP_CONCAT(DISTINCT pemesanan.lot SEPARATOR ", ") AS lot, pemesanan.po_tambahan, master_order.foll_up, master_order.no_model, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, material.id_order, material.item_type, material.kode_warna, material.color, total_pemesanan.id_total_pemesanan, pemesanan.id_material')
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
@@ -925,7 +925,7 @@ class PemesananModel extends Model
         // Urutan tampil
         $this->orderBy('material.item_type', 'ASC')
             ->orderBy('material.kode_warna', 'ASC');
-        
+
 
         return $this->findAll();
     }
@@ -1153,7 +1153,7 @@ class PemesananModel extends Model
 
     public function getTotalPemesanan($area = null, $item_type = null, $kode_warna = null, $id_order = null, $tgl_pakai = null)
     {
-        $this->select('pemesanan.tgl_pakai, pemesanan.admin AS area, pemesanan.admin, material.item_type, material.kode_warna, material.color, SUM(total_pemesanan.ttl_jl_mc) AS ttl_jl_mc, SUM(total_pemesanan.ttl_kg) AS ttl_kg, SUM(total_pemesanan.ttl_cns) AS ttl_cns')
+        $this->select('pemesanan.tgl_pakai, pemesanan.admin AS area, material.item_type, material.kode_warna, SUM(total_pemesanan.ttl_jl_mc) AS ttl_jl_mc, SUM(total_pemesanan.ttl_kg) AS ttl_kg, SUM(total_pemesanan.ttl_cns) AS ttl_cns')
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->where('pemesanan.admin', $area)
@@ -1168,11 +1168,10 @@ class PemesananModel extends Model
             'pemesanan.tgl_pakai',
             'material.item_type',
             'material.kode_warna',
-            'material.color',
             'material.id_order',
             'pemesanan.admin',
         ]);
 
-        return $this->findAll();
+        return $this->first();
     }
 }

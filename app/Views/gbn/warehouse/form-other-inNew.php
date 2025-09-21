@@ -95,7 +95,7 @@
                                                 <label>No Model</label>
                                                 <input class="form-control" list="noModelOptions" id="no_model_input" placeholder="Ketik / pilih No Model">
                                                 <datalist id="noModelOptions">
-                                                    <?php foreach ($no_model as $item): ?>
+                                                    <?php foreach ($no_model as $item) : ?>
                                                         <option data-id="<?= $item['id_order'] ?>" value="<?= $item['no_model'] ?>"></option>
                                                     <?php endforeach; ?>
                                                 </datalist>
@@ -185,7 +185,7 @@
                                                             <td><input type="text" class="form-control text-center" name="no_karung[0]" value="1" readonly></td>
                                                             <td><input type="number" step="0.01" class="form-control gw" name="gw[0]" value="0"></td>
                                                             <td><input type="number" step="0.01" class="form-control kgs" name="kgs[0]" value="0"></td>
-                                                            <td><input type="number" step="0.01" class="form-control cones" name="cones[0]" value="0"></td>
+                                                            <td><input type="number" min="0" class="form-control cones" name="cones[0]" value="0"></td>
                                                             <td style="width:180px"><select class="form-control cluster" name="cluster[0]" required></select></td>
                                                             <td><input type="text" class="form-control kapasitas" name="kapasitas[0]" readonly></td>
                                                             <td class="text-center"></td>
@@ -516,7 +516,7 @@
         <td><input type="text" class="form-control text-center" name="no_karung[${idx}]" value="${idx+1}" readonly></td>
         <td><input type="number" step="0.01" class="form-control gw"    name="gw[${idx}]"    value="0"></td>
         <td><input type="number" step="0.01" class="form-control kgs"   name="kgs[${idx}]"   value="0"></td>
-        <td><input type="number" step="0.01" class="form-control cones" name="cones[${idx}]" value="0"></td>
+        <td><input type="number" min="0" class="form-control cones" name="cones[${idx}]" value="0"></td>
         <td style="width:180px"><select class="form-control cluster" name="cluster[${idx}]" required></select></td>
         <td><input type="text" class="form-control kapasitas" name="kapasitas[${idx}]" readonly></td>
         <td class="text-center"><button type="button" class="btn btn-danger removeRow"><i class="fas fa-trash"></i></button></td>
