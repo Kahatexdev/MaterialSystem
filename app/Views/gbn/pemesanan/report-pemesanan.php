@@ -110,9 +110,7 @@
 
                 <!-- Progress bar -->
                 <div class="progress mt-3" style="height: 6px; border-radius: 6px;">
-                    <div id="progressBar"
-                        class="progress-bar progress-bar-striped progress-bar-animated bg-info"
-                        role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                     </div>
                 </div>
                 <small id="progressText" class="text-white mt-1 d-block">0%</small>
@@ -310,9 +308,9 @@
                                 item.tgl_list,
                                 item.tgl_pesan,
                                 item.tgl_pakai,
-                                item.jl_mc,
-                                item.ttl_qty_cones,
-                                item.ttl_berat_cones,
+                                item.ttl_jl_mc,
+                                item.ttl_kg,
+                                item.ttl_cns,
                                 item.sisa_kgs_mc,
                                 item.sisa_cones_mc,
                                 item.lot,

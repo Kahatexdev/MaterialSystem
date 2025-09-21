@@ -2066,6 +2066,41 @@ class PemesananController extends BaseController
         return view($this->role . '/pemesanan/report-pemesanan', $data);
     }
 
+    // public function filterPemesananArea()
+    // {
+    //     $key = $this->request->getGet('key');
+    //     $tanggalAwal = $this->request->getGet('tanggal_awal');
+    //     $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+    //     $data = $this->pemesananModel->getFilterPemesananArea($key, $tanggalAwal, $tanggalAkhir);
+    //     //Ambil dulu dari data kemudian ambil total pemesanan
+    //     // $tgl_pakai = [];
+    //     $idTotalPemesanan = [];
+    //     $idMaterial = [];
+    //     // $area = [];
+    //     // $id_order = [];
+    //     // $item_type = [];
+    //     // $kode_warna = [];
+    //     foreach ($data as $dt) {
+    //         $tgl_pakai[] = $dt['tgl_pakai'];
+    //         $idTotalPemesanan[] = $dt['id_total_pemesanan'];
+    //         $idMaterial[] = $dt['id_material'];
+    //         $area[] = $dt['admin'];
+    //     }
+    //     // dd($data, $tgl_pakai, $idTotalPemesanan, $idMaterial, $area);
+    //     $material = $this->materialModel->find($idMaterial);
+    //     $area = array_column($data, 'admin');
+    //     $item_type = array_column($data, 'item_type');
+    //     $kode_warna = array_column($data, 'kode_warna');
+    //     $id_order = array_column($data, 'id_order');
+    //     $tgl_pakai = array_column($data, 'tgl_pakai');
+    //     // $item_type = $this->materialModel->select('item_type')->whereIn('id_material', $idMaterial)->get()->getResultArray();
+    //     dd($area, $item_type, $id_order, $tgl_pakai);
+    //     $totalPemesanan = $this->pemesananModel->getTotalPemesanan($area, $item_type, $kode_warna, $id_order, $tgl_pakai);
+    //     dd($totalPemesanan);
+    //     return $this->response->setJSON($data);
+    // }
+
     public function filterPemesananArea()
     {
         $key = $this->request->getGet('key');
@@ -2073,27 +2108,76 @@ class PemesananController extends BaseController
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
         $data = $this->pemesananModel->getFilterPemesananArea($key, $tanggalAwal, $tanggalAkhir);
-        //Ambil dulu dari data kemudian ambil total pemesanan
-        // $tgl_pakai = [];
-        // $idTotalPemesanan = [];
-        // $idMaterial = [];
-        // $area = [];
-        // $id_order = [];
-        // $item_type = [];
-        // $kode_warna = [];
-        // foreach ($data as $dt) {
-        //     $tgl_pakai[] = $dt['tgl_pakai'];
-        //     $idTotalPemesanan[] = $dt['id_total_pemesanan'];
-        //     $idMaterial[] = $dt['id_material'];
-        //     $area[] = $dt['admin'];
-        // }
-        // dd($data, $tgl_pakai, $idTotalPemesanan, $idMaterial, $area);
-        // $material = $this->materialModel->find($idMaterial);
-        // $item_type = $this->materialModel->select('item_type')->whereIn('id_material', $idMaterial)->groupBy('item_type')->get()->getResultArray();
-        // dd($item_type);
-        // $totalPemesanan = $this->totalPemesananModel->getTotalPemesanan($area, $item_type, $kode_warna, $id_order, $tgl_pakai);
+
+        // helper key
+        $makeKey = function ($area, $item_type, $kode_warna, $id_order, $tgl_pakai) {
+            return implode('|', [
+                $area ?? '',
+                $item_type ?? '',
+                $kode_warna ?? '',
+                $id_order ?? '',
+                $tgl_pakai ?? ''
+            ]);
+        };
+
+        // 1) buat kombinasi unik dari $data
+        $uniqueGroup = [];
+        foreach ($data as $r) {
+            $k = $makeKey($r['area'] ?? $r['admin'], $r['item_type'], $r['kode_warna'], $r['id_order'], $r['tgl_pakai']);
+            if (!isset($uniqueGroup[$k])) {
+                $uniqueGroup[$k] = [
+                    'area' => $r['area'] ?? $r['admin'],
+                    'item_type' => $r['item_type'],
+                    'kode_warna' => $r['kode_warna'],
+                    'id_order' => $r['id_order'],
+                    'tgl_pakai' => $r['tgl_pakai'],
+                ];
+            }
+        }
+
+        // 2) panggil model per combo dan simpan hanya 3 field yang diperlukan ke map
+        $totalsMap = [];
+        foreach ($uniqueGroup as $c) {
+            $t = $this->pemesananModel->getTotalPemesanan(
+                $c['area'],
+                $c['item_type'],
+                $c['kode_warna'],
+                $c['id_order'],
+                $c['tgl_pakai']
+            );
+
+            $key = $makeKey($c['area'], $c['item_type'], $c['kode_warna'], $c['id_order'], $c['tgl_pakai']);
+
+            $totalsMap[$key] = [
+                'ttl_jl_mc' => isset($t['ttl_jl_mc']) ? $t['ttl_jl_mc'] : 0,
+                'ttl_kg'    => isset($t['ttl_kg']) ? $t['ttl_kg'] : 0,
+                'ttl_cns'   => isset($t['ttl_cns']) ? $t['ttl_cns'] : 0,
+            ];
+        }
+
+        // 3) merge hanya 3 field ke setiap row $data
+        foreach ($data as &$row) {
+            $key = $makeKey($row['area'] ?? $row['admin'], $row['item_type'] ?? null, $row['kode_warna'] ?? null, $row['id_order'] ?? null, $row['tgl_pakai'] ?? null);
+
+            if (isset($totalsMap[$key])) {
+                $row['ttl_jl_mc'] = $totalsMap[$key]['ttl_jl_mc'];
+                $row['ttl_kg']    = $totalsMap[$key]['ttl_kg'];
+                $row['ttl_cns']   = $totalsMap[$key]['ttl_cns'];
+            } else {
+                $row['ttl_jl_mc'] = 0;
+                $row['ttl_kg']    = 0;
+                $row['ttl_cns']   = 0;
+            }
+        }
+        unset($row); // lepaskan reference
+
+        // sekarang $data tiap baris punya ttl_jl_mc, ttl_kg, ttl_cns
+        // dd($data); // atau return $this->response->setJSON($data);
+
+
         return $this->response->setJSON($data);
     }
+
     public function getCountStatusRequest()
     {
         $countWt = $this->pemesananModel->countStatusRequest();

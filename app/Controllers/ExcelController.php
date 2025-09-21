@@ -1274,19 +1274,78 @@ class ExcelController extends BaseController
 
     public function excelPemesananArea()
     {
-        //BENERIN DATA KGS CONES JL MC AMBIL DARI TABEL TOTAL PEMESANAN
         $key = $this->request->getGet('key');
         $tanggal_awal = $this->request->getGet('tanggal_awal');
         $tanggal_akhir = $this->request->getGet('tanggal_akhir');
         // Ambil data hasil filter dari model
         $filteredData = $this->pemesananModel->getFilterPemesananArea($key, $tanggal_awal, $tanggal_akhir);
+
+        $makeKey = function ($area, $item_type, $kode_warna, $id_order, $tgl_pakai) {
+            return implode('|', [
+                $area ?? '',
+                $item_type ?? '',
+                $kode_warna ?? '',
+                $id_order ?? '',
+                $tgl_pakai ?? ''
+            ]);
+        };
+
+        $uniqueGroup = [];
+        foreach ($filteredData as $r) {
+            $k = $makeKey($r['area'] ?? $r['admin'], $r['item_type'], $r['kode_warna'], $r['id_order'], $r['tgl_pakai']);
+            if (!isset($uniqueGroup[$k])) {
+                $uniqueGroup[$k] = [
+                    'area' => $r['area'] ?? $r['admin'],
+                    'item_type' => $r['item_type'],
+                    'kode_warna' => $r['kode_warna'],
+                    'id_order' => $r['id_order'],
+                    'tgl_pakai' => $r['tgl_pakai'],
+                ];
+            }
+        }
+
+        $totalsMap = [];
+        foreach ($uniqueGroup as $c) {
+            $t = $this->pemesananModel->getTotalPemesanan(
+                $c['area'],
+                $c['item_type'],
+                $c['kode_warna'],
+                $c['id_order'],
+                $c['tgl_pakai']
+            );
+
+            $key = $makeKey($c['area'], $c['item_type'], $c['kode_warna'], $c['id_order'], $c['tgl_pakai']);
+
+            $totalsMap[$key] = [
+                'ttl_jl_mc' => isset($t['ttl_jl_mc']) ? $t['ttl_jl_mc'] : 0,
+                'ttl_kg'    => isset($t['ttl_kg']) ? $t['ttl_kg'] : 0,
+                'ttl_cns'   => isset($t['ttl_cns']) ? $t['ttl_cns'] : 0,
+            ];
+        }
+
+        // Merge hanya 3 field ke setiap row $data
+        foreach ($filteredData as &$row) {
+            $key = $makeKey($row['area'] ?? $row['admin'], $row['item_type'] ?? null, $row['kode_warna'] ?? null, $row['id_order'] ?? null, $row['tgl_pakai'] ?? null);
+
+            if (isset($totalsMap[$key])) {
+                $row['ttl_jl_mc'] = $totalsMap[$key]['ttl_jl_mc'];
+                $row['ttl_kg']    = $totalsMap[$key]['ttl_kg'];
+                $row['ttl_cns']   = $totalsMap[$key]['ttl_cns'];
+            } else {
+                $row['ttl_jl_mc'] = 0;
+                $row['ttl_kg']    = 0;
+                $row['ttl_cns']   = 0;
+            }
+        }
+        unset($row);
+
         // Buat Spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
         // === Tambahkan Judul Header di Tengah === //
         $title = 'DATA PEMESANAN AREA';
-        $sheet->mergeCells('A1:V1'); // Gabungkan dari kolom A sampai M
+        $sheet->mergeCells('A1:X1'); // Gabungkan dari kolom A sampai X
         $sheet->setCellValue('A1', $title);
 
         // Format judul (bold + center)
@@ -1294,65 +1353,71 @@ class ExcelController extends BaseController
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // === Header Kolom di Baris 2 === //
-        $sheet->setCellValue('A3', 'Foll Up');
-        $sheet->setCellValue('B3', 'No Model');
-        $sheet->setCellValue('C3', 'No Order');
-        $sheet->setCellValue('D3', 'Area');
-        $sheet->setCellValue('E3', 'Buyer');
-        $sheet->setCellValue('F3', 'Delivery Awal');
-        $sheet->setCellValue('G3', 'Delivery Akhir');
-        $sheet->setCellValue('H3', 'Order Type');
-        $sheet->setCellValue('I3', 'Item Type');
-        $sheet->setCellValue('J3', 'Kode Warna');
-        $sheet->setCellValue('K3', 'Warna');
-        $sheet->setCellValue('L3', 'Tanggal List');
-        $sheet->setCellValue('M3', 'Tanggal Pesan');
-        $sheet->setCellValue('N3', 'Tanggal Pakai');
-        $sheet->setCellValue('O3', 'Jalan MC');
-        $sheet->setCellValue('P3', 'Cones Pesan');
-        $sheet->setCellValue('Q3', 'Kg Pesan');
-        $sheet->setCellValue('R3', 'Sisa Kgs MC');
-        $sheet->setCellValue('S3', 'Sisa Cones MC');
-        $sheet->setCellValue('T3', 'LOT');
-        $sheet->setCellValue('U3', 'PO(+)');
-        $sheet->setCellValue('V3', 'Keterangan');
-        $sheet->setCellValue('W3', 'Area');
+        $sheet->setCellValue('A3', 'No');
+        $sheet->setCellValue('B3', 'Foll Up');
+        $sheet->setCellValue('C3', 'No Model');
+        $sheet->setCellValue('D3', 'No Order');
+        $sheet->setCellValue('E3', 'Area');
+        $sheet->setCellValue('F3', 'Buyer');
+        $sheet->setCellValue('G3', 'Delivery Awal');
+        $sheet->setCellValue('H3', 'Delivery Akhir');
+        $sheet->setCellValue('I3', 'Order Type');
+        $sheet->setCellValue('J3', 'Item Type');
+        $sheet->setCellValue('K3', 'Kode Warna');
+        $sheet->setCellValue('L3', 'Warna');
+        $sheet->setCellValue('M3', 'Tanggal List');
+        $sheet->setCellValue('N3', 'Tanggal Pesan');
+        $sheet->setCellValue('O3', 'Tanggal Pakai');
+        $sheet->setCellValue('P3', 'Jalan MC');
+        $sheet->setCellValue('Q3', 'Cones Pesan');
+        $sheet->setCellValue('R3', 'Kg Pesan');
+        $sheet->setCellValue('S3', 'Sisa Kgs MC');
+        $sheet->setCellValue('T3', 'Sisa Cones MC');
+        $sheet->setCellValue('U3', 'LOT');
+        $sheet->setCellValue('V3', 'PO(+)');
+        $sheet->setCellValue('W3', 'Keterangan');
+        $sheet->setCellValue('X3', 'Area');
 
         // === Isi Data mulai dari baris ke-3 === //
         $row = 4;
+        $no = 1;
         foreach ($filteredData as $data) {
-            $sheet->setCellValue('A' . $row, $data['foll_up']);
-            $sheet->setCellValue('B' . $row, $data['no_model']);
-            $sheet->setCellValue('C' . $row, $data['no_order']);
-            $sheet->setCellValue('D' . $row, $data['area']);
-            $sheet->setCellValue('E' . $row, $data['buyer']);
-            $sheet->setCellValue('F' . $row, $data['delivery_awal']);
-            $sheet->setCellValue('G' . $row, $data['delivery_akhir']);
-            $sheet->setCellValue('H' . $row, $data['unit']);
-            $sheet->setCellValue('I' . $row, $data['item_type']);
-            $sheet->setCellValue('J' . $row, $data['kode_warna']);
-            $sheet->setCellValue('K' . $row, $data['color']);
-            $sheet->setCellValue('L' . $row, $data['tgl_list']);
-            $sheet->setCellValue('M' . $row, $data['tgl_pesan']);
-            $sheet->setCellValue('N' . $row, $data['tgl_pakai']);
-            $sheet->setCellValue('O' . $row, $data['jl_mc']);
-            $sheet->setCellValue('P' . $row, $data['ttl_qty_cones']);
-            $sheet->setCellValue('Q' . $row, $data['ttl_berat_cones']);
-            $sheet->setCellValue('R' . $row, $data['sisa_kgs_mc']);
-            $sheet->setCellValue('S' . $row, $data['sisa_cones_mc']);
-            $sheet->setCellValue('T' . $row, $data['lot']);
-            $sheet->setCellValue('U' . $row, $data['po_tambahan']);
-            $sheet->setCellValue('V' . $row, $data['keterangan']);
-            $sheet->setCellValue('W' . $row, $data['admin']);
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $data['foll_up']);
+            $sheet->setCellValue('C' . $row, $data['no_model']);
+            $sheet->setCellValue('D' . $row, $data['no_order']);
+            $sheet->setCellValue('E' . $row, $data['area']);
+            $sheet->setCellValue('F' . $row, $data['buyer']);
+            $sheet->setCellValue('G' . $row, $data['delivery_awal']);
+            $sheet->setCellValue('H' . $row, $data['delivery_akhir']);
+            $sheet->setCellValue('I' . $row, $data['unit']);
+            $sheet->setCellValue('J' . $row, $data['item_type']);
+            $sheet->setCellValue('K' . $row, $data['kode_warna']);
+            $sheet->setCellValue('L' . $row, $data['color']);
+            $sheet->setCellValue('M' . $row, $data['tgl_list']);
+            $sheet->setCellValue('N' . $row, $data['tgl_pesan']);
+            $sheet->setCellValue('O' . $row, $data['tgl_pakai']);
+            $sheet->setCellValue('P' . $row, $data['ttl_jl_mc']);
+            $sheet->setCellValue('Q' . $row, $data['ttl_cns']);
+            $sheet->setCellValue('R' . $row, number_format($data['ttl_kg'], 2));
+            $sheet->setCellValue('S' . $row, number_format($data['sisa_kgs_mc'], 2));
+            $sheet->setCellValue('T' . $row, $data['sisa_cones_mc']);
+            $sheet->setCellValue('U' . $row, $data['lot']);
+            $sheet->setCellValue('V' . $row, $data['po_tambahan']);
+            $sheet->setCellValue('W' . $row, $data['keterangan']);
+            $sheet->getStyle('W' . $row)->getAlignment()->setWrapText(true);
+            $sheet->setCellValue('X' . $row, $data['area']);
             $row++;
         }
-
         // === Auto Size Kolom A - V === //
-        foreach (range('A', 'V') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
+        foreach (range('A', 'X') as $col) {
+            if ($col !== 'W') { // skip kolom W
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
         }
 
-        // === Tambahkan Border (A2:M[row - 1]) === //
+        $sheet->getColumnDimension('W')->setWidth(40);
+
         $styleArray = [
             'borders' => [
                 'allBorders' => [
@@ -1363,7 +1428,7 @@ class ExcelController extends BaseController
         ];
 
         $lastDataRow = $row - 1; // baris terakhir data
-        $sheet->getStyle("A3:W{$lastDataRow}")->applyFromArray($styleArray);
+        $sheet->getStyle("A3:X{$lastDataRow}")->applyFromArray($styleArray);
 
         // === Export File Excel === //
         $filename = 'Data_Pemesanan_Area_' . date('YmdHis') . '.xlsx';
