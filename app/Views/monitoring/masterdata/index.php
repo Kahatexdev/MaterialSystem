@@ -104,7 +104,6 @@
                 </div>
                 <form action="import/mu" method="post" enctype="multipart/form-data">
                     <div class="modal-body">
-                        <!-- Input File -->
                         <div class="mb-3">
                             <label for="excelFile" class="form-label">Pilih File Excel</label>
                             <input type="file" class="form-control" id="excelFile" name="file" accept=".xlsx, .xls, .csv" required>

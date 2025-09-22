@@ -96,7 +96,7 @@ class WarehouseController extends BaseController
         // $updateOrder = $this->masterOrderModel->getNullMc();
 
         // foreach ($updateOrder as $od) {
-        //     $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
+        //     $reqStartMc = 'http://127.0.0.1/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
 
         //     try {
         //         // Fetch data dari API
@@ -463,7 +463,7 @@ class WarehouseController extends BaseController
 
         if ($update) {
             $existing = session()->get('dataOut') ?? [];
-            $filtered = array_filter($existing, fn ($item) => !in_array($item['id_out_celup'], $post['id_out_celup']));
+            $filtered = array_filter($existing, fn($item) => !in_array($item['id_out_celup'], $post['id_out_celup']));
             session()->set('dataOut', array_values($filtered));
         }
 
@@ -1500,7 +1500,7 @@ class WarehouseController extends BaseController
         }
         //update tabel pemasukan
         if (!empty($checkedIds)) {
-            $whereIds = array_map(fn ($index) => $idOutCelup[$index] ?? null, $checkedIds);
+            $whereIds = array_map(fn($index) => $idOutCelup[$index] ?? null, $checkedIds);
             $whereIds = array_filter($whereIds); // Hapus nilai NULL jika ada
 
             if (!empty($whereIds)) {
@@ -1742,7 +1742,7 @@ class WarehouseController extends BaseController
 
             // getStartMc
             if (!isset($startMc[$model])) {
-                $url = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . urlencode($model);
+                $url = 'http://127.0.0.1/CapacityApps/public/api/getStartMc/' . urlencode($model);
                 $resp = @file_get_contents($url);
                 if ($resp !== false) {
                     $json = json_decode($resp, true);
@@ -1839,8 +1839,15 @@ class WarehouseController extends BaseController
                     $this->pemasukanModel->update($pemasukan['id_pemasukan'], ['out_jalur' => "1"]);
                 }
 
-                // Update field out_jalur pada tabel pemasukan
+                $ketPinjam = $data['keterangan_pinjam'][$pemasukan['id_pemasukan']] ?? '';
+                $ket    = $data['keterangan'][$pemasukan['id_pemasukan']] ?? '';
 
+                if ($ketPinjam !== '') {
+                    $ketGbn = $ketPinjam . (!empty($ket) ? ' | ' . $ket : '');
+                } else {
+                    $ketGbn = $ket;
+                }
+                // Update field out_jalur pada tabel pemasukan
                 // Siapkan data pengeluaran sesuai masing-masing pemasukan
                 $insertData = [
                     'id_out_celup'       => $pemasukan['id_out_celup'],
@@ -1854,7 +1861,7 @@ class WarehouseController extends BaseController
                     'lot_out'            => $outCelup['lot_kirim'], // pastikan field ini ada di data pemasukan
                     'id_total_pemesanan' => $idTtlPemesanan,
                     'status'             => 'Pengeluaran Jalur',
-                    'keterangan_gbn'     => $data['keterangan'][$pemasukan['id_pemasukan']],
+                    'keterangan_gbn'     => $ketGbn,
                     'admin'              => $this->username,
                     'created_at'         => date('Y-m-d H:i:s')
                 ];
@@ -1904,10 +1911,11 @@ class WarehouseController extends BaseController
                         'id_stock_old'   => $pemasukan['id_stock'],
                         'cluster_old'    => $pemasukan['nama_cluster'],
                         'cluster_new'    => $pemasukan['nama_cluster'],
-                        'kgs'            => $pemasukan['kgs_kirim'],
-                        'cns'            => $pemasukan['cones_kirim'],
+                        'id_out_celup'   => $pemasukan['id_out_celup'],
+                        'kgs'            => $kgsOut,
+                        'cns'            => $cnsOut,
                         'lot'            => $outCelup['lot_kirim'], // pastikan field ini ada di data pemasukan
-                        'krg'            => 1,
+                        'krg'            => $krgOut,
                         'keterangan'     => 'Pinjam Order',
                         'admin'          => $this->username,
                         'created_at'     => date('Y-m-d H:i:s')
@@ -2078,170 +2086,136 @@ class WarehouseController extends BaseController
             $totalCns += $data['cns'];
             $totalKrg += $data['krg'];
         }
+        $db = \Config\Database::connect();
+        $db->transBegin(); // 🔹 Start Transaction
 
-        foreach ($details as $index => $data) {
-            // cek apakah stock ini stock awal atau bukan
-            $cekStock = $this->stockModel->find($data['id_stock']);
+        try {
+            foreach ($details as $index => $data) {
+                // cek apakah stock ini stock awal atau bukan
+                $cekStock = $this->stockModel->find($data['id_stock']);
 
-            // Tentukan stock_awal
-            $stock_awal = empty($cekStock['lot_awal']) ? '' : 'Ya';
+                // Tentukan stock_awal
+                $stock_awal = empty($cekStock['lot_awal']) ? '' : 'Ya';
 
-            // cek apakah stock data baru sudah ada di tabel
-            $criteria = [
-                'no_model' => $data['no_model'],
-                'item_type' => $data['item_type'],
-                'kode_warna' => $data['kode_warna'],
-                'warna' => $data['warna'],
-                'lot' => $data['lot'],
-                'nama_cluster' => $cluster,
-                'stock_awal' => $stock_awal,
-            ];
-            $cekStockBaru = $this->stockModel->getDataClusterPindah($criteria);
-
-            if ($cekStockBaru) {
-                // Update stok jika sudah ada
-                $updateDataIn =
-                    [
-                        'kgs_in_out' => $cekStockBaru['kgs_in_out'] + $data['kgs'],
-                        'cns_in_out' => $cekStockBaru['cns_in_out'] + $data['cns'],
-                        'krg_in_out' => $cekStockBaru['krg_in_out'] + $data['krg']
-                    ];
-
-                $this->stockModel->update($cekStockBaru['id_stock'], $updateDataIn);
-
-                $newStockId = $cekStockBaru['id_stock'];
-                // Update id_stock di tabel pemasukan berdasarkan id_out_celup
-                $updatePemasukan = [
-                    'id_stock' => $cekStockBaru['id_stock'],
+                // cek apakah stock data baru sudah ada di tabel
+                $criteria = [
+                    'no_model' => $data['no_model'],
+                    'item_type' => $data['item_type'],
+                    'kode_warna' => $data['kode_warna'],
+                    'warna' => $data['warna'],
+                    'lot' => $data['lot'],
                     'nama_cluster' => $cluster,
+                    'stock_awal' => $stock_awal,
                 ];
+                $cekStockBaru = $this->stockModel->getDataClusterPindah($criteria);
 
-                $updateIdStock = $this->pemasukanModel
-                    ->where('id_out_celup', $data['id_out_celup'])
-                    ->set($updatePemasukan)
-                    ->update();
+                if ($cekStockBaru) {
+                    // Update stok jika sudah ada
+                    $updateDataIn =
+                        [
+                            'kgs_in_out' => $cekStockBaru['kgs_in_out'] + $data['kgs'],
+                            'cns_in_out' => $cekStockBaru['cns_in_out'] + $data['cns'],
+                            'krg_in_out' => $cekStockBaru['krg_in_out'] + $data['krg']
+                        ];
 
-                if ($updateIdStock) {
-                    log_message('info', 'Berhasil memperbarui id_stock di tabel pemasukan: ' . json_encode($updatePemasukan));
-                } else {
-                    log_message('error', 'Gagal memperbarui id_stock di tabel pemasukan: ' . json_encode($updatePemasukan));
-                    return [
-                        'status' => 'error',
-                        'message' => 'Gagal memperbarui id_stock di tabel pemasukan',
-                    ];
+                    if (!$this->stockModel->update($cekStockBaru['id_stock'], $updateDataIn)) {
+                        throw new \Exception('Gagal update stock cluster baru');
+                    }
+
+                    $newStockId = $cekStockBaru['id_stock'];
                 }
-            }
-            // inser data baru jika belum ada data
-            else {
-                // Jika data stok baru belum ada, tambahkan data baru
-                $insertData = [
-                    'no_model'          => $data['no_model'],
-                    'item_type'         => $data['item_type'],
-                    'kode_warna'        => $data['kode_warna'],
-                    'warna'             => $data['warna'],
-                    'nama_cluster'      => $cluster,
-                    'kgs_stock_awal'    => $stock_awal == 'Ya' ? $data['kgs'] : 0,
-                    'cns_stock_awal'    => $stock_awal == 'Ya' ? $data['cns'] : 0,
-                    'krg_stock_awal'    => $stock_awal == 'Ya' ? $data['krg'] : 0,
-                    'lot_awal'          => $stock_awal == 'Ya' ? $data['lot'] : '',
-                    'kgs_in_out'        => $stock_awal == '' ? $data['kgs'] : 0,
-                    'cns_in_out'        => $stock_awal == '' ? $data['cns'] : 0,
-                    'krg_in_out'        => $stock_awal == '' ? $data['krg'] : 0,
-                    'lot_stock'         => $stock_awal == '' ? $data['lot'] : '',
-                    'admin'             => session()->get('username'),
-                    'created_at'        => date('Y-m-d H:i:s'),
-                    'updated_at'        => NULL,
-                ];
+                // inser data baru jika belum ada data
+                else {
+                    // Jika data stok baru belum ada, tambahkan data baru
+                    $insertData = [
+                        'no_model'          => $data['no_model'],
+                        'item_type'         => $data['item_type'],
+                        'kode_warna'        => $data['kode_warna'],
+                        'warna'             => $data['warna'],
+                        'nama_cluster'      => $cluster,
+                        'kgs_stock_awal'    => $stock_awal == 'Ya' ? $data['kgs'] : 0,
+                        'cns_stock_awal'    => $stock_awal == 'Ya' ? $data['cns'] : 0,
+                        'krg_stock_awal'    => $stock_awal == 'Ya' ? $data['krg'] : 0,
+                        'lot_awal'          => $stock_awal == 'Ya' ? $data['lot'] : '',
+                        'kgs_in_out'        => $stock_awal == '' ? $data['kgs'] : 0,
+                        'cns_in_out'        => $stock_awal == '' ? $data['cns'] : 0,
+                        'krg_in_out'        => $stock_awal == '' ? $data['krg'] : 0,
+                        'lot_stock'         => $stock_awal == '' ? $data['lot'] : '',
+                        'admin'             => session()->get('username'),
+                        'created_at'        => date('Y-m-d H:i:s'),
+                        'updated_at'        => NULL,
+                    ];
 
-                if ($this->stockModel->insert($insertData)) {
+                    if (!$this->stockModel->insert($insertData)) {
+                        throw new \Exception('Gagal insert stock baru');
+                    }
                     // Dapatkan ID stok baru
                     $newStockId = $this->stockModel->getInsertID();
+                }
+                // 🔹 Update id_stock di tabel pemasukan
+                $updatePemasukan = [
+                    'id_stock' => $newStockId,
+                    'nama_cluster' => $cluster,
+                ];
+                if (
+                    !$this->pemasukanModel
+                        ->where('id_out_celup', $data['id_out_celup'])
+                        ->set($updatePemasukan)
+                        ->update()
+                ) {
+                    throw new \Exception('Gagal update pemasukan');
+                }
 
-                    if ($newStockId) {
-                        // Update id_stock di tabel pemasukan berdasarkan id_out_celup
-                        $updatePemasukan = [
-                            'id_stock' => $newStockId,
-                            'nama_cluster' => $cluster,
-                        ];
-
-                        $updateIdStock = $this->pemasukanModel
-                            ->where('id_out_celup', $data['id_out_celup'])
-                            ->set($updatePemasukan)
-                            ->update();
-
-                        if ($updateIdStock) {
-                            log_message('info', 'Berhasil memperbarui id_stock di tabel pemasukan: ' . json_encode($updatePemasukan));
-                        } else {
-                            log_message('error', 'Gagal memperbarui id_stock di tabel pemasukan: ' . json_encode($updatePemasukan));
-                            return [
-                                'status' => 'error',
-                                'message' => 'Gagal memperbarui id_stock di tabel pemasukan',
-                            ];
-                        }
-                    } else {
-                        log_message('error', 'Gagal mendapatkan ID stok baru setelah insert.');
-                        return [
-                            'status' => 'error',
-                            'message' => 'Gagal mendapatkan ID stok baru',
-                        ];
-                    }
-                } else {
-                    log_message('error', 'Gagal menambahkan data stok baru: ' . json_encode($insertData));
-                    return [
-                        'status' => 'error',
-                        'message' => 'Gagal menambahkan data stok baru',
+                // Update stok keluar
+                $updateDataOut = $stock_awal == '' ?
+                    [
+                        'kgs_in_out' => $cekStock['kgs_in_out'] - $data['kgs'],
+                        'cns_in_out' => $cekStock['cns_in_out'] - $data['cns'],
+                        'krg_in_out' => $cekStock['krg_in_out'] - $data['krg'],
+                    ] :
+                    [
+                        'kgs_stock_awal' => $cekStock['kgs_stock_awal'] - $data['kgs'],
+                        'cns_stock_awal' => $cekStock['cns_stock_awal'] - $data['cns'],
+                        'krg_stock_awal' => $cekStock['krg_stock_awal'] - $data['krg'],
                     ];
+
+                if (!$this->stockModel->update($cekStock['id_stock'], $updateDataOut)) {
+                    throw new \Exception('Gagal mengurangi stok lama');
+                }
+                // insert data history
+                $insertHistory = [
+                    'id_stock_old'  => $details[0]['id_stock'],
+                    'id_stock_new'  => $newStockId,
+                    'cluster_old'   => $details[0]['cluster_old'],
+                    'cluster_new'   => $cluster,
+                    'id_out_celup'  => $data['id_out_celup'],
+                    'kgs'           => $data['kgs'], // Total kgs
+                    'cns'           => $data['cns'], // Total cns
+                    'krg'           => $data['krg'], // Total krg
+                    'lot'           => $details[0]['lot'],
+                    'keterangan'    => "Pindah Cluster",
+                    'admin'         => session()->get('username'),
+                    'created_at'    => date('Y-m-d H:i:s'),
+                    'updated_at'    => NULL,
+                ];
+                if (!$this->historyStock->insert($insertHistory)) {
+                    throw new \Exception('Gagal insert history');
                 }
             }
-            // Update stok keluar
-            $updateDataOut = $stock_awal == '' ?
-                [
-                    'kgs_in_out' => $cekStock['kgs_in_out'] - $data['kgs'],
-                    'cns_in_out' => $cekStock['cns_in_out'] - $data['cns'],
-                    'krg_in_out' => $cekStock['krg_in_out'] - $data['krg'],
-                ] :
-                [
-                    'kgs_stock_awal' => $cekStock['kgs_stock_awal'] - $data['kgs'],
-                    'cns_stock_awal' => $cekStock['cns_stock_awal'] - $data['cns'],
-                    'krg_stock_awal' => $cekStock['krg_stock_awal'] - $data['krg'],
-                ];
-
-            $kurangiStock = $this->stockModel->update($cekStock['id_stock'], $updateDataOut);
-
-            if (!$kurangiStock) {
-                return [
-                    'status' => 'error',
-                    'message' => 'Gagal mengurangi stock',
-                ];
-            }
-        }
-        // insert data history
-        $insertHistory = [
-            'id_stock_old'  => $details[0]['id_stock'],
-            'id_stock_new'  => $newStockId,
-            'cluster_old'   => $details[0]['cluster_old'],
-            'cluster_new'   => $cluster,
-            'kgs'           => $totalKgs, // Total kgs
-            'cns'           => $totalCns, // Total cns
-            'krg'           => $totalKrg, // Total krg
-            'lot'           => $details[0]['lot'],
-            'keterangan'    => "Pindah Cluster",
-            'admin'         => session()->get('username'),
-            'created_at'    => date('Y-m-d H:i:s'),
-            'updated_at'    => NULL,
-        ];
-        $history = $this->historyStock->insert($insertHistory);
-        if (!$history) {
-            return [
+            // ✅ Semua query sukses → commit
+            $db->transCommit();
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Pindah cluster berhasil'
+            ]);
+        } catch (\Exception $e) {
+            $db->transRollback();
+            log_message('error', 'Transaksi gagal: ' . $e->getMessage());
+            return $this->response->setJSON([
                 'status' => 'error',
-                'message' => 'Gagal insert history',
-            ];
+                'message' => $e->getMessage(),
+            ]);
         }
-        return $this->response->setJSON([
-            'success' => true,
-            'received' => $cluster,
-            'details' => $cekStock,
-        ]);
     }
     public function reportPengiriman()
     {
@@ -3055,7 +3029,7 @@ class WarehouseController extends BaseController
 
         // 2) Siapkan HTTP client
         $client = \Config\Services::curlrequest([
-            'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
+            'baseURI' => 'http://127.0.0.1/CapacityApps/public/api/',
             'timeout' => 5
         ]);
 

@@ -576,6 +576,24 @@
         $(document).on('change', '.form-check-input[type="checkbox"]', function() {
             const id = $(this).val();
             $(`#kgs_out_${id}, #cns_out_${id}, #keterangan_${id}`).prop('disabled', !this.checked);
+
+            // ambil elemen keterangan pinjam (type text)
+            const inputKet = $(`#keterangan_pinjam_${id}`);
+            const sel = $('#noModelSelect option:selected');
+
+            if (this.checked) {
+                // ambil data model
+                const nm = $('#noModelSelect').val();
+                const itemTypePinjam = sel.data('item_type');
+                const kodeWarnaPinjam = sel.data('kode_warna');
+                const warnaPinjam = sel.data('warna');
+
+                // isi value default
+                inputKet.val(`pinjam dari ${nm} / ${itemTypePinjam} / ${kodeWarnaPinjam} / ${warnaPinjam}`);
+            } else {
+                // kosongkan jika di-uncheck
+                inputKet.val('');
+            }
         });
 
         // Submit usageForm (payload ringkas)
@@ -679,7 +697,7 @@
                         if (Array.isArray(data) && data.length) {
                             data.forEach(it => {
                                 options += `
-                                <option value="${it.no_model}" data-item_type="${it.item_type}" data-kode_warna="${it.kode_warna}">
+                                <option value="${it.no_model}" data-item_type="${it.item_type}" data-kode_warna="${it.kode_warna}" data-warna="${it.warna}">
                                     ${it.no_model} | ${it.item_type} | ${it.kode_warna} | ${it.warna}
                                 </option>`;
                             });
@@ -745,6 +763,7 @@
                             const sel = $('#noModelSelect option:selected');
                             const itemTypePinjam = sel.data('item_type');
                             const kodeWarnaPinjam = sel.data('kode_warna');
+                            const warnaPinjam = sel.data('warna');
 
                             const target = document.getElementById('formDetailPinjamOrder');
                             target.innerHTML = '';
@@ -783,12 +802,12 @@
                                                             <div class="row gx-2">
                                                                 <div class="col-6">
                                                                     <label for="kgs_out_${it.id_pemasukan}" class="form-label small mb-1">Kg Out Manual</label>
-                                                                    <input type="number" step="0.01" max="${it.kgs_kirim}" class="form-control form-control-sm"
+                                                                    <input type="number" step="0.01" max="${it.kgs_kirim}" min=0 class="form-control form-control-sm"
                                                                            name="kgs_out[${it.id_pemasukan}]" id="kgs_out_${it.id_pemasukan}" placeholder="Kg" disabled>
                                                                 </div>
                                                                 <div class="col-6">
                                                                     <label for="cns_out_${it.id_pemasukan}" class="form-label small mb-1">Cones Out Manual</label>
-                                                                    <input type="number" step="1" max="${it.cones_kirim}" class="form-control form-control-sm"
+                                                                    <input type="number" step="1" max="${it.cones_kirim}" min=0 class="form-control form-control-sm"
                                                                            name="cns_out[${it.id_pemasukan}]" id="cns_out_${it.id_pemasukan}" placeholder="CNS" disabled>
                                                                 </div>
                                                             </div>
@@ -797,6 +816,7 @@
                                                                 <textarea class="form-control form-control-sm" name="keterangan[${it.id_pemasukan}]"
                                                                           id="keterangan_${it.id_pemasukan}" rows="3" placeholder="Masukkan keterangan…" disabled></textarea>
                                                             </div>
+                                                            <input type="hidden" name="keterangan_pinjam[${it.id_pemasukan}]" id="keterangan_pinjam_${it.id_pemasukan}"
                                                         </div>
                                                     </div>
                                                 </div>
@@ -885,12 +905,12 @@
                         <div class="row gx-2">
                             <div class="col-6">
                                 <label for="kgs_out_${item.id_pemasukan}" class="form-label small mb-1">Kg Out Manual</label>
-                                <input type="number" step="0.01" max="${item.kgs_kirim}" class="form-control form-control-sm"
+                                <input type="number" step="0.01" max="${item.kgs_kirim}" min=0 class="form-control form-control-sm"
                                        name="kgs_out[${item.id_pemasukan}]" id="kgs_out_${item.id_pemasukan}" placeholder="Kg" disabled>
                             </div>
                             <div class="col-6">
                                 <label for="cns_out_${item.id_pemasukan}" class="form-label small mb-1">Cones Out Manual</label>
-                                <input type="number" step="1" max="${item.cones_kirim}" class="form-control form-control-sm"
+                                <input type="number" step="1" max="${item.cones_kirim}" min=0 class="form-control form-control-sm"
                                        name="cns_out[${item.id_pemasukan}]" id="cns_out_${item.id_pemasukan}" placeholder="CNS" disabled>
                             </div>
                         </div>
