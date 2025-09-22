@@ -110,9 +110,7 @@
 
                 <!-- Progress bar -->
                 <div class="progress mt-3" style="height: 6px; border-radius: 6px;">
-                    <div id="progressBar"
-                        class="progress-bar progress-bar-striped progress-bar-animated bg-info"
-                        role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                     </div>
                 </div>
                 <small id="progressText" class="text-white mt-1 d-block">0%</small>
@@ -184,8 +182,8 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Pesan</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Pakai</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jalan MC</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones Pesan</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">KG Pesan</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones Pesan</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Sisa KGS MC</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Sisa Cones MC</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Lot</th>
@@ -310,10 +308,10 @@
                                 item.tgl_list,
                                 item.tgl_pesan,
                                 item.tgl_pakai,
-                                item.jl_mc,
-                                item.ttl_qty_cones,
-                                item.ttl_berat_cones,
-                                item.sisa_kgs_mc,
+                                item.ttl_jl_mc,
+                                parseFloat(item.ttl_kg).toFixed(2),
+                                item.ttl_cns,
+                                parseFloat(item.sisa_kgs_mc).toFixed(2),
                                 item.sisa_cones_mc,
                                 item.lot,
                                 item.po_tambahan,
