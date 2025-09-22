@@ -4217,7 +4217,7 @@ class ExcelController extends BaseController
         foreach ($categories as $label => $keyword) {
             $colLetter = 'H';
             foreach ($areaHeaders as $_) {
-                $formula = "172.23.44.14$dataStartRow}:F{$dataEndRow},\"{$keyword}\",{$colLetter}{$dataStartRow}:{$colLetter}{$dataEndRow})";
+                $formula = "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"{$keyword}\",{$colLetter}{$dataStartRow}:{$colLetter}{$dataEndRow})";
                 $sheet->setCellValue("{$colLetter}{$row}", $formula);
                 $sheet->getStyle("{$colLetter}{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
                 $sheet->getStyle("{$colLetter}{$row}")->getFont()->setBold(true);
