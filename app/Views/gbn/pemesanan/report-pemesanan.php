@@ -182,8 +182,8 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Pesan</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Pakai</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jalan MC</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones Pesan</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">KG Pesan</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones Pesan</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Sisa KGS MC</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Sisa Cones MC</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Lot</th>
@@ -309,9 +309,9 @@
                                 item.tgl_pesan,
                                 item.tgl_pakai,
                                 item.ttl_jl_mc,
-                                item.ttl_kg,
+                                parseFloat(item.ttl_kg).toFixed(2),
                                 item.ttl_cns,
-                                item.sisa_kgs_mc,
+                                parseFloat(item.sisa_kgs_mc).toFixed(2),
                                 item.sisa_cones_mc,
                                 item.lot,
                                 item.po_tambahan,
