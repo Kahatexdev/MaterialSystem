@@ -389,9 +389,11 @@ class PengeluaranModel extends Model
             pengeluaran.cns_out,
             pengeluaran.krg_out,
             pengeluaran.nama_cluster,
-            CONCAT(COALESCE(pengeluaran.keterangan_gbn, ''), 
-           CASE WHEN pengeluaran.keterangan_gbn IS NOT NULL THEN ' - ' ELSE '' END, 
-           pemesanan.keterangan_gbn) AS keterangan_gbn,
+            CONCAT(
+                COALESCE(pengeluaran.keterangan_gbn, ''),
+                CASE WHEN pemesanan.keterangan_gbn IS NOT NULL THEN ' - ' ELSE '' END,
+                COALESCE(pemesanan.keterangan_gbn, '')
+            ) AS keterangan_gbn,
             cluster.group
         ")
 
