@@ -270,7 +270,7 @@
                                 item.kode_warna,
                                 item.no_model,
                                 item.ttl_jl_mc,
-                                item.ttl_kg,
+                                parseFloat(item.ttl_kg).toFixed(2),
                                 item.ttl_cns
                             ]).draw(false);
                         });
