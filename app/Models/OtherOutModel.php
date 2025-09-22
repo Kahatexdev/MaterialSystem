@@ -67,10 +67,11 @@ class OtherOutModel extends Model
     public function getPakaiLain($key, $jenis = null)
     {
         $builder = $this->db->table('other_out oo')
-            ->select('oo.*, oc.no_model, sc.item_type, sc.kode_warna, sc.warna, mm.jenis, sc.po_plus')
+            ->select('oo.*, oc.no_model, sc.item_type, sc.kode_warna, sc.warna, mm.jenis, sc.po_plus, p.area_out, p.tgl_out, p.kgs_out, p.cns_out, p.krg_out, p.lot_out')
             ->join('out_celup oc', 'oc.id_out_celup = oo.id_out_celup', 'left')
             ->join('schedule_celup sc', 'oc.id_celup = sc.id_celup', 'left')
             ->join('master_material mm', 'sc.item_type = mm.item_type', 'left')
+            ->join('pengeluaran p', 'p.id_out_celup = oo.id_out_celup', 'left')
             ->where('oc.no_model', $key);
 
         if (!empty($jenis)) {
