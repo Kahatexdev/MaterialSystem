@@ -21,6 +21,7 @@ class MasterOrderModel extends Model
         'lco_date',
         'memo',
         'start_mc',
+        'jarum',
         'delivery_awal',
         'delivery_akhir',
         'unit',
