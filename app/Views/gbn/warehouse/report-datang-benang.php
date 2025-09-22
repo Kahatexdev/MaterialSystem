@@ -167,6 +167,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">GW</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Harga</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Nama Cluster</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Po Tambahan</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Update</th>
                         </tr>
@@ -288,6 +289,7 @@
 
                     if (response.length > 0) {
                         $.each(response, function(index, item) {
+                            let poPlus = (item.po_plus === "1") ? "Ya" : "Tidak";
                             dataTable.row.add([
                                 index + 1,
                                 item.foll_up,
@@ -301,15 +303,16 @@
                                 item.kode_warna,
                                 item.warna,
                                 parseFloat(item.kgs_material ?? 0).toFixed(2),
-                                item.tgl_masuk,
+                                item.tgl_datang,
                                 parseFloat(item.kgs_kirim ?? 0).toFixed(2),
                                 item.cones_kirim,
                                 item.lot_kirim,
                                 item.no_surat_jalan,
                                 item.l_m_d,
-                                item.gw_kirim,
+                                parseFloat(item.gw_kirim ?? 0).toFixed(2),
                                 item.harga,
                                 item.nama_cluster,
+                                poPlus,
                                 item.keterangan,
                                 `<button class="btn btn-warning btn-update" 
                                     data-id_bon="${item.id_bon || ''}" 
