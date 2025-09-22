@@ -2151,6 +2151,7 @@ class WarehouseController extends BaseController
                     }
                     // Dapatkan ID stok baru
                     $newStockId = $this->stockModel->getInsertID();
+                }
                 // 🔹 Update id_stock di tabel pemasukan
                 $updatePemasukan = [
                     'id_stock' => $newStockId,
@@ -2685,15 +2686,17 @@ class WarehouseController extends BaseController
                 'kgs'        => $data['total_kgs'],
                 'admin'      => session()->get('username')
             ]);
+        } else {
+            $newKgs = $material['kgs'] + $data['total_kgs'];
+            // Update material jika sudah ada
+            $this->materialModel->update($material['id_material'], [
+                'gw'         => 0,
+                'qty_pcs'    => 0,
+                'loss'       => 0,
+                'kgs'        => $newKgs,
+                'admin'      => session()->get('username')
+            ]);
         }
-        //  else {
-        //     $newKgs = $material['kgs'] + $data['total_kgs'];
-        //     // Update material jika sudah ada
-        //     $this->materialModel->update($material['id_material'], [
-        //         'kgs'        => $newKgs,
-        //         'admin'      => session()->get('username')
-        //     ]);
-        // }
 
         // 1) Insert Bon
         $dataOtherBon = [
