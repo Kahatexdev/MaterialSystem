@@ -2143,7 +2143,7 @@ class ExcelController extends BaseController
         $response = file_get_contents($getDeliv);
         $delivery = json_decode($response, true);
         $totalDel  = count($delivery);
-
+        // dd($data);
         $dataStockAwal = $this->historyStock->getDataStockAwal($key, $jenis);
         $dataDatangSolid = $this->pemasukanModel->getDatangSolid($key, $jenis);
         $dataPlusDatangSolid = $this->pemasukanModel->getPlusDatangSolid($key, $jenis);
