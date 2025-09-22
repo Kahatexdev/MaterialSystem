@@ -441,7 +441,7 @@ class ScheduleController extends BaseController
             $total_qty_po = $sisa_jatah;
         }
         // URL API untuk mengambil data start mesin
-        $reqStartMc = 'http://127.0.0.1/CapacityApps/public/api/reqstartmc/' . $no_model;
+        $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $no_model;
 
         try {
             // Fetch data dari API
@@ -1174,7 +1174,7 @@ class ScheduleController extends BaseController
         $listPdk = $this->masterOrderModel->getNullDeliv() ?? null;
         if ($listPdk) {
             $client = \Config\Services::curlrequest([
-                'baseURI' => 'http://127.0.0.1/CapacityApps/public/api/',
+                'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
                 'timeout' => 5
             ]);
 
@@ -1543,7 +1543,7 @@ class ScheduleController extends BaseController
         $model = $this->request->getGet('model');
         $search = $this->request->getGet('search');
         if (!empty($model)) {
-            $masterApi = 'http://127.0.0.1/CapacityApps/public/api/getStartMc/' . $model;
+            $masterApi = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . $model;
             $masterResponse = file_get_contents($masterApi);
             $master = json_decode($masterResponse, true);
         } else {
@@ -1564,7 +1564,7 @@ class ScheduleController extends BaseController
             'search' => $search ?? ''
         ];
 
-        $apiUrl = 'http://127.0.0.1/MaterialSystem/public/api/statusbahanbaku/?' . http_build_query($params);
+        $apiUrl = 'http://172.23.44.14/MaterialSystem/public/api/statusbahanbaku/?' . http_build_query($params);
 
         // Mengambil data dari API eksternal
         $response = file_get_contents($apiUrl);
