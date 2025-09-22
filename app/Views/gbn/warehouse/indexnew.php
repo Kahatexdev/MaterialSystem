@@ -408,15 +408,15 @@
                                 <div class="row mt-4 g-2">
                                     <div class="col-md-4">
                                         <label for="inputKgs" class="form-label">Total Kgs</label>
-                                        <input type="number" inputmode="decimal" step="0.01" class="form-control" id="inputKgs" name="input_kgs" placeholder="Masukkan Kgs" required>
+                                        <input type="number" inputmode="decimal" step="0.01" min="0" class="form-control" id="inputKgs" name="input_kgs" placeholder="Masukkan Kgs" required>
                                     </div>
                                     <div class="col-md-4">
                                         <label for="inputCns" class="form-label">Total Cns</label>
-                                        <input type="number" inputmode="numeric" step="1" class="form-control" id="inputCns" name="input_cns" placeholder="Masukkan Cns" required>
+                                        <input type="number" inputmode="numeric" step="1" min="0" class="form-control" id="inputCns" name="input_cns" placeholder="Masukkan Cns" required>
                                     </div>
                                     <div class="col-md-4">
                                         <label for="inputKrg" class="form-label">Total Krg</label>
-                                        <input type="number" inputmode="numeric" step="1" class="form-control" id="inputKrg" name="input_krg" placeholder="Masukkan Krg" required>
+                                        <input type="number" inputmode="numeric" step="1" min="0" class="form-control" id="inputKrg" name="input_krg" placeholder="Masukkan Krg" required>
                                     </div>
                                 </div>
 
@@ -549,7 +549,7 @@
                          | ${(item.cns_stock_awal && item.cns_stock_awal>0)? item.cns_stock_awal : item.cns_in_out} Cones
                          | ${(item.krg_stock_awal && item.krg_stock_awal>0)? item.krg_stock_awal : item.krg_in_out} KRG</p>
                     </div>
-                    <div class="col-12 col-md-4 d-grid gap-2">
+                    <div class="col-12 col-md-4 gap-2">
                       <button class="btn btn-outline-info btn-sm PindahCluster"
                         data-id="${item.id_stock}" data-nama-cluster-old="${item.nama_cluster}">
                         Pindah Cluster
@@ -594,7 +594,7 @@
             allowClear: true,
             width: '100%',
             dropdownParent: $('#modalPindahOrder'),
-            dropdownAutoWidth: true,
+            dropdownAutoWidth: false,
             minimumInputLength: isSmall ? 1 : 3,
             ajax: {
                 url: '<?= base_url() ?>/<?= session()->get('role') ?>/warehouse/getNoModel',
@@ -678,11 +678,11 @@
                     <div class="row gx-2">
                       <div class="col-6">
                         <label for="kgs_out_${d.id_out_celup}" class="form-label small mb-1">Kg Out Manual</label>
-                        <input type="number" inputmode="decimal" step="0.01" class="form-control form-control-sm" name="kgs_out[${d.id_out_celup}]" id="kgs_out_${d.id_out_celup}" placeholder="Kg" disabled>
+                        <input type="number" inputmode="decimal" step="0.01" min="0" class="form-control form-control-sm" name="kgs_out[${d.id_out_celup}]" id="kgs_out_${d.id_out_celup}" placeholder="Kg" disabled>
                       </div>
                       <div class="col-6">
                         <label for="cns_out_${d.id_out_celup}" class="form-label small mb-1">Cones Out Manual</label>
-                        <input type="number" inputmode="numeric" step="1" class="form-control form-control-sm" name="cns_out[${d.id_out_celup}]" id="cns_out_${d.id_out_celup}" placeholder="CNS" disabled>
+                        <input type="number" inputmode="numeric" step="1" min="0" class="form-control form-control-sm" name="cns_out[${d.id_out_celup}]" id="cns_out_${d.id_out_celup}" placeholder="CNS" disabled>
                       </div>
                     </div>
                   </div>
