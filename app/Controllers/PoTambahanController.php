@@ -179,7 +179,7 @@ class PoTambahanController extends BaseController
             $loss = $items['loss'];
             $gwpcs = ($gw * $comp) / 100;
             $styleSize = urlencode($styleSize);
-            $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $noModel . '/' . $styleSize;
+            $apiUrl  = 'http://127.0.0.1/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $noModel . '/' . $styleSize;
 
             $response = file_get_contents($apiUrl);
 
