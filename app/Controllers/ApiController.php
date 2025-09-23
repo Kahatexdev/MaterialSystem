@@ -1045,9 +1045,9 @@ class ApiController extends ResourceController
             'kode_warna' => $kode_warna,
         ];
 
-        $totalPengiriman = $this->returModel->getTotalRetur($data);
+        $totalRetur = $this->returModel->getTotalRetur($data);
 
-        return $this->respond($totalPengiriman, 200);
+        return $this->respond($totalRetur, 200);
     }
     public function cekStokPerstyle($model, $style)
     {
