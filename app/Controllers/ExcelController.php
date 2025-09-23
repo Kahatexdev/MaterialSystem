@@ -836,7 +836,7 @@ class ExcelController extends BaseController
             if ($getPoPlus == 1) {
                 $poPlus = 'YA';
             } else {
-                $poPlus = 'TIDAK';
+                $poPlus = '';
             }
             $sheet->fromArray([
                 [

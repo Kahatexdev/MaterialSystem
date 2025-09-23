@@ -290,7 +290,7 @@
 
                     if (response.length > 0) {
                         $.each(response, function(index, item) {
-                            let poPlus = (item.po_plus === "1") ? "Ya" : "Tidak";
+                            let poPlus = (item.po_plus === "1") ? "Ya" : "";
                             dataTable.row.add([
                                 index + 1,
                                 item.foll_up,
