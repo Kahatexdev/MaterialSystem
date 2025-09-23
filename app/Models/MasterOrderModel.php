@@ -343,21 +343,23 @@ class MasterOrderModel extends Model
             AND r.area_retur <> 'GUDANG BENANG'
         ) AS retur_pb_area,
 
-       -- pakai area 
+        -- pakai area (kgs_out tanpa looping)
         (
             SELECT SUM(COALESCE(p.kgs_out, 0))
-            FROM pemesanan pms
-            JOIN total_pemesanan tp ON tp.id_total_pemesanan = pms.id_total_pemesanan
-            JOIN material m2 ON m2.id_material = pms.id_material
-            JOIN master_order mo2 ON mo2.id_order = m2.id_order
-            LEFT JOIN pengeluaran p 
-                ON p.id_total_pemesanan = tp.id_total_pemesanan 
-                AND p.status = 'Pengiriman Area'
-            WHERE pms.status_kirim = 'YA'
-            AND pms.admin = material.area
-            AND mo2.no_model = master_order.no_model
-            AND m2.item_type = material.item_type
-            AND m2.kode_warna = material.kode_warna
+            FROM pengeluaran p
+            WHERE p.status = 'Pengiriman Area'
+            AND EXISTS (
+                SELECT 1
+                FROM pemesanan pms
+                JOIN material m2 ON m2.id_material = pms.id_material
+                JOIN master_order mo2 ON mo2.id_order = m2.id_order
+                WHERE p.id_total_pemesanan = pms.id_total_pemesanan
+                    AND pms.status_kirim = 'YA'
+                    AND pms.admin = material.area
+                    AND mo2.no_model = master_order.no_model
+                    AND m2.item_type = material.item_type
+                    AND m2.kode_warna = material.kode_warna
+            )
         ) AS pakai_area,
 
         -- lot
@@ -512,7 +514,7 @@ class MasterOrderModel extends Model
         $data = $this->select('no_model, buyer, delivery_awal, delivery_akhir, material.style_size, material.item_type, material.color, material.kode_warna, sum(material.kgs) as kg_mu, material.composition, material.gw, material.loss')
             ->join('material', 'material.id_order=master_order.id_order')
             ->where('master_order.id_order', $id)
-            ->where('material.area', $area)
+            // ->where('material.area', $area)
             ->where('material.composition !=', 0)
             ->where('material.gw !=', 0)
             ->where('material.qty_pcs !=', 0)
