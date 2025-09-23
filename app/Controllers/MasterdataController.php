@@ -148,7 +148,7 @@ class MasterdataController extends BaseController
         $masterOrderModel    = new MasterOrderModel();
         $materialModel       = new MaterialModel();
         $masterMaterialModel = new MasterMaterialModel();
-
+        $jarum = $this->request->getPost('jarum');
         // Ambil username admin dari session
         $admin = session()->get('username');
         if (!$admin) {
@@ -217,6 +217,7 @@ class MasterdataController extends BaseController
                     'foll_up'        => $foll_up,
                     'lco_date'       => $lco_date,
                     'memo'           => NULL,
+                    'jarum'           => $jarum,
                     'delivery_awal'  => $validate['delivery_awal'] ?? NULL,
                     'delivery_akhir' => $validate['delivery_akhir'] ?? NULL,
                     'unit'           => $unit ?? NULL,
@@ -1042,6 +1043,7 @@ class MasterdataController extends BaseController
                 'lco_date' => "<span style='$style'>{$row['lco_date']}</span>",
                 'no_model' => "<span style='$style'>{$row['no_model']}</span>",
                 'no_order' => "<span style='$style'>{$row['no_order']}</span>",
+                'jarum' => "<span style='$style'>{$row['jarum']}</span>",
                 'buyer' => "<span style='$style'>{$row['buyer']}</span>",
                 'memo' => "<span style='$style'>{$row['memo']}</span>",
                 'start_mc' => "<span style='$style'>" .

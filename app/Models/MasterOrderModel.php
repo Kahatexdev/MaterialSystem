@@ -21,6 +21,7 @@ class MasterOrderModel extends Model
         'lco_date',
         'memo',
         'start_mc',
+        'jarum',
         'delivery_awal',
         'delivery_akhir',
         'unit',
@@ -345,12 +346,18 @@ class MasterOrderModel extends Model
         -- pakai area 
         (
             SELECT SUM(COALESCE(p.kgs_out, 0))
-            FROM pengeluaran p
-            JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
-            JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
-            WHERE sc.no_model = master_order.no_model
-            AND sc.kode_warna = material.kode_warna
-            AND sc.item_type = material.item_type
+            FROM pemesanan pms
+            JOIN total_pemesanan tp ON tp.id_total_pemesanan = pms.id_total_pemesanan
+            JOIN material m2 ON m2.id_material = pms.id_material
+            JOIN master_order mo2 ON mo2.id_order = m2.id_order
+            LEFT JOIN pengeluaran p 
+                ON p.id_total_pemesanan = tp.id_total_pemesanan 
+                AND p.status = 'Pengiriman Area'
+            WHERE pms.status_kirim = 'YA'
+            AND pms.admin = material.area
+            AND mo2.no_model = master_order.no_model
+            AND m2.item_type = material.item_type
+            AND m2.kode_warna = material.kode_warna
         ) AS pakai_area,
 
         -- lot

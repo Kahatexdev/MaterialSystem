@@ -112,7 +112,7 @@
 
                                             <div class="col-md-4">
                                                 <label>Kode Warna</label>
-                                                <input class="form-control" list="kodeWarnaOptions" id="kode_warna_input" placeholder="Pilih / ketik Kode Warna">
+                                                <input class="form-control" list="kodeWarnaOptions" id="kode_warna_input" placeholder="Pilih / ketik Kode Warna" required>
                                                 <datalist id="kodeWarnaOptions"></datalist>
                                                 <input type="hidden" name="kode_warna" id="kode_warna">
                                             </div>
@@ -121,7 +121,7 @@
                                         <div class="row g-3 mt-3">
                                             <div class="col-md-4">
                                                 <label>Warna</label>
-                                                <input class="form-control" list="warnaOptions" id="warna_input" placeholder="Pilih / ketik Warna">
+                                                <input class="form-control" list="warnaOptions" id="warna_input" placeholder="Pilih / ketik Warna" required>
                                                 <datalist id="warnaOptions"></datalist>
                                                 <input type="hidden" name="warna" id="warna">
                                             </div>

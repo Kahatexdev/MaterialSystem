@@ -84,11 +84,17 @@
                 <form action="import/mu" method="post" enctype="multipart/form-data">
                     <div class="modal-body">
                         <!-- Input File -->
+                        <div class="">
+                            <label for="" class="form-label">Jarum</label>
+                            <input type="text" class="form-control" name="jarum">
+                        </div>
                         <div class="mb-3">
                             <label for="excelFile" class="form-label">Pilih File Excel</label>
                             <input type="file" class="form-control" id="excelFile" name="file" accept=".xlsx, .xls, .csv" required>
                             <small class="text-muted">Hanya file dengan format .xlsx, .xls, atau .csv yang didukung.</small>
                         </div>
+
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -155,6 +161,7 @@
                             <th>LCO Date</th>
                             <th>No Model</th>
                             <th>No Order</th>
+                            <th>Jarum</th>
                             <th>Buyer</th>
                             <th>Memo</th>
                             <th>Start Mc</th>
@@ -261,6 +268,9 @@
                 },
                 {
                     "data": "no_order"
+                },
+                {
+                    "data": "jarum"
                 },
                 {
                     "data": "buyer"
