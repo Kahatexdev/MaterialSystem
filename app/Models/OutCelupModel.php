@@ -388,4 +388,15 @@ class OutCelupModel extends Model
             ->where('out_celup.lot_kirim', $lot)
             ->first();
     }
+
+    public function getDataOutFromRetur($id)
+    {
+        return $this->db->table('out_celup')
+            ->select('out_celup.*, retur.item_type, retur.kode_warna, retur.warna')
+            ->join('retur', 'out_celup.id_retur = retur.id_retur')
+            ->where('out_celup.id_out_celup', $id)
+            ->distinct()
+            ->get()
+            ->getResultArray();
+    }
 }
