@@ -969,6 +969,7 @@ $routes->group(
         $routes->get('getKategoriRetur', 'ApiController::getKategoriRetur');
         $routes->post('saveRetur', 'ApiController::saveRetur');
         $routes->get('getTotalPengiriman', 'ApiController::getTotalPengiriman');
+        $routes->get('getTotalRetur', 'ApiController::getTotalRetur');
         $routes->post('warehouse/search', 'WarehouseController::search');
         $routes->get('warehouse/exportExcel', 'ExcelController::excelStockMaterial');
         $routes->get('poTambahanDetail/(:any)/(:any)', 'ApiController::poTambahanDetail/$1/$2');

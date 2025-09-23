@@ -1723,7 +1723,8 @@ class PemesananController extends BaseController
         $styleRows = $this->materialModel->getStyleSizeByBb(
             $pemesanan['no_model'],
             $pemesanan['item_type'],
-            $pemesanan['kode_warna']
+            $pemesanan['kode_warna'],
+            $pemesanan['color']
         );
         $styleSizes = array_values(array_unique(array_column($styleRows, 'style_size')));
 
@@ -2458,7 +2459,8 @@ class PemesananController extends BaseController
                 $styleList = $this->materialModel->getStyleSizeByBb(
                     $order['no_model'],
                     $order['item_type'],
-                    $order['kode_warna']
+                    $order['kode_warna'],
+                    $order['color']
                 );
 
                 if ($styleList) {
@@ -2585,7 +2587,7 @@ class PemesananController extends BaseController
         // Tambahkan semua data pemesanan ke mergedData
         foreach ($dataPemesanan as $key => $pemesanan) {
             // ambil data styleSize by bb
-            $getStyle = $this->materialModel->getStyleSizeByBb($pemesanan['no_model'], $pemesanan['item_type'], $pemesanan['kode_warna']);
+            $getStyle = $this->materialModel->getStyleSizeByBb($pemesanan['no_model'], $pemesanan['item_type'], $pemesanan['kode_warna'], $pemesanan['color']);
 
             $ttlKeb = 0;
             $ttlQty = 0;
@@ -2656,7 +2658,7 @@ class PemesananController extends BaseController
         // Tambahkan semua data retur ke mergedData (data pemesanan diset null)
         foreach ($dataRetur as $retur) {
             // ambil data styleSize by bb
-            $getStyle = $this->materialModel->getStyleSizeByBb($retur['no_model'], $retur['item_type'], $retur['kode_warna']);
+            $getStyle = $this->materialModel->getStyleSizeByBb($retur['no_model'], $retur['item_type'], $retur['kode_warna'], $retur['warna']);
             // dd($getStyle);
 
             $ttlKeb = 0;

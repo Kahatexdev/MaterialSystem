@@ -944,8 +944,9 @@ class ApiController extends ResourceController
         $noModel = $this->request->getGet('no_model') ?? '';
         $itemType = $this->request->getGet('item_type') ?? '';
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
+        $warna = $this->request->getGet('warna') ?? '';
 
-        $data = $this->materialModel->getStyleSizeByBb($noModel, $itemType, $kodeWarna);
+        $data = $this->materialModel->getStyleSizeByBb($noModel, $itemType, $kodeWarna, $warna);
 
         return $this->respond($data, 200);
     }
@@ -1030,6 +1031,23 @@ class ApiController extends ResourceController
         $totalPengiriman = $this->pengeluaranModel->getTotalPengiriman($data);
 
         return $this->respond($totalPengiriman, 200);
+    }
+    public function getTotalRetur()
+    {
+        $area = $this->request->getGet('area') ?? '';
+        $no_model = $this->request->getGet('no_model') ?? '';
+        $item_type = $this->request->getGet('item_type') ?? '';
+        $kode_warna = $this->request->getGet('kode_warna') ?? '';
+        $data = [
+            'area' => $area,
+            'no_model' => $no_model,
+            'item_type' => $item_type,
+            'kode_warna' => $kode_warna,
+        ];
+
+        $totalRetur = $this->returModel->getTotalRetur($data);
+
+        return $this->respond($totalRetur, 200);
     }
     public function cekStokPerstyle($model, $style)
     {
