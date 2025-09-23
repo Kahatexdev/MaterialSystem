@@ -169,6 +169,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Nama Cluster</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Po Tambahan</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Admin</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Update</th>
                         </tr>
                     </thead>
@@ -313,6 +314,7 @@
                                 item.harga,
                                 item.nama_cluster,
                                 poPlus,
+                                item.admin,
                                 item.keterangan,
                                 `<button class="btn btn-warning btn-update" 
                                     data-id_bon="${item.id_bon || ''}" 
