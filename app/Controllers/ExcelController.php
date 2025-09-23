@@ -130,7 +130,7 @@ class ExcelController extends BaseController
             $loss = $items['loss'];
             $gwpcs = ($gw * $comp) / 100;
             $styleSize = urlencode($styleSize);
-            $apiUrl  = 'http://127.0.0.1/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
+            $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
 
             $response = file_get_contents($apiUrl);
 
@@ -399,7 +399,7 @@ class ExcelController extends BaseController
             $loss = $items['loss'];
             $gwpcs = ($gw * $comp) / 100;
             $styleSize = urlencode($styleSize);
-            $apiUrl  = 'http://127.0.0.1/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
+            $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
 
             $response = file_get_contents($apiUrl);
 
@@ -606,7 +606,7 @@ class ExcelController extends BaseController
     }
     public function excelPPHDays($area, $tanggal)
     {
-        $apiUrl = 'http://127.0.0.1/CapacityApps/public/api/getPPhPerhari/' . $area . '/' . $tanggal;
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getPPhPerhari/' . $area . '/' . $tanggal;
 
         $response = file_get_contents($apiUrl);
         if ($response === false) {
@@ -816,22 +816,28 @@ class ExcelController extends BaseController
 
         // Judul
         $sheet->setCellValue('A1', 'Datang Benang');
-        $sheet->mergeCells('A1:V1'); // Menggabungkan sel untuk judul
+        $sheet->mergeCells('A1:W1'); // Menggabungkan sel untuk judul
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["No", "Foll Up", "No Model", "No Order", "Buyer", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "KG Pesan", "Tanggal Datang", "Kgs Datang", "Cones Datang", "LOT Datang", "No Surat Jalan", "LMD", "GW", "Harga", "Nama Cluster", "Admin"];
+        $header = ["No", "Foll Up", "No Model", "No Order", "Buyer", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "KG Pesan", "Tanggal Datang", "Kgs Datang", "Cones Datang", "LOT Datang", "No Surat Jalan", "LMD", "GW", "Harga", "Nama Cluster", "PO Tambahan", "Admin"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
-        $sheet->getStyle('A3:V3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:V3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A3:V3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3:W3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:W3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:W3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         // Data
         $row = 4;
         foreach ($data as $index => $item) {
+            $getPoPlus = $item['po_plus'];
+            if ($getPoPlus == 1) {
+                $poPlus = 'YA';
+            } else {
+                $poPlus = '';
+            }
             $sheet->fromArray([
                 [
                     $index + 1,
@@ -855,6 +861,7 @@ class ExcelController extends BaseController
                     number_format($item['gw_kirim'], 2),
                     number_format($item['harga'], 2),
                     $item['nama_cluster'],
+                    $poPlus,
                     $item['admin']
                 ]
             ], NULL, 'A' . $row);
@@ -870,16 +877,16 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle('A3:V' . ($row - 1))->applyFromArray($styleArray);
+        $sheet->getStyle('A3:W' . ($row - 1))->applyFromArray($styleArray);
 
         // Set auto width untuk setiap kolom
-        foreach (range('A', 'V') as $column) {
+        foreach (range('A', 'W') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Set isi tabel agar rata tengah
-        $sheet->getStyle('A4:V' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A4:V' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A4:W' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:W' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
         $fileName = 'Report_Datang_Benang_' . date('Y-m-d') . '.xlsx';
@@ -921,8 +928,8 @@ class ExcelController extends BaseController
         $row = 4;
         foreach ($data as $index => $item) {
             $model = $item['no_model'];
-            // Ambil data dari API ge127.0.0.1
-            $getStartMcUrl = 'http://127.0.0.1/CapacityApps/public/api/getStartMc/' . $model;
+            // Ambil data dari API ge172.23.44.14
+            $getStartMcUrl = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . $model;
             $getStartMcResponse = file_get_contents($getStartMcUrl);
             $getStartMc = json_decode($getStartMcResponse, true);
 
@@ -2139,11 +2146,11 @@ class ExcelController extends BaseController
         $key = $this->request->getGet('key');
         $jenis = $this->request->getGet('jenis') ?? '';
         $data = $this->masterOrderModel->getFilterReportGlobal($key, $jenis);
-        $getDeliv = 'http://127.0.0.1/CapacityApps/public/api/getDeliv/' . $key;
+        $getDeliv = 'http://172.23.44.14/CapacityApps/public/api/getDeliv/' . $key;
         $response = file_get_contents($getDeliv);
         $delivery = json_decode($response, true);
         $totalDel  = count($delivery);
-
+        // dd($data);
         $dataStockAwal = $this->historyStock->getDataStockAwal($key, $jenis);
         $dataDatangSolid = $this->pemasukanModel->getDatangSolid($key, $jenis);
         $dataPlusDatangSolid = $this->pemasukanModel->getPlusDatangSolid($key, $jenis);
@@ -4674,7 +4681,7 @@ class ExcelController extends BaseController
     public function exportReportGlobalBenang()
     {
         $key = $this->request->getGet('key');
-        $getDeliv = 'http://127.0.0.1/CapacityApps/public/api/getDeliv/' . $key;
+        $getDeliv = 'http://172.23.44.14/CapacityApps/public/api/getDeliv/' . $key;
         $response = file_get_contents($getDeliv);
 
         // $data = $this->stockModel->getFilterReportGlobalBenang($key);
@@ -5623,7 +5630,7 @@ class ExcelController extends BaseController
         $sheet->setCellValue('O4', 'KG');
         $sheet->setCellValue('P4', 'LOT');
 
-        // Po Tambahan Gbn: 127.0.0.1Sub-header
+        // Po Tambahan Gbn: 172.23.44.14Sub-header
         $sheet->mergeCells('R3:U3');
         $sheet->setCellValue('R3', 'PO TAMBAHAN GBN');
         $sheet->setCellValue('R4', 'TGL TERIMA PO(+) GBN');
@@ -6080,7 +6087,7 @@ class ExcelController extends BaseController
     {
         $data = $this->masterOrderModel->getFilterReportGlobal($key);
 
-        $getDeliv = 'http://127.0.0.1/CapacityApps/public/api/getDeliv/' . $key;
+        $getDeliv = 'http://172.23.44.14/CapacityApps/public/api/getDeliv/' . $key;
         $response = file_get_contents($getDeliv);
         $delivery = json_decode($response, true);
         $totalDel  = count($delivery);
@@ -7158,7 +7165,7 @@ class ExcelController extends BaseController
 
         // 2) Siapkan HTTP client
         $client = \Config\Services::curlrequest([
-            'baseURI' => 'http://127.0.0.1/CapacityApps/public/api/',
+            'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
             'timeout' => 5
         ]);
 
@@ -7459,7 +7466,7 @@ class ExcelController extends BaseController
         $noModel   = $result[0]['no_model'] ?? '';
         $kodeBuyer = $result[0]['buyer'] ?? '';
 
-        $apiUrl = 'http://127.0.0.1/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
 
         $buyerName = '';
         $response   = @file_get_contents($apiUrl);
@@ -7497,7 +7504,7 @@ class ExcelController extends BaseController
         }
 
         // Ambil buyer dari API
-        // $buyerApiUrl = 'http://127.0.0.1/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+        // $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
 
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';
@@ -9491,7 +9498,7 @@ class ExcelController extends BaseController
             }
 
             // API URL dari config
-            $apiUrl = 'http://127.0.0.1/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($res['no_model']);
+            $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($res['no_model']);
 
             // Pakai stream context untuk timeout dan error handling
             $context = stream_context_create(['http' => ['timeout' => 3]]); // 3 detik timeout
@@ -10076,7 +10083,7 @@ class ExcelController extends BaseController
         // $noModel =  $result[0]['no_model'] ?? '';
 
         // Ambil buyer dari API
-        // $buyerApiUrl = 'http://127.0.0.1/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+        // $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
         // $buyerName = json_decode(file_get_contents($buyerApiUrl), true);
 
         if ($tujuan == 'CELUP') {
@@ -10653,7 +10660,7 @@ class ExcelController extends BaseController
         // $noModel =  $result[0]['no_model'] ?? '';
 
         // Ambil buyer dari API
-        // $buyerApiUrl = 'http://127.0.0.1/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+        // $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
         // $buyerName = json_decode(file_get_contents($buyerApiUrl), true);
 
         if ($tujuan == 'CELUP') {
@@ -11222,7 +11229,7 @@ class ExcelController extends BaseController
 
         // // 2) Siapkan HTTP client
         // $client = \Config\Services::curlrequest([
-        //     'baseURI' => 'http://127.0.0.1/CapacityApps/public/api/',
+        //     'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
         //     'timeout' => 5
         // ]);
 
@@ -13490,7 +13497,7 @@ class ExcelController extends BaseController
             }
 
             // API URL dari config
-            $apiUrl = 'http://127.0.0.1/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($res['no_model']);
+            $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($res['no_model']);
 
             // Pakai stream context untuk timeout dan error handling
             $context = stream_context_create(['http' => ['timeout' => 3]]); // 3 detik timeout
@@ -14117,13 +14124,13 @@ class ExcelController extends BaseController
         // ====== dari PEMESANAN ======
         foreach ($dataPemesanan as $p) {
             // dd($p);
-            $getStyle = $this->materialModel->getStyleSizeByBb($p['no_model'], $p['item_type'], $p['kode_warna']);
+            $getStyle = $this->materialModel->getStyleSizeByBb($p['no_model'], $p['item_type'], $p['kode_warna'], $p['color']);
 
             $ttlKeb = 0.0;
             $ttlQty = 0;
 
             foreach ($getStyle as $row) {
-                $urlQty = 'http://127.0.0.1/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($p['no_model'])
+                $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($p['no_model'])
                     . '&style_size=' . urlencode($row['style_size'])
                     . '&area=' . urlencode($area);
 
@@ -14184,13 +14191,13 @@ class ExcelController extends BaseController
 
         // ====== dari RETUR ======
         foreach ($dataRetur as $r) {
-            $getStyle = $this->materialModel->getStyleSizeByBb($r['no_model'], $r['item_type'], $r['kode_warna']);
+            $getStyle = $this->materialModel->getStyleSizeByBb($r['no_model'], $r['item_type'], $r['kode_warna'], $r['warna']);
 
             $ttlKeb = 0.0;
             $ttlQty = 0;
 
             foreach ($getStyle as $row) {
-                $urlQty = 'http://127.0.0.1/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($r['no_model'])
+                $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($r['no_model'])
                     . '&style_size=' . urlencode($row['style_size'])
                     . '&area=' . urlencode($area);
 

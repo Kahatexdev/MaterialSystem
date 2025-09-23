@@ -944,8 +944,9 @@ class ApiController extends ResourceController
         $noModel = $this->request->getGet('no_model') ?? '';
         $itemType = $this->request->getGet('item_type') ?? '';
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
+        $warna = $this->request->getGet('warna') ?? '';
 
-        $data = $this->materialModel->getStyleSizeByBb($noModel, $itemType, $kodeWarna);
+        $data = $this->materialModel->getStyleSizeByBb($noModel, $itemType, $kodeWarna, $warna);
 
         return $this->respond($data, 200);
     }
@@ -1030,6 +1031,23 @@ class ApiController extends ResourceController
         $totalPengiriman = $this->pengeluaranModel->getTotalPengiriman($data);
 
         return $this->respond($totalPengiriman, 200);
+    }
+    public function getTotalRetur()
+    {
+        $area = $this->request->getGet('area') ?? '';
+        $no_model = $this->request->getGet('no_model') ?? '';
+        $item_type = $this->request->getGet('item_type') ?? '';
+        $kode_warna = $this->request->getGet('kode_warna') ?? '';
+        $data = [
+            'area' => $area,
+            'no_model' => $no_model,
+            'item_type' => $item_type,
+            'kode_warna' => $kode_warna,
+        ];
+
+        $totalRetur = $this->returModel->getTotalRetur($data);
+
+        return $this->respond($totalRetur, 200);
     }
     public function cekStokPerstyle($model, $style)
     {
@@ -1402,7 +1420,7 @@ class ApiController extends ResourceController
     {
         $username = urlencode(session()->get('username'));
         $role     = session()->get('role');
-        $url      = 'http://127.0.0.1/CapacityApps/public/api/pengaduan/' . $username . '/' . $role;
+        $url      = 'http://172.23.44.14/CapacityApps/public/api/pengaduan/' . $username . '/' . $role;
 
         try {
             $json = @file_get_contents($url);
@@ -1641,7 +1659,7 @@ class ApiController extends ResourceController
 
         // Ambil data dari API lokal
         $client = service('curlrequest');
-        $response = $client->get("http://127.0.0.1/CapacityApps/public/api/ExportPengaduan/{$idPengaduan}");
+        $response = $client->get("http://172.23.44.14/CapacityApps/public/api/ExportPengaduan/{$idPengaduan}");
 
         $pengaduan = json_decode($response->getBody(), true);
 
