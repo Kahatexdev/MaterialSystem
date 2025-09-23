@@ -270,15 +270,29 @@ class MaterialModel extends Model
             ->where('id_order', $idOrder)
             ->update();
     }
-    public function getStyleSizeByBb($noModel, $itemType, $kodeWarna)
+    public function getStyleSizeByBb($noModel, $itemType, $kodeWarna, $warna = null)
     {
-        return $this->select('master_order.no_model, material.item_type, material.kode_warna, material.style_size, material.kgs, material.gw, material.composition, material.loss, SUM(kgs) AS kgs')
-            ->join('master_order', 'master_order.id_order=material.id_order', 'left')
+        $builder = $this->select('
+            master_order.no_model, 
+            material.item_type, 
+            material.kode_warna, 
+            material.style_size, 
+            material.kgs, 
+            material.gw, 
+            material.composition, 
+            material.loss, 
+            SUM(kgs) AS kgs
+        ')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('master_order.no_model', $noModel)
             ->where('material.item_type', $itemType)
-            ->where('material.kode_warna', $kodeWarna)
-            ->groupBy('material.style_size')
-            ->findAll();
+            ->where('material.kode_warna', $kodeWarna);
+
+        if ($warna !== null) {
+            $builder->where('material.color', $warna);
+        }
+
+        return $builder->groupBy('material.style_size')->findAll();
     }
 
     public function getNoModel($noModelOld, $kodeWarna, $term = null)

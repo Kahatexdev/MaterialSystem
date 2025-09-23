@@ -14117,7 +14117,7 @@ class ExcelController extends BaseController
         // ====== dari PEMESANAN ======
         foreach ($dataPemesanan as $p) {
             // dd($p);
-            $getStyle = $this->materialModel->getStyleSizeByBb($p['no_model'], $p['item_type'], $p['kode_warna']);
+            $getStyle = $this->materialModel->getStyleSizeByBb($p['no_model'], $p['item_type'], $p['kode_warna'], $p['color']);
 
             $ttlKeb = 0.0;
             $ttlQty = 0;
@@ -14184,7 +14184,7 @@ class ExcelController extends BaseController
 
         // ====== dari RETUR ======
         foreach ($dataRetur as $r) {
-            $getStyle = $this->materialModel->getStyleSizeByBb($r['no_model'], $r['item_type'], $r['kode_warna']);
+            $getStyle = $this->materialModel->getStyleSizeByBb($r['no_model'], $r['item_type'], $r['kode_warna'], $r['warna']);
 
             $ttlKeb = 0.0;
             $ttlQty = 0;
