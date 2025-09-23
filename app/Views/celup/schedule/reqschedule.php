@@ -253,7 +253,7 @@
                         <?php
                         $no = 1;
                         foreach ($uniqueData as $data):
-                            if ($data['last_status'] == 'done') {
+                            if ($data['last_status'] == '') {
                                 continue; // Skip rows with last_status 'done'
                             }
                         ?>
