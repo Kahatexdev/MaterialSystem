@@ -343,7 +343,7 @@ class MasterOrderModel extends Model
             AND r.area_retur <> 'GUDANG BENANG'
         ) AS retur_pb_area,
 
-        -- pakai area 
+       -- pakai area 
         (
             SELECT SUM(COALESCE(p.kgs_out, 0))
             FROM pemesanan pms

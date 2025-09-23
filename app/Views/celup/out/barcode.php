@@ -43,6 +43,7 @@
             font-size: 25px;
             font-weight: bold;
             color: #000;
+            border-bottom: 1px solid #000;
         }
 
         .l-desc {
@@ -92,17 +93,32 @@
             text-align: left;
         }
 
+
         .footer {
             display: flex;
             justify-content: space-between;
-            margin-top: 6px;
+            /* margin-top: 6px; */
             font-size: 11px;
+        }
+
+        .footer-left {
+            text-align: left;
+            display: flex;
+            align-items: center;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         .footer-right {
             text-align: right;
         }
 
+        .lot-value {
+            margin: 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
 
         .no-karung-value {
             margin: 0;
@@ -143,7 +159,6 @@
                             <div class="barcode-section">
                                 <img src="<?= $barcodeImages[$i] ?>" alt="barcode">
                                 <div style="margin-top: 1px;" class="l-header"> <?= $row['no_model'] ?? '-' ?></div>
-                                <div class="l-desc">Lot: <?= $row['lot_kirim'] ?></div>
                             </div>
                         </td>
                     </tr>
@@ -171,7 +186,9 @@
                 </table>
 
                 <div class="footer">
-
+                    <div class="footer-left">
+                        <div class="lot-value">Lot: <?= $row['lot_kirim'] ?></div>
+                    </div>
                     <div class="footer-right">
                         No Karung
                         <div class="no-karung-value"><?= htmlspecialchars($row['no_karung'] ?? '-', ENT_QUOTES) ?></div>
