@@ -334,7 +334,8 @@ class ScheduleCelupModel extends Model
     {
         return $this
             ->select('id_celup,no_model, item_type, kode_warna, warna, lot_celup, kg_celup')
-            ->whereIn('last_status', ['done', 'complain'])
+            // ->whereIn('last_status', ['done', 'complain'])
+            ->where('lot_celup IS NOT NULL')
             ->groupBy('id_celup')
             ->findAll();
     }
