@@ -308,7 +308,7 @@ class PemesananModel extends Model
 
         // Kondisi status_kirim berdasarkan role
         if ($role === 'monitoring') {
-            $builder->where('pemesanan.status_kirim', 'YA');
+            // $builder->where('pemesanan.status_kirim', 'YA');
         } else {
             $builder->where('pemesanan.status_kirim !=', 'YA');
         }
@@ -486,7 +486,9 @@ class PemesananModel extends Model
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->where('pemesanan.status_kirim', 'YA');
+            ->where('pemesanan.status_kirim', 'YA')
+            ->where('master_order.no_model', 'rz2675')
+            ->where('material.kode_warna', '1801-AY');
 
         // Cek apakah ada input key untuk pencarian
         if (!empty($key)) {
