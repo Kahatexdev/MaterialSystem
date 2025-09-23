@@ -1279,7 +1279,7 @@ class ExcelController extends BaseController
         $tanggal_akhir = $this->request->getGet('tanggal_akhir');
         // Ambil data hasil filter dari model
         $filteredData = $this->pemesananModel->getFilterPemesananArea($key, $tanggal_awal, $tanggal_akhir);
-
+        dd($filteredData);
         $makeKey = function ($area, $item_type, $kode_warna, $id_order, $tgl_pakai) {
             return implode('|', [
                 $area ?? '',
