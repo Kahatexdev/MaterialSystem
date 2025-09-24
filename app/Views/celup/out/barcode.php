@@ -40,7 +40,7 @@
 
         .l-header {
             text-align: center;
-            font-size: 25px;
+            font-size: 30px;
             font-weight: bold;
             color: #000;
             border-bottom: 1px solid #000;
@@ -93,37 +93,66 @@
             text-align: left;
         }
 
-
         .footer {
-            display: flex;
-            justify-content: space-between;
-            /* margin-top: 6px; */
+            position: relative;
+            width: 100%;
+            margin-top: 30px;
+            padding-left: 5px;
+            padding-right: 5px;
             font-size: 11px;
+            height: 50px;
         }
 
         .footer-left {
+            position: absolute;
+            left: 5px;
+            bottom: 0;
             text-align: left;
+            max-width: 60%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
             display: flex;
-            align-items: center;
-            position: relative;
-            top: 50%;
-            transform: translateY(-50%);
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .footer-left>div:first-child {
+            margin-bottom: 0;
         }
 
         .footer-right {
+            position: absolute;
+            right: 10px;
+            bottom: 0;
             text-align: right;
+            margin-top: 20px;
+            max-width: 35%;
+        }
+
+        .lot-label {
+            font-size: 11px;
+            line-height: 1;
+            margin-bottom: 2px;
+            /* Jarak tetap antara LOT dan value */
         }
 
         .lot-value {
             margin: 0;
-            font-size: 20px;
+            font-size: 40px;
             font-weight: bold;
+            line-height: 0.9;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            display: inline-block;
+            vertical-align: bottom;
         }
 
         .no-karung-value {
             margin: 0;
             font-size: 40px;
             font-weight: bold;
+            line-height: 1;
         }
 
         .headerRow {
@@ -187,7 +216,8 @@
 
                 <div class="footer">
                     <div class="footer-left">
-                        <div class="lot-value">Lot: <?= $row['lot_kirim'] ?></div>
+                        <!-- <div class="lot-label">LOT</div> -->
+                        <div class="lot-value"> <?= $row['lot_kirim'] ?></div>
                     </div>
                     <div class="footer-right">
                         No Karung
