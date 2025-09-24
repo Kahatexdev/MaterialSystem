@@ -355,7 +355,6 @@ class MasterOrderModel extends Model
                 JOIN master_order mo2 ON mo2.id_order = m2.id_order
                 WHERE p.id_total_pemesanan = pms.id_total_pemesanan
                     AND pms.status_kirim = 'YA'
-                    AND pms.admin = material.area
                     AND mo2.no_model = master_order.no_model
                     AND m2.item_type = material.item_type
                     AND m2.kode_warna = material.kode_warna
