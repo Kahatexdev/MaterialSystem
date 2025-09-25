@@ -409,7 +409,7 @@ class WarehouseController extends BaseController
                                 AND oc.id_out_celup = ?
                             )
                             -- Kemudian cocokkan atribut model/item/warna secara dinamis:
-                            AND COALESCE(r.no_model,      sc.no_model)      = ?
+                            AND COALESCE(r.no_model,      oc.no_model)      = ?
                             AND COALESCE(r.item_type,     sc.item_type)     = ?
                             AND COALESCE(r.kode_warna,    sc.kode_warna)    = ?
                             AND p.nama_cluster                           = ?
@@ -3647,6 +3647,7 @@ class WarehouseController extends BaseController
             ]);
         }
         [$noModel, $itemType, $kodeWarna, $warna] = explode('|', $reqData['no_model_tujuan']);
+        // log_message('info', "Tujuan pindah order: no_model=$noModel, item_type=$itemType, kode_warna=$kodeWarna, warna=$warna");
 
         $idOutCelup = $reqData['idOutCelup'] ?? [];
         $idStock    = $reqData['id_stock']   ?? [];
@@ -3673,7 +3674,8 @@ class WarehouseController extends BaseController
                 'message' => 'Beberapa data tidak ditemukan di database.'
             ]);
         }
-
+        // log_message('info', 'Data Stock: ' . json_encode($idStockData));
+        // dd($idStockData);
         // -------------------------------------------------------
         // PREPASS: hitung TOTAL semua kgs/cones/krg untuk stock baru
         // supaya ketika kita insert/update stock tujuan (di dalam foreach)
@@ -3735,9 +3737,10 @@ class WarehouseController extends BaseController
             ];
 
             $cluster  = $idStockData[$i]['nama_cluster'];
-            $lotStock = $idStockData[$i]['lot_stock'];
+            // Jika lot_stock kosong/null, gunakan lot_awal
+            $lotStock = !empty($idStockData[$i]['lot_stock']) ? $idStockData[$i]['lot_stock'] : $idStockData[$i]['lot_awal'];
             $oldIdOC  = $d['id_out_celup'];
-
+            // log_message('info', "lotstock: $lotStock, cluster: $cluster, data stock : " . json_encode($idStockData[$i]));
             // — baru out_celup (sama seperti sebelumnya)
             $idRetur = $this->outCelupModel
                 ->select('id_retur')
@@ -3760,21 +3763,44 @@ class WarehouseController extends BaseController
             }
 
             // — update stok LAMA (kurangi sesuai tiap item, pakai nilai per-item)
-            $newKgs = max(0, $idStockData[$i]['kgs_in_out'] - $totalKgs);
-            $newCns = max(0, $idStockData[$i]['cns_in_out'] - $totalCns);
-            $newKrg = max(0, $idStockData[$i]['krg_in_out'] - $totalKrgOut);
+            // Jika kgs_in_out ada (lebih dari 0), kurangi dari kgs_in_out, jika tidak ada (0/null), kurangi dari kgs_stock_awal
+            if (!empty($idStockData[$i]['kgs_in_out']) && $idStockData[$i]['kgs_in_out'] > 0) {
+                $newKgs = max(0, $idStockData[$i]['kgs_in_out'] - $totalKgs);
+            } else {
+                $newKgs = max(0, $idStockData[$i]['kgs_stock_awal'] - $totalKgs);
+            }
+            if (!empty($idStockData[$i]['cns_in_out']) && $idStockData[$i]['cns_in_out'] > 0) {
+                $newCns = max(0, $idStockData[$i]['cns_in_out'] - $totalCns);
+            } else {
+                $newCns = max(0, $idStockData[$i]['cns_stock_awal'] - $totalCns);
+            }
+            if (!empty($idStockData[$i]['krg_in_out']) && $idStockData[$i]['krg_in_out'] > 0) {
+                $newKrg = max(0, $idStockData[$i]['krg_in_out'] - $totalKrgOut);
+            } else {
+                $newKrg = max(0, $idStockData[$i]['krg_stock_awal'] - $totalKrgOut);
+            }
+
+            // $newKgs = max(0, $idStockData[$i]['kgs_in_out'] - $totalKgs);
+            // $newCns = max(0, $idStockData[$i]['cns_in_out'] - $totalCns);
+            // $newKrg = max(0, $idStockData[$i]['krg_in_out'] - $totalKrgOut);
             $this->stockModel->update($idStock[$i], [
-                'kgs_in_out'   => $newKgs,
-                'cns_in_out'   => $newCns,
-                'krg_in_out'   => $newKrg,
+                // Update kgs_in_out jika ada, jika tidak update kgs_stock_awal
+                'kgs_in_out'   => (!empty($idStockData[$i]['kgs_in_out']) && $idStockData[$i]['kgs_in_out'] > 0) ? $newKgs : $idStockData[$i]['kgs_in_out'],
+                'kgs_stock_awal' => (empty($idStockData[$i]['kgs_in_out']) || $idStockData[$i]['kgs_in_out'] == 0) ? $newKgs : $idStockData[$i]['kgs_stock_awal'],
+                // Update cns_in_out jika ada, jika tidak update cns_stock_awal
+                'cns_in_out'   => (!empty($idStockData[$i]['cns_in_out']) && $idStockData[$i]['cns_in_out'] > 0) ? $newCns : $idStockData[$i]['cns_in_out'],
+                'cns_stock_awal' => (empty($idStockData[$i]['cns_in_out']) || $idStockData[$i]['cns_in_out'] == 0) ? $newCns : $idStockData[$i]['cns_stock_awal'],
+                // Update krg_in_out jika ada, jika tidak update krg_stock_awal
+                'krg_in_out'   => (!empty($idStockData[$i]['krg_in_out']) && $idStockData[$i]['krg_in_out'] > 0) ? $newKrg : $idStockData[$i]['krg_in_out'],
+                'krg_stock_awal' => (empty($idStockData[$i]['krg_in_out']) || $idStockData[$i]['krg_in_out'] == 0) ? $newKrg : $idStockData[$i]['krg_stock_awal'],
                 'lot_stock'    => $lotStock,
-                'lot_awal'     => $idStockData[$i]['lot_awal'] ?? $idStockData[$i]['lot_stock'],
+                'lot_awal'     => $lotStock,
                 'nama_cluster' => $cluster,
             ]);
 
             // --- Buat key unik untuk tujuan stock supaya insert/update tujuan hanya sekali
             $destKey = implode('|', [$noModel, $itemType, $kodeWarna, $warna, $cluster, $lotStock]);
-
+            // log_message('info', "Dest Key: $destKey");
             if (!isset($processedDest[$destKey])) {
                 // cek stock tujuan (gunakan total akhir yang sudah dihitung)
                 $existingStock = $this->stockModel
@@ -3832,7 +3858,7 @@ class WarehouseController extends BaseController
                 'kgs'           => $kgsKirim,
                 'cns'           => $cnsKirim,
                 'krg'           => $krgKirimOut,
-                'lot'           => $idStockData[0]['lot_stock'],
+                'lot'           => $lotStock,
                 'keterangan'    => "Pindah Order",
                 'admin'         => session()->get('username'),
                 'created_at'    => date('Y-m-d H:i:s'),
@@ -3846,8 +3872,8 @@ class WarehouseController extends BaseController
 
             $totalKgsHistory = array_sum(array_column($dataHistory, 'kgs'));
 
-            log_message('debug', 'Data History: ' . print_r($dataHistory, true));
-            log_message('debug', 'Total Kgs History: ' . $totalKgsHistory);
+            // log_message('debug', 'Data History: ' . print_r($dataHistory, true));
+            // log_message('debug', 'Total Kgs History: ' . $totalKgsHistory);
 
             $dataOutCelupLama = $this->outCelupModel->find($oldIdOC);
             $kgsKirim = $dataOutCelupLama['kgs_kirim'];
@@ -3857,6 +3883,22 @@ class WarehouseController extends BaseController
                     ->set('out_jalur', '1')
                     ->where('id_out_celup', $oldIdOC)
                     ->update();
+
+                // — update stock lama: kurangi karung (krg_in_out) sebanyak 1
+                $oldStock = $this->stockModel->find($idStock[$i]);
+                if ($oldStock) {
+                    if (!empty($oldStock['krg_in_out']) && $oldStock['krg_in_out'] > 0) {
+                        $newKrgInOut = max(0, $oldStock['krg_in_out'] - 1);
+                        $this->stockModel->update($idStock[$i], [
+                            'krg_in_out' => $newKrgInOut
+                        ]);
+                    } else {
+                        $newKrgStockAwal = max(0, $oldStock['krg_stock_awal'] - 1);
+                        $this->stockModel->update($idStock[$i], [
+                            'krg_stock_awal' => $newKrgStockAwal
+                        ]);
+                    }
+                }
             } else {
                 $this->pemasukanModel
                     ->set('out_jalur', '0')
