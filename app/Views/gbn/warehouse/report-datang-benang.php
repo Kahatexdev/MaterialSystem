@@ -314,8 +314,8 @@
                                 item.harga,
                                 item.nama_cluster,
                                 poPlus,
-                                item.admin,
                                 item.keterangan,
+                                item.admin,
                                 `<button class="btn btn-warning btn-update" 
                                     data-id_bon="${item.id_bon || ''}" 
                                     data-id_other="${item.id_other_bon || ''}" 
