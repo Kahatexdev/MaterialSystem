@@ -302,11 +302,11 @@ class PemasukanModel extends Model
             ->join('retur', 'retur.id_retur = out_celup.id_retur', 'left')
             ->join('other_bon', 'other_bon.id_other_bon = out_celup.id_other_bon', 'left') // tambahkan join
             ->join('stock', 'stock.id_stock=pemasukan.id_stock', 'left')
+            ->where('stock.nama_cluster', $data['cluster'])
+            ->where('pemasukan.out_jalur', '0')
             ->where("COALESCE(schedule_celup.no_model, retur.no_model, other_bon.no_model, stock.no_model) = ", $data['no_model'])
             ->where("COALESCE(schedule_celup.item_type, retur.item_type, other_bon.item_type, stock.item_type) = ", $data['item_type'])
             ->where("COALESCE(schedule_celup.kode_warna, retur.kode_warna, other_bon.kode_warna, stock.kode_warna) = ", $data['kode_warna'])
-            ->where('stock.nama_cluster', $data['cluster'])
-            ->where('pemasukan.out_jalur', '0')
             // ->orWhere('stock.kgs_in_out >', 0)
             // ->orWhere('stock.kgs_stock_awal >', 0)
             ->groupBy('out_celup.id_out_celup')
