@@ -663,6 +663,7 @@ class MasterdataController extends BaseController
             'qty_pcs' => $this->request->getPost('qty_pcs'),
             'loss' => $this->request->getPost('loss'),
             'kgs' => $this->request->getPost('kgs'),
+            'keterangan' => $this->request->getPost('keterangan'),
 
 
         ];
