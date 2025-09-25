@@ -119,7 +119,7 @@
             <div class="row mt-2">
                 <div class="col-md-3">
                     <label for="">Key</label>
-                    <input type="text" class="form-control" placeholder="No Model/Item Type/Kode Warna/Warna" style="font-size: 11px;">
+                    <input type="text" class="form-control" placeholder="No Model/Item Type/Kode Warna/Warna/Lot" style="font-size: 11px;">
                 </div>
                 <div class="col-md-3">
                     <label for="">Tanggal Awal (Tanggal Datang)</label>
@@ -314,8 +314,8 @@
                                 item.harga,
                                 item.nama_cluster,
                                 poPlus,
-                                item.admin,
                                 item.keterangan,
+                                item.admin,
                                 `<button class="btn btn-warning btn-update" 
                                     data-id_bon="${item.id_bon || ''}" 
                                     data-id_other="${item.id_other_bon || ''}" 

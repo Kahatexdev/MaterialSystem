@@ -92,6 +92,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty(pcs)</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Loss</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                         </tr>
                     </thead>
@@ -112,6 +113,7 @@
                                 <td><?= ($data['qty_pcs'] == 1) ? '-' : $data['qty_pcs'] ?></td>
                                 <td><?= ($data['loss'] == 1) ? '-' : $data['loss'] ?></td>
                                 <td><?= $data['kgs'] ?></td>
+                                <td><?= $data['keterangan'] ?></td>
                                 <td class="d-flex justify-content-start align-items-center gap-1">
                                     <button class="btn btn-warning btn-xs btn-edit" data-id="<?= $data['id_material'] ?>">
                                         <i class="fas fa-edit"></i>
@@ -236,6 +238,11 @@
                                     <label for="qty_pcs" class="form-label">Kgs</label>
                                     <input type="number" step="0.01" class="form-control" id="add_kgs" name="kgs" required>
                                 </div>
+
+                                <div class="col-3">
+                                    <label for="keterangan" class="form-label">Keterangan</label>
+                                    <textarea name="keterangan" id="add_keterangan" class="form-control" rows="2"></textarea>
+                                </div>
                             </div>
 
                             <div class="modal-footer">
@@ -313,6 +320,11 @@
                             <div class="mb-3">
                                 <label for="kgs" class="form-label">Kgs</label>
                                 <input type="number" step="0.01" class="form-control" id="kgs" name="kgs" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="keterangan" class="form-label">Keterangan</label>
+                                <textarea class="form-control" id="keterangan" name="keterangan" rows="2"></textarea>
                             </div>
                             <!-- Button update dan batal di sebelah kanan -->
                             <div class="modal-footer">
@@ -632,6 +644,7 @@
                     $('#qty_pcs').val(response.qty_pcs);
                     $('#loss').val(response.loss);
                     $('#kgs').val(response.kgs);
+                    $('#keterangan').val(response.keterangan);
                     // Show modal dialog
                     $('#updateModal').modal('show');
                 },

@@ -85,6 +85,7 @@ class MaterialController extends BaseController
                         'qty_pcs'    => esc($data['qty_pcs']),
                         'loss'       => esc($data['loss']),
                         'kgs'        => esc($data['kgs']),
+                        'keterangan' => esc($data['keterangan']),
                         'admin'      => session()->get('id_user'),
                     ];
                     if (!$this->materialModel->insert($saveData)) {
@@ -107,6 +108,7 @@ class MaterialController extends BaseController
                     'qty_pcs'    => esc($data['qty_pcs']),
                     'loss'       => esc($data['loss']),
                     'kgs'        => esc($data['kgs']),
+                    'keterangan' => esc($data['keterangan']),
                     'admin'      => session()->get('id_user'),
                 ];
                 if (!$this->materialModel->insert($saveData)) {

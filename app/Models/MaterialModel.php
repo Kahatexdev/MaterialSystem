@@ -12,7 +12,7 @@ class MaterialModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id_material', 'id_order', 'style_size', 'area', 'inisial', 'color', 'item_type', 'kode_warna', 'composition', 'gw', 'gw_aktual', 'qty_pcs', 'loss', 'kgs', 'admin', 'created_at', 'updated_at'];
+    protected $allowedFields    = ['id_material', 'id_order', 'style_size', 'area', 'inisial', 'color', 'item_type', 'kode_warna', 'composition', 'gw', 'gw_aktual', 'qty_pcs', 'loss', 'kgs', 'keterangan', 'admin', 'created_at', 'updated_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -300,6 +300,7 @@ class MaterialModel extends Model
         $builder =  $this->select('material.item_type, material.kode_warna, master_order.no_model, material.color')
             ->join('master_order', 'master_order.id_order = material.id_order')
             ->where('master_order.no_model !=', $noModelOld)
+            ->where('material.color IS NOT NULL')
             // ->where('material.kode_warna', $kodeWarna)
             ->groupBy('material.item_type, material.kode_warna, master_order.no_model');
 
