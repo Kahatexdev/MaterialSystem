@@ -545,10 +545,10 @@ class PemesananController extends BaseController
     {
         // Ambil semua input POST
         $postData = $this->request->getPost();
-
+        // dd ($postData);
         // Validasi data yang diperlukan: bisa menghasilkan array of records
         $validDatas = $this->pengeluaranModel->validateDeliveryData($postData);
-
+        log_message('debug', '[saveSessionDeliveryArea] Validated data: ' . json_encode($validDatas));
         // Jika tidak ada data valid, kembalikan error
         if (!is_array($validDatas) || count($validDatas) === 0) {
             return $this->response->setStatusCode(400)->setJSON([
@@ -571,6 +571,7 @@ class PemesananController extends BaseController
             $isDuplicate = array_filter($manualDelivery, function ($item) use ($row) {
                 return
                     $item['id_out_celup'] == $row['id_out_celup']
+                    && $item['id_pengeluaran'] == $row['id_pengeluaran']
                     && $item['area_out']  == $row['area_out']
                     && $item['tgl_out']   == $row['tgl_out'];
             });
