@@ -516,11 +516,11 @@ class MasterOrderModel extends Model
             ->join('material', 'material.id_order=master_order.id_order')
             ->where('master_order.id_order', $id)
             // ->where('material.area', $area)
-            ->where('material.composition !=', 0)
-            ->where('material.gw !=', 0)
-            ->where('material.qty_pcs !=', 0)
-            ->where('material.loss !=', 0)
-            ->where('material.kgs >', 0)
+            // ->where('material.composition !=', 0)
+            // ->where('material.gw !=', 0)
+            // ->where('material.qty_pcs !=', 0)
+            // ->where('material.loss !=', 0)
+            // ->where('material.kgs >', 0)
             ->groupBy(['material.item_type', 'material.kode_warna', 'material.style_size'])
             ->orderBy('material.item_type')
             ->findAll();
@@ -547,6 +547,7 @@ class MasterOrderModel extends Model
                 'kg_mu' => $row['kg_mu'],
                 'composition' => $row['composition'],
                 'gw' => $row['gw'],
+                'gw_aktual' => $row['gw_aktual'],
                 'loss' => $row['loss'],
             ];
         }
