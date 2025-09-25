@@ -221,10 +221,12 @@ class MasterOrderModel extends Model
         -- total po tambahan
         (
             SELECT 
-            SUM(COALESCE(pt.poplus_mc_kg, 0) + COALESCE(pt.plus_pck_kg, 0))
-            FROM po_tambahan pt
-            WHERE pt.id_material = material.id_material
-            AND pt.status = 'approved'
+                SUM(tp.ttl_tambahan_kg)
+            FROM po_tambahan pp
+            JOIN total_potambahan tp 
+                ON tp.id_total_potambahan = pp.id_total_potambahan
+            WHERE pp.id_material = material.id_material
+              AND pp.status = 'approved'
         ) AS qty_poplus,
 
         -- stock awal tanpa duplikasi

@@ -103,17 +103,48 @@ class PengeluaranModel extends Model
     }
     public function getTotalPengiriman($data)
     {
-        return $this->select('SUM(pengeluaran.kgs_out) AS kgs_out')
-            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left')
-            ->join('pemesanan', 'pemesanan.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
-            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
-            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->where('pengeluaran.area_out', $data['area'])
-            ->where('pengeluaran.status', 'Pengiriman Area')
-            ->where('master_order.no_model', $data['no_model'])
-            ->where('material.item_type', $data['item_type'])
-            ->where('material.kode_warna', $data['kode_warna'])
-            ->first();
+        // return $this->select('SUM(pengeluaran.kgs_out) AS kgs_out')
+        //     ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left')
+        //     ->join('pemesanan', 'pemesanan.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
+        //     ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+        //     ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+        //     ->where('pengeluaran.area_out', $data['area'])
+        //     ->where('pengeluaran.status', 'Pengiriman Area')
+        //     ->where('master_order.no_model', $data['no_model'])
+        //     ->where('material.item_type', $data['item_type'])
+        //     ->where('material.kode_warna', $data['kode_warna'])
+        //     ->first();
+        $area       = $data['area'] ?? '';
+        $noModel    = $data['no_model'] ?? '';
+        $itemType   = $data['item_type'] ?? '';
+        $kodeWarna  = $data['kode_warna'] ?? '';
+
+        $sql = "
+            SELECT 
+                SUM(sub.total_kgs_out) AS kgs_out
+            FROM (
+                SELECT 
+                    p.id_total_pemesanan,
+                    SUM(p.kgs_out) AS total_kgs_out
+                FROM pengeluaran p
+                WHERE p.area_out = ?
+                  AND p.status = 'Pengiriman Area'
+                GROUP BY p.id_total_pemesanan
+            ) AS sub
+            WHERE EXISTS (
+                SELECT 1
+                FROM total_pemesanan tp
+                JOIN pemesanan pm ON pm.id_total_pemesanan = tp.id_total_pemesanan
+                JOIN material m ON m.id_material = pm.id_material
+                JOIN master_order mo ON mo.id_order = m.id_order
+                WHERE tp.id_total_pemesanan = sub.id_total_pemesanan
+                  AND mo.no_model = ?
+                  AND m.item_type = ?
+                  AND m.kode_warna = ?
+            )
+        ";
+
+        return $this->db->query($sql, [$area, $noModel, $itemType, $kodeWarna])->getRowArray();
     }
     public function getFilterPengiriman($key = null, $tanggal_awal = null, $tanggal_akhir = null)
     {
