@@ -512,7 +512,7 @@ class MasterOrderModel extends Model
 
     public function getMaterial($id, $area)
     {
-        $data = $this->select('no_model, buyer, delivery_awal, delivery_akhir, material.style_size, material.item_type, material.color, material.kode_warna, sum(material.kgs) as kg_mu, material.composition, material.gw, material.loss')
+        $data = $this->select('no_model, buyer, delivery_awal, delivery_akhir, material.style_size, material.item_type, material.color, material.kode_warna, sum(material.kgs) as kg_mu, material.composition, material.gw, material.gw_aktual, material.loss')
             ->join('material', 'material.id_order=master_order.id_order')
             ->where('master_order.id_order', $id)
             // ->where('material.area', $area)
