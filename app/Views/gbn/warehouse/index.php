@@ -266,6 +266,7 @@
                                         <option value="Perbaikan Data Menumpuk">Perbaikan Data Menumpuk</option>
                                         <option value="Rombak Cylinder">Rombak Cylinder MC Area</option>
                                         <option value="Untuk Kelos Warna">Untuk Kelos Warna</option>
+                                        <option value="Untuk Doublingan Kelos">Untuk Doublingan Kelos</option>
                                     </select>
                                 </div>
 

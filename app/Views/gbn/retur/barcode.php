@@ -43,6 +43,7 @@
             font-size: 30px;
             font-weight: bold;
             color: #000;
+            border-bottom: 1px solid #000;
         }
 
         .l-desc {
@@ -187,7 +188,6 @@
                             <div class="barcode-section">
                                 <img src="<?= $barcodeImages[$i] ?>" alt="barcode">
                                 <div style="margin-top: 1px;" class="l-header"> <?= $row['no_model'] ?? '-' ?></div>
-                                <div class="l-desc">Lot: <?= $row['lot_kirim'] ?></div>
                             </div>
                         </td>
                     </tr>
