@@ -64,7 +64,13 @@ class DomPdfController extends BaseController
             $firstName = $operatorParts[0] ?? '';
             $secondInitial = isset($operatorParts[1]) ? strtoupper(substr($operatorParts[1], 0, 1)) : '';
             $operatorShort = $firstName . ($secondInitial ? ' ' . $secondInitial : '');
+            $noModel = $row['no_model'];
+            $maxNoModelLength = 15;
+            if (strlen($noModel) > $maxNoModelLength) {
+                $noModel = substr($noModel, 0, $maxNoModelLength);
+            }
             $row['operator_packing'] = $operatorShort;
+            $row['no_model'] = $noModel;
         }
         unset($row); // break the reference
 

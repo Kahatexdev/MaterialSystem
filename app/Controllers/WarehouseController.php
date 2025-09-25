@@ -193,7 +193,6 @@ class WarehouseController extends BaseController
         // dd(session()->get('dataOut'));
         // Ambil data dari session (jika ada)
         $existingData = session()->get('dataOut') ?? [];
-        // dd ($existingData);
 
         if (!empty($id)) {
             // 1. Cek duplikasi
@@ -206,7 +205,7 @@ class WarehouseController extends BaseController
 
             // 2. Coba ambil dari outCelup
             $outCelup = $this->outCelupModel->getDataOut($id);
-            // log_message('debug', 'Data outCelup: ' . json_encode($outCelup)); // Debugging
+            log_message('debug', 'Data outCelup: ' . json_encode($outCelup)); // Debugging
             if (!empty($outCelup)) {
                 $newData = $outCelup;
             } else {
@@ -216,7 +215,8 @@ class WarehouseController extends BaseController
                     session()->setFlashdata('error', "Data tidak ditemukan! ({$id})");
                     return redirect()->to(base_url($this->role . "/pemasukan"));
                 }
-                $dataRetur = $this->returModel->getDataRetur($id, $findId['id_retur']);
+                $dataRetur = $this->outCelupModel->getDataOutFromRetur($id, $findId['id_retur']);
+                // $dataRetur = $this->returModel->getDataRetur($id, $findId['id_retur']);
                 // log_message('debug', 'Data retur: ' . json_encode($dataRetur)); // Debugging
                 if (!empty($dataRetur)) {
                     $newData = $dataRetur;
@@ -354,7 +354,8 @@ class WarehouseController extends BaseController
                         'krg_in_out'  => 1, // Asumsikan setiap pemasukan hanya 1 kali
                         'lot_stock'   => $lotKirim[$key] ?? null,
                         'nama_cluster' => $namaClusters,
-                        'admin'       => session()->get('username')
+                        'admin'       => session()->get('username'),
+                        'created_at' => date('Y-m-d H:i:s')
                     ];
                 }
 

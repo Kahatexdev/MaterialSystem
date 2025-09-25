@@ -40,7 +40,7 @@
 
         .l-header {
             text-align: center;
-            font-size: 25px;
+            font-size: 30px;
             font-weight: bold;
             color: #000;
         }
@@ -93,21 +93,65 @@
         }
 
         .footer {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 6px;
+            position: relative;
+            width: 100%;
+            margin-top: 30px;
+            padding-left: 5px;
+            padding-right: 5px;
             font-size: 11px;
+            height: 50px;
+        }
+
+        .footer-left {
+            position: absolute;
+            left: 5px;
+            bottom: 0;
+            text-align: left;
+            max-width: 60%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .footer-left>div:first-child {
+            margin-bottom: 0;
         }
 
         .footer-right {
+            position: absolute;
+            right: 10px;
+            bottom: 0;
             text-align: right;
+            margin-top: 20px;
+            max-width: 35%;
         }
 
+        .lot-label {
+            font-size: 11px;
+            line-height: 1;
+            margin-bottom: 2px;
+            /* Jarak tetap antara LOT dan value */
+        }
+
+        .lot-value {
+            margin: 0;
+            font-size: 40px;
+            font-weight: bold;
+            line-height: 0.9;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            display: inline-block;
+            vertical-align: bottom;
+        }
 
         .no-karung-value {
             margin: 0;
             font-size: 40px;
             font-weight: bold;
+            line-height: 1;
         }
 
         .headerRow {
@@ -171,12 +215,14 @@
                 </table>
 
                 <div class="footer">
-
+                    <div class="footer-left">
+                        <!-- <div class="lot-label">LOT</div> -->
+                        <div class="lot-value"> <?= $row['lot_kirim'] ?></div>
+                    </div>
                     <div class="footer-right">
                         No Karung
                         <div class="no-karung-value"><?= htmlspecialchars($row['no_karung'] ?? '-', ENT_QUOTES) ?></div>
-                        <div class="operator-info">Retur : <?= $row['kategori'] ?? '-' ?></div>
-
+                        <?= $row['kategori'] ?? '-' ?>
                     </div>
                 </div>
             </div>
