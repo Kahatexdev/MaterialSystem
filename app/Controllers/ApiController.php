@@ -1112,6 +1112,9 @@ class ApiController extends ResourceController
                 ->where('DATE(po_tambahan.created_at)', $today)
                 ->first();
 
+            log_message('info', 'Sample data: ' . print_r($sample, true));
+            log_message('info', 'Exist data: ' . print_r($exist, true));
+
             // --- hitung total dari semua items ---
             // $ttl = [
             //     'ttl_terima_kg'    => 0,
@@ -1149,6 +1152,8 @@ class ApiController extends ResourceController
                     'ttl_sisa_bb_dimc' => $sample['ttl_sisa_bb_dimc'] ?? 0,
                     'ttl_tambahan_kg'  => $sample['ttl_tambahan_kg'] ?? 0,
                     'ttl_tambahan_cns' => $sample['ttl_tambahan_cns'] ?? 0,
+                    'loss_aktual'      => $sample['loss_aktual'] ?? 0,
+                    'loss_tambahan'    => $sample['loss_tambahan'] ?? 0,
                     'keterangan'       => $sample['keterangan'] ?? '',
                     'created_at'       => date('Y-m-d H:i:s'),
                 ];
@@ -1183,7 +1188,7 @@ class ApiController extends ResourceController
                     'plus_pck_pcs'        => $item['plus_pck_pcs'] ?? 0,
                     'plus_pck_kg'         => $item['plus_pck_kg'] ?? 0,
                     'plus_pck_cns'        => $item['plus_pck_cns'] ?? 0,
-                    'lebih_pakai_kg'      => $item['lebih_pakai_kg'] ?? 0,
+                    // 'lebih_pakai_kg'      => $item['lebih_pakai_kg'] ?? 0,
                     'delivery_po_plus'    => $item['delivery_po_plus'] ?? '',
                     'admin'               => $item['admin'] ?? session()->get('username'),
                     'created_at'          => date('Y-m-d H:i:s'),

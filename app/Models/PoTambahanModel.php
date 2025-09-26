@@ -68,7 +68,7 @@ class PoTambahanModel extends Model
 
     public function filterData($area, $tglBuat, $noModel = null)
     {
-        $builder = $this->select('po_tambahan.*, total_potambahan.ttl_terima_kg, total_potambahan.ttl_sisa_bb_dimc, master_order.no_model, master_order.delivery_akhir, material.item_type, material.kode_warna, material.color, material.style_size, material.kgs, material.composition, material.gw, material.qty_pcs, material.loss')
+        $builder = $this->select('po_tambahan.*, total_potambahan.ttl_terima_kg, total_potambahan.ttl_sisa_bb_dimc, total_potambahan.ttl_tambahan_kg, total_potambahan.ttl_tambahan_cns, master_order.no_model, master_order.delivery_akhir, material.item_type, material.kode_warna, material.color, material.style_size, material.kgs, material.composition, material.gw, material.qty_pcs, material.loss')
             ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
             ->join('total_potambahan', 'po_tambahan.id_total_potambahan = total_potambahan.id_total_potambahan', 'left')
             ->join('master_order', 'material.id_order = master_order.id_order', 'left')

@@ -19,6 +19,8 @@ class TotalPoTambahanModel extends Model
         'ttl_terima_kg',
         'ttl_sisa_jatah',
         'ttl_sisa_bb_dimc',
+        'loss_aktual',
+        'loss_tambahan',
         'keterangan',
     ];
 
