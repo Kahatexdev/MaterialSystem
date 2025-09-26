@@ -281,9 +281,10 @@ class MaterialModel extends Model
             material.gw, 
             material.composition, 
             material.loss, 
-            SUM(kgs) AS kgs
+            SUM(material.kgs) AS kgs
         ')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('material.composition >', 0)
             ->where('master_order.no_model', $noModel)
             ->where('material.item_type', $itemType)
             ->where('material.kode_warna', $kodeWarna);

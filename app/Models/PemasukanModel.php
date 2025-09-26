@@ -290,10 +290,10 @@ class PemasukanModel extends Model
     {
         return
             $this->select('
-                COALESCE(schedule_celup.no_model, retur.no_model, other_bon.no_model, stock.no_model) AS no_model,
-                COALESCE(schedule_celup.item_type, retur.item_type, other_bon.item_type, stock.item_type) AS item_type,
-                COALESCE(schedule_celup.kode_warna, retur.kode_warna, other_bon.kode_warna, stock.kode_warna) AS kode_warna,
-                COALESCE(schedule_celup.warna, retur.warna, other_bon.warna, stock.warna) AS warna,
+                COALESCE(out_celup.no_model, retur.no_model, other_bon.no_model, stock.no_model) AS no_model,
+                COALESCE(retur.item_type, other_bon.item_type, stock.item_type) AS item_type,
+                COALESCE(retur.kode_warna, other_bon.kode_warna, stock.kode_warna) AS kode_warna,
+                COALESCE(retur.warna, other_bon.warna, stock.warna) AS warna,
                 pemasukan.*,
                 out_celup.no_karung, 
                 out_celup.lot_kirim, out_celup.kgs_kirim, out_celup.cones_kirim,
@@ -306,9 +306,9 @@ class PemasukanModel extends Model
             ->join('stock', 'stock.id_stock=pemasukan.id_stock', 'left')
             ->where('stock.nama_cluster', $data['cluster'])
             ->where('pemasukan.out_jalur', '0')
-            ->where("COALESCE(schedule_celup.no_model, retur.no_model, other_bon.no_model, stock.no_model) = ", $data['no_model'])
-            ->where("COALESCE(schedule_celup.item_type, retur.item_type, other_bon.item_type, stock.item_type) = ", $data['item_type'])
-            ->where("COALESCE(schedule_celup.kode_warna, retur.kode_warna, other_bon.kode_warna, stock.kode_warna) = ", $data['kode_warna'])
+            ->where("COALESCE(out_celup.no_model, retur.no_model, other_bon.no_model, stock.no_model) = ", $data['no_model'])
+            ->where("COALESCE(retur.item_type, other_bon.item_type, stock.item_type) = ", $data['item_type'])
+            ->where("COALESCE(retur.kode_warna, other_bon.kode_warna, stock.kode_warna) = ", $data['kode_warna'])
             // ->orWhere('stock.kgs_in_out >', 0)
             // ->orWhere('stock.kgs_stock_awal >', 0)
             ->groupBy('out_celup.id_out_celup')

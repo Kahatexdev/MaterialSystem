@@ -385,6 +385,7 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
     $routes->get('schedule/nylon', 'ScheduleController::nylon');
     $routes->get('reqschedule', 'ScheduleController::reqschedule');
+    $routes->post('getDataSchedule', 'ScheduleController::getDataSchedule');
     $routes->post('schedule', 'ScheduleController::reqschedule');
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('edit/(:num)', 'CelupController::editStatus/$1');
