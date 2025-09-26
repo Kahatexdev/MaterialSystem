@@ -3,6 +3,13 @@
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
 
+<style>
+    table.dataTable td.wrap-text {
+        white-space: normal !important;
+        word-break: break-word;
+        max-width: 150px;
+    }
+</style>
 
 <div class="container-fluid py-4">
     <?php if (session()->getFlashdata('success')) : ?>
@@ -43,11 +50,11 @@
                             <label for="filter_tglschsampai" class="form-label">Tgl Schedule(Sampai)</label>
                             <input type="date" id="filter_tglschsampai" name="filter_tglschsampai" class="form-control" value="<?= old('filter_tglschsampai') ?>">
                         </div>
-                        <div class="d-flex flex-column">
+                        <!-- <div class="d-flex flex-column">
                             <label for="filter_nomodel" class="form-label">LOT / Model / Kode Warna</label>
                             <input type="text" id="filter_nomodel" name="filter_nomodel" class="form-control" placeholder="LOT / Model / Kode Warna">
-                        </div>
-                        <button class="btn btn-filter mt-md-4" id="filter_date_range" type="submit">
+                        </div> -->
+                        <button class="btn btn-filter mt-md-4" id="filter_date_range" type="button">
                             <i class="bi bi-funnel me-2"></i>Filter
                         </button>
                         <!-- btn reset -->
@@ -63,7 +70,7 @@
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table" id="ReqScheduleTable">
+                <table class="table" id="ReqScheduleTable" style="width:100%">
                     <thead>
                         <tr>
                             <th class="sticky">No</th>
@@ -75,6 +82,7 @@
                             <th class="sticky">Warna</th>
                             <th class="sticky">Start Mc</th>
                             <th class="sticky">Tanggal Schedule</th>
+                            <th class="sticky">Keterangan</th>
                             <th class="sticky">Action</th>
                         </tr>
                     </thead>
@@ -89,42 +97,51 @@
 
 <script>
     $(document).ready(function() {
-        $('#ReqScheduleTable').DataTable({
+        var table = $('#ReqScheduleTable').DataTable({
             "processing": true,
             "serverSide": true,
             "pageLength": 10,
             "ajax": {
-                "url": "<?= base_url($role . '/getDataSchedule') ?>",
-                "type": "POST"
+                "url": "<?= base_url($role . '/getDataEditSchedule') ?>",
+                "type": "POST",
+                "data": function(d) {
+                    d.filter_tglsch = $('#filter_tglsch').val();
+                    d.filter_tglschsampai = $('#filter_tglschsampai').val();
+                    d.filter_nomodel = $('#filter_nomodel').val();
+                }
             },
             "columns": [{
                     "data": "no"
-                }, // No
+                },
                 {
                     "data": "no_mc"
-                }, // No Mc
+                },
                 {
                     "data": "no_model"
-                }, // PO
+                },
                 {
                     "data": "item_type"
-                }, // Jenis Benang
+                },
                 {
                     "data": "lot_celup"
-                }, // LOT
+                },
                 {
                     "data": "kode_warna"
-                }, // Kode Warna
+                },
                 {
                     "data": "warna"
-                }, // Warna
+                },
                 {
                     "data": "start_mc"
-                }, // Start Mc
+                },
                 {
                     "data": "tanggal_schedule"
-                }, // Tanggal Schedule
-                { // Action
+                },
+                {
+                    "data": "ket_schedule",
+                    className: "wrap-text"
+                },
+                {
                     "data": "action",
                     "orderable": false,
                     "searchable": false
@@ -134,36 +151,32 @@
                 "emptyTable": "Data belum tersedia untuk saat ini."
             }
         });
-    });
 
-    document.getElementById('filter_date_range').addEventListener('click', function() {
-        const startDate = document.getElementById('start_date').value;
-        const endDate = document.getElementById('end_date').value;
+        // tombol filter
+        $('#filter_date_range').on('click', function() {
+            const startDate = $('#filter_tglsch').val();
+            const endDate = $('#filter_tglschsampai').val();
 
-        if (!startDate || !endDate) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: 'Silakan pilih rentang tanggal.',
-            });
-            return;
-        }
+            if (!startDate || !endDate) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Silakan pilih rentang tanggal.',
+                });
+                return;
+            }
 
-        // Redirect ke URL dengan parameter filter
-        const url = `<?= base_url($role . '/reqschedule') ?>?start_date=${startDate}&end_date=${endDate}`;
-        window.location.href = url;
-    });
+            table.ajax.reload();
+        });
 
-    // reset filter tanggal
-    document.getElementById('reset_date_range').addEventListener('click', function() {
-        // Hapus nilai input tanggal
-        document.getElementById('filter_tglsch').value = '';
-        document.getElementById('filter_tglschsampai').value = '';
-        document.getElementById('filter_nomodel').value = '';
-
-        // Redirect ke URL tanpa parameter filter
-        const url = `<?= base_url($role . '/reqschedule') ?>`;
-        window.location.href = url;
+        // tombol reset
+        $('#reset_date_range').on('click', function() {
+            $('#filter_tglsch').val('');
+            $('#filter_tglschsampai').val('');
+            $('#filter_nomodel').val('');
+            table.ajax.reload();
+        });
     });
 </script>
+
 <?php $this->endSection(); ?>
