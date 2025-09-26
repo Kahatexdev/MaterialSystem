@@ -605,6 +605,9 @@ class StockModel extends Model
             ->orWhere('kgs_in_out >', 0)
             ->groupEnd()   // <-- Tutup grup
             ->groupBy('no_model')
+            ->groupBy('item_type')
+            ->groupBy('kode_warna')
+            ->groupBy('warna')
             ->findAll();
     }
 
