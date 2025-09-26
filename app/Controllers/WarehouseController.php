@@ -2691,9 +2691,6 @@ class WarehouseController extends BaseController
             $newKgs = $material['kgs'] + $data['total_kgs'];
             // Update material jika sudah ada
             $this->materialModel->update($material['id_material'], [
-                'gw'         => 0,
-                'qty_pcs'    => 0,
-                'loss'       => 0,
                 'kgs'        => $newKgs,
                 'admin'      => session()->get('username')
             ]);
