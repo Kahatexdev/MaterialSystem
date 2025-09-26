@@ -174,6 +174,7 @@ class OutCelupModel extends Model
                   bon_celup.tgl_datang, 
                   bon_celup.no_surat_jalan, 
                   bon_celup.detail_sj,
+                  schedule_celup.lot_celup,
                  GROUP_CONCAT(out_celup.id_celup) as id_celup_list')
             ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup')
             ->join('bon_celup', 'out_celup.id_bon = bon_celup.id_bon')

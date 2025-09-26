@@ -385,7 +385,6 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
     $routes->get('schedule/nylon', 'ScheduleController::nylon');
     $routes->get('reqschedule', 'ScheduleController::reqschedule');
-    $routes->post('getDataSchedule', 'ScheduleController::getDataSchedule');
     $routes->post('schedule', 'ScheduleController::reqschedule');
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('edit/(:num)', 'CelupController::editStatus/$1');
@@ -894,9 +893,6 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     //Retur
     $routes->get('retur', 'ReturController::returArea');
     $routes->get('retur', 'ReturController::index');
-    $routes->get('retur/listRetur', 'ReturController::listRetur');
-    $routes->get('retur/cekBahanBaku', 'ReturController::cekBahanBaku');
-    $routes->get('retur/getPengirimanArea', 'ReturController::getPengirimanArea');
     $routes->post('retur/approve', 'ReturController::approve');
     $routes->post('retur/reject', 'ReturController::reject');
     $routes->get('retur/listBarcodeRetur', 'ReturController::listBarcodeRetur');
@@ -970,7 +966,6 @@ $routes->group(
         $routes->get('getKategoriRetur', 'ApiController::getKategoriRetur');
         $routes->post('saveRetur', 'ApiController::saveRetur');
         $routes->get('getTotalPengiriman', 'ApiController::getTotalPengiriman');
-        $routes->get('getTotalRetur', 'ApiController::getTotalRetur');
         $routes->post('warehouse/search', 'WarehouseController::search');
         $routes->get('warehouse/exportExcel', 'ExcelController::excelStockMaterial');
         $routes->get('poTambahanDetail/(:any)/(:any)', 'ApiController::poTambahanDetail/$1/$2');

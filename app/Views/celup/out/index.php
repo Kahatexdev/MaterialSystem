@@ -52,6 +52,7 @@
                         <tr>
                             <th class="text-center align-middle">No </th>
                             <th class="text-center align-middle">No Model</th>
+                            <th class="text-center align-middle">Lot </th>
                             <th class="text-center align-middle">Tanggal Kirim</th>
                             <th class="text-center align-middle">No Surat Jalan</th>
                             <th class="text-center align-middle">Detail Surat Jalan</th>
@@ -63,7 +64,11 @@
                         foreach ($outCelup as $out) : ?>
                             <tr>
                                 <td class="text-center align-middle"><?= $no++ ?></td>
-                                <td class="text-center align-middle"><?= $out['no_model_list'] ?></td>
+                                <td class="text-center align-middle">
+                                    <?= substr($out['no_model_list'], 0, 20) ?>
+                                </td>
+                                <td class="text-center align-middle"><?= $out['lot_celup'] ?></td>
+
                                 <td class="text-center align-middle">
                                     <?= date('d-m-Y', strtotime($out['tgl_datang'])) ?>
                                 </td>
