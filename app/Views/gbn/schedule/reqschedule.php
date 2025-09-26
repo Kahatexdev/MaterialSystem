@@ -175,19 +175,10 @@
         color: #43a047 !important;
     }
 
-    /* Default wrap semua cell */
-    #ReqScheduleTable td,
-    #ReqScheduleTable th {
+    table.dataTable td.wrap-text {
         white-space: normal !important;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-    }
-
-    /* Batasi khusus kolom Keterangan (kolom ke-11) */
-    #ReqScheduleTable td:nth-child(11),
-    #ReqScheduleTable th:nth-child(11) {
-        max-width: 200px;
-        /* sesuaikan kebutuhan */
+        word-break: break-word;
+        max-width: 150px;
     }
 </style>
 
@@ -240,14 +231,11 @@
                         <button class="btn btn-filter mt-md-4" id="btnReset">
                             <i class="fas fa-redo-alt"></i>
                         </button>
-                        <?php if (!empty($showExcel)): ?>
-                            <button type="button"
-                                class="btn btn-success mt-md-4"
-                                id="btnExcel"
-                                onclick="window.location.href='<?= base_url($role . '/schedule/exportReqSchedule')
-                                                                    . '?filter_tglsch=' . urlencode($filterTglSch)
-                                                                    . '&filter_tglschsampai=' . urlencode($filterTglSchsampai)
-                                                                    . '&filter_nomodel=' . urlencode($filterNoModel) ?>'">
+                        <?php if (!empty($showExcel)) : ?>
+                            <button type="button" class="btn btn-success mt-md-4" id="btnExcel" onclick="window.location.href='<?= base_url($role . '/schedule/exportReqSchedule')
+                                                                                                                                    . '?filter_tglsch=' . urlencode($filterTglSch)
+                                                                                                                                    . '&filter_tglschsampai=' . urlencode($filterTglSchsampai)
+                                                                                                                                    . '&filter_nomodel=' . urlencode($filterNoModel) ?>'">
                                 <i class="fas fa-file-excel"></i>
                             </button>
                         <?php endif; ?>
@@ -261,7 +249,7 @@
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table" id="ReqScheduleTable">
+                <table class="table" id="ReqScheduleTable" style="width: 100%;">
                     <thead>
                         <tr>
                             <th class="sticky">No</th>
@@ -281,44 +269,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php
-                        $no = 1;
-                        foreach ($uniqueData as $data):
-                        ?>
-                            <tr>
-                                <td><?= $no++; ?></td>
-                                <td><?= $data['no_mesin']; ?></td>
-                                <?php
-                                $poFull = $data['no_model'];
-                                if (isset($data['po_plus']) && $data['po_plus'] == 1) {
-                                    $poFull = '(+) ' . $poFull;
-                                }
-                                $poDisplay = strlen($poFull) > 27 ? substr($poFull, 0, 27) . '...' : $poFull;
-                                ?>
-                                <td><?= $poDisplay ?></td>
-                                <td><?= $data['item_type']; ?></td>
-                                <td><?= $data['lot_celup']; ?></td>
-                                <td><?= $data['kode_warna']; ?></td>
-                                <td><?= $data['warna']; ?></td>
-                                <td><?= $data['start_mc']; ?></td>
-                                <td><?= $data['tgl_schedule']; ?></td>
-                                <td><?= $data['last_status']; ?></td>
-                                <td><?= $data['kg_po']; ?></td>
-                                <td><?= $data['kg_celup']; ?></td>
-                                <td><?= $data['ket_schedule']; ?></td>
-                                <?php if ($data['last_status'] != 'complain') { ?>
-                                    <td>
-                                        <a href="<?= base_url($role . '/schedule/reqschedule/show/' . $data['id_celup']) ?>" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Detail">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
-                                <?php } else { ?>
-                                    <td></td>
-                                <?php } ?>
-                            </tr>
-                        <?php
-                        endforeach;
-                        ?>
+
                     </tbody>
                 </table>
             </div>
@@ -344,15 +295,94 @@
 <script src="https://cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('#ReqScheduleTable').DataTable({
-            scrollX: true,
-            responsive: true,
-            autoWidth: false,
-            columnDefs: [{
-                targets: 10, // index kolom Keterangan (mulai 0)
-                width: "200px", // batasi lebar
-                className: "text-wrap"
-            }]
+        var table = $('#ReqScheduleTable').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "pageLength": 10,
+            "ajax": {
+                "url": "<?= base_url($role . '/getDataSchedule') ?>",
+                "type": "POST",
+                "data": function(d) {
+                    d.filter_tglsch = $('#filter_tglsch').val();
+                    d.filter_tglschsampai = $('#filter_tglschsampai').val();
+                    d.filter_nomodel = $('#filter_nomodel').val();
+                }
+            },
+            "columns": [{
+                    "data": "no"
+                },
+                {
+                    "data": "no_mc"
+                },
+                {
+                    "data": "no_model"
+                },
+                {
+                    "data": "item_type"
+                },
+                {
+                    "data": "lot_celup"
+                },
+                {
+                    "data": "kode_warna"
+                },
+                {
+                    "data": "warna"
+                },
+                {
+                    "data": "start_mc"
+                },
+                {
+                    "data": "tanggal_schedule"
+                },
+                {
+                    "data": "last_status"
+                },
+                {
+                    "data": "kg_po"
+                },
+                {
+                    "data": "kg_celup"
+                },
+                {
+                    "data": "ket_schedule",
+                    className: "wrap-text"
+                },
+                {
+                    "data": "action",
+                    "orderable": false,
+                    "searchable": false
+                }
+            ],
+            "language": {
+                "emptyTable": "Data belum tersedia untuk saat ini.",
+                infoFiltered: ""
+            }
+        });
+
+        // tombol filter
+        $('#filter_date_range').on('click', function() {
+            const startDate = $('#filter_tglsch').val();
+            const endDate = $('#filter_tglschsampai').val();
+
+            if (!startDate || !endDate) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Silakan pilih rentang tanggal.',
+                });
+                return;
+            }
+
+            table.ajax.reload();
+        });
+
+        // tombol reset
+        $('#reset_date_range').on('click', function() {
+            $('#filter_tglsch').val('');
+            $('#filter_tglschsampai').val('');
+            $('#filter_nomodel').val('');
+            table.ajax.reload();
         });
     });
     document.addEventListener("DOMContentLoaded", function() {
@@ -530,40 +560,40 @@
         });
 
 
-        document.getElementById('filter_date_range').addEventListener('click', function() {
-            const startDate = document.getElementById('start_date').value;
-            const endDate = document.getElementById('end_date').value;
+        // document.getElementById('filter_date_range').addEventListener('click', function() {
+        //     const startDate = document.getElementById('start_date').value;
+        //     const endDate = document.getElementById('end_date').value;
 
-            if (!startDate || !endDate) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: 'Silakan pilih rentang tanggal.',
-                });
-                return;
-            }
+        //     if (!startDate || !endDate) {
+        //         Swal.fire({
+        //             icon: 'error',
+        //             title: 'Error!',
+        //             text: 'Silakan pilih rentang tanggal.',
+        //         });
+        //         return;
+        //     }
 
-            // Redirect ke URL dengan parameter filter
-            const url = `<?= base_url($role . '/schedule') ?>?start_date=${startDate}&end_date=${endDate}`;
-            window.location.href = url;
-        });
+        //     // Redirect ke URL dengan parameter filter
+        //     const url = `<?= base_url($role . '/schedule') ?>?start_date=${startDate}&end_date=${endDate}`;
+        //     window.location.href = url;
+        // });
 
-        // reset filter tanggal
-        document.getElementById('reset_date_range').addEventListener('click', function() {
-            // Redirect ke URL dengan parameter filter menampilkan data 2 hari kebelakang dan 7 hari kedepan
-            const start_date = new Date();
-            const end_date = new Date();
-            start_date.setDate(start_date.getDate() - 2);
-            end_date.setDate(end_date.getDate() + 7);
+        // // reset filter tanggal
+        // document.getElementById('reset_date_range').addEventListener('click', function() {
+        //     // Redirect ke URL dengan parameter filter menampilkan data 2 hari kebelakang dan 7 hari kedepan
+        //     const start_date = new Date();
+        //     const end_date = new Date();
+        //     start_date.setDate(start_date.getDate() - 2);
+        //     end_date.setDate(end_date.getDate() + 7);
 
-            const startDate = start_date.toISOString().split('T')[0];
+        //     const startDate = start_date.toISOString().split('T')[0];
 
-            const endDate = end_date.toISOString().split('T')[0];
+        //     const endDate = end_date.toISOString().split('T')[0];
 
-            // Redirect ke URL dengan parameter filter
-            const url = `<?= base_url($role . '/schedule') ?>?start_date=${startDate}&end_date=${endDate}`;
-            window.location.href = url;
-        });
+        //     // Redirect ke URL dengan parameter filter
+        //     const url = `<?= base_url($role . '/schedule') ?>?start_date=${startDate}&end_date=${endDate}`;
+        //     window.location.href = url;
+        // });
     });
 </script>
 <script>
