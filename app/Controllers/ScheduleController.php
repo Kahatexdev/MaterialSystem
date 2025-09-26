@@ -1582,7 +1582,7 @@ class ScheduleController extends BaseController
         return $this->response->setJSON($responseData);
     }
 
-    public function getDataSchedule()
+    public function getDataEditSchedule()
     {
         $request = service('request');
         $postData = $request->getPost();
@@ -1592,17 +1592,23 @@ class ScheduleController extends BaseController
         $length = $postData['length'];
         $search = $postData['search']['value'];
 
-        // Total tanpa filter
-        $totalRecords = $this->scheduleCelupModel->countAll();
+        $filterTglSch       = $postData['filter_tglsch'] ?? null;
+        $filterTglSchsampai = $postData['filter_tglschsampai'] ?? null;
 
         $select = 'schedule_celup.*, mesin_celup.no_mesin as no_mesin';
 
-        // 2) Hitung recordsFiltered (dengan kondisi search jika ada)
         $builder = $this->scheduleCelupModel
             ->select($select)
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin', 'left')
             ->where('schedule_celup.id_celup !=', null)
             ->where('schedule_celup.id_mesin !=', null);
+
+        if (!empty($filterTglSch) && !empty($filterTglSchsampai)) {
+            $builder->where('schedule_celup.tanggal_schedule >=', $filterTglSch)
+                ->where('schedule_celup.tanggal_schedule <=', $filterTglSchsampai);
+        } elseif (!empty($filterTglSch)) {
+            $builder->where('schedule_celup.tanggal_schedule', $filterTglSch);
+        }
 
         if (!empty($search)) {
             $builder->groupStart()
@@ -1613,12 +1619,6 @@ class ScheduleController extends BaseController
         }
 
         $totalFiltered = $this->scheduleCelupModel->countAllResults(false);
-
-        // $data = $builder->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin', 'left')
-        // where('id_celup !=', null)
-        //     ->where('id_mesin !=', null)
-        //     ->orderBy('id_celup', 'DESC')
-        //     ->findAll($length, $start);
 
         $data = $builder
             ->orderBy('schedule_celup.id_celup', 'DESC')
@@ -1643,11 +1643,123 @@ class ScheduleController extends BaseController
                         : 'Belum update')
                     . "</span>",
                 'tanggal_schedule' => "<span>{$row['tanggal_schedule']}</span>",
+                'ket_schedule' => "<span class='wrap-text'>{$row['ket_schedule']}</span>",
                 'action' => '<a href="' . base_url($this->role . '/edit/' . $row['id_celup']) . '" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Detail"><i class="fas fa-eye"></i></a>'
             ];
             $no++;
         }
-        // return $this->response->setJSON($result);
+
+        $totalRecords = $this->scheduleCelupModel
+            ->where('id_celup !=', null)
+            ->where('id_mesin !=', null)
+            ->countAllResults();
+
+        return $this->response->setJSON([
+            'draw' => intval($draw),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $totalFiltered,
+            'data' => $result
+        ]);
+    }
+
+    public function getDataSchedule()
+    {
+        $request = service('request');
+        $postData = $request->getPost();
+
+        $draw   = $postData['draw'];
+        $start  = $postData['start'];
+        $length = $postData['length'];
+        $search = $postData['search']['value'];
+
+        $filterTglSch       = $postData['filter_tglsch'] ?? null;
+        $filterTglSchsampai = $postData['filter_tglschsampai'] ?? null;
+
+        $select = 'schedule_celup.*, 
+           mesin_celup.no_mesin as no_mesin,
+           IF(schedule_celup.po_plus = "0", schedule_celup.kg_celup, 0) AS qty_celup, 
+           IF(schedule_celup.po_plus = "1", schedule_celup.kg_celup, 0) AS qty_celup_plus,
+           open_po.kg_po';
+
+        $builder = $this->scheduleCelupModel
+            ->select($select)
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin', 'left')
+            ->join('open_po', 'open_po.no_model = schedule_celup.no_model 
+                    AND open_po.item_type = schedule_celup.item_type 
+                    AND open_po.kode_warna = schedule_celup.kode_warna', 'left')
+            ->where('schedule_celup.id_celup !=', null)
+            ->where('schedule_celup.id_mesin !=', null);
+
+        if (!empty($filterTglSch) && !empty($filterTglSchsampai)) {
+            $builder->where('schedule_celup.tanggal_schedule >=', $filterTglSch)
+                ->where('schedule_celup.tanggal_schedule <=', $filterTglSchsampai);
+        } elseif (!empty($filterTglSch)) {
+            $builder->where('schedule_celup.tanggal_schedule', $filterTglSch);
+        }
+
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('schedule_celup.no_model', $search)
+                ->orLike('schedule_celup.lot_celup', $search)
+                ->orLike('schedule_celup.kode_warna', $search)
+                ->groupEnd();
+        }
+
+        $totalFiltered = $this->scheduleCelupModel->countAllResults(false);
+
+        $data = $builder
+            ->orderBy('schedule_celup.id_celup', 'DESC')
+            ->findAll($length, $start);
+
+        $result = [];
+        $no = $start + 1;
+        foreach ($data as $row) {
+
+            // --- handle PO (+) dan substring ---
+            $poFull = $row['no_model'];
+            if (isset($row['po_plus']) && $row['po_plus'] == 1) {
+                $poFull = '(+) ' . $poFull;
+            }
+            $poDisplay = strlen($poFull) > 27 ? substr($poFull, 0, 27) . '...' : $poFull;
+
+            // --- tombol action hanya kalau last_status != complain ---
+            $actionBtn = '';
+            if ($row['last_status'] != 'complain') {
+                $actionBtn = '<a href="' . base_url($this->role . '/schedule/reqschedule/show/' . $row['id_celup']) . '" 
+                            class="btn btn-info" 
+                            data-bs-toggle="tooltip" 
+                            data-bs-placement="top" 
+                            title="Lihat Detail">
+                            <i class="fas fa-eye"></i></a>';
+            }
+
+            $result[] = [
+                'no'                => "<span>{$no}</span>",
+                'no_mc'             => "<span>{$row['no_mesin']}</span>",
+                'no_model'          => "<span>{$poDisplay}</span>",
+                'item_type'         => "<span>{$row['item_type']}</span>",
+                'lot_celup'         => "<span>{$row['lot_celup']}</span>",
+                'kode_warna'        => "<span>{$row['kode_warna']}</span>",
+                'warna'             => "<span>{$row['warna']}</span>",
+                'start_mc'          => "<span>" .
+                    (!empty($row['start_mc']) && $row['start_mc'] !== '0000-00-00 00:00:00'
+                        ? date('d-m-Y', strtotime($row['start_mc']))
+                        : 'Belum update')
+                    . "</span>",
+                'tanggal_schedule'  => "<span>{$row['tanggal_schedule']}</span>",
+                'last_status'       => "<span>{$row['last_status']}</span>",
+                'kg_po'             => "<span>{$row['kg_po']}</span>",
+                'kg_celup'          => "<span>{$row['kg_celup']}</span>",
+                'ket_schedule'      => "<span class='wrap-text'>{$row['ket_schedule']}</span>",
+                'action'            => $actionBtn
+            ];
+            $no++;
+        }
+
+        $totalRecords = $this->scheduleCelupModel
+            ->where('id_celup !=', null)
+            ->where('id_mesin !=', null)
+            ->countAllResults();
 
         return $this->response->setJSON([
             'draw' => intval($draw),

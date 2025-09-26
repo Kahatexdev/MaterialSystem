@@ -145,6 +145,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('schedule/filterTagihanBenang', 'ScheduleController::filterTagihanBenang');
     $routes->get('schedule/exportTagihanBenang', 'ExcelController::exportTagihanBenang');
     $routes->get('schedule/exportReqSchedule', 'ExcelController::exportReqSchedule');
+    $routes->post('getDataSchedule', 'ScheduleController::getDataSchedule');
     // $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJatah');
 
     $routes->get('mesin/mesinCelup', 'MesinCelupController::mesinCelup');
@@ -385,7 +386,7 @@ $routes->group('/celup', ['filter' => 'celup'], function ($routes) {
     $routes->get('schedule/acrylic', 'ScheduleController::acrylic');
     $routes->get('schedule/nylon', 'ScheduleController::nylon');
     $routes->get('reqschedule', 'ScheduleController::reqschedule');
-    $routes->post('getDataSchedule', 'ScheduleController::getDataSchedule');
+    $routes->post('getDataEditSchedule', 'ScheduleController::getDataEditSchedule');
     $routes->post('schedule', 'ScheduleController::reqschedule');
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('edit/(:num)', 'CelupController::editStatus/$1');
