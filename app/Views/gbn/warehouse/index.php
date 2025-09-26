@@ -244,6 +244,14 @@
                     <div class="modal-body p-0">
                         <div class="card card-plain">
                             <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="tglOutSelect" class="form-label">Tanggal Pengeluran</label>
+                                    <input type="date" name="tgl_out" id="tglOut" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="keteranganSelect" class="form-label">Keterangan</label>
+                                    <textarea class="form-control" name="keterangan" id="keterangan"></textarea>
+                                </div>
                                 <!-- Select Kategori -->
                                 <div class="mb-3">
                                     <input type="text" name="nama_cluster" id="inputNamaCluster" hidden>
@@ -1069,6 +1077,8 @@
         e.preventDefault(); // penting agar tidak reload halaman
 
         const idOutCelup = $('input[name="pilih_item"]:checked').val();
+        const tglOut = $('#tglOut').val();
+        const keterangan = $('#keterangan').val();
         const kategori = $('#kategoriSelect').val();
         const kgsOtherOut = $('#inputKgs').val();
         const cnsOtherOut = $('#inputCns').val();
@@ -1086,6 +1096,8 @@
             method: 'POST',
             data: {
                 id_out_celup: idOutCelup,
+                tgl_out: tglOut,
+                keterangan: keterangan,
                 kategori: kategori,
                 kgs_other_out: kgsOtherOut,
                 cns_other_out: cnsOtherOut,

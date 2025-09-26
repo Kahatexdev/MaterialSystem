@@ -2423,14 +2423,16 @@ class WarehouseController extends BaseController
             ]);
         }
 
-        $idOutCelup    = $this->request->getPost('id_out_celup');
-        $kategori      = $this->request->getPost('kategori');
-        $kgsOtherOut   = $this->request->getPost('kgs_other_out');
-        $cnsOtherOut   = $this->request->getPost('cns_other_out');
-        $krgOtherOut   = $this->request->getPost('krg_other_out');
-        $lot           = $this->request->getPost('lot');
-        $idStock       = $this->request->getPost('id_stock');
-        $namaCluster   = $this->request->getPost('nama_cluster');
+        $idOutCelup     = $this->request->getPost('id_out_celup');
+        $tglOut         = $this->request->getPost('tgl_out');
+        $keterangan     = $this->request->getPost('keterangan');
+        $kategori       = $this->request->getPost('kategori');
+        $kgsOtherOut    = $this->request->getPost('kgs_other_out');
+        $cnsOtherOut    = $this->request->getPost('cns_other_out');
+        $krgOtherOut    = $this->request->getPost('krg_other_out');
+        $lot            = $this->request->getPost('lot');
+        $idStock        = $this->request->getPost('id_stock');
+        $namaCluster    = $this->request->getPost('nama_cluster');
 
         if (!$idOutCelup || !$kategori) {
             return $this->response->setJSON([
@@ -2443,16 +2445,17 @@ class WarehouseController extends BaseController
 
         try {
             $save = $this->otherOutModel->insert([
-                'id_out_celup' => $idOutCelup,
-                'kategori' => $kategori,
-                'tgl_other_out' => date('Y-m-d'),
+                'id_out_celup'  => $idOutCelup,
+                'kategori'      => $kategori,
+                'tgl_other_out' => $tglOut,
+                'keterangan'    => $keterangan,
                 'kgs_other_out' => $kgsOtherOut,
                 'cns_other_out' => $cnsOtherOut,
                 'krg_other_out' => $krgOtherOut,
                 'lot_other_out' => $lot,
-                'admin' => session()->get('username'),
-                'created_at' => date('Y-m-d H:i:s'),
-                'nama_cluster' => $namaCluster,
+                'admin'         => session()->get('username'),
+                'created_at'    => date('Y-m-d H:i:s'),
+                'nama_cluster'  => $namaCluster,
             ]);
 
             if ($save) {
@@ -2691,9 +2694,6 @@ class WarehouseController extends BaseController
             $newKgs = $material['kgs'] + $data['total_kgs'];
             // Update material jika sudah ada
             $this->materialModel->update($material['id_material'], [
-                'gw'         => 0,
-                'qty_pcs'    => 0,
-                'loss'       => 0,
                 'kgs'        => $newKgs,
                 'admin'      => session()->get('username')
             ]);

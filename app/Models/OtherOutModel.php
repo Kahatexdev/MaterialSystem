@@ -22,6 +22,7 @@ class OtherOutModel extends Model
         'krg_other_out',
         'lot_other_out',
         'nama_cluster',
+        'keterangan',
         'admin',
         'created_at',
         'updated_at',
