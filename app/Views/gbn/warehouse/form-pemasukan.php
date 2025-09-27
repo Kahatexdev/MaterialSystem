@@ -142,7 +142,7 @@
                                                         <div class="row mb-2">
                                                             <div class="col-md-6">
                                                                 <label class="form-label">Model:</label>
-                                                                <input type="text" class="form-control form-control-sm" name="no_model[]" value="<?= $data['nama_barcode'] ?>" readonly>
+                                                                <input type="text" class="form-control form-control-sm" name="no_model[]" value="<?= $data['no_model'] ?>" readonly>
                                                                 <input type="hidden" name="id_retur[]" value="<?= $data['id_retur'] ?? NULL ?>">
                                                             </div>
                                                             <div class="col-md-6">
