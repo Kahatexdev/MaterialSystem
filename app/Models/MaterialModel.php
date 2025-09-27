@@ -10,9 +10,9 @@ class MaterialModel extends Model
     protected $primaryKey       = 'id_material';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
-    protected $useSoftDeletes   = false;
+    protected $useSoftDeletes   = true;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id_material', 'id_order', 'style_size', 'area', 'inisial', 'color', 'item_type', 'kode_warna', 'composition', 'gw', 'gw_aktual', 'qty_pcs', 'loss', 'kgs', 'keterangan', 'admin', 'created_at', 'updated_at'];
+    protected $allowedFields    = ['id_material', 'id_order', 'style_size', 'area', 'inisial', 'color', 'item_type', 'kode_warna', 'composition', 'gw', 'gw_aktual', 'qty_pcs', 'loss', 'kgs', 'keterangan', 'admin', 'created_at', 'updated_at', 'deleted_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -21,7 +21,7 @@ class MaterialModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -47,7 +47,9 @@ class MaterialModel extends Model
     public function getMaterial($id_order)
     {
         return $this->join('master_order', 'master_order.id_order = material.id_order')
-            ->where('material.id_order', $id_order)->findAll();
+            ->where('material.id_order', $id_order)
+            ->where('material.deleted_at', null)
+            ->findAll();
     }
     public function getTotalKebutuhan($id_order)
     {
