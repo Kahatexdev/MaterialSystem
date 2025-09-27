@@ -598,7 +598,7 @@ class StockModel extends Model
     {
         return $this->select('no_model, item_type, kode_warna, warna, kgs_stock_awal, kgs_in_out')
             ->where('no_model !=', $noModel)
-            ->where('item_type', $item_type)
+            // ->where('item_type', $item_type)
             // ->where('kode_warna', $kode_warna)
             ->groupStart() // <-- Mulai grup untuk OR
             ->where('kgs_stock_awal >', 0)
