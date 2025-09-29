@@ -218,7 +218,7 @@
                 </div>
                 <div class="col-6 col-md-2">
                     <label class="form-label small text-muted">Username pengirim</label>
-                    <input id="filterUser" type="text" class="form-control" placeholder="mis. alfa">
+                    <input id="filterUser" type="text" class="form-control" placeholder="mis. SHABIRA">
                 </div>
                 <div class="col-6 col-md-2">
                     <label class="form-label small text-muted">Dari tanggal</label>
