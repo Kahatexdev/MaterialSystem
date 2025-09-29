@@ -1080,6 +1080,7 @@ class PemesananController extends BaseController
 
         foreach ($selectedIndexes as $index => $id) {
             $id = (int) $id; // pastikan integer
+
             $record = $this->pengeluaranModel->find($id); // get data pengeluaran
             if (!$record) {
                 $errors[] = "ID $id: pengeluaran tidak ditemukan.";
@@ -1092,10 +1093,10 @@ class PemesananController extends BaseController
                 'updated_at'  => date('Y-m-d H:i:s'),
             ];
 
-            if (isset($kgsById[$index]) && $kgsById[$index] !== '') $dataPengeluaran['kgs_out'] = (float) $kgsById[$index];
-            if (isset($cnsById[$index]) && $cnsById[$index] !== '') $dataPengeluaran['cns_out'] = (int)   $cnsById[$index];
-            if (isset($krgById[$index]) && $krgById[$index] !== '') $dataPengeluaran['krg_out'] = (int)   $krgById[$index];
-            if (isset($lotById[$index]) && $lotById[$index] !== '') $dataPengeluaran['lot_out'] = (string)$lotById[$index];
+            if (isset($kgsById[$id]) && $kgsById[$id] !== '') $dataPengeluaran['kgs_out'] = (float) $kgsById[$id];
+            if (isset($cnsById[$id]) && $cnsById[$id] !== '') $dataPengeluaran['cns_out'] = (int)   $cnsById[$id];
+            if (isset($krgById[$id]) && $krgById[$id] !== '') $dataPengeluaran['krg_out'] = (int)   $krgById[$id];
+            if (isset($lotById[$id]) && $lotById[$id] !== '') $dataPengeluaran['lot_out'] = (string)$lotById[$id];
 
             $this->db->transStart();
             if (!$this->pengeluaranModel->update($id, $dataPengeluaran)) {
@@ -1105,7 +1106,7 @@ class PemesananController extends BaseController
             }
 
             // jika bb benang & nylon update stock
-            if ($jenisId[$index] == 'BENANG' || $jenisId[$index] == 'NYLON') {
+            if ($jenisId[$id] == 'BENANG' || $jenisId[$id] == 'NYLON') {
                 // get data stock
                 $stock = $this->stockModel->find($record['id_stock']);
                 if ($stock) {
@@ -1124,7 +1125,7 @@ class PemesananController extends BaseController
                     $lotAwalStockNew  = (string)($stock['lot_awal']  ?? '');
                     $lotInOutStockNew = (string)($stock['lot_stock'] ?? '');
                     // cek apakah kgs & cones nya berubah
-                    if ($kgsById[$index] != $record['kgs_out'] || $cnsById[$index] != $record['cns_out']) {
+                    if ($kgsById[$id] != $record['kgs_out'] || $cnsById[$id] != $record['cns_out']) {
                         // jika berubah, update stock nya
                         // ===== Hitung KGS =====
                         if ($outKgsBaru != 0.0) {
@@ -1184,7 +1185,23 @@ class PemesananController extends BaseController
             if ($this->db->transStatus()) $updatedCount++;
             else $errors[] = "ID $id: transaksi gagal.";
         }
-        session()->remove('manual_delivery');
+
+        $manualDelivery = session('manual_delivery') ?? [];
+        $selected = $post['selected'] ?? [];
+
+        foreach ($selected as $id) {
+            foreach ($manualDelivery as $key => $row) {
+                if ($row['id_pengeluaran'] == $id) {
+                    unset($manualDelivery[$key]);
+                }
+            }
+        }
+
+        // reindex array supaya rapih (optional)
+        $manualDelivery = array_values($manualDelivery);
+
+        // simpan ulang ke session
+        session()->set('manual_delivery', $manualDelivery);
 
         if ($updatedCount > 0 && empty($errors)) {
             session()->setFlashdata('success', "{$updatedCount} status berhasil diperbarui");
