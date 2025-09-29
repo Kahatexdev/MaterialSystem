@@ -1282,4 +1282,73 @@ class PemesananModel extends Model
 
         return $this->first();
     }
+
+    public function getPemesananAreaAgg(string $tglPakai, string $noModel, string $area, string $search = ''): array
+    {
+        $sql = "
+            SELECT
+              tp.id_total_pemesanan,
+              pm.tgl_pakai,
+              pm.admin,
+              tp.ttl_jl_mc AS jl_mc,
+              tp.ttl_kg    AS qty_pesan,
+              tp.ttl_cns   AS cns_pesan,
+              mo.no_model,
+              m.item_type,
+              m.kode_warna,
+              m.color,
+              MAX(m.loss)                          AS max_loss,
+              SUM(pm.sisa_kgs_mc)                  AS qty_sisa,
+              SUM(pm.sisa_cones_mc)                AS cns_sisa,
+              IFNULL(p.kgs_out, 0)                 AS kgs_out,
+              IFNULL(p.cns_out, 0)                 AS cns_out,
+              p.lot_out,
+              p.kgs_out_list,
+              pm.keterangan AS keterangan,
+              pm.keterangan_gbn AS keterangan_gbn,
+              pm.po_tambahan,
+              p.area_out AS area,
+              pm.status_kirim
+            FROM pemesanan pm
+            LEFT JOIN total_pemesanan tp
+              ON tp.id_total_pemesanan = pm.id_total_pemesanan
+            LEFT JOIN (
+              SELECT
+                id_total_pemesanan,
+                area_out,
+                SUM(kgs_out) AS kgs_out,
+                SUM(cns_out) AS cns_out,
+                GROUP_CONCAT(DISTINCT lot_out) AS lot_out,
+                GROUP_CONCAT(CAST(kgs_out AS CHAR) ORDER BY id_pengeluaran SEPARATOR ',') AS kgs_out_list
+              FROM pengeluaran
+              WHERE status = 'Pengiriman Area'
+              GROUP BY id_total_pemesanan
+            ) p ON p.id_total_pemesanan = tp.id_total_pemesanan
+            LEFT JOIN material m
+              ON m.id_material = pm.id_material
+            LEFT JOIN master_order mo
+              ON mo.id_order = m.id_order
+            WHERE pm.status_kirim = 'YA'
+              AND pm.admin = ?
+              AND mo.no_model = ?
+              AND pm.tgl_pakai = ?
+        ";
+
+        $binds = [$area, $noModel, $tglPakai];
+
+        // optional global search (DataTables)
+        if ($search !== '') {
+            $sql .= " AND (m.item_type LIKE ? OR m.kode_warna LIKE ? OR m.color LIKE ? OR tp.id_total_pemesanan LIKE ?)";
+            $like = '%' . $search . '%';
+            array_push($binds, $like, $like, $like, $like);
+        }
+
+        $sql .= "
+            GROUP BY
+              tp.id_total_pemesanan
+            ORDER BY m.item_type, m.kode_warna, pm.tgl_pakai ASC
+        ";
+
+        return $this->db->query($sql, $binds)->getResultArray();
+    }
 }

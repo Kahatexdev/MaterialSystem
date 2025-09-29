@@ -388,7 +388,7 @@
                     data: '_ttl_cns_pesan'
                 },
                 {
-                    data: 'lot'
+                    data: 'lot_out'
                 },
                 {
                     data: 'keterangan'
