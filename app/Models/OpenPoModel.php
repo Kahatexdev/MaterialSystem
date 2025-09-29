@@ -79,6 +79,7 @@ class OpenPoModel extends Model
             ->where('open_po.po_plus', '0')
             ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
             ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
+            ->orderBy('open_po.color')
             ->findAll();
     }
 
@@ -93,6 +94,7 @@ class OpenPoModel extends Model
             ->where('open_po.po_plus', '1')
             ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
             ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
+            ->orderBy('open_po.color')
             ->findAll();
     }
 
@@ -176,13 +178,13 @@ class OpenPoModel extends Model
         $row = $this->db
             ->table('schedule_celup')
             ->selectSum('kg_celup', 'total_kg_celup')
-            ->where('no_model', $noModel)
-            ->where('item_type',  $itemType)
-            ->where('kode_warna', $kodeWarna)
-            ->where('warna',      $warna)
+            ->where('no_model', trim($noModel))
+            ->where('item_type',  trim($itemType))
+            ->where('kode_warna', trim($kodeWarna))
+            ->where('warna',      trim($warna))
             ->get()
             ->getRowArray();
-
+        // dd($row);
         $total = (float) ($row['total_kg_celup'] ?? 0);
 
         // 2) Ambil PO
@@ -190,13 +192,13 @@ class OpenPoModel extends Model
             ->table('open_po')
             ->select('kg_po,po_plus, master_order.delivery_awal, master_order.delivery_akhir')
             ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
-            ->where('open_po.no_model',   $noModel)
-            ->where('open_po.item_type',  $itemType)
-            ->where('open_po.kode_warna', $kodeWarna)
-            ->where('open_po.color',      $warna)
+            ->where('open_po.no_model',   trim($noModel))
+            ->where('open_po.item_type',  trim($itemType))
+            ->where('open_po.kode_warna', trim($kodeWarna))
+            ->where('open_po.color',      trim($warna))
             ->get()
             ->getRowArray();
-
+        // dd($poRow);
         $kgPo = (float) ($poRow['kg_po'] ?? 0);
         $poPlus = (float) ($poRow['po_plus'] ?? '0');
 

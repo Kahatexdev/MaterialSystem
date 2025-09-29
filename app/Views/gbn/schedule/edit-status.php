@@ -22,6 +22,29 @@
 </style>
 
 <div class="container-fluid">
+    <?php if (session()->getFlashdata('success')) : ?>
+        <script>
+            $(document).ready(function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    html: '<?= session()->getFlashdata('success') ?>',
+                });
+            });
+        </script>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')) : ?>
+        <script>
+            $(document).ready(function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    html: '<?= session()->getFlashdata('error') ?>',
+                });
+            });
+        </script>
+    <?php endif; ?>
     <div class="row">
         <div class="col-md-12">
             <div class="card">
@@ -126,7 +149,7 @@
                                     <!-- Lot Celup -->
                                     <div class="form-group" id="lotCelupGroup">
                                         <label for="qty_celup">Lot Celup</label>
-                                        <input type="text" class="form-control" name="lot_celup" id="lot_celup" value="<?= $data['lot_celup'] ?>" disabled>
+                                        <input type="text" class="form-control" name="lot_celup" id="lot_celup" value="<?= $data['lot_celup'] ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-3">

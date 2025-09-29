@@ -275,13 +275,13 @@
                                                             <div class="col-4">
                                                                 <div class="form-group">
                                                                     <label for="qty_po">Qty PO</label>
-                                                                    <input type="number" class="form-control" name="qty_po[]">
+                                                                    <input type="number" step="0.01" class="form-control" name="qty_po[]">
                                                                 </div>
                                                             </div>
                                                             <div class="col-4">
                                                                 <div class="form-group">
                                                                     <label for="qty_po_plus">Qty PO (+)</label>
-                                                                    <input type="number" class="form-control" name="qty_po_plus[]">
+                                                                    <input type="number" step="0.01" class="form-control" name="qty_po_plus[]">
                                                                 </div>
                                                             </div>
                                                             <div class="col-4">

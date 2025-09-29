@@ -10,9 +10,9 @@ class MasterMaterialModel extends Model
     protected $primaryKey       = 'item_type';
     protected $useAutoIncrement = false;
     protected $returnType       = 'array';
-    protected $useSoftDeletes   = false;
+    protected $useSoftDeletes   = true;
     protected $protectFields    = true;
-    protected $allowedFields    = ['item_type', 'deskripsi', 'jenis', 'ukuran'];
+    protected $allowedFields    = ['item_type', 'deskripsi', 'jenis', 'ukuran','created_at', 'updated_at', 'deleted_at'];
 
 
     protected bool $allowEmptyInserts = false;
@@ -22,7 +22,7 @@ class MasterMaterialModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -57,17 +57,17 @@ class MasterMaterialModel extends Model
 
     public function getItemtype()
     {
-        return $this->select('item_type')->findAll();
+        return $this->select('item_type')->where('deleted_at', null)->findAll();
     }
 
     public function getItemTypeByJenis($jenis)
     {
-        return $this->select('item_type')->where('jenis', $jenis)->findAll();
+        return $this->select('item_type')->where('jenis', $jenis)->where('deleted_at', null)->findAll();
     }
 
     public function getJenisByitemType($item_type)
     {
-        return $this->select('jenis')->where('item_type', $item_type)->findAll();
+        return $this->select('jenis')->where('item_type', $item_type)->where('deleted_at', null)->findAll();
     }
 
     public function updateMasterMaterial($id, $data)
@@ -107,6 +107,7 @@ class MasterMaterialModel extends Model
         if (!empty($key)) {
             $builder->like('item_type', $key);
         }
+        $builder->where('deleted_at', null); // Hanya ambil yang tidak dihapus
 
         return $builder->get()->getResultArray();
     }

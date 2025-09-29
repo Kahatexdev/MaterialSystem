@@ -97,7 +97,7 @@ class PengeluaranModel extends Model
             ->join('master_order', 'master_order.id_order = material.id_order')
             ->where('master_order.no_model', $noModel)
             ->where('pengeluaran.status', 'Pengiriman Area')
-            ->groupBy('master_order.no_model, material.kode_warna, material.color, material.item_type')
+            ->groupBy('master_order.no_model, material.kode_warna, material.color, material.item_type, pengeluaran.lot_out')
             ->get()
             ->getResultArray();
     }
@@ -578,64 +578,6 @@ class PengeluaranModel extends Model
         return $builder->get()->getResultArray();
     }
 
-    // public function validateDeliveryData(array $data): array
-    // {
-    //     $builder = $this->db
-    //         ->table('pengeluaran as p')
-    //         ->distinct()
-    //         ->select([
-    //             'p.*',
-    //             'pe.tgl_pakai',
-    //             // jika ada di schedule_celup ambil sc.no_model, jika tidak ambil mo.no_model
-    //             'COALESCE(sc.no_model, mo.no_model) AS no_model',
-    //             'COALESCE(sc.item_type, m.item_type) AS item_type',
-    //             'COALESCE(sc.kode_warna, m.kode_warna)    AS kode_warna',
-    //             'COALESCE(sc.warna, m.color)             AS warna',
-    //             'mm.jenis',
-    //             'tp.ttl_kg',
-    //             'tp.ttl_cns',
-    //             'oc.no_karung',
-    //         ])
-    //         // JOIN semua tabel
-    //         ->join('out_celup oc',                'oc.id_out_celup    = p.id_out_celup',            'left')
-    //         ->join('schedule_celup sc',           'sc.id_celup        = oc.id_celup',               'left')
-    //         ->join('pemesanan_spandex_karet psk', 'psk.id_psk         = p.id_psk',                 'left')
-    //         ->join(
-    //             'pemesanan pe',
-    //             '(
-    //             pe.id_total_pemesanan = psk.id_total_pemesanan
-    //             OR pe.id_total_pemesanan = p.id_total_pemesanan
-    //         )',
-    //             'left'
-    //         )
-    //         ->join('total_pemesanan tp',         'tp.id_total_pemesanan = p.id_total_pemesanan',   'left')
-    //         ->join('material m',                  'm.id_material      = pe.id_material',            'left')
-    //         ->join('master_material mm',          'mm.item_type     = m.item_type',             'left')
-    //         ->join('master_order mo',             'mo.id_order        = m.id_order',                'left')
-    //         // Filter status sebelum grouping
-    //         ->where('p.status', 'Pengeluaran Jalur')
-    //         // Filter no_model
-    //         ->groupStart()
-    //         ->where('sc.no_model', $data['no_model'])
-    //         ->orWhere('mo.no_model', $data['no_model'])
-    //         ->groupEnd()
-    //         // Filter item_type
-    //         ->groupStart()
-    //         ->where('sc.item_type', $data['item_type'])
-    //         ->orWhere('m.item_type', $data['item_type'])
-    //         ->groupEnd()
-    //         // Filter kode_warna
-    //         ->groupStart()
-    //         ->where('sc.kode_warna', $data['kode_warna'])
-    //         ->orWhere('m.kode_warna', $data['kode_warna'])
-    //         ->groupEnd()
-    //         // Group by id_pengeluaran untuk distinct
-    //         ->groupBy('p.id_pengeluaran');
-
-    //     return $builder
-    //         ->get()
-    //         ->getResultArray();
-    // }
     public function validateDeliveryData(array $data): array
     {
         $builder = $this->db
@@ -645,10 +587,10 @@ class PengeluaranModel extends Model
                 'p.*',
                 'pe.tgl_pakai',
                 // jika ada di schedule_celup ambil sc.no_model, jika tidak ambil mo.no_model
-                'COALESCE(sc.no_model, mo.no_model) AS no_model',
-                'COALESCE(sc.item_type, m.item_type) AS item_type',
-                'COALESCE(sc.kode_warna, m.kode_warna)    AS kode_warna',
-                'COALESCE(sc.warna, m.color)             AS warna',
+                'mo.no_model',
+                'm.item_type',
+                'm.kode_warna',
+                'm.color AS warna',
                 'mm.jenis',
                 'tp.ttl_kg',
                 'tp.ttl_cns',
