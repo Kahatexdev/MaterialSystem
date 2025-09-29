@@ -1129,47 +1129,6 @@ class ScheduleController extends BaseController
 
         $sch = $this->scheduleCelupModel->getSchedule($filterTglSch, $filterTglSchsampai, $filterNoModel);
 
-        $uniqueData = [];
-        foreach ($sch as $key => $id) {
-            // Ambil parameter dari data schedule
-            $nomodel = $id['no_model'];
-            $itemtype = $id['item_type'];
-            $kodewarna = $id['kode_warna'];
-
-            // Debug untuk memastikan parameter tidak null
-            if (empty($nomodel) || empty($itemtype) || empty($kodewarna)) {
-                log_message('error', "Parameter null: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
-                continue; // Skip data jika ada parameter kosong
-            }
-
-
-            $keys = $id['no_model'] . '-' . $id['item_type'] . '-' . $id['kode_warna'];
-
-            // Pastikan key belum ada, jika belum maka tambahkan data
-            if (!isset($uniqueData[$key])) {
-
-                // Buat array data unik
-                $uniqueData[] = [
-                    'no_model' => $nomodel,
-                    'item_type' => $itemtype,
-                    'kode_warna' => $kodewarna,
-                    'warna' => $id['warna'],
-                    'start_mc' => $id['start_mc'],
-                    'qty_celup' => $id['qty_celup'],
-                    'no_mesin' => $id['no_mesin'],
-                    'id_celup' => $id['id_celup'],
-                    'lot_celup' => $id['lot_celup'],
-                    'lot_urut' => $id['lot_urut'],
-                    'tgl_schedule' => $id['tanggal_schedule'],
-                    'last_status' => $id['last_status'],
-                    'kg_po' => $id['kg_po'],
-                    'kg_celup' => $id['kg_celup'],
-                    'ket_schedule' => $id['ket_schedule'],
-                    'po_plus' => $id['po_plus'],
-                    'admin' => $id['user_cek_status']
-                ];
-            }
-        }
         // fetching delivery
         $listPdk = $this->masterOrderModel->getNullDeliv() ?? null;
         if ($listPdk) {
@@ -1199,7 +1158,6 @@ class ScheduleController extends BaseController
             'title' => 'Schedule',
             'role' => $this->role,
             'data_sch' => $sch,
-            'uniqueData' => $uniqueData,
             'showExcel' => $showExcel,
             'filterTglSch' => $filterTglSch,
             'filterTglSchsampai' => $filterTglSchsampai,
