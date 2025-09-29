@@ -147,34 +147,17 @@ class PengeluaranModel extends Model
     //     return $this->db->query($sql, [$area, $noModel, $itemType, $kodeWarna])->getRowArray();
     // }
 
-    public function getTotalPengiriman(array $data): array
+    public function getTotalPengiriman($data)
     {
-        $area      = $data['area'] ?? '';
-        $idTotal   = $data['id_total_pemesanan'] ?? null;
-        $tglMax    = $data['tgl_max'] ?? null; // opsional (pakai jika ingin cut-off hingga tgl_pakai)
-
-        if (!$area || !$idTotal) {
-            return ['kgs_out' => 0];
-        }
-
-        $params = [$area, $idTotal];
-        $tglSql = '';
-        if ($tglMax) {
-            $tglSql = ' AND p.tgl_out <= ?';
-            $params[] = $tglMax;
-        }
-
-        $sql = "
-        SELECT COALESCE(SUM(CAST(p.kgs_out AS DECIMAL(15,3))), 0) AS kgs_out
-        FROM pengeluaran p
-        WHERE p.area_out = ?
-          AND p.status   = 'Pengiriman Area'
-          AND p.id_total_pemesanan = ?
-          $tglSql
-    ";
-
-        return $this->db->query($sql, $params)->getRowArray();
+        $area = $data['area'] ?? '';
+        $noModel = $data['no_model'] ?? '';
+        $itemType = $data['item_type'] ?? '';
+        $kodeWarna = $data['kode_warna'] ?? '';
+        $sql = " SELECT SUM(sub.total_kgs_out) AS kgs_out FROM ( SELECT p.id_total_pemesanan, SUM(p.kgs_out) AS total_kgs_out FROM pengeluaran p WHERE p.area_out = ? AND p.status = 'Pengiriman Area' GROUP BY p.id_total_pemesanan ) AS sub WHERE EXISTS ( SELECT 1 FROM total_pemesanan tp JOIN pemesanan pm ON pm.id_total_pemesanan = tp.id_total_pemesanan JOIN material m ON m.id_material = pm.id_material JOIN master_order mo ON mo.id_order = m.id_order WHERE tp.id_total_pemesanan = sub.id_total_pemesanan AND mo.no_model = ? AND m.item_type = ? AND m.kode_warna = ? ) ";
+        return $this->db->query($sql, [$area, $noModel, $itemType, $kodeWarna])->getRowArray();
     }
+
+
 
     public function getFilterPengiriman($key = null, $tanggal_awal = null, $tanggal_akhir = null)
     {
