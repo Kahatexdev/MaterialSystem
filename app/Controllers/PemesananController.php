@@ -2530,7 +2530,7 @@ class PemesananController extends BaseController
                 $order['ttl_pengiriman'] = $pengiriman['kgs_out'] ?? 0;
                 $order['sisa_jatah']     = ($order['ttl_kebutuhan_bb'] ?? 0) - ($order['ttl_pengiriman'] ?? 0);
             }
-
+            // \var_dump($pengiriman);
             // kolom turunan
             $ttl_kg_pesan  = (float)$order['qty_pesan'] - (float)$order['qty_sisa'];
             $ttl_cns_pesan = (int)$order['cns_pesan'] - (int)$order['cns_sisa'];
