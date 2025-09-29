@@ -149,32 +149,21 @@ class PengeluaranModel extends Model
 
     public function getTotalPengiriman(array $data): array
     {
-        $area      = $data['area'] ?? '';
-        $idTotal   = $data['id_total_pemesanan'] ?? null;
-        $tglMax    = $data['tgl_max'] ?? null; // opsional (pakai jika ingin cut-off hingga tgl_pakai)
-
-        if (!$area || !$idTotal) {
-            return ['kgs_out' => 0];
-        }
-
-        $params = [$area, $idTotal];
-        $tglSql = '';
-        if ($tglMax) {
-            $tglSql = ' AND p.tgl_out <= ?';
-            $params[] = $tglMax;
-        }
+        $area    = $data['area'] ?? '';
+        $idTotal = $data['id_total_pemesanan'] ?? null;
+        if (!$area || !$idTotal) return ['kgs_out' => 0];
 
         $sql = "
         SELECT COALESCE(SUM(CAST(p.kgs_out AS DECIMAL(15,3))), 0) AS kgs_out
-        FROM pengeluaran p
-        WHERE p.area_out = ?
-          AND p.status   = 'Pengiriman Area'
-          AND p.id_total_pemesanan = ?
-          $tglSql
+        FROM total_pemesanan tp
+        JOIN pengeluaran p ON p.id_total_pemesanan = tp.id_total_pemesanan
+        WHERE p.status = 'Pengiriman Area'
+          AND p.area_out = ?
+          AND tp.id_total_pemesanan = ?
     ";
-
-        return $this->db->query($sql, $params)->getRowArray();
+        return $this->db->query($sql, [$area, $idTotal])->getRowArray();
     }
+
 
 
     public function getFilterPengiriman($key = null, $tanggal_awal = null, $tanggal_akhir = null)
