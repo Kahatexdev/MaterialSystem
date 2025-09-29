@@ -133,6 +133,17 @@
         line-height: 1.4;
     }
 
+    /* filter inputs focus ring */
+    #filterText:focus,
+    #filterUser:focus,
+    #filterFrom:focus,
+    #filterTo:focus,
+    #filterRole:focus {
+        box-shadow: var(--ring);
+        border-color: var(--brand);
+    }
+
+
 
     .reply-textarea:focus {
         box-shadow: var(--ring);
@@ -183,6 +194,56 @@
             <i class="bi bi-plus-lg me-1"></i> Buat Pengaduan
         </button>
     </div>
+    <!-- FILTER BAR -->
+    <div class="card mb-3" style="border:0; border-radius:16px; box-shadow: var(--card-shadow);">
+        <div class="card-body">
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-3">
+                    <label class="form-label small text-muted">Cari teks (isi / balasan)</label>
+                    <input id="filterText" type="text" class="form-control" placeholder="Ketik untuk mencari...">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small text-muted">Role tujuan</label>
+                    <select id="filterRole" class="form-select">
+                        <option value="">Semua</option>
+                        <option value="capacity">Capacity</option>
+                        <option value="planning">PPC</option>
+                        <option value="aps">Planner</option>
+                        <option value="user">Area</option>
+                        <option value="rosso">Rosso</option>
+                        <option value="gbn">GBN</option>
+                        <option value="sudo">Monitoring Planning & Produksi</option>
+                        <option value="monitoring">Monitoring Bahan Baku</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small text-muted">Username pengirim</label>
+                    <input id="filterUser" type="text" class="form-control" placeholder="mis. alfa">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small text-muted">Dari tanggal</label>
+                    <input id="filterFrom" type="date" class="form-control">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small text-muted">Sampai tanggal</label>
+                    <input id="filterTo" type="date" class="form-control">
+                </div>
+                <div class="col-12 col-md-1">
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="filterHasReply">
+                        <label class="form-check-label small" for="filterHasReply">Ada balasan</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div class="small text-muted"><span id="resultCount">0</span> hasil</div>
+                <div class="d-flex gap-1">
+                    <button id="btnClearFilter" class="btn btn-light btn-sm">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- EMPTY / LIST -->
     <?php if (empty($pengaduan)) : ?>
@@ -201,20 +262,44 @@
                 <?php
                 $timestamp = strtotime($p['created_at']);
                 $formattedDate = '<strong>' . date('l, d/m/Y', $timestamp) . '</strong> (' . date('H:i', $timestamp) . ')';
+                $dateISO = date('Y-m-d', $timestamp);
+
                 $roleMap = [
-                    'sudo'     => 'Monitoring Planning & Produksi',
-                    'aps'      => 'Planner',
-                    'planning' => 'PPC',
-                    'user'     => 'Area',
-                    'capacity' => 'Capacity',
-                    'rosso'    => 'Rosso',
-                    'gbn'      => 'GBN',
+                    'sudo'       => 'Monitoring Planning & Produksi',
+                    'aps'        => 'Planner',
+                    'planning'   => 'PPC',
+                    'user'       => 'Area',
+                    'capacity'   => 'Capacity',
+                    'rosso'      => 'Rosso',
+                    'gbn'        => 'GBN',
                     'monitoring' => 'Monitoring Bahan Baku',
                 ];
                 $displayRole = $roleMap[$p['target_role']] ?? $p['target_role'];
                 $roleClass = 'role-' . preg_replace('/[^a-z0-9]/', '', strtolower($p['target_role']));
+
+                // kumpulkan teks balasan (untuk filter text)
+                $replyTexts = [];
+                $hasReply = 0;
+                if (!empty($replies[$p['id_pengaduan']])) {
+                    foreach ($replies[$p['id_pengaduan']] as $r) {
+                        $replyTexts[] = ($r['username'] ?? '') . ' ' . ($r['isi'] ?? '');
+                    }
+                    $hasReply = 1;
+                }
+                $searchBlob = strtolower(
+                    ($p['username'] ?? '') . ' ' .
+                        ($p['isi'] ?? '') . ' ' .
+                        implode(' ', $replyTexts) . ' ' .
+                        $displayRole
+                );
                 ?>
-                <div class="card complaint-card mb-3" data-complaint-id="<?= $p['id_pengaduan'] ?>">
+                <div class="card complaint-card mb-3"
+                    data-complaint-id="<?= $p['id_pengaduan'] ?>"
+                    data-role="<?= esc($p['target_role']) ?>"
+                    data-user="<?= esc(strtolower($p['username'])) ?>"
+                    data-date="<?= esc($dateISO) ?>"
+                    data-hasreply="<?= $hasReply ?>"
+                    data-search="<?= esc($searchBlob) ?>">
                     <div class="card-body timeline-accent">
                         <div class="d-flex justify-content-between align-items-start gap-3">
                             <div>
@@ -238,7 +323,6 @@
                         <p class="mt-3 mb-2"><?= nl2br(esc($p['isi'])) ?></p>
                         <hr class="my-3">
 
-                        <!-- Replies -->
                         <?php if (!empty($replies[$p['id_pengaduan']])) : ?>
                             <?php foreach ($replies[$p['id_pengaduan']] as $r) : ?>
                                 <div class="reply-item mb-2">
@@ -251,20 +335,13 @@
                             <div class="text-muted small">Belum ada balasan.</div>
                         <?php endif; ?>
 
-                        <!-- Reply form -->
-                        <!-- Reply form -->
                         <form class="formReply mt-3" data-id="<?= $p['id_pengaduan'] ?>">
                             <div class="d-flex gap-2 align-items-start">
                                 <textarea name="isi" class="form-control reply-textarea auto-resize" rows="1" placeholder="Tulis balasan..." minlength="2" required></textarea>
-                                <button class="btn btn-brand text-white px-3" type="submit">
-                                    <i class="bi bi-send-fill"></i>
-                                </button>
+                                <button class="btn btn-brand text-white px-3" type="submit"><i class="bi bi-send-fill"></i></button>
                             </div>
                             <input type="hidden" name="username" value="<?= esc(session()->get('username')) ?>">
                         </form>
-
-
-
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -425,5 +502,107 @@
         });
     }
 </script>
+<script>
+    // element filter
+    const $filterText = $('#filterText');
+    const $filterRole = $('#filterRole');
+    const $filterUser = $('#filterUser');
+    const $filterFrom = $('#filterFrom');
+    const $filterTo = $('#filterTo');
+    const $filterHasReply = $('#filterHasReply');
+    const $resultCount = $('#resultCount');
+
+    function debounce(fn, wait = 200) {
+        let t;
+        return function() {
+            clearTimeout(t);
+            t = setTimeout(() => fn.apply(this, arguments), wait);
+        };
+    }
+
+    function applyFilter() {
+        const q = ($filterText.val() || '').toLowerCase().trim();
+        const role = ($filterRole.val() || '').trim();
+        const user = ($filterUser.val() || '').toLowerCase().trim();
+        const fromStr = $filterFrom.val();
+        const toStr = $filterTo.val();
+        const needReply = $filterHasReply.is(':checked');
+
+        const from = fromStr ? new Date(fromStr) : null;
+        const to = toStr ? new Date(toStr) : null;
+        if (to) {
+            to.setHours(23, 59, 59, 999);
+        }
+
+        let visible = 0;
+        $('#pengaduanList .complaint-card').each(function() {
+            const $card = $(this);
+            const cardRole = ($card.data('role') || '').toString().trim();
+            const cardUser = ($card.data('user') || '').toString().trim();
+            const cardDateStr = ($card.data('date') || '').toString();
+            const blob = ($card.data('search') || '').toString();
+            const hasReply = Number($card.data('hasreply')) === 1;
+
+            // tanggal
+            let passDate = true;
+            if (from || to) {
+                const d = new Date(cardDateStr);
+                if (from && d < from) passDate = false;
+                if (to && d > to) passDate = false;
+            }
+
+            const passRole = role === '' || role === cardRole;
+            const passUser = user === '' || cardUser.includes(user);
+            const passText = q === '' || blob.includes(q);
+            const passReply = !needReply || hasReply;
+
+            const show = passRole && passUser && passText && passDate && passReply;
+            $card.toggle(show);
+            if (show) visible++;
+        });
+
+        $resultCount.text(visible);
+    }
+
+    const applyFilterDebounced = debounce(applyFilter, 150);
+
+    $filterText.on('input', applyFilterDebounced);
+    $filterRole.on('change', applyFilter);
+    $filterUser.on('input', applyFilterDebounced);
+    $filterFrom.on('change', applyFilter);
+    $filterTo.on('change', applyFilter);
+    $filterHasReply.on('change', applyFilter);
+    $('#btnClearFilter').on('click', function() {
+        $filterText.val('');
+        $filterRole.val('');
+        $filterUser.val('');
+        $filterFrom.val('');
+        $filterTo.val('');
+        $filterHasReply.prop('checked', false);
+        applyFilter();
+    });
+
+    // re-apply setelah reload list
+    function afterListReload() {
+        applyFilter();
+    }
+
+    // override fungsi loadPengaduan agar panggil applyFilter()
+    function loadPengaduan() {
+        $.get('<?= base_url($role . "/pengaduan") ?>', function(html) {
+            const $newList = $(html).find('#pengaduanList').html();
+            if ($newList) {
+                $('#pengaduanList').html($newList);
+                afterListReload();
+            }
+        });
+    }
+
+    // init
+    $(function() {
+        applyFilter();
+    });
+</script>
+
 
 <?= $this->endSection() ?>
