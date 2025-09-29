@@ -79,7 +79,7 @@ class OpenPoModel extends Model
             ->where('open_po.po_plus', '0')
             ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
             ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
-            ->orderBy('open_po.item_type', 'DESC')
+            ->orderBy('open_po.created_at', 'ASC')
             ->findAll();
     }
 
@@ -94,7 +94,7 @@ class OpenPoModel extends Model
             ->where('open_po.po_plus', '1')
             ->join('master_material', 'master_material.item_type=open_po.item_type', 'left')
             ->join('master_order', 'master_order.no_model=open_po.no_model', 'left')
-            ->orderBy('open_po.item_type', 'DESC')
+            ->orderBy('open_po.created_at', 'ASC')
             ->findAll();
     }
 
