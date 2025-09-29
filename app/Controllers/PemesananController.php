@@ -2503,7 +2503,8 @@ class PemesananController extends BaseController
 
                 // total pengiriman aktual area
                 $reqPengiriman = [
-                    'area'      => $areaRow,
+                    'area'                => $order['admin'],               // area_out
+                    'id_total_pemesanan'  => $order['id_total_pemesanan'],  // <- WAJIB
                     'no_model'  => $order['no_model'],
                     'item_type' => $order['item_type'],
                     'kode_warna' => $order['kode_warna'],
