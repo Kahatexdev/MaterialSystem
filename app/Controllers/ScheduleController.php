@@ -1628,7 +1628,10 @@ class ScheduleController extends BaseController
         $draw   = $postData['draw'];
         $start  = $postData['start'];
         $length = $postData['length'];
-        $search = $postData['search']['value'];
+        $search = trim((string)($postData['search']['value'] ?? ''));
+        if ($search === '' && !empty($postData['filter_nomodel'])) {
+            $search = trim((string)$postData['filter_nomodel']);
+        }
 
         $filterTglSch       = $postData['filter_tglsch'] ?? null;
         $filterTglSchsampai = $postData['filter_tglschsampai'] ?? null;

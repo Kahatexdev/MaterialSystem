@@ -350,11 +350,13 @@
         $('#btnFilter').on('click', function() {
             const start = $('#filter_tglsch').val();
             const end = $('#filter_tglschsampai').val();
-            if (!start || !end) {
+            const key = $('#filter_nomodel').val();
+            // 1) Minimal salah satu filter diisi
+            if (!start && !end && !key) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error!',
-                    text: 'Silakan pilih rentang tanggal.'
+                    text: 'Silakan isi minimal salah satu filter (tanggal dari-sampai ATAU No Model/Lot/Kode).'
                 });
                 return;
             }
