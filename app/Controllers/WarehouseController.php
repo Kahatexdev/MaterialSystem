@@ -2690,7 +2690,7 @@ class WarehouseController extends BaseController
                 'kgs'        => $data['total_kgs'],
                 'admin'      => session()->get('username')
             ]);
-        } 
+        }
         // else {
         //     $newKgs = $material['kgs'] + $data['total_kgs'];
         //     // Update material jika sudah ada
