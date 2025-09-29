@@ -97,7 +97,7 @@ class PengeluaranModel extends Model
             ->join('master_order', 'master_order.id_order = material.id_order')
             ->where('master_order.no_model', $noModel)
             ->where('pengeluaran.status', 'Pengiriman Area')
-            ->groupBy('master_order.no_model, material.kode_warna, material.color, material.item_type')
+            ->groupBy('master_order.no_model, material.kode_warna, material.color, material.item_type, pengeluaran.lot_out')
             ->get()
             ->getResultArray();
     }
