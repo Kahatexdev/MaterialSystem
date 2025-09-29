@@ -2466,26 +2466,45 @@ class PemesananController extends BaseController
 
                 if ($styleList) {
                     $totalRequirement = 0.0;
+                    $qtyTotal = 0;
                     foreach ($styleList as $style) {
-                        if (isset($style['no_model'], $style['style_size'], $style['gw'], $style['composition'], $style['loss'])) {
-                            $orderApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model='
-                                . $order['no_model'] . '&style_size=' . urlencode($style['style_size']) . '&area=' . urlencode($areaRow);
+                        $orderApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model='
+                            . $order['no_model'] . '&style_size=' . urlencode($style['style_size'])
+                            . '&area=' . urlencode($areaRow);
 
-                            // panggil helper lokal (tanpa echo di view)
-                            $orderQty = $this->fetchApiDataSilently($orderApiUrl);
-                            if (isset($orderQty['qty'])) {
-                                $requirement = $orderQty['qty'] * $style['gw'] * ($style['composition'] / 100) * (1 + ($style['loss'] / 100)) / 1000;
-                                $totalRequirement += $requirement;
-                                $order['qty'] = $orderQty['qty'];
-                            }
+                        $orderQty = $this->fetchApiDataSilently($orderApiUrl);
+                        $qty = (int)($orderQty['qty'] ?? 0);
+
+                        // PO Tambahan per style_size & area
+                        $kgPoTambahan = (float)($this->poTambahanModel->getKgPoTambahan([
+                            'no_model'   => $order['no_model'],
+                            'item_type'  => $order['item_type'],
+                            'kode_warna' => $order['kode_warna'],
+                            'style_size' => $style['style_size'],
+                            'area'       => $areaRow,
+                        ])['ttl_keb_potambahan'] ?? 0);
+
+                        // JHT exception
+                        if (stripos((string)$order['item_type'], 'JHT') !== false) {
+                            $requirement = (float)($style['kgs'] ?? 0) + $kgPoTambahan;
+                        } else {
+                            $requirement = ($qty * (float)$style['gw'] * ((float)$style['composition'] / 100))
+                                * (1 + ((float)$style['loss'] / 100)) / 1000
+                                + $kgPoTambahan;
                         }
+
+                        $totalRequirement += $requirement;
+                        // $order['qty'] = $qty; // opsional: last qty, atau akumulasi jika perlu
+                        $qtyTotal += $qty;
                     }
+                    $order['qty'] = $qtyTotal;
                     $order['ttl_kebutuhan_bb'] = $totalRequirement;
                 }
 
                 // total pengiriman aktual area
                 $reqPengiriman = [
-                    'area'      => $areaRow,
+                    'area'                => $order['admin'],               // area_out
+                    'id_total_pemesanan'  => $order['id_total_pemesanan'],  // <- WAJIB
                     'no_model'  => $order['no_model'],
                     'item_type' => $order['item_type'],
                     'kode_warna' => $order['kode_warna'],
@@ -2494,7 +2513,7 @@ class PemesananController extends BaseController
                 $order['ttl_pengiriman'] = $pengiriman['kgs_out'] ?? 0;
                 $order['sisa_jatah']     = ($order['ttl_kebutuhan_bb'] ?? 0) - ($order['ttl_pengiriman'] ?? 0);
             }
-
+            // \var_dump($pengiriman);
             // kolom turunan
             $ttl_kg_pesan  = (float)$order['qty_pesan'] - (float)$order['qty_sisa'];
             $ttl_cns_pesan = (int)$order['cns_pesan'] - (int)$order['cns_sisa'];
@@ -2688,7 +2707,7 @@ class PemesananController extends BaseController
                 );
 
                 if ($qty >= 0) {
-                    if (isset($pemesanan['item_type']) && stripos($pemesanan['item_type'], 'JHT') !== false) {
+                    if (isset($retur['item_type']) && stripos($retur['item_type'], 'JHT') !== false) {
                         $kebutuhan = $data['kgs'] ?? 0;
                     } else {
                         $kebutuhan = (($qty * $data['gw'] * $data['composition'] / 100 / 1000) * (1 + ($data['loss'] / 100))) + $kgPoTambahan;
