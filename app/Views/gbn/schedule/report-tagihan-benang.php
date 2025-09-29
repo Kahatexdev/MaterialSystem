@@ -224,16 +224,18 @@
                                 item.start_mc ?? '',
                                 item.delivery_awal ?? '',
                                 item.delivery_akhir ?? '',
-                                item.qty_po ?? 0,
-                                item.po_plus ?? 0,
-                                item.stock_awal ?? 0,
-                                item.stock_opname ?? 0,
-                                item.retur_stock ?? 0,
-                                item.qty_sch ?? 0,
-                                item.qty_datang_solid ?? 0,
-                                item.qty_ganti_retur_solid ?? 0,
-                                item.retur_belang ?? 0,
-                                item.tagihan_datang ?? 0,
+                                //dua angka di belakang koma
+                                formatNumber(item.qty_po),
+                                formatNumber(item.po_plus),
+                                formatNumber(item.stock_awal),
+                                formatNumber(item.stock_opname),
+                                formatNumber(item.retur_stock),
+                                formatNumber(item.qty_sch),
+                                formatNumber(item.qty_datang_solid),
+                                formatNumber(item.qty_ganti_retur_solid),
+                                formatNumber(item.retur_belang),
+                                formatNumber(item.tagihan_datang),
+                                //sampai sini
                             ]).draw(false);
                         });
 
@@ -252,6 +254,11 @@
                     console.error("Error:", error);
                 }
             });
+        }
+
+        function formatNumber(num) {
+            num = parseFloat(num ?? 0);
+            return Number.isInteger(num) ? num.toString() : num.toFixed(2);
         }
 
         $('#btnSearch').click(function() {
