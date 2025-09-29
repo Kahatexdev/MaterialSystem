@@ -12758,19 +12758,27 @@ class ExcelController extends BaseController
                 && $sj !== ''
                 && stripos($sj, 'SL') !== 0
                 && stripos($sj, 'SC') !== 0
+                && stripos($sj, 'QD') !== 0
+                && stripos($sj, 'P') !== 0
             ) {
                 $groups['Surat Jalan Tidak Masuk'][] = $row;
                 continue;
             }
 
             // 2) Cotton
-            // bukan Lurex, bukan Polyester, bukan Spun, bukan ACR; SJ diawali KWS atau ''
+            // bukan Lurex, bukan Polyester, bukan Spun, bukan ACR; SJ diawali KWS, '', QD, atau P
             if (
                 stripos($it, 'LUREX') === false
                 && stripos($it, 'POLYESTER') === false
                 && stripos($it, 'SPUN') === false
                 && stripos($it, 'ACR') === false
-                && (stripos($sj, 'KWS') === 0 || $sj === '')
+                &&
+                (
+                    stripos($sj, 'KWS') === 0 ||
+                    $sj === '' ||
+                    stripos($sj, 'QD') === 0 ||
+                    stripos($sj, 'P') === 0
+                )
             ) {
                 $groups['COTTON'][] = $row;
                 continue;
@@ -12780,7 +12788,11 @@ class ExcelController extends BaseController
             // mengandung ACR; bukan Spun, bukan Polyester, bukan pola Lurex-Acr/Lurex-Acrylic
             if (
                 stripos($it, 'ACR') !== false
-                && stripos($sj, 'KWS') !== false
+                && (
+                    stripos($sj, 'KWS') === 0 ||
+                    stripos($sj, 'QD') === 0 ||
+                    stripos($sj, 'P') === 0
+                )
                 && stripos($it, 'SPUN') === false
                 && stripos($it, 'POLYESTER') === false
                 && stripos($it, 'LUREX ACR') === false
@@ -12797,14 +12809,20 @@ class ExcelController extends BaseController
                 stripos($it, 'ACR') === false
                 && stripos($it, 'LUREX') === false
                 && (stripos($it, 'SPUN') !== false || stripos($it, 'POLYESTER') !== false)
-                && (stripos($sj, 'KWS') === 0 || $sj === '')
+                &&
+                (
+                    stripos($sj, 'KWS') === 0 ||
+                    $sj === '' ||
+                    stripos($sj, 'QD') === 0 ||
+                    stripos($sj, 'P') === 0
+                )
             ) {
                 $groups['SPUN POLYESTER'][] = $row;
                 continue;
             }
 
             // 5) Cotton X Lurex
-            // bukan ACR; mengandung LUREX
+            // bukan ACR; mengandung LUREX, dan surat jalan diawali QD atau P
             if (
                 stripos($it, 'ACR') === false
                 && stripos($it, 'LUREX') !== false
@@ -12821,7 +12839,9 @@ class ExcelController extends BaseController
                 && (
                     stripos($sj, 'KWS') === 0
                     || $sj === ''
-                    || stripos($sj, 'LRX') !== false
+                    || stripos($sj, 'LRX') !== false ||
+                    stripos($sj, 'QD') === 0 ||
+                    stripos($sj, 'P') === 0
                 )
             ) {
                 $groups['ACRYLIC X LUREX'][] = $row;
