@@ -1146,9 +1146,9 @@ class PemesananModel extends Model
         if (!empty($area)) {
             $base->where('pemesanan.admin', $area);
         }
-        if ($role !== 'monitoring') {
-            $base->where('pemesanan.status_kirim', 'YA');
-        }
+        // if ($role !== 'monitoring') {
+        //     $base->where('pemesanan.status_kirim', 'YA');
+        // }
 
         // global search (opsional)
         if ($search !== '') {
