@@ -147,21 +147,14 @@ class PengeluaranModel extends Model
     //     return $this->db->query($sql, [$area, $noModel, $itemType, $kodeWarna])->getRowArray();
     // }
 
-    public function getTotalPengiriman(array $data): array
+    public function getTotalPengiriman($data)
     {
-        $area    = $data['area'] ?? '';
-        $idTotal = $data['id_total_pemesanan'] ?? null;
-        if (!$area || !$idTotal) return ['kgs_out' => 0];
-
-        $sql = "
-        SELECT COALESCE(SUM(CAST(p.kgs_out AS DECIMAL(15,3))), 0) AS kgs_out
-        FROM total_pemesanan tp
-        JOIN pengeluaran p ON p.id_total_pemesanan = tp.id_total_pemesanan
-        WHERE p.status = 'Pengiriman Area'
-          AND p.area_out = ?
-          AND tp.id_total_pemesanan = ?
-    ";
-        return $this->db->query($sql, [$area, $idTotal])->getRowArray();
+        $area = $data['area'] ?? '';
+        $noModel = $data['no_model'] ?? '';
+        $itemType = $data['item_type'] ?? '';
+        $kodeWarna = $data['kode_warna'] ?? '';
+        $sql = " SELECT SUM(sub.total_kgs_out) AS kgs_out FROM ( SELECT p.id_total_pemesanan, SUM(p.kgs_out) AS total_kgs_out FROM pengeluaran p WHERE p.area_out = ? AND p.status = 'Pengiriman Area' GROUP BY p.id_total_pemesanan ) AS sub WHERE EXISTS ( SELECT 1 FROM total_pemesanan tp JOIN pemesanan pm ON pm.id_total_pemesanan = tp.id_total_pemesanan JOIN material m ON m.id_material = pm.id_material JOIN master_order mo ON mo.id_order = m.id_order WHERE tp.id_total_pemesanan = sub.id_total_pemesanan AND mo.no_model = ? AND m.item_type = ? AND m.kode_warna = ? ) ";
+        return $this->db->query($sql, [$area, $noModel, $itemType, $kodeWarna])->getRowArray();
     }
 
 
