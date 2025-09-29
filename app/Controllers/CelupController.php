@@ -394,7 +394,7 @@ class CelupController extends BaseController
         $this->scheduleCelupModel->update($id, $dataUpdate);
 
         // Redirect ke halaman sebelumnya dengan pesan sukses
-        return redirect()->to(base_url(session()->get('role') . '/reqschedule'))->withInput()->with('success', 'Data Berhasil diupdate');
+        return redirect()->back()->withInput()->with('success', 'Data Berhasil diupdate');
     }
 
     public function outCelup()

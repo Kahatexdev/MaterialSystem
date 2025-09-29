@@ -574,13 +574,20 @@ class MasterOrderModel extends Model
             ->where('no_model', $noModel)
             ->first();
     }
-    public function getNullDeliv()
+    public function getNullDeliv(): array
     {
+        // tanggal batas: 3 bulan ke belakang dari sekarang
+        $since = (new \DateTimeImmutable('now'))
+            ->modify('-3 months')
+            ->format('Y-m-d H:i:s');
+
         return $this->select('no_model')
-            ->where('delivery_awal', null)
-            ->where('delivery_akhir', null)
+            ->where('delivery_awal', null)     // menghasilkan IS NULL
+            ->where('delivery_akhir', null)    // menghasilkan IS NULL
+            ->where('created_at >=', $since)   // dalam 3 bulan terakhir
             ->findAll();
     }
+
     public function updateDeliv($model, $body)
     {
         if ($body['unit'] == 'CJ') {
