@@ -229,32 +229,35 @@
                     <thead>
                         <tr>
                             <th class="sticky">No</th>
-                            <th class="sticky">No Mc</th>
                             <th class="sticky">PO</th>
                             <th class="sticky">Jenis Benang</th>
                             <th class="sticky">Kode Warna</th>
                             <th class="sticky">Warna</th>
                             <th class="sticky">Alasan</th>
-                            <th class="sticky">Tanggal Schedule</th>
+                            <th class="sticky">Lot Celup</th>
+                            <th class="sticky">Surat Jalan</th>
                             <th class="sticky">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
                         $no = 1;
-                        foreach ($uniqueData as $data):
+                        foreach ($uniqueData as $data) :
                         ?>
                             <tr>
                                 <td><?= $no++; ?></td>
-                                <td><?= $data['no_mesin']; ?></td>
                                 <td><?= $data['no_model']; ?></td>
                                 <td><?= $data['item_type']; ?></td>
                                 <td><?= $data['kode_warna']; ?></td>
                                 <td><?= $data['warna']; ?></td>
                                 <td><?= $data['ket_daily_cek']; ?></td>
-                                <td><?= $data['tgl_schedule']; ?></td>
-                                <td><a href="<?= base_url($role . '/editretur/' . $data['id_celup']) ?>" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Detail">
-                                        <i class="fas fa-eye"></i></a></td>
+                                <td><?= $data['lot_celup']; ?></td>
+                                <td><?= $data['no_surat_jalan']; ?></td>
+                                <td><a href="<?= base_url($role . '/createRetur/' . $data['id_celup']) ?>" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="New Bon">
+                                        <i class="fas fa-barcode"></i></a>
+                                    <a href="<?= base_url($role . '/outCelup/editBon/' . $data['id_bon']) ?>" class="btn btn-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Bon">
+                                        <i class="fas fa-file-alt"></i></a>
+                                </td>
                             </tr>
                         <?php
                         endforeach;

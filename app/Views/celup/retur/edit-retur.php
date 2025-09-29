@@ -25,7 +25,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="card">
-                <?php foreach ($uniqueData as $data): ?>
+                <?php foreach ($uniqueData as $data) : ?>
                     <div class="card-header">
                         <div class="card-header d-flex justify-content-between">
                             <h3 class="card-title">Form Edit Retur <?= implode(', ', $po) ?></h3>
@@ -156,14 +156,7 @@
                                     <!-- Tanggal Press -->
                                     <div class="form-group" id="tglPressGroup">
                                         <label for="tgl_press">Tanggal Press</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_press" id="tgl_press" value="<?= $data['tgl_press'] ?>">
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <!-- Tanggal Oven -->
-                                    <div class="form-group" id="tglOvenGroup">
-                                        <label for="tgl_oven">Tanggal Oven</label>
-                                        <input type="datetime-local" class="form-control" name="tgl_oven" id="tgl_oven" value="<?= $data['tgl_oven'] ?>">
+                                        <input type="datetime-local" class="form-control" name="tgl_press_oven" id="tgl_press_oven" value="<?= $data['tgl_press_oven'] ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
