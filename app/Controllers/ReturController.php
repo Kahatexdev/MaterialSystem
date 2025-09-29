@@ -66,8 +66,8 @@ class ReturController extends BaseController
         $dataRetur = $this->returModel->findAll();
         // dd ($dataRetur);
         $getJenisBb = $this->masterMaterial->getJenisBahanBaku();
-        // $urlApi = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
-        $urlApi = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        // $urlApi = 'http://172.23.39.117/CapacityApps/public/api/getDataArea';
+        $urlApi = 'http://172.23.39.117/CapacityApps/public/api/getDataArea';
         $getArea = json_decode(file_get_contents($urlApi), true);
         // dd ($getArea);
         $jenis = $this->request->getGet('jenis');
@@ -317,7 +317,7 @@ class ReturController extends BaseController
                 'tipe_kategori' => $item['tipe_kategori']
             ];
         }
-        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $apiUrl  = 'http://172.23.39.117/CapacityApps/public/api/getDataArea';
         $response = file_get_contents($apiUrl);
 
         $area = json_decode($response, true);
