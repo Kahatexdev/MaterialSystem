@@ -176,6 +176,7 @@ class PengeluaranModel extends Model
         return $this->db->query($sql, $params)->getRowArray();
     }
 
+
     public function getFilterPengiriman($key = null, $tanggal_awal = null, $tanggal_akhir = null)
     {
         // 1) Siapkan keempat builder tanpa filter tanggal
