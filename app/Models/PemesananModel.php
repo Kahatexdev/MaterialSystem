@@ -1098,14 +1098,16 @@ class PemesananModel extends Model
         string $area = '',
         string $search = ''
     ): array {
-        $subPengeluaran = '(SELECT id_total_pemesanan,
-                               SUM(kgs_out)  AS kgs_out,
-                               SUM(cns_out)  AS cns_out,
-                               GROUP_CONCAT(DISTINCT lot_out) AS lot_out
-                        FROM pengeluaran
-                        WHERE status = "Pengiriman Area"
-                        GROUP BY id_total_pemesanan) p';
 
+        $subPengeluaran = '(SELECT 
+        id_total_pemesanan,
+        area_out,
+        SUM(kgs_out) AS kgs_out,
+        SUM(cns_out) AS cns_out,
+        GROUP_CONCAT(DISTINCT lot_out) AS lot_out
+    FROM pengeluaran
+    WHERE status = "Pengiriman Area"
+    GROUP BY id_total_pemesanan, area_out) p';
         // ===== base (pakai style "model kedua") =====
         $base = $this->db->table('pemesanan')
             ->select("
@@ -1133,7 +1135,7 @@ class PemesananModel extends Model
             p.lot_out
         ")
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
-            ->join($subPengeluaran, 'p.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
+            ->join($subPengeluaran, 'p.id_total_pemesanan = total_pemesanan.id_total_pemesanan AND p.area_out = pemesanan.admin', 'left')
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pemesanan.tgl_pakai', $tglPakai);
@@ -1159,13 +1161,15 @@ class PemesananModel extends Model
                 ->groupEnd();
         }
 
+        $base->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.admin')
+            ->orderBy('material.item_type, material.kode_warna, pemesanan.tgl_pakai', 'ASC');
         // ===== filtered count (hitung sebelum groupBy) =====
         $forCount = clone $base;
-        $recordsFiltered = $forCount->countAllResults(false);
+        $forCount->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.admin');
+        $recordsFiltered = $forCount->get()->getNumRows();
+
 
         // ===== ambil data (grouping + ordering seperti model kedua) =====
-        $base->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.po_tambahan, pemesanan.admin')
-            ->orderBy('material.item_type, material.kode_warna, pemesanan.tgl_pakai', 'ASC');
 
         $data = $base->get()->getResultArray();
 
