@@ -280,11 +280,34 @@ class ReturModel extends Model
     {
         $db = \Config\Database::connect();
 
-        $subPengeluaran = $db->table('pengeluaran')
-            ->select('stock.id_stock, stock.no_model, stock.item_type, stock.kode_warna, SUM(pengeluaran.kgs_out) AS terima_kg')
-            ->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
-            ->where('pengeluaran.area_out', $area)
-            ->groupBy('stock.no_model, stock.item_type, stock.kode_warna');
+        $subPengeluaran = $db->table('pengeluaran p')
+            ->select('m.id_order, m.item_type, m.kode_warna, SUM(DISTINCT p.kgs_out) AS terima_kg')
+            ->join('pemesanan pm', 'pm.id_total_pemesanan = p.id_total_pemesanan', 'left')
+            ->join('material m', 'm.id_material = pm.id_material', 'left')
+            ->where('p.area_out', $area)
+            ->groupBy('m.id_order, m.item_type, m.kode_warna');
+
+        $subPoTambahan = $db->table('po_tambahan pt')
+            ->select("
+        m.id_order, 
+        m.item_type, 
+        m.kode_warna, 
+        SUM(pt.sisa_order_pcs) AS sisa_order_pcs,
+        SUM(pt.poplus_mc_kg) AS poplus_mc_kg,
+        MAX(pt.poplus_mc_cns) AS poplus_mc_cns,
+        SUM(pt.plus_pck_pcs) AS plus_pck_pcs,
+        SUM(pt.plus_pck_kg) AS plus_pck_kg,
+        MAX(pt.plus_pck_cns) AS plus_pck_cns,
+        MAX(tp.ttl_tambahan_kg) AS ttl_tambahan_kg,
+        MAX(tp.ttl_tambahan_cns) AS ttl_tambahan_cns,
+        MAX(tp.ttl_sisa_bb_dimc) AS sisa_bb_mc,
+        MAX(pt.status) AS status
+    ")
+            ->join('total_potambahan tp', 'tp.id_total_potambahan = pt.id_total_potambahan', 'left')
+            ->join('material m', 'm.id_material = pt.id_material', 'left')
+            ->where('pt.admin', $area)
+            ->where('pt.status', 'approved')
+            ->groupBy('m.id_order, m.item_type, m.kode_warna');
 
         // Subquery SUM material
         $subMaterial = $db->table('material')
@@ -295,25 +318,25 @@ class ReturModel extends Model
         retur.kgs_retur, retur.cns_retur, retur.krg_retur, retur.lot_retur,
         retur.kategori, retur.keterangan_gbn, retur.admin,
         peng.terima_kg,
-        IF(po_tambahan.status = 'approved', po_tambahan.sisa_bb_mc, 0) AS sisa_bb_mc,
-        IF(po_tambahan.status = 'approved', po_tambahan.sisa_order_pcs, 0) AS sisa_order_pcs,
-        IF(po_tambahan.status = 'approved', po_tambahan.poplus_mc_kg, 0) AS poplus_mc_kg,
-        IF(po_tambahan.status = 'approved', po_tambahan.poplus_mc_cns, 0) AS poplus_mc_cns,
-        IF(po_tambahan.status = 'approved', po_tambahan.plus_pck_pcs, 0) AS plus_pck_pcs,
-        IF(po_tambahan.status = 'approved', po_tambahan.plus_pck_kg, 0) AS plus_pck_kg,
-        IF(po_tambahan.status = 'approved', po_tambahan.plus_pck_cns, 0) AS plus_pck_cns,
-        IF(po_tambahan.status = 'approved', po_tambahan.lebih_pakai_kg, 0) AS lebih_pakai_kg, 
+        poplus.sisa_bb_mc,
+        poplus.sisa_order_pcs,
+        poplus.poplus_mc_kg,
+        poplus.poplus_mc_cns,
+        poplus.plus_pck_pcs,
+        poplus.plus_pck_kg,
+        poplus.plus_pck_cns,
+        poplus.ttl_tambahan_kg,
+        poplus.ttl_tambahan_cns, 
         master_order.no_model, master_order.delivery_akhir, material.item_type,
         material.kode_warna, material.color, material.style_size,
         mat.kgs_sum AS kgs,
-        material.composition, material.gw,
-        mat.qty_pcs_sum AS qty_pcs,
-        material.loss
     ")
             ->join('master_order', 'retur.no_model = master_order.no_model', 'left')
             ->join('material', 'master_order.id_order = material.id_order AND retur.item_type = material.item_type AND retur.kode_warna = material.kode_warna', 'left')
             ->join('po_tambahan', 'po_tambahan.id_material = material.id_material', 'left')
-            ->join("({$subPengeluaran->getCompiledSelect()}) peng", 'peng.no_model = master_order.no_model AND peng.item_type = material.item_type AND peng.kode_warna = material.kode_warna', 'left')
+            // ->join("({$subPengeluaran->getCompiledSelect()}) peng", 'peng.no_model = master_order.no_model AND peng.item_type = material.item_type AND peng.kode_warna = material.kode_warna', 'left')
+            ->join("({$subPengeluaran->getCompiledSelect()}) peng", 'peng.id_order = master_order.id_order AND peng.item_type = material.item_type AND peng.kode_warna = material.kode_warna', 'left')
+            ->join("({$subPoTambahan->getCompiledSelect()}) poplus", 'poplus.id_order = master_order.id_order AND poplus.item_type = material.item_type AND poplus.kode_warna = material.kode_warna', 'left')
             ->join("({$subMaterial->getCompiledSelect()}) mat", 'mat.id_material = material.id_material', 'left')
             ->where('retur.area_retur', $area)
             ->where('retur.tgl_retur', $tglBuat);
