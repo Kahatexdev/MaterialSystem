@@ -427,7 +427,6 @@ class CelupController extends BaseController
         $filterNoModel = $this->request->getPost('filter_nomodel');
 
         $sch = $this->scheduleCelupModel->getDataComplain();
-
         if ($filterTglSch && $filterNoModel) {
             $sch = array_filter($sch, function ($data) use ($filterTglSch, $filterNoModel) {
                 return $data['tanggal_schedule'] === $filterTglSch &&
@@ -461,7 +460,6 @@ class CelupController extends BaseController
 
             // Panggil fungsi model untuk mendapatkan qty_po dan warna
             $pdk = $this->materialModel->getQtyPOForCelup($nomodel, $itemtype, $kodewarna);
-
             if (!$pdk) {
                 log_message('error', "Data null dari model: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
                 continue; // Skip jika $pdk kosong
@@ -953,8 +951,6 @@ class CelupController extends BaseController
                     'tgl_bon' => $id['tanggal_bon'],
                     'tgl_celup' => $id['tanggal_celup'],
                     'tgl_bongkar' => $id['tanggal_bongkar'],
-                    'tgl_press' => $id['tanggal_press'],
-                    'tgl_oven' => $id['tanggal_oven'],
                     'tgl_tl' => $id['tanggal_tl'],
                     'tgl_rajut_pagi' => $id['tanggal_rajut_pagi'],
                     'tgl_kelos' => $id['tanggal_kelos'],
