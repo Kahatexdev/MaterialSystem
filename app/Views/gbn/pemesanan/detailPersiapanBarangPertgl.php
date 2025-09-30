@@ -207,6 +207,10 @@
                                 class="btn bg-gradient-success w-100" target="_blank">
                                 <i class="fas fa-file-excel"></i> Export
                             </a>
+                            <a href="<?= base_url($role . '/pemesanan/exportPdfListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tglPakai) ?>"
+                                class="btn bg-gradient-danger w-100" target="_blank">
+                                <i class="fas fa-file-pdf"></i> Export
+                            </a>
                         </div>
                     </form>
                     <div class="table-responsive mt-4">
