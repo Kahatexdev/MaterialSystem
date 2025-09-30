@@ -65,6 +65,7 @@
                                     <div class="col-md-4">
                                         <label>No Surat Jalan</label>
                                         <input type="text" class="form-control" id="no_surat_jalan" name="no_surat_jalan" required>
+                                        <div id="no_surat_jalan_error" class="text-danger mt-1 small"></div>
                                     </div>
                                     <div class="col-md-4">
                                         <label>Tanggal Kirim</label>
@@ -257,6 +258,24 @@
         locale: "id",
         allowInput: true
         // disableMobile: true
+    });
+</script>
+<script>
+    const input = document.getElementById('no_surat_jalan');
+    const error = document.getElementById('no_surat_jalan_error');
+
+    input.addEventListener('input', function() {
+        const val = this.value.trim();
+
+        if (val === '-') {
+            error.textContent = 'Tidak boleh hanya tanda "-" saja';
+            // Optional: hapus nilai supaya user tidak bisa submit
+            // this.value = '';
+        } else if (val === '0') {
+            error.textContent = 'Tidak boleh hanya  "0" saja';
+        } else {
+            error.textContent = '';
+        }
     });
 </script>
 <script>
