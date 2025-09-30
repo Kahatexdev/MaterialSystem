@@ -487,7 +487,7 @@ class PemesananModel extends Model
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pemesanan.status_kirim', 'YA')
-            // ->where('master_order.no_model', 'rz2675')
+            ->where('master_order.no_model', 'rz2675')
             ->where('material.kode_warna', '1801-AY');
 
         // Cek apakah ada input key untuk pencarian
@@ -1310,10 +1310,6 @@ class PemesananModel extends Model
               p.area_out AS area,
               pm.status_kirim
             FROM pemesanan pm
-            LEFT JOIN material m
-              ON m.id_material = pm.id_material
-            LEFT JOIN master_order mo
-              ON mo.id_order = m.id_order
             LEFT JOIN total_pemesanan tp
               ON tp.id_total_pemesanan = pm.id_total_pemesanan
             LEFT JOIN (
@@ -1328,7 +1324,12 @@ class PemesananModel extends Model
               WHERE status = 'Pengiriman Area'
               GROUP BY id_total_pemesanan
             ) p ON p.id_total_pemesanan = tp.id_total_pemesanan
-            WHERE pm.admin = ?
+            LEFT JOIN material m
+              ON m.id_material = pm.id_material
+            LEFT JOIN master_order mo
+              ON mo.id_order = m.id_order
+            WHERE pm.status_kirim = 'YA'
+              AND pm.admin = ?
               AND mo.no_model = ?
               AND pm.tgl_pakai = ?
         ";
