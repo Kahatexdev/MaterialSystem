@@ -488,7 +488,7 @@ class PemesananModel extends Model
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pemesanan.status_kirim', 'YA')
             // ->where('master_order.no_model', 'rz2675')
-            ->where('material.kode_warna', '1801-AY');
+            // ->where('material.kode_warna', '1801-AY');
 
         // Cek apakah ada input key untuk pencarian
         if (!empty($key)) {
