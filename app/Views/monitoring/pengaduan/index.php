@@ -150,6 +150,9 @@
         border-color: var(--brand);
     }
 
+    .card.border-warning {
+        box-shadow: 0 0 0 2px rgba(245, 158, 11, .35);
+    }
 
     /* ====== OVERLAY ====== */
     #loadingOverlay {
@@ -228,12 +231,14 @@
                     <label class="form-label small text-muted">Sampai tanggal</label>
                     <input id="filterTo" type="date" class="form-control">
                 </div>
-                <div class="col-12 col-md-1">
+                <div class="col-12 col-md-2">
                     <div class="form-check mt-3">
-                        <input class="form-check-input" type="checkbox" id="filterHasReply">
-                        <label class="form-check-label small" for="filterHasReply">Ada balasan</label>
+                        <input class="form-check-input" type="checkbox" id="filterUnread">
+                        <label class="form-check-label small" for="filterUnread">Belum dibaca</label>
                     </div>
                 </div>
+
+
             </div>
 
             <div class="d-flex justify-content-between align-items-center mt-3">
@@ -293,17 +298,33 @@
                         $displayRole
                 );
                 ?>
-                <div class="card complaint-card mb-3" data-complaint-id="<?= $p['id_pengaduan'] ?>" data-role="<?= esc($p['target_role']) ?>" data-user="<?= esc(strtolower($p['username'])) ?>" data-date="<?= esc($dateISO) ?>" data-hasreply="<?= $hasReply ?>" data-search="<?= esc($searchBlob) ?>">
+                <?php
+                // Unread = tidak ada balasan
+                $isUnread = $hasReply ? 0 : 1;
+                ?>
+
+                <div
+                    class="card complaint-card mb-3 <?= $isUnread ? 'border-warning' : '' ?>"
+                    data-complaint-id="<?= $p['id_pengaduan'] ?>"
+                    data-role="<?= esc($p['target_role']) ?>"
+                    data-user="<?= esc(strtolower($p['username'])) ?>"
+                    data-date="<?= esc($dateISO) ?>"
+                    data-hasreply="<?= $hasReply ?>"
+                    data-unread="<?= $isUnread ?>"  
+                    data-search="<?= esc($searchBlob) ?>">
+
                     <div class="card-body timeline-accent">
                         <div class="d-flex justify-content-between align-items-start gap-3">
                             <div>
                                 <h6 class="mb-1">
+                                    <?php if ($isUnread): ?>
+                                        <span class="badge bg-warning text-dark me-2">Baru</span>
+                                    <?php endif; ?>
                                     <span class="fw-bold"><?= esc($p['username']) ?></span>
                                     <i class="bi bi-arrow-right-short mx-1 opacity-50"></i>
-                                    <span class="badge role-badge <?= $roleClass ?>">
-                                        <?= esc($displayRole) ?>
-                                    </span>
+                                    <span class="badge role-badge <?= $roleClass ?>"><?= esc($displayRole) ?></span>
                                 </h6>
+
                                 <div class="meta-time"><?= $formattedDate ?></div>
                             </div>
                             <div class="dropstart">
@@ -485,26 +506,17 @@
         loadPengaduan(); // sementara refresh all
     });
 
-    // RELOAD LIST
-    function loadPengaduan() {
-        // ambil ulang view & ganti isi container list
-        $.get('<?= base_url($role . "/pengaduan") ?>', function(html) {
-            const $newList = $(html).find('#pengaduanList').html();
-            if ($newList) {
-                $('#pengaduanList').html($newList);
-            }
-        });
-    }
-</script>
-<script>
+
     // element filter
     const $filterText = $('#filterText');
     const $filterRole = $('#filterRole');
     const $filterUser = $('#filterUser');
     const $filterFrom = $('#filterFrom');
     const $filterTo = $('#filterTo');
-    const $filterHasReply = $('#filterHasReply');
+    // const $filterHasReply = $('#filterHasReply');
     const $resultCount = $('#resultCount');
+    const $filterUnread = $('#filterUnread');
+
 
     function debounce(fn, wait = 200) {
         let t;
@@ -520,14 +532,14 @@
         const user = ($filterUser.val() || '').toLowerCase().trim();
         const fromStr = $filterFrom.val();
         const toStr = $filterTo.val();
-        const needReply = $filterHasReply.is(':checked');
+        // const needReply = $filterHasReply.is(':checked');
+        const needUnread = $filterUnread.is(':checked');
 
         const from = fromStr ? new Date(fromStr) : null;
         const to = toStr ? new Date(toStr) : null;
         if (to) {
             to.setHours(23, 59, 59, 999);
         }
-
         let visible = 0;
         $('#pengaduanList .complaint-card').each(function() {
             const $card = $(this);
@@ -535,7 +547,7 @@
             const cardUser = ($card.data('user') || '').toString().trim();
             const cardDateStr = ($card.data('date') || '').toString();
             const blob = ($card.data('search') || '').toString();
-            const hasReply = Number($card.data('hasreply')) === 1;
+            const unread = Number($card.data('unread')) === 1; // <-- baca atribut baru
 
             // tanggal
             let passDate = true;
@@ -548,12 +560,13 @@
             const passRole = role === '' || role === cardRole;
             const passUser = user === '' || cardUser.includes(user);
             const passText = q === '' || blob.includes(q);
-            const passReply = !needReply || hasReply;
+            const passUnread = !needUnread || unread; // <-- filter unread
 
-            const show = passRole && passUser && passText && passDate && passReply;
+            const show = passRole && passUser && passText && passDate && passUnread;
             $card.toggle(show);
             if (show) visible++;
         });
+
 
         $resultCount.text(visible);
     }
@@ -565,14 +578,16 @@
     $filterUser.on('input', applyFilterDebounced);
     $filterFrom.on('change', applyFilter);
     $filterTo.on('change', applyFilter);
-    $filterHasReply.on('change', applyFilter);
+    $filterUnread.on('change click', applyFilter);
+    // $filterHasReply.on('change', applyFilter);
     $('#btnClearFilter').on('click', function() {
         $filterText.val('');
         $filterRole.val('');
         $filterUser.val('');
         $filterFrom.val('');
         $filterTo.val('');
-        $filterHasReply.prop('checked', false);
+        // $filterHasReply.prop('checked', false);
+        $filterUnread.prop('checked', false); // reset
         applyFilter();
     });
 
