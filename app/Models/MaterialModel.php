@@ -873,6 +873,16 @@ class MaterialModel extends Model
                 AND s2.kode_warna = m.kode_warna
             ) AS kgs_out,
 
+            -- other_out (pakai_selain_order)
+            (
+                SELECT SUM(COALESCE(oo.kgs_other_out, 0))
+                FROM other_out oo
+                JOIN stock s3 ON s3.lot_stock = oo.lot_other_out AND s3.nama_cluster = oo.nama_cluster
+                WHERE s3.no_model = mo.no_model
+                AND s3.item_type = m.item_type
+                AND s3.kode_warna = m.kode_warna
+            ) AS kgs_other_out,
+
             -- pengeluaran (area)
             (
                 SELECT p.area_out
