@@ -474,13 +474,13 @@ class ScheduleCelupModel extends Model
 
     public function getDataComplain()
     {
-        return $this->select('schedule_celup.*, mesin_celup.no_mesin, IF(po_plus = "0", kg_celup, 0) AS qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus')
+        return $this->select('schedule_celup.id_celup, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.lot_celup, mesin_celup.no_mesin, IF(po_plus = "0", kg_celup, 0) AS qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus, schedule_celup.ket_daily_cek,schedule_celup.lot_urut, schedule_celup.tanggal_schedule, out_celup.id_bon, bon_celup.tgl_datang, bon_celup.no_surat_jalan, bon_celup.detail_sj')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+            ->join('out_celup', 'out_celup.no_model = schedule_celup.no_model', 'left')
+            ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon')
             ->where('schedule_celup.last_status', 'complain')
-            ->groupBy('schedule_celup.id_mesin')
             ->groupBy('schedule_celup.id_celup')
-            ->groupBy('schedule_celup.tanggal_schedule')
-            ->groupBy('schedule_celup.lot_urut')
+            ->groupBy('bon_celup.id_bon')
             ->findAll();
     }
 
@@ -1360,11 +1360,11 @@ class ScheduleCelupModel extends Model
             ->groupBy(['mo.no_model', 'material.item_type', 'material.kode_warna', 'material.color',]);
 
         // Subquery Po Tambahan
-        $subPo = $this->db->table('po_tambahan')
-            ->select('mo.no_model, m.item_type, m.kode_warna, m.color AS warna, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS po_plus')
-            ->join('material m', 'm.id_material = po_tambahan.id_material')
-            ->join('master_order mo', 'mo.id_order = m.id_order')
-            ->groupBy(['mo.no_model', 'm.item_type', 'm.kode_warna', 'm.color', 'm.id_order',]);
+        // $subPo = $this->db->table('po_tambahan')
+        //     ->select('mo.no_model, m.item_type, m.kode_warna, m.color AS warna, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS po_plus')
+        //     ->join('material m', 'm.id_material = po_tambahan.id_material')
+        //     ->join('master_order mo', 'mo.id_order = m.id_order')
+        //     ->groupBy(['mo.no_model', 'm.item_type', 'm.kode_warna', 'm.color', 'm.id_order',]);
 
         // Subquery Stock
         $subSt = $this->db->table('stock')
@@ -1380,9 +1380,15 @@ class ScheduleCelupModel extends Model
             ->groupBy(['retur.no_model', 'retur.item_type', 'retur.kode_warna', 'retur.warna']);
 
         //Sub Open Po
-        $subOp = $this->db->table('open_po')
-            ->select('no_model, item_type, kode_warna, SUM(kg_po) AS qty_sch')
-            ->groupBy(['no_model', 'item_type', 'kode_warna']);
+        // $subOp = $this->db->table('open_po')
+        //     ->select('no_model, item_type, kode_warna, SUM(kg_po) AS qty_sch')
+        //     ->groupBy(['no_model', 'item_type', 'kode_warna']);
+
+        // Subquery qty_po_plus dari open_po
+        $subPoPlus = $this->db->table('open_po')
+            ->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, SUM(open_po.kg_po) AS po_plus')
+            ->where('po_plus', '1')  // kolom penanda po_plus = 1
+            ->groupBy(['open_po.no_model', 'open_po.item_type', 'open_po.kode_warna', 'open_po.color']);
 
         //Sub Pemasukan
         $subPm = $this->db->table('pemasukan')
@@ -1414,23 +1420,24 @@ class ScheduleCelupModel extends Model
                 'sc.kode_warna',
                 'sc.warna',
                 'k.area',
-                'k.qty_po',
-                'pp.po_plus',
+                'k.qty_po', // qty po biasa
+                'pp.po_plus', // qty po plus yg where kolom po_plus='1'
                 'mo.delivery_awal',
                 'mo.delivery_akhir',
                 'sc.start_mc',
                 'st.stock_awal',
                 'rt.retur_stock',
-                'op.qty_sch',
+                'SUM(sc.kg_celup) AS qty_sch',
                 'pm.qty_datang_solid',
                 'oc.qty_ganti_retur_solid',
                 'rtbl.retur_belang',
             ])
             ->join('master_order mo', 'mo.no_model = sc.no_model')
             ->join("({$subMaterial->getCompiledSelect()}) k", 'k.no_model = sc.no_model AND k.item_type = sc.item_type AND k.kode_warna = sc.kode_warna AND k.warna = sc.warna', 'left')
-            ->join("({$subPo->getCompiledSelect()}) pp", 'pp.no_model = sc.no_model AND pp.item_type  = sc.item_type AND pp.kode_warna = sc.kode_warna AND pp.warna = sc.warna', 'left')
+            // ->join("({$subPo->getCompiledSelect()}) pp", 'pp.no_model = sc.no_model AND pp.item_type  = sc.item_type AND pp.kode_warna = sc.kode_warna AND pp.warna = sc.warna', 'left')
             ->join("({$subSt->getCompiledSelect()}) st", 'st.no_model   = sc.no_model AND st.item_type  = sc.item_type AND st.kode_warna = sc.kode_warna AND st.warna = sc.warna', 'left')
-            ->join("({$subOp->getCompiledSelect()}) op", 'op.no_model = sc.no_model AND op.item_type = sc.item_type AND op.kode_warna = sc.kode_warna', 'left')
+            // ->join("({$subOp->getCompiledSelect()}) op", 'op.no_model = sc.no_model AND op.item_type = sc.item_type AND op.kode_warna = sc.kode_warna', 'left')
+            ->join("({$subPoPlus->getCompiledSelect()}) pp", 'pp.no_model = sc.no_model AND pp.item_type = sc.item_type AND pp.kode_warna = sc.kode_warna AND pp.color = sc.warna', 'left')
             ->join("({$subRt->getCompiledSelect()}) rt", 'rt.no_model = sc.no_model AND rt.item_type = sc.item_type AND rt.kode_warna = sc.kode_warna', 'left')
             ->join("({$subPm->getCompiledSelect()}) pm", 'pm.no_model = sc.no_model AND pm.item_type   = sc.item_type AND pm.kode_warna  = sc.kode_warna AND pm.warna = sc.warna', 'left')
             ->join("({$subOc->getCompiledSelect()}) oc", 'oc.no_model = sc.no_model AND oc.item_type   = sc.item_type AND oc.kode_warna  = sc.kode_warna AND oc.warna = sc.warna', 'left')
@@ -1446,7 +1453,7 @@ class ScheduleCelupModel extends Model
         if ($deliveryAwal && $deliveryAkhir) {
             $builder
                 ->where('mo.delivery_awal >=', $deliveryAwal)
-                ->where('mo.delivery_awal <=', $deliveryAkhir);
+                ->where('mo.delivery_akhir <=', $deliveryAkhir);
         }
         if ($tglAwal && $tglAkhir) {
             $builder
@@ -1463,7 +1470,7 @@ class ScheduleCelupModel extends Model
                 'k.qty_po',
                 'mo.delivery_awal',
                 'mo.delivery_akhir',
-                'sc.start_mc',
+                // 'sc.start_mc',
             ])
             ->get()
             ->getResultArray();

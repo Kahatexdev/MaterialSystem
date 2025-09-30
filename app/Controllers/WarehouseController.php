@@ -468,54 +468,54 @@ class WarehouseController extends BaseController
             session()->set('dataOut', array_values($filtered));
         }
 
-        $dataRetur = [];
-        foreach ($checkedIds as $idx => $outId) {
-            $dataRetur[] = [
-                'no_model'   => $post['no_model'][$idx],
-                'item_type'  => $post['item_type'][$idx],
-                'kode_warna' => $post['kode_warna'][$idx],
-                'warna'      => $post['warna'][$idx],
-                'area_retur' => 'GUDANG BENANG',
-                'tgl_retur'  => date('Y-m-d'),
-                'kgs_retur'  => $post['kgs_kirim'][$idx],
-                'cns_retur'  => $post['cns_kirim'][$idx],
-                'lot_retur'  => $post['lot_kirim'][$idx],
-                'krg_retur'  => 1,
-                'kategori'  => $post['kategori_retur'],
-                'keterangan_area'  => null,
-                'keterangan_gbn'  => $post['alasan'] ?? '',
-                'waktu_acc_retur'  => null,
-                'admin'  => session()->get('username'),
-            ];
-        }
+        // $dataRetur = [];
+        // foreach ($checkedIds as $idx => $outId) {
+        //     $dataRetur[] = [
+        //         'no_model'   => $post['no_model'][$idx],
+        //         'item_type'  => $post['item_type'][$idx],
+        //         'kode_warna' => $post['kode_warna'][$idx],
+        //         'warna'      => $post['warna'][$idx],
+        //         'area_retur' => 'GUDANG BENANG',
+        //         'tgl_retur'  => date('Y-m-d'),
+        //         'kgs_retur'  => $post['kgs_kirim'][$idx],
+        //         'cns_retur'  => $post['cns_kirim'][$idx],
+        //         'lot_retur'  => $post['lot_kirim'][$idx],
+        //         'krg_retur'  => 1,
+        //         'kategori'  => $post['kategori_retur'],
+        //         'keterangan_area'  => null,
+        //         'keterangan_gbn'  => $post['alasan'] ?? '',
+        //         'waktu_acc_retur'  => null,
+        //         'admin'  => session()->get('username'),
+        //     ];
+        // }
 
-        //SUM berdasarkan no_model, item_type, kode_warna, dan warna
-        $grouped = [];
-        foreach ($dataRetur as $row) {
-            // buat key unik per kombinasi 4 kolom
-            $key = $row['no_model']
-                . '|' . $row['item_type']
-                . '|' . $row['kode_warna']
-                . '|' . $row['warna'];
+        // //SUM berdasarkan no_model, item_type, kode_warna, dan warna
+        // $grouped = [];
+        // foreach ($dataRetur as $row) {
+        //     // buat key unik per kombinasi 4 kolom
+        //     $key = $row['no_model']
+        //         . '|' . $row['item_type']
+        //         . '|' . $row['kode_warna']
+        //         . '|' . $row['warna'];
 
-            if (!isset($grouped[$key])) {
-                // pertama kali, simpan seluruh row
-                $grouped[$key] = $row;
-            } else {
-                // sudah ada, cukup sum kgs_retur, dan cns_retur
-                $grouped[$key]['kgs_retur'] += $row['kgs_retur'];
-                $grouped[$key]['cns_retur'] += $row['cns_retur'];
-                $grouped[$key]['krg_retur'] += $row['krg_retur'];
-            }
-        }
-        // Re-index jadi array numerik
-        $dataRetur = array_values($grouped);
+        //     if (!isset($grouped[$key])) {
+        //         // pertama kali, simpan seluruh row
+        //         $grouped[$key] = $row;
+        //     } else {
+        //         // sudah ada, cukup sum kgs_retur, dan cns_retur
+        //         $grouped[$key]['kgs_retur'] += $row['kgs_retur'];
+        //         $grouped[$key]['cns_retur'] += $row['cns_retur'];
+        //         $grouped[$key]['krg_retur'] += $row['krg_retur'];
+        //     }
+        // }
+        // // Re-index jadi array numerik
+        // $dataRetur = array_values($grouped);
 
-        // Insert batch
-        $inserted = $this->returModel->insertBatch($dataRetur);
+        // // Insert batch
+        // $inserted = $this->returModel->insertBatch($dataRetur);
 
         // Flashdata & redirect
-        if ($update && $inserted) {
+        if ($update) {
             session()->setFlashdata('success', 'Data berhasil dikomplain dan retur disimpan.');
         } else {
             session()->setFlashdata('error', 'Gagal memproses komplain atau menyimpan retur.');

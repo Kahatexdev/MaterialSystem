@@ -280,10 +280,10 @@ class ReturModel extends Model
     {
         $db = \Config\Database::connect();
 
-        // Subquery SUM pengeluaran
         $subPengeluaran = $db->table('pengeluaran')
-            ->select('stock.id_stock, SUM(pengeluaran.kgs_out) AS terima_kg')
+            ->select('stock.id_stock, stock.no_model, stock.item_type, stock.kode_warna, SUM(pengeluaran.kgs_out) AS terima_kg')
             ->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
+            ->where('pengeluaran.area_out', $area)
             ->groupBy('stock.no_model, stock.item_type, stock.kode_warna');
 
         // Subquery SUM material
@@ -313,8 +313,7 @@ class ReturModel extends Model
             ->join('master_order', 'retur.no_model = master_order.no_model', 'left')
             ->join('material', 'master_order.id_order = material.id_order AND retur.item_type = material.item_type AND retur.kode_warna = material.kode_warna', 'left')
             ->join('po_tambahan', 'po_tambahan.id_material = material.id_material', 'left')
-            ->join('stock', 'master_order.no_model = stock.no_model AND material.item_type = stock.item_type AND material.kode_warna = stock.kode_warna', 'left')
-            ->join("({$subPengeluaran->getCompiledSelect()}) peng", 'peng.id_stock = stock.id_stock', 'left')
+            ->join("({$subPengeluaran->getCompiledSelect()}) peng", 'peng.no_model = master_order.no_model AND peng.item_type = material.item_type AND peng.kode_warna = material.kode_warna', 'left')
             ->join("({$subMaterial->getCompiledSelect()}) mat", 'mat.id_material = material.id_material', 'left')
             ->where('retur.area_retur', $area)
             ->where('retur.tgl_retur', $tglBuat);
