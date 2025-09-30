@@ -219,7 +219,7 @@
                                     </td>
                                     <td><?= esc(isset($row['tgl_pakai']) ? $row['tgl_pakai'] : '') ?></td>
                                     <!-- hiden kolom -->
-                                    <input type="hidden" name="jenis[]" value="<?= $row['jenis'] ?>">
+                                    <input type="hidden" name="jenis[<?= $row['id_pengeluaran'] ?>]" value="<?= $row['jenis'] ?>">
                                     <td><?= esc(isset($row['area_out']) ? $row['area_out'] : '') ?></td>
                                     <td><?= esc(isset($row['no_model']) ? $row['no_model'] : '') ?></td>
                                     <td><?= esc(isset($row['item_type']) ? $row['item_type'] : '') ?></td>
@@ -229,13 +229,13 @@
                                     <td><?= esc(isset($row['no_karung']) ? $row['no_karung'] : '') ?></td>
 
                                     <td>
-                                        <textarea name="lot_out[<?= $i ?>]" class="form-control"><?= esc(isset($row['lot_out']) ? $row['lot_out'] : '') ?></textarea>
+                                        <textarea name="lot_out[<?= $row['id_pengeluaran'] ?>]" class="form-control"><?= esc(isset($row['lot_out']) ? $row['lot_out'] : '') ?></textarea>
                                     </td>
                                     <td>
-                                        <input type="number" name="kgs_out[<?= $i ?>]" class="form-control kgs-val" value="<?= esc(isset($row['kgs_out']) ? $row['kgs_out'] : '') ?>" step="0.01" min="0">
+                                        <input type="number" name="kgs_out[<?= $row['id_pengeluaran'] ?>]" class="form-control kgs-val" value="<?= esc(isset($row['kgs_out']) ? $row['kgs_out'] : '') ?>" step="0.01" min="0">
                                     </td>
                                     <td>
-                                        <input type="number" name="cns_out[<?= $i ?>]" class="form-control cns-val" value="<?= esc(isset($row['cns_out']) ? $row['cns_out'] : '') ?>" step="1" min="0">
+                                        <input type="number" name="cns_out[<?= $row['id_pengeluaran'] ?>]" class="form-control cns-val" value="<?= esc(isset($row['cns_out']) ? $row['cns_out'] : '') ?>" step="1" min="0">
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-danger btn-remove" data-index="<?= $i ?>"><i class="fas fa-trash"></i></button>
