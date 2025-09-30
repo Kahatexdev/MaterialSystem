@@ -1170,7 +1170,6 @@ class CelupController extends BaseController
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => '',
         ];
-
         $this->bonCelupModel->insert($saveDataBon);
 
         $id_bon = $this->bonCelupModel->insertID();
