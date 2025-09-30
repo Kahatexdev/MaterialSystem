@@ -111,12 +111,7 @@
                         $displayRole
                 );
                 ?>
-                <div
-                    class="card mb-3 pengaduan-card"
-                    data-role="<?= esc($p['target_role']) ?>"
-                    data-user="<?= esc(strtolower($p['username'])) ?>"
-                    data-date="<?= esc($dateISO) ?>"
-                    data-search="<?= esc($searchBlob) ?>">
+                <div class="card mb-3 pengaduan-card" data-role="<?= esc($p['target_role']) ?>" data-user="<?= esc(strtolower($p['username'])) ?>" data-date="<?= esc($dateISO) ?>" data-search="<?= esc($searchBlob) ?>">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <h6 class="mb-1">
