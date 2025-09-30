@@ -3886,21 +3886,22 @@ class WarehouseController extends BaseController
                     ->update();
 
                 // — update stock lama: kurangi karung (krg_in_out) sebanyak 1
-                $oldStock = $this->stockModel->find($idStock[$i]);
-                if ($oldStock) {
-                    if (!empty($oldStock['krg_in_out']) && $oldStock['krg_in_out'] > 0) {
-                        $newKrgInOut = max(0, $oldStock['krg_in_out'] - 1);
-                        $this->stockModel->update($idStock[$i], [
-                            'krg_in_out' => $newKrgInOut
-                        ]);
-                    } else {
-                        $newKrgStockAwal = max(0, $oldStock['krg_stock_awal'] - 1);
-                        $this->stockModel->update($idStock[$i], [
-                            'krg_stock_awal' => $newKrgStockAwal
-                        ]);
-                    }
-                }
+                // $oldStock = $this->stockModel->find($idStock[$i]);
+                // if ($oldStock) {
+                //     if (!empty($oldStock['krg_in_out']) && $oldStock['krg_in_out'] > 0) {
+                //         $newKrgInOut = max(0, $oldStock['krg_in_out'] - 1);
+                //         $this->stockModel->update($idStock[$i], [
+                //             'krg_in_out' => $newKrgInOut
+                //         ]);
+                //     } else {
+                //         $newKrgStockAwal = max(0, $oldStock['krg_stock_awal'] - 1);
+                //         $this->stockModel->update($idStock[$i], [
+                //             'krg_stock_awal' => $newKrgStockAwal
+                //         ]);
+                //     }
+                // }
             } else {
+                // kalau belum habis atau pindahnya parsial (per cones), tetap 0
                 $this->pemasukanModel
                     ->set('out_jalur', '0')
                     ->where('id_out_celup', $oldIdOC)
