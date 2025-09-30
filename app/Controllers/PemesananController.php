@@ -2459,21 +2459,24 @@ class PemesananController extends BaseController
             ]);
         }
 
-        // ambil data dasar (tanpa paging dulu)
-        $rows = $this->pemesananModel->getDataPemesananArea($tglPakai, $noModel, $role, $area, $search);
-
-        $recordsTotal    = $rows['meta']['total'] ?? count($rows['data']);
-        $recordsFiltered = $rows['meta']['filtered'] ?? count($rows['data']);
-        $dataList        = $rows['data'];
-
-        // H I T U N G  tambahan kebutuhan & pengiriman per baris
-        // (dipindah ke endpoint AJAX agar view ringan)
+        // >>>> PANGGIL QUERY BARU DI MODEL <<<<
+        $dataList = $this->pemesananModel->getPemesananAreaAgg($tglPakai, $noModel, $area, $search);
+        // dd($dataList);
+        // Enhancement seperti sebelumnya
         $enhanced = [];
         foreach ($dataList as $order) {
             $order['ttl_kebutuhan_bb'] = 0.0;
-            $areaRow = $order['admin'];
+
+            // pastikan field yang dipakai ada
+            $order['qty_pesan'] = (float)($order['qty_pesan'] ?? 0);
+            $order['cns_pesan'] = (int)($order['cns_pesan'] ?? 0);
+            $order['qty_sisa']  = (float)($order['qty_sisa'] ?? 0);
+            $order['cns_sisa']  = (int)($order['cns_sisa'] ?? 0);
+            $order['color']     = $order['color'] ?? '';
+
+            $areaRow = $order['admin'] ?? $area;
+
             if (isset($order['no_model'], $order['item_type'], $order['kode_warna'])) {
-                // ambil style size & parameter gw/composition/loss
                 $styleList = $this->materialModel->getStyleSizeByBb(
                     $order['no_model'],
                     $order['item_type'],
@@ -2484,6 +2487,7 @@ class PemesananController extends BaseController
                 if ($styleList) {
                     $totalRequirement = 0.0;
                     $qtyTotal = 0;
+
                     foreach ($styleList as $style) {
                         $orderApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model='
                             . $order['no_model'] . '&style_size=' . urlencode($style['style_size'])
@@ -2492,7 +2496,6 @@ class PemesananController extends BaseController
                         $orderQty = $this->fetchApiDataSilently($orderApiUrl);
                         $qty = (int)($orderQty['qty'] ?? 0);
 
-                        // PO Tambahan per style_size & area
                         $kgPoTambahan = (float)($this->poTambahanModel->getKgPoTambahan([
                             'no_model'   => $order['no_model'],
                             'item_type'  => $order['item_type'],
@@ -2501,7 +2504,6 @@ class PemesananController extends BaseController
                             'area'       => $areaRow,
                         ])['ttl_keb_potambahan'] ?? 0);
 
-                        // JHT exception
                         if (stripos((string)$order['item_type'], 'JHT') !== false) {
                             $requirement = (float)($style['kgs'] ?? 0) + $kgPoTambahan;
                         } else {
@@ -2511,49 +2513,47 @@ class PemesananController extends BaseController
                         }
 
                         $totalRequirement += $requirement;
-                        // $order['qty'] = $qty; // opsional: last qty, atau akumulasi jika perlu
                         $qtyTotal += $qty;
                     }
                     $order['qty'] = $qtyTotal;
                     $order['ttl_kebutuhan_bb'] = $totalRequirement;
                 }
 
-                // total pengiriman aktual area
+                // total pengiriman aktual area (per id_total_pemesanan)
                 $reqPengiriman = [
-                    'area'                => $order['admin'],               // area_out
-                    'id_total_pemesanan'  => $order['id_total_pemesanan'],  // <- WAJIB
-                    'no_model'  => $order['no_model'],
-                    'item_type' => $order['item_type'],
-                    'kode_warna' => $order['kode_warna'],
+                    'area'               => $areaRow,
+                    'id_total_pemesanan' => $order['id_total_pemesanan'],
+                    'no_model'           => $order['no_model'],
+                    'item_type'          => $order['item_type'],
+                    'kode_warna'         => $order['kode_warna'],
                 ];
                 $pengiriman = $this->pengeluaranModel->getTotalPengiriman($reqPengiriman);
-                $order['ttl_pengiriman'] = $pengiriman['kgs_out'] ?? 0;
+                $order['ttl_pengiriman'] = (float)($pengiriman['kgs_out'] ?? 0);
                 $order['sisa_jatah']     = ($order['ttl_kebutuhan_bb'] ?? 0) - ($order['ttl_pengiriman'] ?? 0);
             }
-            // \var_dump($pengiriman);
-            // kolom turunan
+
             $ttl_kg_pesan  = (float)$order['qty_pesan'] - (float)$order['qty_sisa'];
             $ttl_cns_pesan = (int)$order['cns_pesan'] - (int)$order['cns_sisa'];
 
-            $order['_ttl_kg_pesan']  = number_format($ttl_kg_pesan, 2);
-            $order['_ttl_cns_pesan'] = $ttl_cns_pesan;
+            $order['_ttl_kg_pesan']   = number_format($ttl_kg_pesan, 2);
+            $order['_ttl_cns_pesan']  = $ttl_cns_pesan;
             $order['_ttl_pengiriman'] = number_format((float)$order['ttl_pengiriman'], 2);
-            $order['_sisa_jatah']    = number_format((float)$order['sisa_jatah'], 2);
-            $order['_status_jatah']  = ($order['sisa_jatah'] > 0)
+            $order['_sisa_jatah']     = number_format((float)$order['sisa_jatah'], 2);
+            $order['_status_jatah']   = ($order['sisa_jatah'] > 0)
                 ? (($ttl_kg_pesan >= $order['sisa_jatah']) ? 'Pemesanan Melebihi Jatah' : '')
                 : 'Habis Jatah';
 
             $enhanced[] = $order;
         }
 
-        // paging di level PHP (opsional, bisa juga dilakukan di query builder jika mau)
+        // (opsional) paging di PHP jika mau:
         // $paged = array_slice($enhanced, $start, $length);
 
         return $this->response->setJSON([
             'draw' => $draw,
-            'recordsTotal'    => count($enhanced),   // opsional, biar konsisten
+            'recordsTotal'    => count($enhanced),
             'recordsFiltered' => count($enhanced),
-            'data' => $enhanced,                     // kirim full
+            'data' => $enhanced,
         ]);
     }
 

@@ -293,13 +293,7 @@
                         $displayRole
                 );
                 ?>
-                <div class="card complaint-card mb-3"
-                    data-complaint-id="<?= $p['id_pengaduan'] ?>"
-                    data-role="<?= esc($p['target_role']) ?>"
-                    data-user="<?= esc(strtolower($p['username'])) ?>"
-                    data-date="<?= esc($dateISO) ?>"
-                    data-hasreply="<?= $hasReply ?>"
-                    data-search="<?= esc($searchBlob) ?>">
+                <div class="card complaint-card mb-3" data-complaint-id="<?= $p['id_pengaduan'] ?>" data-role="<?= esc($p['target_role']) ?>" data-user="<?= esc(strtolower($p['username'])) ?>" data-date="<?= esc($dateISO) ?>" data-hasreply="<?= $hasReply ?>" data-search="<?= esc($searchBlob) ?>">
                     <div class="card-body timeline-accent">
                         <div class="d-flex justify-content-between align-items-start gap-3">
                             <div>

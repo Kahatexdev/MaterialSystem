@@ -46,7 +46,7 @@
                         <h3>Form Input Bon Pengiriman</h3>
                     </div>
                     <div class="card-body">
-                        <form action="<?= base_url($role . '/outCelup/saveBon') ?>" method="post">
+                        <form action="<?= base_url($role . '/saveBonRetur') ?>" method="post">
                             <div id="kebutuhan-container">
                                 <div class="row mb-4">
                                     <div class="col-md-4">
@@ -54,10 +54,6 @@
                                         <label>Detail Surat Jalan</label>
                                         <select class="form-control" name="detail_sj" id="detail_sj" required>
                                             <option value="">Pilih Surat Jalan</option>
-                                            <!-- <option value="COVER MAJALAYA">COVER MAJALAYA</option>
-                                            <option value="IMPORT DARI KOREA">IMPORT DARI KOREA</option>
-                                            <option value="JS MISTY">JS MISTY</option>
-                                            <option value="JS SOLID">JS SOLID</option> -->
                                             <option value="KHTEX">KHTEX</option>
                                             <option value="PO(+)">PO(+)</option>
                                         </select>
@@ -65,7 +61,6 @@
                                     <div class="col-md-4">
                                         <label>No Surat Jalan</label>
                                         <input type="text" class="form-control" id="no_surat_jalan" name="no_surat_jalan" required>
-                                        <div id="no_surat_jalan_error" class="text-danger mt-1 small"></div>
                                     </div>
                                     <div class="col-md-4">
                                         <label>Tanggal Kirim</label>
@@ -85,38 +80,32 @@
                                             <div class="row g-3 mb-2">
                                                 <div class="col-md-12">
                                                     <label for="itemType">Done Celup</label>
-                                                    <select class="form-control" id="add_item" name="add_item" required>
-                                                        <option value="">Pilih Item </option>
-                                                        <?php foreach ($no_model as $item): ?>
-                                                            <option value="<?= $item['id_celup'] ?>"><?= $item['no_model'] ?> | <?= $item['item_type'] ?> |<?= $item['kode_warna'] ?> | <?= $item['warna']  ?> | Lot <?= $item['lot_celup'] ?> | <?= $item['kg_celup'] ?>kg</option>
-                                                        <?php endforeach; ?>
-                                                    </select>
+                                                    <input type="text" class="form-control" value="<?= $schData['no_model'] ?> | <?= $schData['item_type'] ?> | <?= $schData['kode_warna'] ?> | <?= $schData['warna'] ?> | Lot <?= $schData['lot_celup'] ?> | <?= $schData['kg_celup'] ?> kg" readonly>
+                                                    <input type="hidden" id="add_item" name="add_item" value="<?= $schData['id_celup'] ?>">
                                                 </div>
+
                                             </div>
                                             <div class="row g-3">
-
                                                 <div class="col-md-4">
                                                     <label>No Model</label>
                                                     <input type="text" class="form-control" name="items[0][id_celup]" id="id_celup" required placeholder="Pilih No Model" readonly hidden>
-                                                    <input type="text" class="form-control" name="items[0][no_model]" id="no_model" required placeholder="No Model">
+                                                    <input type="text" class="form-control" name="items[0][no_model]" id="no_model" required placeholder="No Model" value="<?= $schData['no_model'] ?>" readonly>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label>Item Type</label>
-                                                    <input type="text" class="form-control" name="items[0][item_type]" id="item_type" required placeholder="Item Type" readonly>
+                                                    <input type="text" class="form-control" name="items[0][item_type]" id="item_type" required placeholder="Item Type" value="<?= $schData['item_type'] ?>" readonly>
 
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label>Kode Warna</label>
-                                                    <input type="text" class="form-control" name="items[0][kode_warna]" id="kode_warna" required placeholder="Kode Warna" readonly>
+                                                    <input type="text" class="form-control" name="items[0][kode_warna]" id="kode_warna" required placeholder="Kode Warna" value="<?= $schData['kode_warna'] ?>" readonly>
                                                 </div>
-
                                             </div>
 
-                                            <!-- Surat Jalan Section -->
                                             <div class="row g-3 mt-3">
                                                 <div class="col-md-4">
                                                     <label>Warna</label>
-                                                    <input type="text" class="form-control" name="items[0][warna]" id="warna" required placeholder="Warna" readonly>
+                                                    <input type="text" class="form-control" name="items[0][warna]" id="warna" required placeholder="Warna" value="<?= $schData['kode_warna'] ?>" readonly>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label>LMD</label>
@@ -137,8 +126,7 @@
                                                         <div class="col-md-3 form-check">
                                                             <label>
                                                                 <input type="hidden" name="ganti_retur[0]" value="0">
-                                                                <input type="checkbox" name="ganti_retur[0]" id="ganti_retur" value="1" class="form-check-input"
-                                                                    <?= isset($data['ganti_retur']) && $data['ganti_retur'] == 1 ? 'checked' : '' ?>>
+                                                                <input type="checkbox" name="ganti_retur[0]" id="ganti_retur" value="1" class="form-check-input" <?= isset($data['ganti_retur']) && $data['ganti_retur'] == 1 ? 'checked' : '' ?>>
                                                             </label>
                                                         </div>
 
@@ -179,7 +167,7 @@
                                                                 <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[0][0]" required></td>
                                                                 <td><input type="number" step="0.01" class="form-control gw_kirim_input" name="gw_kirim[0][0]" required></td>
                                                                 <td><input type="number" step="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[0][0]" required></td>
-                                                                <td><input type="text" class="form-control lot_celup_input" name="items[0][lot_celup]" id="lot_celup" required></td>
+                                                                <td><input type="text" class="form-control lot_celup_input" name="items[0][lot_celup]" id="lot_celup" value="<?= $schData['lot_celup'] ?>" required></td>
                                                                 <td><input type="text" class="form-control operator_packing_input" name="operator_packing[0][0]" id="operator_packing" required></td>
                                                                 <td><select class="form-control" name="shift[0][0]" id="shift" required>
                                                                         <option value="">Pilih Shift</option>
@@ -217,7 +205,7 @@
                                                 </div>
                                             </div>
                                             <!-- Buttons -->
-                                            <div class="row mt-3">
+                                            <!-- <div class="row mt-3">
                                                 <div class="col-12 text-center mt-2">
                                                     <button class="btn btn-icon btn-3 btn-outline-info add-more" type="button">
                                                         <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
@@ -226,7 +214,7 @@
                                                         <span class="btn-inner--icon"><i class="fas fa-trash"></i></span>
                                                     </button>
                                                 </div>
-                                            </div>
+                                            </div> -->
                                         </div>
                                     </div>
                                 </div>
@@ -258,24 +246,6 @@
         locale: "id",
         allowInput: true
         // disableMobile: true
-    });
-</script>
-<script>
-    const input = document.getElementById('no_surat_jalan');
-    const error = document.getElementById('no_surat_jalan_error');
-
-    input.addEventListener('input', function() {
-        const val = this.value.trim();
-
-        if (val === '-') {
-            error.textContent = 'Tidak boleh hanya tanda "-" saja';
-            // Optional: hapus nilai supaya user tidak bisa submit
-            // this.value = '';
-        } else if (val === '0') {
-            error.textContent = 'Tidak boleh hanya  "0" saja';
-        } else {
-            error.textContent = '';
-        }
     });
 </script>
 <script>
@@ -403,12 +373,10 @@
                                         <div class="row g-3 mb-2">
                                                 <div class="col-md-12">
                                                     <label for="itemType">Done Celup</label>
-                                                    <select class="form-control slc2" id="add_item_${tabIndex}" name="add_item" required>
-                                                        <option value="">Pilih Item </option>
-                                                        <?php foreach ($no_model as $item): ?>
-                                                            <option value="<?= $item['id_celup'] ?>"><?= $item['no_model'] ?> | <?= $item['item_type'] ?> |<?= $item['kode_warna'] ?> | <?= $item['warna']  ?> | Lot <?= $item['lot_celup'] ?> | <?= $item['kg_celup'] ?>kg</option>
-                                                        <?php endforeach; ?>
-                                                    </select>
+                                                    <input type="text" class="form-control" 
+                                                        value="<?= $schData['no_model'] ?> | <?= $schData['item_type'] ?> | <?= $schData['kode_warna'] ?> | <?= $schData['warna'] ?> | Lot <?= $schData['lot_celup'] ?> | <?= $schData['kg_celup'] ?>"
+                                                        readonly>
+                                                    <input type="hidden" id="add_item" name="add_item" value="<?= $schData['id_celup'] ?>">
                                                 </div>
                                             </div>
                                            <div class="row g-3">
@@ -732,7 +700,7 @@
             <td><input type="number" step="0.01" class="form-control" name="cones_kirim[0][${rowCount-1}]" required></td>
             <td><input type="number" step="0.01" class="form-control" name="gw_kirim[0][${rowCount-1}]" required></td>
             <td><input type="number" step="0.01" class="form-control" name="kgs_kirim[0][${rowCount-1}]" required></td>
-            <td><input type="text" class="form-control lot_celup_input" name="items[0][lot_celup]" id="lot_celup" value="${lotCelupValue}" required></td>
+            <td><input type="text" class="form-control lot_celup_input" name="items[0][lot_celup]" id="lot_celup" value="<?= $schData['lot_celup'] ?>" required></td>
             <td><input type="text" class="form-control" name="operator_packing[0][${rowCount - 1}]" disabled></td>
             <td><select class="form-control" name="shift[0][${rowCount - 1}]" id="shift" disabled>
                 <option value=""></option>
