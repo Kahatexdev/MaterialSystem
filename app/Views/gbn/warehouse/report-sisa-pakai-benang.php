@@ -305,10 +305,12 @@
                     let html = '';
                     if (response.length > 0) {
                         $.each(response, function(index, item) {
-                            const pakai = parseFloat(item.kgs_out) || 0;
+                            const pakai = (item.kgs_out !== undefined && item.kgs_out !== null && item.kgs_out !== '' && parseFloat(item.kgs_out) !== 0) ?
+                                parseFloat(item.kgs_out) :
+                                (parseFloat(item.kgs_other_out) || 0);
                             const pakaiPlus = parseFloat(item.kgs_out_plus) || 0;
                             const retur = parseFloat(item.kgs_retur) || 0;
-                            const pesan = parseFloat(item.kg_po) || 0;
+                            const pesan = parseFloat(item.kg_pesan) || 0;
                             const poPlus = parseFloat(item.kg_po_plus) || 0;
 
                             const sisa = (pakai + pakaiPlus) - retur - (pesan + poPlus);
@@ -340,7 +342,8 @@
                                     <td>${(parseFloat(item.kgs_out_plus) || 0).toFixed(2)}</td>
                                     <td>${(parseFloat(item.kgs_retur) || 0).toFixed(2)}</td>
                                     <td>${item.lot_retur || ''}</td>
-                                    <td>${sisa.toFixed(2)}</td>
+                                     <td style="${sisa < 0 ? 'color:red;font-weight:bold;' : ''}">
+                                    ${sisa.toFixed(2)}</td>
                                 </tr>
                             `;
                         });
