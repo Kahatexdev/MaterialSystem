@@ -1243,6 +1243,7 @@ class ApiController extends ResourceController
         $tglBuat = $this->request->getGet('tglBuat') ?? '';
 
         $listRetur = $this->returModel->getListRetur($area, $noModel, $tglBuat);
+
         return $this->response->setJSON($listRetur);
     }
     public function filterTglPakai($area)
@@ -1380,9 +1381,14 @@ class ApiController extends ResourceController
         $tglBuat = $this->request->getGet('tglBuat') ?? '';
         // $noModel = '';
         // $tglBuat = '2025-05-09';
-
+        $data = [];
         $listRetur = $this->returModel->filterData($area, $tglBuat, $noModel);
-        return $this->response->setJSON($listRetur);
+        $material = $this->materialModel->getMaterialForPPH($noModel);
+        $data = [
+            'dataRetur' => $listRetur,
+            'material' => $material,
+        ];
+        return $this->response->setJSON($data);
     }
 
     public function getGWAktual()
