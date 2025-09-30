@@ -461,7 +461,6 @@ class CelupController extends BaseController
 
             // Panggil fungsi model untuk mendapatkan qty_po dan warna
             $pdk = $this->materialModel->getQtyPOForCelup($nomodel, $itemtype, $kodewarna);
-
             if (!$pdk) {
                 log_message('error', "Data null dari model: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
                 continue; // Skip jika $pdk kosong
@@ -1161,7 +1160,7 @@ class CelupController extends BaseController
         $tglDatang = $data['tgl_datang'];
         list($d, $m, $y) = explode('-', $tglDatang);
         $tglDatang = $y . '-' . $m . '-' . $d;
-        dd($data);
+        // dd($data);
 
         $saveDataBon = [
             'detail_sj' => $data['detail_sj'],
@@ -1171,7 +1170,6 @@ class CelupController extends BaseController
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => '',
         ];
-
         $this->bonCelupModel->insert($saveDataBon);
 
         $id_bon = $this->bonCelupModel->insertID();
@@ -1194,7 +1192,7 @@ class CelupController extends BaseController
         }
 
         for ($h = 0; $h < $tab; $h++) {
-            $id_celup = $data['items'][$h]['id_celup'] ?? null;
+            $id_celup = $data['add_item'] ?? null;
             $lot = $this->scheduleCelupModel->select('lot_celup')->where('id_celup', $id_celup)->first();
             $gantiRetur = isset($data['ganti_retur'][$h]) ? $data['ganti_retur'][$h] : '0';
 
@@ -1223,37 +1221,13 @@ class CelupController extends BaseController
                         'created_at' => date('Y-m-d H:i:s'),
                         'updated_at' => '',
                     ];
-
-                    if ($id_celup) {
-                        $idCelupList[] = $id_celup;
-                    }
                 }
             }
         }
 
         $this->outCelupModel->insertBatch($saveDataOutCelup);
-        $uniqueIdCelup = array_values(array_unique($idCelupList));
 
-        // Update last status jadi sent
-        foreach ($uniqueIdCelup as $idCelup) {
-            $totalPengiriman = $this->scheduleCelupModel
-                ->select('schedule_celup.id_celup, COALESCE(SUM(out_celup.kgs_kirim), 0) as total_kirim, schedule_celup.kg_celup')
-                ->join('out_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
-                ->where('schedule_celup.id_celup', $idCelup)
-                ->groupBy('schedule_celup.id_celup')
-                ->first();
-
-            $totalKirim = $totalPengiriman['total_kirim'];
-            $kgCelup = $totalPengiriman['kg_celup'];
-
-            // Jika total pengiriman >= kg celup, update last_status jadi 'sent'
-            if ($totalPengiriman && ($totalKirim >= $kgCelup) && $kgCelup > 0) {
-                $this->scheduleCelupModel->update($idCelup, [
-                    'last_status' => 'sent',
-                    // 'id_bon' => $id_bon,
-                ]);
-            }
-        }
+        $this->scheduleCelupModel->update($id_celup, ['last_status' => 'sent_retur']);
 
         return redirect()->to(base_url($this->role . '/outCelup'))->with('success', 'BON Berhasil Di Simpan.');
     }

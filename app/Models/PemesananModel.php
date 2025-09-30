@@ -487,7 +487,7 @@ class PemesananModel extends Model
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pemesanan.status_kirim', 'YA')
-            // ->where('master_order.no_model', 'rz2675')
+            ->where('master_order.no_model', 'rz2675')
             ->where('material.kode_warna', '1801-AY');
 
         // Cek apakah ada input key untuk pencarian
@@ -1329,6 +1329,11 @@ class PemesananModel extends Model
               GROUP BY id_total_pemesanan
             ) p ON p.id_total_pemesanan = tp.id_total_pemesanan
             WHERE pm.admin = ?
+
+
+
+
+
               AND mo.no_model = ?
               AND pm.tgl_pakai = ?
         ";
