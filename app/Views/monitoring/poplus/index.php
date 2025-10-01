@@ -69,7 +69,9 @@
                     <h5 class="mb-0 font-weight-bolder">List PO Tambahan Area</h5>
                 </div>
                 <div class="col-6 text-end">
-
+                    <button class="btn btn-info ms-2">
+                        <a href="<?= base_url($role . '/poplus/form_potambahan') ?>" class="fa fa-list text-white" style="text-decoration: none;"> Open PO(+)</a>
+                    </button>
                 </div>
             </div>
         </div>
