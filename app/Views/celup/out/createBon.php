@@ -269,10 +269,11 @@
 
         if (val === '-') {
             error.textContent = 'Tidak boleh hanya tanda "-" saja';
-            // Optional: hapus nilai supaya user tidak bisa submit
-            // this.value = '';
+            this.value = '';
         } else if (val === '0') {
             error.textContent = 'Tidak boleh hanya  "0" saja';
+            this.value = '';
+
         } else {
             error.textContent = '';
         }
