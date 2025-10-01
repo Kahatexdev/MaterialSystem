@@ -464,7 +464,7 @@ class WarehouseController extends BaseController
 
         if ($update) {
             $existing = session()->get('dataOut') ?? [];
-            $filtered = array_filter($existing, fn ($item) => !in_array($item['id_out_celup'], $post['id_out_celup']));
+            $filtered = array_filter($existing, fn($item) => !in_array($item['id_out_celup'], $post['id_out_celup']));
             session()->set('dataOut', array_values($filtered));
         }
 
@@ -1501,7 +1501,7 @@ class WarehouseController extends BaseController
         }
         //update tabel pemasukan
         if (!empty($checkedIds)) {
-            $whereIds = array_map(fn ($index) => $idOutCelup[$index] ?? null, $checkedIds);
+            $whereIds = array_map(fn($index) => $idOutCelup[$index] ?? null, $checkedIds);
             $whereIds = array_filter($whereIds); // Hapus nilai NULL jika ada
 
             if (!empty($whereIds)) {
@@ -2098,9 +2098,15 @@ class WarehouseController extends BaseController
                 // Tentukan stock_awal
                 $stock_awal = empty($cekStock['lot_awal']) ? '' : 'Ya';
 
+                if ($cluster == "STOCK") {
+                    $no_model = "BENANG STOCK";
+                } else {
+                    $no_model = $data['no_model'];
+                }
+
                 // cek apakah stock data baru sudah ada di tabel
                 $criteria = [
-                    'no_model' => $data['no_model'],
+                    'no_model' => $no_model,
                     'item_type' => $data['item_type'],
                     'kode_warna' => $data['kode_warna'],
                     'warna' => $data['warna'],
@@ -2129,7 +2135,7 @@ class WarehouseController extends BaseController
                 else {
                     // Jika data stok baru belum ada, tambahkan data baru
                     $insertData = [
-                        'no_model'          => $data['no_model'],
+                        'no_model'          => $no_model,
                         'item_type'         => $data['item_type'],
                         'kode_warna'        => $data['kode_warna'],
                         'warna'             => $data['warna'],
@@ -3784,20 +3790,28 @@ class WarehouseController extends BaseController
             // $newKgs = max(0, $idStockData[$i]['kgs_in_out'] - $totalKgs);
             // $newCns = max(0, $idStockData[$i]['cns_in_out'] - $totalCns);
             // $newKrg = max(0, $idStockData[$i]['krg_in_out'] - $totalKrgOut);
-            $this->stockModel->update($idStock[$i], [
+            $updateData = [
                 // Update kgs_in_out jika ada, jika tidak update kgs_stock_awal
-                'kgs_in_out'   => (!empty($idStockData[$i]['kgs_in_out']) && $idStockData[$i]['kgs_in_out'] > 0) ? $newKgs : $idStockData[$i]['kgs_in_out'],
+                'kgs_in_out'     => (!empty($idStockData[$i]['kgs_in_out']) && $idStockData[$i]['kgs_in_out'] > 0) ? $newKgs : $idStockData[$i]['kgs_in_out'],
                 'kgs_stock_awal' => (empty($idStockData[$i]['kgs_in_out']) || $idStockData[$i]['kgs_in_out'] == 0) ? $newKgs : $idStockData[$i]['kgs_stock_awal'],
                 // Update cns_in_out jika ada, jika tidak update cns_stock_awal
-                'cns_in_out'   => (!empty($idStockData[$i]['cns_in_out']) && $idStockData[$i]['cns_in_out'] > 0) ? $newCns : $idStockData[$i]['cns_in_out'],
+                'cns_in_out'     => (!empty($idStockData[$i]['cns_in_out']) && $idStockData[$i]['cns_in_out'] > 0) ? $newCns : $idStockData[$i]['cns_in_out'],
                 'cns_stock_awal' => (empty($idStockData[$i]['cns_in_out']) || $idStockData[$i]['cns_in_out'] == 0) ? $newCns : $idStockData[$i]['cns_stock_awal'],
                 // Update krg_in_out jika ada, jika tidak update krg_stock_awal
-                'krg_in_out'   => (!empty($idStockData[$i]['krg_in_out']) && $idStockData[$i]['krg_in_out'] > 0) ? $newKrg : $idStockData[$i]['krg_in_out'],
+                'krg_in_out'     => (!empty($idStockData[$i]['krg_in_out']) && $idStockData[$i]['krg_in_out'] > 0) ? $newKrg : $idStockData[$i]['krg_in_out'],
                 'krg_stock_awal' => (empty($idStockData[$i]['krg_in_out']) || $idStockData[$i]['krg_in_out'] == 0) ? $newKrg : $idStockData[$i]['krg_stock_awal'],
-                'lot_stock'    => $lotStock,
-                'lot_awal'     => $lotStock,
-                'nama_cluster' => $cluster,
-            ]);
+                'nama_cluster'   => $cluster,
+            ];
+
+            // kalau asalnya dari lot_stock, update hanya lot_stock
+            if (!empty($idStockData[$i]['lot_stock'])) {
+                $updateData['lot_stock'] = $lotStock;
+            } else {
+                // kalau asalnya dari lot_awal
+                $updateData['lot_awal'] = $lotStock;
+            }
+
+            $this->stockModel->update($idStock[$i], $updateData);
 
             // --- Buat key unik untuk tujuan stock supaya insert/update tujuan hanya sekali
             $destKey = implode('|', [$noModel, $itemType, $kodeWarna, $warna, $cluster, $lotStock]);
@@ -3886,21 +3900,22 @@ class WarehouseController extends BaseController
                     ->update();
 
                 // — update stock lama: kurangi karung (krg_in_out) sebanyak 1
-                $oldStock = $this->stockModel->find($idStock[$i]);
-                if ($oldStock) {
-                    if (!empty($oldStock['krg_in_out']) && $oldStock['krg_in_out'] > 0) {
-                        $newKrgInOut = max(0, $oldStock['krg_in_out'] - 1);
-                        $this->stockModel->update($idStock[$i], [
-                            'krg_in_out' => $newKrgInOut
-                        ]);
-                    } else {
-                        $newKrgStockAwal = max(0, $oldStock['krg_stock_awal'] - 1);
-                        $this->stockModel->update($idStock[$i], [
-                            'krg_stock_awal' => $newKrgStockAwal
-                        ]);
-                    }
-                }
+                // $oldStock = $this->stockModel->find($idStock[$i]);
+                // if ($oldStock) {
+                //     if (!empty($oldStock['krg_in_out']) && $oldStock['krg_in_out'] > 0) {
+                //         $newKrgInOut = max(0, $oldStock['krg_in_out'] - 1);
+                //         $this->stockModel->update($idStock[$i], [
+                //             'krg_in_out' => $newKrgInOut
+                //         ]);
+                //     } else {
+                //         $newKrgStockAwal = max(0, $oldStock['krg_stock_awal'] - 1);
+                //         $this->stockModel->update($idStock[$i], [
+                //             'krg_stock_awal' => $newKrgStockAwal
+                //         ]);
+                //     }
+                // }
             } else {
+                // kalau belum habis atau pindahnya parsial (per cones), tetap 0
                 $this->pemasukanModel
                     ->set('out_jalur', '0')
                     ->where('id_out_celup', $oldIdOC)

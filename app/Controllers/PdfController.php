@@ -25,6 +25,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpParser\Node\Stmt\Else_;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use App\Models\PengeluaranModel;
 
 class PdfController extends BaseController
 {
@@ -43,6 +44,7 @@ class PdfController extends BaseController
     protected $coveringStockModel;
     protected $warehouseBBModel;
     protected $pemesananModel;
+    protected $pengeluaranModel;
 
     public function __construct()
     {
@@ -57,7 +59,7 @@ class PdfController extends BaseController
         $this->coveringStockModel = new CoveringStockModel();
         $this->warehouseBBModel = new WarehouseBBModel();
         $this->pemesananModel = new PemesananModel();
-
+        $this->pengeluaranModel = new PengeluaranModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -4643,5 +4645,279 @@ class PdfController extends BaseController
             $pdf->Cell(55, 5, '(                               )', 0, 0, 'C');
         }
         $pdf->Cell(55, 5, '(       ' . 'Retno' . '       )', 0, 1, 'C');
+    }
+
+    public function exportListBarangKeluar()
+    {
+        $jenis = $this->request->getGet('jenis');
+        $tglPakai = $this->request->getGet('tglPakai');
+
+        $dataPemesanan = $this->pengeluaranModel->getDataPemesananExport($jenis, $tglPakai);
+        // dd($dataPemesanan);
+        // Grouping data
+        $groupedData = [];
+        foreach ($dataPemesanan as $row) {
+            $groupedData[$row['group']][] = $row;
+        }
+        // dd($groupedData);
+
+        $pdf = new FPDF('L', 'mm', 'A4'); // Landscape
+        $pdf->AliasNbPages();
+        $pdf->SetAutoPageBreak(true, 10);
+
+        foreach ($groupedData as $group => $rows) {
+
+            $pdf->AddPage();
+
+            if ($group == "barang_jln") {
+                $group = "LAIN - LAIN";
+            }
+
+            // === HEADER TITLE ===
+            $pdf->SetFont('Arial', 'B', 11);
+            $pdf->Cell(0, 8, "CLUSTER GROUP " . strtoupper($group), 0, 1, 'C');
+            $pdf->Cell(0, 8, "PAKAI " . $tglPakai, 0, 1, 'C');
+            $pdf->Ln(3);
+
+            // === HEADER TABEL ===
+            $pdf->SetFont('Arial', 'B', 9);
+            $header = [
+                'Area',
+                'No Model',
+                'Item Type',
+                'Kode Warna',
+                'Color',
+                "Qty/Cns\nPesan",
+                'Lot',
+                'No Karung',
+                'Kgs',
+                'Cns',
+                'Krg',
+                'Nama Cluster',
+                'Kgs Out',
+                'Cns Out',
+                'Keterangan'
+            ];
+            $widths = [13, 17, 30, 23, 23, 20, 18, 15, 15, 12, 12, 22, 14, 14, 30];
+
+            foreach ($header as $i => $col) {
+                if ($i == 5) { // index ke-5 adalah Qty/Cns Pesan
+                    $x = $pdf->GetX();
+                    $y = $pdf->GetY();
+                    $pdf->MultiCell($widths[$i], 3.5, $col, 1, 'C');
+                    $pdf->SetXY($x + $widths[$i], $y);
+                } else {
+                    $pdf->Cell($widths[$i], 7, $col, 1, 0, 'C');
+                }
+            }
+            $pdf->Ln();
+
+            // === ISI DATA ===
+            $pdf->SetFont('Arial', '', 8);
+            $currentCluster = '';
+            $clusterRows = [];
+
+            foreach ($rows as $row) {
+                // Kalau nama_cluster kosong/null → langsung cetak satu baris biasa
+                if (empty($row['nama_cluster'])) {
+                    // Jika sebelumnya ada blok yang pending, render dulu
+                    if (!empty($clusterRows)) {
+                        $this->renderClusterBlock($pdf, $clusterRows, $widths);
+                        $clusterRows = [];
+                    }
+
+                    // Cetak sebagai baris normal (tanpa merge)
+                    $this->renderSingleRow($pdf, $row, $widths);
+                    continue;
+                }
+
+                // === Kalau nama_cluster tidak null → lanjutkan proses merge ===
+                if ($currentCluster !== '' && $currentCluster !== $row['nama_cluster']) {
+                    // Render block untuk cluster sebelumnya
+                    $this->renderClusterBlock($pdf, $clusterRows, $widths);
+                    $clusterRows = [];
+                }
+
+                $clusterRows[] = $row;
+                $currentCluster = $row['nama_cluster'];
+            }
+            // Render blok terakhir
+            if (!empty($clusterRows)) {
+                $this->renderClusterBlock($pdf, $clusterRows, $widths);
+            }
+        }
+
+        // Output PDF
+        return $this->response->setHeader('Content-Type', 'application/pdf')
+            ->setBody($pdf->Output('S'));
+    }
+
+    function renderSingleRow($pdf, $row, $widths)
+    {
+        $rowHeight = 6;
+        $data = [
+            $row['admin'],
+            $row['no_model'],
+            $row['item_type'],
+            $row['kode_warna'],
+            $row['color'],
+            $row['pesanan'],
+            $row['lot_out'],
+            $row['no_karung'],
+            $row['kgs_out'],
+            $row['cns_out'],
+            $row['krg_out'],
+            $row['nama_cluster'],  // mungkin null, gapapa
+            '',
+            '',
+            $row['keterangan_gbn']
+        ];
+
+        foreach ($data as $i => $text) {
+            $pdf->Cell($widths[$i], $rowHeight, $text, 1, 0, 'C');
+        }
+        $pdf->Ln();
+    }
+
+    function renderClusterBlock($pdf, $rows, $widths)
+    {
+        $rowHeight = 6;
+        $blockHeight = $rowHeight * count($rows);
+
+        $first = $rows[0];
+
+        // Kolom yang di-merge (multi row)
+        $pdf->MultiCell($widths[0], $blockHeight, $first['admin'], 1, 'C');
+        $x = $pdf->GetX();
+        $y = $pdf->GetY() - $blockHeight;
+        $pdf->SetXY($x + $widths[0], $y);
+        $pdf->MultiCell($widths[1], $blockHeight, $first['no_model'], 1, 'C');
+        $pdf->SetXY($x + $widths[0] + $widths[1], $y);
+        $pdf->MultiCell($widths[2], $blockHeight, $first['item_type'], 1, 'C');
+        $pdf->SetXY($x + array_sum(array_slice($widths, 0, 3)), $y);
+        $pdf->MultiCell($widths[3], $blockHeight, $first['kode_warna'], 1, 'C');
+        $pdf->SetXY($x + array_sum(array_slice($widths, 0, 4)), $y);
+        $pdf->MultiCell($widths[4], $blockHeight, $first['color'], 1, 'C');
+        $pdf->SetXY($x + array_sum(array_slice($widths, 0, 5)), $y);
+        $pdf->MultiCell($widths[5], $blockHeight, $first['pesanan'], 1, 'C');
+
+        // Kolom lainnya per baris
+        $xStart = $x + array_sum(array_slice($widths, 0, 6));
+        $yStart = $y;
+
+        foreach ($rows as $row) {
+            $pdf->SetXY($xStart, $yStart);
+            $pdf->Cell($widths[6], $rowHeight, $row['lot_out'], 1, 0, 'C');
+            $pdf->Cell($widths[7], $rowHeight, $row['no_karung'], 1, 0, 'C');
+            $pdf->Cell($widths[8], $rowHeight, $row['kgs_out'], 1, 0, 'C');
+            $pdf->Cell($widths[9], $rowHeight, $row['cns_out'], 1, 0, 'C');
+            $pdf->Cell($widths[10], $rowHeight, $row['krg_out'], 1, 0, 'C');
+            $pdf->Cell($widths[11], $rowHeight, $row['nama_cluster'], 1, 0, 'C');
+            $pdf->Cell($widths[12], $rowHeight, '', 1, 0, 'C');
+            $pdf->Cell($widths[13], $rowHeight, '', 1, 0, 'C');
+            $pdf->Cell($widths[14], $rowHeight, $row['keterangan_gbn'], 1, 0, 'C');
+            $pdf->Ln();
+            $yStart += $rowHeight;
+        }
+    }
+
+    public function exportListPemesananSpdxKaretPertgl()
+    {
+        $key   = $this->request->getGet('tglPakai');
+        $jenis = $this->request->getGet('jenis');
+
+        $allData = $this->pemesananModel->getDataPemesananPerArea($key, $jenis);
+
+        // Grouping per admin
+        $grouped = [];
+        foreach ($allData as $item) {
+            $admin = $item['admin'] ?: 'Unknown';
+            $grouped[$admin][] = $item;
+        }
+
+        $pdf = new FPDF('L', 'mm', 'A4'); // Landscape
+        $pdf->SetAutoPageBreak(true, 10);
+
+        foreach ($grouped as $adminName => $items) {
+            $pdf->AddPage();
+            $pdf->SetFont('Arial', 'B', 14);
+            $pdf->Cell(0, 10, 'REPORT PERMINTAAN BAHAN BAKU', 0, 1, 'C');
+
+            $pdf->SetFont('Arial', '', 12);
+            $pdf->Cell(60, 8, 'Jenis Bahan Baku: ' . $jenis, 0, 0);
+            $pdf->Cell(80, 8, 'Area: ' . $adminName, 0, 0);
+            $pdf->Cell(60, 8, 'Tanggal Pakai: ' . $key, 0, 1);
+
+            // Header kolom
+            $headers = ['NO', 'JAM', 'TGL PESAN', 'NO MODEL', 'ITEM TYPE', 'KODE WARNA', 'WARNA', 'LOT', 'JL MC', 'TOTAL', 'CONES', 'KETERANGAN', 'BAGIAN PERSIAPAN', 'QTY OUT', 'CNS OUT'];
+            $widths  = [8, 12, 15, 20, 25, 18, 20, 10, 12, 12, 12, 30, 25, 15, 15];
+            $pdf->SetFont('Arial', 'B', 10);
+            foreach ($headers as $i => $h) {
+                $pdf->Cell($widths[$i], 8, $h, 1, 0, 'C');
+            }
+            $pdf->Ln();
+
+            // Data
+            $pdf->SetFont('Arial', '', 10);
+            $no = 1;
+            foreach ($items as $item) {
+                if ($item['po_tambahan']) {
+                    $item['no_model'] = $item['no_model'] . ' (+)';
+                }
+                $row = $item;
+                $row['no'] = $no++;
+
+                $this->renderSingle($pdf, $row, $widths);
+            }
+        }
+
+        // Output PDF
+        return $this->response->setHeader('Content-Type', 'application/pdf')
+            ->setBody($pdf->Output('S'));
+    }
+
+    /** Render satu baris (private helper) */
+    private function renderSingle($pdf, $row, $widths)
+    {
+        $lineHeight = 5;
+        $rowHeightDefault = 6;
+        $wrapColumns = [4, 11]; // ITEM TYPE & KETERANGAN
+
+        $data = [
+            $row['no'],
+            $row['jam_pesan'],
+            $row['tgl_pesan'],
+            $row['no_model'],
+            $row['item_type'],
+            $row['kode_warna'],
+            $row['color'],
+            $row['lot'],
+            $row['ttl_jl_mc'],
+            $row['ttl_kg'],
+            $row['ttl_cns'],
+            $row['keterangan_gbn'],
+            '', //BAGIAN PERSIAPAN
+            '', // qty_out
+            '' // cns_out
+        ];
+
+        $maxLines = 1;
+        // foreach ($wrapColumns as $i) {
+        //     $lines = $this->NbLines($pdf, $widths[$i], $data[$i]);
+        //     if ($lines > $maxLines) $maxLines = $lines;
+        // }
+        $actualHeight = max($rowHeightDefault, $lineHeight * $maxLines);
+
+        foreach ($data as $i => $text) {
+            $x = $pdf->GetX();
+            $y = $pdf->GetY();
+            if (in_array($i, $wrapColumns)) {
+                $pdf->MultiCell($widths[$i], $lineHeight, $text, 1, 'C');
+                $pdf->SetXY($x + $widths[$i], $y);
+            } else {
+                $pdf->Cell($widths[$i], $actualHeight, $text, 1, 0, 'C');
+            }
+        }
+        $pdf->Ln($actualHeight);
     }
 }

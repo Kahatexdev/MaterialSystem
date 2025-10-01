@@ -312,8 +312,10 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('pemesanan/filterListBarangKeluarPertgl', 'PemesananController::filterListBarangKeluarPertgl');
     $routes->get('pemesanan/detailListBarangKeluar', 'PemesananController::detailListBarangKeluar');
     $routes->get('pemesanan/exportListBarangKeluar', 'ExcelController::exportListBarangKeluar');
+    $routes->get('pemesanan/exportPdfListBarangKeluar', 'PdfController::exportListBarangKeluar');
     $routes->post('pemesanan/listPemesananSpandexKaretPertgl', 'PemesananController::listPemesananSpandexKaretPertgl');
     $routes->get('pemesanan/exportListPemesananSpdxKaretPertgl', 'ExcelController::exportListPemesananSpdxKaretPertgl');
+    $routes->get('pemesanan/exportPdfListPemesananSpdxKaretPertgl', 'PdfController::exportListPemesananSpdxKaretPertgl');
     $routes->get('pemesanan/sisaKebutuhanArea', 'PemesananController::sisaKebutuhanArea');
     $routes->get('reportPermintaanBahanBaku', 'ExcelController::reportPermintaanBahanBaku');
     // $routes->get('pemesanan/sisaKebutuhanArea_filter', 'PemesananController::sisaKebutuhanArea');
@@ -728,6 +730,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('hapus_pengiriman', 'PemesananController::hapusListPengiriman');
     $routes->post('proses_pengiriman', 'PemesananController::prosesPengirimanArea');
     $routes->get('pengeluaran', 'WarehouseController::pengeluaran');
+
     $routes->post('warehouse/search', 'WarehouseController::search');
     $routes->post('warehouse/sisaKapasitas', 'WarehouseController::getSisaKapasitas');
     $routes->post('warehouse/getCluster', 'WarehouseController::getClusterbyId');
@@ -735,7 +738,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('warehouse/updateCluster', 'WarehouseController::updateCluster');
     $routes->get('warehouse/getNoModel', 'WarehouseController::getNoModel');
     $routes->post('warehouse/savePindahOrder', 'WarehouseController::savePindahOrder');
+    $routes->post('warehouse/savePindahOrderTest', 'WarehouseController::savePindahOrderTest');
     $routes->post('warehouse/getPindahOrder', 'WarehouseController::getPindahOrder');
+    $routes->post('warehouse/getPindahOrderTest', 'WarehouseController::getPindahOrderTest');
     $routes->post('warehouse/savePindahCluster', 'WarehouseController::savePindahCluster');
     $routes->post('warehouse/getPindahCluster', 'WarehouseController::getPindahCluster');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');

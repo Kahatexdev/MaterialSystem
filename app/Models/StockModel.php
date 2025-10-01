@@ -492,7 +492,7 @@ class StockModel extends Model
     ')
             ->join('master_order AS mo', 'mo.no_model = stock.no_model')
             ->join('master_material AS mm', 'mm.item_type = stock.item_type')
-            ->join('pengeluaran', 'pengeluaran.lot_out = stock.lot_stock AND pengeluaran.nama_cluster = stock.nama_cluster', 'left')
+            ->join('pengeluaran', 'pengeluaran.lot_out = COALESCE(stock.lot_stock, stock.lot_awal) AND pengeluaran.nama_cluster = stock.nama_cluster', 'left')
             ->join('open_po', 'open_po.no_model = stock.no_model AND open_po.item_type = stock.item_type AND open_po.kode_warna = stock.kode_warna', 'left')
             ->join('retur', 'retur.no_model = stock.no_model AND retur.item_type = stock.item_type AND retur.kode_warna = stock.kode_warna', 'left')
             ->where('mm.jenis', 'NYLON')

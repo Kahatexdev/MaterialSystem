@@ -1,4 +1,4 @@
-<?php $this->extend($role . '/out/header'); ?>
+<?php $this->extend($role . '/retur/header'); ?>
 <?php $this->section('content'); ?>
 
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -6,13 +6,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
 <link rel="stylesheet" href="<?= base_url('assets/css/flatpickr/flatpickr.min.css') ?>">
 <link rel="stylesheet" href="<?= base_url('assets/js/plugins/flatpickr/style.css') ?>">
-<style>
-    /* Auto Complete */
-    .ui-state-active {
-        background: rgb(230, 153, 233) !important;
-        color: #fff !important;
-    }
-</style>
+
 <div class="container-fluid py-4">
     <?php if (session()->getFlashdata('success')) : ?>
         <script>
@@ -43,14 +37,13 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3>Form Input Bon Pengiriman</h3>
+                        <h3>Form Input Bon Pengiriman Retur</h3>
                     </div>
                     <div class="card-body">
                         <form action="<?= base_url($role . '/saveBonRetur') ?>" method="post">
                             <div id="kebutuhan-container">
                                 <div class="row mb-4">
                                     <div class="col-md-4">
-
                                         <label>Detail Surat Jalan</label>
                                         <select class="form-control" name="detail_sj" id="detail_sj" required>
                                             <option value="">Pilih Surat Jalan</option>
