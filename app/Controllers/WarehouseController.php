@@ -3790,20 +3790,28 @@ class WarehouseController extends BaseController
             // $newKgs = max(0, $idStockData[$i]['kgs_in_out'] - $totalKgs);
             // $newCns = max(0, $idStockData[$i]['cns_in_out'] - $totalCns);
             // $newKrg = max(0, $idStockData[$i]['krg_in_out'] - $totalKrgOut);
-            $this->stockModel->update($idStock[$i], [
+            $updateData = [
                 // Update kgs_in_out jika ada, jika tidak update kgs_stock_awal
-                'kgs_in_out'   => (!empty($idStockData[$i]['kgs_in_out']) && $idStockData[$i]['kgs_in_out'] > 0) ? $newKgs : $idStockData[$i]['kgs_in_out'],
+                'kgs_in_out'     => (!empty($idStockData[$i]['kgs_in_out']) && $idStockData[$i]['kgs_in_out'] > 0) ? $newKgs : $idStockData[$i]['kgs_in_out'],
                 'kgs_stock_awal' => (empty($idStockData[$i]['kgs_in_out']) || $idStockData[$i]['kgs_in_out'] == 0) ? $newKgs : $idStockData[$i]['kgs_stock_awal'],
                 // Update cns_in_out jika ada, jika tidak update cns_stock_awal
-                'cns_in_out'   => (!empty($idStockData[$i]['cns_in_out']) && $idStockData[$i]['cns_in_out'] > 0) ? $newCns : $idStockData[$i]['cns_in_out'],
+                'cns_in_out'     => (!empty($idStockData[$i]['cns_in_out']) && $idStockData[$i]['cns_in_out'] > 0) ? $newCns : $idStockData[$i]['cns_in_out'],
                 'cns_stock_awal' => (empty($idStockData[$i]['cns_in_out']) || $idStockData[$i]['cns_in_out'] == 0) ? $newCns : $idStockData[$i]['cns_stock_awal'],
                 // Update krg_in_out jika ada, jika tidak update krg_stock_awal
-                'krg_in_out'   => (!empty($idStockData[$i]['krg_in_out']) && $idStockData[$i]['krg_in_out'] > 0) ? $newKrg : $idStockData[$i]['krg_in_out'],
+                'krg_in_out'     => (!empty($idStockData[$i]['krg_in_out']) && $idStockData[$i]['krg_in_out'] > 0) ? $newKrg : $idStockData[$i]['krg_in_out'],
                 'krg_stock_awal' => (empty($idStockData[$i]['krg_in_out']) || $idStockData[$i]['krg_in_out'] == 0) ? $newKrg : $idStockData[$i]['krg_stock_awal'],
-                'lot_stock'    => $lotStock,
-                'lot_awal'     => $lotStock,
-                'nama_cluster' => $cluster,
-            ]);
+                'nama_cluster'   => $cluster,
+            ];
+
+            // kalau asalnya dari lot_stock, update hanya lot_stock
+            if (!empty($idStockData[$i]['lot_stock'])) {
+                $updateData['lot_stock'] = $lotStock;
+            } else {
+                // kalau asalnya dari lot_awal
+                $updateData['lot_awal'] = $lotStock;
+            }
+
+            $this->stockModel->update($idStock[$i], $updateData);
 
             // --- Buat key unik untuk tujuan stock supaya insert/update tujuan hanya sekali
             $destKey = implode('|', [$noModel, $itemType, $kodeWarna, $warna, $cluster, $lotStock]);
