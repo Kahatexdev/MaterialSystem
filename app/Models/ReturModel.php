@@ -281,7 +281,7 @@ class ReturModel extends Model
         $db = \Config\Database::connect();
 
         $subPengeluaran = $db->table('pengeluaran p')
-            ->select('m.id_order, m.item_type, m.kode_warna, SUM(DISTINCT p.kgs_out) AS terima_kg')
+            ->select('m.id_order, m.item_type, m.kode_warna, SUM(p.kgs_out) AS terima_kg')
             ->join('pemesanan pm', 'pm.id_total_pemesanan = p.id_total_pemesanan', 'left')
             ->join('material m', 'm.id_material = pm.id_material', 'left')
             ->where('p.area_out', $area)
@@ -317,7 +317,7 @@ class ReturModel extends Model
         $builder = $this->select("
         retur.kgs_retur, retur.cns_retur, retur.krg_retur, retur.lot_retur,
         retur.kategori, retur.keterangan_gbn, retur.admin,
-        peng.terima_kg,
+        peng.kgs_out AS terima_kg,
         poplus.sisa_bb_mc,
         poplus.sisa_order_pcs,
         poplus.poplus_mc_kg,
