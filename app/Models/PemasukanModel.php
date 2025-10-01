@@ -652,4 +652,37 @@ class PemasukanModel extends Model
             ->get()
             ->getResultArray();
     }
+
+    public function listPindahOrderBarcode()
+    {
+        return $this->db->table('pemasukan')
+            ->select('pemasukan.id_out_celup, stock.id_stock, stock.no_model, stock.item_type, stock.kode_warna, stock.warna, stock.lot_awal, history_stock.keterangan')
+            ->join('stock', 'stock.id_stock = pemasukan.id_stock', 'left')
+            ->join('history_stock', 'history_stock.id_stock_new = pemasukan.id_stock', 'left')
+            ->where('history_stock.id_out_celup IS NOT NULL')
+            ->where('history_stock.id_out_celup_new IS NOT NULL')
+            ->where('history_stock.keterangan', 'Pindah Order')
+            ->where('history_stock.krg', 1)
+            ->groupBy('stock.no_model')
+            ->orderBy('history_stock.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
+    public function detailPindahOrderBarcode($idStock)
+    {
+        return $this->db->table('pemasukan')
+            ->select('out_celup.id_out_celup, out_celup.no_karung, out_celup.kgs_kirim, out_celup.cones_kirim, out_celup.lot_kirim, pemasukan.id_stock, stock.no_model, stock.item_type, stock.kode_warna, stock.warna, history_stock.keterangan, history_stock.krg, out_celup.admin')
+            ->join('stock', 'stock.id_stock = pemasukan.id_stock', 'left')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->join('history_stock', 'history_stock.id_out_celup_new = out_celup.id_out_celup', 'left')
+            ->where('history_stock.id_stock_new', $idStock)
+            ->where('history_stock.id_out_celup IS NOT NULL')
+            ->where('history_stock.id_out_celup_new IS NOT NULL')
+            ->where('history_stock.keterangan', 'Pindah Order')
+            ->where('history_stock.krg', 1)
+            ->orderBy('out_celup.no_karung', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
 }
