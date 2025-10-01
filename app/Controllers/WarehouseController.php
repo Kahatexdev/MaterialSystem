@@ -262,28 +262,200 @@ class WarehouseController extends BaseController
             return redirect()->to($this->role . '/pemasukan');
         }
     }
+    // public function prosesSimpanPemasukan()
+    // {
+    //     $checkedIds = $this->request->getPost('checked_id'); // Ambil index yang dicentang
+    //     // dd ($checkedIds);
+    //     if (empty($checkedIds)) {
+    //         session()->setFlashdata('error', 'Tidak ada data yang dipilih.');
+    //         return redirect()->to($this->role . '/pemasukan');
+    //     }
+
+    //     $idOutCelup  = $this->request->getPost('id_out_celup');
+    //     $noModels    = $this->request->getPost('no_model');
+    //     $itemTypes   = $this->request->getPost('item_type');
+    //     $kodeWarnas  = $this->request->getPost('kode_warna');
+    //     $warnas      = $this->request->getPost('warna');
+    //     $kgsMasuks   = $this->request->getPost('kgs_kirim') ?? $this->request->getPost('kgs_retur');
+    //     $cnsMasuks   = $this->request->getPost('cns_kirim') ?? $this->request->getPost('cns_retur');
+    //     $tglMasuks   = $this->request->getPost('tgl_masuk');
+    //     $namaClusters = $this->request->getPost('cluster');
+    //     $lotKirim    = $this->request->getPost('lot_kirim') ?? $this->request->getPost('lot_retur');
+    //     $idRetur    = $this->request->getPost('id_retur') ?? null;
+    //     // dd($idOutCelup, $noModels, $itemTypes, $kodeWarnas, $warnas, $kgsMasuks, $cnsMasuks, $tglMasuks, $namaClusters, $lotKirim, $idRetur);
+    //     // Pastikan data tidak kosong
+    //     if (empty($idOutCelup) || !is_array($idOutCelup)) {
+    //         session()->setFlashdata('error', 'Data yang dikirim kosong atau tidak valid.');
+    //         return redirect()->to($this->role . '/pemasukan');
+    //     }
+
+    //     // Validasi cluster
+    //     $clusterExists = $this->clusterModel->where('nama_cluster', $namaClusters)->countAllResults();
+    //     if ($clusterExists === 0) {
+    //         session()->setFlashdata('error', 'Cluster yang dipilih tidak valid.');
+    //         return redirect()->to($this->role . '/pemasukan');
+    //     }
+
+    //     $dataPemasukan = [];
+    //     foreach ($checkedIds as $key => $idOut) {
+    //         $dataPemasukan[] = [
+    //             'id_out_celup'  => $idOutCelup[$key] ?? null,
+    //             // 'no_model'      => $noModels[$key] ?? null,
+    //             // 'item_type'     => $itemTypes[$key] ?? null,
+    //             // 'kode_warna'    => $kodeWarnas[$key] ?? null,
+    //             // 'warna'         => $warnas[$key] ?? null,
+    //             // 'kgs_masuk'     => $kgsMasuks[$key] ?? null,
+    //             // 'cns_masuk'     => $cnsMasuks[$key] ?? null,
+    //             'tgl_masuk'     => $tglMasuks[$key] ?? null,
+    //             'nama_cluster'  => $namaClusters,
+    //             'admin'         => session()->get('username')
+    //         ];
+    //     }
+
+    //     // Pastikan data pemasukan ada sebelum insert
+    //     if (empty($dataPemasukan)) {
+    //         session()->setFlashdata('error', 'Tidak ada data yang dimasukkan.');
+    //         return redirect()->to($this->role . '/pemasukan');
+    //     }
+
+    //     // Update session dataOut jika perlu
+    //     $checked = session()->get('dataOut');
+    //     if (!empty($checked)) {
+    //         $idToRemove = array_column($dataPemasukan, 'id_out_celup');
+    //         $filteredChecked = array_filter($checked, function ($tes) use ($idToRemove) {
+    //             return !in_array($tes['id_out_celup'], $idToRemove);
+    //         });
+    //         if (!empty($filteredChecked)) {
+    //             session()->set('dataOut', array_values($filteredChecked));
+    //         } else {
+    //             session()->remove('dataOut');
+    //         }
+    //     }
+
+    //     // Cek duplikat pemasukan
+    //     $cekDuplikat = $this->pemasukanModel
+    //         ->whereIn('id_out_celup', array_column($dataPemasukan, 'id_out_celup'))
+    //         ->countAllResults();
+
+    //     if ($cekDuplikat == 0) {
+
+    //         // Insert batch ke tabel pemasukan
+    //         if ($this->pemasukanModel->insertBatch($dataPemasukan)) {
+
+    //             // Persiapkan data stock untuk masing-masing record
+    //             $dataStock = [];
+    //             foreach ($checkedIds as $key => $idOut) {
+    //                 $dataStock[] = [
+    //                     'no_model'    => $noModels[$key] ?? null,
+    //                     'item_type'   => $itemTypes[$key] ?? null,
+    //                     'kode_warna'  => $kodeWarnas[$key] ?? null,
+    //                     'warna'       => $warnas[$key] ?? null,
+    //                     'kgs_in_out'  => $kgsMasuks[$key] ?? null,
+    //                     'cns_in_out'  => $cnsMasuks[$key] ?? null,
+    //                     'krg_in_out'  => 1, // Asumsikan setiap pemasukan hanya 1 kali
+    //                     'lot_stock'   => $lotKirim[$key] ?? null,
+    //                     'nama_cluster' => $namaClusters,
+    //                     'admin'       => session()->get('username'),
+    //                     'created_at' => date('Y-m-d H:i:s')
+    //                 ];
+    //             }
+
+    //             // Looping untuk update/insert stock dan update id_stok di pemasukan
+    //             foreach ($dataStock as $key => $stock) {
+    //                 // $idOut = $checkedIds[$key] ?? null;
+    //                 $idOut = $idOutCelup[$key] ?? null;
+    //                 $idRetur = $this->request->getPost('id_retur')[$key] ?? null;
+
+    //                 // Cek stok lama/bikin stok baru (sudah OK di kode Agan)
+    //                 $existingStock = $this->stockModel
+    //                     ->where('no_model', $stock['no_model'])
+    //                     ->where('item_type', $stock['item_type'])
+    //                     ->where('kode_warna', $stock['kode_warna'])
+    //                     ->where('nama_cluster', $stock['nama_cluster'])
+    //                     ->where('lot_stock', $stock['lot_stock'])
+    //                     ->first();
+
+    //                 if ($existingStock) {
+    //                     $this->stockModel->update($existingStock['id_stock'], [
+    //                         'kgs_in_out' => $existingStock['kgs_in_out'] + $stock['kgs_in_out'],
+    //                         'cns_in_out' => $existingStock['cns_in_out'] + $stock['cns_in_out'],
+    //                         'krg_in_out' => $existingStock['krg_in_out'] + 1
+    //                     ]);
+    //                     $idStok = $existingStock['id_stock'];
+    //                 } else {
+    //                     $this->stockModel->insert($stock);
+    //                     $idStok = $this->stockModel->getInsertID();
+    //                     // log_message('debug', 'ID Stok baru: ' . $idStok); // Debugging
+    //                 }
+
+    //                 // === UPDATE PEMASUKAN BERDASARKAN SUMBERNYA (gabungan RETUR & OUT_CELUP) ===
+    //                 $sql = "
+    //                         UPDATE pemasukan p
+    //                         INNER JOIN out_celup oc 
+    //                             ON oc.id_out_celup = p.id_out_celup
+    //                         LEFT  JOIN retur r 
+    //                             ON r.id_retur      = oc.id_retur
+    //                         LEFT  JOIN schedule_celup sc 
+    //                             ON sc.id_celup     = oc.id_celup
+    //                         SET p.id_stock = ?
+    //                         WHERE
+    //                         -- Pilih baris RETUR jika ada, else baris SCHEDULE
+    //                         (
+    //                             r.id_retur IS NOT NULL 
+    //                             AND r.id_retur = ?
+    //                         )
+    //                         OR
+    //                         (
+    //                             r.id_retur IS     NULL 
+    //                             AND oc.id_out_celup = ?
+    //                         )
+    //                         -- Kemudian cocokkan atribut model/item/warna secara dinamis:
+    //                         AND COALESCE(r.no_model,      oc.no_model)      = ?
+    //                         AND COALESCE(r.item_type,     sc.item_type)     = ?
+    //                         AND COALESCE(r.kode_warna,    sc.kode_warna)    = ?
+    //                         AND p.nama_cluster                           = ?
+    //                     ";
+    //                 $params = [
+    //                     $idStok,              // untuk SET p.id_stock
+    //                     $idRetur,             // untuk kondisi r.id_retur = ?
+    //                     $idOut,               // untuk kondisi sc.id_celup  = ?
+    //                     $stock['no_model'],   // untuk membandingkan no_model
+    //                     $stock['item_type'],  // untuk membandingkan item_type
+    //                     $stock['kode_warna'], // untuk membandingkan kode_warna
+    //                     $stock['nama_cluster']
+    //                 ];
+    //                 $this->db->query($sql, $params);
+    //                 // dd($params);      
+    //             }
+
+    //             session()->setFlashdata('success', 'Data berhasil dimasukkan.');
+    //         }
+    //     } else {
+    //         session()->setFlashdata('error', 'Gagal, Data pemasukan sudah ada.');
+    //     }
+    //     return redirect()->to($this->role . '/pemasukan');
+    // }
+
     public function prosesSimpanPemasukan()
     {
-        $checkedIds = $this->request->getPost('checked_id'); // Ambil index yang dicentang
-        // dd ($checkedIds);
+        $checkedIds = $this->request->getPost('checked_id');
         if (empty($checkedIds)) {
             session()->setFlashdata('error', 'Tidak ada data yang dipilih.');
             return redirect()->to($this->role . '/pemasukan');
         }
 
-        $idOutCelup  = $this->request->getPost('id_out_celup');
-        $noModels    = $this->request->getPost('no_model');
-        $itemTypes   = $this->request->getPost('item_type');
-        $kodeWarnas  = $this->request->getPost('kode_warna');
-        $warnas      = $this->request->getPost('warna');
-        $kgsMasuks   = $this->request->getPost('kgs_kirim') ?? $this->request->getPost('kgs_retur');
-        $cnsMasuks   = $this->request->getPost('cns_kirim') ?? $this->request->getPost('cns_retur');
-        $tglMasuks   = $this->request->getPost('tgl_masuk');
+        $idOutCelup   = $this->request->getPost('id_out_celup');
+        $noModels     = $this->request->getPost('no_model');
+        $itemTypes    = $this->request->getPost('item_type');
+        $kodeWarnas   = $this->request->getPost('kode_warna');
+        $warnas       = $this->request->getPost('warna');
+        $kgsMasuks    = $this->request->getPost('kgs_kirim') ?? $this->request->getPost('kgs_retur');
+        $cnsMasuks    = $this->request->getPost('cns_kirim') ?? $this->request->getPost('cns_retur');
+        $tglMasuks    = $this->request->getPost('tgl_masuk');
         $namaClusters = $this->request->getPost('cluster');
-        $lotKirim    = $this->request->getPost('lot_kirim') ?? $this->request->getPost('lot_retur');
-        $idRetur    = $this->request->getPost('id_retur') ?? null;
-        // dd ($idOutCelup, $noModels, $itemTypes, $kodeWarnas, $warnas, $kgsMasuks, $cnsMasuks, $tglMasuks, $namaClusters, $lotKirim , $idRetur);
-        // Pastikan data tidak kosong
+        $lotKirim     = $this->request->getPost('lot_kirim') ?? $this->request->getPost('lot_retur');
+        $idRetur      = $this->request->getPost('id_retur') ?? null;
+
         if (empty($idOutCelup) || !is_array($idOutCelup)) {
             session()->setFlashdata('error', 'Data yang dikirim kosong atau tidak valid.');
             return redirect()->to($this->role . '/pemasukan');
@@ -296,29 +468,23 @@ class WarehouseController extends BaseController
             return redirect()->to($this->role . '/pemasukan');
         }
 
+        // Susun data pemasukan
         $dataPemasukan = [];
         foreach ($checkedIds as $key => $idOut) {
             $dataPemasukan[] = [
-                'id_out_celup'  => $idOutCelup[$key] ?? null,
-                // 'no_model'      => $noModels[$key] ?? null,
-                // 'item_type'     => $itemTypes[$key] ?? null,
-                // 'kode_warna'    => $kodeWarnas[$key] ?? null,
-                // 'warna'         => $warnas[$key] ?? null,
-                // 'kgs_masuk'     => $kgsMasuks[$key] ?? null,
-                // 'cns_masuk'     => $cnsMasuks[$key] ?? null,
-                'tgl_masuk'     => $tglMasuks[$key] ?? null,
-                'nama_cluster'  => $namaClusters,
-                'admin'         => session()->get('username')
+                'id_out_celup' => $idOutCelup[$key] ?? null,
+                'tgl_masuk'    => $tglMasuks[$key] ?? null,
+                'nama_cluster' => $namaClusters,
+                'admin'        => session()->get('username')
             ];
         }
 
-        // Pastikan data pemasukan ada sebelum insert
         if (empty($dataPemasukan)) {
             session()->setFlashdata('error', 'Tidak ada data yang dimasukkan.');
             return redirect()->to($this->role . '/pemasukan');
         }
 
-        // Update session dataOut jika perlu
+        // Update session dataOut
         $checked = session()->get('dataOut');
         if (!empty($checked)) {
             $idToRemove = array_column($dataPemasukan, 'id_out_celup');
@@ -332,40 +498,42 @@ class WarehouseController extends BaseController
             }
         }
 
-        // Cek duplikat pemasukan
+        // Cek duplikat
         $cekDuplikat = $this->pemasukanModel
             ->whereIn('id_out_celup', array_column($dataPemasukan, 'id_out_celup'))
             ->countAllResults();
 
         if ($cekDuplikat == 0) {
-            // Insert batch ke tabel pemasukan
+
+            // === Insert pemasukan ===
             if ($this->pemasukanModel->insertBatch($dataPemasukan)) {
 
-                // Persiapkan data stock untuk masing-masing record
                 $dataStock = [];
                 foreach ($checkedIds as $key => $idOut) {
+
+                    // Override no_model kalau cluster == STOCK
+                    $noModel = ($namaClusters == 'STOCK') ? 'BENANG STOCK' : ($noModels[$key] ?? null);
+
                     $dataStock[] = [
-                        'no_model'    => $noModels[$key] ?? null,
-                        'item_type'   => $itemTypes[$key] ?? null,
-                        'kode_warna'  => $kodeWarnas[$key] ?? null,
-                        'warna'       => $warnas[$key] ?? null,
-                        'kgs_in_out'  => $kgsMasuks[$key] ?? null,
-                        'cns_in_out'  => $cnsMasuks[$key] ?? null,
-                        'krg_in_out'  => 1, // Asumsikan setiap pemasukan hanya 1 kali
-                        'lot_stock'   => $lotKirim[$key] ?? null,
+                        'no_model'     => $noModel,
+                        'item_type'    => $itemTypes[$key] ?? null,
+                        'kode_warna'   => $kodeWarnas[$key] ?? null,
+                        'warna'        => $warnas[$key] ?? null,
+                        'kgs_in_out'   => $kgsMasuks[$key] ?? null,
+                        'cns_in_out'   => $cnsMasuks[$key] ?? null,
+                        'krg_in_out'   => 1,
+                        'lot_stock'    => $lotKirim[$key] ?? null,
                         'nama_cluster' => $namaClusters,
-                        'admin'       => session()->get('username'),
-                        'created_at' => date('Y-m-d H:i:s')
+                        'admin'        => session()->get('username'),
+                        'created_at'   => date('Y-m-d H:i:s')
                     ];
                 }
 
-                // Looping untuk update/insert stock dan update id_stok di pemasukan
                 foreach ($dataStock as $key => $stock) {
-                    // $idOut = $checkedIds[$key] ?? null;
-                    $idOut = $idOutCelup[$key] ?? null;
+                    $idOut   = $idOutCelup[$key] ?? null;
                     $idRetur = $this->request->getPost('id_retur')[$key] ?? null;
 
-                    // Cek stok lama/bikin stok baru (sudah OK di kode Agan)
+                    // Cek stock existing
                     $existingStock = $this->stockModel
                         ->where('no_model', $stock['no_model'])
                         ->where('item_type', $stock['item_type'])
@@ -384,47 +552,42 @@ class WarehouseController extends BaseController
                     } else {
                         $this->stockModel->insert($stock);
                         $idStok = $this->stockModel->getInsertID();
-                        // log_message('debug', 'ID Stok baru: ' . $idStok); // Debugging
                     }
 
-                    // === UPDATE PEMASUKAN BERDASARKAN SUMBERNYA (gabungan RETUR & OUT_CELUP) ===
+                    // Update id_stock di pemasukan
                     $sql = "
-                            UPDATE pemasukan p
-                            INNER JOIN out_celup oc 
-                                ON oc.id_out_celup = p.id_out_celup
-                            LEFT  JOIN retur r 
-                                ON r.id_retur      = oc.id_retur
-                            LEFT  JOIN schedule_celup sc 
-                                ON sc.id_celup     = oc.id_celup
-                            SET p.id_stock = ?
-                            WHERE
-                            -- Pilih baris RETUR jika ada, else baris SCHEDULE
-                            (
-                                r.id_retur IS NOT NULL 
-                                AND r.id_retur = ?
-                            )
-                            OR
-                            (
-                                r.id_retur IS     NULL 
-                                AND oc.id_out_celup = ?
-                            )
-                            -- Kemudian cocokkan atribut model/item/warna secara dinamis:
-                            AND COALESCE(r.no_model,      oc.no_model)      = ?
-                            AND COALESCE(r.item_type,     sc.item_type)     = ?
-                            AND COALESCE(r.kode_warna,    sc.kode_warna)    = ?
-                            AND p.nama_cluster                           = ?
-                        ";
+                    UPDATE pemasukan p
+                    INNER JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
+                    LEFT JOIN retur r ON r.id_retur = oc.id_retur
+                    LEFT JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+                    SET p.id_stock = ?
+                    WHERE
+                        (
+                            r.id_retur IS NOT NULL 
+                            AND r.id_retur = ?
+                        )
+                        OR
+                        (
+                            r.id_retur IS NULL 
+                            AND oc.id_out_celup = ?
+                        )
+                    AND COALESCE(r.no_model, oc.no_model) = ?
+                    AND COALESCE(r.item_type, sc.item_type) = ?
+                    AND COALESCE(r.kode_warna, sc.kode_warna) = ?
+                    AND p.nama_cluster = ?
+                ";
+
                     $params = [
-                        $idStok,              // untuk SET p.id_stock
-                        $idRetur,             // untuk kondisi r.id_retur = ?
-                        $idOut,               // untuk kondisi sc.id_celup  = ?
-                        $stock['no_model'],   // untuk membandingkan no_model
-                        $stock['item_type'],  // untuk membandingkan item_type
-                        $stock['kode_warna'], // untuk membandingkan kode_warna
+                        $idStok,
+                        $idRetur,
+                        $idOut,
+                        $stock['no_model'],
+                        $stock['item_type'],
+                        $stock['kode_warna'],
                         $stock['nama_cluster']
                     ];
+
                     $this->db->query($sql, $params);
-                    // dd($params);      
                 }
 
                 session()->setFlashdata('success', 'Data berhasil dimasukkan.');
@@ -432,8 +595,10 @@ class WarehouseController extends BaseController
         } else {
             session()->setFlashdata('error', 'Gagal, Data pemasukan sudah ada.');
         }
+
         return redirect()->to($this->role . '/pemasukan');
     }
+
 
     private function prosesKomplain()
     {
