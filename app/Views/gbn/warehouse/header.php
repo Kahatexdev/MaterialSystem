@@ -103,11 +103,15 @@
                 </nav>
                 <div class="d-flex align-items-center">
                     <ul class="navbar-nav justify-content-end">
-                        <li class="nav-item d-flex align-items-center">
-                            <a href="<?= base_url($role . '/warehouse/listOtherBarcode') ?>" class="nav-link text-body font-weight-bold px-2">
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-barcode"></i>
-                                <span class="d-lg-inline-block d-none ms-1">Other Barcode</span>
+                                <span class="d-lg-inline-block d-none ms-1">Barcode</span>
                             </a>
+                            <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownMenuLink">
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/listOtherBarcode') ?>">Barcode Lain-Lain</a></li>
+                                <!-- <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/listPindahOrderBarcode') ?>">Barcode Pindah Order</a></li> -->
+                            </ul>
                         </li>
                         <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle text-body font-weight-bold px-2" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">

@@ -164,4 +164,41 @@ class DomPdfController extends BaseController
 
         return $dompdf->stream("Barcode_$tglDatang.pdf", ['Attachment' => false]);
     }
+
+    public function generatePindahOrderBarcode($noModel)
+    {
+        $dompdf = new DompdfService();
+        $dataList = $this->outCelupModel->getDataPindahOrderBarcode($noModel);
+        if (empty($dataList)) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException("Tidak ada pemasukan lain-lain pada tanggal {$noModel}");
+        }
+
+        $path = FCPATH . 'assets/img/logo-kahatex.png';
+        $type = pathinfo($path, PATHINFO_EXTENSION);
+        $data = file_get_contents($path);
+        $img = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        $option = new Options();
+        $generator = new BarcodeGeneratorPNG();
+        $barcodeImages = [];
+        foreach ($dataList as $i => &$row) {
+            $id = $row['id_out_celup'];
+            $bin = $generator->getBarcode($id, $generator::TYPE_CODE_128);
+            $barcodeImages[$i] = 'data:image/png;base64,' . base64_encode($bin);
+        }
+
+        // Ambil data barcode sesuai $id
+        $html = view($this->role . '/warehouse/pindah-order-barcode', [
+            'noModel' => $noModel,
+            'dataList' => $dataList,
+            'img' => $img,
+            'barcodeImages' => $barcodeImages,
+        ]);
+
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('10cm', '10cm');
+        $dompdf->render();
+        $option->set('dpi', 203);
+
+        return $dompdf->stream("Barcode $noModel.pdf", ['Attachment' => false]);
+    }
 }

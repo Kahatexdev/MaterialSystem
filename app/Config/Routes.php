@@ -254,6 +254,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/listOtherBarcode', 'WarehouseController::listOtherBarcode');
     $routes->get('warehouse/detailOtherBarcode/(:any)', 'WarehouseController::detailOtherBarcode/$1');
     $routes->get('warehouse/generateOtherBarcode/(:any)', 'DomPdfController::generateOtherBarcode/$1');
+    $routes->get('warehouse/listPindahOrderBarcode', 'WarehouseController::listPindahOrderBarcode');
+    $routes->get('warehouse/detailPindahOrderBarcode/(:any)', 'WarehouseController::detailPindahOrderBarcode/$1');
+    $routes->get('warehouse/generatePindahOrderBarcode/(:any)', 'DomPdfController::generatePindahOrderBarcode/$1');
     $routes->get('warehouse/reportDatangNylon', 'WarehouseController::reportDatangNylon');
     $routes->get('warehouse/filterDatangNylon', 'WarehouseController::filterDatangNylon');
     $routes->get('warehouse/exportDatangNylon', 'ExcelController::exportDatangNylon');
