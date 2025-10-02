@@ -1659,8 +1659,7 @@ class GodController extends BaseController
 
     public function formPoTambahan()
     {
-        // $apiUrl = 'http://172.23.44.14/MaterialSystem/public/api/getNoModel';
-        $apiUrl = 'http://localhost:8000/api/getNoModel';
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getNoModel';
 
         // Mengambil data dari API eksternal
         $response = @file_get_contents($apiUrl);
@@ -1751,7 +1750,7 @@ class GodController extends BaseController
         $sisaOrderList = [];
         $poPlusList = [];
         foreach ($styleSize as $style) {
-            $apiUrl = 'http://172.23.44.14/MaterialSystem/public/api/getSisaPerSize/' . $noModel . '/' . $area . '/' . $style;
+            $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getSisaPerSize/' . $noModel . '/' . $area . '/' . $style;
 
             // Mengambil data dari API eksternal
             $response = @file_get_contents($apiUrl);
@@ -1775,7 +1774,7 @@ class GodController extends BaseController
         // Ambil BS MESIN per style_size
         $bsMesinList = [];
         foreach ($styleSize as $style) {
-            $apiUrl = 'http://172.23.44.14/MaterialSystem/public/api/getBsMesin/' . $noModel . '/' . $area . '/' . $style;
+            $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getBsMesin/' . $noModel . '/' . $area . '/' . $style;
 
             // Mengambil data dari API eksternal
             $response = @file_get_contents($apiUrl);
