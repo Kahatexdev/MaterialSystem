@@ -1072,4 +1072,25 @@ class MasterdataController extends BaseController
             'data' => $result
         ]);
     }
+
+    public function reportKebutuhanBahanBaku()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/masterdata/report-kebutuhan-bb', $data);
+    }
+
+    public function filterReportKebutuhanBahanBaku()
+    {
+        $jenis = $this->request->getGet('jenis');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->masterOrderModel->getFilterKebutuhanBahanBaku($jenis, $tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
+    }
 }

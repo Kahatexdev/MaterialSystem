@@ -3084,7 +3084,7 @@ class WarehouseController extends BaseController
         $bulan = $bulanMap[$delivery] ?? null;
         // $data = $this->stockModel->getFilterSisaPakaiBenang($bulan, $noModel, $kodeWarna);
         $data = $this->materialModel->getFilterSisaPakai($jenis, $bulan, $noModel, $kodeWarna);
-
+        // dd($data);
         return $this->response->setJSON($data);
     }
 

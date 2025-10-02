@@ -618,4 +618,35 @@ class MasterOrderModel extends Model
             ->limit(100)
             ->findAll();
     }
+
+    public function getFilterKebutuhanBahanBaku($jenis = null, $tanggal_awal = null, $tanggal_akhir = null)
+    {
+        $builder = $this->select('material.item_type, SUM(material.kgs) AS total_kebutuhan')
+            ->join('material', 'material.id_order = master_order.id_order', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left');
+        // $builder = $this->select('master_order.no_model, master_order.buyer, master_order.foll_up, master_order.delivery_awal, master_order.delivery_akhir, material.item_type, SUM(material.kgs) AS total_kebutuhan')
+        //     ->join('material', 'material.id_order = master_order.id_order', 'left')
+        //     ->join('master_material', 'master_material.item_type = material.item_type', 'left');
+
+        $builder->groupBy('material.item_type');
+        //     $builder->groupBy('
+        //     master_order.no_model, 
+        //     master_order.buyer, 
+        //     master_order.foll_up, 
+        //     master_order.delivery_awal, 
+        //     master_order.delivery_akhir, 
+        //     material.item_type
+        // ');
+
+        if (!empty($jenis)) {
+            $builder->where('master_material.jenis', $jenis);
+        }
+
+        if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
+            $builder->where('master_order.delivery_awal >=', $tanggal_awal)
+                ->where('master_order.delivery_akhir <=', $tanggal_akhir);
+        }
+
+        return $builder->findAll();
+    }
 }

@@ -162,48 +162,35 @@
                 <table id="dataTable" class="table table-bordered table-hover text-center text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>
                         <tr>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal PO</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Foll Up</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Order</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Buyer</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Start Mc</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Order Type</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
-                            <th colspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Stock Awal</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Pesan Kg</th>
-                            <th colspan="4" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Po Tambahan Gbn</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Pakai</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">(+) Pakai</th>
-                            <th colspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Retur</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Sisa</th>
-                        </tr>
-                        <tr>
-                            <!-- Sub-header Stock Awal -->
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kg</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Lot</th>
-
-                            <!-- Sub-header Po Tambahan Gbn -->
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tgl Terima Po(+) Gbn</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tgl Po(+) Area</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Po(+)</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kg Po (+)</th>
-
-                            <!-- Sub-header Retur -->
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Lot</th>
+                            <th>No</th>
+                            <th>Tanggal PO</th>
+                            <th>Foll Up</th>
+                            <th>No Model</th>
+                            <th>No Order</th>
+                            <th>Area</th>
+                            <th>Buyer</th>
+                            <th>Start Mc</th>
+                            <th>Delivery Awal</th>
+                            <th>Delivery Akhir</th>
+                            <th>Order Type</th>
+                            <th>Item Type</th>
+                            <th>Kode Warna</th>
+                            <th>Warna</th>
+                            <th>Stock Awal Kg</th>
+                            <th>Stock Awal Lot</th>
+                            <th>Pesan Kg</th>
+                            <th>Tgl Terima Po(+) Gbn</th>
+                            <th>Tgl Po(+) Area</th>
+                            <th>Delivery Po(+)</th>
+                            <th>Kg Po(+)</th>
+                            <th>Pakai</th>
+                            <th>Pakai (+)</th>
+                            <th>Retur Kgs</th>
+                            <th>Retur Lot</th>
+                            <th>Sisa</th>
                         </tr>
                     </thead>
-
-                    <tbody>
-
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
@@ -234,6 +221,123 @@
 
 <script>
     $(document).ready(function() {
+        let dataTable = $('#dataTable').DataTable({
+            processing: true,
+            serverSide: false,
+            searching: true,
+            paging: true,
+            info: true,
+            ordering: true,
+            data: [],
+            columns: [{
+                    data: null,
+                    render: (d, t, r, m) => m.row + 1
+                }, // No
+                {
+                    data: "lco_date"
+                }, // Tanggal PO
+                {
+                    data: "foll_up"
+                }, // Foll Up
+                {
+                    data: "no_model"
+                }, // No Model
+                {
+                    data: "no_order"
+                }, // No Order
+                {
+                    data: "area_out"
+                }, // Area
+                {
+                    data: "buyer"
+                }, // Buyer
+                {
+                    data: "start_mc"
+                }, // Start Mc
+                {
+                    data: "delivery_awal"
+                }, // Delivery Awal
+                {
+                    data: "delivery_akhir"
+                }, // Delivery Akhir
+                {
+                    data: "unit"
+                }, // Order Type
+                {
+                    data: "item_type"
+                }, // Item Type
+                {
+                    data: "kode_warna"
+                }, // Kode Warna
+                {
+                    data: "color"
+                }, // Warna
+                {
+                    data: "kgs_stock_awal",
+                    render: d => (parseFloat(d) || 0).toFixed(2)
+                }, // Stock Awal Kg
+                {
+                    data: "lot_awal"
+                }, // Stock Awal Lot
+                {
+                    data: "kg_pesan",
+                    render: d => (parseFloat(d) || 0).toFixed(2)
+                }, // Pesan Kg
+                {
+                    data: "tgl_terima_po_plus"
+                }, // Tgl Terima Po (+) Gbn
+                {
+                    data: "tgl_po_plus_area"
+                }, // Tgl Po (+) Area
+                {
+                    data: "delivery_po_plus"
+                }, // Delivery Po (+)
+                {
+                    data: "kg_po_plus",
+                    render: d => (parseFloat(d) || 0).toFixed(2)
+                }, // Kg Po (+)
+                { // Pakai
+                    data: null,
+                    render: d => {
+                        let val = (d.kgs_out_spandex_karet !== undefined && d.kgs_out_spandex_karet !== null && d.kgs_out_spandex_karet !== '' && parseFloat(d.kgs_out_spandex_karet) !== 0) ?
+                            parseFloat(d.kgs_out_spandex_karet) :
+                            (parseFloat(d.kgs_other_out) || 0);
+                        return (val || 0).toFixed(2);
+                    }
+                },
+                {
+                    data: "kgs_out_spandex_karet_plus",
+                    render: d => (parseFloat(d) || 0).toFixed(2)
+                }, // Pakai (+)
+                {
+                    data: "kgs_retur",
+                    render: d => (parseFloat(d) || 0).toFixed(2)
+                }, // Retur Kg
+                {
+                    data: "lot_retur"
+                }, // Retur Lot
+                { // Sisa
+                    data: null,
+                    render: d => {
+                        const stockAwal = parseFloat(d.kgs_stock_awal) || 0;
+                        const pesan = parseFloat(d.kg_pesan) || 0;
+                        const poPlus = parseFloat(d.kg_po_plus) || 0;
+                        const retur = parseFloat(d.kgs_retur) || 0;
+
+                        const pakai = (d.kgs_out_spandex_karet !== undefined && d.kgs_out_spandex_karet !== null && d.kgs_out_spandex_karet !== '' && parseFloat(d.kgs_out_spandex_karet) !== 0) ?
+                            parseFloat(d.kgs_out_spandex_karet) :
+                            (parseFloat(d.kgs_other_out) || 0);
+                        const pakaiPlus = parseFloat(d.kgs_out_spandex_karet_plus) || 0;
+
+                        // Rumus: Stock + Pesan + Po Tambah + Retur - (Pakai + Pakai Plus)
+                        const sisa = (pakai + pakaiPlus) - retur - (pesan + poPlus);
+
+                        return `<span style="${sisa < 0 ? 'color:red;font-weight:bold;' : ''}">${sisa.toFixed(2)}</span>`;
+                    }
+                }
+            ]
+        });
+
         function showLoading() {
             $('#loadingOverlay').addClass('active');
             $('#btnSearch').prop('disabled', true);
@@ -281,7 +385,6 @@
                     no_model: no_model,
                     kode_warna: kode_warna,
                     jenis: jenis
-
                 },
                 dataType: "json",
                 beforeSend: function() {
@@ -290,85 +393,35 @@
                 },
                 xhr: function() {
                     let xhr = new window.XMLHttpRequest();
-
-                    // progress download data dari server
                     xhr.addEventListener("progress", function(evt) {
                         if (evt.lengthComputable) {
                             let percentComplete = Math.round((evt.loaded / evt.total) * 100);
                             updateProgress(percentComplete);
                         }
                     }, false);
-
                     return xhr;
                 },
                 success: function(response) {
-                    let html = '';
                     if (response.length > 0) {
-                        $.each(response, function(index, item) {
-                            const pakai = (item.kgs_out !== undefined && item.kgs_out !== null && item.kgs_out !== '' && parseFloat(item.kgs_out) !== 0) ?
-                                parseFloat(item.kgs_out) :
-                                (parseFloat(item.kgs_other_out) || 0);
-                            const pakaiPlus = parseFloat(item.kgs_out_plus) || 0;
-                            const retur = parseFloat(item.kgs_retur) || 0;
-                            const pesan = parseFloat(item.kg_pesan) || 0;
-                            const poPlus = parseFloat(item.kg_po_plus) || 0;
-
-                            const sisa = (pakai + pakaiPlus) - retur - (pesan + poPlus);
-
-                            html += `
-                                <tr>
-                                    <td>${index + 1}</td>
-                                    <td>${item.lco_date || ''}</td>
-                                    <td>${item.foll_up || ''}</td>
-                                    <td>${item.no_model || ''}</td>
-                                    <td>${item.no_order || ''}</td>
-                                    <td>${item.area_out || ''}</td>
-                                    <td>${item.buyer || ''}</td>
-                                    <td>${item.start_mc || ''}</td>
-                                    <td>${item.delivery_awal || ''}</td>
-                                    <td>${item.delivery_akhir || ''}</td>
-                                    <td>${item.unit || ''}</td>
-                                    <td>${item.item_type || ''}</td>
-                                    <td>${item.kode_warna || ''}</td>
-                                    <td>${item.warna || ''}</td>
-                                    <td>${(parseFloat(item.kgs_stock_awal) || 0).toFixed(2)}</td>
-                                    <td>${item.lot_awal || ''}</td>
-                                    <td>${(parseFloat(item.kg_pesan) || 0).toFixed(2)}</td>
-                                    <td>${item.tgl_terima_po_plus || ''}</td>
-                                    <td>${item.tgl_po_plus_area || ''}</td>
-                                    <td>${item.delivery_po_plus || ''}</td>
-                                    <td>${(parseFloat(item.kg_po_plus) || 0).toFixed(2)}</td>
-                                    <td>${(parseFloat(item.kgs_out) || 0).toFixed(2)}</td>
-                                    <td>${(parseFloat(item.kgs_out_plus) || 0).toFixed(2)}</td>
-                                    <td>${(parseFloat(item.kgs_retur) || 0).toFixed(2)}</td>
-                                    <td>${item.lot_retur || ''}</td>
-                                    <td style="${sisa < 0 ? 'color:red;font-weight:bold;' : ''}">
-                                    ${sisa.toFixed(2)}</td>
-                                </tr>
-                            `;
-                        });
-                        $('#dataTable tbody').html(html);
+                        dataTable.clear().rows.add(response).draw();
                         $('#btnExport').removeClass('d-none');
                     } else {
-                        let colCount = $('#dataTable thead th').length;
-                        $('#dataTable tbody').html(`
-                            <tr>
-                                <td colspan="${colCount}" class="text-center text-danger font-weight-bold">
-                                    ⚠ Tidak ada data ditemukan
-                                </td>
-                            </tr>
-                        `);
-
+                        dataTable.clear().draw();
                         $('#btnExport').addClass('d-none');
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Tidak ada data ditemukan',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
                     }
-
                 },
                 error: function(xhr, status, error) {
                     console.error("Error:", error);
                 },
                 complete: function() {
-                    updateProgress(100); // pastikan full
-                    setTimeout(() => hideLoading(), 400); // kasih jeda biar animasi progress keliatan
+                    updateProgress(100);
+                    setTimeout(() => hideLoading(), 400);
                 }
             });
         }
