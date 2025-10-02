@@ -93,7 +93,7 @@
                                         <div class="row g-3">
                                             <div class="col-md-4">
                                                 <label>No Model</label>
-                                                <input class="form-control" list="noModelOptions" id="no_model_input" placeholder="Ketik / pilih No Model">
+                                                <input class="form-control" list="noModelOptions" id="no_model_input" placeholder="Ketik / pilih No Model" required>
                                                 <datalist id="noModelOptions">
                                                     <?php foreach ($no_model as $item) : ?>
                                                         <option data-id="<?= $item['id_order'] ?>" value="<?= $item['no_model'] ?>"></option>
@@ -105,7 +105,7 @@
 
                                             <div class="col-md-4">
                                                 <label>Item Type</label>
-                                                <input class="form-control" list="itemTypeOptions" id="item_type_input" placeholder="Pilih / ketik Item Type">
+                                                <input class="form-control" list="itemTypeOptions" id="item_type_input" placeholder="Pilih / ketik Item Type" required>
                                                 <datalist id="itemTypeOptions"></datalist>
                                                 <input type="hidden" name="item_type" id="item_type">
                                             </div>
