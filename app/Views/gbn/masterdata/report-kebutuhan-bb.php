@@ -78,12 +78,12 @@
                     <thead>
                         <tr>
                             <th class="text-center">No</th>
-                            <th class="text-center">No Model</th>
+                            <!-- <th class="text-center">No Model</th>
                             <th class="text-center">Buyer</th>
-                            <th class="text-center">Foll Up</th>
+                            <th class="text-center">Foll Up</th> -->
                             <th class="text-center">Item Type</th>
-                            <th class="text-center">Delivery Awal</th>
-                            <th class="text-center">Delivery Akhir</th>
+                            <!-- <th class="text-center">Delivery Awal</th>
+                            <th class="text-center">Delivery Akhir</th> -->
                             <th class="text-center">Total Kebutuhan (Kg)</th>
                         </tr>
                     </thead>
@@ -105,7 +105,12 @@
             "info": true,
             "responsive": true,
             "processing": true,
-            "serverSide": false
+            "serverSide": false,
+            "columnDefs": [{
+                    "className": "text-center",
+                    "targets": "_all"
+                } // semua kolom di-center
+            ]
         });
 
         function loadData() {
@@ -153,12 +158,12 @@
                         $.each(response, function(index, item) {
                             dataTable.row.add([
                                 index + 1,
-                                item.no_model,
-                                item.buyer,
-                                item.foll_up,
+                                // item.no_model,
+                                // item.buyer,
+                                // item.foll_up,
                                 item.item_type,
-                                item.delivery_awal,
-                                item.delivery_akhir,
+                                // item.delivery_awal,
+                                // item.delivery_akhir,
                                 parseFloat(item.total_kebutuhan).toFixed(2)
                             ]).draw(false);
                         });

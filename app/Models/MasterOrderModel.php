@@ -621,18 +621,22 @@ class MasterOrderModel extends Model
 
     public function getFilterKebutuhanBahanBaku($jenis = null, $tanggal_awal = null, $tanggal_akhir = null)
     {
-        $builder = $this->select('master_order.no_model, master_order.buyer, master_order.foll_up, master_order.delivery_awal, master_order.delivery_akhir, material.item_type, SUM(material.kgs) AS total_kebutuhan')
+        $builder = $this->select('material.item_type, SUM(material.kgs) AS total_kebutuhan')
             ->join('material', 'material.id_order = master_order.id_order', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left');
+        // $builder = $this->select('master_order.no_model, master_order.buyer, master_order.foll_up, master_order.delivery_awal, master_order.delivery_akhir, material.item_type, SUM(material.kgs) AS total_kebutuhan')
+        //     ->join('material', 'material.id_order = master_order.id_order', 'left')
+        //     ->join('master_material', 'master_material.item_type = material.item_type', 'left');
 
-        $builder->groupBy('
-        master_order.no_model, 
-        master_order.buyer, 
-        master_order.foll_up, 
-        master_order.delivery_awal, 
-        master_order.delivery_akhir, 
-        material.item_type
-    ');
+        $builder->groupBy('material.item_type');
+        //     $builder->groupBy('
+        //     master_order.no_model, 
+        //     master_order.buyer, 
+        //     master_order.foll_up, 
+        //     master_order.delivery_awal, 
+        //     master_order.delivery_akhir, 
+        //     material.item_type
+        // ');
 
         if (!empty($jenis)) {
             $builder->where('master_material.jenis', $jenis);
