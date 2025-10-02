@@ -310,7 +310,7 @@
                     data-user="<?= esc(strtolower($p['username'])) ?>"
                     data-date="<?= esc($dateISO) ?>"
                     data-hasreply="<?= $hasReply ?>"
-                    data-unread="<?= $isUnread ?>"  
+                    data-unread="<?= $isUnread ?>"
                     data-search="<?= esc($searchBlob) ?>">
 
                     <div class="card-body timeline-accent">
