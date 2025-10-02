@@ -20,14 +20,20 @@
         <div class="card-body p-4 rounded-top-4" style="background-color: #344767">
             <div class="d-flex align-items-center mb-3">
                 <i class="fas fa-filter text-white me-3 fs-4"></i>
-                <h4 class="mb-0 fw-bold" style="color: white;">Filter Master Order</h4>
+                <h4 class="mb-0 fw-bold" style="color: white;">Filter Kebutuhan Bahan Baku</h4>
             </div>
         </div>
         <div class="card-body bg-white rounded-bottom-0 p-4">
             <div class="row gy-4">
                 <div class="col-md-4">
-                    <label for="keyInput">Key</label>
-                    <input type="text" class="form-control" id="keyInput" placeholder="Buyer/Foll Up">
+                    <label for="">Jenis</label>
+                    <select name="jenis" id="jenis" class="form-select">
+                        <option value="">PILIH JENIS</option>
+                        <option value="BENANG">BENANG</option>
+                        <option value="NYLON">NYLON</option>
+                        <option value="SPANDEX">SPANDEX</option>
+                        <option value="KARET">KARET</option>
+                    </select>
                 </div>
                 <div class="col-md-4">
                     <label for="">Tanggal Awal (Tanggal Delivery Awal)</label>
@@ -68,22 +74,17 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
+                <table id="dataTable" class="display text-center text-uppercase font-bolder" style="width:100%">
                     <thead>
                         <tr>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Order</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Buyer</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Foll Up</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LCO Date</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Memo</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Unit</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Admin</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Created At</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Updated At</th>
+                            <th class="text-center">No</th>
+                            <th class="text-center">No Model</th>
+                            <th class="text-center">Buyer</th>
+                            <th class="text-center">Foll Up</th>
+                            <th class="text-center">Item Type</th>
+                            <th class="text-center">Delivery Awal</th>
+                            <th class="text-center">Delivery Akhir</th>
+                            <th class="text-center">Total Kebutuhan (Kg)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -108,25 +109,25 @@
         });
 
         function loadData() {
-            let key = $('#keyInput').val().trim();
+            let jenis = $('#jenis').val().trim();
             let tanggal_awal = $('#tglAwal').val().trim();
             let tanggal_akhir = $('#tglAkhir').val().trim();
-
+            console.log(jenis);
             // Validasi: Jika semua input kosong, tampilkan alert dan hentikan pencarian
-            if (key === '' && tanggal_awal === '' && tanggal_akhir === '') {
+            if (jenis === '' && tanggal_awal === '' && tanggal_akhir === '') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
-                    text: 'Harap isi filter terlebih dahulu!',
+                    text: 'Isi semua filter terlebih dahulu!',
                 });
                 return;
             }
 
             $.ajax({
-                url: "<?= base_url($role . '/masterdata/filterMasterOrder') ?>",
+                url: "<?= base_url($role . '/masterdata/filterReportKebutuhanBahanBaku') ?>",
                 type: "GET",
                 data: {
-                    key: key,
+                    jenis: jenis,
                     tanggal_awal: tanggal_awal,
                     tanggal_akhir: tanggal_akhir
                 },
@@ -152,18 +153,13 @@
                         $.each(response, function(index, item) {
                             dataTable.row.add([
                                 index + 1,
-                                item.no_order,
                                 item.no_model,
                                 item.buyer,
                                 item.foll_up,
-                                item.lco_date,
-                                item.memo,
+                                item.item_type,
                                 item.delivery_awal,
                                 item.delivery_akhir,
-                                item.unit,
-                                item.admin,
-                                item.created_at,
-                                item.updated_at
+                                parseFloat(item.total_kebutuhan).toFixed(2)
                             ]).draw(false);
                         });
 
@@ -183,10 +179,10 @@
         });
 
         $('#btnExport').click(function() {
-            let key = $('#keyInput').val().trim();
+            let jenis = $('#jenis').val().trim();
             let tanggal_awal = $('#tglAwal').val().trim();
             let tanggal_akhir = $('#tglAkhir').val().trim();
-            window.location.href = "<?= base_url($role . '/masterdata/excelMasterOrder') ?>?key=" + key + "&tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
+            window.location.href = "<?= base_url($role . '/masterdata/excelReportKebutuhanBahanBaku') ?>?jenis=" + jenis + "&tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
         });
 
         dataTable.clear().draw();

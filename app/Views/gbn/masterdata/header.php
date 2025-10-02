@@ -53,6 +53,7 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownMenuLink">
                                 <li><a href="<?= base_url($role . '/masterdata/reportMasterOrder') ?>" class="dropdown-item">Master Order</a></li>
+                                <li><a href="<?= base_url($role . '/masterdata/reportKebutuhanBahanBaku') ?>" class="dropdown-item">Kebutuhan Bahan Baku</a></li>
                             </ul>
                         </li>
                         <li class="nav-item d-flex align-items-center">
