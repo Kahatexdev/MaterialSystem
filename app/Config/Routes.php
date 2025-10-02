@@ -254,6 +254,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/listOtherBarcode', 'WarehouseController::listOtherBarcode');
     $routes->get('warehouse/detailOtherBarcode/(:any)', 'WarehouseController::detailOtherBarcode/$1');
     $routes->get('warehouse/generateOtherBarcode/(:any)', 'DomPdfController::generateOtherBarcode/$1');
+    $routes->get('warehouse/listPindahOrderBarcode', 'WarehouseController::listPindahOrderBarcode');
+    $routes->get('warehouse/detailPindahOrderBarcode/(:any)', 'WarehouseController::detailPindahOrderBarcode/$1');
+    $routes->get('warehouse/generatePindahOrderBarcode/(:any)', 'DomPdfController::generatePindahOrderBarcode/$1');
     $routes->get('warehouse/reportDatangNylon', 'WarehouseController::reportDatangNylon');
     $routes->get('warehouse/filterDatangNylon', 'WarehouseController::filterDatangNylon');
     $routes->get('warehouse/exportDatangNylon', 'ExcelController::exportDatangNylon');
@@ -834,6 +837,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('poplus/reportPoTambahan', 'PoTambahanController::reportPoTambahan');
     $routes->post('poplus/reportPoTambahan', 'PoTambahanController::reportPoTambahan');
     $routes->get('poplus/exportPoTambahan', 'ExcelController::exportPoTambahan');
+    $routes->get('poplus/form_potambahan', 'GodController::formPoTambahan');
+    $routes->get('poTambahanDetail/(:any)/(:any)', 'GodController::poTambahanDetail/$1/$2');
 
     // $routes->get('pph', 'PphController::index');
     $routes->get('pph', 'PphController::tampilPerModel');

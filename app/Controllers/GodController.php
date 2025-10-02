@@ -1412,8 +1412,8 @@ class GodController extends BaseController
                     $key = $colMap[$col] ?? null;
                     if ($key) $data[$key] = trim((string)$val);
                 }
-                
-                if(empty($data['id_bahan_baku'])) {
+
+                if (empty($data['id_bahan_baku'])) {
                     continue;
                 }
 
@@ -1448,7 +1448,7 @@ class GodController extends BaseController
                 $jalur = $this->clusterModel->select('nama_cluster')
                     ->where('nama_cluster', $data['jalur'] ?? '')
                     ->first();
-                if(empty($jalur)){
+                if (empty($jalur)) {
                     $jalur = NULL;
                 }
                 // dd($jalur);
@@ -1655,5 +1655,190 @@ class GodController extends BaseController
         }
 
         return ['date' => null, 'time' => $time];
+    }
+
+    public function formPoTambahan()
+    {
+        // $apiUrl = 'http://172.23.44.14/MaterialSystem/public/api/getNoModel';
+        $apiUrl = 'http://localhost:8000/api/getNoModel';
+
+        // Mengambil data dari API eksternal
+        $response = @file_get_contents($apiUrl);
+
+        log_message('debug', 'API response: ' . $response);
+
+        if ($response === false) {
+            log_message('error', 'Gagal mengambil data dari API');
+            return $this->response->setStatusCode(500)->setJSON(['error' => 'Tidak dapat mengambil data dari API']);
+        }
+
+        $model = json_decode($response, true);
+        log_message('info', 'material data : ' . json_encode($model));
+        // $model = $this->ApsPerstyleModel->getPerArea($area);
+
+        // Grouping berdasarkan factory
+        $dataGrouped = [];
+        foreach ($model as $row) {
+            $factory = $row['factory'];
+            $mastermodel = $row['mastermodel'];
+
+            if (!isset($dataGrouped[$factory])) {
+                $dataGrouped[$factory] = [];
+            }
+            $dataGrouped[$factory][] = $mastermodel;
+        }
+        // $noModel = array_unique(array_column($model, 'mastermodel'));
+        $data = [
+            'active' => 'PoTambahan',
+            'area' => $dataGrouped,
+            'title' => 'Po Tambahan',
+            // 'area' => $area,
+            'role' => session()->get('role'),
+        ];
+        return view(session()->get('role') . '/poplus/form-po-tambahan', $data);
+    }
+
+    public function poTambahanDetail($noModel, $area)
+    {
+        $idOrder = $this->masterOrderModel->getIdOrder($noModel);
+        $materialData = $this->masterOrderModel->getMaterial($idOrder, $area);
+
+        foreach ($materialData as $itemType => &$itemData) {
+            foreach ($itemData['kode_warna'] as $kodeWarna => &$warnaData) {
+                // Ambil kirimArea hanya sekali per kode_warna
+                $dataKirim = [
+                    'area' => $area,
+                    'no_model' => $noModel,
+                    'item_type' => $itemType,
+                    'kode_warna' => $kodeWarna
+                ];
+
+                $kirimArea = $this->pengeluaranModel->getTotalPengiriman($dataKirim);
+                $warnaData['kgs_out'] = $kirimArea['kgs_out'] ?? 0;
+            }
+        }
+
+        // Ambil item_type saja (key dari level pertama JSON)
+        $itemTypes = [];
+        foreach ($materialData as $key => $value) {
+            if (isset($value['item_type'])) {
+                $itemTypes[] = [
+                    'item_type' => $value['item_type']
+                ];
+            }
+        }
+
+        // Ambil semua style_size
+        $styleSize = [];
+        foreach ($materialData as $itemTypeData) {
+            if (isset($itemTypeData['kode_warna']) && is_array($itemTypeData['kode_warna'])) {
+                foreach ($itemTypeData['kode_warna'] as $kodeWarnaData) {
+                    if (isset($kodeWarnaData['style_size']) && is_array($kodeWarnaData['style_size'])) {
+                        foreach ($kodeWarnaData['style_size'] as $style) {
+                            if (isset($style['style_size'])) {
+                                $styleSize[] = $style['style_size'];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $styleSize = array_unique($styleSize);
+
+        // Ambil SISA dan QTY PO PLUS per style_size
+        $qtyOrderList = [];
+        $sisaOrderList = [];
+        $poPlusList = [];
+        foreach ($styleSize as $style) {
+            $apiUrl = 'http://172.23.44.14/MaterialSystem/public/api/getSisaPerSize/' . $noModel . '/' . $area . '/' . $style;
+
+            // Mengambil data dari API eksternal
+            $response = @file_get_contents($apiUrl);
+
+            log_message('debug', 'API response: ' . $response);
+
+            if ($response === false) {
+                log_message('error', 'Gagal mengambil data dari API');
+                return $this->response->setStatusCode(500)->setJSON(['error' => 'Tidak dapat mengambil data dari API']);
+            }
+
+            $sisa = json_decode($response, true);
+            $qtyPcs = is_array($sisa) ? $sisa['qty'] ?? 0 : ($sisa->qty ?? 0);
+            $qtyOrderList[$style] = (float)$qtyPcs;
+            $sisaPcs = is_array($sisa) ? $sisa['sisa'] ?? 0 : ($sisa->sisa ?? 0);
+            $sisaOrderList[$style] = (float)$sisaPcs;
+            $poPlusPcs = is_array($sisa) ? $sisa['po_plus'] ?? 0 : ($sisa->po_plus ?? 0);
+            $poPlusList[$style] = (float)$poPlusPcs;
+        }
+
+        // Ambil BS MESIN per style_size
+        $bsMesinList = [];
+        foreach ($styleSize as $style) {
+            $apiUrl = 'http://172.23.44.14/MaterialSystem/public/api/getBsMesin/' . $noModel . '/' . $area . '/' . $style;
+
+            // Mengambil data dari API eksternal
+            $response = @file_get_contents($apiUrl);
+
+            log_message('debug', 'API response: ' . $response);
+
+            if ($response === false) {
+                log_message('error', 'Gagal mengambil data dari API');
+                return $this->response->setStatusCode(500)->setJSON(['error' => 'Tidak dapat mengambil data dari API']);
+            }
+
+            $bs = json_decode($response, true);
+            $bsGram = is_array($bs) ? $bs['bs_gram'] ?? 0 : ($bs->bs_gram ?? 0);
+            $bsMesinList[$style] = (float)$bsGram;
+        }
+
+        // Ambil BS SETTING per style_size
+        $bsSettingList = [];
+        foreach ($styleSize as $style) {
+            $validate = [
+                'area' => $area,
+                'style' => $style,
+                'no_model' => $noModel
+            ];
+            // $idaps = $this->ApsPerstyleModel->getIdForBs($validate);
+            $idaps = '';
+            if (!is_array($idaps) || empty($idaps)) {
+                $bsSettingList[$style] = 0;
+                continue;
+            }
+            // $bsSetting = $this->bsModel->getTotalBsSet($idaps);
+            $bsSetting = '';
+            $bsSettingList[$style] = isset($bsSetting['qty']) ? (int)$bsSetting['qty'] : 0;
+        }
+
+        $brutoList = [];
+        foreach ($materialData as $itemType => $itemData) {
+            foreach ($itemData['kode_warna'] as $kodeWarna => $warnaData) {
+                foreach ($warnaData['style_size'] as $style) {
+                    $styleSize = $style['style_size'] ?? '';
+
+                    // ambil data produksi per style
+                    // $prod = $this->orderModel->getDataPph($area, $noModel, $styleSize);
+                    $prod = '';
+                    $prod = is_array($prod) ? $prod : [];
+                    $bruto = $prod['bruto'] ?? 0;
+
+                    $brutoList[$styleSize] = $bruto;
+                }
+            }
+        }
+
+        log_message('debug', 'PPH: ' . print_r($brutoList, true));
+
+        return $this->response->setJSON([
+            'item_types' => $itemTypes,
+            'material' => $materialData,
+            'qty_order' => $qtyOrderList,
+            'sisa_order' => $sisaOrderList,
+            'bs_mesin' => $bsMesinList,
+            'bs_setting' => $bsSettingList,
+            'bruto' => $brutoList,
+            'plusPck' => $poPlusList,
+        ]);
     }
 }

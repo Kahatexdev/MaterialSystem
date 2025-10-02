@@ -3084,7 +3084,7 @@ class WarehouseController extends BaseController
         $bulan = $bulanMap[$delivery] ?? null;
         // $data = $this->stockModel->getFilterSisaPakaiBenang($bulan, $noModel, $kodeWarna);
         $data = $this->materialModel->getFilterSisaPakai($jenis, $bulan, $noModel, $kodeWarna);
-
+        // dd($data);
         return $this->response->setJSON($data);
     }
 
@@ -4399,5 +4399,33 @@ class WarehouseController extends BaseController
         }
 
         return $this->response->setJSON($dataArray);
+    }
+
+    public function listPindahOrderBarcode()
+    {
+        $listBarcode = $this->pemasukanModel->listPindahOrderBarcode();
+
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "List Pindah Order Barcode",
+            'listBarcode' => $listBarcode,
+        ];
+
+        return view($this->role . '/warehouse/list-pindah-order-barcode', $data);
+    }
+
+    public function detailPindahOrderBarcode($idStock)
+    {
+        $detailPindahOrderBarcode = $this->pemasukanModel->detailPindahOrderBarcode($idStock);
+
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "Detail Pindah Order Barcode",
+            'detail' => $detailPindahOrderBarcode,
+        ];
+
+        return view($this->role . '/warehouse/detail-pindah-order-barcode', $data);
     }
 }

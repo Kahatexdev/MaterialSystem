@@ -400,4 +400,15 @@ class OutCelupModel extends Model
             ->get()
             ->getResultArray();
     }
+
+    public function getDataPindahOrderBarcode($noModel)
+    {
+        return $this->select('out_celup.id_out_celup, out_celup.no_karung, out_celup.gw_kirim, out_celup.kgs_kirim, out_celup.cones_kirim, out_celup.lot_kirim, out_celup.admin, stock.no_model, stock.item_type, stock.kode_warna, stock.warna, history_stock.keterangan')
+            ->join('pemasukan', 'pemasukan.id_out_celup = out_celup.id_out_celup')
+            ->join('stock', 'stock.id_stock = pemasukan.id_stock')
+            ->join('history_stock', 'history_stock.id_out_celup_new = out_celup.id_out_celup')
+            ->where('out_celup.no_model', $noModel)
+            ->orderBy('out_celup.id_out_celup', 'ASC')
+            ->findAll();
+    }
 }
