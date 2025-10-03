@@ -53,4 +53,34 @@ class TotalPoTambahanModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    public function getKgPoTambahan($data)
+    {
+        $no_model = $data['no_model'] ?? null;
+        $item_type = $data['item_type'] ?? null;
+        $kode_warna = $data['kode_warna'] ?? null;
+        $style_size = $data['style_size'] ?? null;
+        $area = $data['area'] ?? null;
+
+        $query = $this->select('total_potambahan.ttl_tambahan_kg AS ttl_keb_potambahan')
+            ->join('po_tambahan', 'po_tambahan.id_total_potambahan = total_potambahan.id_total_potambahan', 'left')
+            ->join('material', 'material.id_material = po_tambahan.id_material', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('po_tambahan.admin', $area)
+            ->where('master_order.no_model', $no_model)
+            ->where('material.item_type', $item_type)
+            ->where('material.kode_warna', $kode_warna)
+            ->where('po_tambahan.status', 'approved');
+
+        // If $style_size is not null, add the condition
+        if (!empty($style_size)) {
+            $query->where('material.style_size', $style_size);
+        }
+
+        $query = $query->groupBy('master_order.no_model, material.item_type, material.kode_warna')
+            ->first();
+
+        return $query;
+    }
 }

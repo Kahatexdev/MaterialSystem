@@ -1318,11 +1318,13 @@ class ApiController extends ResourceController
             'no_model' => $this->request->getGet('no_model'),
             'item_type' => $this->request->getGet('item_type'),
             'kode_warna' => $this->request->getGet('kode_warna'),
-            'style_size' => $this->request->getGet('style_size'),
+            'style_size' => $this->request->getGet('style_size') ?? null,
             'area' => $this->request->getGet('area'),
         ];
 
-        $data = $this->poTambahanModel->getKgPoTambahan($params);
+        // $data = $this->poTambahanModel->getKgPoTambahan($params);
+        $data = $this->totalPoTambahanModel->getKgPoTambahan($params);
+
 
         return $this->response
             ->setStatusCode(200)
