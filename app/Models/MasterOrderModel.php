@@ -623,7 +623,9 @@ class MasterOrderModel extends Model
     {
         $builder = $this->select('material.item_type, SUM(material.kgs) AS total_kebutuhan')
             ->join('material', 'material.id_order = master_order.id_order', 'left')
-            ->join('master_material', 'master_material.item_type = material.item_type', 'left');
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->where('material.item_type IS NOT NULL')
+            ->where('material.deleted_at IS NULL');
         // $builder = $this->select('master_order.no_model, master_order.buyer, master_order.foll_up, master_order.delivery_awal, master_order.delivery_akhir, material.item_type, SUM(material.kgs) AS total_kebutuhan')
         //     ->join('material', 'material.id_order = master_order.id_order', 'left')
         //     ->join('master_material', 'master_material.item_type = material.item_type', 'left');
