@@ -4699,10 +4699,10 @@ class PdfController extends BaseController
                 'Cns Out',
                 'Keterangan'
             ];
-            $widths = [13, 17, 30, 23, 23, 20, 18, 15, 15, 12, 12, 22, 14, 14, 30];
+            $widths = [15, 17, 30, 23, 23, 20, 18, 14, 15, 12, 12, 22, 14, 14, 30];
 
             foreach ($header as $i => $col) {
-                if ($i == 5) { // index ke-5 adalah Qty/Cns Pesan
+                if ($i == 5 || $i == 7) { // index ke-5 adalah Qty/Cns Pesan
                     $x = $pdf->GetX();
                     $y = $pdf->GetY();
                     $pdf->MultiCell($widths[$i], 4, $col, 1, 'C');
@@ -4719,32 +4719,47 @@ class PdfController extends BaseController
             $clusterRows = [];
 
             foreach ($rows as $row) {
-                // Kalau nama_cluster kosong/null → langsung cetak satu baris biasa
-                if (empty($row['nama_cluster'])) {
-                    // Jika sebelumnya ada blok yang pending, render dulu
+                $clusterName = $row['nama_cluster'] ?? '';
+
+                // === Kalau nama_cluster kosong/null → langsung cetak baris biasa ===
+                if ($clusterName === '') {
+                    // Kalau sebelumnya ada cluster block yang belum dicetak → cetak dulu
                     if (!empty($clusterRows)) {
-                        $this->renderClusterBlock($pdf, $clusterRows, $widths);
+                        if (count($clusterRows) === 1) {
+                            $this->renderSingleRow($pdf, $clusterRows[0], $widths);
+                        } else {
+                            $this->renderClusterBlock($pdf, $clusterRows, $widths);
+                        }
                         $clusterRows = [];
                     }
 
-                    // Cetak sebagai baris normal (tanpa merge)
+                    // Cetak single row
                     $this->renderSingleRow($pdf, $row, $widths);
                     continue;
                 }
 
-                // === Kalau nama_cluster tidak null → lanjutkan proses merge ===
-                if ($currentCluster !== '' && $currentCluster !== $row['nama_cluster']) {
-                    // Render block untuk cluster sebelumnya
-                    $this->renderClusterBlock($pdf, $clusterRows, $widths);
+                // === Kalau cluster berubah → render cluster sebelumnya dulu ===
+                if ($currentCluster !== '' && $currentCluster !== $clusterName) {
+                    if (count($clusterRows) === 1) {
+                        $this->renderSingleRow($pdf, $clusterRows[0], $widths);
+                    } else {
+                        $this->renderClusterBlock($pdf, $clusterRows, $widths);
+                    }
                     $clusterRows = [];
                 }
 
+                // Tambahkan row ke cluster saat ini
                 $clusterRows[] = $row;
-                $currentCluster = $row['nama_cluster'];
+                $currentCluster = $clusterName;
             }
-            // Render blok terakhir
+
+            // === Render blok cluster terakhir (kalau ada) ===
             if (!empty($clusterRows)) {
-                $this->renderClusterBlock($pdf, $clusterRows, $widths);
+                if (count($clusterRows) === 1) {
+                    $this->renderSingleRow($pdf, $clusterRows[0], $widths);
+                } else {
+                    $this->renderClusterBlock($pdf, $clusterRows, $widths);
+                }
             }
         }
 
@@ -4777,7 +4792,7 @@ class PdfController extends BaseController
         // simpan posisi awal X untuk memastikan konsistensi
         $pdf->SetX(10); // jika kamu punya margin kiri tertentu, sesuaikan
         foreach ($header as $i => $col) {
-            if ($i == 5) {
+            if ($i == 5 || $i == 7) {
                 $x = $pdf->GetX();
                 $y = $pdf->GetY();
                 $pdf->MultiCell($widths[$i], 4, $col, 1, 'C');
@@ -4792,92 +4807,54 @@ class PdfController extends BaseController
 
     function renderSingleRow($pdf, $row, $widths)
     {
-        $rowHeight = 6;
-        $pageLimit = 200;
+        $lineHeight = 4;
 
-        // Cek posisi Y sebelum render row
-        if ($pdf->GetY() + 10 > $pageLimit) { // +10 margin
-            $pdf->AddPage();
-            $pdf->SetFont('Arial', 'B', 9);
-            $header = [
-                'Area',
-                'No Model',
-                'Item Type',
-                'Kode Warna',
-                'Color',
-                "Qty/Cns\nPesan",
-                'Lot',
-                'No Karung',
-                'Kgs',
-                'Cns',
-                'Krg',
-                'Nama Cluster',
-                'Kgs Out',
-                'Cns Out',
-                'Keterangan'
-            ];
-            $widths = [13, 17, 30, 23, 23, 20, 18, 15, 15, 12, 12, 22, 14, 14, 30];
-
-            foreach ($header as $i => $col) {
-                if ($i == 5) { // index ke-5 adalah Qty/Cns Pesan
-                    $x = $pdf->GetX();
-                    $y = $pdf->GetY();
-                    $pdf->MultiCell($widths[$i], 4, $col, 1, 'C');
-                    $pdf->SetXY($x + $widths[$i], $y);
-                } else {
-                    $pdf->Cell($widths[$i], 8, $col, 1, 0, 'C');
-                }
-            }
-            $pdf->Ln();
-            $pdf->SetFont('Arial', '', 8);
-        }
-
+        // --- Tentukan kolom ---
         $columns = [
-            ['text' => $row['admin'],           'w' => $widths[0],  'multi' => true],
-            ['text' => $row['no_model'],        'w' => $widths[1],  'multi' => false],
-            ['text' => $row['item_type'],       'w' => $widths[2],  'multi' => true],
-            ['text' => $row['kode_warna'],      'w' => $widths[3],  'multi' => true],
-            ['text' => $row['color'],           'w' => $widths[4],  'multi' => true],
-            ['text' => $row['pesanan'],         'w' => $widths[5],  'multi' => true],
-            ['text' => $row['lot_out'],         'w' => $widths[6],  'multi' => true],
-            ['text' => $row['no_karung'],       'w' => $widths[7],  'multi' => false],
-            ['text' => $row['kgs_out'],         'w' => $widths[8],  'multi' => false],
-            ['text' => $row['cns_out'],         'w' => $widths[9],  'multi' => false],
-            ['text' => $row['krg_out'],         'w' => $widths[10], 'multi' => false],
-            ['text' => $row['nama_cluster'],    'w' => $widths[11], 'multi' => false],
-            ['text' => '',                       'w' => $widths[12], 'multi' => false],
-            ['text' => '',                       'w' => $widths[13], 'multi' => false],
-            ['text' => $row['keterangan_gbn'],  'w' => $widths[14], 'multi' => true],
+            ['text' => $row['admin'],        'w' => $widths[0],  'multi' => true],
+            ['text' => $row['no_model'],     'w' => $widths[1],  'multi' => false],
+            ['text' => $row['item_type'],    'w' => $widths[2],  'multi' => true],
+            ['text' => $row['kode_warna'],   'w' => $widths[3],  'multi' => true],
+            ['text' => $row['color'],        'w' => $widths[4],  'multi' => true],
+            ['text' => $row['pesanan'],      'w' => $widths[5],  'multi' => true],
+            ['text' => $row['lot_out'],      'w' => $widths[6],  'multi' => true],
+            ['text' => $row['no_karung'],    'w' => $widths[7],  'multi' => false],
+            ['text' => $row['kgs_out'],      'w' => $widths[8],  'multi' => false],
+            ['text' => $row['cns_out'],      'w' => $widths[9],  'multi' => false],
+            ['text' => $row['krg_out'],      'w' => $widths[10], 'multi' => false],
+            ['text' => $row['nama_cluster'], 'w' => $widths[11], 'multi' => false],
+            ['text' => '',                    'w' => $widths[12], 'multi' => false],
+            ['text' => '',                    'w' => $widths[13], 'multi' => false],
+            ['text' => $row['keterangan_gbn'], 'w' => $widths[14], 'multi' => true],
         ];
 
-        // Hitung maxHeight per row
-        $lineHeight = 4;
+        // --- Hitung tinggi row maksimal per kolom ---
         $maxHeight = 0;
         foreach ($columns as $col) {
             if ($col['multi']) {
-                $nb = ceil($pdf->GetStringWidth($col['text']) / $col['w']);
-                $height = max($nb * $lineHeight, 6);
+                $height = $this->getMultiCellHeight($pdf, $col['w'], $lineHeight, $col['text']);
             } else {
                 $height = 6;
             }
             if ($height > $maxHeight) $maxHeight = $height;
         }
 
-        // Auto page break
+        // --- Auto page break ---
         if ($pdf->GetY() + $maxHeight > $pdf->GetPageHeight() - 10) {
             $pdf->AddPage();
+            $this->renderTableHeader($pdf, $widths);
         }
 
         $xStart = $pdf->GetX();
         $yStart = $pdf->GetY();
 
-        // Border
+        // --- Draw border ---
         foreach ($columns as $col) {
             $pdf->Cell($col['w'], $maxHeight, '', 1, 0, 'C');
         }
         $pdf->Ln();
 
-        // Isi teks
+        // --- Render teks ---
         $x = $xStart;
         $y = $yStart;
         foreach ($columns as $col) {
@@ -4893,14 +4870,13 @@ class PdfController extends BaseController
         $pdf->SetXY($xStart, $yStart + $maxHeight);
     }
 
-    private function renderClusterBlock($pdf, $rows, $widths, $lineHeight = 4)
+    private function renderClusterBlock($pdf, $rows, $widths, $lineHeight = 6)
     {
         if (empty($rows)) return;
 
         $pageHeight = $pdf->GetPageHeight();
         $bottomMargin = 10;
 
-        // Hitung rowHeight masing-masing row
         $rowHeights = [];
         foreach ($rows as $r) {
             $nbLot = $this->getMultiCellHeight($pdf, $widths[6], $lineHeight, $r['lot_out']);
@@ -4908,43 +4884,91 @@ class PdfController extends BaseController
             $rowHeights[] = max($nbLot, $nbKet, 6);
         }
 
-        // Hitung total tinggi cluster
-        $mergeHeight = array_sum($rowHeights);
+        $chunk = [];
+        $chunkHeights = 0;
 
-        // 🚨 Cek dulu: apakah cluster muat di halaman sekarang?
-        if ($pdf->GetY() + $mergeHeight > $pageHeight - $bottomMargin) {
-            $pdf->AddPage();
-            $this->renderTableHeader($pdf, $widths); // header ulang
+        for ($i = 0; $i < count($rows); $i++) {
+            $rh = $rowHeights[$i];
+
+            // ✅ Kalau tinggi blok sekarang + row berikutnya melebihi halaman → render dahulu
+            if ($pdf->GetY() + $chunkHeights + $rh > $pageHeight - $bottomMargin) {
+                // render dulu yang sudah dikumpulkan
+                if (!empty($chunk)) {
+                    $this->renderClusterPartial($pdf, $chunk, $widths, $chunkHeights, $lineHeight);
+                    $chunk = [];
+                    $chunkHeights = 0;
+                }
+
+                $pdf->AddPage();
+                $this->renderTableHeader($pdf, $widths);
+            }
+
+            $chunk[] = $rows[$i];
+            $chunkHeights += $rh;
         }
 
-        // Posisi awal cluster
-        $x = $pdf->GetX();
-        $y = $pdf->GetY();
+        if (!empty($chunk)) {
+            $this->renderClusterPartial($pdf, $chunk, $widths, $chunkHeights, $lineHeight);
+        }
+    }
 
-        // --- Render kolom 0–5 merge (sekali saja) ---
-        $pdf->SetXY($x, $y);
-        $pdf->Cell($widths[0], $mergeHeight, $rows[0]['admin'], 1, 0, 'C');
-        $pdf->Cell($widths[1], $mergeHeight, $rows[0]['no_model'], 1, 0, 'C');
-        $pdf->Cell($widths[2], $mergeHeight, $rows[0]['item_type'], 1, 0, 'C');
-        $pdf->Cell($widths[3], $mergeHeight, $rows[0]['kode_warna'], 1, 0, 'C');
-        $pdf->Cell($widths[4], $mergeHeight, $rows[0]['color'], 1, 0, 'C');
-        $pdf->Cell($widths[5], $mergeHeight, $rows[0]['pesanan'], 1, 0, 'C');
+    private function renderClusterPartial($pdf, $rows, $widths, $mergeHeight, $lineHeight)
+    {
+        if (empty($rows)) return;
 
-        // --- Render kolom 6–14 per row ---
-        $xStart = $x + array_sum(array_slice($widths, 0, 6));
-        $yStart = $y;
+        $xStart = $pdf->GetX();
+        $yStart = $pdf->GetY();
 
+        // --- Render kolom merge (6 kolom) ---
+        $mergeCols = [
+            ['text' => $rows[0]['admin'] ?? '',      'w' => $widths[0]],
+            ['text' => $rows[0]['no_model'] ?? '',   'w' => $widths[1]],
+            ['text' => $rows[0]['item_type'] ?? '',  'w' => $widths[2]],
+            ['text' => $rows[0]['kode_warna'] ?? '', 'w' => $widths[3]],
+            ['text' => $rows[0]['color'] ?? '',      'w' => $widths[4]],
+            ['text' => $rows[0]['pesanan'] ?? '',    'w' => $widths[5]],
+        ];
+
+        foreach ($mergeCols as $col) {
+            $curX = $pdf->GetX();
+            $curY = $pdf->GetY();
+
+            // Border sel tinggi mergeHeight
+            $pdf->Cell($col['w'], $mergeHeight, '', 1, 0);
+
+            // Isi teks pakai MultiCell tapi di atas border
+            $pdf->SetXY($curX + 1, $curY + 1); // padding kecil
+            $pdf->MultiCell($col['w'] - 2, $lineHeight, $col['text'], 0, 'C');
+
+            // Kembali ke posisi kanan border
+            $pdf->SetXY($curX + $col['w'], $curY);
+        }
+
+        // --- Render kolom kanan per-row ---
+        $xData = $xStart + array_sum(array_slice($widths, 0, 6));
+        $yData = $yStart;
+
+        // === Render kolom kanan per-row ===
         foreach ($rows as $i => $r) {
-            $rowHeight = $rowHeights[$i];
-            $curX = $xStart;
-            $curY = $yStart;
+            $rowHeight = max(
+                $this->getMultiCellHeight($pdf, $widths[6], $lineHeight, $r['lot_out']),
+                $this->getMultiCellHeight($pdf, $widths[14], $lineHeight, $r['keterangan_gbn']),
+                6
+            );
+            // $rowHeight = $rowHeights[$i];
+            $curX = $xData;
+            $curY = $yData;
 
-            // Lot
+            // Lot_out
             $pdf->SetXY($curX, $curY);
-            $pdf->MultiCell($widths[6], $lineHeight, $r['lot_out'], 1, 'C');
+            $pdf->Cell($widths[6], $rowHeight, '', 1, 0); // border dulu
+            $lotX = $curX;
+            $lotY = $curY;
+            $pdf->SetXY($lotX, $lotY);
+            $pdf->MultiCell($widths[6], $lineHeight, $r['lot_out'], 0, 'C');
             $curX += $widths[6];
 
-            // Angka-angka
+            // Kolom angka normal
             $pdf->SetXY($curX, $curY);
             $pdf->Cell($widths[7], $rowHeight, $r['no_karung'], 1, 0, 'C');
             $curX += $widths[7];
@@ -4963,12 +4987,19 @@ class PdfController extends BaseController
 
             // Keterangan
             $pdf->SetXY($curX, $curY);
-            $pdf->MultiCell($widths[14], $lineHeight, $r['keterangan_gbn'], 1, 'L');
+            $pdf->Cell($widths[14], $rowHeight, '', 1, 0); // border dulu
+            $ketX = $curX;
+            $ketY = $curY;
+            $pdf->SetXY($ketX, $ketY);
+            $pdf->MultiCell($widths[14], $lineHeight, $r['keterangan_gbn'], 0, 'C');
 
-            // Geser pointer ke row berikut
-            $yStart += $rowHeight;
-            $pdf->SetXY($x, $yStart);
+            // Pindah ke row berikut
+            $yData += $rowHeight;
+            $pdf->SetXY($xData, $yData);
         }
+
+        // Geser pointer ke bawah blok merge
+        $pdf->SetXY($xStart, $yStart + $mergeHeight);
     }
 
     private function getMultiCellHeight($pdf, $w, $h, $txt,  $cMargin = 2)
@@ -5022,48 +5053,6 @@ class PdfController extends BaseController
 
         return $nl * $h;
     }
-
-    // function renderClusterBlock($pdf, $rows, $widths)
-    // {
-    //     $rowHeight = 6;
-    //     $blockHeight = $rowHeight * count($rows);
-
-    //     $first = $rows[0];
-
-    //     // Kolom yang di-merge (multi row)
-    //     $pdf->MultiCell($widths[0], $blockHeight, $first['admin'], 1, 'C');
-    //     $x = $pdf->GetX();
-    //     $y = $pdf->GetY() - $blockHeight;
-    //     $pdf->SetXY($x + $widths[0], $y);
-    //     $pdf->MultiCell($widths[1], $blockHeight, $first['no_model'], 1, 'C'); //multi cell
-    //     $pdf->SetXY($x + $widths[0] + $widths[1], $y);
-    //     $pdf->MultiCell($widths[2], $blockHeight, $first['item_type'], 1, 'C'); //multi cell
-    //     $pdf->SetXY($x + array_sum(array_slice($widths, 0, 3)), $y);
-    //     $pdf->MultiCell($widths[3], $blockHeight, $first['kode_warna'], 1, 'C'); //multi cell
-    //     $pdf->SetXY($x + array_sum(array_slice($widths, 0, 4)), $y);
-    //     $pdf->MultiCell($widths[4], $blockHeight, $first['color'], 1, 'C'); //multi cell
-    //     $pdf->SetXY($x + array_sum(array_slice($widths, 0, 5)), $y);
-    //     $pdf->MultiCell($widths[5], $blockHeight, $first['pesanan'], 1, 'C');
-
-    //     // Kolom lainnya per baris
-    //     $xStart = $x + array_sum(array_slice($widths, 0, 6));
-    //     $yStart = $y;
-
-    //     foreach ($rows as $row) {
-    //         $pdf->SetXY($xStart, $yStart);
-    //         $pdf->Cell($widths[6], $rowHeight, $row['lot_out'], 1, 0, 'C'); //multi cell
-    //         $pdf->Cell($widths[7], $rowHeight, $row['no_karung'], 1, 0, 'C');
-    //         $pdf->Cell($widths[8], $rowHeight, $row['kgs_out'], 1, 0, 'C');
-    //         $pdf->Cell($widths[9], $rowHeight, $row['cns_out'], 1, 0, 'C');
-    //         $pdf->Cell($widths[10], $rowHeight, $row['krg_out'], 1, 0, 'C');
-    //         $pdf->Cell($widths[11], $rowHeight, $row['nama_cluster'], 1, 0, 'C');
-    //         $pdf->Cell($widths[12], $rowHeight, '', 1, 0, 'C');
-    //         $pdf->Cell($widths[13], $rowHeight, '', 1, 0, 'C');
-    //         $pdf->Cell($widths[14], $rowHeight, $row['keterangan_gbn'], 1, 0, 'C'); //multi cell
-    //         $pdf->Ln();
-    //         $yStart += $rowHeight;
-    //     }
-    // }
 
     // PERSIAPAN BARANG KELUAR SPANDEX / KARET
     public function exportListPemesananSpdxKaretPertgl()
@@ -5172,10 +5161,10 @@ class PdfController extends BaseController
         $maxHeight = 0;
         foreach ($columns as $col) {
             if ($col['multi']) {
-                $nb = ceil($pdf->GetStringWidth($col['text']) / $col['w']); // Perkiraan jumlah baris
-                $height = max($nb * $lineHeight, 7);
+                $height = $this->getMultiCellHeight($pdf, $col['w'], $lineHeight, $col['text']);
+                if ($height < 6) $height = 6; // minimum biar gak kependekan
             } else {
-                $height = 6; // Fixed height untuk Cell biasa
+                $height = 6;
             }
             if ($height > $maxHeight) $maxHeight = $height;
         }
