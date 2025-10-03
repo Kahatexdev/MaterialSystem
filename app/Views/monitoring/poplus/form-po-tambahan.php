@@ -367,6 +367,8 @@
             const $row = $(this).closest('.kebutuhan-item');
             const modelCode = $(this).val();
             const area = $row.find('.select-area').val();
+            console.log('No Model', modelCode);
+            console.log('Area', area);
             let loading = document.getElementById('loading-spinner');
             const $ss = $row.find('.item-type').empty().append('<option value="">Pilih Kode Benang</option>').trigger('change');
             $row.find('.item-type, .kode-warna').empty().append('<option value="">Pilih Item Type</option>').trigger('change');

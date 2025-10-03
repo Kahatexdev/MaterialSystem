@@ -1664,16 +1664,12 @@ class GodController extends BaseController
         // Mengambil data dari API eksternal
         $response = @file_get_contents($apiUrl);
 
-        log_message('debug', 'API response: ' . $response);
-
         if ($response === false) {
             log_message('error', 'Gagal mengambil data dari API');
             return $this->response->setStatusCode(500)->setJSON(['error' => 'Tidak dapat mengambil data dari API']);
         }
 
         $model = json_decode($response, true);
-        log_message('info', 'material data : ' . json_encode($model));
-        // $model = $this->ApsPerstyleModel->getPerArea($area);
 
         // Grouping berdasarkan factory
         $dataGrouped = [];
@@ -1744,90 +1740,95 @@ class GodController extends BaseController
         }
 
         $styleSize = array_unique($styleSize);
+        // log_message('debug', 'STYLE SIZE LIST: ' . print_r($styleSize, true));
 
-        // Ambil SISA dan QTY PO PLUS per style_size
-        $qtyOrderList = [];
-        $sisaOrderList = [];
-        $poPlusList = [];
-        foreach ($styleSize as $style) {
-            $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getSisaPerSize/' . $noModel . '/' . $area . '/' . $style;
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getSisaPerSize/' . $area . '/' . $noModel
+            . '?styles[]=' . implode('&styles[]=', array_map('urlencode', $styleSize));
 
-            // Mengambil data dari API eksternal
-            $response = @file_get_contents($apiUrl);
+        $response = @file_get_contents($apiUrl);
 
-            log_message('debug', 'API response: ' . $response);
+        if ($response === false) {
+            log_message('error', 'Gagal mengambil data dari API');
+            return $this->response->setStatusCode(500)->setJSON(['error' => 'Tidak dapat mengambil data dari API']);
+        }
 
-            if ($response === false) {
-                log_message('error', 'Gagal mengambil data dari API');
-                return $this->response->setStatusCode(500)->setJSON(['error' => 'Tidak dapat mengambil data dari API']);
-            }
+        $sisaAll = json_decode($response, true);
+        // log_message('debug', 'SISA ALL: ' . print_r($sisaAll, true));
 
-            $sisa = json_decode($response, true);
-            $qtyPcs = is_array($sisa) ? $sisa['qty'] ?? 0 : ($sisa->qty ?? 0);
-            $qtyOrderList[$style] = (float)$qtyPcs;
-            $sisaPcs = is_array($sisa) ? $sisa['sisa'] ?? 0 : ($sisa->sisa ?? 0);
-            $sisaOrderList[$style] = (float)$sisaPcs;
-            $poPlusPcs = is_array($sisa) ? $sisa['po_plus'] ?? 0 : ($sisa->po_plus ?? 0);
-            $poPlusList[$style] = (float)$poPlusPcs;
+        // contoh akses hasil
+        foreach ($sisaAll as $style => $data) {
+            $qtyOrderList[$style] = (float)($data['qty'] ?? 0);
+            $sisaOrderList[$style] = (float)($data['sisa'] ?? 0);
+            $poPlusList[$style] = (float)($data['po_plus'] ?? 0);
         }
 
         // Ambil BS MESIN per style_size
         $bsMesinList = [];
-        foreach ($styleSize as $style) {
-            $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getBsMesin/' . $noModel . '/' . $area . '/' . $style;
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getBsMesin/' . $area . '/' . $noModel
+            . '?styles[]=' . implode('&styles[]=', array_map('urlencode', $styleSize));
+        // Mengambil data dari API eksternal
+        $response = @file_get_contents($apiUrl);
+        // log_message('debug', 'BS Mesin API response: ' . $response);
+        if ($response === false) {
+            log_message('error', 'Gagal mengambil data dari API');
+            return $this->response->setStatusCode(500)->setJSON(['error' => 'Tidak dapat mengambil data dari API']);
+        }
 
-            // Mengambil data dari API eksternal
-            $response = @file_get_contents($apiUrl);
+        $bsMesinAll = json_decode($response, true);
+        // log_message('debug', 'BS MC ALL: ' . print_r($bsMesinAll, true));
 
-            log_message('debug', 'API response: ' . $response);
-
-            if ($response === false) {
-                log_message('error', 'Gagal mengambil data dari API');
-                return $this->response->setStatusCode(500)->setJSON(['error' => 'Tidak dapat mengambil data dari API']);
-            }
-
-            $bs = json_decode($response, true);
-            $bsGram = is_array($bs) ? $bs['bs_gram'] ?? 0 : ($bs->bs_gram ?? 0);
+        // Simpan hasil per style
+        foreach ($bsMesinAll as $style => $bsGram) {
             $bsMesinList[$style] = (float)$bsGram;
         }
 
         // Ambil BS SETTING per style_size
         $bsSettingList = [];
-        foreach ($styleSize as $style) {
-            $validate = [
-                'area' => $area,
-                'style' => $style,
-                'no_model' => $noModel
-            ];
-            // $idaps = $this->ApsPerstyleModel->getIdForBs($validate);
-            $idaps = '';
-            if (!is_array($idaps) || empty($idaps)) {
-                $bsSettingList[$style] = 0;
-                continue;
-            }
-            // $bsSetting = $this->bsModel->getTotalBsSet($idaps);
-            $bsSetting = '';
-            $bsSettingList[$style] = isset($bsSetting['qty']) ? (int)$bsSetting['qty'] : 0;
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getBsSetting'
+            . '?area=' . urlencode($area)
+            . '&no_model=' . urlencode($noModel)
+            . '&styles[]=' . implode('&styles[]=', array_map('urlencode', $styleSize));
+
+        $response = @file_get_contents($apiUrl);
+
+        if ($response === false) {
+            log_message('error', 'Gagal mengambil data BS Setting dari API');
+            return $this->response->setStatusCode(500)->setJSON(['error' => 'Tidak dapat mengambil data dari API']);
         }
+
+        $bsSettingAll = json_decode($response, true);
+        // log_message('debug', 'BS Setting ALL: ' . print_r($bsSettingAll, true));
+
+        // Simpan hasil per style
+        foreach ($bsSettingAll as $style => $qty) {
+            $bsSettingList[$style] = (int)$qty;
+        }
+
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBruto'
+            . '?area=' . rawurlencode($area)
+            . '&no_model=' . rawurlencode($noModel)
+            . '&styles[]=' . implode('&styles[]=', array_map('rawurlencode', $styleSize));
+
+        $response = @file_get_contents($apiUrl);
+        log_message('debug', 'PPH API URL: ' . $apiUrl);
+
+        if ($response === false) {
+            log_message('error', 'Gagal mengambil data PPH dari API');
+            return $this->response->setStatusCode(500)->setJSON(['error' => 'Tidak dapat mengambil data dari API']);
+        }
+
+        $prodAll = json_decode($response, true);
 
         $brutoList = [];
-        foreach ($materialData as $itemType => $itemData) {
-            foreach ($itemData['kode_warna'] as $kodeWarna => $warnaData) {
-                foreach ($warnaData['style_size'] as $style) {
-                    $styleSize = $style['style_size'] ?? '';
 
-                    // ambil data produksi per style
-                    // $prod = $this->orderModel->getDataPph($area, $noModel, $styleSize);
-                    $prod = '';
-                    $prod = is_array($prod) ? $prod : [];
-                    $bruto = $prod['bruto'] ?? 0;
-
-                    $brutoList[$styleSize] = $bruto;
-                }
-            }
+        foreach ($styleSize as $st) {
+            $brutoList[$st] = isset($prodAll[$st]['bruto'])
+                ? (float)$prodAll[$st]['bruto']
+                : 0;
         }
 
-        log_message('debug', 'PPH: ' . print_r($brutoList, true));
+        // log_message('debug', 'Prod All: ' . print_r($prodAll, true));
+        log_message('debug', 'Mat Data: ' . print_r($materialData, true));
 
         return $this->response->setJSON([
             'item_types' => $itemTypes,
@@ -1836,7 +1837,7 @@ class GodController extends BaseController
             'sisa_order' => $sisaOrderList,
             'bs_mesin' => $bsMesinList,
             'bs_setting' => $bsSettingList,
-            'bruto' => $brutoList,
+            'bruto' => $prodAll,
             'plusPck' => $poPlusList,
         ]);
     }
