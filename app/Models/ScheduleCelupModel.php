@@ -216,7 +216,7 @@ class ScheduleCelupModel extends Model
         // Build query
         $builder = $this->builder()
             ->select('schedule_celup.*, schedule_celup.user_cek_status AS admin,
-                  mesin_celup.no_mesin, 
+                  mesin_celup.no_mesin, schedule_celup.admin AS admin_sch,
                   IF(schedule_celup.po_plus = "0", schedule_celup.kg_celup, 0) AS qty_celup, 
                   IF(schedule_celup.po_plus = "1", schedule_celup.kg_celup, 0) AS qty_celup_plus,
                   open_po.kg_po')

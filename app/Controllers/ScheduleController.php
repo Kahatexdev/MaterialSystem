@@ -554,6 +554,7 @@ class ScheduleController extends BaseController
                 'ket_schedule' => $scheduleData['ket_schedule'][$index] ?? null,
                 'po_plus' => $scheduleData['po_plus'][$index] ?? 0,
                 'user_cek_status' => session()->get('username'),
+                'admin' => session()->get('username'),
                 'created_at' => date('Y-m-d H:i:s'),
             ];
         }
@@ -801,7 +802,9 @@ class ScheduleController extends BaseController
                 'ket_schedule'     => $scheduleData['ket_schedule'][$i] ?? null,
                 'last_status'      => $last_status,
                 'user_cek_status'  => session()->get('username'),
+                'admin'  => session()->get('username'),
                 'created_at'       => date('Y-m-d H:i:s'),
+                'updated_at'       => date('Y-m-d H:i:s'),
             ];
 
             $i++; // Naikkan counter agar indeks scheduleData selalu berurutan
