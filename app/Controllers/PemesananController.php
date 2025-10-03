@@ -24,6 +24,7 @@ use App\Models\OtherOutModel;
 use App\Models\PemesananSpandexKaretModel;
 use App\Models\ReturModel;
 use App\Models\PoTambahanModel;
+use App\Models\TotalPoTambahanModel;
 use App\Models\HistoryStock;
 use App\Models\MasterRangePemesanan;
 use CodeIgniter\API\ResponseTrait;
@@ -54,6 +55,7 @@ class PemesananController extends BaseController
     protected $otherOutModel;
     protected $pemesananSpandexKaretModel;
     protected $poTambahanModel;
+    protected $totalPoTambahanModel;
     protected $returModel;
     protected $historyStock;
     protected $masterRangePemesanan;
@@ -78,6 +80,7 @@ class PemesananController extends BaseController
         $this->otherOutModel = new OtherOutModel();
         $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
         $this->poTambahanModel = new PoTambahanModel();
+        $this->totalPoTambahanModel = new TotalPoTambahanModel();
         $this->returModel = new ReturModel();
         $this->historyStock = new HistoryStock();
         $this->masterRangePemesanan = new MasterRangePemesanan();
@@ -2496,7 +2499,7 @@ class PemesananController extends BaseController
                         $orderQty = $this->fetchApiDataSilently($orderApiUrl);
                         $qty = (int)($orderQty['qty'] ?? 0);
 
-                        $kgPoTambahan = (float)($this->poTambahanModel->getKgPoTambahan([
+                        $kgPoTambahan = (float)($this->totalPoTambahanModel->getKgPoTambahan([
                             'no_model'   => $order['no_model'],
                             'item_type'  => $order['item_type'],
                             'kode_warna' => $order['kode_warna'],
@@ -2642,7 +2645,7 @@ class PemesananController extends BaseController
 
                 // Ambil kg po tambahan
                 $kgPoTambahan = floatval(
-                    $this->poTambahanModel->getKgPoTambahan([
+                    $this->totalPoTambahanModel->getKgPoTambahan([
                         'no_model'    => $pemesanan['no_model'],
                         'item_type'   => $pemesanan['item_type'],
                         'kode_warna'  => $pemesanan['kode_warna'],
@@ -2714,7 +2717,7 @@ class PemesananController extends BaseController
 
                 // Ambil kg po tambahan
                 $kgPoTambahan = floatval(
-                    $this->poTambahanModel->getKgPoTambahan([
+                    $this->totalPoTambahanModel->getKgPoTambahan([
                         'no_model'    => $retur['no_model'],
                         'item_type'   => $retur['item_type'],
                         'kode_warna'  => $retur['kode_warna'],

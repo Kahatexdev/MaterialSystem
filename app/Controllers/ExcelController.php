@@ -24,6 +24,7 @@ use App\Models\ReturModel;
 use App\Models\MesinCelupModel;
 use App\Models\CoveringStockModel;
 use App\Models\PoTambahanModel;
+use App\Models\TotalPoTambahanModel;
 use App\Models\HistoryStock;
 use App\Models\MasterBuyerModel;
 use App\Models\PemesananSpandexKaretModel;
@@ -67,6 +68,7 @@ class ExcelController extends BaseController
     protected $mesinCelupModel;
     protected $coveringStockModel;
     protected $poPlusModel;
+    protected $totalPoTambahanModel;
     protected $historyStock;
     protected $pemesananSpandexKaretModel;
     protected $warehouseBBModel;
@@ -95,6 +97,7 @@ class ExcelController extends BaseController
         $this->mesinCelupModel = new MesinCelupModel();
         $this->coveringStockModel = new CoveringStockModel();
         $this->poPlusModel = new PoTambahanModel();
+        $this->totalPoTambahanModel = new TotalPoTambahanModel();
         $this->historyStock = new HistoryStock();
         $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
         $this->warehouseBBModel = new WarehouseBBModel();
@@ -14158,7 +14161,7 @@ class ExcelController extends BaseController
                 $qty     = intval($qtyData['qty'] ?? 0);
 
                 $kgPoTambahan = floatval(
-                    $this->poTambahanModel->getKgPoTambahan([
+                    $this->totalPoTambahanModel->getKgPoTambahan([
                         'no_model'    => $p['no_model'],
                         'item_type'   => $p['item_type'],
                         'kode_warna'  => $p['kode_warna'],
@@ -14225,7 +14228,7 @@ class ExcelController extends BaseController
                 $qty     = intval($qtyData['qty'] ?? 0);
 
                 $kgPoTambahan = floatval(
-                    $this->poTambahanModel->getKgPoTambahan([
+                    $this->totalPoTambahanModel->getKgPoTambahan([
                         'no_model'    => $r['no_model'],
                         'item_type'   => $r['item_type'],
                         'kode_warna'  => $r['kode_warna'],

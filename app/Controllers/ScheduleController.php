@@ -1649,7 +1649,8 @@ class ScheduleController extends BaseController
                     AND open_po.item_type = schedule_celup.item_type 
                     AND open_po.kode_warna = schedule_celup.kode_warna', 'left')
             ->where('schedule_celup.id_celup !=', null)
-            ->where('schedule_celup.id_mesin !=', null);
+            ->where('schedule_celup.id_mesin !=', null)
+            ->groupBy('schedule_celup.id_celup');
 
         if (!empty($filterTglSch) && !empty($filterTglSchsampai)) {
             $builder->where('schedule_celup.tanggal_schedule >=', $filterTglSch)
