@@ -232,11 +232,10 @@
                         <button class="btn btn-filter mt-md-4" id="btnReset" type="button">
                             <i class="fas fa-redo-alt"></i> Reset
                         </button>
-                        <?php if (!empty($showExcel)) : ?>
-                            <button type="button" class="btn btn-success mt-md-4 d-none" id="btnExcel">
-                                <i class="fas fa-file-excel"></i>
-                            </button>
-                        <?php endif; ?>
+                        <button type="button" class="btn btn-success mt-md-4 d-none" id="btnExcel">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
+
                     </div>
                 </div>
             </form>

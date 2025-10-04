@@ -24,6 +24,7 @@ use App\Models\ReturModel;
 use App\Models\MesinCelupModel;
 use App\Models\CoveringStockModel;
 use App\Models\PoTambahanModel;
+use App\Models\TotalPoTambahanModel;
 use App\Models\HistoryStock;
 use App\Models\MasterBuyerModel;
 use App\Models\PemesananSpandexKaretModel;
@@ -67,6 +68,7 @@ class ExcelController extends BaseController
     protected $mesinCelupModel;
     protected $coveringStockModel;
     protected $poPlusModel;
+    protected $totalPoTambahanModel;
     protected $historyStock;
     protected $pemesananSpandexKaretModel;
     protected $warehouseBBModel;
@@ -95,6 +97,7 @@ class ExcelController extends BaseController
         $this->mesinCelupModel = new MesinCelupModel();
         $this->coveringStockModel = new CoveringStockModel();
         $this->poPlusModel = new PoTambahanModel();
+        $this->totalPoTambahanModel = new TotalPoTambahanModel();
         $this->historyStock = new HistoryStock();
         $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
         $this->warehouseBBModel = new WarehouseBBModel();
@@ -14158,7 +14161,7 @@ class ExcelController extends BaseController
                 $qty     = intval($qtyData['qty'] ?? 0);
 
                 $kgPoTambahan = floatval(
-                    $this->poTambahanModel->getKgPoTambahan([
+                    $this->totalPoTambahanModel->getKgPoTambahan([
                         'no_model'    => $p['no_model'],
                         'item_type'   => $p['item_type'],
                         'kode_warna'  => $p['kode_warna'],
@@ -14225,7 +14228,7 @@ class ExcelController extends BaseController
                 $qty     = intval($qtyData['qty'] ?? 0);
 
                 $kgPoTambahan = floatval(
-                    $this->poTambahanModel->getKgPoTambahan([
+                    $this->totalPoTambahanModel->getKgPoTambahan([
                         'no_model'    => $r['no_model'],
                         'item_type'   => $r['item_type'],
                         'kode_warna'  => $r['kode_warna'],
@@ -14514,18 +14517,18 @@ class ExcelController extends BaseController
 
         // Judul
         $sheet->setCellValue('A1', 'Report Request Schedule');
-        $sheet->mergeCells('A1:K1'); // Menggabungkan sel untuk judul
+        $sheet->mergeCells('A1:N1'); // Menggabungkan sel untuk judul
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["No", "No Mc", "No Model", "Item Type", "Lot", "Kode Warna", "Warna", "Start Mc", "Tanggal Schedule", "Last Status", "Keterangan"];
+        $header = ["No", "No Mc", "No Model", "Item Type", "Lot", "Kode Warna", "Warna", "Start Mc", "Tanggal Schedule", "Last Status", "Keterangan", "Admin", "Created_At", "Updated_at"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
-        $sheet->getStyle('A3:K3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:K3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A3:K3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3:N3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:N3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:N3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         // Data
         $row = 4;
@@ -14543,6 +14546,9 @@ class ExcelController extends BaseController
                     $item['tanggal_schedule'],
                     $item['last_status'],
                     $item['ket_schedule'],
+                    $item['admin_sch'],
+                    $item['created_at'],
+                    $item['updated_at'],
                 ]
             ], NULL, 'A' . $row);
             $row++;
@@ -14557,19 +14563,95 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle('A3:K' . ($row - 1))->applyFromArray($styleArray);
+        $sheet->getStyle('A3:N' . ($row - 1))->applyFromArray($styleArray);
 
         // Set auto width untuk setiap kolom
-        foreach (range('A', 'K') as $column) {
+        foreach (range('A', 'N') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Set isi tabel agar rata tengah
-        $sheet->getStyle('A4:K' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A4:K' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A4:N' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:N' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
         $fileName = 'Report_Request_Schedule' . date('Y-m-d') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function excelReportKebutuhanBahanBaku()
+    {
+        $jenis = $this->request->getGet('jenis');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->masterOrderModel->getFilterKebutuhanBahanBaku($jenis, $tanggalAwal, $tanggalAkhir);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Judul
+        $sheet->setCellValue('A1', 'Report Kebutuhan Bahan Baku');
+        $sheet->mergeCells('A1:C1'); // Menggabungkan sel untuk judul
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Header
+        $header = ["No", "Item Type", "Total Kebutuhan (Kg)"];
+        // $header = ["No", "No Model", "Buyer", "Foll Up", "Item Type", "Delivery Awal", "Delivery Akhir", "Total Kebutuhan (Kg)"];
+        $sheet->fromArray([$header], NULL, 'A3');
+
+        // Styling Header
+        $sheet->getStyle('A3:C3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:C3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:C3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        // Data
+        $row = 4;
+        foreach ($data as $index => $item) {
+            $sheet->fromArray([
+                [
+                    $index + 1,
+                    // $item['no_model'],
+                    // $item['buyer'],
+                    // $item['foll_up'],
+                    $item['item_type'],
+                    // $item['delivery_awal'],
+                    // $item['delivery_akhir'],
+                    number_format($item['total_kebutuhan'], 2, '.', ',')
+                ]
+            ], NULL, 'A' . $row);
+            $row++;
+        }
+
+        // Atur border untuk seluruh tabel
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle('A3:C' . ($row - 1))->applyFromArray($styleArray);
+
+        // Set auto width untuk setiap kolom
+        foreach (range('A', 'C') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set isi tabel agar rata tengah
+        $sheet->getStyle('A4:C' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:C' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Report_Total_Kebutuhan' . date('Y-m-d') . '.xlsx';
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
