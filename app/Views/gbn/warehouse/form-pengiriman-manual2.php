@@ -148,11 +148,11 @@
         <div class="card-body">
             <form id="filter-form">
                 <div class="row g-3">
-                    <div class="col-md-4">
+                    <div class="col-md-4" id="col-tgl">
                         <label for="tgl_pakai" class="form-label">Tanggal Pakai</label>
                         <input type="date" id="tgl_pakai" class="form-control" name="tgl_pakai" required>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-4" id="col-jenis">
                         <label for="jenis" class="form-label">Jenis</label>
                         <select id="jenis" class="form-control select2" name="jenis" required>
                             <option value="">-- Pilih Jenis --</option>
@@ -162,7 +162,7 @@
                             <option value="SPANDEX">SPANDEX</option>
                         </select>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-4" id="col-area">
                         <label for="area" class="form-label">Area</label>
                         <select id="area" class="form-control select2" name="area" required>
                             <option value="">-- Pilih Area --</option>
@@ -173,7 +173,18 @@
                             } ?>
                         </select>
                     </div>
+                    <!-- Checkbox Kekurangan -->
+                    <div class="col-md-1" id="kekurangan-container" style="display:none;">
+                        <label for="kekurangan" class="form-label">Kekurangan (Pengiriman Area)</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="kekurangan" name="kekurangan">
+                        </div>
+                    </div>
+                    <!-- input hidden untuk kirim default -->
+                    <input type="hidden" name="status" id="status" value="Pengeluaran Jalur">
                 </div>
+
+
                 <div class="row mt-3">
                     <div class="col-md-12">
                         <button type="button" id="btn-saveSession" class="btn btn-md bg-gradient-info w-100">
@@ -216,8 +227,11 @@
                                 <tr>
                                     <td>
                                         <input type="checkbox" name="selected[]" value="<?= esc($row['id_pengeluaran']) ?>" class="row-check">
+                                        <input type="hidden" name="statusPengeluaran[<?= $row['id_pengeluaran'] ?>]" value="<?= $row['status_pengeluaran']  ?? null ?>">
                                     </td>
-                                    <td><?= esc(isset($row['tgl_pakai']) ? $row['tgl_pakai'] : '') ?></td>
+                                    <td>
+                                        <?= esc(isset($row['tgl_pakai']) ? $row['tgl_pakai'] : '') ?>
+                                    </td>
                                     <!-- hiden kolom -->
                                     <input type="hidden" name="jenis[<?= $row['id_pengeluaran'] ?>]" value="<?= $row['jenis'] ?>">
                                     <td><?= esc(isset($row['area_out']) ? $row['area_out'] : '') ?></td>
@@ -276,8 +290,45 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
 
 <script>
+    $('#jenis').on('change', function() {
+        let val = $(this).val()?.toUpperCase(); // ambil value
+        console.log("Value sekarang:", val);
+
+        if (val === 'SPANDEX' || val === 'KARET') {
+            // tampilkan kolom kekurangan
+            $('#kekurangan-container').show();
+
+            // atur semua jadi col-md-3
+            $('#col-tgl').attr('class', 'col-md-4');
+            $('#col-jenis').attr('class', 'col-md-4');
+            $('#col-area').attr('class', 'col-md-3');
+        } else {
+            // sembunyikan kolom kekurangan
+            $('#kekurangan-container').hide();
+
+            // balikin jadi 3 kolom (4-4-4)
+            // atur semua jadi col-md-3
+            $('#col-tgl').attr('class', 'col-md-4');
+            $('#col-jenis').attr('class', 'col-md-4');
+            $('#col-area').attr('class', 'col-md-4');
+        }
+    });
+
+    const statusPengeluaran = document.getElementById('status');
+    $('#kekurangan').on('change', function() {
+        // ubah value hidden input sesuai checkbox
+        if (this.checked) {
+            statusPengeluaran.value = "Pengiriman Area";
+        } else {
+            statusPengeluaran.value = "Pengeluaran Jalur";
+        }
+    });
+</script>
+<script>
     $(function() {
-        $('.select2').select2();
+        $('.select2').select2({
+            width: '100%'
+        });
         updateTotals();
 
         // Select/Deselect semua
