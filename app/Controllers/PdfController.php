@@ -111,7 +111,7 @@ class PdfController extends BaseController
         // dd($result);
         $noModel =  $result[0]['no_model'] ?? '';
 
-        $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+        $buyerApiUrl = 'http://127.0.0.1/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
 
         $buyerName = fetchApiData($buyerApiUrl);
         // dd($buyerName);

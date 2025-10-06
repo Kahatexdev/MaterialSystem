@@ -1110,4 +1110,6 @@ $routes->group('/kantordepan', ['filter' => 'kantordepan'], function ($routes) {
     $routes->get('warehouse/reportIndri', 'WarehouseController::reportIndri');
     $routes->get('warehouse/filterReportIndri', 'WarehouseController::filterReportIndri');
     $routes->get('warehouse/exportReportIndri', 'ExcelController::exportReportIndri');
+
+    $routes->get('pengaduan', 'ApiController::getpengaduan');
 });
