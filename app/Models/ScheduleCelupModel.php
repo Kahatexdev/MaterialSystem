@@ -1176,11 +1176,13 @@ class ScheduleCelupModel extends Model
             s.po_plus,
             s.ket_schedule,
             s.no_model,
+            s.last_status,
             SUM(s.kg_celup) AS kg_per_model,
             MIN(s.id_celup) AS id_celup_per_model
         ")
             ->where('s.tanggal_schedule >=', $tglAwal)
             ->where('s.tanggal_schedule <=', $tglAkhir)
+            ->where('s.last_status', 'scheduled')
             // **penting: group by juga no_model supaya SUM jadi per model**
             ->groupBy('s.item_type, s.kode_warna, s.warna, s.tanggal_schedule, s.id_mesin, s.lot_urut, s.no_model')
             ->getCompiledSelect();
@@ -1198,6 +1200,7 @@ class ScheduleCelupModel extends Model
             s.start_mc,
             s.po_plus,
             s.ket_schedule,
+            s.last_status,
             SUM(s.kg_per_model) AS kg_celup, -- total per grup
             GROUP_CONCAT(DISTINCT s.no_model ORDER BY s.no_model SEPARATOR ', ') AS no_model,
             GROUP_CONCAT(CONCAT(s.no_model, '=', REPLACE(FORMAT(s.kg_per_model, 2), ',', '')) ORDER BY s.no_model SEPARATOR ', ') AS no_model_detail,
@@ -1206,12 +1209,13 @@ class ScheduleCelupModel extends Model
         ")
             ->where('s.tanggal_schedule >=', $tglAwal)
             ->where('s.tanggal_schedule <=', $tglAkhir)
+            ->where('s.last_status', 'scheduled')
             ->groupBy('s.item_type, s.kode_warna, s.warna, s.tanggal_schedule, s.id_mesin, s.lot_urut')
             ->getCompiledSelect();
 
         // Builder utama (sama seperti sebelumnya) — gunakan hasil sub2 sebagai schedule_celup
         $builder = $db->table("({$sub2}) AS schedule_celup")
-            ->select('schedule_celup.id_celup, schedule_celup.no_model, schedule_celup.no_model_detail, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna,  schedule_celup.kg_celup, schedule_celup.start_mc, schedule_celup.lot_urut, schedule_celup.lot_celup, schedule_celup.tanggal_schedule, schedule_celup.po_plus, schedule_celup.ket_schedule, mesin_celup.id_mesin, mesin_celup.no_mesin, mesin_celup.min_caps, mesin_celup.max_caps, master_material.jenis, MAX(COALESCE(master_order.delivery_awal, parent_master.delivery_awal)) AS delivery_awal')
+            ->select('schedule_celup.id_celup, schedule_celup.no_model, schedule_celup.no_model_detail, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna,  schedule_celup.kg_celup, schedule_celup.start_mc, schedule_celup.lot_urut, schedule_celup.lot_celup, schedule_celup.tanggal_schedule, schedule_celup.po_plus, schedule_celup.ket_schedule, mesin_celup.id_mesin, mesin_celup.no_mesin, mesin_celup.min_caps, mesin_celup.max_caps, master_material.jenis, MAX(COALESCE(master_order.delivery_awal, parent_master.delivery_awal)) AS delivery_awal, schedule_celup.last_status')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->join(
                 'open_po open_po_child',
@@ -1236,6 +1240,7 @@ class ScheduleCelupModel extends Model
             )
             ->where('schedule_celup.tanggal_schedule >=', $tglAwal)
             ->where('schedule_celup.tanggal_schedule <=', $tglAkhir)
+            ->where('schedule_celup.last_status', 'scheduled')
             ->orderBy('schedule_celup.tanggal_schedule', 'ASC')
             ->orderBy('mesin_celup.no_mesin', 'ASC');
 
