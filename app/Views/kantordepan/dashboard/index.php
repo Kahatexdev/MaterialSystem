@@ -28,35 +28,35 @@
     <?php
     $reports = [
         [
-            'key'   => 'pengaduan harian komplien',
+            'key'   => 'PO Benang',
             'title' => 'PO Benang',
             'icon'  => 'ni ni-chat-round',
             'color' => 'primary',
             'url'   => base_url($role . '/reportPo/BENANG')
         ],
         [
-            'key'   => 'pengaduan bulanan komplien',
+            'key'   => 'PO NYLON',
             'title' => 'PO NYLON',
             'icon'  => 'ni ni-time-alarm',
             'color' => 'info',
             'url'   => base_url($role . '/reportPo/NYLON')
         ],
         [
-            'key'   => 'pengeluaran kirim area timeline',
+            'key'   => 'PO SPANDEX',
             'title' => 'PO SPANDEX',
             'icon'  => 'ni ni-send',
             'color' => 'warning',
             'url'   => base_url($role . '/reportPo/SPANDEX')
         ],
         [
-            'key'   => 'stok gudang sisa stock posisi',
+            'key'   => 'PO KARET',
             'title' => 'PO KARET',
             'icon'  => 'ni ni-archive-2',
             'color' => 'dark',
             'url'   => base_url($role . '/reportPo/KARET')
         ],
         [
-            'key'   => 'retur barang kembali',
+            'key'   => 'Datang Benang',
             'title' => 'Datang Benang',
             'icon'  => 'ni ni-curved-next',
             'color' => 'danger',
@@ -70,98 +70,98 @@
             'url'   => base_url($role . '/reportDatangNylon')
         ],
         [
-            'key'   => 'retur barang kembali',
+            'key'   => 'Report Global ALL BB',
             'title' => 'Report Global ALL BB',
             'icon'  => 'ni ni-curved-next',
             'color' => 'danger',
             'url'   => base_url($role . '/reportGlobal')
         ],
         [
-            'key'   => 'kapasitas cluster covering celup',
+            'key'   => 'Report Global Nylon',
             'title' => 'Report Global Nylon',
             'icon'  => 'ni ni-chart-pie-35',
             'color' => 'info',
             'url'   => base_url($role . '/reportGlobalNylon')
         ],
         [
-            'key'   => 'model item type kode warna',
+            'key'   => 'Report Global Benang',
             'title' => 'Report Global Benang',
             'icon'  => 'ni ni-collection',
             'color' => 'success',
             'url'   => base_url($role . '/reportGlobalStockBenang')
         ],
         [
-            'key'   => 'rekap harian dashboard ringkas',
+            'key'   => 'Report Pemakaian Nylon',
             'title' => 'Report Pemakaian Nylon',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportPemakaianNylon')
         ],
         [
-            'key'   => 'rekap harian dashboard ringkas',
+            'key'   => 'Report Sisa Pakai Benang',
             'title' => 'Report Sisa Pakai Benang',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportSisaPakaiBenang')
         ],
         [
-            'key'   => 'rekap harian dashboard ringkas',
+            'key'   => 'Report Sisa Pakai Nylon',
             'title' => 'Report Sisa Pakai Nylon',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportSisaPakaiNylon')
         ],
         [
-            'key'   => 'rekap harian dashboard ringkas',
+            'key'   => 'Report Sisa Pakai Spandex',
             'title' => 'Report Sisa Pakai Spandex',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportSisaPakaiSpandex')
         ],
         [
-            'key'   => 'rekap harian dashboard ringkas',
+            'key'   => 'Report Sisa Pakai Karet',
             'title' => 'Report Sisa Pakai Karet',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportSisaPakaiKaret')
         ],
         [
-            'key'   => 'rekap harian dashboard ringkas',
+            'key'   => 'Report Sisa Datang Benang',
             'title' => 'Report Sisa Datang Benang',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportSisaDatangBenang')
         ],
         [
-            'key'   => 'rekap harian dashboard ringkas',
+            'key'   => 'Report Sisa Datang Nylon',
             'title' => 'Report Sisa Datang Nylon',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportSisaDatangNylon')
         ],
         [
-            'key'   => 'rekap harian dashboard ringkas',
+            'key'   => 'Report Sisa Datang Spandex',
             'title' => 'Report Sisa Datang Spandex',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportSisaDatangSpandex')
         ],
         [
-            'key'   => 'rekap harian dashboard ringkas',
+            'key'   => 'Report Sisa Datang Karet',
             'title' => 'Report Sisa Datang Karet',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportSisaDatangKaret')
         ],
         [
-            'key'   => 'rekap harian dashboard ringkas',
+            'key'   => 'Report Benang Mingguan',
             'title' => 'Report Benang Mingguan',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportBenangMingguan')
         ],
         [
-            'key'   => 'rekap harian dashboard ringkas',
+            'key'   => 'Report Bulanan',
             'title' => 'Report Bulanan',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
