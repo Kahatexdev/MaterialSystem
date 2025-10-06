@@ -613,7 +613,7 @@ class PengeluaranModel extends Model
             ->join('master_material mm',          'mm.item_type     = m.item_type',             'left')
             ->join('master_order mo',             'mo.id_order        = m.id_order',                'left')
             // Filter status sebelum grouping
-            ->where('p.status', 'Pengeluaran Jalur')
+            ->where('p.status', $data['status'])
             ->where('pe.tgl_pakai', $data['tgl_pakai'])
             ->where('mm.jenis', $data['jenis'])
             ->where('p.area_out', $data['area'])

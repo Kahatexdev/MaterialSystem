@@ -14517,18 +14517,18 @@ class ExcelController extends BaseController
 
         // Judul
         $sheet->setCellValue('A1', 'Report Request Schedule');
-        $sheet->mergeCells('A1:K1'); // Menggabungkan sel untuk judul
+        $sheet->mergeCells('A1:N1'); // Menggabungkan sel untuk judul
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["No", "No Mc", "No Model", "Item Type", "Lot", "Kode Warna", "Warna", "Start Mc", "Tanggal Schedule", "Last Status", "Keterangan"];
+        $header = ["No", "No Mc", "No Model", "Item Type", "Lot", "Kode Warna", "Warna", "Start Mc", "Tanggal Schedule", "Last Status", "Keterangan", "Admin", "Created_At", "Updated_at"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
-        $sheet->getStyle('A3:K3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:K3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A3:K3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3:N3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:N3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:N3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         // Data
         $row = 4;
@@ -14546,6 +14546,9 @@ class ExcelController extends BaseController
                     $item['tanggal_schedule'],
                     $item['last_status'],
                     $item['ket_schedule'],
+                    $item['admin_sch'],
+                    $item['created_at'],
+                    $item['updated_at'],
                 ]
             ], NULL, 'A' . $row);
             $row++;
@@ -14560,16 +14563,16 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle('A3:K' . ($row - 1))->applyFromArray($styleArray);
+        $sheet->getStyle('A3:N' . ($row - 1))->applyFromArray($styleArray);
 
         // Set auto width untuk setiap kolom
-        foreach (range('A', 'K') as $column) {
+        foreach (range('A', 'N') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Set isi tabel agar rata tengah
-        $sheet->getStyle('A4:K' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A4:K' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A4:N' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:N' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
         $fileName = 'Report_Request_Schedule' . date('Y-m-d') . '.xlsx';
