@@ -214,6 +214,7 @@
                                     <input type="text" class="form-control" name="keterangan" id="keterangan">
                                 </div>
                             </div>
+                            <h6 class="text-danger">* Harap lengkapi dulu inputan sebelumnya sebelum mengubah style size !! </h6>
                         </div>
                         <!-- Container untuk style size  -->
                         <div class="row populate-size-wrapper">
@@ -235,7 +236,6 @@
                 <button type="button" class="btn btn-info w-100" id="btn-save">Save</button>
                 <div class="d-none" id="populateSizeTemplate">
                     <div class="size-block mb-3 p-1 border rounded shadow-sm bg-white">
-
                         <!-- Judul Style Size -->
                         <div class="row">
                             <div class="col-12 text-center">
@@ -250,6 +250,21 @@
 
                         <!-- Form Fields -->
                         <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Composition(%)</label>
+                                    <input type="text" class="form-control composition-hidden" value="" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Gw Aktual</label>
+                                    <input type="text" class="form-control gw-hidden" value="" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Form Fields -->
+                        <div class="row">
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label>Pesanan<br>Kgs</label>
@@ -261,7 +276,7 @@
                                 <div class="form-group">
                                     <input type="hidden" class="form-control qty-order" name="items[0][qty_order]" readonly>
                                     <label>Sisa<br>Order</label>
-                                    <input type="text" class="form-control sisa-order" name="items[0][sisa_order]" readonly>
+                                    <input type="text" class="form-control sisa-order" name="items[0][sisa_order]">
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -287,7 +302,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label>(+) Pcs<br>Packing</label>
-                                    <input type="number" class="form-control plus-pck-pcs" readonly>
+                                    <input type="number" class="form-control plus-pck-pcs">
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -405,7 +420,8 @@
         // Event listener saat Item Type dipilih
         $(document).on('change', '.item-type', function() {
             const $row = $(this).closest('.kebutuhan-item');
-            const modelCode = $row.find('.select-no-model option:selected').data('no-model');
+            // const modelCode = $row.find('.select-no-model option:selected').data('no-model');
+            const modelCode = $row.find('.select-no-model').val(); // <-- Ganti ini
 
             if (!modelCode) return;
 
@@ -450,7 +466,8 @@
 
             const itemType = $row.find('.item-type').val();
             const kodeWarna = $(this).val();
-            const modelCode = $row.find('.select-no-model option:selected').data('no-model');
+            // const modelCode = $row.find('.select-no-model option:selected').data('no-model');
+            const modelCode = $row.find('.select-no-model').val();
 
             const materialData = $row.data('material');
             const qtyOrderMap = $row.data('qtyOrder') || {};
@@ -477,6 +494,11 @@
                 const composition = parseFloat(style.composition || 0);
                 const gw = parseFloat(style.gw || 0);
                 const gwAktual = parseFloat(style.gw_aktual || 0);
+                const gwFinal = gwAktual > 0 ? gwAktual : gw;
+
+                // set hidden values AWAL (important: gwFinal sudah terdefinisi)
+                $template.find('.composition-hidden').val(composition);
+                $template.find('.gw-hidden').val(gwFinal);
 
                 $template.find('.color').val(size || '');
                 const qtyOrderVal = (parseFloat(qtyOrderMap[size]) || 0);
@@ -486,9 +508,6 @@
                 $template.find('.bs-mesin').val(((bsMesinMap[size] || 0) / 1000).toFixed(2));
                 $template.find('.bs-setting').val(bsSettingMap[size] || 0);
                 $template.find('.plus-pck-pcs').val(plusPckMap[size] || 0);
-
-
-                const gwFinal = gwAktual > 0 ? gwAktual : gw;
 
                 // qty po kg (already final because itu independent dari globalLossAktual)
                 const qtyPoKg = gwFinal > 0 ?
@@ -761,6 +780,29 @@
             hitungTotalKg();
         });
 
+        // Saat user mengubah sisa-order secara manual → hitung ulang poplus-mc-kg
+        $(document).on('input', '.sisa-order', function() {
+            const $row = $(this).closest('.size-block'); // container untuk 1 size
+            const $wrapper = $row.closest('.kebutuhan-item');
+
+            const sisaOrderVal = parseFloat($(this).val()) || 0;
+            const composition = parseFloat($row.find('.composition-hidden').val()) || 0; // tambahkan input hidden jika perlu
+            const gwFinal = parseFloat($row.find('.gw-hidden').val()) || 0; // tambahkan input hidden jika perlu
+
+            // Hitung ulang base KG (tanpa loss)
+            const baseKg = gwFinal > 0 ? (sisaOrderVal * composition * gwFinal / 100 / 1000) : 0;
+
+            // Simpan ulang base ke data
+            $row.find('.poplus-mc-kg').data("baseSisaOrderKg", baseKg);
+
+            // Hitung ulang final KG dengan loss
+            const finalKg = baseKg * (1 + (globalLossAktual / 100));
+            $row.find('.poplus-mc-kg').val(finalKg.toFixed(2));
+
+            // Trigger update total
+            hitungTotalKg();
+        });
+
         // Fungsi untuk render ulang semua perhitungan
         function reRenderSemua() {
             $('.kebutuhan-item').each(function() {
@@ -803,6 +845,7 @@
             loading.classList.remove('d-none')
 
             $('.kebutuhan-item').each(function() {
+                const area = $(this).find('.select-area').val();
                 const no_model = $(this).find('.select-no-model').val();
                 const item_type = $(this).find('.item-type').val();
                 const kode_warna = $(this).find('.kode-warna').val();
@@ -821,6 +864,7 @@
                 console.log(delivery_po_plus);
                 $(this).find('.size-block').each(function() {
                     formData.push({
+                        area: area,
                         no_model: no_model,
                         item_type: item_type,
                         kode_warna: kode_warna,
@@ -837,7 +881,6 @@
                         poplus_mc_kg: $(this).find('.poplus-mc-kg').val(),
                         plus_pck_pcs: $(this).find('.plus-pck-pcs').val(),
                         plus_pck_kg: $(this).find('.plus-pck-kg').val(),
-                        // lebih_pakai_kg: $(this).find('.lebih-pakai').val(),
                         total_kg_po: total_kg_po,
                         total_cns_po: total_cns_po,
                         delivery_po_plus: delivery_po_plus,
@@ -851,7 +894,7 @@
             console.log(formData); // Debug sebelum submit
 
             $.ajax({
-                url: base + role + '/savePoTambahan/' + area,
+                url: base + role + '/savePoTambahan',
                 method: 'POST',
                 data: JSON.stringify(formData),
                 contentType: 'application/json',

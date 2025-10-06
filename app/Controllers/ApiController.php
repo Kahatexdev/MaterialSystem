@@ -1112,8 +1112,8 @@ class ApiController extends ResourceController
                 ->where('DATE(po_tambahan.created_at)', $today)
                 ->first();
 
-            log_message('info', 'Sample data: ' . print_r($sample, true));
-            log_message('info', 'Exist data: ' . print_r($exist, true));
+            // log_message('info', 'Sample data: ' . print_r($sample, true));
+            // log_message('info', 'Exist data: ' . print_r($exist, true));
 
             // --- hitung total dari semua items ---
             // $ttl = [

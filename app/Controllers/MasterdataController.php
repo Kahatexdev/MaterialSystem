@@ -475,7 +475,7 @@ class MasterdataController extends BaseController
             // Iterasi baris data material (misalnya mulai dari baris 15)
             foreach ($sheet->getRowIterator(2) as $row) {
                 $rowIndex  = $row->getRowIndex();
-                if ($rowIndex < 15) {
+                if ($rowIndex < 14) {
                     continue;
                 }
 

@@ -22,6 +22,9 @@ use App\Models\OtherBonModel;
 use App\Models\PemesananModel;
 use App\Models\TotalPemesananModel;
 use App\Models\PengeluaranModel;
+use App\Models\PoTambahanModel;
+use App\Models\TotalPoTambahanModel;
+
 
 
 
@@ -44,6 +47,8 @@ class GodController extends BaseController
     protected $pemesananModel;
     protected $totalPemesananModel;
     protected $pengeluaranModel;
+    protected $poTambahanModel;
+    protected $totalPoTambahanModel;
 
 
     public function __construct()
@@ -62,6 +67,8 @@ class GodController extends BaseController
         $this->pemesananModel = new PemesananModel();
         $this->totalPemesananModel = new TotalPemesananModel();
         $this->pengeluaranModel = new PengeluaranModel();
+        $this->poTambahanModel = new PoTambahanModel();
+        $this->totalPoTambahanModel = new TotalPoTambahanModel();
         $this->request = \Config\Services::request();
 
         $this->role = session()->get('role');
@@ -1810,7 +1817,7 @@ class GodController extends BaseController
             . '&styles[]=' . implode('&styles[]=', array_map('rawurlencode', $styleSize));
 
         $response = @file_get_contents($apiUrl);
-        log_message('debug', 'PPH API URL: ' . $apiUrl);
+        // log_message('debug', 'PPH API URL: ' . $apiUrl);
 
         if ($response === false) {
             log_message('error', 'Gagal mengambil data PPH dari API');
@@ -1828,7 +1835,7 @@ class GodController extends BaseController
         }
 
         // log_message('debug', 'Prod All: ' . print_r($prodAll, true));
-        log_message('debug', 'Mat Data: ' . print_r($materialData, true));
+        // log_message('debug', 'Mat Data: ' . print_r($materialData, true));
 
         return $this->response->setJSON([
             'item_types' => $itemTypes,
@@ -1840,5 +1847,162 @@ class GodController extends BaseController
             'bruto' => $prodAll,
             'plusPck' => $poPlusList,
         ]);
+    }
+
+    public function savePoTambahan()
+    {
+        try {
+            $req = $this->request->getJSON(true);
+            if (empty($req) || !isset($req[0])) {
+                return $this->response
+                    ->setStatusCode(400)
+                    ->setJSON(['status' => 'error', 'message' => 'Payload invalid.']);
+            }
+
+            // --- Siapkan items sesuai permintaan ---
+            $items = array_map(function ($item) {
+                return [
+                    'area'              => $item['area'] ?? '',
+                    'no_model'          => $item['no_model'] ?? '',
+                    'item_type'         => $item['item_type'] ?? '',
+                    'kode_warna'        => $item['kode_warna'] ?? '',
+                    'color'             => $item['color'] ?? '',
+                    'style_size'        => $item['style_size'] ?? '',
+                    'ttl_terima_kg'     => (float) ($item['terima_kg'] ?? 0),
+                    'ttl_sisa_jatah'    => (float) ($item['sisa_jatah'] ?? 0),
+                    'ttl_sisa_bb_dimc'  => (float) ($item['sisa_bb_mc'] ?? 0),
+                    'sisa_order_pcs'    => (float) ($item['sisa_order_pcs'] ?? 0),
+                    'bs_mesin_kg'       => (float) ($item['bs_mesin_kg'] ?? 0),
+                    'bs_st_pcs'         => (float) ($item['bs_st_pcs'] ?? 0),
+                    'poplus_mc_kg'      => (float) ($item['poplus_mc_kg'] ?? 0),
+                    'poplus_mc_cns'     => (float) ($item['poplus_mc_cns'] ?? 0),
+                    'plus_pck_pcs'      => (float) ($item['plus_pck_pcs'] ?? 0),
+                    'plus_pck_kg'       => (float) ($item['plus_pck_kg'] ?? 0),
+                    'plus_pck_cns'      => (float) ($item['plus_pck_cns'] ?? 0),
+                    'ttl_tambahan_kg'   => (float) ($item['total_kg_po'] ?? 0),
+                    'ttl_tambahan_cns'  => (float) ($item['total_cns_po'] ?? 0),
+                    'delivery_po_plus'  => $item['delivery_po_plus'] ?? '',
+                    'keterangan'        => $item['keterangan'] ?? '',
+                    'loss_aktual'       => (float) ($item['loss_aktual'] ?? 0),
+                    'loss_tambahan'     => (float) ($item['loss_tambahan'] ?? 0),
+                    'admin'             => $item['area'] ?? '',
+                    'created_at'        => date('Y-m-d H:i:s'),
+                ];
+            }, $req);
+
+            if (empty($items)) {
+                return $this->response
+                    ->setStatusCode(400)
+                    ->setJSON(['status' => 'error', 'message' => 'Items tidak ditemukan.']);
+            }
+
+            $sukses = 0;
+            $gagal  = 0;
+            $today  = date('Y-m-d');
+
+            // ambil sample dari item pertama (karena kombinasi no_model, item_type, kode_warna sama)
+            $sample = $items[0];
+
+            // --- cek apakah total_potambahan sudah ada ---
+            $exist = $this->poTambahanModel
+                ->select('po_tambahan.id_total_potambahan')
+                ->join('material m', 'm.id_material = po_tambahan.id_material')
+                ->join('master_order mo', 'mo.id_order = m.id_order')
+                ->where('mo.no_model', $sample['no_model'])
+                ->where('m.item_type', $sample['item_type'])
+                ->where('m.kode_warna', $sample['kode_warna'])
+                ->where('DATE(po_tambahan.created_at)', $today)
+                ->first();
+
+            // log_message('info', 'Sample data: ' . print_r($sample, true));
+            // log_message('info', 'Exist data: ' . print_r($exist, true));
+
+            if ($exist && $exist['id_total_potambahan']) {
+                // --- update total yang sudah ada ---
+                $idTotal = $exist['id_total_potambahan'];
+                $ttlData = $this->totalPoTambahanModel->find($idTotal);
+
+                $this->totalPoTambahanModel->update($idTotal, [
+                    'ttl_terima_kg'    => ($sample['ttl_terima_kg'] ?? 0),
+                    'ttl_sisa_jatah'   => ($sample['ttl_sisa_jatah'] ?? 0),
+                    'ttl_sisa_bb_dimc' => ($ttlData['ttl_sisa_bb_dimc'] ?? 0) + ($sample['ttl_sisa_bb_dimc'] ?? 0),
+                    'ttl_tambahan_kg'  => ($ttlData['ttl_tambahan_kg'] ?? 0) + ($sample['ttl_tambahan_kg'] ?? 0),
+                    'ttl_tambahan_cns' => ($ttlData['ttl_tambahan_cns'] ?? 0) + ($sample['ttl_tambahan_cns'] ?? 0),
+                ]);
+            } else {
+                // --- insert total baru ---
+                // --- Insert total_potambahan baru ---
+                $dataTotal = [
+                    'ttl_terima_kg'    => $sample['ttl_terima_kg'] ?? 0,
+                    'ttl_sisa_jatah'   => $sample['ttl_sisa_jatah'] ?? 0,
+                    'ttl_sisa_bb_dimc' => $sample['ttl_sisa_bb_dimc'] ?? 0,
+                    'ttl_tambahan_kg'  => $sample['ttl_tambahan_kg'] ?? 0,
+                    'ttl_tambahan_cns' => $sample['ttl_tambahan_cns'] ?? 0,
+                    'loss_aktual'      => $sample['loss_aktual'] ?? 0,
+                    'loss_tambahan'    => $sample['loss_tambahan'] ?? 0,
+                    'keterangan'       => $sample['keterangan'] ?? '',
+                    'created_at'       => date('Y-m-d H:i:s'),
+                ];
+
+                $this->totalPoTambahanModel->insert($dataTotal);
+                $idTotal = $this->totalPoTambahanModel->getInsertID();
+            }
+
+            // --- loop kedua: insert detail ---
+            foreach ($items as $item) {
+                $idMat = $this->materialModel->getIdMaterial([
+                    'no_model'   => $item['no_model'],
+                    'area'       => $item['area'],
+                    'item_type'  => $item['item_type'],
+                    'kode_warna' => $item['kode_warna'],
+                    'style_size' => $item['style_size'],
+                ]);
+
+                if (empty($idMat)) {
+                    $gagal++;
+                    continue;
+                }
+
+                $dataDetail = [
+                    'id_material'         => $idMat,
+                    'id_total_potambahan' => $idTotal,
+                    'sisa_order_pcs'      => $item['sisa_order_pcs'] ?? 0,
+                    'bs_mesin_kg'         => $item['bs_mesin_kg'] ?? 0,
+                    'bs_st_pcs'           => $item['bs_st_pcs'] ?? 0,
+                    'poplus_mc_kg'        => $item['poplus_mc_kg'] ?? 0,
+                    'poplus_mc_cns'       => $item['poplus_mc_cns'] ?? 0,
+                    'plus_pck_pcs'        => $item['plus_pck_pcs'] ?? 0,
+                    'plus_pck_kg'         => $item['plus_pck_kg'] ?? 0,
+                    'plus_pck_cns'        => $item['plus_pck_cns'] ?? 0,
+                    // 'lebih_pakai_kg'      => $item['lebih_pakai_kg'] ?? 0,
+                    'delivery_po_plus'    => $item['delivery_po_plus'] ?? '',
+                    'admin'               => $item['area'] ?? '',
+                    'created_at'          => date('Y-m-d H:i:s'),
+                ];
+
+                if ($this->poTambahanModel->insert($dataDetail)) {
+                    $sukses++;
+                } else {
+                    $gagal++;
+                }
+            }
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'sukses'  => $sukses,
+                'gagal'   => $gagal,
+                'message' => "Sukses insert: $sukses, Gagal insert: $gagal",
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error in savePoTambahan: ' . $e);
+            return $this->response
+                ->setStatusCode(500)
+                ->setJSON([
+                    'status'  => 'failed',
+                    'sukses'  => 0,
+                    'gagal'   => 1,
+                    'message' => "Gagal insert: " . $e->getMessage(),
+                ]);
+        }
     }
 }
