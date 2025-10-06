@@ -4,16 +4,19 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
+use App\Models\MasterMaterialModel;
 
 class DashboardKantorController extends BaseController
 {
     protected $role;
     protected $active;
     protected $filters;
+    protected $masterMaterialModel;
 
     public function __construct()
     {
         // $this->scheduleCelupModel = new ScheduleCelupModel();
+        $this->masterMaterialModel = new MasterMaterialModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -31,11 +34,13 @@ class DashboardKantorController extends BaseController
 
     public function index()
     {
-
+        // $jenis = $this->masterMaterialModel->getJenisBahanBaku();
+        // dd($jenis);
         $data = [
             'active' => $this->active,
             'title' => 'Report',
-            'role' => $this->role
+            'role' => $this->role,
+            // 'jenis' => $jenis,
         ];
         return view($this->role . '/dashboard/index', $data);
     }

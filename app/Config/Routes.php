@@ -1026,6 +1026,7 @@ $routes->group(
     }
 );
 
-$routes->group('/kantordepan',['filter' => 'kantordepan'],function ($routes) {
+$routes->group('/kantordepan', ['filter' => 'kantordepan'], function ($routes) {
     $routes->get('Report', 'DashboardKantorController::index');
+    $routes->get('reportPo/(:any)', 'WarehouseController::reportPoBenang/$1');
 });

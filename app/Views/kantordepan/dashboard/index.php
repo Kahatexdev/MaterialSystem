@@ -33,7 +33,7 @@
             'desc'  => 'Ringkasan pengaduan harian dengan status dan SLA respon',
             'icon'  => 'ni ni-chat-round',
             'color' => 'primary',
-            'url'   => base_url('pengaduan/report/harian')
+            'url'   => base_url($role . '/reportPo/BENANG')
         ],
         [
             'key'   => 'pengaduan bulanan komplien',
@@ -41,7 +41,7 @@
             'desc'  => 'Tren bulanan per bagian dan kategori',
             'icon'  => 'ni ni-time-alarm',
             'color' => 'info',
-            'url'   => base_url('pengaduan/report/bulanan')
+            'url'   => base_url($role . '/reportPo/NYLON')
         ],
         [
             'key'   => 'pengeluaran kirim area timeline',
@@ -49,7 +49,7 @@
             'desc'  => 'Rekap pengiriman per area dan timeline',
             'icon'  => 'ni ni-send',
             'color' => 'warning',
-            'url'   => base_url('report/pengeluaran')
+            'url'   => base_url($role . '/reportPo/SPANDEX')
         ],
         [
             'key'   => 'stok gudang sisa stock posisi',
@@ -57,7 +57,7 @@
             'desc'  => 'Stok by item, warna, cluster, dan aging',
             'icon'  => 'ni ni-archive-2',
             'color' => 'dark',
-            'url'   => base_url('report/stock')
+            'url'   => base_url($role . '/reportPo/KARET')
         ],
         [
             'key'   => 'retur barang kembali',
