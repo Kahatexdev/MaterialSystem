@@ -1025,3 +1025,7 @@ $routes->group(
         $routes->get('getMasterRangePemesanan', 'ApiController::getMasterRangePemesanan');
     }
 );
+
+$routes->group('/kantordepan',['filter' => 'kantordepan'],function ($routes) {
+    $routes->get('Report', 'DashboardKantorController::index');
+});

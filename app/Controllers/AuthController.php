@@ -43,7 +43,9 @@ class AuthController extends BaseController
             case 'area':
                 return redirect()->to(base_url('/area'));
                 break;
-
+            case 'kantordepan':
+                return redirect()->to(base_url('/kantordepan/Report'));
+                break;
             default:
                 return redirect()->to(base_url('/login'))->withInput()->with('error', 'Invalid username or password');
                 break;
