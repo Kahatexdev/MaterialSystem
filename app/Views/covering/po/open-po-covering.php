@@ -168,18 +168,25 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-6 mt-2">
+                    <div class="col-md-4 mt-2">
                         <div class="form-group">
                             <label>Tanggal PO (Gudang Benang)</label>
                             <input type="date" class="form-control" name="tgl_po" id="tgl_po" value="" required>
                         </div>
                     </div>
-                    <div class="col-md-6 mt-2">
+                    <div class="col-md-4 mt-2">
                         <div class="form-group">
                             <label>Tanggal PO (Covering)</label>
                             <input type="date" class="form-control" name="tgl_po_covering" id="tgl_po_covering" value="" required>
                         </div>
                     </div>
+                    <div class="col-md-4 mt-2">
+                        <div class="form-check d-flex flex-column">
+                            <label class="mb-1">Po Booking</label>
+                            <input type="checkbox" class="form-check-input" id="po_booking" name="po_booking">
+                        </div>
+                    </div>
+
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="form-check">
@@ -244,6 +251,7 @@
         const selectedCountEl = document.getElementById('selectedCount');
         const btnExpandAll = document.getElementById('btnExpandAll');
         const btnCollapseAll = document.getElementById('btnCollapseAll');
+        const poBooking = document.getElementById('po_booking');
 
         function toast(msg, icon = 'success') {
             if (!window.Swal) return;
@@ -443,9 +451,11 @@
         btnExpandAll.addEventListener('click', () => toggleAll(true));
         btnCollapseAll.addEventListener('click', () => toggleAll(false));
 
-        // Fetch & render by tanggal (card default collapse)
-        tglPoEl.addEventListener('change', function() {
-            const tglPo = this.value;
+        function loadPoData() {
+            const tglPo = tglPoEl.value;
+            if (!tglPo) return;
+
+            const isBooking = poBooking.checked ? 1 : 0;
 
             fetch("<?= base_url($role . '/po/getDetailByTglPO') ?>", {
                     method: 'POST',
@@ -453,7 +463,8 @@
                         'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: 'tgl_po=' + encodeURIComponent(tglPo)
+                    body: 'tgl_po=' + encodeURIComponent(tglPo) +
+                        '&po_booking=' + encodeURIComponent(isBooking)
                 })
                 .then(r => r.json())
                 .then(data => {
@@ -471,7 +482,6 @@
                             frag.appendChild(wrap.firstElementChild);
                         });
                         container.appendChild(frag);
-                        // semua tetap collapsed secara default
                     } else {
                         container.innerHTML = `<div class="col-12 text-center text-muted">Tidak ada detail PO untuk tanggal ini.</div>`;
                     }
@@ -479,7 +489,51 @@
                 .catch(() => {
                     container.innerHTML = `<div class="col-12 text-center text-danger">Gagal memuat data.</div>`;
                 });
-        });
+        }
+        // trigger fetch saat pilih tanggal
+        tglPoEl.addEventListener('change', loadPoData);
+
+        // trigger fetch saat toggle booking (tapi hanya kalau tanggal sudah dipilih)
+        poBooking.addEventListener('change', loadPoData);
+
+        // Fetch & render by tanggal (card default collapse)
+        // tglPoEl.addEventListener('change', function() {
+        //     const tglPo = this.value;
+        //     const isBooking = poBooking.checked ? 1 : 0;
+
+        //     fetch("<?= base_url($role . '/po/getDetailByTglPO') ?>", {
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/x-www-form-urlencoded',
+        //                 'X-Requested-With': 'XMLHttpRequest'
+        //             },
+        //             body: 'tgl_po=' + encodeURIComponent(tglPo) + '&po_booking=' + encodeURIComponent(isBooking)
+        //         })
+        //         .then(r => r.json())
+        //         .then(data => {
+        //             container.innerHTML = '';
+        //             selectAllEl.checked = false;
+        //             selectAllEl.indeterminate = false;
+        //             btnDeleteSelected.disabled = true;
+        //             selectedCountEl.textContent = '0';
+
+        //             if (Array.isArray(data) && data.length) {
+        //                 const frag = document.createDocumentFragment();
+        //                 data.forEach((item, index) => {
+        //                     const wrap = document.createElement('div');
+        //                     wrap.innerHTML = buildCard(item, index);
+        //                     frag.appendChild(wrap.firstElementChild);
+        //                 });
+        //                 container.appendChild(frag);
+        //                 // semua tetap collapsed secara default
+        //             } else {
+        //                 container.innerHTML = `<div class="col-12 text-center text-muted">Tidak ada detail PO untuk tanggal ini.</div>`;
+        //             }
+        //         })
+        //         .catch(() => {
+        //             container.innerHTML = `<div class="col-12 text-center text-danger">Gagal memuat data.</div>`;
+        //         });
+        // });
     })();
 </script>
 

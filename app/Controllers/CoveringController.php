@@ -692,7 +692,9 @@ class CoveringController extends BaseController
     public function getDetailByTglPO()
     {
         $tgl_po = $this->request->getPost('tgl_po');
-        $data = $this->openPoModel->getPODetailCovering($tgl_po);
+        $filterBooking = $this->request->getPost('po_booking') == 1 ? true : false;
+        $data = $this->openPoModel->getPODetailCovering($tgl_po, $filterBooking);
+
         return $this->response->setJSON($data);
     }
 
@@ -700,6 +702,7 @@ class CoveringController extends BaseController
     {
         $data = $this->request->getPost();
         // dd($data);
+
         if (isset($data['detail']) && is_array($data['detail'])) {
             foreach ($data['detail'] as $row) {
                 $this->openPoModel->save([
@@ -713,11 +716,25 @@ class CoveringController extends BaseController
                     'jenis_produksi'  => $data['jenis_produksi'] ?? null,
                     'ket_celup'       => $data['ket_celup'] ?? null,
                     'po_plus'         => $data['po_plus'] ?? null,
+                    'po_booking'      => isset($data['po_booking']) ? 1 : 0,
                     'penerima'        => 'Retno',
                     'penanggung_jawab' => 'Paryanti',
                     'admin'           => session()->get('username') ?? '',
                     'created_at'      => $data['tgl_po_covering'] ?? null
                 ]);
+
+                $idPoGbn = $this->openPoModel->getInsertID();
+
+                if (!empty($data['po_booking'])) {
+                    $this->trackingPoCoveringModel->insert([
+                        'id_po_gbn'  => $idPoGbn,
+                        'status'     => '',
+                        'keterangan' => $data['ket_celup'] ?? '',
+                        'admin'      => session()->get('username'),
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                }
             }
         }
 
