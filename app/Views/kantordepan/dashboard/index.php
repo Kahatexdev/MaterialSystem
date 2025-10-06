@@ -30,7 +30,6 @@
         [
             'key'   => 'pengaduan harian komplien',
             'title' => 'PO Benang',
-            'desc'  => 'Ringkasan pengaduan harian dengan status dan SLA respon',
             'icon'  => 'ni ni-chat-round',
             'color' => 'primary',
             'url'   => base_url($role . '/reportPo/BENANG')
@@ -38,7 +37,6 @@
         [
             'key'   => 'pengaduan bulanan komplien',
             'title' => 'PO NYLON',
-            'desc'  => 'Tren bulanan per bagian dan kategori',
             'icon'  => 'ni ni-time-alarm',
             'color' => 'info',
             'url'   => base_url($role . '/reportPo/NYLON')
@@ -46,7 +44,6 @@
         [
             'key'   => 'pengeluaran kirim area timeline',
             'title' => 'PO SPANDEX',
-            'desc'  => 'Rekap pengiriman per area dan timeline',
             'icon'  => 'ni ni-send',
             'color' => 'warning',
             'url'   => base_url($role . '/reportPo/SPANDEX')
@@ -54,7 +51,6 @@
         [
             'key'   => 'stok gudang sisa stock posisi',
             'title' => 'PO KARET',
-            'desc'  => 'Stok by item, warna, cluster, dan aging',
             'icon'  => 'ni ni-archive-2',
             'color' => 'dark',
             'url'   => base_url($role . '/reportPo/KARET')
@@ -62,7 +58,6 @@
         [
             'key'   => 'retur barang kembali',
             'title' => 'Datang Benang',
-            'desc'  => 'Detail retur dengan kategori dan tindak lanjut',
             'icon'  => 'ni ni-curved-next',
             'color' => 'danger',
             'url'   => base_url($role . '/reportDatangBenang')
@@ -70,7 +65,6 @@
         [
             'key'   => 'po gabungan nylon pck spandex',
             'title' => 'Datang Nylon',
-            'desc'  => 'Ringkasan PO per model dan periode',
             'icon'  => 'ni ni-bag-17',
             'color' => 'primary',
             'url'   => base_url($role . '/reportDatangNylon')
@@ -78,7 +72,6 @@
         [
             'key'   => 'retur barang kembali',
             'title' => 'Report Global ALL BB',
-            'desc'  => 'Detail retur dengan kategori dan tindak lanjut',
             'icon'  => 'ni ni-curved-next',
             'color' => 'danger',
             'url'   => base_url($role . '/reportGlobal')
@@ -86,7 +79,6 @@
         [
             'key'   => 'kapasitas cluster covering celup',
             'title' => 'Report Global Nylon',
-            'desc'  => 'Utilisasi dan bottleneck per cluster',
             'icon'  => 'ni ni-chart-pie-35',
             'color' => 'info',
             'url'   => base_url($role . '/reportGlobalNylon')
@@ -94,7 +86,6 @@
         [
             'key'   => 'model item type kode warna',
             'title' => 'Report Global Benang',
-            'desc'  => 'Semua aktivitas terintegrasi per model',
             'icon'  => 'ni ni-collection',
             'color' => 'success',
             'url'   => base_url($role . '/reportGlobalStockBenang')
@@ -102,7 +93,6 @@
         [
             'key'   => 'rekap harian dashboard ringkas',
             'title' => 'Report Pemakaian Nylon',
-            'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportPemakaianNylon')
@@ -110,7 +100,6 @@
         [
             'key'   => 'rekap harian dashboard ringkas',
             'title' => 'Report Sisa Pakai Benang',
-            'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportSisaPakaiBenang')
@@ -118,7 +107,6 @@
         [
             'key'   => 'rekap harian dashboard ringkas',
             'title' => 'Report Sisa Pakai Nylon',
-            'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportSisaPakaiNylon')
@@ -126,7 +114,6 @@
         [
             'key'   => 'rekap harian dashboard ringkas',
             'title' => 'Report Sisa Pakai Spandex',
-            'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportSisaPakaiSpandex')
@@ -134,7 +121,6 @@
         [
             'key'   => 'rekap harian dashboard ringkas',
             'title' => 'Report Sisa Pakai Karet',
-            'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportSisaPakaiKaret')
@@ -142,7 +128,6 @@
         [
             'key'   => 'rekap harian dashboard ringkas',
             'title' => 'Report Sisa Datang Benang',
-            'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportSisaDatangBenang')
@@ -150,7 +135,6 @@
         [
             'key'   => 'rekap harian dashboard ringkas',
             'title' => 'Report Sisa Datang Nylon',
-            'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportSisaDatangNylon')
@@ -158,7 +142,6 @@
         [
             'key'   => 'rekap harian dashboard ringkas',
             'title' => 'Report Sisa Datang Spandex',
-            'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportSisaDatangSpandex')
@@ -166,7 +149,6 @@
         [
             'key'   => 'rekap harian dashboard ringkas',
             'title' => 'Report Sisa Datang Karet',
-            'desc'  => 'Snapshot harian lintas karet',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportSisaDatangKaret')
@@ -174,7 +156,6 @@
         [
             'key'   => 'rekap harian dashboard ringkas',
             'title' => 'Report Benang Mingguan',
-            'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportBenangMingguan')
@@ -182,7 +163,6 @@
         [
             'key'   => 'rekap harian dashboard ringkas',
             'title' => 'Report Bulanan',
-            'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
             'url'   => base_url($role . '/reportBenangBulanan')
@@ -199,7 +179,7 @@
                         <i class="<?= esc($r['icon']) ?>"></i>
                     </div>
                     <h6 class="report-title"><?= esc($r['title']) ?></h6>
-                    <p class="report-desc"><?= esc($r['desc']) ?></p>
+
                     <a href="<?= esc($r['url']) ?>" class="report-link">
                         Lihat Laporan
                         <i class="ni ni-bold-right ms-1"></i>
