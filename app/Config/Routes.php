@@ -842,6 +842,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('poplus/exportPoTambahan', 'ExcelController::exportPoTambahan');
     $routes->get('poplus/form_potambahan', 'GodController::formPoTambahan');
     $routes->get('poTambahanDetail/(:any)/(:any)', 'GodController::poTambahanDetail/$1/$2');
+    $routes->post('savePoTambahan', 'GodController::savePoTambahan');
 
     // $routes->get('pph', 'PphController::index');
     $routes->get('pph', 'PphController::tampilPerModel');
@@ -1024,3 +1025,7 @@ $routes->group(
         $routes->get('getMasterRangePemesanan', 'ApiController::getMasterRangePemesanan');
     }
 );
+
+$routes->group('/kantordepan',['filter' => 'kantordepan'],function ($routes) {
+    $routes->get('Report', 'DashboardKantorController::index');
+});

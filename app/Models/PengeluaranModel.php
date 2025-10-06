@@ -633,7 +633,8 @@ class PengeluaranModel extends Model
             // ->orWhere('m.kode_warna', $data['kode_warna'])
             // ->groupEnd()
             // Group by id_pengeluaran untuk distinct
-            ->groupBy('p.id_pengeluaran');
+            ->groupBy('p.id_pengeluaran')
+            ->orderBy('mo.no_model');
 
         return $builder
             ->get()
