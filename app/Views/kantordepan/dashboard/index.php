@@ -65,7 +65,7 @@
             'desc'  => 'Detail retur dengan kategori dan tindak lanjut',
             'icon'  => 'ni ni-curved-next',
             'color' => 'danger',
-            'url'   => base_url('report/retur')
+            'url'   => base_url($role . '/reportDatangBenang')
         ],
         [
             'key'   => 'po gabungan nylon pck spandex',
@@ -73,7 +73,15 @@
             'desc'  => 'Ringkasan PO per model dan periode',
             'icon'  => 'ni ni-bag-17',
             'color' => 'primary',
-            'url'   => base_url('report/po-gabungan')
+            'url'   => base_url($role . '/reportDatangNylon')
+        ],
+        [
+            'key'   => 'retur barang kembali',
+            'title' => 'Report Global ALL BB',
+            'desc'  => 'Detail retur dengan kategori dan tindak lanjut',
+            'icon'  => 'ni ni-curved-next',
+            'color' => 'danger',
+            'url'   => base_url($role . '/reportGlobal')
         ],
         [
             'key'   => 'kapasitas cluster covering celup',
@@ -81,7 +89,7 @@
             'desc'  => 'Utilisasi dan bottleneck per cluster',
             'icon'  => 'ni ni-chart-pie-35',
             'color' => 'info',
-            'url'   => base_url('report/kapasitas-cluster')
+            'url'   => base_url($role . '/reportGlobalNylon')
         ],
         [
             'key'   => 'model item type kode warna',
@@ -89,7 +97,7 @@
             'desc'  => 'Semua aktivitas terintegrasi per model',
             'icon'  => 'ni ni-collection',
             'color' => 'success',
-            'url'   => base_url('report/by-model')
+            'url'   => base_url($role . '/reportGlobalStockBenang')
         ],
         [
             'key'   => 'rekap harian dashboard ringkas',
@@ -97,7 +105,7 @@
             'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
-            'url'   => base_url('report/rekap-harian')
+            'url'   => base_url($role . '/reportPemakaianNylon')
         ],
         [
             'key'   => 'rekap harian dashboard ringkas',
@@ -105,7 +113,7 @@
             'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
-            'url'   => base_url('report/rekap-harian')
+            'url'   => base_url($role . '/reportSisaPakaiBenang')
         ],
         [
             'key'   => 'rekap harian dashboard ringkas',
@@ -113,7 +121,7 @@
             'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
-            'url'   => base_url('report/rekap-harian')
+            'url'   => base_url($role . '/reportSisaPakaiNylon')
         ],
         [
             'key'   => 'rekap harian dashboard ringkas',
@@ -121,7 +129,7 @@
             'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
-            'url'   => base_url('report/rekap-harian')
+            'url'   => base_url($role . '/reportSisaPakaiSpandex')
         ],
         [
             'key'   => 'rekap harian dashboard ringkas',
@@ -129,7 +137,7 @@
             'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
-            'url'   => base_url('report/rekap-harian')
+            'url'   => base_url($role . '/reportSisaPakaiKaret')
         ],
         [
             'key'   => 'rekap harian dashboard ringkas',
@@ -137,7 +145,7 @@
             'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
-            'url'   => base_url('report/rekap-harian')
+            'url'   => base_url($role . '/reportSisaDatangBenang')
         ],
         [
             'key'   => 'rekap harian dashboard ringkas',
@@ -145,7 +153,7 @@
             'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
-            'url'   => base_url('report/rekap-harian')
+            'url'   => base_url($role . '/reportSisaDatangNylon')
         ],
         [
             'key'   => 'rekap harian dashboard ringkas',
@@ -153,15 +161,15 @@
             'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
-            'url'   => base_url('report/rekap-harian')
+            'url'   => base_url($role . '/reportSisaDatangSpandex')
         ],
         [
             'key'   => 'rekap harian dashboard ringkas',
-            'title' => 'Report Sisa Datang Spandex',
+            'title' => 'Report Sisa Datang Karet',
             'desc'  => 'Snapshot harian lintas karet',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
-            'url'   => base_url('report/rekap-harian')
+            'url'   => base_url($role . '/reportSisaDatangKaret')
         ],
         [
             'key'   => 'rekap harian dashboard ringkas',
@@ -169,7 +177,7 @@
             'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
-            'url'   => base_url('report/rekap-harian')
+            'url'   => base_url($role . '/reportBenangMingguan')
         ],
         [
             'key'   => 'rekap harian dashboard ringkas',
@@ -177,16 +185,8 @@
             'desc'  => 'Snapshot harian lintas modul',
             'icon'  => 'ni ni-notification-70',
             'color' => 'warning',
-            'url'   => base_url('report/rekap-harian')
-        ],
-        [
-            'key'   => 'rekap harian dashboard ringkas',
-            'title' => 'Report Sisa Datang Spandex',
-            'desc'  => 'Snapshot harian lintas modul',
-            'icon'  => 'ni ni-notification-70',
-            'color' => 'warning',
-            'url'   => base_url('report/rekap-harian')
-        ],
+            'url'   => base_url($role . '/reportBenangBulanan')
+        ]
     ];
     ?>
 
