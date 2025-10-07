@@ -167,6 +167,9 @@
                                                 <a href="<?= base_url($role . '/pemesanan/exportListPemesananSpdxKaretPertgl?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
                                                     <i class="fas fa-file-excel fa-2x"></i>
                                                 </a>
+                                                <a href="<?= base_url($role . '/pemesanan/exportPdfListPemesananSpdxKaretPertgl?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-danger" target="_blank">
+                                                    <i class="fas fa-file-pdf fa-2x"></i>
+                                                </a>
                                             </td>
                                         <?php else : ?>
                                             <td class="text-center">
@@ -257,12 +260,27 @@
 
                         const actionCell = document.createElement('td');
                         actionCell.classList.add('text-center');
-                        actionCell.innerHTML = `
-                            <a href="<?= base_url($role . '/pemesanan/detailListBarangKeluar?jenis' . $jenis) ?>&tglPakai=${psn.tgl_pakai}" class="btn bg-gradient-info">
-                                <i class="fas fa-eye"></i>
-                                Detail
-                            </a>
-                        `;
+                        // Buat link export/detail tergantung jenis
+                        if (jenis === 'SPANDEX' || jenis === 'KARET') {
+                            const excelUrl = `<?= base_url($role . '/pemesanan/exportListPemesananSpdxKaretPertgl') ?>?jenis=${jenis}&tglPakai=${psn.tgl_pakai}`;
+                            const pdfUrl = `<?= base_url($role . '/pemesanan/exportPdfListPemesananSpdxKaretPertgl') ?>?jenis=${jenis}&tglPakai=${psn.tgl_pakai}`;
+
+                            actionCell.innerHTML = `
+                        <a href="${excelUrl}" class="btn bg-gradient-success" target="_blank">
+                            <i class="fas fa-file-excel fa-2x"></i>
+                        </a>
+                        <a href="${pdfUrl}" class="btn bg-gradient-danger" target="_blank">
+                            <i class="fas fa-file-pdf fa-2x"></i>
+                        </a>
+                    `;
+                        } else {
+                            const detailUrl = `<?= base_url($role . '/pemesanan/detailListBarangKeluar') ?>?jenis=${jenis}&tglPakai=${psn.tgl_pakai}`;
+                            actionCell.innerHTML = `
+                        <a href="${detailUrl}" class="btn bg-gradient-info">
+                            <i class="fas fa-eye"></i> Detail
+                        </a>
+                    `;
+                        }
                         row.appendChild(actionCell);
 
                         tableBody.appendChild(row);

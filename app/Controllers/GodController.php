@@ -1666,7 +1666,7 @@ class GodController extends BaseController
 
     public function formPoTambahan()
     {
-        $apiUrl = 'http://127.0.0.1/CapacityApps/public/api/getNoModel';
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getNoModel';
 
         // Mengambil data dari API eksternal
         $response = @file_get_contents($apiUrl);
@@ -1749,7 +1749,7 @@ class GodController extends BaseController
         $styleSize = array_unique($styleSize);
         // log_message('debug', 'STYLE SIZE LIST: ' . print_r($styleSize, true));
 
-        $apiUrl = 'http://127.0.0.1/CapacityApps/public/api/getSisaPerSize/' . $area . '/' . $noModel
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getSisaPerSize/' . $area . '/' . $noModel
             . '?styles[]=' . implode('&styles[]=', array_map('urlencode', $styleSize));
 
         $response = @file_get_contents($apiUrl);
@@ -1771,7 +1771,7 @@ class GodController extends BaseController
 
         // Ambil BS MESIN per style_size
         $bsMesinList = [];
-        $apiUrl = 'http://127.0.0.1/CapacityApps/public/api/getBsMesin/' . $area . '/' . $noModel
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getBsMesin/' . $area . '/' . $noModel
             . '?styles[]=' . implode('&styles[]=', array_map('urlencode', $styleSize));
         // Mengambil data dari API eksternal
         $response = @file_get_contents($apiUrl);
@@ -1791,7 +1791,7 @@ class GodController extends BaseController
 
         // Ambil BS SETTING per style_size
         $bsSettingList = [];
-        $apiUrl = 'http://127.0.0.1/CapacityApps/public/api/getBsSetting'
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getBsSetting'
             . '?area=' . urlencode($area)
             . '&no_model=' . urlencode($noModel)
             . '&styles[]=' . implode('&styles[]=', array_map('urlencode', $styleSize));
@@ -1811,7 +1811,7 @@ class GodController extends BaseController
             $bsSettingList[$style] = (int)$qty;
         }
 
-        $apiUrl = 'http://127.0.0.1/CapacityApps/public/api/getDataBruto'
+        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBruto'
             . '?area=' . rawurlencode($area)
             . '&no_model=' . rawurlencode($noModel)
             . '&styles[]=' . implode('&styles[]=', array_map('rawurlencode', $styleSize));
