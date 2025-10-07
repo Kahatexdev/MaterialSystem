@@ -588,89 +588,90 @@
     });
 </script>
 <script>
-    // ===== MODAL DETAIL HANDLER =====
     document.addEventListener("DOMContentLoaded", function() {
         const modalDetail = document.getElementById("modalDetail");
 
-        // Modal show event handler
         modalDetail.addEventListener("show.bs.modal", function(event) {
             const button = event.relatedTarget;
-            const kapasitas = button.getAttribute("data-kapasitas");
-            const total_qty = button.getAttribute("data-total_qty");
-            const nama_cluster = button.getAttribute("data-nama_cluster");
-            const detailData = JSON.parse(button.getAttribute("data-detail"));
-            const detailKarung = JSON.parse(button.getAttribute("data-karung"));
-            const totalTerisi = detailData.reduce((sum, item) => {
-                return sum + (Number(item.qty) || 0);
-            }, 0).toFixed(2);
-            const sisa = (Number(kapasitas) || 0) - totalTerisi;
+            const kapasitas = Number(button.getAttribute("data-kapasitas")) || 0;
+            const totalQty = Number(button.getAttribute("data-total_qty")) || 0;
+            const namaCluster = button.getAttribute("data-nama_cluster") || "-";
 
-            // Populate modal data
-            document.getElementById("modalKapasitas").textContent = kapasitas;
-            document.getElementById("modalTotalQty").textContent = totalTerisi;
-            document.getElementById("modalNamaCluster").textContent = nama_cluster;
+            let detailData = [];
+            try {
+                detailData = JSON.parse(button.getAttribute("data-detail") || "[]");
+            } catch (_) {
+                detailData = [];
+            }
+
+            let detailKarung = [];
+            try {
+                detailKarung = JSON.parse(button.getAttribute("data-karung") || "[]");
+            } catch (_) {
+                detailKarung = [];
+            }
+
+            const sisa = Math.max(kapasitas - totalQty, 0);
+
+            // Header
+            document.getElementById("modalKapasitas").textContent = kapasitas.toFixed(2);
+            document.getElementById("modalTotalQty").textContent = totalQty.toFixed(2);
+            document.getElementById("modalNamaCluster").textContent = namaCluster;
             document.getElementById("modalSisaKapasitas").textContent = sisa.toFixed(2);
+
+            // Tabel
+            const tbody = document.getElementById("modalDetailTableBody");
+            tbody.innerHTML = "";
+            if (detailData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">Tidak ada detail model di cluster ini.</td></tr>`;
+            } else {
+                detailData.forEach((item) => {
+                    const karungForThis = detailKarung.filter(k => k.no_model === item.no_model);
+                    const karungJSON = JSON.stringify(karungForThis)
+                        .replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
+
+                    const row = `
+          <tr class="fade-in">
+            <td>${item.no_model || ''}</td>
+            <td>${item.kode_warna || ''}</td>
+            <td>${item.foll_up || ''}</td>
+            <td>${item.delivery || ''}</td>
+            <td>${item.kapasitas_pakai != null ? item.kapasitas_pakai + ' kg' : '-'}</td>
+            <td>
+              <button class="btn btn-info btn-sm show-karung" data-karung='${karungJSON}'>
+                <i class="fas fa-eye"></i>
+              </button>
+            </td>
+          </tr>`;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+            }
+
+            // kosongkan panel karung
             document.getElementById("modalKarungList").innerHTML = "";
-
-            // Populate table
-            const tableBody = document.getElementById("modalDetailTableBody");
-            tableBody.innerHTML = "";
-
-            detailData.forEach((item) => {
-                const karungForThis = detailKarung.filter(k => k.no_model === item.no_model);
-                const karungJSON = JSON.stringify(karungForThis);
-
-                const row = `
-                    <tr class="fade-in">
-                        <td>${item.no_model || ''}</td>
-                        <td>${item.kode_warna || ''}</td>
-                        <td>${item.foll_up || ''}</td>
-                        <td>${item.delivery || ''}</td>
-                        <td>${item.qty || ''} kg</td>
-                        <td>
-                            <button class="btn btn-info btn-sm show-karung" data-karung='${karungJSON}'>
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-
-                tableBody.innerHTML += row;
-            });
         });
 
-        // Karung detail click handler
+        // Handler tombol "lihat karung"
         modalDetail.addEventListener("click", function(e) {
             const btn = e.target.closest(".show-karung");
             if (!btn) return;
-
-            // Parse array no_karung
-            const list = JSON.parse(btn.getAttribute("data-karung"));
-            const karungListElement = document.getElementById("modalKarungList");
-
-            if (list.length === 0) {
-                karungListElement.innerHTML = `
-                    <em><i class="fas fa-info-circle me-1"></i>Tidak ada karung untuk baris ini.</em>
-                `;
+            const list = JSON.parse(btn.getAttribute("data-karung") || "[]");
+            const wrap = document.getElementById("modalKarungList");
+            if (!list.length) {
+                wrap.innerHTML = `<em><i class="fas fa-info-circle me-1"></i>Tidak ada karung untuk baris ini.</em>`;
             } else {
-                // Generate karung list HTML
                 const items = list.map(k =>
                     `<li><i class="fas fa-box me-1"></i>No Karung ${k.no_karung} = ${k.kgs_kirim} kg | Lot = ${k.lot_kirim}</li>`
                 ).join("");
-
                 const modelName = btn.closest("tr").children[0].textContent;
-
-                karungListElement.innerHTML = `
-                    <strong><i class="fas fa-list me-1"></i>Daftar No. Karung untuk ${modelName}:</strong>
-                    <ul class="mt-2">${items}</ul>
-                `;
+                wrap.innerHTML = `<strong><i class="fas fa-list me-1"></i>Daftar No. Karung untuk ${modelName}:</strong>
+                        <ul class="mt-2">${items}</ul>`;
             }
-
-            // Add fade-in animation
-            karungListElement.classList.add('fade-in');
+            wrap.classList.add('fade-in');
         });
     });
 </script>
+
 <script>
     $(document).ready(function() {
         const cards = $('.group-card');

@@ -169,6 +169,7 @@
                             <th>Delivery Akhir</th>
                             <th>Unit</th>
                             <th>Tanggal Buka PO</th>
+                            <th>Tanggal Import</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -292,6 +293,9 @@
                 },
                 {
                     "data": "tanggal_po"
+                },
+                {
+                    "data": "tanggal_import"
                 },
                 {
                     "data": "action",

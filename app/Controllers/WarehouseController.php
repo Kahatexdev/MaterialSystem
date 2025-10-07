@@ -2261,7 +2261,7 @@ class WarehouseController extends BaseController
                 $cekStock = $this->stockModel->find($data['id_stock']);
 
                 // Tentukan stock_awal
-                $stock_awal = empty($cekStock['lot_awal']) ? '' : 'Ya';
+                $stock_awal = $cekStock['kgs_stock_awal'] > 0 ? '' : 'Ya';
 
                 if ($cluster == "STOCK") {
                     $no_model = "BENANG STOCK";
@@ -2305,14 +2305,14 @@ class WarehouseController extends BaseController
                         'kode_warna'        => $data['kode_warna'],
                         'warna'             => $data['warna'],
                         'nama_cluster'      => $cluster,
-                        'kgs_stock_awal'    => $stock_awal == 'Ya' ? $data['kgs'] : 0,
-                        'cns_stock_awal'    => $stock_awal == 'Ya' ? $data['cns'] : 0,
-                        'krg_stock_awal'    => $stock_awal == 'Ya' ? $data['krg'] : 0,
-                        'lot_awal'          => $stock_awal == 'Ya' ? $data['lot'] : '',
-                        'kgs_in_out'        => $stock_awal == '' ? $data['kgs'] : 0,
-                        'cns_in_out'        => $stock_awal == '' ? $data['cns'] : 0,
-                        'krg_in_out'        => $stock_awal == '' ? $data['krg'] : 0,
-                        'lot_stock'         => $stock_awal == '' ? $data['lot'] : '',
+                        'kgs_stock_awal'    => 0,
+                        'cns_stock_awal'    => 0,
+                        'krg_stock_awal'    => 0,
+                        'lot_awal'          => '',
+                        'kgs_in_out'        => $data['kgs'],
+                        'cns_in_out'        => $data['cns'],
+                        'krg_in_out'        => $data['krg'],
+                        'lot_stock'         => $data['lot'],
                         'admin'             => session()->get('username'),
                         'created_at'        => date('Y-m-d H:i:s'),
                         'updated_at'        => NULL,

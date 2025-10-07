@@ -167,7 +167,7 @@
                                 <td class="text-center">${item.l_m_d}</td>
                                 <td class="text-center">${item.harga}</td>
                                 <td class="text-center">${gantiReturText}</td>
-                                <td class="text-center">${item.gw_kirim}</td>
+                                <td class="text-center">${item.gw_kirim || 0}</td>
                                 <td class="text-center">${item.kgs_kirim}</td>
                                 <td class="text-center">${item.cones_kirim}</td>
                                 <td class="text-center">${item.lot_kirim}</td>
