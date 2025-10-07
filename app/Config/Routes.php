@@ -887,6 +887,14 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('pemesanan/exportPermintaanKaret', 'ExcelController::exportPermintaanKaret');
     $routes->get('pemesanan/exportPermintaanSpandex', 'ExcelController::exportPermintaanSpandex');
     $routes->get('pemesanan/sisaKebutuhanArea', 'PemesananController::sisaKebutuhanArea');
+    $routes->post('pemesanan/listBarangKeluarPertgl', 'PemesananController::listBarangKeluarPertgl');
+    $routes->post('pemesanan/filterListBarangKeluarPertgl', 'PemesananController::filterListBarangKeluarPertgl');
+    $routes->get('pemesanan/detailListBarangKeluar', 'PemesananController::detailListBarangKeluar');
+    $routes->get('pemesanan/exportListBarangKeluar', 'ExcelController::exportListBarangKeluar');
+    $routes->get('pemesanan/exportPdfListBarangKeluar', 'PdfController::exportListBarangKeluar');
+    $routes->post('pemesanan/listPemesananSpandexKaretPertgl', 'PemesananController::listPemesananSpandexKaretPertgl');
+    $routes->get('pemesanan/exportListPemesananSpdxKaretPertgl', 'ExcelController::exportListPemesananSpdxKaretPertgl');
+    $routes->get('pemesanan/exportPdfListPemesananSpdxKaretPertgl', 'PdfController::exportListPemesananSpdxKaretPertgl');
 
     //Celup
     $routes->get('schedule', 'ScheduleController::index');
