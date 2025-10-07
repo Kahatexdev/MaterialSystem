@@ -1057,6 +1057,7 @@ class MasterdataController extends BaseController
                 'delivery_akhir' => "<span style='$style'>{$row['delivery_akhir']}</span>",
                 'unit' => "<span style='$style'>{$row['unit']}</span>",
                 'tanggal_po' => "<span style='$style'>{$row['tanggal_po']}</span>",
+                'tanggal_import' => "<span style='$style'>{$row['created_at']}</span>",
                 'admin' => "<span style='$style'>{$row['admin']}</span>",
                 'action' => "
                 <a href='" . base_url($this->role . '/material/' . $row['id_order']) . "' class='btn btn-info btn-sm'>Detail</a>
