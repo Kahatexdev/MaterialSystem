@@ -39,12 +39,14 @@ class TrackingPoCoveringController extends BaseController
         $tgl_po = urldecode($date);
         $tgl_po = date('Y-m-d', strtotime($tgl_po));
         $trackingData = $this->trackingPoCoveringModel->trackingDataDaily($tgl_po);
-        // dd($trackingData);
+        $trackingDataBooking = $this->trackingPoCoveringModel->trackingDataPoBooking($tgl_po);
+
         $data = [
             'title' => 'Tracking PO Covering',
             'role' => $this->role,
             'active' => 'trackingPoCovering',
             'trackingPoCovering' => $trackingData,
+            'dataBooking' => $trackingDataBooking,
         ];
         $role = $this->role;
         if ($role == 'covering') {
