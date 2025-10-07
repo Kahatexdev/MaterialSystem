@@ -207,6 +207,10 @@
                                 class="btn bg-gradient-success w-100" target="_blank">
                                 <i class="fas fa-file-excel"></i> Export
                             </a>
+                            <a href="<?= base_url($role . '/pemesanan/exportPdfListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tglPakai) ?>"
+                                class="btn bg-gradient-danger w-100" target="_blank">
+                                <i class="fas fa-file-pdf"></i> Export
+                            </a>
                         </div>
                     </form>
                     <div class="table-responsive mt-4">
@@ -234,7 +238,7 @@
                                             <p class="text-sm font-weight-bold mb-0"><?= $id['tgl_pakai'] ?></p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0"><?= $id['area_out'] ?></p>
+                                            <p class="text-sm font-weight-bold mb-0"><?= $id['admin'] ?></p>
                                         </td>
                                         <td>
                                             <p class="text-sm font-weight-bold mb-0"><?= $id['no_model'] ?></p>
@@ -355,7 +359,7 @@
                         const row = `
                         <tr>
                             <td><p class="text-sm font-weight-bold mb-0">${id.tgl_pakai}</p></td>
-                            <td><p class="text-sm font-weight-bold mb-0">${id.area_out}</p></td>
+                            <td><p class="text-sm font-weight-bold mb-0">${id.admin}</p></td>
                             <td><p class="text-sm font-weight-bold mb-0">${id.no_model}</p></td>
                             <td><p class="text-sm font-weight-bold mb-0">${id.item_type}</p></td>
                             <td><p class="text-sm font-weight-bold mb-0">${id.kode_warna}</p></td>
@@ -365,7 +369,18 @@
                             <td><p class="text-sm font-weight-bold mb-0">${id.cns_out}</p></td>
                             <td><p class="text-sm font-weight-bold mb-0">${id.lot_out}</p></td>
                             <td><p class="text-sm font-weight-bold mb-0">${id.nama_cluster}</p></td>
-                            <td><a class="btn btn-danger"><i class="fas fa-trash"></i></a></td>
+                            <td>
+                                <button type="button" 
+                                        class="btn btn-danger btn-hapus" 
+                                        data-id="${id.id_pengeluaran}" 
+                                        data-id-out-celup="${id.id_out_celup}" 
+                                        data-id-stock="${id.id_stock}" 
+                                        data-kgs-out="${id.kgs_out}" 
+                                        data-cns-out="${id.cns_out}" 
+                                        data-krg-out="${id.krg_out}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
                         </tr>
                     `;
                         tableBody.insertAdjacentHTML('beforeend', row);

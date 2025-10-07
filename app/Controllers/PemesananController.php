@@ -100,7 +100,7 @@ class PemesananController extends BaseController
     }
     public function index()
     {
-        $apiUrl  = 'http://127.0.0.1/CapacityApps/public/api/getDataArea';
+        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
         $response = file_get_contents($apiUrl);
 
         $area = json_decode($response, true);
@@ -298,7 +298,7 @@ class PemesananController extends BaseController
     // }
     public function pengirimanAreaManual()
     {
-        $apiUrl  = 'http://127.0.0.1/CapacityApps/public/api/getDataArea';
+        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
         $response = file_get_contents($apiUrl);
         $area = json_decode($response, true);
 
@@ -1554,7 +1554,7 @@ class PemesananController extends BaseController
 
     //         foreach ($getStyle as $i => $data) {
     //             // Ambil qty
-    //             $urlQty = 'http://127.0.0.1/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($pem['no_model'])
+    //             $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($pem['no_model'])
     //                 . '&style_size=' . urlencode($data['style_size'])
     //                 . '&area=' . $area;
 
@@ -1621,7 +1621,7 @@ class PemesananController extends BaseController
 
     //         foreach ($getStyle as $i => $data) {
     //             // Ambil qty
-    //             $urlQty = 'http://127.0.0.1/CapacityApps/public/api/getQtyOrder?no_model=' . $retur['no_model']
+    //             $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . $retur['no_model']
     //                 . '&style_size=' . urlencode($data['style_size'])
     //                 . '&area=' . $area;
 
@@ -1813,7 +1813,7 @@ class PemesananController extends BaseController
             ]);
             // dd ($query);
             try {
-                $resp = $client->get("http://127.0.0.1/CapacityApps/public/api/getQtyOrderBulk?{$query}", [
+                $resp = $client->get("http://172.23.44.14/CapacityApps/public/api/getQtyOrderBulk?{$query}", [
                     'timeout' => 3,
                     'connect_timeout' => 1.5,
                 ]);
@@ -2437,7 +2437,7 @@ class PemesananController extends BaseController
     //                 $totalRequirement = 0;
     //                 foreach ($styleList as $style) {
     //                     if (isset($style['no_model'], $style['style_size'], $style['gw'], $style['composition'], $style['loss'])) {
-    //                         $orderApiUrl = 'http://127.0.0.1/CapacityApps/public/api/getQtyOrder?no_model='
+    //                         $orderApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model='
     //                             . $order['no_model'] . '&style_size=' . urlencode($style['style_size']) . '&area=' . urlencode($area);
 
     //                         // TAMBAHKAN INI UNTUK NAMPIL DI CONSOLE BROWSER
@@ -2543,7 +2543,7 @@ class PemesananController extends BaseController
                     $qtyTotal = 0;
 
                     foreach ($styleList as $style) {
-                        $orderApiUrl = 'http://127.0.0.1/CapacityApps/public/api/getQtyOrder?no_model='
+                        $orderApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model='
                             . $order['no_model'] . '&style_size=' . urlencode($style['style_size'])
                             . '&area=' . urlencode($areaRow);
 
@@ -2655,7 +2655,7 @@ class PemesananController extends BaseController
     }
     public function sisaKebutuhanArea()
     {
-        $apiUrl  = 'http://127.0.0.1/CapacityApps/public/api/getDataArea';
+        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
         $response = file_get_contents($apiUrl);
         $allArea = json_decode($response, true);
 
@@ -2686,7 +2686,7 @@ class PemesananController extends BaseController
 
             foreach ($getStyle as $i => $data) {
                 // Ambil qty
-                $urlQty = 'http://127.0.0.1/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($pemesanan['no_model'])
+                $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($pemesanan['no_model'])
                     . '&style_size=' . urlencode($data['style_size'])
                     . '&area=' . $area;
 
@@ -2758,7 +2758,7 @@ class PemesananController extends BaseController
 
             foreach ($getStyle as $i => $data) {
                 // Ambil qty
-                $urlQty = 'http://127.0.0.1/CapacityApps/public/api/getQtyOrder?no_model=' . $retur['no_model']
+                $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . $retur['no_model']
                     . '&style_size=' . urlencode($data['style_size'])
                     . '&area=' . $area;
 
@@ -2861,7 +2861,7 @@ class PemesananController extends BaseController
     // public function sisaKebutuhanArea()
     // {
     //     // Ambil daftar area dari API eksternal
-    //     $apiUrl   = 'http://127.0.0.1/CapacityApps/public/api/getDataArea';
+    //     $apiUrl   = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
     //     $response = file_get_contents($apiUrl);
     //     $allArea  = json_decode($response, true) ?? [];
 
@@ -2910,7 +2910,7 @@ class PemesananController extends BaseController
     //     $results = [];
     //     foreach ($styles as $style) {
     //         $url = sprintf(
-    //             'http://127.0.0.1/CapacityApps/public/api/getQtyOrder?no_model=%s&style_size=%s&area=%s',
+    //             'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=%s&style_size=%s&area=%s',
     //             $noModel,
     //             urlencode($style['style_size']),
     //             $area
@@ -3064,7 +3064,7 @@ class PemesananController extends BaseController
 
         // // 2) Siapkan HTTP client
         // $client = \Config\Services::curlrequest([
-        //     'baseURI' => 'http://127.0.0.1/CapacityApps/public/api/',
+        //     'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
         //     'timeout' => 5
         // ]);
 

@@ -61,7 +61,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('updatePoGabungan', 'PoGabunganController::updatePoGabungan');
     $routes->post('deletePoGabungan/(:num)', 'PoGabunganController::deletePoGabungan/$1');
     // $routes->get('exportOpenPOGabung', 'PdfController::exportOpenPOGabung');
-    $routes->get('exportOpenPOGabung', 'ExcelController::exportOpenPOGabung');
+    $routes->get('exportOpenPOGabung', 'ExcelController::exportOpenPOGabungNew');
     $routes->get('exportPoBoking', 'ExcelController::exportPoBooking');
 
 
@@ -629,7 +629,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('updatePoGabungan', 'PoGabunganController::updatePoGabungan');
     $routes->post('deletePoGabungan/(:num)', 'PoGabunganController::deletePoGabungan/$1');
     // $routes->get('exportOpenPOGabung', 'PdfController::exportOpenPOGabung');
-    $routes->get('exportOpenPOGabung', 'ExcelController::exportOpenPOGabung');
+    $routes->get('exportOpenPOGabung', 'ExcelController::exportOpenPOGabungNew');
     // $routes->post('exportPoNylon', 'ExcelController::generateOpenPONylon');
     $routes->post('exportPoNylon', 'ExcelController::generateOpenPONylonNew');
     $routes->get('exportPoBoking', 'ExcelController::exportPoBooking');
@@ -887,6 +887,14 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('pemesanan/exportPermintaanKaret', 'ExcelController::exportPermintaanKaret');
     $routes->get('pemesanan/exportPermintaanSpandex', 'ExcelController::exportPermintaanSpandex');
     $routes->get('pemesanan/sisaKebutuhanArea', 'PemesananController::sisaKebutuhanArea');
+    $routes->post('pemesanan/listBarangKeluarPertgl', 'PemesananController::listBarangKeluarPertgl');
+    $routes->post('pemesanan/filterListBarangKeluarPertgl', 'PemesananController::filterListBarangKeluarPertgl');
+    $routes->get('pemesanan/detailListBarangKeluar', 'PemesananController::detailListBarangKeluar');
+    $routes->get('pemesanan/exportListBarangKeluar', 'ExcelController::exportListBarangKeluar');
+    $routes->get('pemesanan/exportPdfListBarangKeluar', 'PdfController::exportListBarangKeluar');
+    $routes->post('pemesanan/listPemesananSpandexKaretPertgl', 'PemesananController::listPemesananSpandexKaretPertgl');
+    $routes->get('pemesanan/exportListPemesananSpdxKaretPertgl', 'ExcelController::exportListPemesananSpdxKaretPertgl');
+    $routes->get('pemesanan/exportPdfListPemesananSpdxKaretPertgl', 'PdfController::exportListPemesananSpdxKaretPertgl');
 
     //Celup
     $routes->get('schedule', 'ScheduleController::index');
