@@ -2261,7 +2261,7 @@ class WarehouseController extends BaseController
                 $cekStock = $this->stockModel->find($data['id_stock']);
 
                 // Tentukan stock_awal
-                $stock_awal = $cekStock['kgs_stock_awal'] > 0 ? '' : 'Ya';
+                $stock_awal = $cekStock['kgs_stock_awal'] > 0 ? 'Ya' : '';
 
                 if ($cluster == "STOCK") {
                     $no_model = "BENANG STOCK";
