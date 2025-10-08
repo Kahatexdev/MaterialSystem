@@ -43,7 +43,7 @@ class PphController extends BaseController
 
     public function index()
     {
-        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $apiUrl  = 'http://172.23.39.116/CapacityApps/public/api/getDataArea';
         $response = file_get_contents($apiUrl);
 
         $area = json_decode($response, true);
@@ -60,7 +60,7 @@ class PphController extends BaseController
 
     public function tampilPerStyle()
     {
-        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $apiUrl  = 'http://172.23.39.116/CapacityApps/public/api/getDataArea';
         $response = file_get_contents($apiUrl);
         $area = json_decode($response, true);
 
@@ -75,7 +75,7 @@ class PphController extends BaseController
 
     public function tampilPerModel()
     {
-        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $apiUrl  = 'http://172.23.39.116/CapacityApps/public/api/getDataArea';
         $response = file_get_contents($apiUrl);
 
         $area = json_decode($response, true);
@@ -90,7 +90,7 @@ class PphController extends BaseController
     }
     public function pphPerhari()
     {
-        $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $apiUrl  = 'http://172.23.39.116/CapacityApps/public/api/getDataArea';
         $response = file_get_contents($apiUrl);
 
         $area = json_decode($response, true);
@@ -119,7 +119,7 @@ class PphController extends BaseController
             $loss = $items['loss'];
             $gwpcs = ($gw * $comp) / 100;
             $styleSize = urlencode($styleSize);
-            $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
+            $apiUrl  = 'http://172.23.39.116/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
 
             $response = file_get_contents($apiUrl);
 
@@ -240,7 +240,7 @@ class PphController extends BaseController
             $loss = $items['loss'];
             $gwpcs = ($gw * $comp) / 100;
             $styleSize = urlencode($styleSize);
-            $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
+            $apiUrl  = 'http://172.23.39.116/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
 
             $response = file_get_contents($apiUrl);
 
@@ -304,7 +304,7 @@ class PphController extends BaseController
     {
         $tanggal = $this->request->getGet('tanggal');
         $area = $this->request->getGet('area');
-        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getPPhPerhari/' . $area . '/' . $tanggal;
+        $apiUrl = 'http://172.23.39.116/CapacityApps/public/api/getPPhPerhari/' . $area . '/' . $tanggal;
 
         $response = file_get_contents($apiUrl);
         if ($response === false) {
