@@ -685,4 +685,117 @@ class PemasukanModel extends Model
             ->get()
             ->getResultArray();
     }
+
+    public function searchStockDetail($noModel = null, $kodeWarna = null)
+    {
+        $db = \Config\Database::connect();
+
+        // base SQL tanpa filter
+        $sql = "
+        SELECT 
+            cl.nama_cluster, 
+            oc.no_model, 
+            st.item_type, 
+            st.kode_warna, 
+            st.warna, 
+            cl.kapasitas, 
+            oc.no_karung,
+            oc.lot_kirim AS lot_stock,
+            hs.lot AS lot_awal,
+            -- Kgs: kalau ada history_stock, maka 0; kalau tidak, hitung dari oc dan pengeluaran
+            IF(
+                COALESCE(hs.kgsAwal, 0) > 0 AND pm.out_jalur = 0,
+                0,
+                oc.kgs_kirim 
+                    - SUM(COALESCE(p.kgs_out, 0)) 
+                    - SUM(COALESCE(oo.kgs_other_out, 0))
+            ) AS Kgs,
+
+            -- Cns: kalau ada history_stock, maka 0; kalau tidak, hitung dari oc dan pengeluaran
+            IF(
+                COALESCE(hs.cnsAwal, 0) > 0 AND pm.out_jalur = 0,
+                0,
+                oc.cones_kirim 
+                    - SUM(COALESCE(p.cns_out, 0)) 
+                    - SUM(COALESCE(oo.cns_other_out, 0))
+            ) AS Cns,
+
+            -- Stock awal (jika ada history)
+            IF(
+                COALESCE(hs.kgsAwal,0) > 0, 
+                COALESCE(hs.kgsAwal,0) - SUM(COALESCE(p.kgs_out,0)) - SUM(COALESCE(oo.kgs_other_out,0)), 
+                0
+            ) AS KgsStockAwal, 
+
+            IF(
+                COALESCE(hs.cnsAwal,0) > 0, 
+                COALESCE(hs.cnsAwal,0) - SUM(COALESCE(p.cns_out,0)) - SUM(COALESCE(oo.cns_other_out,0)), 
+                0
+            ) AS CnsStockAwal, 
+
+            IF(
+                COALESCE(hs.krgAwal,0) > 0, 
+                COALESCE(hs.krgAwal,0) - SUM(COALESCE(p.krg_out,0)) - SUM(COALESCE(oo.krg_other_out,0)), 
+                0
+            ) AS KrgStockAwal
+
+        FROM pemasukan pm 
+        LEFT JOIN out_celup oc 
+            ON oc.id_out_celup = pm.id_out_celup
+        LEFT JOIN stock st 
+            ON pm.id_stock = st.id_stock
+
+        LEFT JOIN (
+            SELECT 
+                hs.id_out_celup,
+                hs.id_history_pindah,
+                hs.id_stock_new,
+                oc1.no_karung,
+                SUM(hs.kgs) AS kgsAwal, 
+                SUM(hs.cns) AS cnsAwal, 
+                SUM(hs.krg) AS krgAwal,
+                hs.lot
+            FROM history_stock hs
+            LEFT JOIN out_celup oc1 
+                ON oc1.id_out_celup = hs.id_out_celup
+            LEFT JOIN stock st 
+                ON st.id_stock = hs.id_stock_new
+            WHERE hs.keterangan = 'Pindah Order'
+            GROUP BY hs.id_out_celup, hs.id_stock_new, oc1.no_karung
+        ) hs 
+            ON hs.id_stock_new = st.id_stock 
+
+        LEFT JOIN pengeluaran p 
+            ON p.id_out_celup = oc.id_out_celup
+        LEFT JOIN other_out oo 
+            ON oo.id_out_celup = oc.id_out_celup
+        LEFT JOIN cluster cl 
+            ON cl.nama_cluster = st.nama_cluster
+
+        WHERE 1=1
+    ";
+
+        // Tambahkan filter dinamis
+        $params = [];
+        if (!empty($noModel)) {
+            $sql .= " AND st.no_model = :no_model:";
+            $params['no_model'] = $noModel;
+        }
+        if (!empty($kodeWarna)) {
+            $sql .= " AND st.kode_warna = :kode_warna:";
+            $params['kode_warna'] = $kodeWarna;
+        }
+
+        // Kelompokkan hasil
+        $sql .= "
+            GROUP BY 
+                st.id_stock, 
+                oc.id_out_celup
+            ORDER BY pm.id_out_celup DESC
+        ";
+
+        // Jalankan query
+        $query = $db->query($sql, $params);
+        return $query->getResultArray();
+    }
 }

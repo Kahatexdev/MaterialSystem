@@ -1198,95 +1198,11 @@ class ExcelController extends BaseController
         exit;
     }
 
-    // public function excelStockMaterial()
-    // {
-    //     $noModel = $this->request->getGet('no_model');
-    //     $warna = $this->request->getGet('warna');
-    //     $filteredData = $this->stockModel->searchStock($noModel, $warna);
-
-    //     // Buat Spreadsheet
-    //     $spreadsheet = new Spreadsheet();
-    //     $sheet = $spreadsheet->getActiveSheet();
-
-    //     $title = 'DATA STOCK MATERIAL';
-    //     $sheet->mergeCells('A1:M1');
-    //     $sheet->setCellValue('A1', $title);
-
-    //     $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-    //     $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-    //     // === Header Kolom di Baris 2 === //
-    //     $sheet->setCellValue('A3', 'Nama Cluster');
-    //     $sheet->setCellValue('B3', 'No Model');
-    //     $sheet->setCellValue('C3', 'Kode Warna');
-    //     $sheet->setCellValue('D3', 'Warna');
-    //     $sheet->setCellValue('E3', 'Item Type');
-    //     $sheet->setCellValue('F3', 'Kapasitas');
-    //     $sheet->setCellValue('G3', 'Kgs');
-    //     $sheet->setCellValue('H3', 'Krg');
-    //     $sheet->setCellValue('I3', 'Cns');
-    //     $sheet->setCellValue('J3', 'Kgs Stock Awal');
-    //     $sheet->setCellValue('K3', 'Krg Stock Awal');
-    //     $sheet->setCellValue('L3', 'Cns Stock Awal');
-    //     $sheet->setCellValue('M3', 'Lot Stock');
-    //     $sheet->setCellValue('N3', 'Lot Awal');
-
-
-    //     // === Isi Data mulai dari baris ke-3 === //
-    //     $row = 4;
-    //     foreach ($filteredData as $data) {
-    //         if ($data->Kgs != 0 || $data->KgsStockAwal != 0) {
-    //             $sheet->setCellValue('A' . $row, $data->nama_cluster);
-    //             $sheet->setCellValue('B' . $row, $data->no_model);
-    //             $sheet->setCellValue('C' . $row, $data->kode_warna);
-    //             $sheet->setCellValue('D' . $row, $data->warna);
-    //             $sheet->setCellValue('E' . $row, $data->item_type);
-    //             $sheet->setCellValue('F' . $row, $data->kapasitas);
-    //             $sheet->setCellValue('G' . $row, number_format($data->Kgs, 2));
-    //             $sheet->setCellValue('H' . $row, $data->Krg);
-    //             $sheet->setCellValue('I' . $row, $data->Cns);
-    //             $sheet->setCellValue('J' . $row, $data->KgsStockAwal);
-    //             $sheet->setCellValue('K' . $row, $data->KrgStockAwal);
-    //             $sheet->setCellValue('L' . $row, $data->CnsStockAwal);
-    //             $sheet->setCellValue('M' . $row, $data->lot_stock);
-    //             $sheet->setCellValue('N' . $row, $data->lot_awal);
-    //             $row++;
-    //         }
-    //     }
-
-    //     // === Auto Size Kolom A - M === //
-    //     foreach (range('A', 'N') as $col) {
-    //         $sheet->getColumnDimension($col)->setAutoSize(true);
-    //     }
-
-    //     // === Tambahkan Border (A2:M[row - 1]) === //
-    //     $styleArray = [
-    //         'borders' => [
-    //             'allBorders' => [
-    //                 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-    //                 'color' => ['argb' => 'FF000000'],
-    //             ],
-    //         ],
-    //     ];
-
-    //     $lastDataRow = $row - 1;
-    //     $sheet->getStyle("A3:N{$lastDataRow}")->applyFromArray($styleArray);
-
-    //     $filename = 'Data_Stock_' . date('YmdHis') . '.xlsx';
-    //     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    //     header("Content-Disposition: attachment; filename=\"$filename\"");
-    //     header('Cache-Control: max-age=0');
-
-    //     $writer = new Xlsx($spreadsheet);
-    //     $writer->save('php://output');
-    //     exit;
-    // }
-
     public function excelStockMaterial()
     {
         $noModel = $this->request->getGet('no_model');
         $warna = $this->request->getGet('warna');
-        $filteredData = $this->stockModel->searchStockDetail($noModel, $warna);
+        $filteredData = $this->stockModel->searchStock($noModel, $warna);
 
         // Buat Spreadsheet
         $spreadsheet = new Spreadsheet();
@@ -1306,8 +1222,8 @@ class ExcelController extends BaseController
         $sheet->setCellValue('D3', 'Warna');
         $sheet->setCellValue('E3', 'Item Type');
         $sheet->setCellValue('F3', 'Kapasitas');
-        $sheet->setCellValue('G3', 'No Krg');
-        $sheet->setCellValue('H3', 'Kgs');
+        $sheet->setCellValue('G3', 'Kgs');
+        $sheet->setCellValue('H3', 'Krg');
         $sheet->setCellValue('I3', 'Cns');
         $sheet->setCellValue('J3', 'Kgs Stock Awal');
         $sheet->setCellValue('K3', 'Krg Stock Awal');
@@ -1319,21 +1235,21 @@ class ExcelController extends BaseController
         // === Isi Data mulai dari baris ke-3 === //
         $row = 4;
         foreach ($filteredData as $data) {
-            if ($data['Kgs'] != 0 || $data['KgsStockAwal'] != 0) {
-                $sheet->setCellValue('A' . $row, $data['nama_cluster']);
-                $sheet->setCellValue('B' . $row, $data['no_model']);
-                $sheet->setCellValue('C' . $row, $data['kode_warna']);
-                $sheet->setCellValue('D' . $row, $data['warna']);
-                $sheet->setCellValue('E' . $row, $data['item_type']);
-                $sheet->setCellValue('F' . $row, $data['kapasitas']);
-                $sheet->setCellValue('G' . $row, $data['no_karung']);
-                $sheet->setCellValue('H' . $row, number_format($data['Kgs'], 2));
-                $sheet->setCellValue('I' . $row, $data['Cns']);
-                $sheet->setCellValue('J' . $row, $data['KgsStockAwal']);
-                $sheet->setCellValue('K' . $row, $data['KrgStockAwal']);
-                $sheet->setCellValue('L' . $row, $data['CnsStockAwal']);
-                $sheet->setCellValue('M' . $row, $data['lot_stock']);
-                $sheet->setCellValue('N' . $row, $data['lot_awal']);
+            if ($data->Kgs != 0 || $data->KgsStockAwal != 0) {
+                $sheet->setCellValue('A' . $row, $data->nama_cluster);
+                $sheet->setCellValue('B' . $row, $data->no_model);
+                $sheet->setCellValue('C' . $row, $data->kode_warna);
+                $sheet->setCellValue('D' . $row, $data->warna);
+                $sheet->setCellValue('E' . $row, $data->item_type);
+                $sheet->setCellValue('F' . $row, $data->kapasitas);
+                $sheet->setCellValue('G' . $row, number_format($data->Kgs, 2));
+                $sheet->setCellValue('H' . $row, $data->Krg);
+                $sheet->setCellValue('I' . $row, $data->Cns);
+                $sheet->setCellValue('J' . $row, $data->KgsStockAwal);
+                $sheet->setCellValue('K' . $row, $data->KrgStockAwal);
+                $sheet->setCellValue('L' . $row, $data->CnsStockAwal);
+                $sheet->setCellValue('M' . $row, $data->lot_stock);
+                $sheet->setCellValue('N' . $row, $data->lot_awal);
                 $row++;
             }
         }
@@ -1365,6 +1281,90 @@ class ExcelController extends BaseController
         $writer->save('php://output');
         exit;
     }
+
+    // public function excelStockMaterial()
+    // {
+    //     $noModel = $this->request->getGet('no_model');
+    //     $warna = $this->request->getGet('warna');
+    //     $filteredData = $this->pemasukanModel->searchStockDetail($noModel, $warna);
+
+    //     // Buat Spreadsheet
+    //     $spreadsheet = new Spreadsheet();
+    //     $sheet = $spreadsheet->getActiveSheet();
+
+    //     $title = 'DATA STOCK MATERIAL';
+    //     $sheet->mergeCells('A1:M1');
+    //     $sheet->setCellValue('A1', $title);
+
+    //     $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+    //     $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+    //     // === Header Kolom di Baris 2 === //
+    //     $sheet->setCellValue('A3', 'Nama Cluster');
+    //     $sheet->setCellValue('B3', 'No Model');
+    //     $sheet->setCellValue('C3', 'Kode Warna');
+    //     $sheet->setCellValue('D3', 'Warna');
+    //     $sheet->setCellValue('E3', 'Item Type');
+    //     $sheet->setCellValue('F3', 'Kapasitas');
+    //     $sheet->setCellValue('G3', 'No Krg');
+    //     $sheet->setCellValue('H3', 'Kgs');
+    //     $sheet->setCellValue('I3', 'Cns');
+    //     $sheet->setCellValue('J3', 'Kgs Stock Awal');
+    //     $sheet->setCellValue('K3', 'Krg Stock Awal');
+    //     $sheet->setCellValue('L3', 'Cns Stock Awal');
+    //     $sheet->setCellValue('M3', 'Lot Stock');
+    //     $sheet->setCellValue('N3', 'Lot Awal');
+
+
+    //     // === Isi Data mulai dari baris ke-3 === //
+    //     $row = 4;
+    //     foreach ($filteredData as $data) {
+    //         if ($data['Kgs'] != 0 || $data['KgsStockAwal'] != 0) {
+    //             $sheet->setCellValue('A' . $row, $data['nama_cluster']);
+    //             $sheet->setCellValue('B' . $row, $data['no_model']);
+    //             $sheet->setCellValue('C' . $row, $data['kode_warna']);
+    //             $sheet->setCellValue('D' . $row, $data['warna']);
+    //             $sheet->setCellValue('E' . $row, $data['item_type']);
+    //             $sheet->setCellValue('F' . $row, $data['kapasitas']);
+    //             $sheet->setCellValue('G' . $row, $data['no_karung']);
+    //             $sheet->setCellValue('H' . $row, number_format($data['Kgs'], 2));
+    //             $sheet->setCellValue('I' . $row, $data['Cns']);
+    //             $sheet->setCellValue('J' . $row, $data['KgsStockAwal']);
+    //             $sheet->setCellValue('K' . $row, $data['KrgStockAwal']);
+    //             $sheet->setCellValue('L' . $row, $data['CnsStockAwal']);
+    //             $sheet->setCellValue('M' . $row, $data['lot_stock']);
+    //             $sheet->setCellValue('N' . $row, $data['lot_awal']);
+    //             $row++;
+    //         }
+    //     }
+
+    //     // === Auto Size Kolom A - M === //
+    //     foreach (range('A', 'N') as $col) {
+    //         $sheet->getColumnDimension($col)->setAutoSize(true);
+    //     }
+
+    //     // === Tambahkan Border (A2:M[row - 1]) === //
+    //     $styleArray = [
+    //         'borders' => [
+    //             'allBorders' => [
+    //                 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+    //                 'color' => ['argb' => 'FF000000'],
+    //             ],
+    //         ],
+    //     ];
+
+    //     $lastDataRow = $row - 1;
+    //     $sheet->getStyle("A3:N{$lastDataRow}")->applyFromArray($styleArray);
+
+    //     $filename = 'Data_Stock_' . date('YmdHis') . '.xlsx';
+    //     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    //     header("Content-Disposition: attachment; filename=\"$filename\"");
+    //     header('Cache-Control: max-age=0');
+
+    //     $writer = new Xlsx($spreadsheet);
+    //     $writer->save('php://output');
+    //     exit;
+    // }
 
     public function excelPemesananArea()
     {
