@@ -135,4 +135,28 @@ class TrackingPoCovering extends Model
             ->get()
             ->getResultArray();
     }
+
+    public function trackingDataPoBooking($date)
+    {
+        return $this->db->table('tracking_po_covering')
+            ->select('
+                tracking_po_covering.id_tpc,
+                tracking_po_covering.status,
+                tracking_po_covering.keterangan,
+                tracking_po_covering.admin,
+                open_po.no_model,
+                open_po.item_type,
+                open_po.kode_warna,
+                open_po.color,
+                open_po.kg_po,
+                open_po.created_at
+            ')
+            ->join('open_po', 'tracking_po_covering.id_po_gbn = open_po.id_po')
+            ->where('DATE(open_po.created_at)', $date)
+            ->where('open_po.penerima', 'Retno')
+            ->where('open_po.penanggung_jawab', 'Paryanti')
+            ->where('open_po.po_booking', '1')
+            ->get()
+            ->getResultArray();
+    }
 }

@@ -149,7 +149,7 @@
                                     </div>
                                     <div class="col-md-2 mb-2">
                                         <label for="">GW Kirim</label>
-                                        <input type="text" name="gw_kirim[<?= $index ?>][]" value="<?= $karung['gw_kirim'] ?>" class="form-control">
+                                        <input type="text" name="gw_kirim[<?= $index ?>][]" value="<?= $karung['gw_kirim'] ?>" class="form-control" readonly>
                                     </div>
                                     <div class="col-md-2 mb-2">
                                         <label for="">Kgs Kirim</label>

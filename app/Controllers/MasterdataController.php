@@ -475,7 +475,7 @@ class MasterdataController extends BaseController
             // Iterasi baris data material (misalnya mulai dari baris 15)
             foreach ($sheet->getRowIterator(2) as $row) {
                 $rowIndex  = $row->getRowIndex();
-                if ($rowIndex < 15) {
+                if ($rowIndex < 14) {
                     continue;
                 }
 
@@ -1057,6 +1057,7 @@ class MasterdataController extends BaseController
                 'delivery_akhir' => "<span style='$style'>{$row['delivery_akhir']}</span>",
                 'unit' => "<span style='$style'>{$row['unit']}</span>",
                 'tanggal_po' => "<span style='$style'>{$row['tanggal_po']}</span>",
+                'tanggal_import' => "<span style='$style'>{$row['created_at']}</span>",
                 'admin' => "<span style='$style'>{$row['admin']}</span>",
                 'action' => "
                 <a href='" . base_url($this->role . '/material/' . $row['id_order']) . "' class='btn btn-info btn-sm'>Detail</a>

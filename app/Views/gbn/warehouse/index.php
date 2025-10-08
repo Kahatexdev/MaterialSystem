@@ -218,7 +218,7 @@
                                     <!-- Kolom Sisa Kapasitas -->
                                     <div class="col-md-4">
                                         <label for="SisaKapasitas" class="form-label">Sisa Kapasitas</label>
-                                        <input type="text" class="form-control" id="SisaKapasitas" required>
+                                        <input type="text" class="form-control" id="SisaKapasitas" readonly required>
                                     </div>
                                 </div>
                             </div>
