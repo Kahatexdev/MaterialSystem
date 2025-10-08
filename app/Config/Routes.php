@@ -355,6 +355,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('retur/reportReturArea', 'ReturController::reportReturArea');
     $routes->get('retur/filterReturArea', 'ReturController::filterReturArea');
     $routes->get('retur/exportReturArea', 'ExcelController::exportReturArea');
+    $routes->get('retur/returSample', 'ReturController::returSample');
+    $routes->get('retur/getItemTypeForReturSample/(:any)', 'ReturController::getItemTypeForReturSample/$1');
+    $routes->post('retur/saveReturSample', 'ReturController::saveReturSample');
 
     //Po Plus
     $routes->get('poplus', 'PoTambahanController::index');
