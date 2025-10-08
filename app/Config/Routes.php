@@ -345,6 +345,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('po/listTrackingPo/(:any)', 'TrackingPoCoveringController::TrackingPo/$1');
     $routes->get('po/exportPO/(:any)', 'ExcelController::generateOpenPOCoveringExcel/$1');
     $routes->get('pesanKeCovering/(:any)', 'CoveringPemesananController::pesanKeCovering/$1');
+    $routes->get('updatePesanKeCovering/(:any)', 'CoveringPemesananController::updatePesanKeCovering/$1');
     //Retur
     $routes->get('retur', 'ReturController::index');
     $routes->post('retur/approve', 'ReturController::approve');
@@ -355,6 +356,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('retur/reportReturArea', 'ReturController::reportReturArea');
     $routes->get('retur/filterReturArea', 'ReturController::filterReturArea');
     $routes->get('retur/exportReturArea', 'ExcelController::exportReturArea');
+    $routes->get('retur/returSample', 'ReturController::returSample');
+    $routes->get('retur/getItemTypeForReturSample/(:any)', 'ReturController::getItemTypeForReturSample/$1');
+    $routes->post('retur/saveReturSample', 'ReturController::saveReturSample');
 
     //Po Plus
     $routes->get('poplus', 'PoTambahanController::index');

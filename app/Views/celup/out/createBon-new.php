@@ -199,7 +199,7 @@
                                                             <tr>
                                                                 <th class="text-center">Total Karung</th>
                                                                 <th class="text-center">Total Cones</th>
-                                                                <th class="text-center">Total GW</th>
+                                                                <!-- <th class="text-center">Total GW</th> -->
                                                                 <th class="text-center">Total NW</th>
                                                                 <th class="text-center">Total Lot</th>
                                                                 <th></th>
@@ -518,7 +518,7 @@
                                                         <tr>
                                                             <th class="text-center">Total Karung</th>
                                                             <th class="text-center">Total Cones</th>
-                                                            <th class="text-center">Total GW</th>
+                                                            <!-- <th class="text-center">Total GW</th> -->
                                                             <th class="text-center">Total NW</th>
                                                             <th class="text-center">Total Lot</th>
                                                             <th></th>
@@ -526,7 +526,7 @@
                                                          <tr>
                                                             <td><input type="number" class="form-control" id="${totalKarungId}" readonly></td>
                                                             <td><input type="float" class="form-control" id="${totalConesId}" readonly></td>
-                                                            <td><input type="float" class="form-control" id="${totalGwId}" readonly></td>
+                                                           <!-- <td><input type="float" class="form-control" id="${totalGwId}" readonly></td> -->
                                                             <td><input type="float" class="form-control" id="${totalKgsId}" readonly></td>
                                                             <td><input type="text" class="form-control" id="${totalLotId}" readonly></td>
                                                             <td></td>

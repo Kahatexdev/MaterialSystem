@@ -435,4 +435,26 @@ class CoveringPemesananController extends BaseController
 
         return redirect()->back()->with('success', 'Status pemesanan berhasil diperbarui.');
     }
+
+    public function updatePesanKeCovering($id)
+    {
+        $ketGbn = $this->request->getGet('keterangan_gbn'); // string (boleh kosong)
+        try {
+            // 1) Ambil data pemesanan master
+            $dataPemesanan = $this->pemesananModel->getPemesananSpandex($id);
+            if (!$dataPemesanan) {
+                return redirect()->back()->with('error', 'Data pemesanan tidak ditemukan.');
+            }
+
+            $this->pemesananModel
+                ->where('id_total_pemesanan', $dataPemesanan['id_total_pemesanan'])
+                ->set(['keterangan_gbn' => $ketGbn])
+                ->update();
+
+            return redirect()->back()->with('success', 'Keterangan berhasil diperbarui.');
+        } catch (\Exception $e) {
+            // tangkap error unexpected
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
 }

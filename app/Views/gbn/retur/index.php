@@ -49,6 +49,7 @@
                                                     <?= $row ?>
                                                 </option>
                                             <?php endforeach; ?>
+                                            <option value="SAMPLE">SAMPLE</option>
                                         </select>
 
                                         <input type="date" name="tgl_retur" id="tgl_retur" class="form-control"
