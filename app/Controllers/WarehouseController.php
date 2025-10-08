@@ -2858,7 +2858,7 @@ class WarehouseController extends BaseController
                 'gw'         => 0,
                 'qty_pcs'    => 0,
                 'loss'       => 0,
-                'kgs'        => $data['total_kgs'],
+                'kgs'        => 0,
                 'admin'      => session()->get('username')
             ]);
         }
