@@ -13,6 +13,8 @@ use App\Models\PemasukanModel;
 use App\Models\OutCelupModel;
 use App\Models\KategoriReturModel;
 use App\Models\ScheduleCelupModel;
+use App\Models\ClusterModel;
+use App\Models\StockModel;
 
 
 
@@ -32,6 +34,8 @@ class ReturController extends BaseController
     protected $outCelupModel;
     protected $kategoriReturModel;
     protected $scheduleCelupModel;
+    protected $clusterModel;
+    protected $stockModel;
 
 
     public function __construct()
@@ -44,6 +48,8 @@ class ReturController extends BaseController
         $this->outCelupModel = new OutCelupModel();
         $this->kategoriReturModel = new KategoriReturModel();
         $this->scheduleCelupModel = new ScheduleCelupModel();
+        $this->clusterModel = new ClusterModel();
+        $this->stockModel = new StockModel();
 
         $this->role = session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
@@ -389,5 +395,249 @@ class ReturController extends BaseController
         }
 
         return $this->response->setJSON($data);
+    }
+    public function returSample()
+    {
+        $no_model = $this->masterOrderModel->getAllNoModel();
+        $cluster = $this->clusterModel->getDataCluster();
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "Retur Sample",
+            'no_model' => $no_model,
+            'cluster' => $cluster
+        ];
+        return view($this->role . '/retur/retur-sample', $data);
+    }
+    public function getItemTypeForReturSample($idOrder)
+    {
+        $db = \Config\Database::connect();
+
+        if (!$idOrder) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'ID Order tidak ditemukan.'
+            ]);
+        }
+
+        // Data dari order (tabel material)
+        $orderItemTypes = $db->table('material')
+            ->distinct()
+            ->select('item_type')
+            ->where('id_order', $idOrder)
+            ->groupBy('item_type')
+            ->orderBy('item_type', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        // Data dari master material
+        $masterItemTypes = $db->table('master_material')
+            ->distinct()
+            ->select('item_type')
+            ->groupBy('item_type')
+            ->orderBy('item_type', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        return $this->response->setJSON([
+            'orderItemTypes'  => $orderItemTypes,
+            'masterItemTypes' => $masterItemTypes
+        ]);
+    }
+    public function saveReturSample()
+    {
+        $data = $this->request->getPost();
+        // dd($data);
+
+        $db = \Config\Database::connect();
+        // mulai transaksi
+        $db->transStart();
+
+        try {
+            $pesanTambahan = ''; // <-- flag pesan tambahan
+            // cek apakah sudah ada item type di tabel master material
+            $cekMasterMaterial = $this->masterMaterial
+                ->select('item_type')
+                ->where('item_type', $data['item_type'])
+                ->first();
+
+            // jika data material belum ada
+            if (!$cekMasterMaterial) {
+                // insert data material baru
+                $newMasterMaterial = [
+                    'item_type'      => $data['item_type'],
+                    'created_at'    => date('Y-m-d H:i:s')
+                ];
+                // lakukan insert
+                if (!$this->masterMaterial->insert($newMasterMaterial)) {
+                    throw new \Exception('Gagal menambahkan data master material baru.');
+                }
+                // tambahkan pesan tambahan
+                $pesanTambahan = 'Jangan lupa lengkapi data master material.';
+            }
+
+            // cek apakah ada data material
+            $cekMaterial = $this->materialModel
+                ->select('item_type')
+                ->where('id_order', $data['id_order'])
+                ->where('item_type', $data['item_type'])
+                ->where('kode_warna', $data['kode_warna'])
+                ->where('color', $data['warna'])
+                ->first();
+
+            // jika data material belum ada
+            if (!$cekMaterial) {
+                // insert data material baru
+                $newMaterial = [
+                    'id_order'      => $data['id_order'],
+                    'area'          => 'SAMPLE',
+                    'color'         => $data['warna'],
+                    'item_type'     => $data['item_type'],
+                    'kode_warna'    => $data['kode_warna'],
+                    'admin'         => session()->get('username'),
+                    'created_at'    => date('Y-m-d H:i:s')
+                ];
+                // lakukan insert
+                if (!$this->materialModel->insert($newMaterial)) {
+                    throw new \Exception('Gagal menambahkan data material baru.');
+                }
+            }
+            // insert data retur
+            foreach ($data['no_karung'] as $index => $noKarung) {
+                if (!isset($data['kgs'][$index]) || !isset($data['cones'][$index]) || !isset($data['cluster'][$index])) {
+                    throw new \Exception("Data karung ke-$noKarung tidak lengkap (kgs atau cones kosong).");
+                }
+                $dataRetur = [
+                    'no_model'          => $data['no_model'],
+                    'item_type'         => $data['item_type'],
+                    'kode_warna'        => $data['kode_warna'],
+                    'warna'             => $data['warna'],
+                    'area_retur'        => 'SAMPLE',
+                    'tgl_retur'         => $data['tgl_retur'],
+                    'kgs_retur'         => $data['kgs'][$index],
+                    'cns_retur'         => $data['cones'][$index],
+                    'krg_retur'         => 1,
+                    'lot_retur'         => $data['lot'],
+                    'kategori'          => $data['kategori'],
+                    'keterangan_gbn'    => 'Approve:' . (!empty($data['keterangan']) ? $data['keterangan'] : ''),
+                    'waktu_acc_retur'   => date('Y-m-d H:i:s'),
+                    'admin'             => session()->get('username'),
+                    'created_at'        => date('Y-m-d H:i:s')
+                ];
+                // lakukan insert
+                if (!$this->returModel->insert($dataRetur)) {
+                    throw new \Exception('Gagal menambahkan data retur.');
+                }
+
+                // ambil ID retur yang baru saja diinsert
+                $idRetur = $this->returModel->getInsertID();
+
+                // insert out celup
+                $dataOutCelup = [
+                    'id_retur'      => $idRetur,
+                    'no_model'      => $data['no_model'],
+                    'no_karung'     => $noKarung,
+                    'kgs_kirim'     => $data['kgs'][$index],
+                    'cns_kirim'     => $data['cones'][$index],
+                    'lot_kirim'     => $data['lot'],
+                    'l_m_d'         => '',
+                    'admin'         => session()->get('username'),
+                    'created_at'    => date('Y-m-d H:i:s')
+                ];
+                // lakukan insert
+                if (!$this->outCelupModel->insert($dataOutCelup)) {
+                    throw new \Exception('Gagal menambahkan data out celup.');
+                }
+
+                // ambil ID out celup yang baru saja diinsert
+                $idOutCelup = $this->outCelupModel->getInsertID();
+
+                // insert out celup
+                $dataPemasukan = [
+                    'id_out_celup'  => $idOutCelup,
+                    'tgl_masuk'     => date('Y-m-d'),
+                    'nama_cluster'  => $data['cluster'][$index],
+                    'out_jalur'     => '0',
+                    'admin'         => session()->get('username'),
+                    'created_at'    => date('Y-m-d H:i:s')
+                ];
+                // lakukan insert
+                if (!$this->pemasukanModel->insert($dataPemasukan)) {
+                    throw new \Exception('Gagal menambahkan data pemasukan.');
+                }
+
+                // ambil ID out celup yang baru saja diinsert
+                $idPemasukan = $this->pemasukanModel->getInsertID();
+
+                // cek apakah ada data stock
+                $cekStock = $this->stockModel
+                    ->select('*')
+                    ->where('no_model', $data['no_model'])
+                    ->where('item_type', $data['item_type'])
+                    ->where('kode_warna', $data['kode_warna'])
+                    ->where('warna', $data['warna'])
+                    ->where('lot_stock', $data['lot'])
+                    ->where('nama_cluster', $data['cluster'][$index])
+                    ->first();
+
+                // jika stock sudah ada 
+                if ($cekStock) {
+                    $updateStock = [
+                        'kgs_in_out' => $cekStock['kgs_in_out'] + $data['kgs'][$index],
+                        'cns_in_out' => $cekStock['cns_in_out'] + $data['cones'][$index],
+                        'krg_in_out' => $cekStock['krg_in_out'] + 1,
+                    ];
+
+                    if (!$this->stockModel->update($cekStock['id_stock'], $updateStock)) {
+                        throw new \Exception('Gagal memperbarui data stok.');
+                    }
+
+                    $idStock = $cekStock['id_stock'];
+                } else {
+                    // Insert stok baru
+                    $newStock = [
+                        'no_model'     => $data['no_model'],
+                        'item_type'    => $data['item_type'],
+                        'kode_warna'   => $data['kode_warna'],
+                        'warna'        => $data['warna'],
+                        'nama_cluster' => $data['cluster'][$index],
+                        'kgs_in_out'   => $data['kgs'][$index],
+                        'cns_in_out'   => $data['cones'][$index],
+                        'krg_in_out'   => 1,
+                        'lot_stock'    => $data['lot'],
+                        'admin'        => session()->get('username'),
+                        'created_at'   => date('Y-m-d H:i:s'),
+                    ];
+                    if (!$this->stockModel->insert($newStock)) {
+                        throw new \Exception('Gagal menambahkan data stok baru.');
+                    }
+                    $idStock = $this->stockModel->getInsertID();
+                }
+
+                // update id stock di tabel pemasukan
+                if (!$this->pemasukanModel->update($idPemasukan, ['id_stock' => $idStock])) {
+                    throw new \Exception('Gagal mengupdate id_stock pada pemasukan.');
+                }
+            }
+            // commit transaksi kalau semua sukses
+            $db->transCommit();
+
+
+            session()->setFlashdata([
+                'status'  => 'success',
+                'message' => 'Data retur berhasil disimpan.' . ($pesanTambahan ? ' ' . $pesanTambahan : '')
+            ]);
+
+            return redirect()->to(base_url($this->role . '/retur/returSample'));
+        } catch (\Exception $e) {
+            $db->transRollback();
+
+            session()->setFlashdata([
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ]);
+
+            return redirect()->to(base_url($this->role . '/retur/returSample'));
+        }
     }
 }

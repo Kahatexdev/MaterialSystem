@@ -169,6 +169,15 @@
             box-sizing: border-box;
             /* biar border masuk hitungan layout */
         }
+
+        .tgl-datang {
+            margin: 0;
+            font-size: 15px;
+            font-weight: bold;
+            padding-left: 5px;
+            /* padding-right: 5px; */
+            text-align: right;
+        }
     </style>
 </head>
 
@@ -218,6 +227,7 @@
                     <div class="footer-left">
                         <!-- <div class="lot-label">LOT</div> -->
                         <div class="lot-value"> <?= $row['lot_kirim'] ?></div>
+
                     </div>
                     <div class="footer-right">
                         No Karung
@@ -225,6 +235,7 @@
                         <?= htmlspecialchars($row['operator_packing'] ?? '-', ENT_QUOTES) ?> | <?= htmlspecialchars($row['shift'] ?? '-', ENT_QUOTES) ?>
                     </div>
                 </div>
+                <div class="tgl-datang"><?= $dataBon['tgl_datang'] ?></div>
             </div>
         </div>
         </div>

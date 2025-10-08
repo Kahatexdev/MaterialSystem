@@ -40,6 +40,7 @@ class Filters extends BaseFilters
         'covering' => \App\Filters\CoverAuth::class,
         'monitoring' => \App\Filters\MonitoringAuth::class,
         'area' => \App\Filters\AreaAuth::class,
+        'kantordepan' => \App\Filters\KantorDepanAuth::class,
     ];
 
     /**

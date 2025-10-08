@@ -98,6 +98,7 @@
                             <option value="celup">Celup</option>
                             <option value="covering">Covering</option>
                             <option value="area">Area</option>
+                            <option value="kantordepan">Kantor Depan</option>
                             <option value="monitoring">Monitoring</option>
                         </select>
                     </div>
@@ -142,6 +143,7 @@
                             <option value="celup">Celup</option>
                             <option value="covering">Covering</option>
                             <option value="area">Area</option>
+                            <option value="kantordepan">Kantor Depan</option>
                             <option value="monitoring">Monitoring</option>
                         </select>
                     </div>

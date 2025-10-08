@@ -148,7 +148,7 @@ class PemesananController extends BaseController
     public function detailPemesanan($area, $jenis, $tglPakai)
     {
         $dataPemesanan = $this->totalPemesananModel->getDataPemesanan($area, $jenis, $tglPakai);
-        // dd ($dataPemesanan);
+
         if (!is_array($dataPemesanan)) {
             $dataPemesanan = [];
         }
@@ -161,7 +161,6 @@ class PemesananController extends BaseController
             $item['sudah_pesan_spandex'] = $cekSpandex ? true : false;
             $item['status'] = $cekSpandex ? $cekSpandex['status'] : 'BELUM PESAN';
         }
-        // dd($dataPemesanan);
 
         $listPemesanan = $this->pemesananSpandexKaretModel->getListPemesananSpandexKaret($area, $jenis, $tglPakai);
 
@@ -586,24 +585,25 @@ class PemesananController extends BaseController
 
             // Tambahkan ke array session
             $manualDelivery[] = [
-                'id_pengeluaran' => $row['id_pengeluaran'] ?? null,
-                'id_out_celup'   => $row['id_out_celup'],
-                'tgl_pakai'      => $row['tgl_pakai'],
-                'no_model'       => $row['no_model']    ?? '',
-                'item_type'      => $row['item_type']   ?? '',
-                'jenis'          => $row['jenis']       ?? '',
-                'kode_warna'     => $row['kode_warna']  ?? '',
-                'warna'          => $row['warna']       ?? '',
-                'area_out'       => $row['area_out'],
-                'no_karung'      => $row['no_karung'],
-                'tgl_out'        => $row['tgl_out'],
-                'kgs_out'        => $row['kgs_out']     ?? $row['ttl_kg'] ?? 0,
-                'cns_out'        => $row['cns_out']     ?? $row['ttl_cns'] ?? 0,
-                'krg_out'        => 0, // asumsi default
-                'lot_out'        => $row['lot_out']     ?? '',
-                'nama_cluster'   => $row['nama_cluster'] ?? '',
-                'admin'          => $session->get('username'),
-                'jenis'          => $row['jenis'],
+                'id_pengeluaran'        => $row['id_pengeluaran'] ?? null,
+                'id_out_celup'          => $row['id_out_celup'],
+                'tgl_pakai'             => $row['tgl_pakai'],
+                'no_model'              => $row['no_model']    ?? '',
+                'item_type'             => $row['item_type']   ?? '',
+                'jenis'                 => $row['jenis']       ?? '',
+                'kode_warna'            => $row['kode_warna']  ?? '',
+                'warna'                 => $row['warna']       ?? '',
+                'area_out'              => $row['area_out'],
+                'no_karung'             => $row['no_karung'],
+                'tgl_out'               => $row['tgl_out'],
+                'kgs_out'               => ($row['status'] ?? '') === 'Pengiriman Area' ? 0 : ($row['kgs_out'] ?? $row['ttl_kg'] ?? 0),
+                'cns_out'               => ($row['status'] ?? '') === 'Pengiriman Area' ? 0 : ($row['cns_out'] ?? $row['ttl_cns'] ?? 0),
+                'krg_out'               => 0, // asumsi default
+                'lot_out'               => ($row['status'] ?? '') === 'Pengiriman Area' ? '' : ($row['lot_out'] ?? ''),
+                'nama_cluster'          => $row['nama_cluster'] ?? '',
+                'admin'                 => $session->get('username'),
+                'jenis'                 => $row['jenis'],
+                'status_pengeluaran'    => $postData['status'],
             ];
 
             $addedCount++;
@@ -1071,11 +1071,12 @@ class PemesananController extends BaseController
         }
 
         // Expect: kgs_out[ID] = val, cns_out[ID] = val, lot_out[ID] = val, (opsional) krg_out[ID] = val
-        $kgsById = $post['kgs_out'] ?? [];
-        $cnsById = $post['cns_out'] ?? [];
-        $krgById = $post['krg_out'] ?? []; // kalau tidak dipakai, hapus semua bagian KRG
-        $lotById = $post['lot_out'] ?? [];
-        $jenisId = $post['jenis'] ?? [];
+        $kgsById    = $post['kgs_out'] ?? [];
+        $cnsById    = $post['cns_out'] ?? [];
+        $krgById    = $post['krg_out'] ?? []; // kalau tidak dipakai, hapus semua bagian KRG
+        $lotById    = $post['lot_out'] ?? [];
+        $jenisId    = $post['jenis'] ?? [];
+        $statusId   = $post['statusPengeluaran'] ?? [];
 
         $sessionUser  = (string) session('username');
         $updatedCount = 0;
@@ -1089,23 +1090,72 @@ class PemesananController extends BaseController
                 $errors[] = "ID $id: pengeluaran tidak ditemukan.";
                 continue;
             }
-            // Siapkan data update pengeluaran
-            $dataPengeluaran = [
-                'status' => 'Pengiriman Area',
-                'admin'  => $sessionUser,
-                'updated_at'  => date('Y-m-d H:i:s'),
-            ];
 
-            if (isset($kgsById[$id]) && $kgsById[$id] !== '') $dataPengeluaran['kgs_out'] = (float) $kgsById[$id];
-            if (isset($cnsById[$id]) && $cnsById[$id] !== '') $dataPengeluaran['cns_out'] = (int)   $cnsById[$id];
-            if (isset($krgById[$id]) && $krgById[$id] !== '') $dataPengeluaran['krg_out'] = (int)   $krgById[$id];
-            if (isset($lotById[$id]) && $lotById[$id] !== '') $dataPengeluaran['lot_out'] = (string)$lotById[$id];
+            if ($jenisId[$id] == "SPANDEX" || $jenisId[$id] == "KARET") {
+                // jika yg di pilih pemesanan yg masih kurang kg pengirimannya
+                if ($statusId[$id] == "Pengiriman Area") {
+                    if ($kgsById[$id] > 0) {
+                        // insert pengeluaran baru
+                        $scndOut = [
+                            'id_psk' => $record['id_psk'],
+                            'id_total_pemesanan' => $record['id_total_pemesanan'],
+                            'area_out' => $record['area_out'],
+                            'tgl_out' => $record['tgl_out'],
+                            'kgs_out' => $kgsById[$id],
+                            'cns_out' => $cnsById[$id],
+                            'krg_out' => 0,
+                            'lot_out' => $lotById[$id],
+                            'status' => "Pengiriman Area",
+                            'keterangan_gbn' => $record['keterangan_gbn'],
+                            'admin' => $sessionUser,
+                            'updated_at'  => date('Y-m-d H:i:s')
+                        ];
+                        $this->db->transStart();
+                        if (!$this->pengeluaranModel->insert($scndOut)) {
+                            $this->db->transRollback();
+                            $errors[] = "gagal insert pengeluaran baru.";
+                            continue;
+                        }
+                    }
+                } else {
+                    // Siapkan data update pengeluaran
+                    $dataPengeluaran = [
+                        'status' => 'Pengiriman Area',
+                        'admin'  => $sessionUser,
+                        'updated_at'  => date('Y-m-d H:i:s'),
+                    ];
 
-            $this->db->transStart();
-            if (!$this->pengeluaranModel->update($id, $dataPengeluaran)) {
-                $this->db->transRollback();
-                $errors[] = "ID $id: gagal update pengeluaran.";
-                continue;
+                    if (isset($kgsById[$id]) && $kgsById[$id] !== '') $dataPengeluaran['kgs_out'] = (float) $kgsById[$id];
+                    if (isset($cnsById[$id]) && $cnsById[$id] !== '') $dataPengeluaran['cns_out'] = (int)   $cnsById[$id];
+                    if (isset($krgById[$id]) && $krgById[$id] !== '') $dataPengeluaran['krg_out'] = (int)   $krgById[$id];
+                    if (isset($lotById[$id]) && $lotById[$id] !== '') $dataPengeluaran['lot_out'] = (string)$lotById[$id];
+
+                    $this->db->transStart();
+                    if (!$this->pengeluaranModel->update($id, $dataPengeluaran)) {
+                        $this->db->transRollback();
+                        $errors[] = "ID $id: gagal update pengeluaran.";
+                        continue;
+                    }
+                }
+            } else {
+                // Siapkan data update pengeluaran
+                $dataPengeluaran = [
+                    'status' => 'Pengiriman Area',
+                    'admin'  => $sessionUser,
+                    'updated_at'  => date('Y-m-d H:i:s'),
+                ];
+
+                if (isset($kgsById[$id]) && $kgsById[$id] !== '') $dataPengeluaran['kgs_out'] = (float) $kgsById[$id];
+                if (isset($cnsById[$id]) && $cnsById[$id] !== '') $dataPengeluaran['cns_out'] = (int)   $cnsById[$id];
+                if (isset($krgById[$id]) && $krgById[$id] !== '') $dataPengeluaran['krg_out'] = (int)   $krgById[$id];
+                if (isset($lotById[$id]) && $lotById[$id] !== '') $dataPengeluaran['lot_out'] = (string)$lotById[$id];
+
+                $this->db->transStart();
+                if (!$this->pengeluaranModel->update($id, $dataPengeluaran)) {
+                    $this->db->transRollback();
+                    $errors[] = "ID $id: gagal update pengeluaran.";
+                    continue;
+                }
             }
 
             // jika bb benang & nylon update stock

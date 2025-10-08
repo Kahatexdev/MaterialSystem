@@ -24,6 +24,12 @@
                 <div class="d-flex align-items-center">
                     <ul class="navbar-nav justify-content-end">
                         <li class="nav-item d-flex align-items-center">
+                            <a href="<?= base_url($role . '/retur/returSample') ?>" class="nav-link text-body font-weight-bold px-2">
+                                <i class="fas fa-th-large"></i>
+                                <span class="d-lg-inline-block d-none ms-1">Retur Sample</span>
+                            </a>
+                        </li>
+                        <li class="nav-item d-flex align-items-center">
                             <a href="<?= base_url($role . '/retur/listBarcodeRetur') ?>" class="nav-link text-body font-weight-bold px-2">
                                 <i class="fas fa-barcode"></i>
                                 <span class="d-lg-inline-block d-none ms-1">Barcode</span>

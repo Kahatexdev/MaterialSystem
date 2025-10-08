@@ -554,6 +554,7 @@ class ScheduleController extends BaseController
                 'ket_schedule' => $scheduleData['ket_schedule'][$index] ?? null,
                 'po_plus' => $scheduleData['po_plus'][$index] ?? 0,
                 'user_cek_status' => session()->get('username'),
+                'admin' => session()->get('username'),
                 'created_at' => date('Y-m-d H:i:s'),
             ];
         }
@@ -801,7 +802,9 @@ class ScheduleController extends BaseController
                 'ket_schedule'     => $scheduleData['ket_schedule'][$i] ?? null,
                 'last_status'      => $last_status,
                 'user_cek_status'  => session()->get('username'),
+                'admin'  => session()->get('username'),
                 'created_at'       => date('Y-m-d H:i:s'),
+                'updated_at'       => date('Y-m-d H:i:s'),
             ];
 
             $i++; // Naikkan counter agar indeks scheduleData selalu berurutan
@@ -1647,7 +1650,7 @@ class ScheduleController extends BaseController
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin', 'left')
             ->join('open_po', 'open_po.no_model = schedule_celup.no_model 
                     AND open_po.item_type = schedule_celup.item_type 
-                    AND open_po.kode_warna = schedule_celup.kode_warna', 'left')
+                    AND open_po.kode_warna = schedule_celup.kode_warna')
             ->where('schedule_celup.id_celup !=', null)
             ->where('schedule_celup.id_mesin !=', null)
             ->groupBy('schedule_celup.id_celup');
