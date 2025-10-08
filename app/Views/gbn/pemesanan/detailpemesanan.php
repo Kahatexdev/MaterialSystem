@@ -163,7 +163,18 @@
                                                     <i class="fas fa-layer-group"></i> Pesan <?= ucfirst($data['jenis']) ?>
                                                 </button>
                                             <?php else: ?>
-                                                <span class="badge bg-info"><?= $data['status'] ?></span>
+                                                <!-- <span class="badge bg-info"><?= $data['status'] ?></span> -->
+                                                <button
+                                                    type="button"
+                                                    class="btn bg-gradient-warning btn-sm btn-open-modal-pesan"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalPesan"
+                                                    data-id="<?= $data['id_total_pemesanan'] ?>"
+                                                    data-jenis="<?= $data['jenis'] ?>"
+                                                    data-ketGbn="<?= $data['ket_gbn'] ?>"
+                                                    data-action="<?= base_url($role . '/updatePesanKeCovering/' . $data['id_total_pemesanan']) ?>">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </button>
                                             <?php endif; ?>
                                         <?php else: ?>
                                             <a href="<?= base_url($role . '/selectClusterWarehouse/' . $data['id_total_pemesanan']) . '?Area=' . $area . '&KgsPesan=' . $data['ttl_kg'] . '&CnsPesan=' . $data['ttl_cns'] ?>"

@@ -148,7 +148,7 @@ class PemesananController extends BaseController
     public function detailPemesanan($area, $jenis, $tglPakai)
     {
         $dataPemesanan = $this->totalPemesananModel->getDataPemesanan($area, $jenis, $tglPakai);
-        // dd ($dataPemesanan);
+
         if (!is_array($dataPemesanan)) {
             $dataPemesanan = [];
         }
@@ -161,7 +161,6 @@ class PemesananController extends BaseController
             $item['sudah_pesan_spandex'] = $cekSpandex ? true : false;
             $item['status'] = $cekSpandex ? $cekSpandex['status'] : 'BELUM PESAN';
         }
-        // dd($dataPemesanan);
 
         $listPemesanan = $this->pemesananSpandexKaretModel->getListPemesananSpandexKaret($area, $jenis, $tglPakai);
 

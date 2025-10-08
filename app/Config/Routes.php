@@ -345,6 +345,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('po/listTrackingPo/(:any)', 'TrackingPoCoveringController::TrackingPo/$1');
     $routes->get('po/exportPO/(:any)', 'ExcelController::generateOpenPOCoveringExcel/$1');
     $routes->get('pesanKeCovering/(:any)', 'CoveringPemesananController::pesanKeCovering/$1');
+    $routes->get('updatePesanKeCovering/(:any)', 'CoveringPemesananController::updatePesanKeCovering/$1');
     //Retur
     $routes->get('retur', 'ReturController::index');
     $routes->post('retur/approve', 'ReturController::approve');

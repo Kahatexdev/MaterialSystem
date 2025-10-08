@@ -510,7 +510,7 @@ class CelupController extends BaseController
             'title' => "Out Celup",
             'no_model' => $no_model,
         ];
-        return view($this->role . '/out/createBon-new', $data);
+        return view($this->role . '/out/createBon', $data);
     }
     public function getItem($id)
     {
