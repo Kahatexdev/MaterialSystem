@@ -5195,4 +5195,3 @@ class PdfController extends BaseController
         $pdf->SetXY($xStart, $yStart + $maxHeight);
     }
 }
- 
