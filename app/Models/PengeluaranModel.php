@@ -616,24 +616,30 @@ class PengeluaranModel extends Model
             ->where('p.status', $data['status'])
             ->where('pe.tgl_pakai', $data['tgl_pakai'])
             ->where('mm.jenis', $data['jenis'])
-            ->where('p.area_out', $data['area'])
-            // Filter no_model
-            // ->groupStart()
-            // ->where('sc.no_model', $data['no_model'])
-            // ->orWhere('mo.no_model', $data['no_model'])
-            // ->groupEnd()d
-            // Filter item_type
-            // ->groupStart()
-            // ->where('sc.item_type', $data['item_type'])
-            // ->orWhere('m.item_type', $data['item_type'])
-            // ->groupEnd()
-            // // Filter kode_warna
-            // ->groupStart()
-            // ->where('sc.kode_warna', $data['kode_warna'])
-            // ->orWhere('m.kode_warna', $data['kode_warna'])
-            // ->groupEnd()
-            // Group by id_pengeluaran untuk distinct
-            ->groupBy('p.id_pengeluaran')
+            ->where('p.area_out', $data['area']);
+        // Filter no_model
+        // ->groupStart()
+        // ->where('sc.no_model', $data['no_model'])
+        // ->orWhere('mo.no_model', $data['no_model'])
+        // ->groupEnd()d
+        // Filter item_type
+        // ->groupStart()
+        // ->where('sc.item_type', $data['item_type'])
+        // ->orWhere('m.item_type', $data['item_type'])
+        // ->groupEnd()
+        // // Filter kode_warna
+        // ->groupStart()
+        // ->where('sc.kode_warna', $data['kode_warna'])
+        // ->orWhere('m.kode_warna', $data['kode_warna'])
+        // ->groupEnd()
+        // Group by id_pengeluaran untuk distinct
+
+        // kondisi tambahan khusus status tertentu
+        if ($data['status'] === 'Pengiriman Area') {
+            $builder->where('p.kgs_out >', 0);
+        }
+
+        $builder->groupBy('p.id_pengeluaran')
             ->orderBy('mo.no_model');
 
         return $builder
