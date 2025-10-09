@@ -229,6 +229,16 @@
                         </thead>
                         <tbody>
                             <?php $sessionData = session()->get('manual_delivery') ?? []; ?>
+                            <?php if (!empty($sessionData)): ?>
+                                <script>
+                                    Swal.fire({
+                                        icon: 'warning',
+                                        title: 'PERHATIAN',
+                                        html: 'CEK KEMBALI DATA PENGELUARAN SEBELUM DISIMPAN.<BR>PASTIKAN DATA SUDAH BENAR!',
+                                        confirmButtonText: 'OK'
+                                    });
+                                </script>
+                            <?php endif; ?>
                             <?php foreach ($sessionData as $i => $row): ?>
                                 <tr>
                                     <td class="text-center">
@@ -266,8 +276,21 @@
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
+
                         </tbody>
                     </table>
+                    <?php if (!empty($sessionData)): ?>
+                        <div class="w-100 text-center my-4 p-3 rounded-4 shadow-sm border"
+                            style="background: linear-gradient(135deg, #fffef5, #fffdf0); border-color: #f1c40f; color: #3c3c3c;">
+                            <i class="fas fa-triangle-exclamation me-2" style="color: #d4a017; font-size: 1.2rem;"></i>
+                            <span style="font-weight: 600; font-size: 30px; color: #d4a017;">
+                                PERIKSA KEMBALI SELURUH DATA SEBELUM MENYIMPAN!
+                            </span>
+                            <p class="mt-1 mb-0" style="font-size: 20px; ">
+                                PASTIKAN NILAI <strong>KGS</strong>, <strong>CONES</strong>, dan <strong>LOT</strong> SUDAH BENAR.
+                            </p>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <div class="row mt-3">
                     <div class="col-md-3">
