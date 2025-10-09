@@ -1286,7 +1286,7 @@ class ExcelController extends BaseController
     // {
     //     $noModel = $this->request->getGet('no_model');
     //     $warna = $this->request->getGet('warna');
-    //     $filteredData = $this->stockModel->searchStockDetail($noModel, $warna);
+    //     $filteredData = $this->pemasukanModel->searchStockDetail($noModel, $warna);
 
     //     // Buat Spreadsheet
     //     $spreadsheet = new Spreadsheet();
