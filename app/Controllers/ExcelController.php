@@ -2995,10 +2995,10 @@ class ExcelController extends BaseController
                     $newSheet->setCellValue('G' . $row, $item['tgl_out'] ?: '-');
                     $newSheet->setCellValue('H' . $row, $item['po_plus'] == '1' ? 'YA' : '');
                     $newSheet->setCellValue('I' . $row, $item['nama_cluster']);
-                    $newSheet->setCellValue('J' . $row, isset($item['kgs_out']) ? number_format($item['kgs_out'], 2, '.', '') : 0);
-                    $newSheet->setCellValue('K' . $row, $item['cns_out'] ?: 0);
-                    $newSheet->setCellValue('L' . $row, $item['krg_out'] ?: 0);
-                    $newSheet->setCellValue('M' . $row, $item['lot_out'] ?: '-');
+                    $newSheet->setCellValue('J' . $row, isset($item['kgs_other_out']) ? number_format($item['kgs_other_out'], 2, '.', '') : 0);
+                    $newSheet->setCellValue('K' . $row, $item['cns_other_out'] ?: 0);
+                    $newSheet->setCellValue('L' . $row, $item['krg_other_out'] ?: 0);
+                    $newSheet->setCellValue('M' . $row, $item['lot_other_out'] ?: '-');
                     $newSheet->setCellValue('N' . $row, $item['admin'] ?: '-');
                     $row++;
                 }
