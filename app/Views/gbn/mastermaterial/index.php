@@ -52,7 +52,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Deskripsi</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jenis</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Ukuran</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
+                            <!-- <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th> -->
                         </tr>
                     </thead>
                     <tbody>
@@ -175,14 +175,17 @@
                         "data": "jenis"
                     },
                     {
-                        "data": "ukuran"
-                    },
-                    {
-                        "data": "action",
+                        "data": "ukuran",
                         "orderable": false,
                         "searchable": false,
                         "className": "text-center"
-                    }
+                    },
+                    // {
+                    //     // "data": "action",
+                    //     "orderable": false,
+                    //     "searchable": false,
+                    //     "className": "text-center"
+                    // }
                 ],
                 "order": [
                     [1, "asc"]
