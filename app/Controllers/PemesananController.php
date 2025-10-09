@@ -3233,4 +3233,53 @@ class PemesananController extends BaseController
 
         return redirect()->back()->with('success', "Selesai. Total terupdate: {$totalUpdated}.");
     }
+
+    public function getFilterArea($role = null)
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'ok' => false,
+                'message' => 'AJAX only'
+            ]);
+        }
+
+        $noModel = trim((string) $this->request->getGet('no_model'));
+        if ($noModel === '') {
+            return $this->response->setJSON(['ok' => true, 'areas' => []]);
+        }
+
+        $client = \Config\Services::curlrequest();
+
+        $resp   = $client->get('http://172.23.44.14/api/getFilterArea', [
+            'http_errors' => false,
+            'timeout'     => 5,
+            'query'       => ['no_model' => $noModel],
+        ]);
+
+        if ($resp->getStatusCode() !== 200) {
+            return $this->response->setStatusCode(502)->setJSON([
+                'ok' => false,
+                'message' => 'Upstream error'
+            ]);
+        }
+
+        $json  = json_decode((string) $resp->getBody(), true) ?: [];
+        $areas = [];
+
+        foreach ($json as $row) {
+            if (is_array($row) && isset($row['area'])) {
+                $areas[] = trim($row['area']);
+            } elseif (is_string($row)) {
+                $areas[] = trim($row);
+            }
+        }
+
+        // bersihkan kosong & duplikat
+        $areas = array_values(array_unique(array_filter($areas)));
+
+        return $this->response->setJSON([
+            'ok'    => true,
+            'areas' => $areas,
+        ]);
+    }
 }
