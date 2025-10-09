@@ -3843,490 +3843,899 @@ class ExcelController extends BaseController
     //     exit;
     // }
 
+    // public function exportPermintaanKaret()
+    // {
+    //     $tglAwal  = $this->request->getGet('tanggal_awal');
+    //     $tglAkhir = $this->request->getGet('tanggal_akhir');
+
+    //     // Ambil data dari Model (sudah benar sesuai user)
+    //     $data = $this->pemesananModel->getFilterPemesananKaret($tglAwal, $tglAkhir);
+    //     // dd ($data);
+    //     // Sort supaya merge blok rapi (tgl_pakai, item_type, color, kode_warna, no_model)
+    //     usort($data, function ($a, $b) {
+    //         return [$a['tgl_pakai'], $a['item_type'], $a['color'], $a['kode_warna'], $a['no_model']]
+    //             <=> [$b['tgl_pakai'], $b['item_type'], $b['color'], $b['kode_warna'], $b['no_model']];
+    //     });
+    //     // dd ($data);
+    //     $spreadsheet = new Spreadsheet();
+    //     $sheet = $spreadsheet->getActiveSheet();
+
+    //     // Judul
+    //     $sheet->mergeCells('A1:U1');
+    //     $sheet->setCellValue('A1', 'DATA PERMINTAAN KARET ' . date('d-M-Y', strtotime($tglAwal)) . ' s/d ' . date('d-M-Y', strtotime($tglAkhir)));
+    //     $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+    //     $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+    //     // Header
+    //     $headers = ['TANGGAL PAKAI', 'ITEM TYPE', 'WARNA', 'KODE WARNA', 'NO MODEL'];
+    //     $col = 'A';
+    //     foreach ($headers as $header) {
+    //         $sheet->mergeCells($col . '2:' . $col . '3');
+    //         $sheet->setCellValue($col . '2', $header);
+    //         $sheet->getStyle($col . '2')->getFont()->setBold(true);
+    //         $sheet->getStyle($col . '2')->getAlignment()
+    //             ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+    //             ->setVertical(Alignment::VERTICAL_CENTER);
+    //         $col++;
+    //     }
+
+    //     // Data & Total Result Header
+    //     $sheet->mergeCells('F2:F3')->setCellValue('F2', 'Data');
+    //     $sheet->mergeCells('G2:G3')->setCellValue('G2', 'Total Result');
+    //     $sheet->getStyle('F2:G2')->getFont()->setBold(true);
+    //     $sheet->getStyle('F2:G2')->getAlignment()
+    //         ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+    //         ->setVertical(Alignment::VERTICAL_CENTER);
+
+    //     // Header Area
+    //     $areaHeaders = ['KK1A', 'KK1B', 'KK2A', 'KK2B', 'KK2C', 'KK5G', 'KK7K', 'KK7L', 'KK8D', 'KK8F', 'KK8J', 'KK9D', 'KK10', 'KK11M'];
+    //     $sheet->mergeCells('H2:U2')->setCellValue('H2', 'AREA');
+    //     $sheet->getStyle('H2')->getFont()->setBold(true);
+    //     $col = 'H';
+    //     foreach ($areaHeaders as $header) {
+    //         $sheet->setCellValue($col . '3', $header);
+    //         $sheet->getStyle($col . '3')->getFont()->setBold(true);
+    //         $sheet->getStyle($col . '3')->getAlignment()
+    //             ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+    //             ->setVertical(Alignment::VERTICAL_CENTER);
+    //         $col++;
+    //     }
+
+    //     // --- Tulis data per no_model (TIDAK di-concat/implode) ---
+    //     $row = 4;
+    //     $dataStartRow = $row;
+
+    //     // Penanda merge HANYA untuk kolom A, B, C, D (Tgl_Pakai, Item Type, Warna, Kode)
+    //     $mergeStart = [
+    //         'tgl_pakai' => $row,
+    //         'item_type'  => $row,
+    //         'color'      => $row,
+    //         'kode_warna' => $row,
+    //     ];
+    //     $prev = [
+    //         'tgl_pakai' => null,
+    //         'item_type'  => null,
+    //         'color'      => null,
+    //         'kode_warna' => null,
+    //     ];
+
+    //     foreach ($data as $item) {
+    //         // dd ($item);
+    //         // Kol A: Tanggal pakai (di merge blok)
+    //         if ($item['tgl_pakai'] != $prev['tgl_pakai']) {
+    //             if ($prev['tgl_pakai'] != '') {
+    //                 $sheet->mergeCells("A{$mergeStart['tgl_pakai']}:A" . ($row - 1));
+    //             }
+    //             $sheet->setCellValue("A{$row}", $item['tgl_pakai']);
+    //             $mergeStart['tgl_pakai'] = $row;
+    //         }
+
+    //         // Kol B: Item Type (merge blok)
+    //         if ($item['item_type'] !== $prev['item_type']) {
+    //             if ($prev['item_type'] !== null) {
+    //                 $sheet->mergeCells("B{$mergeStart['item_type']}:B" . ($row - 1));
+    //                 $sheet->getStyle("B{$mergeStart['item_type']}:B" . ($row - 1))
+    //                     ->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setHorizontal(Alignment::HORIZONTAL_LEFT);
+    //             }
+    //             $sheet->setCellValue("B{$row}", $item['item_type']);
+    //             $mergeStart['item_type'] = $row;
+    //         }
+
+    //         // Kol C: Warna (merge blok)
+    //         if ($item['color'] !== $prev['color'] || $item['item_type'] !== $prev['item_type']) {
+    //             if ($prev['color'] !== null) {
+    //                 $sheet->mergeCells("C{$mergeStart['color']}:C" . ($row - 1));
+    //                 $sheet->getStyle("C{$mergeStart['color']}:C" . ($row - 1))
+    //                     ->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setHorizontal(Alignment::HORIZONTAL_LEFT);
+    //             }
+    //             $sheet->setCellValue("C{$row}", $item['color']);
+    //             $mergeStart['color'] = $row;
+    //         }
+
+    //         // Kol D: Kode Warna (merge blok) + tampilkan keterangan KELOS 2X bila ada
+    //         $kodeWarnaTampil = ($item['keterangan'] === 'KELOS 2X')
+    //             ? $item['kode_warna'] . ' (' . $item['keterangan'] . ')'
+    //             : $item['kode_warna'];
+
+    //         if ($item['kode_warna'] !== $prev['kode_warna'] || $item['color'] !== $prev['color'] || $item['item_type'] !== $prev['item_type']) {
+    //             if ($prev['kode_warna'] !== null) {
+    //                 $sheet->mergeCells("D{$mergeStart['kode_warna']}:D" . ($row - 1));
+    //                 $sheet->getStyle("D{$mergeStart['kode_warna']}:D" . ($row - 1))
+    //                     ->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setHorizontal(Alignment::HORIZONTAL_LEFT);
+    //             }
+    //             $sheet->setCellValue("D{$row}", $kodeWarnaTampil);
+    //             $mergeStart['kode_warna'] = $row;
+    //         }
+
+    //         // Kol E: NO MODEL (JANGAN merge) — tampilkan apa adanya, beri (+) jika po_tambahan=1
+    //         $noModel = $item['no_model'] . ($item['po_tambahan'] == '1' ? '(+)' : '');
+    //         $sheet->setCellValue("E{$row}", $noModel);
+
+    //         // Baris 1: JALAN MC
+    //         $sheet->setCellValue("F{$row}", 'Sum - JALAN MC:');
+    //         $sheet->setCellValue("G{$row}", "=SUM(H{$row}:U{$row})");
+    //         $col = 'H';
+    //         foreach ($areaHeaders as $area) {
+    //             $sheet->setCellValue($col . $row, ($item['admin'] == $area) ? (float)$item['ttl_jl_mc'] : 0);
+    //             $col++;
+    //         }
+    //         $row++;
+
+    //         // Baris 2: TOTAL PESAN (KG)
+    //         $sheet->setCellValue("F{$row}", 'Sum - TOTAL PESAN (KG):');
+    //         // format angka 2 desimal
+    //         $sheet->getStyle("G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+    //         $sheet->setCellValue("G{$row}", "=SUM(H{$row}:U{$row})");
+    //         $col = 'H';
+    //         foreach ($areaHeaders as $area) {
+    //             $value = ($item['admin'] == $area) ? (float)$item['ttl_kg'] : 0;
+
+    //             if ($value != 0) {
+    //                 // hanya format kalau bukan 0
+    //                 $sheet->getStyle($col . $row)
+    //                     ->getNumberFormat()
+    //                     ->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+    //             }
+
+    //             $sheet->setCellValue($col . $row, $value);
+    //             $col++;
+    //         }
+
+    //         $row++;
+
+    //         // Baris 3: CONES
+    //         $sheet->setCellValue("F{$row}", 'Sum - CONES:');
+    //         $sheet->setCellValue("G{$row}", "=SUM(H{$row}:U{$row})");
+    //         $col = 'H';
+    //         foreach ($areaHeaders as $area) {
+    //             $sheet->setCellValue($col . $row, ($item['admin'] == $area) ? (float)$item['ttl_cns'] : 0);
+    //             $col++;
+    //         }
+    //         $row++;
+
+    //         // Simpan prev untuk kontrol merge
+    //         $prev = [
+    //             'tgl_pakai' => $item['tgl_pakai'],
+    //             'item_type'  => $item['item_type'],
+    //             'color'      => $item['color'],
+    //             'kode_warna' => $item['kode_warna'],
+    //         ];
+    //     }
+
+    //     // Merge terakhir utk B, C, D
+    //     if ($row > $dataStartRow) {
+    //         $sheet->mergeCells("B{$mergeStart['item_type']}:B" . ($row - 1));
+    //         $sheet->mergeCells("C{$mergeStart['color']}:C" . ($row - 1));
+    //         $sheet->mergeCells("D{$mergeStart['kode_warna']}:D" . ($row - 1));
+
+    //         foreach (['B', 'C', 'D'] as $col) {
+    //             $sheet->getStyle("{$col}{$mergeStart[$col === 'B' ? 'item_type' : ($col === 'C' ? 'color' : 'kode_warna')]}:{$col}" . ($row - 1))
+    //                 ->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setHorizontal(Alignment::HORIZONTAL_LEFT);
+    //         }
+    //     }
+
+    //     // ---- TOTAL GLOBAL (berdasarkan label di kolom F) ----
+    //     $dataEndRow = $row - 1;
+
+    //     $sheet->mergeCells("A{$row}:F{$row}")->setCellValue("A{$row}", 'Total Sum - JALAN MC');
+    //     $sheet->setCellValue("G{$row}", "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"*JALAN MC*\",G{$dataStartRow}:G{$dataEndRow})");
+    //     $sheet->getStyle("A{$row}:G{$row}")->getFont()->setBold(true);
+    //     $row++;
+
+    //     $sheet->mergeCells("A{$row}:F{$row}")->setCellValue("A{$row}", 'Total Sum - TOTAL PESAN (KG)');
+    //     $sheet->setCellValue("G{$row}", "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"*TOTAL PESAN*\",G{$dataStartRow}:G{$dataEndRow})");
+    //     // format angka 2 desimal
+    //     $sheet->getStyle("G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+    //     $sheet->getStyle("A{$row}:G{$row}")->getFont()->setBold(true);
+    //     $row++;
+
+    //     $sheet->mergeCells("A{$row}:F{$row}")->setCellValue("A{$row}", 'Total Sum - CONES');
+    //     $sheet->setCellValue("G{$row}", "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"*CONES*\",G{$dataStartRow}:G{$dataEndRow})");
+    //     $sheet->getStyle("A{$row}:G{$row}")->getFont()->setBold(true);
+    //     $row++;
+
+    //     // ---- TOTAL PER AREA per kategori (JALAN MC, TOTAL PESAN (KG), CONES) ----
+    //     $categories = [
+    //         'JALAN MC'        => '*JALAN MC*',
+    //         'TOTAL PESAN (KG)' => '*TOTAL PESAN*',
+    //         'CONES'           => '*CONES*',
+    //     ];
+
+    //     $row -= 3;
+    //     foreach ($categories as $label => $keyword) {
+    //         $colLetter = 'H';
+    //         foreach ($areaHeaders as $_) {
+    //             $formula = "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"{$keyword}\",{$colLetter}{$dataStartRow}:{$colLetter}{$dataEndRow})";
+    //             $sheet->setCellValue("{$colLetter}{$row}", $formula);
+    //             $sheet->getStyle("{$colLetter}{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+    //             $sheet->getStyle("{$colLetter}{$row}")->getFont()->setBold(true);
+    //             $colLetter++;
+    //         }
+    //         $row++;
+    //     }
+
+    //     // Border & autosize
+    //     $sheet->getStyle("A2:U" . ($row - 1))->applyFromArray([
+    //         'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]],
+    //     ]);
+    //     foreach (range('A', 'U') as $c) {
+    //         $sheet->getColumnDimension($c)->setAutoSize(true);
+    //     }
+
+    //     // Output
+    //     $filename = 'Report_Permintaan_Karet_' . date('d-M-Y', strtotime($tglAwal)) . '_sd_' . date('d-M-Y', strtotime($tglAkhir)) . '.xlsx';
+    //     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    //     header("Content-Disposition: attachment; filename=\"{$filename}\"");
+    //     header('Cache-Control: max-age=0');
+    //     $writer = new Xlsx($spreadsheet);
+    //     $writer->save('php://output');
+    //     exit;
+    // }
+
     public function exportPermintaanKaret()
     {
-        $tglAwal  = $this->request->getGet('tanggal_awal');
+        $tglAwal = $this->request->getGet('tanggal_awal');
         $tglAkhir = $this->request->getGet('tanggal_akhir');
-
-        // Ambil data dari Model (sudah benar sesuai user)
         $data = $this->pemesananModel->getFilterPemesananKaret($tglAwal, $tglAkhir);
-        // dd ($data);
-        // Sort supaya merge blok rapi (tgl_pakai, item_type, color, kode_warna, no_model)
-        usort($data, function ($a, $b) {
-            return [$a['tgl_pakai'], $a['item_type'], $a['color'], $a['kode_warna'], $a['no_model']]
-                <=> [$b['tgl_pakai'], $b['item_type'], $b['color'], $b['kode_warna'], $b['no_model']];
-        });
-        // dd ($data);
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
+        // dd($data);
+        // Pisahkan admin
+        $group1 = ['KK1A', 'KK1B'];
+        $grouped = [];
+        $otherAdmins = [];
 
-        // Judul
-        $sheet->mergeCells('A1:U1');
-        $sheet->setCellValue('A1', 'DATA PERMINTAAN KARET ' . date('d-M-Y', strtotime($tglAwal)) . ' s/d ' . date('d-M-Y', strtotime($tglAkhir)));
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        // Header
-        $headers = ['TANGGAL PAKAI', 'ITEM TYPE', 'WARNA', 'KODE WARNA', 'NO MODEL'];
-        $col = 'A';
-        foreach ($headers as $header) {
-            $sheet->mergeCells($col . '2:' . $col . '3');
-            $sheet->setCellValue($col . '2', $header);
-            $sheet->getStyle($col . '2')->getFont()->setBold(true);
-            $sheet->getStyle($col . '2')->getAlignment()
-                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-                ->setVertical(Alignment::VERTICAL_CENTER);
-            $col++;
+        foreach ($data as $row) {
+            if (in_array($row['admin'], $group1)) {
+                $grouped['KK1A-KK1B'][$row['admin']][] = $row;
+            } else {
+                $grouped['KK2A-KK11M'][$row['admin']][] = $row;
+            }
         }
 
-        // Data & Total Result Header
-        $sheet->mergeCells('F2:F3')->setCellValue('F2', 'Data');
-        $sheet->mergeCells('G2:G3')->setCellValue('G2', 'Total Result');
-        $sheet->getStyle('F2:G2')->getFont()->setBold(true);
-        $sheet->getStyle('F2:G2')->getAlignment()
-            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-            ->setVertical(Alignment::VERTICAL_CENTER);
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheetIndex = 0;
 
-        // Header Area
-        $areaHeaders = ['KK1A', 'KK1B', 'KK2A', 'KK2B', 'KK2C', 'KK5G', 'KK7K', 'KK7L', 'KK8D', 'KK8F', 'KK8J', 'KK9D', 'KK10', 'KK11M'];
-        $sheet->mergeCells('H2:U2')->setCellValue('H2', 'AREA');
-        $sheet->getStyle('H2')->getFont()->setBold(true);
-        $col = 'H';
-        foreach ($areaHeaders as $header) {
-            $sheet->setCellValue($col . '3', $header);
-            $sheet->getStyle($col . '3')->getFont()->setBold(true);
-            $sheet->getStyle($col . '3')->getAlignment()
-                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-                ->setVertical(Alignment::VERTICAL_CENTER);
-            $col++;
-        }
-
-        // --- Tulis data per no_model (TIDAK di-concat/implode) ---
-        $row = 4;
-        $dataStartRow = $row;
-
-        // Penanda merge HANYA untuk kolom A, B, C, D (Tgl_Pakai, Item Type, Warna, Kode)
-        $mergeStart = [
-            'tgl_pakai' => $row,
-            'item_type'  => $row,
-            'color'      => $row,
-            'kode_warna' => $row,
-        ];
-        $prev = [
-            'tgl_pakai' => null,
-            'item_type'  => null,
-            'color'      => null,
-            'kode_warna' => null,
-        ];
-
-        foreach ($data as $item) {
-            // dd ($item);
-            // Kol A: Tanggal pakai (di merge blok)
-            if ($item['tgl_pakai'] != $prev['tgl_pakai']) {
-                if ($prev['tgl_pakai'] != '') {
-                    $sheet->mergeCells("A{$mergeStart['tgl_pakai']}:A" . ($row - 1));
-                }
-                $sheet->setCellValue("A{$row}", $item['tgl_pakai']);
-                $mergeStart['tgl_pakai'] = $row;
+        foreach (['KK1A-KK1B', 'KK2A-KK11M'] as $sheetName) {
+            if (!isset($grouped[$sheetName])) continue;
+            // Buat sheet
+            if ($sheetIndex === 0) {
+                $sheet = $spreadsheet->getActiveSheet();
+            } else {
+                $sheet = $spreadsheet->createSheet($sheetIndex);
             }
 
-            // Kol B: Item Type (merge blok)
-            if ($item['item_type'] !== $prev['item_type']) {
-                if ($prev['item_type'] !== null) {
-                    $sheet->mergeCells("B{$mergeStart['item_type']}:B" . ($row - 1));
-                    $sheet->getStyle("B{$mergeStart['item_type']}:B" . ($row - 1))
-                        ->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setHorizontal(Alignment::HORIZONTAL_LEFT);
-                }
-                $sheet->setCellValue("B{$row}", $item['item_type']);
-                $mergeStart['item_type'] = $row;
-            }
+            // pastikan nama sheet tidak lebih dari 31 karakter
+            $safeName = substr($sheetName, 0, 31);
+            $sheet->setTitle($safeName);
 
-            // Kol C: Warna (merge blok)
-            if ($item['color'] !== $prev['color'] || $item['item_type'] !== $prev['item_type']) {
-                if ($prev['color'] !== null) {
-                    $sheet->mergeCells("C{$mergeStart['color']}:C" . ($row - 1));
-                    $sheet->getStyle("C{$mergeStart['color']}:C" . ($row - 1))
-                        ->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setHorizontal(Alignment::HORIZONTAL_LEFT);
-                }
-                $sheet->setCellValue("C{$row}", $item['color']);
-                $mergeStart['color'] = $row;
-            }
+            // Judul
+            $sheet->mergeCells('A1:T1');
+            $sheet->setCellValue('A1', 'DATA PERMINTAAN BAHAN BAKU');
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+            $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-            // Kol D: Kode Warna (merge blok) + tampilkan keterangan KELOS 2X bila ada
-            $kodeWarnaTampil = ($item['keterangan'] === 'KELOS 2X')
-                ? $item['kode_warna'] . ' (' . $item['keterangan'] . ')'
-                : $item['kode_warna'];
+            $row = 3; // mulai dari baris 3 untuk sub judul per admin
 
-            if ($item['kode_warna'] !== $prev['kode_warna'] || $item['color'] !== $prev['color'] || $item['item_type'] !== $prev['item_type']) {
-                if ($prev['kode_warna'] !== null) {
-                    $sheet->mergeCells("D{$mergeStart['kode_warna']}:D" . ($row - 1));
-                    $sheet->getStyle("D{$mergeStart['kode_warna']}:D" . ($row - 1))
-                        ->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setHorizontal(Alignment::HORIZONTAL_LEFT);
-                }
-                $sheet->setCellValue("D{$row}", $kodeWarnaTampil);
-                $mergeStart['kode_warna'] = $row;
-            }
+            foreach ($grouped[$sheetName] as $admin => $items) {
+                // Sub Judul Admin
+                $sheet->mergeCells("A{$row}:C{$row}");
+                $sheet->setCellValue("A{$row}", 'JENIS BAHAN BAKU');
+                $sheet->setCellValue("D{$row}", ': KARET');
+                $sheet->setCellValue("I{$row}", 'AREA');
+                $sheet->mergeCells("J{$row}:L{$row}");
+                $sheet->setCellValue("J{$row}", ": $admin");
+                $sheet->setCellValue("R{$row}", 'TANGGAL PAKAI');
+                $sheet->mergeCells("S{$row}:T{$row}");
+                $sheet->setCellValue("S{$row}", ($tglAwal == $tglAkhir) ? date('d-m-Y', strtotime($tglAwal)) : date('d-m-Y', strtotime($tglAwal)) . ' s/d ' . date('d-m-Y', strtotime($tglAkhir)));
 
-            // Kol E: NO MODEL (JANGAN merge) — tampilkan apa adanya, beri (+) jika po_tambahan=1
-            $noModel = $item['no_model'] . ($item['po_tambahan'] == '1' ? '(+)' : '');
-            $sheet->setCellValue("E{$row}", $noModel);
-
-            // Baris 1: JALAN MC
-            $sheet->setCellValue("F{$row}", 'Sum - JALAN MC:');
-            $sheet->setCellValue("G{$row}", "=SUM(H{$row}:U{$row})");
-            $col = 'H';
-            foreach ($areaHeaders as $area) {
-                $sheet->setCellValue($col . $row, ($item['admin'] == $area) ? (float)$item['ttl_jl_mc'] : 0);
-                $col++;
-            }
-            $row++;
-
-            // Baris 2: TOTAL PESAN (KG)
-            $sheet->setCellValue("F{$row}", 'Sum - TOTAL PESAN (KG):');
-            // format angka 2 desimal
-            $sheet->getStyle("G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-            $sheet->setCellValue("G{$row}", "=SUM(H{$row}:U{$row})");
-            $col = 'H';
-            foreach ($areaHeaders as $area) {
-                $value = ($item['admin'] == $area) ? (float)$item['ttl_kg'] : 0;
-
-                if ($value != 0) {
-                    // hanya format kalau bukan 0
-                    $sheet->getStyle($col . $row)
-                        ->getNumberFormat()
-                        ->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+                foreach (['A' . $row, 'D' . $row, 'I' . $row, 'J' . $row, 'R' . $row, 'S' . $row] as $c) {
+                    $sheet->getStyle($c)->getFont()->setBold(true)->setSize(12);
                 }
 
-                $sheet->setCellValue($col . $row, $value);
-                $col++;
+                $row++; // header baris berikutnya
+
+                // Header Tabel
+                $headers = ['NO', 'JAM', 'TGL PESAN', 'NO MODEL', 'ITEM TYPE', 'KODE WARNA', 'WARNA', 'LMD', 'LOT', 'JL MC', 'TOTAL', 'CONES', 'KETERANGAN', 'RINCIAN PERSIAPAN', 'TOTAL QTY OUT', 'TOTAL CNS OUT'];
+                $col = 'A';
+                foreach ($headers as $header) {
+                    if ($header == 'RINCIAN PERSIAPAN') {
+                        $sheet->mergeCells('N' . $row . ':R' . $row);
+                        $sheet->setCellValue('N' . $row, $header);
+                        $sheet->getStyle("A$row:T$row")->getFont()->setBold(true);
+                        $sheet->getStyle("A$row:T$row")->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+                        $sheet->getStyle('N' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                        $col = 'S';
+                        continue;
+                    }
+                    $sheet->setCellValue($col . $row, $header);
+                    $sheet->getStyle($col . $row)->getFont()->setBold(true);
+                    $sheet->getStyle($col . $row)->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                        ->setVertical(Alignment::VERTICAL_CENTER);
+                    $col++;
+                }
+
+                // Lebar kolom bisa diatur di sini jika mau
+                $columnWidths = [
+                    'A' => 4.2,
+                    'B' => 9,
+                    'C' => 11,
+                    'D' => 12.5,
+                    'E' => 25,
+                    'F' => 15,
+                    'G' => 14,
+                    'H' => 6,
+                    'I' => 30,
+                    'J' => 6,
+                    'K' => 8,
+                    'L' => 8,
+                    'M' => 14,
+                    'N' => 18,
+                    'O' => 18,
+                    'P' => 18,
+                    'Q' => 18,
+                    'R' => 18,
+                    'S' => 16,
+                    'T' => 16
+                ];
+                foreach ($columnWidths as $c => $w) {
+                    $sheet->getColumnDimension($c)->setWidth($w);
+                }
+
+                $row++; // mulai isi tabel
+
+                // Isi Tabel
+                $no = 1;
+                $totalJlMc = 0;
+                $totalKg = 0;
+                $totalCns = 0;
+
+                foreach ($items as $item) {
+                    $sheet->setCellValue('A' . $row, $no);
+                    $sheet->setCellValue('B' . $row, $item['jam_pesan'] ?? '');
+                    $sheet->setCellValue('C' . $row, $item['tgl_pesan'] ?? '');
+                    $sheet->setCellValue('D' . $row, $item['no_model'] ?? '');
+                    $sheet->setCellValue('E' . $row, $item['item_type'] ?? '');
+                    $sheet->setCellValue('F' . $row, $item['kode_warna'] ?? '');
+                    $sheet->setCellValue('G' . $row, $item['color'] ?? '');
+                    $sheet->setCellValue('H' . $row, '');
+                    $sheet->setCellValue('I' . $row, '');
+                    $sheet->setCellValue('J' . $row, $item['ttl_jl_mc'] ?? 0);
+                    $sheet->setCellValue('K' . $row, $item['ttl_kg'] ?? 0);
+                    $sheet->setCellValue('L' . $row, $item['ttl_cns'] ?? 0);
+                    $sheet->setCellValue('M' . $row, $item['keterangan'] ?? '');
+                    $sheet->setCellValue('N' . $row, '');
+                    $sheet->setCellValue('O' . $row, '');
+                    $sheet->setCellValue('P' . $row, '');
+                    $sheet->setCellValue('Q' . $row, '');
+                    $sheet->setCellValue('R' . $row, '');
+                    $sheet->setCellValue('S' . $row, '');
+                    $sheet->setCellValue('T' . $row, '');
+
+                    // Rata tengah semua kolom
+                    $sheet->getStyle("A{$row}:T{$row}")
+                        ->getAlignment()
+                        ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                        ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+                    // Border tipis untuk semua kolom
+                    $sheet->getStyle("A{$row}:T{$row}")
+                        ->getBorders()
+                        ->getAllBorders()
+                        ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+                    // Border tebal khusus kolom N sampai R
+                    $sheet->getStyle("N{$row}:R{$row}")
+                        ->getBorders()
+                        ->getOutline()
+                        ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM);
+
+                    $sheet->getRowDimension($row)->setRowHeight(45);
+                    // Set font size
+                    foreach (['D', 'E', 'F', 'G', 'K'] as $col) {
+                        $sheet->getStyle("{$col}{$row}")->getFont()->setSize(15);
+                    }
+
+                    // Wrap text
+                    $sheet->getStyle("E{$row}")->getAlignment()->setWrapText(true);
+                    $sheet->getStyle("F{$row}")->getAlignment()->setWrapText(true);
+                    $sheet->getStyle("G{$row}")->getAlignment()->setWrapText(true);
+                    $sheet->getStyle("M{$row}")->getAlignment()->setWrapText(true);
+
+                    $totalJlMc += $item['ttl_jl_mc'] ?? 0;
+                    $totalKg += $item['ttl_kg'] ?? 0;
+                    $totalCns += $item['ttl_cns'] ?? 0;
+
+                    $row++;
+                    $no++;
+                }
+
+                // Baris Total Admin
+                $sheet->mergeCells("A{$row}:I{$row}");
+                $sheet->setCellValue("A{$row}", "TOTAL");
+                $sheet->getStyle("A{$row}")->getFont()->setBold(true);
+                $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->setCellValue("J{$row}", $totalJlMc);
+                $sheet->setCellValue("K{$row}", $totalKg);
+                $sheet->setCellValue("L{$row}", $totalCns);
+                $sheet->getStyle("J{$row}:T{$row}")->getFont()->setBold(true);
+                $sheet->getStyle("A{$row}:T{$row}")->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+                $row += 2; // kasih 1 baris kosong sebelum sub judul admin berikutnya
             }
 
-            $row++;
-
-            // Baris 3: CONES
-            $sheet->setCellValue("F{$row}", 'Sum - CONES:');
-            $sheet->setCellValue("G{$row}", "=SUM(H{$row}:U{$row})");
-            $col = 'H';
-            foreach ($areaHeaders as $area) {
-                $sheet->setCellValue($col . $row, ($item['admin'] == $area) ? (float)$item['ttl_cns'] : 0);
-                $col++;
-            }
-            $row++;
-
-            // Simpan prev untuk kontrol merge
-            $prev = [
-                'tgl_pakai' => $item['tgl_pakai'],
-                'item_type'  => $item['item_type'],
-                'color'      => $item['color'],
-                'kode_warna' => $item['kode_warna'],
-            ];
+            $sheetIndex++;
         }
 
-        // Merge terakhir utk B, C, D
-        if ($row > $dataStartRow) {
-            $sheet->mergeCells("B{$mergeStart['item_type']}:B" . ($row - 1));
-            $sheet->mergeCells("C{$mergeStart['color']}:C" . ($row - 1));
-            $sheet->mergeCells("D{$mergeStart['kode_warna']}:D" . ($row - 1));
-
-            foreach (['B', 'C', 'D'] as $col) {
-                $sheet->getStyle("{$col}{$mergeStart[$col === 'B' ? 'item_type' : ($col === 'C' ? 'color' : 'kode_warna')]}:{$col}" . ($row - 1))
-                    ->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            }
-        }
-
-        // ---- TOTAL GLOBAL (berdasarkan label di kolom F) ----
-        $dataEndRow = $row - 1;
-
-        $sheet->mergeCells("A{$row}:F{$row}")->setCellValue("A{$row}", 'Total Sum - JALAN MC');
-        $sheet->setCellValue("G{$row}", "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"*JALAN MC*\",G{$dataStartRow}:G{$dataEndRow})");
-        $sheet->getStyle("A{$row}:G{$row}")->getFont()->setBold(true);
-        $row++;
-
-        $sheet->mergeCells("A{$row}:F{$row}")->setCellValue("A{$row}", 'Total Sum - TOTAL PESAN (KG)');
-        $sheet->setCellValue("G{$row}", "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"*TOTAL PESAN*\",G{$dataStartRow}:G{$dataEndRow})");
-        // format angka 2 desimal
-        $sheet->getStyle("G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-        $sheet->getStyle("A{$row}:G{$row}")->getFont()->setBold(true);
-        $row++;
-
-        $sheet->mergeCells("A{$row}:F{$row}")->setCellValue("A{$row}", 'Total Sum - CONES');
-        $sheet->setCellValue("G{$row}", "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"*CONES*\",G{$dataStartRow}:G{$dataEndRow})");
-        $sheet->getStyle("A{$row}:G{$row}")->getFont()->setBold(true);
-        $row++;
-
-        // ---- TOTAL PER AREA per kategori (JALAN MC, TOTAL PESAN (KG), CONES) ----
-        $categories = [
-            'JALAN MC'        => '*JALAN MC*',
-            'TOTAL PESAN (KG)' => '*TOTAL PESAN*',
-            'CONES'           => '*CONES*',
-        ];
-
-        $row -= 3;
-        foreach ($categories as $label => $keyword) {
-            $colLetter = 'H';
-            foreach ($areaHeaders as $_) {
-                $formula = "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"{$keyword}\",{$colLetter}{$dataStartRow}:{$colLetter}{$dataEndRow})";
-                $sheet->setCellValue("{$colLetter}{$row}", $formula);
-                $sheet->getStyle("{$colLetter}{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-                $sheet->getStyle("{$colLetter}{$row}")->getFont()->setBold(true);
-                $colLetter++;
-            }
-            $row++;
-        }
-
-        // Border & autosize
-        $sheet->getStyle("A2:U" . ($row - 1))->applyFromArray([
-            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]],
-        ]);
-        foreach (range('A', 'U') as $c) {
-            $sheet->getColumnDimension($c)->setAutoSize(true);
-        }
 
         // Output
         $filename = 'Report_Permintaan_Karet_' . date('d-M-Y', strtotime($tglAwal)) . '_sd_' . date('d-M-Y', strtotime($tglAkhir)) . '.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header("Content-Disposition: attachment; filename=\"{$filename}\"");
+        header("Content-Disposition: attachment; filename=\"$filename\"");
         header('Cache-Control: max-age=0');
-        $writer = new Xlsx($spreadsheet);
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
     }
 
+    // public function exportPermintaanSpandex()
+    // {
+    //     $tglAwal = $this->request->getGet('tanggal_awal');
+    //     $tglAkhir = $this->request->getGet('tanggal_akhir');
+    //     $data = $this->pemesananModel->getFilterPemesananSpandex($tglAwal, $tglAkhir);
+    //     // Sort supaya merge blok rapi (tgl_pakai, item_type, color, kode_warna, no_model)
+    //     usort($data, function ($a, $b) {
+    //         return [$a['tgl_pakai'], $a['item_type'], $a['color'], $a['kode_warna'], $a['no_model']]
+    //             <=> [$b['tgl_pakai'], $b['item_type'], $b['color'], $b['kode_warna'], $b['no_model']];
+    //     });
+    //     $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    //     $sheet = $spreadsheet->getActiveSheet();
+
+    //     // Judul
+    //     $sheet->mergeCells('A1:U1');
+    //     $sheet->setCellValue('A1', 'DATA PERMINTAAN SPANDEX ' . date('d-M-Y', strtotime($tglAwal)) . ' s/d ' . date('d-M-Y', strtotime($tglAkhir)));
+    //     $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+    //     $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+    //     // Header
+    //     $headers = ['TANGGAL PAKAI', 'ITEM TYPE', 'WARNA', 'KODE WARNA', 'NO MODEL'];
+    //     $col = 'A';
+    //     foreach ($headers as $header) {
+    //         $sheet->mergeCells($col . '2:' . $col . '3');
+    //         $sheet->setCellValue($col . '2', $header);
+    //         $sheet->getStyle($col . '2')->getFont()->setBold(true);
+    //         $sheet->getStyle($col . '2')->getAlignment()
+    //             ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+    //             ->setVertical(Alignment::VERTICAL_CENTER);
+    //         $col++;
+    //     }
+
+    //     // Data & Total Result Header
+    //     $sheet->mergeCells('F2:F3')->setCellValue('F2', 'Data');
+    //     $sheet->mergeCells('G2:G3')->setCellValue('G2', 'Total Result');
+    //     $sheet->getStyle('F2:G2')->getFont()->setBold(true);
+    //     $sheet->getStyle('F2:G2')->getAlignment()
+    //         ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+    //         ->setVertical(Alignment::VERTICAL_CENTER);
+
+    //     // Header Area
+    //     $areaHeaders = ['KK1A', 'KK1B', 'KK2A', 'KK2B', 'KK2C', 'KK5G', 'KK7K', 'KK7L', 'KK8D', 'KK8F', 'KK8J', 'KK9D', 'KK10', 'KK11M'];
+    //     $sheet->mergeCells('H2:U2')->setCellValue('H2', 'AREA');
+    //     $sheet->getStyle('H2')->getFont()->setBold(true);
+    //     $col = 'H';
+    //     foreach ($areaHeaders as $header) {
+    //         $sheet->setCellValue($col . '3', $header);
+    //         $sheet->getStyle($col . '3')->getFont()->setBold(true);
+    //         $sheet->getStyle($col . '3')->getAlignment()
+    //             ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+    //             ->setVertical(Alignment::VERTICAL_CENTER);
+    //         $col++;
+    //     }
+
+    //     // --- Tulis data per no_model (TIDAK di-concat/implode) ---
+    //     $row = 4;
+    //     $dataStartRow = $row;
+
+    //     // Penanda merge HANYA untuk kolom A, B, C, D (Tgl_Pakai, Item Type, Warna, Kode)
+    //     $mergeStart = [
+    //         'tgl_pakai' => $row,
+    //         'item_type'  => $row,
+    //         'color'      => $row,
+    //         'kode_warna' => $row,
+    //     ];
+    //     $prev = [
+    //         'tgl_pakai' => null,
+    //         'item_type'  => null,
+    //         'color'      => null,
+    //         'kode_warna' => null,
+    //     ];
+
+    //     foreach ($data as $item) {
+    //         // dd ($item);
+    //         // Kol A: Tanggal pakai (di merge blok)
+    //         if ($item['tgl_pakai'] != $prev['tgl_pakai']) {
+    //             if ($prev['tgl_pakai'] != '') {
+    //                 $sheet->mergeCells("A{$mergeStart['tgl_pakai']}:A" . ($row - 1));
+    //             }
+    //             $sheet->setCellValue("A{$row}", $item['tgl_pakai']);
+    //             $mergeStart['tgl_pakai'] = $row;
+    //         }
+
+    //         // Kol B: Item Type (merge blok)
+    //         if ($item['item_type'] !== $prev['item_type']) {
+    //             if ($prev['item_type'] !== null) {
+    //                 $sheet->mergeCells("B{$mergeStart['item_type']}:B" . ($row - 1));
+    //                 $sheet->getStyle("B{$mergeStart['item_type']}:B" . ($row - 1))
+    //                     ->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setHorizontal(Alignment::HORIZONTAL_LEFT);
+    //             }
+    //             $sheet->setCellValue("B{$row}", $item['item_type']);
+    //             $mergeStart['item_type'] = $row;
+    //         }
+
+    //         // Kol C: Warna (merge blok)
+    //         if ($item['color'] !== $prev['color'] || $item['item_type'] !== $prev['item_type']) {
+    //             if ($prev['color'] !== null) {
+    //                 $sheet->mergeCells("C{$mergeStart['color']}:C" . ($row - 1));
+    //                 $sheet->getStyle("C{$mergeStart['color']}:C" . ($row - 1))
+    //                     ->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setHorizontal(Alignment::HORIZONTAL_LEFT);
+    //             }
+    //             $sheet->setCellValue("C{$row}", $item['color']);
+    //             $mergeStart['color'] = $row;
+    //         }
+
+    //         // Kol D: Kode Warna (merge blok) + tampilkan keterangan KELOS 2X bila ada
+    //         $kodeWarnaTampil = ($item['keterangan'] === 'KELOS 2X')
+    //             ? $item['kode_warna'] . ' (' . $item['keterangan'] . ')'
+    //             : $item['kode_warna'];
+
+    //         if ($item['kode_warna'] !== $prev['kode_warna'] || $item['color'] !== $prev['color'] || $item['item_type'] !== $prev['item_type']) {
+    //             if ($prev['kode_warna'] !== null) {
+    //                 $sheet->mergeCells("D{$mergeStart['kode_warna']}:D" . ($row - 1));
+    //                 $sheet->getStyle("D{$mergeStart['kode_warna']}:D" . ($row - 1))
+    //                     ->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setHorizontal(Alignment::HORIZONTAL_LEFT);
+    //             }
+    //             $sheet->setCellValue("D{$row}", $kodeWarnaTampil);
+    //             $mergeStart['kode_warna'] = $row;
+    //         }
+
+    //         // Kol E: NO MODEL (JANGAN merge) — tampilkan apa adanya, beri (+) jika po_tambahan=1
+    //         $noModel = $item['no_model'] . ($item['po_tambahan'] == '1' ? '(+)' : '');
+    //         $sheet->setCellValue("E{$row}", $noModel);
+
+    //         // Baris 1: JALAN MC
+    //         $sheet->setCellValue("F{$row}", 'Sum - JALAN MC:');
+    //         $sheet->setCellValue("G{$row}", "=SUM(H{$row}:U{$row})");
+    //         $col = 'H';
+    //         foreach ($areaHeaders as $area) {
+    //             $sheet->setCellValue($col . $row, ($item['admin'] == $area) ? (float)$item['ttl_jl_mc'] : 0);
+    //             $col++;
+    //         }
+    //         $row++;
+
+    //         // Baris 2: TOTAL PESAN (KG)
+    //         $sheet->setCellValue("F{$row}", 'Sum - TOTAL PESAN (KG):');
+    //         // format angka 2 desimal
+    //         $sheet->getStyle("G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+    //         $sheet->setCellValue("G{$row}", "=SUM(H{$row}:U{$row})");
+    //         $col = 'H';
+    //         foreach ($areaHeaders as $area) {
+    //             $value = ($item['admin'] == $area) ? (float)$item['ttl_kg'] : 0;
+
+    //             if ($value != 0) {
+    //                 // hanya format kalau bukan 0
+    //                 $sheet->getStyle($col . $row)
+    //                     ->getNumberFormat()
+    //                     ->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+    //             }
+
+    //             $sheet->setCellValue($col . $row, $value);
+    //             $col++;
+    //         }
+
+    //         $row++;
+
+    //         // Baris 3: CONES
+    //         $sheet->setCellValue("F{$row}", 'Sum - CONES:');
+    //         $sheet->setCellValue("G{$row}", "=SUM(H{$row}:U{$row})");
+    //         $col = 'H';
+    //         foreach ($areaHeaders as $area) {
+    //             $sheet->setCellValue($col . $row, ($item['admin'] == $area) ? (float)$item['ttl_cns'] : 0);
+    //             $col++;
+    //         }
+    //         $row++;
+
+    //         // Simpan prev untuk kontrol merge
+    //         $prev = [
+    //             'tgl_pakai' => $item['tgl_pakai'],
+    //             'item_type'  => $item['item_type'],
+    //             'color'      => $item['color'],
+    //             'kode_warna' => $item['kode_warna'],
+    //         ];
+    //     }
+
+    //     // Merge terakhir utk B, C, D
+    //     if ($row > $dataStartRow) {
+    //         $sheet->mergeCells("B{$mergeStart['item_type']}:B" . ($row - 1));
+    //         $sheet->mergeCells("C{$mergeStart['color']}:C" . ($row - 1));
+    //         $sheet->mergeCells("D{$mergeStart['kode_warna']}:D" . ($row - 1));
+
+    //         foreach (['B', 'C', 'D'] as $col) {
+    //             $sheet->getStyle("{$col}{$mergeStart[$col === 'B' ? 'item_type' : ($col === 'C' ? 'color' : 'kode_warna')]}:{$col}" . ($row - 1))
+    //                 ->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setHorizontal(Alignment::HORIZONTAL_LEFT);
+    //         }
+    //     }
+
+    //     // ---- TOTAL GLOBAL (berdasarkan label di kolom F) ----
+    //     $dataEndRow = $row - 1;
+
+    //     $sheet->mergeCells("A{$row}:F{$row}")->setCellValue("A{$row}", 'Total Sum - JALAN MC');
+    //     $sheet->setCellValue("G{$row}", "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"*JALAN MC*\",G{$dataStartRow}:G{$dataEndRow})");
+    //     $sheet->getStyle("A{$row}:G{$row}")->getFont()->setBold(true);
+    //     $row++;
+
+    //     $sheet->mergeCells("A{$row}:F{$row}")->setCellValue("A{$row}", 'Total Sum - TOTAL PESAN (KG)');
+    //     $sheet->setCellValue("G{$row}", "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"*TOTAL PESAN*\",G{$dataStartRow}:G{$dataEndRow})");
+    //     // format angka 2 desimal
+    //     $sheet->getStyle("G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+    //     $sheet->getStyle("A{$row}:G{$row}")->getFont()->setBold(true);
+    //     $row++;
+
+    //     $sheet->mergeCells("A{$row}:F{$row}")->setCellValue("A{$row}", 'Total Sum - CONES');
+    //     $sheet->setCellValue("G{$row}", "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"*CONES*\",G{$dataStartRow}:G{$dataEndRow})");
+    //     $sheet->getStyle("A{$row}:G{$row}")->getFont()->setBold(true);
+    //     $row++;
+
+    //     // ---- TOTAL PER AREA per kategori (JALAN MC, TOTAL PESAN (KG), CONES) ----
+    //     $categories = [
+    //         'JALAN MC'        => '*JALAN MC*',
+    //         'TOTAL PESAN (KG)' => '*TOTAL PESAN*',
+    //         'CONES'           => '*CONES*',
+    //     ];
+
+    //     $row -= 3;
+    //     foreach ($categories as $label => $keyword) {
+    //         $colLetter = 'H';
+    //         foreach ($areaHeaders as $_) {
+    //             $formula = "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"{$keyword}\",{$colLetter}{$dataStartRow}:{$colLetter}{$dataEndRow})";
+    //             $sheet->setCellValue("{$colLetter}{$row}", $formula);
+    //             $sheet->getStyle("{$colLetter}{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+    //             $sheet->getStyle("{$colLetter}{$row}")->getFont()->setBold(true);
+    //             $colLetter++;
+    //         }
+    //         $row++;
+    //     }
+
+    //     // Border & autosize
+    //     $sheet->getStyle("A2:U" . ($row - 1))->applyFromArray([
+    //         'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]],
+    //     ]);
+    //     foreach (range('A', 'U') as $c) {
+    //         $sheet->getColumnDimension($c)->setAutoSize(true);
+    //     }
+
+    //     // Output
+    //     $filename = 'Report_Permintaan_Spandex_' . date('d-M-Y', strtotime($tglAwal)) . '_sd_' . date('d-M-Y', strtotime($tglAkhir)) . '.xlsx';
+    //     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    //     header("Content-Disposition: attachment; filename=\"$filename\"");
+    //     header('Cache-Control: max-age=0');
+
+    //     $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+    //     $writer->save('php://output');
+    //     exit;
+    // }
 
     public function exportPermintaanSpandex()
     {
         $tglAwal = $this->request->getGet('tanggal_awal');
         $tglAkhir = $this->request->getGet('tanggal_akhir');
         $data = $this->pemesananModel->getFilterPemesananSpandex($tglAwal, $tglAkhir);
-        // Sort supaya merge blok rapi (tgl_pakai, item_type, color, kode_warna, no_model)
-        usort($data, function ($a, $b) {
-            return [$a['tgl_pakai'], $a['item_type'], $a['color'], $a['kode_warna'], $a['no_model']]
-                <=> [$b['tgl_pakai'], $b['item_type'], $b['color'], $b['kode_warna'], $b['no_model']];
-        });
+
+        // Grouping per admin
+        $grouped = [];
+        foreach ($data as $row) {
+            $grouped[$row['admin']][] = $row;
+        }
+
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
+        $sheetIndex = 0;
 
-        // Judul
-        $sheet->mergeCells('A1:U1');
-        $sheet->setCellValue('A1', 'DATA PERMINTAAN SPANDEX ' . date('d-M-Y', strtotime($tglAwal)) . ' s/d ' . date('d-M-Y', strtotime($tglAkhir)));
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        // Header
-        $headers = ['TANGGAL PAKAI', 'ITEM TYPE', 'WARNA', 'KODE WARNA', 'NO MODEL'];
-        $col = 'A';
-        foreach ($headers as $header) {
-            $sheet->mergeCells($col . '2:' . $col . '3');
-            $sheet->setCellValue($col . '2', $header);
-            $sheet->getStyle($col . '2')->getFont()->setBold(true);
-            $sheet->getStyle($col . '2')->getAlignment()
-                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-                ->setVertical(Alignment::VERTICAL_CENTER);
-            $col++;
-        }
-
-        // Data & Total Result Header
-        $sheet->mergeCells('F2:F3')->setCellValue('F2', 'Data');
-        $sheet->mergeCells('G2:G3')->setCellValue('G2', 'Total Result');
-        $sheet->getStyle('F2:G2')->getFont()->setBold(true);
-        $sheet->getStyle('F2:G2')->getAlignment()
-            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-            ->setVertical(Alignment::VERTICAL_CENTER);
-
-        // Header Area
-        $areaHeaders = ['KK1A', 'KK1B', 'KK2A', 'KK2B', 'KK2C', 'KK5G', 'KK7K', 'KK7L', 'KK8D', 'KK8F', 'KK8J', 'KK9D', 'KK10', 'KK11M'];
-        $sheet->mergeCells('H2:U2')->setCellValue('H2', 'AREA');
-        $sheet->getStyle('H2')->getFont()->setBold(true);
-        $col = 'H';
-        foreach ($areaHeaders as $header) {
-            $sheet->setCellValue($col . '3', $header);
-            $sheet->getStyle($col . '3')->getFont()->setBold(true);
-            $sheet->getStyle($col . '3')->getAlignment()
-                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-                ->setVertical(Alignment::VERTICAL_CENTER);
-            $col++;
-        }
-
-        // --- Tulis data per no_model (TIDAK di-concat/implode) ---
-        $row = 4;
-        $dataStartRow = $row;
-
-        // Penanda merge HANYA untuk kolom A, B, C, D (Tgl_Pakai, Item Type, Warna, Kode)
-        $mergeStart = [
-            'tgl_pakai' => $row,
-            'item_type'  => $row,
-            'color'      => $row,
-            'kode_warna' => $row,
-        ];
-        $prev = [
-            'tgl_pakai' => null,
-            'item_type'  => null,
-            'color'      => null,
-            'kode_warna' => null,
-        ];
-
-        foreach ($data as $item) {
-            // dd ($item);
-            // Kol A: Tanggal pakai (di merge blok)
-            if ($item['tgl_pakai'] != $prev['tgl_pakai']) {
-                if ($prev['tgl_pakai'] != '') {
-                    $sheet->mergeCells("A{$mergeStart['tgl_pakai']}:A" . ($row - 1));
-                }
-                $sheet->setCellValue("A{$row}", $item['tgl_pakai']);
-                $mergeStart['tgl_pakai'] = $row;
+        foreach ($grouped as $admin => $items) {
+            // Buat sheet baru untuk setiap admin
+            if ($sheetIndex == 0) {
+                $sheet = $spreadsheet->getActiveSheet();
+                $sheet->setTitle($admin);
+            } else {
+                $sheet = $spreadsheet->createSheet($sheetIndex);
+                $sheet->setTitle($admin);
             }
 
-            // Kol B: Item Type (merge blok)
-            if ($item['item_type'] !== $prev['item_type']) {
-                if ($prev['item_type'] !== null) {
-                    $sheet->mergeCells("B{$mergeStart['item_type']}:B" . ($row - 1));
-                    $sheet->getStyle("B{$mergeStart['item_type']}:B" . ($row - 1))
-                        ->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setHorizontal(Alignment::HORIZONTAL_LEFT);
-                }
-                $sheet->setCellValue("B{$row}", $item['item_type']);
-                $mergeStart['item_type'] = $row;
+            // Judul
+            $sheet->mergeCells('A1:T1');
+            $sheet->setCellValue('A1', 'DATA PERMINTAAN BAHAN BAKU');
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+            $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            $sheet->mergeCells('A3:C3');
+            $sheet->setCellValue('A3', 'JENIS BAHAN BAKU');
+            $sheet->setCellValue('D3', ': SPANDEX');
+            $sheet->setCellValue('I3', 'AREA');
+            $sheet->mergeCells('J3:L3');
+            $sheet->setCellValue('J3', ": $admin");
+            $sheet->setCellValue('R3', 'TANGGAL PAKAI');
+            $sheet->mergeCells('S3:T3');
+            if ($tglAwal == $tglAkhir) {
+                $sheet->setCellValue('S3', ': ' . date('d-m-Y', strtotime($tglAwal)));
+            } else {
+                $sheet->setCellValue('S3', ': ' . date('d-m-Y', strtotime($tglAwal)) . ' s/d ' . date('d-m-Y', strtotime($tglAkhir)));
             }
 
-            // Kol C: Warna (merge blok)
-            if ($item['color'] !== $prev['color'] || $item['item_type'] !== $prev['item_type']) {
-                if ($prev['color'] !== null) {
-                    $sheet->mergeCells("C{$mergeStart['color']}:C" . ($row - 1));
-                    $sheet->getStyle("C{$mergeStart['color']}:C" . ($row - 1))
-                        ->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setHorizontal(Alignment::HORIZONTAL_LEFT);
-                }
-                $sheet->setCellValue("C{$row}", $item['color']);
-                $mergeStart['color'] = $row;
+            foreach (['A3', 'D3', 'I3', 'J3', 'R3', 'S3'] as $c) {
+                $sheet->getStyle($c)->getFont()->setBold(true)->setSize(12);
             }
 
-            // Kol D: Kode Warna (merge blok) + tampilkan keterangan KELOS 2X bila ada
-            $kodeWarnaTampil = ($item['keterangan'] === 'KELOS 2X')
-                ? $item['kode_warna'] . ' (' . $item['keterangan'] . ')'
-                : $item['kode_warna'];
-
-            if ($item['kode_warna'] !== $prev['kode_warna'] || $item['color'] !== $prev['color'] || $item['item_type'] !== $prev['item_type']) {
-                if ($prev['kode_warna'] !== null) {
-                    $sheet->mergeCells("D{$mergeStart['kode_warna']}:D" . ($row - 1));
-                    $sheet->getStyle("D{$mergeStart['kode_warna']}:D" . ($row - 1))
-                        ->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setHorizontal(Alignment::HORIZONTAL_LEFT);
-                }
-                $sheet->setCellValue("D{$row}", $kodeWarnaTampil);
-                $mergeStart['kode_warna'] = $row;
-            }
-
-            // Kol E: NO MODEL (JANGAN merge) — tampilkan apa adanya, beri (+) jika po_tambahan=1
-            $noModel = $item['no_model'] . ($item['po_tambahan'] == '1' ? '(+)' : '');
-            $sheet->setCellValue("E{$row}", $noModel);
-
-            // Baris 1: JALAN MC
-            $sheet->setCellValue("F{$row}", 'Sum - JALAN MC:');
-            $sheet->setCellValue("G{$row}", "=SUM(H{$row}:U{$row})");
-            $col = 'H';
-            foreach ($areaHeaders as $area) {
-                $sheet->setCellValue($col . $row, ($item['admin'] == $area) ? (float)$item['ttl_jl_mc'] : 0);
-                $col++;
-            }
-            $row++;
-
-            // Baris 2: TOTAL PESAN (KG)
-            $sheet->setCellValue("F{$row}", 'Sum - TOTAL PESAN (KG):');
-            // format angka 2 desimal
-            $sheet->getStyle("G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-            $sheet->setCellValue("G{$row}", "=SUM(H{$row}:U{$row})");
-            $col = 'H';
-            foreach ($areaHeaders as $area) {
-                $value = ($item['admin'] == $area) ? (float)$item['ttl_kg'] : 0;
-
-                if ($value != 0) {
-                    // hanya format kalau bukan 0
-                    $sheet->getStyle($col . $row)
-                        ->getNumberFormat()
-                        ->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+            // Header
+            $headers = ['NO', 'JAM', 'TGL PESAN', 'NO MODEL', 'ITEM TYPE', 'KODE WARNA', 'WARNA', 'LMD', 'LOT', 'JL MC', 'TOTAL', 'CONES', 'KETERANGAN', 'RINCIAN PERSIAPAN', 'TOTAL QTY OUT', 'TOTAL CNS OUT'];
+            $col = 'A';
+            foreach ($headers as $header) {
+                // Skip dulu kolom N karena nanti akan di-merge
+                if ($header === 'RINCIAN PERSIAPAN') {
+                    $sheet->mergeCells('N4:R4');
+                    $sheet->setCellValue('N4', 'RINCIAN PERSIAPAN');
+                    $sheet->getStyle('N4')->getFont()->setBold(true);
+                    $sheet->getStyle("A4:T4")->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+                    $sheet->getStyle('N4')->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                        ->setVertical(Alignment::VERTICAL_CENTER);
+                    // Lompat ke kolom setelah R
+                    $col = 'S';
+                    continue;
                 }
 
-                $sheet->setCellValue($col . $row, $value);
+                // Kolom biasa
+                $sheet->setCellValue($col . '4', $header);
+                $sheet->getStyle($col . '4')->getFont()->setBold(true);
+                $sheet->getStyle($col . '4')->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(Alignment::VERTICAL_CENTER);
                 $col++;
             }
 
-            $row++;
-
-            // Baris 3: CONES
-            $sheet->setCellValue("F{$row}", 'Sum - CONES:');
-            $sheet->setCellValue("G{$row}", "=SUM(H{$row}:U{$row})");
-            $col = 'H';
-            foreach ($areaHeaders as $area) {
-                $sheet->setCellValue($col . $row, ($item['admin'] == $area) ? (float)$item['ttl_cns'] : 0);
-                $col++;
-            }
-            $row++;
-
-            // Simpan prev untuk kontrol merge
-            $prev = [
-                'tgl_pakai' => $item['tgl_pakai'],
-                'item_type'  => $item['item_type'],
-                'color'      => $item['color'],
-                'kode_warna' => $item['kode_warna'],
+            // Lebar kolom pakai char
+            $columnWidths = [
+                'A' => 4.2,
+                'B' => 9,
+                'C' => 11,
+                'D' => 12.5,
+                'E' => 25,
+                'F' => 15,
+                'G' => 14,
+                'H' => 6,
+                'I' => 30,
+                'J' => 6,
+                'K' => 8,
+                'L' => 8,
+                'M' => 14,
+                'N' => 18,
+                'O' => 18,
+                'P' => 18,
+                'Q' => 18,
+                'R' => 18,
+                'S' => 16,
+                'T' => 16
             ];
-        }
-
-        // Merge terakhir utk B, C, D
-        if ($row > $dataStartRow) {
-            $sheet->mergeCells("B{$mergeStart['item_type']}:B" . ($row - 1));
-            $sheet->mergeCells("C{$mergeStart['color']}:C" . ($row - 1));
-            $sheet->mergeCells("D{$mergeStart['kode_warna']}:D" . ($row - 1));
-
-            foreach (['B', 'C', 'D'] as $col) {
-                $sheet->getStyle("{$col}{$mergeStart[$col === 'B' ? 'item_type' : ($col === 'C' ? 'color' : 'kode_warna')]}:{$col}" . ($row - 1))
-                    ->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setHorizontal(Alignment::HORIZONTAL_LEFT);
+            foreach ($columnWidths as $col => $width) {
+                $sheet->getColumnDimension($col)->setWidth($width);
             }
-        }
 
-        // ---- TOTAL GLOBAL (berdasarkan label di kolom F) ----
-        $dataEndRow = $row - 1;
+            // Tabel isi
+            $row = 5;
+            $no = 1;
+            $totalJlMc = 0;
+            $totalKg = 0;
+            $totalCns = 0;
 
-        $sheet->mergeCells("A{$row}:F{$row}")->setCellValue("A{$row}", 'Total Sum - JALAN MC');
-        $sheet->setCellValue("G{$row}", "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"*JALAN MC*\",G{$dataStartRow}:G{$dataEndRow})");
-        $sheet->getStyle("A{$row}:G{$row}")->getFont()->setBold(true);
-        $row++;
+            foreach ($data as $item) {
+                // dd($item);
+                $sheet->setCellValue('A' . $row, $no);
+                $sheet->setCellValue('B' . $row, $item['jam_pesan'] ?? '');
+                $sheet->setCellValue('C' . $row, $item['tgl_pesan'] ?? '');
+                $sheet->setCellValue('D' . $row, $item['no_model'] ?? '');
+                $sheet->setCellValue('E' . $row, $item['item_type'] ?? '');
+                $sheet->setCellValue('F' . $row, $item['kode_warna'] ?? '');
+                $sheet->setCellValue('G' . $row, $item['color'] ?? '');
+                $sheet->setCellValue('H' . $row, '');
+                $sheet->setCellValue('I' . $row, '');
+                $sheet->setCellValue('J' . $row, $item['ttl_jl_mc'] ?? '');
+                $sheet->setCellValue('K' . $row, $item['ttl_kg'] ?? '');
+                $sheet->setCellValue('L' . $row, $item['ttl_cns'] ?? '');
+                $sheet->setCellValue('M' . $row, $item['keterangan'] ?? '');
+                $sheet->setCellValue('N' . $row, ''); // Rincian Persiapan
+                $sheet->setCellValue('O' . $row, ''); // Rincian Persiapan
+                $sheet->setCellValue('P' . $row, ''); // Rincian Persiapan
+                $sheet->setCellValue('Q' . $row, ''); // Rincian Persiapan
+                $sheet->setCellValue('R' . $row, ''); // Rincian Persiapan
+                $sheet->setCellValue('S' . $row, '');
+                $sheet->setCellValue('T' . $row, '');
 
-        $sheet->mergeCells("A{$row}:F{$row}")->setCellValue("A{$row}", 'Total Sum - TOTAL PESAN (KG)');
-        $sheet->setCellValue("G{$row}", "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"*TOTAL PESAN*\",G{$dataStartRow}:G{$dataEndRow})");
-        // format angka 2 desimal
-        $sheet->getStyle("G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-        $sheet->getStyle("A{$row}:G{$row}")->getFont()->setBold(true);
-        $row++;
+                // Rata tengah semua kolom
+                $sheet->getStyle("A{$row}:T{$row}")
+                    ->getAlignment()
+                    ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
-        $sheet->mergeCells("A{$row}:F{$row}")->setCellValue("A{$row}", 'Total Sum - CONES');
-        $sheet->setCellValue("G{$row}", "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"*CONES*\",G{$dataStartRow}:G{$dataEndRow})");
-        $sheet->getStyle("A{$row}:G{$row}")->getFont()->setBold(true);
-        $row++;
+                // Border tipis untuk semua kolom
+                $sheet->getStyle("A{$row}:T{$row}")
+                    ->getBorders()
+                    ->getAllBorders()
+                    ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
 
-        // ---- TOTAL PER AREA per kategori (JALAN MC, TOTAL PESAN (KG), CONES) ----
-        $categories = [
-            'JALAN MC'        => '*JALAN MC*',
-            'TOTAL PESAN (KG)' => '*TOTAL PESAN*',
-            'CONES'           => '*CONES*',
-        ];
+                // Border tebal khusus kolom N sampai R
+                $sheet->getStyle("N{$row}:R{$row}")
+                    ->getBorders()
+                    ->getOutline()
+                    ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM);
 
-        $row -= 3;
-        foreach ($categories as $label => $keyword) {
-            $colLetter = 'H';
-            foreach ($areaHeaders as $_) {
-                $formula = "=SUMIF(F{$dataStartRow}:F{$dataEndRow},\"{$keyword}\",{$colLetter}{$dataStartRow}:{$colLetter}{$dataEndRow})";
-                $sheet->setCellValue("{$colLetter}{$row}", $formula);
-                $sheet->getStyle("{$colLetter}{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-                $sheet->getStyle("{$colLetter}{$row}")->getFont()->setBold(true);
-                $colLetter++;
+                // Set font size
+                foreach (['D', 'E', 'F', 'G', 'K'] as $col) {
+                    $sheet->getStyle("{$col}{$row}")->getFont()->setSize(15);
+                }
+
+                // Wrap text
+                $sheet->getStyle("E{$row}")->getAlignment()->setWrapText(true);
+                $sheet->getStyle("F{$row}")->getAlignment()->setWrapText(true);
+                $sheet->getStyle("G{$row}")->getAlignment()->setWrapText(true);
+                $sheet->getStyle("M{$row}")->getAlignment()->setWrapText(true);
+
+                $sheet->getRowDimension($row)->setRowHeight(45);
+
+                $totalJlMc += $item['ttl_jl_mc'] ?? 0;
+                $totalKg   += $item['ttl_kg'] ?? 0;
+                $totalCns  += $item['ttl_cns'] ?? 0;
+
+                $row++;
+                $no++;
             }
-            $row++;
+
+            //Baris Total
+            $sheet->mergeCells("A{$row}:I{$row}");
+            $sheet->setCellValue("A{$row}", "TOTAL");
+            $sheet->getStyle("A{$row}")->getFont()->setBold(true);
+            $sheet->getStyle("A{$row}")->getAlignment()
+                ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+                ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+            $sheet->getStyle("A{$row}:T{$row}")->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            $sheet->setCellValue("J{$row}", $totalJlMc);
+            $sheet->setCellValue("K{$row}", $totalKg);
+            $sheet->setCellValue("L{$row}", $totalCns);
+
+            $sheetIndex++;
         }
 
-        // Border & autosize
-        $sheet->getStyle("A2:U" . ($row - 1))->applyFromArray([
-            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]],
-        ]);
-        foreach (range('A', 'U') as $c) {
-            $sheet->getColumnDimension($c)->setAutoSize(true);
-        }
+        // Style border & bold
+        $sheet->getStyle("A{$row}:T{$row}")->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+        $sheet->getStyle("J{$row}:L{$row}")->getFont()->setBold(true);
 
         // Output
         $filename = 'Report_Permintaan_Spandex_' . date('d-M-Y', strtotime($tglAwal)) . '_sd_' . date('d-M-Y', strtotime($tglAkhir)) . '.xlsx';

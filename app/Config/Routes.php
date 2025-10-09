@@ -846,6 +846,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('poplus/reportPoTambahan', 'PoTambahanController::reportPoTambahan');
     $routes->get('poplus/exportPoTambahan', 'ExcelController::exportPoTambahan');
     $routes->get('poplus/form_potambahan', 'GodController::formPoTambahan');
+    $routes->get('poplus/getNoModelByArea', 'GodController::getNoModelByArea');
     $routes->get('poTambahanDetail/(:any)/(:any)', 'GodController::poTambahanDetail/$1/$2');
     $routes->post('savePoTambahan', 'GodController::savePoTambahan');
 
