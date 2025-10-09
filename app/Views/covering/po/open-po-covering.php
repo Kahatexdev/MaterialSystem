@@ -168,19 +168,19 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-4 mt-2">
+                    <div class="col-md-5 mt-2">
                         <div class="form-group">
                             <label>Tanggal PO (Gudang Benang)</label>
                             <input type="date" class="form-control" name="tgl_po" id="tgl_po" value="" required>
                         </div>
                     </div>
-                    <div class="col-md-4 mt-2">
+                    <div class="col-md-5 mt-2">
                         <div class="form-group">
                             <label>Tanggal PO (Covering)</label>
                             <input type="date" class="form-control" name="tgl_po_covering" id="tgl_po_covering" value="" required>
                         </div>
                     </div>
-                    <div class="col-md-4 mt-2">
+                    <div class="col-md-2 mt-2">
                         <div class="form-check d-flex flex-column">
                             <label class="mb-1">Po Booking</label>
                             <input type="checkbox" class="form-check-input" id="po_booking" name="po_booking">
@@ -188,6 +188,20 @@
                     </div>
 
                 </div>
+                <!-- Search Card -->
+                <div class="row align-items-center mb-3 mt-2">
+                    <div class="col-md-12">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" id="searchCard" class="form-control border-start-0" placeholder="Ketik No Model atau PO atau Item Type...">
+                        </div>
+                        <small class="text-muted">Gunakan untuk mencari card berdasarkan no model atau PO atau item type.</small>
+                    </div>
+                </div>
+
+
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="selectAll">
@@ -252,6 +266,25 @@
         const btnExpandAll = document.getElementById('btnExpandAll');
         const btnCollapseAll = document.getElementById('btnCollapseAll');
         const poBooking = document.getElementById('po_booking');
+        const searchInput = document.getElementById('searchCard');
+
+        // Fitur pencarian dinamis berdasarkan no_model atau item_type
+        searchInput.addEventListener('input', function() {
+            const keyword = this.value.trim().toLowerCase();
+            const cards = container.querySelectorAll('[data-card]');
+
+            cards.forEach(card => {
+                const model = card.querySelector('strong')?.textContent?.toLowerCase() || '';
+                const itemType = card.querySelector('small')?.textContent?.toLowerCase() || '';
+
+                if (model.includes(keyword) || itemType.includes(keyword)) {
+                    card.style.display = ''; // tampilkan
+                } else {
+                    card.style.display = 'none'; // sembunyikan
+                }
+            });
+        });
+
 
         function toast(msg, icon = 'success') {
             if (!window.Swal) return;

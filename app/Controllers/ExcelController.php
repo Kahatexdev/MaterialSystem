@@ -1286,7 +1286,7 @@ class ExcelController extends BaseController
     // {
     //     $noModel = $this->request->getGet('no_model');
     //     $warna = $this->request->getGet('warna');
-    //     $filteredData = $this->stockModel->searchStockDetail($noModel, $warna);
+    //     $filteredData = $this->pemasukanModel->searchStockDetail($noModel, $warna);
 
     //     // Buat Spreadsheet
     //     $spreadsheet = new Spreadsheet();
@@ -2858,7 +2858,7 @@ class ExcelController extends BaseController
                     $newSheet->setCellValue('E' . $row, $item['warna'] ?: '-');
                     $newSheet->setCellValue('F' . $row, $item['area_retur']);
                     $newSheet->setCellValue('G' . $row, $item['tgl_retur'] ?: '-');
-                    $newSheet->setCellValue('H' . $row, $item['nama_cluster']);
+                    $newSheet->setCellValue('H' . $row, isset($item['nama_cluster']) ? $item['nama_cluster'] : '-');
                     $newSheet->setCellValue('I' . $row, isset($item['kgs_retur']) ? number_format($item['kgs_retur'], 2, '.', '') : 0);
                     $newSheet->setCellValue('J' . $row, $item['cns_retur'] ?: 0);
                     $newSheet->setCellValue('K' . $row, $item['krg_retur'] ?: 0);
@@ -3060,7 +3060,7 @@ class ExcelController extends BaseController
                     $newSheet->setCellValue('E' . $row, $item['warna'] ?: '-');
                     $newSheet->setCellValue('F' . $row, $item['area_retur']);
                     $newSheet->setCellValue('G' . $row, $item['tgl_retur'] ?: '-');
-                    $newSheet->setCellValue('H' . $row, $item['nama_cluster']);
+                    $newSheet->setCellValue('H' . $row, isset($item['nama_cluster']) ? $item['nama_cluster'] : '-');
                     $newSheet->setCellValue('I' . $row, isset($item['kgs_retur']) ? number_format($item['kgs_retur'], 2, '.', '') : 0);
                     $newSheet->setCellValue('J' . $row, $item['cns_retur'] ?: 0);
                     $newSheet->setCellValue('K' . $row, $item['krg_retur'] ?: 0);

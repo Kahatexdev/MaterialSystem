@@ -53,8 +53,8 @@
                             <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
                             <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Order Type</th>
                             <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
                             <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
+                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
                             <th colspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Stock Awal</th>
                             <th colspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Pesan</th>
                             <th colspan="4" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">PO Tambahan Gbn</th>
@@ -147,8 +147,8 @@
                                 item.delivery_akhir,
                                 item.unit || '',
                                 item.item_type,
-                                item.kode_warna,
                                 item.color,
+                                item.kode_warna,
                                 parseFloat(item.kgs_stock || 0).toFixed(2),
                                 item.lot_stock || '',
                                 parseFloat(item.kg_po).toFixed(2) || '',

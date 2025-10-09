@@ -464,8 +464,10 @@ class ReturModel extends Model
         $builder = $this->db->table('retur')
             ->select('retur.*')
             ->join('master_material mm', 'mm.item_type = retur.item_type', 'left')
+            ->join('kategori_retur kr', 'retur.kategori = kr.nama_kategori', 'left')
             ->where('retur.no_model', $key)
-            ->where('retur.area_retur', 'GUDANG BENANG');
+            ->where('retur.area_retur', 'GUDANG BENANG')
+            ->where('kr.tipe_kategori', 'PENGEMBALIAN');
 
         if (!empty($jenis)) {
             $builder->where('mm.jenis', $jenis);
@@ -482,8 +484,10 @@ class ReturModel extends Model
         $builder = $this->db->table('retur')
             ->select('retur.*')
             ->join('master_material mm', 'mm.item_type = retur.item_type', 'left')
+            ->join('kategori_retur kr', 'retur.kategori = kr.nama_kategori', 'left')
             ->where('retur.no_model', $key)
-            ->where('retur.area_retur <>', 'GUDANG BENANG');
+            ->where('retur.area_retur', 'GUDANG BENANG')
+            ->where('kr.tipe_kategori', 'PENGEMBALIAN');
 
         if (!empty($jenis)) {
             $builder->where('mm.jenis', $jenis);
