@@ -2926,7 +2926,7 @@ class ExcelController extends BaseController
                     $newSheet->setCellValue('E' . $row, $item['warna'] ?: '-');
                     $newSheet->setCellValue('F' . $row, $item['area_out']);
                     $newSheet->setCellValue('G' . $row, $item['tgl_out'] ?: '-');
-                    $newSheet->setCellValue('H' . $row, $item['po_plus'] == '1' ? 'YA' : '');
+                    $newSheet->setCellValue('H' . $row, $item['po_tambahan'] == '1' ? 'YA' : '');
                     $newSheet->setCellValue('I' . $row, $item['nama_cluster']);
                     $newSheet->setCellValue('J' . $row, isset($item['kgs_out']) ? number_format($item['kgs_out'], 2, '.', '') : 0);
                     $newSheet->setCellValue('K' . $row, $item['cns_out'] ?: 0);
