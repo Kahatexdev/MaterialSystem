@@ -616,24 +616,30 @@ class PengeluaranModel extends Model
             ->where('p.status', $data['status'])
             ->where('pe.tgl_pakai', $data['tgl_pakai'])
             ->where('mm.jenis', $data['jenis'])
-            ->where('p.area_out', $data['area'])
-            // Filter no_model
-            // ->groupStart()
-            // ->where('sc.no_model', $data['no_model'])
-            // ->orWhere('mo.no_model', $data['no_model'])
-            // ->groupEnd()d
-            // Filter item_type
-            // ->groupStart()
-            // ->where('sc.item_type', $data['item_type'])
-            // ->orWhere('m.item_type', $data['item_type'])
-            // ->groupEnd()
-            // // Filter kode_warna
-            // ->groupStart()
-            // ->where('sc.kode_warna', $data['kode_warna'])
-            // ->orWhere('m.kode_warna', $data['kode_warna'])
-            // ->groupEnd()
-            // Group by id_pengeluaran untuk distinct
-            ->groupBy('p.id_pengeluaran')
+            ->where('p.area_out', $data['area']);
+        // Filter no_model
+        // ->groupStart()
+        // ->where('sc.no_model', $data['no_model'])
+        // ->orWhere('mo.no_model', $data['no_model'])
+        // ->groupEnd()d
+        // Filter item_type
+        // ->groupStart()
+        // ->where('sc.item_type', $data['item_type'])
+        // ->orWhere('m.item_type', $data['item_type'])
+        // ->groupEnd()
+        // // Filter kode_warna
+        // ->groupStart()
+        // ->where('sc.kode_warna', $data['kode_warna'])
+        // ->orWhere('m.kode_warna', $data['kode_warna'])
+        // ->groupEnd()
+        // Group by id_pengeluaran untuk distinct
+
+        // kondisi tambahan khusus status tertentu
+        if ($data['status'] === 'Pengiriman Area') {
+            $builder->where('p.kgs_out >', 0);
+        }
+
+        $builder->groupBy('p.id_pengeluaran')
             ->orderBy('mo.no_model');
 
         return $builder
@@ -663,10 +669,13 @@ class PengeluaranModel extends Model
     public function getPakaiArea($key, $jenis = null)
     {
         $builder = $this->db->table('pengeluaran p')
-            ->select('p.*, oc.no_model, sc.item_type, sc.kode_warna, sc.warna, mm.jenis, sc.po_plus')
+            ->select('p.*, oc.no_model, s.item_type, s.kode_warna, s.warna, mm.jenis, pem.po_tambahan')
             ->join('out_celup oc', 'oc.id_out_celup = p.id_out_celup', 'left')
-            ->join('schedule_celup sc', 'oc.id_celup = sc.id_celup', 'left')
-            ->join('master_material mm', 'sc.item_type = mm.item_type', 'left')
+            ->join('master_order mo', 'mo.no_model = oc.no_model', 'left')
+            // ->join('schedule_celup sc', 'oc.id_celup = sc.id_celup', 'left')
+            ->join('stock s', 's.no_model = mo.no_model', 'left')
+            ->join('master_material mm', 's.item_type = mm.item_type', 'left')
+            ->join('pemesanan pem', 'pem.id_total_pemesanan = p.id_total_pemesanan', 'left')
             ->where('oc.no_model', $key);
 
         if (!empty($jenis)) {
@@ -675,7 +684,7 @@ class PengeluaranModel extends Model
 
         return $builder
             ->groupBy('p.id_pengeluaran')
-            ->orderBy('p.tgl_out, sc.item_type, sc.kode_warna', 'ASC')
+            ->orderBy('p.tgl_out, s.item_type, s.kode_warna', 'ASC')
             ->get()
             ->getResultArray();
     }

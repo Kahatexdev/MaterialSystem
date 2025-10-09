@@ -12,7 +12,7 @@
             <div class="row mt-2">
                 <div class="col-md-9">
                     <label for="">Key</label>
-                    <input type="text" class="form-control" placeholder="No Model/Item Type/Kode Warna/Warna">
+                    <input type="text" class="form-control" id="key" placeholder="No Model/Item Type/Kode Warna/Warna">
                 </div>
                 <div class="col-md-3">
                     <label for="">Aksi</label><br>
@@ -36,41 +36,41 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table id="dataTable" class="table table-bordered table-hover text-center text-uppercase text-xs font-bolder" style="width:100%">
+                <table id="dataTable" class="table table-bordered table-hover text-center text-uppercase font-bolder" style="width:100%">
                     <thead>
                         <tr>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Waktu Input</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal PO</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Foll Up</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Order</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Memo</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Buyer</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Start MC</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Order Type</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
-                            <th colspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Stock Awal</th>
-                            <th colspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Pesan</th>
-                            <th colspan="4" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">PO Tambahan Gbn</th>
-                            <th rowspan="2" class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Admin</th>
+                            <th rowspan="2" class="text-center text-uppercase">No</th>
+                            <th rowspan="2" class="text-center text-uppercase">Waktu Input</th>
+                            <th rowspan="2" class="text-center text-uppercase">Tanggal PO</th>
+                            <th rowspan="2" class="text-center text-uppercase">Foll Up</th>
+                            <th rowspan="2" class="text-center text-uppercase">No Model</th>
+                            <th rowspan="2" class="text-center text-uppercase">No Order</th>
+                            <th rowspan="2" class="text-center text-uppercase">Area</th>
+                            <th rowspan="2" class="text-center text-uppercase">Memo</th>
+                            <th rowspan="2" class="text-center text-uppercase">Buyer</th>
+                            <th rowspan="2" class="text-center text-uppercase">Start MC</th>
+                            <th rowspan="2" class="text-center text-uppercase">Delivery Awal</th>
+                            <th rowspan="2" class="text-center text-uppercase">Delivery Akhir</th>
+                            <th rowspan="2" class="text-center text-uppercase">Order Type</th>
+                            <th rowspan="2" class="text-center text-uppercase">Item Type</th>
+                            <th rowspan="2" class="text-center text-uppercase">Warna</th>
+                            <th rowspan="2" class="text-center text-uppercase">Kode Warna</th>
+                            <th colspan="2" class="text-center text-uppercase">Stock Awal</th>
+                            <th colspan="2" class="text-center text-uppercase">Pesan</th>
+                            <th colspan="4" class="text-center text-uppercase">PO Tambahan Gbn</th>
+                            <th rowspan="2" class="text-center text-uppercase">Admin</th>
                         </tr>
                         <tr>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kg</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Lot</th>
+                            <th class="text-center text-uppercase">Kg</th>
+                            <th class="text-center text-uppercase">Lot</th>
 
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kg</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Loss</th>
+                            <th class="text-center text-uppercase">Kg</th>
+                            <th class="text-center text-uppercase">Loss</th>
 
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tgl Terima Po(+) Gbn</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tgl Po(+) Area</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Po(+)</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kg Po(+)</th>
+                            <th class="text-center text-uppercase">Tgl Terima Po(+) Gbn</th>
+                            <th class="text-center text-uppercase">Tgl Po(+) Area</th>
+                            <th class="text-center text-uppercase">Delivery Po(+)</th>
+                            <th class="text-center text-uppercase">Kg Po(+)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -147,8 +147,8 @@
                                 item.delivery_akhir,
                                 item.unit || '',
                                 item.item_type,
-                                item.kode_warna,
                                 item.color,
+                                item.kode_warna,
                                 parseFloat(item.kgs_stock || 0).toFixed(2),
                                 item.lot_stock || '',
                                 parseFloat(item.kg_po).toFixed(2) || '',
@@ -204,6 +204,16 @@
 
         // Sembunyikan tombol Export Excel
         $('#btnExport').addClass('d-none');
+    });
+
+    $(document).ready(function() {
+        // Trigger pencarian saat tombol Enter ditekan di input apa pun
+        $('#key').on('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Hindari form submit default (jika ada form)
+                $('#btnSearch').click(); // Trigger tombol Search
+            }
+        });
     });
 </script>
 

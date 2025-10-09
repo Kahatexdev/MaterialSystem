@@ -2,7 +2,7 @@
 <?php $this->section('content'); ?>
 
 <style>
-    .select2-container--default .select2-selection--single {
+    /* .select2-container--default .select2-selection--single {
         border: none;
         border-bottom: 2px solid rgb(34, 121, 37);
         border-radius: 0 0 10px 10px;
@@ -26,7 +26,7 @@
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         top: 50%;
         transform: translateY(-50%);
-    }
+    } */
 
     #manualTable th,
     #manualTable td {
@@ -84,21 +84,26 @@
 
     #manualTable th:nth-child(10),
     #manualTable td:nth-child(10) {
-        width: 60px;
+        width: 20px;
     }
 
     #manualTable th:nth-child(11),
     #manualTable td:nth-child(11) {
-        width: 150px;
+        width: 60px;
     }
 
     #manualTable th:nth-child(12),
     #manualTable td:nth-child(12) {
-        width: 70px;
+        width: 1500px;
     }
 
     #manualTable th:nth-child(13),
     #manualTable td:nth-child(13) {
+        width: 70px;
+    }
+
+    #manualTable th:nth-child(14),
+    #manualTable td:nth-child(14) {
         width: 50px;
     }
 
@@ -214,7 +219,8 @@
                                 <th>Kode Warna</th>
                                 <th>Warna</th>
                                 <th>Cluster</th>
-                                <th>No Karung</th>
+                                <th>No Krg</th>
+                                <th>Kekurangan</th>
                                 <th>Lot</th>
                                 <th>Kgs</th>
                                 <th>Cones</th>
@@ -223,9 +229,19 @@
                         </thead>
                         <tbody>
                             <?php $sessionData = session()->get('manual_delivery') ?? []; ?>
+                            <?php if (!empty($sessionData)): ?>
+                                <script>
+                                    Swal.fire({
+                                        icon: 'warning',
+                                        title: 'PERHATIAN',
+                                        html: 'CEK KEMBALI DATA PENGELUARAN SEBELUM DISIMPAN.<BR>PASTIKAN DATA SUDAH BENAR!',
+                                        confirmButtonText: 'OK'
+                                    });
+                                </script>
+                            <?php endif; ?>
                             <?php foreach ($sessionData as $i => $row): ?>
                                 <tr>
-                                    <td>
+                                    <td class="text-center">
                                         <input type="checkbox" name="selected[]" value="<?= esc($row['id_pengeluaran']) ?>" class="row-check">
                                         <input type="hidden" name="statusPengeluaran[<?= $row['id_pengeluaran'] ?>]" value="<?= $row['status_pengeluaran']  ?? null ?>">
                                     </td>
@@ -234,14 +250,18 @@
                                     </td>
                                     <!-- hiden kolom -->
                                     <input type="hidden" name="jenis[<?= $row['id_pengeluaran'] ?>]" value="<?= $row['jenis'] ?>">
-                                    <td><?= esc(isset($row['area_out']) ? $row['area_out'] : '') ?></td>
-                                    <td><?= esc(isset($row['no_model']) ? $row['no_model'] : '') ?></td>
+                                    <td class="text-center"><?= esc(isset($row['area_out']) ? $row['area_out'] : '') ?></td>
+                                    <td class="text-center"><?= esc(isset($row['no_model']) ? $row['no_model'] : '') ?></td>
                                     <td><?= esc(isset($row['item_type']) ? $row['item_type'] : '') ?></td>
                                     <td><?= esc(isset($row['kode_warna']) ? $row['kode_warna'] : '') ?></td>
                                     <td><?= esc(isset($row['warna']) ? $row['warna'] : '') ?></td>
                                     <td><?= esc(isset($row['nama_cluster']) ? $row['nama_cluster'] : '') ?></td>
                                     <td><?= esc(isset($row['no_karung']) ? $row['no_karung'] : '') ?></td>
-
+                                    <td class="text-center">
+                                        <?= ($row['status_pengeluaran'] === 'Pengiriman Area')
+                                            ? '<i class="fas fa-check-square fa-2x" style="color: #6fbf73;"></i>'
+                                            : '' ?>
+                                    </td>
                                     <td>
                                         <textarea name="lot_out[<?= $row['id_pengeluaran'] ?>]" class="form-control"><?= esc(isset($row['lot_out']) ? $row['lot_out'] : '') ?></textarea>
                                     </td>
@@ -256,8 +276,21 @@
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
+
                         </tbody>
                     </table>
+                    <?php if (!empty($sessionData)): ?>
+                        <div class="w-100 text-center my-4 p-3 rounded-4 shadow-sm border"
+                            style="background: linear-gradient(135deg, #fffef5, #fffdf0); border-color: #f1c40f; color: #3c3c3c;">
+                            <i class="fas fa-triangle-exclamation me-2" style="color: #d4a017; font-size: 1.2rem;"></i>
+                            <span style="font-weight: 600; font-size: 30px; color: #d4a017;">
+                                PERIKSA KEMBALI SELURUH DATA SEBELUM MENYIMPAN!
+                            </span>
+                            <p class="mt-1 mb-0" style="font-size: 20px; ">
+                                PASTIKAN NILAI <strong>KGS</strong>, <strong>CONES</strong>, dan <strong>LOT</strong> SUDAH BENAR.
+                            </p>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <div class="row mt-3">
                     <div class="col-md-3">

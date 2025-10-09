@@ -2,28 +2,20 @@
 <?php $this->section('content'); ?>
 <div class="container-fluid py-4">
     <style>
-        /* ===== Design Tokens (mudah ganti tema) ===== */
         :root {
             --bg: #0f172a;
-            /* slate-900 */
             --card: #111827;
-            /* gray-900 */
             --muted: #64748b;
-            /* slate-500 */
             --text: #e5e7eb;
-            /* gray-200 */
             --accent: #22d3ee;
-            /* cyan-400 */
             --accent-strong: #06b6d4;
-            /* cyan-500 */
             --success: #22c55e;
             --danger: #ef4444;
-            --ring: rgba(34, 211, 238, 0.35);
+            --ring: rgba(34, 211, 238, .35);
             --shadow: 0 10px 30px rgba(2, 8, 23, .45);
             --radius: 16px;
         }
 
-        /* Overlay transparan */
         #loadingOverlay {
             display: none;
             position: fixed;
@@ -66,7 +58,7 @@
 
         @keyframes r {
             to {
-                transform: rotate(360deg);
+                transform: rotate(360deg)
             }
         }
 
@@ -91,7 +83,6 @@
             transition: width .25s ease;
         }
 
-        /* ===== Small helpers ===== */
         .icon-pill {
             width: 44px;
             height: 44px;
@@ -102,7 +93,6 @@
             border: 1px solid rgba(255, 255, 255, .06);
         }
 
-        /* Respect reduced motion */
         @media (prefers-reduced-motion: reduce) {
 
             .btn,
@@ -111,7 +101,8 @@
             }
         }
     </style>
-    <!-- ===== Overlay ===== -->
+
+    <!-- Overlay -->
     <div id="loadingOverlay" aria-hidden="true">
         <div class="loader-wrap">
             <div class="loading-card" role="status" aria-live="polite">
@@ -132,9 +123,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-sm mb-0 text-capitalize font-weight-bold">Sisa Kebutuhan Area</p>
-                            <h5 class="font-weight-bolder mb-0">
-                                Data Sisa Kebutuhan Area
-                            </h5>
+                            <h5 class="font-weight-bolder mb-0">Data Sisa Kebutuhan Area</h5>
                         </div>
                         <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
                             <i class="ni ni-chart-bar-32 text-lg opacity-10" aria-hidden="true"></i>
@@ -145,26 +134,36 @@
         </div>
     </div>
 
+    <!-- Filter Bar -->
     <div class="row">
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-body">
                     <div class="row g-3">
+                        <!-- No Model -->
+                        <div class="col-md-3">
+                            <label for="filter_model" class="form-label">No Model</label>
+                            <input
+                                type="text"
+                                id="filter_model"
+                                name="filter_model"
+                                class="form-control"
+                                placeholder="No Model"
+                                value="<?= esc($noModel ?? '') ?>"
+                                required>
+                        </div>
+                        <!-- Area -->
                         <div class="col-md-3">
                             <label for="filter_area" class="form-label">Area</label>
                             <select class="form-control" name="filter_area" id="filter_area" required>
-                                <option value="">Pilih Area</option>
-                                <?php foreach ($allArea as $ar) {
-                                ?>
-                                    <option value="<?= $ar ?>"><?= $ar ?></option>
-                                <?php
-                                } ?>
+                                <?php if (!empty($area)): ?>
+                                    <option value="<?= esc($area) ?>"><?= esc($area) ?></option>
+                                <?php else: ?>
+                                    <option value="">Pilih Area</option>
+                                <?php endif; ?>
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label for="filter_model" class="form-label">No Model</label>
-                            <input type="text" id="filter_model" name="filter_model" class="form-control" placeholder="No Model" required>
-                        </div>
+
                         <!-- Tombol Filter -->
                         <div class="col-md-2">
                             <label class="form-label d-block invisible">Filter</label>
@@ -182,14 +181,16 @@
                             </button>
                         </div>
 
+                        <!-- Export -->
                         <div class="col-md-3 text-end">
                             <label class="form-label d-block invisible">Export</label>
-                            <button type="button" class="btn btn-success w-100"
-                                onclick="window.location.href='<?= base_url($role . '/pemesanan/reportSisaKebutuhanArea') . '?filter_model=' . ($noModel ?? '') . '&filter_area=' . ($area ?? '') ?>'">
+                            <button type="button" class="btn btn-success w-100" id="exportExcelBtn">
                                 <i class="fas fa-file-excel"></i> EXPORT EXCEL
                             </button>
                         </div>
                     </div>
+
+                    <!-- Tabel -->
                     <div class="table-responsive mt-4">
                         <table class="table align-items-center">
                             <thead class="table-light">
@@ -228,24 +229,12 @@
                                     </tr>
                                     <?php
                                 } elseif (!empty($dataPemesanan) && !empty($area) && !empty($noModel)) {
-
                                     $prevKey = null;
-                                    $ttlKgPesan = 0;
-                                    $ttlCnsPesan = 0;
-                                    $ttlKgOut = 0;
-                                    $ttlCnsOut = 0;
-                                    $ttlKgRetur = 0;
-                                    $ttlCnsRetur = 0;
-                                    $ttlKebTotal = 0;
-                                    $sisa = 0;
-
+                                    $ttlKgPesan = $ttlCnsPesan = $ttlKgOut = $ttlCnsOut = $ttlKgRetur = $ttlCnsRetur = $ttlKebTotal = $sisa = 0;
                                     foreach ($dataPemesanan as $key => $id) {
-                                        // Buat key unik untuk kombinasi
                                         $currentKey = $id['item_type'] . '|' . $id['kode_warna'] . '|' . $id['color'];
-
-                                        if ($prevKey !== null && $currentKey !== $prevKey) {
-                                    ?>
-                                            <tr style="font-weight: bold; background-color: #f0f0f0;">
+                                        if ($prevKey !== null && $currentKey !== $prevKey) { ?>
+                                            <tr style="font-weight:bold;background-color:#f0f0f0;">
                                                 <th colspan="7" class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">Total Kebutuhan</th>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKebTotal, 2) ?></th>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgPesan, 2) ?></th>
@@ -257,37 +246,22 @@
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgRetur, 2) ?></th>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= $ttlCnsRetur ?></th>
                                                 <th colspan="2"></th>
-                                                <th class="text-uppercase text-xs font-weight-bolder text-center text-<?= $color; ?>"><?= number_format($sisa, 2) ?></th>
+                                                <th class="text-uppercase text-xs font-weight-bolder text-center text-<?= $sisa < 0 ? 'danger' : 'success'; ?>"><?= number_format($sisa, 2) ?></th>
                                             </tr>
                                         <?php
-                                            // Reset total untuk grup berikutnya
-                                            $ttlKgPesan = 0;
-                                            $ttlCnsPesan = 0;
-                                            $ttlKgOut = 0;
-                                            $ttlCnsOut = 0;
-                                            $ttlKgRetur = 0;
-                                            $ttlCnsRetur = 0;
-                                            $ttlKebTotal = 0;
-                                            $sisa = 0;
+                                            $ttlKgPesan = $ttlCnsPesan = $ttlKgOut = $ttlCnsOut = $ttlKgRetur = $ttlCnsRetur = $ttlKebTotal = $sisa = 0;
                                         }
-                                        // Hitung total sementara
                                         $ttlKgPesan += $id['ttl_kg'];
                                         $ttlCnsPesan += $id['ttl_cns'];
-                                        $ttlKgOut += $id['kg_out'];
-                                        $ttlCnsOut += $id['cns_out'];
+                                        $ttlKgOut   += $id['kg_out'];
+                                        $ttlCnsOut  += $id['cns_out'];
                                         $ttlKgRetur += $id['kgs_retur'];
                                         $ttlCnsRetur += $id['cns_retur'];
-                                        // Ambil ttl_keb satu kali per grup
                                         if (!isset($shownKebutuhan[$currentKey])) {
-                                            $ttlKebTotal = $id['ttl_keb']; // Ambil hanya sekali
+                                            $ttlKebTotal = $id['ttl_keb'];
                                             $shownKebutuhan[$currentKey] = true;
                                         }
                                         $sisa = $ttlKebTotal - $ttlKgOut + $ttlKgRetur;
-                                        if ($sisa < 0) {
-                                            $color = "danger";
-                                        } else {
-                                            $color = "success";
-                                        }
                                         ?>
                                         <tr>
                                             <td class="text-xs text-center"><?= $id['tgl_pakai']; ?></td>
@@ -310,14 +284,10 @@
                                             <td class="text-xs text-center"><?= $id['ket_gbn']; ?></td>
                                             <td></td>
                                         </tr>
-                                    <?php
-                                        $prevKey = $currentKey;
+                                    <?php $prevKey = $currentKey;
                                     }
-
-                                    // Tampilkan total untuk grup terakhir
-                                    if ($prevKey !== null) {
-                                    ?>
-                                        <tr style="font-weight: bold; background-color: #f0f0f0;">
+                                    if ($prevKey !== null) { ?>
+                                        <tr style="font-weight:bold;background-color:#f0f0f0;">
                                             <th colspan="7" class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">Total Kebutuhan</th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKebTotal, 2) ?></th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgPesan, 2) ?></th>
@@ -329,12 +299,10 @@
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgRetur, 2) ?></th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= $ttlCnsRetur ?></th>
                                             <th colspan="2"></th>
-                                            <th class="text-uppercase text-xs font-weight-bolder text-center text-<?= $color; ?>"><?= number_format($sisa, 2) ?></th>
+                                            <th class="text-uppercase text-xs font-weight-bolder text-center text-<?= $sisa < 0 ? 'danger' : 'success'; ?>"><?= number_format($sisa, 2) ?></th>
                                         </tr>
-                                <?php
-                                    }
-                                }
-                                ?>
+                                <?php }
+                                } ?>
                             </tbody>
                         </table>
                     </div>
@@ -345,6 +313,141 @@
 </div>
 
 <script>
+    const modelInput = document.getElementById('filter_model');
+    const areaSelect = document.getElementById('filter_area');
+    const rolePrefix = '<?= $role ?>';
+
+    // Placeholder yang harus diabaikan (case-insensitive)
+    const PLACEHOLDERS = new Set([
+        'belum ada area', 'tidak ada area', 'no area', '-', ''
+    ]);
+
+    // --- parser respons ---
+    function parseAreasPayload(payload) {
+        // { ok:true, areas:[...] }
+        if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+            if (payload.ok && Array.isArray(payload.areas)) return payload.areas.map(String);
+        }
+        // [ { area:"..." }, ... ]
+        if (Array.isArray(payload)) {
+            return payload.map(r => (r && typeof r === 'object' && 'area' in r) ? String(r.area) : '')
+                .filter(Boolean);
+        }
+        return [];
+    }
+
+    // --- normalisasi & filter ---
+    function normalizeAreas(rawAreas) {
+        // trim, buang placeholder, dedupe, pertahankan urutan
+        const seen = new Set();
+        const out = [];
+        for (const a of rawAreas) {
+            const val = String(a).trim();
+            if (!val) continue;
+            if (PLACEHOLDERS.has(val.toLowerCase())) continue; // <— filter "Belum Ada Area"
+            if (seen.has(val)) continue;
+            seen.add(val);
+            out.push(val);
+        }
+        return out;
+    }
+
+    function setAreaLoading() {
+        areaSelect.innerHTML = '<option value="">Memuat area…</option>';
+        areaSelect.disabled = true;
+    }
+
+    function setAreaEmpty() {
+        areaSelect.innerHTML = '<option value="">(Tidak ada area untuk model ini)</option>';
+        areaSelect.disabled = true;
+    }
+
+    function setAreaOptions(areas, keepValue = null) {
+        // bersihkan & buang placeholder
+        const PLACEHOLDERS = new Set(['belum ada area', 'tidak ada area', 'no area', '-', '']);
+        const uniq = [];
+        const seen = new Set();
+        let placeholder = null;
+
+        for (const a of areas.map(String)) {
+            const val = a.trim();
+            if (!val) continue;
+            if (PLACEHOLDERS.has(val.toLowerCase())) {
+                placeholder = val;
+                continue;
+            }
+            if (seen.has(val)) continue;
+            seen.add(val);
+            uniq.push(val); // JANGAN ubah case
+        }
+
+        let html = '<option value="">Pilih Area</option>';
+        if (placeholder) html += `<option value="" disabled>${placeholder}</option>`;
+        uniq.forEach(v => {
+            html += `<option value="${v}">${v}</option>`;
+        });
+
+        const prev = keepValue; // simpan pilihan sebelumnya
+        areaSelect.innerHTML = html;
+        areaSelect.disabled = uniq.length === 0;
+
+        if (prev && uniq.includes(prev)) {
+            areaSelect.value = prev; // restore kalau masih valid
+        } else if (prev && PLACEHOLDERS.has((prev + '').toLowerCase())) {
+            areaSelect.value = '';
+        }
+    }
+
+
+
+    async function fetchAreasNow() {
+        const noModel = modelInput.value.trim();
+        if (!noModel) {
+            setAreaEmpty();
+            return;
+        }
+        try {
+            setAreaLoading();
+            // pakai controller kamu sendiri
+            const url = `http://172.23.44.14/CapacityApps/public/api/getFilterArea?no_model=${encodeURIComponent(noModel)}`;
+
+            const res = await fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const payload = await res.json();
+
+            const areas = parseAreasPayload(payload);
+            const current = areaSelect.value || null; // simpan pilihan sebelum replace
+            setAreaOptions(areas, current); // rebuild opsi tapi pertahankan kalau masih valid
+        } catch (e) {
+            console.error(e);
+            setAreaEmpty();
+        }
+    }
+
+
+    function debounce(fn, wait) {
+        let t;
+        return (...a) => {
+            clearTimeout(t);
+            t = setTimeout(() => fn(...a), wait);
+        };
+    }
+
+
+    const fetchAreas = debounce(fetchAreasNow, 300);
+    modelInput.addEventListener('input', fetchAreas);
+    modelInput.addEventListener('change', fetchAreas);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const hasModel = (modelInput.value || '').trim() !== '';
+        const hasArea = (areaSelect.value || '').trim() !== '';
+        if (hasModel && !hasArea) fetchAreasNow();
+    });
+
     // ===== Loader helpers =====
     function showLoading() {
         document.getElementById('loadingOverlay').classList.add('active');
@@ -408,6 +511,13 @@
             clearInterval(tick);
             window.location.href = url;
         }, 900);
+    });
+
+    document.getElementById('exportExcelBtn')?.addEventListener('click', () => {
+        const nm = modelInput.value.trim();
+        const ar = areaSelect.value.trim();
+        const u = `<?= base_url($role . '/pemesanan/reportSisaKebutuhanArea') ?>?filter_model=${encodeURIComponent(nm)}&filter_area=${encodeURIComponent(ar)}`;
+        window.location.href = u;
     });
 </script>
 
