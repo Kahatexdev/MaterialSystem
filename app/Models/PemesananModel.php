@@ -634,14 +634,6 @@ class PemesananModel extends Model
             'pemesanan.admin',
         ]);
 
-        $this->orderBy('pemesanan.admin', 'ASC')
-            ->orderBy('pemesanan.tgl_pakai', 'ASC')
-            ->orderBy('master_order.no_model', 'ASC')
-            ->orderBy('material.item_type', 'ASC')
-            ->orderBy('material.kode_warna', 'ASC')
-            ->orderBy('material.color', 'ASC')
-            ->orderBy('tp.id_total_pemesanan', 'ASC');
-
         return $this->findAll();
     }
 
@@ -695,14 +687,6 @@ class PemesananModel extends Model
             'tp.id_total_pemesanan',
             'pemesanan.admin',
         ]);
-
-        $this->orderBy('pemesanan.admin', 'ASC')
-            ->orderBy('pemesanan.tgl_pakai', 'ASC')
-            ->orderBy('master_order.no_model', 'ASC')
-            ->orderBy('material.item_type', 'ASC')
-            ->orderBy('material.kode_warna', 'ASC')
-            ->orderBy('material.color', 'ASC')
-            ->orderBy('tp.id_total_pemesanan', 'ASC');
 
         return $this->findAll();
     }
