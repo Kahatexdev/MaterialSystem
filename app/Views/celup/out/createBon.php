@@ -12,6 +12,26 @@
         background: rgb(230, 153, 233) !important;
         color: #fff !important;
     }
+
+    /* Tambahkan CSS ini */
+    .form-control:disabled,
+    .form-control[readonly] {
+        background-color: #f8f9fa !important;
+        opacity: 1 !important;
+        color: #212529 !important;
+        cursor: not-allowed;
+        border-color: #dee2e6;
+    }
+
+    .form-check-input:disabled {
+        opacity: 1 !important;
+        cursor: not-allowed;
+    }
+
+    .form-check-input:disabled~label {
+        opacity: 1 !important;
+        color: #212529 !important;
+    }
 </style>
 <div class="container-fluid py-4">
     <?php if (session()->getFlashdata('success')) : ?>
@@ -105,11 +125,23 @@
                                                     <input type="text" class="form-control" name="items[0][item_type]" id="item_type" required placeholder="Item Type" readonly>
 
                                                 </div>
-                                                <div class="col-md-4">
+                                                <div class="col-md-3">
                                                     <label>Kode Warna</label>
                                                     <input type="text" class="form-control" name="items[0][kode_warna]" id="kode_warna" required placeholder="Kode Warna" readonly>
                                                 </div>
-
+                                                <div class="col-md-1">
+                                                    <label for="po-plus" class="text-center">Po Tambahan</label>
+                                                    <div class="row">
+                                                        <div class="col-md-3 form-check">
+                                                            <label>
+                                                                <input type="checkbox" name="po_plus" id="po_plus" class="form-check-input" disabled>
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label for="">Ya</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <!-- Surat Jalan Section -->
@@ -278,6 +310,11 @@
             error.textContent = '';
         }
     });
+
+    document.getElementById('no_model').addEventListener('input', function(e) {
+        // hanya huruf (A-Z, a-z) dan spasi yang boleh
+        this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+    });
 </script>
 <script>
     $(document).ready(function() {
@@ -374,6 +411,7 @@
             const itemTypeId = `item_type_${tabIndex}`;
             const kodeWarnaId = `kode_warna_${tabIndex}`;
             const warnaId = `warna_${tabIndex}`;
+            const poPlusId = `po_plus_${tabIndex}`;
             const lotCelupId = `lot_celup_${tabIndex}`;
 
             // Tambahkan tab baru ke nav-tab
@@ -424,11 +462,24 @@
                                                     <option value="">Pilih Item Type</option>
                                                 </select>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <label>Kode Warna</label>
                                                 <select class="form-control kode-warna" name="items[${tabIndex - 1}][kode_warna]" id="${kodeWarnaId}" required>
                                                     <option value="">Pilih Kode Warna</option>
                                                 </select>
+                                            </div>
+                                            <div class="col-md-1">
+                                                <label for="po-plus" class="text-center">Po Tambahan</label>
+                                                <div class="row">
+                                                    <div class="col-md-3 form-check">
+                                                        <label>
+                                                            <input type="checkbox" name="po_plus" id="${poPlusId}" class="form-check-input" disabled>
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label for="">Ya</label>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -573,6 +624,8 @@
                             document.getElementById(itemTypeId).innerHTML = `<option value="${data.item_type}" selected>${data.item_type}</option>`;
                             document.getElementById(kodeWarnaId).innerHTML = `<option value="${data.kode_warna}" selected>${data.kode_warna}</option>`;
                             document.getElementById(warnaId).innerHTML = `<option value="${data.warna}" selected>${data.warna}</option>`;
+                            document.getElementById(warnaId).innerHTML = `<option value="${data.warna}" selected>${data.warna}</option>`;
+                            document.getElementById(poPlusId).checked = (data.po_plus == 1);
                             document.getElementById(lotCelupId).value = data.lot_celup;
                             valueLot = data.lot_celup;
                         }
@@ -718,6 +771,7 @@
                         $('#id_celup').val(idcelup);
                         $('#lot_celup').val(data.lot_celup);
                         lotCelupValue = data.lot_celup; // Simpan nilai lot_celup
+                        $('#po_plus').prop('checked', data.po_plus == 1);
                     }
                 });
             });
