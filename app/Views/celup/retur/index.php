@@ -209,6 +209,10 @@
                             <input type="date" id="filter_tglsch" name="filter_tglsch" class="form-control" placeholder="Tanggal Schedule">
                         </div>
                         <div class="d-flex flex-column">
+                            <label for="filter_tglsch" class="form-label">Tanggal Kirim</label>
+                            <input type="date" id="filter_tglkirim" name="filter_tglkirim" class="form-control" placeholder="Tanggal Kirim">
+                        </div>
+                        <div class="d-flex flex-column">
                             <label for="filter_nomodel" class="form-label">No Model / Kode Warna</label>
                             <input type="text" id="filter_nomodel" name="filter_nomodel" class="form-control" placeholder="No Model / Kode Warna">
                         </div>
@@ -225,7 +229,7 @@
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table">
+                <table id="dataTable" class="table">
                     <thead>
                         <tr>
                             <th class="sticky">No</th>
@@ -235,6 +239,7 @@
                             <th class="sticky">Warna</th>
                             <th class="sticky">Alasan</th>
                             <th class="sticky">Lot Celup</th>
+                            <th class="sticky">Tanggal Kirim</th>
                             <th class="sticky">Surat Jalan</th>
                             <th class="sticky">Action</th>
                         </tr>
@@ -252,6 +257,7 @@
                                 <td><?= $data['warna']; ?></td>
                                 <td><?= $data['ket_daily_cek']; ?></td>
                                 <td><?= $data['lot_celup']; ?></td>
+                                <td><?= $data['tgl_datang']; ?></td>
                                 <td><?= $data['no_surat_jalan']; ?></td>
                                 <td><a href="<?= base_url($role . '/createRetur/' . $data['id_celup']) ?>" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="New Bon">
                                         <i class="fas fa-barcode"></i></a>
@@ -287,6 +293,30 @@
 
 
 <script>
+    $(document).ready(function() {
+        $('#dataTable').DataTable({
+            "pageLength": 10,
+            "ordering": true,
+            "columns": [
+                null, // No
+                null, // PO
+                null, // Jenis Benang
+                null, // Kode Warna
+                null, // Warna
+                null, // Alasan
+                null, // Lot Celup
+                null, // Tanggal Kirim
+                null, // Surat Jalan
+                {
+                    "orderable": false,
+                    "searchable": false
+                } // Action
+            ],
+            "language": {
+                "emptyTable": "Data belum tersedia untuk saat ini."
+            }
+        });
+    });
     document.addEventListener("DOMContentLoaded", function() {
         var tooltipList = [].slice
             .call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
