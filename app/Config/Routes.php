@@ -270,6 +270,10 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportOtherOut', 'WarehouseController::reportOtherOut');
     $routes->get('warehouse/filterOtherOut', 'WarehouseController::filterOtherOut');
     $routes->get('warehouse/exportOtherOut', 'ExcelController::exportOtherOut');
+    $routes->get('warehouse/returCelup', 'WarehouseController::returCelup');
+    $routes->get('warehouse/reportHistoryReturCelup', 'WarehouseController::reportHistoryReturCelup');
+    $routes->get('warehouse/filterHistoryReturCelup', 'WarehouseController::filterHistoryReturCelup');
+    $routes->get('warehouse/exportHistoryReturCelup', 'ExcelController::exportHistoryReturCelup');
 
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');
@@ -281,6 +285,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('otherIn/listBarcode/filter', 'WarehouseController::listBarcodeFilter');
     $routes->get('otherIn/detailListBarcode/(:any)', 'WarehouseController::detailListBarcode/$1');
     $routes->get('otherIn/printBarcode/(:any)', 'PdfController::printBarcodeOtherBon/$1');
+    $routes->post('warehouse/saveReturCelup', 'WarehouseController::saveReturCelup');
 
     //
     $routes->post('getStockByParams', 'PemesananController::getStockByParams');
@@ -836,6 +841,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('otherIn/detailListBarcode/(:any)', 'WarehouseController::detailListBarcode/$1');
     $routes->get('otherIn/printBarcode/(:any)', 'PdfController::printBarcodeOtherBon/$1');
     $routes->get('importPemasukan', 'WarehouseController::importPemasukan');
+    $routes->post('warehouse/saveReturCelup', 'WarehouseController::saveReturCelup');
 
     //Po Plus
     $routes->get('poplus', 'PoTambahanController::index');

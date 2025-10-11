@@ -44,6 +44,7 @@ class ScheduleCelupModel extends Model
         'ket_schedule',
         'po_plus',
         'user_cek_status',
+        'admin',
         'created_at',
         'updated_at',
     ];
