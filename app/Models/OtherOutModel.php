@@ -65,14 +65,43 @@ class OtherOutModel extends Model
             // ->where('nama_cluster', $namaCluster)
             ->first();
     }
+    // public function getPakaiLain($key, $jenis = null)
+    // {
+    //     $builder = $this->db->table('other_out oo')
+    //         ->select('oo.*, oc.no_model, sc.item_type, sc.kode_warna, sc.warna, mm.jenis, sc.po_plus, p.area_out, p.tgl_out, p.kgs_out, p.cns_out, p.krg_out, p.lot_out')
+    //         ->join('out_celup oc', 'oc.id_out_celup = oo.id_out_celup', 'left')
+    //         ->join('schedule_celup sc', 'oc.id_celup = sc.id_celup', 'left')
+    //         ->join('master_material mm', 'sc.item_type = mm.item_type', 'left')
+    //         ->join('pengeluaran p', 'p.id_out_celup = oo.id_out_celup', 'left')
+    //         ->where('oc.no_model', $key);
+
+    //     if (!empty($jenis)) {
+    //         $builder->where('mm.jenis', $jenis);
+    //     }
+
+    //     return $builder
+    //         ->groupBy('oo.id_other_out')
+    //         ->orderBy('oo.tgl_other_out, sc.item_type, sc.kode_warna', 'ASC')
+    //         ->get()
+    //         ->getResultArray();
+    // }
+
     public function getPakaiLain($key, $jenis = null)
     {
         $builder = $this->db->table('other_out oo')
-            ->select('oo.*, oc.no_model, sc.item_type, sc.kode_warna, sc.warna, mm.jenis, sc.po_plus, p.area_out, p.tgl_out, p.kgs_out, p.cns_out, p.krg_out, p.lot_out')
+            ->select('
+            oo.*, 
+            oc.no_model, 
+            COALESCE(sc.item_type, ob.item_type) AS item_type,
+            COALESCE(sc.kode_warna, ob.kode_warna) AS kode_warna,
+            COALESCE(sc.warna, ob.warna) AS warna,
+            mm.jenis, 
+            sc.po_plus
+        ')
             ->join('out_celup oc', 'oc.id_out_celup = oo.id_out_celup', 'left')
+            ->join('other_bon ob', 'ob.id_other_bon = oc.id_other_bon', 'left')
             ->join('schedule_celup sc', 'oc.id_celup = sc.id_celup', 'left')
-            ->join('master_material mm', 'sc.item_type = mm.item_type', 'left')
-            ->join('pengeluaran p', 'p.id_out_celup = oo.id_out_celup', 'left')
+            ->join('master_material mm', '(sc.item_type = mm.item_type OR ob.item_type = mm.item_type)', 'left')
             ->where('oc.no_model', $key);
 
         if (!empty($jenis)) {
@@ -85,6 +114,7 @@ class OtherOutModel extends Model
             ->get()
             ->getResultArray();
     }
+
 
     public function getFilterOtherOut($key, $tanggalAwal, $tanggalAkhir): array
     {

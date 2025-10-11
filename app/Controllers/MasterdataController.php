@@ -370,219 +370,512 @@ class MasterdataController extends BaseController
         }
     }
 
+    // public function reviseMU()
+    // {
+    //     // Ambil file yang diupload dan validasi file
+    //     $file = $this->request->getFile('file');
+    //     if (!$file || !$file->isValid()) {
+    //         return redirect()->back()->with('error', 'No file uploaded or file is invalid.');
+    //     }
+
+    //     // (Opsional) Cek ekstensi file jika diperlukan
+    //     $allowedExtensions = ['xls', 'xlsx', 'csv'];
+    //     if (!in_array($file->getClientExtension(), $allowedExtensions)) {
+    //         return redirect()->back()->with('error', 'File yang diupload harus berformat Excel atau CSV.');
+    //     }
+
+    //     // Inisialisasi model-model yang dibutuhkan
+    //     $masterOrderModel    = new MasterOrderModel();
+    //     $materialModel       = new MaterialModel();
+    //     $masterMaterialModel = new MasterMaterialModel();
+
+    //     // Ambil username admin dari session
+    //     $admin = session()->get('username');
+    //     if (!$admin) {
+    //         return redirect()->back()->with('error', 'Session expired. Please log in again.');
+    //     }
+
+    //     try {
+    //         // Load file Excel/CSV dan ambil sheet aktif
+    //         $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getTempName());
+    //         $sheet       = $spreadsheet->getActiveSheet();
+
+    //         // Ambil no_model dari file Excel (misalnya dari sel B9)
+    //         $no_model = str_replace([': '], '', $sheet->getCell('B9')->getValue());
+    //         if (empty($no_model)) {
+    //             return redirect()->back()->with('error', 'No Model tidak ditemukan di file.');
+    //         }
+
+    //         // Cari master order berdasarkan no_model
+    //         $masterOrder = $masterOrderModel->where('no_model', $no_model)->first();
+    //         if (!$masterOrder) {
+    //             return redirect()->back()->with('error', 'Master order dengan No Model ' . $no_model . ' tidak ditemukan.');
+    //         }
+    //         $id_order = $masterOrder['id_order'];
+
+    //         // --- Update data master_order berdasarkan header file Excel ---
+    //         $no_order    = str_replace([': '], '', $sheet->getCell('B5')->getValue());
+    //         if (empty($no_order)) {
+    //             return redirect()->back()->with('error', 'No Order tidak ditemukan di file.');
+    //         }
+    //         $buyer       = str_replace([': '], '', $sheet->getCell('B6')->getValue());
+    //         $lco_dateRaw = str_replace([': '], '', $sheet->getCell('B4')->getFormattedValue());
+    //         $foll_up     = str_replace([': '], '', $sheet->getCell('D5')->getValue());
+
+    //         // Validasi format tanggal
+    //         $date_object = DateTime::createFromFormat('d.m.Y', $lco_dateRaw);
+    //         if ($date_object) {
+    //             $lco_date = $date_object->format('Y-m-d');
+    //         } else {
+    //             return redirect()->back()->with('error', 'Format tanggal LCO tidak valid.');
+    //         }
+
+    //         $masterDataUpdate = [
+    //             'no_order'  => $no_order,
+    //             'buyer'     => $buyer,
+    //             'lco_date'  => $lco_date,
+    //             'foll_up'   => $foll_up,
+    //             'admin'     => $admin,
+    //             'updated_at' => date('Y-m-d H:i:s'),
+    //         ];
+    //         $masterOrderModel->update($id_order, $masterDataUpdate);
+    //         // --- End update master_order ---
+
+    //         // Ambil data material lama (yang sudah ada di DB) untuk master order ini
+    //         $existingMaterials = $materialModel->where('id_order', $id_order)->findAll();
+    //         $existingKeys = [];
+    //         foreach ($existingMaterials as $material) {
+    //             // Normalisasi data untuk composite key
+    //             $oldStyleSize = strtoupper(trim($material['style_size']));
+    //             $oldItemType  = strtoupper(trim($material['item_type']));
+    //             $oldKodeWarna = strtoupper(trim($material['kode_warna']));
+    //             $oldColor     = strtoupper(trim($material['color']));
+
+    //             // Composite key: style_size_itemType_kodeWarna_color
+    //             $existingKey = $oldStyleSize . '_' . $oldItemType . '_' . $oldKodeWarna . '_' . $oldColor;
+    //             $existingKeys[$existingKey] = $material;
+    //         }
+
+    //         // Mapping header sesuai format file Excel
+    //         $headerMap = [
+    //             'Color'          => 'A',
+    //             'Item Type'      => 'B',
+    //             'Kode Warna'     => 'C',
+    //             'Item Nr'        => 'D', // berisi style_size
+    //             'Composition(%)' => 'E',
+    //             'GW/pc'          => 'F',
+    //             'Qty/pcs'        => 'G',
+    //             'Loss'           => 'H',
+    //             'Kgs'            => 'I',
+    //         ];
+
+    //         // Array untuk menyimpan composite key dari file Excel revisi
+    //         $newMaterialKeys = [];
+
+    //         // Iterasi baris data material (misalnya mulai dari baris 15)
+    //         foreach ($sheet->getRowIterator(2) as $row) {
+    //             $rowIndex  = $row->getRowIndex();
+    //             if ($rowIndex < 14) {
+    //                 continue;
+    //             }
+
+    //             // Ambil raw data untuk style_size
+    //             $style_sizeRaw = $sheet->getCell($headerMap['Item Nr'] . $rowIndex)->getValue();
+    //             if (empty($style_sizeRaw)) {
+    //                 // Lewati baris tanpa style_size
+    //                 continue;
+    //             }
+
+    //             // (Opsional) Cek apakah style_size mengandung 'X'
+    //             if (stripos($style_sizeRaw, 'X') === false) {
+    //                 log_message('error', 'Baris ' . $rowIndex . ' tidak mengandung X: ' . $style_sizeRaw);
+    //                 continue;
+    //             }
+
+    //             // Validasi dengan API (pastikan respons valid dan memiliki format yang diharapkan)
+    //             $validate = $this->validateWithAPI($no_model, $style_sizeRaw);
+    //             if (!$validate || !isset($validate['size'])) {
+    //                 // Catat error, tapi lanjutkan ke baris berikutnya tanpa return
+    //                 log_message('error', 'Data StyleSize pada baris ke-' . $rowIndex . ': ' . $style_sizeRaw . ' tidak valid atau tidak ditemukan di CapacityApps.');
+    //                 continue;
+    //             }
+
+    //             // Normalisasi style_size dari API
+    //             $style_size = strtoupper(trim($validate['size'] ?? $style_sizeRaw));
+
+    //             // Ambil dan validasi item type
+    //             $raw_item_type = $sheet->getCell($headerMap['Item Type'] . $rowIndex)->getValue();
+    //             if (empty($raw_item_type)) {
+    //                 return redirect()->back()->with('error', 'Item Type tidak boleh kosong pada baris ' . $rowIndex);
+    //             }
+    //             $item_type = strtoupper(trim($raw_item_type));
+    //             if (!$masterMaterialModel->checkItemType($item_type)) {
+    //                 return redirect()->back()->with('error', $item_type . ' tidak ada di database pada baris ' . $rowIndex);
+    //             }
+
+    //             // Normalisasi data lain
+    //             $kode_warna = strtoupper(trim($sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue()));
+    //             $color      = strtoupper(trim($sheet->getCell($headerMap['Color'] . $rowIndex)->getValue()));
+
+    //             // Buat composite key baru
+    //             $key = $style_size . '_' . $item_type . '_' . $kode_warna . '_' . $color;
+    //             $newMaterialKeys[] = $key;
+
+    //             // Validasi nilai numeric untuk Qty, GW, dan Kgs
+    //             $qty_raw = $sheet->getCell($headerMap['Qty/pcs'] . $rowIndex)->getValue();
+    //             $qty_pcs = intval(str_replace([',', '.'], '', $qty_raw));
+    //             if (!is_numeric($qty_pcs)) {
+    //                 return redirect()->back()->with('error', 'Qty/pcs tidak valid pada baris ' . $rowIndex);
+    //             }
+
+    //             // Siapkan data material baru dari file Excel
+    //             $materialData = [
+    //                 'id_order'    => $id_order,
+    //                 'style_size'  => $style_size,
+    //                 'area'        => $validate['area'] ?? NULL,
+    //                 'inisial'     => $validate['inisial'] ?? NULL,
+    //                 'color'       => $color,
+    //                 'item_type'   => $item_type,
+    //                 'kode_warna'  => $kode_warna,
+    //                 'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(),
+    //                 'gw'          => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
+    //                 'gw_aktual'   => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(), // Asumsikan gw_aktual sama dengan gw
+    //                 'qty_pcs'     => $qty_pcs,
+    //                 'loss'        => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue() ?? 0,
+    //                 'kgs'         => $sheet->getCell($headerMap['Kgs'] . $rowIndex)->getValue(),
+    //                 'admin'       => $admin,
+    //                 'updated_at'  => date('Y-m-d H:i:s'),
+    //             ];
+
+    //             // Jika composite key sudah ada, update data material lama
+    //             if (isset($existingKeys[$key])) {
+    //                 $materialModel->update($existingKeys[$key]['id_material'], $materialData);
+    //             } else {
+    //                 // Jika belum ada, tambahkan created_at untuk data baru dan insert
+    //                 $materialData['created_at'] = date('Y-m-d H:i:s');
+    //                 $materialModel->insert($materialData);
+    //             }
+    //         }
+
+    //         // Setelah proses import, update data lama yang tidak ada di file revisi
+    //         // foreach ($existingMaterials as $material) {
+    //         //     $oldStyleSize = strtoupper(trim($material['style_size']));
+    //         //     $oldItemType  = strtoupper(trim($material['item_type']));
+    //         //     $oldKodeWarna = strtoupper(trim($material['kode_warna']));
+    //         //     $oldColor     = strtoupper(trim($material['color']));
+
+    //         //     $existingKey = $oldStyleSize . '_' . $oldItemType . '_' . $oldKodeWarna . '_' . $oldColor;
+    //         //     if (!in_array($existingKey, $newMaterialKeys)) {
+    //         //         $updateData = [
+    //         //             'qty_pcs'     => null,
+    //         //             'gw'          => null,
+    //         //             'loss'        => null,
+    //         //             'kgs'         => null,
+    //         //             'composition' => null,
+    //         //             'updated_at'  => date('Y-m-d H:i:s'),
+    //         //         ];
+    //         //         $materialModel->update($material['id_material'], $updateData);
+    //         //     }
+    //         // }
+
+    //         return redirect()->back()->with('success', 'Data revisi MU berhasil diperbarui.');
+    //     } catch (\Exception $e) {
+    //         return redirect()->back()->with('error', 'Terjadi kesalahan saat merevisi data: ' . $e->getMessage());
+    //     }
+    // }
+
+
     public function reviseMU()
     {
-        // Ambil file yang diupload dan validasi file
+        // ===== 0) Validasi request & session =====
         $file = $this->request->getFile('file');
         if (!$file || !$file->isValid()) {
             return redirect()->back()->with('error', 'No file uploaded or file is invalid.');
         }
 
-        // (Opsional) Cek ekstensi file jika diperlukan
         $allowedExtensions = ['xls', 'xlsx', 'csv'];
-        if (!in_array($file->getClientExtension(), $allowedExtensions)) {
+        if (!in_array(strtolower($file->getClientExtension()), $allowedExtensions, true)) {
             return redirect()->back()->with('error', 'File yang diupload harus berformat Excel atau CSV.');
         }
 
-        // Inisialisasi model-model yang dibutuhkan
-        $masterOrderModel    = new MasterOrderModel();
-        $materialModel       = new MaterialModel();
-        $masterMaterialModel = new MasterMaterialModel();
-
-        // Ambil username admin dari session
         $admin = session()->get('username');
         if (!$admin) {
             return redirect()->back()->with('error', 'Session expired. Please log in again.');
         }
 
-        try {
-            // Load file Excel/CSV dan ambil sheet aktif
-            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getTempName());
-            $sheet       = $spreadsheet->getActiveSheet();
+        // ===== 1) Model =====
+        $masterOrderModel    = new MasterOrderModel();
+        $materialModel       = new MaterialModel();
+        $masterMaterialModel = new MasterMaterialModel();
 
-            // Ambil no_model dari file Excel (misalnya dari sel B9)
-            $no_model = str_replace([': '], '', $sheet->getCell('B9')->getValue());
-            if (empty($no_model)) {
-                return redirect()->back()->with('error', 'No Model tidak ditemukan di file.');
+        // ===== 2) Util kecil =====
+        $norm = static function ($v) {
+            // trim, hilangkan whitespace "aneh", uppercase multibyte aman
+            $v = is_scalar($v) ? (string)$v : '';
+            $v = trim(preg_replace('/\s+/u', ' ', $v));
+            return mb_strtoupper($v, 'UTF-8');
+        };
+        $stripLabel = static function ($v) {
+            // buang awalan "LABEL: " jika ada
+            $v = is_scalar($v) ? (string)$v : '';
+            return preg_replace('/^[^:]*:\s*/', '', trim($v));
+        };
+        $parseExcelDate = static function ($raw) {
+            // Terima "d.m.Y" atau serial number Excel
+            if (empty($raw) && $raw !== 0) return null;
+
+            if (is_numeric($raw)) {
+                // Excel serial -> PHP DateTime
+                // 25569 adalah offset dari 1970-01-01 untuk Excel (Windows)
+                $ts = ((int)$raw - 25569) * 86400;
+                if ($ts <= 0) return null;
+                return gmdate('Y-m-d', $ts);
             }
 
-            // Cari master order berdasarkan no_model
+            // Coba d.m.Y
+            $dt = DateTime::createFromFormat('d.m.Y', (string)$raw);
+            if ($dt !== false) return $dt->format('Y-m-d');
+
+            // Coba format lain umum (fallback)
+            $try = date_create((string)$raw);
+            return $try ? $try->format('Y-m-d') : null;
+        };
+        $toInt = static function ($raw) {
+            // Ambil integer dari string yang mungkin ada koma/titik
+            if (is_null($raw) || $raw === '') return null;
+            $clean = preg_replace('/[^\d\-]/', '', (string)$raw);
+            if ($clean === '' || $clean === '-') return null;
+            return (int)$clean;
+        };
+
+        // ===== 3) Load spreadsheet (read-only) =====
+        try {
+            $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($file->getTempName());
+            if (method_exists($reader, 'setReadDataOnly')) {
+                $reader->setReadDataOnly(true);
+            }
+            $spreadsheet = $reader->load($file->getTempName());
+            $sheet       = $spreadsheet->getActiveSheet();
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', 'Gagal membuka file: ' . $e->getMessage());
+        }
+
+        // ===== 4) Ambil header Master Order dari sel tetap =====
+        try {
+            $no_model = $this->removeLabelIfAny($sheet->getCell('B9')->getValue() ?? '');
+            $no_model = $norm($no_model);
+            if ($no_model === '') {
+                return redirect()->back()->with('error', 'No Model tidak ditemukan di file (B9).');
+            }
+
             $masterOrder = $masterOrderModel->where('no_model', $no_model)->first();
             if (!$masterOrder) {
                 return redirect()->back()->with('error', 'Master order dengan No Model ' . $no_model . ' tidak ditemukan.');
             }
             $id_order = $masterOrder['id_order'];
 
-            // --- Update data master_order berdasarkan header file Excel ---
-            $no_order    = str_replace([': '], '', $sheet->getCell('B5')->getValue());
-            if (empty($no_order)) {
-                return redirect()->back()->with('error', 'No Order tidak ditemukan di file.');
-            }
-            $buyer       = str_replace([': '], '', $sheet->getCell('B6')->getValue());
-            $lco_dateRaw = str_replace([': '], '', $sheet->getCell('B4')->getFormattedValue());
-            $foll_up     = str_replace([': '], '', $sheet->getCell('D5')->getValue());
+            $no_order   = $norm($this->removeLabelIfAny($sheet->getCell('B5')->getValue() ?? ''));
+            $buyer      = $norm($this->removeLabelIfAny($sheet->getCell('B6')->getValue() ?? ''));
+            $lco_raw    = $this->removeLabelIfAny($sheet->getCell('B4')->getFormattedValue() ?? '');
+            $foll_up    = $norm($this->removeLabelIfAny($sheet->getCell('D5')->getValue() ?? ''));
 
-            // Validasi format tanggal
-            $date_object = DateTime::createFromFormat('d.m.Y', $lco_dateRaw);
-            if ($date_object) {
-                $lco_date = $date_object->format('Y-m-d');
-            } else {
-                return redirect()->back()->with('error', 'Format tanggal LCO tidak valid.');
-            }
+            if ($no_order === '')  return redirect()->back()->with('error', 'No Order tidak ditemukan di file (B5).');
+            $lco_date = $parseExcelDate($lco_raw);
+            if (!$lco_date)        return redirect()->back()->with('error', 'Format tanggal LCO tidak valid (B4).');
 
             $masterDataUpdate = [
-                'no_order'  => $no_order,
-                'buyer'     => $buyer,
-                'lco_date'  => $lco_date,
-                'foll_up'   => $foll_up,
-                'admin'     => $admin,
+                'no_order'   => $no_order,
+                'buyer'      => $buyer,
+                'lco_date'   => $lco_date,
+                'foll_up'    => $foll_up,
+                'admin'      => $admin,
                 'updated_at' => date('Y-m-d H:i:s'),
             ];
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', 'Gagal membaca header MU: ' . $e->getMessage());
+        }
+
+        // ===== 5) Siapkan peta existing materials (kunci komposit) =====
+        $existingMaterials = $materialModel->select('id_material, style_size, item_type, kode_warna, color')
+            ->where('id_order', $id_order)->findAll();
+
+        $existingMap = []; // key => ['id_material'=>..]
+        foreach ($existingMaterials as $m) {
+            $key = implode('_', [
+                $norm($m['style_size']),
+                $norm($m['item_type']),
+                $norm($m['kode_warna']),
+                $norm($m['color']),
+            ]);
+            $existingMap[$key] = ['id_material' => $m['id_material']];
+        }
+
+        // ===== 6) Pemetaan kolom & baris awal data =====
+        $headerMap = [
+            'Color'          => 'A',
+            'Item Type'      => 'B',
+            'Kode Warna'     => 'C',
+            'Item Nr'        => 'D', // style_size
+            'Composition(%)' => 'E',
+            'GW/pc'          => 'F',
+            'Qty/pcs'        => 'G',
+            'Loss'           => 'H',
+            'Kgs'            => 'I',
+        ];
+        // Jika struktur kamu fix, isi saja 15. Kalau berubah, bisa cari otomatis.
+        $dataStartRow = 15;
+
+        // ===== 7) Loop baris + validasi + upsert =====
+        $errors  = [];
+        $stats   = ['insert' => 0, 'update' => 0, 'skip' => 0];
+        $now     = date('Y-m-d H:i:s');
+        $seenKeys = [];
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        try {
+            // update master_order dulu
             $masterOrderModel->update($id_order, $masterDataUpdate);
-            // --- End update master_order ---
 
-            // Ambil data material lama (yang sudah ada di DB) untuk master order ini
-            $existingMaterials = $materialModel->where('id_order', $id_order)->findAll();
-            $existingKeys = [];
-            foreach ($existingMaterials as $material) {
-                // Normalisasi data untuk composite key
-                $oldStyleSize = strtoupper(trim($material['style_size']));
-                $oldItemType  = strtoupper(trim($material['item_type']));
-                $oldKodeWarna = strtoupper(trim($material['kode_warna']));
-                $oldColor     = strtoupper(trim($material['color']));
-
-                // Composite key: style_size_itemType_kodeWarna_color
-                $existingKey = $oldStyleSize . '_' . $oldItemType . '_' . $oldKodeWarna . '_' . $oldColor;
-                $existingKeys[$existingKey] = $material;
-            }
-
-            // Mapping header sesuai format file Excel
-            $headerMap = [
-                'Color'          => 'A',
-                'Item Type'      => 'B',
-                'Kode Warna'     => 'C',
-                'Item Nr'        => 'D', // berisi style_size
-                'Composition(%)' => 'E',
-                'GW/pc'          => 'F',
-                'Qty/pcs'        => 'G',
-                'Loss'           => 'H',
-                'Kgs'            => 'I',
-            ];
-
-            // Array untuk menyimpan composite key dari file Excel revisi
-            $newMaterialKeys = [];
-
-            // Iterasi baris data material (misalnya mulai dari baris 15)
-            foreach ($sheet->getRowIterator(2) as $row) {
-                $rowIndex  = $row->getRowIndex();
-                if ($rowIndex < 14) {
+            // iterasi aman (mis: maksimal 2000 baris untuk jaga-jaga)
+            $maxRow = max($sheet->getHighestRow(), $dataStartRow);
+            for ($row = $dataStartRow; $row <= $maxRow; $row++) {
+                // Ambil style_size (wajib)
+                $style_sizeRaw = (string)($sheet->getCell($headerMap['Item Nr'] . $row)->getValue() ?? '');
+                if ($style_sizeRaw === '') {
+                    // kalau baris kosong penuh, boleh break untuk performa
+                    $maybeColor = (string)($sheet->getCell($headerMap['Color'] . $row)->getValue() ?? '');
+                    $maybeItemT = (string)($sheet->getCell($headerMap['Item Type'] . $row)->getValue() ?? '');
+                    $maybeKode  = (string)($sheet->getCell($headerMap['Kode Warna'] . $row)->getValue() ?? '');
+                    if ($maybeColor === '' && $maybeItemT === '' && $maybeKode === '') {
+                        $stats['skip']++;
+                        continue;
+                    }
+                    // Kalau kolom lain ada isi tapi style_size kosong, catat error
+                    $errors[] = "Baris $row: Item Nr (style_size) kosong.";
+                    $stats['skip']++;
                     continue;
                 }
 
-                // Ambil raw data untuk style_size
-                $style_sizeRaw = $sheet->getCell($headerMap['Item Nr'] . $rowIndex)->getValue();
-                if (empty($style_sizeRaw)) {
-                    // Lewati baris tanpa style_size
-                    continue;
-                }
-
-                // (Opsional) Cek apakah style_size mengandung 'X'
+                // Pastikan mengandung 'X' (sesuai aturanmu)
                 if (stripos($style_sizeRaw, 'X') === false) {
-                    log_message('error', 'Baris ' . $rowIndex . ' tidak mengandung X: ' . $style_sizeRaw);
+                    // hanya log, jangan matikan proses
+                    log_message('warning', "Baris $row: style_size tidak mengandung 'X' => {$style_sizeRaw}");
+                    $stats['skip']++;
                     continue;
                 }
 
-                // Validasi dengan API (pastikan respons valid dan memiliki format yang diharapkan)
-                $validate = $this->validateWithAPI($no_model, $style_sizeRaw);
+                // Validasi ke API CapacityApps
+                try {
+                    $validate = $this->validateWithAPI($no_model, $style_sizeRaw);
+                } catch (\Throwable $e) {
+                    $validate = null;
+                }
                 if (!$validate || !isset($validate['size'])) {
-                    // Catat error, tapi lanjutkan ke baris berikutnya tanpa return
-                    log_message('error', 'Data StyleSize pada baris ke-' . $rowIndex . ': ' . $style_sizeRaw . ' tidak valid atau tidak ditemukan di CapacityApps.');
+                    $errors[] = "Baris $row: StyleSize '{$style_sizeRaw}' tidak valid / tidak ditemukan di CapacityApps.";
+                    $stats['skip']++;
                     continue;
                 }
 
-                // Normalisasi style_size dari API
-                $style_size = strtoupper(trim($validate['size'] ?? $style_sizeRaw));
+                $style_size = $norm($validate['size']);
 
-                // Ambil dan validasi item type
-                $raw_item_type = $sheet->getCell($headerMap['Item Type'] . $rowIndex)->getValue();
-                if (empty($raw_item_type)) {
-                    return redirect()->back()->with('error', 'Item Type tidak boleh kosong pada baris ' . $rowIndex);
+                // Item Type (wajib & harus terdaftar)
+                $raw_item_type = (string)($sheet->getCell($headerMap['Item Type'] . $row)->getValue() ?? '');
+                if ($raw_item_type === '') {
+                    $errors[] = "Baris $row: Item Type kosong.";
+                    $stats['skip']++;
+                    continue;
                 }
-                $item_type = strtoupper(trim($raw_item_type));
+                $item_type = $norm($raw_item_type);
                 if (!$masterMaterialModel->checkItemType($item_type)) {
-                    return redirect()->back()->with('error', $item_type . ' tidak ada di database pada baris ' . $rowIndex);
+                    $errors[] = "Baris $row: Item Type '{$item_type}' tidak ada di database MasterMaterial.";
+                    $stats['skip']++;
+                    continue;
                 }
 
-                // Normalisasi data lain
-                $kode_warna = strtoupper(trim($sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue()));
-                $color      = strtoupper(trim($sheet->getCell($headerMap['Color'] . $rowIndex)->getValue()));
+                // Kolom lain
+                $kode_warna = $norm((string)$sheet->getCell($headerMap['Kode Warna'] . $row)->getValue());
+                $color      = $norm((string)$sheet->getCell($headerMap['Color'] . $row)->getValue());
 
-                // Buat composite key baru
-                $key = $style_size . '_' . $item_type . '_' . $kode_warna . '_' . $color;
-                $newMaterialKeys[] = $key;
+                // Key komposit
+                $key = implode('_', [$style_size, $item_type, $kode_warna, $color]);
+                $seenKeys[$key] = true;
 
-                // Validasi nilai numeric untuk Qty, GW, dan Kgs
-                $qty_raw = $sheet->getCell($headerMap['Qty/pcs'] . $rowIndex)->getValue();
-                $qty_pcs = intval(str_replace([',', '.'], '', $qty_raw));
-                if (!is_numeric($qty_pcs)) {
-                    return redirect()->back()->with('error', 'Qty/pcs tidak valid pada baris ' . $rowIndex);
+                // Numerik
+                $qty_pcs = $toInt($sheet->getCell($headerMap['Qty/pcs'] . $row)->getValue());
+                if ($qty_pcs === null) {
+                    $errors[] = "Baris $row: Qty/pcs tidak valid.";
+                    $stats['skip']++;
+                    continue;
                 }
 
-                // Siapkan data material baru dari file Excel
+                $composition = (string)($sheet->getCell($headerMap['Composition(%)'] . $row)->getValue() ?? '');
+                $gw          = (float) str_replace(',', '.', (string)($sheet->getCell($headerMap['GW/pc'] . $row)->getValue() ?? 0));
+                $loss        = (float) str_replace(',', '.', (string)($sheet->getCell($headerMap['Loss']   . $row)->getValue() ?? 0));
+                $kgs         = (float) str_replace(',', '.', (string)($sheet->getCell($headerMap['Kgs']    . $row)->getValue() ?? 0));
+
+                // Payload material
                 $materialData = [
                     'id_order'    => $id_order,
                     'style_size'  => $style_size,
-                    'area'        => $validate['area'] ?? NULL,
-                    'inisial'     => $validate['inisial'] ?? NULL,
+                    'area'        => $validate['area']    ?? null,
+                    'inisial'     => $validate['inisial'] ?? null,
                     'color'       => $color,
                     'item_type'   => $item_type,
                     'kode_warna'  => $kode_warna,
-                    'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(),
-                    'gw'          => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
-                    'gw_aktual'   => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(), // Asumsikan gw_aktual sama dengan gw
+                    'composition' => $composition,
+                    'gw'          => $gw,
+                    'gw_aktual'   => $gw, // default = gw
                     'qty_pcs'     => $qty_pcs,
-                    'loss'        => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue() ?? 0,
-                    'kgs'         => $sheet->getCell($headerMap['Kgs'] . $rowIndex)->getValue(),
+                    'loss'        => $loss,
+                    'kgs'         => $kgs,
                     'admin'       => $admin,
-                    'updated_at'  => date('Y-m-d H:i:s'),
+                    'updated_at'  => $now,
                 ];
 
-                // Jika composite key sudah ada, update data material lama
-                if (isset($existingKeys[$key])) {
-                    $materialModel->update($existingKeys[$key]['id_material'], $materialData);
+                // Upsert
+                if (isset($existingMap[$key])) {
+                    $materialModel->update($existingMap[$key]['id_material'], $materialData);
+                    $stats['update']++;
                 } else {
-                    // Jika belum ada, tambahkan created_at untuk data baru dan insert
-                    $materialData['created_at'] = date('Y-m-d H:i:s');
+                    $materialData['created_at'] = $now;
                     $materialModel->insert($materialData);
+                    $stats['insert']++;
                 }
             }
 
-            // Setelah proses import, update data lama yang tidak ada di file revisi
-            foreach ($existingMaterials as $material) {
-                $oldStyleSize = strtoupper(trim($material['style_size']));
-                $oldItemType  = strtoupper(trim($material['item_type']));
-                $oldKodeWarna = strtoupper(trim($material['kode_warna']));
-                $oldColor     = strtoupper(trim($material['color']));
-
-                $existingKey = $oldStyleSize . '_' . $oldItemType . '_' . $oldKodeWarna . '_' . $oldColor;
-                if (!in_array($existingKey, $newMaterialKeys)) {
-                    $updateData = [
-                        'qty_pcs'     => null,
-                        'gw'          => null,
-                        'loss'        => null,
-                        'kgs'         => null,
-                        'composition' => null,
-                        'updated_at'  => date('Y-m-d H:i:s'),
-                    ];
-                    $materialModel->update($material['id_material'], $updateData);
-                }
+            $db->transComplete();
+            if ($db->transStatus() === false) {
+                throw new \RuntimeException('Transaksi DB gagal diselesaikan.');
             }
-
-            return redirect()->back()->with('success', 'Data revisi MU berhasil diperbarui.');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            $db->transRollback();
             return redirect()->back()->with('error', 'Terjadi kesalahan saat merevisi data: ' . $e->getMessage());
         }
+
+        // ===== 8) Buat pesan hasil =====
+        $msg = "Revisi MU selesai. Insert: {$stats['insert']}, Update: {$stats['update']}, Skip: {$stats['skip']}.";
+        if (!empty($errors)) {
+            // tampilkan ringkas; kalau mau detail bisa simpan ke log/file
+            $sample = implode("\n", array_slice($errors, 0, 8));
+            $msg .= "\nBeberapa catatan:\n" . $sample . (count($errors) > 8 ? "\n... (" . count($errors) . " total)" : '');
+            return redirect()->back()->with('warning', nl2br($msg));
+        }
+
+        return redirect()->back()->with('success', $msg);
     }
+
+    /**
+     * Hapus label "X: " di depan nilai sel, jika ada.
+     * (dipisah agar bisa dipakai di tempat lain juga)
+     */
+    private function removeLabelIfAny($v)
+    {
+        $v = is_scalar($v) ? (string)$v : '';
+        return preg_replace('/^[^:]*:\s*/', '', trim($v));
+    }
+
 
     public function material($id)
     {

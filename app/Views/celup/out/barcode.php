@@ -196,7 +196,13 @@
                         <td colspan="3">
                             <div class="barcode-section">
                                 <img src="<?= $barcodeImages[$i] ?>" alt="barcode">
-                                <div style="margin-top: 1px;" class="l-header"> <?= $row['no_model'] ?? '-' ?></div>
+                                <?php
+                                $noModel = $row['no_model'] ?? '-';
+                                if (($row['po_plus'] ?? '') === '1') {
+                                    $noModel = '(+)' . $noModel;
+                                }
+                                ?>
+                                <div style="margin-top: 1px;" class="l-header"> <?= $noModel ?></div>
                             </div>
                         </td>
                     </tr>

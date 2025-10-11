@@ -323,6 +323,68 @@
         </div>
     </div>
     <!-- modal Pengeluaran Selain Order end -->
+
+    <!-- Modal Retur Celup -->
+    <div class="modal fade" id="returCelup" tabindex="-1" role="dialog" aria-labelledby="modal-form" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white border-0">
+                    <h5 class="modal-title text-white" id="modalReturCelupLabel"></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formReturCelup">
+                    <div class="modal-body p-0">
+                        <div class="card card-plain">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="keteranganSelect" class="form-label">Keterangan</label>
+                                    <textarea class="form-control" name="keterangan_retur_celup" id="keteranganReturCelup"></textarea>
+                                </div>
+
+                                <!-- Container Data -->
+                                <div class="row g-3" id="returCelupContainer">
+                                    <!-- Data akan di-inject JS -->
+                                </div>
+
+                                <!-- Display Total dari Checkbox -->
+                                <div class="row mt-3">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" name="ttl_kgs" readonly placeholder="Total Kgs Terpilih" disabled>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" name="ttl_cns" readonly placeholder="Total Cns Terpilih" disabled>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" name="ttl_krg" readonly placeholder="Total Krg Terpilih" disabled>
+                                    </div>
+                                </div>
+
+                                <!-- Input Total -->
+                                <div class="row mt-4">
+                                    <div class="col-md-4">
+                                        <label for="inputKgs" class="form-label">Total Kgs</label>
+                                        <input type="number" step="0.01" class="form-control" id="inputKgsRetur" name="input_kgs_retur" placeholder="Masukkan Kgs" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="inputCns" class="form-label">Total Cns</label>
+                                        <input type="number" class="form-control" id="inputCnsRetur" name="input_cns_retur" placeholder="Masukkan Cns" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="inputKrg" class="form-label">Total Krg</label>
+                                        <input type="number" class="form-control" id="inputKrgRetur" name="input_krg_retur" placeholder="Masukkan Krg" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-info">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
@@ -408,6 +470,15 @@
                                             data-nama-cluster="${item.nama_cluster}"
                                             >
                                             Pengeluaran Selain Order
+                                        </button>
+                                        <button 
+                                            class="btn btn-outline-info btn-sm returCelup"
+                                            data-id="${item.id_stock}"
+                                            data-no-model="${item.no_model}"
+                                            data-kode-warna="${item.kode_warna}"
+                                            data-nama-cluster="${item.nama_cluster}"
+                                            >
+                                            Retur Celup
                                         </button>
                                     </div>
                                 </div>
@@ -1117,6 +1188,196 @@
                             // Menutup modal dan reset form jika diperlukan
                             $('#pengeluaranSelainOrder').modal('hide');
                             $('#formpengeluaranSelainOrder')[0].reset();
+                            reloadSearchResult(); // refresh data stock tanpa reload page
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Gagal!',
+                        text: 'Gagal menyimpan data: ' + res.message,
+                        icon: 'error',
+                        confirmButtonColor: '#e74c3c'
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error(error);
+                Swal.fire({
+                    title: 'Terjadi Kesalahan!',
+                    text: 'Ada masalah dengan server.',
+                    icon: 'error',
+                    confirmButtonColor: '#e74c3c'
+                });
+            }
+        });
+    });
+
+    //Modal Retur Celup
+    $(document).ready(function() {
+        let selectedData = [];
+
+        $(document).on('click', '.returCelup', function() {
+            const idStock = $(this).data('id');
+            const base = '<?= base_url() ?>';
+            const role = '<?= session()->get('role') ?>';
+            const namaCluster = $(this).data('nama-cluster');
+            const $container = $('#returCelupContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i></div>');
+
+            $('#returCelup').modal('show');
+
+            // Perbarui judul modal dengan nama cluster
+            $('#modalReturCelupLabel').text(`Retur Celup - ${namaCluster}`);
+
+            $.post(`${base}${role}/warehouse/getPindahOrderTest`, {
+                id_stock: idStock
+            }, res => {
+                $container.empty();
+                selectedData = res.data || [];
+
+                if (!res.success || !selectedData.length) {
+                    return $container.html('<div class="alert alert-warning text-center">Data tidak ditemukan</div>');
+                }
+
+                selectedData.forEach(d => {
+                    const lot = d.lot_stock || d.lot_awal;
+                    $container.append(`
+                    <div class="col-md-12">
+                        <div class="card result-card h-100">
+                        <div class="form-check">
+                            <input class="form-check-input row-check" type="radio" name="pilih_item" value="${d.id_out_celup}" id="radio${d.id_out_celup}" data-lot="${lot}">
+                            <label class="form-check-label fw-bold" for="chk${d.id_out_celup}">
+                            ${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.warna}
+                            </label>
+                        </div>
+                        <div class="card-body row">
+                            <div class="col-md-4">
+                            <p><strong>Kode Warna:</strong> ${d.kode_warna}</p>
+                            <p><strong>Warna:</strong> ${d.warna}</p>
+                            </div>
+                            <div class="col-md-4">
+                            <p><strong>Lot Jalur:</strong> ${lot}</p>
+                            <p><strong>No Karung:</strong> ${d.no_karung}</p>
+                            </div>
+                            <div class="col-md-4">
+                            <p><strong>Total Kgs:</strong> ${parseFloat(d.kgs_kirim || 0).toFixed(2)} KG</p>
+                            <p><strong>Cones:</strong> ${d.cones_kirim} Cns</p>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    `);
+                });
+
+                calculateTotals();
+            });
+            $('#inputNamaCluster').val(namaCluster);
+            $('#id_stock').val(idStock);
+            $container.on('change', '.row-check', calculateTotals);
+        });
+
+        function calculateTotals() {
+            let totalKgs = 0,
+                totalCns = 0,
+                totalKrg = 0;
+
+            const selected = $('#returCelupContainer .row-check:checked').val();
+            const item = selectedData.find(d => d.id_out_celup == selected);
+
+            if (item) {
+                totalKgs = parseFloat(item.kgs_kirim || 0);
+                totalCns = parseInt(item.cones_kirim || 0);
+                totalKrg = 1;
+            }
+
+            $('input[name="ttl_kgs"]').val(totalKgs.toFixed(2));
+            $('input[name="ttl_cns"]').val(totalCns);
+            $('input[name="ttl_krg"]').val(totalKrg);
+        }
+
+        // Validasi Input Manual
+        $('#inputKgsRetur, #inputCnsRetur, #inputKrgRetur').on('input', function() {
+            const maxKgs = parseFloat($('input[name="ttl_kgs"]').val()) || 0;
+            const maxCns = parseInt($('input[name="ttl_cns"]').val()) || 0;
+            const maxKrg = parseInt($('input[name="ttl_krg"]').val()) || 0;
+
+            const inputKgs = parseFloat($('#inputKgsRetur').val()) || 0;
+            const inputCns = parseInt($('#inputCnsRetur').val()) || 0;
+            const inputKrg = parseInt($('#inputKrgRetur').val()) || 0;
+            const kgsKarung = parseFloat($('input[name="ttl_kgs"]').val()) || 0;
+
+            if (inputKgs > maxKgs) {
+                alert(`Total Kgs tidak boleh melebihi ${maxKgs}`);
+                $('#inputKgsRetur').val(maxKgs);
+            }
+            if (inputCns > maxCns) {
+                alert(`Total Cns tidak boleh melebihi ${maxCns}`);
+                $('#inputCnsRetur').val(maxCns);
+            }
+            if (inputKrg > maxKrg) {
+                alert(`Total Krg tidak boleh melebihi ${maxKrg}`);
+                $('#inputKrgRetur').val(maxKrg);
+            }
+
+            // Jika user isi karung 1 tapi kgs belum sama dengan total kgs karung
+            if (inputKrg === 1 && inputKgs < kgsKarung) {
+                alert(`Tidak bisa input 1 karung jika Total Kgs = ${inputKgs}, masih kurang dari total Kgs karung ${kgsKarung}.`);
+                $('#inputKrgRetur').val(0);
+            }
+
+            // Jika Kgs sudah sama persis, karung otomatis 1
+            if (inputKgs === kgsKarung) {
+                $('#inputKrgRetur').val(1);
+            }
+
+            // Jika Kgs lebih kecil, karung otomatis 0
+            if (inputKgs < kgsKarung) {
+                $('#inputKrgRetur').val(0);
+            }
+        });
+    });
+    // Simpan data dari modal Pengeluaran Selain Order
+    $('#formReturCelup').on('submit', function(e) {
+        e.preventDefault(); // penting agar tidak reload halaman
+
+        const idOutCelup = $('input[name="pilih_item"]:checked').val();
+        // const tglOut = $('#tglOut').val();
+        const keteranganReturCelup = $('#keteranganReturCelup').val();
+        const kgsReturCelup = $('#inputKgsRetur').val();
+        const cnsReturCelup = $('#inputCnsRetur').val();
+        const krgReturCelup = $('#inputKrgRetur').val();
+        const namaCluster = $('#inputNamaCluster').val();
+        const lot = $('input[name="pilih_item"]:checked').data('lot');
+        const idStock = $('#id_stock').val(); // atau sesuaikan jika beda
+
+        if (!idOutCelup) {
+            return alert('Silakan pilih karung terlebih dahulu.');
+        }
+        console.log('keterangan:', keteranganReturCelup, 'kgsReturCelup:', kgsReturCelup, 'cnsReturCelup:', cnsReturCelup, 'krgReturCelup:', krgReturCelup);
+        $.ajax({
+            url: '<?= base_url(session()->get("role") . "/warehouse/saveReturCelup") ?>',
+            method: 'POST',
+            data: {
+                id_out_celup: idOutCelup,
+                // tgl_out: tglOut,
+                keterangan: keteranganReturCelup,
+                kgs: kgsReturCelup,
+                cns: cnsReturCelup,
+                krg: krgReturCelup,
+                lot: lot,
+                nama_cluster: namaCluster,
+                id_stock: idStock
+            },
+            success: function(res) {
+                if (res.success) {
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: res.message || 'Data berhasil disimpan!',
+                        icon: 'success',
+                        confirmButtonColor: '#4a90e2',
+                        willClose: () => {
+                            // Menutup modal dan reset form jika diperlukan
+                            $('#returCelup').modal('hide');
+                            $('#formReturCelup')[0].reset();
                             reloadSearchResult(); // refresh data stock tanpa reload page
                         }
                     });

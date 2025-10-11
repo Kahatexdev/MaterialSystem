@@ -1666,38 +1666,46 @@ class GodController extends BaseController
 
     public function formPoTambahan()
     {
-        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getNoModel';
-
-        // Mengambil data dari API eksternal
-        $response = @file_get_contents($apiUrl);
+        // API untuk ambil daftar area unik
+        $apiArea = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $response = @file_get_contents($apiArea);
 
         if ($response === false) {
-            log_message('error', 'Gagal mengambil data dari API');
-            return $this->response->setStatusCode(500)->setJSON(['error' => 'Tidak dapat mengambil data dari API']);
+            log_message('error', 'Gagal mengambil data Area dari API');
+            return $this->response->setStatusCode(500)
+                ->setJSON(['error' => 'Tidak dapat mengambil data dari API Area']);
         }
 
-        $model = json_decode($response, true);
+        $areas = json_decode($response, true);
+        log_message('debug', 'API data: ' . print_r($areas, true));
 
-        // Grouping berdasarkan factory
-        $dataGrouped = [];
-        foreach ($model as $row) {
-            $factory = $row['factory'];
-            $mastermodel = $row['mastermodel'];
-
-            if (!isset($dataGrouped[$factory])) {
-                $dataGrouped[$factory] = [];
-            }
-            $dataGrouped[$factory][] = $mastermodel;
-        }
-        // $noModel = array_unique(array_column($model, 'mastermodel'));
         $data = [
             'active' => 'PoTambahan',
-            'area' => $dataGrouped,
-            'title' => 'Po Tambahan',
-            // 'area' => $area,
-            'role' => session()->get('role'),
+            'title'  => 'PO Tambahan',
+            'role'   => session()->get('role'),
+            'areas'  => $areas, // kirim ke view
         ];
+
         return view(session()->get('role') . '/poplus/form-po-tambahan', $data);
+    }
+
+    public function getNoModelByArea()
+    {
+        $area = $this->request->getGet('area');
+        if (!$area) {
+            return $this->response->setJSON([]);
+        }
+
+        $apiNoModel = 'http://172.23.44.14/CapacityApps/public/api/getNoModel?area=' . urlencode($area);
+        $response = @file_get_contents($apiNoModel);
+
+        if ($response === false) {
+            log_message('error', 'Gagal ambil No Model dari API');
+            return $this->response->setJSON([]);
+        }
+
+        $data = json_decode($response, true);
+        return $this->response->setJSON($data);
     }
 
     public function poTambahanDetail($noModel, $area)
@@ -1800,15 +1808,26 @@ class GodController extends BaseController
 
         if ($response === false) {
             log_message('error', 'Gagal mengambil data BS Setting dari API');
-            return $this->response->setStatusCode(500)->setJSON(['error' => 'Tidak dapat mengambil data dari API']);
-        }
+            // jika API gagal diakses, set semua style_size jadi 0
+            foreach ($styleSize as $style) {
+                $bsSettingList[$style] = 0;
+            }
+        } else {
+            $bsSettingAll = json_decode($response, true);
 
-        $bsSettingAll = json_decode($response, true);
-        // log_message('debug', 'BS Setting ALL: ' . print_r($bsSettingAll, true));
-
-        // Simpan hasil per style
-        foreach ($bsSettingAll as $style => $qty) {
-            $bsSettingList[$style] = (int)$qty;
+            // jika API mengembalikan kosong atau bukan array valid
+            if (empty($bsSettingAll) || !is_array($bsSettingAll)) {
+                foreach ($styleSize as $style) {
+                    $bsSettingList[$style] = 0;
+                }
+            } else {
+                // Simpan hasil per style, yang tidak ada di API juga di-0-kan
+                foreach ($styleSize as $style) {
+                    $bsSettingList[$style] = isset($bsSettingAll[$style])
+                        ? (int)$bsSettingAll[$style]
+                        : 0;
+                }
+            }
         }
 
         $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBruto'

@@ -198,6 +198,320 @@ class MasterOrderModel extends Model
             ->first();
     }
 
+    // public function getFilterReportGlobal($noModel, $jenis = null)
+    // {
+    //     $builder = $this->select("
+    //     master_order.no_model,
+    //     master_order.buyer,
+    //     material.item_type,
+    //     material.kode_warna,
+    //     material.color,
+    //     material.loss,
+    //     material.area,
+
+    //     -- total kgs material
+    //     (
+    //         SELECT SUM(COALESCE(m.kgs, 0))
+    //         FROM material m
+    //         WHERE m.id_order = master_order.id_order
+    //         AND m.item_type = material.item_type
+    //         AND m.kode_warna = material.kode_warna
+    //     ) AS kgs,
+
+    //     -- total po tambahan
+    //     (
+    //         SELECT 
+    //             SUM(tp.ttl_tambahan_kg)
+    //         FROM po_tambahan pp
+    //         JOIN total_potambahan tp 
+    //             ON tp.id_total_potambahan = pp.id_total_potambahan
+    //         WHERE pp.id_material = material.id_material
+    //           AND pp.status = 'approved'
+    //     ) AS qty_poplus,
+
+    //     -- stock awal tanpa duplikasi
+    //     (
+    //         SELECT SUM(COALESCE(s.kgs_stock_awal, 0))
+    //         FROM stock s
+    //         WHERE s.id_stock IN (
+    //             SELECT DISTINCT s2.id_stock
+    //             FROM stock s2
+    //             JOIN pemasukan p ON p.id_stock = s2.id_stock
+    //             JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
+    //             JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+    //             WHERE sc.no_model = master_order.no_model
+    //             AND sc.kode_warna = material.kode_warna
+    //             AND sc.item_type = material.item_type
+    //         )
+    //     ) AS stock_awal,
+
+    //     -- stock akhir
+    //     (
+    //         SELECT SUM(COALESCE(s.kgs_in_out, 0))
+    //         FROM stock s
+    //         WHERE EXISTS (
+    //             SELECT 1
+    //             FROM pemasukan p
+    //             LEFT JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
+    //             LEFT JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+    //             WHERE p.id_stock = s.id_stock
+    //             AND sc.no_model = master_order.no_model
+    //             AND sc.kode_warna = material.kode_warna
+    //             AND sc.item_type = material.item_type
+    //         )
+    //     ) AS stock_akhir,
+
+    //     -- datang solid
+    //     (
+    //         SELECT 
+    //         SUM(CASE WHEN COALESCE(sc.po_plus,0) = 0 THEN oc.kgs_kirim ELSE 0 END)
+    //         FROM pemasukan p
+    //         JOIN out_celup oc ON p.id_out_celup = oc.id_out_celup
+    //         JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+    //         WHERE sc.no_model = master_order.no_model
+    //         AND sc.kode_warna = material.kode_warna
+    //         AND sc.item_type = material.item_type
+    //     ) AS datang_solid,
+
+    //     -- plus datang solid
+    //     (
+    //         SELECT 
+    //         SUM(CASE WHEN COALESCE(sc.po_plus,0) = 1 THEN oc.kgs_kirim ELSE 0 END)
+    //         FROM pemasukan p
+    //         JOIN out_celup oc ON p.id_out_celup = oc.id_out_celup
+    //         JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+    //         WHERE sc.no_model = master_order.no_model
+    //         AND sc.kode_warna = material.kode_warna
+    //         AND sc.item_type = material.item_type
+    //     ) AS plus_datang_solid,
+
+    //     -- ganti retur
+    //     (
+    //         SELECT SUM(COALESCE(oc.kgs_kirim, 0))
+    //         FROM other_bon ob
+    //         JOIN out_celup oc ON ob.id_other_bon = oc.id_other_bon
+    //         JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+    //         WHERE sc.no_model = master_order.no_model
+    //         AND sc.kode_warna = material.kode_warna
+    //         AND sc.item_type = material.item_type
+    //         AND ob.ganti_retur = 1
+    //     ) AS ganti_retur,
+
+    //     -- datang lurex
+    //     (
+    //         SELECT SUM(COALESCE(oc.kgs_kirim, 0))
+    //         FROM other_bon ob
+    //         JOIN out_celup oc ON ob.id_other_bon = oc.id_other_bon
+    //         JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+    //         WHERE sc.no_model = master_order.no_model
+    //         AND sc.kode_warna = material.kode_warna
+    //         AND sc.item_type = material.item_type
+    //         AND ob.ganti_retur <> 1
+    //         AND ob.no_surat_jalan LIKE '%LRX%'
+    //     ) AS datang_lurex,
+
+    //     -- plus datang lurex
+    //     (
+    //         SELECT SUM(COALESCE(oc.kgs_kirim, 0))
+    //         FROM other_bon ob
+    //         JOIN out_celup oc ON ob.id_other_bon = oc.id_other_bon
+    //         JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+    //         WHERE sc.no_model = master_order.no_model
+    //         AND sc.kode_warna = material.kode_warna
+    //         AND sc.item_type = material.item_type
+    //         AND sc.po_plus = 1
+    //         AND ob.no_surat_jalan LIKE '%LRX%'
+    //     ) AS plus_datang_lurex,
+
+    //     -- retur pb gudang benang
+    //     (
+    //         SELECT SUM(COALESCE(r.kgs_retur, 0))
+    //         FROM retur r
+    //         JOIN kategori_retur kr ON r.kategori = kr.nama_kategori
+    //         WHERE r.no_model = master_order.no_model
+    //         AND r.kode_warna = material.kode_warna
+    //         AND r.item_type = material.item_type
+    //         AND r.area_retur = 'GUDANG BENANG'
+    //         AND kr.tipe_kategori = 'PENGEMBALIAN'
+    //     ) AS retur_pb_gbn,
+
+    //     -- retur pb area
+    //     (
+    //         SELECT SUM(COALESCE(r.kgs_retur, 0))
+    //         FROM retur r
+    //         JOIN kategori_retur kr ON r.kategori = kr.nama_kategori
+    //         WHERE r.no_model = master_order.no_model
+    //         AND r.kode_warna = material.kode_warna
+    //         AND r.item_type = material.item_type
+    //         AND r.area_retur <> 'GUDANG BENANG'
+    //         AND kr.tipe_kategori = 'PENGEMBALIAN'
+    //     ) AS retur_pb_area,
+
+    //     -- pakai area (kgs_out tanpa looping)
+    //     (
+    //         SELECT SUM(COALESCE(p.kgs_out, 0))
+    //         FROM pengeluaran p
+    //         WHERE p.status = 'Pengiriman Area'
+    //         AND EXISTS (
+    //             SELECT 1
+    //             FROM pemesanan pms
+    //             JOIN material m2 ON m2.id_material = pms.id_material
+    //             JOIN master_order mo2 ON mo2.id_order = m2.id_order
+    //             WHERE p.id_total_pemesanan = pms.id_total_pemesanan
+    //                 AND pms.status_kirim = 'YA'
+    //                 AND mo2.no_model = master_order.no_model
+    //                 AND m2.item_type = material.item_type
+    //                 AND m2.kode_warna = material.kode_warna
+    //         )
+    //     ) AS pakai_area,
+
+    //     -- lot
+    //     (
+    //         SELECT COALESCE(s.lot_stock, 0)
+    //         FROM stock s
+    //         WHERE s.no_model = master_order.no_model
+    //         AND s.kode_warna = material.kode_warna
+    //         AND s.item_type = material.item_type
+    //         LIMIT 1
+    //     ) AS lot, 
+
+    //     -- kgs other out
+    //     (
+    //         SELECT SUM(COALESCE(oo.kgs_other_out, 0))
+    //         FROM other_out oo
+    //         JOIN out_celup oc ON oc.id_out_celup = oo.id_out_celup
+    //         JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+    //         WHERE sc.no_model = master_order.no_model
+    //         AND sc.kode_warna = material.kode_warna
+    //         AND sc.item_type = material.item_type
+    //     ) AS kgs_other_out,
+
+    //     -- retur stock
+    //     (
+    //         SELECT SUM(COALESCE(r.kgs_retur, 0))
+    //         FROM retur r
+    //         JOIN kategori_retur kr ON r.kategori = kr.nama_kategori
+    //         WHERE r.no_model = master_order.no_model
+    //         AND r.kode_warna = material.kode_warna
+    //         AND r.item_type = material.item_type
+    //         AND kr.tipe_kategori = 'SIMPAN ULANG'
+    //     ) AS retur_stock,
+
+    //     -- retur titip
+    //     (
+    //         SELECT SUM(COALESCE(r.kgs_retur, 0))
+    //         FROM retur r
+    //         JOIN kategori_retur kr ON r.kategori = kr.nama_kategori
+    //         WHERE r.no_model = master_order.no_model
+    //         AND r.kode_warna = material.kode_warna
+    //         AND r.item_type = material.item_type
+    //         AND kr.tipe_kategori = 'BAHAN BAKU TITIP'
+    //     ) AS retur_titip,
+
+    //     -- dipinjam
+    //     (
+    //         SELECT SUM(COALESCE(hs.kgs, 0))
+    //         FROM history_stock hs
+    //         JOIN stock s ON hs.id_stock_old = s.id_stock
+    //         WHERE s.no_model = master_order.no_model
+    //         AND s.kode_warna = material.kode_warna
+    //         AND s.item_type = material.item_type
+    //         AND hs.keterangan = 'Pinjam Order'
+    //     ) AS dipinjam,
+
+    //     -- pindah order
+    //     (
+    //         SELECT SUM(COALESCE(hs.kgs, 0))
+    //         FROM history_stock hs
+    //         JOIN stock s ON hs.id_stock_old = s.id_stock
+    //         WHERE s.no_model = master_order.no_model
+    //         AND s.kode_warna = material.kode_warna
+    //         AND s.item_type = material.item_type
+    //         AND hs.keterangan = 'Pindah Order'
+    //     ) AS pindah_order,
+
+    //     -- cns pindah order
+    //     (
+    //         SELECT SUM(COALESCE(hs.cns, 0))
+    //         FROM history_stock hs
+    //         JOIN stock s ON hs.id_stock_old = s.id_stock
+    //         WHERE s.no_model = master_order.no_model
+    //         AND s.kode_warna = material.kode_warna
+    //         AND s.item_type = material.item_type
+    //         AND hs.keterangan = 'Pindah Order'
+    //     ) AS cns_pindah_order,
+
+    //     -- cluster
+    //     (
+    //         SELECT COALESCE(s.nama_cluster, 0)
+    //         FROM stock s
+    //         WHERE s.no_model = master_order.no_model
+    //         AND s.kode_warna = material.kode_warna
+    //         AND s.item_type = material.item_type
+    //         LIMIT 1
+    //     ) AS cluster, 
+
+    //     -- tgl pindah
+    //     (
+    //         SELECT COALESCE(DATE(hs.created_at), 0)
+    //         FROM history_stock hs
+    //         JOIN stock s ON hs.id_stock_old = s.id_stock
+    //         WHERE s.no_model = master_order.no_model
+    //         AND s.kode_warna = material.kode_warna
+    //         AND s.item_type = material.item_type
+    //         LIMIT 1
+    //     ) AS tgl_pindah,
+
+    //     -- ket pindah
+    //     (
+    //         SELECT COALESCE(hs.keterangan, 0)
+    //         FROM history_stock hs
+    //         JOIN stock s ON hs.id_stock_old = s.id_stock
+    //         WHERE s.no_model = master_order.no_model
+    //         AND s.kode_warna = material.kode_warna
+    //         AND s.item_type = material.item_type
+    //         LIMIT 1
+    //     ) AS ket_pindah,
+
+    //     -- nomodel new pindah order
+    //     (
+    //         SELECT COALESCE(s_new.no_model, 0)
+    //         FROM history_stock hs
+    //         JOIN stock s_old ON s_old.id_stock = hs.id_stock_old   -- stock lama
+    //         JOIN stock s_new ON s_new.id_stock = hs.id_stock_new   -- stock baru
+    //         WHERE s_old.no_model = master_order.no_model
+    //         AND s_old.kode_warna = material.kode_warna
+    //         AND s_old.item_type = material.item_type
+    //         LIMIT 1
+    //     ) AS nomodel_new,
+
+    //     -- admin pindah
+    //     (
+    //         SELECT COALESCE(hs.admin, 0)
+    //         FROM history_stock hs
+    //         JOIN stock s ON hs.id_stock_old = s.id_stock
+    //         WHERE s.no_model = master_order.no_model
+    //         AND s.kode_warna = material.kode_warna
+    //         AND s.item_type = material.item_type
+    //         LIMIT 1
+    //     ) AS admin_pindah,
+    // ")
+    //         ->join('material', 'material.id_order = master_order.id_order', 'left')
+    //         ->join('master_material', 'material.item_type = master_material.item_type', 'left')
+    //         ->where('master_order.no_model', $noModel);
+
+    //     if (!empty($jenis)) {
+    //         $builder->where('master_material.jenis', $jenis);
+    //     }
+
+    //     return $builder
+    //         ->groupBy('master_order.no_model')
+    //         ->groupBy('material.item_type')
+    //         ->groupBy('material.kode_warna')
+    //         ->orderBy('material.item_type, material.kode_warna', 'ASC')
+    //         ->findAll();
+    // }
+
     public function getFilterReportGlobal($noModel, $jenis = null)
     {
         $builder = $this->select("
@@ -220,8 +534,7 @@ class MasterOrderModel extends Model
 
         -- total po tambahan
         (
-            SELECT 
-                SUM(tp.ttl_tambahan_kg)
+            SELECT SUM(COALESCE(tp.ttl_tambahan_kg, 0))
             FROM po_tambahan pp
             JOIN total_potambahan tp 
                 ON tp.id_total_potambahan = pp.id_total_potambahan
@@ -263,8 +576,7 @@ class MasterOrderModel extends Model
 
         -- datang solid
         (
-            SELECT 
-            SUM(CASE WHEN COALESCE(sc.po_plus,0) = 0 THEN oc.kgs_kirim ELSE 0 END)
+            SELECT SUM(CASE WHEN COALESCE(sc.po_plus,0) = 0 THEN oc.kgs_kirim ELSE 0 END)
             FROM pemasukan p
             JOIN out_celup oc ON p.id_out_celup = oc.id_out_celup
             JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
@@ -275,8 +587,7 @@ class MasterOrderModel extends Model
 
         -- plus datang solid
         (
-            SELECT 
-            SUM(CASE WHEN COALESCE(sc.po_plus,0) = 1 THEN oc.kgs_kirim ELSE 0 END)
+            SELECT SUM(CASE WHEN COALESCE(sc.po_plus,0) = 1 THEN oc.kgs_kirim ELSE 0 END)
             FROM pemasukan p
             JOIN out_celup oc ON p.id_out_celup = oc.id_out_celup
             JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
@@ -347,7 +658,7 @@ class MasterOrderModel extends Model
             AND kr.tipe_kategori = 'PENGEMBALIAN'
         ) AS retur_pb_area,
 
-        -- pakai area (kgs_out tanpa looping)
+        -- pakai area
         (
             SELECT SUM(COALESCE(p.kgs_out, 0))
             FROM pengeluaran p
@@ -373,7 +684,7 @@ class MasterOrderModel extends Model
             AND s.kode_warna = material.kode_warna
             AND s.item_type = material.item_type
             LIMIT 1
-        ) AS lot, 
+        ) AS lot,
 
         -- kgs other out
         (
@@ -449,7 +760,7 @@ class MasterOrderModel extends Model
             AND s.kode_warna = material.kode_warna
             AND s.item_type = material.item_type
             LIMIT 1
-        ) AS cluster, 
+        ) AS cluster,
 
         -- tgl pindah
         (
@@ -477,8 +788,8 @@ class MasterOrderModel extends Model
         (
             SELECT COALESCE(s_new.no_model, 0)
             FROM history_stock hs
-            JOIN stock s_old ON s_old.id_stock = hs.id_stock_old   -- stock lama
-            JOIN stock s_new ON s_new.id_stock = hs.id_stock_new   -- stock baru
+            JOIN stock s_old ON s_old.id_stock = hs.id_stock_old
+            JOIN stock s_new ON s_new.id_stock = hs.id_stock_new
             WHERE s_old.no_model = master_order.no_model
             AND s_old.kode_warna = material.kode_warna
             AND s_old.item_type = material.item_type
@@ -494,7 +805,7 @@ class MasterOrderModel extends Model
             AND s.kode_warna = material.kode_warna
             AND s.item_type = material.item_type
             LIMIT 1
-        ) AS admin_pindah,
+        ) AS admin_pindah
     ")
             ->join('material', 'material.id_order = master_order.id_order', 'left')
             ->join('master_material', 'material.item_type = master_material.item_type', 'left')
@@ -505,12 +816,11 @@ class MasterOrderModel extends Model
         }
 
         return $builder
-            ->groupBy('master_order.no_model')
-            ->groupBy('material.item_type')
-            ->groupBy('material.kode_warna')
-            ->orderBy('material.item_type, material.kode_warna', 'ASC')
+            ->groupBy(['master_order.no_model', 'material.item_type', 'material.kode_warna'])
+            ->orderBy('material.item_type ASC, material.kode_warna ASC')
             ->findAll();
     }
+
 
     public function getMaterial($id, $area)
     {

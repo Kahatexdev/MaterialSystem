@@ -82,10 +82,8 @@
                                     <label>Area</label>
                                     <select class="form-control select-area" name="area[0][area]" required>
                                         <option value="">Pilih Area</option>
-                                        <?php foreach ($area as $factory => $noModels) : ?>
-                                            <option value="<?= $factory ?>" data-no-model='<?= json_encode($noModels) ?>'>
-                                                <?= $factory ?>
-                                            </option>
+                                        <?php foreach ($areas as $area): ?>
+                                            <option value="<?= $area ?>"><?= $area ?></option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
@@ -356,25 +354,41 @@
         initSelect2(document);
 
         $('.select-area').on('change', function() {
-            let models = $(this).find(':selected').data('no-model');
-            if (typeof models === "string") {
-                models = JSON.parse(models);
+            const area = $(this).val();
+            const $container = $(this).closest('.form-group').parent().parent().parent();
+            const $noModelSelect = $container.find('.select-no-model');
+
+            $noModelSelect.empty().append('<option value="">Loading...</option>');
+
+            if (!area) {
+                $noModelSelect.html('<option value="">Pilih No Model</option>');
+                return;
             }
 
-            // cari select-no-model yang masih dalam form-group besar yang sama
-            let $container = $(this).closest('.form-group').parent().parent().parent();
-            let $noModelSelect = $container.find('.select-no-model');
+            $.ajax({
+                url: '<?= base_url() ?>' + role + '/poplus/getNoModelByArea',
+                method: 'GET',
+                data: {
+                    area: area
+                },
+                dataType: 'json',
+                success: function(data) {
+                    $noModelSelect.empty().append('<option value="">Pilih No Model</option>');
 
-            $noModelSelect.empty();
-            $noModelSelect.append('<option value="">Pilih No Model</option>');
+                    if (Array.isArray(data)) {
+                        data.forEach(function(item) {
+                            if (item.mastermodel) {
+                                $noModelSelect.append('<option value="' + item.mastermodel + '">' + item.mastermodel + '</option>');
+                            }
+                        });
+                    }
 
-            if (Array.isArray(models)) {
-                models.forEach(function(m) {
-                    $noModelSelect.append('<option value="' + m + '">' + m + '</option>');
-                });
-            }
-
-            $noModelSelect.trigger('change.select2');
+                    $noModelSelect.trigger('change.select2'); // kalau kamu pakai select2
+                },
+                error: function() {
+                    $noModelSelect.html('<option value="">Gagal memuat data</option>');
+                }
+            });
         });
 
         // Handler saat No Model dipilih

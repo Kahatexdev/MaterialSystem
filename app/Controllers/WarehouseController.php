@@ -4374,6 +4374,7 @@ class WarehouseController extends BaseController
             $other = $this->otherOutModel->getQty($id['id_out_celup']);
             $outByCns = $this->pengeluaranModel->getQtyOutByCns($id['id_out_celup']);
             $pindahOrder = $this->historyStock->getKgsPindahOrder($id['id_out_celup']);
+            $returCelup = $this->historyStock->getKgsReturCelup($id['id_out_celup']);
 
             $kgsOther = !empty($other) ? (float) $other['kgs_other_out'] : 0;
             $kgsOutByCns = !empty($outByCns) ? (float) $outByCns['kgs_out'] : 0;
@@ -4381,14 +4382,18 @@ class WarehouseController extends BaseController
             $cnsOther = !empty($other) ? (int) $other['cns_other_out'] : 0;
             $cnsOutByCns = !empty($outByCns) ? (int) $outByCns['cns_out'] : 0;
             $cnsPindahOrder = !empty($pindahOrder) ? (int) $pindahOrder['cns_pindah_order'] : 0;
+            $kgsReturCelup = !empty($returCelup) ? (float) $returCelup['kgs_retur_celup'] : 0;
+            $cnsReturCelup = !empty($returCelup) ? (int) $returCelup['cns_retur_celup'] : 0;
 
             // kurangi other out & pengeluaran by cones
-            $id['kgs_kirim'] = round((float) $id['kgs_kirim'] - $kgsPindahOrder - $kgsOther - $kgsOutByCns, 2);
-            $id['cones_kirim'] = (int) $id['cones_kirim'] - $cnsOther - $cnsOutByCns - $cnsPindahOrder;
+            $id['kgs_kirim'] = round((float) $id['kgs_kirim'] - $kgsPindahOrder - $kgsOther - $kgsOutByCns - $kgsReturCelup, 2);
+            $id['cones_kirim'] = (int) $id['cones_kirim'] - $cnsOther - $cnsOutByCns - $cnsPindahOrder - $cnsReturCelup;
         }
         // var_dump($dataArray);
         // log_message('debug', 'Data Stock: ' . print_r($dataArray, true));
         // log_message('debug', 'pindah order: ' . print_r($kgsPindahOrder, true));
+        // log_message('info', 'Kgs Retur Celup : ' . print_r($kgsReturCelup, true));
+        // log_message('info', 'Data Array : ' . print_r($dataArray, true));
         if (empty($dataArray)) {
             return $this->response->setJSON(['error' => false, 'message' => 'Data tidak ditemukan']);
         } else {
@@ -4427,5 +4432,156 @@ class WarehouseController extends BaseController
         ];
 
         return view($this->role . '/warehouse/detail-pindah-order-barcode', $data);
+    }
+
+    public function saveReturCelup()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Invalid request.'
+            ]);
+        }
+
+        $idOutCelup     = $this->request->getPost('id_out_celup');
+        $keterangan     = $this->request->getPost('keterangan');
+        $kgsReturCelup  = $this->request->getPost('kgs');
+        $cnsReturCelup  = $this->request->getPost('cns');
+        $krgReturCelup  = $this->request->getPost('krg');
+        $lot            = $this->request->getPost('lot');
+        $idStock        = $this->request->getPost('id_stock');
+        $namaCluster    = $this->request->getPost('nama_cluster');
+        // log_message('info', 'POST saveReturCelup: ' . json_encode($this->request->getPost()));
+        if (!$idOutCelup) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Karung Tidak Terpilih'
+            ]);
+        }
+        // log_message('info', 'Keterangan untuk update celup: ' . $keterangan);
+
+        $this->db->transBegin();
+
+        try {
+            $save = $this->historyStock->insert([
+                'id_stock_old'  => $idStock,
+                'id_out_celup'  => $idOutCelup,
+                'cluster_old'   => $namaCluster,
+                'kgs'           => $kgsReturCelup,
+                'cns'           => $cnsReturCelup,
+                'lot'           => $lot,
+                'krg'           => $krgReturCelup,
+                'keterangan'    => 'Retur Celup',
+                'admin'         => session()->get('username'),
+                'created_at'    => date('Y-m-d H:i:s'),
+                'nama_cluster'  => $namaCluster,
+            ]);
+
+            if ($save) {
+                $selectStock = $this->stockModel->where('id_stock', $idStock)->first();
+
+                $kgsStockAwal = (float)$selectStock['kgs_stock_awal'];
+                $kgsInOut     = (float)$selectStock['kgs_in_out'];
+                $cnsStockAwal = (int)$selectStock['cns_stock_awal'];
+                $cnsInOut     = (int)$selectStock['cns_in_out'];
+                $krgStockAwal = (int)$selectStock['krg_stock_awal'];
+                $krgInOut     = (int)$selectStock['krg_in_out'];
+
+                $kgsReturCelup = (float)$kgsReturCelup;
+                $cnsReturCelup = (int)$cnsReturCelup;
+                $krgReturCelup = (int)$krgReturCelup;
+
+                if ($selectStock) {
+                    $kgsStockAwal = $selectStock['kgs_stock_awal'];
+                    $kgsInOut     = $selectStock['kgs_in_out'];
+
+                    if ($kgsStockAwal >= $kgsReturCelup) {
+                        $kgsNew = $selectStock['kgs_stock_awal'] - $kgsReturCelup;
+                        $cnsNew = $selectStock['cns_stock_awal'] - $cnsReturCelup;
+                        $krgNew = $selectStock['krg_stock_awal'] - $krgReturCelup;
+
+                        $this->stockModel->set('kgs_stock_awal', $kgsNew)
+                            ->set('cns_stock_awal', $cnsNew)
+                            ->set('krg_stock_awal', $krgNew)
+                            ->where('id_stock', $idStock)
+                            ->update();
+                    } elseif ($kgsInOut >= $kgsReturCelup) {
+                        $kgsNew = $selectStock['kgs_in_out'] - $kgsReturCelup;
+                        $cnsNew = $selectStock['cns_in_out'] - $cnsReturCelup;
+                        $krgNew = $selectStock['krg_in_out'] - $krgReturCelup;
+
+                        $this->stockModel->set('kgs_in_out', $kgsNew)
+                            ->set('cns_in_out', $cnsNew)
+                            ->set('krg_in_out', $krgNew)
+                            ->where('id_stock', $idStock)
+                            ->update();
+                    }
+                }
+
+                $selectOutCelup = $this->outCelupModel->where('id_out_celup', $idOutCelup)->first();
+                $kgsHistoryStock = $this->historyStock
+                    ->selectSum('kgs', 'kgs_retur') // ✅ gunakan format benar untuk alias
+                    ->where('id_out_celup', $idOutCelup)
+                    ->like('keterangan', 'Retur Celup') // ✅ gunakan like(), bukan where LIKE
+                    ->first();
+
+                log_message('info', 'Kgs History Retur: ' . json_encode($kgsHistoryStock));
+                $kgsMasuk  = $selectOutCelup['kgs_kirim'];
+
+                if (round($kgsHistoryStock['kgs_retur'], 2) == round($kgsMasuk, 2)) {
+                    $this->pemasukanModel->set('out_jalur', '1')
+                        ->where('id_out_celup', $idOutCelup)
+                        ->where('id_stock', $idStock)
+                        ->update();
+                }
+
+                $idCelup = $selectOutCelup['id_celup'];
+                if ($idCelup) {
+                    $selectCelup = $this->scheduleCelupModel->where('id_celup', $idCelup)->first();
+                    if ($selectCelup) {
+                        // log_message('info', 'Keterangan untuk update celup: ' . $keterangan);
+
+                        $this->scheduleCelupModel->set('last_status', 'complain')
+                            ->set('updated_at', date('Y-m-d H:i:s'))
+                            ->set('admin', session()->get('username'))
+                            ->set('ket_schedule', $keterangan)
+                            ->where('id_celup', $idCelup)
+                            ->update();
+                    }
+                }
+            }
+
+            // cek hasil transaksi
+            if ($this->db->transStatus() === false) {
+                $this->db->transRollback();
+                return $this->response->setJSON(['success' => false, 'message' => 'Transaksi gagal.']);
+            } else {
+                $this->db->transCommit();
+                return $this->response->setJSON(['success' => true, 'message' => 'Data berhasil disimpan.']);
+            }
+        } catch (\Exception $e) {
+            $this->db->transRollback();
+            return $this->response->setJSON(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function reportHistoryReturCelup()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/warehouse/report-history-retur', $data);
+    }
+
+    public function filterHistoryReturCelup()
+    {
+        $no_model = $this->request->getGet('no_model');
+        $no_surat = $this->request->getGet('no_surat_jalan');
+
+        $data = $this->historyStock->getFilterHistoryReturCelup($no_model, $no_surat);
+        // dd($data);
+        return $this->response->setJSON($data);
     }
 }

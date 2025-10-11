@@ -587,6 +587,8 @@ class PemesananModel extends Model
     public function getFilterPemesananKaret($tanggal_awal, $tanggal_akhir)
     {
         $this->select("
+        DATE_FORMAT(pemesanan.tgl_pesan, '%H:%i:%s') AS jam_pesan,
+        DATE(pemesanan.tgl_pesan) AS tgl_pesan,
         pemesanan.tgl_pakai,
         material.item_type,
         material.color,
@@ -639,6 +641,8 @@ class PemesananModel extends Model
     public function getFilterPemesananSpandex($tanggal_awal, $tanggal_akhir)
     {
         $this->select("
+        DATE_FORMAT(pemesanan.tgl_pesan, '%H:%i:%s') AS jam_pesan,
+        DATE(pemesanan.tgl_pesan) AS tgl_pesan,
         pemesanan.tgl_pakai,
         material.item_type,
         material.color,
@@ -683,6 +687,7 @@ class PemesananModel extends Model
             'tp.id_total_pemesanan',
             'pemesanan.admin',
         ]);
+
         return $this->findAll();
     }
     public function countStatusRequest()

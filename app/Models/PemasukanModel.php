@@ -791,6 +791,12 @@ class PemasukanModel extends Model
             GROUP BY 
                 st.id_stock, 
                 oc.id_out_celup
+
+            HAVING 
+                KgsStockAwal <> 0
+                OR 
+                Kgs <> 0
+
             ORDER BY pm.id_out_celup DESC
         ";
 
