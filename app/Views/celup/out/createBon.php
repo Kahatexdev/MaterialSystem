@@ -313,7 +313,7 @@
 
     document.getElementById('no_model').addEventListener('input', function(e) {
         // hanya huruf (A-Z, a-z) dan spasi yang boleh
-        this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+        this.value = this.value.replace(/[^a-zA-Z0-9\s]/g, '');
     });
 </script>
 <script>
