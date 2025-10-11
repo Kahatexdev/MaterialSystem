@@ -503,13 +503,14 @@ class CelupController extends BaseController
     public function createBon()
     {
         $no_model = $this->scheduleCelupModel->getCelupDoneAndComplain();
-        // dd($no_model);
+
         $data = [
             'role' => $this->role,
             'active' => $this->active,
             'title' => "Out Celup",
             'no_model' => $no_model,
         ];
+
         return view($this->role . '/out/createBon', $data);
     }
     public function getItem($id)
