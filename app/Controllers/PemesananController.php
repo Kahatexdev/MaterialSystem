@@ -2693,22 +2693,12 @@ class PemesananController extends BaseController
                 $qtyData     = json_decode($qtyResponse, true);
                 $qty         = (intval($qtyData['qty']) ?? 0);
 
-                // Ambil kg po tambahan
-                $kgPoTambahan = floatval(
-                    $this->totalPoTambahanModel->getKgPoTambahan([
-                        'no_model'    => $pemesanan['no_model'],
-                        'item_type'   => $pemesanan['item_type'],
-                        'kode_warna'  => $pemesanan['kode_warna'],
-                        'style_size'  => $data['style_size'],
-                        'area'        => $area,
-                    ])['ttl_keb_potambahan'] ?? 0
-                );
 
                 if ($qty >= 0) {
                     if (isset($pemesanan['item_type']) && stripos($pemesanan['item_type'], 'JHT') !== false) {
                         $kebutuhan = $data['kgs'] ?? 0;
                     } else {
-                        $kebutuhan = (($qty * $data['gw'] * $data['composition'] / 100 / 1000) * (1 + ($data['loss'] / 100))) + $kgPoTambahan;
+                        $kebutuhan = (($qty * $data['gw'] * $data['composition'] / 100 / 1000) * (1 + ($data['loss'] / 100)));
                     }
                     $pemesanan['ttl_keb'] = $ttlKeb;
                 }
@@ -2716,6 +2706,18 @@ class PemesananController extends BaseController
                 $ttlKeb += $kebutuhan;
                 $ttlQty += $qty;
             }
+            // Ambil kg po tambahan
+            $kgPoTambahan = floatval(
+                $this->totalPoTambahanModel->getKgPoTambahan([
+                    'no_model'    => $pemesanan['no_model'],
+                    'item_type'   => $pemesanan['item_type'],
+                    'kode_warna'  => $pemesanan['kode_warna'],
+                    'style_size'  => $data['style_size'],
+                    'area'        => $area,
+                ])['ttl_keb_potambahan'] ?? 0
+            );
+            $ttlKeb += $kgPoTambahan;
+
             $pemesanan['qty']     = $ttlQty; // ttl qty pcs
             $pemesanan['ttl_keb'] = $ttlKeb; // ttl kebutuhan bb
 
@@ -2765,28 +2767,29 @@ class PemesananController extends BaseController
                 $qtyData     = json_decode($qtyResponse, true);
                 $qty         = (intval($qtyData['qty']) ?? 0);
 
-                // Ambil kg po tambahan
-                $kgPoTambahan = floatval(
-                    $this->totalPoTambahanModel->getKgPoTambahan([
-                        'no_model'    => $retur['no_model'],
-                        'item_type'   => $retur['item_type'],
-                        'kode_warna'  => $retur['kode_warna'],
-                        'style_size'  => $data['style_size'],
-                        'area'        => $area,
-                    ])['ttl_keb_potambahan'] ?? 0
-                );
-
                 if ($qty >= 0) {
                     if (isset($retur['item_type']) && stripos($retur['item_type'], 'JHT') !== false) {
                         $kebutuhan = $data['kgs'] ?? 0;
                     } else {
-                        $kebutuhan = (($qty * $data['gw'] * $data['composition'] / 100 / 1000) * (1 + ($data['loss'] / 100))) + $kgPoTambahan;
+                        $kebutuhan = (($qty * $data['gw'] * $data['composition'] / 100 / 1000) * (1 + ($data['loss'] / 100)));
                     }
                     $retur['ttl_keb'] = $ttlKeb;
                 }
                 $ttlKeb += $kebutuhan;
                 $ttlQty += $qty;
             }
+            // Ambil kg po tambahan
+            $kgPoTambahan = floatval(
+                $this->totalPoTambahanModel->getKgPoTambahan([
+                    'no_model'    => $retur['no_model'],
+                    'item_type'   => $retur['item_type'],
+                    'kode_warna'  => $retur['kode_warna'],
+                    'style_size'  => $data['style_size'],
+                    'area'        => $area,
+                ])['ttl_keb_potambahan'] ?? 0
+            );
+            $ttlKeb += $kgPoTambahan;
+
             $retur['qty']     = $ttlQty; // ttl qty pcs
             $retur['ttl_keb'] = $ttlKeb; // ttl kebutuhan bb
 

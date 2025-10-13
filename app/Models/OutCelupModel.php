@@ -140,6 +140,7 @@ class OutCelupModel extends Model
             schedule_celup.item_type, 
             schedule_celup.kode_warna, 
             schedule_celup.warna,
+            schedule_celup.po_plus,
             master_material.ukuran,
             master_buyer.nama_buyer as buyer,
             open_po.spesifikasi_benang

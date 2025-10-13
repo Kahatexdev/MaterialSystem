@@ -65,7 +65,7 @@ class CelupController extends BaseController
         $filterTglSch = $this->request->getPost('filter_tglsch');
         $filterNoModel = $this->request->getPost('filter_nomodel');
 
-        $sch = $this->scheduleCelupModel->getSchedule();
+        // $sch = $this->scheduleCelupModel->getSchedule();
         // dd($sch);
         if ($filterTglSch && $filterNoModel) {
             $sch = array_filter($sch, function ($data) use ($filterTglSch, $filterNoModel) {
@@ -424,26 +424,28 @@ class CelupController extends BaseController
     public function retur()
     {
         $filterTglSch = $this->request->getPost('filter_tglsch');
+        $filterTglKirim = $this->request->getPost('filter_tglkirim');
         $filterNoModel = $this->request->getPost('filter_nomodel');
 
-        $sch = $this->scheduleCelupModel->getDataComplain();
+        // $sch = $this->scheduleCelupModel->getDataComplain();
+        $sch = $this->scheduleCelupModel->getDataComplain($filterTglSch, $filterTglKirim, $filterNoModel);
         // dd($sch);
-        if ($filterTglSch && $filterNoModel) {
-            $sch = array_filter($sch, function ($data) use ($filterTglSch, $filterNoModel) {
-                return $data['tanggal_schedule'] === $filterTglSch &&
-                    (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
-            });
-        } elseif ($filterTglSch) {
-            // Filter berdasarkan tanggal saja
-            $sch = array_filter($sch, function ($data) use ($filterTglSch) {
-                return $data['tanggal_schedule'] === $filterTglSch;
-            });
-        } elseif ($filterNoModel) {
-            // Filter berdasarkan nomor model atau kode warna saja
-            $sch = array_filter($sch, function ($data) use ($filterNoModel) {
-                return (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
-            });
-        }
+        // if ($filterTglSch && $filterNoModel) {
+        //     $sch = array_filter($sch, function ($data) use ($filterTglSch, $filterNoModel) {
+        //         return $data['tanggal_schedule'] === $filterTglSch &&
+        //             (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
+        //     });
+        // } elseif ($filterTglSch) {
+        //     // Filter berdasarkan tanggal saja
+        //     $sch = array_filter($sch, function ($data) use ($filterTglSch) {
+        //         return $data['tanggal_schedule'] === $filterTglSch;
+        //     });
+        // } elseif ($filterNoModel) {
+        //     // Filter berdasarkan nomor model atau kode warna saja
+        //     $sch = array_filter($sch, function ($data) use ($filterNoModel) {
+        //         return (strpos($data['no_model'], $filterNoModel) !== false || strpos($data['kode_warna'], $filterNoModel) !== false);
+        //     });
+        // }
 
 
         $uniqueData = [];
@@ -485,6 +487,7 @@ class CelupController extends BaseController
                     'lot_celup' => $id['lot_celup'],
                     'lot_urut' => $id['lot_urut'],
                     'tgl_schedule' => $id['tanggal_schedule'],
+                    'tgl_datang' => $id['tgl_datang'],
                     'no_surat_jalan' => $id['no_surat_jalan'],
                 ];
             }
@@ -503,13 +506,14 @@ class CelupController extends BaseController
     public function createBon()
     {
         $no_model = $this->scheduleCelupModel->getCelupDoneAndComplain();
-        // dd($no_model);
+
         $data = [
             'role' => $this->role,
             'active' => $this->active,
             'title' => "Out Celup",
             'no_model' => $no_model,
         ];
+
         return view($this->role . '/out/createBon', $data);
     }
     public function getItem($id)

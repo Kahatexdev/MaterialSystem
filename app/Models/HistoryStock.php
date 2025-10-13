@@ -177,4 +177,33 @@ class HistoryStock extends Model
             ->where('keterangan', 'Pindah Order')
             ->first();
     }
+
+    public function getKgsReturCelup($idOutCelup)
+    {
+        return $this->select('SUM(kgs) AS kgs_retur_celup, SUM(cns) AS cns_retur_celup')
+            ->where('id_out_celup', $idOutCelup)
+            ->where('keterangan', 'Retur Celup')
+            ->first();
+    }
+
+    public function getFilterHistoryReturCelup($no_model = null, $no_surat = null)
+    {
+        $builder = $this->db->table('history_stock')
+            ->select('stock.no_model, stock.item_type, stock.kode_warna, stock.warna, history_stock.kgs, history_stock.cns, history_stock.lot, history_stock.krg, stock.nama_cluster, DATE(history_stock.created_at) AS tgl_retur, history_stock.keterangan, history_stock.admin, bon_celup.no_surat_jalan')
+            ->join('stock', 'stock.id_stock = history_stock.id_stock_old', 'left')
+            ->join('out_celup', 'history_stock.id_out_celup = out_celup.id_out_celup', 'left')
+            ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
+            ->where('history_stock.keterangan', 'Retur Celup');
+
+        if (!empty($no_model)) {
+            $builder->where('stock.no_model', $no_model);
+        }
+        if (!empty($no_surat)) {
+            $builder->where('bon_celup.no_surat_jalan', $no_surat);
+        }
+
+        return $builder->orderBy('history_stock.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
 }

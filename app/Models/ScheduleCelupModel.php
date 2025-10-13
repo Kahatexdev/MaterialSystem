@@ -44,6 +44,7 @@ class ScheduleCelupModel extends Model
         'ket_schedule',
         'po_plus',
         'user_cek_status',
+        'admin',
         'created_at',
         'updated_at',
         'admin'
@@ -259,6 +260,7 @@ class ScheduleCelupModel extends Model
 
         // sortby order by created_at DESC 
         $builder->orderBy('schedule_celup.created_at', 'DESC');
+        $builder->limit(30);
 
         return $builder->get()->getResultArray();
     }
@@ -334,7 +336,7 @@ class ScheduleCelupModel extends Model
     public function getCelupDoneAndComplain()
     {
         return $this
-            ->select('id_celup,no_model, item_type, kode_warna, warna, lot_celup, kg_celup')
+            ->select('id_celup,no_model, item_type, kode_warna, warna, lot_celup, kg_celup, po_plus')
             ->whereIn('last_status', ['done', 'complain'])
             // ->where('lot_celup IS NOT NULL')
             // ->where('last_status', 'complain')
@@ -473,14 +475,38 @@ class ScheduleCelupModel extends Model
         return $query->getResultArray();
     }
 
-    public function getDataComplain()
+    // public function getDataComplain()
+    // {
+    //     return $this->select('schedule_celup.id_celup, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.lot_celup, mesin_celup.no_mesin, IF(po_plus = "0", kg_celup, 0) AS qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus, schedule_celup.ket_daily_cek,schedule_celup.lot_urut, schedule_celup.tanggal_schedule, out_celup.id_bon, bon_celup.tgl_datang, bon_celup.no_surat_jalan, bon_celup.detail_sj')
+    //         ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
+    //         ->join('out_celup', 'out_celup.no_model = schedule_celup.no_model', 'left')
+    //         ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon')
+    //         ->where('schedule_celup.last_status', 'complain')
+    //         ->groupBy('schedule_celup.id_celup')
+    //         ->groupBy('bon_celup.id_bon')
+    //         ->findAll();
+    // }
+
+    public function getDataComplain($tglSch = null, $tglKirim = null, $noModel = null)
     {
-        return $this->select('schedule_celup.id_celup, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.lot_celup, mesin_celup.no_mesin, IF(po_plus = "0", kg_celup, 0) AS qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus, schedule_celup.ket_daily_cek,schedule_celup.lot_urut, schedule_celup.tanggal_schedule, out_celup.id_bon, bon_celup.tgl_datang, bon_celup.no_surat_jalan, bon_celup.detail_sj')
+        $builder = $this->select('schedule_celup.id_celup, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.lot_celup, mesin_celup.no_mesin, IF(po_plus = "0", kg_celup, 0) AS qty_celup, IF(po_plus = "1", kg_celup, 0) AS qty_celup_plus, schedule_celup.ket_daily_cek,schedule_celup.lot_urut, schedule_celup.tanggal_schedule, out_celup.id_bon, bon_celup.tgl_datang, bon_celup.no_surat_jalan, bon_celup.detail_sj')
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->join('out_celup', 'out_celup.no_model = schedule_celup.no_model', 'left')
             ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon')
-            ->where('schedule_celup.last_status', 'complain')
-            ->groupBy('schedule_celup.id_celup')
+            ->where('schedule_celup.last_status', 'complain');
+        if (!empty($tglSch)) {
+            $builder = $this->where('schedule_celup.tanggal_schedule', $tglSch);
+        }
+        if (!empty($tglKirim)) {
+            $builder = $this->where('bon_celup.tgl_datang', $tglKirim);
+        }
+        if (!empty($noModel)) {
+            $builder = $builder->groupStart()
+                ->where('schedule_celup.no_model', $noModel)
+                ->orLike('schedule_celup.kode_warna', $noModel)
+                ->groupEnd();
+        }
+        return $builder->groupBy('schedule_celup.id_celup')
             ->groupBy('bon_celup.id_bon')
             ->findAll();
     }
