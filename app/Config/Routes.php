@@ -274,6 +274,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportHistoryReturCelup', 'WarehouseController::reportHistoryReturCelup');
     $routes->get('warehouse/filterHistoryReturCelup', 'WarehouseController::filterHistoryReturCelup');
     $routes->get('warehouse/exportHistoryReturCelup', 'ExcelController::exportHistoryReturCelup');
+    $routes->get('warehouse/reportStockOrderBenang', 'WarehouseController::reportStockOrderBenang');
+    $routes->get('warehouse/filterStockOrderBenang', 'WarehouseController::filterStockOrderBenang');
+    $routes->get('warehouse/exportStockOrderBenang', 'ExcelController::exportStockOrderBenang');
 
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');

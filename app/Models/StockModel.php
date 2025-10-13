@@ -648,4 +648,57 @@ class StockModel extends Model
             ->get()
             ->getRowArray();
     }
+
+    public function searchStockOrder($jenis, $modelCluster = null, $kodeWarna = null)
+    {
+        $builder = $this->db->table('stock st')
+            ->select("
+            cl.nama_cluster, 
+            mo.foll_up, 
+            cl.kapasitas AS space, 
+            mo.buyer, 
+            mo.no_model, 
+            mo.delivery_awal, 
+            mo.delivery_akhir, 
+            st.item_type, 
+            st.kode_warna, 
+            st.warna, 
+            SUM(st.kgs_stock_awal + st.kgs_in_out) AS qty_kg, 
+            SUM(st.cns_stock_awal + st.cns_in_out) AS qty_cns, 
+            SUM(st.krg_stock_awal + st.krg_in_out) AS qty_krg, 
+            CONCAT(st.lot_awal, ', ', st.lot_stock) AS lot_stock
+        ")
+            ->join('cluster cl', 'cl.nama_cluster = st.nama_cluster', 'left')
+            ->join('master_order mo', 'mo.no_model = st.no_model', 'left')
+            ->join('master_material mm', 'mm.item_type = st.item_type', 'left')
+            ->where('mm.jenis', $jenis)
+            ->groupStart() // untuk (kgs_in_out<>0 OR kgs_stock_awal<>0)
+            ->where('st.kgs_in_out <>', 0)
+            ->orWhere('st.kgs_stock_awal <>', 0)
+            ->groupEnd();
+
+        // Filter Model / Cluster
+        if (!empty($modelCluster)) {
+            $builder->groupStart()
+                ->where('mo.no_model', $modelCluster)
+                ->orWhere('cl.nama_cluster', $modelCluster)
+                ->groupEnd();
+        }
+
+        // Filter Kode Warna
+        if (!empty($kodeWarna)) {
+            $builder->where('st.kode_warna', $kodeWarna);
+        }
+
+        return $builder
+            ->groupBy([
+                'cl.nama_cluster',
+                'mo.no_model',
+                'st.item_type',
+                'st.kode_warna',
+                'st.warna'
+            ])
+            ->get()
+            ->getResultArray();
+    }
 }
