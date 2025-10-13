@@ -1982,9 +1982,10 @@ class WarehouseController extends BaseController
         $key = $this->request->getGet('key');
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+        $poPlus = $this->request->getGet('po_plus');
 
-        $data = $this->pemasukanModel->getFilterDatangBenang($key, $tanggalAwal, $tanggalAkhir);
-        // dd($data);
+        $data = $this->pemasukanModel->getFilterDatangBenang($key, $tanggalAwal, $tanggalAkhir, $poPlus);
+        // dd($data, $poPlus);
         return $this->response->setJSON($data);
     }
 
@@ -3616,8 +3617,9 @@ class WarehouseController extends BaseController
         $key = $this->request->getGet('key');
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+        $poPlus = $this->request->getGet('po_plus');
 
-        $data = $this->pemasukanModel->getFilterDatangNylon($key, $tanggalAwal, $tanggalAkhir);
+        $data = $this->pemasukanModel->getFilterDatangNylon($key, $tanggalAwal, $tanggalAkhir, $poPlus);
 
         return $this->response->setJSON($data);
     }
@@ -4621,6 +4623,26 @@ class WarehouseController extends BaseController
         $no_surat = $this->request->getGet('no_surat_jalan');
 
         $data = $this->historyStock->getFilterHistoryReturCelup($no_model, $no_surat);
+        // dd($data);
+        return $this->response->setJSON($data);
+    }
+
+    public function reportStockOrderBenang()
+    {
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+        ];
+        return view($this->role . '/warehouse/report-stock-order-benang', $data);
+    }
+
+    public function filterStockOrderBenang()
+    {
+        $jenis = $this->request->getGet('jenis');
+        $modelCluster = $this->request->getGet('model_cluster');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $data = $this->stockModel->searchStockOrder($jenis, $modelCluster, $kodeWarna);
         // dd($data);
         return $this->response->setJSON($data);
     }
