@@ -3576,8 +3576,9 @@ class WarehouseController extends BaseController
         $key = $this->request->getGet('key');
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+        $poPlus = $this->request->getGet('po_plus');
 
-        $data = $this->pemasukanModel->getFilterDatangNylon($key, $tanggalAwal, $tanggalAkhir);
+        $data = $this->pemasukanModel->getFilterDatangNylon($key, $tanggalAwal, $tanggalAkhir, $poPlus);
 
         return $this->response->setJSON($data);
     }
