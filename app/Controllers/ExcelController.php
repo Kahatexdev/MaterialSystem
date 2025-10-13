@@ -15777,59 +15777,77 @@ class ExcelController extends BaseController
         $modelCluster = $this->request->getGet('model_cluster');
         $kodeWarna = $this->request->getGet('kode_warna');
         $filteredData = $this->stockModel->searchStockOrder($jenis, $modelCluster, $kodeWarna);
-        dd($filteredData);
+        // dd($filteredData);
         // Buat Spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $title = 'DATA STOCK MATERIAL';
-        $sheet->mergeCells('A1:M1');
+        $title = 'DATA STOCK ORDER BENANG';
+        $sheet->mergeCells('A1:P1');
         $sheet->setCellValue('A1', $title);
 
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // === Header Kolom di Baris 2 === //
-        $sheet->setCellValue('A3', 'Nama Cluster');
-        $sheet->setCellValue('B3', 'No Model');
-        $sheet->setCellValue('C3', 'Kode Warna');
-        $sheet->setCellValue('D3', 'Warna');
-        $sheet->setCellValue('E3', 'Item Type');
-        $sheet->setCellValue('F3', 'Kapasitas');
-        $sheet->setCellValue('G3', 'No Krg');
-        $sheet->setCellValue('H3', 'Kgs');
-        $sheet->setCellValue('I3', 'Cns');
-        $sheet->setCellValue('J3', 'Kgs Stock Awal');
-        $sheet->setCellValue('K3', 'Krg Stock Awal');
-        $sheet->setCellValue('L3', 'Cns Stock Awal');
-        $sheet->setCellValue('M3', 'Lot Stock');
-        $sheet->setCellValue('N3', 'Lot Awal');
+        $sheet->setCellValue('A3', 'NO');
+        $sheet->setCellValue('B3', 'NAMA CLUSTER');
+        $sheet->setCellValue('C3', 'FOLLOW UP');
+        $sheet->setCellValue('D3', 'SPACE');
+        $sheet->setCellValue('E3', 'SISA SPACE');
+        $sheet->setCellValue('F3', 'KODE BUYER');
+        $sheet->setCellValue('G3', 'NO MODEL');
+        $sheet->setCellValue('H3', 'DELIVERY AWAL');
+        $sheet->setCellValue('I3', 'DELIVERY AKHIR');
+        $sheet->setCellValue('J3', 'ITEM TYPE');
+        $sheet->setCellValue('K3', 'KODE WARNA');
+        $sheet->setCellValue('L3', 'WARNA');
+        $sheet->setCellValue('M3', 'QTY KG');
+        $sheet->setCellValue('N3', 'QTY CNS');
+        $sheet->setCellValue('O3', 'QTY KRG');
+        $sheet->setCellValue('P3', 'LOT JALUR');
 
+        $clusterTotals = [];
+        foreach ($filteredData as $data) {
+            $cluster = $data['nama_cluster'];
+            $qtyKg = floatval($data['qty_kg'] ?? 0);
+
+            if (!isset($clusterTotals[$cluster])) {
+                $clusterTotals[$cluster] = 0;
+            }
+            $clusterTotals[$cluster] += $qtyKg;
+        }
 
         // === Isi Data mulai dari baris ke-3 === //
         $row = 4;
+        $no = 1;
         foreach ($filteredData as $data) {
-            if ($data['Kgs'] != 0 || $data['KgsStockAwal'] != 0) {
-                $sheet->setCellValue('A' . $row, $data['nama_cluster']);
-                $sheet->setCellValue('B' . $row, $data['no_model']);
-                $sheet->setCellValue('C' . $row, $data['kode_warna']);
-                $sheet->setCellValue('D' . $row, $data['warna']);
-                $sheet->setCellValue('E' . $row, $data['item_type']);
-                $sheet->setCellValue('F' . $row, $data['kapasitas']);
-                $sheet->setCellValue('G' . $row, $data['no_karung']);
-                $sheet->setCellValue('H' . $row, number_format($data['Kgs'], 2));
-                $sheet->setCellValue('I' . $row, $data['Cns']);
-                $sheet->setCellValue('J' . $row, $data['KgsStockAwal']);
-                $sheet->setCellValue('K' . $row, $data['KrgStockAwal']);
-                $sheet->setCellValue('L' . $row, $data['CnsStockAwal']);
-                $sheet->setCellValue('M' . $row, $data['lot_stock']);
-                $sheet->setCellValue('N' . $row, $data['lot_awal']);
-                $row++;
-            }
+            $cluster = $data['nama_cluster'];
+            $space = floatval($data['space'] ?? 0);
+            $totalQtyKg = $clusterTotals[$cluster] ?? 0;
+            $sisaSpace = $space - $totalQtyKg;
+
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $data['nama_cluster']);
+            $sheet->setCellValue('C' . $row, $data['foll_up']);
+            $sheet->setCellValue('D' . $row, $space);
+            $sheet->setCellValue('E' . $row, number_format($sisaSpace, 2));
+            $sheet->setCellValue('F' . $row, $data['buyer'] . ' (' . $data['nama_buyer'] . ')');
+            $sheet->setCellValue('G' . $row, $data['no_model']);
+            $sheet->setCellValue('H' . $row, $data['delivery_awal']);
+            $sheet->setCellValue('I' . $row, $data['delivery_akhir']);
+            $sheet->setCellValue('J' . $row, $data['item_type']);
+            $sheet->setCellValue('K' . $row, $data['kode_warna']);
+            $sheet->setCellValue('L' . $row, $data['warna']);
+            $sheet->setCellValue('M' . $row, number_format($data['qty_kg'], 2));
+            $sheet->setCellValue('N' . $row, $data['qty_cns']);
+            $sheet->setCellValue('O' . $row, $data['qty_krg']);
+            $sheet->setCellValue('P' . $row, $data['lot_stock']);
+            $row++;
         }
 
         // === Auto Size Kolom A - M === //
-        foreach (range('A', 'N') as $col) {
+        foreach (range('A', 'P') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
@@ -15837,16 +15855,25 @@ class ExcelController extends BaseController
         $styleArray = [
             'borders' => [
                 'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'borderStyle' => Border::BORDER_THIN,
                     'color' => ['argb' => 'FF000000'],
                 ],
             ],
         ];
 
         $lastDataRow = $row - 1;
-        $sheet->getStyle("A3:N{$lastDataRow}")->applyFromArray($styleArray);
 
-        $filename = 'Data_Stock_' . date('YmdHis') . '.xlsx';
+        $sheet->getStyle("A3:P{$lastDataRow}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("A3:P{$lastDataRow}")->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle("A3:P{$lastDataRow}")->applyFromArray($styleArray);
+
+        // Styling Header
+        $headerRange = 'A3:P3';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle($headerRange)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $filename = 'Report_Stock_Order_Benang' . date('YmdHis') . '.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"$filename\"");
         header('Cache-Control: max-age=0');

@@ -651,54 +651,77 @@ class StockModel extends Model
 
     public function searchStockOrder($jenis, $modelCluster = null, $kodeWarna = null)
     {
-        $builder = $this->db->table('stock st')
+        $db = $this->db;
+
+        // --- 1️⃣ Buat subquery stock untuk sum tanpa duplikasi karena join ---
+        $subStock = $db->table('stock')
             ->select("
-            cl.nama_cluster, 
-            mo.foll_up, 
-            cl.kapasitas AS space, 
-            mo.buyer, 
-            mo.no_model, 
-            mo.delivery_awal, 
-            mo.delivery_akhir, 
-            st.item_type, 
-            st.kode_warna, 
-            st.warna, 
-            SUM(st.kgs_stock_awal + st.kgs_in_out) AS qty_kg, 
-            SUM(st.cns_stock_awal + st.cns_in_out) AS qty_cns, 
-            SUM(st.krg_stock_awal + st.krg_in_out) AS qty_krg, 
-            CONCAT(st.lot_awal, ', ', st.lot_stock) AS lot_stock
+            nama_cluster,
+            no_model,
+            item_type,
+            kode_warna,
+            warna,
+            SUM(kgs_stock_awal + kgs_in_out) AS qty_kg,
+            SUM(cns_stock_awal + cns_in_out) AS qty_cns,
+            SUM(krg_stock_awal + krg_in_out) AS qty_krg,
+            GROUP_CONCAT(lot_awal, ', ', lot_stock) AS lot_stock
+        ")
+            ->groupBy(['nama_cluster', 'no_model', 'item_type', 'kode_warna', 'warna'])
+            ->getCompiledSelect();
+
+        // --- 2️⃣ Join subquery ke tabel lain untuk info tambahan ---
+        $builder = $db->table("($subStock) st")
+            ->select("
+            st.nama_cluster,
+            mo.foll_up,
+            cl.kapasitas AS space,
+            mo.buyer,
+            mb.nama_buyer,
+            st.no_model,
+            mo.delivery_awal,
+            mo.delivery_akhir,
+            st.item_type,
+            st.kode_warna,
+            st.warna,
+            st.qty_kg,
+            st.qty_cns,
+            st.qty_krg,
+            st.lot_stock,
+            (cl.kapasitas - st.qty_kg) AS sisa_space
         ")
             ->join('cluster cl', 'cl.nama_cluster = st.nama_cluster', 'left')
             ->join('master_order mo', 'mo.no_model = st.no_model', 'left')
             ->join('master_material mm', 'mm.item_type = st.item_type', 'left')
-            ->where('mm.jenis', $jenis)
-            ->groupStart() // untuk (kgs_in_out<>0 OR kgs_stock_awal<>0)
-            ->where('st.kgs_in_out <>', 0)
-            ->orWhere('st.kgs_stock_awal <>', 0)
+            ->join('master_buyer mb', 'mb.kode_buyer = mo.buyer', 'left')
+            ->where('mm.jenis', $jenis);
+
+        // --- 3️⃣ Filter stock yang qty_kg > 0 ---
+        $builder->groupStart()
+            ->where('st.qty_kg <>', 0)
             ->groupEnd();
 
-        // Filter Model / Cluster
+        // --- 4️⃣ Filter Model / Cluster ---
         if (!empty($modelCluster)) {
             $builder->groupStart()
-                ->where('mo.no_model', $modelCluster)
-                ->orWhere('cl.nama_cluster', $modelCluster)
+                ->where('st.no_model', $modelCluster)
+                ->orWhere('st.nama_cluster', $modelCluster)
                 ->groupEnd();
         }
 
-        // Filter Kode Warna
+        // --- 5️⃣ Filter Kode Warna ---
         if (!empty($kodeWarna)) {
             $builder->where('st.kode_warna', $kodeWarna);
         }
 
-        return $builder
-            ->groupBy([
-                'cl.nama_cluster',
-                'mo.no_model',
-                'st.item_type',
-                'st.kode_warna',
-                'st.warna'
-            ])
-            ->get()
-            ->getResultArray();
+        // --- 6️⃣ Group by final (jika mau tetap per nama_cluster dan model) ---
+        $builder->groupBy([
+            'st.nama_cluster',
+            'st.no_model',
+            'st.item_type',
+            'st.kode_warna',
+            'st.warna'
+        ]);
+
+        return $builder->get()->getResultArray();
     }
 }

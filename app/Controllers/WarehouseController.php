@@ -4600,11 +4600,10 @@ class WarehouseController extends BaseController
 
     public function filterStockOrderBenang()
     {
-        $key = $this->request->getGet('key');
-        $tanggalAwal = $this->request->getGet('tanggal_awal');
-        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
-
-        $data = $this->otherOutModel->getFilterOtherOut($key, $tanggalAwal, $tanggalAkhir);
+        $jenis = $this->request->getGet('jenis');
+        $modelCluster = $this->request->getGet('model_cluster');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $data = $this->stockModel->searchStockOrder($jenis, $modelCluster, $kodeWarna);
         // dd($data);
         return $this->response->setJSON($data);
     }

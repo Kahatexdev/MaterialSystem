@@ -126,8 +126,8 @@
                     <label for="">Aksi</label><br>
                     <button class="btn btn-info btn-block" id="btnSearch"><i class="fas fa-search"></i></button>
                     <button class="btn btn-danger" id="btnReset"><i class="fas fa-redo-alt"></i></button>
-                    <button class="btn btn-primary" id="btnExport"><i class="fas fa-file-excel"></i></button>
-                    <button class="btn btn-primary" id="btnExportGlobal"><i class="fas fa-file-excel"></i></button>
+                    <button class="btn btn-primary d-none" id="btnExport"><i class="fas fa-file-excel"></i></button>
+                    <button class="btn btn-primary" id="btnExportAll"><i class="fas fa-file-excel"></i></button>
                 </div>
             </div>
         </div>
@@ -180,7 +180,7 @@
         });
 
         // Saat pertama kali load halaman
-        $('#btnExportGlobal').removeClass('d-none'); // tampilkan global export
+        $('#btnExportAll').removeClass('d-none'); // tampilkan global export
         $('#btnExport').addClass('d-none'); // pastikan export filter sembunyi
 
         function showLoading() {
@@ -208,9 +208,9 @@
         }
 
         function loadData() {
-            let modelCluster = $('input[type="text"]').val().trim();
-            let kodeWarna = $('input[type="text"]').val().trim();
-
+            let modelCluster = $('input[type="text"]').eq(0).val().trim();
+            let kodeWarna = $('input[type="text"]').eq(1).val().trim();
+            let jenis = "BENANG";
             // Validasi: Jika semua input kosong, tampilkan alert dan hentikan pencarian
             if (modelCluster === '' && kodeWarna === '') {
                 Swal.fire({
@@ -221,13 +221,13 @@
                 return;
             }
 
-
             $.ajax({
                 url: "<?= base_url($role . '/warehouse/filterStockOrderBenang') ?>",
                 type: "GET",
                 data: {
                     model_cluster: modelCluster,
                     kode_warna: kodeWarna,
+                    jenis: jenis
                 },
                 dataType: "json",
                 beforeSend: function() {
@@ -251,29 +251,43 @@
                     dataTable.clear().draw();
 
                     if (response.length > 0) {
+                        // Hitung total qty_kg per cluster dulu
+                        let clusterTotals = {};
+                        response.forEach(item => {
+                            let cluster = item.nama_cluster;
+                            clusterTotals[cluster] = (clusterTotals[cluster] || 0) + parseFloat(item.qty_kg || 0);
+                        });
+
+                        dataTable.clear().draw();
+
                         $.each(response, function(index, item) {
+                            let cluster = item.nama_cluster;
+                            let space = parseFloat(item.space || 0);
+                            let totalQtyKg = clusterTotals[cluster] || 0;
+                            let sisaSpace = space - totalQtyKg;
+
                             dataTable.row.add([
                                 index + 1,
+                                item.nama_cluster,
+                                item.foll_up,
+                                space.toFixed(2),
+                                sisaSpace.toFixed(2),
+                                item.buyer + ' (' + (item.nama_buyer || '') + ')',
                                 item.no_model,
+                                item.delivery_awal,
+                                item.delivery_akhir,
                                 item.item_type,
                                 item.kode_warna,
                                 item.warna,
-                                item.kategori,
-                                item.tgl_otherout,
-                                item.kgs_otherout,
-                                item.cns_otherout,
-                                item.krg_otherout,
-                                item.lot,
-                                item.cluster,
-                                item.admin,
-                                item.admin,
-                                item.admin,
-                                item.admin,
+                                parseFloat(item.qty_kg || 0).toFixed(2),
+                                item.qty_cns || 0,
+                                item.qty_krg || 0,
+                                item.lot_stock || ''
                             ]).draw(false);
                         });
 
-                        $('#btnExport').removeClass('d-none'); // Munculkan tombol Export Excel
-                        $('#btnExportGlobal').addClass('d-none'); // sembunyikan export global
+                        $('#btnExport').removeClass('d-none'); // tombol export filter
+                        $('#btnExportAll').addClass('d-none'); // sembunyikan export global
                     } else {
                         let colCount = $('#dataTable thead th').length;
                         $('#dataTable tbody').html(`
@@ -284,9 +298,10 @@
                             </tr>
                         `);
 
-                        $('#btnExport').addClass('d-none'); // Sembunyikan jika tidak ada data
-                        $('#btnExportGlobal').removeClass('d-none'); // tetap bisa export global
+                        $('#btnExport').addClass('d-none'); // sembunyikan tombol export
+                        $('#btnExportAll').removeClass('d-none'); // tampilkan export global
                     }
+
                 },
                 error: function(xhr, status, error) {
                     console.error("Error:", error);
@@ -303,15 +318,15 @@
         });
 
         $('#btnExport').click(function() {
-            let modelCluster = $('input[type="text"]').val();
-            let kodeWarna = $('input[type="text"]').val();
+            let modelCluster = $('input[type="text"]').eq(0).val();
+            let kodeWarna = $('input[type="text"]').eq(1).val();
             let jenis = "BENANG";
             window.location.href = "<?= base_url($role . '/warehouse/exportStockOrderBenang') ?>?jenis=" + jenis + "&model_cluster=" + modelCluster + "&kode_warna=" + kodeWarna;
         });
 
-        $('#btnExport').click(function() {
-            let modelCluster = $('input[type="text"]').val();
-            let kodeWarna = $('input[type="text"]').val();
+        $('#btnExportAll').click(function() {
+            let modelCluster = $('input[type="text"]').eq(0).val();
+            let kodeWarna = $('input[type="text"]').eq(1).val();
             let jenis = "BENANG";
             window.location.href = "<?= base_url($role . '/warehouse/exportStockOrderBenang') ?>?jenis=" + jenis + "&model_cluster=" + modelCluster + "&kode_warna=" + kodeWarna;
         });
@@ -329,7 +344,7 @@
 
         // Sembunyikan tombol Export Excel
         $('#btnExport').addClass('d-none');
-        $('#btnExportGlobal').removeClass('d-none'); // tampilkan kembali export global
+        $('#btnExportAll').removeClass('d-none'); // tampilkan kembali export global
     });
 </script>
 
