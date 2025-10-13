@@ -126,6 +126,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('schedule/saveScheduleSample', 'ScheduleController::saveScheduleSample');
     $routes->get('schedule/editSchedule', 'ScheduleController::editSchedule');
     $routes->post('schedule/updateSchedule', 'ScheduleController::updateSchedule');
+    $routes->post('schedule/getPindahMesin', 'ScheduleController::getPindahMesin');
+    $routes->post('schedule/updateMesinSchedule', 'ScheduleController::updateMesinSchedule');
     $routes->post('schedule/updateTglSchedule', 'ScheduleController::updateTglSchedule');
     $routes->post('schedule/deleteSchedule', 'ScheduleController::deleteSchedule');
     $routes->get('schedule/getStock', 'ScheduleController::getStock');

@@ -342,12 +342,38 @@
                                                             </div>
                                                         </td>
                                                         <td class="text-center">
-                                                            <button type="button" class="btn btn-info editRow" data-id="<?= $detail['id_celup'] ?>" data-tanggalschedule="<?= $tanggal_schedule ?>">
-                                                                <i class="fas fa-calendar-alt"></i>
-                                                            </button>
-                                                            <button type="button" class="btn btn-danger removeRow">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
+                                                            <div class="btn-group-vertical w-100 gap-2" role="group" aria-label="Aksi schedule">
+                                                                <button type="button"
+                                                                    class="btn btn-warning editMesin"
+                                                                    data-id-celup="<?= esc($detail['id_celup']) ?>"
+                                                                    data-mesin-schedule="<?= esc($no_mesin) ?>"
+                                                                    data-bs-toggle="tooltip"
+                                                                    data-bs-placement="left"
+                                                                    title="Edit mesin schedule (Mesin: <?= esc($no_mesin) ?>)">
+                                                                    <i class="fas fa-cube" aria-hidden="true"></i>
+                                                                    <span class="visually-hidden">Edit mesin</span>
+                                                                </button>
+
+                                                                <button type="button"
+                                                                    class="btn btn-info editRow"
+                                                                    data-id-celup="<?= esc($detail['id_celup']) ?>"
+                                                                    data-tanggal-schedule="<?= esc($tanggal_schedule) ?>"
+                                                                    data-bs-toggle="tooltip"
+                                                                    data-bs-placement="left"
+                                                                    title="Atur tanggal schedule (<?= esc($tanggal_schedule) ?>)">
+                                                                    <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                                                                    <span class="visually-hidden">Edit tanggal</span>
+                                                                </button>
+
+                                                                <button type="button"
+                                                                    class="btn btn-danger removeRow"
+                                                                    data-bs-toggle="tooltip"
+                                                                    data-bs-placement="left"
+                                                                    title="Hapus baris ini">
+                                                                    <i class="fas fa-trash" aria-hidden="true"></i>
+                                                                    <span class="visually-hidden">Hapus baris</span>
+                                                                </button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                     <tr>
@@ -364,8 +390,6 @@
                                                         <input type="number" class="form-control" id="total_qty_celup" name="total_qty_celup" value="" readonly>
                                                     </td>
                                                 </tr>
-
-
                                             </tfoot>
                                         </table>
                                     </div>
@@ -460,8 +484,65 @@
         </div>
     </div>
 </div>
+
+
+<!-- Modal Edit MESIN -->
+<div class="modal fade" id="editModalMesin" tabindex="-1" aria-labelledby="editModalMesinLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formEditMesin" action="<?= base_url(session('role') . '/schedule/updateMesinSchedule') ?>" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalMesinLabel">Edit Mesin Schedule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="id_celup" id="idCelupMesin">
+
+                    <div class="form-group mb-3">
+                        <label for="mesinSchedule" class="form-label">Mesin Schedule Tersedia</label>
+                        <!-- value: id_mesin|lot_urut -->
+                        <select name="id_mesin" id="mesinSchedule" class="form-select" required>
+                            <option value="" selected disabled>— Pilih Mesin —</option>
+                            <!-- opsi diisi via JS -->
+                        </select>
+                        <small class="text-muted d-block mt-1">Format: Mesin X</small>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="lotUrut" class="form-label">Lot Urut</label>
+                        <!-- value: id_mesin|lot_urut -->
+                        <select name="lotUrut" id="lotUrut" class="form-select" required>
+                            <option value="" selected disabled>— Lot Urut —</option>
+                            <option value="1">— 1 —</option>
+                            <option value="2">— 2 —</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-info">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function(el) {
+            new bootstrap.Tooltip(el, {
+                container: 'body'
+            });
+        });
+    });
+</script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // Element referensi
@@ -491,7 +572,7 @@
         document.addEventListener('click', function(e) {
             const button = e.target.closest('.editRow');
             if (button) {
-                const idCelup = button.dataset.id;
+                const idCelup = button.dataset.idCelup;
                 const modalEl = document.getElementById('editModal');
                 if (!modalEl) {
                     console.error('Modal edit tidak ditemukan!');
@@ -499,7 +580,7 @@
                 }
                 const modal = new bootstrap.Modal(modalEl);
                 document.getElementById('idCelup').value = idCelup;
-                document.getElementById('tanggal_schedule').value = button.dataset.tanggalschedule;
+                document.getElementById('tanggal_schedule').value = button.dataset.tanggalSchedule;
                 modal.show();
             }
         });
@@ -509,10 +590,9 @@
             e.preventDefault();
             const formData = {
                 id_celup: $('#idCelup').val(),
-                tanggal_schedule: $('#tanggal_schedule').val(),
-                no_mesin: $('#no_mesin').val(),
-                lot_urut: $('#lot_urut').val()
+                tanggal_schedule: $('#tanggal_schedule').val()
             };
+
 
             $.ajax({
                     url: '<?= base_url(session('role') . '/schedule/updateTglSchedule') ?>',
@@ -534,9 +614,153 @@
                 });
         });
 
+        // Event delegation untuk tombol Edit Mesin(modal edit)
+        // Klik tombol Edit MESIN
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.editMesin');
+            if (!btn) return;
+
+            // Ambil id_celup dari data-id-celup
+            const idCelup = btn.dataset.idCelup; // <-- pastikan HTML pakai data-id-celup
+            if (!idCelup) {
+                console.error('id_celup tidak ditemukan di data-id-celup');
+                return;
+            }
+
+            const modalEl = document.getElementById('editModalMesin');
+            const modal = new bootstrap.Modal(modalEl);
+            const select = document.getElementById('mesinSchedule');
+
+            // reset awal
+            document.getElementById('idCelupMesin').value = idCelup;
+            select.innerHTML = '<option value="" selected disabled>— Memuat... —</option>';
+
+            // ---- optional: jika pakai CSRF CodeIgniter 4 ----
+            // const csrfName = '<?= csrf_token() ?>';
+            // const csrfHash = '<?= csrf_hash() ?>';
+
+            $.ajax({
+                    url: '<?= base_url(session("role") . "/schedule/getPindahMesin") ?>',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        id_celup: idCelup,
+                        // [csrfName]: csrfHash   // uncomment bila CSRF aktif
+                    }
+                })
+                .done(function(res) {
+                    // Siapkan opsi default
+                    select.innerHTML = '<option value="" selected disabled>— Pilih Mesin —</option>';
+
+                    if (res && res.success && Array.isArray(res.options) && res.options.length > 0) {
+                        res.options.forEach(op => {
+                            const opt = document.createElement('option');
+                            // pastikan field ada
+                            const val = op.id_mesin || '';
+                            const noMesin = op.no_mesin ?? '-';
+                            const text = op.text ?? '';
+                            // Hilangkan duplikasi "Mesin X •" kalau text sudah mengandungnya
+                            // dan tetap aman jika formatnya beda
+                            let label = text;
+                            const prefixRe = new RegExp(`^\\s*Mesin\\s+${String(noMesin).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*•\\s*`, 'i');
+                            if (!prefixRe.test(text)) {
+                                // text belum punya "Mesin X •"
+                                label = `Mesin ${noMesin} ${text.replace(/^Mesin\s+\d+\s*•\s*/i, '')}`;
+                            }
+
+                            opt.value = val; // "idMesin"
+                            opt.textContent = label.trim();
+                            select.appendChild(opt);
+                        });
+                    } else {
+                        const opt = document.createElement('option');
+                        opt.value = '';
+                        opt.disabled = true;
+                        opt.textContent = 'Tidak ada mesin tersedia';
+                        select.appendChild(opt);
+                    }
+
+                    modal.show();
+                })
+                .fail(function(xhr) {
+                    alert('Gagal memuat daftar mesin');
+                    console.error(xhr.responseText || xhr.statusText || xhr.status);
+                });
+        });
+
+
+        // Ajax submit untuk modal edit menggunakan jQuery
+        $('#formEditMesin').on('submit', async function(e) {
+            e.preventDefault();
+            const form = this;
+
+            // Konfirmasi
+            const {
+                isConfirmed
+            } = await Swal.fire({
+                title: 'Simpan perubahan?',
+                text: 'Mesin schedule akan diperbarui.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, simpan',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+            });
+            if (!isConfirmed) return;
+
+            // Loading
+            const loading = Swal.fire({
+                title: 'Memproses...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            $.ajax({
+                    url: form.action,
+                    type: 'POST',
+                    data: $(form).serialize(),
+                    dataType: 'json'
+                })
+                .done(res => {
+                    if (res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: 'Mesin schedule berhasil diupdate',
+                            confirmButtonText: 'Ke halaman schedule'
+                        }).then(() => {
+                            window.location.href = '<?= base_url(session('role') . '/schedule') ?>';
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Gagal',
+                            text: res.message || 'Gagal update mesin'
+                        });
+                    }
+                })
+                .fail(xhr => {
+                    let msg = 'Terjadi kesalahan server';
+                    try {
+                        const j = JSON.parse(xhr.responseText);
+                        if (j && j.message) msg = j.message;
+                    } catch (_) {}
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        html: `<small>${msg}</small>`
+                    });
+                    console.error(xhr.responseText);
+                })
+                .always(() => {
+                    loading.then(() => Swal.close()); // tutup loading kalau masih terbuka
+                });
+        });
+
+
+
         // Event handler untuk input kode warna
-
-
         // Fungsi utilitas untuk fetching data dengan URL building
         function fetchData(endpoint, params, callback) {
             const url = new URL(`<?= base_url(session('role') . "/schedule/") ?>${endpoint}`);
