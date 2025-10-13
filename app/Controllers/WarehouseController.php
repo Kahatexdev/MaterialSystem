@@ -28,6 +28,8 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpParser\Node\Expr\FuncCall;
 
+use function PHPUnit\Framework\returnSelf;
+
 class WarehouseController extends BaseController
 {
     protected $role;
@@ -118,10 +120,13 @@ class WarehouseController extends BaseController
         //     }
         // }
 
+        $kategori = $this->kategoriModel->findAll();
+
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
+            'kategori' => $kategori,
         ];
         return view($this->role . '/warehouse/index', $data);
     }
@@ -617,70 +622,84 @@ class WarehouseController extends BaseController
         }
 
         $idCelup = $this->outCelupModel->getIdCelups($idOutCelup);
-
+        // $idBon = $this->bonCelupModel->select('id_bon')->whereIn('id_out_celup', $idOutCelup)->findAll();
         // Tambahkan proses komplain sesuai kebutuhanmu
-        $update = $this->scheduleCelupModel
-            ->whereIn('id_celup', array_column($idCelup, 'id_celup'))
+        // $update = $this->scheduleCelupModel
+        //     ->whereIn('id_celup', array_column($idCelup, 'id_celup'))
+        //     ->set([
+        //         'last_status' => 'complain',
+        //         // 'ket_daily_cek' => $alasan
+        //     ])
+        //     ->update();
+
+        // if ($update) {
+        //     $existing = session()->get('dataOut') ?? [];
+        //     $filtered = array_filter($existing, fn($item) => !in_array($item['id_out_celup'], $post['id_out_celup']));
+        //     session()->set('dataOut', array_values($filtered));
+        // }
+
+        $idBonRows = $this->outCelupModel->select('id_bon')
+            ->whereIn('id_out_celup', $idOutCelup)
+            ->findAll();
+
+        $idBon = array_column($idBonRows, 'id_bon');
+
+        $updateBon = $this->bonCelupModel
+            ->whereIn('id_bon', $idBon)
             ->set([
-                'last_status' => 'complain',
-                'ket_daily_cek' => $alasan
+                'status' => 'complain',
+                'keterangan' => 'Retur Celup : ' . '(' . $kategori . ') ' . $alasan
             ])
             ->update();
+        // $idBonChecked sekarang berisi array id_bon yang diceklis berdasarkan id_out_celup
+        // $dataRetur = [];
+        // foreach ($checkedIds as $idx => $outId) {
+        //     $dataRetur[] = [
+        //         'no_model'   => $post['no_model'][$idx],
+        //         'item_type'  => $post['item_type'][$idx],
+        //         'kode_warna' => $post['kode_warna'][$idx],
+        //         'warna'      => $post['warna'][$idx],
+        //         'area_retur' => 'GUDANG BENANG',
+        //         'tgl_retur'  => date('Y-m-d'),
+        //         'kgs_retur'  => $post['kgs_kirim'][$idx],
+        //         'cns_retur'  => $post['cns_kirim'][$idx],
+        //         'lot_retur'  => $post['lot_kirim'][$idx],
+        //         'krg_retur'  => 1,
+        //         'kategori'  => $post['kategori_retur'],
+        //         'keterangan_area'  => null,
+        //         'keterangan_gbn'  => $post['alasan'] ?? '',
+        //         'waktu_acc_retur'  => null,
+        //         'admin'  => session()->get('username'),
+        //     ];
+        // }
 
-        if ($update) {
-            $existing = session()->get('dataOut') ?? [];
-            $filtered = array_filter($existing, fn($item) => !in_array($item['id_out_celup'], $post['id_out_celup']));
-            session()->set('dataOut', array_values($filtered));
-        }
+        // //SUM berdasarkan no_model, item_type, kode_warna, dan warna
+        // $grouped = [];
+        // foreach ($dataRetur as $row) {
+        //     // buat key unik per kombinasi 4 kolom
+        //     $key = $row['no_model']
+        //         . '|' . $row['item_type']
+        //         . '|' . $row['kode_warna']
+        //         . '|' . $row['warna'];
 
-        $dataRetur = [];
-        foreach ($checkedIds as $idx => $outId) {
-            $dataRetur[] = [
-                'no_model'   => $post['no_model'][$idx],
-                'item_type'  => $post['item_type'][$idx],
-                'kode_warna' => $post['kode_warna'][$idx],
-                'warna'      => $post['warna'][$idx],
-                'area_retur' => 'GUDANG BENANG',
-                'tgl_retur'  => date('Y-m-d'),
-                'kgs_retur'  => $post['kgs_kirim'][$idx],
-                'cns_retur'  => $post['cns_kirim'][$idx],
-                'lot_retur'  => $post['lot_kirim'][$idx],
-                'krg_retur'  => 1,
-                'kategori'  => $post['kategori_retur'],
-                'keterangan_area'  => null,
-                'keterangan_gbn'  => $post['alasan'] ?? '',
-                'waktu_acc_retur'  => null,
-                'admin'  => session()->get('username'),
-            ];
-        }
+        //     if (!isset($grouped[$key])) {
+        //         // pertama kali, simpan seluruh row
+        //         $grouped[$key] = $row;
+        //     } else {
+        //         // sudah ada, cukup sum kgs_retur, dan cns_retur
+        //         $grouped[$key]['kgs_retur'] += $row['kgs_retur'];
+        //         $grouped[$key]['cns_retur'] += $row['cns_retur'];
+        //         $grouped[$key]['krg_retur'] += $row['krg_retur'];
+        //     }
+        // }
+        // // Re-index jadi array numerik
+        // $dataRetur = array_values($grouped);
 
-        //SUM berdasarkan no_model, item_type, kode_warna, dan warna
-        $grouped = [];
-        foreach ($dataRetur as $row) {
-            // buat key unik per kombinasi 4 kolom
-            $key = $row['no_model']
-                . '|' . $row['item_type']
-                . '|' . $row['kode_warna']
-                . '|' . $row['warna'];
-
-            if (!isset($grouped[$key])) {
-                // pertama kali, simpan seluruh row
-                $grouped[$key] = $row;
-            } else {
-                // sudah ada, cukup sum kgs_retur, dan cns_retur
-                $grouped[$key]['kgs_retur'] += $row['kgs_retur'];
-                $grouped[$key]['cns_retur'] += $row['cns_retur'];
-                $grouped[$key]['krg_retur'] += $row['krg_retur'];
-            }
-        }
-        // Re-index jadi array numerik
-        $dataRetur = array_values($grouped);
-
-        // Insert batch
-        $inserted = $this->returModel->insertBatch($dataRetur);
+        // // Insert batch
+        // $inserted = $this->returModel->insertBatch($dataRetur);
 
         // Flashdata & redirect
-        if ($update && $inserted) {
+        if ($updateBon) {
             session()->setFlashdata('success', 'Data berhasil dikomplain dan retur disimpan.');
         } else {
             session()->setFlashdata('error', 'Gagal memproses komplain atau menyimpan retur.');
@@ -1666,7 +1685,7 @@ class WarehouseController extends BaseController
         }
         //update tabel pemasukan
         if (!empty($checkedIds)) {
-            $whereIds = array_map(fn($index) => $idOutCelup[$index] ?? null, $checkedIds);
+            $whereIds = array_map(fn ($index) => $idOutCelup[$index] ?? null, $checkedIds);
             $whereIds = array_filter($whereIds); // Hapus nilai NULL jika ada
 
             if (!empty($whereIds)) {
@@ -1815,20 +1834,22 @@ class WarehouseController extends BaseController
     {
         $idOutCelup = $this->request->getPost('id_out_celup');
         $alasan = $this->request->getPost('alasan');
+        $kategori = $this->request->getPost('kategori_retur');
         $post = $this->request->getPost();
         // dd($post);
         $idCelup = $this->outCelupModel->getIdCelup($idOutCelup);
+        $idBon = $this->outCelupModel->select('id_bon')->where('id_out_celup', $idOutCelup)->first();
 
-        if (!$idCelup) {
+        if (!$idBon) {
             session()->setFlashdata('error', 'Data tidak ditemukan.');
             return redirect()->back();
         }
 
-        $update = $this->scheduleCelupModel
-            ->where('id_celup', $idCelup)
+        $update = $this->bonCelupModel
+            ->where('id_bon', $idBon['id_bon'])
             ->set([
-                'last_status' => 'complain',
-                'ket_daily_cek' => $alasan
+                'status' => 'complain',
+                'keterangan' => 'Retur Celup : ' . '(' . $kategori . ') ' . $alasan
             ])
             ->update();
 
@@ -1844,30 +1865,50 @@ class WarehouseController extends BaseController
             // Simpan kembali dataOut ke session tanpa data yang dihapus
             session()->set('dataOut', array_values($filteredData));
         }
+        // $update = $this->scheduleCelupModel
+        //     ->where('id_celup', $idCelup)
+        //     ->set([
+        //         'last_status' => 'complain',
+        //         'ket_daily_cek' => $alasan
+        //     ])
+        //     ->update();
 
-        $dataRetur[] = [
-            'no_model'   => $post['no_model'],
-            'item_type'  => $post['item_type'],
-            'kode_warna' => $post['kode_warna'],
-            'warna'      => $post['warna'],
-            'area_retur' => 'GUDANG BENANG',
-            'tgl_retur'  => date('Y-m-d'),
-            'kgs_retur'  => $post['kgs_kirim'],
-            'cns_retur'  => $post['cns_kirim'],
-            'lot_retur'  => $post['lot_kirim'],
-            'krg_retur'  => 1,
-            'kategori'  => $post['kategori_retur'],
-            'keterangan_area'  => null,
-            'keterangan_gbn'  => $post['alasan'] ?? '',
-            'waktu_acc_retur'  => null,
-            'admin'  => session()->get('username'),
-        ];
+        // if ($update) {
+        //     // Ambil session dataOut
+        //     $existingData = session()->get('dataOut') ?? [];
 
-        // Insert batch
-        $inserted = $this->returModel->insertBatch($dataRetur);
+        //     // Hapus data berdasarkan idOutCelup
+        //     $filteredData = array_filter($existingData, function ($item) use ($idOutCelup) {
+        //         return $item['id_out_celup'] != $idOutCelup;
+        //     });
+
+        //     // Simpan kembali dataOut ke session tanpa data yang dihapus
+        //     session()->set('dataOut', array_values($filteredData));
+        // }
+
+        // $dataRetur[] = [
+        //     'no_model'   => $post['no_model'],
+        //     'item_type'  => $post['item_type'],
+        //     'kode_warna' => $post['kode_warna'],
+        //     'warna'      => $post['warna'],
+        //     'area_retur' => 'GUDANG BENANG',
+        //     'tgl_retur'  => date('Y-m-d'),
+        //     'kgs_retur'  => $post['kgs_kirim'],
+        //     'cns_retur'  => $post['cns_kirim'],
+        //     'lot_retur'  => $post['lot_kirim'],
+        //     'krg_retur'  => 1,
+        //     'kategori'  => $post['kategori_retur'],
+        //     'keterangan_area'  => null,
+        //     'keterangan_gbn'  => $post['alasan'] ?? '',
+        //     'waktu_acc_retur'  => null,
+        //     'admin'  => session()->get('username'),
+        // ];
+
+        // // Insert batch
+        // $inserted = $this->returModel->insertBatch($dataRetur);
 
         // Flashdata & redirect
-        if ($update && $inserted) {
+        if ($update) {
             session()->setFlashdata('success', 'Data berhasil dikomplain dan retur disimpan.');
         } else {
             session()->setFlashdata('error', 'Gagal memproses komplain atau menyimpan retur.');
@@ -4452,6 +4493,7 @@ class WarehouseController extends BaseController
         $lot            = $this->request->getPost('lot');
         $idStock        = $this->request->getPost('id_stock');
         $namaCluster    = $this->request->getPost('nama_cluster');
+        $kategori       = $this->request->getPost('kategori');
         // log_message('info', 'POST saveReturCelup: ' . json_encode($this->request->getPost()));
         if (!$idOutCelup) {
             return $this->response->setJSON([
@@ -4462,6 +4504,7 @@ class WarehouseController extends BaseController
         // log_message('info', 'Keterangan untuk update celup: ' . $keterangan);
 
         $this->db->transBegin();
+        $selectStock = $this->stockModel->where('id_stock', $idStock)->first();
 
         try {
             $save = $this->historyStock->insert([
@@ -4472,15 +4515,13 @@ class WarehouseController extends BaseController
                 'cns'           => $cnsReturCelup,
                 'lot'           => $lot,
                 'krg'           => $krgReturCelup,
-                'keterangan'    => 'Retur Celup',
+                'keterangan'    => 'Retur Celup : ' . '(' . $kategori . ')' . ' ' . $keterangan,
                 'admin'         => session()->get('username'),
                 'created_at'    => date('Y-m-d H:i:s'),
                 'nama_cluster'  => $namaCluster,
             ]);
 
             if ($save) {
-                $selectStock = $this->stockModel->where('id_stock', $idStock)->first();
-
                 $kgsStockAwal = (float)$selectStock['kgs_stock_awal'];
                 $kgsInOut     = (float)$selectStock['kgs_in_out'];
                 $cnsStockAwal = (int)$selectStock['cns_stock_awal'];
@@ -4521,32 +4562,30 @@ class WarehouseController extends BaseController
 
                 $selectOutCelup = $this->outCelupModel->where('id_out_celup', $idOutCelup)->first();
                 $kgsHistoryStock = $this->historyStock
-                    ->selectSum('kgs', 'kgs_retur') // ✅ gunakan format benar untuk alias
+                    ->selectSum('kgs', 'kgs_retur')
                     ->where('id_out_celup', $idOutCelup)
-                    ->like('keterangan', 'Retur Celup') // ✅ gunakan like(), bukan where LIKE
+                    ->like('keterangan', 'Retur Celup')
                     ->first();
 
                 log_message('info', 'Kgs History Retur: ' . json_encode($kgsHistoryStock));
-                $kgsMasuk  = $selectOutCelup['kgs_kirim'];
+                $kgsKirim  = $selectOutCelup['kgs_kirim'];
 
-                if (round($kgsHistoryStock['kgs_retur'], 2) == round($kgsMasuk, 2)) {
+                if (round($kgsHistoryStock['kgs_retur'], 2) == round($kgsKirim, 2)) {
                     $this->pemasukanModel->set('out_jalur', '1')
                         ->where('id_out_celup', $idOutCelup)
                         ->where('id_stock', $idStock)
                         ->update();
                 }
 
-                $idCelup = $selectOutCelup['id_celup'];
-                if ($idCelup) {
-                    $selectCelup = $this->scheduleCelupModel->where('id_celup', $idCelup)->first();
-                    if ($selectCelup) {
-                        // log_message('info', 'Keterangan untuk update celup: ' . $keterangan);
-
-                        $this->scheduleCelupModel->set('last_status', 'complain')
+                $idBon = $selectOutCelup['id_bon'];
+                log_message('info', 'ID Bon dari Out Celup: ' . $idBon);
+                if ($idBon) {
+                    $selectBon = $this->bonCelupModel->where('id_bon', $idBon)->first();
+                    if ($selectBon) {
+                        log_message('info', 'Keterangan untuk update celup: ' . $idBon);
+                        $this->bonCelupModel->set('status', 'complain')
                             ->set('updated_at', date('Y-m-d H:i:s'))
-                            ->set('admin', session()->get('username'))
-                            ->set('ket_schedule', $keterangan)
-                            ->where('id_celup', $idCelup)
+                            ->where('id_bon', $idBon)
                             ->update();
                     }
                 }

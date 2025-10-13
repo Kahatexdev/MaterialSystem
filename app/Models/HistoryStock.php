@@ -182,7 +182,7 @@ class HistoryStock extends Model
     {
         return $this->select('SUM(kgs) AS kgs_retur_celup, SUM(cns) AS cns_retur_celup')
             ->where('id_out_celup', $idOutCelup)
-            ->where('keterangan', 'Retur Celup')
+            ->like('keterangan', 'Retur Celup : ')
             ->first();
     }
 

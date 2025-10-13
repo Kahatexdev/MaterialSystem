@@ -340,7 +340,15 @@
                                     <label for="keteranganSelect" class="form-label">Keterangan</label>
                                     <textarea class="form-control" name="keterangan_retur_celup" id="keteranganReturCelup" required></textarea>
                                 </div>
-
+                                <div class="mb-3">
+                                    <label for="">Kategori</label>
+                                    <select name="kategori_retur" id="kategori_retur" class="form-control" required>
+                                        <option value="">Pilih Kategori Retur</option>
+                                        <?php foreach ($kategori as $k) : ?>
+                                            <option value="<?= $k['nama_kategori'] ?>"><?= $k['nama_kategori'] ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
                                 <!-- Container Data -->
                                 <div class="row g-3" id="returCelupContainer">
                                     <!-- Data akan di-inject JS -->
@@ -1348,6 +1356,7 @@
         const namaCluster = $('#inputNamaCluster').val();
         const lot = $('input[name="pilih_item"]:checked').data('lot');
         const idStock = $('#id_stock').val(); // atau sesuaikan jika beda
+        const kategori = $('#kategori_retur').val();
 
         if (!idOutCelup) {
             return alert('Silakan pilih karung terlebih dahulu.');
@@ -1365,7 +1374,8 @@
                 krg: krgReturCelup,
                 lot: lot,
                 nama_cluster: namaCluster,
-                id_stock: idStock
+                id_stock: idStock,
+                kategori: kategori
             },
             success: function(res) {
                 if (res.success) {
