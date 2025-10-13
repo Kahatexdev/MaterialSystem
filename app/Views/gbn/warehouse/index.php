@@ -338,7 +338,7 @@
                             <div class="card-body">
                                 <div class="mb-3">
                                     <label for="keteranganSelect" class="form-label">Keterangan</label>
-                                    <textarea class="form-control" name="keterangan_retur_celup" id="keteranganReturCelup"></textarea>
+                                    <textarea class="form-control" name="keterangan_retur_celup" id="keteranganReturCelup" required></textarea>
                                 </div>
 
                                 <!-- Container Data -->
