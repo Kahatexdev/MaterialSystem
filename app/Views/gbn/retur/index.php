@@ -32,6 +32,10 @@
                             <div>
 
                                 <form method="get" action="<?= base_url($role . '/retur') ?>">
+                                    <?php
+                                    // Ambil semua query GET dari URL
+                                    $currentFilters = $_GET ?? [];
+                                    ?>
                                     <div class="d-flex align-items-center gap-3">
                                         <select name="jenis" id="jenis" class="form-control">
                                             <option value="">Jenis Bahan Baku</option>
@@ -102,6 +106,7 @@
                                             <th>Cns Retur</th>
                                             <th>Area Retur</th>
                                             <th>Tgl Retur</th>
+                                            <th>Kategori Retur</th>
                                             <th>Aksi</th>
                                         </tr>
                                     </thead>
@@ -125,6 +130,7 @@
                                                 <td><?= $row['cns_retur'] ?></td>
                                                 <td><?= $row['area_retur'] ?></td>
                                                 <td><?= date('d-m-Y', strtotime($row['tgl_retur'])) ?></td>
+                                                <td><?= $row['kategori'] ?></td>
                                                 <td>
                                                     <!-- Modal buttons -->
                                                     <button type="button" class="btn btn-info " data-bs-toggle="modal" data-bs-target="#acceptModal<?= $row['id_retur'] ?>">
@@ -156,6 +162,9 @@
             <form action="<?= base_url($role . '/retur/approve') ?>" method="post">
                 <?= csrf_field() ?>
                 <input type="hidden" name="id_retur" value="<?= $row['id_retur'] ?>">
+                <?php foreach ($currentFilters as $key => $value): ?>
+                    <input type="hidden" name="<?= esc($key) ?>" value="<?= esc($value) ?>">
+                <?php endforeach; ?>
                 <div class="modal-content">
                     <div class="modal-header text-white">
                         <h5 class="modal-title" id="acceptModalLabel<?= $row['id_retur'] ?>">Konfirmasi Approve</h5>
@@ -186,6 +195,9 @@
             <form action="<?= base_url($role . '/retur/reject') ?>" method="post">
                 <?= csrf_field() ?>
                 <input type="hidden" name="id_retur" value="<?= $row['id_retur'] ?>">
+                <?php foreach ($currentFilters as $key => $value): ?>
+                    <input type="hidden" name="<?= esc($key) ?>" value="<?= esc($value) ?>">
+                <?php endforeach; ?>
                 <div class="modal-content">
                     <div class="modal-header text-white">
                         <h5 class="modal-title" id="rejectModalLabel<?= $row['id_retur'] ?>">Konfirmasi Reject</h5>
