@@ -1667,7 +1667,7 @@ class GodController extends BaseController
     public function formPoTambahan()
     {
         // API untuk ambil daftar area unik
-        $apiArea = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $apiArea = 'http://172.23.39.117/CapacityApps/public/api/getDataArea';
         $response = @file_get_contents($apiArea);
 
         if ($response === false) {
@@ -1696,7 +1696,7 @@ class GodController extends BaseController
             return $this->response->setJSON([]);
         }
 
-        $apiNoModel = 'http://172.23.44.14/CapacityApps/public/api/getNoModel?area=' . urlencode($area);
+        $apiNoModel = 'http://172.23.39.117/CapacityApps/public/api/getNoModel?area=' . urlencode($area);
         $response = @file_get_contents($apiNoModel);
 
         if ($response === false) {
@@ -1757,7 +1757,7 @@ class GodController extends BaseController
         $styleSize = array_unique($styleSize);
         // log_message('debug', 'STYLE SIZE LIST: ' . print_r($styleSize, true));
 
-        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getSisaPerSize/' . $area . '/' . $noModel
+        $apiUrl = 'http://172.23.39.117/CapacityApps/public/api/getSisaPerSize/' . $area . '/' . $noModel
             . '?styles[]=' . implode('&styles[]=', array_map('urlencode', $styleSize));
 
         $response = @file_get_contents($apiUrl);
@@ -1779,7 +1779,7 @@ class GodController extends BaseController
 
         // Ambil BS MESIN per style_size
         $bsMesinList = [];
-        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getBsMesin/' . $area . '/' . $noModel
+        $apiUrl = 'http://172.23.39.117/CapacityApps/public/api/getBsMesin/' . $area . '/' . $noModel
             . '?styles[]=' . implode('&styles[]=', array_map('urlencode', $styleSize));
         // Mengambil data dari API eksternal
         $response = @file_get_contents($apiUrl);
@@ -1799,7 +1799,7 @@ class GodController extends BaseController
 
         // Ambil BS SETTING per style_size
         $bsSettingList = [];
-        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getBsSetting'
+        $apiUrl = 'http://172.23.39.117/CapacityApps/public/api/getBsSetting'
             . '?area=' . urlencode($area)
             . '&no_model=' . urlencode($noModel)
             . '&styles[]=' . implode('&styles[]=', array_map('urlencode', $styleSize));
@@ -1830,7 +1830,7 @@ class GodController extends BaseController
             }
         }
 
-        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBruto'
+        $apiUrl = 'http://172.23.39.117/CapacityApps/public/api/getDataBruto'
             . '?area=' . rawurlencode($area)
             . '&no_model=' . rawurlencode($noModel)
             . '&styles[]=' . implode('&styles[]=', array_map('rawurlencode', $styleSize));
