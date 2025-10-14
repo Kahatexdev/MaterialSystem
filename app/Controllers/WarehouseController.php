@@ -1685,7 +1685,7 @@ class WarehouseController extends BaseController
         }
         //update tabel pemasukan
         if (!empty($checkedIds)) {
-            $whereIds = array_map(fn ($index) => $idOutCelup[$index] ?? null, $checkedIds);
+            $whereIds = array_map(fn($index) => $idOutCelup[$index] ?? null, $checkedIds);
             $whereIds = array_filter($whereIds); // Hapus nilai NULL jika ada
 
             if (!empty($whereIds)) {
@@ -4642,7 +4642,9 @@ class WarehouseController extends BaseController
         $jenis = $this->request->getGet('jenis');
         $modelCluster = $this->request->getGet('model_cluster');
         $kodeWarna = $this->request->getGet('kode_warna');
-        $data = $this->stockModel->searchStockOrder($jenis, $modelCluster, $kodeWarna);
+        $deliveryAwal = $this->request->getGet('delivery_awal');
+        $deliveryAkhir = $this->request->getGet('delivery_akhir');
+        $data = $this->stockModel->searchStockOrder($jenis, $modelCluster, $kodeWarna, $deliveryAwal, $deliveryAkhir);
         // dd($data);
         return $this->response->setJSON($data);
     }
