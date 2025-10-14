@@ -401,7 +401,7 @@
         try {
             setAreaLoading();
             // pakai controller kamu sendiri
-            const url = `http://172.23.39.117/CapacityApps/public/api/getFilterArea?no_model=${encodeURIComponent(noModel)}`;
+            const url = `http://172.23.44.14/CapacityApps/public/api/getFilterArea?no_model=${encodeURIComponent(noModel)}`;
 
             const res = await fetch(url, {
                 headers: {
