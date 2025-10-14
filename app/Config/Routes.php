@@ -363,7 +363,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('retur/filterReturArea', 'ReturController::filterReturArea');
     $routes->get('retur/exportReturArea', 'ExcelController::exportReturArea');
     $routes->get('retur/returSample', 'ReturController::returSample');
-    $routes->get('retur/getItemTypeForReturSample/(:any)', 'ReturController::getItemTypeForReturSample/$1');
+    $routes->get('retur/getItemTypeForReturSample', 'ReturController::getItemTypeForReturSample');
     $routes->post('retur/saveReturSample', 'ReturController::saveReturSample');
 
     //Po Plus
