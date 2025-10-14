@@ -1733,4 +1733,53 @@ class ScheduleController extends BaseController
             'data' => $result
         ]);
     }
+
+    public function getPindahMesin()
+    {
+        // id_celup dikirim via POST dari tombol Edit Mesin
+        $idCelup = (int) ($this->request->getPost('id_celup') ?? 0);
+
+        if ($idCelup <= 0) {
+            return $this->response->setStatusCode(400)
+                ->setJSON(['success' => false, 'message' => 'id_celup kosong']);
+        }
+
+        $rows = (array) ($this->scheduleCelupModel->getPindahMesin($idCelup) ?? []);
+        // \var_dump($rows);
+        // Jika tidak ada data
+        if (!$rows) {
+            return $this->response->setJSON(['success' => true, 'options' => []]);
+        }
+
+        return $this->response->setJSON(['success' => true, 'options' => $rows]);
+    }
+
+    public function updateMesinSchedule()
+    {
+        $id_celup = (int) ($this->request->getPost('id_celup') ?? 0);
+        $id_mesin = (int) ($this->request->getPost('id_mesin') ?? 0);
+        $lot_urut = $this->request->getPost('lotUrut') ?? '';
+
+        if ($id_celup <= 0 || $id_mesin <= 0) {
+            return $this->response->setStatusCode(400)
+                ->setJSON(['success' => false, 'message' => 'data kosong']);
+        }
+
+        $data = [
+            'id_mesin' => $id_mesin,
+            'lot_urut' => $lot_urut,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'admin' => session()->get('username'),
+        ];
+
+        $updated = $this->scheduleCelupModel->update($id_celup, $data);
+        if ($updated) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Mesin berhasil diupdate']);
+        } else {
+            return $this->response->setStatusCode(500)
+                ->setJSON(['success' => false, 'message' => 'Gagal mengupdate mesin']);
+        }
+
+        return $this->response->setJSON(['success' => false, 'message' => 'Tidak ada perubahan data']);
+    }
 }

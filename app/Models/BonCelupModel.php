@@ -19,6 +19,7 @@ class BonCelupModel extends Model
         'detail_sj',
         'admin',
         'keterangan',
+        'status',
         'created_at',
         'updated_at',
     ];
@@ -75,5 +76,38 @@ class BonCelupModel extends Model
         // ->join('out_celup', 'out_celup.id_bon=bon_celup.id_bon', 'left')
         // ->join('schedule_celup', 'out_celup.id_bon=bon_celup.id_bon')
         //     ->();
+    }
+
+    public function getDataComplainRetur($tglSch = null, $tglKirim = null, $noModel = null)
+    {
+        $builder = $this->select('out_celup.id_celup, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.lot_celup, schedule_celup.tanggal_schedule, out_celup.id_bon, bon_celup.tgl_datang, bon_celup.no_surat_jalan, history_stock.keterangan, bon_celup.keterangan AS ket_bon')
+            ->join('out_celup', 'out_celup.id_bon = bon_celup.id_bon', 'left')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
+            ->join('history_stock', 'history_stock.id_out_celup = out_celup.id_out_celup', 'left')
+            ->where('bon_celup.status', 'complain');
+        if (!empty($tglSch)) {
+            $builder = $this->where('schedule_celup.tanggal_schedule', $tglSch);
+        }
+        if (!empty($tglKirim)) {
+            $builder = $this->where('bon_celup.tgl_datang', $tglKirim);
+        }
+        if (!empty($noModel)) {
+            $builder = $builder->groupStart()
+                ->where('schedule_celup.no_model', $noModel)
+                ->orLike('schedule_celup.kode_warna', $noModel)
+                ->groupEnd();
+        }
+        return $builder->groupBy('bon_celup.id_bon')
+            ->orderBy('bon_celup.updated_at', 'DESC')
+            ->findAll();
+    }
+
+    public function getScheduleBon($idBon)
+    {
+        return $this->select('bon_celup.id_bon, out_celup.id_celup, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.lot_celup, schedule_celup.tanggal_schedule, schedule_celup.kg_celup')
+            ->join('out_celup', 'out_celup.id_bon = bon_celup.id_bon', 'left')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
+            ->where('bon_celup.id_bon', $idBon)
+            ->first();
     }
 }

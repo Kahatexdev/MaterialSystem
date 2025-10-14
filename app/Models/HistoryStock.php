@@ -182,18 +182,18 @@ class HistoryStock extends Model
     {
         return $this->select('SUM(kgs) AS kgs_retur_celup, SUM(cns) AS cns_retur_celup')
             ->where('id_out_celup', $idOutCelup)
-            ->where('keterangan', 'Retur Celup')
+            ->like('keterangan', 'Retur Celup : ')
             ->first();
     }
 
     public function getFilterHistoryReturCelup($no_model = null, $no_surat = null)
     {
         $builder = $this->db->table('history_stock')
-            ->select('stock.no_model, stock.item_type, stock.kode_warna, stock.warna, history_stock.kgs, history_stock.cns, history_stock.lot, history_stock.krg, stock.nama_cluster, DATE(history_stock.created_at) AS tgl_retur, history_stock.keterangan, history_stock.admin, bon_celup.no_surat_jalan')
+            ->select('stock.no_model, stock.item_type, stock.kode_warna, stock.warna, history_stock.kgs, history_stock.cns, history_stock.lot, history_stock.krg, stock.nama_cluster, DATE(history_stock.created_at) AS tgl_retur, history_stock.keterangan, history_stock.admin, bon_celup.no_surat_jalan, history_stock.created_at, history_stock.updated_at')
             ->join('stock', 'stock.id_stock = history_stock.id_stock_old', 'left')
             ->join('out_celup', 'history_stock.id_out_celup = out_celup.id_out_celup', 'left')
             ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
-            ->where('history_stock.keterangan', 'Retur Celup');
+            ->like('history_stock.keterangan', 'Retur Celup :');
 
         if (!empty($no_model)) {
             $builder->where('stock.no_model', $no_model);

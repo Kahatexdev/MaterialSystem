@@ -126,6 +126,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('schedule/saveScheduleSample', 'ScheduleController::saveScheduleSample');
     $routes->get('schedule/editSchedule', 'ScheduleController::editSchedule');
     $routes->post('schedule/updateSchedule', 'ScheduleController::updateSchedule');
+    $routes->post('schedule/getPindahMesin', 'ScheduleController::getPindahMesin');
+    $routes->post('schedule/updateMesinSchedule', 'ScheduleController::updateMesinSchedule');
     $routes->post('schedule/updateTglSchedule', 'ScheduleController::updateTglSchedule');
     $routes->post('schedule/deleteSchedule', 'ScheduleController::deleteSchedule');
     $routes->get('schedule/getStock', 'ScheduleController::getStock');
@@ -274,6 +276,9 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/reportHistoryReturCelup', 'WarehouseController::reportHistoryReturCelup');
     $routes->get('warehouse/filterHistoryReturCelup', 'WarehouseController::filterHistoryReturCelup');
     $routes->get('warehouse/exportHistoryReturCelup', 'ExcelController::exportHistoryReturCelup');
+    $routes->get('warehouse/reportStockOrderBenang', 'WarehouseController::reportStockOrderBenang');
+    $routes->get('warehouse/filterStockOrderBenang', 'WarehouseController::filterStockOrderBenang');
+    $routes->get('warehouse/exportStockOrderBenang', 'ExcelController::exportStockOrderBenang');
 
     $routes->post('warehouse/savePengeluaranSelainOrder', 'WarehouseController::savePengeluaranSelainOrder');
     $routes->get('otherIn', 'WarehouseController::otherIn');

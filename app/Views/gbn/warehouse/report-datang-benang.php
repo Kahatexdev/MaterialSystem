@@ -129,7 +129,15 @@
                     <label for="">Tanggal Akhir (Tanggal Datang)</label>
                     <input type="date" class="form-control">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-1 d-flex align-items-center">
+                    <div class="form-check mb-0">
+                        <label class="form-check-label" for="po_plus">
+                            PO(+)
+                        </label>
+                        <input class="form-check-input" type="checkbox" id="po_plus">
+                    </div>
+                </div>
+                <div class="col-md-2">
                     <label for="">Aksi</label><br>
                     <button class="btn btn-info btn-block" id="btnSearch"><i class="fas fa-search"></i></button>
                     <button class="btn btn-danger" id="btnReset"><i class="fas fa-redo-alt"></i></button>
@@ -247,9 +255,17 @@
             let key = $('input[type="text"]').val().trim();
             let tanggal_awal = $('input[type="date"]').eq(0).val().trim();
             let tanggal_akhir = $('input[type="date"]').eq(1).val().trim();
-
+            let po_plus = $('#po_plus').is(':checked') ? 1 : 0;
+            // Log data yang akan dikirim
+            let dataToSend = {
+                key: key,
+                tanggal_awal: tanggal_awal,
+                tanggal_akhir: tanggal_akhir,
+                po_plus: po_plus
+            };
+            console.log('Data yang dikirim ke server:', dataToSend);
             // Validasi: Jika semua input kosong, tampilkan alert dan hentikan pencarian
-            if (key === '' && tanggal_awal === '' && tanggal_akhir === '') {
+            if (key === '' && tanggal_awal === '' && tanggal_akhir === '' && po_plus === 0) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
@@ -264,7 +280,8 @@
                 data: {
                     key: key,
                     tanggal_awal: tanggal_awal,
-                    tanggal_akhir: tanggal_akhir
+                    tanggal_akhir: tanggal_akhir,
+                    po_plus: po_plus
                 },
                 dataType: "json",
                 beforeSend: function() {
@@ -392,7 +409,8 @@
             let key = $('input[type="text"]').val();
             let tanggal_awal = $('input[type="date"]').eq(0).val();
             let tanggal_akhir = $('input[type="date"]').eq(1).val();
-            window.location.href = "<?= base_url($role . '/warehouse/exportDatangBenang') ?>?key=" + key + "&tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
+            let po_plus = $('#po_plus').is(':checked') ? 1 : 0;
+            window.location.href = "<?= base_url($role . '/warehouse/exportDatangBenang') ?>?key=" + key + "&tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir + "&po_plus=" + po_plus;
         });
 
         dataTable.clear().draw();

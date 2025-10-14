@@ -191,7 +191,7 @@ class GodController extends BaseController
                         ->where('delivery_awal', $delAwal)
                         ->first();
 
-                    if (! $masterOrder) {
+                    if (!$masterOrder) {
                         $msg = sprintf(
                             "Baris %d dilewati: master order tidak ditemukan (no_model=%s, delivery_awal=%s)",
                             $line,
@@ -221,7 +221,7 @@ class GodController extends BaseController
                         ->where('kode_warna', $kodeWarna)
                         ->first();
                     // var_dump($normalizedType, $kodeWarna);
-                    if (! $material) {
+                    if (!$material) {
                         $msg = sprintf(
                             "Baris %d dilewati: material tidak ditemukan (item_type=%s, kode_warna=%s)",
                             $line,

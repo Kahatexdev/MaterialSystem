@@ -229,10 +229,11 @@
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="dataTable" class="table">
+                <table id="dataTable" class="table" width="100%">
                     <thead>
                         <tr>
                             <th class="sticky">No</th>
+                            <th class="sticky">Tanggal Schedule</th>
                             <th class="sticky">PO</th>
                             <th class="sticky">Jenis Benang</th>
                             <th class="sticky">Kode Warna</th>
@@ -251,15 +252,16 @@
                         ?>
                             <tr>
                                 <td><?= $no++; ?></td>
+                                <td><?= $data['tgl_schedule']; ?></td>
                                 <td><?= $data['no_model']; ?></td>
                                 <td><?= $data['item_type']; ?></td>
                                 <td><?= $data['kode_warna']; ?></td>
                                 <td><?= $data['warna']; ?></td>
-                                <td><?= $data['ket_daily_cek']; ?></td>
+                                <td><?= $data['keterangan'] ?? $data['ket_bon']; ?></td>
                                 <td><?= $data['lot_celup']; ?></td>
                                 <td><?= $data['tgl_datang']; ?></td>
                                 <td><?= $data['no_surat_jalan']; ?></td>
-                                <td><a href="<?= base_url($role . '/createRetur/' . $data['id_celup']) ?>" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="New Bon">
+                                <td><a href="<?= base_url($role . '/createRetur/' . $data['id_bon']) ?>" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="New Bon">
                                         <i class="fas fa-barcode"></i></a>
                                     <a href="<?= base_url($role . '/outCelup/editBon/' . $data['id_bon']) ?>" class="btn btn-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Bon">
                                         <i class="fas fa-file-alt"></i></a>
@@ -298,6 +300,7 @@
             "pageLength": 10,
             "ordering": true,
             "columns": [
+                null, // No
                 null, // No
                 null, // PO
                 null, // Jenis Benang
