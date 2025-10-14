@@ -303,21 +303,13 @@
                 $isUnread = $hasReply ? 0 : 1;
                 ?>
 
-                <div
-                    class="card complaint-card mb-3 <?= $isUnread ? 'border-warning' : '' ?>"
-                    data-complaint-id="<?= $p['id_pengaduan'] ?>"
-                    data-role="<?= esc($p['target_role']) ?>"
-                    data-user="<?= esc(strtolower($p['username'])) ?>"
-                    data-date="<?= esc($dateISO) ?>"
-                    data-hasreply="<?= $hasReply ?>"
-                    data-unread="<?= $isUnread ?>"
-                    data-search="<?= esc($searchBlob) ?>">
+                <div class="card complaint-card mb-3 <?= $isUnread ? 'border-warning' : '' ?>" data-complaint-id="<?= $p['id_pengaduan'] ?>" data-role="<?= esc($p['target_role']) ?>" data-user="<?= esc(strtolower($p['username'])) ?>" data-date="<?= esc($dateISO) ?>" data-hasreply="<?= $hasReply ?>" data-unread="<?= $isUnread ?>" data-search="<?= esc($searchBlob) ?>">
 
                     <div class="card-body timeline-accent">
                         <div class="d-flex justify-content-between align-items-start gap-3">
                             <div>
                                 <h6 class="mb-1">
-                                    <?php if ($isUnread): ?>
+                                    <?php if ($isUnread) : ?>
                                         <span class="badge bg-warning text-dark me-2">Baru</span>
                                     <?php endif; ?>
                                     <span class="fw-bold"><?= esc($p['username']) ?></span>
