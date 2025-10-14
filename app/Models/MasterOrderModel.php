@@ -958,7 +958,7 @@ class MasterOrderModel extends Model
 
         if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
             $builder->where('master_order.delivery_awal >=', $tanggal_awal)
-                ->where('master_order.delivery_akhir <=', $tanggal_akhir);
+                ->orWhere('master_order.delivery_akhir <=', $tanggal_akhir);
         }
 
         return $builder->findAll();
