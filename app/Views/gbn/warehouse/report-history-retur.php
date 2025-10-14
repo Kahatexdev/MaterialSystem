@@ -148,7 +148,9 @@
                             <th class="text-center text-uppercase">Cns Retur</th>
                             <th class="text-center text-uppercase">Total Karung</th>
                             <th class="text-center text-uppercase">Lot Retur</th>
+                            <th class="text-center text-uppercase">Keterangan</th>
                             <th class="text-center text-uppercase">Admin</th>
+                            <th class="text-center text-uppercase">Tanggal Retur</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -251,7 +253,9 @@
                                 item.cns,
                                 item.krg,
                                 item.lot,
-                                item.admin
+                                item.keterangan,
+                                item.admin,
+                                item.created_at
                             ]).draw(false);
                         });
 
@@ -303,6 +307,14 @@
 
         // Sembunyikan tombol Export Excel
         $('#btnExport').addClass('d-none');
+    });
+
+    // Trigger pencarian saat tombol Enter ditekan di input apa pun
+    $('#key, input[type="text"]').on('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Hindari form submit default (jika ada form)
+            $('#btnSearch').click(); // Trigger tombol Search
+        }
     });
 </script>
 
