@@ -111,22 +111,31 @@
     <div class="card card-frame">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 font-weight-bolder">Filter History Retur Celup</h5>
+                <h5 class="mb-0 font-weight-bolder">Filter Stock Order Benang</h5>
             </div>
             <div class="row mt-2">
                 <div class="col-md-3">
-                    <label for="">No Model</label>
-                    <input type="text" class="form-control" id="noModel" placeholder="No Model">
+                    <label for="">No Model / Cluster</label>
+                    <input type="text" class="form-control">
                 </div>
                 <div class="col-md-3">
-                    <label for="">No Surat Jalan</label>
-                    <input type="text" class="form-control" id="noSuratJalan" placeholder="No Surat Jalan">
+                    <label for="">Kode Warna</label>
+                    <input type="text" class="form-control">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    <label for="">Delivery Dari</label>
+                    <input type="date" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label for="">Delivery Sampai</label>
+                    <input type="date" class="form-control">
+                </div>
+                <div class="col-md-2">
                     <label for="">Aksi</label><br>
                     <button class="btn btn-info btn-block" id="btnSearch"><i class="fas fa-search"></i></button>
                     <button class="btn btn-danger" id="btnReset"><i class="fas fa-redo-alt"></i></button>
                     <button class="btn btn-primary d-none" id="btnExport"><i class="fas fa-file-excel"></i></button>
+                    <button class="btn btn-primary" id="btnExportAll"><i class="fas fa-file-excel"></i></button>
                 </div>
             </div>
         </div>
@@ -136,21 +145,25 @@
     <div class="card mt-4">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="dataTable" class="display text-center text-uppercase" style="width:100%">
+                <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>
                         <tr>
-                            <th class="text-center text-uppercase">No</th>
-                            <th class="text-center text-uppercase">No Model</th>
-                            <th class="text-center text-uppercase">Item Type</th>
-                            <th class="text-center text-uppercase">Kode Warna</th>
-                            <th class="text-center text-uppercase">Warna</th>
-                            <th class="text-center text-uppercase">Kgs Retur</th>
-                            <th class="text-center text-uppercase">Cns Retur</th>
-                            <th class="text-center text-uppercase">Total Karung</th>
-                            <th class="text-center text-uppercase">Lot Retur</th>
-                            <th class="text-center text-uppercase">Keterangan</th>
-                            <th class="text-center text-uppercase">Admin</th>
-                            <th class="text-center text-uppercase">Tanggal Retur</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cluster</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Follow Up</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Space</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Sisa Space</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Buyer</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty Kg</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty Cns</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty Krg</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Lot Stock</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -173,6 +186,10 @@
             "processing": true,
             "serverSide": false
         });
+
+        // Saat pertama kali load halaman
+        $('#btnExportAll').removeClass('d-none'); // tampilkan global export
+        $('#btnExport').addClass('d-none'); // pastikan export filter sembunyi
 
         function showLoading() {
             $('#loadingOverlay').addClass('active');
@@ -199,11 +216,13 @@
         }
 
         function loadData() {
-            let no_model = $('#noModel').val().trim();
-            let no_surat = $('#noSuratJalan').val().trim();
-
+            let modelCluster = $('input[type="text"]').eq(0).val().trim();
+            let kodeWarna = $('input[type="text"]').eq(1).val().trim();
+            let deliveryAwal = $('input[type="date"]').eq(0).val().trim();
+            let deliveryAkhir = $('input[type="date"]').eq(1).val().trim();
+            let jenis = "BENANG";
             // Validasi: Jika semua input kosong, tampilkan alert dan hentikan pencarian
-            if (no_model === '' && no_surat === '') {
+            if (modelCluster === '' && kodeWarna === '' && deliveryAwal === '' && deliveryAkhir === '') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
@@ -212,13 +231,15 @@
                 return;
             }
 
-
             $.ajax({
-                url: "<?= base_url($role . '/warehouse/filterHistoryReturCelup') ?>",
+                url: "<?= base_url($role . '/warehouse/filterStockOrderBenang') ?>",
                 type: "GET",
                 data: {
-                    no_model: no_model,
-                    no_surat: no_surat
+                    model_cluster: modelCluster,
+                    kode_warna: kodeWarna,
+                    delivery_awal: deliveryAwal,
+                    delivery_akhir: deliveryAkhir,
+                    jenis: jenis
                 },
                 dataType: "json",
                 beforeSend: function() {
@@ -242,24 +263,43 @@
                     dataTable.clear().draw();
 
                     if (response.length > 0) {
+                        // Hitung total qty_kg per cluster dulu
+                        let clusterTotals = {};
+                        response.forEach(item => {
+                            let cluster = item.nama_cluster;
+                            clusterTotals[cluster] = (clusterTotals[cluster] || 0) + parseFloat(item.qty_kg || 0);
+                        });
+
+                        dataTable.clear().draw();
+
                         $.each(response, function(index, item) {
+                            let cluster = item.nama_cluster;
+                            let space = parseFloat(item.space || 0);
+                            let totalQtyKg = clusterTotals[cluster] || 0;
+                            let sisaSpace = space - totalQtyKg;
+
                             dataTable.row.add([
                                 index + 1,
+                                item.nama_cluster,
+                                item.foll_up,
+                                space.toFixed(2),
+                                sisaSpace.toFixed(2),
+                                item.buyer + ' (' + (item.nama_buyer || '') + ')',
                                 item.no_model,
+                                item.delivery_awal,
+                                item.delivery_akhir,
                                 item.item_type,
                                 item.kode_warna,
                                 item.warna,
-                                item.kgs,
-                                item.cns,
-                                item.krg,
-                                item.lot,
-                                item.keterangan,
-                                item.admin,
-                                item.created_at
+                                parseFloat(item.qty_kg || 0).toFixed(2),
+                                item.qty_cns || 0,
+                                item.qty_krg || 0,
+                                item.lot_stock || ''
                             ]).draw(false);
                         });
 
-                        $('#btnExport').removeClass('d-none'); // Munculkan tombol Export Excel
+                        $('#btnExport').removeClass('d-none'); // tombol export filter
+                        $('#btnExportAll').addClass('d-none'); // sembunyikan export global
                     } else {
                         let colCount = $('#dataTable thead th').length;
                         $('#dataTable tbody').html(`
@@ -270,8 +310,10 @@
                             </tr>
                         `);
 
-                        $('#btnExport').addClass('d-none'); // Sembunyikan jika tidak ada data
+                        $('#btnExport').addClass('d-none'); // sembunyikan tombol export
+                        $('#btnExportAll').removeClass('d-none'); // tampilkan export global
                     }
+
                 },
                 error: function(xhr, status, error) {
                     console.error("Error:", error);
@@ -288,9 +330,21 @@
         });
 
         $('#btnExport').click(function() {
-            let no_model = $('#noModel').val().trim();
-            let no_surat = $('#noSuratJalan').val().trim();
-            window.location.href = "<?= base_url($role . '/warehouse/exportHistoryReturCelup') ?>?no_model=" + encodeURIComponent(no_model) + "&no_surat=" + encodeURIComponent(no_surat);
+            let modelCluster = $('input[type="text"]').eq(0).val();
+            let kodeWarna = $('input[type="text"]').eq(1).val();
+            let deliveryAwal = $('input[type="date"]').eq(0).val();
+            let deliveryAkhir = $('input[type="date"]').eq(1).val();
+            let jenis = "BENANG";
+            window.location.href = "<?= base_url($role . '/warehouse/exportStockOrderBenang') ?>?jenis=" + jenis + "&model_cluster=" + modelCluster + "&kode_warna=" + kodeWarna + "&delivery_awal=" + deliveryAwal + "&delivery_akhir=" + deliveryAkhir;
+        });
+
+        $('#btnExportAll').click(function() {
+            let modelCluster = $('input[type="text"]').eq(0).val();
+            let kodeWarna = $('input[type="text"]').eq(1).val();
+            let deliveryAwal = $('input[type="date"]').eq(0).val();
+            let deliveryAkhir = $('input[type="date"]').eq(1).val();
+            let jenis = "BENANG";
+            window.location.href = "<?= base_url($role . '/warehouse/exportStockOrderBenang') ?>?jenis=" + jenis + "&model_cluster=" + modelCluster + "&kode_warna=" + kodeWarna + "&delivery_awal=" + deliveryAwal + "&delivery_akhir=" + deliveryAkhir;
         });
 
         dataTable.clear().draw();
@@ -307,14 +361,7 @@
 
         // Sembunyikan tombol Export Excel
         $('#btnExport').addClass('d-none');
-    });
-
-    // Trigger pencarian saat tombol Enter ditekan di input apa pun
-    $('#key, input[type="text"]').on('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault(); // Hindari form submit default (jika ada form)
-            $('#btnSearch').click(); // Trigger tombol Search
-        }
+        $('#btnExportAll').removeClass('d-none'); // tampilkan kembali export global
     });
 </script>
 

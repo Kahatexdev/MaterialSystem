@@ -775,13 +775,13 @@ class MaterialModel extends Model
             ->join('master_order', 'master_order.id_order=material.id_order')
             ->where('master_order.no_model', $noModel)
             ->where('material.style_size', $styleSize)
-            ->first();
+            ->findAll();
     }
 
     public function updateGwAktual($idMaterial, $gwAktual)
     {
         return $this->set('gw_aktual', $gwAktual)
-            ->where('id_material', $idMaterial)
+            ->whereIn('id_material', $idMaterial)
             ->update();
     }
 

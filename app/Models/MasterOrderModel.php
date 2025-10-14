@@ -933,7 +933,7 @@ class MasterOrderModel extends Model
 
     public function getFilterKebutuhanBahanBaku($jenis = null, $tanggal_awal = null, $tanggal_akhir = null)
     {
-        $builder = $this->select('material.item_type, SUM(material.kgs) AS total_kebutuhan')
+        $builder = $this->select('material.item_type, SUM(material.kgs) AS total_kebutuhan, material.color')
             ->join('material', 'material.id_order = master_order.id_order', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->where('material.item_type IS NOT NULL')
@@ -958,7 +958,7 @@ class MasterOrderModel extends Model
 
         if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
             $builder->where('master_order.delivery_awal >=', $tanggal_awal)
-                ->where('master_order.delivery_akhir <=', $tanggal_akhir);
+                ->where('master_order.delivery_awal <=', $tanggal_akhir);
         }
 
         return $builder->findAll();

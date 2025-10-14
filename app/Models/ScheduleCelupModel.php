@@ -47,6 +47,7 @@ class ScheduleCelupModel extends Model
         'admin',
         'created_at',
         'updated_at',
+        'admin'
     ];
 
     protected bool $allowEmptyInserts = false;
@@ -259,6 +260,7 @@ class ScheduleCelupModel extends Model
 
         // sortby order by created_at DESC 
         $builder->orderBy('schedule_celup.created_at', 'DESC');
+        $builder->limit(30);
 
         return $builder->get()->getResultArray();
     }
@@ -504,7 +506,7 @@ class ScheduleCelupModel extends Model
                 ->orLike('schedule_celup.kode_warna', $noModel)
                 ->groupEnd();
         }
-        return $builder->groupBy('schedule_celup.id_celup')
+        return $builder->groupBy('bon_celup.id_bon')
             ->groupBy('bon_celup.id_bon')
             ->findAll();
     }
@@ -1534,5 +1536,105 @@ class ScheduleCelupModel extends Model
             ->where('last_status !=', 'scheduled')
             ->groupBy('id_celup')
             ->findAll();
+    }
+
+    // public function getPindahMesin(int $idCelup): array
+    // {
+    //     $sql = "
+    //     WITH RECURSIVE
+    //     seq AS (
+    //       SELECT 1 AS n
+    //       UNION ALL
+    //       SELECT n + 1
+    //       FROM seq
+    //       WHERE n < (SELECT COALESCE(MAX(m.jml_lot), 1) FROM mesin_celup m)
+    //     ),
+    //     src AS (
+    //       SELECT
+    //         sc.id_celup,
+    //         sc.id_mesin,
+    //         sc.lot_urut,
+    //         DATE(sc.tanggal_schedule) AS tgl,
+    //         sc.kode_warna
+    //       FROM schedule_celup sc
+    //       WHERE sc.id_celup = :id_celup:
+    //     ),
+    //     lot_series AS (
+    //       SELECT
+    //         m.id_mesin,
+    //         m.no_mesin,
+    //         m.jml_lot,
+    //         m.max_caps,
+    //         s.n AS lot_urut
+    //       FROM mesin_celup m
+    //       JOIN seq s ON s.n <= m.jml_lot
+    //     ),
+    //     kosong AS (
+    //       SELECT
+    //         ls.id_mesin,
+    //         ls.no_mesin,
+    //         ls.lot_urut
+    //       FROM lot_series ls
+    //       JOIN src ON 1=1
+    //       LEFT JOIN schedule_celup sch
+    //         ON  sch.id_mesin = ls.id_mesin
+    //         AND sch.lot_urut = ls.lot_urut
+    //         AND DATE(sch.tanggal_schedule) = src.tgl
+    //         AND sch.last_status != 'celup'
+    //       WHERE sch.id_mesin IS NULL
+    //     )
+    //     SELECT
+    //       k.id_mesin,
+    //       m.no_mesin,
+    //       k.lot_urut,
+    //       m.max_caps,
+    //       0 AS kg_terjadwal,
+    //       m.max_caps AS sisa_caps
+    //     FROM kosong k
+    //     JOIN src s         ON 1=1
+    //     JOIN mesin_celup m ON m.id_mesin = k.id_mesin
+    //     WHERE NOT (k.id_mesin = s.id_mesin AND k.lot_urut = s.lot_urut)
+    //       AND NOT EXISTS (
+    //         SELECT 1
+    //         FROM schedule_celup x
+    //         WHERE x.id_mesin = k.id_mesin
+    //           AND DATE(x.tanggal_schedule) = s.tgl
+    //           AND x.last_status != 'celup'
+    //       )
+    //     ORDER BY m.no_mesin, k.lot_urut
+    //     ";
+
+    //     return $this->db->query($sql, ['id_celup' => $idCelup])->getResultArray();
+    // }
+
+    public function getPindahMesin(int $idCelup): array
+    {
+        // Ambil tgl_schedule dari id_celup sumber
+        $row = $this->db->table('schedule_celup')
+            ->select('DATE(tanggal_schedule) AS tgl', false)
+            ->where('id_celup', $idCelup)
+            ->get()
+            ->getRowArray();
+
+        if (!$row || empty($row['tgl'])) {
+            return [];
+        }
+
+        $tgl = $row['tgl'];
+
+        // Mesin yang tidak punya schedule aktif (last_status != 'celup') pada tgl tsb
+        $builder = $this->db->table('mesin_celup m')
+            ->select('DISTINCT m.id_mesin, m.no_mesin', false)
+            ->orderBy('m.no_mesin');
+
+        // NOT EXISTS subquery
+        $builder->where("NOT EXISTS (
+        SELECT 1 FROM schedule_celup sch
+        WHERE sch.id_mesin = m.id_mesin
+          AND DATE(sch.tanggal_schedule) = " . $this->db->escape($tgl) . "
+          AND sch.last_status <> 'celup'
+    )", null, false);
+
+        return $builder->get()->getResultArray();
     }
 }

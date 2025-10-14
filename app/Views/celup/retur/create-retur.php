@@ -43,6 +43,7 @@
                         <form action="<?= base_url($role . '/saveBonRetur') ?>" method="post">
                             <div id="kebutuhan-container">
                                 <div class="row mb-4">
+                                    <input type="hidden" name="id_bon_old" value="<?= $schData['id_bon'] ?>">
                                     <div class="col-md-4">
                                         <label>Detail Surat Jalan</label>
                                         <select class="form-control" name="detail_sj" id="detail_sj" required>
@@ -119,7 +120,7 @@
                                                         <div class="col-md-3 form-check">
                                                             <label>
                                                                 <input type="hidden" name="ganti_retur[0]" value="0">
-                                                                <input type="checkbox" name="ganti_retur[0]" id="ganti_retur" value="1" class="form-check-input" <?= isset($data['ganti_retur']) && $data['ganti_retur'] == 1 ? 'checked' : '' ?>>
+                                                                <input type="checkbox" name="ganti_retur[0]" id="ganti_retur" value="1" class="form-check-input" <?= isset($data['ganti_retur']) && $data['ganti_retur'] == 1 ? 'checked' : '' ?> required>
                                                             </label>
                                                         </div>
 
