@@ -82,6 +82,7 @@
                             <th class="text-center">Buyer</th>
                             <th class="text-center">Foll Up</th> -->
                             <th class="text-center">Item Type</th>
+                            <th class="text-center">Warna</th>
                             <!-- <th class="text-center">Delivery Awal</th>
                             <th class="text-center">Delivery Akhir</th> -->
                             <th class="text-center">Total Kebutuhan (Kg)</th>
@@ -162,6 +163,7 @@
                                 // item.buyer,
                                 // item.foll_up,
                                 item.item_type,
+                                item.color,
                                 // item.delivery_awal,
                                 // item.delivery_akhir,
                                 parseFloat(item.total_kebutuhan).toFixed(2)
