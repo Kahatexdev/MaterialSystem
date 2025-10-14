@@ -143,22 +143,15 @@
                         <!-- No Model -->
                         <div class="col-md-3">
                             <label for="filter_model" class="form-label">No Model</label>
-                            <input
-                                type="text"
-                                id="filter_model"
-                                name="filter_model"
-                                class="form-control"
-                                placeholder="No Model"
-                                value="<?= esc($noModel ?? '') ?>"
-                                required>
+                            <input type="text" id="filter_model" name="filter_model" class="form-control" placeholder="No Model" value="<?= esc($noModel ?? '') ?>" required>
                         </div>
                         <!-- Area -->
                         <div class="col-md-3">
                             <label for="filter_area" class="form-label">Area</label>
                             <select class="form-control" name="filter_area" id="filter_area" required>
-                                <?php if (!empty($area)): ?>
+                                <?php if (!empty($area)) : ?>
                                     <option value="<?= esc($area) ?>"><?= esc($area) ?></option>
-                                <?php else: ?>
+                                <?php else : ?>
                                     <option value="">Pilih Area</option>
                                 <?php endif; ?>
                             </select>
@@ -175,8 +168,7 @@
                         <!-- Tombol Refresh -->
                         <div class="col-md-1">
                             <label class="form-label d-block invisible">Refresh</label>
-                            <button type="button" class="btn btn-secondary w-100"
-                                onclick="window.location.href='<?= base_url($role . '/pemesanan/sisaKebutuhanArea') ?>'">
+                            <button type="button" class="btn btn-secondary w-100" onclick="window.location.href='<?= base_url($role . '/pemesanan/sisaKebutuhanArea') ?>'">
                                 <i class="fas fa-sync-alt"></i>
                             </button>
                         </div>

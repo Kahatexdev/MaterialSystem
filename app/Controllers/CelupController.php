@@ -11,6 +11,7 @@ use App\Models\OpenPoModel;
 use App\Models\ScheduleCelupModel;
 use App\Models\OutCelupModel;
 use App\Models\BonCelupModel;
+use App\Models\ReturModel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 
 class CelupController extends BaseController
@@ -26,6 +27,7 @@ class CelupController extends BaseController
     protected $scheduleCelupModel;
     protected $outCelupModel;
     protected $bonCelupModel;
+    protected $returModel;
 
     public function __construct()
     {
@@ -36,6 +38,7 @@ class CelupController extends BaseController
         $this->scheduleCelupModel = new ScheduleCelupModel();
         $this->outCelupModel = new OutCelupModel();
         $this->bonCelupModel = new BonCelupModel();
+        $this->returModel = new ReturModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -65,7 +68,7 @@ class CelupController extends BaseController
         $filterTglSch = $this->request->getPost('filter_tglsch');
         $filterNoModel = $this->request->getPost('filter_nomodel');
 
-        // $sch = $this->scheduleCelupModel->getSchedule();
+        $sch = $this->scheduleCelupModel->getSchedule();
         // dd($sch);
         if ($filterTglSch && $filterNoModel) {
             $sch = array_filter($sch, function ($data) use ($filterTglSch, $filterNoModel) {
@@ -428,7 +431,8 @@ class CelupController extends BaseController
         $filterNoModel = $this->request->getPost('filter_nomodel');
 
         // $sch = $this->scheduleCelupModel->getDataComplain();
-        $sch = $this->scheduleCelupModel->getDataComplain($filterTglSch, $filterTglKirim, $filterNoModel);
+        // $sch = $this->scheduleCelupModel->getDataComplain($filterTglSch, $filterTglKirim, $filterNoModel);
+        $sch = $this->bonCelupModel->getDataComplainRetur($filterTglSch, $filterTglKirim, $filterNoModel);
         // dd($sch);
         // if ($filterTglSch && $filterNoModel) {
         //     $sch = array_filter($sch, function ($data) use ($filterTglSch, $filterNoModel) {
@@ -462,11 +466,11 @@ class CelupController extends BaseController
             }
 
             // Panggil fungsi model untuk mendapatkan qty_po dan warna
-            $pdk = $this->materialModel->getQtyPOForCelup($nomodel, $itemtype, $kodewarna);
-            if (!$pdk) {
-                log_message('error', "Data null dari model: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
-                continue; // Skip jika $pdk kosong
-            }
+            // $pdk = $this->materialModel->getQtyPOForCelup($nomodel, $itemtype, $kodewarna);
+            // if (!$pdk) {
+            //     log_message('error', "Data null dari model: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
+            //     continue; // Skip jika $pdk kosong
+            // }
 
             $keys = $id['no_model'] . '-' . $id['item_type'] . '-' . $id['kode_warna'];
 
@@ -480,15 +484,13 @@ class CelupController extends BaseController
                     'no_model' => $nomodel,
                     'item_type' => $itemtype,
                     'kode_warna' => $kodewarna,
-                    'warna' => $pdk['color'],
-                    'ket_daily_cek' => $id['ket_daily_cek'],
-                    'qty_celup' => $id['qty_celup'],
-                    'no_mesin' => $id['no_mesin'],
+                    'warna' => $id['warna'],
                     'lot_celup' => $id['lot_celup'],
-                    'lot_urut' => $id['lot_urut'],
                     'tgl_schedule' => $id['tanggal_schedule'],
                     'tgl_datang' => $id['tgl_datang'],
                     'no_surat_jalan' => $id['no_surat_jalan'],
+                    'keterangan' => $id['keterangan'],
+                    'ket_bon' => $id['ket_bon'],
                 ];
             }
         }
@@ -681,6 +683,7 @@ class CelupController extends BaseController
     public function updateBon()
     {
         $id_bon = $this->request->getPost('id_bon');
+        $statusBon = $this->bonCelupModel->select('status')->where('id_bon', $id_bon)->first();
 
         $dataBon = [
             'tgl_datang' => $this->request->getPost('tgl_datang'),
@@ -688,8 +691,17 @@ class CelupController extends BaseController
             'detail_sj' => $this->request->getPost('detail_sj'),
         ];
 
-        // Update data utama di bonCelupModel
-        $this->bonCelupModel->update($id_bon, $dataBon);
+        // Cek status bon
+        if ($statusBon && $statusBon['status'] === 'complain') {
+            // Update data bon dan status
+            $this->bonCelupModel->update($id_bon, $dataBon);
+
+            $this->bonCelupModel->set('status', 'sent_retur')
+                ->where('id_bon', $id_bon)
+                ->update();
+        } else {
+            $this->bonCelupModel->update($id_bon, $dataBon);
+        }
 
         // Update setiap karung
         $id_out_celup_list = $this->request->getPost('id_out_celup');
@@ -1144,9 +1156,10 @@ class CelupController extends BaseController
         return $this->response->setJSON($data);
     }
 
-    public function createRetur($idCelup)
+    public function createRetur($idBon)
     {
-        $schData = $this->scheduleCelupModel->find($idCelup);
+        // $schData = $this->scheduleCelupModel->find($idCelup);
+        $schData = $this->bonCelupModel->getScheduleBon($idBon);
         // $no_model = $this->scheduleCelupModel->getCelupDoneAndComplain();
         // dd($schData);
         $data = [
@@ -1164,6 +1177,7 @@ class CelupController extends BaseController
         $tglDatang = $data['tgl_datang'];
         list($d, $m, $y) = explode('-', $tglDatang);
         $tglDatang = $y . '-' . $m . '-' . $d;
+        $idBonOld = $data['id_bon_old'];
         // dd($data);
 
         $saveDataBon = [
@@ -1231,7 +1245,7 @@ class CelupController extends BaseController
 
         $this->outCelupModel->insertBatch($saveDataOutCelup);
 
-        $this->scheduleCelupModel->update($id_celup, ['last_status' => 'sent_retur']);
+        $this->bonCelupModel->update($idBonOld, ['status' => 'sent_retur']);
 
         return redirect()->to(base_url($this->role . '/outCelup'))->with('success', 'BON Berhasil Di Simpan.');
     }

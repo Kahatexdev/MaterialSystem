@@ -1415,8 +1415,10 @@ class ApiController extends ResourceController
         // Validasi input
         $idMaterial = $this->materialModel->getMaterialID($no_model, $style_size);
 
+        $materialIDs = array_column($idMaterial, 'id_material');
+
         if ($idMaterial) {
-            $updated = $this->materialModel->updateGwAktual($idMaterial, $gwAktual);
+            $updated = $this->materialModel->updateGwAktual($materialIDs, $gwAktual);
         }
 
         if ($updated) {

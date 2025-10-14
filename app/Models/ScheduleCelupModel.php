@@ -506,7 +506,7 @@ class ScheduleCelupModel extends Model
                 ->orLike('schedule_celup.kode_warna', $noModel)
                 ->groupEnd();
         }
-        return $builder->groupBy('schedule_celup.id_celup')
+        return $builder->groupBy('bon_celup.id_bon')
             ->groupBy('bon_celup.id_bon')
             ->findAll();
     }
