@@ -122,7 +122,15 @@
                     <label for="">Kode Warna</label>
                     <input type="text" class="form-control">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    <label for="">Delivery Dari</label>
+                    <input type="date" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label for="">Delivery Sampai</label>
+                    <input type="date" class="form-control">
+                </div>
+                <div class="col-md-2">
                     <label for="">Aksi</label><br>
                     <button class="btn btn-info btn-block" id="btnSearch"><i class="fas fa-search"></i></button>
                     <button class="btn btn-danger" id="btnReset"><i class="fas fa-redo-alt"></i></button>
@@ -210,9 +218,11 @@
         function loadData() {
             let modelCluster = $('input[type="text"]').eq(0).val().trim();
             let kodeWarna = $('input[type="text"]').eq(1).val().trim();
+            let deliveryAwal = $('input[type="date"]').eq(0).val().trim();
+            let deliveryAkhir = $('input[type="date"]').eq(1).val().trim();
             let jenis = "BENANG";
             // Validasi: Jika semua input kosong, tampilkan alert dan hentikan pencarian
-            if (modelCluster === '' && kodeWarna === '') {
+            if (modelCluster === '' && kodeWarna === '' && deliveryAwal === '' && deliveryAkhir === '') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
@@ -227,6 +237,8 @@
                 data: {
                     model_cluster: modelCluster,
                     kode_warna: kodeWarna,
+                    delivery_awal: deliveryAwal,
+                    delivery_akhir: deliveryAkhir,
                     jenis: jenis
                 },
                 dataType: "json",
@@ -320,15 +332,19 @@
         $('#btnExport').click(function() {
             let modelCluster = $('input[type="text"]').eq(0).val();
             let kodeWarna = $('input[type="text"]').eq(1).val();
+            let deliveryAwal = $('input[type="date"]').eq(0).val();
+            let deliveryAkhir = $('input[type="date"]').eq(1).val();
             let jenis = "BENANG";
-            window.location.href = "<?= base_url($role . '/warehouse/exportStockOrderBenang') ?>?jenis=" + jenis + "&model_cluster=" + modelCluster + "&kode_warna=" + kodeWarna;
+            window.location.href = "<?= base_url($role . '/warehouse/exportStockOrderBenang') ?>?jenis=" + jenis + "&model_cluster=" + modelCluster + "&kode_warna=" + kodeWarna + "&delivery_awal=" + deliveryAwal + "&delivery_akhir=" + deliveryAkhir;
         });
 
         $('#btnExportAll').click(function() {
             let modelCluster = $('input[type="text"]').eq(0).val();
             let kodeWarna = $('input[type="text"]').eq(1).val();
+            let deliveryAwal = $('input[type="date"]').eq(0).val();
+            let deliveryAkhir = $('input[type="date"]').eq(1).val();
             let jenis = "BENANG";
-            window.location.href = "<?= base_url($role . '/warehouse/exportStockOrderBenang') ?>?jenis=" + jenis + "&model_cluster=" + modelCluster + "&kode_warna=" + kodeWarna;
+            window.location.href = "<?= base_url($role . '/warehouse/exportStockOrderBenang') ?>?jenis=" + jenis + "&model_cluster=" + modelCluster + "&kode_warna=" + kodeWarna + "&delivery_awal=" + deliveryAwal + "&delivery_akhir=" + deliveryAkhir;
         });
 
         dataTable.clear().draw();
@@ -338,6 +354,7 @@
     $('#btnReset').click(function() {
         // Kosongkan input
         $('input[type="text"]').val('');
+        $('input[type="date"]').val('');
 
         // Kosongkan tabel hasil pencarian
         $('#dataTable tbody').html('');

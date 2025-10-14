@@ -15778,7 +15778,9 @@ class ExcelController extends BaseController
         $jenis = $this->request->getGet('jenis');
         $modelCluster = $this->request->getGet('model_cluster');
         $kodeWarna = $this->request->getGet('kode_warna');
-        $filteredData = $this->stockModel->searchStockOrder($jenis, $modelCluster, $kodeWarna);
+        $deliveryAwal = $this->request->getGet('delivery_awal');
+        $deliveryAkhir = $this->request->getGet('delivery_akhir');
+        $filteredData = $this->stockModel->searchStockOrder($jenis, $modelCluster, $kodeWarna, $deliveryAwal, $deliveryAkhir);
         // dd($filteredData);
         // Buat Spreadsheet
         $spreadsheet = new Spreadsheet();

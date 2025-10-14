@@ -649,7 +649,7 @@ class StockModel extends Model
             ->getRowArray();
     }
 
-    public function searchStockOrder($jenis, $modelCluster = null, $kodeWarna = null)
+    public function searchStockOrder($jenis, $modelCluster = null, $kodeWarna = null, $deliveryAwal = null, $deliveryAkhir = null)
     {
         $db = $this->db;
 
@@ -711,6 +711,16 @@ class StockModel extends Model
         // --- 5️⃣ Filter Kode Warna ---
         if (!empty($kodeWarna)) {
             $builder->where('st.kode_warna', $kodeWarna);
+        }
+
+        // --- 5️⃣ Filter Deliveri Dari ---
+        if (!empty($deliveryAwal)) {
+            $builder->where('mo.delivery_akhir >=', $deliveryAwal);
+        }
+
+        // --- 5️⃣ Filter Deliveri Sampai ---
+        if (!empty($deliveryAkhir)) {
+            $builder->where('mo.delivery_akhir <=', $deliveryAkhir);
         }
 
         // --- 6️⃣ Group by final (jika mau tetap per nama_cluster dan model) ---
