@@ -2743,7 +2743,7 @@ class PemesananController extends BaseController
                 'kgs_retur'          => null,
                 'cns_retur'          => null,
                 'lot_retur'          => null,
-                'ket_gbn'            => null,
+                'ket_gbn'            => $pemesanan['keterangan_gbn'],
             ];
             $kebutuhanDipakai[$key] = true;
         }
