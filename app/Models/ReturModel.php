@@ -238,8 +238,8 @@ class ReturModel extends Model
                 'm.item_type = retur.item_type AND m.kode_warna = retur.kode_warna',
                 'left'
             )
-            ->where('retur.waktu_acc_retur IS NOT NULL')
-            ->like('retur.keterangan_gbn', 'Approve:')
+            // ->where('retur.waktu_acc_retur IS NOT NULL')
+            // ->like('retur.keterangan_gbn', 'Approve:')
             ->groupBy('retur.no_model, retur.item_type, retur.kode_warna, retur.kategori');
 
         // Filter opsional
@@ -262,6 +262,11 @@ class ReturModel extends Model
                 $this->where('retur.tgl_retur <=', $tanggal_akhir);
             }
             $this->groupEnd();
+        }
+
+        if (session()->get('role') !== 'monitoring') {
+            $this->where('retur.waktu_acc_retur IS NOT NULL')
+                ->like('retur.keterangan_gbn', 'Approve:');
         }
 
         return $this->findAll();
