@@ -805,7 +805,18 @@ class MasterOrderModel extends Model
             AND s.kode_warna = material.kode_warna
             AND s.item_type = material.item_type
             LIMIT 1
-        ) AS admin_pindah
+        ) AS admin_pindah,
+
+         -- retur pb gudang benang
+        (
+            SELECT SUM(COALESCE(hs.kgs, 0))
+            FROM history_stock hs
+            LEFT JOIN out_celup oc ON hs.id_out_celup = oc.id_out_celup
+            LEFT JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+            WHERE oc.no_model = master_order.no_model
+            AND sc.kode_warna = material.kode_warna
+            AND sc.item_type = material.item_type
+        ) AS retur_celup,
     ")
             ->join('material', 'material.id_order = master_order.id_order', 'left')
             ->join('master_material', 'material.item_type = master_material.item_type', 'left')
@@ -933,7 +944,7 @@ class MasterOrderModel extends Model
 
     public function getFilterKebutuhanBahanBaku($jenis = null, $tanggal_awal = null, $tanggal_akhir = null)
     {
-        $builder = $this->select('material.item_type, SUM(material.kgs) AS total_kebutuhan')
+        $builder = $this->select('material.item_type, SUM(material.kgs) AS total_kebutuhan, material.color')
             ->join('material', 'material.id_order = master_order.id_order', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->where('material.item_type IS NOT NULL')
@@ -958,7 +969,7 @@ class MasterOrderModel extends Model
 
         if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
             $builder->where('master_order.delivery_awal >=', $tanggal_awal)
-                ->where('master_order.delivery_akhir <=', $tanggal_akhir);
+                ->where('master_order.delivery_awal <=', $tanggal_akhir);
         }
 
         return $builder->findAll();

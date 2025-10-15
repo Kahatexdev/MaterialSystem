@@ -159,11 +159,11 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty Kg</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty Cns</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty Krg</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Lot Stock</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
                         </tr>
                     </thead>
                     <tbody>
