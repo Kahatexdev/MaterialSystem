@@ -237,7 +237,8 @@ class MaterialModel extends Model
             material.loss, 
             SUM(material.kgs) AS ttl_kebutuhan
         ')
-            ->join('master_order', 'master_order.id_order = material.id_order');
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('material.gw >', 0);
 
         // Tambahkan filter untuk no_model jika ada
         if (!empty($no_model)) {
