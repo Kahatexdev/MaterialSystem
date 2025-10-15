@@ -1494,7 +1494,7 @@ class ApiController extends ResourceController
     {
         $key = $this->request->getGet('key');
 
-        $data = $this->openPoModel->getFilterPoBenang($key);
+        $data = $this->materialModel->getFilterPoBenang($key);
 
         return $this->response->setJSON($data);
     }
