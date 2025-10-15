@@ -272,6 +272,7 @@
                             const returTitip = Number(item.retur_titip) || 0;
                             const dipinjam = Number(item.dipinjam) || 0;
                             const pindahOrder = Number(item.pindah_order) || 0;
+                            const returCelup = Number(item.retur_celup) || 0;
 
                             // perhitungan
                             const tagihanGbn = kgs - (datangSolid + plusDatangSolid + kgsStockAwal);
@@ -297,7 +298,7 @@
                                 fmt(gantiRetur), // ganti retur
                                 fmt(datangLurex), // datang lurex
                                 fmt(plusDatangLurex), // (+) datang lurex
-                                fmt(returPbGbn), // retur pb gbn
+                                fmt(returCelup), // retur pb gbn
                                 fmt(returPbArea), // retur pb area
                                 fmt(pakaiArea), // pakai area 
                                 fmt(kgsOtherOut), // pakai lain-lain
