@@ -65,11 +65,12 @@ class PengeluaranModel extends Model
     public function getDataForOut($id)
     {
         return $this->db->table('pengeluaran')
-            ->select('pengeluaran.*, out_celup.lot_kirim, schedule_celup.no_model, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.item_type')
+            ->select('pengeluaran.*, out_celup.lot_kirim, out_celup.no_model, stock.kode_warna, stock.warna, stock.item_type')
             ->join('out_celup', 'out_celup.id_out_celup = pengeluaran.id_out_celup')
-            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup')
+            ->join('stock', 'stock.id_stock = pengeluaran.id_stock')
             ->where('pengeluaran.id_out_celup', $id)
-            ->distinct()
+            ->where('pengeluaran.status', 'Pengeluaran Jalur')
+            ->groupBy('pengeluaran.id_pengeluaran')
             ->get()
             ->getResultArray();
     }

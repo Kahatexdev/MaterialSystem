@@ -186,6 +186,14 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <div class="form-group">
+                                                                    <label for=""> Keterangan Gbn</label>
+                                                                    <textarea class="form-control keterangan" name="keterangan_gbn[]" placeholder="Keterangan GBN" readonly><?= $data['keterangan_gbn'] ?></textarea>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                         <div class="form-group d-flex justify-content-end">
                                                             <button type="button" class="btn btn-danger removeRow btn-hapus" data-id="<?= $data['id_out_celup'] ?>">
                                                                 <i class="fas fa-trash"></i>
@@ -246,42 +254,42 @@
         $(document).ready(function() {
             // Event listener untuk tombol "Hapus"
             $('button.btn-hapus').on('click', function() {
-            var id = $(this).data('id'); // Ambil ID yang ingin dihapus
-            var row = $(this).closest('tr'); // Ambil baris tabel yang akan dihapus
+                var id = $(this).data('id'); // Ambil ID yang ingin dihapus
+                var row = $(this).closest('tr'); // Ambil baris tabel yang akan dihapus
 
-            // Tampilkan alert konfirmasi menggunakan Swal
-            Swal.fire({
-                title: 'Apakah Anda yakin?',
-                text: "Data yang dihapus tidak dapat dikembalikan!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                // Kirim ID ke controller untuk dihapus dari session
-                $.post("<?= base_url($role . '/hapus_pengiriman') ?>", {
-                    id: id
-                }, function(response) {
-                    if (response.success) {
-                    row.remove(); // Hapus baris dari tabel
-                    Swal.fire(
-                        'Terhapus!',
-                        'Data berhasil dihapus.',
-                        'success'
-                    );
-                    } else {
-                    Swal.fire(
-                        'Gagal!',
-                        'Terjadi kesalahan saat menghapus data.',
-                        'error'
-                    );
+                // Tampilkan alert konfirmasi menggunakan Swal
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Kirim ID ke controller untuk dihapus dari session
+                        $.post("<?= base_url($role . '/hapus_pengiriman') ?>", {
+                            id: id
+                        }, function(response) {
+                            if (response.success) {
+                                row.remove(); // Hapus baris dari tabel
+                                Swal.fire(
+                                    'Terhapus!',
+                                    'Data berhasil dihapus.',
+                                    'success'
+                                );
+                            } else {
+                                Swal.fire(
+                                    'Gagal!',
+                                    'Terjadi kesalahan saat menghapus data.',
+                                    'error'
+                                );
+                            }
+                        }, 'json');
                     }
-                }, 'json');
-                }
-            });
+                });
             });
         });
 
