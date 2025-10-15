@@ -170,6 +170,14 @@ class ReturController extends BaseController
     {
         $post = $this->request->getPost();
         $data = $this->returModel->find($post['id_retur']);
+        $query = http_build_query([
+            'jenis' => $post['jenis'] ?? '',
+            'area' => $post['area'] ?? '',
+            'tgl_retur' => $post['tgl_retur'] ?? '',
+            'no_model' => $post['no_model'] ?? '',
+            'kode_warna' => $post['kode_warna'] ?? ''
+        ]);
+        $url = base_url(session()->get('role') . '/retur' . (!empty($query) ? '?' . $query : ''));
 
         $no_model   = $data['no_model'] ?? null;
         $item_type  = $data['item_type'] ?? null;
@@ -248,7 +256,9 @@ class ReturController extends BaseController
         }
 
         session()->setFlashdata('success', 'Data berhasil di approve ' . count($rows));
-        return redirect()->to(base_url(session()->get('role') . '/retur'));
+        // return redirect()->to(base_url(session()->get('role') . '/retur'));
+
+        return redirect()->to($url);
     }
 
     public function reject()
@@ -259,6 +269,14 @@ class ReturController extends BaseController
 
         // ambil baris referensi
         $data = $this->returModel->find($post['id_retur']);
+        $query = http_build_query([
+            'jenis' => $post['jenis'] ?? '',
+            'area' => $post['area'] ?? '',
+            'tgl_retur' => $post['tgl_retur'] ?? '',
+            'no_model' => $post['no_model'] ?? '',
+            'kode_warna' => $post['kode_warna'] ?? ''
+        ]);
+        $url = base_url(session()->get('role') . '/retur' . (!empty($query) ? '?' . $query : ''));
 
         // ambil key grup dari baris referensi
         $no_model   = $data['no_model'] ?? null;
@@ -309,9 +327,9 @@ class ReturController extends BaseController
         }
 
         session()->setFlashdata('success', 'Data Berhasil Di Reject');
-        return redirect()->to(base_url(session()->get('role') . '/retur'));
+        // return redirect()->to(base_url(session()->get('role') . '/retur'));
+        return redirect()->to($url);
     }
-
 
     public function returArea()
     {
@@ -409,9 +427,10 @@ class ReturController extends BaseController
         ];
         return view($this->role . '/retur/retur-sample', $data);
     }
-    public function getItemTypeForReturSample($idOrder)
+    public function getItemTypeForReturSample()
     {
         $db = \Config\Database::connect();
+        $idOrder = $this->request->getGet('id_order'); // ambil dari query string
 
         if (!$idOrder) {
             return $this->response->setJSON([

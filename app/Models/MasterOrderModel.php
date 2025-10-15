@@ -805,7 +805,18 @@ class MasterOrderModel extends Model
             AND s.kode_warna = material.kode_warna
             AND s.item_type = material.item_type
             LIMIT 1
-        ) AS admin_pindah
+        ) AS admin_pindah,
+
+         -- retur pb gudang benang
+        (
+            SELECT SUM(COALESCE(hs.kgs, 0))
+            FROM history_stock hs
+            LEFT JOIN out_celup oc ON hs.id_out_celup = oc.id_out_celup
+            LEFT JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+            WHERE oc.no_model = master_order.no_model
+            AND sc.kode_warna = material.kode_warna
+            AND sc.item_type = material.item_type
+        ) AS retur_celup,
     ")
             ->join('material', 'material.id_order = master_order.id_order', 'left')
             ->join('master_material', 'material.item_type = master_material.item_type', 'left')
