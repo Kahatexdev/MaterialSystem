@@ -427,9 +427,10 @@ class ReturController extends BaseController
         ];
         return view($this->role . '/retur/retur-sample', $data);
     }
-    public function getItemTypeForReturSample($idOrder)
+    public function getItemTypeForReturSample()
     {
         $db = \Config\Database::connect();
+        $idOrder = $this->request->getGet('id_order'); // ambil dari query string
 
         if (!$idOrder) {
             return $this->response->setJSON([

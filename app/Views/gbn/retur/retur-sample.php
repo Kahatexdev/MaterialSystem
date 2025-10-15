@@ -55,13 +55,7 @@
                                         <div class="row g-3">
                                             <div class="col-md-4">
                                                 <label>No Model</label>
-                                                <input class="form-control" list="noModelOptions" id="no_model_input" placeholder="Ketik / pilih No Model" required>
-                                                <datalist id="noModelOptions">
-                                                    <!-- <?php foreach ($no_model as $item) : ?>
-                                                        <option data-id="<?= $item['id_order'] ?>" value="<?= $item['no_model'] ?>"></option>
-                                                        <?php endforeach; ?> -->
-                                                    <option data-id="2911" value="SAMPLE"></option>
-                                                </datalist>
+                                                <input type="text" class="form-control" id="no_model_input" value="SAMPLE" readonly>
                                                 <input type="hidden" name="id_order" id="id_order">
                                                 <input type="hidden" name="no_model" id="no_model">
                                             </div>
@@ -501,48 +495,41 @@
             syncInputToHidden('#kode_warna_input', '#kode_warna', '#kodeWarnaOptions');
             syncInputToHidden('#warna_input', '#warna', '#warnaOptions');
 
-            $('#no_model_input').on('input', function() {
-                const val = $(this).val();
-                $('#no_model').val(val);
 
-                let id_order = null;
-                $('#noModelOptions option').each(function() {
-                    if ($(this).val() === val) id_order = $(this).data('id');
-                });
-                $('#id_order').val(id_order || '');
+            $('#id_order').val('2911');
+            $('#no_model').val('SAMPLE');
 
-                if (!id_order) {
-                    $('#itemTypeOptions, #kodeWarnaOptions, #warnaOptions').empty();
+            let id_order = $('#id_order').val();
+            let urlFinal = "<?= base_url($role . '/retur/getItemTypeForReturSample/') ?>" + encodeURIComponent(id_order);
+            console.log("URL FINAL:", urlFinal);
+
+            $.ajax({
+                url: "<?= base_url($role . '/retur/getItemTypeForReturSample/') ?>",
+                type: 'GET',
+                data: {
+                    id_order: id_order
+                },
+                dataType: 'json',
+                success: function(data) {
+                    const $dl = $('#itemTypeOptions').empty();
+
+                    if (data.orderItemTypes?.length) {
+                        data.orderItemTypes.forEach(item => {
+                            $dl.append('<option value="' + item.item_type + '">');
+                        });
+                    }
+
+                    if (data.masterItemTypes?.length) {
+                        data.masterItemTypes.forEach(item => {
+                            $dl.append('<option value="' + item.item_type + '">');
+                        });
+                    }
+
+                    // reset input
                     $('#item_type_input, #kode_warna_input, #warna_input').val('');
                     $('#item_type, #kode_warna, #warna').val('');
-                    return;
+                    $('#kodeWarnaOptions, #warnaOptions').empty();
                 }
-
-                $.ajax({
-                    url: "<?= base_url($role . '/retur/getItemTypeForReturSample/') ?>" + id_order,
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(data) {
-                        const $dl = $('#itemTypeOptions').empty();
-
-                        if (data.orderItemTypes?.length) {
-                            data.orderItemTypes.forEach(item => {
-                                $dl.append('<option value="' + item.item_type + '">');
-                            });
-                        }
-
-                        if (data.masterItemTypes?.length) {
-                            data.masterItemTypes.forEach(item => {
-                                $dl.append('<option value="' + item.item_type + '">');
-                            });
-                        }
-
-                        // reset input
-                        $('#item_type_input, #kode_warna_input, #warna_input').val('');
-                        $('#item_type, #kode_warna, #warna').val('');
-                        $('#kodeWarnaOptions, #warnaOptions').empty();
-                    }
-                });
             });
 
             $('#item_type_input').on('input', function() {
