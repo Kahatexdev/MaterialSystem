@@ -310,6 +310,7 @@
                             const stockAkhir = Number(item.stock_akhir) || 0;
                             const kgsOtherOut = Number(item.kgs_other_out) || 0;
                             const loss = Number(item.loss) || 0;
+                            const returCelup = Number(item.retur_celup) || 0;
 
                             // perhitungan
                             const tagihanGbn = kgs - (datangSolid + plusDatangSolid + kgsStockAwal);
@@ -334,7 +335,7 @@
                                 fmt(gantiRetur), // ganti retur
                                 fmt(datangLurex), // datang lurex
                                 fmt(plusDatangLurex), // (+) datang lurex
-                                fmt(returPbGbn), // retur pb gbn
+                                fmt(returCelup), // retur celup
                                 fmt(returPbArea), // retur pb area
                                 fmt(pakaiArea), // pakai area 
                                 fmt(kgsOtherOut), // pakai lain-lain
