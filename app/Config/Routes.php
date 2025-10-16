@@ -87,6 +87,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('getPoDetails/(:num)', 'MaterialController::getPoDetails/$1');
     $routes->delete('deletePo/(:num)', 'MaterialController::deletePo/$1');
     $routes->post('splitMaterial', 'MaterialController::splitMaterial');
+    $routes->post('materialTypeEdit', 'MaterialController::materialTypeEdit');
 
     $routes->post('import/mu', 'MasterdataController::importMU');
     $routes->post('revise/mu', 'MasterdataController::reviseMU');

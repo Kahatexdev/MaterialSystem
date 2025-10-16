@@ -428,4 +428,43 @@ class MaterialController extends BaseController
 
         return redirect()->back()->with('error', 'Permintaan tidak valid.');
     }
+
+    public function materialTypeEdit()
+    {
+        $id_order = $this->request->getPost('id_order');
+        $item_type = $this->request->getPost('item_type');
+        $material_type = $this->request->getPost('material_type');
+
+        // Pecah item_type yang dikirim dari select
+        // Misal value = "Nylon | K01 | Blue"
+        $parts = explode('|', $item_type);
+        $itemType = trim($parts[0] ?? '');
+        $kodeWarna = trim($parts[1] ?? '');
+        $color = trim($parts[2] ?? '');
+
+        // Validasi data
+        if (empty($itemType) || empty($kodeWarna) || empty($color) || empty($material_type)) {
+            return redirect()->back()->with('error', 'Semua field harus diisi.');
+        }
+
+        // Data yang akan diupdate
+        $data = [
+            'material_type' => $material_type,
+        ];
+
+        // Update semua baris berdasarkan group (item_type, kode_warna, color)
+        $update = $this->materialModel
+            ->where('item_type', $itemType)
+            ->where('kode_warna', $kodeWarna)
+            ->where('color', $color)
+            ->where('id_order', $id_order)
+            ->set($data)
+            ->update();
+
+        if ($update) {
+            return redirect()->back()->with('success', 'Material Type berhasil diperbarui untuk group tersebut.');
+        } else {
+            return redirect()->back()->with('error', 'Gagal memperbarui Material Type.');
+        }
+    }
 }

@@ -387,8 +387,8 @@
                 { // Pakai
                     data: null,
                     render: d => {
-                        let val = (d.kgs_out_spandex_karet !== undefined && d.kgs_out_spandex_karet !== null && d.kgs_out_spandex_karet !== '' && parseFloat(d.kgs_out_spandex_karet) !== 0) ?
-                            parseFloat(d.kgs_out_spandex_karet) :
+                        let val = (d.kgs_out !== undefined && d.kgs_out !== null && d.kgs_out !== '' && parseFloat(d.kgs_out) !== 0) ?
+                            parseFloat(d.kgs_out) :
                             (parseFloat(d.kgs_other_out) || 0);
                         return (val || 0).toFixed(2);
                     }
@@ -412,8 +412,8 @@
                         const poPlus = parseFloat(d.kg_po_plus) || 0;
                         const retur = parseFloat(d.kgs_retur) || 0;
 
-                        const pakai = (d.kgs_out_spandex_karet !== undefined && d.kgs_out_spandex_karet !== null && d.kgs_out_spandex_karet !== '' && parseFloat(d.kgs_out_spandex_karet) !== 0) ?
-                            parseFloat(d.kgs_out_spandex_karet) :
+                        const pakai = (d.kgs_out !== undefined && d.kgs_out !== null && d.kgs_out !== '' && parseFloat(d.kgs_out) !== 0) ?
+                            parseFloat(d.kgs_out) :
                             (parseFloat(d.kgs_other_out) || 0);
                         const pakaiPlus = parseFloat(d.kgs_out_plus) || 0;
 

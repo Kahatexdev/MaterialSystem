@@ -13,11 +13,11 @@ use App\Models\MaterialModel;
 use App\Models\MasterMaterialModel;
 use App\Models\OpenPoModel;
 use App\Models\EstimasiStokModel;
+use App\Models\MasterMaterialTypeModel;
 use App\Models\StockModel;
 use App\Models\TrackingPoCovering;
 use App\Models\PoTambahanModel;
 use App\Models\ScheduleCelupModel;
-
 
 class MasterdataController extends BaseController
 {
@@ -34,6 +34,8 @@ class MasterdataController extends BaseController
     protected $trackingPoCoveringModel;
     protected $poTambahanModel;
     protected $scheduleCelupModel;
+    protected $masterMaterialTypeModel;
+
     public function __construct()
     {
         $this->masterOrderModel = new MasterOrderModel();
@@ -45,6 +47,7 @@ class MasterdataController extends BaseController
         $this->trackingPoCoveringModel = new TrackingPoCovering();
         $this->poTambahanModel = new PoTambahanModel();
         $this->scheduleCelupModel = new ScheduleCelupModel();
+        $this->masterMaterialTypeModel = new MasterMaterialTypeModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -887,6 +890,9 @@ class MasterdataController extends BaseController
         $itemType = $this->masterMaterialModel->getItemType();
         $orderData = $this->materialModel->getMaterial($id_order);
         $totalKebutuhan = $this->materialModel->getTotalKebutuhan($id_order);
+        $itemTypeByIdOrder = $this->materialModel->getItemTypeByIdOrder($id_order);
+        $materialtype = $this->masterMaterialTypeModel->getMaterialType();
+
         if ($totalKebutuhan) {
             foreach ($totalKebutuhan as &$keb) { // ← Pake referensi &
                 $tgl = $this->scheduleCelupModel->cekSch($model, $keb) ?? '-';
@@ -908,6 +914,7 @@ class MasterdataController extends BaseController
         if (!$orderData) {
             return redirect()->to(base_url($this->role . '/masterOrder'))->with('error', 'Data Order tidak ditemukan.');
         }
+        // dd($orderData);
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
@@ -918,7 +925,9 @@ class MasterdataController extends BaseController
             'itemType' => $itemType,
             'area' => $areaData,
             'style' => $styleSize,
-            'kebutuhan' => $totalKebutuhan
+            'kebutuhan' => $totalKebutuhan,
+            'itemTypeByIdOrder' => $itemTypeByIdOrder,
+            'materialtype' => $materialtype
         ];
 
         return view($this->role . '/mastermaterial/detailMaterial', $data);

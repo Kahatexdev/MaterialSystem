@@ -1380,6 +1380,8 @@ class PemesananController extends BaseController
         $cnsOuts = $this->request->getPost('cns_kirim');
         $namaClusters = $this->request->getPost('nama_cluster');
         $lotKirims = $this->request->getPost('lot_kirim');
+        $noKarung = $this->request->getPost('no_karung');
+
         // dd ($checkedIds,$idOutCelup, $itemTypes, $kodeWarnas, $tglOuts, $kgsOuts, $cnsOuts, $namaClusters, $lotKirims, $area, $idPengeluaran);
         // Pastikan data tidak kosong
         if (empty($idOutCelup) || !is_array($idOutCelup)) {
@@ -1401,6 +1403,7 @@ class PemesananController extends BaseController
                 'krg_out' => 1, // Asumsikan setiap pemasukan hanya 1 kali
                 'lot_out' => $lotKirims[$key] ?? null,
                 'nama_cluster' => $namaClusters[$key] ?? null,
+                'no_karung' => $noKarung[$key] ?? null,
                 'admin' => session()->get('username')
             ];
         }
