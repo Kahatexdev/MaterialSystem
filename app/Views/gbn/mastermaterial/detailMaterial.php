@@ -55,6 +55,9 @@
                     <button id="btn-delete-selected" class="btn btn-danger me-2">
                         <i class="fas fa-trash"></i> Hapus Terpilih
                     </button>
+                    <button type="button" class="btn btn-outline-info me-2" data-bs-toggle="modal" data-bs-target="#materialTypeModal">
+                        <i class="fas fa-edit me-2"></i>Material Type
+                    </button>
                     <button type="button" class="btn btn-outline-info me-2" data-bs-toggle="modal" data-bs-target="#ubahAreaModal">
                         <i class="ni ni-building me-2"></i>Ubah Area
                     </button>
@@ -92,6 +95,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty(pcs)</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Loss</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Material Type</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                         </tr>
@@ -113,6 +117,7 @@
                                 <td><?= ($data['qty_pcs'] == 1) ? '-' : $data['qty_pcs'] ?></td>
                                 <td><?= ($data['loss'] == 1) ? '-' : $data['loss'] ?></td>
                                 <td><?= $data['kgs'] ?></td>
+                                <td><?= $data['material_type'] ?></td>
                                 <td><?= $data['keterangan'] ?></td>
                                 <td class="d-flex justify-content-start align-items-center gap-1">
                                     <button class="btn btn-warning btn-xs btn-edit" data-id="<?= $data['id_material'] ?>">
@@ -599,6 +604,50 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Edit Material Type -->
+    <div class="modal fade" id="materialTypeModal" tabindex="-1" aria-labelledby="materialTypeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="materialTypeModalLabel">Edit Material Type</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="<?= base_url($role . '/materialTypeEdit') ?>" method="post" id="form-material-type">
+                        <input type="hidden" name="id_order" value="<?= $id_order ?>">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="itemType">Item Type</label>
+                                <select class="" id="itemTypeByIdOrder" name="item_type">
+                                    <option value="">Pilih Item Type</option>
+                                    <?php foreach ($itemTypeByIdOrder as $item): ?>
+                                        <option value="<?= $item['item_type'] ?>|<?= $item['kode_warna'] ?>|<?= $item['color'] ?>">
+                                            <?= $item['item_type'] ?> | <?= $item['kode_warna'] ?> | <?= $item['color'] ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="material_type" class="form-label">Material Type</label>
+                                <select name="material_type" id="materialTypeByIdOrder" class="form-select">
+                                    <option value="">Pilih Material Type</option>
+                                    <?php foreach ($materialtype as $material): ?>
+                                        <option value="<?= $material['material_type'] ?>"><?= $material['material_type'] ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-info">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -607,6 +656,14 @@
         $('#tambahModal').on('shown.bs.modal', function() {
             $('#add_item_type').select2({
                 dropdownParent: $('#tambahModal'),
+                width: '100%',
+            });
+        });
+    });
+    $(document).ready(function() {
+        $('#materialTypeModal').on('shown.bs.modal', function() {
+            $('#itemTypeByIdOrder').select2({
+                dropdownParent: $('#materialTypeModal'),
                 width: '100%',
             });
         });

@@ -55,6 +55,7 @@
                             <th rowspan="2" class="text-center text-uppercase">Item Type</th>
                             <th rowspan="2" class="text-center text-uppercase">Warna</th>
                             <th rowspan="2" class="text-center text-uppercase">Kode Warna</th>
+                            <th rowspan="2" class="text-center text-uppercase">Material Type</th>
                             <th colspan="2" class="text-center text-uppercase">Stock Awal</th>
                             <th colspan="2" class="text-center text-uppercase">Pesan</th>
                             <th colspan="4" class="text-center text-uppercase">PO Tambahan Gbn</th>
@@ -149,6 +150,7 @@
                                 item.item_type,
                                 item.color,
                                 item.kode_warna,
+                                item.material_type,
                                 parseFloat(item.kgs_stock || 0).toFixed(2),
                                 item.lot_stock || '',
                                 parseFloat(item.kg_po).toFixed(2) || '',

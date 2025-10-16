@@ -12,7 +12,7 @@ class MaterialModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id_material', 'id_order', 'style_size', 'area', 'inisial', 'color', 'item_type', 'kode_warna', 'composition', 'gw', 'gw_aktual', 'qty_pcs', 'loss', 'kgs', 'keterangan', 'admin', 'created_at', 'updated_at', 'deleted_at'];
+    protected $allowedFields    = ['id_material', 'id_order', 'style_size', 'area', 'inisial', 'color', 'item_type', 'kode_warna', 'composition', 'gw', 'gw_aktual', 'qty_pcs', 'loss', 'kgs', 'keterangan', 'material_type', 'admin', 'created_at', 'updated_at', 'deleted_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -871,10 +871,12 @@ class MaterialModel extends Model
             (
                 SELECT SUM(COALESCE(p.kgs_out, 0))
                 FROM pengeluaran p
-                JOIN stock s2 ON s2.id_stock = p.id_stock
-                WHERE s2.no_model = mo.no_model
-                AND s2.item_type = m.item_type
-                AND s2.kode_warna = m.kode_warna
+                JOIN pemesanan pem ON pem.id_total_pemesanan = p.id_total_pemesanan
+                JOIN material mat ON mat.id_material = pem.id_material
+                JOIN master_order mo2 ON mo2.id_order = mat.id_order
+                WHERE mo2.no_model = mo.no_model
+                AND mat.item_type = m.item_type
+                AND mat.kode_warna = m.kode_warna
             ) AS kgs_out,
 
             -- pengeluaran (pakai (+) benang & nylon)
@@ -1136,6 +1138,7 @@ class MaterialModel extends Model
             material.kode_warna,
             material.color,
             material.loss,
+            material.material_type,
             SUM(material.kgs) AS kg_po,
             material.created_at AS tgl_input,
             material.admin,
@@ -1221,6 +1224,14 @@ class MaterialModel extends Model
 
         return $builder
             ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color')
+            ->findAll();
+    }
+
+    public function getItemTypeByIdOrder($idOrder)
+    {
+        return $this->select('item_type, kode_warna, color')
+            ->where('id_order', $idOrder)
+            ->groupBy('item_type, kode_warna, color')
             ->findAll();
     }
 }

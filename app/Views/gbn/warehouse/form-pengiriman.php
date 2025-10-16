@@ -130,13 +130,19 @@
                                                             <input type="text" class="form-control" name="idPengeluaran[]" value="<?= $data['id_pengeluaran'] ?>" hidden>
                                                         </div>
                                                         <div class="row">
-                                                            <div class="col-6">
+                                                            <div class="col-4">
+                                                                <div class="form-group">
+                                                                    <label for="tgl">No Karung : </label>
+                                                                    <input type="text" class="form-control" name="no_karung[]" value="<?= $data['no_karung'] ?>" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-4">
                                                                 <div class="form-group">
                                                                     <label for="tgl">Model : </label>
                                                                     <input type="text" class="form-control" name="no_model[]" value="<?= $data['no_model'] ?>" readonly>
                                                                 </div>
                                                             </div>
-                                                            <div class="col-6">
+                                                            <div class="col-4">
                                                                 <div class="form-group">
                                                                     <label for="tgl">Area : </label>
                                                                     <input type="text" class="form-control" name="area[]" value="<?= $data['area_out'] ?>" readonly>
@@ -183,6 +189,14 @@
                                                                 <div class="form-group">
                                                                     <label for="">Cones Kirim:</label>
                                                                     <input type="number" class="form-control" name="cns_kirim[]" value="<?= $data['cns_out'] ?>" readonly>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <div class="form-group">
+                                                                    <label for=""> Keterangan Gbn</label>
+                                                                    <textarea class="form-control keterangan" name="keterangan_gbn[]" placeholder="Keterangan GBN" readonly><?= $data['keterangan_gbn'] ?></textarea>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -246,42 +260,42 @@
         $(document).ready(function() {
             // Event listener untuk tombol "Hapus"
             $('button.btn-hapus').on('click', function() {
-            var id = $(this).data('id'); // Ambil ID yang ingin dihapus
-            var row = $(this).closest('tr'); // Ambil baris tabel yang akan dihapus
+                var id = $(this).data('id'); // Ambil ID yang ingin dihapus
+                var row = $(this).closest('tr'); // Ambil baris tabel yang akan dihapus
 
-            // Tampilkan alert konfirmasi menggunakan Swal
-            Swal.fire({
-                title: 'Apakah Anda yakin?',
-                text: "Data yang dihapus tidak dapat dikembalikan!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                // Kirim ID ke controller untuk dihapus dari session
-                $.post("<?= base_url($role . '/hapus_pengiriman') ?>", {
-                    id: id
-                }, function(response) {
-                    if (response.success) {
-                    row.remove(); // Hapus baris dari tabel
-                    Swal.fire(
-                        'Terhapus!',
-                        'Data berhasil dihapus.',
-                        'success'
-                    );
-                    } else {
-                    Swal.fire(
-                        'Gagal!',
-                        'Terjadi kesalahan saat menghapus data.',
-                        'error'
-                    );
+                // Tampilkan alert konfirmasi menggunakan Swal
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Kirim ID ke controller untuk dihapus dari session
+                        $.post("<?= base_url($role . '/hapus_pengiriman') ?>", {
+                            id: id
+                        }, function(response) {
+                            if (response.success) {
+                                row.remove(); // Hapus baris dari tabel
+                                Swal.fire(
+                                    'Terhapus!',
+                                    'Data berhasil dihapus.',
+                                    'success'
+                                );
+                            } else {
+                                Swal.fire(
+                                    'Gagal!',
+                                    'Terjadi kesalahan saat menghapus data.',
+                                    'error'
+                                );
+                            }
+                        }, 'json');
                     }
-                }, 'json');
-                }
-            });
+                });
             });
         });
 

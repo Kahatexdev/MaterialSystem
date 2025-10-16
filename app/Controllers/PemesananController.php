@@ -227,29 +227,49 @@ class PemesananController extends BaseController
         $existingData = session()->get('dataPengiriman') ?? [];
 
         if (!empty($id)) {
-
-            // Cek apakah barcode sudah ada di data yang tersimpan
-            foreach ($existingData as $item) {
-                if ($item['id_out_celup'] == $id) {
-                    session()->setFlashdata('error', 'Barcode sudah ada di tabel!');
-                    return redirect()->to(base_url($this->role . '/pengiriman_area'));
-                }
-            }
-
             // Ambil data dari database berdasarkan barcode yang dimasukkan
             $outJalur = $this->pengeluaranModel->getDataForOut($id);
 
             if (empty($outJalur)) {
                 session()->setFlashdata('error', 'Barcode tidak ditemukan di database!');
                 return redirect()->to(base_url($this->role . '/pengiriman_area'));
-            } else {
-                // Tambahkan data baru ke dalam array
-                $existingData = array_merge($existingData, $outJalur);
             }
 
-            // Simpan kembali ke session
-            session()->set('dataPengiriman', $existingData);
-            session()->set('pengirimanForm', $formData);
+            // Siapkan array baru untuk data yang belum ada
+            $newItems = [];
+
+            // Loop hasil query (bisa lebih dari 1 baris)
+            foreach ($outJalur as $newItem) {
+                $duplicate = false;
+
+                // Cek apakah sudah ada di session
+                foreach ($existingData as $item) {
+                    if (
+                        $item['id_out_celup'] == $newItem['id_out_celup'] &&
+                        $item['id_pengeluaran'] == $newItem['id_pengeluaran']
+                    ) {
+                        $duplicate = true;
+                        break;
+                    }
+                }
+
+                // Kalau tidak duplikat → simpan ke array baru
+                if (!$duplicate) {
+                    $newItems[] = $newItem;
+                }
+            }
+
+            // Kalau ada data baru, tambahkan ke session
+            if (!empty($newItems)) {
+                $existingData = array_merge($existingData, $newItems);
+                session()->set('dataPengiriman', $existingData);
+                session()->set('pengirimanForm', $formData);
+                session()->setFlashdata('success', 'Data baru berhasil ditambahkan.');
+            } else {
+                // Semua data sudah ada
+                session()->setFlashdata('error', 'Semua data barcode sudah ada di tabel!');
+            }
+
 
             // Redirect agar form tidak resubmit saat refresh
             return redirect()->to(base_url($this->role . '/pengiriman_area'));
@@ -1380,6 +1400,8 @@ class PemesananController extends BaseController
         $cnsOuts = $this->request->getPost('cns_kirim');
         $namaClusters = $this->request->getPost('nama_cluster');
         $lotKirims = $this->request->getPost('lot_kirim');
+        $noKarung = $this->request->getPost('no_karung');
+
         // dd ($checkedIds,$idOutCelup, $itemTypes, $kodeWarnas, $tglOuts, $kgsOuts, $cnsOuts, $namaClusters, $lotKirims, $area, $idPengeluaran);
         // Pastikan data tidak kosong
         if (empty($idOutCelup) || !is_array($idOutCelup)) {
@@ -1401,6 +1423,7 @@ class PemesananController extends BaseController
                 'krg_out' => 1, // Asumsikan setiap pemasukan hanya 1 kali
                 'lot_out' => $lotKirims[$key] ?? null,
                 'nama_cluster' => $namaClusters[$key] ?? null,
+                'no_karung' => $noKarung[$key] ?? null,
                 'admin' => session()->get('username')
             ];
         }
@@ -1978,6 +2001,7 @@ class PemesananController extends BaseController
             'kgPersiapan'   => $kgPersiapan,
             'kgPengiriman'  => $kgPengiriman,
             'sisaKebutuhan' => $sisa,
+            'tglPakai'      => $pemesanan['tgl_pakai'],
         ]);
 
         // setelah view selesai dibuat → hapus cache terkait
