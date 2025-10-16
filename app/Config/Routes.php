@@ -1049,6 +1049,8 @@ $routes->group(
         $routes->get('filterBenangBulanan', 'ApiController::filterBenangBulanan');
         $routes->get('historyPindahOrder', 'ApiController::historyPindahOrder');
         $routes->get('getMasterRangePemesanan', 'ApiController::getMasterRangePemesanan');
+        $routes->get('filterReportKebutuhanBahanBaku', 'ApiController::filterReportKebutuhanBahanBaku');
+        $routes->get('excelReportKebutuhanBahanBaku', 'ApiController::excelReportKebutuhanBahanBaku');
     }
 );
 

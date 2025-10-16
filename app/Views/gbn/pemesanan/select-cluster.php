@@ -315,7 +315,7 @@
             <!-- Header -->
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-2">
                 <h3 class="fw-bold mb-0"><?= $noModel . ' - ' . $itemType . ' - ' . $kodeWarna . ' - ' . $color; ?></h3>
-                <span class="badge bg-gradient-blue fs-6 shadow-sm px-3 py-2"><?= date('d F Y'); ?></span>
+                <span class="badge bg-gradient-blue fs-6 shadow-sm px-3 py-2"><?= date('d F Y', strtotime($tglPakai)); ?></span>
             </div>
 
             <!-- Sub Title -->

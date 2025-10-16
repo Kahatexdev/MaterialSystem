@@ -192,6 +192,14 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <div class="form-group">
+                                                                    <label for=""> Keterangan Gbn</label>
+                                                                    <textarea class="form-control keterangan" name="keterangan_gbn[]" placeholder="Keterangan GBN" readonly><?= $data['keterangan_gbn'] ?></textarea>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                         <div class="form-group d-flex justify-content-end">
                                                             <button type="button" class="btn btn-danger removeRow btn-hapus" data-id="<?= $data['id_out_celup'] ?>">
                                                                 <i class="fas fa-trash"></i>

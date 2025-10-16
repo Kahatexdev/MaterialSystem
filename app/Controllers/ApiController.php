@@ -31,6 +31,14 @@ use App\Models\MasterRangePemesanan;
 use App\Models\TotalPoTambahanModel;
 use Dompdf\Dompdf;
 use PHPUnit\Framework\Attributes\IgnoreFunctionForCodeCoverage;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+
 
 class ApiController extends ResourceController
 {
@@ -1486,7 +1494,7 @@ class ApiController extends ResourceController
     {
         $key = $this->request->getGet('key');
 
-        $data = $this->openPoModel->getFilterPoBenang($key);
+        $data = $this->materialModel->getFilterPoBenang($key);
 
         return $this->response->setJSON($data);
     }
@@ -1695,5 +1703,92 @@ class ApiController extends ResourceController
 
         // Auto download
         return $dompdf->stream('pengaduan_' . $idPengaduan . '.pdf', ["Attachment" => true]);
+    }
+
+    public function filterReportKebutuhanBahanBaku()
+    {
+        $jenis = $this->request->getGet('jenis');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->masterOrderModel->getFilterKebutuhanBahanBaku($jenis, $tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
+    }
+
+    public function excelReportKebutuhanBahanBaku()
+    {
+        $jenis = $this->request->getGet('jenis');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->masterOrderModel->getFilterKebutuhanBahanBaku($jenis, $tanggalAwal, $tanggalAkhir);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Judul
+        $sheet->setCellValue('A1', 'Report Kebutuhan Bahan Baku');
+        $sheet->mergeCells('A1:C1'); // Menggabungkan sel untuk judul
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Header
+        $header = ["No", "Item Type", "Total Kebutuhan (Kg)"];
+        // $header = ["No", "No Model", "Buyer", "Foll Up", "Item Type", "Delivery Awal", "Delivery Akhir", "Total Kebutuhan (Kg)"];
+        $sheet->fromArray([$header], NULL, 'A3');
+
+        // Styling Header
+        $sheet->getStyle('A3:C3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:C3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:C3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        // Data
+        $row = 4;
+        foreach ($data as $index => $item) {
+            $sheet->fromArray([
+                [
+                    $index + 1,
+                    // $item['no_model'],
+                    // $item['buyer'],
+                    // $item['foll_up'],
+                    $item['item_type'],
+                    // $item['delivery_awal'],
+                    // $item['delivery_akhir'],
+                    number_format($item['total_kebutuhan'], 2, '.', ',')
+                ]
+            ], NULL, 'A' . $row);
+            $row++;
+        }
+
+        // Atur border untuk seluruh tabel
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle('A3:C' . ($row - 1))->applyFromArray($styleArray);
+
+        // Set auto width untuk setiap kolom
+        foreach (range('A', 'C') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set isi tabel agar rata tengah
+        $sheet->getStyle('A4:C' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:C' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Report_Total_Kebutuhan' . date('Y-m-d') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
     }
 }
