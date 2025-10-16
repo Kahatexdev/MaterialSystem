@@ -1136,6 +1136,7 @@ class MaterialModel extends Model
             material.kode_warna,
             material.color,
             material.loss,
+            material.material_type,
             SUM(material.kgs) AS kg_po,
             material.created_at AS tgl_input,
             material.admin,
