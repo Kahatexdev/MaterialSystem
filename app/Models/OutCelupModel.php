@@ -143,7 +143,8 @@ class OutCelupModel extends Model
             schedule_celup.po_plus,
             master_material.ukuran,
             master_buyer.nama_buyer as buyer,
-            open_po.spesifikasi_benang
+            open_po.spesifikasi_benang,
+            open_po.bentuk_celup
         ')
             ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
             ->join('master_material', 'master_material.item_type = schedule_celup.item_type', 'left')

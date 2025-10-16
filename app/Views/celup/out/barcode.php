@@ -211,6 +211,7 @@
                             <div class="data-section">
                                 <div>Item : <?= $row['item_type'] ?></div>
                                 <div>Kode : <?= $row['kode_warna'] ?>/ <?= $row['warna'] ?></div>
+                                <?= !empty($row['bentuk_celup']) ? '(' . $row['bentuk_celup'] . ')' : '' ?>
                                 <!-- <div class="nums">GW : <?= $row['gw_kirim'] ?> kg</div>
                                 <div class="nums">NW : <?= $row['kgs_kirim'] ?> kg</div>
                                 <div class="nums">Cones : <?= $row['cones_kirim'] ?></div> -->
