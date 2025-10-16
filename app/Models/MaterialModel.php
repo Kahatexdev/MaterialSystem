@@ -287,11 +287,13 @@ class MaterialModel extends Model
             SUM(material.kgs) AS kgs
         ')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->where('material.composition >', 0)
             ->where('master_order.no_model', $noModel)
             ->where('material.item_type', $itemType)
             ->where('material.kode_warna', $kodeWarna);
-
+        // jika item_type bukan JHT, tambahkan kondisi composition > 0
+        if (stripos($itemType, 'JHT') === false) {
+            $builder->where('material.composition >', 0);
+        }
         if ($warna !== null) {
             $builder->where('material.color', $warna);
         }
