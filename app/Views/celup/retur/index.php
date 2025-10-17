@@ -257,7 +257,7 @@
                                 <td><?= $data['item_type']; ?></td>
                                 <td><?= $data['kode_warna']; ?></td>
                                 <td><?= $data['warna']; ?></td>
-                                <td><?= $data['keterangan'] ?? $data['ket_bon']; ?></td>
+                                <td><?= (!empty($data['ket_bon'])) ? $data['ket_bon'] : ($data['keterangan'] ?? ''); ?></td>
                                 <td><?= $data['lot_celup']; ?></td>
                                 <td><?= $data['tgl_datang']; ?></td>
                                 <td><?= $data['no_surat_jalan']; ?></td>
