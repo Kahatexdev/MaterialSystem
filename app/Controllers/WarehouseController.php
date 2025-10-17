@@ -2030,8 +2030,10 @@ class WarehouseController extends BaseController
             foreach ($pemasukanData as $pemasukan) {
                 // Ambil data tabel out_celup terkait
                 $outCelup = $this->outCelupModel->find($pemasukan['id_out_celup']);
-                $other = $this->otherOutModel->getQty($pemasukan['id_out_celup'], $pemasukan['nama_cluster']);
+                // $other = $this->otherOutModel->getQty($pemasukan['id_out_celup'], $pemasukan['nama_cluster']);
                 $outByCns = $this->pengeluaranModel->getQtyOutByCns($pemasukan['id_out_celup']);
+                $pindahOrder = $this->historyStock->getKgsPindahOrder($pemasukan['id_out_celup']);
+                $returCelup = $this->historyStock->getKgsReturCelup($pemasukan['id_out_celup']);
                 // jika kgs manual kosong maka
                 $rawKgsManual = $data['kgs_out'][$pemasukan['id_pemasukan']] ?? 0;
                 $rawCnsManual = $data['cns_out'][$pemasukan['id_pemasukan']] ?? 0;
@@ -2041,8 +2043,8 @@ class WarehouseController extends BaseController
                     $cnsOut = floatval($rawCnsManual);
                     $krgOut = 0;
                 } else {
-                    $kgsOut = round($pemasukan['kgs_kirim'] - ($other['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0), 2);
-                    $cnsOut = $pemasukan['cones_kirim'] - ($other['cns_other_out'] ?? 0) - ($outByCns['cns_out'] ?? 0);
+                    $kgsOut = round($pemasukan['kgs_kirim'] - ($pindahOrder['kgs_pindah_order'] ?? 0) - ($outByCns['kgs_out'] ?? 0) - ($returCelup['kgs_retur_celup'] ?? 0), 2);
+                    $cnsOut = $pemasukan['cones_kirim'] - ($pindahOrder['cns_pindah_order'] ?? 0) - ($outByCns['cns_out'] ?? 0) - ($returCelup['cns_retur_celup'] ?? 0);
                     $krgOut = 1;
                     $this->pemasukanModel->update($pemasukan['id_pemasukan'], ['out_jalur' => "1"]);
                 }
@@ -2256,17 +2258,21 @@ class WarehouseController extends BaseController
             $other = $this->otherOutModel->getQty($id['id_out_celup']);
             $outByCns = $this->pengeluaranModel->getQtyOutByCns($id['id_out_celup']);
             $pindahOrder = $this->historyStock->getKgsPindahOrder($id['id_out_celup']);
+            $returCelup = $this->historyStock->getKgsReturCelup($id['id_out_celup']);
+
 
             $kgsOther = !empty($other) ? (float) $other['kgs_other_out'] : 0;
             $kgsOutByCns = !empty($outByCns) ? (float) $outByCns['kgs_out'] : 0;
             $kgsPindahOrder = !empty($pindahOrder) ? (float) $pindahOrder['kgs_pindah_order'] : 0;
+            $kgsReturCelup = !empty($returCelup) ? (float) $returCelup['kgs_retur_celup'] : 0;
             $cnsOther = !empty($other) ? (int) $other['cns_other_out'] : 0;
             $cnsOutByCns = !empty($outByCns) ? (int) $outByCns['cns_out'] : 0;
             $cnsPindahOrder = !empty($pindahOrder) ? (int) $pindahOrder['cns_pindah_order'] : 0;
+            $cnsReturCelup = !empty($returCelup) ? (int) $returCelup['cns_retur_celup'] : 0;
 
             // kurangi other out & pengeluaran by cones
-            $id['kgs_kirim'] = round((float) $id['kgs_kirim'] - $kgsPindahOrder - $kgsOther - $kgsOutByCns, 2);
-            $id['cones_kirim'] = (int) $id['cones_kirim'] - $cnsOther - $cnsOutByCns - $cnsPindahOrder;
+            $id['kgs_kirim'] = round((float) $id['kgs_kirim'] - $kgsPindahOrder - $kgsOther - $kgsOutByCns - $kgsReturCelup, 2);
+            $id['cones_kirim'] = (int) $id['cones_kirim'] - $cnsOther - $cnsOutByCns - $cnsPindahOrder - $cnsReturCelup;
         }
 
         // var_dump($dataArray);

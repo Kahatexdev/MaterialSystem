@@ -2070,8 +2070,9 @@ class PemesananController extends BaseController
             $other = $this->otherOutModel->getQty($dt['id_out_celup'], $dt['nama_cluster']);
             $outByCns = $this->pengeluaranModel->getQtyOutByCns($dt['id_out_celup']);
             $pindahOrder = $this->historyStock->getKgsPindahOrder($dt['id_out_celup']);
-            $sisaKg  = round($dt['kgs_kirim'] - ($other['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0) - ((float) $pindahOrder['kgs_pindah_order'] ?? 0), 2);
-            $sisaCns = (int)$dt['cones_kirim'] - (int)($other['cns_other_out'] ?? 0) - (int)($outByCns['cns_out'] ?? 0) - ((int) $pindahOrder['cns_pindah_order'] ?? 0);
+            $returCelup = $this->historyStock->getKgsReturCelup($dt['id_out_celup']);
+            $sisaKg  = round($dt['kgs_kirim'] - ($other['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0) - ((float) $pindahOrder['kgs_pindah_order'] ?? 0) - ((float) $returCelup['kgs_retur_celup'] ?? 0), 2);
+            $sisaCns = (int)$dt['cones_kirim'] - (int)($other['cns_other_out'] ?? 0) - (int)($outByCns['cns_out'] ?? 0) - ((int) $pindahOrder['cns_pindah_order'] ?? 0) - ((int) $returCelup['cns_retur_celup'] ?? 0);
             // log_message('info', "ini sisaKg $sisaKg, sisaCns $sisaCns");
             if ($sisaKg <= 0 && $sisaCns <= 0) {
                 // lewati baris ini; tidak layak tampil
