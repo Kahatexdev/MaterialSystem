@@ -305,7 +305,7 @@ class MaterialModel extends Model
     {
         $builder =  $this->select('material.item_type, material.kode_warna, master_order.no_model, material.color')
             ->join('master_order', 'master_order.id_order = material.id_order')
-            ->where('master_order.no_model !=', $noModelOld)
+            // ->where('master_order.no_model !=', $noModelOld)
             ->where('material.color IS NOT NULL')
             // ->where('material.kode_warna', $kodeWarna)
             ->groupBy('material.item_type, material.kode_warna, master_order.no_model');
