@@ -530,7 +530,7 @@ class CelupController extends BaseController
         $tglDatang = $data['tgl_datang'];
         list($d, $m, $y) = explode('-', $tglDatang);
         $tglDatang = $y . '-' . $m . '-' . $d;
-
+        // dd($data);
         $saveDataBon = [
             'detail_sj' => $data['detail_sj'],
             'no_surat_jalan' => $data['no_surat_jalan'],
@@ -583,7 +583,7 @@ class CelupController extends BaseController
                         'gw_kirim' => $data['gw_kirim'][$h][$i] ?? null,
                         'kgs_kirim' => $data['kgs_kirim'][$h][$i] ?? null,
                         'cones_kirim' => $data['cones_kirim'][$h][$i] ?? null,
-                        'lot_kirim' => $lot['lot_celup'],
+                        'lot_kirim' => $data['items'][$h]['lot_celup'] ?? null,
                         'ganti_retur' => $gantiRetur,
                         'operator_packing' => $operatorPerTab,
                         'shift' => $shiftPerTab,
@@ -830,12 +830,13 @@ class CelupController extends BaseController
 
         // Hasilkan barcode untuk setiap ID outCelup di grup
         foreach ($groupedDetails as &$group) {
-            $getDeskripsi = $this->masterMaterialModel->where('item_type', $detail['item_type'])->select('deskripsi')->first();
+            // dd($group);
+            $getDeskripsi = $this->masterMaterialModel->where('item_type', $group['item_type'])->select('deskripsi')->first();
             if (!$getDeskripsi || empty($getDeskripsi['deskripsi'] ?? '')) {
                 $missing[] = $group['item_type'];
             }
             if (!empty($missing)) {
-                $msg = 'Tidak Ada Item Type: ' . implode(', ', $missing);
+                $msg = 'Tidak Ada Item Type: ' . implode(', ', $missing) . '<br>Hubungi Gudang Benang Untuk Menambahkan Master Material';
                 session()->setFlashdata('deskripsi_missing', $msg);
 
                 // hentikan proses selanjutnya dan kembalikan user
@@ -1211,7 +1212,7 @@ class CelupController extends BaseController
 
         for ($h = 0; $h < $tab; $h++) {
             $id_celup = $data['add_item'] ?? null;
-            $lot = $this->scheduleCelupModel->select('lot_celup')->where('id_celup', $id_celup)->first();
+            // $lot = $this->scheduleCelupModel->select('lot_celup')->where('id_celup', $id_celup)->first();
             $gantiRetur = isset($data['ganti_retur'][$h]) ? $data['ganti_retur'][$h] : '0';
 
             $operatorPerTab = $operatorPacking[$h] ?? null;
@@ -1231,7 +1232,7 @@ class CelupController extends BaseController
                         'gw_kirim' => $data['gw_kirim'][$h][$i] ?? null,
                         'kgs_kirim' => $data['kgs_kirim'][$h][$i] ?? null,
                         'cones_kirim' => $data['cones_kirim'][$h][$i] ?? null,
-                        'lot_kirim' => $lot['lot_celup'],
+                        'lot_kirim' => $data['items'][$h]['lot_celup'] ?? null,
                         'ganti_retur' => $gantiRetur,
                         'operator_packing' => $operatorPerTab,
                         'shift' => $shiftPerTab,

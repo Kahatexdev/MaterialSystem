@@ -163,7 +163,7 @@
                                                     <label>Harga</label>
                                                     <input type="number" step="0.01" class="form-control" name="harga[0]" id="harga" required>
                                                 </div>
-                                                <div class="col-md-1">
+                                                <!-- <div class="col-md-1">
                                                     <label for="ganti-retur" class="text-center">Ganti Retur</label>
                                                     <div class="row">
                                                         <div class="col-md-3 form-check">
@@ -178,7 +178,7 @@
                                                             <label for="">Ya</label>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </div> -->
                                             </div>
 
                                             <div class="mt-5">
@@ -504,7 +504,7 @@
                                                 <label>Harga</label>
                                                 <input type="number" step="0.01" class="form-control" name="harga[${tabIndex - 1}]" id="harga" required>
                                             </div>
-                                            <div class="col-md-1">
+                                            <!-- <div class="col-md-1">
                                                 <label for="ganti-retur" class="text-center">Ganti Retur</label>
                                                 <div class="row">
                                                     <div class="col-md-3">
@@ -517,7 +517,7 @@
                                                         <label for="">Ya</label>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </div> -->
                                         </div>
                                         <div class="mt-5">
                                             <h3>Form Input Data Karung</h3>
