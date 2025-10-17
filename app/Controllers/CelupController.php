@@ -831,7 +831,7 @@ class CelupController extends BaseController
         // Hasilkan barcode untuk setiap ID outCelup di grup
         foreach ($groupedDetails as &$group) {
             // dd($group);
-            $getDeskripsi = $this->masterMaterialModel->where('item_type', $group['item_type'])->select('deskripsi')->first();
+            $getDeskripsi = $this->masterMaterialModel->where('item_type', $detail['item_type'])->select('deskripsi')->first();
             if (!$getDeskripsi || empty($getDeskripsi['deskripsi'] ?? '')) {
                 $missing[] = $group['item_type'];
             }
