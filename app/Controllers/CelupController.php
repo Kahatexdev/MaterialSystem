@@ -830,10 +830,10 @@ class CelupController extends BaseController
 
         // Hasilkan barcode untuk setiap ID outCelup di grup
         foreach ($groupedDetails as &$group) {
-            // dd($group);
+            // dd($detailBon);
             $getDeskripsi = $this->masterMaterialModel->where('item_type', $detail['item_type'])->select('deskripsi')->first();
             if (!$getDeskripsi || empty($getDeskripsi['deskripsi'] ?? '')) {
-                $missing[] = $group['item_type'];
+                $missing[] = $detail['item_type'];
             }
             if (!empty($missing)) {
                 $msg = 'Tidak Ada Item Type: ' . implode(', ', $missing) . '<br>Hubungi Gudang Benang Untuk Menambahkan Master Material';
