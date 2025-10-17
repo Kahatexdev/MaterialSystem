@@ -877,6 +877,7 @@ class MaterialModel extends Model
                 WHERE mo2.no_model = mo.no_model
                 AND mat.item_type = m.item_type
                 AND mat.kode_warna = m.kode_warna
+                AND p.status = 'Pengiriman Area'
             ) AS kgs_out,
 
             -- pengeluaran (pakai (+) benang & nylon)
@@ -889,6 +890,7 @@ class MaterialModel extends Model
                 AND s2.item_type = m.item_type
                 AND s2.kode_warna = m.kode_warna
                 AND pem.po_tambahan = '1'
+                AND p.status = 'Pengiriman Area'
             ) AS kgs_out_plus,
 
             -- Pengeluaran (Pakai Spandex & Karet)
