@@ -64,6 +64,7 @@
                         <?php foreach ($poTambahan as $data):
                             // Cek apakah id_order ini ada di materialOrderIds
                             $isNotApproved = $data['status'] == '';
+                            $rejected = $data['status'] == 'rejected';
                         ?>
                             <tr>
                                 <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= $data['tgl_poplus'] ?></td>
@@ -89,6 +90,8 @@
                                             data-warna="<?= $data['kode_warna'] ?>" data-status="<?= $data['status'] ?>" data-area="<?= $data['admin'] ?>" data-bs-toggle="modal" data-bs-target="#rejectModal">
                                             Reject
                                         </button>
+                                    <?php elseif ($rejected): ?>
+                                        <span class="badge bg-danger">REJECT: <?= $data['ket_gbn'] ?></span>
                                     <?php else: ?>
                                         <a class="btn btn-success btn-sm" href="<?= base_url($role . '/masterdata/poGabungan/' . $data['jenis']) ?>"> BUKA PO (+)
                                         </a> <!-- Font Awesome centang hijau -->

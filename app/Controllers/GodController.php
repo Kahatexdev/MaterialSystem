@@ -24,6 +24,7 @@ use App\Models\TotalPemesananModel;
 use App\Models\PengeluaranModel;
 use App\Models\PoTambahanModel;
 use App\Models\TotalPoTambahanModel;
+use App\Models\ReturModel;
 
 
 
@@ -49,6 +50,7 @@ class GodController extends BaseController
     protected $pengeluaranModel;
     protected $poTambahanModel;
     protected $totalPoTambahanModel;
+    protected $returModel;
 
 
     public function __construct()
@@ -69,6 +71,7 @@ class GodController extends BaseController
         $this->pengeluaranModel = new PengeluaranModel();
         $this->poTambahanModel = new PoTambahanModel();
         $this->totalPoTambahanModel = new TotalPoTambahanModel();
+        $this->returModel = new ReturModel();
         $this->request = \Config\Services::request();
 
         $this->role = session()->get('role');
@@ -1724,7 +1727,8 @@ class GodController extends BaseController
                 ];
 
                 $kirimArea = $this->pengeluaranModel->getTotalPengiriman($dataKirim);
-                $warnaData['kgs_out'] = $kirimArea['kgs_out'] ?? 0;
+                $returArea = $this->returModel->getTotalRetur($dataKirim);
+                $warnaData['kgs_out'] = ($kirimArea['kgs_out'] ?? 0) - ($returArea['kgs_retur'] ?? 0);
             }
         }
 

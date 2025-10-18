@@ -1088,7 +1088,8 @@ class ApiController extends ResourceController
                 ];
 
                 $kirimArea = $this->pengeluaranModel->getTotalPengiriman($dataKirim);
-                $warnaData['kgs_out'] = $kirimArea['kgs_out'] ?? 0;
+                $returArea = $this->returModel->getTotalRetur($dataKirim);
+                $warnaData['kgs_out'] = ($kirimArea['kgs_out'] ?? 0) - ($returArea['kgs_retur'] ?? 0);
             }
         }
 
