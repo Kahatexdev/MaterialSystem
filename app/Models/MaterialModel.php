@@ -999,13 +999,16 @@ class MaterialModel extends Model
             ) AS tgl_po_plus_area,
 
             (
-                SELECT SUM(pp.poplus_mc_kg + pp.plus_pck_kg)
-                FROM po_tambahan pp
+                SELECT SUM(ttl_tambahan_kg)
+                FROM total_potambahan tp
+                JOIN po_tambahan pp ON pp.id_total_potambahan = tp.id_total_potambahan
                 JOIN material m2 ON m2.id_material = pp.id_material
+                JOIN master_order mo2 ON mo2.id_order = m2.id_order
                 WHERE m2.id_order = mo.id_order
                 AND m2.item_type = m.item_type
                 AND m2.kode_warna = m.kode_warna
-                GROUP BY m2.id_order, m2.item_type, m2.kode_warna
+                AND pp.status LIKE '%approved%'
+                GROUP BY m2.id_material
             ) AS kg_po_plus,
 
             (
@@ -1189,6 +1192,7 @@ class MaterialModel extends Model
 
         // Group by yang lebih lengkap
         $builder->groupBy([
+            'master_order.no_model',
             'material.item_type',
             'material.kode_warna',
             'material.color'
