@@ -61,9 +61,9 @@ class MasterOrderModel extends Model
     protected $afterDelete    = [];
 
 
-    public function findIdOrder($no_order)
+    public function findIdOrder($no_order, $no_model)
     {
-        return $this->select('id_order')->where('no_order', $no_order)->first();
+        return $this->select('id_order')->where('no_order', $no_order)->where('no_model', $no_model)->first();
     }
 
     public function checkDatabase($no_order, $no_model, $buyer, $lco_date, $foll_up)

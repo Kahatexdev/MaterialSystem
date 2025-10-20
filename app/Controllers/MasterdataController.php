@@ -237,12 +237,11 @@ class MasterdataController extends BaseController
             // }
 
             // Dapatkan id_order untuk digunakan pada tabel material
-            $orderData = $masterOrderModel->findIdOrder($no_order);
+            $orderData = $masterOrderModel->findIdOrder($no_order, $no_model);
             if (!$orderData) {
                 return redirect()->back()->with('error', 'Gagal menemukan ID Order untuk ' . $no_order);
             }
             $id_order = $orderData['id_order'];
-
             // Mapping header untuk data material
             $headerMap = [
                 'Color'          => 'A',

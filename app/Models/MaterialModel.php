@@ -466,18 +466,19 @@ class MaterialModel extends Model
         // Subquery Datang
         $datang = $this->db->table('pemasukan p')->select([
             'oc.no_model',
-            'sc.item_type',
-            'sc.kode_warna',
+            'COALESCE(sc.item_type, ot.item_type) AS item_type',
+            'COALESCE(sc.kode_warna, ot.kode_warna) AS kode_warna',
             'SUM(CASE WHEN oc.ganti_retur = "0" THEN oc.kgs_kirim ELSE 0 END) AS kgs_datang',
             'SUM(CASE WHEN oc.ganti_retur = "1" THEN oc.kgs_kirim ELSE 0 END) AS kgs_ganti_retur'
         ])
             ->join('out_celup oc', 'p.id_out_celup = oc.id_out_celup')
-            ->join('schedule_celup sc', 'oc.id_celup = sc.id_celup');
-        $datang->groupBy([
-            'oc.no_model',
-            'sc.item_type',
-            'sc.kode_warna',
-        ]);
+            ->join('schedule_celup sc', 'oc.id_celup = sc.id_celup', 'left')
+            ->join('other_bon ot', 'oc.id_other_bon = ot.id_other_bon', 'left')
+            ->groupBy([
+                'oc.no_model',
+                'item_type',
+                'kode_warna'
+            ]);
 
         // Main Query
         $builder = $this->db->table('(' . $material->getCompiledSelect(false) . ') AS m')
