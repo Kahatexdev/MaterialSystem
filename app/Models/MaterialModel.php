@@ -986,7 +986,8 @@ class MaterialModel extends Model
                 WHERE m2.id_order = mo.id_order
                 AND m2.item_type = m.item_type
                 AND m2.kode_warna = m.kode_warna
-                GROUP BY m2.id_order, m2.item_type, m2.kode_warna
+                ORDER BY pp.tanggal_approve DESC
+                LIMIT 1
             ) AS tgl_terima_po_plus,
 
             (
@@ -996,7 +997,8 @@ class MaterialModel extends Model
                 WHERE m2.id_order = mo.id_order
                 AND m2.item_type = m.item_type
                 AND m2.kode_warna = m.kode_warna
-                GROUP BY m2.id_order, m2.item_type, m2.kode_warna
+                ORDER BY pp.created_at DESC
+                LIMIT 1
             ) AS tgl_po_plus_area,
 
             (
@@ -1009,7 +1011,6 @@ class MaterialModel extends Model
                 AND m2.item_type = m.item_type
                 AND m2.kode_warna = m.kode_warna
                 AND pp.status LIKE '%approved%'
-                GROUP BY m2.id_material
             ) AS kg_po_plus,
 
             (
@@ -1019,7 +1020,8 @@ class MaterialModel extends Model
                 WHERE m2.id_order = mo.id_order
                 AND m2.item_type = m.item_type
                 AND m2.kode_warna = m.kode_warna
-                GROUP BY m2.id_order, m2.item_type, m2.kode_warna
+                ORDER BY pp.created_at DESC
+                LIMIT 1
             ) AS delivery_po_plus
         ")
             ->join('master_material mm', 'm.item_type = mm.item_type', 'left')
