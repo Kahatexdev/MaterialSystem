@@ -12430,18 +12430,18 @@ class ExcelController extends BaseController
             $sheet->setCellValue('L' . $row, $item['item_type']);
             $sheet->setCellValue('M' . $row, $item['kode_warna']);
             $sheet->setCellValue('N' . $row, $item['color']);
-            $sheet->setCellValue('O' . $row, $item['kgs_stock_awal']);
+            $sheet->setCellValue('O' . $row, number_format($item['kgs_stock_awal'], 2));
             $sheet->setCellValue('P' . $row, $item['lot_awal']);
-            $sheet->setCellValue('Q' . $row, $item['kg_po']);
+            $sheet->setCellValue('Q' . $row, number_format($item['kg_po'], 2));
             $sheet->setCellValue('R' . $row, $item['tgl_terima_po_plus_gbn'] ?? '');
             $sheet->setCellValue('S' . $row, $item['tgl_po_plus_area'] ?? '');
             $sheet->setCellValue('T' . $row, $item['delivery_awal_plus'] ?? '');
-            $sheet->setCellValue('U' . $row, $item['kg_po_plus'] ?? 0);
-            $sheet->setCellValue('V' . $row, $item['kgs_datang'] ?? 0);
-            $sheet->setCellValue('W' . $row, $item['kgs_datang_plus'] ?? 0);
-            $sheet->setCellValue('X' . $row, $item['kgs_retur'] ?? 0);
-            $sheet->setCellValue('Y' . $row, $item['qty_retur'] ?? 0);
-            $sheet->setCellValue('Z' . $row, $sisa ?? 0);
+            $sheet->setCellValue('U' . $row, number_format($item['kg_po_plus'] ?? 0, 2));
+            $sheet->setCellValue('V' . $row, number_format($item['kgs_datang'] ?? 0, 2));
+            $sheet->setCellValue('W' . $row, number_format($item['kgs_datang_plus'] ?? 0, 2));
+            $sheet->setCellValue('X' . $row, number_format($item['kgs_retur'] ?? 0, 2));
+            $sheet->setCellValue('Y' . $row, number_format($item['qty_retur'] ?? 0, 2));
+            $sheet->setCellValue('Z' . $row, number_format($sisa ?? 0, 2));
             $row++;
         }
 
@@ -15184,6 +15184,21 @@ class ExcelController extends BaseController
                 $po['delivery_awal'] = '';
                 $po['no_order']      = '';
             }
+
+            $masterMaterial = $this->masterMaterialModel
+                ->select('item_type, jenis, ukuran')
+                ->where('item_type', $po['item_type'])
+                ->first();
+
+            if ($masterMaterial) {
+                $jenisMaterial = $masterMaterial['jenis'];
+                $ukuran = trim($masterMaterial['ukuran'] ?? '');
+
+                // Hanya hapus ukuran jika jenisnya NYLON
+                if (strtoupper($jenisMaterial) === 'NYLON' && !empty($ukuran)) {
+                    $po['item_type'] = trim(str_replace($ukuran, '', $po['item_type']));
+                }
+            }
         }
         unset($po);
 
@@ -15577,7 +15592,7 @@ class ExcelController extends BaseController
             $totalKg = $totalCones = $totalYard = $totalKgPerCones = 0;
 
             foreach ($items as $row) {
-                // dd($row);
+
                 $spesifikasiBenang = trim($row['spesifikasi_benang'] ?? '');
                 if ($spesifikasiBenang === '- -') {
                     $spesifikasiBenang = '';
@@ -15595,7 +15610,7 @@ class ExcelController extends BaseController
 
                 // --- Kolom B: Jenis (merge vertical, wrap & center) ---
                 $sheet->mergeCells("B{$startRow}:B{$endRow}");
-                $sheet->setCellValue("B{$startRow}", $row['item_type'] . ' ' . $spesifikasiBenang);
+                $sheet->setCellValue("B{$startRow}", $row['item_type'] . ' ' . $spesifikasiBenang); //ganti item type
                 $sheet->getStyle("B{$startRow}:B{$endRow}")->getAlignment()
                     ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
                     ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER)
