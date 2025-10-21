@@ -268,7 +268,7 @@
                                             <p class="text-sm font-weight-bold mb-0"><?= $id['nama_cluster'] ?></p>
                                         </td>
                                         <td>
-                                            <button type="button" class="btn btn-danger btn-hapus" data-id="<?= $id['id_pengeluaran'] ?>" data-id-out-celup="<?= $id['id_out_celup'] ?>" data-id-stock="<?= $id['id_stock'] ?>" data-kgs-out="<?= $id['kgs_out'] ?>" data-cns-out="<?= $id['cns_out'] ?>" data-krg-out="<?= $id['krg_out'] ?>">
+                                            <button type="button" class="btn btn-danger btn-hapus" data-id="<?= $id['id_pengeluaran'] ?>" data-id-out-celup="<?= $id['id_out_celup'] ?>" data-id-stock="<?= $id['id_stock'] ?>" data-kgs-out="<?= $id['kgs_out'] ?>" data-cns-out="<?= $id['cns_out'] ?>" data-krg-out="<?= $id['krg_out'] ?>" data-lot-out="<?= $id['lot_out'] ?>">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </td>
@@ -410,6 +410,7 @@
     let kgsOut = null;
     let cnsOut = null;
     let krgOut = null;
+    let lotOut = null;
     const BASE_URL = "<?= base_url(); ?>";
     const role = "<?= $role ?>";
 
@@ -420,6 +421,7 @@
         kgsOut = $(this).data('kgs-out');
         cnsOut = $(this).data('cns-out');
         krgOut = $(this).data('krg-out');
+        lotOut = $(this).data('lot-out');
 
         $('#modalHapus').modal('show');
     });
@@ -437,6 +439,7 @@
                     kgs_out: kgsOut,
                     cns_out: cnsOut,
                     krg_out: krgOut,
+                    lot_out: lotOut,
                 },
                 success: function(res) {
                     $('#modalHapus').modal('hide');

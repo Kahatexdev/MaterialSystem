@@ -3558,6 +3558,7 @@ class WarehouseController extends BaseController
         $kgsOut        = (float) $this->request->getPost('kgs_out');
         $cnsOut        = (float) $this->request->getPost('cns_out');
         $krgOut        = (float) $this->request->getPost('krg_out');
+        $lotOut        = $this->request->getPost('lot_out');
 
         if ($idPengeluaran && $idOutCelup && $idStock) {
             $this->db->transStart();
@@ -3575,17 +3576,29 @@ class WarehouseController extends BaseController
             }
 
             $select = $this->stockModel
-                ->select('kgs_in_out, cns_in_out, krg_in_out')
+                ->select('kgs_in_out, cns_in_out, krg_in_out, lot_stock')
                 ->where('id_stock', $idStock)
+                ->where('lot_stock', $lotOut)
                 ->first();
 
             if ($select) {
                 $this->stockModel
                     ->where('id_stock', $idStock)
+                    ->where('lot_stock', $lotOut)
                     ->set([
                         'kgs_in_out' => $select['kgs_in_out'] + $kgsOut,
                         'cns_in_out' => $select['cns_in_out'] + $cnsOut,
                         'krg_in_out' => $select['krg_in_out'] + $krgOut
+                    ])
+                    ->update();
+            } else {
+                $this->stockModel
+                    ->where('id_stock', $idStock)
+                    ->where('lot_awal', $lotOut)
+                    ->set([
+                        'kgs_stock_awal' => $select['kgs_stock_awal'] + $kgsOut,
+                        'cns_stock_awal' => $select['cns_stock_awal'] + $cnsOut,
+                        'krg_stock_awal' => $select['krg_stock_awal'] + $krgOut
                     ])
                     ->update();
             }
