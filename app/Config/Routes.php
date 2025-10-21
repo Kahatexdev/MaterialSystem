@@ -64,6 +64,13 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('exportOpenPOGabung', 'ExcelController::exportOpenPOGabungNew');
     $routes->get('exportPoBoking', 'ExcelController::exportPoBooking');
 
+    $routes->get('masterMaterialType', 'MaterialTypeController::index');
+    $routes->post('tampilMasterMaterialType', 'MaterialTypeController::tampilMasterMaterialType');
+    $routes->get('getMasterMaterialTypeDetails', 'MaterialTypeController::getMasterMaterialTypeDetails');
+    $routes->post('updateMasterMaterialType', 'MaterialTypeController::updateMasterMaterialType');
+    $routes->post('saveMasterMaterialType', 'MaterialTypeController::saveMasterMaterialType');
+    $routes->get('deleteMasterMaterialType', 'MaterialTypeController::deleteMasterMaterialType');
+
 
     $routes->post('getMasterData', 'MasterdataController::getMasterData');
     $routes->get('material/(:num)', 'MasterdataController::material/$1');

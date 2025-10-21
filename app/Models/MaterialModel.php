@@ -466,18 +466,19 @@ class MaterialModel extends Model
         // Subquery Datang
         $datang = $this->db->table('pemasukan p')->select([
             'oc.no_model',
-            'sc.item_type',
-            'sc.kode_warna',
+            'COALESCE(sc.item_type, ot.item_type) AS item_type',
+            'COALESCE(sc.kode_warna, ot.kode_warna) AS kode_warna',
             'SUM(CASE WHEN oc.ganti_retur = "0" THEN oc.kgs_kirim ELSE 0 END) AS kgs_datang',
             'SUM(CASE WHEN oc.ganti_retur = "1" THEN oc.kgs_kirim ELSE 0 END) AS kgs_ganti_retur'
         ])
             ->join('out_celup oc', 'p.id_out_celup = oc.id_out_celup')
-            ->join('schedule_celup sc', 'oc.id_celup = sc.id_celup');
-        $datang->groupBy([
-            'oc.no_model',
-            'sc.item_type',
-            'sc.kode_warna',
-        ]);
+            ->join('schedule_celup sc', 'oc.id_celup = sc.id_celup', 'left')
+            ->join('other_bon ot', 'oc.id_other_bon = ot.id_other_bon', 'left')
+            ->groupBy([
+                'oc.no_model',
+                'item_type',
+                'kode_warna'
+            ]);
 
         // Main Query
         $builder = $this->db->table('(' . $material->getCompiledSelect(false) . ') AS m')
@@ -985,7 +986,8 @@ class MaterialModel extends Model
                 WHERE m2.id_order = mo.id_order
                 AND m2.item_type = m.item_type
                 AND m2.kode_warna = m.kode_warna
-                GROUP BY m2.id_order, m2.item_type, m2.kode_warna
+                ORDER BY pp.tanggal_approve DESC
+                LIMIT 1
             ) AS tgl_terima_po_plus,
 
             (
@@ -995,17 +997,20 @@ class MaterialModel extends Model
                 WHERE m2.id_order = mo.id_order
                 AND m2.item_type = m.item_type
                 AND m2.kode_warna = m.kode_warna
-                GROUP BY m2.id_order, m2.item_type, m2.kode_warna
+                ORDER BY pp.created_at DESC
+                LIMIT 1
             ) AS tgl_po_plus_area,
 
             (
-                SELECT SUM(pp.poplus_mc_kg + pp.plus_pck_kg)
-                FROM po_tambahan pp
+                SELECT SUM(ttl_tambahan_kg)
+                FROM total_potambahan tp
+                JOIN po_tambahan pp ON pp.id_total_potambahan = tp.id_total_potambahan
                 JOIN material m2 ON m2.id_material = pp.id_material
+                JOIN master_order mo2 ON mo2.id_order = m2.id_order
                 WHERE m2.id_order = mo.id_order
                 AND m2.item_type = m.item_type
                 AND m2.kode_warna = m.kode_warna
-                GROUP BY m2.id_order, m2.item_type, m2.kode_warna
+                AND pp.status LIKE '%approved%'
             ) AS kg_po_plus,
 
             (
@@ -1015,7 +1020,8 @@ class MaterialModel extends Model
                 WHERE m2.id_order = mo.id_order
                 AND m2.item_type = m.item_type
                 AND m2.kode_warna = m.kode_warna
-                GROUP BY m2.id_order, m2.item_type, m2.kode_warna
+                ORDER BY pp.created_at DESC
+                LIMIT 1
             ) AS delivery_po_plus
         ")
             ->join('master_material mm', 'm.item_type = mm.item_type', 'left')
@@ -1189,6 +1195,7 @@ class MaterialModel extends Model
 
         // Group by yang lebih lengkap
         $builder->groupBy([
+            'master_order.no_model',
             'material.item_type',
             'material.kode_warna',
             'material.color'
