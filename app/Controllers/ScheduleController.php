@@ -42,8 +42,11 @@ class ScheduleController extends BaseController
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
-        if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
-            return redirect()->to(base_url('/login'));
+        $this->filters = ['role' => ['gbn']];
+        if (!in_array($this->role, $this->filters['role'])) {
+            // Redirect and stop execution (constructor cannot safely return a Response object)
+            header('Location: ' . base_url('/login'));
+            exit;
         }
         $this->isLogedin();
     }
@@ -133,6 +136,7 @@ class ScheduleController extends BaseController
         $scheduleDetails = $this->scheduleCelupModel->getScheduleDetails($no_mesin, $tanggal_schedule, $lot_urut);
         if (!empty($scheduleDetails['id_induk'])) {
         }
+        // dd($scheduleDetails);
         foreach ($scheduleDetails as &$item) {
             if (empty($item['id_induk'])) {
                 // Tanpa induk: langsung pakai no_model anak
@@ -140,8 +144,12 @@ class ScheduleController extends BaseController
                     ->where('no_model', $item['no_model'])
                     ->first();
 
-                $item['delivery_awal']  = $masterOrder['delivery_awal'] ?? null;
-                $item['delivery_akhir'] = $masterOrder['delivery_akhir'] ?? null;
+                //Delivery Awal dan Akhir Po Gabungan
+                $modelAnakPoGabung = $this->openPoModel->getNoModelAnakDariPoGabung($item['no_model']);
+                $delivPoGabung = $this->openPoModel->getDelivPoGabungan($modelAnakPoGabung);
+
+                $item['delivery_awal']  = $masterOrder['delivery_awal'] ?? $delivPoGabung['delivery_awal'];
+                $item['delivery_akhir'] = $masterOrder['delivery_akhir'] ?? $delivPoGabung['delivery_akhir'];
             } else {
                 // Ada induk: ambil no_model induk terlebih dahulu
                 $parentPo = $this->openPoModel
@@ -387,6 +395,7 @@ class ScheduleController extends BaseController
             ->where('item_type', $itemType)
             ->where('kode_warna', $kodeWarna)
             ->first();
+        // dd($poCovering);
         // Tentukan no_model induk
         if (empty($poCovering['id_induk'])) {
             $no_model_induk = $poCovering['no_model']; // Sudah induk
@@ -413,12 +422,17 @@ class ScheduleController extends BaseController
             ->select('delivery_awal, delivery_akhir')
             ->where('no_model', $no_model_induk)
             ->first();
-        if (!$deliveryPoCovering) {
-            return $this->response->setJSON([
-                'status' => 'fail',
-                'message' => 'Delivery tidak ditemukan'
-            ]);
-        }
+        // if (!$deliveryPoCovering) {
+        //     return $this->response->setJSON([
+        //         'status' => 'fail',
+        //         'message' => 'Delivery tidak ditemukan'
+        //     ]);
+        // }
+
+        //Delivery Awal dan Akhir Po Gabungan
+        $modelAnakPoGabung = $this->openPoModel->getNoModelAnakDariPoGabung($no_model_induk);
+        $delivPoGabung = $this->openPoModel->getDelivPoGabungan($modelAnakPoGabung);
+        // dd($modelAnakPoGabung);
 
         // Ambil data kg_kebutuhan dari model
         $kg_kebutuhan = $this->openPoModel->getKgKebutuhan($no_model, $itemType, $kodeWarna);
@@ -463,16 +477,16 @@ class ScheduleController extends BaseController
             $poDetails['qty_po'] = $total_qty_po;
             $poDetails['sisa_jatah'] = $sisa_jatah;
             $poDetails['kg_kebutuhan'] = $kg_kebutuhan['kg_po'] ?? 0;
-            $poDetails['delivery_awal'] = $deliveryPoCovering['delivery_awal'] ?? 0;
-            $poDetails['delivery_akhir'] = $deliveryPoCovering['delivery_akhir'] ?? 0;
+            $poDetails['delivery_awal'] = $deliveryPoCovering['delivery_awal'] ?? $delivPoGabung['delivery_awal'];
+            $poDetails['delivery_akhir'] = $deliveryPoCovering['delivery_akhir'] ?? $delivPoGabung['delivery_akhir'];
         } catch (\Exception $e) {
             // Tangani error dan assign fallback value
             $poDetails['start_mesin'] = 'Data Not Found';
             $poDetails['qty_po'] = $total_qty_po;
             $poDetails['sisa_jatah'] = $sisa_jatah;
             $poDetails['kg_kebutuhan'] = $kg_kebutuhan['kg_po'] ?? 0;
-            $poDetails['delivery_awal'] = $deliveryPoCovering['delivery_awal'] ?? 0;
-            $poDetails['delivery_akhir'] = $deliveryPoCovering['delivery_akhir'] ?? 0;
+            $poDetails['delivery_awal'] = $deliveryPoCovering['delivery_awal'] ?? $delivPoGabung['delivery_awal'];
+            $poDetails['delivery_akhir'] = $deliveryPoCovering['delivery_akhir'] ?? $delivPoGabung['delivery_akhir'];
             // Log error
             log_message('error', 'Error fetching API data: ' . $e->getMessage());
         }
@@ -607,8 +621,12 @@ class ScheduleController extends BaseController
                     ->where('no_model', $item['no_model'])
                     ->first();
 
-                $item['delivery_awal']  = $masterOrder['delivery_awal'] ?? null;
-                $item['delivery_akhir'] = $masterOrder['delivery_akhir'] ?? null;
+                //Delivery Awal dan Akhir Po Gabungan
+                $modelAnakPoGabung = $this->openPoModel->getNoModelAnakDariPoGabung($item['no_model']);
+                $delivPoGabung = $this->openPoModel->getDelivPoGabungan($modelAnakPoGabung);
+
+                $item['delivery_awal']  = $masterOrder['delivery_awal'] ?? $delivPoGabung['delivery_awal'];
+                $item['delivery_akhir'] = $masterOrder['delivery_akhir'] ?? $delivPoGabung['delivery_akhir'];
             } else {
                 // Ada induk: ambil no_model induk terlebih dahulu
                 $parentPo = $this->openPoModel
