@@ -626,4 +626,26 @@ class OpenPoModel extends Model
             ->get()
             ->getResult();
     }
+
+    public function getNoModelAnakDariPoGabung($no_model_induk)
+    {
+        return $this->select('anak.no_model')
+            ->from('open_po AS anak')
+            ->join('open_po AS induk', 'anak.id_induk = induk.id_po')
+            ->join('master_order', 'master_order.no_model = anak.no_model')
+            ->where('anak.no_model !=', 'STOCK')
+            ->where('induk.no_model', $no_model_induk)
+            ->orderBy('master_order.delivery_akhir', 'ASC')
+            ->first();
+    }
+    public function getDelivPoGabungan($no_model_anak)
+    {
+        return $this->select('anak.no_model, master_order.delivery_awal, master_order.delivery_akhir')
+            ->from('open_po AS anak')
+            ->join('open_po AS induk', 'anak.id_induk = induk.id_po')
+            ->join('master_order', 'master_order.no_model = anak.no_model')
+            ->where('anak.no_model !=', 'STOCK')
+            ->where('anak.no_model', $no_model_anak)
+            ->first();
+    }
 }
