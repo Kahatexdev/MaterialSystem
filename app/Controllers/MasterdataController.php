@@ -1324,7 +1324,6 @@ class MasterdataController extends BaseController
         }
 
         return redirect()->back()->with('success', $msg);
-        
     }
 
 
