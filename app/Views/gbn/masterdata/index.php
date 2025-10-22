@@ -13,6 +13,17 @@
             });
         </script>
     <?php endif; ?>
+    <?php if (session()->getFlashdata('warning')) : ?>
+        <script>
+            $(document).ready(function() {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Warning!',
+                    html: '<?= session()->getFlashdata('warning') ?>',
+                });
+            });
+        </script>
+    <?php endif; ?>
 
     <?php if (session()->getFlashdata('error')) : ?>
         <script>

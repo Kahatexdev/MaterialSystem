@@ -298,7 +298,7 @@ class MaterialModel extends Model
             $builder->where('material.color', $warna);
         }
 
-        return $builder->groupBy('material.style_size')->findAll();
+        return $builder->groupBy('material.style_size, material.composition')->findAll();
     }
 
     public function getNoModel($noModelOld, $kodeWarna, $term = null)
@@ -870,56 +870,67 @@ class MaterialModel extends Model
 
             -- pengeluaran (pakai benang)
             (
-                SELECT SUM(COALESCE(p.kgs_out, 0))
+                SELECT COALESCE(SUM(p.kgs_out), 0)
                 FROM pengeluaran p
-                JOIN pemesanan pem ON pem.id_total_pemesanan = p.id_total_pemesanan
-                JOIN material mat ON mat.id_material = pem.id_material
-                JOIN master_order mo2 ON mo2.id_order = mat.id_order
-                WHERE mo2.no_model = mo.no_model
-                AND mat.item_type = m.item_type
-                AND mat.kode_warna = m.kode_warna
-                AND p.status = 'Pengiriman Area'
+                WHERE p.status = 'Pengiriman Area'
+                AND p.id_total_pemesanan IN (
+                    SELECT DISTINCT pem.id_total_pemesanan
+                    FROM pemesanan pem
+                    JOIN material mat ON mat.id_material = pem.id_material
+                    WHERE mat.id_order = mo.id_order
+                    AND mat.item_type = m.item_type
+                    AND mat.kode_warna = m.kode_warna
+                )
             ) AS kgs_out,
 
             -- pengeluaran (pakai (+) benang & nylon)
             (
-                SELECT SUM(COALESCE(p.kgs_out, 0))
+                SELECT COALESCE(SUM(p.kgs_out), 0)
                 FROM pengeluaran p
-                JOIN stock s2 ON s2.id_stock = p.id_stock
-                JOIN pemesanan pem ON pem.id_total_pemesanan = p.id_total_pemesanan
-                WHERE s2.no_model = mo.no_model
-                AND s2.item_type = m.item_type
-                AND s2.kode_warna = m.kode_warna
-                AND pem.po_tambahan = '1'
-                AND p.status = 'Pengiriman Area'
+                WHERE p.status = 'Pengiriman Area'
+                AND p.id_total_pemesanan IN (
+                    SELECT DISTINCT pem.id_total_pemesanan
+                    FROM pemesanan pem
+                    JOIN material mat ON mat.id_material = pem.id_material
+                    WHERE mat.id_order = mo.id_order
+                    AND mat.item_type = m.item_type
+                    AND mat.kode_warna = m.kode_warna
+                    AND pem.po_tambahan = '1'
+                )
             ) AS kgs_out_plus,
 
             -- Pengeluaran (Pakai Spandex & Karet)
             (
-                SELECT SUM(COALESCE(p.kgs_out, 0))
+                SELECT COALESCE(SUM(p.kgs_out), 0)
                 FROM pengeluaran p
-                JOIN pemesanan pem ON pem.id_total_pemesanan = p.id_total_pemesanan
-                JOIN material mat ON mat.id_material = pem.id_material
-                JOIN master_order mo2 ON mo2.id_order = mat.id_order
-                WHERE mo2.no_model = mo.no_model
-                AND mat.item_type = m.item_type
-                AND mat.kode_warna = m.kode_warna
+                WHERE p.status = 'Pengiriman Area'
                 AND p.id_psk IS NOT NULL
-                AND pem.po_tambahan = '0'
+                AND p.id_total_pemesanan IN (
+                    SELECT DISTINCT pem.id_total_pemesanan
+                    FROM pemesanan pem
+                    JOIN material mat ON mat.id_material = pem.id_material
+                    WHERE mat.id_order = mo.id_order
+                    AND mat.item_type = m.item_type
+                    AND mat.kode_warna = m.kode_warna
+                    AND pem.po_tambahan = '0'
+                )
             ) AS kgs_out_spandex_karet,
 
             -- Pengeluaran (Pakai (+) Spandex & Karet)
             (
-                SELECT SUM(COALESCE(p.kgs_out, 0))
+                SELECT COALESCE(SUM(p.kgs_out), 0)
                 FROM pengeluaran p
-                JOIN pemesanan pem ON pem.id_total_pemesanan = p.id_total_pemesanan
-                JOIN material mat ON mat.id_material = pem.id_material
-                JOIN master_order mo2 ON mo2.id_order = mat.id_order
-                WHERE mo2.no_model = mo.no_model
-                AND mat.item_type = m.item_type
-                AND mat.kode_warna = m.kode_warna
+                WHERE p.status = 'Pengiriman Area'
                 AND p.id_psk IS NOT NULL
-                AND pem.po_tambahan = '1'
+                AND p.id_total_pemesanan IN (
+                    SELECT DISTINCT pem.id_total_pemesanan
+                    FROM pemesanan pem
+                    JOIN material mat ON mat.id_material = pem.id_material
+                    WHERE mat.id_order = mo.id_order
+                    AND mat.item_type = m.item_type
+                    AND mat.kode_warna = m.kode_warna
+                    AND pem.po_tambahan = '1'
+                )
             ) AS kgs_out_spandex_karet_plus,
 
             -- other_out (pakai_selain_order)
@@ -986,7 +997,8 @@ class MaterialModel extends Model
                 WHERE m2.id_order = mo.id_order
                 AND m2.item_type = m.item_type
                 AND m2.kode_warna = m.kode_warna
-                GROUP BY m2.id_order, m2.item_type, m2.kode_warna
+                ORDER BY pp.tanggal_approve DESC
+                LIMIT 1
             ) AS tgl_terima_po_plus,
 
             (
@@ -996,7 +1008,8 @@ class MaterialModel extends Model
                 WHERE m2.id_order = mo.id_order
                 AND m2.item_type = m.item_type
                 AND m2.kode_warna = m.kode_warna
-                GROUP BY m2.id_order, m2.item_type, m2.kode_warna
+                ORDER BY pp.created_at DESC
+                LIMIT 1
             ) AS tgl_po_plus_area,
 
             (
@@ -1009,7 +1022,6 @@ class MaterialModel extends Model
                 AND m2.item_type = m.item_type
                 AND m2.kode_warna = m.kode_warna
                 AND pp.status LIKE '%approved%'
-                GROUP BY m2.id_material
             ) AS kg_po_plus,
 
             (
@@ -1019,7 +1031,8 @@ class MaterialModel extends Model
                 WHERE m2.id_order = mo.id_order
                 AND m2.item_type = m.item_type
                 AND m2.kode_warna = m.kode_warna
-                GROUP BY m2.id_order, m2.item_type, m2.kode_warna
+                ORDER BY pp.created_at DESC
+                LIMIT 1
             ) AS delivery_po_plus
         ")
             ->join('master_material mm', 'm.item_type = mm.item_type', 'left')

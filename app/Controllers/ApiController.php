@@ -1390,8 +1390,7 @@ class ApiController extends ResourceController
     {
         $noModel = $this->request->getGet('noModel') ?? '';
         $tglBuat = $this->request->getGet('tglBuat') ?? '';
-        // $noModel = '';
-        // $tglBuat = '2025-05-09';
+
         $data = [];
         $listRetur = $this->returModel->filterData($area, $tglBuat, $noModel);
         $material = $this->materialModel->getMaterialForPPH($noModel);
@@ -1486,9 +1485,10 @@ class ApiController extends ResourceController
         $key = $this->request->getGet('key');
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+        $poPlus = $this->request->getGet('po_plus');
 
-        $data = $this->pemasukanModel->getFilterDatangBenang($key, $tanggalAwal, $tanggalAkhir);
-
+        $data = $this->pemasukanModel->getFilterDatangBenang($key, $tanggalAwal, $tanggalAkhir, $poPlus);
+        // dd($data, $poPlus);
         return $this->response->setJSON($data);
     }
     public function filterPoBenang()

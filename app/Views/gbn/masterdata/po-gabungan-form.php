@@ -149,7 +149,7 @@
                                         <!-- Kode Warna -->
                                         <div class="form-group">
                                             <div class="col"><label>Kg Kebutuhan</label>
-                                                <input type="text" class="form-control kg-po" name="items[0][kg_po]" required>
+                                                <input type="number" step="0.01" class="form-control kg-po" name="items[0][kg_po]" placeholder="Kg" required>
                                             </div>
                                         </div>
                                     </div>
@@ -169,7 +169,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <label for="ttl_keb">Celup Stock</label>
-                            <input type="text" class="form-control" name="celup_stock" id="celup_stock">
+                            <input type="number" step="0.01" class="form-control" name="celup_stock" id="celup_stock" placeholder="Kg">
                         </div>
                         <div class="col-md-6">
                             <label for="ttl_keb">Total Kg Kebutuhan</label>
@@ -187,7 +187,7 @@
                 </div>
                 <div class="form-group">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="kg_stock">Bentuk Celup</label>
                             <select class="form-control" name="bentuk_celup" id="bentuk_celup">
                                 <option value="">Pilih Bentuk Celup</option>
@@ -195,13 +195,21 @@
                                 <option value="Hank">Hank</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="ttl_keb">Untuk Produksi</label>
                             <input type="text" class="form-control" name="jenis_produksi" id="jenis_produksi">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="ttl_keb">Contoh Warna</label>
                             <input type="text" class="form-control" name="contoh_warna" id="contoh_warna">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="poPlus">PO (+)</label>
+                            <select class="form-control" name="po_plus" id="po_plus" required>
+                                <option value="">Pilih</option>
+                                <option value="0">Tidak</option>
+                                <option value="1">Ya</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -309,7 +317,7 @@
                         </div>
                         <div class="col-md-6">
                             <label>Kg Kebutuhan</label>
-                            <input type="text" class="form-control kg-po" name="items[${idx}][kg_po]" required>
+                            <input  type="number" step="0.01" class="form-control kg-po" name="items[${idx}][kg_po]" placeholder="Kg" required>
                         </div>
                     </div>
                     <div class="text-center my-2">

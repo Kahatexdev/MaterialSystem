@@ -61,9 +61,9 @@ class MasterOrderModel extends Model
     protected $afterDelete    = [];
 
 
-    public function findIdOrder($no_order)
+    public function findIdOrder($no_order, $no_model)
     {
-        return $this->select('id_order')->where('no_order', $no_order)->first();
+        return $this->select('id_order')->where('no_order', $no_order)->where('no_model', $no_model)->first();
     }
 
     public function checkDatabase($no_order, $no_model, $buyer, $lco_date, $foll_up)
@@ -644,6 +644,7 @@ class MasterOrderModel extends Model
             AND r.item_type = material.item_type
             AND r.area_retur = 'GUDANG BENANG'
             AND kr.tipe_kategori = 'PENGEMBALIAN'
+            AND r.keterangan_gbn LIKE '%Approve%'
         ) AS retur_pb_gbn,
 
         -- retur pb area
@@ -656,6 +657,7 @@ class MasterOrderModel extends Model
             AND r.item_type = material.item_type
             AND r.area_retur <> 'GUDANG BENANG'
             AND kr.tipe_kategori = 'PENGEMBALIAN'
+            AND r.keterangan_gbn LIKE '%Approve%'
         ) AS retur_pb_area,
 
         -- pakai area
@@ -706,6 +708,7 @@ class MasterOrderModel extends Model
             AND r.kode_warna = material.kode_warna
             AND r.item_type = material.item_type
             AND kr.tipe_kategori = 'SIMPAN ULANG'
+            AND r.keterangan_gbn LIKE '%Approve%'
         ) AS retur_stock,
 
         -- retur titip
@@ -717,6 +720,7 @@ class MasterOrderModel extends Model
             AND r.kode_warna = material.kode_warna
             AND r.item_type = material.item_type
             AND kr.tipe_kategori = 'BAHAN BAKU TITIP'
+            AND r.keterangan_gbn LIKE '%Approve%'
         ) AS retur_titip,
 
         -- dipinjam
