@@ -42,11 +42,8 @@ class ScheduleController extends BaseController
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
-        $this->filters = ['role' => ['gbn']];
-        if (!in_array($this->role, $this->filters['role'])) {
-            // Redirect and stop execution (constructor cannot safely return a Response object)
-            header('Location: ' . base_url('/login'));
-            exit;
+        if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
+            return redirect()->to(base_url('/login'));
         }
         $this->isLogedin();
     }
