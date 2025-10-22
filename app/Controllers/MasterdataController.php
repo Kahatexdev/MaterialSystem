@@ -1009,41 +1009,41 @@ class MasterdataController extends BaseController
                     // key fields (jarang berubah, tapi kita catat kalau iya)
                     if (!$eq($old['color'], $payload['color'])) {
                         $diffCols[]    = 'color';
-                        $changesText[] = 'Color: ' . $old['color'] . ' → ' . $payload['color'];
+                        $changesText[] = 'Color: <b>' . $old['color'] . '</b> → <b>' . $payload['color'] . '</b>';
                     }
                     if (!$eq($old['item_type'], $payload['item_type'])) {
                         $diffCols[]    = 'item_type';
-                        $changesText[] = 'ItemType: ' . $old['item_type'] . ' → ' . $payload['item_type'];
+                        $changesText[] = 'ItemType: <b>' . $old['item_type'] . '</b> → <b>' . $payload['item_type'] . '</b>';
                     }
                     if (!$eq($old['kode_warna'], $payload['kode_warna'])) {
                         $diffCols[]    = 'kode_warna';
-                        $changesText[] = 'Kode Warna: ' . $old['kode_warna'] . ' → ' . $payload['kode_warna'];
+                        $changesText[] = 'Kode Warna: <b>' . $old['kode_warna'] . '</b> → <b>' . $payload['kode_warna'] . '</b>';
                     }
                     if (!$eq($old['style_size'], $payload['style_size'])) {
                         $diffCols[]    = 'style_size';
-                        $changesText[] = 'ItemNR: ' . $old['style_size'] . ' → ' . $payload['style_size'];
+                        $changesText[] = 'ItemNR: <b>' . $old['style_size'] . '</b> → <b>' . $payload['style_size'] . '</b>';
                     }
 
                     // value fields (ini yang kamu minta)
                     if (!$eq($old['composition'], $payload['composition'])) {
                         $diffCols[]    = 'composition';
-                        $changesText[] = 'Composition: ' . $old['composition'] . ' → ' . $payload['composition'];
+                        $changesText[] = 'Composition: <b>' . htmlspecialchars($old['composition']) . '</b> → <b>' . htmlspecialchars($payload['composition']) . '</b>';
                     }
                     if (!$eq($old['gw'], $payload['gw'])) {
                         $diffCols[]    = 'gw';
-                        $changesText[] = 'GW: ' . $fmtNum($old['gw'], 2) . ' → ' . $fmtNum($payload['gw'], 2);
+                        $changesText[] = 'GW: <b>'  . $fmtNum($old['gw'], 2)       . '</b> → <b>' . $fmtNum($payload['gw'], 2) . '</b>';
                     }
                     if (!$eq($old['qty_pcs'], $payload['qty_pcs'])) {
                         $diffCols[]    = 'qty_pcs';
-                        $changesText[] = 'Qty: ' . $fmtNum($old['qty_pcs'], 0) . ' → ' . $fmtNum($payload['qty_pcs'], 0);
+                        $changesText[] = 'Qty: <b>' . $fmtNum($old['qty_pcs'], 0) . '</b> → <b>' . $fmtNum($payload['qty_pcs'], 0) . '</b>';
                     }
                     if (!$eq($old['loss'], $payload['loss'])) {
                         $diffCols[]    = 'loss';
-                        $changesText[] = 'Loss: ' . $fmtNum($old['loss'], 2) . ' → ' . $fmtNum($payload['loss'], 2);
+                        $changesText[] = 'Loss: <b>' . $fmtNum($old['loss'], 2) . '</b> → <b>' . $fmtNum($payload['loss'], 2) . '</b>';
                     }
                     if (!$eq($old['kgs'], $payload['kgs'])) {
                         $diffCols[]    = 'kgs';
-                        $changesText[] = 'Kgs: ' . $fmtNum($old['kgs'], 2) . ' → ' . $fmtNum($payload['kgs'], 2);
+                        $changesText[] = 'Kgs: <b>' . $fmtNum($old['kgs'], 2) . '</b> → <b>' . $fmtNum($payload['kgs'], 2) . '</b>';
                     }
 
                     if ($diffCols) {
