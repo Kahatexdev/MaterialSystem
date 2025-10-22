@@ -1241,4 +1241,13 @@ class MaterialModel extends Model
             ->groupBy('item_type, kode_warna, color')
             ->findAll();
     }
+    public function getBBForSummaryPlanner($idOrder)
+    {
+        return $this->where('id_order', $idOrder)
+            ->where('style_size IS NOT NULL')
+            ->where('style_size!=', '')
+            ->groupBy('id_material')
+            ->orderBy('item_type, kode_warna, color')
+            ->findAll();
+    }
 }

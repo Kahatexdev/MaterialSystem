@@ -1792,4 +1792,68 @@ class ApiController extends ResourceController
         $writer->save('php://output');
         exit;
     }
+    public function getBBForSummaryPlanner()
+    {
+        $noModel = $this->request->getGet('no_model');
+        $area = $this->request->getGet('area');
+        if (!$noModel && !$area) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Parameter no_model tidak ditemukan'
+            ]);
+        }
+
+        // Ambil id_order dari tabel master_order
+        $result = $this->masterOrderModel->select('id_order')->where('no_model', $noModel)->first();
+
+        $bb = [];
+
+        // ambil data styleSize by bb
+        $getStyle = $this->materialModel->getBBForSummaryPlanner($result['id_order'], $area);
+
+        foreach ($getStyle as $i => $data) {
+            // 🔹 Buat key unik berdasarkan kombinasi item_type + kode_warna + color
+            $key = $data['item_type'] . '|' . $data['kode_warna'] . '|' . $data['color'];
+
+            // 🔹 Inisialisasi grup jika belum ada
+            if (!isset($bb[$key])) {
+                $bb[$key] = [
+                    'item_type'     => $data['item_type'],
+                    'kode_warna'    => $data['kode_warna'],
+                    'color'         => $data['color'],
+                    'ttl_qty'       => 0,
+                    'ttl_kebutuhan' => 0,
+                ];
+            }
+
+            // 🔹 Ambil qty dari API
+            $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($noModel)
+                . '&style_size=' . urlencode($data['style_size'])
+                . '&area=' . urlencode($area);
+
+            $qtyResponse = @file_get_contents($urlQty);
+            $qtyData     = json_decode($qtyResponse, true);
+            $qty         = intval($qtyData['qty'] ?? 0);
+
+            // 🔹 Hitung kebutuhan bahan baku
+            if ($qty >= 0) {
+                if (isset($data['item_type']) && stripos($data['item_type'], 'JHT') !== false) {
+                    $kebutuhan = $data['kgs'] ?? 0;
+                } else {
+                    $kebutuhan = (($qty * $data['gw'] * $data['composition'] / 100 / 1000) * (1 + ($data['loss'] / 100)));
+                }
+
+                // 🔹 Akumulasi total per grup
+                $bb[$key]['ttl_qty']       += $qty;
+                $bb[$key]['ttl_kebutuhan'] += $kebutuhan;
+            }
+        }
+        log_message('debug', 'inii: ' . json_encode(array_values($bb)));
+
+        // 🔹 Return hasil JSON
+        return $this->response->setJSON([
+            'status' => 'success',
+            'data' => array_values($bb)
+        ]);
+    }
 }
