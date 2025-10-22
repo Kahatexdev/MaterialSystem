@@ -1390,8 +1390,7 @@ class ApiController extends ResourceController
     {
         $noModel = $this->request->getGet('noModel') ?? '';
         $tglBuat = $this->request->getGet('tglBuat') ?? '';
-        // $noModel = '';
-        // $tglBuat = '2025-05-09';
+
         $data = [];
         $listRetur = $this->returModel->filterData($area, $tglBuat, $noModel);
         $material = $this->materialModel->getMaterialForPPH($noModel);
