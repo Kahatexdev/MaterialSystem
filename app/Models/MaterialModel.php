@@ -298,7 +298,7 @@ class MaterialModel extends Model
             $builder->where('material.color', $warna);
         }
 
-        return $builder->groupBy('material.style_size')->findAll();
+        return $builder->groupBy('material.style_size, material.composition')->findAll();
     }
 
     public function getNoModel($noModelOld, $kodeWarna, $term = null)
