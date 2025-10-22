@@ -211,7 +211,7 @@ class PemasukanModel extends Model
             ->groupBy('out_celup.id_out_celup, bon_celup.id_bon, out_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna');
 
         // Filter PO(+) jika checkbox dicentang
-        if ($poPlus !== null && $poPlus !== '') {
+        if (!empty($poPlus)) {
             $builder1->where('other_bon.po_tambahan', $poPlus);
             $builder2->where('schedule_celup.po_plus', $poPlus);
         }

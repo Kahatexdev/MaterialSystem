@@ -54,13 +54,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($detail as $data):
-                            $no = 1;
+                        <?php
+                        $no = 1;
+                        foreach ($detail as $data):
                         ?>
                             <tr>
                                 <td><?= $no++ ?></td>
                                 <td><?= $data['style_size'] ?></td>
-                                <td><?= number_format($data['po_plus'] + $data['po_plus'], 2) ?></td>
+                                <td><?= number_format($data['po_plus'], 2) ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
