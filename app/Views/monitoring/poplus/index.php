@@ -94,7 +94,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kg Po Tambahan</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cns Po Tambahan</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Sisa Bahan Baku di Mesin</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder" colspan="2">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -115,9 +115,15 @@
                                 <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= $data['sisa_bb_mc'] ?></td>
 
                                 <td style="<?= $isNotApproved ? 'color:red;' : '' ?>">
-                                    <!-- <a href="<?= base_url($role . '/poplus/detail?area=' . $data['admin'] . '&tgl_poplus=' . $data['tgl_poplus'] . '&no_model=' . $data['no_model'] . '&item_type=' . $data['item_type'] . '&kode_warna=' . $data['kode_warna'] . '&warna=' . $data['color'] . '&status=' . $data['status']) ?>" class="btn btn-info btn-sm">
+                                    <a href="<?= base_url($role . '/poplus/detail?area=' . $data['admin'] . '&tgl_poplus=' . $data['tgl_poplus'] . '&no_model=' . $data['no_model'] . '&item_type=' . $data['item_type'] . '&kode_warna=' . $data['kode_warna'] . '&warna=' . $data['color'] . '&status=' . $data['status']) ?>" class="btn btn-info btn-sm">
                                         Detail
-                                    </a> -->
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="<?= base_url($role . '/poplus/editPoTambahan?area=' . $data['admin'] . '&tgl_poplus=' . $data['tgl_poplus'] . '&no_model=' . $data['no_model'] . '&item_type=' . $data['item_type'] . '&kode_warna=' . $data['kode_warna'] . '&warna=' . $data['color'] . '&status=' . $data['status']) ?>" class="btn btn-info btn-sm">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+
                                 </td>
                             </tr>
                         <?php endforeach; ?>

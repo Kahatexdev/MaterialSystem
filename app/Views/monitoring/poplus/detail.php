@@ -60,7 +60,7 @@
                             <tr>
                                 <td><?= $no++ ?></td>
                                 <td><?= $data['style_size'] ?></td>
-                                <td><?= number_format($data['poplus_mc_kg'] + $data['plus_pck_kg'], 2) ?></td>
+                                <td><?= number_format($data['po_plus'] + $data['po_plus'], 2) ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
