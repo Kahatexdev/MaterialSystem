@@ -3550,76 +3550,160 @@ class WarehouseController extends BaseController
         return view($this->role . '/warehouse/detail-other-barcode', $data);
     }
 
+    // public function hapusPengeluaranJalur()
+    // {
+    //     $idPengeluaran = $this->request->getPost('id_pengeluaran');
+    //     $idOutCelup    = $this->request->getPost('id_out_celup');
+    //     $idStock       = $this->request->getPost('id_stock');
+    //     $kgsOut        = (float) $this->request->getPost('kgs_out');
+    //     $cnsOut        = (float) $this->request->getPost('cns_out');
+    //     $krgOut        = (float) $this->request->getPost('krg_out');
+    //     $lotOut        = $this->request->getPost('lot_out');
+
+    //     // dd ($idPengeluaran, $idOutCelup, $idStock, $kgsOut, $cnsOut, $krgOut, $lotOut);
+    //     if ($idPengeluaran && $idOutCelup && $idStock) {
+    //         $this->db->transStart();
+
+    //         $this->pengeluaranModel
+    //             ->where('status', 'Pengeluaran Jalur')
+    //             ->where('id_pengeluaran', $idPengeluaran)
+    //             ->delete();
+
+    //         if ($krgOut > 0) {
+    //             $this->pemasukanModel
+    //                 ->where('id_out_celup', $idOutCelup)
+    //                 ->set('out_jalur', '0')
+    //                 ->update();
+    //         }
+
+    //         $select = $this->stockModel
+    //             ->select('kgs_in_out, cns_in_out, krg_in_out, lot_stock')
+    //             ->where('id_stock', $idStock)
+    //             ->where('lot_stock', $lotOut)
+    //             ->first();
+
+    //         if (!empty($select)) {
+    //             $cobaa = $this->stockModel
+    //                 ->where('id_stock', $idStock)
+    //                 ->where('lot_stock', $lotOut)
+    //                 ->set([
+    //                     'kgs_in_out' => $select['kgs_in_out'] + $kgsOut,
+    //                     'cns_in_out' => $select['cns_in_out'] + $cnsOut,
+    //                     'krg_in_out' => $select['krg_in_out'] + $krgOut
+    //                 ])
+    //                 ->update();
+    //         } else {
+    //             $coba = $this->stockModel
+    //                 ->where('id_stock', $idStock)
+    //                 ->where('lot_awal', $lotOut)
+    //                 ->set([
+    //                     'kgs_stock_awal' => $select['kgs_stock_awal'] + $kgsOut,
+    //                     'cns_stock_awal' => $select['cns_stock_awal'] + $cnsOut,
+    //                     'krg_stock_awal' => $select['krg_stock_awal'] + $krgOut
+    //                 ])
+    //                 ->update();
+    //         }
+
+
+    //         $this->db->transComplete();
+
+    //         if ($this->db->transStatus() === false) {
+    //             return $this->response->setJSON([
+    //                 'status' => 'error',
+    //                 'message' => 'Gagal menghapus data.'
+    //             ]);
+    //         } else {
+    //             return $this->response->setJSON([
+    //                 'status' => 'success',
+    //                 'message' => 'Data pengeluaran jalur berhasil dihapus.'
+    //             ]);
+    //         }
+    //     }
+
+    //     return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak lengkap']);
+    // }
+
     public function hapusPengeluaranJalur()
     {
         $idPengeluaran = $this->request->getPost('id_pengeluaran');
         $idOutCelup    = $this->request->getPost('id_out_celup');
         $idStock       = $this->request->getPost('id_stock');
-        $kgsOut        = (float) $this->request->getPost('kgs_out');
-        $cnsOut        = (float) $this->request->getPost('cns_out');
-        $krgOut        = (float) $this->request->getPost('krg_out');
         $lotOut        = $this->request->getPost('lot_out');
 
-        if ($idPengeluaran && $idOutCelup && $idStock) {
-            $this->db->transStart();
+        $kgsOut = (float) ($this->request->getPost('kgs_out') ?? 0);
+        $cnsOut = (float) ($this->request->getPost('cns_out') ?? 0);
+        $krgOut = (float) ($this->request->getPost('krg_out') ?? 0);
 
-            $this->pengeluaranModel
-                ->where('status', 'Pengeluaran Jalur')
-                ->where('id_pengeluaran', $idPengeluaran)
-                ->delete();
+        if (!($idPengeluaran && $idOutCelup && $idStock && $lotOut)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak lengkap']);
+        }
 
-            if ($krgOut > 0) {
-                $this->pemasukanModel
-                    ->where('id_out_celup', $idOutCelup)
-                    ->set('out_jalur', '0')
-                    ->update();
-            }
+        $db = \Config\Database::connect();
+        $db->transStart();
 
-            $select = $this->stockModel
-                ->select('kgs_in_out, cns_in_out, krg_in_out, lot_stock')
+        // 1) Hapus baris pengeluaran yang dimaksud (status: Pengeluaran Jalur)
+        $this->pengeluaranModel
+            ->where('id_pengeluaran', $idPengeluaran)
+            ->where('status', 'Pengeluaran Jalur')
+            ->delete();
+
+        // 2) Jika sebelumnya menandai pemasukan sebagai out_jalur, reset ke 0 (opsional: pakai krgOut sebagai sinyal)
+        if ($krgOut > 0) {
+            $this->pemasukanModel
+                ->where('id_out_celup', $idOutCelup)
+                ->set('out_jalur', '0')
+                ->update();
+        }
+
+        // 3) ROLLBACK stok: karena kita MENGHAPUS pengeluaran, maka NILAI DIKURANGI dari pencatatan out/in yang sebelumnya ditambahkan.
+        //    Coba ke lot_stock (kolom *_in_out).
+        $this->stockModel
+            ->where('id_stock', $idStock)
+            ->where('lot_stock', $lotOut)
+            ->set('kgs_in_out', 'COALESCE(kgs_in_out,0) + ' . $kgsOut, false)
+            ->set('cns_in_out', 'COALESCE(cns_in_out,0) + ' . $cnsOut, false)
+            ->set('krg_in_out', 'COALESCE(krg_in_out,0) + ' . $krgOut, false)
+            ->update();
+
+        // Jika tidak ada baris yang kena, fallback ke lot_awal (kolom *_stock_awal)
+        if ($db->affectedRows() === 0) {
+            $this->stockModel
                 ->where('id_stock', $idStock)
-                ->where('lot_stock', $lotOut)
-                ->first();
+                ->where('lot_awal', $lotOut)
+                ->set('kgs_stock_awal', 'COALESCE(kgs_stock_awal,0) + ' . $kgsOut, false)
+                ->set('cns_stock_awal', 'COALESCE(cns_stock_awal,0) + ' . $cnsOut, false)
+                ->set('krg_stock_awal', 'COALESCE(krg_stock_awal,0) + ' . $krgOut, false)
+                ->update();
 
-            if ($select) {
-                $this->stockModel
-                    ->where('id_stock', $idStock)
-                    ->where('lot_stock', $lotOut)
-                    ->set([
-                        'kgs_in_out' => $select['kgs_in_out'] + $kgsOut,
-                        'cns_in_out' => $select['cns_in_out'] + $cnsOut,
-                        'krg_in_out' => $select['krg_in_out'] + $krgOut
-                    ])
-                    ->update();
-            } else {
-                $this->stockModel
-                    ->where('id_stock', $idStock)
-                    ->where('lot_awal', $lotOut)
-                    ->set([
-                        'kgs_stock_awal' => $select['kgs_stock_awal'] + $kgsOut,
-                        'cns_stock_awal' => $select['cns_stock_awal'] + $cnsOut,
-                        'krg_stock_awal' => $select['krg_stock_awal'] + $krgOut
-                    ])
-                    ->update();
-            }
-
-            $this->db->transComplete();
-
-            if ($this->db->transStatus() === false) {
+            // Jika tetap 0 baris terpengaruh, anggap data referensinya tidak ditemukan → batalkan transaksi
+            if ($db->affectedRows() === 0) {
+                $db->transComplete(); // menyelesaikan supaya bisa rollback status dibaca
+                if ($db->transStatus() !== false) {
+                    // Paksa rollback manual jika environment tidak otomatis rollback
+                    $db->transRollback();
+                }
                 return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'Gagal menghapus data.'
-                ]);
-            } else {
-                return $this->response->setJSON([
-                    'status' => 'success',
-                    'message' => 'Data pengeluaran jalur berhasil dihapus.'
+                    'status'  => 'error',
+                    'message' => 'Stok untuk lot tersebut tidak ditemukan (lot_stock / lot_awal).'
                 ]);
             }
         }
 
-        return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak lengkap']);
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Gagal menghapus data.'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Data pengeluaran jalur berhasil dihapus & stok sudah di-rollback.'
+        ]);
     }
+
 
     public function reportDatangNylon()
     {
