@@ -377,7 +377,8 @@
                                         data-id-stock="${id.id_stock}" 
                                         data-kgs-out="${id.kgs_out}" 
                                         data-cns-out="${id.cns_out}" 
-                                        data-krg-out="${id.krg_out}">
+                                        data-krg-out="${id.krg_out}"
+                                        data-lot-out="${id.lot_out}">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
