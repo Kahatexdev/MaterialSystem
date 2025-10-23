@@ -225,7 +225,15 @@ class PoGabunganController extends BaseController
 
             $kgPo = (float) $it['kg_po']; // Konversi kg_po menjadi float untuk penghitungan
             $noModel = $noModelMap[$modelId] ?? ''; // Cari no_model berdasarkan modelId
-            $ket .= "$noModel = $kgPo";
+            $unit = $this->masterOrderModel->select('unit')->where('no_model', $noModel)->first();
+            $unitValue = $unit['unit'] ?? null;
+
+            if ($unitValue === 'MAJALAYA') {
+                $ket .= "$noModel = $kgPo (MAJALAYA)";
+            } else {
+                $ket .= "$noModel = $kgPo";
+            }
+
             // Tambahkan '/' kecuali untuk data terakhir
             if ($idx < count($data['items']) - 1) {
                 $ket .= ' / ';
