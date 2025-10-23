@@ -277,6 +277,7 @@
                     'capacity'   => 'Capacity',
                     'rosso'      => 'Rosso',
                     'gbn'        => 'GBN',
+                    'celup'      => 'Celup Cones',
                     'monitoring' => 'Monitoring Bahan Baku',
                 ];
                 $displayRole = $roleMap[$p['target_role']] ?? $p['target_role'];
