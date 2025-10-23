@@ -229,7 +229,7 @@ class PoGabunganController extends BaseController
             $unitValue = $unit['unit'] ?? null;
 
             if ($unitValue === 'MAJALAYA') {
-                $ket .= "$noModel = $kgPo (MAJALAYA)";
+                $ket .= "$noModel (MAJALAYA) = $kgPo";
             } else {
                 $ket .= "$noModel = $kgPo";
             }
