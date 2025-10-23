@@ -1033,6 +1033,7 @@ $routes->group(
         $routes->get('apiexportGlobalReport/(:any)', 'ExcelController::apiexportGlobalReport/$1');
         $routes->get('getKgTambahan', 'ApiController::getKgTambahan');
         $routes->get('getPemesananByAreaModel', 'ApiController::getPemesananByAreaModel');
+        $routes->get('getTotalRetur', 'ApiController::getTotalRetur');
         $routes->get('getReturByAreaModel', 'ApiController::getReturByAreaModel');
         $routes->get('getKgPoTambahan', 'ApiController::getKgPoTambahan');
         $routes->get('getMaterialByNoModel/(:any)', 'ApiController::getMaterialByNoModel/$1');
