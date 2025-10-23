@@ -94,7 +94,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kg Po Tambahan</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cns Po Tambahan</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Sisa Bahan Baku di Mesin</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder" colspan="2">Action</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -114,17 +114,16 @@
                                 <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= $data['cns_poplus'] ?></td>
                                 <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= $data['sisa_bb_mc'] ?></td>
 
-                                <td style="<?= $isNotApproved ? 'color:red;' : '' ?>">
+                                <!-- <td style="<?= $isNotApproved ? 'color:red;' : '' ?>">
                                     <a href="<?= base_url($role . '/poplus/detail?area=' . $data['admin'] . '&tgl_poplus=' . $data['tgl_poplus'] . '&no_model=' . $data['no_model'] . '&item_type=' . $data['item_type'] . '&kode_warna=' . $data['kode_warna'] . '&warna=' . $data['color'] . '&status=' . $data['status']) ?>" class="btn btn-info btn-sm">
                                         Detail
                                     </a>
-                                </td>
+                                </td> -->
                                 <td>
                                     <button type="button" class="btn btn-warning update-btn" data-bs-toggle="modal" data-bs-target="#updateListModal"
                                         data-area="<?= $data['admin'] ?>" data-tgl="<?= $data['tgl_poplus'] ?>">
                                         <i class="fa fa-edit fa-lg"></i>
                                     </button>
-
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -163,7 +162,7 @@
                                 <input type="text" class="form-control" name="area" readonly>
                             </div>
                             <div class="col-lg-4">
-                                <label for="recipient-name" class="col-form-label text-center">Tgl Pakai</label>
+                                <label for="recipient-name" class="col-form-label text-center">Tgl PO(+)</label>
                                 <input type="date" class="form-control" name="tgl_pakai">
                             </div>
                             <div class="col-lg-4">
@@ -173,26 +172,62 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-lg-6">
+                            <div class="col-lg-4">
                                 <label for="recipient-name" class="col-form-label text-center">Item Type</label>
                                 <input type="text" class="form-control" name="item_type" readonly>
                             </div>
-                            <div class="col-lg-6">
+                            <div class="col-lg-4">
                                 <label for="recipient-name" class="col-form-label text-center">Kode Warna</label>
                                 <input type="text" class="form-control" name="kode_warna" readonly>
                             </div>
-                        </div>
-
-                        <div class="row">
                             <div class="col-lg-4">
                                 <label for="recipient-name" class="col-form-label text-center">Color</label>
                                 <input type="text" class="form-control" name="color" readonly>
                             </div>
-                            <div class="col-lg-4">
-                                <label for="recipient-name" class="col-form-label text-center">Lot</label>
-                                <input type="text" class="form-control" name="lot">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <label for="recipient-name" class="col-form-label text-center">PO (Kg)</label>
+                                <input type="text" class="form-control" name="po_kg">
                             </div>
-                            <div class="col-lg-4">
+                            <div class="col-lg-3">
+                                <label for="recipient-name" class="col-form-label text-center">Terima (Kg)</label>
+                                <input type="text" class="form-control" name="terima_kg">
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="recipient-name" class="col-form-label text-center">Sisa Jatah (Kg)</label>
+                                <input type="text" class="form-control" name="sisa_jatah">
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="recipient-name" class="col-form-label text-center">Sisa BB di Mesin (Kg)</label>
+                                <input type="text" class="form-control" name="sisa_bb_mc">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <label for="recipient-name" class="col-form-label text-center">(+) Mesin Cns</label>
+                                <input type="text" class="form-control" name="tambahan_mesin">
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="recipient-name" class="col-form-label text-center">(+) Packing Cns</label>
+                                <input type="text" class="form-control" name="tambahan_pck">
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="recipient-name" class="col-form-label text-center">Loss Aktual</label>
+                                <input type="text" class="form-control" name="loss_aktual">
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="recipient-name" class="col-form-label text-center">Loss Tambahan</label>
+                                <input type="text" class="form-control" name="loss_tambahan">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <label for="recipient-name" class="col-form-label text-center">Delivery PO(+)</label>
+                                <input type="date" class="form-control" name="delivery_po_tambahan">
+                            </div>
+                            <div class="col-lg-9">
                                 <label for="recipient-name" class="col-form-label text-center">Keterangan</label>
                                 <textarea class="form-control" name="keterangan"></textarea>
                             </div>
@@ -205,22 +240,8 @@
                             <div class="col-lg-3">
                                 <label for="recipient-name" class="col-form-label text-center">Style Size</label>
                             </div>
-                            <div class="col-lg-1">
-                                <label for="recipient-name" class="col-form-label text-center">Jl Mc</label>
-                            </div>
-                            <div class="col-lg-2">
-                                <label for="recipient-name" class="col-form-label text-center">Qty Cones</label>
-                            </div>
-                            <div class="col-lg-2">
-                                <label for="recipient-name" class="col-form-label text-center">Ttl Qty Cones</label>
-                            </div>
-                            <div class="col-lg-2">
-                                <label for="recipient-name" class="col-form-label text-center">Berat Cones</label>
-                            </div>
-                            <div class="col-lg-2">
-                                <label for="recipient-name" class="col-form-label text-center"> Ttl Berat Cones</label>
-                            </div>
                         </div>
+
                         <div id="dataPerstyle">
                             <!-- data perstyle muncul di sini -->
                         </div>
@@ -329,72 +350,49 @@
 
                         dataPerstyle += `
                             <div class="col-lg-12">
-                                <div class="row mb-1">
-                                <input type="hidden" class="form-control id_material" name="items[${index}][id_total_pemesanan]" value="${item.id_total_pemesanan}" readonly>
-                                <input type="hidden" class="form-control id_material" name="items[${index}][id_material]" value="${item.id_material}" readonly>
-                                <input type="hidden" class="form-control id_pemesanan" name="items[${index}][id_pemesanan]" value="${item.id_pemesanan}" readonly>
-                                <div class="col-lg-3">
-                                    <input type="text" class="form-control style" name="items[${index}][style]" value="${item.style_size}" readonly>
+                                <div class="row">
+                                    <div class="col-lg-1">
+                                        <label for="recipient-name" class="col-form-label text-center">Composition(%)</label>
+                                    </div>
+                                    <div class="col-lg-1">
+                                        <label for="recipient-name" class="col-form-label text-center">GW Aktual</label>
+                                    </div>
+                                    <div class="col-lg-1">
+                                        <label for="recipient-name" class="col-form-label text-center">Po(Kg)</label>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <label for="recipient-name" class="col-form-label text-center">Sisa Order(Pcs)</label>
+                                    </div>
+                                    <div class="col-lg-1">
+                                        <label for="recipient-name" class="col-form-label text-center">Bs Mesin(Kg)</label>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <label for="recipient-name" class="col-form-label text-center">Bs Setting(Pcs)</label>
+                                    </div>
+                                    <div class="col-lg-1">
+                                        <label for="recipient-name" class="col-form-label text-center">PO(+) Mesin (Kg)</label>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <label for="recipient-name" class="col-form-label text-center">(+)Packing (Pcs)</label>
+                                    </div>
+                                    <div class="col-lg-1">
+                                        <label for="recipient-name" class="col-form-label text-center">(+)Packing (Kg)</label>
+                                    </div>
                                 </div>
-                                <div class="col-lg-1">
-                                    <input type="number" class="form-control jalan_mc" name="items[${index}][jalan_mc]" value="${item.jl_mc}">
-                                </div>
-                                <div class="col-lg-2">
-                                    <input type="number" class="form-control qty_cns" name="items[${index}][qty_cns]" value="${item.qty_cns}">
-                                </div>
-                                <div class="col-lg-2">
-                                    <input type="text" class="form-control ttl_qty_cns" name="items[${index}][ttl_qty_cns]" value="${item.ttl_qty_cones}" readonly>
-                                </div>
-                                <div class="col-lg-2">
-                                    <input type="number" step="0.01" class="form-control qty_berat_cns" name="items[${index}][qty_berat_cns]" value="${parseFloat(item.qty_berat_cns).toFixed(2)}">
-                                </div>
-                                <div class="col-lg-2">
-                                    <input type="text" class="form-control ttl_berat_cns" name="items[${index}][ttl_berat_cns]" value="${parseFloat(item.ttl_berat_cones).toFixed(2)}" readonly>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <label for="recipient-name" class="col-form-label text-center">Total PO Tambahan (Kg)</label>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <label for="recipient-name" class="col-form-label text-center">Total PO Tambahan (Cns)</label>
+                                    </div>
                                 </div>
                             </div>
                             `;
                         totalRows++;
                     });
-
-                    // Hitung rata-rata jalan_mc
-                    // const sisaCnsMc = totalRows > 0 ? (sisaCns / totalRows) : 0;
-                    // const sisaKgMc = totalRows > 0 ? (sisaKg / totalRows) : 0;
-                    const ttl_cns_pesan = sisaCns > 0 ? cns_pesan - sisaCns : cns_pesan;
-                    const ttl_kg_pesan = sisaKg > 0 ? kg_pesan - sisaKg : kg_pesan;
-                    dataPerstyle += `
-                            <div class="row mt-1">
-                                <div class="col-lg-6">
-                                    <label for="recipient-name" class="col-form-label text-center">Stock Area</label>
-                                </div>
-                                <div class="col-lg-2">
-                                    <input type="number" class="form-control sisa_cns" name="sisa_cns" value="${sisaCns}">
-                                </div>
-                                <div class="col-lg-2">
-                                    
-                                </div>
-                                <div class="col-lg-2">
-                                    <input type="number" step="0.01" class="form-control sisa_kg" name="sisa_kg" value="${parseFloat(sisaKg).toFixed(2)}">
-                                </div>
-                            </div>
-                            <div class="row mt-1">
-                                <div class="col-lg-3">
-                                    <label for="recipient-name" class="col-form-label text-center">Total</label>
-                                </div>
-                                <div class="col-lg-1">
-                                    <input type="text" class="form-control ttl_jl_mc" name="ttl_jl_mc" value="${ttl_jl_mc}" readonly>
-                                </div>
-                                <div class="col-lg-2">
-                                </div>
-                                <div class="col-lg-2">
-                                <input type="text" class="form-control ttl_cns_pesan" name="ttl_cns_pesan" value="${ttl_cns_pesan}" readonly>
-                                </div>
-                                <div class="col-lg-2">
-                                </div>
-                                <div class="col-lg-2">
-                                    <input type="text" class="form-control ttl_kg_pesan" name="ttl_kg_pesan" value="${parseFloat(ttl_kg_pesan).toFixed(2)}" readonly>
-                                </div>
-                            </div>
-                        `;
                     $('#dataPerstyle').html(dataPerstyle); // Ganti isi elemen di modal
 
                     // Kalkulasi otomatis

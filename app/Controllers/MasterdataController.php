@@ -744,8 +744,8 @@ class MasterdataController extends BaseController
         // ===== 4) Ambil header Master Order (lebih toleran lokasi sel) =====
         try {
             // Flexible: cari di beberapa kandidat sel (fallback ke pencarian label di sekitar)
-            $c_get = fn ($addr) => $sheet->getCell($addr) ? ($sheet->getCell($addr)->getCalculatedValue() ?? '') : '';
-            $c_getFmt = fn ($addr) => $sheet->getCell($addr) ? ($sheet->getCell($addr)->getFormattedValue() ?? '') : '';
+            $c_get = fn($addr) => $sheet->getCell($addr) ? ($sheet->getCell($addr)->getCalculatedValue() ?? '') : '';
+            $c_getFmt = fn($addr) => $sheet->getCell($addr) ? ($sheet->getCell($addr)->getFormattedValue() ?? '') : '';
 
             // Lokasi default sesuai kode awal
             $raw_no_model = $stripLabel($c_get('B9'));
@@ -1059,7 +1059,7 @@ class MasterdataController extends BaseController
                             'item_type'          => $payload['item_type'],
                             'kode_warna'         => $payload['kode_warna'],
                             'color'              => $payload['color'],
-                            'changed'            => array_map(fn ($c) => $LABELS[$c], $diffCols),
+                            'changed'            => array_map(fn($c) => $LABELS[$c], $diffCols),
 
                             // nilai lama (untuk konsumsi UI/CSV)
                             'prev_qty_pcs'       => $old['qty_pcs'],
@@ -1119,7 +1119,7 @@ class MasterdataController extends BaseController
                 }
                 if ($toDisableIds) {
                     foreach (array_chunk($toDisableIds, $BATCH_SIZE) as $chunk) {
-                        $rows = array_map(fn ($id) => [
+                        $rows = array_map(fn($id) => [
                             'id_material' => $id,
                             'composition' => 0,
                             'gw'          => 0,
@@ -1239,7 +1239,7 @@ class MasterdataController extends BaseController
                         'prev_item_type'  => $rem['item_type'],
                         'prev_kode_warna' => $rem['kode_warna'],
                         'prev_color'      => $rem['color'],
-                        'changed'         => array_map(fn ($c) => $LABELS[$c], $diffCols),
+                        'changed'         => array_map(fn($c) => $LABELS[$c], $diffCols),
                         'note'            => implode('; ', $changesText),
                     ];
                 }
