@@ -848,7 +848,7 @@ class MasterOrderModel extends Model
             // ->where('material.qty_pcs !=', 0)
             // ->where('material.loss !=', 0)
             // ->where('material.kgs >', 0)
-            ->groupBy(['material.item_type', 'material.kode_warna', 'material.style_size'])
+            ->groupBy(['material.item_type', 'material.kode_warna', 'material.style_size', 'material.composition'])
             ->orderBy('material.item_type')
             ->findAll();
         // Susun data menjadi terstruktur

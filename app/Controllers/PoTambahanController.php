@@ -314,4 +314,8 @@ class PoTambahanController extends BaseController
             return redirect()->to(base_url($this->role . '/poplus'))->with('error', 'Data Po Tambahan Gagal ditolak.');
         }
     }
+    public function editPoTambahan()
+    {
+        $tglPo = $this->request->getGet('tgl_poplus');
+    }
 }
