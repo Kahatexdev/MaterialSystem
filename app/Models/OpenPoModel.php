@@ -466,6 +466,7 @@ class OpenPoModel extends Model
         return $this->select('DISTINCT open_po.id_po, open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, open_po.kg_po, GROUP_CONCAT(DISTINCT open_po.keterangan) AS keterangan, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, open_po.bentuk_celup, open_po.kg_percones, open_po.jumlah_cones, open_po.jenis_produksi, open_po.ket_celup, master_material.jenis, master_material.ukuran, material.kgs', false)
             ->like('open_po.no_model', 'POGABUNGAN')
             ->where('open_po.penerima', $penerima)
+            ->where('open_po.created_at >=', date('Y-m-d H:i:s', strtotime('-14 days')))
             ->groupStart()
             ->where('master_material.jenis', $jenis)
             ->orWhere('master_material.jenis', $jenis2)
@@ -475,11 +476,12 @@ class OpenPoModel extends Model
             ->join('material', 'material.item_type=open_po.item_type', 'left')
             // ->join('stock', 'stock.no_model=open_po.no_model', 'left')
             ->groupBy('open_po.id_po, open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color')
+            ->orderBy('open_po.created_at', 'DESC')
             ->findAll();
     }
     public function listOpenPoGabungbyDate($jenis, $jenis2, $penerima, $startDate, $endDate)
     {
-        return $this->select('DISTINCT open_po.id_po, open_po.no_model, open_po.item_type, open_po.spesifikasi_benang, open_po.kode_warna, open_po.color, open_po.kg_po, GROUP_CONCAT(DISTINCT open_po.keterangan) AS keterangan, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, open_po.bentuk_celup, open_po.kg_percones, open_po.jumlah_cones, open_po.jenis_produksi, open_po.ket_celup, open_po.admin, master_material.jenis, master_material.ukuran, material.kgs, open_po.contoh_warna', false)
+        return $this->select('DISTINCT open_po.id_po, open_po.no_model, open_po.item_type, open_po.spesifikasi_benang, open_po.kode_warna, open_po.color, open_po.kg_po, GROUP_CONCAT(DISTINCT open_po.keterangan) AS keterangan, open_po.penanggung_jawab, DATE(open_po.created_at) AS tgl_po, open_po.bentuk_celup, open_po.kg_percones, open_po.jumlah_cones, open_po.jenis_produksi, open_po.ket_celup, open_po.admin, master_material.jenis, master_material.ukuran, material.kgs, open_po.contoh_warna, master_order.unit', false)
             ->like('open_po.no_model', 'POGABUNGAN')
             ->where('open_po.penerima', $penerima)
             ->where('DATE(open_po.created_at) >=', $startDate)
@@ -625,5 +627,27 @@ class OpenPoModel extends Model
             ->where('DATE(open_po.created_at)', $tgl_po)
             ->get()
             ->getResult();
+    }
+
+    public function getNoModelAnakDariPoGabung($no_model_induk)
+    {
+        return $this->select('anak.no_model')
+            ->from('open_po AS anak')
+            ->join('open_po AS induk', 'anak.id_induk = induk.id_po')
+            ->join('master_order', 'master_order.no_model = anak.no_model')
+            ->where('anak.no_model !=', 'STOCK')
+            ->where('induk.no_model', $no_model_induk)
+            ->orderBy('master_order.delivery_akhir', 'ASC')
+            ->first();
+    }
+    public function getDelivPoGabungan($no_model_anak)
+    {
+        return $this->select('anak.no_model, master_order.delivery_awal, master_order.delivery_akhir')
+            ->from('open_po AS anak')
+            ->join('open_po AS induk', 'anak.id_induk = induk.id_po')
+            ->join('master_order', 'master_order.no_model = anak.no_model')
+            ->where('anak.no_model !=', 'STOCK')
+            ->where('anak.no_model', $no_model_anak)
+            ->first();
     }
 }

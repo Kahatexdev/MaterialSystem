@@ -944,6 +944,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     //Retur
     $routes->get('retur', 'ReturController::returArea');
     $routes->get('retur', 'ReturController::index');
+    $routes->get('retur/listRetur', 'ReturController::listRetur');
+    $routes->get('retur/cekBahanBaku', 'ReturController::cekBahanBaku');
+    $routes->get('retur/getPengirimanArea', 'ReturController::getPengirimanArea');
     $routes->post('retur/approve', 'ReturController::approve');
     $routes->post('retur/reject', 'ReturController::reject');
     $routes->get('retur/listBarcodeRetur', 'ReturController::listBarcodeRetur');
@@ -1033,6 +1036,7 @@ $routes->group(
         $routes->get('apiexportGlobalReport/(:any)', 'ExcelController::apiexportGlobalReport/$1');
         $routes->get('getKgTambahan', 'ApiController::getKgTambahan');
         $routes->get('getPemesananByAreaModel', 'ApiController::getPemesananByAreaModel');
+        $routes->get('getTotalRetur', 'ApiController::getTotalRetur');
         $routes->get('getReturByAreaModel', 'ApiController::getReturByAreaModel');
         $routes->get('getKgPoTambahan', 'ApiController::getKgPoTambahan');
         $routes->get('getMaterialByNoModel/(:any)', 'ApiController::getMaterialByNoModel/$1');
