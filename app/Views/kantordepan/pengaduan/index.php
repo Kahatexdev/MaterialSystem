@@ -93,6 +93,7 @@
                         <option value="user">Area</option>
                         <option value="rosso">Rosso</option>
                         <option value="gbn">GBN</option>
+                        <option value="celup">Celup Cones</option>
                         <option value="sudo">Monitoring Planning & Produksi</option>
                         <option value="monitoring">Monitoring Bahan Baku</option>
                     </select>
