@@ -1792,4 +1792,26 @@ class ApiController extends ResourceController
         $writer->save('php://output');
         exit;
     }
+    public function getBBForSummaryPlanner()
+    {
+        $noModel = $this->request->getGet('no_model');
+        $area = $this->request->getGet('area');
+        if (!$noModel && !$area) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Parameter no_model tidak ditemukan'
+            ]);
+        }
+
+        // Ambil id_order dari tabel master_order
+        $result = $this->masterOrderModel->select('id_order')->where('no_model', $noModel)->first();
+        // ambil data styleSize by bb
+        $bb = $this->materialModel->getBBForSummaryPlanner($result['id_order']);
+
+        // 🔹 Return hasil JSON
+        return $this->response->setJSON([
+            'status' => 'success',
+            'data' => array_values($bb)
+        ]);
+    }
 }
