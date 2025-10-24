@@ -963,14 +963,31 @@ class ApiController extends ResourceController
     public function getPengirimanArea()
     {
         $noModel = $this->request->getGet('noModel') ?? '';
-        // $results = $this->pengeluaranModel->searchPengiriman($noModel);
         $results = $this->pengeluaranModel->searchPengiriman2($noModel);
-
-        // Konversi stdClass menjadi array
+        $lotKirim = $this->pengeluaranModel->getLotKirim($noModel);
+        // Ubah jadi array
         $resultsArray = json_decode(json_encode($results), true);
+        $lotKirimArray = json_decode(json_encode($lotKirim), true);
 
+        // --- Buat index lot kirim per kombinasi unik ---
+        $lotGrouped = [];
+        foreach ($lotKirimArray as $lot) {
+            $key = $lot['no_model'] . '|' . $lot['kode_warna'] . '|' . $lot['item_type'] . '|' . $lot['warna'];
+            $lotGrouped[$key][] = $lot['lot_kirim'];
+        }
+
+        // --- Gabungkan ke results utama ---
+        foreach ($resultsArray as &$res) {
+            $key = $res['no_model'] . '|' . $res['kode_warna'] . '|' . $res['item_type'] . '|' . $res['warna'];
+            $res['lot_kirim'] = $lotGrouped[$key] ?? [];
+        }
+
+        unset($res);
+
+        // Response akhir
         return $this->respond($resultsArray, 200);
     }
+
     public function getGwBulk()
     {
         $input = $this->request->getJSON(true);
