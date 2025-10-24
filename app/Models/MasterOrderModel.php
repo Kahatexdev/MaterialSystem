@@ -576,15 +576,28 @@ class MasterOrderModel extends Model
 
         -- datang solid
         (
-            SELECT SUM(CASE WHEN COALESCE(sc.po_plus,0) = 0 THEN oc.kgs_kirim ELSE 0 END)
+            SELECT 
+                SUM(
+                    CASE 
+                        WHEN COALESCE(sc.po_plus, 0) = 0 
+                             AND COALESCE(ob.po_tambahan, 0) = 0 
+                        THEN oc.kgs_kirim 
+                        ELSE 0 
+                    END
+                )
             FROM pemasukan p
             JOIN out_celup oc ON p.id_out_celup = oc.id_out_celup
-            JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
-            WHERE sc.no_model = master_order.no_model
-            AND sc.kode_warna = material.kode_warna
-            AND sc.item_type = material.item_type
+            LEFT JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+            LEFT JOIN other_bon ob ON ob.id_other_bon = oc.id_other_bon
+            WHERE 
+                oc.no_model = master_order.no_model
+                AND (
+                    (sc.kode_warna = material.kode_warna AND sc.item_type = material.item_type)
+                    OR
+                    (ob.kode_warna = material.kode_warna AND ob.item_type = material.item_type)
+                )
         ) AS datang_solid,
-
+         
         -- plus datang solid
         (
             SELECT SUM(CASE WHEN COALESCE(sc.po_plus,0) = 1 THEN oc.kgs_kirim ELSE 0 END)

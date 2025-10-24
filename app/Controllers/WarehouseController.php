@@ -4066,9 +4066,9 @@ class WarehouseController extends BaseController
                 ->first();
             if ($idRetur) {
                 $this->outCelupModel->insert([
-                    'id_retur'    => $idRetur['id_retur'] ?? null,
-                    'id_bon'      => $d['id_bon'] ?? null,
-                    'id_celup'    => $d['id_celup'] ?? null,
+                    // 'id_retur'    => $idRetur['id_retur'] ?? null,
+                    // 'id_bon'      => $d['id_bon'] ?? null,
+                    // 'id_celup'    => $d['id_celup'] ?? null,
                     'no_model'    => $noModel,
                     'no_karung'   => $d['no_karung'],
                     'kgs_kirim'   => $kgsKirim,
