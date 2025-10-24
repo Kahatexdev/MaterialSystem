@@ -1062,6 +1062,7 @@ $routes->group(
         $routes->get('getMasterRangePemesanan', 'ApiController::getMasterRangePemesanan');
         $routes->get('filterReportKebutuhanBahanBaku', 'ApiController::filterReportKebutuhanBahanBaku');
         $routes->get('excelReportKebutuhanBahanBaku', 'ApiController::excelReportKebutuhanBahanBaku');
+        $routes->get('getBBForSummaryPlanner', 'ApiController::getBBForSummaryPlanner');
     }
 );
 
