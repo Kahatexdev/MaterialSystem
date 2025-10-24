@@ -1812,23 +1812,32 @@ class ApiController extends ResourceController
     public function getBBForSummaryPlanner()
     {
         $noModel = $this->request->getGet('no_model');
-        $area = $this->request->getGet('area');
-        if (!$noModel && !$area) {
+        if (!$noModel) {
             return $this->response->setJSON([
                 'status' => 'error',
                 'message' => 'Parameter no_model tidak ditemukan'
             ]);
         }
+        // Ubah string "AK5485,AK5484,..." jadi array
+        $models = array_map('trim', explode(',', $noModel));
 
-        // Ambil id_order dari tabel master_order
-        $result = $this->masterOrderModel->select('id_order')->where('no_model', $noModel)->first();
-        // ambil data styleSize by bb
-        $bb = $this->materialModel->getBBForSummaryPlanner($result['id_order']);
+        // Ambil data styleSize by bb
+        $bbData = $this->materialModel->getBBForSummaryPlanner($models);
+
+        // 🔹 Susun ulang array agar key-nya pakai no_model
+        $bb = [];
+        foreach ($bbData as $row) {
+            $modelName = $row['no_model'] ?? 'UNKNOWN';
+            if (!isset($bb[$modelName])) {
+                $bb[$modelName] = [];
+            }
+            $bb[$modelName][] = $row; // bisa juga = $row kalau 1 data per model
+        }
 
         // 🔹 Return hasil JSON
         return $this->response->setJSON([
             'status' => 'success',
-            'data' => array_values($bb)
+            'data' => $bb
         ]);
     }
 }
