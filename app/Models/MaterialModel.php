@@ -1254,9 +1254,11 @@ class MaterialModel extends Model
             ->groupBy('item_type, kode_warna, color')
             ->findAll();
     }
-    public function getBBForSummaryPlanner($idOrder)
+    public function getBBForSummaryPlanner(array $noModel)
     {
-        return $this->where('id_order', $idOrder)
+        return $this->select('master_order.no_model, material.*')
+            ->whereIn('master_order.no_model', $noModel)
+            ->join('master_order', 'master_order.id_order=material.id_order', 'left')
             ->where('style_size IS NOT NULL')
             ->where('style_size!=', '')
             ->groupBy('id_material')
