@@ -277,7 +277,8 @@ class ReturModel extends Model
             ->join('kategori_retur', 'kategori_retur.nama_kategori=retur.kategori', 'left')
             ->where('retur.area_retur', $area)
             ->where('retur.no_model', $noModel)
-            ->where('kategori_retur.tipe_kategori', 'SIMPAN ULANG')
+            ->where('retur.waktu_acc_retur IS NOT NULL')
+            ->like('retur.keterangan_gbn', 'Approve')
             ->groupBy('id_retur')
             ->findAll();
     }
@@ -591,6 +592,7 @@ class ReturModel extends Model
         return $this->select('SUM(retur.kgs_retur) AS kgs_retur')
             ->where('retur.area_retur', $data['area'])
             ->where('retur.waktu_acc_retur IS NOT NULL')
+            ->like('retur.keterangan_gbn', 'Approve')
             ->where('retur.no_model', $data['no_model'])
             ->where('retur.item_type', $data['item_type'])
             ->where('retur.kode_warna', $data['kode_warna'])

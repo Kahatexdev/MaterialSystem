@@ -137,26 +137,19 @@ class PengeluaranModel extends Model
 
         $sql = "
             SELECT 
-                SUM(sub.total_kgs_out) AS kgs_out
-            FROM (
-                SELECT 
-                    p.id_total_pemesanan,
-                    SUM(p.kgs_out) AS total_kgs_out
-                FROM pengeluaran p
-                WHERE p.area_out = ?
-                  AND p.status = 'Pengiriman Area'
-                GROUP BY p.id_total_pemesanan
-            ) AS sub
-            WHERE EXISTS (
-                SELECT 1
+                COALESCE(SUM(p.kgs_out), 0) AS kgs_out
+            FROM pengeluaran p
+            WHERE p.area_out = ?
+            AND p.status = 'Pengiriman Area'
+            AND p.id_total_pemesanan IN (
+                SELECT DISTINCT tp.id_total_pemesanan
                 FROM total_pemesanan tp
                 JOIN pemesanan pm ON pm.id_total_pemesanan = tp.id_total_pemesanan
                 JOIN material m ON m.id_material = pm.id_material
                 JOIN master_order mo ON mo.id_order = m.id_order
-                WHERE tp.id_total_pemesanan = sub.id_total_pemesanan
-                  AND mo.no_model = ?
-                  AND m.item_type = ?
-                  AND m.kode_warna = ?
+                WHERE mo.no_model = ?
+                    AND m.item_type = ?
+                    AND m.kode_warna = ?
             )
         ";
 

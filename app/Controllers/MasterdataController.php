@@ -1121,7 +1121,10 @@ class MasterdataController extends BaseController
                     foreach (array_chunk($toDisableIds, $BATCH_SIZE) as $chunk) {
                         $rows = array_map(fn($id) => [
                             'id_material' => $id,
+                            'composition' => 0,
+                            'gw'          => 0,
                             'qty_pcs'     => 0,
+                            'loss'        => 0,
                             'kgs'         => 0,
                             'updated_at'  => $now,
                             'admin'       => $admin,
@@ -1177,6 +1180,8 @@ class MasterdataController extends BaseController
             if ($eq($ins['color'],      $rem['color']))      $score += 1;
             return $score;
         };
+
+        $noteUpdates = []; // <--- KUMPULKAN UPDATE KETERANGAN DI SINI
 
         // Pairing: untuk setiap insert, cari removed terbaik di SS yang sama
         foreach ($insBySS as $ss => $insList) {
@@ -1238,6 +1243,21 @@ class MasterdataController extends BaseController
                         'note'            => implode('; ', $changesText),
                     ];
                 }
+                // Daripada update per baris langsung, kumpulkan dulu:
+                $noteUpdates[] = [
+                    'id_material' => (int)$rem['id_material'],
+                    'keterangan'  => 'Revisi MU: dipindah → '
+                        . 'Color=' . ($ins['color'] ?? '-')
+                        . ', ItemType=' . ($ins['item_type'] ?? '-')
+                        . ', KodeWarna=' . ($ins['kode_warna'] ?? '-')
+                        . ', StyleSize=' . ($ins['style_size'] ?? '-'),
+                ];
+            }
+        }
+        // Setelah selesai pairing SEMUA, eksekusi batch update "keterangan":
+        if (!empty($noteUpdates)) {
+            foreach (array_chunk($noteUpdates, $BATCH_SIZE) as $chunk) {
+                $materialModel->updateBatch($chunk, 'id_material');
             }
         }
         // ===== 8) Hasil (versi <ul><li>) =====
