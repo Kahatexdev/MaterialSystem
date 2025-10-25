@@ -277,7 +277,7 @@ class ReturModel extends Model
             ->join('kategori_retur', 'kategori_retur.nama_kategori=retur.kategori', 'left')
             ->where('retur.area_retur', $area)
             ->where('retur.no_model', $noModel)
-            // ->where('kategori_retur.tipe_kategori', 'SIMPAN ULANG')
+            ->like('retur.keterangan_gbn', 'Approve')
             ->groupBy('id_retur')
             ->findAll();
     }
