@@ -121,7 +121,7 @@
                                 </td> -->
                                 <td>
                                     <button type="button" class="btn btn-warning update-btn" data-bs-toggle="modal" data-bs-target="#updateListModal"
-                                        data-area="<?= $data['admin'] ?>" data-tgl="<?= $data['tgl_poplus'] ?>">
+                                        data-area="<?= $data['admin'] ?>" data-tgl="<?= $data['tgl_poplus'] ?>" data-model="<?= $data['no_model'] ?>" data-item="<?= $data['item_type'] ?>" data-kode="<?= $data['kode_warna'] ?>" data-color="<?= $data['color'] ?>">
                                         <i class="fa fa-edit fa-lg"></i>
                                     </button>
                                 </td>
