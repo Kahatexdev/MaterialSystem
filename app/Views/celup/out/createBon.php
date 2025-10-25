@@ -706,6 +706,16 @@
 
             tabIndex++;
             calculateTotals(newPoTable);
+
+            // Validasi Karakter No Model
+            setTimeout(() => {
+                const noModelInput = document.getElementById(newInputId);
+                if (noModelInput) {
+                    noModelInput.addEventListener('input', function(e) {
+                        this.value = this.value.replace(/[^a-zA-Z0-9\s]/g, '');
+                    });
+                }
+            }, 300);
         }
 
 
