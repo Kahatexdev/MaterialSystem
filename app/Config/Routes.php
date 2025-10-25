@@ -868,6 +868,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('poplus/getNoModelByArea', 'GodController::getNoModelByArea');
     $routes->get('poTambahanDetail/(:any)/(:any)', 'GodController::poTambahanDetail/$1/$2');
     $routes->post('savePoTambahan', 'GodController::savePoTambahan');
+    $routes->post('poplus/deletePoTambahan', 'PoTambahanController::deletePoTambahan');
+
 
     // $routes->get('pph', 'PphController::index');
     $routes->get('pph', 'PphController::tampilPerModel');

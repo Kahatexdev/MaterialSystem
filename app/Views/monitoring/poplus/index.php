@@ -124,6 +124,10 @@
                                         data-area="<?= $data['admin'] ?>" data-tgl="<?= $data['tgl_poplus'] ?>">
                                         <i class="fa fa-edit fa-lg"></i>
                                     </button>
+                                    <!-- delete by id_total_potambahan -->
+                                    <button type="button" class="btn btn-danger delete-btn" data-idttlplus="<?= $data['id_total_potambahan'] ?? null ?>">
+                                        <i class="fa fa-trash fa-lg"></i>
+                                    </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -453,5 +457,55 @@
         });
     });
     // END VIEW MODAL UPDATE PEMESANAN
+
+
+    // delete po tambahan
+    $(document).on('click', '.delete-btn', function() {
+        var idTtlPlus = $(this).data('idttlplus');
+        const deleteUrl = "<?= base_url("$role/poplus/deletePoTambahan") ?>";
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Kirim data ke server untuk penghapusan
+                $.ajax({
+                    url: deleteUrl,
+                    method: 'POST',
+                    data: {
+                        id_ttl_plus: idTtlPlus
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            Swal.fire(
+                                'Deleted!',
+                                response.message,
+                                'success'
+                            ).then(() => {
+                                location.reload(); // Muat ulang halaman setelah penghapusan
+                            });
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                response.message,
+                                'error'
+                            );
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(error);
+                        alert('Terjadi kesalahan saat menghapus data.');
+                    }
+                });
+            }
+        });
+    });
 </script>
 <?php $this->endSection(); ?>
