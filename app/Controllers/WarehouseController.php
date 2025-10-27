@@ -3244,9 +3244,19 @@ class WarehouseController extends BaseController
     {
         $noModel   = $this->request->getGet('model')     ?? '';
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
+        $limit     = $this->request->getGet('limit') ?? null;
 
         // 1) Ambil data
-        $dataPindah = $this->historyStock->getHistoryPindahOrder($noModel, $kodeWarna);
+        if ($noModel === '' && $kodeWarna === '') {
+            // ambil hanya 10 data terbaru
+            $dataPindah = $this->historyStock
+                ->orderBy('created_at', 'DESC')
+                ->limit(10)
+                ->findAll();
+        } else {
+            // jika ada filter pencarian
+            $dataPindah = $this->historyStock->getHistoryPindahOrder($noModel, $kodeWarna);
+        }
 
         // 2) Siapkan HTTP client
         $client = \Config\Services::curlrequest([
@@ -3269,7 +3279,6 @@ class WarehouseController extends BaseController
             }
         }
         unset($row);
-
         // 4) Response
         if ($this->request->isAJAX()) {
             return $this->response->setJSON($dataPindah);
