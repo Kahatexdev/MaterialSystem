@@ -3244,17 +3244,11 @@ class WarehouseController extends BaseController
     {
         $noModel   = $this->request->getGet('model')     ?? '';
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
-        $limit     = $this->request->getGet('limit') ?? null;
 
         // 1) Ambil data
         if ($noModel === '' && $kodeWarna === '') {
-            // ambil hanya 10 data terbaru
-            $dataPindah = $this->historyStock
-                ->orderBy('created_at', 'DESC')
-                ->limit(10)
-                ->findAll();
+            $dataPindah = $this->historyStock->getHistoryPindahOrder(null, null, 10);
         } else {
-            // jika ada filter pencarian
             $dataPindah = $this->historyStock->getHistoryPindahOrder($noModel, $kodeWarna);
         }
 
