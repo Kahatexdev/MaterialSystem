@@ -524,6 +524,24 @@ class CelupController extends BaseController
         return $this->response->setJSON($item);
     }
 
+    private function normalizePdk(?string $s): ?string
+    {
+        if ($s === null) return null;
+
+        $raw = trim($s);
+
+        // Pola: 1–2 huruf (A–Z, a–z) lalu hanya digit (spasi di antaranya boleh)
+        // Contoh valid: "A123", "AK 5453", "Ak   7 5 0"
+        $pattern = '/^[A-Za-z]{1,2}(?:\s*\d+)+$/';
+
+        if (preg_match($pattern, $raw)) {
+            // Hapus semua spasi
+            return str_replace(' ', '', $raw);
+        }
+        // selain pola itu, biarkan apa adanya
+        return $raw;
+    }
+
     public function saveBon()
     {
         $data = $this->request->getPost();
@@ -569,6 +587,9 @@ class CelupController extends BaseController
             $operatorPerTab = $operatorPacking[$h] ?? null;
             $shiftPerTab    = $shift[$h] ?? null;
 
+            $noModelRaw = $data['items'][$h]['no_model'] ?? null;
+            $noModelFix = $this->normalizePdk($noModelRaw);
+
             if (!empty($data['no_karung'][$h]) && is_array($data['no_karung'][$h])) {
                 $jmldatapertab = count($data['no_karung'][$h]);
 
@@ -576,7 +597,7 @@ class CelupController extends BaseController
                     $saveDataOutCelup[] = [
                         'id_bon' => $id_bon,
                         'id_celup' => $id_celup ?? null,
-                        'no_model' => $data['items'][$h]['no_model'],
+                        'no_model' => $noModelFix,
                         'l_m_d' => $data['l_m_d'][$h] ?? null,
                         'harga' => $data['harga'][$h] ?? null,
                         'no_karung' => $data['no_karung'][$h][$i] ?? null,
@@ -598,7 +619,7 @@ class CelupController extends BaseController
                 }
             }
         }
-
+        // dd ($saveDataOutCelup);
         $this->outCelupModel->insertBatch($saveDataOutCelup);
         $uniqueIdCelup = array_values(array_unique($idCelupList));
 

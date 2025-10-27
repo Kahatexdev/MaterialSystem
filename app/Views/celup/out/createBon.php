@@ -311,9 +311,12 @@
         }
     });
 
-    document.getElementById('no_model').addEventListener('input', function(e) {
-        // hanya huruf (A-Z, a-z) dan spasi yang boleh
-        this.value = this.value.replace(/[^a-zA-Z0-9\s]/g, '');
+    // document.getElementById('no_model').addEventListener('input', function(e) {
+    //     // hanya huruf (A-Z, a-z) dan spasi yang boleh
+    //     this.value = this.value.replace(/[^a-zA-Z0-9\s]/g, '');
+    // });
+    document.getElementById('no_model').addEventListener('input', function() {
+        this.value = this.value.replace(/[^a-zA-Z0-9 &]/g, '');
     });
 </script>
 <script>
@@ -712,7 +715,7 @@
                 const noModelInput = document.getElementById(newInputId);
                 if (noModelInput) {
                     noModelInput.addEventListener('input', function(e) {
-                        this.value = this.value.replace(/[^a-zA-Z0-9\s]/g, '');
+                        this.value = this.value.replace(/[^a-zA-Z0-9 &]/g, '');
                     });
                 }
             }, 300);
