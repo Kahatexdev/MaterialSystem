@@ -580,7 +580,7 @@
 
                 // === BS Mesin & Setting dalam KG ===
                 const bsMesinKg = composition > 0 ?
-                    ((bsMesinVal / 1000) * (composition / 100)) : 0;
+                    (bsMesinVal / 1000) : 0;
                 const bsSettingKg = gwFinal > 0 ?
                     bsSettingVal * composition * gwFinal / 100 / 1000 : 0;
 
@@ -731,7 +731,7 @@
             // hitung Loss Aktual %
             let lossAktual = 0;
             if (totalPoKg > 0) {
-                lossAktual = (totalBs / totalPoKg) * 100;
+                lossAktual = (totalBs / totalPoKgTanpaLoss) * 100;
             }
 
             lastLossAktual = lossAktual; // simpan untuk dipakai fungsi lain
