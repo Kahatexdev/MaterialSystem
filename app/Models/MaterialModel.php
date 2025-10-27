@@ -1012,17 +1012,17 @@ class MaterialModel extends Model
                 LIMIT 1
             ) AS tgl_po_plus_area,
 
-            (
-                SELECT SUM(ttl_tambahan_kg)
+             COALESCE((
+                SELECT SUM(DISTINCT tp.ttl_tambahan_kg)
                 FROM total_potambahan tp
                 JOIN po_tambahan pp ON pp.id_total_potambahan = tp.id_total_potambahan
                 JOIN material m2 ON m2.id_material = pp.id_material
                 JOIN master_order mo2 ON mo2.id_order = m2.id_order
-                WHERE m2.id_order = mo.id_order
-                AND m2.item_type = m.item_type
-                AND m2.kode_warna = m.kode_warna
-                AND pp.status LIKE '%approved%'
-            ) AS kg_po_plus,
+                WHERE mo2.no_model = mo.no_model
+                  AND m2.item_type = m.item_type
+                  AND m2.kode_warna = m.kode_warna
+                  AND pp.status LIKE '%approved%'
+            ), 0) AS kg_po_plus,
 
             (
                 SELECT pp.delivery_po_plus
