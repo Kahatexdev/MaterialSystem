@@ -544,18 +544,13 @@ class MasterOrderModel extends Model
 
         -- stock awal tanpa duplikasi
         (
-            SELECT SUM(COALESCE(s.kgs_stock_awal, 0))
-            FROM stock s
-            WHERE s.id_stock IN (
-                SELECT DISTINCT s2.id_stock
-                FROM stock s2
-                JOIN pemasukan p ON p.id_stock = s2.id_stock
-                JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
-                JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
-                WHERE sc.no_model = master_order.no_model
-                AND sc.kode_warna = material.kode_warna
-                AND sc.item_type = material.item_type
-            )
+            SELECT SUM(DISTINCT hs.kgs)
+            FROM history_stock hs
+            LEFT JOIN stock s ON s.id_stock = hs.id_stock_new
+            WHERE s.no_model = master_order.no_model
+            AND s.item_type = material.item_type
+            AND s.kode_warna = material.kode_warna
+            AND hs.keterangan = 'Pindah Order'
         ) AS stock_awal,
 
         -- stock akhir
@@ -597,7 +592,7 @@ class MasterOrderModel extends Model
                     (ob.kode_warna = material.kode_warna AND ob.item_type = material.item_type)
                 )
         ) AS datang_solid,
-         
+
         -- plus datang solid
         (
             SELECT SUM(CASE WHEN COALESCE(sc.po_plus,0) = 1 THEN oc.kgs_kirim ELSE 0 END)
