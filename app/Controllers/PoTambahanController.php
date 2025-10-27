@@ -318,4 +318,24 @@ class PoTambahanController extends BaseController
     {
         $tglPo = $this->request->getGet('tgl_poplus');
     }
+
+    public function deletePoTambahan()
+    {
+        $idTtlPlus = $this->request->getPost('id_ttl_plus');
+
+        if (!$idTtlPlus) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'ID Total Po Tambahan tidak ditemukan.']);
+        }
+
+        // Hapus data dari tabel po_tambahan berdasarkan id_total_potambahan
+        $builder = $this->poTambahanModel->builder();
+        $builder->where('id_total_potambahan', $idTtlPlus);
+        $deleted = $builder->delete();
+
+        if ($deleted) {
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Data Po Tambahan berhasil dihapus.']);
+        } else {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menghapus data Po Tambahan.']);
+        }
+    }
 }
