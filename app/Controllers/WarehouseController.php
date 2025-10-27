@@ -3244,9 +3244,19 @@ class WarehouseController extends BaseController
     {
         $noModel   = $this->request->getGet('model')     ?? '';
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
+        $limit     = $this->request->getGet('limit') ?? null;
 
         // 1) Ambil data
-        $dataPindah = $this->historyStock->getHistoryPindahOrder($noModel, $kodeWarna);
+        if ($noModel === '' && $kodeWarna === '') {
+            // ambil hanya 10 data terbaru
+            $dataPindah = $this->historyStock
+                ->orderBy('created_at', 'DESC')
+                ->limit(10)
+                ->findAll();
+        } else {
+            // jika ada filter pencarian
+            $dataPindah = $this->historyStock->getHistoryPindahOrder($noModel, $kodeWarna);
+        }
 
         // 2) Siapkan HTTP client
         $client = \Config\Services::curlrequest([
@@ -3269,7 +3279,6 @@ class WarehouseController extends BaseController
             }
         }
         unset($row);
-
         // 4) Response
         if ($this->request->isAJAX()) {
             return $this->response->setJSON($dataPindah);
@@ -4059,26 +4068,17 @@ class WarehouseController extends BaseController
             $lotStock = !empty($idStockData[$i]['lot_stock']) ? $idStockData[$i]['lot_stock'] : $idStockData[$i]['lot_awal'];
             $oldIdOC  = $d['id_out_celup'];
             // log_message('info', "lotstock: $lotStock, cluster: $cluster, data stock : " . json_encode($idStockData[$i]));
-            // — baru out_celup (sama seperti sebelumnya)
-            $idRetur = $this->outCelupModel
-                ->select('id_retur')
-                ->where('id_out_celup', $oldIdOC)
-                ->first();
-            if ($idRetur) {
-                $this->outCelupModel->insert([
-                    // 'id_retur'    => $idRetur['id_retur'] ?? null,
-                    // 'id_bon'      => $d['id_bon'] ?? null,
-                    // 'id_celup'    => $d['id_celup'] ?? null,
-                    'no_model'    => $noModel,
-                    'no_karung'   => $d['no_karung'],
-                    'kgs_kirim'   => $kgsKirim,
-                    'cones_kirim' => $cnsKirim,
-                    'lot_kirim'   => $lotStock,
-                    'ganti_retur' => '0',
-                    'admin'       => session()->get('username'),
-                ]);
-                $idOutCelupBaru[] = $this->outCelupModel->getInsertID();
-            }
+
+            $this->outCelupModel->insert([
+                'no_model'    => $noModel,
+                'no_karung'   => $d['no_karung'],
+                'kgs_kirim'   => $kgsKirim,
+                'cones_kirim' => $cnsKirim,
+                'lot_kirim'   => $lotStock,
+                'ganti_retur' => '0',
+                'admin'       => session()->get('username'),
+            ]);
+            $idOutCelupBaru[] = $this->outCelupModel->getInsertID();
 
             // — update stok LAMA (kurangi sesuai tiap item, pakai nilai per-item)
             // Jika kgs_in_out ada (lebih dari 0), kurangi dari kgs_in_out, jika tidak ada (0/null), kurangi dari kgs_stock_awal

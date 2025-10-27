@@ -282,6 +282,112 @@ class ReturModel extends Model
             ->groupBy('id_retur')
             ->findAll();
     }
+    // public function filterData($area, $tglBuat, $noModel = null)
+    // {
+    //     // $kdwarna = 'LB.0051500-1-1';
+    //     $db = \Config\Database::connect();
+
+    //     // -----------------------------
+    //     // Subquery Pengeluaran (Anti-Duplikat)
+    //     // -----------------------------
+    //     $subPengeluaran = $db->table('
+    //         (SELECT 
+    //             id_total_pemesanan, 
+    //             SUM(kgs_out) AS kgs_out, 
+    //             SUM(cns_out) AS cns_out, 
+    //             GROUP_CONCAT(DISTINCT lot_out) AS lot_out
+    //         FROM pengeluaran
+    //         WHERE status = "Pengiriman Area" AND area_out = "' . $area . '"
+    //         GROUP BY id_total_pemesanan
+    //         ) AS p
+    //     ')
+    //         ->select('mo.id_order,mo.no_model, m.item_type, m.kode_warna, m.color, MAX(m.loss) AS max_loss,pms.tgl_pakai, tp.id_total_pemesanan, tp.ttl_jl_mc, tp.ttl_kg, tp.ttl_cns, pms.po_tambahan, pms.keterangan_gbn, p.kgs_out, p.cns_out, p.lot_out')
+    //         ->join('pemesanan pms', 'pms.id_total_pemesanan = p.id_total_pemesanan', 'left')
+    //         ->join('total_pemesanan tp', 'tp.id_total_pemesanan = p.id_total_pemesanan', 'left')
+    //         ->join('material m', 'm.id_material = pms.id_material', 'left')
+    //         ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
+    //         ->where('mo.no_model', $noModel)
+    //         // ->where('m.kode_warna', $kdwarna)
+    //         ->groupBy('p.id_total_pemesanan');
+
+
+    //     // -----------------------------
+    //     // Subquery Po Tambahan
+    //     // -----------------------------
+    //     $subPoTambahan = $db->table('po_tambahan pt')
+    //         ->select("
+    //         m.id_order, 
+    //         m.item_type, 
+    //         m.kode_warna, 
+    //         SUM(pt.sisa_order_pcs) AS sisa_order_pcs,
+    //         SUM(pt.poplus_mc_kg) AS poplus_mc_kg,
+    //         MAX(pt.poplus_mc_cns) AS poplus_mc_cns,
+    //         SUM(pt.plus_pck_pcs) AS plus_pck_pcs,
+    //         SUM(pt.plus_pck_kg) AS plus_pck_kg,
+    //         MAX(pt.plus_pck_cns) AS plus_pck_cns,
+    //         MAX(tp.ttl_tambahan_kg) AS ttl_tambahan_kg,
+    //         MAX(tp.ttl_tambahan_cns) AS ttl_tambahan_cns,
+    //         MAX(tp.ttl_sisa_bb_dimc) AS sisa_bb_mc,
+    //         MAX(pt.status) AS status
+    //     ")
+    //         ->join('total_potambahan tp', 'tp.id_total_potambahan = pt.id_total_potambahan', 'left')
+    //         ->join('material m', 'm.id_material = pt.id_material', 'left')
+    //         ->where('pt.admin', $area)
+    //         ->where('pt.status', 'approved')
+    //         ->groupBy('m.id_order, m.item_type, m.kode_warna');
+
+    //     // -----------------------------
+    //     // Main Query
+    //     // -----------------------------
+    //     $builder = $this->select("
+    //     retur.kgs_retur, retur.cns_retur, retur.krg_retur, retur.lot_retur,
+    //     retur.kategori, retur.keterangan_area, retur.area_retur,
+    //     peng.no_model,peng.item_type,peng.kode_warna, peng.color,
+    //     SUM(DISTINCT peng.kgs_out) AS terima_kg,
+    //     poplus.sisa_bb_mc,
+    //     poplus.sisa_order_pcs,
+    //     poplus.poplus_mc_kg,
+    //     poplus.poplus_mc_cns,
+    //     poplus.plus_pck_pcs,
+    //     poplus.plus_pck_kg,
+    //     poplus.plus_pck_cns,
+    //     poplus.ttl_tambahan_kg,
+    //     poplus.ttl_tambahan_cns,
+    //     master_order.delivery_akhir
+    // ")
+    //         ->join('master_order', 'retur.no_model = master_order.no_model', 'left')
+    //         ->join('material', 'master_order.id_order = material.id_order 
+    //                      AND retur.item_type = material.item_type 
+    //                      AND retur.kode_warna = material.kode_warna', 'left')
+    //         ->join(
+    //             "({$subPengeluaran->getCompiledSelect()}) peng",
+    //             'peng.no_model = master_order.no_model 
+    //         AND peng.item_type = material.item_type 
+    //         AND peng.kode_warna = material.kode_warna',
+    //             'left'
+    //         )
+    //         ->join(
+    //             "({$subPoTambahan->getCompiledSelect()}) poplus",
+    //             'poplus.id_order = master_order.id_order 
+    //         AND poplus.item_type = material.item_type 
+    //         AND poplus.kode_warna = material.kode_warna',
+    //             'left'
+    //         )
+    //         ->where('retur.area_retur', $area)
+    //         ->where('retur.tgl_retur', $tglBuat);
+
+    //     if (!empty($noModel)) {
+    //         $builder->where('master_order.no_model', $noModel);
+    //     }
+
+    //     return $builder
+    //         ->groupBy('retur.id_retur')
+    //         ->orderBy('master_order.no_model', 'ASC')
+    //         ->orderBy('material.item_type', 'ASC')
+    //         ->orderBy('material.kode_warna', 'ASC')
+    //         ->findAll();
+    // }
+
     public function filterData($area, $tglBuat, $noModel = null)
     {
         // $kdwarna = 'LB.0051500-1-1';
@@ -342,7 +448,10 @@ class ReturModel extends Model
         $builder = $this->select("
         retur.kgs_retur, retur.cns_retur, retur.krg_retur, retur.lot_retur,
         retur.kategori, retur.keterangan_area, retur.area_retur,
-        peng.no_model,peng.item_type,peng.kode_warna, peng.color,
+        COALESCE(peng.no_model, retur.no_model) AS no_model,
+        COALESCE(peng.item_type, retur.item_type) AS item_type,
+        COALESCE(peng.kode_warna, retur.kode_warna) AS kode_warna,
+        COALESCE(peng.color, retur.warna) AS color,
         SUM(DISTINCT peng.kgs_out) AS terima_kg,
         poplus.sisa_bb_mc,
         poplus.sisa_order_pcs,
@@ -387,83 +496,6 @@ class ReturModel extends Model
             ->orderBy('material.kode_warna', 'ASC')
             ->findAll();
     }
-
-    // public function filterData($area, $tglBuat, $noModel = null)
-    // {
-    //     $db = \Config\Database::connect();
-
-    //     $subPengeluaran = $db->table('pengeluaran p')
-    //         ->select('m.id_order, m.item_type, m.kode_warna, SUM(p.kgs_out) AS terima_kg')
-    //         ->join('pemesanan pm', 'pm.id_total_pemesanan = p.id_total_pemesanan', 'left')
-    //         ->join('material m', 'm.id_material = pm.id_material', 'left')
-    //         ->where('p.area_out', $area)
-    //         ->groupBy('m.id_order, m.item_type, m.kode_warna');
-
-    //     $subPoTambahan = $db->table('po_tambahan pt')
-    //         ->select("
-    //     m.id_order, 
-    //     m.item_type, 
-    //     m.kode_warna, 
-    //     SUM(pt.sisa_order_pcs) AS sisa_order_pcs,
-    //     SUM(pt.poplus_mc_kg) AS poplus_mc_kg,
-    //     MAX(pt.poplus_mc_cns) AS poplus_mc_cns,
-    //     SUM(pt.plus_pck_pcs) AS plus_pck_pcs,
-    //     SUM(pt.plus_pck_kg) AS plus_pck_kg,
-    //     MAX(pt.plus_pck_cns) AS plus_pck_cns,
-    //     MAX(tp.ttl_tambahan_kg) AS ttl_tambahan_kg,
-    //     MAX(tp.ttl_tambahan_cns) AS ttl_tambahan_cns,
-    //     MAX(tp.ttl_sisa_bb_dimc) AS sisa_bb_mc,
-    //     MAX(pt.status) AS status
-    // ")
-    //         ->join('total_potambahan tp', 'tp.id_total_potambahan = pt.id_total_potambahan', 'left')
-    //         ->join('material m', 'm.id_material = pt.id_material', 'left')
-    //         ->where('pt.admin', $area)
-    //         ->where('pt.status', 'approved')
-    //         ->groupBy('m.id_order, m.item_type, m.kode_warna');
-
-    //     // Subquery SUM material
-    //     $subMaterial = $db->table('material')
-    //         ->select('material.id_material, SUM(material.kgs) AS kgs_sum, SUM(material.qty_pcs) AS qty_pcs_sum')
-    //         ->groupBy('material.id_order, material.item_type, material.kode_warna');
-
-    //     $builder = $this->select("
-    //     retur.kgs_retur, retur.cns_retur, retur.krg_retur, retur.lot_retur,
-    //     retur.kategori, retur.keterangan_gbn, retur.admin,
-    //     peng.kgs_out AS terima_kg,
-    //     poplus.sisa_bb_mc,
-    //     poplus.sisa_order_pcs,
-    //     poplus.poplus_mc_kg,
-    //     poplus.poplus_mc_cns,
-    //     poplus.plus_pck_pcs,
-    //     poplus.plus_pck_kg,
-    //     poplus.plus_pck_cns,
-    //     poplus.ttl_tambahan_kg,
-    //     poplus.ttl_tambahan_cns, 
-    //     master_order.no_model, master_order.delivery_akhir, material.item_type,
-    //     material.kode_warna, material.color, material.style_size,
-    //     mat.kgs_sum AS kgs,
-    // ")
-    //         ->join('master_order', 'retur.no_model = master_order.no_model', 'left')
-    //         ->join('material', 'master_order.id_order = material.id_order AND retur.item_type = material.item_type AND retur.kode_warna = material.kode_warna', 'left')
-    //         ->join('po_tambahan', 'po_tambahan.id_material = material.id_material', 'left')
-    //         // ->join("({$subPengeluaran->getCompiledSelect()}) peng", 'peng.no_model = master_order.no_model AND peng.item_type = material.item_type AND peng.kode_warna = material.kode_warna', 'left')
-    //         ->join("({$subPengeluaran->getCompiledSelect()}) peng", 'peng.id_order = master_order.id_order AND peng.item_type = material.item_type AND peng.kode_warna = material.kode_warna', 'left')
-    //         ->join("({$subPoTambahan->getCompiledSelect()}) poplus", 'poplus.id_order = master_order.id_order AND poplus.item_type = material.item_type AND poplus.kode_warna = material.kode_warna', 'left')
-    //         ->join("({$subMaterial->getCompiledSelect()}) mat", 'mat.id_material = material.id_material', 'left')
-    //         ->where('retur.area_retur', $area)
-    //         ->where('retur.tgl_retur', $tglBuat);
-
-    //     if (!empty($noModel)) {
-    //         $builder->where('master_order.no_model', $noModel);
-    //     }
-
-    //     return $builder
-    //         ->groupBy('retur.id_retur')
-    //         ->orderBy('master_order.no_model', 'ASC')
-    //         ->orderBy('material.item_type', 'ASC')
-    //         ->orderBy('material.kode_warna', 'ASC')
-    //         ->findAll();
-    // }
 
     public function getDataReturGbn($key, $jenis = null)
     {
