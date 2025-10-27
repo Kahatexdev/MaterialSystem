@@ -1689,7 +1689,7 @@ class GodController extends BaseController
             'areas'  => $areas, // kirim ke view
         ];
 
-        return view(session()->get('role') . '/poplus/form-po-tambahan', $data);
+        return view(session()->get('role') . '/poplus/form-po-tambahan-fix', $data);
     }
 
     public function getNoModelByArea()
