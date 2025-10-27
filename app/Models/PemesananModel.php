@@ -1334,11 +1334,6 @@ class PemesananModel extends Model
               GROUP BY id_total_pemesanan
             ) p ON p.id_total_pemesanan = tp.id_total_pemesanan
             WHERE pm.admin = ?
-
-
-
-
-
               AND mo.no_model = ?
               AND pm.tgl_pakai = ?
         ";
@@ -1354,7 +1349,11 @@ class PemesananModel extends Model
 
         $sql .= "
             GROUP BY
-              tp.id_total_pemesanan
+                mo.no_model,
+                m.item_type,
+                m.kode_warna,
+                pm.tgl_pakai,
+                tp.id_total_pemesanan
             ORDER BY m.item_type, m.kode_warna, pm.tgl_pakai ASC
         ";
 
