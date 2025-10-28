@@ -197,26 +197,35 @@ class ApiController extends ResourceController
 
                     $res[] = $newRow;
                 }
-            }
-            if (!empty($allCoverings)) {
-                //     foreach ($allCoverings as $coverData) {
-                //         $newRow = $row;
-                //         $newRow['qty_po'] = $masterQty;
+            } else if (in_array($jenis, ['KARET', 'SPANDEX'])) {
+                $allCoverings = $this->trackingPoCovering
+                    ->statusBahanBaku(
+                        $row['no_model'],
+                        $row['item_type'],
+                        $row['kode_warna'],
+                        $search
+                    );
+                // dd($allCoverings);
+                if (!empty($allCoverings)) {
+                    foreach ($allCoverings as $coverData) {
+                        $newRow = $row;
+                        $newRow['qty_po'] = $masterQty;
 
-                //         $coverData['jenis'] = $row['jenis'];
-                //         foreach ($fields as $f) {
-                //             $newRow[$f] = $coverData[$f] ?? '';
-                //         }
+                        $coverData['jenis'] = $row['jenis'];
+                        foreach ($fields as $f) {
+                            $newRow[$f] = $coverData[$f] ?? '';
+                        }
 
-                //         $res[] = $newRow;
-                //     }
-                // } else {
-                $newRow = $row;
-                $newRow['qty_po'] = $masterQty;
-                foreach ($fields as $f) {
-                    $newRow[$f] = '';
+                        $res[] = $newRow;
+                    }
+                } else {
+                    $newRow = $row;
+                    $newRow['qty_po'] = $masterQty;
+                    foreach ($fields as $f) {
+                        $newRow[$f] = '';
+                    }
+                    $res[] = $newRow;
                 }
-                $res[] = $newRow;
             } else {
                 // jenis lain
                 $newRow = $row;
