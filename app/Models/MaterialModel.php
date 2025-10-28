@@ -136,7 +136,7 @@ class MaterialModel extends Model
             ->join('master_material', 'master_material.item_type = material.item_type', 'left');
 
         if (!empty($model)) {
-            $builder->like('master_order.no_model', $model);
+            $builder->where('master_order.no_model', $model);
         }
 
         if (!empty($search)) {
