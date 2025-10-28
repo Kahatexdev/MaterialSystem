@@ -206,26 +206,27 @@ class ApiController extends ResourceController
                         $search
                     );
                 // dd($allCoverings);
-                if (!empty($allCoverings)) {
-                    foreach ($allCoverings as $coverData) {
-                        $newRow = $row;
-                        $newRow['qty_po'] = $masterQty;
+                // if (!empty($allCoverings)) {
+                //     foreach ($allCoverings as $coverData) {
+                //         $newRow = $row;
+                //         $newRow['qty_po'] = $masterQty;
 
-                        $coverData['jenis'] = $row['jenis'];
-                        foreach ($fields as $f) {
-                            $newRow[$f] = $coverData[$f] ?? '';
-                        }
+                //         $coverData['jenis'] = $row['jenis'];
+                //         foreach ($fields as $f) {
+                //             $newRow[$f] = $coverData[$f] ?? '';
+                //         }
 
-                        $res[] = $newRow;
-                    }
-                } else {
-                    $newRow = $row;
-                    $newRow['qty_po'] = $masterQty;
-                    foreach ($fields as $f) {
-                        $newRow[$f] = '';
-                    }
-                    $res[] = $newRow;
-                }
+                //         $res[] = $newRow;
+                //     }
+                // } 
+                // else {
+                //     $newRow = $row;
+                //     $newRow['qty_po'] = $masterQty;
+                //     foreach ($fields as $f) {
+                //         $newRow[$f] = '';
+                //     }
+                //     $res[] = $newRow;
+                // }
             } 
             // else {
             //     // jenis lain
