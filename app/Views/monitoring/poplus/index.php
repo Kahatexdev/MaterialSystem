@@ -67,6 +67,8 @@
             <div class="row">
                 <div class="col-6">
                     <h5 class="mb-0 font-weight-bolder">List PO Tambahan Area</h5>
+                    <p class="text-dark">*Warna hitam artinya Po tambahan belum disetujui GBN</p>
+                    <p class="text-danger">*Warna merah artinya Po tambahan di tolak GBN</p>
                 </div>
                 <div class="col-6 text-end">
                     <button class="btn btn-info ms-2">
@@ -100,34 +102,38 @@
                     <tbody>
                         <?php foreach ($poTambahan as $data):
                             // Cek apakah id_order ini ada di materialOrderIds
-                            $isNotApproved = $data['status'] == '';
+                            $isNotRejected = $data['status'] == '';
                         ?>
                             <tr>
-                                <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= $data['tgl_poplus'] ?></td>
-                                <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= $data['admin'] ?></td>
-                                <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= $data['no_model'] ?></td>
-                                <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= $data['item_type'] ?></td>
-                                <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= $data['kode_warna'] ?></td>
-                                <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= $data['color'] ?></td>
-                                <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= number_format($data['sisa_jatah'], 2) ?></td>
-                                <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= number_format($data['kg_poplus'], 2) ?></td>
-                                <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= $data['cns_poplus'] ?></td>
-                                <td style="<?= $isNotApproved ? 'color:red;' : '' ?>"><?= $data['sisa_bb_mc'] ?></td>
+                                <td style="<?= $isNotRejected ? '' : 'color:red;' ?>"><?= $data['tgl_poplus'] ?></td>
+                                <td style="<?= $isNotRejected ? '' : 'color:red;' ?>"><?= $data['admin'] ?></td>
+                                <td style="<?= $isNotRejected ? '' : 'color:red;' ?>"><?= $data['no_model'] ?></td>
+                                <td style="<?= $isNotRejected ? '' : 'color:red;' ?>"><?= $data['item_type'] ?></td>
+                                <td style="<?= $isNotRejected ? '' : 'color:red;' ?>"><?= $data['kode_warna'] ?></td>
+                                <td style="<?= $isNotRejected ? '' : 'color:red;' ?>"><?= $data['color'] ?></td>
+                                <td style="<?= $isNotRejected ? '' : 'color:red;' ?>"><?= number_format($data['sisa_jatah'], 2) ?></td>
+                                <td style="<?= $isNotRejected ? '' : 'color:red;' ?>"><?= number_format($data['kg_poplus'], 2) ?></td>
+                                <td style="<?= $isNotRejected ? '' : 'color:red;' ?>"><?= $data['cns_poplus'] ?></td>
+                                <td style="<?= $isNotRejected ? '' : 'color:red;' ?>"><?= $data['sisa_bb_mc'] ?></td>
 
-                                <!-- <td style="<?= $isNotApproved ? 'color:red;' : '' ?>">
+                                <!-- <td style="<?= $isNotRejected ? 'color:red;' : '' ?>">
                                     <a href="<?= base_url($role . '/poplus/detail?area=' . $data['admin'] . '&tgl_poplus=' . $data['tgl_poplus'] . '&no_model=' . $data['no_model'] . '&item_type=' . $data['item_type'] . '&kode_warna=' . $data['kode_warna'] . '&warna=' . $data['color'] . '&status=' . $data['status']) ?>" class="btn btn-info btn-sm">
                                         Detail
                                     </a>
                                 </td> -->
                                 <td>
-                                    <button type="button" class="btn btn-warning update-btn" data-bs-toggle="modal" data-bs-target="#updateListModal"
-                                        data-area="<?= $data['admin'] ?>" data-tgl="<?= $data['tgl_poplus'] ?>" data-model="<?= $data['no_model'] ?>" data-item="<?= $data['item_type'] ?>" data-kode="<?= $data['kode_warna'] ?>" data-color="<?= $data['color'] ?>">
-                                        <i class="fa fa-edit fa-lg"></i>
-                                    </button>
-                                    <!-- delete by id_total_potambahan -->
-                                    <button type="button" class="btn btn-danger delete-btn" data-idttlplus="<?= $data['id_total_potambahan'] ?? null ?>">
-                                        <i class="fa fa-trash fa-lg"></i>
-                                    </button>
+                                    <?php if ($isNotRejected): ?>
+                                        <button type="button" class="btn btn-warning update-btn" data-bs-toggle="modal" data-bs-target="#updateListModal"
+                                            data-area="<?= $data['admin'] ?>" data-tgl="<?= $data['tgl_poplus'] ?>" data-model="<?= $data['no_model'] ?>" data-item="<?= $data['item_type'] ?>" data-kode="<?= $data['kode_warna'] ?>" data-color="<?= $data['color'] ?>">
+                                            <i class="fa fa-edit fa-lg"></i>
+                                        </button>
+                                        <!-- delete by id_total_potambahan -->
+                                        <button type="button" class="btn btn-danger delete-btn" data-idttlplus="<?= $data['id_total_potambahan'] ?? null ?>">
+                                            <i class="fa fa-trash fa-lg"></i>
+                                        </button>
+                                    <?php else: ?>
+                                        <span class="badge bg-danger">REJECT: <?= $data['ket_gbn'] ?></span>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

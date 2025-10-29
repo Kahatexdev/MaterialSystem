@@ -136,7 +136,7 @@ class MaterialModel extends Model
             ->join('master_material', 'master_material.item_type = material.item_type', 'left');
 
         if (!empty($model)) {
-            $builder->like('master_order.no_model', $model);
+            $builder->where('master_order.no_model', $model);
         }
 
         if (!empty($search)) {
@@ -386,7 +386,7 @@ class MaterialModel extends Model
         $row = $this->select('material.id_material')
             ->join('master_order', 'master_order.id_order = material.id_order')
             ->where('master_order.no_model', $validate['no_model'])
-            ->where('material.area', $validate['area'])
+            // ->where('material.area', $validate['area'])
             ->where('material.item_type', $validate['item_type'])
             ->where('material.kode_warna', $validate['kode_warna'])
             ->where('material.style_size', $validate['style_size'])
@@ -399,7 +399,7 @@ class MaterialModel extends Model
         return $this->select('material.id_material')
             ->join('master_order', 'master_order.id_order = material.id_order')
             ->where('master_order.no_model', $validate['no_model'])
-            ->where('material.area', $validate['area'])
+            // ->where('material.area', $validate['area'])
             ->where('material.item_type', $validate['item_type'])
             ->where('material.kode_warna', $validate['kode_warna'])
             ->findAll();

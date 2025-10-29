@@ -1192,7 +1192,7 @@ class ApiController extends ResourceController
             foreach ($req['items'] as $item) {
                 $idMat = $this->materialModel->getIdMaterial([
                     'no_model'   => $item['no_model'],
-                    'area'       => $item['area'],
+                    // 'area'       => $item['area'],
                     'item_type'  => $item['item_type'],
                     'kode_warna' => $item['kode_warna'],
                     'style_size' => $item['style_size'],

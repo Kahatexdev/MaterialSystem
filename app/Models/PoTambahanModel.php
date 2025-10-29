@@ -72,7 +72,7 @@ class PoTambahanModel extends Model
             ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
             ->join('total_potambahan', 'po_tambahan.id_total_potambahan = total_potambahan.id_total_potambahan', 'left')
             ->join('master_order', 'material.id_order = master_order.id_order', 'left')
-            ->where('material.area', $area)
+            ->where('po_tambahan.admin', $area)
             ->like('po_tambahan.created_at', $tglBuat);
         // Cek apakah tglBuat diisi, baru apply filter
         if (!empty($noModel)) {
@@ -93,6 +93,7 @@ class PoTambahanModel extends Model
             ->join('total_potambahan', 'po_tambahan.id_total_potambahan = total_potambahan.id_total_potambahan', 'left')
             ->join('master_order', 'material.id_order = master_order.id_order', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->where('po_tambahan.status <>', 'approved')
             ->groupBy('DATE(po_tambahan.created_at)', false)
             ->groupBy('master_order.no_model')
             ->groupBy('material.item_type')
