@@ -226,8 +226,7 @@ class ApiController extends ResourceController
                     }
                     $res[] = $newRow;
                 }
-            } 
-            else {
+            } else {
                 // jenis lain
                 $newRow = $row;
                 $newRow['qty_po'] = $masterQty;

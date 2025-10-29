@@ -114,7 +114,7 @@ class PoTambahanController extends BaseController
 
         $validate = [
             'no_model'   => $noModel,
-            'area'       => $area,
+            // 'area'       => $area,
             'item_type'  => $itemType,
             'kode_warna' => $kodeWarna,
         ];
