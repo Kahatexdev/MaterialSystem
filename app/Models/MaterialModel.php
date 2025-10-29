@@ -446,7 +446,7 @@ class MaterialModel extends Model
             ->first();
     }
 
-    public function getFilterSisaDatangBenang($bulan = null, $noModel = null, $kodeWarna = null)
+    public function getFilterSisaDatangBenang($bulan = null, $noModel = null, $kodeWarna = null, $itemType = null)
     {
         // Subquery Material
         $material = $this->db->table('material')
@@ -455,13 +455,19 @@ class MaterialModel extends Model
             ->groupBy(['material.id_order', 'master_order.no_model', 'material.item_type', 'material.kode_warna', 'material.color', 'material.area']);
 
         // Subquery Stock
-        $stock = $this->db->table('stock')->select(['no_model', 'item_type', 'kode_warna', 'lot_awal', 'SUM(kgs_stock_awal) AS kgs_stock_awal'])
+        $stock = $this->db->table('stock')->select(['no_model', 'item_type', 'kode_warna'])
             ->groupBy(['no_model', 'item_type', 'kode_warna', 'lot_awal']);
 
         // Subquery Retur (Complain)
         $retur = $this->db->table('retur')->select(['no_model', 'item_type', 'kode_warna', 'SUM(kgs_retur) AS qty_retur'])
             ->where('area_retur', 'GUDANG BENANG')
             ->groupBy(['no_model', 'item_type', 'kode_warna']);
+
+        // Subquery Stock Awal dan Lot Awal
+        $stockAwal = $this->db->table('history_stock')
+            ->select(['stock.no_model', 'stock.item_type', 'stock.kode_warna', 'SUM(history_stock.kgs) AS kgs_awal', 'GROUP_CONCAT(DISTINCT history_stock.lot) AS lot_awal'])
+            ->join('stock', 'stock.id_stock = history_stock.id_stock_new')
+            ->groupBy(['stock.no_model', 'stock.item_type', 'stock.kode_warna']);
 
         // Subquery Datang
         $datang = $this->db->table('pemasukan p')->select([
@@ -499,7 +505,12 @@ class MaterialModel extends Model
                 'd.no_model = m.no_model AND d.item_type = m.item_type AND d.kode_warna = m.kode_warna',
                 'left'
             )
-            ->select(['mo.no_model', 'mo.lco_date', 'mo.foll_up', 'mo.no_order', 'm.area', 'mo.delivery_awal', 'mo.delivery_akhir', 'mo.unit', 'm.kg_po', 'm.item_type', 'm.kode_warna', 'm.color', 'mo.buyer', 'mm.jenis', 's.kgs_stock_awal', 's.lot_awal', 'r.qty_retur', 'd.kgs_datang', 'd.kgs_ganti_retur'])
+            ->join(
+                '(' . $stockAwal->getCompiledSelect(false)  . ') AS sa',
+                'sa.no_model = m.no_model AND sa.item_type = m.item_type AND sa.kode_warna = m.kode_warna',
+                'left'
+            )
+            ->select(['mo.no_model', 'mo.lco_date', 'mo.foll_up', 'mo.no_order', 'm.area', 'mo.delivery_awal', 'mo.delivery_akhir', 'mo.unit', 'm.kg_po', 'm.item_type', 'm.kode_warna', 'm.color', 'mo.buyer', 'mm.jenis', 'sa.kgs_awal', 'sa.lot_awal', 'r.qty_retur', 'd.kgs_datang', 'd.kgs_ganti_retur'])
             ->where('mm.jenis', 'BENANG');
 
         // Filters
