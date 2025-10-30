@@ -495,4 +495,110 @@ class CoveringPemesananController extends BaseController
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
+    public function bulkKirimPemesanan()
+    {
+        $db = \Config\Database::connect();
+
+        $ids      = array_values(array_unique((array)$this->request->getPost('selected_ids'))); // id_psk[]
+        $jenis    = $this->request->getPost('jenis');
+        $tglPakai = $this->request->getPost('tgl_pakai');
+
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'Tidak ada data dipilih.');
+        }
+
+        // Ambil data pemesanan untuk pendukung (area/admin, dll)
+        $rows = $this->pemesananSpandexKaretModel
+            ->whereIn('id_psk', $ids)
+            ->findAll();
+        // dd ($rows);
+        if (!$rows) {
+            return redirect()->back()->with('error', 'Data pemesanan tidak ditemukan.');
+        }
+
+        // Map id_psk -> row pemesanan
+        $pskMap = [];
+        foreach ($rows as $r) {
+            $pskMap[$r['id_psk']] = $r;
+        }
+        
+        // Ambil pengeluaran yang SUDAH ADA untuk id_psk yang dipilih
+        $existing = $this->pengeluaranModel
+            ->select('id_pengeluaran,id_psk,status')
+            ->whereIn('id_psk', $ids)
+            ->findAll();
+        // dd ($existing);
+        $existByIdPsk = [];
+        foreach ($existing as $ex) {
+            $existByIdPsk[$ex['id_psk']] = $ex;
+        }
+
+        // STRICT: jika ada id_psk tanpa baris pengeluaran → error
+        $missing = array_values(array_diff($ids, array_keys($existByIdPsk)));
+        if (!empty($missing)) {
+            // tampilkan sebagian saja agar pesan tidak kepanjangan
+            $sample = implode(', ', array_slice($missing, 0, 10));
+            $msg = 'Gagal: ' . count($missing) . ' item belum dipesan ke Covering';
+            return redirect()->back()->with('error', $msg);
+        }
+
+        $now   = date('Y-m-d H:i:s');
+        $today = date('Y-m-d');
+
+        // Optional: jika kamu mau SKIP yang sudah final, set true
+        $SKIP_FINAL = true;
+        $FINAL_STATUSES = ['Pengeluaran Jalur', 'Pengiriman Area'];
+
+        $toUpdate = [];
+        foreach ($ids as $idPsk) {
+            $r  = $pskMap[$idPsk];
+            $ex = $existByIdPsk[$idPsk];
+            $areaOut = $this->pemesananModel
+                ->select('admin')
+                ->where('id_total_pemesanan', $r['id_total_pemesanan'])
+                ->first();
+
+            if ($SKIP_FINAL && in_array($ex['status'], $FINAL_STATUSES, true)) {
+                continue; // lewati yang sudah final
+            }
+
+            $toUpdate[] = [
+                'id_pengeluaran' => $ex['id_pengeluaran'],   // key untuk updateBatch
+                'area_out'       => $areaOut['admin'],
+                'tgl_out'        => $today,
+                'status'         => 'Pengeluaran Jalur',      // atau 'Pengiriman Area'
+                'admin'          => session()->get('username'),
+                'updated_at'     => $now,
+                // ⚠️ Tidak menyentuh kgs_out/cns_out supaya tidak jadi 0
+            ];
+        }
+        // dd ($toUpdate);
+        if (empty($toUpdate)) {
+            return redirect()->back()->with('error', 'Tidak ada item yang bisa di-update.');
+        }
+
+        $db->transStart();
+
+        // Update pengeluaran
+        $this->pengeluaranModel->updateBatch($toUpdate, 'id_pengeluaran');
+
+        // Sinkronkan tracking (jika perlu)
+        // $this->trackingPoCoveringModel
+        //     ->whereIn('id_psk', $ids)
+        //     ->set([
+        //         'status'     => 'Pengeluaran Jalur',   // selaraskan dengan atas
+        //         'admin'      => session('username'),
+        //         'updated_at' => $now,
+        //     ])->update();
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->with('error', 'Gagal update bulk pengeluaran.');
+        }
+
+        return redirect()->to(base_url("$this->role/pemesanan/$jenis"))
+            ->with('success', 'Berhasil update pengeluaran untuk ' . count($toUpdate) . ' item.');
+    }
 }
