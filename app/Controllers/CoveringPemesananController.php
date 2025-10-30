@@ -82,38 +82,73 @@ class CoveringPemesananController extends BaseController
             ->getListPemesananCovering($jenis, $tgl_pakai);
         // dd ($listPemesanan);
         // Loop untuk men-set tombol enable/disable
+        // foreach ($listPemesanan as $key => $value) {
+        //     $history = $this->pengeluaranModel
+        //         ->where('id_total_pemesanan', $value['id_total_pemesanan'])
+        //         ->where('status', 'Pengeluaran Jalur')
+        //         ->first();
+        //     // dd ($history);
+        //     if (!empty($history)) {
+        //         // kalau sudah pernah dikirim, tombol harus disable
+        //         $listPemesanan[$key]['button'] = 'disable';
+        //     } else {
+        //         // kalau belum, tombol enable
+        //         $listPemesanan[$key]['button'] = 'enable';
+        //     }
+        // }
+        // // dd ($listPemesanan);
+
+        // // Ambil daftar tipe (jenis) unik dari covering_stock untuk select “Jenis” di modal
+        // $selectOptionData = $this->coveringStockModel
+        //     ->select('jenis')
+        //     ->distinct()
+        //     ->findAll();
+
+        // $optionDataJenis = [];
+        // foreach ($selectOptionData as $row) {
+        //     $optionDataJenis[] = $row['jenis'];
+        // }
+
+        // $data = [
+        //     'active'         => $this->active,
+        //     'title'          => 'Material System',
+        //     'role'           => $this->role,
+        //     'listPemesanan'  => $listPemesanan,
+        //     'optionDataJenis' => $optionDataJenis
+        // ];
+        // return view("{$this->role}/pemesanan/detail-pemesanan", $data);
+        $ids = array_values(array_unique(array_filter(
+            array_column($listPemesanan, 'id_total_pemesanan')
+        )));
+
+        // 3) Ambil id_total_pemesanan yang SUDAH punya pengeluaran dgn status yang dimaksud
+        $disabledIds = [];
+        if (!empty($ids)) {
+            $disabledIds = $this->pengeluaranModel
+                ->select('id_total_pemesanan')
+                ->whereIn('id_total_pemesanan', $ids)
+                ->whereIn('status', ['Pengeluaran Jalur', 'Pengiriman Area'])
+                ->groupBy('id_total_pemesanan')
+                ->findColumn('id_total_pemesanan') ?? [];
+        }
+
+        // 4) Tandai enable/disable di list
         foreach ($listPemesanan as $key => $value) {
-            $history = $this->pengeluaranModel
-                ->where('id_total_pemesanan', $value['id_total_pemesanan'])
-                ->where('status', 'Pengeluaran Jalur')
-                ->first();
-            // dd ($history);
-            if (!empty($history)) {
-                // kalau sudah pernah dikirim, tombol harus disable
-                $listPemesanan[$key]['button'] = 'disable';
-            } else {
-                // kalau belum, tombol enable
-                $listPemesanan[$key]['button'] = 'enable';
-            }
+            $idTot = $value['id_total_pemesanan'] ?? null;
+            $listPemesanan[$key]['button'] = ($idTot && in_array($idTot, $disabledIds, true))
+                ? 'disable'
+                : 'enable';
         }
-        // dd ($listPemesanan);
 
-        // Ambil daftar tipe (jenis) unik dari covering_stock untuk select “Jenis” di modal
-        $selectOptionData = $this->coveringStockModel
-            ->select('jenis')
-            ->distinct()
-            ->findAll();
-
-        $optionDataJenis = [];
-        foreach ($selectOptionData as $row) {
-            $optionDataJenis[] = $row['jenis'];
-        }
+        // 5) Select option jenis (tanpa perubahan)
+        $selectOptionData = $this->coveringStockModel->select('jenis')->distinct()->findAll();
+        $optionDataJenis = array_map(fn($r) => $r['jenis'], $selectOptionData);
 
         $data = [
-            'active'         => $this->active,
-            'title'          => 'Material System',
-            'role'           => $this->role,
-            'listPemesanan'  => $listPemesanan,
+            'active'          => $this->active,
+            'title'           => 'Material System',
+            'role'            => $this->role,
+            'listPemesanan'   => $listPemesanan,
             'optionDataJenis' => $optionDataJenis
         ];
         return view("{$this->role}/pemesanan/detail-pemesanan", $data);
@@ -384,12 +419,13 @@ class CoveringPemesananController extends BaseController
             ->select('id_total_pemesanan')
             ->where('id_psk', $id_psk)
             ->first();
+            // dd ($total);
         if (!$total) {
             return redirect()->back()->with('error', 'ID Total Pemesanan tidak ditemukan.');
         }
         $noModel = $this->pemesananSpandexKaretModel
             ->getNoModelById($id_psk)['no_model'] ?? '';
-
+        // dd ($noModel);
         // // Insert history
         // $this->historyCoveringStockModel->insert([
         //     'id_total_pemesanan' => $total['id_total_pemesanan'],
@@ -412,6 +448,7 @@ class CoveringPemesananController extends BaseController
             ->select('id_pengeluaran')
             ->where('id_psk', $id_psk)
             ->first();
+            // dd ($pengeluaran);
         if (!$pengeluaran) {
             return redirect()->back()->with('error', 'ID Pengeluaran tidak ditemukan.');
         }
@@ -419,6 +456,7 @@ class CoveringPemesananController extends BaseController
             ->select('admin')
             ->where('id_total_pemesanan', $total['id_total_pemesanan'])
             ->first();
+            // dd ($areaOut);
         $this->pengeluaranModel->update($pengeluaran['id_pengeluaran'], [
             'area_out' => $areaOut['admin'] ?? '',
             'tgl_out' => date('Y-m-d'),

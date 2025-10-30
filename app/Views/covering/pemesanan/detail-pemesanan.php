@@ -118,24 +118,18 @@
                             <td class="text-center"><?= esc($list['total_cones']); ?></td>
                             <td class="text-center"><?= esc($list['admin']); ?></td>
                             <td class="text-center">
-                                <?php if ($list['button'] === 'disable') : ?>
+                                <?php if (($list['button'] ?? 'enable') === 'disable') : ?>
                                     <button type="button" class="btn bg-gradient-secondary" disabled>
                                         <i class="fas fa-box"></i> Stock Terkirim
                                     </button>
                                 <?php else : ?>
-                                    <!-- <button
-                                        type="button"
-                                        class="btn bg-gradient-info"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editModal<?= esc($list['id_psk']) ?>">
-                                        <i class="fas fa-paper-plane"></i> Kirim Stock
-                                    </button> -->
                                     <form action="<?= base_url("$role/updatePemesanan/{$list['id_psk']}") ?>" method="POST">
-                                        <!-- Hidden values for reference -->
                                         <input type="hidden" name="id_psk" value="<?= esc($list['id_psk']) ?>">
                                         <input type="hidden" name="jenis" value="<?= esc($list['jenis']) ?>">
                                         <input type="hidden" name="tgl_pakai" value="<?= esc($list['tgl_pakai']) ?>">
-                                        <button type="submit" class="btn bg-gradient-info"><i class="fas fa-paper-plane"></i> Kirim Stock</button>
+                                        <button type="submit" class="btn bg-gradient-info">
+                                            <i class="fas fa-paper-plane"></i> Kirim Stock
+                                        </button>
                                     </form>
                                 <?php endif; ?>
                             </td>
