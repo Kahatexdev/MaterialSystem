@@ -1250,13 +1250,31 @@ class ApiController extends ResourceController
         $tglBuat = $this->request->getGet('tglBuat');
         $noModel = $this->request->getGet('model') ?? null;
 
-        // $area = 'KK2A';
-        // $noModel = '';
-        // $tglBuat = '2025-06-17';
-
+        $data = [];
         $filterData = $this->poTambahanModel->filterData($area, $tglBuat, $noModel);
 
-        return $this->respond($filterData);
+        // Ambil kolom-kolom unik dari hasil filterData
+        $noModels    = array_unique(array_column($filterData, 'no_model'));
+        $itemTypes   = array_unique(array_column($filterData, 'item_type'));
+        $kodeWarnas  = array_unique(array_column($filterData, 'kode_warna'));
+        $colors      = array_unique(array_column($filterData, 'color'));
+
+        $validate = [
+            'area'       => $area,
+            'no_model'   => $noModels,
+            'item_type'  => $itemTypes,
+            'kode_warna' => $kodeWarnas,
+            'color'      => $colors,
+        ];
+
+        $listRetur = $this->returModel->getQtyRetur($validate);
+
+        $data = [
+            'dataPoTambahan' => $filterData,
+            'dataRetur' => $listRetur,
+        ];
+
+        return $this->respond($data);
     }
     public function cekMaterial($id)
     {
@@ -1410,9 +1428,26 @@ class ApiController extends ResourceController
 
         $data = [];
         $listRetur = $this->returModel->filterData($area, $tglBuat, $noModel);
+
+        // Ambil kolom-kolom unik dari hasil filterData
+        $noModels    = array_unique(array_column($listRetur, 'no_model'));
+        $itemTypes   = array_unique(array_column($listRetur, 'item_type'));
+        $kodeWarnas  = array_unique(array_column($listRetur, 'kode_warna'));
+        $colors      = array_unique(array_column($listRetur, 'color'));
+
+        $validate = [
+            'area'       => $area,
+            'no_model'   => $noModels,
+            'item_type'  => $itemTypes,
+            'kode_warna' => $kodeWarnas,
+            'color'      => $colors,
+        ];
+
+        $dataPoTamabahan = $this->poTambahanModel->getDataPlus($validate);
         $material = $this->materialModel->getMaterialForPPH($noModel);
         $data = [
             'dataRetur' => $listRetur,
+            'dataPoTambahan' => $dataPoTamabahan,
             'material' => $material,
         ];
         return $this->response->setJSON($data);
