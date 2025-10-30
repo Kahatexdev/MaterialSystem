@@ -119,11 +119,11 @@
                     <input type="text" class="form-control" placeholder="PDK / Item Type / Kode Warna dan Warna">
                 </div>
                 <div class="col-md-3">
-                    <label for="">Tanggal Awal (Tanggal Keluar)</label>
+                    <label for="">Tanggal Awal (Tanggal Pakai)</label>
                     <input type="date" class="form-control">
                 </div>
                 <div class="col-md-3">
-                    <label for="">Tanggal Akhir (Tanggal Keluar)</label>
+                    <label for="">Tanggal Akhir (Tanggal Pakai)</label>
                     <input type="date" class="form-control">
                 </div>
                 <div class="col-md-3">
