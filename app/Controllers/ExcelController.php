@@ -934,14 +934,19 @@ class ExcelController extends BaseController
             $model = $item['no_model'];
             // Ambil data dari API ge172.23.44.14
             $getStartMcUrl = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . $model;
-            $getStartMcResponse = file_get_contents($getStartMcUrl);
-            $getStartMc = json_decode($getStartMcResponse, true);
 
-            // Return data JSON jika request via AJAX
-            if ($this->request->isAJAX()) {
-                return $this->response->setJSON($getStartMc);
+            $getStartMcResponse = @file_get_contents($getStartMcUrl);
+            if ($getStartMcResponse === false) {
+                $startMc = 'Gagal Ambil Data Start Mc';
+            } else {
+                $getStartMc = json_decode($getStartMcResponse, true);
+
+                if ($this->request->isAJAX()) {
+                    return $this->response->setJSON($getStartMc);
+                } else {
+                    $startMc = $getStartMc['start_mc'] ?? 'Belum Ada Start Mc';
+                }
             }
-            $startMc = $getStartMc['start_mc'] ?? 'Belum Ada Start Mc';
 
             $sheet->fromArray([
                 [
