@@ -1095,48 +1095,17 @@ class MaterialModel extends Model
         $db = \Config\Database::connect();
 
         // 1) Subquery KGS (aggregate sekali per kombinasi)
-        $stockKgs = $db->table('stock')
-            ->select("
-            item_type,
-            kode_warna,
-            warna,
-            SUM(COALESCE(kgs_stock_awal,0) + COALESCE(kgs_in_out,0)) AS kgs_stock
-        ")
-            ->groupBy('item_type, kode_warna, warna')
-            ->getCompiledSelect(false);
-
-        // 2) Subqueries untuk LOT dengan filter yang lebih ketat
-        $subLot1 = $db->table('stock')
-            ->select("item_type, kode_warna, warna, lot_stock AS lot")
-            ->where('lot_stock IS NOT NULL')
-            ->where('lot_stock !=', '')
-            ->where('TRIM(lot_stock) !=', '')
-            ->getCompiledSelect(false);
-
-        $subLot2 = $db->table('stock')
-            ->select("item_type, kode_warna, warna, lot_awal AS lot")
-            ->where('lot_awal IS NOT NULL')
-            ->where('lot_awal !=', '')
-            ->where('TRIM(lot_awal) !=', '')
-            ->getCompiledSelect(false);
-
-        // 3) Gabungkan dengan UNION ALL dan aggregate
-        $unionLots = "({$subLot1} UNION ALL {$subLot2})";
-
-        $stockLots = $db->table("({$unionLots}) AS u_lots")
-            ->select("
-            item_type,
-            kode_warna,
-            warna,
-            GROUP_CONCAT(DISTINCT TRIM(lot) ORDER BY lot SEPARATOR ', ') AS lot_stock
-        ")
-            ->groupBy('item_type, kode_warna, warna')
+        $stockKgs = $db->table('history_stock')
+            ->select("stock.no_model, stock.item_type, stock.kode_warna, stock.warna, SUM(COALESCE(history_stock.kgs,0)) AS kgs_stock, GROUP_CONCAT(DISTINCT(history_stock.lot)) AS lot_stock")
+            ->join('stock', 'stock.id_stock = history_stock.id_stock_new', 'left')
+            ->where('history_stock.keterangan', 'Pindah Order')
+            ->groupBy('stock.no_model, stock.item_type, stock.kode_warna, stock.warna')
             ->getCompiledSelect(false);
 
         $subPoPlus = $db->table('po_tambahan')
             ->select('
                 po_tambahan.id_material, 
-                SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS kg_po_plus, 
+                SUM(total_potambahan.ttl_tambahan_kg) AS kg_po_plus, 
                 po_tambahan.tanggal_approve, 
                 DATE(po_tambahan.created_at) AS tgl_po_plus_area, 
                 po_tambahan.delivery_po_plus,
@@ -1145,6 +1114,7 @@ class MaterialModel extends Model
                 material.color
             ')
             ->join('material', 'material.id_material = po_tambahan.id_material', 'left')
+            ->join('total_potambahan', 'total_potambahan.id_total_potambahan = po_tambahan.id_total_potambahan', 'left')
             ->where('po_tambahan.tanggal_approve IS NOT NULL')
             ->where('po_tambahan.status', 'approved')
             ->groupBy('po_tambahan.tanggal_approve, material.item_type, material.kode_warna, material.color')
@@ -1173,7 +1143,7 @@ class MaterialModel extends Model
             material.created_at AS tgl_input,
             material.admin,
             COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock,
-            COALESCE(lotSub.lot_stock, '-') AS lot_stock,
+            COALESCE(stockKgs.lot_stock, '-') AS lot_stock,
             COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus,
             plusSub.tgl_po_plus_area,
             plusSub.delivery_po_plus,
@@ -1183,16 +1153,10 @@ class MaterialModel extends Model
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join(
                 "({$stockKgs}) AS stockKgs",
-                'stockKgs.item_type = material.item_type 
+                'stockKgs.no_model = master_order.no_model 
+                stockKgs.item_type = material.item_type 
              AND stockKgs.kode_warna = material.kode_warna 
              AND stockKgs.warna = material.color',
-                'left'
-            )
-            ->join(
-                "({$stockLots}) AS lotSub",
-                'lotSub.item_type = material.item_type 
-             AND lotSub.kode_warna = material.kode_warna 
-             AND lotSub.warna = material.color',
                 'left'
             )
             ->join(
