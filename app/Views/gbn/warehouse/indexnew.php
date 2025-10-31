@@ -764,6 +764,22 @@
 
     $('#formPindahOrder').on('submit', function(e) {
         e.preventDefault();
+
+        const $form = $(this);
+        // kalau cuma satu tombol submit di form
+        // const $btn  = $form.find('[type=submit]');
+        // kalau ada banyak tombol submit dan kamu ingin yg diklik saja:
+        const $btn = $(document.activeElement).is('[type=submit]') ? $(document.activeElement) : $form.find('[type=submit]');
+
+        // guard: cegah double submit
+        if ($btn.data('loading')) return;
+
+        const origHtml = $btn.html();
+        $btn
+            .data('loading', true)
+            .prop('disabled', true)
+            .html('<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...');
+
         const role = '<?= session()->get('role') ?>';
         const base = '<?= base_url() ?>';
         const model = $('#ModelSelect').val();
@@ -788,29 +804,34 @@
         });
 
         $.post(`${base}${role}/warehouse/savePindahOrderTest`, {
-            no_model_tujuan: model,
-            idOutCelup: orders,
-            id_stock: stock,
-            kgs_out: kgsOut,
-            cns_out: cnsOut
-        }, res => {
-            const ok = !!res.success;
-            Swal.fire({
-                icon: ok ? 'success' : 'error',
-                text: ok ? `Berhasil memindahkan ${orders.length} order.` : (res.message || 'Terjadi kesalahan saat memindahkan order.'),
-                confirmButtonText: 'OK',
-                willClose: () => {
-                    $('#modalPindahOrder').modal('hide');
-                    $('#formPindahOrder')[0].reset();
-                    reloadSearchResult();
-                }
+                no_model_tujuan: model,
+                idOutCelup: orders,
+                id_stock: stock,
+                kgs_out: kgsOut,
+                cns_out: cnsOut
+            }, res => {
+                const ok = !!res.success;
+                Swal.fire({
+                    icon: ok ? 'success' : 'error',
+                    text: ok ? `Berhasil memindahkan ${orders.length} order.` : (res.message || 'Terjadi kesalahan saat memindahkan order.'),
+                    confirmButtonText: 'OK',
+                    willClose: () => {
+                        $('#modalPindahOrder').modal('hide');
+                        $('#formPindahOrder')[0].reset();
+                        reloadSearchResult();
+                    }
+                });
+            }, 'json')
+            .fail((_, __, err) => {
+                Swal.fire({
+                    icon: 'error',
+                    text: `Error: ${err}`
+                });
+            })
+            .always(() => {
+                // apapun hasilnya, balikin tombol
+                $btn.prop('disabled', false).data('loading', false).html(origHtml);
             });
-        }, 'json').fail((_, __, err) => {
-            Swal.fire({
-                icon: 'error',
-                text: `Error: ${err}`
-            });
-        });
     });
 
     // —— Modal Pindah Cluster
