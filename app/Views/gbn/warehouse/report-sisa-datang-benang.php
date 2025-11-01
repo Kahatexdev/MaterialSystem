@@ -346,7 +346,7 @@
                                     <td>${item.item_type || ''}</td>
                                     <td>${item.kode_warna || ''}</td>
                                     <td>${item.color || ''}</td>
-                                    <td>${item.kgs_stock_awal || 0}</td>
+                                    <td>${(parseFloat(item.kgs_awal) || 0).toFixed(2)}</td>
                                     <td>${item.lot_awal || ''}</td>
                                     <td>${(parseFloat(item.kg_po) || 0).toFixed(2)}</td>
                                     <td>${item.tgl_terima_po_plus || ''}</td>

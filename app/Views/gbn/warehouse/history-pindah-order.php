@@ -250,8 +250,7 @@
                 type: "GET",
                 data: {
                     model: no_model,
-                    kode_warna: kode_warna,
-                    limit: 10
+                    kode_warna: kode_warna
                 },
                 dataType: "json",
                 beforeSend: function() {

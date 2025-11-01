@@ -169,7 +169,7 @@ class PengeluaranModel extends Model
                 // 'po_tambahan.no_po',
                 // 'NULL AS qty_po_plus',
                 'pemesanan.tgl_pakai',
-                'pengeluaran.tgl_out',
+                'pengeluaran.updated_at AS tgl_out',
                 'pengeluaran.nama_cluster',
                 'pengeluaran.area_out',
                 'pengeluaran.kgs_out AS kgs_pakai',
@@ -218,7 +218,7 @@ class PengeluaranModel extends Model
                 'material.color',
                 'material.loss',
                 'pemesanan.tgl_pakai',
-                'pengeluaran.tgl_out',
+                'pengeluaran.updated_at AS tgl_out',
                 'pengeluaran.nama_cluster',
                 'pengeluaran.area_out',
                 'pengeluaran.kgs_out AS kgs_pakai',
@@ -382,8 +382,8 @@ class PengeluaranModel extends Model
         $conds = [];
 
         // filter tanggal sama seperti sebelumnya
-        if ($tanggal_awal)  $conds[] = "all_data.tgl_out >= '$tanggal_awal'";
-        if ($tanggal_akhir) $conds[] = "all_data.tgl_out <= '$tanggal_akhir'";
+        if ($tanggal_awal)  $conds[] = "all_data.tgl_pakai >= '$tanggal_awal'";
+        if ($tanggal_akhir) $conds[] = "all_data.tgl_pakai <= '$tanggal_akhir'";
 
         // filter keyword, QUALIFIED dengan alias derived table
         if ($key) {
@@ -397,7 +397,7 @@ class PengeluaranModel extends Model
         if (count($conds)) {
             $sql .= ' WHERE ' . implode(' AND ', $conds);
         }
-        $sql .= ' ORDER BY all_data.tgl_out DESC';
+        $sql .= ' ORDER BY all_data.tgl_pakai DESC';
 
 
         // 5) Eksekusi dan return

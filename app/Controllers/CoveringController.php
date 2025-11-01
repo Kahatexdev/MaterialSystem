@@ -209,21 +209,118 @@ class CoveringController extends BaseController
                     continue;
                 }
 
-                $updateData = [
-                    'status' => '(CELUP - ' . $newStatus . ')',
-                    'keterangan' => '(CELUP - ' . $newKet . ')',
-                    'updated_at' => date('Y-m-d H:i:s'),
-                ];
+                // $updateData = [
+                //     'status' => '(CELUP - ' . $newStatus . ')',
+                //     'keterangan' => '(CELUP - ' . $newKet . ')',
+                //     'updated_at' => date('Y-m-d H:i:s'),
+                // ];
 
+                // if ($id) {
+                //     // update by primary key via model
+                //     $this->trackingPoCoveringModel->update($id, $updateData);
+                // } else {
+                //     // update by where (hati-hati: bisa update banyak baris)
+                //     $where = ['kode_warna' => $kodeT];
+                //     if ($itT !== '') $where['item_type'] = $itT;
+                //     $this->trackingPoCoveringModel->where($where)->set($updateData)->update();
+                // }
+
+                // $rowsUpdated++;
+                // $details[] = [
+                //     'id_tpc' => $id,
+                //     'no_model' => $modelT,
+                //     'kode_warna' => $kodeT,
+                //     'matched_with' => $matchedKey . ' (model:' . ($found['_norm_model'] ?? '') . ', kode:' . ($found['_norm_kode'] ?? '') . ')',
+                //     'status_after' => $newStatus,
+                //     'keterangan_after' => $newKet,
+                //     'updated' => true,
+                // ];
+                // === PERUBAHAN DIMULAI DI SINI ===
+                // === PERUBAHAN DIMULAI DI SINI ===
+                $now           = date('Y-m-d H:i:s');
+                $displayStatus = '(CELUP - ' . ($newStatus ?? '-') . ')';
+
+                // Ambil data existing (utamakan by PK)
                 if ($id) {
-                    // update by primary key via model
-                    $this->trackingPoCoveringModel->update($id, $updateData);
+                    $existing = $this->trackingPoCoveringModel->find($id);
                 } else {
-                    // update by where (hati-hati: bisa update banyak baris)
+                    // HATI-HATI: tanpa PK bisa melebar. Minimal batasi dengan item_type bila ada.
                     $where = ['kode_warna' => $kodeT];
                     if ($itT !== '') $where['item_type'] = $itT;
+                    // Kalau memungkinkan, tambahkan kecocokan model juga:
+                    if (!empty($modelT)) {
+                        $this->trackingPoCoveringModel
+                            ->groupStart()
+                            ->where('no_model', $modelT)
+                            ->orWhere('no_model_anak', $modelT)
+                            ->groupEnd();
+                    }
+                    $existing = $this->trackingPoCoveringModel->where($where)->orderBy('updated_at', 'DESC')->first();
+                }
+
+                $oldStatus = $existing['status'] ?? '';
+                $oldKet    = $existing['keterangan'] ?? '';
+
+                // --- Guard idempotent: skip update jika tidak ada perubahan berarti ---
+                // 1) Kalau status sudah sama; dan
+                if (trim($oldStatus) === $displayStatus) {
+                    // 2) Cek baris terakhir keterangan berisi status yang sama (abaikan jam:menit:detik agar tidak double-append)
+                    $lastLine = '';
+                    if ($oldKet !== '') {
+                        $lines = preg_split("/\r\n|\r|\n/", $oldKet);
+                        $lastLine = trim(end($lines));
+                    }
+
+                    // Bentuk pola "STATUS (YYYY-mm-dd"
+                    $prefixToday = $displayStatus . ' (' . date('Y-m-d');
+                    if (strpos($lastLine, $prefixToday) === 0) {
+                        // Tidak ada perubahan → catat dan lanjut
+                        $details[] = [
+                            'id_tpc'          => $id,
+                            'no_model'        => $modelT,
+                            'kode_warna'      => $kodeT,
+                            'matched_with'    => $matchedKey,
+                            'updated'         => false,
+                            'reason'          => 'no change'
+                        ];
+                        continue;
+                    }
+                }
+
+                // Susun baris baru keterangan: boleh ikutkan ket_daily_cek jika ada
+                $newKetLine = $displayStatus
+                    . (!empty($newKet) ? ' - ' . $newKet : '')
+                    . ' (' . $now . ')';
+
+                // Gabungkan rapi (pakai baris baru)
+                $keteranganGabung = trim($oldKet . ($oldKet !== '' ? ",\n" : '') . $newKetLine);
+
+                // Data update final
+                $updateData = [
+                    'status'     => $displayStatus,
+                    'keterangan' => $keteranganGabung,
+                    'updated_at' => $now,
+                    // 'admin'   => session()->get('username') ?? null, // aktifkan jika ingin log admin
+                ];
+
+                // Tulis by PK kalau ada, hindari mass-update tanpa PK
+                if ($id) {
+                    $this->trackingPoCoveringModel->update($id, $updateData);
+                } else {
+                    // MASIH BERISIKO mass-update jika where kurang spesifik.
+                    $where = ['kode_warna' => $kodeT];
+                    if ($itT !== '') $where['item_type'] = $itT;
+                    if (!empty($modelT)) {
+                        $this->trackingPoCoveringModel
+                            ->groupStart()
+                            ->where('no_model', $modelT)
+                            ->orWhere('no_model_anak', $modelT)
+                            ->groupEnd();
+                    }
                     $this->trackingPoCoveringModel->where($where)->set($updateData)->update();
                 }
+                // === PERUBAHAN SELESAI ===
+
 
                 $rowsUpdated++;
                 $details[] = [
@@ -231,8 +328,8 @@ class CoveringController extends BaseController
                     'no_model' => $modelT,
                     'kode_warna' => $kodeT,
                     'matched_with' => $matchedKey . ' (model:' . ($found['_norm_model'] ?? '') . ', kode:' . ($found['_norm_kode'] ?? '') . ')',
-                    'status_after' => $newStatus,
-                    'keterangan_after' => $newKet,
+                    'status_after' => $displayStatus,
+                    'keterangan_after' => $keteranganGabung,
                     'updated' => true,
                 ];
             } else {
@@ -332,11 +429,11 @@ class CoveringController extends BaseController
 
         // fetch data automatically from database for tracking po covering
         // panggil private function untuk sinkronisasi
-        $trackingData = $this->trackingPoCoveringModel->dailyUpdateTrackingPO();
-        $scheduleData = $this->scheduleCelupModel->where('tanggal_schedule >=', date('Y-m-01', strtotime('-1 month')))
-            ->where('tanggal_schedule <', date('Y-m-01', strtotime('+2 month')))
-            ->findAll();
-        $summary = $this->syncTrackingFromSchedule($trackingData, $scheduleData);
+        // $trackingData = $this->trackingPoCoveringModel->dailyUpdateTrackingPO();
+        // $scheduleData = $this->scheduleCelupModel->where('tanggal_schedule >=', date('Y-m-01', strtotime('-1 month')))
+        //     ->where('tanggal_schedule <', date('Y-m-01', strtotime('+2 month')))
+        //     ->findAll();
+        // $summary = $this->syncTrackingFromSchedule($trackingData, $scheduleData);
 
         // debug / inspect: ganti dengan return view/json jika perlu
         // dd($summary);

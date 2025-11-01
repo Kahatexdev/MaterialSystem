@@ -934,14 +934,19 @@ class ExcelController extends BaseController
             $model = $item['no_model'];
             // Ambil data dari API ge172.23.44.14
             $getStartMcUrl = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . $model;
-            $getStartMcResponse = file_get_contents($getStartMcUrl);
-            $getStartMc = json_decode($getStartMcResponse, true);
 
-            // Return data JSON jika request via AJAX
-            if ($this->request->isAJAX()) {
-                return $this->response->setJSON($getStartMc);
+            $getStartMcResponse = @file_get_contents($getStartMcUrl);
+            if ($getStartMcResponse === false) {
+                $startMc = 'Gagal Ambil Data Start Mc';
+            } else {
+                $getStartMc = json_decode($getStartMcResponse, true);
+
+                if ($this->request->isAJAX()) {
+                    return $this->response->setJSON($getStartMc);
+                } else {
+                    $startMc = $getStartMc['start_mc'] ?? 'Belum Ada Start Mc';
+                }
             }
-            $startMc = $getStartMc['start_mc'] ?? 'Belum Ada Start Mc';
 
             $sheet->fromArray([
                 [
@@ -2096,6 +2101,7 @@ class ExcelController extends BaseController
             'LOT PAKAI',
             'KET GBN PAKAI',
             'ADMIN',
+            'TANGGAL KELUAR',
         ];
 
         // Teks footer
@@ -2140,8 +2146,8 @@ class ExcelController extends BaseController
             // Ganti judul sheet (maks 31 char)
             $sheet->setTitle(substr($jenis, 0, 31));
 
-            // Judul di A1:X1
-            $sheet->mergeCells('A1:X1');
+            // Judul di A1:Y1
+            $sheet->mergeCells('A1:Y1');
             $sheet->setCellValue('A1', "DATA PEMAKAIAN AREA {$jenis} {$key}");
             $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
             $sheet->getStyle('A1')
@@ -2184,15 +2190,16 @@ class ExcelController extends BaseController
                 $sheet->setCellValue("V{$rowNum}", $item['lot_pakai'] ?? '-');
                 $sheet->setCellValue("W{$rowNum}", $item['keterangan_gbn'] ?? '-');
                 $sheet->setCellValue("X{$rowNum}", $item['admin'] ?? '-');
+                $sheet->setCellValue("Y{$rowNum}", $item['tgl_out'] ?? '-');
                 $rowNum++;
             }
 
             // Tentukan print area sekarang data sudah terisi
             $lastRow = $rowNum - 1;
-            $ps->setPrintArea("A1:X{$lastRow}");
+            $ps->setPrintArea("A1:Y{$lastRow}");
 
             // Border + alignment
-            $sheet->getStyle("A3:X{$lastRow}")
+            $sheet->getStyle("A3:Y{$lastRow}")
                 ->applyFromArray([
                     'borders' => [
                         'allBorders' => [
@@ -2207,7 +2214,7 @@ class ExcelController extends BaseController
                 ]);
 
             // Auto–size kolom
-            foreach (range('A', 'X') as $c) {
+            foreach (range('A', 'Y') as $c) {
                 $sheet->getColumnDimension($c)->setAutoSize(true);
             }
 

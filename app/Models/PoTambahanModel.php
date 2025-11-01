@@ -72,7 +72,7 @@ class PoTambahanModel extends Model
             ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
             ->join('total_potambahan', 'po_tambahan.id_total_potambahan = total_potambahan.id_total_potambahan', 'left')
             ->join('master_order', 'material.id_order = master_order.id_order', 'left')
-            ->where('material.area', $area)
+            ->where('po_tambahan.admin', $area)
             ->like('po_tambahan.created_at', $tglBuat);
         // Cek apakah tglBuat diisi, baru apply filter
         if (!empty($noModel)) {
@@ -93,6 +93,7 @@ class PoTambahanModel extends Model
             ->join('total_potambahan', 'po_tambahan.id_total_potambahan = total_potambahan.id_total_potambahan', 'left')
             ->join('master_order', 'material.id_order = master_order.id_order', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->where('po_tambahan.status <>', 'approved')
             ->groupBy('DATE(po_tambahan.created_at)', false)
             ->groupBy('master_order.no_model')
             ->groupBy('material.item_type')
@@ -235,5 +236,27 @@ class PoTambahanModel extends Model
             $map[$r['style_size']] = (float) $r['ttl_keb_potambahan'];
         }
         return $map;
+    }
+
+    public function getDataPlus($validate)
+    {
+        return $this->select('SUM(po_tambahan.sisa_order_pcs) AS sisa_order_pcs, SUM(po_tambahan.poplus_mc_kg) AS poplus_mc_kg, MAX(po_tambahan.poplus_mc_cns) AS poplus_mc_cns, SUM(po_tambahan.plus_pck_pcs) AS plus_pck_pcs, SUM(po_tambahan.plus_pck_kg) AS plus_pck_kg, MAX(po_tambahan.plus_pck_cns) AS plus_pck_cns, total_potambahan.ttl_terima_kg, total_potambahan.ttl_sisa_bb_dimc, total_potambahan.ttl_tambahan_kg, total_potambahan.ttl_tambahan_cns, total_potambahan.keterangan AS ket_area, master_order.no_model, master_order.delivery_akhir, material.item_type, material.kode_warna, material.color, material.style_size, material.kgs, material.composition, material.gw, material.qty_pcs, material.loss')
+            ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
+            ->join('total_potambahan', 'po_tambahan.id_total_potambahan = total_potambahan.id_total_potambahan', 'left')
+            ->join('master_order', 'material.id_order = master_order.id_order', 'left')
+            ->where('po_tambahan.admin', $validate['area'])
+            ->whereIn('material.item_type', $validate['item_type'])
+            ->whereIn('material.kode_warna', $validate['kode_warna'])
+            ->whereIn('material.color', $validate['color'])
+            ->groupBy('master_order.no_model')
+            ->groupBy('material.item_type')
+            ->groupBy('material.kode_warna')
+            ->groupBy('material.color')
+            ->groupBy('material.style_size')
+            ->orderBy('master_order.no_model', 'ASC')
+            ->orderBy('material.item_type', 'ASC')
+            ->orderBy('material.kode_warna', 'ASC')
+            ->orderBy('material.style_size', 'ASC')
+            ->findAll();
     }
 }

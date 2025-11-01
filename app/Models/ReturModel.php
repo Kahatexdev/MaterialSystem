@@ -420,27 +420,27 @@ class ReturModel extends Model
         // -----------------------------
         // Subquery Po Tambahan
         // -----------------------------
-        $subPoTambahan = $db->table('po_tambahan pt')
-            ->select("
-            m.id_order, 
-            m.item_type, 
-            m.kode_warna, 
-            SUM(pt.sisa_order_pcs) AS sisa_order_pcs,
-            SUM(pt.poplus_mc_kg) AS poplus_mc_kg,
-            MAX(pt.poplus_mc_cns) AS poplus_mc_cns,
-            SUM(pt.plus_pck_pcs) AS plus_pck_pcs,
-            SUM(pt.plus_pck_kg) AS plus_pck_kg,
-            MAX(pt.plus_pck_cns) AS plus_pck_cns,
-            MAX(tp.ttl_tambahan_kg) AS ttl_tambahan_kg,
-            MAX(tp.ttl_tambahan_cns) AS ttl_tambahan_cns,
-            MAX(tp.ttl_sisa_bb_dimc) AS sisa_bb_mc,
-            MAX(pt.status) AS status
-        ")
-            ->join('total_potambahan tp', 'tp.id_total_potambahan = pt.id_total_potambahan', 'left')
-            ->join('material m', 'm.id_material = pt.id_material', 'left')
-            ->where('pt.admin', $area)
-            ->where('pt.status', 'approved')
-            ->groupBy('m.id_order, m.item_type, m.kode_warna');
+        // $subPoTambahan = $db->table('po_tambahan pt')
+        //     ->select("
+        //     m.id_order, 
+        //     m.item_type, 
+        //     m.kode_warna, 
+        //     SUM(pt.sisa_order_pcs) AS sisa_order_pcs,
+        //     SUM(pt.poplus_mc_kg) AS poplus_mc_kg,
+        //     MAX(pt.poplus_mc_cns) AS poplus_mc_cns,
+        //     SUM(pt.plus_pck_pcs) AS plus_pck_pcs,
+        //     SUM(pt.plus_pck_kg) AS plus_pck_kg,
+        //     MAX(pt.plus_pck_cns) AS plus_pck_cns,
+        //     MAX(tp.ttl_tambahan_kg) AS ttl_tambahan_kg,
+        //     MAX(tp.ttl_tambahan_cns) AS ttl_tambahan_cns,
+        //     MAX(tp.ttl_sisa_bb_dimc) AS sisa_bb_mc,
+        //     MAX(pt.status) AS status
+        // ")
+        //     ->join('total_potambahan tp', 'tp.id_total_potambahan = pt.id_total_potambahan', 'left')
+        //     ->join('material m', 'm.id_material = pt.id_material', 'left')
+        //     ->where('pt.admin', $area)
+        //     ->where('pt.status', 'approved')
+        //     ->groupBy('m.id_order, m.item_type, m.kode_warna');
 
         // -----------------------------
         // Main Query
@@ -453,17 +453,17 @@ class ReturModel extends Model
         COALESCE(peng.kode_warna, retur.kode_warna) AS kode_warna,
         COALESCE(peng.color, retur.warna) AS color,
         SUM(DISTINCT peng.kgs_out) AS terima_kg,
-        poplus.sisa_bb_mc,
-        poplus.sisa_order_pcs,
-        poplus.poplus_mc_kg,
-        poplus.poplus_mc_cns,
-        poplus.plus_pck_pcs,
-        poplus.plus_pck_kg,
-        poplus.plus_pck_cns,
-        poplus.ttl_tambahan_kg,
-        poplus.ttl_tambahan_cns,
         master_order.delivery_akhir
     ")
+            //  poplus.sisa_bb_mc,
+            //      poplus.sisa_order_pcs,
+            //      poplus.poplus_mc_kg,
+            //      poplus.poplus_mc_cns,
+            //      poplus.plus_pck_pcs,
+            //      poplus.plus_pck_kg,
+            //      poplus.plus_pck_cns,
+            //      poplus.ttl_tambahan_kg,
+            //      poplus.ttl_tambahan_cns,
             ->join('master_order', 'retur.no_model = master_order.no_model', 'left')
             ->join('material', 'master_order.id_order = material.id_order 
                          AND retur.item_type = material.item_type 
@@ -475,13 +475,13 @@ class ReturModel extends Model
             AND peng.kode_warna = material.kode_warna',
                 'left'
             )
-            ->join(
-                "({$subPoTambahan->getCompiledSelect()}) poplus",
-                'poplus.id_order = master_order.id_order 
-            AND poplus.item_type = material.item_type 
-            AND poplus.kode_warna = material.kode_warna',
-                'left'
-            )
+            // ->join(
+            //     "({$subPoTambahan->getCompiledSelect()}) poplus",
+            //     'poplus.id_order = master_order.id_order 
+            // AND poplus.item_type = material.item_type 
+            // AND poplus.kode_warna = material.kode_warna',
+            //     'left'
+            // )
             ->where('retur.area_retur', $area)
             ->where('retur.tgl_retur', $tglBuat);
 
@@ -597,5 +597,22 @@ class ReturModel extends Model
             ->where('retur.item_type', $data['item_type'])
             ->where('retur.kode_warna', $data['kode_warna'])
             ->first();
+    }
+
+    public function getQtyRetur($validate)
+    {
+        return $this->select('retur.no_model, retur.item_type, retur.kode_warna, retur.warna as color, SUM(retur.kgs_retur) AS kgs_retur, SUM(retur.cns_retur) AS cns_retur, SUM(retur.krg_retur) AS krg_retur, GROUP_CONCAT(retur.lot_retur) AS lot_retur')
+            ->where('retur.area_retur', $validate['area'])
+            ->where('retur.waktu_acc_retur IS NOT NULL')
+            ->like('retur.keterangan_gbn', 'Approve')
+            ->whereIn('retur.no_model', $validate['no_model'])
+            ->whereIn('retur.item_type', $validate['item_type'])
+            ->whereIn('retur.kode_warna', $validate['kode_warna'])
+            ->whereIn('retur.warna', $validate['color'])
+            ->groupBy('retur.no_model')
+            ->groupBy('retur.item_type')
+            ->groupBy('retur.kode_warna')
+            ->groupBy('retur.warna')
+            ->findAll();
     }
 }

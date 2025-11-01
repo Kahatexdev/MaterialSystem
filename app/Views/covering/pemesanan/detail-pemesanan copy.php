@@ -73,10 +73,6 @@
         background-color: #e3f2fd;
         box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
     }
-
-    .btn-big-text {
-        font-size: 1.15rem;
-    }
 </style>
 
 <div class="card card-frame">
@@ -90,96 +86,58 @@
 <!-- Tabel Data -->
 <div class="card mt-4">
     <div class="card-body">
-        <form id="bulkForm" action="<?= base_url("$role/bulkKirimPemesanan") ?>" method="POST">
-            <?= csrf_field(); ?>
-            <input type="hidden" name="jenis" value="<?= esc($listPemesanan[0]['jenis'] ?? '') ?>">
-            <input type="hidden" name="tgl_pakai" value="<?= esc($listPemesanan[0]['tgl_pakai'] ?? '') ?>">
-
-            <!-- <div class="mb-3 d-flex gap-2 align-items-center">
-                <label class="mb-0">
-                    <input type="checkbox" id="checkAll"> Pilih Semua
-                </label>
-            </div> -->
-
-            <div class="table-responsive">
-                <table class="table" id="dataTable">
-                    <thead>
+        <div class="table-responsive">
+            <table class="table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th class="sticky text-center">No</th>
+                        <th class="sticky text-center">Tanggal Pakai</th>
+                        <th class="sticky text-center">Item Type</th>
+                        <th class="sticky text-center">Warna</th>
+                        <th class="sticky text-center">Kode Warna</th>
+                        <th class="sticky text-center">No Model</th>
+                        <th class="sticky text-center">Jalan MC</th>
+                        <th class="sticky text-center">Total Pesan (Kg)</th>
+                        <th class="sticky text-center">Cones</th>
+                        <th class="sticky text-center">Area</th>
+                        <th class="sticky text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php $no = 1; ?>
+                    <?php foreach ($listPemesanan as $list) : ?>
                         <tr>
-                            <th class="sticky text-center align-middle">
-                                <div class="form-check d-inline-flex align-items-center justify-content-center m-0">
-                                    <input class="form-check-input me-2" type="checkbox" id="checkAll">
-                                    <label class="form-check-label text-white mb-0" for="checkAll">Pilih Semua</label>
-                                </div>
-                            </th>
-
-                            <th class="sticky text-center">No</th>
-                            <th class="sticky text-center">Tanggal Pakai</th>
-                            <th class="sticky text-center">Item Type</th>
-                            <th class="sticky text-center">Warna</th>
-                            <th class="sticky text-center">Kode Warna</th>
-                            <th class="sticky text-center">No Model</th>
-                            <th class="sticky text-center">Jalan MC</th>
-                            <th class="sticky text-center">Total Pesan (Kg)</th>
-                            <th class="sticky text-center">Cones</th>
-                            <th class="sticky text-center">Area</th>
-                            <th class="sticky text-center">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php $no = 1;
-                        foreach ($listPemesanan as $list): ?>
-                            <?php
-                            $isDisabled = (($list['button'] ?? 'enable') === 'disable');
-                            ?>
-                            <tr>
-
-
-                                <td class="text-center">
-                                    <input
-                                        type="checkbox"
-                                        name="selected_ids[]"
-                                        value="<?= esc($list['id_psk']) ?>"
-                                        <?= $isDisabled ? 'disabled' : '' ?>>
-                                </td>
-                                <td class="text-center"><?= $no++; ?></td>
-                                <td class="text-center"><?= esc($list['tgl_pakai']); ?></td>
-                                <td class="text-center"><?= esc($list['item_type']); ?></td>
-                                <td class="text-center"><?= esc($list['color']); ?></td>
-                                <td class="text-center"><?= esc($list['kode_warna']); ?></td>
-                                <td class="text-center"><?= esc($list['no_model']); ?></td>
-                                <td class="text-center"><?= esc($list['jl_mc']); ?></td>
-                                <td class="text-center"><?= number_format((float)$list['total_pesan'], 2); ?></td>
-                                <td class="text-center"><?= esc($list['total_cones']); ?></td>
-                                <td class="text-center"><?= esc($list['admin']); ?></td>
-
-                                <!-- Dropdown Action per baris -->
-                                <td class="text-center">
-                                    <?php if ($isDisabled): ?>
-                                        <span class="badge bg-gradient-info"><i class="fas fa-check-circle"></i> Sudah Dikirim</span>
-                                    <?php else: ?>
-                                        <!-- <button type="submit"
-                                            class="btn bg-gradient-info"
-                                            formaction="<?= base_url("$role/updatePemesanan/{$list['id_psk']}") ?>"
-                                            name="id_psk"
-                                            value="<?= esc($list['id_psk']) ?>">
+                            <td class="text-center"><?= $no++; ?></td>
+                            <td class="text-center"><?= esc($list['tgl_pakai']); ?></td>
+                            <td class="text-center"><?= esc($list['item_type']); ?></td>
+                            <td class="text-center"><?= esc($list['color']); ?></td>
+                            <td class="text-center"><?= esc($list['kode_warna']); ?></td>
+                            <td class="text-center"><?= esc($list['no_model']); ?></td>
+                            <td class="text-center"><?= esc($list['jl_mc']); ?></td>
+                            <td class="text-center"><?= number_format($list['total_pesan'], 2); ?></td>
+                            <td class="text-center"><?= esc($list['total_cones']); ?></td>
+                            <td class="text-center"><?= esc($list['admin']); ?></td>
+                            <td class="text-center">
+                                <?php if (($list['button'] ?? 'enable') === 'disable') : ?>
+                                    <button type="button" class="btn bg-gradient-secondary" disabled>
+                                        <i class="fas fa-box"></i> Stock Terkirim
+                                    </button>
+                                <?php else : ?>
+                                    <form action="<?= base_url("$role/updatePemesanan/{$list['id_psk']}") ?>" method="POST">
+                                        <input type="hidden" name="id_psk" value="<?= esc($list['id_psk']) ?>">
+                                        <input type="hidden" name="jenis" value="<?= esc($list['jenis']) ?>">
+                                        <input type="hidden" name="tgl_pakai" value="<?= esc($list['tgl_pakai']) ?>">
+                                        <button type="submit" class="btn bg-gradient-info">
                                             <i class="fas fa-paper-plane"></i> Kirim Stock
-                                        </button> -->
-                                        <span class="badge bg-gradient-warning"><i class="fas fa-box"></i> Belum Dikirim</span>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-            <div class="mt-3">
-                <button type="submit" class="btn bg-gradient-info w-100"
-                    style="font-size:1.15rem;">
-                    <i class="fas fa-paper-plane" style="font-size:1.25em; margin-right:.35rem;"></i>
-                    Kirim Stock
-                </button>
-            </div>
-        </form>
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -319,14 +277,6 @@
         </div>
     </div>
 <?php endforeach; ?>
-
-
-<script>
-    document.getElementById('checkAll')?.addEventListener('change', function() {
-        const checks = document.querySelectorAll('input[name="selected_ids[]"]:not(:disabled)');
-        checks.forEach(ch => ch.checked = this.checked);
-    });
-</script>
 
 <!-- Script AJAX untuk setiap modal -->
 <script>
