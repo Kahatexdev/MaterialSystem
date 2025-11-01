@@ -429,11 +429,11 @@ class CoveringController extends BaseController
 
         // fetch data automatically from database for tracking po covering
         // panggil private function untuk sinkronisasi
-        $trackingData = $this->trackingPoCoveringModel->dailyUpdateTrackingPO();
-        $scheduleData = $this->scheduleCelupModel->where('tanggal_schedule >=', date('Y-m-01', strtotime('-1 month')))
-            ->where('tanggal_schedule <', date('Y-m-01', strtotime('+2 month')))
-            ->findAll();
-        $summary = $this->syncTrackingFromSchedule($trackingData, $scheduleData);
+        // $trackingData = $this->trackingPoCoveringModel->dailyUpdateTrackingPO();
+        // $scheduleData = $this->scheduleCelupModel->where('tanggal_schedule >=', date('Y-m-01', strtotime('-1 month')))
+        //     ->where('tanggal_schedule <', date('Y-m-01', strtotime('+2 month')))
+        //     ->findAll();
+        // $summary = $this->syncTrackingFromSchedule($trackingData, $scheduleData);
 
         // debug / inspect: ganti dengan return view/json jika perlu
         // dd($summary);
