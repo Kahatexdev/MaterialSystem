@@ -1240,4 +1240,16 @@ class MaterialModel extends Model
             ->orderBy('item_type, kode_warna, color')
             ->findAll();
     }
+    public function getMaterialByModels($noModels)
+    {
+        return $this->select('item_type, kode_warna, color, style_size, composition, gw, gw_aktual, loss')
+            ->join('master_order', 'master_order.id_order=material.id_order')
+            ->whereIn('master_order.no_model', $noModels)
+            ->where('material.kgs<>', 0)
+            ->where('material.composition<>', 0)
+            ->where('material.gw<>', 0)
+            ->where('material.loss<>', 0)
+            ->groupBy('id_material')
+            ->findAll();
+    }
 }

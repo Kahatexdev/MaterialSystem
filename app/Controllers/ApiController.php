@@ -1286,9 +1286,37 @@ class ApiController extends ResourceController
         $noModel = $this->request->getGet('noModel') ?? '';
         $tglBuat = $this->request->getGet('tglBuat') ?? '';
 
+        $listRetur = [];
+        $material = [];
+        $kirim = [];
+
         $listRetur = $this->returModel->getListRetur($area, $noModel, $tglBuat);
 
-        return $this->response->setJSON($listRetur);
+        $noModels    = array_unique(array_column($listRetur, 'no_model'));
+        if (!empty($noModels)) {
+            $material = $this->materialModel->getMaterialByModels($noModels);
+
+            $itemTypes    = array_unique(array_column($material, 'item_type'));
+            $kodeWarnas    = array_unique(array_column($material, 'kode_warna'));
+
+            $validate = [
+                'area' => $area,
+                'no_model' => $noModels,
+                'item_type' => $itemTypes,
+                'kode_warna' => $kodeWarnas,
+            ];
+
+            if (!empty($validate)) {
+                $kirim = $this->pengeluaranModel->getQtyKirim($validate);
+            }
+        }
+
+        $data = [
+            'listRetur' => $listRetur,
+            'material' => $material,
+            'kirim' => $kirim,
+        ];
+        return $this->response->setJSON($data);
     }
     public function filterTglPakai($area)
     {
@@ -1495,7 +1523,7 @@ class ApiController extends ResourceController
     {
         $username = urlencode(session()->get('username'));
         $role     = session()->get('role');
-        $url      = 'http://172.23.44.14/CapacityApps/public/api/pengaduan/' . $username . '/' . $role;
+        $url      = 'http://172.23.39.114/CapacityApps/public/api/pengaduan/' . $username . '/' . $role;
 
         try {
             $json = @file_get_contents($url);
@@ -1735,7 +1763,7 @@ class ApiController extends ResourceController
 
         // Ambil data dari API lokal
         $client = service('curlrequest');
-        $response = $client->get("http://172.23.44.14/CapacityApps/public/api/ExportPengaduan/{$idPengaduan}");
+        $response = $client->get("http://172.23.39.114/CapacityApps/public/api/ExportPengaduan/{$idPengaduan}");
 
         $pengaduan = json_decode($response->getBody(), true);
 

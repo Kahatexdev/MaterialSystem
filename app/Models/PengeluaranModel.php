@@ -826,4 +826,49 @@ class PengeluaranModel extends Model
 
         return $builder->get()->getResultArray();
     }
+    public function getQtyKirim($data)
+    {
+        $area       = $data['area'] ?? '';
+        $noModels   = (array) ($data['no_model'] ?? []);
+        $itemTypes  = (array) ($data['item_type'] ?? []);
+        $kodeWarnas = (array) ($data['kode_warna'] ?? []);
+
+        if (empty($noModels) || empty($itemTypes) || empty($kodeWarnas)) {
+            return [];
+        }
+
+        $noModelPlaceholders   = implode(',', array_fill(0, count($noModels), '?'));
+        $itemTypePlaceholders  = implode(',', array_fill(0, count($itemTypes), '?'));
+        $kodeWarnaPlaceholders = implode(',', array_fill(0, count($kodeWarnas), '?'));
+
+        $sql = "
+        SELECT 
+            mo.no_model,
+            m.item_type,
+            m.kode_warna,
+            COALESCE(SUM(p_sub.total_kgs_out), 0) AS total_kgs_out
+        FROM (
+            SELECT 
+                p.id_total_pemesanan,
+                SUM(p.kgs_out) AS total_kgs_out
+            FROM pengeluaran p
+            WHERE p.area_out = ?
+              AND p.status = 'Pengiriman Area'
+            GROUP BY p.id_total_pemesanan
+        ) AS p_sub
+        JOIN total_pemesanan tp ON tp.id_total_pemesanan = p_sub.id_total_pemesanan
+        JOIN pemesanan pm ON pm.id_total_pemesanan = tp.id_total_pemesanan
+        JOIN material m ON m.id_material = pm.id_material
+        JOIN master_order mo ON mo.id_order = m.id_order
+        WHERE mo.no_model IN ($noModelPlaceholders)
+          AND m.item_type IN ($itemTypePlaceholders)
+          AND m.kode_warna IN ($kodeWarnaPlaceholders)
+        GROUP BY mo.no_model, m.item_type, m.kode_warna
+        ORDER BY mo.no_model, m.item_type, m.kode_warna
+    ";
+
+        $params = array_merge([$area], $noModels, $itemTypes, $kodeWarnas);
+
+        return $this->db->query($sql, $params)->getResultArray();
+    }
 }
