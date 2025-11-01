@@ -3322,4 +3322,19 @@ class PemesananController extends BaseController
             'areas' => $areas,
         ]);
     }
+    public function getFilterAreaRosso()
+    {
+        $noModel = $this->request->getGet('no_model');
+
+        $get =  $this->pemesananModel
+            ->select('pemesanan.admin')
+            ->join('material', 'material.id_material=pemesanan.id_material', 'left')
+            ->join('master_order', 'material.id_order=master_order.id_order', 'left')
+            ->like('pemesanan.admin', 'rosso')
+            ->where('master_order.no_model', $noModel)
+            ->groupBy('pemesanan.admin')
+            ->findAll();
+        // dd($get);
+        return $this->response->setJSON($get);
+    }
 }
