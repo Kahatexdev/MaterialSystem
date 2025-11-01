@@ -236,40 +236,91 @@ class CoveringController extends BaseController
                 //     'updated' => true,
                 // ];
                 // === PERUBAHAN DIMULAI DI SINI ===
-                $now = date('Y-m-d H:i:s');
-                $displayStatus = '(CELUP - ' . ($newStatus ?? '-') . ')'; // status yang akan ditulis
+                // === PERUBAHAN DIMULAI DI SINI ===
+                $now           = date('Y-m-d H:i:s');
+                $displayStatus = '(CELUP - ' . ($newStatus ?? '-') . ')';
 
-                // Ambil keterangan lama terlebih dulu
+                // Ambil data existing (utamakan by PK)
                 if ($id) {
                     $existing = $this->trackingPoCoveringModel->find($id);
                 } else {
-                    // hati-hati: ini bisa meng-update banyak baris; tapi kita butuh satu contoh untuk ambil keterangan lama
+                    // HATI-HATI: tanpa PK bisa melebar. Minimal batasi dengan item_type bila ada.
                     $where = ['kode_warna' => $kodeT];
                     if ($itT !== '') $where['item_type'] = $itT;
-                    $existing = $this->trackingPoCoveringModel->where($where)->first();
+                    // Kalau memungkinkan, tambahkan kecocokan model juga:
+                    if (!empty($modelT)) {
+                        $this->trackingPoCoveringModel
+                            ->groupStart()
+                            ->where('no_model', $modelT)
+                            ->orWhere('no_model_anak', $modelT)
+                            ->groupEnd();
+                    }
+                    $existing = $this->trackingPoCoveringModel->where($where)->orderBy('updated_at', 'DESC')->first();
                 }
-                $oldKet = $existing['keterangan'] ?? '';
 
-                // Susun baris baru untuk keterangan: "STATUS (timestamp)"
-                $newKetLine = $displayStatus . ' (' . $now . ')';
+                $oldStatus = $existing['status'] ?? '';
+                $oldKet    = $existing['keterangan'] ?? '';
 
-                // Gabungkan rapi dengan baris lama (pakai baris baru, tanpa spasi berlebih)
+                // --- Guard idempotent: skip update jika tidak ada perubahan berarti ---
+                // 1) Kalau status sudah sama; dan
+                if (trim($oldStatus) === $displayStatus) {
+                    // 2) Cek baris terakhir keterangan berisi status yang sama (abaikan jam:menit:detik agar tidak double-append)
+                    $lastLine = '';
+                    if ($oldKet !== '') {
+                        $lines = preg_split("/\r\n|\r|\n/", $oldKet);
+                        $lastLine = trim(end($lines));
+                    }
+
+                    // Bentuk pola "STATUS (YYYY-mm-dd"
+                    $prefixToday = $displayStatus . ' (' . date('Y-m-d');
+                    if (strpos($lastLine, $prefixToday) === 0) {
+                        // Tidak ada perubahan → catat dan lanjut
+                        $details[] = [
+                            'id_tpc'          => $id,
+                            'no_model'        => $modelT,
+                            'kode_warna'      => $kodeT,
+                            'matched_with'    => $matchedKey,
+                            'updated'         => false,
+                            'reason'          => 'no change'
+                        ];
+                        continue;
+                    }
+                }
+
+                // Susun baris baru keterangan: boleh ikutkan ket_daily_cek jika ada
+                $newKetLine = $displayStatus
+                    . (!empty($newKet) ? ' - ' . $newKet : '')
+                    . ' (' . $now . ')';
+
+                // Gabungkan rapi (pakai baris baru)
                 $keteranganGabung = trim($oldKet . ($oldKet !== '' ? ",\n" : '') . $newKetLine);
-                // === PERUBAHAN SELESAI ===
 
+                // Data update final
                 $updateData = [
-                    'status'     => $displayStatus,   // tetap simpan status terbaru
-                    'keterangan' => $keteranganGabung, // <-- sekarang append, bukan overwrite
+                    'status'     => $displayStatus,
+                    'keterangan' => $keteranganGabung,
                     'updated_at' => $now,
+                    // 'admin'   => session()->get('username') ?? null, // aktifkan jika ingin log admin
                 ];
 
+                // Tulis by PK kalau ada, hindari mass-update tanpa PK
                 if ($id) {
                     $this->trackingPoCoveringModel->update($id, $updateData);
                 } else {
+                    // MASIH BERISIKO mass-update jika where kurang spesifik.
                     $where = ['kode_warna' => $kodeT];
                     if ($itT !== '') $where['item_type'] = $itT;
+                    if (!empty($modelT)) {
+                        $this->trackingPoCoveringModel
+                            ->groupStart()
+                            ->where('no_model', $modelT)
+                            ->orWhere('no_model_anak', $modelT)
+                            ->groupEnd();
+                    }
                     $this->trackingPoCoveringModel->where($where)->set($updateData)->update();
                 }
+                // === PERUBAHAN SELESAI ===
+
 
                 $rowsUpdated++;
                 $details[] = [
