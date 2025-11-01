@@ -345,6 +345,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('reportPermintaanBahanBaku', 'ExcelController::reportPermintaanBahanBaku');
     // $routes->get('pemesanan/sisaKebutuhanArea_filter', 'PemesananController::sisaKebutuhanArea');
     $routes->get('pemesanan/reportSisaKebutuhanArea', 'ExcelController::reportSisaKebutuhanArea');
+    $routes->get('pemesanan/getFilterAreaRosso', 'PemesananController::getFilterAreaRosso');
 
     $routes->get('pph', 'PphController::tampilPerModel');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');

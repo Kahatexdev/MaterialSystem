@@ -179,6 +179,7 @@
                             <th>Delivery Awal</th>
                             <th>Delivery Akhir</th>
                             <th>Unit</th>
+                            <th>Area</th>
                             <th>Tanggal Buka PO</th>
                             <th>Tanggal Import</th>
                             <th>Action</th>
@@ -303,6 +304,9 @@
                     "data": "unit"
                 },
                 {
+                    "data": "area"
+                },
+                {
                     "data": "tanggal_po"
                 },
                 {
@@ -342,6 +346,7 @@
                     $('#delivery_awal').val(response.delivery_awal);
                     $('#delivery_akhir').val(response.delivery_akhir);
                     $('#unit').val(response.unit);
+                    $('#area').val(response.area);
 
                     // Tambahkan data lain sesuai kebutuhan
 

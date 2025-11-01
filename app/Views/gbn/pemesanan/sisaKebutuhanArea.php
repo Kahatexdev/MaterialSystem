@@ -401,19 +401,42 @@
         try {
             setAreaLoading();
             // pakai controller kamu sendiri
-            const url = `http://172.23.44.14/CapacityApps/public/api/getFilterArea?no_model=${encodeURIComponent(noModel)}`;
+            // const url = `http://172.23.44.14/CapacityApps/public/api/getFilterArea?no_model=${encodeURIComponent(noModel)}`;
 
-            const res = await fetch(url, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const payload = await res.json();
+            // const res = await fetch(url, {
+            //     headers: {
+            //         'X-Requested-With': 'XMLHttpRequest'
+            //     }
+            // });
+            // if (!res.ok) throw new Error('HTTP ' + res.status);
+            // const payload = await res.json();
 
-            const areas = parseAreasPayload(payload);
-            const current = areaSelect.value || null; // simpan pilihan sebelum replace
-            setAreaOptions(areas, current); // rebuild opsi tapi pertahankan kalau masih valid
+            // const areas = parseAreasPayload(payload);
+            // const current = areaSelect.value || null; // simpan pilihan sebelum replace
+            // setAreaOptions(areas, current); // rebuild opsi tapi pertahankan kalau masih valid
+
+            const urlAreaRosso = "<?= base_url($role . '/pemesanan/getFilterAreaRosso?no_model=') ?>" + encodeURIComponent(noModel);
+
+            const [resApi, resPemesanan] = await Promise.all([
+                fetch(`http://172.23.44.14/CapacityApps/public/api/getFilterArea?no_model=${encodeURIComponent(noModel)}`),
+                fetch(urlAreaRosso, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+
+            ]);
+
+            const payloadApi = await resApi.json();
+            const payloadPemesanan = await resPemesanan.json();
+            console.log(payloadApi, payloadPemesanan);
+            const areasFromApi = parseAreasPayload(payloadApi);
+            const areasFromPemesanan = payloadPemesanan.map(a => a.admin);
+
+
+            const allAreas = [...new Set([...areasFromApi, ...areasFromPemesanan])];
+
+            setAreaOptions(allAreas);
         } catch (e) {
             console.error(e);
             setAreaEmpty();
