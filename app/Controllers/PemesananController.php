@@ -1846,20 +1846,19 @@ class PemesananController extends BaseController
             }
         });
 
-        // === Ambil Po Tambahan BULK ===
-        $poTambahanMap = $this->poTambahanModel->getKgPoTambahanBulk([
-            'no_model'   => $pemesanan['no_model'],
-            'item_type'  => $pemesanan['item_type'],
-            'kode_warna' => $pemesanan['kode_warna'],
-            'area'       => $area,
-        ], $styleSizes);
+        // // === Ambil Po Tambahan BULK ===
+        // $poTambahanMap = $this->poTambahanModel->getKgPoTambahanBulk([
+        //     'no_model'   => $pemesanan['no_model'],
+        //     'item_type'  => $pemesanan['item_type'],
+        //     'kode_warna' => $pemesanan['kode_warna'],
+        //     'area'       => $area,
+        // ], $styleSizes);
 
         // Helper hitung kebutuhan utk satu baris (reusable utk pemesanan & retur)
-        $hitungKebutuhan = function () use ($styleRows, $qtyMap, $poTambahanMap, $pemesanan) {
+        $hitungKebutuhan = function () use ($styleRows, $qtyMap, $pemesanan, $area) {
             $ttlKeb = 0.0;
             $ttlQty = 0;
             $isJht  = isset($pemesanan['item_type']) && stripos($pemesanan['item_type'], 'JHT') !== false;
-
             foreach ($styleRows as $sr) {
                 $sz   = $sr['style_size'];
                 $gw   = (float)($sr['gw'] ?? 0);
@@ -1868,18 +1867,31 @@ class PemesananController extends BaseController
                 $kgs  = (float)($sr['kgs'] ?? 0);
 
                 $qty  = (int)($qtyMap[$sz]['qty'] ?? 0);
-                $kgPo = (float)($poTambahanMap[$sz] ?? 0);
+                // $kgPo = (float)($poTambahanMap[$sz] ?? 0);
 
                 if ($isJht) {
                     // Khusus JHT: pakai kgs langsung
-                    $kebutuhan = $kgs + $kgPo;
+                    $kebutuhan = $kgs;
                 } else {
                     // rumus umum
-                    $kebutuhan = (($qty * $gw * ($comp / 100.0)) * (1.0 + ($loss / 100.0)) / 1000.0) + $kgPo;
+                    $kebutuhan = (($qty * $gw * ($comp / 100.0)) * (1.0 + ($loss / 100.0)) / 1000.0);
                 }
                 $ttlKeb += $kebutuhan;
                 $ttlQty += $qty;
             }
+            // Ambil kg po tambahan
+            $kgPoTambahan = floatval(
+                $this->totalPoTambahanModel->getKgPoTambahan([
+                    'no_model'    => $pemesanan['no_model'],
+                    'item_type'   => $pemesanan['item_type'],
+                    'kode_warna'  => $pemesanan['kode_warna'],
+                    // 'style_size'  => $data['style_size'],
+                    'area'        => $area,
+                ])['ttl_keb_potambahan'] ?? 0
+            );
+            $ttlKeb += $kgPoTambahan;
+
+
             return [$ttlKeb, $ttlQty];
         };
 
@@ -2737,7 +2749,7 @@ class PemesananController extends BaseController
                     'no_model'    => $pemesanan['no_model'],
                     'item_type'   => $pemesanan['item_type'],
                     'kode_warna'  => $pemesanan['kode_warna'],
-                    'style_size'  => $data['style_size'],
+                    // 'style_size'  => $data['style_size'],
                     'area'        => $area,
                 ])['ttl_keb_potambahan'] ?? 0
             );
