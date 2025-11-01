@@ -209,17 +209,63 @@ class CoveringController extends BaseController
                     continue;
                 }
 
+                // $updateData = [
+                //     'status' => '(CELUP - ' . $newStatus . ')',
+                //     'keterangan' => '(CELUP - ' . $newKet . ')',
+                //     'updated_at' => date('Y-m-d H:i:s'),
+                // ];
+
+                // if ($id) {
+                //     // update by primary key via model
+                //     $this->trackingPoCoveringModel->update($id, $updateData);
+                // } else {
+                //     // update by where (hati-hati: bisa update banyak baris)
+                //     $where = ['kode_warna' => $kodeT];
+                //     if ($itT !== '') $where['item_type'] = $itT;
+                //     $this->trackingPoCoveringModel->where($where)->set($updateData)->update();
+                // }
+
+                // $rowsUpdated++;
+                // $details[] = [
+                //     'id_tpc' => $id,
+                //     'no_model' => $modelT,
+                //     'kode_warna' => $kodeT,
+                //     'matched_with' => $matchedKey . ' (model:' . ($found['_norm_model'] ?? '') . ', kode:' . ($found['_norm_kode'] ?? '') . ')',
+                //     'status_after' => $newStatus,
+                //     'keterangan_after' => $newKet,
+                //     'updated' => true,
+                // ];
+                // === PERUBAHAN DIMULAI DI SINI ===
+                $now = date('Y-m-d H:i:s');
+                $displayStatus = '(CELUP - ' . ($newStatus ?? '-') . ')'; // status yang akan ditulis
+
+                // Ambil keterangan lama terlebih dulu
+                if ($id) {
+                    $existing = $this->trackingPoCoveringModel->find($id);
+                } else {
+                    // hati-hati: ini bisa meng-update banyak baris; tapi kita butuh satu contoh untuk ambil keterangan lama
+                    $where = ['kode_warna' => $kodeT];
+                    if ($itT !== '') $where['item_type'] = $itT;
+                    $existing = $this->trackingPoCoveringModel->where($where)->first();
+                }
+                $oldKet = $existing['keterangan'] ?? '';
+
+                // Susun baris baru untuk keterangan: "STATUS (timestamp)"
+                $newKetLine = $displayStatus . ' (' . $now . ')';
+
+                // Gabungkan rapi dengan baris lama (pakai baris baru, tanpa spasi berlebih)
+                $keteranganGabung = trim($oldKet . ($oldKet !== '' ? ",\n" : '') . $newKetLine);
+                // === PERUBAHAN SELESAI ===
+
                 $updateData = [
-                    'status' => '(CELUP - ' . $newStatus . ')',
-                    'keterangan' => '(CELUP - ' . $newKet . ')',
-                    'updated_at' => date('Y-m-d H:i:s'),
+                    'status'     => $displayStatus,   // tetap simpan status terbaru
+                    'keterangan' => $keteranganGabung, // <-- sekarang append, bukan overwrite
+                    'updated_at' => $now,
                 ];
 
                 if ($id) {
-                    // update by primary key via model
                     $this->trackingPoCoveringModel->update($id, $updateData);
                 } else {
-                    // update by where (hati-hati: bisa update banyak baris)
                     $where = ['kode_warna' => $kodeT];
                     if ($itT !== '') $where['item_type'] = $itT;
                     $this->trackingPoCoveringModel->where($where)->set($updateData)->update();
@@ -231,8 +277,8 @@ class CoveringController extends BaseController
                     'no_model' => $modelT,
                     'kode_warna' => $kodeT,
                     'matched_with' => $matchedKey . ' (model:' . ($found['_norm_model'] ?? '') . ', kode:' . ($found['_norm_kode'] ?? '') . ')',
-                    'status_after' => $newStatus,
-                    'keterangan_after' => $newKet,
+                    'status_after' => $displayStatus,
+                    'keterangan_after' => $keteranganGabung,
                     'updated' => true,
                 ];
             } else {
