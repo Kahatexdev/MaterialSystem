@@ -986,4 +986,53 @@ class MasterOrderModel extends Model
 
         return $builder->findAll();
     }
+
+    public function getMasterOrder($length = null, $start = null, $search = null)
+    {
+        $builder = $this->builder();
+
+        $builder->select('master_order.id_order, master_order.no_order, master_order.no_model, master_order.buyer, master_order.foll_up, master_order.lco_date, master_order.memo, master_order.delivery_awal, master_order.delivery_akhir, master_order.jarum, master_order.start_mc, master_order.unit, master_order.admin, master_order.created_at, GROUP_CONCAT(DISTINCT material.area) AS area')
+            ->join('material', 'material.id_order = master_order.id_order', 'left')
+            ->where('master_order.no_order IS NOT NULL', null, false)
+            ->where('master_order.no_order !=', '-')
+            ->groupBy('master_order.id_order')
+            ->orderBy('master_order.id_order', 'DESC');
+
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('master_order.no_order', $search)
+                ->orLike('master_order.buyer', $search)
+                ->orLike('master_order.admin', $search)
+                ->orLike('master_order.no_model', $search)
+                ->groupEnd();
+        }
+
+        // pakai get($length, $start) dari builder lalu ambil array
+        $query = $builder->get($length, $start);
+        return $query->getResultArray();
+    }
+
+    public function countFiltered($search = null)
+    {
+        $builder = $this->builder();
+
+        $builder->select('master_order.id_order')
+            ->join('material', 'material.id_order = master_order.id_order', 'left')
+            ->where('master_order.no_order IS NOT NULL', null, false)
+            ->where('master_order.no_order !=', '-')
+            ->groupBy('master_order.id_order');
+
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('master_order.no_order', $search)
+                ->orLike('master_order.buyer', $search)
+                ->orLike('master_order.admin', $search)
+                ->orLike('master_order.no_model', $search)
+                ->groupEnd();
+        }
+
+        // ambil jumlah baris hasil query (groupBy tetap dihitung)
+        $result = $builder->get();
+        return $result->getNumRows();
+    }
 }

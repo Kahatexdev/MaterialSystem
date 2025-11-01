@@ -1777,22 +1777,13 @@ class MasterdataController extends BaseController
         $totalRecords = $this->masterOrderModel->countAll();
 
         // Apply filter jika ada pencarian
-        if (!empty($search)) {
-            $this->masterOrderModel
-                ->like('no_order', $search)
-                ->orLike('buyer', $search)
-                ->orLike('admin', $search)
-                ->orLike('no_order', $search)
-                ->orLike('no_model', $search);
-        }
+        // if (!empty($search)) {
+        //     $this->masterOrderModel->getMasterOrder($length, $start, $search);
+        // }
 
-        $totalFiltered = $this->masterOrderModel->countAllResults(false);
+        $totalFiltered = $this->masterOrderModel->countFiltered($search);
 
-        $data = $this->masterOrderModel
-            ->where('no_order !=', null)
-            ->Where('no_order !=', '-')
-            ->orderBy('id_order', 'DESC')
-            ->findAll($length, $start);
+        $data = $this->masterOrderModel->getMasterOrder($length, $start, $search);
         // dd($data);
         foreach ($data as &$dt) {
             $tanggal_po = $this->openPoModel->getTanggalPo($dt);
@@ -1826,6 +1817,7 @@ class MasterdataController extends BaseController
                 'delivery_awal' => "<span style='$style'>{$row['delivery_awal']}</span>",
                 'delivery_akhir' => "<span style='$style'>{$row['delivery_akhir']}</span>",
                 'unit' => "<span style='$style'>{$row['unit']}</span>",
+                'area' => "<span style='$style'>{$row['area']}</span>",
                 'tanggal_po' => "<span style='$style'>{$row['tanggal_po']}</span>",
                 'tanggal_import' => "<span style='$style'>{$row['created_at']}</span>",
                 'admin' => "<span style='$style'>{$row['admin']}</span>",
