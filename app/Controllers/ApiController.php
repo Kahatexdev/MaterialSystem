@@ -1903,4 +1903,10 @@ class ApiController extends ResourceController
             'data' => $bb
         ]);
     }
+    public function getListKirim($area, $tanggal)
+    {
+        $tanggal = date('Y-m-d');
+        dd($tanggal);
+        $list = $this->pengeluaranModel->getKirimArea($area, $tanggal);
+    }
 }
