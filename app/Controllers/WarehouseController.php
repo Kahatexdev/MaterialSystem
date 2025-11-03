@@ -1934,7 +1934,7 @@ class WarehouseController extends BaseController
         $key = $this->request->getGet('key');
         $jenis = $this->request->getGet('jenis') ?? null;
         $data = $this->materialModel->getFilterPoBenang($key, $jenis);
-
+        // dd($data);
         $startMc = [];
         $result = [];
 
