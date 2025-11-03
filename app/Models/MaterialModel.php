@@ -1109,64 +1109,80 @@ class MaterialModel extends Model
             ->groupBy('stock.no_model, stock.item_type, stock.kode_warna, stock.warna')
             ->getCompiledSelect(false);
 
-        // 2) pPlus: HANYA hitung baris dengan sisa_order_pcs > 0 (agregat bersyarat)
-        $subPoPlus = $db->table('po_tambahan')
-            ->select("
-                mo.no_model,
-                m.item_type,
-                m.kode_warna,
-                m.color,
+        // 2) Po Tambahanz
+        $subPoPlus = $db->table("
+                (
+                    SELECT
+                        mo.no_model,
+                        m.item_type,
+                        m.kode_warna,
+                        m.color,
+                        po_tambahan.id_total_potambahan,
 
-                -- SUM kg hanya untuk baris yang sisa > 0
-                SUM(
-                    CASE WHEN COALESCE(po_tambahan.sisa_order_pcs,0) > 0
-                        THEN COALESCE(tp.ttl_tambahan_kg,0)
-                        ELSE 0 END
-                ) AS kg_po_plus,
+                        -- Hanya ambil 1x ttl_tambahan_kg per id_total_potambahan
+                        MAX(
+                            CASE 
+                                WHEN COALESCE(po_tambahan.sisa_order_pcs,0) > 0 
+                                THEN COALESCE(tp.ttl_tambahan_kg, 0)
+                                ELSE 0 
+                            END
+                        ) AS ttl_tambahan_kg_satuan,
 
-                -- total sisa (hanya yang > 0)
-                SUM(
-                    CASE WHEN COALESCE(po_tambahan.sisa_order_pcs,0) > 0
-                        THEN po_tambahan.sisa_order_pcs
-                        ELSE 0 END
-                ) AS sisa_order_pcs,
+                        -- total sisa per id_total_potambahan
+                        SUM(
+                            CASE 
+                                WHEN COALESCE(po_tambahan.sisa_order_pcs,0) > 0 
+                                THEN po_tambahan.sisa_order_pcs
+                                ELSE 0 
+                            END
+                        ) AS sisa_order_pcs_id,
 
-                -- kumpulan id_material hanya yang sisanya > 0
-                GROUP_CONCAT(
-                    DISTINCT CASE
-                        WHEN COALESCE(po_tambahan.sisa_order_pcs,0) > 0
-                        THEN po_tambahan.id_material
-                        ELSE NULL
-                    END
-                    ORDER BY po_tambahan.id_material
-                ) AS id_materials,
+                        MIN(
+                            CASE WHEN COALESCE(po_tambahan.sisa_order_pcs,0) > 0
+                                THEN DATE(po_tambahan.created_at)
+                            END
+                        ) AS tgl_po_plus_area_id,
 
-                -- meta tanggal hanya dari baris yang sisanya > 0
-                MIN(
-                    CASE WHEN COALESCE(po_tambahan.sisa_order_pcs,0) > 0
-                        THEN DATE(po_tambahan.created_at)
-                    END
-                ) AS tgl_po_plus_area,
+                        MAX(
+                            CASE WHEN COALESCE(po_tambahan.sisa_order_pcs,0) > 0
+                                THEN po_tambahan.delivery_po_plus
+                            END
+                        ) AS delivery_po_plus_id,
 
-                MAX(
-                    CASE WHEN COALESCE(po_tambahan.sisa_order_pcs,0) > 0
-                        THEN po_tambahan.delivery_po_plus
-                    END
-                ) AS delivery_po_plus,
+                        MAX(
+                            CASE WHEN COALESCE(po_tambahan.sisa_order_pcs,0) > 0
+                                THEN po_tambahan.tanggal_approve
+                            END
+                        ) AS tanggal_approve_id
 
-                MAX(
-                    CASE WHEN COALESCE(po_tambahan.sisa_order_pcs,0) > 0
-                        THEN po_tambahan.tanggal_approve
-                    END
-                ) AS tanggal_approve
+                    FROM po_tambahan
+                    LEFT JOIN total_potambahan tp ON tp.id_total_potambahan = po_tambahan.id_total_potambahan
+                    LEFT JOIN material m ON m.id_material = po_tambahan.id_material
+                    LEFT JOIN master_order mo ON mo.id_order = m.id_order
+                    WHERE po_tambahan.tanggal_approve IS NOT NULL
+                    AND po_tambahan.status = 'approved'
+                    GROUP BY mo.no_model, m.item_type, m.kode_warna, m.color, po_tambahan.id_total_potambahan
+                ) AS sub_po
             ")
-            ->join('material m', 'm.id_material = po_tambahan.id_material', 'left')
-            ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
-            ->join('total_potambahan tp', 'tp.id_total_potambahan = po_tambahan.id_total_potambahan', 'left')
-            ->where('po_tambahan.tanggal_approve IS NOT NULL')
-            ->where('po_tambahan.status', 'approved')
-            ->groupBy('mo.no_model, m.item_type, m.kode_warna, m.color')
+            ->select("
+                sub_po.no_model,
+                sub_po.item_type,
+                sub_po.kode_warna,
+                sub_po.color,
+
+                -- Sekarang SUM hanya antara id_total_potambahan yang berbeda
+                SUM(sub_po.ttl_tambahan_kg_satuan) AS kg_po_plus,
+
+                SUM(sub_po.sisa_order_pcs_id) AS sisa_order_pcs,
+
+                GROUP_CONCAT(DISTINCT sub_po.id_total_potambahan ORDER BY sub_po.id_total_potambahan) AS id_total_potambahan_list,
+                MIN(sub_po.tgl_po_plus_area_id) AS tgl_po_plus_area,
+                MAX(sub_po.delivery_po_plus_id) AS delivery_po_plus,
+                MAX(sub_po.tanggal_approve_id) AS tanggal_approve
+            ")
+            ->groupBy('sub_po.no_model, sub_po.item_type, sub_po.kode_warna, sub_po.color')
             ->getCompiledSelect(false);
+
 
         // 3) Main query (tetap 1 baris per kombinasi)
         $builder = $db->table('material')
@@ -1203,8 +1219,7 @@ class MaterialModel extends Model
                 COALESCE(MAX(pPlus.kg_po_plus), 0)       AS kg_po_plus,
                 MAX(pPlus.tgl_po_plus_area)              AS tgl_po_plus_area,
                 MAX(pPlus.delivery_po_plus)              AS delivery_po_plus,
-                MAX(pPlus.tanggal_approve)               AS tanggal_approve,
-                MAX(pPlus.id_materials)                  AS id_materials
+                MAX(pPlus.tanggal_approve)               AS tanggal_approve
             ")
             ->join('master_order mo', 'mo.id_order = material.id_order', 'left')
             ->join('master_material mm', 'mm.item_type = material.item_type', 'left')
