@@ -1094,94 +1094,164 @@ class MaterialModel extends Model
     {
         $db = \Config\Database::connect();
 
-        // 1) Subquery KGS (aggregate sekali per kombinasi)
+        // 1) stockKgs: agregat per kombinasi
         $stockKgs = $db->table('history_stock')
-            ->select("stock.no_model, stock.item_type, stock.kode_warna, stock.warna, SUM(COALESCE(history_stock.kgs,0)) AS kgs_stock, GROUP_CONCAT(DISTINCT(history_stock.lot)) AS lot_stock")
+            ->select("
+                stock.no_model,
+                stock.item_type,
+                stock.kode_warna,
+                stock.warna,
+                SUM(COALESCE(history_stock.kgs,0)) AS kgs_stock,
+                GROUP_CONCAT(DISTINCT history_stock.lot ORDER BY history_stock.lot SEPARATOR ',') AS lot_stock
+            ")
             ->join('stock', 'stock.id_stock = history_stock.id_stock_new', 'left')
             ->where('history_stock.keterangan', 'Pindah Order')
             ->groupBy('stock.no_model, stock.item_type, stock.kode_warna, stock.warna')
             ->getCompiledSelect(false);
 
-        $subPoPlus = $db->table('po_tambahan')
-            ->select('
-                po_tambahan.id_material, 
-                SUM(total_potambahan.ttl_tambahan_kg) AS kg_po_plus, 
-                po_tambahan.tanggal_approve, 
-                DATE(po_tambahan.created_at) AS tgl_po_plus_area, 
-                po_tambahan.delivery_po_plus,
-                material.item_type,
-                material.kode_warna,
-                material.color
-            ')
-            ->join('material', 'material.id_material = po_tambahan.id_material', 'left')
-            ->join('total_potambahan', 'total_potambahan.id_total_potambahan = po_tambahan.id_total_potambahan', 'left')
-            ->where('po_tambahan.tanggal_approve IS NOT NULL')
-            ->where('po_tambahan.status', 'approved')
-            ->groupBy('po_tambahan.tanggal_approve, material.item_type, material.kode_warna, material.color')
+        // 2) Po Tambahanz
+        $subPoPlus = $db->table("
+                (
+                    SELECT
+                        mo.no_model,
+                        m.item_type,
+                        m.kode_warna,
+                        m.color,
+                        po_tambahan.id_total_potambahan,
+
+                        -- Hanya ambil 1x ttl_tambahan_kg per id_total_potambahan
+                        MAX(
+                            CASE 
+                                WHEN COALESCE(po_tambahan.sisa_order_pcs,0) > 0 
+                                THEN COALESCE(tp.ttl_tambahan_kg, 0)
+                                ELSE 0 
+                            END
+                        ) AS ttl_tambahan_kg_satuan,
+
+                        -- total sisa per id_total_potambahan
+                        SUM(
+                            CASE 
+                                WHEN COALESCE(po_tambahan.sisa_order_pcs,0) > 0 
+                                THEN po_tambahan.sisa_order_pcs
+                                ELSE 0 
+                            END
+                        ) AS sisa_order_pcs_id,
+
+                        MIN(
+                            CASE WHEN COALESCE(po_tambahan.sisa_order_pcs,0) > 0
+                                THEN DATE(po_tambahan.created_at)
+                            END
+                        ) AS tgl_po_plus_area_id,
+
+                        MAX(
+                            CASE WHEN COALESCE(po_tambahan.sisa_order_pcs,0) > 0
+                                THEN po_tambahan.delivery_po_plus
+                            END
+                        ) AS delivery_po_plus_id,
+
+                        MAX(
+                            CASE WHEN COALESCE(po_tambahan.sisa_order_pcs,0) > 0
+                                THEN po_tambahan.tanggal_approve
+                            END
+                        ) AS tanggal_approve_id
+
+                    FROM po_tambahan
+                    LEFT JOIN total_potambahan tp ON tp.id_total_potambahan = po_tambahan.id_total_potambahan
+                    LEFT JOIN material m ON m.id_material = po_tambahan.id_material
+                    LEFT JOIN master_order mo ON mo.id_order = m.id_order
+                    WHERE po_tambahan.tanggal_approve IS NOT NULL
+                    AND po_tambahan.status = 'approved'
+                    GROUP BY mo.no_model, m.item_type, m.kode_warna, m.color, po_tambahan.id_total_potambahan
+                ) AS sub_po
+            ")
+            ->select("
+                sub_po.no_model,
+                sub_po.item_type,
+                sub_po.kode_warna,
+                sub_po.color,
+
+                -- Sekarang SUM hanya antara id_total_potambahan yang berbeda
+                SUM(sub_po.ttl_tambahan_kg_satuan) AS kg_po_plus,
+
+                SUM(sub_po.sisa_order_pcs_id) AS sisa_order_pcs,
+
+                GROUP_CONCAT(DISTINCT sub_po.id_total_potambahan ORDER BY sub_po.id_total_potambahan) AS id_total_potambahan_list,
+                MIN(sub_po.tgl_po_plus_area_id) AS tgl_po_plus_area,
+                MAX(sub_po.delivery_po_plus_id) AS delivery_po_plus,
+                MAX(sub_po.tanggal_approve_id) AS tanggal_approve
+            ")
+            ->groupBy('sub_po.no_model, sub_po.item_type, sub_po.kode_warna, sub_po.color')
             ->getCompiledSelect(false);
 
-        // 4) Query utama
+
+        // 3) Main query (tetap 1 baris per kombinasi)
         $builder = $db->table('material')
             ->select("
-            master_order.no_model,
-            master_order.foll_up,
-            master_order.lco_date,
-            master_order.no_order,
-            master_order.buyer,
-            master_order.delivery_awal,
-            master_order.delivery_akhir,
-            master_order.memo,
-            master_order.unit,
-            master_material.jenis,
-            material.area,
-            material.item_type,
-            material.kode_warna,
-            material.color,
-            material.loss,
-            material.material_type,
-            SUM(material.kgs) AS kg_po,
-            material.created_at AS tgl_input,
-            material.admin,
-            COALESCE(stockKgs.kgs_stock, 0) AS kgs_stock,
-            COALESCE(stockKgs.lot_stock, '-') AS lot_stock,
-            COALESCE(plusSub.kg_po_plus, 0) AS kg_po_plus,
-            plusSub.tgl_po_plus_area,
-            plusSub.delivery_po_plus,
-            plusSub.tanggal_approve
-        ")
-            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
-            ->join(
-                "({$stockKgs}) AS stockKgs",
-                'stockKgs.no_model = master_order.no_model 
-                stockKgs.item_type = material.item_type 
-             AND stockKgs.kode_warna = material.kode_warna 
-             AND stockKgs.warna = material.color',
-                'left'
-            )
-            ->join(
-                "({$subPoPlus}) AS plusSub",
-                'plusSub.id_material = material.id_material 
-             AND plusSub.item_type = material.item_type 
-             AND plusSub.kode_warna = material.kode_warna 
-             AND plusSub.color = material.color',
-                'left'
-            )
-            ->where('master_material.jenis', $jenis);
+                mo.no_model,
 
-        // Filter pencarian
+                MAX(mo.foll_up)               AS foll_up,
+                MAX(mo.lco_date)              AS lco_date,
+                GROUP_CONCAT(DISTINCT mo.no_order ORDER BY mo.no_order) AS no_order,
+                MAX(mo.buyer)                 AS buyer,
+                MAX(mo.delivery_awal)         AS delivery_awal,
+                MAX(mo.delivery_akhir)        AS delivery_akhir,
+                MAX(mo.memo)                  AS memo,
+                MAX(mo.unit)                  AS unit,
+
+                MAX(mm.jenis)                 AS jenis,
+
+                MAX(material.area)            AS area,
+                material.item_type,
+                material.kode_warna,
+                material.color,
+                MAX(material.loss)            AS loss,
+                MAX(material.material_type)   AS material_type,
+
+                SUM(material.kgs)             AS kg_po,
+                MIN(material.created_at)      AS tgl_input,
+                material.admin           AS admin,
+
+                COALESCE(MAX(sK.kgs_stock), 0)           AS kgs_stock,
+                COALESCE(MAX(sK.lot_stock), '-')         AS lot_stock,
+
+                -- hasil dari pPlus (sudah filtered sisa > 0)
+                COALESCE(MAX(pPlus.sisa_order_pcs), 0)   AS sisa_order_pcs,
+                COALESCE(MAX(pPlus.kg_po_plus), 0)       AS kg_po_plus,
+                MAX(pPlus.tgl_po_plus_area)              AS tgl_po_plus_area,
+                MAX(pPlus.delivery_po_plus)              AS delivery_po_plus,
+                MAX(pPlus.tanggal_approve)               AS tanggal_approve
+            ")
+            ->join('master_order mo', 'mo.id_order = material.id_order', 'left')
+            ->join('master_material mm', 'mm.item_type = material.item_type', 'left')
+            ->join(
+                "({$stockKgs}) AS sK",
+                'sK.no_model   = mo.no_model
+                AND sK.item_type  = material.item_type
+                AND sK.kode_warna = material.kode_warna
+                AND sK.warna      = material.color',
+                'left'
+            )
+            ->join(
+                "({$subPoPlus}) AS pPlus",
+                'pPlus.no_model   = mo.no_model
+                AND pPlus.item_type  = material.item_type
+                AND pPlus.kode_warna = material.kode_warna
+                AND pPlus.color      = material.color',
+                'left'
+            )
+            ->where('mm.jenis', $jenis);
+
         if (!empty($key)) {
             $builder->groupStart()
-                ->like('master_order.no_model', $key)
+                ->like('mo.no_model', $key)
                 ->orLike('material.item_type', $key)
                 ->orLike('material.kode_warna', $key)
                 ->orLike('material.color', $key)
                 ->groupEnd();
         }
 
-        // Group by yang lebih lengkap
         $builder->groupBy([
-            'master_order.no_model',
+            'mo.no_model',
             'material.item_type',
             'material.kode_warna',
             'material.color'
