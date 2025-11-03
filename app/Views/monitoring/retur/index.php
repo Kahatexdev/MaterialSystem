@@ -43,7 +43,7 @@
                                     <?php endforeach ?>
                                 </select>
 
-                                <input type="text" class="form-control" id="no_model" value="" placeholder="No Model">
+                                <input type="text" class="form-control" id="no_model" value="" placeholder="No Model" required>
                                 <button id="searchModel" class="btn btn-info ms-2"><i class="fas fa-search"></i> Filter</button>
                                 <button type="button" class="btn btn-warning ms-2 btnRetur d-none" id="btn-retur">
                                     <i class="fas fa-paper-plane"></i> Pengajuan Retur</button>
@@ -205,6 +205,7 @@
         $(document).ready(function() {
             const btnSearch = document.getElementById('searchModel');
             const returbtn = document.getElementById('btn-retur');
+
             btnSearch.addEventListener('click', function() {
                 const area = document.getElementById('area').value;
                 const model = document.getElementById('no_model').value;
@@ -212,6 +213,17 @@
                 const loading = document.getElementById('loading');
                 const info = document.getElementById('info');
 
+                // 🔍 Validasi input
+                if (model === '' && area === '') {
+                    alert('Harap pilih area dan isi No Model terlebih dahulu!');
+                    return;
+                } else if (area === '') {
+                    alert('Harap pilih area terlebih dahulu!');
+                    return;
+                } else if (model === '') {
+                    alert('Harap isi No Model terlebih dahulu!');
+                    return;
+                }
 
                 loading.style.display = 'block';
                 info.style.display = 'none';
@@ -234,7 +246,7 @@
                     complete: function() {
                         loading.style.display = 'none';
                         returbtn.classList.remove('d-none')
-                        listRetur(model, area);
+                        // listRetur(model, area);
                     }
                 });
             });
@@ -268,91 +280,91 @@
         // Sisanya (seperti event untuk search, build table, dan add more item) tetap sama
 
 
-        function listRetur(model, area) {
-            const rowbawah = document.getElementById('rowbawah')
-            $.ajax({
-                // url: "http://172.23.44.14/MaterialSystem/public/api/listRetur",
-                url: baseUrl + role + "/retur/listRetur",
-                type: "GET",
-                data: {
-                    model: model,
-                    area: area
-                },
-                dataType: "json",
-                success: function(response) {
-                    fetchListRetur(response, model, area);
+        // function listRetur(model, area) {
+        //     const rowbawah = document.getElementById('rowbawah')
+        //     $.ajax({
+        //         // url: "http://172.23.44.14/MaterialSystem/public/api/listRetur",
+        //         url: baseUrl + role + "/retur/listRetur",
+        //         type: "GET",
+        //         data: {
+        //             model: model,
+        //             area: area
+        //         },
+        //         dataType: "json",
+        //         success: function(response) {
+        //             fetchListRetur(response, model, area);
 
-                },
-                error: function(xhr, status, error) {
-                    console.error("Error:", error);
-                },
-                complete: function() {
-                    rowbawah.classList.remove('d-none')
-                }
-            });
-        }
+        //         },
+        //         error: function(xhr, status, error) {
+        //             console.error("Error:", error);
+        //         },
+        //         complete: function() {
+        //             rowbawah.classList.remove('d-none')
+        //         }
+        //     });
+        // }
 
-        function fetchListRetur(data, model, area) {
-            const tableBody = document.getElementById('bodyData2');
-            const baseUrl = "http://172.23.44.14/CapacityApps/public/user/retur/";
-            tableBody.innerHTML = `
-                <div class="d-flex align-items-center justify-content-between">
-                    <h3 class="model-title mb-0">List Retur ${area}</h3>
-                    <div class="d-flex align-items-center gap-2">
-                        <a href="${baseUrl}${area}/exportExcel" class="btn btn-success">
-                            <i class="fas fa-file-excel"></i> Export Excel
-                        </a>
-                    
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="display text-center text-uppercase text-xs font-bolder" id="dataTableRetur" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th class="text-center">No</th>
-                                <th class="text-center">Tanggal Retur</th>
-                                <th class="text-center">No Model</th>
-                                <th class="text-center">Item Type</th>
-                                <th class="text-center">Kode Warna</th>
-                                <th class="text-center">Warna</th>
-                                <th class="text-center">Lot Retur</th>
-                                <th class="text-center">KG Retur</th>
-                                <th class="text-center">Kategori</th>
-                                <th class="text-center">Keterangan GBN</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.map((item, index) => `
-                                <tr>
-                                    <td>${index + 1}</td>
-                                    <td>${item.tgl_retur}</td>
-                                    <td>${item.no_model}</td>
-                                    <td>${item.item_type}</td>
-                                    <td>${item.kode_warna}</td>
-                                    <td>${item.warna}</td>
-                                    <td>${item.lot_retur}</td>
-                                    <td>${parseFloat(item.kgs_retur).toFixed(2)} kg</td>
-                                    <td>${item.kategori}</td>
-                                    <td>${item.keterangan_gbn}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
+        // function fetchListRetur(data, model, area) {
+        //     const tableBody = document.getElementById('bodyData2');
+        //     const baseUrl = "http://172.23.44.14/CapacityApps/public/user/retur/";
+        //     tableBody.innerHTML = `
+        //         <div class="d-flex align-items-center justify-content-between">
+        //             <h3 class="model-title mb-0">List Retur ${area}</h3>
+        //             <div class="d-flex align-items-center gap-2">
+        //                 <a href="${baseUrl}${area}/exportExcel" class="btn btn-success">
+        //                     <i class="fas fa-file-excel"></i> Export Excel
+        //                 </a>
 
-            // Inisialisasi DataTable
-            $(document).ready(function() {
-                $('#dataTableRetur').DataTable({
-                    paging: true,
-                    searching: true,
-                    ordering: true,
-                    info: true,
-                    autoWidth: false,
-                    responsive: true
-                });
-            });
-        }
+        //             </div>
+        //         </div>
+        //         <div class="table-responsive">
+        //             <table class="display text-center text-uppercase text-xs font-bolder" id="dataTableRetur" style="width:100%">
+        //                 <thead>
+        //                     <tr>
+        //                         <th class="text-center">No</th>
+        //                         <th class="text-center">Tanggal Retur</th>
+        //                         <th class="text-center">No Model</th>
+        //                         <th class="text-center">Item Type</th>
+        //                         <th class="text-center">Kode Warna</th>
+        //                         <th class="text-center">Warna</th>
+        //                         <th class="text-center">Lot Retur</th>
+        //                         <th class="text-center">KG Retur</th>
+        //                         <th class="text-center">Kategori</th>
+        //                         <th class="text-center">Keterangan GBN</th>
+        //                     </tr>
+        //                 </thead>
+        //                 <tbody>
+        //                     ${data.map((item, index) => `
+        //                         <tr>
+        //                             <td>${index + 1}</td>
+        //                             <td>${item.tgl_retur}</td>
+        //                             <td>${item.no_model}</td>
+        //                             <td>${item.item_type}</td>
+        //                             <td>${item.kode_warna}</td>
+        //                             <td>${item.warna}</td>
+        //                             <td>${item.lot_retur}</td>
+        //                             <td>${parseFloat(item.kgs_retur).toFixed(2)} kg</td>
+        //                             <td>${item.kategori}</td>
+        //                             <td>${item.keterangan_gbn}</td>
+        //                         </tr>
+        //                     `).join('')}
+        //                 </tbody>
+        //             </table>
+        //         </div>
+        //     `;
+
+        //     // Inisialisasi DataTable
+        //     $(document).ready(function() {
+        //         $('#dataTableRetur').DataTable({
+        //             paging: true,
+        //             searching: true,
+        //             ordering: true,
+        //             info: true,
+        //             autoWidth: false,
+        //             responsive: true
+        //         });
+        //     });
+        // }
 
 
 
@@ -573,7 +585,7 @@
                         });
 
                         const modal = bootstrap.Modal.getInstance(document.getElementById('modalPengajuanRetur'));
-                        listRetur(model, area)
+                        // listRetur(model, area)
                         modal.hide();
                         form.reset();
                     } else {
