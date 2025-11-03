@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use PhpParser\Node\Stmt\Return_;
 
 class TotalPoTambahanModel extends Model
 {
@@ -82,5 +83,32 @@ class TotalPoTambahanModel extends Model
             ->first();
 
         return $query;
+    }
+
+    public function getTotalPoTambahan($data)
+    {
+        $no_model = $data['no_model'] ?? null;
+        $item_type = $data['item_type'] ?? null;
+        $kode_warna = $data['kode_warna'] ?? null;
+        $area = $data['area'] ?? null;
+
+        return $this->select("
+            master_order.no_model,
+            material.item_type,
+            material.kode_warna,
+            material.color,
+            SUM(DISTINCT total_potambahan.ttl_tambahan_kg) AS ttl_tambahan_kg
+        ")
+            ->join('po_tambahan', 'po_tambahan.id_total_potambahan = total_potambahan.id_total_potambahan', 'left')
+            ->join('material', 'material.id_material = po_tambahan.id_material', 'left')
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('po_tambahan.admin', $area)
+            ->whereIn('master_order.no_model', $no_model)
+            ->whereIn('material.item_type', $item_type)
+            ->whereIn('material.kode_warna', $kode_warna)
+            ->where('po_tambahan.status', 'approved')
+            ->groupBy('master_order.no_model, material.item_type, material.kode_warna')
+            ->findAll();
     }
 }

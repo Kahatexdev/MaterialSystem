@@ -1242,7 +1242,7 @@ class MaterialModel extends Model
     }
     public function getMaterialByModels($noModels)
     {
-        return $this->select('item_type, kode_warna, color, style_size, composition, gw, gw_aktual, loss')
+        return $this->select('master_order.no_model, item_type, kode_warna, color, style_size, composition, gw, gw_aktual, loss')
             ->join('master_order', 'master_order.id_order=material.id_order')
             ->whereIn('master_order.no_model', $noModels)
             ->where('material.kgs<>', 0)
