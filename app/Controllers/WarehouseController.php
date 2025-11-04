@@ -4024,6 +4024,11 @@ class WarehouseController extends BaseController
             $totalKrgIn += $krgKirimIn;
         }
 
+        // Setelah perhitungan, hilangkan error floating kecil
+        $eps = 1e-9;
+        if (abs($totalKgs) < $eps) $totalKgs = 0;
+        $totalKgs = round($totalKgs, 4);
+
         // -------------------------------------------------------
         // MAIN LOOP: lakukan operasi per out_celup (history, update stok lama, pemasukan)
         // tapi untuk insert/update stock tujuan: gunakan guard supaya hanya sekali per tujuan.
