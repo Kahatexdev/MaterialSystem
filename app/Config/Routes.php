@@ -1070,6 +1070,7 @@ $routes->group(
 
         $routes->get('getListKirimArea/(:any)/(:any)', 'ApiController::getListKirim/$1/$2');
         $routes->post('getTglScheduleBulk', 'ApiController::getTglScheduleBulk');
+        $routes->get('pengirimanGbnKeArea/(:any)', 'ApiController::pengirimanGbnKeArea/$1');
     }
 );
 
