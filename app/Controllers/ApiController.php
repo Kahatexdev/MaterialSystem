@@ -1905,11 +1905,10 @@ class ApiController extends ResourceController
             'data' => $bb
         ]);
     }
-    public function getListKirim($area, $tanggal)
+    public function getListKirim($area, $tgl)
     {
-        $tanggal = date('Y-m-d');
-        dd($tanggal);
-        $list = $this->pengeluaranModel->getKirimArea($area, $tanggal);
+        dd($tgl);
+        $list = $this->pengeluaranModel->getKirimArea($area, $tgl);
     }
     public function getTglScheduleBulk()
     {
