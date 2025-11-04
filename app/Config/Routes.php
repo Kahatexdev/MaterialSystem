@@ -1069,6 +1069,7 @@ $routes->group(
         $routes->get('getBBForSummaryPlanner', 'ApiController::getBBForSummaryPlanner');
 
         $routes->get('getListKirimArea/(:any)/(:any)', 'ApiController::getListKirim/$1/$2');
+        $routes->post('getTglScheduleBulk', 'ApiController::getTglScheduleBulk');
     }
 );
 
