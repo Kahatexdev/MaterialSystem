@@ -1186,6 +1186,8 @@ class ScheduleCelupModel extends Model
     public function getFilterSchWeekly($tglAwal, $tglAkhir, $jenis)
     {
         $db = \Config\Database::connect();
+        $session = \Config\Services::session();
+        $role = $session->get('role');
 
         // --- SUBQUERY 1: Hitung total per no_model (kg_per_model)
         $sub = $db->table('schedule_celup s')
@@ -1208,24 +1210,27 @@ class ScheduleCelupModel extends Model
             MIN(s.id_celup) AS id_celup_per_model
         ")
             ->where('s.tanggal_schedule >=', $tglAwal)
-            ->where('s.tanggal_schedule <=', $tglAkhir)
-            ->where('s.last_status', 'scheduled')
-            ->groupBy('
-            s.item_type, 
-            s.kode_warna, 
-            s.warna, 
-            s.tanggal_schedule, 
-            s.id_mesin, 
-            s.lot_urut, 
-            s.no_model, 
-            s.id_bon, 
-            s.no_po, 
-            s.lot_celup, 
-            s.start_mc, 
-            s.po_plus, 
-            s.ket_schedule, 
-            s.last_status
-        ')
+            ->where('s.tanggal_schedule <=', $tglAkhir);
+        if ($role !== 'celup') {
+            $sub->where('s.last_status', 'scheduled');
+        }
+        // ->where('s.last_status', 'scheduled')
+        $sub = $sub->groupBy('
+        s.item_type, 
+        s.kode_warna, 
+        s.warna, 
+        s.tanggal_schedule, 
+        s.id_mesin, 
+        s.lot_urut, 
+        s.no_model, 
+        s.id_bon, 
+        s.no_po, 
+        s.lot_celup, 
+        s.start_mc, 
+        s.po_plus, 
+        s.ket_schedule, 
+        s.last_status
+    ')
             ->getCompiledSelect();
 
         // --- SUBQUERY 2: Agregasi ke level mesin + lot
@@ -1311,10 +1316,15 @@ class ScheduleCelupModel extends Model
             )
             ->where('schedule_celup.tanggal_schedule >=', $tglAwal)
             ->where('schedule_celup.tanggal_schedule <=', $tglAkhir)
-            ->where('schedule_celup.last_status', 'scheduled')
+            // ->where('schedule_celup.last_status', 'scheduled')
             ->orderBy('schedule_celup.tanggal_schedule', 'ASC')
             ->orderBy('mesin_celup.no_mesin', 'ASC');
 
+        // hanya tambahkan filter last_status di query utama kalau role bukan 'celup'
+        if ($role !== 'celup') {
+            $builder->where('schedule_celup.last_status', 'scheduled');
+        }
+        // dd($role);
         // --- Filter jenis mesin
         if (!empty($jenis)) {
             $builder->where('mesin_celup.ket_mesin', $jenis);
