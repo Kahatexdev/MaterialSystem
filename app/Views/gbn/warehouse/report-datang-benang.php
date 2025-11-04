@@ -151,7 +151,7 @@
     <div class="card mt-4">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="dataTable" class="display text-center text-uppercase" style="width:100%">
+                <table id="dataTable" class="display table table-bordered table-hover text-center text-uppercase" style="width:100%">
                     <thead>
                         <tr>
                             <th class="text-center text-uppercase">No</th>

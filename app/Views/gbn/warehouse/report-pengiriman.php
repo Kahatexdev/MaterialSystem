@@ -140,27 +140,27 @@
     <div class="card mt-4">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
+                <table id="dataTable" class="table table-bordered table-hover table-striped text-center text-uppercase" style="width:100%">
                     <thead>
                         <tr>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs Pesan</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Pakai</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Keluar</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs Kirim</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones Kirim</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Karung Kirim</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LOT Kirim</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Nama Cluster</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Admin</th>
+                            <th class="text-center text-uppercase">No</th>
+                            <th class="text-center text-uppercase">No Model</th>
+                            <th class="text-center text-uppercase">Area</th>
+                            <th class="text-center text-uppercase">Delivery Awal</th>
+                            <th class="text-center text-uppercase">Delivery Akhir</th>
+                            <th class="text-center text-uppercase">Item Type</th>
+                            <th class="text-center text-uppercase">Kode Warna</th>
+                            <th class="text-center text-uppercase">Warna</th>
+                            <th class="text-center text-uppercase">Kgs Pesan</th>
+                            <th class="text-center text-uppercase">Tanggal Pakai</th>
+                            <th class="text-center text-uppercase">Tanggal Keluar</th>
+                            <th class="text-center text-uppercase">Kgs Kirim</th>
+                            <th class="text-center text-uppercase">Cones Kirim</th>
+                            <th class="text-center text-uppercase">Karung Kirim</th>
+                            <th class="text-center text-uppercase">LOT Kirim</th>
+                            <th class="text-center text-uppercase">Nama Cluster</th>
+                            <th class="text-center text-uppercase">Keterangan</th>
+                            <th class="text-center text-uppercase">Admin</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -176,7 +176,7 @@
     $(document).ready(function() {
         let dataTable = $('#dataTable').DataTable({
             "paging": true,
-            "searching": false,
+            "searching": true,
             "ordering": true,
             "info": true,
             "responsive": true,
@@ -326,6 +326,14 @@
 
         // Sembunyikan tombol Export Excel
         $('#btnExport').addClass('d-none');
+    });
+
+    // Trigger pencarian saat tombol Enter ditekan di input apa pun
+    $('#key, input[type="date"]').on('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Hindari form submit default (jika ada form)
+            $('#btnSearch').click(); // Trigger tombol Search
+        }
     });
 </script>
 

@@ -1186,8 +1186,10 @@ class ScheduleCelupModel extends Model
     public function getFilterSchWeekly($tglAwal, $tglAkhir, $jenis)
     {
         $db = \Config\Database::connect();
+        $session = \Config\Services::session();
+        $role = $session->get('role');
 
-        // SUB: hitung dulu per no_model (kg_per_model)
+        // --- SUBQUERY 1: Hitung total per no_model (kg_per_model)
         $sub = $db->table('schedule_celup s')
             ->select("
             s.item_type,
@@ -1208,13 +1210,30 @@ class ScheduleCelupModel extends Model
             MIN(s.id_celup) AS id_celup_per_model
         ")
             ->where('s.tanggal_schedule >=', $tglAwal)
-            ->where('s.tanggal_schedule <=', $tglAkhir)
-            ->where('s.last_status', 'scheduled')
-            // **penting: group by juga no_model supaya SUM jadi per model**
-            ->groupBy('s.item_type, s.kode_warna, s.warna, s.tanggal_schedule, s.id_mesin, s.lot_urut, s.no_model')
+            ->where('s.tanggal_schedule <=', $tglAkhir);
+        if ($role !== 'celup') {
+            $sub->where('s.last_status', 'scheduled');
+        }
+        // ->where('s.last_status', 'scheduled')
+        $sub = $sub->groupBy('
+        s.item_type, 
+        s.kode_warna, 
+        s.warna, 
+        s.tanggal_schedule, 
+        s.id_mesin, 
+        s.lot_urut, 
+        s.no_model, 
+        s.id_bon, 
+        s.no_po, 
+        s.lot_celup, 
+        s.start_mc, 
+        s.po_plus, 
+        s.ket_schedule, 
+        s.last_status
+    ')
             ->getCompiledSelect();
 
-        // SUB-2: aggregate kembali ke level yang Anda gunakan sebelumnya
+        // --- SUBQUERY 2: Agregasi ke level mesin + lot
         $sub2 = $db->table("({$sub}) AS s")
             ->select("
             s.item_type,
@@ -1228,29 +1247,59 @@ class ScheduleCelupModel extends Model
             s.po_plus,
             s.ket_schedule,
             s.last_status,
-            SUM(s.kg_per_model) AS kg_celup, -- total per grup
+            SUM(s.kg_per_model) AS kg_celup,
             GROUP_CONCAT(DISTINCT s.no_model ORDER BY s.no_model SEPARATOR ', ') AS no_model,
             GROUP_CONCAT(CONCAT(s.no_model, '=', REPLACE(FORMAT(s.kg_per_model, 2), ',', '')) ORDER BY s.no_model SEPARATOR ', ') AS no_model_detail,
             COUNT(*) AS cnt,
             MIN(s.id_celup_per_model) AS id_celup
         ")
-            ->where('s.tanggal_schedule >=', $tglAwal)
-            ->where('s.tanggal_schedule <=', $tglAkhir)
-            ->where('s.last_status', 'scheduled')
-            ->groupBy('s.item_type, s.kode_warna, s.warna, s.tanggal_schedule, s.id_mesin, s.lot_urut')
+            ->groupBy('
+            s.item_type, 
+            s.kode_warna, 
+            s.warna, 
+            s.tanggal_schedule, 
+            s.id_mesin, 
+            s.lot_urut, 
+            s.lot_celup, 
+            s.start_mc, 
+            s.po_plus, 
+            s.ket_schedule, 
+            s.last_status
+        ')
             ->getCompiledSelect();
 
-        // Builder utama (sama seperti sebelumnya) — gunakan hasil sub2 sebagai schedule_celup
+        // --- QUERY UTAMA
         $builder = $db->table("({$sub2}) AS schedule_celup")
-            ->select('schedule_celup.id_celup, schedule_celup.no_model, schedule_celup.no_model_detail, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna,  schedule_celup.kg_celup, schedule_celup.start_mc, schedule_celup.lot_urut, schedule_celup.lot_celup, schedule_celup.tanggal_schedule, schedule_celup.po_plus, schedule_celup.ket_schedule, mesin_celup.id_mesin, mesin_celup.no_mesin, mesin_celup.min_caps, mesin_celup.max_caps, master_material.jenis, MAX(COALESCE(master_order.delivery_awal, parent_master.delivery_awal)) AS delivery_awal, schedule_celup.last_status')
+            ->select("
+            mesin_celup.no_mesin,
+            schedule_celup.id_celup,
+            schedule_celup.no_model,
+            schedule_celup.no_model_detail,
+            schedule_celup.item_type,
+            schedule_celup.kode_warna,
+            schedule_celup.warna,
+            schedule_celup.kg_celup,
+            schedule_celup.start_mc,
+            schedule_celup.lot_urut,
+            schedule_celup.lot_celup,
+            schedule_celup.tanggal_schedule,
+            schedule_celup.po_plus,
+            schedule_celup.ket_schedule,
+            mesin_celup.id_mesin,
+            mesin_celup.min_caps,
+            mesin_celup.max_caps,
+            master_material.jenis,
+            MAX(COALESCE(master_order.delivery_awal, parent_master.delivery_awal)) AS delivery_awal,
+            schedule_celup.last_status
+        ")
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->join(
                 'open_po open_po_child',
                 "open_po_child.no_model = schedule_celup.no_model 
-         AND (
-             open_po_child.kode_warna = schedule_celup.kode_warna
-             OR open_po_child.item_type = schedule_celup.item_type
-         )",
+             AND (
+                 open_po_child.kode_warna = schedule_celup.kode_warna
+                 OR open_po_child.item_type = schedule_celup.item_type
+             )",
                 'left'
             )
             ->join('open_po op_parent', 'op_parent.id_po = open_po_child.id_induk', 'left')
@@ -1259,18 +1308,24 @@ class ScheduleCelupModel extends Model
             ->join(
                 "master_order parent_master",
                 "(
-            parent_master.no_model = TRIM(REPLACE(op_parent.no_model, 'POCOVERING ', ''))
-            OR parent_master.no_model = TRIM(SUBSTRING_INDEX(op_parent.no_model, ' ', -1))
-            OR parent_master.no_model = TRIM(op_parent.no_model)
-        )",
+                parent_master.no_model = TRIM(REPLACE(op_parent.no_model, 'POCOVERING ', ''))
+                OR parent_master.no_model = TRIM(SUBSTRING_INDEX(op_parent.no_model, ' ', -1))
+                OR parent_master.no_model = TRIM(op_parent.no_model)
+            )",
                 'left'
             )
             ->where('schedule_celup.tanggal_schedule >=', $tglAwal)
             ->where('schedule_celup.tanggal_schedule <=', $tglAkhir)
-            ->where('schedule_celup.last_status', 'scheduled')
+            // ->where('schedule_celup.last_status', 'scheduled')
             ->orderBy('schedule_celup.tanggal_schedule', 'ASC')
             ->orderBy('mesin_celup.no_mesin', 'ASC');
 
+        // hanya tambahkan filter last_status di query utama kalau role bukan 'celup'
+        if ($role !== 'celup') {
+            $builder->where('schedule_celup.last_status', 'scheduled');
+        }
+        // dd($role);
+        // --- Filter jenis mesin
         if (!empty($jenis)) {
             $builder->where('mesin_celup.ket_mesin', $jenis);
 
@@ -1286,10 +1341,25 @@ class ScheduleCelupModel extends Model
                 ->where('mesin_celup.no_mesin <=', 43);
         }
 
-        $builder->groupBy('schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, schedule_celup.tanggal_schedule, mesin_celup.id_mesin, schedule_celup.lot_urut');
+        // --- Grouping akhir
+        $builder->groupBy('
+        schedule_celup.no_model,
+        schedule_celup.item_type,
+        schedule_celup.kode_warna,
+        schedule_celup.warna,
+        schedule_celup.tanggal_schedule,
+        mesin_celup.id_mesin,
+        schedule_celup.lot_urut,
+        schedule_celup.lot_celup,
+        schedule_celup.start_mc,
+        schedule_celup.po_plus,
+        schedule_celup.ket_schedule,
+        schedule_celup.last_status
+    ');
 
         return $builder->get()->getResultArray();
     }
+
 
     // public function getFilterSchWeekly($tglAwal, $tglAkhir, $jenis)
     // {
