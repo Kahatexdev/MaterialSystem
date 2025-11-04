@@ -36,7 +36,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table id="dataTable" class="table table-bordered table-hover text-center text-uppercase font-bolder" style="width:100%">
+                <table id="dataTable" class="table table-bordered table-hover table-striped text-center text-uppercase font-bolder" style="width:100%">
                     <thead>
                         <tr>
                             <th rowspan="2" class="text-center text-uppercase">No</th>
