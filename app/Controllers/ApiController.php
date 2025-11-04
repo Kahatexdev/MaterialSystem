@@ -1907,9 +1907,28 @@ class ApiController extends ResourceController
     }
     public function getListKirim($area, $tgl)
     {
-        dd($tgl);
         $list = $this->pengeluaranModel->getKirimArea($area, $tgl);
+        $list = $list ?? [];
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'data' => $list
+        ]);
     }
+    public function countKirimArea($area, $tgl)
+    {
+        $num = $this->pengeluaranModel->countKirim($area, $tgl);
+
+        return $this->response->setJSON([
+            'count' => $num
+        ]);
+    }
+    public function updateTerimaArea($id)
+    {
+        $update = $this->pengeluaranModel->update($id, ['terima_area' => 1]);
+        $this->response->setStatusCode($update ? 200 : 500);
+    }
+
     public function getTglScheduleBulk()
     {
         $request = service('request');
