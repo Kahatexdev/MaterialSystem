@@ -1934,7 +1934,7 @@ class WarehouseController extends BaseController
         $key = $this->request->getGet('key');
         $jenis = $this->request->getGet('jenis') ?? null;
         $data = $this->materialModel->getFilterPoBenang($key, $jenis);
-
+        // dd($data);
         $startMc = [];
         $result = [];
 
@@ -4023,6 +4023,11 @@ class WarehouseController extends BaseController
             $totalKrgOut += $krgKirimOut;
             $totalKrgIn += $krgKirimIn;
         }
+
+        // Setelah perhitungan, hilangkan error floating kecil
+        $eps = 1e-9;
+        if (abs($totalKgs) < $eps) $totalKgs = 0;
+        $totalKgs = round($totalKgs, 4);
 
         // -------------------------------------------------------
         // MAIN LOOP: lakukan operasi per out_celup (history, update stok lama, pemasukan)

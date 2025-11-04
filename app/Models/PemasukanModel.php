@@ -448,10 +448,10 @@ class PemasukanModel extends Model
             ->groupBy('other_bon.id_other_bon, other_bon.no_model, other_bon.item_type, other_bon.kode_warna');
 
         $builder2 = $this->db->table('pemasukan')
-            ->select('bon_celup.id_bon, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, SUM(out_celup.kgs_kirim) AS kgs_kirim, COUNT(out_celup.cones_kirim) AS cones_kirim, pemasukan.tgl_masuk, pemasukan.nama_cluster, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, m.total_kgs AS kgs_material, out_celup.lot_kirim, bon_celup.no_surat_jalan, bon_celup.tgl_datang, out_celup.l_m_d, out_celup.gw_kirim, out_celup.harga, bon_celup.keterangan, pemasukan.admin, schedule_celup.po_plus')
-            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
-            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup')
-            ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
+            ->select('bon_celup.id_bon, out_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, SUM(out_celup.kgs_kirim) AS kgs_kirim, COUNT(out_celup.cones_kirim) AS cones_kirim, pemasukan.tgl_masuk, pemasukan.nama_cluster, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, m.total_kgs AS kgs_material, out_celup.lot_kirim, bon_celup.no_surat_jalan, bon_celup.tgl_datang, out_celup.l_m_d, out_celup.gw_kirim, out_celup.harga, bon_celup.keterangan, pemasukan.admin, schedule_celup.po_plus')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
+            ->join('master_order', 'master_order.no_model = out_celup.no_model', 'left')
             ->join('open_po', 'open_po.no_model = master_order.no_model AND open_po.kode_warna = schedule_celup.kode_warna AND open_po.item_type = schedule_celup.item_type', 'left')
             ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
             ->join("($subMaterial) m", "m.no_model  = schedule_celup.no_model AND m.item_type  = schedule_celup.item_type AND m.kode_warna = schedule_celup.kode_warna AND m.color = schedule_celup.warna", 'left')

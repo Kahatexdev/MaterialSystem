@@ -188,6 +188,9 @@
                                     <option value="KK9">KK9</option>
                                     <option value="KK10">KK10</option>
                                     <option value="KK11M">KK11M</option>
+                                    <option value="Gedung 1">Gedung 1</option>
+                                    <option value="Gedung 2">Gedung 2</option>
+                                    <option value="MJ">MJ</option>
                                     <option value="Belum Ada Area">Belum Ada Area</option>
                                 </select>
                             </div>

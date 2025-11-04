@@ -1286,9 +1286,39 @@ class ApiController extends ResourceController
         $noModel = $this->request->getGet('noModel') ?? '';
         $tglBuat = $this->request->getGet('tglBuat') ?? '';
 
+        $listRetur = [];
+        $material = [];
+        $kirim = [];
+
         $listRetur = $this->returModel->getListRetur($area, $noModel, $tglBuat);
 
-        return $this->response->setJSON($listRetur);
+        $noModels    = array_unique(array_column($listRetur, 'no_model'));
+        if (!empty($noModels)) {
+            $material = $this->materialModel->getMaterialByModels($noModels);
+
+            $itemTypes    = array_unique(array_column($material, 'item_type'));
+            $kodeWarnas    = array_unique(array_column($material, 'kode_warna'));
+
+            $validate = [
+                'area' => $area,
+                'no_model' => $noModels,
+                'item_type' => $itemTypes,
+                'kode_warna' => $kodeWarnas,
+            ];
+
+            if (!empty($validate)) {
+                $kirim = $this->pengeluaranModel->getQtyKirim($validate);
+                $poPlus = $this->totalPoTambahanModel->getTotalPoTambahan($validate);
+            }
+        }
+
+        $data = [
+            'listRetur' => $listRetur,
+            'material' => $material,
+            'kirim' => $kirim,
+            'poPlus' => $poPlus,
+        ];
+        return $this->response->setJSON($data);
     }
     public function filterTglPakai($area)
     {
@@ -1874,6 +1904,12 @@ class ApiController extends ResourceController
             'status' => 'success',
             'data' => $bb
         ]);
+    }
+    public function getListKirim($area, $tanggal)
+    {
+        $tanggal = date('Y-m-d');
+        dd($tanggal);
+        $list = $this->pengeluaranModel->getKirimArea($area, $tanggal);
     }
     public function getTglScheduleBulk()
     {
