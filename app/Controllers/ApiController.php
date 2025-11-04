@@ -1308,6 +1308,7 @@ class ApiController extends ResourceController
 
             if (!empty($validate)) {
                 $kirim = $this->pengeluaranModel->getQtyKirim($validate);
+                $poPlus = $this->totalPoTambahanModel->getTotalPoTambahan($validate);
             }
         }
 
@@ -1315,6 +1316,7 @@ class ApiController extends ResourceController
             'listRetur' => $listRetur,
             'material' => $material,
             'kirim' => $kirim,
+            'poPlus' => $poPlus,
         ];
         return $this->response->setJSON($data);
     }
@@ -1902,5 +1904,11 @@ class ApiController extends ResourceController
             'status' => 'success',
             'data' => $bb
         ]);
+    }
+    public function getListKirim($area, $tanggal)
+    {
+        $tanggal = date('Y-m-d');
+        dd($tanggal);
+        $list = $this->pengeluaranModel->getKirimArea($area, $tanggal);
     }
 }
