@@ -1067,6 +1067,7 @@ $routes->group(
         $routes->get('filterReportKebutuhanBahanBaku', 'ApiController::filterReportKebutuhanBahanBaku');
         $routes->get('excelReportKebutuhanBahanBaku', 'ApiController::excelReportKebutuhanBahanBaku');
         $routes->get('getBBForSummaryPlanner', 'ApiController::getBBForSummaryPlanner');
+        $routes->post('getTglScheduleBulk', 'ApiController::getTglScheduleBulk');
     }
 );
 
