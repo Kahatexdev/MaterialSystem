@@ -2656,7 +2656,7 @@ class ExcelController extends BaseController
 
                 $row = 4;
                 $no = 1;
-                foreach ($dataDatangSolid as $item) {
+                foreach ($dataDatangLurex as $item) {
                     $newSheet->setCellValue('A' . $row, $no++);
                     $newSheet->setCellValue('B' . $row, $item['no_model'] ?: '-');
                     $newSheet->setCellValue('C' . $row, $item['item_type'] ?: '-');
@@ -2721,7 +2721,7 @@ class ExcelController extends BaseController
 
                 $row = 4;
                 $no = 1;
-                foreach ($dataPlusDatangSolid as $item) {
+                foreach ($dataPlusDatangLurex as $item) {
                     $newSheet->setCellValue('A' . $row, $no++);
                     $newSheet->setCellValue('B' . $row, $item['no_model'] ?: '-');
                     $newSheet->setCellValue('C' . $row, $item['item_type'] ?: '-');
