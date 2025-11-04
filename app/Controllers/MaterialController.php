@@ -86,7 +86,7 @@ class MaterialController extends BaseController
                         'loss'       => esc($data['loss']),
                         'kgs'        => esc($data['kgs']),
                         'keterangan' => esc($data['keterangan']),
-                        'admin'      => session()->get('id_user'),
+                        'admin'      => session()->get('username'),
                     ];
                     if (!$this->materialModel->insert($saveData)) {
                         throw new \Exception('Gagal insert pada baris ke-' . ($i + 1));
