@@ -1289,7 +1289,7 @@ class ApiController extends ResourceController
         $listRetur = [];
         $material = [];
         $kirim = [];
-
+        $poPlus = [];
         $listRetur = $this->returModel->getListRetur($area, $noModel, $tglBuat);
 
         $noModels    = array_unique(array_column($listRetur, 'no_model'));
