@@ -149,10 +149,9 @@
                         <div class="col-md-3">
                             <label for="filter_area" class="form-label">Area</label>
                             <select class="form-control" name="filter_area" id="filter_area" required>
+                                <option value="">Pilih Area</option>
                                 <?php if (!empty($area)) : ?>
-                                    <option value="<?= esc($area) ?>"><?= esc($area) ?></option>
-                                <?php else : ?>
-                                    <option value="">Pilih Area</option>
+                                    <option value="<?= esc($area) ?>" selected><?= esc($area) ?></option>
                                 <?php endif; ?>
                             </select>
                         </div>
@@ -309,41 +308,21 @@
     const areaSelect = document.getElementById('filter_area');
     const rolePrefix = '<?= $role ?>';
 
-    // Placeholder yang harus diabaikan (case-insensitive)
-    const PLACEHOLDERS = new Set([
-        'belum ada area', 'tidak ada area', 'no area', '-', ''
-    ]);
+    // ====== Placeholder yang harus diabaikan ======
+    const PLACEHOLDERS = new Set(['belum ada area', 'tidak ada area', 'no area', '-', '']);
 
-    // --- parser respons ---
+    // ====== Helper parsing dari API ======
     function parseAreasPayload(payload) {
-        // { ok:true, areas:[...] }
         if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
             if (payload.ok && Array.isArray(payload.areas)) return payload.areas.map(String);
         }
-        // [ { area:"..." }, ... ]
         if (Array.isArray(payload)) {
-            return payload.map(r => (r && typeof r === 'object' && 'area' in r) ? String(r.area) : '')
-                .filter(Boolean);
+            return payload.map(r => (r && typeof r === 'object' && 'area' in r) ? String(r.area) : '').filter(Boolean);
         }
         return [];
     }
 
-    // --- normalisasi & filter ---
-    function normalizeAreas(rawAreas) {
-        // trim, buang placeholder, dedupe, pertahankan urutan
-        const seen = new Set();
-        const out = [];
-        for (const a of rawAreas) {
-            const val = String(a).trim();
-            if (!val) continue;
-            if (PLACEHOLDERS.has(val.toLowerCase())) continue; // <— filter "Belum Ada Area"
-            if (seen.has(val)) continue;
-            seen.add(val);
-            out.push(val);
-        }
-        return out;
-    }
-
+    // ====== State loader ======
     function setAreaLoading() {
         areaSelect.innerHTML = '<option value="">Memuat area…</option>';
         areaSelect.disabled = true;
@@ -354,9 +333,8 @@
         areaSelect.disabled = true;
     }
 
+    // ====== Set dropdown area ======
     function setAreaOptions(areas, keepValue = null) {
-        // bersihkan & buang placeholder
-        const PLACEHOLDERS = new Set(['belum ada area', 'tidak ada area', 'no area', '-', '']);
         const uniq = [];
         const seen = new Set();
         let placeholder = null;
@@ -370,7 +348,7 @@
             }
             if (seen.has(val)) continue;
             seen.add(val);
-            uniq.push(val); // JANGAN ubah case
+            uniq.push(val);
         }
 
         let html = '<option value="">Pilih Area</option>';
@@ -379,41 +357,24 @@
             html += `<option value="${v}">${v}</option>`;
         });
 
-        const prev = keepValue; // simpan pilihan sebelumnya
         areaSelect.innerHTML = html;
         areaSelect.disabled = uniq.length === 0;
 
-        if (prev && uniq.includes(prev)) {
-            areaSelect.value = prev; // restore kalau masih valid
-        } else if (prev && PLACEHOLDERS.has((prev + '').toLowerCase())) {
-            areaSelect.value = '';
+        if (keepValue && uniq.includes(keepValue)) {
+            areaSelect.value = keepValue;
         }
     }
 
-
-
-    async function fetchAreasNow() {
+    // ====== Ambil data area dari API & controller ======
+    async function fetchAreasNow(keepSelected = false) {
         const noModel = modelInput.value.trim();
         if (!noModel) {
             setAreaEmpty();
             return;
         }
+
         try {
             setAreaLoading();
-            // pakai controller kamu sendiri
-            // const url = `http://172.23.44.14/CapacityApps/public/api/getFilterArea?no_model=${encodeURIComponent(noModel)}`;
-
-            // const res = await fetch(url, {
-            //     headers: {
-            //         'X-Requested-With': 'XMLHttpRequest'
-            //     }
-            // });
-            // if (!res.ok) throw new Error('HTTP ' + res.status);
-            // const payload = await res.json();
-
-            // const areas = parseAreasPayload(payload);
-            // const current = areaSelect.value || null; // simpan pilihan sebelum replace
-            // setAreaOptions(areas, current); // rebuild opsi tapi pertahankan kalau masih valid
 
             const urlAreaRosso = "<?= base_url($role . '/pemesanan/getFilterAreaRosso?no_model=') ?>" + encodeURIComponent(noModel);
 
@@ -424,26 +385,29 @@
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 })
-
             ]);
 
             const payloadApi = await resApi.json();
             const payloadPemesanan = await resPemesanan.json();
-            console.log(payloadApi, payloadPemesanan);
+
             const areasFromApi = parseAreasPayload(payloadApi);
             const areasFromPemesanan = payloadPemesanan.map(a => a.admin);
-
-
             const allAreas = [...new Set([...areasFromApi, ...areasFromPemesanan])];
 
-            setAreaOptions(allAreas);
+            const currentValue = keepSelected ? areaSelect.value : null;
+            setAreaOptions(allAreas, currentValue);
+
+            if (!keepSelected) {
+                areaSelect.value = '';
+            }
+
         } catch (e) {
             console.error(e);
             setAreaEmpty();
         }
     }
 
-
+    // ====== Utility debounce ======
     function debounce(fn, wait) {
         let t;
         return (...a) => {
@@ -452,18 +416,37 @@
         };
     }
 
+    const fetchAreas = debounce(() => fetchAreasNow(false), 300);
 
-    const fetchAreas = debounce(fetchAreasNow, 300);
+    // ====== Event: saat no model berubah ======
     modelInput.addEventListener('input', fetchAreas);
     modelInput.addEventListener('change', fetchAreas);
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const hasModel = (modelInput.value || '').trim() !== '';
-        const hasArea = (areaSelect.value || '').trim() !== '';
-        if (hasModel && !hasArea) fetchAreasNow();
+    // ====== Saat halaman pertama kali dibuka ======
+    document.addEventListener('DOMContentLoaded', async () => {
+        const params = new URLSearchParams(window.location.search);
+        const modelFromUrl = params.get('filter_model');
+        const areaFromUrl = params.get('filter_area');
+
+        if (modelFromUrl && !modelInput.value) {
+            modelInput.value = modelFromUrl;
+        }
+
+        if (modelFromUrl) {
+            await fetchAreasNow(true);
+            if (areaFromUrl) {
+                const exists = [...areaSelect.options].some(opt => opt.value === areaFromUrl);
+                if (!exists) {
+                    const opt = new Option(areaFromUrl, areaFromUrl);
+                    areaSelect.add(opt);
+                }
+                areaSelect.value = areaFromUrl;
+                console.log(`✅ Area di-set otomatis dari URL: ${areaFromUrl}`);
+            }
+        }
     });
 
-    // ===== Loader helpers =====
+    // ====== Loader helper ======
     function showLoading() {
         document.getElementById('loadingOverlay').classList.add('active');
         const btn = document.getElementById('filterButton');
@@ -494,10 +477,10 @@
         }
     }
 
-    // ===== Filter action =====
+    // ====== Tombol Filter ======
     document.getElementById('filterButton').addEventListener('click', function() {
-        const filterArea = document.getElementById('filter_area').value.trim();
-        const filterModel = document.getElementById('filter_model').value.trim();
+        const filterArea = areaSelect.value.trim();
+        const filterModel = modelInput.value.trim();
 
         if (!filterArea || !filterModel) {
             Swal.fire({
@@ -521,13 +504,13 @@
             updateProgress(p);
         }, 120);
 
-        // sedikit delay agar animasi terlihat
         setTimeout(() => {
             clearInterval(tick);
             window.location.href = url;
         }, 900);
     });
 
+    // ====== Tombol Export ======
     document.getElementById('exportExcelBtn')?.addEventListener('click', () => {
         const nm = modelInput.value.trim();
         const ar = areaSelect.value.trim();
@@ -535,5 +518,6 @@
         window.location.href = u;
     });
 </script>
+
 
 <?php $this->endSection(); ?>
