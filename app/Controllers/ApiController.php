@@ -1972,7 +1972,7 @@ class ApiController extends ResourceController
     public function searchStock()
     {
         $no_model = $this->request->getGet('no_model');
-        $warna = $this->request->getGet('warna');
+        $warna = $this->request->getGet('warna') ?? '';
 
         $filteredData = $this->stockModel->searchStock($no_model, $warna);
 
