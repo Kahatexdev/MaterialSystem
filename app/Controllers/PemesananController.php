@@ -2006,6 +2006,7 @@ class PemesananController extends BaseController
             'kodeWarna'     => $pemesanan['kode_warna'],
             'color'         => $pemesanan['color'],
             'area'          => $pemesanan['admin'],
+            'lot'           => $pemesanan['lot'],
             'id'            => $id,
             'ketGbn'        => $ket['ket_gbn'] ?? '',
             'KgsPesan'      => $KgsPesan,
