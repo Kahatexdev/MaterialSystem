@@ -982,7 +982,6 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
 
     // pengaduan
     $routes->get('pengaduan', 'ApiController::getpengaduan');
-    $routes->get('searchStock', 'ApiController::searchStock');
 });
 
 $routes->options('(:any)', function () {
@@ -1073,6 +1072,7 @@ $routes->group(
         $routes->get('countKirimArea/(:any)/(:any)', 'ApiController::countKirimArea/$1/$2');
         $routes->get('updateTerimaArea/(:any)', 'ApiController::updateTerimaArea/$1');
         $routes->post('getTglScheduleBulk', 'ApiController::getTglScheduleBulk');
+        $routes->get('searchStock', 'ApiController::searchStock');
     }
 );
 
