@@ -1289,7 +1289,7 @@ class ApiController extends ResourceController
         $listRetur = [];
         $material = [];
         $kirim = [];
-
+        $poPlus = [];
         $listRetur = $this->returModel->getListRetur($area, $noModel, $tglBuat);
 
         $noModels    = array_unique(array_column($listRetur, 'no_model'));
@@ -1905,12 +1905,30 @@ class ApiController extends ResourceController
             'data' => $bb
         ]);
     }
-    public function getListKirim($area, $tanggal)
+    public function getListKirim($area, $tgl)
     {
-        $tanggal = date('Y-m-d');
-        dd($tanggal);
-        $list = $this->pengeluaranModel->getKirimArea($area, $tanggal);
+        $list = $this->pengeluaranModel->getKirimArea($area, $tgl);
+        $list = $list ?? [];
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'data' => $list
+        ]);
     }
+    public function countKirimArea($area, $tgl)
+    {
+        $num = $this->pengeluaranModel->countKirim($area, $tgl);
+
+        return $this->response->setJSON([
+            'count' => $num
+        ]);
+    }
+    public function updateTerimaArea($id)
+    {
+        $update = $this->pengeluaranModel->update($id, ['terima_area' => 1]);
+        $this->response->setStatusCode($update ? 200 : 500);
+    }
+
     public function getTglScheduleBulk()
     {
         $request = service('request');
