@@ -982,6 +982,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
 
     // pengaduan
     $routes->get('pengaduan', 'ApiController::getpengaduan');
+    $routes->get('searchStock', 'ApiController::searchStock');
 });
 
 $routes->options('(:any)', function () {
