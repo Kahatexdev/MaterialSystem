@@ -4808,6 +4808,7 @@ class PdfController extends BaseController
     function renderSingleRow($pdf, $row, $widths)
     {
         $lineHeight = 4;
+        $ketPindahOrder = !empty($row['model_dipinjam']) ? ' | Pindah Order dari ' . $row['model_dipinjam'] . ' / ' . ($row['item_type_dipinjam'] ?? '') . ' / ' . ($row['kode_warna_dipinjam'] ?? '') . ' / ' . ($row['warna_dipinjam'] ?? '') : '';
 
         // --- Tentukan kolom ---
         $columns = [
@@ -4825,7 +4826,7 @@ class PdfController extends BaseController
             ['text' => $row['nama_cluster'], 'w' => $widths[11], 'multi' => false],
             ['text' => '',                    'w' => $widths[12], 'multi' => false],
             ['text' => '',                    'w' => $widths[13], 'multi' => false],
-            ['text' => $row['keterangan_gbn'], 'w' => $widths[14], 'multi' => true],
+            ['text' => $row['keterangan_gbn'] . $ketPindahOrder, 'w' => $widths[14], 'multi' => true],
         ];
 
         // --- Hitung tinggi row maksimal per kolom ---
@@ -4950,6 +4951,8 @@ class PdfController extends BaseController
 
         // === Render kolom kanan per-row ===
         foreach ($rows as $i => $r) {
+            $ketPindahOrder = !empty($r['model_dipinjam']) ? ' | Pindah Order dari ' . $r['model_dipinjam'] . ' / ' . ($r['item_type_dipinjam'] ?? '') . ' / ' . ($r['kode_warna_dipinjam'] ?? '') . ' / ' . ($r['warna_dipinjam'] ?? '') : '';
+
             $rowHeight = max(
                 $this->getMultiCellHeight($pdf, $widths[6], $lineHeight, $r['lot_out']),
                 $this->getMultiCellHeight($pdf, $widths[14], $lineHeight, $r['keterangan_gbn']),
@@ -4991,7 +4994,7 @@ class PdfController extends BaseController
             $ketX = $curX;
             $ketY = $curY;
             $pdf->SetXY($ketX, $ketY);
-            $pdf->MultiCell($widths[14], $lineHeight, $r['keterangan_gbn'], 0, 'C');
+            $pdf->MultiCell($widths[14], $lineHeight, $r['keterangan_gbn'] . $ketPindahOrder, 0, 'C');
 
             // Pindah ke row berikut
             $yData += $rowHeight;

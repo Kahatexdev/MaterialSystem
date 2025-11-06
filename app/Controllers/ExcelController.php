@@ -3483,6 +3483,7 @@ class ExcelController extends BaseController
             foreach ($rows as $row) {
 
                 $currentTotalId = $row['id_total_pemesanan'];
+                $ketPindahOrder = !empty($row['model_dipinjam']) ? ' | Pindah Order dari ' . $row['model_dipinjam'] . ' / ' . ($row['item_type_dipinjam'] ?? '') . ' / ' . ($row['kode_warna_dipinjam'] ?? '') . ' / ' . ($row['warna_dipinjam'] ?? '') : '';
 
                 $sheet->setCellValue("A$rowNumber", $row['admin']);
                 $sheet->setCellValue("B$rowNumber", $row['no_model']);
@@ -3498,7 +3499,7 @@ class ExcelController extends BaseController
                 $sheet->setCellValue("L$rowNumber", $row['nama_cluster']);
                 $sheet->setCellValue("M$rowNumber", ''); // kgs_out tambahan?
                 $sheet->setCellValue("N$rowNumber", ''); // cns_out tambahan?
-                $sheet->setCellValue("O$rowNumber", $row['keterangan_gbn']);
+                $sheet->setCellValue("O$rowNumber", $row['keterangan_gbn'] . $ketPindahOrder);
 
                 // cek id_total_pemesanan ganti
                 if ($prevTotalId !== null && $currentTotalId !== $prevTotalId) {
