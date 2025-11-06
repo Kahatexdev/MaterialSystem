@@ -1072,6 +1072,7 @@ $routes->group(
         $routes->get('countKirimArea/(:any)/(:any)', 'ApiController::countKirimArea/$1/$2');
         $routes->get('updateTerimaArea/(:any)', 'ApiController::updateTerimaArea/$1');
         $routes->post('getTglScheduleBulk', 'ApiController::getTglScheduleBulk');
+        $routes->get('searchStock', 'ApiController::searchStock');
     }
 );
 

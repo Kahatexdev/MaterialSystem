@@ -1968,4 +1968,14 @@ class ApiController extends ResourceController
         log_message('debug', 'Schedule bulk result: ' . json_encode($result));
         return $this->respond($result, 200);
     }
+
+    public function searchStock()
+    {
+        $no_model = $this->request->getGet('no_model');
+        $warna = $this->request->getGet('warna') ?? '';
+
+        $filteredData = $this->stockModel->searchStock($no_model, $warna);
+
+        return $this->respond($filteredData);
+    }
 }
