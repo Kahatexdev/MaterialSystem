@@ -435,9 +435,12 @@ class PengeluaranModel extends Model
                 CASE WHEN pemesanan.keterangan_gbn IS NOT NULL THEN ' - ' ELSE '' END,
                 COALESCE(pemesanan.keterangan_gbn, '')
             ) AS keterangan_gbn,
-            cluster.group
+            cluster.group,
+            stock_dipinjam.no_model AS model_dipinjam,
+            stock_dipinjam.item_type AS item_type_dipinjam,
+            stock_dipinjam.kode_warna AS kode_warna_dipinjam,
+            stock_dipinjam.warna AS warna_dipinjam
         ")
-
             ->join('pengeluaran', 'pengeluaran.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('out_celup', 'out_celup.id_out_celup = pengeluaran.id_out_celup', 'left')
             ->join('cluster', 'cluster.nama_cluster = pengeluaran.nama_cluster', 'left')
@@ -445,24 +448,33 @@ class PengeluaranModel extends Model
             ->join('material', 'material.id_material = pemesanan.id_material', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->join('history_stock', "history_stock.id_stock_new = pengeluaran.id_stock AND history_stock.keterangan = 'Pindah Order'", 'left')
+            ->join('pemasukan', 'pemasukan.id_stock = history_stock.id_stock_new AND pemasukan.id_out_celup = pengeluaran.id_out_celup', 'left')
+            ->join('stock AS stock_dipinjam', 'stock_dipinjam.id_stock = history_stock.id_stock_old', 'left')
             ->where('master_material.jenis', $jenis)
             ->where('pemesanan.tgl_pakai', $tglPakai)
             ->where('pemesanan.status_kirim', 'YA');
+
         if (!empty($noModel)) {
             $builder->where('master_order.no_model', $noModel);
         }
+
         $builder->groupStart()
             ->where('pengeluaran.status', 'Pengeluaran Jalur')
             ->orWhere('pengeluaran.id_pengeluaran IS NULL', null, false)
             ->groupEnd();
-        return $builder
-            // ->where('pengeluaran.status', 'Pengeluaran Jalur')
-            // ->where('pengeluaran.status = "Pengeluaran Jalur" OR pengeluaran.id_pengeluaran IS NULL')
-            ->groupBy('pengeluaran.id_pengeluaran')
+
+        $builder->groupBy('pengeluaran.id_pengeluaran')
             ->groupBy('pemesanan.id_total_pemesanan')
-            ->orderBy('pengeluaran.area_out, pengeluaran.nama_cluster', 'ASC')
-            ->get() // Dapatkan objek query
-            ->getResultArray(); // Konversi ke array hasil
+            ->orderBy('pengeluaran.area_out, pengeluaran.nama_cluster', 'ASC');
+
+        // // 🔍 tampilkan query mentah (debug)
+        // $sql = $builder->getCompiledSelect();
+        // echo "<pre>$sql</pre>";
+        // exit;
+
+        // return hasil query (non-debug)
+        return $builder->get()->getResultArray();
     }
     public function getKgPersiapanPengeluaran($id_total_pemesanan)
     {
