@@ -15642,7 +15642,12 @@ class ExcelController extends BaseController
                 // --- Kolom E..Q: isi di baris pertama dari pasangan ---
                 $sheet->setCellValue("E{$startRow}", $row['color']);
                 $sheet->setCellValue("F{$startRow}", $row['kode_warna']);
-                $sheet->setCellValue("G{$startRow}", $row['buyer'] . ' (' . ($buyerName['kd_buyer_order'] ?? '') . ')');
+                $sheet->setCellValue(
+                    "G{$startRow}",
+                    isset($buyerName['kd_buyer_order']) && $buyerName['kd_buyer_order'] !== ''
+                        ? $row['buyer'] . ' (' . $buyerName['kd_buyer_order'] . ')'
+                        : $row['buyer']
+                );
                 $sheet->setCellValue("H{$startRow}", $row['no_order']);
                 $sheet->setCellValue("I{$startRow}", $row['delivery_awal']);
                 $sheet->setCellValue("J{$startRow}", $row['kg_po']);
