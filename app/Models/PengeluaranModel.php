@@ -420,7 +420,8 @@ class PengeluaranModel extends Model
             $conds[] = "( all_data.no_model   LIKE '%{$k}%'
                 OR all_data.item_type  LIKE '%{$k}%'
                 OR all_data.kode_warna LIKE '%{$k}%'
-                OR all_data.color      LIKE '%{$k}%')";
+                OR all_data.color      LIKE '%{$k}%'
+                OR all_data.lot_pakai  LIKE '%{$k}%')";
         }
 
         if (count($conds)) {

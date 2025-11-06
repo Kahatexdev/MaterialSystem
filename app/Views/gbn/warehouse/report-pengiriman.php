@@ -126,7 +126,7 @@
                 </div>
                 <div class="col-md-2">
                     <label for="">Key</label>
-                    <input type="text" class="form-control" placeholder="PDK / Item Type / Kode Warna dan Warna">
+                    <input id="key" type="text" class="form-control" placeholder="PDK / Item Type / Kode Warna / Warna / Lot">
                 </div>
                 <div class="col-md-2">
                     <label for="">Tanggal Awal (Tanggal Pakai)</label>
@@ -225,16 +225,24 @@
             let tanggal_awal = $('input[type="date"]').eq(0).val().trim();
             let tanggal_akhir = $('input[type="date"]').eq(1).val().trim();
 
+            if (jenis === '') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Jenis wajib dipilih!',
+                    text: 'Silakan pilih jenis sebelum melakukan pencarian.',
+                });
+                return;
+            }
+
             // Validasi: Jika semua input kosong, tampilkan alert dan hentikan pencarian
             if (key === '' && tanggal_awal === '' && tanggal_akhir === '') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
-                    text: 'Harap isi minimal salah satu kolom sebelum melakukan pencarian!',
+                    text: 'Harap isi key atau tanggal pakai sebelum melakukan pencarian!',
                 });
                 return;
             }
-
 
             $.ajax({
                 url: "<?= base_url($role . '/warehouse/filterPengiriman') ?>",
