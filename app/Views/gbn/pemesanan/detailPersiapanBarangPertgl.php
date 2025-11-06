@@ -228,6 +228,7 @@
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Cns</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Lot</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Nama Cluster</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Ket Pindah Order</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">Action</th>
                                 </tr>
                             </thead>
@@ -266,6 +267,16 @@
                                         </td>
                                         <td>
                                             <p class="text-sm font-weight-bold mb-0"><?= $id['nama_cluster'] ?></p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0">
+                                                <?= !empty($id['model_dipinjam'])
+                                                    ? 'Pindah Order dari ' . $id['model_dipinjam'] . ' / ' .
+                                                    ($id['item_type_dipinjam'] ?? '') . ' / ' .
+                                                    ($id['kode_warna_dipinjam'] ?? '') . ' / ' .
+                                                    ($id['warna_dipinjam'] ?? '')
+                                                    : '' ?>
+                                            </p>
                                         </td>
                                         <td>
                                             <button type="button" class="btn btn-danger btn-hapus" data-id="<?= $id['id_pengeluaran'] ?>" data-id-out-celup="<?= $id['id_out_celup'] ?>" data-id-stock="<?= $id['id_stock'] ?>" data-kgs-out="<?= $id['kgs_out'] ?>" data-cns-out="<?= $id['cns_out'] ?>" data-krg-out="<?= $id['krg_out'] ?>" data-lot-out="<?= $id['lot_out'] ?>">
@@ -369,6 +380,7 @@
                             <td><p class="text-sm font-weight-bold mb-0">${id.cns_out}</p></td>
                             <td><p class="text-sm font-weight-bold mb-0">${id.lot_out}</p></td>
                             <td><p class="text-sm font-weight-bold mb-0">${id.nama_cluster}</p></td>
+                            <td><p class="text-sm font-weight-bold mb-0">${id?.model_dipinjam ? `Pindah Order dari ${id.model_dipinjam} / ${id.item_type_dipinjam || ''} / ${id.kode_warna_dipinjam || ''} / ${id.warna_dipinjam || ''}` : ''}</p></td>
                             <td>
                                 <button type="button" 
                                         class="btn btn-danger btn-hapus" 
