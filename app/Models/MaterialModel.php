@@ -124,26 +124,51 @@ class MaterialModel extends Model
     public function MaterialPDK($model = null, $search = null)
     {
         $builder = $this->select('
-            master_order.no_model,
-            area,
-            material.kode_warna,
-            material.item_type,
-            material.color,
-            SUM(kgs) AS qty_po,
-            master_material.jenis
-        ')
+                master_order.no_model,
+                area,
+                material.kode_warna,
+                material.item_type,
+                material.color,
+                SUM(kgs) AS qty_po,
+                master_material.jenis
+            ')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->join('master_material', 'master_material.item_type = material.item_type', 'left');
+            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+            ->join(
+                'open_po',
+                'open_po.no_model = master_order.no_model
+                AND open_po.item_type = master_material.item_type
+                AND open_po.kode_warna = material.kode_warna',
+                'left'
+            )
+            // self join open_po dengan alias "induk"
+            ->join(
+                'open_po as induk',
+                'open_po.id_induk = induk.id_po',
+                'left'
+            )
+            ->join(
+                'schedule_celup',
+                'schedule_celup.no_model = open_po.no_model
+                AND schedule_celup.item_type = open_po.item_type
+                AND schedule_celup.kode_warna = open_po.kode_warna',
+                'left'
+            );
 
         if (!empty($model)) {
             $builder->where('master_order.no_model', $model);
         }
 
         if (!empty($search)) {
-            $builder->like('material.kode_warna', $search);
+            // dikelompokkan supaya OR tidak lepas dari filter lain
+            $builder->groupStart()
+                ->like('material.kode_warna', $search)
+                ->orLike('schedule_celup.lot_celup', $search)
+                ->groupEnd();
         }
 
-        $builder->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color')->orderBy('  master_material.jenis');
+        $builder->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color')
+            ->orderBy('master_material.jenis');
 
         return $builder->findAll();
     }
