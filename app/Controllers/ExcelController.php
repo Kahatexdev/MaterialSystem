@@ -2057,13 +2057,14 @@ class ExcelController extends BaseController
     public function exportPengiriman()
     {
         // Ambil parameter filter
+        $jenis         = $this->request->getGet('jenis');
         $key           = $this->request->getGet('key');
         $tanggal_awal  = $this->request->getGet('tanggal_awal');
         $tanggal_akhir = $this->request->getGet('tanggal_akhir');
 
         // Ambil data
         $data = $this->pengeluaranModel
-            ->getFilterPengiriman($key, $tanggal_awal, $tanggal_akhir);
+            ->getFilterPengiriman($jenis, $key, $tanggal_awal, $tanggal_akhir);
 
         // Grouping per jenis
         $grouped = [];
@@ -2225,7 +2226,7 @@ class ExcelController extends BaseController
         $spreadsheet->setActiveSheetIndex(0);
 
         // Output file
-        $filename = 'PEMAKAIAN_AREA_BENANG.xlsx';
+        $filename = 'Report Pengiriman.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"{$filename}\"");
         header('Cache-Control: max-age=0');

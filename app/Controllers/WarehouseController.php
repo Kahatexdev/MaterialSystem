@@ -2448,11 +2448,12 @@ class WarehouseController extends BaseController
     }
     public function filterPengiriman()
     {
+        $jenis = $this->request->getGet('jenis');
         $key = $this->request->getGet('key');
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
-        $data = $this->pengeluaranModel->getFilterPengiriman($key, $tanggalAwal, $tanggalAkhir);
+        $data = $this->pengeluaranModel->getFilterPengiriman($jenis, $key, $tanggalAwal, $tanggalAkhir);
         // dd($data);
         return $this->response->setJSON($data);
     }
