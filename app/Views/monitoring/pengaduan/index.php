@@ -154,6 +154,32 @@
         box-shadow: 0 0 0 2px rgba(245, 158, 11, .35);
     }
 
+    .quick-reply-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: #f3f4f6;
+        font-size: .75rem;
+        cursor: pointer;
+        border: 1px solid transparent;
+        margin-top: 4px;
+        margin-right: 4px;
+        color: #374151;
+    }
+
+    .quick-reply-chip:hover {
+        background: #e5e7eb;
+        border-color: rgba(79, 70, 229, .35);
+    }
+
+    .quick-reply-label {
+        font-size: .75rem;
+        color: var(--text-muted);
+        margin-top: 4px;
+    }
+
+
     /* ====== OVERLAY ====== */
     #loadingOverlay {
         position: fixed;
@@ -263,6 +289,16 @@
     <?php else : ?>
         <!-- gunakan satu container ID untuk di-reload -->
         <div id="pengaduanList">
+            <?php
+            // daftar balasan cepat default
+            $quickReplies = [
+                'Data sudah diperbaiki, coba dicek lagi.',
+                'Baik sebentar, Datanya kami dicek dulu.',
+                'Silahkan Konfirmasi Ke Gudang Benang.',
+                'Sudah dikirim permintaan manualnya, silahkan dicek lagi.',
+            ];
+            ?>
+
             <?php foreach ($pengaduan as $p) : ?>
                 <?php
                 $timestamp = strtotime($p['created_at']);
@@ -347,6 +383,16 @@
                             <div class="d-flex gap-2 align-items-start">
                                 <textarea name="isi" class="form-control reply-textarea auto-resize" rows="1" placeholder="Tulis balasan..." minlength="2" required></textarea>
                                 <button class="btn btn-brand text-white px-3" type="submit"><i class="bi bi-send-fill"></i></button>
+                            </div>
+
+                            <!-- Balas Cepat -->
+                            <div class="quick-reply-label">Balas cepat:</div>
+                            <div class="mt-1">
+                                <?php foreach ($quickReplies as $qr) : ?>
+                                    <span class="quick-reply-chip" data-text="<?= esc($qr) ?>">
+                                        <?= esc($qr) ?>
+                                    </span>
+                                <?php endforeach; ?>
                             </div>
                             <input type="hidden" name="username" value="<?= esc(session()->get('username')) ?>">
                         </form>
@@ -604,6 +650,23 @@
     // init
     $(function() {
         applyFilter();
+    });
+
+    // QUICK REPLY: klik chip -> isi textarea
+    $(document).on('click', '.quick-reply-chip', function() {
+        const text = $(this).data('text') || '';
+        const $form = $(this).closest('.formReply');
+        const $ta = $form.find('.reply-textarea');
+
+        const current = ($ta.val() || '').trim();
+
+        // kalau sudah ada teks, tambahkan di belakang, kalau belum, langsung isi
+        const newVal = current ?
+            current + (current.endsWith('.') ? ' ' : ' - ') + text :
+            text;
+
+        $ta.val(newVal + ' ');
+        $ta.trigger('input').focus(); // trigger auto-resize & fokus ke textarea
     });
 </script>
 

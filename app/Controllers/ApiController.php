@@ -1289,7 +1289,7 @@ class ApiController extends ResourceController
         $listRetur = [];
         $material = [];
         $kirim = [];
-
+        $poPlus = [];
         $listRetur = $this->returModel->getListRetur($area, $noModel, $tglBuat);
 
         $noModels    = array_unique(array_column($listRetur, 'no_model'));
@@ -1904,5 +1904,78 @@ class ApiController extends ResourceController
             'status' => 'success',
             'data' => $bb
         ]);
+    }
+    public function getListKirim($area, $tgl)
+    {
+        $list = $this->pengeluaranModel->getKirimArea($area, $tgl);
+        $list = $list ?? [];
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'data' => $list
+        ]);
+    }
+    public function countKirimArea($area, $tgl)
+    {
+        $num = $this->pengeluaranModel->countKirim($area, $tgl);
+
+        return $this->response->setJSON([
+            'count' => $num
+        ]);
+    }
+    public function updateTerimaArea($id)
+    {
+        $update = $this->pengeluaranModel->update($id, ['terima_area' => 1]);
+        $this->response->setStatusCode($update ? 200 : 500);
+    }
+
+    public function getTglScheduleBulk()
+    {
+        $request = service('request');
+        $json = $request->getJSON(true); // ambil input JSON sebagai array
+
+        if (!isset($json['models']) || !is_array($json['models'])) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Parameter "models" wajib dan harus berupa array'
+            ])->setStatusCode(400);
+        }
+        $models = $json['models'];
+
+        log_message('debug', 'Schedule bulk result: ' . json_encode($models));
+
+        // 🔹 Query ke DB (gunakan model kamu sendiri)
+        $db = \Config\Database::connect();
+        $builder = $db->table('schedule_celup'); // ganti sesuai nama tabel kamu
+        $builder->select('no_model, MIN(tanggal_schedule) AS tgl_schedule');
+        $builder->join('master_material', 'master_material.item_type=schedule_celup.item_type');
+        $builder->where('master_material.jenis', 'BENANG');
+        $builder->whereIn('no_model', $models);
+        $builder->groupBy('no_model');
+
+        $query = $builder->get();
+        $result = $query->getResultArray();
+
+        // 🔹 Untuk jaga-jaga kalau ada model yang gak ketemu
+        $existingModels = array_column($result, 'no_model');
+        foreach ($models as $m) {
+            if (!in_array($m, $existingModels)) {
+                $result[$m] = [
+                    'tgl_schedule' => null
+                ];
+            }
+        }
+        log_message('debug', 'Schedule bulk result: ' . json_encode($result));
+        return $this->respond($result, 200);
+    }
+
+    public function searchStock()
+    {
+        $no_model = $this->request->getGet('no_model');
+        $warna = $this->request->getGet('warna') ?? '';
+
+        $filteredData = $this->stockModel->searchStock($no_model, $warna);
+
+        return $this->respond($filteredData);
     }
 }

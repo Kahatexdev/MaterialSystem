@@ -448,10 +448,10 @@ class PemasukanModel extends Model
             ->groupBy('other_bon.id_other_bon, other_bon.no_model, other_bon.item_type, other_bon.kode_warna');
 
         $builder2 = $this->db->table('pemasukan')
-            ->select('bon_celup.id_bon, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, SUM(out_celup.kgs_kirim) AS kgs_kirim, COUNT(out_celup.cones_kirim) AS cones_kirim, pemasukan.tgl_masuk, pemasukan.nama_cluster, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, m.total_kgs AS kgs_material, out_celup.lot_kirim, bon_celup.no_surat_jalan, bon_celup.tgl_datang, out_celup.l_m_d, out_celup.gw_kirim, out_celup.harga, bon_celup.keterangan, pemasukan.admin, schedule_celup.po_plus')
-            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
-            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup')
-            ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
+            ->select('bon_celup.id_bon, out_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, SUM(out_celup.kgs_kirim) AS kgs_kirim, COUNT(out_celup.cones_kirim) AS cones_kirim, pemasukan.tgl_masuk, pemasukan.nama_cluster, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, m.total_kgs AS kgs_material, out_celup.lot_kirim, bon_celup.no_surat_jalan, bon_celup.tgl_datang, out_celup.l_m_d, out_celup.gw_kirim, out_celup.harga, bon_celup.keterangan, pemasukan.admin, schedule_celup.po_plus')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
+            ->join('master_order', 'master_order.no_model = out_celup.no_model', 'left')
             ->join('open_po', 'open_po.no_model = master_order.no_model AND open_po.kode_warna = schedule_celup.kode_warna AND open_po.item_type = schedule_celup.item_type', 'left')
             ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
             ->join("($subMaterial) m", "m.no_model  = schedule_celup.no_model AND m.item_type  = schedule_celup.item_type AND m.kode_warna = schedule_celup.kode_warna AND m.color = schedule_celup.warna", 'left')
@@ -472,14 +472,17 @@ class PemasukanModel extends Model
                 ->like('other_bon.no_model', $key)
                 ->orLike('other_bon.item_type', $key)
                 ->orLike('other_bon.kode_warna', $key)
+                ->orLike('other_bon.warna', $key)
+                ->orLike('out_celup.lot_kirim', $key)
                 ->groupEnd();
 
             // builder2 untuk pencarian di kolom schedule_celup
             $builder2->groupStart()
-                ->like('schedule_celup.no_model', $key)
+                ->like('out_celup.no_model', $key)
                 ->orLike('schedule_celup.item_type', $key)
                 ->orLike('schedule_celup.kode_warna', $key)
                 ->orLike('schedule_celup.warna', $key)
+                ->orLike('out_celup.lot_kirim', $key)
                 ->groupEnd();
         }
 
@@ -612,22 +615,22 @@ class PemasukanModel extends Model
     public function getDatangLurex($key, $jenis = null)
     {
         $builder = $this->db->table('pemasukan p')
-            ->select('p.created_at as tgl_terima, p.nama_cluster, oc.no_model, sc.item_type, sc.kode_warna, sc.warna, oc.kgs_kirim as qty_datang, oc.cones_kirim as cones_datang, oc.lot_kirim as lot_datang, COALESCE(bc.no_surat_jalan, ob.no_surat_jalan) as no_surat_jalan, oc.l_m_d, COALESCE(bc.tgl_datang, ob.tgl_datang) as tgl_datang, COALESCE(bc.keterangan, ob.keterangan) as keterangan, p.admin')
+            ->select('p.created_at as tgl_terima, p.nama_cluster, oc.no_model, ob.item_type, ob.kode_warna, ob.warna, oc.kgs_kirim as qty_datang, oc.cones_kirim as cones_datang, oc.lot_kirim as lot_datang, ob.no_surat_jalan, oc.l_m_d, ob.tgl_datang, ob.keterangan, p.admin')
             ->join('out_celup oc', 'oc.id_out_celup = p.id_out_celup', 'left')
-            ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup', 'left')
-            ->join('bon_celup bc', 'oc.id_bon = bc.id_bon', 'left')
+            // ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup', 'left')
+            // ->join('bon_celup bc', 'oc.id_bon = bc.id_bon', 'left')
             ->join('other_bon ob', 'oc.id_other_bon = ob.id_other_bon', 'left')
-            ->join('master_material mm', 'sc.item_type = mm.item_type', 'left')
+            ->join('master_material mm', 'ob.item_type = mm.item_type', 'left')
             ->where('oc.no_model', $key)
-            ->like('sc.item_type', '%LUREX%')
+            ->like('ob.item_type', '%LUREX%')
             ->where('oc.ganti_retur <>', '1')
-            ->where('sc.po_plus <>', '1');
+            ->where('ob.po_tambahan <>', '1');
         if (!empty($jenis)) {
             $builder->where('mm.jenis', $jenis);
         }
 
         return $builder->groupBy('p.created_at')
-            ->orderBy('sc.item_type, sc.kode_warna, sc.warna', 'ASC')
+            ->orderBy('ob.item_type, ob.kode_warna, ob.warna', 'ASC')
             ->get()
             ->getResultArray();
     }
@@ -635,7 +638,7 @@ class PemasukanModel extends Model
     public function getPlusDatangLurex($key, $jenis = null)
     {
         $builder = $this->db->table('pemasukan p')
-            ->select("p.created_at as tgl_terima, p.nama_cluster, oc.no_model, sc.item_type, sc.kode_warna, sc.warna, oc.kgs_kirim as qty_datang, oc.cones_kirim as cones_datang, oc.lot_kirim as lot_datang, COALESCE(bc.no_surat_jalan, ob.no_surat_jalan) as no_surat_jalan, oc.l_m_d, COALESCE(bc.tgl_datang, ob.tgl_datang) as tgl_datang, COALESCE(bc.keterangan, ob.keterangan) as keterangan, p.admin,
+            ->select("p.created_at as tgl_terima, p.nama_cluster, oc.no_model, ob.item_type, ob.kode_warna, ob.warna, oc.kgs_kirim as qty_datang, oc.cones_kirim as cones_datang, oc.lot_kirim as lot_datang, ob.no_surat_jalan, oc.l_m_d, ob.tgl_datang, ob.keterangan, p.admin,
             -- Subquery qty_poplus
               (
                 SELECT SUM(COALESCE(pt.poplus_mc_kg, 0) + COALESCE(pt.plus_pck_kg, 0))
@@ -645,22 +648,22 @@ class PemasukanModel extends Model
               ) AS qty_poplus
             ")
             ->join('out_celup oc', 'oc.id_out_celup = p.id_out_celup', 'left')
-            ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup', 'left')
-            ->join('bon_celup bc', 'oc.id_bon = bc.id_bon', 'left')
+            // ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup', 'left')
+            // ->join('bon_celup bc', 'oc.id_bon = bc.id_bon', 'left')
             ->join('other_bon ob', 'oc.id_other_bon = ob.id_other_bon', 'left')
-            ->join('master_material mm', 'sc.item_type = mm.item_type', 'left')
-            ->join('master_order mo', 'sc.no_model = mo.no_model', 'left')
-            ->join('material m', 'sc.item_type = m.item_type AND mo.id_order = m.id_order AND sc.kode_warna = m.kode_warna', 'left')
+            ->join('master_material mm', 'ob.item_type = mm.item_type', 'left')
+            ->join('master_order mo', 'oc.no_model = mo.no_model', 'left')
+            ->join('material m', 'ob.item_type = m.item_type AND mo.id_order = m.id_order AND ob.kode_warna = m.kode_warna', 'left')
             ->where('oc.no_model', $key)
-            ->like('sc.item_type', '%LUREX%')
+            ->like('ob.item_type', '%LUREX%')
             ->where('oc.ganti_retur <>', '1')
-            ->where('sc.po_plus', '1');
+            ->where('ob.po_tambahan', '1');
         if (!empty($jenis)) {
             $builder->where('mm.jenis', $jenis);
         }
 
         return $builder->groupBy('p.created_at')
-            ->orderBy('sc.item_type, sc.kode_warna, sc.warna', 'ASC')
+            ->orderBy('ob.item_type, ob.kode_warna, ob.warna', 'ASC')
             ->get()
             ->getResultArray();
     }

@@ -2057,13 +2057,14 @@ class ExcelController extends BaseController
     public function exportPengiriman()
     {
         // Ambil parameter filter
+        $jenis         = $this->request->getGet('jenis');
         $key           = $this->request->getGet('key');
         $tanggal_awal  = $this->request->getGet('tanggal_awal');
         $tanggal_akhir = $this->request->getGet('tanggal_akhir');
 
         // Ambil data
         $data = $this->pengeluaranModel
-            ->getFilterPengiriman($key, $tanggal_awal, $tanggal_akhir);
+            ->getFilterPengiriman($jenis, $key, $tanggal_awal, $tanggal_akhir);
 
         // Grouping per jenis
         $grouped = [];
@@ -2225,7 +2226,7 @@ class ExcelController extends BaseController
         $spreadsheet->setActiveSheetIndex(0);
 
         // Output file
-        $filename = 'PEMAKAIAN_AREA_BENANG.xlsx';
+        $filename = 'Report Pengiriman.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"{$filename}\"");
         header('Cache-Control: max-age=0');
@@ -2656,7 +2657,7 @@ class ExcelController extends BaseController
 
                 $row = 4;
                 $no = 1;
-                foreach ($dataDatangSolid as $item) {
+                foreach ($dataDatangLurex as $item) {
                     $newSheet->setCellValue('A' . $row, $no++);
                     $newSheet->setCellValue('B' . $row, $item['no_model'] ?: '-');
                     $newSheet->setCellValue('C' . $row, $item['item_type'] ?: '-');
@@ -2721,7 +2722,7 @@ class ExcelController extends BaseController
 
                 $row = 4;
                 $no = 1;
-                foreach ($dataPlusDatangSolid as $item) {
+                foreach ($dataPlusDatangLurex as $item) {
                     $newSheet->setCellValue('A' . $row, $no++);
                     $newSheet->setCellValue('B' . $row, $item['no_model'] ?: '-');
                     $newSheet->setCellValue('C' . $row, $item['item_type'] ?: '-');
@@ -3483,6 +3484,7 @@ class ExcelController extends BaseController
             foreach ($rows as $row) {
 
                 $currentTotalId = $row['id_total_pemesanan'];
+                $ketPindahOrder = !empty($row['model_dipinjam']) ? ' | Pindah Order dari ' . $row['model_dipinjam'] . ' / ' . ($row['item_type_dipinjam'] ?? '') . ' / ' . ($row['kode_warna_dipinjam'] ?? '') . ' / ' . ($row['warna_dipinjam'] ?? '') : '';
 
                 $sheet->setCellValue("A$rowNumber", $row['admin']);
                 $sheet->setCellValue("B$rowNumber", $row['no_model']);
@@ -3498,7 +3500,7 @@ class ExcelController extends BaseController
                 $sheet->setCellValue("L$rowNumber", $row['nama_cluster']);
                 $sheet->setCellValue("M$rowNumber", ''); // kgs_out tambahan?
                 $sheet->setCellValue("N$rowNumber", ''); // cns_out tambahan?
-                $sheet->setCellValue("O$rowNumber", $row['keterangan_gbn']);
+                $sheet->setCellValue("O$rowNumber", $row['keterangan_gbn'] . $ketPindahOrder);
 
                 // cek id_total_pemesanan ganti
                 if ($prevTotalId !== null && $currentTotalId !== $prevTotalId) {
@@ -15640,7 +15642,12 @@ class ExcelController extends BaseController
                 // --- Kolom E..Q: isi di baris pertama dari pasangan ---
                 $sheet->setCellValue("E{$startRow}", $row['color']);
                 $sheet->setCellValue("F{$startRow}", $row['kode_warna']);
-                $sheet->setCellValue("G{$startRow}", $row['buyer'] . ' (' . ($buyerName['kd_buyer_order'] ?? '') . ')');
+                $sheet->setCellValue(
+                    "G{$startRow}",
+                    isset($buyerName['kd_buyer_order']) && $buyerName['kd_buyer_order'] !== ''
+                        ? $row['buyer'] . ' (' . $buyerName['kd_buyer_order'] . ')'
+                        : $row['buyer']
+                );
                 $sheet->setCellValue("H{$startRow}", $row['no_order']);
                 $sheet->setCellValue("I{$startRow}", $row['delivery_awal']);
                 $sheet->setCellValue("J{$startRow}", $row['kg_po']);

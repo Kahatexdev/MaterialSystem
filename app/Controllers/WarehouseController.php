@@ -2448,11 +2448,12 @@ class WarehouseController extends BaseController
     }
     public function filterPengiriman()
     {
+        $jenis = $this->request->getGet('jenis');
         $key = $this->request->getGet('key');
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
-        $data = $this->pengeluaranModel->getFilterPengiriman($key, $tanggalAwal, $tanggalAkhir);
+        $data = $this->pengeluaranModel->getFilterPengiriman($jenis, $key, $tanggalAwal, $tanggalAkhir);
         // dd($data);
         return $this->response->setJSON($data);
     }
@@ -4023,6 +4024,11 @@ class WarehouseController extends BaseController
             $totalKrgOut += $krgKirimOut;
             $totalKrgIn += $krgKirimIn;
         }
+
+        // Setelah perhitungan, hilangkan error floating kecil
+        $eps = 1e-9;
+        if (abs($totalKgs) < $eps) $totalKgs = 0;
+        $totalKgs = round($totalKgs, 4);
 
         // -------------------------------------------------------
         // MAIN LOOP: lakukan operasi per out_celup (history, update stok lama, pemasukan)

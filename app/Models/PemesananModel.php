@@ -299,6 +299,7 @@ class PemesananModel extends Model
             ->join('kebutuhan_cones', 'material.id_material = kebutuhan_cones.id_material', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->where('pemesanan.admin', $data['area'])
+            ->where('kebutuhan_cones.area', $data['area'])
             ->where('pemesanan.tgl_pakai', $data['tgl_pakai'])
             ->where('master_order.no_model', $data['no_model'])
             ->where('material.item_type', $data['item_type'])

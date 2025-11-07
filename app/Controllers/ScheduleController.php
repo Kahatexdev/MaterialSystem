@@ -1332,7 +1332,7 @@ class ScheduleController extends BaseController
         $tglAkhir = $this->request->getGet('tanggal_akhir');
         $jenis = $this->request->getGet('jenis') ?? 'all';
         $data = $this->scheduleCelupModel->getFilterSchWeekly($tglAwal, $tglAkhir, $jenis);
-
+        // dd($data);
         return $this->response->setJSON($data);
     }
 
@@ -1618,7 +1618,7 @@ class ScheduleController extends BaseController
                         ? date('d-m-Y', strtotime($row['start_mc']))
                         : 'Belum update')
                     . "</span>",
-                'tanggal_schedule' => "<span>{$row['tanggal_schedule']}</span>",
+                'tanggal_schedule' => "<span>" . date('d-m-Y', strtotime($row['tanggal_schedule'])) . "</span>",
                 'ket_schedule' => "<span class='wrap-text'>{$row['ket_schedule']}</span>",
                 'action' => '<a href="' . base_url($this->role . '/edit/' . $row['id_celup']) . '" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Detail"><i class="fas fa-eye"></i></a>'
             ];
@@ -1726,7 +1726,7 @@ class ScheduleController extends BaseController
                         ? date('d-m-Y', strtotime($row['start_mc']))
                         : 'Belum update')
                     . "</span>",
-                'tanggal_schedule'  => "<span>{$row['tanggal_schedule']}</span>",
+                'tanggal_schedule'  => "<span>" . date('d-m-Y', strtotime($row['tanggal_schedule'])) . "</span>",
                 'last_status'       => "<span>{$row['last_status']}</span>",
                 'kg_po'             => "<span>{$row['kg_po']}</span>",
                 'kg_celup'          => "<span>{$row['kg_celup']}</span>",

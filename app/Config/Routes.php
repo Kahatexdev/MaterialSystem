@@ -1067,6 +1067,12 @@ $routes->group(
         $routes->get('filterReportKebutuhanBahanBaku', 'ApiController::filterReportKebutuhanBahanBaku');
         $routes->get('excelReportKebutuhanBahanBaku', 'ApiController::excelReportKebutuhanBahanBaku');
         $routes->get('getBBForSummaryPlanner', 'ApiController::getBBForSummaryPlanner');
+
+        $routes->get('getListKirimArea/(:any)/(:any)', 'ApiController::getListKirim/$1/$2');
+        $routes->get('countKirimArea/(:any)/(:any)', 'ApiController::countKirimArea/$1/$2');
+        $routes->get('updateTerimaArea/(:any)', 'ApiController::updateTerimaArea/$1');
+        $routes->post('getTglScheduleBulk', 'ApiController::getTglScheduleBulk');
+        $routes->get('searchStock', 'ApiController::searchStock');
     }
 );
 
