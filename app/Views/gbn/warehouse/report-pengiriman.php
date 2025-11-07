@@ -114,19 +114,30 @@
                 <h5 class="mb-0 font-weight-bolder">Filter Pengiriman</h5>
             </div>
             <div class="row mt-2">
-                <div class="col-md-3">
-                    <label for="">Key</label>
-                    <input type="text" class="form-control" placeholder="PDK / Item Type / Kode Warna dan Warna">
+                <div class="col-md-2">
+                    <label for="">Jenis</label>
+                    <select class="form-select" name="jenis" id="jenis" required>
+                        <option value="">Pilih Jenis</option>
+                        <option value="BENANG">BENANG</option>
+                        <option value="NYLON">NYLON</option>
+                        <option value="SPANDEX">SPANDEX</option>
+                        <option value="KARET">KARET</option>
+                    </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    <label for="">Key</label>
+                    <input id="key" type="text" class="form-control" placeholder="PDK / Item Type / Kode Warna / Warna / Lot">
+                </div>
+                <div class="col-md-2">
                     <label for="">Tanggal Awal (Tanggal Pakai)</label>
                     <input type="date" class="form-control">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label for="">Tanggal Akhir (Tanggal Pakai)</label>
                     <input type="date" class="form-control">
                 </div>
-                <div class="col-md-3">
+
+                <div class="col-md-2">
                     <label for="">Aksi</label><br>
                     <button class="btn btn-info btn-block" id="btnSearch"><i class="fas fa-search"></i></button>
                     <button class="btn btn-danger" id="btnReset"><i class="fas fa-redo-alt"></i></button>
@@ -209,25 +220,35 @@
         }
 
         function loadData() {
+            let jenis = $('#jenis').val().trim();
             let key = $('input[type="text"]').val().trim();
             let tanggal_awal = $('input[type="date"]').eq(0).val().trim();
             let tanggal_akhir = $('input[type="date"]').eq(1).val().trim();
+
+            if (jenis === '') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Jenis wajib dipilih!',
+                    text: 'Silakan pilih jenis sebelum melakukan pencarian.',
+                });
+                return;
+            }
 
             // Validasi: Jika semua input kosong, tampilkan alert dan hentikan pencarian
             if (key === '' && tanggal_awal === '' && tanggal_akhir === '') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
-                    text: 'Harap isi minimal salah satu kolom sebelum melakukan pencarian!',
+                    text: 'Harap isi key atau tanggal pakai sebelum melakukan pencarian!',
                 });
                 return;
             }
-
 
             $.ajax({
                 url: "<?= base_url($role . '/warehouse/filterPengiriman') ?>",
                 type: "GET",
                 data: {
+                    jenis: jenis,
                     key: key,
                     tanggal_awal: tanggal_awal,
                     tanggal_akhir: tanggal_akhir
@@ -306,10 +327,11 @@
         });
 
         $('#btnExport').click(function() {
+            let jenis = $('#jenis').val();
             let key = $('input[type="text"]').val();
             let tanggal_awal = $('input[type="date"]').eq(0).val();
             let tanggal_akhir = $('input[type="date"]').eq(1).val();
-            window.location.href = "<?= base_url($role . '/warehouse/exportPengiriman') ?>?key=" + key + "&tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
+            window.location.href = "<?= base_url($role . '/warehouse/exportPengiriman') ?>?jenis=" + jenis + "&key=" + key + "&tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
         });
 
         dataTable.clear().draw();

@@ -472,14 +472,17 @@ class PemasukanModel extends Model
                 ->like('other_bon.no_model', $key)
                 ->orLike('other_bon.item_type', $key)
                 ->orLike('other_bon.kode_warna', $key)
+                ->orLike('other_bon.warna', $key)
+                ->orLike('out_celup.lot_kirim', $key)
                 ->groupEnd();
 
             // builder2 untuk pencarian di kolom schedule_celup
             $builder2->groupStart()
-                ->like('schedule_celup.no_model', $key)
+                ->like('out_celup.no_model', $key)
                 ->orLike('schedule_celup.item_type', $key)
                 ->orLike('schedule_celup.kode_warna', $key)
                 ->orLike('schedule_celup.warna', $key)
+                ->orLike('out_celup.lot_kirim', $key)
                 ->groupEnd();
         }
 
