@@ -245,6 +245,7 @@ class PoTambahanModel extends Model
             ->join('total_potambahan', 'po_tambahan.id_total_potambahan = total_potambahan.id_total_potambahan', 'left')
             ->join('master_order', 'material.id_order = master_order.id_order', 'left')
             ->where('po_tambahan.admin', $validate['area'])
+            ->where('po_tambahan.status', 'approved')
             ->whereIn('material.item_type', $validate['item_type'])
             ->whereIn('material.kode_warna', $validate['kode_warna'])
             ->whereIn('material.color', $validate['color'])
