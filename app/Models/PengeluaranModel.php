@@ -913,4 +913,49 @@ class PengeluaranModel extends Model
 
         return $this->db->query($sql, $params)->getResultArray();
     }
+    public function getKirimAreaBira($area, $tgl)
+    {
+        return $this->select('master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.tgl_pakai, pemesanan.admin, pengeluaran.*')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan=pengeluaran.id_total_pemesanan', 'left')
+            ->join('pemesanan', 'pemesanan.id_total_pemesanan=total_pemesanan.id_total_pemesanan', 'left')
+            ->join('material', 'material.id_material=pemesanan.id_material')
+            ->join('master_order', 'material.id_order=master_order.id_order')
+            ->where('pemesanan.admin', $area)
+            ->like('pengeluaran.updated_at', $tgl)
+            ->groupBy('pengeluaran.id_pengeluaran')
+            ->orderBy(' pemesanan.tgl_pakai, master_order.no_model, material.item_type, material.kode_warna, material.color, pengeluaran.lot_out')
+            ->findAll();
+    }
+    public function getKirimArea($area, $tgl)
+    {
+        return $this->select('
+            master_order.no_model,
+            material.item_type,
+            material.kode_warna,
+            material.color as warna,
+            pemesanan.tgl_pakai,
+            pemesanan.admin,
+            pengeluaran.*,
+            COALESCE(out_celup.no_karung, 0) AS no_karung
+        ')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left')
+            ->join('out_celup', 'out_celup.id_out_celup = pengeluaran.id_out_celup', 'left')
+            ->join('pemesanan', 'pemesanan.id_total_pemesanan = total_pemesanan.id_total_pemesanan', 'left')
+            ->join('material', 'material.id_material = pemesanan.id_material')
+            ->join('master_order', 'material.id_order = master_order.id_order')
+            ->where('area_out', $area)
+            ->where('DATE(pengeluaran.updated_at)', $tgl)
+            ->where('status', 'Pengiriman Area')
+            ->where('terima_area', 0)
+            ->groupBy('pengeluaran.id_pengeluaran')
+            ->orderBy('pengeluaran.updated_at', 'ASC')
+            ->findAll();
+    }
+    public function countKirim($area, $tgl)
+    {
+        return $this->where('area_out', $area)
+            ->where('DATE(updated_at)', $tgl)
+            ->where('status', 'Pengiriman Area')
+            ->where('terima_area', 0)->countAllResults();
+    }
 }
