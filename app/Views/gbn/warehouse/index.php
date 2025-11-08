@@ -119,7 +119,7 @@
                     <input class="form-control" type="text" name="noModel" placeholder="Masukkan No Model / Cluster">
                 </div>
                 <div class="col-lg-4 col-sm-12">
-                    <input class="form-control" type="text" name="warna" placeholder="Masukkan Kode Warna">
+                    <input class="form-control" type="text" name="warna" placeholder="Masukkan Kode Warna / Lot">
                 </div>
                 <div class="col-lg-4 col-sm-12 d-flex gap-2">
                     <button class="btn btn-info flex-grow-1" id="filter_data"><i class="fas fa-search"></i> Cari</button>

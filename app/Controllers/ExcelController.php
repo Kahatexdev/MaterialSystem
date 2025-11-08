@@ -7486,11 +7486,12 @@ class ExcelController extends BaseController
 
     public function exportHistoryPindahOrder()
     {
-        $noModel   = $this->request->getGet('model')     ?? '';
+        $noModelOld   = $this->request->getGet('model_old')     ?? '';
+        $noModelNew   = $this->request->getGet('model_new')     ?? '';
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
 
         // 1) Ambil data
-        $dataPindah = $this->historyStock->getHistoryPindahOrder($noModel, $kodeWarna);
+        $dataPindah = $this->historyStock->getHistoryPindahOrder($noModelOld, $noModelNew, $kodeWarna);
 
         // 2) Siapkan HTTP client
         $client = \Config\Services::curlrequest([

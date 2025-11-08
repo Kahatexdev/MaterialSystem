@@ -59,7 +59,7 @@ class HistoryStock extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
-    public function getHistoryPindahOrder($noModel = null, $kodeWarna = null, $limit = null)
+    public function getHistoryPindahOrder($noModelOld = null, $noModelNew = null, $kodeWarna = null, $limit = null)
     {
         $builder = $this->db->table('history_stock')
             ->select('s_old.no_model AS no_model_old, s_new.no_model AS no_model_new, s_old.item_type, s_old.kode_warna, s_old.warna, history_stock.kgs, history_stock.cns, history_stock.lot, history_stock.cluster_old, history_stock.cluster_new, history_stock.keterangan, history_stock.created_at, s_new.kode_warna')
@@ -67,11 +67,19 @@ class HistoryStock extends Model
             ->join('stock s_new', 's_new.id_stock = history_stock.id_stock_new')
             ->where('keterangan', 'Pindah Order');
 
-        if (!empty($noModel)) {
-            $builder->where('s_old.no_model', $noModel);
+        if (!empty($noModelOld)) {
+            $builder->like('s_old.no_model', $noModelOld);
         }
+
+        if (!empty($noModelNew)) {
+            $builder->like('s_new.no_model', $noModelNew);
+        }
+
         if (!empty($kodeWarna)) {
-            $builder->where('s_old.kode_warna', $kodeWarna);
+            $builder->groupStart()
+                ->like('s_old.kode_warna', $kodeWarna)
+                ->orLike('s_new.kode_warna', $kodeWarna)
+                ->groupEnd();
         }
 
         $builder->orderBy('history_stock.created_at', 'DESC');

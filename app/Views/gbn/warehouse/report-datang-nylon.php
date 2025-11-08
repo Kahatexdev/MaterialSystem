@@ -117,7 +117,7 @@
             <div class="row mt-2">
                 <div class="col-md-3">
                     <label for="">Key</label>
-                    <input type="text" class="form-control" placeholder="No Model/Item Type/Kode Warna/Warna/Lot" style="font-size: 11px;">
+                    <input type="text" id="key" class="form-control" placeholder="No Model/Item Type/Kode Warna/Warna/Lot" style="font-size: 11px;">
                 </div>
                 <div class="col-md-3">
                     <label for="">Tanggal Awal (Tanggal Datang)</label>

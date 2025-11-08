@@ -3243,14 +3243,15 @@ class WarehouseController extends BaseController
     }
     public function historyPindahOrder()
     {
-        $noModel   = $this->request->getGet('model')     ?? '';
+        $noModelOld   = $this->request->getGet('no_model_old')     ?? '';
+        $noModelNew   = $this->request->getGet('no_model_new')     ?? '';
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
 
         // 1) Ambil data
-        if ($noModel === '' && $kodeWarna === '') {
-            $dataPindah = $this->historyStock->getHistoryPindahOrder(null, null, 10);
+        if ($noModelOld === '' && $noModelNew === '' && $kodeWarna === '') {
+            $dataPindah = $this->historyStock->getHistoryPindahOrder(null, null, null, 10);
         } else {
-            $dataPindah = $this->historyStock->getHistoryPindahOrder($noModel, $kodeWarna);
+            $dataPindah = $this->historyStock->getHistoryPindahOrder($noModelOld, $noModelNew, $kodeWarna);
         }
 
         // 2) Siapkan HTTP client
