@@ -307,4 +307,11 @@ class PoTambahanModel extends Model
             ->orderBy('material.style_size', 'ASC')
             ->findAll();
     }
+    public function countRequest()
+    {
+        return $this
+            ->where('po_tambahan.status <>', 'approved')
+            ->where('po_tambahan.status <>', 'rejected')
+            ->countAllResults();
+    }
 }

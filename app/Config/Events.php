@@ -5,6 +5,7 @@ namespace Config;
 use CodeIgniter\Events\Events;
 use CodeIgniter\Exceptions\FrameworkException;
 use CodeIgniter\HotReloader\HotReloader;
+use App\Models\PoTambahanModel;
 
 /*
  * --------------------------------------------------------------------
@@ -63,6 +64,13 @@ Events::on('pre_system', static function (): void {
             $renderer->setVar('countNotif', $response);
         } catch (\Exception $e) {
             $renderer->setVar('countNotif',  0);
+        }
+        try {
+            $poModel = new PoTambahanModel();
+            $poplusDb = $poModel->countRequest();
+            $renderer->setVar('poRequest', $poplusDb);
+        } catch (\Throwable $th) {
+            $renderer->setVar('poRequest', 0);
         }
     });
 });

@@ -187,7 +187,8 @@
                             <i class="fa-solid fa-cart-plus text-dark"></i>
 
                         </div>
-                        <span class="nav-link-text ms-1">PO+</span>
+                        <span class="nav-link-text ms-1">PO+ <span class="badge bg-danger"><?= $poRequest ?></span>
+
                     </a>
                 </li>
                 <li class="nav-item">
