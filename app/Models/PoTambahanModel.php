@@ -310,8 +310,8 @@ class PoTambahanModel extends Model
     public function countRequest()
     {
         return $this
-            ->where('po_tambahan.status <>', 'approved')
-            ->where('po_tambahan.status <>', 'rejected')
+            ->where('po_tambahan.status !=', 'approved')
+            ->where('po_tambahan.status !=', 'rejected')
             ->countAllResults();
     }
 }
