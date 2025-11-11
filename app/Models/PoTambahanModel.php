@@ -309,20 +309,23 @@ class PoTambahanModel extends Model
     }
     public function countRequest()
     {
-        $subQuery = $this->select('po_tambahan.id_po_tambahan')
+        $data = $this->select('po_tambahan.id_po_tambahan, master_order.no_model, material.item_type, material.kode_warna, material.color, total_potambahan.ttl_tambahan_kg AS kg_poplus, total_potambahan.ttl_tambahan_cns AS cns_poplus, total_potambahan.ttl_sisa_jatah AS sisa_jatah, total_potambahan.ttl_sisa_bb_dimc AS sisa_bb_mc, po_tambahan.status, DATE(po_tambahan.created_at) AS tgl_poplus, po_tambahan.admin, master_material.jenis, po_tambahan.ket_gbn, total_potambahan.id_total_potambahan')
             ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
             ->join('total_potambahan', 'po_tambahan.id_total_potambahan = total_potambahan.id_total_potambahan', 'left')
             ->join('master_order', 'material.id_order = master_order.id_order', 'left')
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
-            ->where('po_tambahan.status <>', 'approved')
+            ->where('po_tambahan.status !=', 'approved')
+            ->where('po_tambahan.status !=', 'rejected')
             ->groupBy('DATE(po_tambahan.created_at)', false)
             ->groupBy('master_order.no_model')
             ->groupBy('material.item_type')
             ->groupBy('material.kode_warna')
-            ->groupBy('po_tambahan.status');
+            ->groupBy('po_tambahan.status')
+            ->orderBy('po_tambahan.status', 'ASC')
+            ->orderBy('po_tambahan.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
 
-        $builder = $this->builder();
-        $builder->fromSubquery($subQuery, 'x');
-        return $builder->countAllResults();
+        return count($data);
     }
 }

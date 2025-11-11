@@ -70,7 +70,10 @@ Events::on('pre_system', static function (): void {
             $poplusDb = $poModel->countRequest();
             $renderer->setVar('poRequest', $poplusDb);
         } catch (\Throwable $th) {
-            $renderer->setVar('poRequest', 0);
+            $poModel = new PoTambahanModel();
+            $poplusDb = $poModel->countRequest();
+            $renderer->setVar('poRequest', $poplusDb);
+            // $renderer->setVar('poRequest', 0);
         }
     });
 });
