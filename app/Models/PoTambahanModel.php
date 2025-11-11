@@ -307,11 +307,21 @@ class PoTambahanModel extends Model
             ->orderBy('material.style_size', 'ASC')
             ->findAll();
     }
-    public function countRequest()
-    {
-        return $this
-            ->where('po_tambahan.status !=', 'approved')
-            ->where('po_tambahan.status !=', 'rejected')
-            ->countAllResults();
-    }
+ $subQuery = $this->select('po_tambahan.id_po_tambahan')
+    ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
+    ->join('total_potambahan', 'po_tambahan.id_total_potambahan = total_potambahan.id_total_potambahan', 'left')
+    ->join('master_order', 'material.id_order = master_order.id_order', 'left')
+    ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+    ->where('po_tambahan.status <>', 'approved')
+    ->where('po_tambahan.status <>', 'rejected')
+    ->groupBy('DATE(po_tambahan.created_at)', false)
+    ->groupBy('master_order.no_model')
+    ->groupBy('material.item_type')
+    ->groupBy('material.kode_warna')
+    ->groupBy('po_tambahan.status');
+
+$builder = $this->builder();
+$builder->fromSubquery($subQuery, 'x');
+return $builder->countAllResults();
+
 }
