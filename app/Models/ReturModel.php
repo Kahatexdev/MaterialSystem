@@ -639,6 +639,7 @@ class ReturModel extends Model
     ');
         $builder->join('master_material', 'master_material.item_type = retur.item_type', 'left');
         $builder->where('retur.waktu_acc_retur IS NULL');
+        $builder->where('retur.area_retur !=', 'GUDANG BENANG');
         $builder->groupBy('
         retur.no_model,
         retur.item_type,
@@ -655,5 +656,11 @@ class ReturModel extends Model
         $result = $builder->get()->getResult();
 
         return count($result);
+    }
+    public function getListTglRetur()
+    {
+        return $this->select('retur.tgl_retur')->where('retur.waktu_acc_retur IS NULL')
+            ->where('retur.area_retur !=', 'GUDANG BENANG')
+            ->groupBy('retur.tgl_retur')->orderBy('retur.tgl_retur', 'DESC')->findAll();
     }
 }
