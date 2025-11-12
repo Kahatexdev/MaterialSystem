@@ -30,6 +30,7 @@ class PengeluaranModel extends Model
         'admin',
         'created_at',
         'updated_at',
+        'terima_area'
     ];
 
     protected bool $allowEmptyInserts = false;
