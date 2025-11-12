@@ -615,4 +615,52 @@ class ReturModel extends Model
             ->groupBy('retur.warna')
             ->findAll();
     }
+    public function countRequest()
+    {
+        $builder = $this->db->table('retur');
+        $builder->select('
+        retur.id_retur,
+        retur.no_model,
+        retur.item_type,
+        retur.kode_warna,
+        retur.warna,
+        retur.area_retur,
+        retur.tgl_retur,
+        SUM(retur.kgs_retur) AS kgs_retur,
+        SUM(retur.cns_retur) AS cns_retur,
+        COUNT(retur.krg_retur) AS total_karung,
+        retur.lot_retur,
+        retur.kategori,
+        retur.keterangan_area,
+        retur.keterangan_gbn,
+        retur.waktu_acc_retur,
+        retur.admin,
+        master_material.jenis
+    ');
+        $builder->join('master_material', 'master_material.item_type = retur.item_type', 'left');
+        $builder->where('retur.waktu_acc_retur IS NULL');
+        $builder->where('retur.area_retur !=', 'GUDANG BENANG');
+        $builder->groupBy('
+        retur.no_model,
+        retur.item_type,
+        retur.kode_warna,
+        retur.warna,
+        retur.area_retur,
+        retur.tgl_retur,
+        retur.lot_retur,
+        retur.kategori
+    ');
+        $builder->orderBy('retur.tgl_retur', 'DESC');
+
+        // Eksekusi query lalu hitung jumlah hasilnya
+        $result = $builder->get()->getResult();
+
+        return count($result);
+    }
+    public function getListTglRetur()
+    {
+        return $this->select('retur.tgl_retur')->where('retur.waktu_acc_retur IS NULL')
+            ->where('retur.area_retur !=', 'GUDANG BENANG')
+            ->groupBy('retur.tgl_retur')->orderBy('retur.tgl_retur', 'DESC')->findAll();
+    }
 }

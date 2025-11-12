@@ -149,6 +149,21 @@
                             </div>
                         <?php endif; ?>
                     </div>
+                    <div class="card-footer">
+                        <?php if (!empty($tglReq)): ?>
+                            <div class="alert alert-danger text-center text-white mb-0 py-3 shadow-sm">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong class="text-white">Perhatian!</strong> Beri tindakan untuk retur pada tanggal:
+                                <br>
+                                <span class="fw-semibold text-white">
+                                    <?= implode(', ', array_map(fn($rq) => date('d M Y', strtotime($rq['tgl_retur'])), $tglReq)) ?>
+                                </span>
+                            </div>
+                        <?php else: ?>
+
+                        <?php endif; ?>
+                    </div>
+
                 </div>
             </div>
         </div>

@@ -85,6 +85,8 @@ class ReturController extends BaseController
         // Logika untuk menentukan apakah ada filter
         $isFiltered = $jenis || $area || $tgl || $model || $kodeWarna;
         $isFiltered = urlencode($isFiltered);
+        $tglReq = $this->returModel->getListTglRetur();
+        // dd($tglReq);
         // Ambil data hanya jika ada filter
         $retur = $isFiltered ? $this->returModel->getFilteredData($this->request->getGet()) : $dataRetur;
         $data = [
@@ -95,7 +97,8 @@ class ReturController extends BaseController
             'active' => $this->active,
             'role' => $this->role,
             'filters' => $this->filters,
-            'isFiltered' => $isFiltered
+            'isFiltered' => $isFiltered,
+            'tglReq' => $tglReq
         ];
 
         return view($data['role'] . '/retur/index', $data);
