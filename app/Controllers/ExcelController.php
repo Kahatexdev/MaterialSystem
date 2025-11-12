@@ -2064,8 +2064,7 @@ class ExcelController extends BaseController
         $tanggal_akhir = $this->request->getGet('tanggal_akhir');
 
         // Ambil data
-        $data = $this->pengeluaranModel
-            ->getFilterPengiriman($jenis, $key, $tanggal_awal, $tanggal_akhir);
+        $data = $this->pengeluaranModel->getFilterPengiriman($jenis, $key, $tanggal_awal, $tanggal_akhir);
 
         // Grouping per jenis
         $grouped = [];
@@ -2083,6 +2082,7 @@ class ExcelController extends BaseController
             'TGL PO',
             'FOLL UP',
             'NO MODEL',
+            'ORDER TYPE',
             'DELIVERY AWAL',
             'DELIVERY AKHIR',
             'NO ORDER',
@@ -2172,36 +2172,37 @@ class ExcelController extends BaseController
                 $sheet->setCellValue("B{$rowNum}", $item['tgl_po'] ?? '-');
                 $sheet->setCellValue("C{$rowNum}", $item['foll_up'] ?? '-');
                 $sheet->setCellValue("D{$rowNum}", $item['no_model'] ?? '-');
-                $sheet->setCellValue("E{$rowNum}", $item['delivery_awal'] ?? '-');
-                $sheet->setCellValue("F{$rowNum}", $item['delivery_akhir'] ?? '-');
-                $sheet->setCellValue("G{$rowNum}", $item['no_order'] ?? '-');
-                $sheet->setCellValue("H{$rowNum}", $item['item_type'] ?? '-');
-                $sheet->setCellValue("I{$rowNum}", $item['color'] ?? '-');
-                $sheet->setCellValue("J{$rowNum}", $item['kode_warna'] ?? '-');
-                $sheet->setCellValue("K{$rowNum}", $item['kgs_pesan'] ?? '0');
-                $sheet->setCellValue("L{$rowNum}", $item['loss'] ?? '0');
-                $sheet->setCellValue("M{$rowNum}", $item['qty_po_plus'] ?? '0');
-                $sheet->setCellValue("N{$rowNum}", $item['kgs_stock_awal'] ?? '0');
-                $sheet->setCellValue("O{$rowNum}", $item['lot_awal'] ?? '-');
-                $sheet->setCellValue("P{$rowNum}", $item['kgs_in_out'] ?? '0');
-                $sheet->setCellValue("Q{$rowNum}", $item['lot_stock'] ?? '-');
-                $sheet->setCellValue("R{$rowNum}", $item['area_out'] ?? '-');
-                $sheet->setCellValue("S{$rowNum}", $item['tgl_pakai'] ?? '-');
-                $sheet->setCellValue("T{$rowNum}", $item['kgs_pakai'] ?? '0');
-                $sheet->setCellValue("U{$rowNum}", $item['cones_pakai'] ?? '0');
-                $sheet->setCellValue("V{$rowNum}", $item['lot_pakai'] ?? '-');
-                $sheet->setCellValue("W{$rowNum}", $item['keterangan_gbn'] ?? '-');
-                $sheet->setCellValue("X{$rowNum}", $item['admin'] ?? '-');
-                $sheet->setCellValue("Y{$rowNum}", $item['tgl_out'] ?? '-');
+                $sheet->setCellValue("E{$rowNum}", $item['unit'] ?? '-');
+                $sheet->setCellValue("F{$rowNum}", $item['delivery_awal'] ?? '-');
+                $sheet->setCellValue("G{$rowNum}", $item['delivery_akhir'] ?? '-');
+                $sheet->setCellValue("H{$rowNum}", $item['no_order'] ?? '-');
+                $sheet->setCellValue("I{$rowNum}", $item['item_type'] ?? '-');
+                $sheet->setCellValue("J{$rowNum}", $item['color'] ?? '-');
+                $sheet->setCellValue("K{$rowNum}", $item['kode_warna'] ?? '-');
+                $sheet->setCellValue("L{$rowNum}", $item['kgs_pesan'] ?? '0');
+                $sheet->setCellValue("M{$rowNum}", $item['loss'] ?? '0');
+                $sheet->setCellValue("N{$rowNum}", $item['qty_po_plus'] ?? '0');
+                $sheet->setCellValue("O{$rowNum}", $item['kgs_stock_awal'] ?? '0');
+                $sheet->setCellValue("P{$rowNum}", $item['lot_awal'] ?? '-');
+                $sheet->setCellValue("Q{$rowNum}", $item['kgs_in_out'] ?? '0');
+                $sheet->setCellValue("R{$rowNum}", $item['lot_stock'] ?? '-');
+                $sheet->setCellValue("S{$rowNum}", $item['area_out'] ?? '-');
+                $sheet->setCellValue("T{$rowNum}", $item['tgl_pakai'] ?? '-');
+                $sheet->setCellValue("U{$rowNum}", $item['kgs_pakai'] ?? '0');
+                $sheet->setCellValue("V{$rowNum}", $item['cones_pakai'] ?? '0');
+                $sheet->setCellValue("W{$rowNum}", $item['lot_pakai'] ?? '-');
+                $sheet->setCellValue("X{$rowNum}", $item['keterangan_gbn'] ?? '-');
+                $sheet->setCellValue("Y{$rowNum}", $item['admin'] ?? '-');
+                $sheet->setCellValue("Z{$rowNum}", $item['tgl_out'] ?? '-');
                 $rowNum++;
             }
 
             // Tentukan print area sekarang data sudah terisi
             $lastRow = $rowNum - 1;
-            $ps->setPrintArea("A1:Y{$lastRow}");
+            $ps->setPrintArea("A1:Z{$lastRow}");
 
             // Border + alignment
-            $sheet->getStyle("A3:Y{$lastRow}")
+            $sheet->getStyle("A3:Z{$lastRow}")
                 ->applyFromArray([
                     'borders' => [
                         'allBorders' => [
@@ -2216,7 +2217,7 @@ class ExcelController extends BaseController
                 ]);
 
             // Auto–size kolom
-            foreach (range('A', 'Y') as $c) {
+            foreach (range('A', 'Z') as $c) {
                 $sheet->getColumnDimension($c)->setAutoSize(true);
             }
 

@@ -173,6 +173,7 @@
                         <tr>
                             <th class="text-center text-uppercase">No</th>
                             <th class="text-center text-uppercase">No Model</th>
+                            <th class="text-center text-uppercase">Order Type</th>
                             <th class="text-center text-uppercase">Area</th>
                             <th class="text-center text-uppercase">Delivery Awal</th>
                             <th class="text-center text-uppercase">Delivery Akhir</th>
@@ -296,6 +297,7 @@
                             dataTable.row.add([
                                 index + 1,
                                 item.no_model,
+                                item.unit,
                                 item.area_out,
                                 item.delivery_awal,
                                 item.delivery_akhir,
