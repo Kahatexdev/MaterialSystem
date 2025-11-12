@@ -130,7 +130,7 @@
                 <!-- Key -->
                 <div class="col-md-6 col-lg-3">
                     <label for="key" class="form-label">Key</label>
-                    <input id="key" type="text" class="form-control" placeholder="PDK / Item Type / Kode Warna / Warna / Lot">
+                    <input id="key" type="text" class="form-control" placeholder="PDK / Item Type / Kode Warna / Warna / Lot / Nama Cluster">
                 </div>
 
                 <!-- Tanggal Awal -->

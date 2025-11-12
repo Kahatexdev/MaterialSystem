@@ -111,7 +111,7 @@ class ClusterModel extends Model
             ->select('s.nama_cluster, oc.no_model, s.item_type, s.kode_warna, SUM(oc.kgs_kirim) AS kgs_model, mo.foll_up,mo.delivery_akhir', false)
             ->join('stock s', 's.id_stock = pms.id_stock', 'inner')
             ->join('out_celup oc', 'oc.id_out_celup = pms.id_out_celup', 'inner')
-            ->join('master_order mo', 'mo.no_model = s.no_model','left')
+            ->join('master_order mo', 'mo.no_model = s.no_model', 'left')
             ->where('pms.out_jalur', '0')
             ->groupBy('s.nama_cluster, oc.no_model, s.item_type, s.kode_warna')
             ->getCompiledSelect();

@@ -421,6 +421,7 @@ class PengeluaranModel extends Model
                 OR all_data.item_type  LIKE '%{$k}%'
                 OR all_data.kode_warna LIKE '%{$k}%'
                 OR all_data.color      LIKE '%{$k}%'
+                OR all_data.nama_cluster LIKE '%{$k}%'
                 OR all_data.lot_pakai  LIKE '%{$k}%')";
         }
 
