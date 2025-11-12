@@ -825,13 +825,13 @@ class ExcelController extends BaseController
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["No", "Foll Up", "No Model", "No Order", "Buyer", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "KG Pesan", "Tanggal Datang", "Kgs Datang", "Cones Datang", "LOT Datang", "No Surat Jalan", "LMD", "GW", "Harga", "Nama Cluster", "PO Tambahan", "Admin"];
+        $header = ["No", "Foll Up", "No Model", "No Order", "Buyer", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "KG Pesan", "Tanggal Datang", "Kgs Datang", "Cones Datang", "LOT Datang", "No Surat Jalan", "LMD", "GW", "Harga", "Nama Cluster", "PO Tambahan", "Waktu Input", "Admin"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
-        $sheet->getStyle('A3:W3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:W3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A3:W3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3:X3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:X3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:X3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         // Data
         $row = 4;
@@ -866,6 +866,7 @@ class ExcelController extends BaseController
                     number_format($item['harga'], 2),
                     $item['nama_cluster'],
                     $poPlus,
+                    $item['created_at'],
                     $item['admin']
                 ]
             ], NULL, 'A' . $row);
@@ -881,19 +882,19 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle('A3:W' . ($row - 1))->applyFromArray($styleArray);
+        $sheet->getStyle('A3:X' . ($row - 1))->applyFromArray($styleArray);
 
         // Set auto width untuk setiap kolom
-        foreach (range('A', 'W') as $column) {
+        foreach (range('A', 'X') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Set isi tabel agar rata tengah
-        $sheet->getStyle('A4:W' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A4:W' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A4:X' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:X' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
-        $fileName = 'Report_Datang_Benang_' . date('Y-m-d') . '.xlsx';
+        $fileName = 'Report Datang Benang ' . date('Y-m-d') . '.xlsx';
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
@@ -13580,18 +13581,18 @@ class ExcelController extends BaseController
 
         // Judul
         $sheet->setCellValue('A1', 'Datang Nylon');
-        $sheet->mergeCells('A1:W1'); // Menggabungkan sel untuk judul
+        $sheet->mergeCells('A1:X1'); // Menggabungkan sel untuk judul
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["No", "Foll Up", "No Model", "No Order", "Buyer", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "KG Pesan", "Tanggal Datang", "Kgs Datang", "Cones Datang", "LOT Datang", "No Surat Jalan", "LMD", "GW", "Harga", "Nama Cluster", "PO Tambahan", "Admin"];
+        $header = ["No", "Foll Up", "No Model", "No Order", "Buyer", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "KG Pesan", "Tanggal Datang", "Kgs Datang", "Cones Datang", "LOT Datang", "No Surat Jalan", "LMD", "GW", "Harga", "Nama Cluster", "PO Tambahan", "Waktu Input", "Admin"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
-        $sheet->getStyle('A3:W3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:W3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A3:W3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3:X3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:X3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:X3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         // Data
         $row = 4;
@@ -13626,6 +13627,7 @@ class ExcelController extends BaseController
                     number_format($item['harga'], 2),
                     $item['nama_cluster'],
                     $poPlus,
+                    $item['created_at'],
                     $item['admin']
                 ]
             ], NULL, 'A' . $row);
@@ -13641,19 +13643,19 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle('A3:W' . ($row - 1))->applyFromArray($styleArray);
+        $sheet->getStyle('A3:X' . ($row - 1))->applyFromArray($styleArray);
 
         // Set auto width untuk setiap kolom
-        foreach (range('A', 'W') as $column) {
+        foreach (range('A', 'X') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Set isi tabel agar rata tengah
-        $sheet->getStyle('A4:W' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A4:W' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A4:X' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:X' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
-        $fileName = 'Report_Datang_Nylon_' . date('Y-m-d') . '.xlsx';
+        $fileName = 'Report Datang Nylon ' . date('Y-m-d') . '.xlsx';
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $fileName . '"');

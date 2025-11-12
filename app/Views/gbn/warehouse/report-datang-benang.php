@@ -177,6 +177,7 @@
                             <th class="text-center text-uppercase">Nama Cluster</th>
                             <th class="text-center text-uppercase">Po Tambahan</th>
                             <th class="text-center text-uppercase">Keterangan</th>
+                            <th class="text-center text-uppercase">Waktu Input</th>
                             <th class="text-center text-uppercase">Admin</th>
                             <th class="text-center text-uppercase">Update</th>
                         </tr>
@@ -332,6 +333,7 @@
                                 item.nama_cluster,
                                 poPlus,
                                 item.keterangan,
+                                item.created_at,
                                 item.admin,
                                 `<button class="btn btn-warning btn-update" 
                                     data-id_bon="${item.id_bon || ''}" 
