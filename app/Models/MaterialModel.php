@@ -1347,4 +1347,17 @@ class MaterialModel extends Model
             ->groupBy('id_material')
             ->findAll();
     }
+    public function getAllGw($noModel, $size)
+    {
+        return $this->select('material.gw, material.gw_aktual')
+            ->join('master_order', 'master_order.id_order=material.id_order')
+            ->where('master_order.no_model', $noModel)
+            ->where('material.style_size', $size)
+            ->where('material.kgs<>', 0)
+            ->where('material.composition<>', 0)
+            ->where('material.gw<>', 0)
+            ->where('material.loss<>', 0)
+            ->groupBy('id_material')
+            ->first();
+    }
 }
