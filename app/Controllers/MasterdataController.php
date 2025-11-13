@@ -189,7 +189,7 @@ class MasterdataController extends BaseController
                     if ($key == 1) {
                         continue;
                     }
-                    $style_size = $sheet->getCell('D' . $key)->getValue();
+                    $style_size = $sheet->getCell('E' . $key)->getValue();
                     if (!empty($no_model) && !empty($style_size)) {
                         $validate = $this->validateWithAPI($no_model, $style_size);
                         if ($validate) {
@@ -245,14 +245,15 @@ class MasterdataController extends BaseController
             // Mapping header untuk data material
             $headerMap = [
                 'Color'          => 'A',
-                'Item Type'      => 'B',
-                'Kode Warna'     => 'C',
-                'Item Nr'        => 'D',
-                'Composition(%)' => 'E',
-                'GW/pc'          => 'F',
-                'Qty/pcs'        => 'G',
-                'Loss'           => 'H',
-                'Kgs'            => 'I',
+                'Material Nr'    => 'B',
+                'Item Type'      => 'C',
+                'Kode Warna'     => 'D',
+                'Item Nr'        => 'E',
+                'Composition(%)' => 'F',
+                'GW/pc'          => 'G',
+                'Qty/pcs'        => 'H',
+                'Loss'           => 'I',
+                'Kgs'            => 'J',
             ];
 
             $validDataMaterial = [];
@@ -261,7 +262,8 @@ class MasterdataController extends BaseController
             // Iterasi baris data material (misalnya mulai dari baris kedua)
             foreach ($sheet->getRowIterator(2) as $row) {
                 $rowIndex  = $row->getRowIndex();
-                $style_size = $sheet->getCell('D' . $rowIndex)->getValue();
+                // Ambil dan validasi style_size
+                $style_size = $sheet->getCell('E' . $rowIndex)->getValue();
                 if (empty($no_model) || empty($style_size)) {
                     $invalidRows[] = $rowIndex;
                     continue;
@@ -294,21 +296,22 @@ class MasterdataController extends BaseController
 
                 // Siapkan data material
                 $validDataMaterial[] = [
-                    'id_order'   => $id_order,
-                    'style_size' => $final_style_size,
-                    'area'       => $final_area,
-                    'inisial'    => $final_inisial,
-                    'color'      => $sheet->getCell($headerMap['Color'] . $rowIndex)->getValue(),
-                    'item_type'  => htmlspecialchars_decode($item_type),
-                    'kode_warna' => $sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue(),
-                    'composition' => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(),
-                    'gw'         => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
-                    'gw_aktual'  => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(), // Asumsikan gw_aktual sama dengan gw
-                    'qty_pcs'    => $qty_pcs, // Menggunakan variabel yang telah diproses
-                    'loss'       => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue() ?? 0,
-                    'kgs'        => number_format($kgs, 2, '.', ''),
-                    'admin'      => $admin,
-                    'created_at' => date('Y-m-d H:i:s'),
+                    'id_order'      => $id_order,
+                    'material_nr'   => $sheet->getCell($headerMap['Material Nr'] . $rowIndex)->getValue(),
+                    'style_size'    => $final_style_size,
+                    'area'          => $final_area,
+                    'inisial'       => $final_inisial,
+                    'color'         => $sheet->getCell($headerMap['Color'] . $rowIndex)->getValue(),
+                    'item_type'     => htmlspecialchars_decode($item_type),
+                    'kode_warna'    => $sheet->getCell($headerMap['Kode Warna'] . $rowIndex)->getValue(),
+                    'composition'   => $sheet->getCell($headerMap['Composition(%)'] . $rowIndex)->getValue(),
+                    'gw'            => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(),
+                    'gw_aktual'     => $sheet->getCell($headerMap['GW/pc'] . $rowIndex)->getValue(), // Asumsikan gw_aktual sama dengan gw
+                    'qty_pcs'       => $qty_pcs, // Menggunakan variabel yang telah diproses
+                    'loss'          => $sheet->getCell($headerMap['Loss'] . $rowIndex)->getValue() ?? 0,
+                    'kgs'           => number_format($kgs, 2, '.', ''),
+                    'admin'         => $admin,
+                    'created_at'    => date('Y-m-d H:i:s'),
                 ];
             }
             // dd($validDataMaterial);
@@ -627,7 +630,7 @@ class MasterdataController extends BaseController
             }
 
             // Syarat minimal: field inti ketemu
-            $must = ['color', 'item_type', 'kode_warna', 'style_size', 'qty_pcs'];
+            $must = ['color','material_nr', 'item_type', 'kode_warna', 'style_size', 'qty_pcs'];
             $ok = true;
             foreach ($must as $m) {
                 if (!isset($found[$m]) || $found[$m] === null) {
@@ -795,7 +798,7 @@ class MasterdataController extends BaseController
         // ===== 5) Siapkan peta existing materials & index =====
         // Ambil kolom lengkap agar bisa dibandingkan
         $existingRows = $materialModel
-            ->select('id_material, style_size, item_type, kode_warna, color, composition, gw, qty_pcs, loss, kgs')
+            ->select('id_material, material_nr, style_size, item_type, kode_warna, color, composition, gw, qty_pcs, loss, kgs')
             ->where('id_order', $id_order)
             ->findAll();
 
@@ -820,6 +823,7 @@ class MasterdataController extends BaseController
         $changedRows = [];    // list perubahan per baris update
         $changedTally = [      // agregat per kolom utk ringkasan
             'color' => 0,
+            'materialnr' => 0,
             'itemtype' => 0,
             'kodewarna' => 0,
             'itemNR' => 0,
@@ -832,6 +836,7 @@ class MasterdataController extends BaseController
         // helper map dari nama kolom DB → label yang kamu minta
         $LABELS = [
             'color' => 'color',
+            'material_nr' => 'materialnr',
             'item_type' => 'itemtype',
             'kode_warna' => 'kodewarna',
             'style_size' => 'itemNR',
@@ -857,6 +862,7 @@ class MasterdataController extends BaseController
         // Cari baris header dengan label minimal: Color, Item Type, Kode Warna, Item Nr, Qty/pcs
         $headerAliases = [
             'color'           => ['color', 'warna'],
+            'material_nr'    => ['material nr', 'materialnr', 'material no', 'material'],
             'item_type'       => ['item type', 'itemtype', 'tipe item'],
             'kode_warna'      => ['kode warna', 'kode_warna', 'code color', 'color code'],
             'style_size'      => ['item nr', 'itemnr', 'style_size', 'style size', 'item no', 'style'],
@@ -869,7 +875,7 @@ class MasterdataController extends BaseController
 
         [$headerRow, $colMap] = $this->detectHeader($sheet, $headerAliases);
         if ($headerRow === null) {
-            return redirect()->back()->with('error', 'Header tabel detail tidak ditemukan. Pastikan ada kolom: Color, Item Type, Kode Warna, Item Nr, Qty/pcs, dll.');
+            return redirect()->back()->with('error', 'Header tabel detail tidak ditemukan. Pastikan ada kolom: Color,Material NR, Item Type, Kode Warna, Item Nr, Qty/pcs, dll.');
         }
         $dataStartRow = $headerRow + 1;
 
@@ -910,13 +916,15 @@ class MasterdataController extends BaseController
                     return $cell ? $cell->getCalculatedValue() : '';
                 };
 
+                // Baca raw values
+                $raw_material_nr = (string)$getVal('material_nr');
                 $raw_style_size = (string)$getVal('style_size');
                 $raw_item_type  = (string)$getVal('item_type');
                 $raw_kode       = (string)$getVal('kode_warna');
                 $raw_color      = (string)$getVal('color');
 
                 // Deteksi baris kosong total → skip
-                if ($raw_style_size === '' && $raw_item_type === '' && $raw_kode === '') {
+                if ( $raw_material_nr === '' && $raw_style_size === '' && $raw_item_type === '' && $raw_kode === '') {
                     $stats['skip']++;
                     continue;
                 }
@@ -953,6 +961,8 @@ class MasterdataController extends BaseController
                     continue;
                 }
 
+                // Normalisasi kunci
+                $material_nr = $norm($raw_material_nr);
                 $style_size = $norm($apiData['size']);
                 $item_type  = $norm($raw_item_type ?: '');
                 if ($item_type === '' || !isset($validItemTypesNorm[$item_type])) {
@@ -982,6 +992,7 @@ class MasterdataController extends BaseController
 
                 $payload = [
                     'id_order'    => $id_order,
+                    'material_nr' => $material_nr,
                     'style_size'  => $style_size,
                     'area'        => $apiData['area']    ?? null,
                     'inisial'     => $apiData['inisial'] ?? null,
@@ -1011,6 +1022,11 @@ class MasterdataController extends BaseController
                         $diffCols[]    = 'color';
                         $changesText[] = 'Color: <b>' . $old['color'] . '</b> → <b>' . $payload['color'] . '</b>';
                     }
+                    if (!$eq($old['material_nr'], $payload['material_nr'])) {
+                        $diffCols[]    = 'material_nr';
+                        $changesText[] = 'MaterialNR: <b>' . htmlspecialchars($old['material_nr']) . '</b> → <b>' . htmlspecialchars($payload['material_nr']) . '</b>';
+                    }
+
                     if (!$eq($old['item_type'], $payload['item_type'])) {
                         $diffCols[]    = 'item_type';
                         $changesText[] = 'ItemType: <b>' . $old['item_type'] . '</b> → <b>' . $payload['item_type'] . '</b>';
@@ -1055,6 +1071,7 @@ class MasterdataController extends BaseController
                         // simpan baris berubah + nilai lama (khusus yang kamu mau tampilkan)
                         $changedRows[] = [
                             'id_material'        => (int)$old['id_material'],
+                            'material_nr'       => $payload['material_nr'],
                             'style_size'         => $payload['style_size'],
                             'item_type'          => $payload['item_type'],
                             'kode_warna'         => $payload['kode_warna'],
@@ -1262,7 +1279,7 @@ class MasterdataController extends BaseController
         }
         // ===== 8) Hasil (versi <ul><li>) =====
         $summaryLis = [];
-        foreach (['color', 'itemtype', 'kodewarna', 'itemNR', 'composition', 'gw', 'qty', 'loss', 'kgs'] as $lbl) {
+        foreach (['color', 'materialnr', 'itemtype', 'kodewarna', 'itemNR', 'composition', 'gw', 'qty', 'loss', 'kgs'] as $lbl) {
             if (!empty($changedTally[$lbl])) {
                 $summaryLis[] = '<li><b>' . strtoupper(htmlspecialchars($lbl)) . '</b>: ' . (int)$changedTally[$lbl] . '</li>';
             }

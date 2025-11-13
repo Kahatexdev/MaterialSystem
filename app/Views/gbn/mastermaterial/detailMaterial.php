@@ -84,6 +84,7 @@
                     <thead>
                         <tr>
                             <th class="text-center"></th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Material NR</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Style Size</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Inisial</th>
@@ -106,6 +107,7 @@
                                 <td>
                                     <input type="checkbox" class="form-check delete-checkbox" data-id="<?= $data['id_material'] ?>">
                                 </td>
+                                <td><?= $data['material_nr'] ?></td>
                                 <td><?= $data['style_size'] ?></td>
                                 <td><?= $data['area'] ?></td>
                                 <td><?= $data['inisial'] ?></td>
