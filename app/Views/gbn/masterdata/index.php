@@ -94,6 +94,7 @@
                 </div>
                 <form action="import/mu" method="post" enctype="multipart/form-data">
                     <div class="modal-body">
+
                         <!-- Input File -->
                         <div class="">
                             <label for="" class="form-label">Jarum</label>
@@ -109,7 +110,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Upload</button>
+                        <button type="submit" class="btn btn-primary" disabled>Upload</button>
                     </div>
                 </form>
             </div>
