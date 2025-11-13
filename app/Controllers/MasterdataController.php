@@ -630,7 +630,7 @@ class MasterdataController extends BaseController
             }
 
             // Syarat minimal: field inti ketemu
-            $must = ['color','material_nr', 'item_type', 'kode_warna', 'style_size', 'qty_pcs'];
+            $must = ['color', 'material_nr', 'item_type', 'kode_warna', 'style_size', 'qty_pcs'];
             $ok = true;
             foreach ($must as $m) {
                 if (!isset($found[$m]) || $found[$m] === null) {
@@ -924,7 +924,7 @@ class MasterdataController extends BaseController
                 $raw_color      = (string)$getVal('color');
 
                 // Deteksi baris kosong total → skip
-                if ( $raw_material_nr === '' && $raw_style_size === '' && $raw_item_type === '' && $raw_kode === '') {
+                if ($raw_material_nr === '' && $raw_style_size === '' && $raw_item_type === '' && $raw_kode === '') {
                     $stats['skip']++;
                     continue;
                 }
@@ -1389,6 +1389,8 @@ class MasterdataController extends BaseController
 
         // dd($totalKebutuhan);
         $styleSize = $this->materialModel->getStyle($id);
+        $materialNr = $this->materialModel->getMaterialNr($id);
+
         if (empty($orderData)) {
             session()->setFlashdata('error', 'Data Material tidak ditemukan! Silakan impor ulang data.');
             return redirect()->to(base_url($this->role . '/masterdata'));
@@ -1412,7 +1414,8 @@ class MasterdataController extends BaseController
             'style' => $styleSize,
             'kebutuhan' => $totalKebutuhan,
             'itemTypeByIdOrder' => $itemTypeByIdOrder,
-            'materialtype' => $materialtype
+            'materialtype' => $materialtype,
+            'materialNr' => $materialNr,
         ];
 
         return view($this->role . '/mastermaterial/detailMaterial', $data);
@@ -1440,6 +1443,7 @@ class MasterdataController extends BaseController
         $idOrder = $this->request->getPost('id_order');
         $data = [
             'style_size' => $this->request->getPost('style_size'),
+            'material_nr' => $this->request->getPost('material_nr'),
             'area' => $this->request->getPost('area'),
             'inisial' => $this->request->getPost('inisial'),
             'color' => $this->request->getPost('color'),
@@ -1451,8 +1455,6 @@ class MasterdataController extends BaseController
             'loss' => $this->request->getPost('loss'),
             'kgs' => $this->request->getPost('kgs'),
             'keterangan' => $this->request->getPost('keterangan'),
-
-
         ];
 
         if ($this->materialModel->update($id, $data)) {

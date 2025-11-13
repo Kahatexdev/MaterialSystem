@@ -74,6 +74,7 @@ class MaterialController extends BaseController
                 for ($i = 0; $i < count($style); $i++) {
                     $saveData = [
                         'id_order'   => esc($idOrder),
+                        'material_nr' => esc($data['material_nr']),
                         'style_size' => esc($style[$i]),
                         'inisial'    => esc($inisial[$i]),
                         'area'       => esc($data['area']),
@@ -97,6 +98,7 @@ class MaterialController extends BaseController
             else {
                 $saveData = [
                     'id_order'   => esc($idOrder),
+                    'material_nr' => esc($data['material_nr']),
                     'style_size' => null,
                     'inisial'    => null,
                     'area'       => esc($data['area']),
