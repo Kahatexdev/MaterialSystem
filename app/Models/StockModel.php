@@ -74,9 +74,13 @@ class StockModel extends Model
         }
 
         if (!empty($warna)) {
-            $builder->like('stock.kode_warna', $warna);
+            $builder->groupStart()
+                ->like('stock.kode_warna', $warna)
+                ->orLike('stock.lot_awal', $warna)
+                ->orLike('stock.lot_stock', $warna)
+                ->groupEnd();
         }
-        $builder->like('kode_warna', $warna);
+        // $builder->like('kode_warna', $warna);
 
         // Kondisi OR: tampilkan jika kgs_stock_awal > 0 ATAU kgs_in_out > 0
         $builder->groupStart()

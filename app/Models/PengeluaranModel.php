@@ -28,9 +28,9 @@ class PengeluaranModel extends Model
         'keterangan_gbn',
         'id_total_pemesanan',
         'admin',
-        'terima_area',
         'created_at',
         'updated_at',
+        'terima_area'
     ];
 
     protected bool $allowEmptyInserts = false;
@@ -156,7 +156,8 @@ class PengeluaranModel extends Model
 
         return $this->db->query($sql, [$area, $noModel, $itemType, $kodeWarna])->getRowArray();
     }
-    public function getFilterPengiriman($key = null, $tanggal_awal = null, $tanggal_akhir = null)
+
+    public function getFilterPengiriman($jenis = null, $key = null, $tanggal_awal = null, $tanggal_akhir = null)
     {
         // 1) Siapkan keempat builder tanpa filter tanggal
         // -- Subquery 1: pengeluaran --
@@ -180,6 +181,7 @@ class PengeluaranModel extends Model
                 'pengeluaran.keterangan_gbn',
                 'pengeluaran.admin',
                 'master_order.foll_up',
+                'master_order.lco_date AS tgl_po',
                 'master_order.no_order',
                 'master_order.buyer',
                 'master_order.unit',
@@ -188,7 +190,6 @@ class PengeluaranModel extends Model
                 'total_pemesanan.ttl_kg AS kgs_pesan',
                 'total_pemesanan.ttl_cns',
                 'master_material.jenis',
-                'open_po.created_at AS tgl_po',
                 '(po_tambahan.poplus_mc_kg + plus_pck_kg) AS qty_po_plus',
                 'stock.kgs_stock_awal',
                 'stock.lot_awal',
@@ -198,13 +199,11 @@ class PengeluaranModel extends Model
             ->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
             ->join('pemesanan_spandex_karet psk',    'psk.id_psk = pengeluaran.id_psk',                                        'left')
             ->join('total_pemesanan',                'total_pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan',    'left')
-            ->join('pemesanan',                      'pemesanan.id_total_pemesanan = psk.id_total_pemesanan',                 'left')
+            ->join('pemesanan',                      'pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan',                 'left')
             ->join('material',                       'material.id_material = pemesanan.id_material',                           'left')
             ->join('po_tambahan',                   'po_tambahan.id_material = material.id_material',                        'left')
             ->join('master_material',                'master_material.item_type = material.item_type',                         'left')
             ->join('master_order',                   'master_order.id_order = material.id_order',                              'left')
-            ->join('open_po',                        'open_po.no_model = master_order.no_model AND open_po.item_type = material.item_type AND open_po.kode_warna = material.kode_warna', 'left')
-            ->where('open_po.id_induk IS NOT NULL')
             ->where('pengeluaran.status', 'Pengiriman Area')
             ->where('pengeluaran.id_out_celup IS NULL')
             ->where('pengeluaran.id_psk IS NOT NULL')
@@ -231,6 +230,7 @@ class PengeluaranModel extends Model
                 // 'NULL AS qty_po_plus',
                 'master_order.foll_up',
                 'master_order.no_order',
+                'master_order.lco_date AS tgl_po',
                 'master_order.buyer',
                 'master_order.unit',
                 'master_order.delivery_awal',
@@ -238,7 +238,6 @@ class PengeluaranModel extends Model
                 'total_pemesanan.ttl_kg AS kgs_pesan',
                 'total_pemesanan.ttl_cns',
                 'master_material.jenis',
-                'open_po.created_at AS tgl_po',
                 '(po_tambahan.poplus_mc_kg + plus_pck_kg) AS qty_po_plus',
                 'stock.kgs_stock_awal',
                 'stock.lot_awal',
@@ -248,7 +247,6 @@ class PengeluaranModel extends Model
             ->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
             ->join('out_celup',      'out_celup.id_out_celup = pengeluaran.id_out_celup',                   'left')
             ->join('schedule_celup', 'schedule_celup.id_celup     = out_celup.id_celup',                 'left')
-            ->join('open_po',       'open_po.no_model = schedule_celup.no_model AND open_po.item_type = schedule_celup.item_type AND open_po.kode_warna = schedule_celup.kode_warna', 'left')
             ->join('pemesanan',      'pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan',      'left')
             ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
             ->join('material',       'material.id_material = pemesanan.id_material',                       'left')
@@ -289,7 +287,7 @@ class PengeluaranModel extends Model
                 'NULL                       AS kgs_pesan',
                 'NULL                      AS ttl_cns',
                 'master_material.jenis     AS jenis',
-                'open_po.created_at AS tgl_po',
+                'master_order.lco_date AS tgl_po',
                 'NULL AS qty_po_plus',
                 'NULL   AS kgs_stock_awal',
                 'NULL   AS lot_awal',
@@ -298,7 +296,6 @@ class PengeluaranModel extends Model
             ])
             ->join('out_celup',      'out_celup.id_out_celup = other_out.id_out_celup',                      'left')
             ->join('schedule_celup', 'schedule_celup.id_celup     = out_celup.id_celup',                'left')
-            ->join('open_po',       'open_po.no_model = schedule_celup.no_model AND open_po.item_type = schedule_celup.item_type AND open_po.kode_warna = schedule_celup.kode_warna', 'left')
             ->join(
                 'material',
                 'material.item_type = schedule_celup.item_type 
@@ -369,6 +366,38 @@ class PengeluaranModel extends Model
         //             ->groupEnd();
         //     }
         // }
+        if ($jenis) {
+            foreach ([$b1, $b2, $b3, $b4] as $sub) {
+                $sub->where('master_material.jenis', $jenis);
+            }
+
+            if (in_array(strtoupper($jenis), ['SPANDEX', 'KARET'])) {
+                // Untuk SPANDEX / KARET
+                $b1->where('pengeluaran.id_out_celup', null)
+                    ->where('pengeluaran.id_psk IS NOT NULL', null, false);
+                $b2->where('pengeluaran.id_out_celup', null)
+                    ->where('pengeluaran.id_psk IS NOT NULL', null, false);
+
+                // other_out pakai out_celup
+                $b3->where('out_celup.id_out_celup', null);
+                // ->where('other_out.id_psk IS NOT NULL', null, false);
+                $b4->where('out_celup.id_out_celup', null);
+                // ->where('other_out.id_psk IS NOT NULL', null, false);
+            } elseif (in_array(strtoupper($jenis), ['BENANG', 'NYLON'])) {
+                // Untuk BENANG / NYLON
+                $b1->where('pengeluaran.id_out_celup IS NOT NULL', null, false)
+                    ->where('pengeluaran.id_psk', null);
+                $b2->where('pengeluaran.id_out_celup IS NOT NULL', null, false)
+                    ->where('pengeluaran.id_psk', null);
+
+                // other_out pakai out_celup
+                $b3->where('out_celup.id_out_celup IS NOT NULL', null, false);
+                // ->where('other_out.id_psk', null);
+                $b4->where('out_celup.id_out_celup IS NOT NULL', null, false);
+                // ->where('other_out.id_psk', null);
+            }
+        }
+
 
         // 3) Compile masing-masing subquery & bangun UNION ALL di dalam derived table
         $sqlUnion  = '(' . $b1->getCompiledSelect() . ') UNION ALL '
@@ -392,7 +421,9 @@ class PengeluaranModel extends Model
             $conds[] = "( all_data.no_model   LIKE '%{$k}%'
                 OR all_data.item_type  LIKE '%{$k}%'
                 OR all_data.kode_warna LIKE '%{$k}%'
-                OR all_data.color      LIKE '%{$k}%')";
+                OR all_data.color      LIKE '%{$k}%'
+                OR all_data.nama_cluster LIKE '%{$k}%'
+                OR all_data.lot_pakai  LIKE '%{$k}%')";
         }
 
         if (count($conds)) {

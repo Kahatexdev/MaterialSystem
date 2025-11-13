@@ -400,7 +400,7 @@ class ScheduleCelupModel extends Model
 
         // Subquery: Hitung stok berdasarkan kombinasi model/type/warna
         $stockSub = $db->table('stock')
-            ->select('no_model, item_type, kode_warna, SUM(kgs_stock_awal + kgs_in_out) AS kg_stock')
+            ->select('no_model, item_type, kode_warna, SUM(kgs_stock_awal + kgs_in_out) AS kg_stock, admin')
             ->groupBy(['no_model', 'item_type', 'kode_warna'])
             ->getCompiledSelect();
 

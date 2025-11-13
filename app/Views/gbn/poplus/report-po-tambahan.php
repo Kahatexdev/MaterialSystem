@@ -376,6 +376,12 @@
             });
         }
     });
+    $('input[type="text"], input[type="date"]').on('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Hindari form submit default (jika ada form)
+            $('#btnSearch').click(); // Trigger tombol Search
+        }
+    });
 </script>
 
 

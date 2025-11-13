@@ -117,7 +117,7 @@
             <div class="row mt-2">
                 <div class="col-md-3">
                     <label for="">No Model</label>
-                    <input type="text" class="form-control">
+                    <input type="text" class="form-control" id="noModel">
                 </div>
                 <div class="col-md-3">
                     <label for="">Aksi</label><br>
@@ -353,6 +353,14 @@
 
         // Sembunyikan tombol Export Excel
         $('#btnExport').addClass('d-none');
+    });
+
+    // Trigger pencarian saat tombol Enter ditekan di input apa pun
+    $('#noModel').on('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Hindari form submit default (jika ada form)
+            $('#btnSearch').click(); // Trigger tombol Search
+        }
     });
 </script>
 

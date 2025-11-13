@@ -84,6 +84,7 @@
                     <thead>
                         <tr>
                             <th class="text-center"></th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Material NR</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Style Size</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Inisial</th>
@@ -106,6 +107,7 @@
                                 <td>
                                     <input type="checkbox" class="form-check delete-checkbox" data-id="<?= $data['id_material'] ?>">
                                 </td>
+                                <td><?= $data['material_nr'] ?></td>
                                 <td><?= $data['style_size'] ?></td>
                                 <td><?= $data['area'] ?></td>
                                 <td><?= $data['inisial'] ?></td>
@@ -168,6 +170,24 @@
                                     </div>
                                     <input type="hidden" name="inisial[]" id="" value="<?= $st['inisial'] ?>">
                                 <?php endforeach; ?>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="st" class="form-label">Material Nr:</label>
+                                <div class="d-flex flex-wrap gap-3">
+                                    <?php foreach ($materialNr as $mn): ?>
+                                        <div class="form-check">
+                                            <input class="form-check-input"
+                                                type="radio"
+                                                name="material_nr"
+                                                value="<?= $mn['material_nr'] ?>"
+                                                id="mn_<?= $mn['material_nr'] ?>">
+                                            <label class="form-check-label" for="mn_<?= $mn['material_nr'] ?>">
+                                                <?= esc($mn['material_nr']) ?>
+                                            </label>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
                             </div>
 
                             <div class="mb-3">
@@ -276,6 +296,11 @@
                             <input type="hidden" name="id_material" id="id_material">
                             <input type="hidden" name="id_order" id="id_order">
                             <div class="mb-3">
+                                <label for="material_nr" class="form-label">Material Nr</label>
+                                <input type="text" class="form-control" id="material_nr" name="material_nr" required>
+                            </div>
+
+                            <div class="mb-3">
                                 <label for="style_size" class="form-label">Style Size</label>
                                 <input type="text" class="form-control" id="style_size" name="style_size" required>
                             </div>
@@ -295,10 +320,12 @@
                                 <input type="text" class="form-control" id="color" name="color" required>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="item_type" class="form-label">Item Type</label>
-                                <input type="text" class="form-control" id="item_type" name="item_type" required>
-                            </div>
+                            <select class="" id="item_type" name="item_type" required>
+                                <option value="">Pilih Item Type</option>
+                                <?php foreach ($itemType as $item): ?>
+                                    <option value="<?= $item['item_type'] ?>"><?= $item['item_type'] ?></option>
+                                <?php endforeach; ?>
+                            </select>
 
                             <div class="mb-3">
                                 <label for="kode_warna" class="form-label">Kode Warna</label>
@@ -480,6 +507,10 @@
                         <input type="hidden" class="form-control" id="color_split" name="color" readonly>
                         <input type="hidden" class="form-control" id="area_split" name="area" readonly>
                         <div class="row">
+                            <div class="col-md-12">
+                                <label for="">Material Nr</label>
+                                <input type="text" class="form-control" id="material_nr_split" name="material_nr" readonly>
+                            </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="style_size" class="form-label">Style Size</label>
@@ -671,7 +702,14 @@
             });
         });
     });
-
+    $(document).ready(function() {
+        $('#updateModal').on('shown.bs.modal', function() {
+            $('#item_type').select2({
+                dropdownParent: $('#updateModal'),
+                width: '100%',
+            });
+        });
+    });
     $(document).ready(function() {
         $('#dataTable').DataTable({
             "pageLength": 35,
@@ -693,6 +731,7 @@
                     // Isi data ke dalam form modal
                     $('#id_material').val(response.id_material);
                     $('#id_order').val(response.id_order);
+                    $('#material_nr').val(response.material_nr);
                     $('#style_size').val(response.style_size);
                     $('#area').val(response.area);
                     $('#inisial').val(response.inisial);
@@ -811,6 +850,7 @@
                     // isi semua field seperti sebelumnya...
                     $('#id_material_split').val(res.id_material);
                     $('#id_order_split').val(res.id_order);
+                    $('#material_nr_split').val(res.material_nr);
                     $('#style_size_split').val(res.style_size);
                     $('#inisial_split').val(res.inisial);
                     $('#gw_split').val(res.gw);

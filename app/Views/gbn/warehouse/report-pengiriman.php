@@ -110,27 +110,55 @@
     <!-- Button Filter -->
     <div class="card card-frame">
         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="mb-0 font-weight-bolder">Filter Pengiriman</h5>
             </div>
-            <div class="row mt-2">
-                <div class="col-md-3">
-                    <label for="">Key</label>
-                    <input type="text" class="form-control" placeholder="PDK / Item Type / Kode Warna dan Warna">
+
+            <div class="row g-3">
+                <!-- Jenis -->
+                <div class="col-md-3 col-lg-2">
+                    <label for="jenis" class="form-label">Jenis</label>
+                    <select class="form-select" name="jenis" id="jenis" required>
+                        <option value="">Pilih Jenis</option>
+                        <option value="BENANG">BENANG</option>
+                        <option value="NYLON">NYLON</option>
+                        <option value="SPANDEX">SPANDEX</option>
+                        <option value="KARET">KARET</option>
+                    </select>
                 </div>
-                <div class="col-md-3">
-                    <label for="">Tanggal Awal (Tanggal Pakai)</label>
-                    <input type="date" class="form-control">
+
+                <!-- Key -->
+                <div class="col-md-6 col-lg-3">
+                    <label for="key" class="form-label">Key</label>
+                    <input id="key" type="text" class="form-control" placeholder="PDK / Item Type / Kode Warna / Warna / Lot / Nama Cluster">
                 </div>
-                <div class="col-md-3">
-                    <label for="">Tanggal Akhir (Tanggal Pakai)</label>
-                    <input type="date" class="form-control">
+
+                <!-- Tanggal Awal -->
+                <div class="col-md-6 col-lg-2">
+                    <label for="tgl_awal" class="form-label">Tanggal Pakai (Awal)</label>
+                    <input id="tgl_awal" type="date" class="form-control">
                 </div>
-                <div class="col-md-3">
-                    <label for="">Aksi</label><br>
-                    <button class="btn btn-info btn-block" id="btnSearch"><i class="fas fa-search"></i></button>
-                    <button class="btn btn-danger" id="btnReset"><i class="fas fa-redo-alt"></i></button>
-                    <button class="btn btn-primary d-none" id="btnExport"><i class="fas fa-file-excel"></i></button>
+
+                <!-- Tanggal Akhir -->
+                <div class="col-md-6 col-lg-2">
+                    <label for="tgl_akhir" class="form-label">Tanggal Pakai (Akhir)</label>
+                    <input id="tgl_akhir" type="date" class="form-control">
+                </div>
+
+                <!-- Aksi -->
+                <div class="col-md-6 col-lg-3 col-xl-2">
+                    <label class="form-label">Aksi</label>
+                    <div class="d-flex gap-1">
+                        <button class="btn btn-info" id="btnSearch" title="Cari">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <button class="btn btn-secondary" id="btnReset" title="Reset">
+                            <i class="fas fa-redo-alt"></i>
+                        </button>
+                        <button class="btn btn-primary d-none" id="btnExport" title="Export Excel">
+                            <i class="fas fa-file-excel"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -145,6 +173,7 @@
                         <tr>
                             <th class="text-center text-uppercase">No</th>
                             <th class="text-center text-uppercase">No Model</th>
+                            <th class="text-center text-uppercase">Order Type</th>
                             <th class="text-center text-uppercase">Area</th>
                             <th class="text-center text-uppercase">Delivery Awal</th>
                             <th class="text-center text-uppercase">Delivery Akhir</th>
@@ -209,25 +238,35 @@
         }
 
         function loadData() {
+            let jenis = $('#jenis').val().trim();
             let key = $('input[type="text"]').val().trim();
             let tanggal_awal = $('input[type="date"]').eq(0).val().trim();
             let tanggal_akhir = $('input[type="date"]').eq(1).val().trim();
+
+            if (jenis === '') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Jenis wajib dipilih!',
+                    text: 'Silakan pilih jenis sebelum melakukan pencarian.',
+                });
+                return;
+            }
 
             // Validasi: Jika semua input kosong, tampilkan alert dan hentikan pencarian
             if (key === '' && tanggal_awal === '' && tanggal_akhir === '') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
-                    text: 'Harap isi minimal salah satu kolom sebelum melakukan pencarian!',
+                    text: 'Harap isi key atau tanggal pakai sebelum melakukan pencarian!',
                 });
                 return;
             }
-
 
             $.ajax({
                 url: "<?= base_url($role . '/warehouse/filterPengiriman') ?>",
                 type: "GET",
                 data: {
+                    jenis: jenis,
                     key: key,
                     tanggal_awal: tanggal_awal,
                     tanggal_akhir: tanggal_akhir
@@ -258,6 +297,7 @@
                             dataTable.row.add([
                                 index + 1,
                                 item.no_model,
+                                item.unit,
                                 item.area_out,
                                 item.delivery_awal,
                                 item.delivery_akhir,
@@ -306,10 +346,11 @@
         });
 
         $('#btnExport').click(function() {
+            let jenis = $('#jenis').val();
             let key = $('input[type="text"]').val();
             let tanggal_awal = $('input[type="date"]').eq(0).val();
             let tanggal_akhir = $('input[type="date"]').eq(1).val();
-            window.location.href = "<?= base_url($role . '/warehouse/exportPengiriman') ?>?key=" + key + "&tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
+            window.location.href = "<?= base_url($role . '/warehouse/exportPengiriman') ?>?jenis=" + jenis + "&key=" + key + "&tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
         });
 
         dataTable.clear().draw();

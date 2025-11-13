@@ -12,7 +12,7 @@ class MaterialModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id_material', 'id_order', 'style_size', 'area', 'inisial', 'color', 'item_type', 'kode_warna', 'composition', 'gw', 'gw_aktual', 'qty_pcs', 'loss', 'kgs', 'keterangan', 'material_type', 'admin', 'created_at', 'updated_at', 'deleted_at'];
+    protected $allowedFields    = ['id_material', 'id_order', 'material_nr', 'style_size', 'area', 'inisial', 'color', 'item_type', 'kode_warna', 'composition', 'gw', 'gw_aktual', 'qty_pcs', 'loss', 'kgs', 'keterangan', 'material_type', 'admin', 'created_at', 'updated_at', 'deleted_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -1346,6 +1346,11 @@ class MaterialModel extends Model
             ->where('material.loss<>', 0)
             ->groupBy('id_material')
             ->findAll();
+    }
+
+    public function getMaterialNr($id)
+    {
+        return $this->select('material_nr')->where('id_order', $id)->groupBy('material_nr')->findAll();
     }
     public function getAllGw($noModel, $size)
     {

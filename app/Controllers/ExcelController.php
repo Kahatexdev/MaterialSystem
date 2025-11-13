@@ -825,13 +825,13 @@ class ExcelController extends BaseController
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["No", "Foll Up", "No Model", "No Order", "Buyer", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "KG Pesan", "Tanggal Datang", "Kgs Datang", "Cones Datang", "LOT Datang", "No Surat Jalan", "LMD", "GW", "Harga", "Nama Cluster", "PO Tambahan", "Admin"];
+        $header = ["No", "Foll Up", "No Model", "No Order", "Buyer", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "KG Pesan", "Tanggal Datang", "Kgs Datang", "Cones Datang", "LOT Datang", "No Surat Jalan", "LMD", "GW", "Harga", "Nama Cluster", "PO Tambahan", "Waktu Input", "Admin"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
-        $sheet->getStyle('A3:W3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:W3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A3:W3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3:X3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:X3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:X3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         // Data
         $row = 4;
@@ -866,6 +866,7 @@ class ExcelController extends BaseController
                     number_format($item['harga'], 2),
                     $item['nama_cluster'],
                     $poPlus,
+                    $item['created_at'],
                     $item['admin']
                 ]
             ], NULL, 'A' . $row);
@@ -881,19 +882,19 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle('A3:W' . ($row - 1))->applyFromArray($styleArray);
+        $sheet->getStyle('A3:X' . ($row - 1))->applyFromArray($styleArray);
 
         // Set auto width untuk setiap kolom
-        foreach (range('A', 'W') as $column) {
+        foreach (range('A', 'X') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Set isi tabel agar rata tengah
-        $sheet->getStyle('A4:W' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A4:W' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A4:X' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:X' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
-        $fileName = 'Report_Datang_Benang_' . date('Y-m-d') . '.xlsx';
+        $fileName = 'Report Datang Benang ' . date('Y-m-d') . '.xlsx';
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
@@ -2057,13 +2058,13 @@ class ExcelController extends BaseController
     public function exportPengiriman()
     {
         // Ambil parameter filter
+        $jenis         = $this->request->getGet('jenis');
         $key           = $this->request->getGet('key');
         $tanggal_awal  = $this->request->getGet('tanggal_awal');
         $tanggal_akhir = $this->request->getGet('tanggal_akhir');
 
         // Ambil data
-        $data = $this->pengeluaranModel
-            ->getFilterPengiriman($key, $tanggal_awal, $tanggal_akhir);
+        $data = $this->pengeluaranModel->getFilterPengiriman($jenis, $key, $tanggal_awal, $tanggal_akhir);
 
         // Grouping per jenis
         $grouped = [];
@@ -2081,6 +2082,7 @@ class ExcelController extends BaseController
             'TGL PO',
             'FOLL UP',
             'NO MODEL',
+            'ORDER TYPE',
             'DELIVERY AWAL',
             'DELIVERY AKHIR',
             'NO ORDER',
@@ -2170,36 +2172,37 @@ class ExcelController extends BaseController
                 $sheet->setCellValue("B{$rowNum}", $item['tgl_po'] ?? '-');
                 $sheet->setCellValue("C{$rowNum}", $item['foll_up'] ?? '-');
                 $sheet->setCellValue("D{$rowNum}", $item['no_model'] ?? '-');
-                $sheet->setCellValue("E{$rowNum}", $item['delivery_awal'] ?? '-');
-                $sheet->setCellValue("F{$rowNum}", $item['delivery_akhir'] ?? '-');
-                $sheet->setCellValue("G{$rowNum}", $item['no_order'] ?? '-');
-                $sheet->setCellValue("H{$rowNum}", $item['item_type'] ?? '-');
-                $sheet->setCellValue("I{$rowNum}", $item['color'] ?? '-');
-                $sheet->setCellValue("J{$rowNum}", $item['kode_warna'] ?? '-');
-                $sheet->setCellValue("K{$rowNum}", $item['kgs_pesan'] ?? '0');
-                $sheet->setCellValue("L{$rowNum}", $item['loss'] ?? '0');
-                $sheet->setCellValue("M{$rowNum}", $item['qty_po_plus'] ?? '0');
-                $sheet->setCellValue("N{$rowNum}", $item['kgs_stock_awal'] ?? '0');
-                $sheet->setCellValue("O{$rowNum}", $item['lot_awal'] ?? '-');
-                $sheet->setCellValue("P{$rowNum}", $item['kgs_in_out'] ?? '0');
-                $sheet->setCellValue("Q{$rowNum}", $item['lot_stock'] ?? '-');
-                $sheet->setCellValue("R{$rowNum}", $item['area_out'] ?? '-');
-                $sheet->setCellValue("S{$rowNum}", $item['tgl_pakai'] ?? '-');
-                $sheet->setCellValue("T{$rowNum}", $item['kgs_pakai'] ?? '0');
-                $sheet->setCellValue("U{$rowNum}", $item['cones_pakai'] ?? '0');
-                $sheet->setCellValue("V{$rowNum}", $item['lot_pakai'] ?? '-');
-                $sheet->setCellValue("W{$rowNum}", $item['keterangan_gbn'] ?? '-');
-                $sheet->setCellValue("X{$rowNum}", $item['admin'] ?? '-');
-                $sheet->setCellValue("Y{$rowNum}", $item['tgl_out'] ?? '-');
+                $sheet->setCellValue("E{$rowNum}", $item['unit'] ?? '-');
+                $sheet->setCellValue("F{$rowNum}", $item['delivery_awal'] ?? '-');
+                $sheet->setCellValue("G{$rowNum}", $item['delivery_akhir'] ?? '-');
+                $sheet->setCellValue("H{$rowNum}", $item['no_order'] ?? '-');
+                $sheet->setCellValue("I{$rowNum}", $item['item_type'] ?? '-');
+                $sheet->setCellValue("J{$rowNum}", $item['color'] ?? '-');
+                $sheet->setCellValue("K{$rowNum}", $item['kode_warna'] ?? '-');
+                $sheet->setCellValue("L{$rowNum}", $item['kgs_pesan'] ?? '0');
+                $sheet->setCellValue("M{$rowNum}", $item['loss'] ?? '0');
+                $sheet->setCellValue("N{$rowNum}", $item['qty_po_plus'] ?? '0');
+                $sheet->setCellValue("O{$rowNum}", $item['kgs_stock_awal'] ?? '0');
+                $sheet->setCellValue("P{$rowNum}", $item['lot_awal'] ?? '-');
+                $sheet->setCellValue("Q{$rowNum}", $item['kgs_in_out'] ?? '0');
+                $sheet->setCellValue("R{$rowNum}", $item['lot_stock'] ?? '-');
+                $sheet->setCellValue("S{$rowNum}", $item['area_out'] ?? '-');
+                $sheet->setCellValue("T{$rowNum}", $item['tgl_pakai'] ?? '-');
+                $sheet->setCellValue("U{$rowNum}", $item['kgs_pakai'] ?? '0');
+                $sheet->setCellValue("V{$rowNum}", $item['cones_pakai'] ?? '0');
+                $sheet->setCellValue("W{$rowNum}", $item['lot_pakai'] ?? '-');
+                $sheet->setCellValue("X{$rowNum}", $item['keterangan_gbn'] ?? '-');
+                $sheet->setCellValue("Y{$rowNum}", $item['admin'] ?? '-');
+                $sheet->setCellValue("Z{$rowNum}", $item['tgl_out'] ?? '-');
                 $rowNum++;
             }
 
             // Tentukan print area sekarang data sudah terisi
             $lastRow = $rowNum - 1;
-            $ps->setPrintArea("A1:Y{$lastRow}");
+            $ps->setPrintArea("A1:Z{$lastRow}");
 
             // Border + alignment
-            $sheet->getStyle("A3:Y{$lastRow}")
+            $sheet->getStyle("A3:Z{$lastRow}")
                 ->applyFromArray([
                     'borders' => [
                         'allBorders' => [
@@ -2214,7 +2217,7 @@ class ExcelController extends BaseController
                 ]);
 
             // Auto–size kolom
-            foreach (range('A', 'Y') as $c) {
+            foreach (range('A', 'Z') as $c) {
                 $sheet->getColumnDimension($c)->setAutoSize(true);
             }
 
@@ -2225,7 +2228,7 @@ class ExcelController extends BaseController
         $spreadsheet->setActiveSheetIndex(0);
 
         // Output file
-        $filename = 'PEMAKAIAN_AREA_BENANG.xlsx';
+        $filename = 'Report Pengiriman.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"{$filename}\"");
         header('Cache-Control: max-age=0');
@@ -7485,11 +7488,12 @@ class ExcelController extends BaseController
 
     public function exportHistoryPindahOrder()
     {
-        $noModel   = $this->request->getGet('model')     ?? '';
+        $noModelOld   = $this->request->getGet('model_old')     ?? '';
+        $noModelNew   = $this->request->getGet('model_new')     ?? '';
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
 
         // 1) Ambil data
-        $dataPindah = $this->historyStock->getHistoryPindahOrder($noModel, $kodeWarna);
+        $dataPindah = $this->historyStock->getHistoryPindahOrder($noModelOld, $noModelNew, $kodeWarna);
 
         // 2) Siapkan HTTP client
         $client = \Config\Services::curlrequest([
@@ -13578,18 +13582,18 @@ class ExcelController extends BaseController
 
         // Judul
         $sheet->setCellValue('A1', 'Datang Nylon');
-        $sheet->mergeCells('A1:W1'); // Menggabungkan sel untuk judul
+        $sheet->mergeCells('A1:X1'); // Menggabungkan sel untuk judul
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["No", "Foll Up", "No Model", "No Order", "Buyer", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "KG Pesan", "Tanggal Datang", "Kgs Datang", "Cones Datang", "LOT Datang", "No Surat Jalan", "LMD", "GW", "Harga", "Nama Cluster", "PO Tambahan", "Admin"];
+        $header = ["No", "Foll Up", "No Model", "No Order", "Buyer", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "KG Pesan", "Tanggal Datang", "Kgs Datang", "Cones Datang", "LOT Datang", "No Surat Jalan", "LMD", "GW", "Harga", "Nama Cluster", "PO Tambahan", "Waktu Input", "Admin"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
-        $sheet->getStyle('A3:W3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:W3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A3:W3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3:X3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:X3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:X3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         // Data
         $row = 4;
@@ -13624,6 +13628,7 @@ class ExcelController extends BaseController
                     number_format($item['harga'], 2),
                     $item['nama_cluster'],
                     $poPlus,
+                    $item['created_at'],
                     $item['admin']
                 ]
             ], NULL, 'A' . $row);
@@ -13639,19 +13644,19 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle('A3:W' . ($row - 1))->applyFromArray($styleArray);
+        $sheet->getStyle('A3:X' . ($row - 1))->applyFromArray($styleArray);
 
         // Set auto width untuk setiap kolom
-        foreach (range('A', 'W') as $column) {
+        foreach (range('A', 'X') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Set isi tabel agar rata tengah
-        $sheet->getStyle('A4:W' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A4:W' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A4:X' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:X' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
-        $fileName = 'Report_Datang_Nylon_' . date('Y-m-d') . '.xlsx';
+        $fileName = 'Report Datang Nylon ' . date('Y-m-d') . '.xlsx';
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
@@ -15641,7 +15646,12 @@ class ExcelController extends BaseController
                 // --- Kolom E..Q: isi di baris pertama dari pasangan ---
                 $sheet->setCellValue("E{$startRow}", $row['color']);
                 $sheet->setCellValue("F{$startRow}", $row['kode_warna']);
-                $sheet->setCellValue("G{$startRow}", $row['buyer'] . ' (' . ($buyerName['kd_buyer_order'] ?? '') . ')');
+                $sheet->setCellValue(
+                    "G{$startRow}",
+                    isset($buyerName['kd_buyer_order']) && $buyerName['kd_buyer_order'] !== ''
+                        ? $row['buyer'] . ' (' . $buyerName['kd_buyer_order'] . ')'
+                        : $row['buyer']
+                );
                 $sheet->setCellValue("H{$startRow}", $row['no_order']);
                 $sheet->setCellValue("I{$startRow}", $row['delivery_awal']);
                 $sheet->setCellValue("J{$startRow}", $row['kg_po']);

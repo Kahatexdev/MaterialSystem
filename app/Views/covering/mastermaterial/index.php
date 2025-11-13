@@ -99,7 +99,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-info">Update</button>
+                            <button type="submit" class="btn btn-info" disabled>Update</button>
                         </div>
                     </form>
                 </div>
@@ -274,7 +274,12 @@
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
+                    // disable confirm/delete button
                     confirmButtonText: 'Ya, hapus!',
+                    didOpen: () => {
+                        const confirmBtn = Swal.getConfirmButton();
+                        if (confirmBtn) confirmBtn.disabled = true;
+                    },
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {

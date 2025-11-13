@@ -45,7 +45,7 @@
     }
 
     .btn {
-        border-radius: 25px;
+        /* border-radius: 25px; */
         padding: 0.75rem 1.5rem;
         font-weight: bold;
         text-transform: uppercase;

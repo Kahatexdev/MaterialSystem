@@ -2448,11 +2448,12 @@ class WarehouseController extends BaseController
     }
     public function filterPengiriman()
     {
+        $jenis = $this->request->getGet('jenis');
         $key = $this->request->getGet('key');
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
 
-        $data = $this->pengeluaranModel->getFilterPengiriman($key, $tanggalAwal, $tanggalAkhir);
+        $data = $this->pengeluaranModel->getFilterPengiriman($jenis, $key, $tanggalAwal, $tanggalAkhir);
         // dd($data);
         return $this->response->setJSON($data);
     }
@@ -3242,14 +3243,15 @@ class WarehouseController extends BaseController
     }
     public function historyPindahOrder()
     {
-        $noModel   = $this->request->getGet('model')     ?? '';
+        $noModelOld   = $this->request->getGet('no_model_old')     ?? '';
+        $noModelNew   = $this->request->getGet('no_model_new')     ?? '';
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
 
         // 1) Ambil data
-        if ($noModel === '' && $kodeWarna === '') {
-            $dataPindah = $this->historyStock->getHistoryPindahOrder(null, null, 10);
+        if ($noModelOld === '' && $noModelNew === '' && $kodeWarna === '') {
+            $dataPindah = $this->historyStock->getHistoryPindahOrder(null, null, null, 10);
         } else {
-            $dataPindah = $this->historyStock->getHistoryPindahOrder($noModel, $kodeWarna);
+            $dataPindah = $this->historyStock->getHistoryPindahOrder($noModelOld, $noModelNew, $kodeWarna);
         }
 
         // 2) Siapkan HTTP client
@@ -3958,309 +3960,332 @@ class WarehouseController extends BaseController
 
     public function savePindahOrderTest()
     {
-        $reqData = $this->request->getPost();
+        $db = \Config\Database::connect();
+        $db->transStart();
 
-        // 1) Validasi model tujuan
-        if (empty($reqData['no_model_tujuan']) || count(explode('|', $reqData['no_model_tujuan'])) < 4) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Data model tujuan tidak lengkap atau tidak valid.'
-            ]);
-        }
-        [$noModel, $itemType, $kodeWarna, $warna] = explode('|', $reqData['no_model_tujuan']);
-        // log_message('info', "Tujuan pindah order: no_model=$noModel, item_type=$itemType, kode_warna=$kodeWarna, warna=$warna");
+        try {
 
-        $idOutCelup = $reqData['idOutCelup'] ?? [];
-        $idStock    = $reqData['id_stock']   ?? [];
+            $reqData = $this->request->getPost();
 
-        // 2) Ambil data outCelup & stock lama
-        $dataOutCelup = [];
-        foreach ($idOutCelup as $id) {
-            if ($d = $this->outCelupModel->find($id)) {
-                $dataOutCelup[] = $d;
+            // 1) Validasi model tujuan
+            if (empty($reqData['no_model_tujuan']) || count(explode('|', $reqData['no_model_tujuan'])) < 4) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Data model tujuan tidak lengkap atau tidak valid.'
+                ]);
             }
-        }
-        $idStockData = [];
-        foreach ($idStock as $id) {
-            if ($s = $this->stockModel->find($id)) {
-                $idStockData[] = $s;
+            [$noModel, $itemType, $kodeWarna, $warna] = explode('|', $reqData['no_model_tujuan']);
+            // log_message('info', "Tujuan pindah order: no_model=$noModel, item_type=$itemType, kode_warna=$kodeWarna, warna=$warna");
+
+            $idOutCelup = $reqData['idOutCelup'] ?? [];
+            $idStock    = $reqData['id_stock']   ?? [];
+
+            // 2) Ambil data outCelup & stock lama
+            $dataOutCelup = [];
+            foreach ($idOutCelup as $id) {
+                if ($d = $this->outCelupModel->find($id)) {
+                    $dataOutCelup[] = $d;
+                }
             }
-        }
-        if (
-            count($dataOutCelup) !== count($idOutCelup)
-            || count($idStockData)  !== count($idStock)
-        ) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Beberapa data tidak ditemukan di database.'
-            ]);
-        }
-        // log_message('info', 'Data Stock: ' . json_encode($idStockData));
-        // dd($idStockData);
-        // -------------------------------------------------------
-        // PREPASS: hitung TOTAL semua kgs/cones/krg untuk stock baru
-        // supaya ketika kita insert/update stock tujuan (di dalam foreach)
-        // kita dapat menggunakan total akhir (bukan partial dari iterasi pertama).
-        // -------------------------------------------------------
-        $totalKgs = $totalCns = $totalKrgOut = $totalKrgIn = 0;
-        foreach ($dataOutCelup as $i => $d) {
-            $other = $this->otherOutModel->getQty($d['id_out_celup']);
-            $outByCns = $this->pengeluaranModel->getQtyOutByCns($d['id_out_celup']);
-            $pindahOrder = $this->historyStock->getKgsPindahOrder($d['id_out_celup']);
-
-            $kgs = round($d['kgs_kirim'] - ($other['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0) - ($pindahOrder['kgs_pindah_order'] ?? 0), 2);
-            $cns = $d['cones_kirim'] - ($other['cns_other_out'] ?? 0) - ($outByCns['cns_out'] ?? 0) - ($pindahOrder['cns_pindah_order'] ?? 0);
-            $kgsOutByCns = $reqData['kgs_out'][$d['id_out_celup']] ?? 0;
-            $cnsOutByCns = $reqData['cns_out'][$d['id_out_celup']] ?? 0;
-
-            $kgsKirim = (!empty($kgsOutByCns) && $kgsOutByCns > 0) ? $kgsOutByCns : $kgs;
-            $cnsKirim = (!empty($kgsOutByCns) && $kgsOutByCns > 0) ? $cnsOutByCns : $cns;
-            $krgKirimOut = (!empty($kgsOutByCns) && $kgsOutByCns > 0) ? 0 : 1;
-            $krgKirimIn = 1;
-
-            $totalKgs += $kgsKirim;
-            $totalCns += $cnsKirim;
-            $totalKrgOut += $krgKirimOut;
-            $totalKrgIn += $krgKirimIn;
-        }
-
-        // Setelah perhitungan, hilangkan error floating kecil
-        $eps = 1e-9;
-        if (abs($totalKgs) < $eps) $totalKgs = 0;
-        $totalKgs = round($totalKgs, 4);
-
-        // -------------------------------------------------------
-        // MAIN LOOP: lakukan operasi per out_celup (history, update stok lama, pemasukan)
-        // tapi untuk insert/update stock tujuan: gunakan guard supaya hanya sekali per tujuan.
-        // -------------------------------------------------------
-        $idOutCelupBaru  = [];
-        $idPemasukanBaru = [];
-        $detailKirim     = [];
-        $processedDest   = []; // guard untuk mencegah insert/update stock tujuan berulang
-        $newStockIdMap   = []; // menyimpan id_stock baru per tujuan key
-
-        foreach ($dataOutCelup as $i => $d) {
-            $other = $this->otherOutModel->getQty($d['id_out_celup']);
-            $outByCns = $this->pengeluaranModel->getQtyOutByCns($d['id_out_celup']);
-            $pindahOrder = $this->historyStock->getKgsPindahOrder($d['id_out_celup']);
-
-            $kgs = round($d['kgs_kirim'] - ($other['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0) - ($pindahOrder['kgs_pindah_order'] ?? 0), 2);
-            $cns = $d['cones_kirim'] - ($other['cns_other_out'] ?? 0) - ($outByCns['cns_out'] ?? 0) - ($pindahOrder['cns_pindah_order'] ?? 0);
-            $kgsOutByCns = $reqData['kgs_out'][$d['id_out_celup']] ?? 0;
-            $cnsOutByCns = $reqData['cns_out'][$d['id_out_celup']] ?? 0;
-
-            $kgsKirim = (!empty($kgsOutByCns) && $kgsOutByCns > 0) ? $kgsOutByCns : $kgs;
-            $cnsKirim = (!empty($kgsOutByCns) && $kgsOutByCns > 0) ? $cnsOutByCns : $cns;
-            $krgKirimOut = (!empty($kgsOutByCns) && $kgsOutByCns > 0) ? 0 : 1;
-            $krgKirimIn = 1;
-
-            // simpan hasil per id_out_celup (bila perlu nanti)
-            $detailKirim[$i] = [
-                'kgs' => $kgsKirim,
-                'cns' => $cnsKirim,
-                'krgOut' => $krgKirimOut,
-                'krgIn' => $krgKirimIn,
-            ];
-
-            $cluster  = $idStockData[$i]['nama_cluster'];
-            // Jika lot_stock kosong/null, gunakan lot_awal
-            $lotStock = !empty($idStockData[$i]['lot_stock']) ? $idStockData[$i]['lot_stock'] : $idStockData[$i]['lot_awal'];
-            $oldIdOC  = $d['id_out_celup'];
-            // log_message('info', "lotstock: $lotStock, cluster: $cluster, data stock : " . json_encode($idStockData[$i]));
-
-            $this->outCelupModel->insert([
-                'no_model'    => $noModel,
-                'no_karung'   => $d['no_karung'],
-                'kgs_kirim'   => $kgsKirim,
-                'cones_kirim' => $cnsKirim,
-                'lot_kirim'   => $lotStock,
-                'ganti_retur' => '0',
-                'admin'       => session()->get('username'),
-            ]);
-            $idOutCelupBaru[] = $this->outCelupModel->getInsertID();
-
-            // — update stok LAMA (kurangi sesuai tiap item, pakai nilai per-item)
-            // Jika kgs_in_out ada (lebih dari 0), kurangi dari kgs_in_out, jika tidak ada (0/null), kurangi dari kgs_stock_awal
-            if (!empty($idStockData[$i]['kgs_in_out']) && $idStockData[$i]['kgs_in_out'] > 0) {
-                $newKgs = max(0, $idStockData[$i]['kgs_in_out'] - $totalKgs);
-            } else {
-                $newKgs = max(0, $idStockData[$i]['kgs_stock_awal'] - $totalKgs);
+            $idStockData = [];
+            foreach ($idStock as $id) {
+                if ($s = $this->stockModel->find($id)) {
+                    $idStockData[] = $s;
+                }
             }
-            if (!empty($idStockData[$i]['cns_in_out']) && $idStockData[$i]['cns_in_out'] > 0) {
-                $newCns = max(0, $idStockData[$i]['cns_in_out'] - $totalCns);
-            } else {
-                $newCns = max(0, $idStockData[$i]['cns_stock_awal'] - $totalCns);
+            if (
+                count($dataOutCelup) !== count($idOutCelup)
+                || count($idStockData)  !== count($idStock)
+            ) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Beberapa data tidak ditemukan di database.'
+                ]);
             }
-            if (!empty($idStockData[$i]['krg_in_out']) && $idStockData[$i]['krg_in_out'] > 0) {
-                $newKrg = max(0, $idStockData[$i]['krg_in_out'] - $totalKrgOut);
-            } else {
-                $newKrg = max(0, $idStockData[$i]['krg_stock_awal'] - $totalKrgOut);
+            // log_message('info', 'Data Stock: ' . json_encode($idStockData));
+            // dd($idStockData);
+            // -------------------------------------------------------
+            // PREPASS: hitung TOTAL semua kgs/cones/krg untuk stock baru
+            // supaya ketika kita insert/update stock tujuan (di dalam foreach)
+            // kita dapat menggunakan total akhir (bukan partial dari iterasi pertama).
+            // -------------------------------------------------------
+            $totalKgs = $totalCns = $totalKrgOut = $totalKrgIn = 0;
+            foreach ($dataOutCelup as $i => $d) {
+                $other = $this->otherOutModel->getQty($d['id_out_celup']);
+                $outByCns = $this->pengeluaranModel->getQtyOutByCns($d['id_out_celup']);
+                $pindahOrder = $this->historyStock->getKgsPindahOrder($d['id_out_celup']);
+
+                $kgs = round($d['kgs_kirim'] - ($other['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0) - ($pindahOrder['kgs_pindah_order'] ?? 0), 2);
+                $cns = $d['cones_kirim'] - ($other['cns_other_out'] ?? 0) - ($outByCns['cns_out'] ?? 0) - ($pindahOrder['cns_pindah_order'] ?? 0);
+                $kgsOutByCns = $reqData['kgs_out'][$d['id_out_celup']] ?? 0;
+                $cnsOutByCns = $reqData['cns_out'][$d['id_out_celup']] ?? 0;
+
+                $kgsKirim = (!empty($kgsOutByCns) && $kgsOutByCns > 0) ? $kgsOutByCns : $kgs;
+                $cnsKirim = (!empty($kgsOutByCns) && $kgsOutByCns > 0) ? $cnsOutByCns : $cns;
+                $krgKirimOut = (!empty($kgsOutByCns) && $kgsOutByCns > 0) ? 0 : 1;
+                $krgKirimIn = 1;
+
+                $totalKgs += $kgsKirim;
+                $totalCns += $cnsKirim;
+                $totalKrgOut += $krgKirimOut;
+                $totalKrgIn += $krgKirimIn;
             }
 
-            // $newKgs = max(0, $idStockData[$i]['kgs_in_out'] - $totalKgs);
-            // $newCns = max(0, $idStockData[$i]['cns_in_out'] - $totalCns);
-            // $newKrg = max(0, $idStockData[$i]['krg_in_out'] - $totalKrgOut);
-            $updateData = [
-                // Update kgs_in_out jika ada, jika tidak update kgs_stock_awal
-                'kgs_in_out'     => (!empty($idStockData[$i]['kgs_in_out']) && $idStockData[$i]['kgs_in_out'] > 0) ? $newKgs : $idStockData[$i]['kgs_in_out'],
-                'kgs_stock_awal' => (empty($idStockData[$i]['kgs_in_out']) || $idStockData[$i]['kgs_in_out'] == 0) ? $newKgs : $idStockData[$i]['kgs_stock_awal'],
-                // Update cns_in_out jika ada, jika tidak update cns_stock_awal
-                'cns_in_out'     => (!empty($idStockData[$i]['cns_in_out']) && $idStockData[$i]['cns_in_out'] > 0) ? $newCns : $idStockData[$i]['cns_in_out'],
-                'cns_stock_awal' => (empty($idStockData[$i]['cns_in_out']) || $idStockData[$i]['cns_in_out'] == 0) ? $newCns : $idStockData[$i]['cns_stock_awal'],
-                // Update krg_in_out jika ada, jika tidak update krg_stock_awal
-                'krg_in_out'     => (!empty($idStockData[$i]['krg_in_out']) && $idStockData[$i]['krg_in_out'] > 0) ? $newKrg : $idStockData[$i]['krg_in_out'],
-                'krg_stock_awal' => (empty($idStockData[$i]['krg_in_out']) || $idStockData[$i]['krg_in_out'] == 0) ? $newKrg : $idStockData[$i]['krg_stock_awal'],
-                'nama_cluster'   => $cluster,
-            ];
+            // Setelah perhitungan, hilangkan error floating kecil
+            $eps = 1e-9;
+            if (abs($totalKgs) < $eps) $totalKgs = 0;
+            $totalKgs = round($totalKgs, 4);
 
-            // kalau asalnya dari lot_stock, update hanya lot_stock
-            if (!empty($idStockData[$i]['lot_stock'])) {
-                $updateData['lot_stock'] = $lotStock;
-            } else {
-                // kalau asalnya dari lot_awal
-                $updateData['lot_awal'] = $lotStock;
-            }
+            // -------------------------------------------------------
+            // MAIN LOOP: lakukan operasi per out_celup (history, update stok lama, pemasukan)
+            // tapi untuk insert/update stock tujuan: gunakan guard supaya hanya sekali per tujuan.
+            // -------------------------------------------------------
+            $idOutCelupBaru  = [];
+            $idPemasukanBaru = [];
+            $detailKirim     = [];
+            $processedDest   = []; // guard untuk mencegah insert/update stock tujuan berulang
+            $newStockIdMap   = []; // menyimpan id_stock baru per tujuan key
 
-            $this->stockModel->update($idStock[$i], $updateData);
+            foreach ($dataOutCelup as $i => $d) {
+                $other = $this->otherOutModel->getQty($d['id_out_celup']);
+                $outByCns = $this->pengeluaranModel->getQtyOutByCns($d['id_out_celup']);
+                $pindahOrder = $this->historyStock->getKgsPindahOrder($d['id_out_celup']);
 
-            // --- Buat key unik untuk tujuan stock supaya insert/update tujuan hanya sekali
-            $destKey = implode('|', [$noModel, $itemType, $kodeWarna, $warna, $cluster, $lotStock]);
-            // log_message('info', "Dest Key: $destKey");
-            if (!isset($processedDest[$destKey])) {
-                // cek stock tujuan (gunakan total akhir yang sudah dihitung)
-                $existingStock = $this->stockModel
-                    ->where('no_model',   $noModel)
-                    ->where('item_type',  $itemType)
-                    ->where('kode_warna', $kodeWarna)
-                    ->where('warna',      $warna)
-                    ->where('nama_cluster', $cluster)
-                    ->where('lot_awal', $lotStock)
-                    ->first();
+                $kgs = round($d['kgs_kirim'] - ($other['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0) - ($pindahOrder['kgs_pindah_order'] ?? 0), 2);
+                $cns = $d['cones_kirim'] - ($other['cns_other_out'] ?? 0) - ($outByCns['cns_out'] ?? 0) - ($pindahOrder['cns_pindah_order'] ?? 0);
+                $kgsOutByCns = $reqData['kgs_out'][$d['id_out_celup']] ?? 0;
+                $cnsOutByCns = $reqData['cns_out'][$d['id_out_celup']] ?? 0;
 
-                if ($existingStock) {
-                    // — jika sudah ada, update stok tujuan (tambah total dari semua pemindahan)
-                    $this->stockModel->update($existingStock['id_stock'], [
-                        'kgs_stock_awal' => $existingStock['kgs_stock_awal'] + $totalKgs,
-                        'cns_stock_awal' => $existingStock['cns_stock_awal'] + $totalCns,
-                        'krg_stock_awal' => $existingStock['krg_stock_awal'] + $totalKrgIn,
-                        'lot_awal'       => $lotStock,
-                        'updated_at'     => date('Y-m-d H:i:s'),
-                    ]);
-                    $newStockId = $existingStock['id_stock'];
+                $kgsKirim = (!empty($kgsOutByCns) && $kgsOutByCns > 0) ? $kgsOutByCns : $kgs;
+                $cnsKirim = (!empty($kgsOutByCns) && $kgsOutByCns > 0) ? $cnsOutByCns : $cns;
+                $krgKirimOut = (!empty($kgsOutByCns) && $kgsOutByCns > 0) ? 0 : 1;
+                $krgKirimIn = 1;
+
+                // simpan hasil per id_out_celup (bila perlu nanti)
+                $detailKirim[$i] = [
+                    'kgs' => $kgsKirim,
+                    'cns' => $cnsKirim,
+                    'krgOut' => $krgKirimOut,
+                    'krgIn' => $krgKirimIn,
+                ];
+
+                $cluster  = $idStockData[$i]['nama_cluster'];
+                // Jika lot_stock kosong/null, gunakan lot_awal
+                $lotStock = !empty($idStockData[$i]['lot_stock']) ? $idStockData[$i]['lot_stock'] : $idStockData[$i]['lot_awal'];
+                $oldIdOC  = $d['id_out_celup'];
+                // log_message('info', "lotstock: $lotStock, cluster: $cluster, data stock : " . json_encode($idStockData[$i]));
+
+                $this->outCelupModel->insert([
+                    'no_model'    => $noModel,
+                    'no_karung'   => $d['no_karung'],
+                    'kgs_kirim'   => $kgsKirim,
+                    'cones_kirim' => $cnsKirim,
+                    'lot_kirim'   => $lotStock,
+                    'ganti_retur' => '0',
+                    'admin'       => session()->get('username'),
+                ]);
+                $idOutCelupBaru[] = $this->outCelupModel->getInsertID();
+
+                // — update stok LAMA (kurangi sesuai tiap item, pakai nilai per-item)
+                // Jika kgs_in_out ada (lebih dari 0), kurangi dari kgs_in_out, jika tidak ada (0/null), kurangi dari kgs_stock_awal
+                if (!empty($idStockData[$i]['kgs_in_out']) && $idStockData[$i]['kgs_in_out'] > 0) {
+                    $newKgs = max(0, $idStockData[$i]['kgs_in_out'] - $totalKgs);
                 } else {
-                    // — jika belum ada, insert stock tujuan (pakai total akhir)
-                    $this->stockModel->insert([
-                        'no_model'       => $noModel,
-                        'item_type'      => $itemType,
-                        'kode_warna'     => $kodeWarna,
-                        'warna'          => $warna,
-                        'kgs_stock_awal' => $totalKgs,
-                        'cns_stock_awal' => $totalCns,
-                        'krg_stock_awal' => $totalKrgIn,
-                        'lot_awal'       => $lotStock,
-                        'nama_cluster'   => $cluster,
-                        'admin'          => session()->get('username'),
-                        'created_at'     => date('Y-m-d H:i:s'),
-                    ]);
-                    $newStockId = $this->stockModel->getInsertID();
+                    $newKgs = max(0, $idStockData[$i]['kgs_stock_awal'] - $totalKgs);
+                }
+                if (!empty($idStockData[$i]['cns_in_out']) && $idStockData[$i]['cns_in_out'] > 0) {
+                    $newCns = max(0, $idStockData[$i]['cns_in_out'] - $totalCns);
+                } else {
+                    $newCns = max(0, $idStockData[$i]['cns_stock_awal'] - $totalCns);
+                }
+                if (!empty($idStockData[$i]['krg_in_out']) && $idStockData[$i]['krg_in_out'] > 0) {
+                    $newKrg = max(0, $idStockData[$i]['krg_in_out'] - $totalKrgOut);
+                } else {
+                    $newKrg = max(0, $idStockData[$i]['krg_stock_awal'] - $totalKrgOut);
                 }
 
-                // simpan mapping & tandai processed supaya tidak jalan lagi untuk tujuan ini
-                $newStockIdMap[$destKey] = $newStockId;
-                $processedDest[$destKey] = true;
-            } else {
-                // sudah ada mapping dari iterasi sebelumnya
-                $newStockId = $newStockIdMap[$destKey];
+                // $newKgs = max(0, $idStockData[$i]['kgs_in_out'] - $totalKgs);
+                // $newCns = max(0, $idStockData[$i]['cns_in_out'] - $totalCns);
+                // $newKrg = max(0, $idStockData[$i]['krg_in_out'] - $totalKrgOut);
+                $updateData = [
+                    // Update kgs_in_out jika ada, jika tidak update kgs_stock_awal
+                    'kgs_in_out'     => (!empty($idStockData[$i]['kgs_in_out']) && $idStockData[$i]['kgs_in_out'] > 0) ? $newKgs : $idStockData[$i]['kgs_in_out'],
+                    'kgs_stock_awal' => (empty($idStockData[$i]['kgs_in_out']) || $idStockData[$i]['kgs_in_out'] == 0) ? $newKgs : $idStockData[$i]['kgs_stock_awal'],
+                    // Update cns_in_out jika ada, jika tidak update cns_stock_awal
+                    'cns_in_out'     => (!empty($idStockData[$i]['cns_in_out']) && $idStockData[$i]['cns_in_out'] > 0) ? $newCns : $idStockData[$i]['cns_in_out'],
+                    'cns_stock_awal' => (empty($idStockData[$i]['cns_in_out']) || $idStockData[$i]['cns_in_out'] == 0) ? $newCns : $idStockData[$i]['cns_stock_awal'],
+                    // Update krg_in_out jika ada, jika tidak update krg_stock_awal
+                    'krg_in_out'     => (!empty($idStockData[$i]['krg_in_out']) && $idStockData[$i]['krg_in_out'] > 0) ? $newKrg : $idStockData[$i]['krg_in_out'],
+                    'krg_stock_awal' => (empty($idStockData[$i]['krg_in_out']) || $idStockData[$i]['krg_in_out'] == 0) ? $newKrg : $idStockData[$i]['krg_stock_awal'],
+                    'nama_cluster'   => $cluster,
+                ];
+
+                // kalau asalnya dari lot_stock, update hanya lot_stock
+                if (!empty($idStockData[$i]['lot_stock'])) {
+                    $updateData['lot_stock'] = $lotStock;
+                } else {
+                    // kalau asalnya dari lot_awal
+                    $updateData['lot_awal'] = $lotStock;
+                }
+
+                $this->stockModel->update($idStock[$i], $updateData);
+
+                // --- Buat key unik untuk tujuan stock supaya insert/update tujuan hanya sekali
+                $destKey = implode('|', [$noModel, $itemType, $kodeWarna, $warna, $cluster, $lotStock]);
+                // log_message('info', "Dest Key: $destKey");
+                if (!isset($processedDest[$destKey])) {
+                    // cek stock tujuan (gunakan total akhir yang sudah dihitung)
+                    $existingStock = $this->stockModel
+                        ->where('no_model',   $noModel)
+                        ->where('item_type',  $itemType)
+                        ->where('kode_warna', $kodeWarna)
+                        ->where('warna',      $warna)
+                        ->where('nama_cluster', $cluster)
+                        ->where('lot_awal', $lotStock)
+                        ->first();
+
+                    if ($existingStock) {
+                        // — jika sudah ada, update stok tujuan (tambah total dari semua pemindahan)
+                        $this->stockModel->update($existingStock['id_stock'], [
+                            'kgs_stock_awal' => $existingStock['kgs_stock_awal'] + $totalKgs,
+                            'cns_stock_awal' => $existingStock['cns_stock_awal'] + $totalCns,
+                            'krg_stock_awal' => $existingStock['krg_stock_awal'] + $totalKrgIn,
+                            'lot_awal'       => $lotStock,
+                            'updated_at'     => date('Y-m-d H:i:s'),
+                        ]);
+                        $newStockId = $existingStock['id_stock'];
+                    } else {
+                        // — jika belum ada, insert stock tujuan (pakai total akhir)
+                        $this->stockModel->insert([
+                            'no_model'       => $noModel,
+                            'item_type'      => $itemType,
+                            'kode_warna'     => $kodeWarna,
+                            'warna'          => $warna,
+                            'kgs_stock_awal' => $totalKgs,
+                            'cns_stock_awal' => $totalCns,
+                            'krg_stock_awal' => $totalKrgIn,
+                            'lot_awal'       => $lotStock,
+                            'nama_cluster'   => $cluster,
+                            'admin'          => session()->get('username'),
+                            'created_at'     => date('Y-m-d H:i:s'),
+                        ]);
+                        $newStockId = $this->stockModel->getInsertID();
+                    }
+
+                    // simpan mapping & tandai processed supaya tidak jalan lagi untuk tujuan ini
+                    $newStockIdMap[$destKey] = $newStockId;
+                    $processedDest[$destKey] = true;
+                } else {
+                    // sudah ada mapping dari iterasi sebelumnya
+                    $newStockId = $newStockIdMap[$destKey];
+                }
+
+                // --- insert data history (per out_celup) menggunakan newStockId yang sudah valid
+                $this->historyStock->insert([
+                    'id_stock_old'  => $idStockData[0]['id_stock'],
+                    'id_stock_new'  => $newStockId,
+                    'id_out_celup'  => $oldIdOC,
+                    'cluster_old'   => $idStockData[0]['nama_cluster'],
+                    'cluster_new'   => $cluster,
+                    'kgs'           => $kgsKirim,
+                    'cns'           => $cnsKirim,
+                    'krg'           => $krgKirimOut,
+                    'lot'           => $lotStock,
+                    'keterangan'    => "Pindah Order",
+                    'admin'         => session()->get('username'),
+                    'created_at'    => date('Y-m-d H:i:s'),
+                    'updated_at'    => null,
+                ]);
+
+                // --- sekarang ambil history untuk out_celup lama (termasuk yg baru saja diinsert)
+                $dataHistory = $this->historyStock
+                    ->where('id_out_celup', $oldIdOC)
+                    ->where('keterangan', 'Pindah Order')
+                    ->findAll();
+
+                $totalKgsHistory = array_sum(array_column($dataHistory, 'kgs'));
+
+                // log_message('debug', 'Data History: ' . print_r($dataHistory, true));
+                // log_message('debug', 'Total Kgs History: ' . $totalKgsHistory);
+
+                $dataOutCelupLama = $this->outCelupModel->find($oldIdOC);
+                $kgsKirim = $dataOutCelupLama['kgs_kirim'];
+                if ($totalKgsHistory >= $kgsKirim) {
+                    // — tandai out_jalur pada pemasukan lama
+                    $this->pemasukanModel
+                        ->set('out_jalur', '1')
+                        ->where('id_out_celup', $oldIdOC)
+                        ->update();
+
+                    // — update stock lama: kurangi karung (krg_in_out) sebanyak 1
+                    // $oldStock = $this->stockModel->find($idStock[$i]);
+                    // if ($oldStock) {
+                    //     if (!empty($oldStock['krg_in_out']) && $oldStock['krg_in_out'] > 0) {
+                    //         $newKrgInOut = max(0, $oldStock['krg_in_out'] - 1);
+                    //         $this->stockModel->update($idStock[$i], [
+                    //             'krg_in_out' => $newKrgInOut
+                    //         ]);
+                    //     } else {
+                    //         $newKrgStockAwal = max(0, $oldStock['krg_stock_awal'] - 1);
+                    //         $this->stockModel->update($idStock[$i], [
+                    //             'krg_stock_awal' => $newKrgStockAwal
+                    //         ]);
+                    //     }
+                    // }
+                } else {
+                    // kalau belum habis atau pindahnya parsial (per cones), tetap 0
+                    $this->pemasukanModel
+                        ->set('out_jalur', '0')
+                        ->where('id_out_celup', $oldIdOC)
+                        ->update();
+                }
+
+                // — insert pemasukan baru (tanpa id_stock dulu)
+                $this->pemasukanModel->insert([
+                    'id_out_celup' => $idOutCelupBaru[$i] ?? null,
+                    'tgl_masuk'    => date('Y-m-d'),
+                    'nama_cluster' => $cluster,
+                    'out_jalur'    => '0',
+                    'admin'        => session()->get('username'),
+                ]);
+                $idPemasukanBaru[] = $this->pemasukanModel->getInsertID();
+            } // end foreach
+
+            // update id_stock pada pemasukan baru (pakai mapping newStockIdMap)
+            // jika hanya satu tujuan, ambil newStockId dari mapping; jika banyak tujuan, kita pakai destKey dari tiap pemasukan
+            // di implementasi ini, semua pemasukan dibuat pada iterasi yg sama urutannya, dan setiap pemasukan terkait idOutCelupBaru indexnya.
+            // Kita akan pasangkan setiap pemasukan dengan newStockId sesuai destinasi yang sama (pakai last $newStockId jika hanya 1 tujuan).
+            // Simpel: jika hanya satu tujuan, gunakan newStockId terakhir; kalau banyak tujuan, gunakan mapping via destKey reconstruct (but user biasanya 1 tujuan).
+            // Untuk safety, ambil last inserted newStockId jika exists.
+            $lastNewStockId = end($newStockIdMap) ?: ($newStockId ?? null);
+
+            foreach ($idPemasukanBaru as $pid) {
+                $this->pemasukanModel->update($pid, ['id_stock' => $lastNewStockId]);
             }
 
-            // --- insert data history (per out_celup) menggunakan newStockId yang sudah valid
-            $this->historyStock->insert([
-                'id_stock_old'  => $idStockData[0]['id_stock'],
-                'id_stock_new'  => $newStockId,
-                'id_out_celup'  => $oldIdOC,
-                'cluster_old'   => $idStockData[0]['nama_cluster'],
-                'cluster_new'   => $cluster,
-                'kgs'           => $kgsKirim,
-                'cns'           => $cnsKirim,
-                'krg'           => $krgKirimOut,
-                'lot'           => $lotStock,
-                'keterangan'    => "Pindah Order",
-                'admin'         => session()->get('username'),
-                'created_at'    => date('Y-m-d H:i:s'),
-                'updated_at'    => null,
-            ]);
+            // Complete transaction and check status
+            $db->transComplete();
 
-            // --- sekarang ambil history untuk out_celup lama (termasuk yg baru saja diinsert)
-            $dataHistory = $this->historyStock
-                ->where('id_out_celup', $oldIdOC)
-                ->where('keterangan', 'Pindah Order')
-                ->findAll();
-
-            $totalKgsHistory = array_sum(array_column($dataHistory, 'kgs'));
-
-            // log_message('debug', 'Data History: ' . print_r($dataHistory, true));
-            // log_message('debug', 'Total Kgs History: ' . $totalKgsHistory);
-
-            $dataOutCelupLama = $this->outCelupModel->find($oldIdOC);
-            $kgsKirim = $dataOutCelupLama['kgs_kirim'];
-            if ($totalKgsHistory >= $kgsKirim) {
-                // — tandai out_jalur pada pemasukan lama
-                $this->pemasukanModel
-                    ->set('out_jalur', '1')
-                    ->where('id_out_celup', $oldIdOC)
-                    ->update();
-
-                // — update stock lama: kurangi karung (krg_in_out) sebanyak 1
-                // $oldStock = $this->stockModel->find($idStock[$i]);
-                // if ($oldStock) {
-                //     if (!empty($oldStock['krg_in_out']) && $oldStock['krg_in_out'] > 0) {
-                //         $newKrgInOut = max(0, $oldStock['krg_in_out'] - 1);
-                //         $this->stockModel->update($idStock[$i], [
-                //             'krg_in_out' => $newKrgInOut
-                //         ]);
-                //     } else {
-                //         $newKrgStockAwal = max(0, $oldStock['krg_stock_awal'] - 1);
-                //         $this->stockModel->update($idStock[$i], [
-                //             'krg_stock_awal' => $newKrgStockAwal
-                //         ]);
-                //     }
-                // }
-            } else {
-                // kalau belum habis atau pindahnya parsial (per cones), tetap 0
-                $this->pemasukanModel
-                    ->set('out_jalur', '0')
-                    ->where('id_out_celup', $oldIdOC)
-                    ->update();
+            if (!$db->transStatus()) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Transaksi gagal dan telah dibatalkan.'
+                ]);
             }
 
-            // — insert pemasukan baru (tanpa id_stock dulu)
-            $this->pemasukanModel->insert([
-                'id_out_celup' => $idOutCelupBaru[$i] ?? null,
-                'tgl_masuk'    => date('Y-m-d'),
-                'nama_cluster' => $cluster,
-                'out_jalur'    => '0',
-                'admin'        => session()->get('username'),
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Transaksi berhasil.'
             ]);
-            $idPemasukanBaru[] = $this->pemasukanModel->getInsertID();
-        } // end foreach
-
-        // update id_stock pada pemasukan baru (pakai mapping newStockIdMap)
-        // jika hanya satu tujuan, ambil newStockId dari mapping; jika banyak tujuan, kita pakai destKey dari tiap pemasukan
-        // di implementasi ini, semua pemasukan dibuat pada iterasi yg sama urutannya, dan setiap pemasukan terkait idOutCelupBaru indexnya.
-        // Kita akan pasangkan setiap pemasukan dengan newStockId sesuai destinasi yang sama (pakai last $newStockId jika hanya 1 tujuan).
-        // Simpel: jika hanya satu tujuan, gunakan newStockId terakhir; kalau banyak tujuan, gunakan mapping via destKey reconstruct (but user biasanya 1 tujuan).
-        // Untuk safety, ambil last inserted newStockId jika exists.
-        $lastNewStockId = end($newStockIdMap) ?: ($newStockId ?? null);
-
-        foreach ($idPemasukanBaru as $pid) {
-            $this->pemasukanModel->update($pid, ['id_stock' => $lastNewStockId]);
+        } catch (\Throwable $e) {
+            // ❌ rollback kalau ada error
+            $db->transRollback();
+            log_message('error', 'PindahOrderTest gagal: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ]);
         }
-
-        // selesai (asumsi transaksi di luar / tidak diubah)
-        return $this->response->setJSON([
-            'success' => true,
-            'message' => 'Data berhasil dipindahkan.'
-        ]);
     }
 
     // public function savePindahOrderTest()

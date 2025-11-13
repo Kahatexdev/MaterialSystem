@@ -119,7 +119,7 @@
                     <input class="form-control" type="text" name="noModel" placeholder="Masukkan No Model / Cluster">
                 </div>
                 <div class="col-lg-4 col-sm-12">
-                    <input class="form-control" type="text" name="warna" placeholder="Masukkan Kode Warna">
+                    <input class="form-control" type="text" name="warna" placeholder="Masukkan Kode Warna / Lot">
                 </div>
                 <div class="col-lg-4 col-sm-12 d-flex gap-2">
                     <button class="btn btn-info flex-grow-1" id="filter_data"><i class="fas fa-search"></i> Cari</button>
@@ -750,6 +750,8 @@
         const model = $('#ModelSelect').val();
         const orders = $("input[name='pindah[]']:checked").map((_, el) => el.value).get();
         const stock = $("input[name='id_stock[]']").map((_, el) => el.value).get();
+        const $btn = $(this).find('button[type="submit"]');
+        $btn.prop('disabled', true).text('Menyimpan...'); // 🔒 disable tombol
 
         if (!model) return Swal.fire({
             icon: 'warning',
@@ -779,6 +781,7 @@
             kgs_out: kgsOut,
             cns_out: cnsOut
         }, res => {
+            $btn.prop('disabled', false).text('Simpan Perubahan');
             if (res.success) {
                 Swal.fire({
                     icon: 'success',
@@ -811,6 +814,7 @@
                 });
             }
         }, 'json').fail((_, __, err) => {
+            $btn.prop('disabled', false).text('Simpan Perubahan');
             Swal.fire({
                 icon: 'error',
                 text: `Error: ${err}`
