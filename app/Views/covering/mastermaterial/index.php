@@ -274,7 +274,12 @@
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
+                    // disable confirm/delete button
                     confirmButtonText: 'Ya, hapus!',
+                    didOpen: () => {
+                        const confirmBtn = Swal.getConfirmButton();
+                        if (confirmBtn) confirmBtn.disabled = true;
+                    },
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
