@@ -3202,7 +3202,7 @@ class WarehouseController extends BaseController
             'Desember' => 12
         ];
         $bulan = $bulanMap[$delivery] ?? null;
-        $data = $this->stockModel->getFilterSisaPakaiSpandex($bulan, $noModel, $kodeWarna);
+        $data = $this->pengeluaranModel->getFilterSisaPakaiSpandexNew($bulan, $noModel, $kodeWarna);
 
         return $this->response->setJSON($data);
     }
@@ -3237,7 +3237,7 @@ class WarehouseController extends BaseController
             'Desember' => 12
         ];
         $bulan = $bulanMap[$delivery] ?? null;
-        $data = $this->stockModel->getFilterSisaPakaiKaret($bulan, $noModel, $kodeWarna);
+        $data = $this->pengeluaranModel->getFilterSisaPakaiKaretNew($bulan, $noModel, $kodeWarna);
 
         return $this->response->setJSON($data);
     }

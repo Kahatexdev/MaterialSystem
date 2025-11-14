@@ -960,4 +960,70 @@ class PengeluaranModel extends Model
             ->where('status', 'Pengiriman Area')
             ->where('terima_area', 0)->countAllResults();
     }
+
+    public function getFilterSisaPakaiSpandexNew($bulan = null, $noModel = null, $kodeWarna = null)
+    {
+        $builder = $this->select('
+        mo.no_model, material.item_type, material.kode_warna, material.warna, NULL AS kgs_stock_awal, NULL AS lot_awal,
+        mo.lco_date, mo.foll_up, mo.no_order, mo.buyer, mo.delivery_awal, mo.delivery_akhir, mo.unit,
+        pengeluaran.area_out, pengeluaran.kgs_out,
+        material.kg_po,
+        retur.kgs_retur, retur.lot_retur,
+        mm.jenis
+    ')
+            ->join('pemesanan', 'pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_material AS mm', 'mm.item_type = material.item_type', 'left')
+            ->join('master_order AS mo', 'mo.id_order = material.id_order')
+            ->join('retur', 'retur.no_model = mo.no_model AND retur.item_type = material.item_type AND retur.kode_warna = material.kode_warna', 'left')
+            ->where('mm.jenis', 'SPANDEX')
+            ->groupBy('material.id_order, material.item_type, material.kode_warna');
+
+        if (!empty($noModel)) {
+            $builder->where('mo.no_model', $noModel);
+        }
+
+        if (!empty($kodeWarna)) {
+            $builder->where('material.kode_warna', $kodeWarna);
+        }
+
+        if (!empty($bulan)) {
+            $builder->where('MONTH(mo.delivery_awal)', $bulan);
+        }
+
+        return $builder->get()->getResultArray();
+    }
+
+    public function getFilterSisaPakaiKaretNew($bulan = null, $noModel = null, $kodeWarna = null)
+    {
+        $builder = $this->select('
+        mo.no_model, material.item_type, material.kode_warna, material.warna, NULL AS kgs_stock_awal, NULL AS lot_awal,
+        mo.lco_date, mo.foll_up, mo.no_order, mo.buyer, mo.delivery_awal, mo.delivery_akhir, mo.unit,
+        pengeluaran.area_out, pengeluaran.kgs_out,
+        material.kg_po,
+        retur.kgs_retur, retur.lot_retur,
+        mm.jenis
+    ')
+            ->join('pemesanan', 'pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left')
+            ->join('material', 'material.id_material = pemesanan.id_material', 'left')
+            ->join('master_material AS mm', 'mm.item_type = material.item_type', 'left')
+            ->join('master_order AS mo', 'mo.id_order = material.id_order')
+            ->join('retur', 'retur.no_model = mo.no_model AND retur.item_type = material.item_type AND retur.kode_warna = material.kode_warna', 'left')
+            ->where('mm.jenis', 'KARET')
+            ->groupBy('material.id_order, material.item_type, material.kode_warna');
+
+        if (!empty($noModel)) {
+            $builder->where('mo.no_model', $noModel);
+        }
+
+        if (!empty($kodeWarna)) {
+            $builder->where('material.kode_warna', $kodeWarna);
+        }
+
+        if (!empty($bulan)) {
+            $builder->where('MONTH(mo.delivery_awal)', $bulan);
+        }
+
+        return $builder->get()->getResultArray();
+    }
 }
