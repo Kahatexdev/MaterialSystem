@@ -457,14 +457,14 @@ class StockModel extends Model
         stock.no_model, stock.item_type, stock.kode_warna, stock.warna, stock.kgs_stock_awal, stock.lot_awal,
         mo.lco_date, mo.foll_up, mo.no_order, mo.buyer, mo.delivery_awal, mo.delivery_akhir, mo.unit,
         pengeluaran.area_out, pengeluaran.kgs_out,
-        open_po.kg_po,
+        material.kgs as kg_po,
         retur.kgs_retur, retur.lot_retur,
         mm.jenis
     ')
             ->join('master_order AS mo', 'mo.no_model = stock.no_model')
             ->join('master_material AS mm', 'mm.item_type = stock.item_type')
-            ->join('pengeluaran', 'pengeluaran.lot_out = stock.lot_stock AND pengeluaran.nama_cluster = stock.nama_cluster', 'left')
-            ->join('open_po', 'open_po.no_model = stock.no_model AND open_po.item_type = stock.item_type AND open_po.kode_warna = stock.kode_warna', 'left')
+            ->join('pengeluaran', 'pengeluaran.id_stock = stock.id_stock', 'left')
+            ->join('material', 'material.id_order = mo.id_order AND material.item_type = stock.item_type AND material.kode_warna = stock.kode_warna', 'left')
             ->join('retur', 'retur.no_model = stock.no_model AND retur.item_type = stock.item_type AND retur.kode_warna = stock.kode_warna', 'left')
             ->where('mm.jenis', 'BENANG')
             ->groupBy('stock.id_stock');
@@ -474,7 +474,7 @@ class StockModel extends Model
         }
 
         if (!empty($kodeWarna)) {
-            $builder->where('stock.kode_warna', $kodeWarna);
+            $builder->like('stock.kode_warna', $kodeWarna);
         }
 
         if (!empty($bulan)) {
@@ -490,14 +490,14 @@ class StockModel extends Model
         stock.no_model, stock.item_type, stock.kode_warna, stock.warna, stock.kgs_stock_awal, stock.lot_awal,
         mo.lco_date, mo.foll_up, mo.no_order, mo.buyer, mo.delivery_awal, mo.delivery_akhir, mo.unit,
         pengeluaran.area_out, pengeluaran.kgs_out,
-        open_po.kg_po,
+        material.kgs as kg_po,
         retur.kgs_retur, retur.lot_retur,
         mm.jenis
     ')
             ->join('master_order AS mo', 'mo.no_model = stock.no_model')
             ->join('master_material AS mm', 'mm.item_type = stock.item_type')
-            ->join('pengeluaran', 'pengeluaran.lot_out = COALESCE(stock.lot_stock, stock.lot_awal) AND pengeluaran.nama_cluster = stock.nama_cluster', 'left')
-            ->join('open_po', 'open_po.no_model = stock.no_model AND open_po.item_type = stock.item_type AND open_po.kode_warna = stock.kode_warna', 'left')
+            ->join('pengeluaran', 'pengeluaran.id_stock = stock.id_stock', 'left')
+            ->join('material', 'material.id_order = mo.id_order AND material.item_type = stock.item_type AND material.kode_warna = stock.kode_warna', 'left')
             ->join('retur', 'retur.no_model = stock.no_model AND retur.item_type = stock.item_type AND retur.kode_warna = stock.kode_warna', 'left')
             ->where('mm.jenis', 'NYLON')
             ->groupBy('stock.id_stock');
@@ -507,7 +507,7 @@ class StockModel extends Model
         }
 
         if (!empty($kodeWarna)) {
-            $builder->where('stock.kode_warna', $kodeWarna);
+            $builder->like('stock.kode_warna', $kodeWarna);
         }
 
         if (!empty($bulan)) {
@@ -523,7 +523,7 @@ class StockModel extends Model
         stock.no_model, stock.item_type, stock.kode_warna, stock.warna, stock.kgs_stock_awal, stock.lot_awal,
         mo.lco_date, mo.foll_up, mo.no_order, mo.buyer, mo.delivery_awal, mo.delivery_akhir, mo.unit,
         pengeluaran.area_out, pengeluaran.kgs_out,
-        open_po.kg_po,
+        material.kgs as kg_po,
         retur.kgs_retur, retur.lot_retur,
         mm.jenis
     ')

@@ -3950,10 +3950,9 @@ class WarehouseController extends BaseController
     public function filterReportIndri()
     {
         $buyer = $this->request->getGet('buyer');
-        $deliveryAwal = $this->request->getGet('delivery_awal');
-        $deliveryAkhir = $this->request->getGet('delivery_akhir');
-        // dd($buyer, $deliveryAwal, $deliveryAkhir);
-        $data = $this->materialModel->getFilterReportIndri($buyer, $deliveryAwal, $deliveryAkhir);
+        $no_model = $this->request->getGet('no_model');
+
+        $data = $this->materialModel->getFilterReportIndri($buyer, $no_model);
         // dd($data);
         return $this->response->setJSON($data);
     }

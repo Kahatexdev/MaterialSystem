@@ -1285,35 +1285,21 @@ class MaterialModel extends Model
         return $builder->get()->getResultArray();
     }
 
-    public function getFilterReportIndri($buyer = null, $deliveryAwal = null, $deliveryAkhir = null)
+    public function getFilterReportIndri($buyer, $no_model)
     {
-        $builder = $this->select('
-            master_order.no_model,
-            master_order.buyer,
-            material.area,
-            material.item_type,
-            material.kode_warna,
-            material.color,
-            material.loss,
-            SUM(material.kgs) AS kg_po,
-         
-        ')
+        $builder = $this->select('master_order.no_model, master_order.buyer, material.area, material.item_type, material.kode_warna, material.color, material.loss, SUM(material.kgs) AS kg_po')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left');
 
         if (!empty($buyer)) {
             $builder->where('master_order.buyer', $buyer);
         }
 
-        if (!empty($deliveryAwal)) {
-            $builder->where('master_order.delivery_awal >=', $deliveryAwal);
-        }
-
-        if (!empty($deliveryAkhir)) {
-            $builder->where('master_order.delivery_akhir <=', $deliveryAkhir);
+        if (!empty($no_model)) {
+            $builder->where('master_order.no_model', $no_model);
         }
 
         return $builder
-            ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color')
+            ->groupBy('material.item_type, material.kode_warna, material.color')
             ->findAll();
     }
 
@@ -1351,5 +1337,113 @@ class MaterialModel extends Model
     public function getMaterialNr($id)
     {
         return $this->select('material_nr')->where('id_order', $id)->groupBy('material_nr')->findAll();
+    }
+
+    public function getExportIndri($buyer, $no_model)
+    {
+        // Subquery dari out_celup
+        $subOutCelup = $this->db->table('pemasukan')
+            ->select("
+        out_celup.no_model,
+        schedule_celup.item_type,
+        schedule_celup.kode_warna,
+        schedule_celup.warna,
+        SUM(out_celup.kgs_kirim) AS qty_datang,
+        SUM(
+            CASE 
+                WHEN schedule_celup.po_plus = '1' THEN out_celup.kgs_kirim 
+                ELSE 0 
+            END
+        ) AS qty_datang_plus
+    ")
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
+            ->groupBy('out_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna');
+
+        // Subquery dari other_bon
+        $subOtherBon = $this->db->table('pemasukan')
+            ->select("
+        out_celup.no_model,
+        other_bon.item_type,
+        other_bon.kode_warna,
+        other_bon.warna,
+        SUM(out_celup.kgs_kirim) AS qty_datang,
+        SUM(
+            CASE 
+                WHEN other_bon.po_tambahan = '1' THEN out_celup.kgs_kirim 
+                ELSE 0 
+            END
+        ) AS qty_datang_plus
+    ")
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->join('other_bon', 'other_bon.id_other_bon = out_celup.id_other_bon', 'left')
+            ->groupBy('out_celup.no_model, other_bon.item_type, other_bon.kode_warna, other_bon.warna');
+
+
+        // Gabungkan dua sumber
+        $unionQuery = "(" .
+            $subOutCelup->getCompiledSelect() .
+            " UNION ALL " .
+            $subOtherBon->getCompiledSelect() .
+            ")";
+
+
+        // Hitung total qty_datang per kombinasi lengkap
+        $subTotalQtyDatang = "
+(
+    SELECT 
+        no_model,
+        item_type,
+        kode_warna,
+        warna,
+        SUM(qty_datang) AS qty_datang,
+        SUM(qty_datang_plus) AS qty_datang_plus
+    FROM {$unionQuery} AS gabungan
+    GROUP BY no_model, item_type, kode_warna, warna
+) AS qty_union
+";
+
+
+        // Query utama
+        $builder = $this->select('
+            master_order.no_model,
+            master_order.buyer,
+            material.area,
+            material.item_type,
+            material.kode_warna,
+            material.color,
+            material.loss,
+            SUM(material.kgs) AS qty_po,
+            total_potambahan.ttl_tambahan_kg AS qty_po_plus,
+            qty_union.qty_datang AS qty_datang,
+            qty_union.qty_datang_plus AS qty_datang_plus
+        ')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->join('po_tambahan', 'po_tambahan.id_material = material.id_material', 'left')
+            ->join('total_potambahan', 'total_potambahan.id_total_potambahan = po_tambahan.id_total_potambahan', 'left')
+            ->join(
+                $subTotalQtyDatang,
+                'qty_union.no_model = master_order.no_model
+             AND qty_union.item_type = material.item_type
+             AND qty_union.kode_warna = material.kode_warna
+             AND qty_union.warna = material.color',
+                'left'
+            )
+            ->groupStart()
+            ->where('po_tambahan.status', 'approved')
+            ->orWhere('po_tambahan.status IS NULL')
+            ->groupEnd();
+
+        if (!empty($buyer)) {
+            $builder->where('master_order.buyer', $buyer);
+        }
+
+        if (!empty($no_model)) {
+            $builder->where('master_order.no_model', $no_model);
+        }
+
+        return $builder
+            ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color')
+            ->findAll();
     }
 }

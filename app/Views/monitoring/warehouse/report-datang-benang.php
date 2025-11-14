@@ -320,7 +320,7 @@
     $(document).ready(function() {
         let dataTable = $('#dataTable').DataTable({
             "paging": true,
-            "searching": false,
+            "searching": true,
             "ordering": true,
             "info": true,
             "responsive": true,

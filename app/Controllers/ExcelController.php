@@ -14984,13 +14984,15 @@ class ExcelController extends BaseController
     public function exportReportIndri()
     {
         $buyer = $this->request->getGet('buyer');
-        $delivAwal = $this->request->getGet('delivery_awal');
-        $delivAkhir = $this->request->getGet('delivery_akhir');
-
-        $data = $this->materialModel->getReportIndri($buyer, $delivAwal, $delivAkhir);
-
+        $no_model = $this->request->getGet('no_model');
+        // $data = $this->materialModel->getReportIndri($buyer);
+        $qtyPo = $this->materialModel->getExportIndri($buyer, $no_model);
+        // $stockAwal = $this->stockModel->getDatang($buyer, $no_model);
+        dd($qtyPo);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
+
+        // Judul
 
         $writer = new Xlsx($spreadsheet);
         $fileName = 'Report Indri' . '.xlsx';

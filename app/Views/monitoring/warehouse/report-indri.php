@@ -123,14 +123,9 @@
                     <input type="text" class="form-control" name="buyer" id="buyer" placeholder="Buyer">
                 </div>
                 <div class="col-md-3">
-                    <label for="">Delivery Awal</label>
-                    <input type="date" class="form-control" name="delivery_awal" id="delivery_awal">
+                    <label for="">No Model</label>
+                    <input type="text" class="form-control" name="no_model" id="no_model" placeholder="No Model">
                 </div>
-                <div class="col-md-3">
-                    <label for="">Delivery Akhir</label>
-                    <input type="date" class="form-control" name="delivery_akhir" id="delivery_akhir">
-                </div>
-
                 <div class="col-md-3">
                     <div class="form-group">
                         <label for="">Aksi</label><br>
@@ -151,17 +146,14 @@
                 <table id="dataTable" class="table table-striped table-bordered table-hover" style="width:100%">
                     <thead>
                         <tr>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Buyer</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Loss</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Sum Of Kg Pesan</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Sum Of Kg (Stock Awal)</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Sum Of Kg PO+</th>
+                            <th class="text-center">No</th>
+                            <th class="text-center">Buyer</th>
+                            <th class="text-center">No Model</th>
+                            <th class="text-center">Area</th>
+                            <th class="text-center">Item Type</th>
+                            <th class="text-center">Kode Warna</th>
+                            <th class="text-center">Warna</th>
+                            <th class="text-center">Loss</th>
                         </tr>
                     </thead>
 
@@ -204,16 +196,14 @@
 
         function loadData() {
             const buyer = $('#buyer').val();
-            const delivery_awal = $('#delivery_awal').val() ?? '';
-            const delivery_akhir = $('#delivery_akhir').val() ?? '';
+            const no_model = $('#no_model').val();
 
             $.ajax({
                 url: "<?= base_url($role . '/warehouse/filterReportIndri') ?>",
                 type: "GET",
                 data: {
                     buyer: buyer,
-                    delivery_awal: delivery_awal,
-                    delivery_akhir: delivery_akhir
+                    no_model: no_model
                 },
                 dataType: "json",
 
@@ -231,9 +221,6 @@
                                 item.kode_warna || '',
                                 item.color || '',
                                 item.loss || '',
-                                (parseFloat(item.kg_po) || 0).toFixed(2),
-                                (parseFloat(item.stock_awal) || 0).toFixed(2),
-                                (parseFloat(item.kg_poplus) || 0).toFixed(2),
                             ]);
                         });
                         $('#btnExport').removeClass('d-none');
@@ -254,7 +241,9 @@
 
         $('#btnExport').click(function() {
             const buyer = $('#buyer').val().trim();
-            const url = "<?= base_url($role . '/warehouse/exportPemakaianNylon') ?>" + "?buyer=" + encodeURIComponent(buyer);
+            const no_model = $('#no_model').val().trim();
+
+            const url = "<?= base_url($role . '/warehouse/exportReportIndri') ?>" + "?buyer=" + encodeURIComponent(buyer) + "&no_model=" + encodeURIComponent(no_model);
 
             window.location.href = url;
         });
