@@ -1978,4 +1978,35 @@ class ApiController extends ResourceController
 
         return $this->respond($filteredData);
     }
+    public function getAllGw()
+    {
+        log_message('info', '🟢 Log info jalan');
+        // Ambil data JSON dari body request
+        $json = $this->request->getJSON(true); // true = hasilnya array, bukan object
+
+        // Misalnya kamu mau proses atau validasi datanya dulu
+        $result = [];
+        foreach ($json as $item) {
+            //get data gw aktual || gw MU
+            $gw = $this->materialModel->getAllGw($item['no_model'], $item['size']);
+
+            // gunakan gw aktual, jika kosong gunakan gw MU
+            $gwValue = (isset($gw['gw_aktual']) && $gw['gw_aktual'] > 0)
+                ? $gw['gw_aktual']
+                : ($gw['gw'] ?? 0); // fallback kalau null
+
+            $result[] = [
+                'no_model' => strtoupper($item['no_model']),
+                'size'     => strtoupper($item['size']),
+                'gw'       => $gwValue
+            ];
+        }
+
+        // Kirim respons balik ke client
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Data diterima',
+            'data' => $result
+        ]);
+    }
 }

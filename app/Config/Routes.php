@@ -1073,6 +1073,7 @@ $routes->group(
         $routes->get('updateTerimaArea/(:any)', 'ApiController::updateTerimaArea/$1');
         $routes->post('getTglScheduleBulk', 'ApiController::getTglScheduleBulk');
         $routes->get('searchStock', 'ApiController::searchStock');
+        $routes->post('getAllGw', 'ApiController::getAllGw');
     }
 );
 
