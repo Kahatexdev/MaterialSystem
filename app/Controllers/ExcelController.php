@@ -3449,9 +3449,9 @@ class ExcelController extends BaseController
             $sheet->setCellValue('A2', 'PAKAI ' . $tglPakai);
 
             // Merge sel untuk teks di A1 dan A2
-            $sheet->mergeCells('A1:O1');
-            $sheet->mergeCells('A2:O2');
-            $sheet->getStyle('A1:O2')->applyFromArray($subHeaderStyle);
+            $sheet->mergeCells('A1:P1');
+            $sheet->mergeCells('A2:P2');
+            $sheet->getStyle('A1:P2')->applyFromArray($subHeaderStyle);
 
 
             // Set header
@@ -3470,12 +3470,13 @@ class ExcelController extends BaseController
                 'Nama Cluster',
                 'Kgs Out',
                 'Cns Out',
-                'Keterangan'
+                'Keterangan Gbn',
+                'Keterangan Area',
             ];
             $sheet->fromArray($header, null, 'A3');
 
 
-            $sheet->getStyle('A3:O3')->applyFromArray($headerStyle);
+            $sheet->getStyle('A3:P3')->applyFromArray($headerStyle);
 
             // Tambahkan data
             // isi data ke excel
@@ -3503,6 +3504,7 @@ class ExcelController extends BaseController
                 $sheet->setCellValue("M$rowNumber", ''); // kgs_out tambahan?
                 $sheet->setCellValue("N$rowNumber", ''); // cns_out tambahan?
                 $sheet->setCellValue("O$rowNumber", $row['keterangan_gbn'] . $ketPindahOrder);
+                $sheet->setCellValue("P$rowNumber", $row['keterangan']);
 
                 // cek id_total_pemesanan ganti
                 if ($prevTotalId !== null && $currentTotalId !== $prevTotalId) {
@@ -3523,10 +3525,10 @@ class ExcelController extends BaseController
 
             // kasih style ke semua cell data
             $dataEndRow = $rowNumber - 1;
-            $sheet->getStyle("A4:O{$dataEndRow}")->applyFromArray($cellStyle);
+            $sheet->getStyle("A4:P{$dataEndRow}")->applyFromArray($cellStyle);
 
             // atur lebar kolom
-            foreach (range('A', 'O') as $column) {
+            foreach (range('A', 'P') as $column) {
                 $sheet->getColumnDimension($column)->setAutoSize(true);
             }
         }

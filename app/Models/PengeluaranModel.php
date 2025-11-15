@@ -444,6 +444,7 @@ class PengeluaranModel extends Model
         $builder = $this->db->table('pemesanan');  // ini yang benar
         $builder->select("
             pemesanan.tgl_pakai,
+            pemesanan.keterangan,
             pemesanan.admin,
             master_order.no_model,
             master_material.jenis,
