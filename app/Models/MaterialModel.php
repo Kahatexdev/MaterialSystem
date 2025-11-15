@@ -1356,66 +1356,55 @@ class MaterialModel extends Model
     {
         // Subquery dari out_celup
         $subOutCelup = $this->db->table('pemasukan')
-            ->select("
-        out_celup.no_model,
-        schedule_celup.item_type,
-        schedule_celup.kode_warna,
-        schedule_celup.warna,
-        SUM(out_celup.kgs_kirim) AS qty_datang,
-        SUM(
-            CASE 
-                WHEN schedule_celup.po_plus = '1' THEN out_celup.kgs_kirim 
-                ELSE 0 
-            END
-        ) AS qty_datang_plus
-    ")
+            ->select("out_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna,
+            SUM(
+                CASE 
+                    WHEN schedule_celup.po_plus = '0' THEN out_celup.kgs_kirim 
+                    ELSE 0 
+                END
+            ) AS qty_datang,
+            SUM(
+                CASE 
+                    WHEN schedule_celup.po_plus = '1' THEN out_celup.kgs_kirim 
+                    ELSE 0 
+                END
+            ) AS qty_datang_plus
+        ")
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
             ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
             ->groupBy('out_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna');
 
         // Subquery dari other_bon
         $subOtherBon = $this->db->table('pemasukan')
-            ->select("
-        out_celup.no_model,
-        other_bon.item_type,
-        other_bon.kode_warna,
-        other_bon.warna,
-        SUM(out_celup.kgs_kirim) AS qty_datang,
-        SUM(
-            CASE 
-                WHEN other_bon.po_tambahan = '1' THEN out_celup.kgs_kirim 
-                ELSE 0 
-            END
-        ) AS qty_datang_plus
-    ")
+            ->select("out_celup.no_model, other_bon.item_type, other_bon.kode_warna, other_bon.warna,
+            SUM(
+                CASE 
+                    WHEN other_bon.po_tambahan = '0' THEN out_celup.kgs_kirim 
+                    ELSE 0 
+                END
+            ) AS qty_datang,
+            SUM(
+                CASE 
+                    WHEN other_bon.po_tambahan = '1' THEN out_celup.kgs_kirim 
+                    ELSE 0 
+                END
+            ) AS qty_datang_plus
+        ")
             ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
             ->join('other_bon', 'other_bon.id_other_bon = out_celup.id_other_bon', 'left')
             ->groupBy('out_celup.no_model, other_bon.item_type, other_bon.kode_warna, other_bon.warna');
 
 
         // Gabungkan dua sumber
-        $unionQuery = "(" .
-            $subOutCelup->getCompiledSelect() .
-            " UNION ALL " .
-            $subOtherBon->getCompiledSelect() .
-            ")";
-
+        $unionQuery = "(" . $subOutCelup->getCompiledSelect() . " UNION ALL " . $subOtherBon->getCompiledSelect() . ")";
 
         // Hitung total qty_datang per kombinasi lengkap
-        $subTotalQtyDatang = "
-(
-    SELECT 
-        no_model,
-        item_type,
-        kode_warna,
-        warna,
-        SUM(qty_datang) AS qty_datang,
-        SUM(qty_datang_plus) AS qty_datang_plus
-    FROM {$unionQuery} AS gabungan
-    GROUP BY no_model, item_type, kode_warna, warna
-) AS qty_union
-";
+        $subTotalQtyDatang = "(SELECT no_model, item_type, kode_warna, warna, SUM(qty_datang) AS qty_datang, SUM(qty_datang_plus) AS qty_datang_plus FROM {$unionQuery} AS gabungan GROUP BY no_model, item_type, kode_warna, warna) AS qty_union";
 
+        $subStockAwal = $this->db->table('history_stock')
+            ->select('SUM(history_stock.kgs) AS stock_awal, stock.no_model, stock.item_type, stock.kode_warna, stock.warna')
+            ->join('stock', 'stock.id_stock = history_stock.id_stock_new', 'left')
+            ->groupBy('history_stock.id_stock_new');
 
         // Query utama
         $builder = $this->select('
