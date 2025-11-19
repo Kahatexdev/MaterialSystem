@@ -28,6 +28,7 @@ use App\Models\PoTambahanModel;
 use App\Models\TrackingPoCovering;
 use App\Models\KebutuhanCones;
 use App\Models\MasterRangePemesanan;
+use App\Models\OtherOutModel;
 use App\Models\TotalPoTambahanModel;
 use Dompdf\Dompdf;
 use PHPUnit\Framework\Attributes\IgnoreFunctionForCodeCoverage;
@@ -69,7 +70,7 @@ class ApiController extends ResourceController
     protected $kebutuhanCones;
     protected $masterRangePemesanan;
     protected $totalPoTambahanModel;
-
+    protected $otherOutModel;
 
     public function __construct()
     {
@@ -96,6 +97,7 @@ class ApiController extends ResourceController
         $this->kebutuhanCones = new KebutuhanCones();
         $this->masterRangePemesanan = new MasterRangePemesanan();
         $this->totalPoTambahanModel = new TotalPoTambahanModel();
+        $this->otherOutModel = new OtherOutModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -2102,5 +2104,145 @@ class ApiController extends ResourceController
             'message' => 'Data diterima',
             'data' => $result
         ]);
+    }
+
+    public function getDataStockAwal()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? '';
+
+        $dataStockAwal = $this->historyStock->getDataStockAwal($key, $jenis);
+
+        return $this->response->setJSON($dataStockAwal);
+    }
+
+    public function getDataDatangSolid()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? '';
+
+        $dataDatangSolid = $this->pemasukanModel->getDatangSolid($key, $jenis);
+
+        return $this->response->setJSON($dataDatangSolid);
+    }
+
+    public function getDataDatangSolidPlus()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? '';
+
+        $dataPlusDatangSolid = $this->pemasukanModel->getPlusDatangSolid($key, $jenis);
+
+        return $this->response->setJSON($dataPlusDatangSolid);
+    }
+
+    public function getDataGantiRetur()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? '';
+
+        $dataGantiRetur = $this->pemasukanModel->getGantiRetur($key, $jenis);
+
+        return $this->response->setJSON($dataGantiRetur);
+    }
+
+    public function getDataDatangLurex()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? '';
+
+        $dataDatangLurex = $this->pemasukanModel->getDatangLurex($key, $jenis);
+
+        return $this->response->setJSON($dataDatangLurex);
+    }
+
+    public function getDataDatangLurexPlus()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? '';
+
+        $dataPlusDatangLurex = $this->pemasukanModel->getPlusDatangLurex($key, $jenis);
+
+        return $this->response->setJSON($dataPlusDatangLurex);
+    }
+
+    public function getDataReturGbn()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? '';
+
+        $dataReturGbn = $this->historyStock->getDataReturGbn($key, $jenis);
+
+        return $this->response->setJSON($dataReturGbn);
+    }
+
+    public function getDataReturArea()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? '';
+
+        $dataReturArea = $this->returModel->getDataReturArea($key, $jenis);
+
+        return $this->response->setJSON($dataReturArea);
+    }
+
+    public function getDataPakaiArea()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? '';
+
+        $dataPakaiArea = $this->pengeluaranModel->getPakaiArea($key, $jenis);
+
+        return $this->response->setJSON($dataPakaiArea);
+    }
+
+    public function getDataPakaiLain()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? '';
+
+        $dataPakaiLain = $this->otherOutModel->getPakaiLain($key, $jenis);
+
+        return $this->response->setJSON($dataPakaiLain);
+    }
+
+    public function getDataReturStock()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? '';
+
+        $dataReturStock = $this->returModel->getDataReturStock($key, $jenis);
+
+        return $this->response->setJSON($dataReturStock);
+    }
+
+    public function getDataReturTitip()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? '';
+
+        $dataReturTitip = $this->returModel->getDataReturTitip($key, $jenis);
+
+        return $this->response->setJSON($dataReturTitip);
+    }
+
+    public function getDataDipinjam()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? '';
+
+        $dataOrderDipinjam = $this->pengeluaranModel->getDataDipinjam($key, $jenis);
+
+        return $this->response->setJSON($dataOrderDipinjam);
+    }
+
+    public function getDataDipindah()
+    {
+        $key = $this->request->getGet('key');
+        $jenis = $this->request->getGet('jenis') ?? '';
+
+        $dataOrderDipindah = $this->historyStock->getDataDipindah($key, $jenis);
+
+        return $this->response->setJSON($dataOrderDipindah);
     }
 }

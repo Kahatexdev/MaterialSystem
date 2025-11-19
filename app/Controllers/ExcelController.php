@@ -2255,7 +2255,7 @@ class ExcelController extends BaseController
         $dataGantiRetur = $this->pemasukanModel->getGantiRetur($key, $jenis);
         $dataDatangLurex = $this->pemasukanModel->getDatangLurex($key, $jenis);
         $dataPlusDatangLurex = $this->pemasukanModel->getPlusDatangLurex($key, $jenis);
-        $dataReturGbn = $this->returModel->getDataReturGbn($key, $jenis);
+        $dataReturGbn = $this->historyStock->getDataReturGbn($key, $jenis);
         $dataReturArea = $this->returModel->getDataReturArea($key, $jenis);
         $dataPakaiArea = $this->pengeluaranModel->getPakaiArea($key, $jenis);
         $dataPakaiLain = $this->otherOutModel->getPakaiLain($key, $jenis);

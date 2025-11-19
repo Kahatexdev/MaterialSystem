@@ -1078,6 +1078,20 @@ $routes->group(
         $routes->post('getTglScheduleBulk', 'ApiController::getTglScheduleBulk');
         $routes->get('searchStock', 'ApiController::searchStock');
         $routes->post('getAllGw', 'ApiController::getAllGw');
+        $routes->get('getDataStockAwal', 'ApiController::getDataStockAwal');
+        $routes->get('getDataDatangSolid', 'ApiController::getDataDatangSolid');
+        $routes->get('getDataDatangSolidPlus', 'ApiController::getDataDatangSolidPlus');
+        $routes->get('getDataGantiRetur', 'ApiController::getDataGantiRetur');
+        $routes->get('getDataDatangLurex', 'ApiController::getDataDatangLurex');
+        $routes->get('getDataDatangLurexPlus', 'ApiController::getDataDatangLurexPlus');
+        $routes->get('getDataReturGbn', 'ApiController::getDataReturGbn');
+        $routes->get('getDataReturArea', 'ApiController::getDataReturArea');
+        $routes->get('getDataPakaiArea', 'ApiController::getDataPakaiArea');
+        $routes->get('getDataPakaiLain', 'ApiController::getDataPakaiLain');
+        $routes->get('getDataReturStock', 'ApiController::getDataReturStock');
+        $routes->get('getDataReturTitip', 'ApiController::getDataReturTitip');
+        $routes->get('getDataDipinjam', 'ApiController::getDataDipinjam');
+        $routes->get('getDataDipindah', 'ApiController::getDataDipindah');
     }
 );
 
