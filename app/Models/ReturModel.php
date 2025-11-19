@@ -601,14 +601,32 @@ class ReturModel extends Model
 
     public function getQtyRetur($validate)
     {
-        return $this->select('retur.no_model, retur.item_type, retur.kode_warna, retur.warna as color, SUM(retur.kgs_retur) AS kgs_retur, SUM(retur.cns_retur) AS cns_retur, SUM(retur.krg_retur) AS krg_retur, GROUP_CONCAT(retur.lot_retur) AS lot_retur')
+        $builder = $this->select('retur.no_model, retur.item_type, retur.kode_warna, retur.warna as color, 
+                              SUM(retur.kgs_retur) AS kgs_retur, 
+                              SUM(retur.cns_retur) AS cns_retur, 
+                              SUM(retur.krg_retur) AS krg_retur, 
+                              GROUP_CONCAT(retur.lot_retur) AS lot_retur')
             ->where('retur.area_retur', $validate['area'])
             ->where('retur.waktu_acc_retur IS NOT NULL')
-            ->like('retur.keterangan_gbn', 'Approve')
-            ->whereIn('retur.no_model', $validate['no_model'])
-            ->whereIn('retur.item_type', $validate['item_type'])
-            ->whereIn('retur.kode_warna', $validate['kode_warna'])
-            ->whereIn('retur.warna', $validate['color'])
+            ->like('retur.keterangan_gbn', 'Approve');
+
+        if (!empty($validate['no_model'])) {
+            $builder->whereIn('retur.no_model', $validate['no_model']);
+        }
+
+        if (!empty($validate['item_type'])) {
+            $builder->whereIn('retur.item_type', $validate['item_type']);
+        }
+
+        if (!empty($validate['kode_warna'])) {
+            $builder->whereIn('retur.kode_warna', $validate['kode_warna']);
+        }
+
+        if (!empty($validate['color'])) {
+            $builder->whereIn('retur.warna', $validate['color']);
+        }
+
+        return $builder
             ->groupBy('retur.no_model')
             ->groupBy('retur.item_type')
             ->groupBy('retur.kode_warna')

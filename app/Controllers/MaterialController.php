@@ -475,13 +475,13 @@ class MaterialController extends BaseController
         $noModel = $this->request->getGet('no_model');
 
         // Inisialisasi data default
-        $order          = [];
-        $qtyPerArea          = [];
+        $order            = [];
+        $qtyPerArea       = [];
         $totalPo          = [];
-        $headerRow      = [];
-        $result         = [];
-        $areas          = [];
-        $totalPo        = 0;
+        $headerRow        = [];
+        $result           = [];
+        $areas            = [];
+        $totalPo          = 0;
         $material         = [];
         $totalAllDelivery = [];
 
@@ -525,8 +525,8 @@ class MaterialController extends BaseController
                 $style_size = $ord['size'];
                 $delivery = $ord['delivery'];
                 $area = $ord['area'];
-                $qty = $ord['qty'];
-                $sisa = $ord['sisa'];
+                $qty = floatval($ord['qty']);
+                $sisa = floatval($ord['sisa']);
 
                 if (!isset($groupedOrders[$style_size][$delivery][$area])) {
                     $groupedOrders[$style_size][$delivery][$area] = [
