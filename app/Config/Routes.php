@@ -405,6 +405,10 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('statusBahanBaku', 'ScheduleController::statusBahanBaku');
     $routes->get('filterstatusbahanbaku', 'ScheduleController::filterstatusbahanbaku');
 
+    $routes->get('jatahBahanBaku', 'MaterialController::jatahBahanBaku');
+    $routes->get('excelJatahBB', 'ExcelController::exportExcelJatahNoModel');
+
+
 
     // pengaduan
     $routes->get('pengaduan', 'ApiController::getpengaduan');
