@@ -497,26 +497,6 @@ class ReturModel extends Model
             ->findAll();
     }
 
-    public function getDataReturGbn($key, $jenis = null)
-    {
-        $builder = $this->db->table('retur')
-            ->select('retur.*')
-            ->join('master_material mm', 'mm.item_type = retur.item_type', 'left')
-            ->join('kategori_retur kr', 'retur.kategori = kr.nama_kategori', 'left')
-            ->where('retur.no_model', $key)
-            ->where('retur.area_retur', 'GUDANG BENANG')
-            ->where('kr.tipe_kategori', 'PENGEMBALIAN');
-
-        if (!empty($jenis)) {
-            $builder->where('mm.jenis', $jenis);
-        }
-
-        return $builder
-            ->groupBy('retur.id_retur')
-            ->orderBy('retur.item_type, retur.kode_warna', 'ASC')
-            ->get()
-            ->getResultArray();
-    }
     public function getDataReturArea($key, $jenis = null)
     {
         $builder = $this->db->table('retur')
@@ -524,7 +504,8 @@ class ReturModel extends Model
             ->join('master_material mm', 'mm.item_type = retur.item_type', 'left')
             ->join('kategori_retur kr', 'retur.kategori = kr.nama_kategori', 'left')
             ->where('retur.no_model', $key)
-            ->where('retur.area_retur', 'GUDANG BENANG')
+            ->where('retur.area_retur <>', 'GUDANG BENANG')
+            ->like('retur.keterangan_gbn', 'Approve')
             ->where('kr.tipe_kategori', 'PENGEMBALIAN');
 
         if (!empty($jenis)) {
@@ -545,6 +526,7 @@ class ReturModel extends Model
             ->join('kategori_retur kr', 'retur.kategori = kr.nama_kategori', 'left')
             ->where('retur.no_model', $key)
             ->where('retur.area_retur <>', 'GUDANG BENANG')
+            ->like('retur.keterangan_gbn', 'Approve')
             ->where('kr.tipe_kategori', 'SIMPAN ULANG');
 
         if (!empty($jenis)) {
@@ -565,6 +547,7 @@ class ReturModel extends Model
             ->join('kategori_retur kr', 'retur.kategori = kr.nama_kategori', 'left')
             ->where('retur.no_model', $key)
             ->where('retur.area_retur <>', 'GUDANG BENANG')
+            ->like('retur.keterangan_gbn', 'Approve')
             ->where('kr.tipe_kategori', 'BAHAN BAKU TITIP');
 
         if (!empty($jenis)) {
