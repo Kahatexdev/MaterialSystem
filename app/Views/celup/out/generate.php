@@ -484,8 +484,7 @@
                                                         <td colspan="3">
                                                             <div class="barcode-section" style="text-align:center;">
                                                                 <img src="<?= $barcode['barcode'] ?>" alt="barcode" style="max-width:100%; height:40px;">
-                                                                <div style="font-weight: bold; color: #000; margin-top:1px;" class="l-header"><?= htmlspecialchars($barcode['no_model'] ?? '-', ENT_QUOTES) ?></div>
-                                                                <div style="font-weight: bold; color: #000;" class="l-desc">Lot: <?= htmlspecialchars($barcode['lot'] ?? '-', ENT_QUOTES) ?></div>
+                                                                <div style="font-weight: bold; color: #000; margin-top:1px;" class="l-header"> PO :<?= htmlspecialchars($barcode['no_model'] ?? '-', ENT_QUOTES) ?></div>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -512,6 +511,10 @@
                                                 </table>
 
                                                 <div class="footer" style="display:flex; justify-content:flex-end; margin-top:6px;">
+                                                    <div class="footer-left" style="text-align:left; font-weight:600; font-weight: bold; color: #000;">
+                                                        <div style="font-weight: bold; color: #000;" class="l-desc">Lot: <?= htmlspecialchars($barcode['lot'] ?? '-', ENT_QUOTES) ?></div>
+
+                                                    </div>
                                                     <div class="footer-right" style="text-align:right; font-weight:600; font-weight: bold; color: #000;">
                                                         No Karung
                                                         <div class="no-karung-value" style="font-size:14px; margin-top:3px; font-weight: bold; color: #000;"><?= htmlspecialchars($barcode['no_karung'] ?? '-', ENT_QUOTES) ?></div>
