@@ -345,7 +345,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('reportPermintaanBahanBaku', 'ExcelController::reportPermintaanBahanBaku');
     // $routes->get('pemesanan/sisaKebutuhanArea_filter', 'PemesananController::sisaKebutuhanArea');
     $routes->get('pemesanan/reportSisaKebutuhanArea', 'ExcelController::reportSisaKebutuhanArea');
-    $routes->get('pemesanan/getFilterAreaRosso', 'PemesananController::getFilterAreaRosso');
+    $routes->get('pemesanan/getFilterByPemesanan', 'PemesananController::getFilterByPemesanan');
 
     $routes->get('pph', 'PphController::tampilPerModel');
     $routes->get('tampilPerStyle', 'PphController::tampilPerStyle');
@@ -379,6 +379,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('retur/returSample', 'ReturController::returSample');
     $routes->get('retur/getItemTypeForReturSample', 'ReturController::getItemTypeForReturSample');
     $routes->post('retur/saveReturSample', 'ReturController::saveReturSample');
+    $routes->get('retur/getDataRepeat', 'ReturController::getDataRepeat');
 
     //Po Plus
     $routes->get('poplus', 'PoTambahanController::index');

@@ -13,6 +13,7 @@ use App\Models\PemasukanModel;
 use App\Models\OutCelupModel;
 use App\Models\KategoriReturModel;
 use App\Models\ScheduleCelupModel;
+use App\Models\PengeluaranModel;
 use App\Models\ClusterModel;
 use App\Models\StockModel;
 
@@ -36,6 +37,7 @@ class ReturController extends BaseController
     protected $scheduleCelupModel;
     protected $clusterModel;
     protected $stockModel;
+    protected $pengeluaranModel;
 
 
     public function __construct()
@@ -50,6 +52,7 @@ class ReturController extends BaseController
         $this->scheduleCelupModel = new ScheduleCelupModel();
         $this->clusterModel = new ClusterModel();
         $this->stockModel = new StockModel();
+        $this->pengeluaranModel = new PengeluaranModel();
 
         $this->role = session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
@@ -89,6 +92,10 @@ class ReturController extends BaseController
         // dd($tglReq);
         // Ambil data hanya jika ada filter
         $retur = $isFiltered ? $this->returModel->getFilteredData($this->request->getGet()) : $dataRetur;
+
+        // ambil data no model untuk acc retur repeat
+        $listModel = $this->materialModel->getAllNoModel();
+
         $data = [
             'title' => 'Retur',
             'retur' => $retur,
@@ -98,7 +105,8 @@ class ReturController extends BaseController
             'role' => $this->role,
             'filters' => $this->filters,
             'isFiltered' => $isFiltered,
-            'tglReq' => $tglReq
+            'tglReq' => $tglReq,
+            'listModel' => $listModel
         ];
 
         return view($data['role'] . '/retur/index', $data);
@@ -661,5 +669,38 @@ class ReturController extends BaseController
 
             return redirect()->to(base_url($this->role . '/retur/returSample'));
         }
+    }
+    public function getDataRepeat()
+    {
+        $idRetur = $this->request->getGet('id_retur');
+
+        $data = $this->returModel->find($idRetur);
+
+        $no_model   = $data['no_model'] ?? null;
+        $item_type  = $data['item_type'] ?? null;
+        $kode_warna = $data['kode_warna'] ?? null;
+        $warna      = $data['warna'] ?? null;
+        $area       = $data['area_retur'] ?? null;
+        $tgl_retur  = $data['tgl_retur'] ?? null;
+        $lot_retur  = $data['lot_retur'] ?? null;
+        $kategori   = $data['kategori'] ?? null;
+        $catatan    = $post['catatan'] ?? '';
+
+        // ambil semua retur matching yang belum di-acc
+        $builder = $this->returModel->table('retur');
+        $builder->where('no_model', $no_model)
+            ->where('item_type', $item_type)
+            ->where('kode_warna', $kode_warna)
+            ->where('warna', $warna)
+            ->where('area_retur', $area)
+            ->where('tgl_retur', $tgl_retur)
+            ->where('lot_retur', $lot_retur)
+            ->where('kategori', $kategori)
+            ->where('waktu_acc_retur IS NULL', null, false);
+
+        $rows = $builder->get()->getResultArray();
+        // ↑ ini data per karung sesuai kebutuhanmu
+
+        return $this->response->setJSON($rows);
     }
 }
