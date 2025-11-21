@@ -219,4 +219,37 @@ class HistoryStock extends Model
             ->get()
             ->getResultArray();
     }
+
+    public function getDataReturGbn($key, $jenis = null)
+    {
+        $builder = $this->db->table('history_stock')
+            ->select('history_stock.id_history_pindah, history_stock.id_stock_old, history_stock.keterangan, s.no_model, s.item_type, s.kode_warna, s.warna, mm.jenis, kr.tipe_kategori, kr.nama_kategori')
+            ->join('stock s', 's.id_stock = history_stock.id_stock_old', 'left')
+            ->join('master_material mm', 'mm.item_type = s.item_type', 'left')
+            ->join(
+                'kategori_retur kr',
+                "kr.nama_kategori = TRIM(
+                SUBSTRING(
+                    history_stock.keterangan,
+                    LOCATE('(', history_stock.keterangan) + 1,
+                    LOCATE(')', history_stock.keterangan) - LOCATE('(', history_stock.keterangan) - 1
+                )
+            )",
+                'left',
+                false // <-- FIX INTI
+            )
+            ->where('s.no_model', $key)
+            ->like('history_stock.keterangan', 'Retur Celup') // tambahan biar pasti dapat pola kurung
+            ->where('kr.tipe_kategori', 'PENGEMBALIAN');
+
+        if (!empty($jenis)) {
+            $builder->where('mm.jenis', $jenis);
+        }
+
+        return $builder
+            ->groupBy('history_stock.id_history_pindah')
+            ->orderBy('s.item_type, s.kode_warna', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
 }

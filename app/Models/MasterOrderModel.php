@@ -553,6 +553,18 @@ class MasterOrderModel extends Model
             AND hs.keterangan = 'Pindah Order'
         ) AS stock_awal,
 
+        -- lot awal
+        (
+            SELECT hs.lot
+            FROM history_stock hs
+            LEFT JOIN stock s ON s.id_stock = hs.id_stock_new
+            WHERE s.no_model = master_order.no_model
+            AND s.item_type = material.item_type
+            AND s.kode_warna = material.kode_warna
+            AND hs.keterangan = 'Pindah Order'
+            LIMIT 1
+        ) AS lot_awal,
+
         -- stock akhir
         (
             SELECT SUM(COALESCE(s.kgs_in_out, 0))
