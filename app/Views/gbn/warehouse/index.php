@@ -1066,7 +1066,7 @@
             // Perbarui judul modal dengan nama cluster
             $('#modalPengeluaranSelainOrderLabel').text(`Pengeluaran Selain Order - ${namaCluster}`);
 
-            $.post(`${base}${role}/warehouse/getPindahOrder`, {
+            $.post(`${base}${role}/warehouse/getPindahOrderTest`, {
                 id_stock: idStock
             }, res => {
                 $container.empty();

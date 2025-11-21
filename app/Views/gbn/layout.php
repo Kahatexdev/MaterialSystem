@@ -226,6 +226,15 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link <?= set_active($active . '/jatahBahanBaku') ?> " href="<?= base_url(session()->get('role') . '/jatahBahanBaku') ?>">
+                        <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fa-solid fa-boxes-stacked text-dark"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Jatah Bahan Baku</span>
+                    </a>
+                </li>
+
             </ul>
         </div>
 

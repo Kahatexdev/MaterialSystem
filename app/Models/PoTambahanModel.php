@@ -111,9 +111,33 @@ class PoTambahanModel extends Model
                 AND m2.kode_warna = material.kode_warna
                 AND m2.style_size = material.style_size
         ) AS composition,
-        material.gw,
-        material.qty_pcs,
-        material.loss
+        (
+            SELECT MAX(NULLIF(m2.gw, 0))
+            FROM material m2
+            WHERE 
+                m2.id_order = material.id_order
+                AND m2.item_type = material.item_type
+                AND m2.kode_warna = material.kode_warna
+                AND m2.style_size = material.style_size
+        ) AS gw,
+        (
+            SELECT MAX(NULLIF(m2.qty_pcs, 0))
+            FROM material m2
+            WHERE 
+                m2.id_order = material.id_order
+                AND m2.item_type = material.item_type
+                AND m2.kode_warna = material.kode_warna
+                AND m2.style_size = material.style_size
+        ) AS qty_pcs,
+        (
+            SELECT MAX(NULLIF(m2.loss, 0))
+            FROM material m2
+            WHERE 
+                m2.id_order = material.id_order
+                AND m2.item_type = material.item_type
+                AND m2.kode_warna = material.kode_warna
+                AND m2.style_size = material.style_size
+        ) AS loss
     ")
             ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
             ->join('total_potambahan', 'po_tambahan.id_total_potambahan = total_potambahan.id_total_potambahan', 'left')
