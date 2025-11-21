@@ -376,16 +376,38 @@
         try {
             setAreaLoading();
 
-            const urlAreaRosso = "<?= base_url($role . '/pemesanan/getFilterAreaRosso?no_model=') ?>" + encodeURIComponent(noModel);
+            const urlAreaByPemesanan = "<?= base_url($role . '/pemesanan/getFilterByPemesanan?no_model=') ?>" + encodeURIComponent(noModel);
 
             const [resApi, resPemesanan] = await Promise.all([
                 fetch(`http://172.23.44.14/CapacityApps/public/api/getFilterArea?no_model=${encodeURIComponent(noModel)}`),
-                fetch(urlAreaRosso, {
+                fetch(urlAreaByPemesanan, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 })
             ]);
+            // const payloadApi = await resApi.json();
+            // const payloadPemesanan = await resPemesanan.json();
+
+            // // Ambil area dari API utama
+            // const areasFromApi = parseAreasPayload(payloadApi); // hasil = array ["ROSSO", "TWIST", ...]
+
+            // // Ambil area dari pemesanan (CI4)
+            // const areasFromPemesanan = payloadPemesanan.map(item => item.admin);
+
+            // // Gabungkan lalu GROUP (hilangkan duplikat)
+            // const allAreas = [...new Set([
+            //     ...areasFromApi,
+            //     ...areasFromPemesanan
+            // ])];
+
+            // // Atur kembali select option
+            // const currentValue = keepSelected ? areaSelect.value : null;
+            // setAreaOptions(allAreas, currentValue);
+
+            // if (!keepSelected) {
+            //     areaSelect.value = '';
+            // }
 
             const payloadApi = await resApi.json();
             const payloadPemesanan = await resPemesanan.json();
