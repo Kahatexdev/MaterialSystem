@@ -1448,4 +1448,15 @@ class MaterialModel extends Model
             ->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color')
             ->findAll();
     }
+    public function getMaterialNo(array $validate)
+    {
+        $row = $this->select('material.material_nr')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->where('master_order.no_model', $validate['no_model'])
+            ->where('material.item_type', $validate['item_type'])
+            ->where('material.kode_warna', $validate['kode_warna'])
+            ->first();    // ambil satu baris
+
+        return $row ? $row['material_nr'] : null;
+    }
 }

@@ -534,10 +534,20 @@ class WarehouseController extends BaseController
                     ];
                 }
 
+                $JsonData = [];
                 foreach ($dataStock as $key => $stock) {
                     $idOut   = $idOutCelup[$key] ?? null;
                     $idRetur = $this->request->getPost('id_retur')[$key] ?? null;
-
+                    // get material model 
+                    $material = $this->materialModel->getMaterialNo($stock);
+                    $JsonData[] = [
+                        'no_model' => $stock['no_model'],
+                        'material_nr' => $material,
+                        'item_type' => $stock['item_type'],
+                        'qty' => $stock['kgs_in_out'],
+                        'storage_from' => 'cns',
+                        'storage_to' => 'GBN'
+                    ];
                     // Cek stock existing
                     $existingStock = $this->stockModel
                         ->where('no_model', $stock['no_model'])
@@ -558,42 +568,16 @@ class WarehouseController extends BaseController
                         $this->stockModel->insert($stock);
                         $idStok = $this->stockModel->getInsertID();
                     }
-
-                    // Update id_stock di pemasukan
-                    $sql = "
-                    UPDATE pemasukan p
-                    INNER JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
-                    LEFT JOIN retur r ON r.id_retur = oc.id_retur
-                    LEFT JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
-                    SET p.id_stock = ?
-                    WHERE
-                        (
-                            r.id_retur IS NOT NULL 
-                            AND r.id_retur = ?
-                        )
-                        OR
-                        (
-                            r.id_retur IS NULL 
-                            AND oc.id_out_celup = ?
-                        )
-                    AND COALESCE(r.no_model, oc.no_model) = ?
-                    AND COALESCE(r.item_type, sc.item_type) = ?
-                    AND COALESCE(r.kode_warna, sc.kode_warna) = ?
-                    AND p.nama_cluster = ?
-                ";
-
-                    $params = [
+                    $this->pemasukanModel->updateIdStock(
                         $idStok,
                         $idRetur,
                         $idOut,
-                        $stock['no_model'],
-                        $stock['item_type'],
-                        $stock['kode_warna'],
-                        $stock['nama_cluster']
-                    ];
-
-                    $this->db->query($sql, $params);
+                        $stock
+                    );
                 }
+                // dd($JsonData);
+                // send data to ERP
+               $url = 'http://172.23.44.21/ERP/UpdateStockErp' ;
 
                 session()->setFlashdata('success', 'Data berhasil dimasukkan.');
             }
@@ -604,7 +588,7 @@ class WarehouseController extends BaseController
         return redirect()->to($this->role . '/pemasukan');
     }
 
-
+    }
     private function prosesKomplain()
     {
         $checkedIds = $this->request->getPost('checked_id');

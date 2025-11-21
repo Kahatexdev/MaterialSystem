@@ -819,4 +819,38 @@ class PemasukanModel extends Model
         $query = $db->query($sql, $params);
         return $query->getResultArray();
     }
+    public function updateIdStock($idStok, $idRetur, $idOut, $stock)
+    {
+        $sql = "
+            UPDATE pemasukan p
+            INNER JOIN out_celup oc ON oc.id_out_celup = p.id_out_celup
+            LEFT JOIN retur r ON r.id_retur = oc.id_retur
+            LEFT JOIN schedule_celup sc ON sc.id_celup = oc.id_celup
+            SET p.id_stock = ?
+            WHERE
+                (
+                    r.id_retur IS NOT NULL 
+                    AND r.id_retur = ?
+                )
+                OR
+                (
+                    r.id_retur IS NULL 
+                    AND oc.id_out_celup = ?
+                )
+            AND COALESCE(r.no_model, oc.no_model) = ?
+            AND COALESCE(r.item_type, sc.item_type) = ?
+            AND COALESCE(r.kode_warna, sc.kode_warna) = ?
+            AND p.nama_cluster = ?
+        ";
+
+        return $this->db->query($sql, [
+            $idStok,
+            $idRetur,
+            $idOut,
+            $stock['no_model'],
+            $stock['item_type'],
+            $stock['kode_warna'],
+            $stock['nama_cluster']
+        ]);
+    }
 }

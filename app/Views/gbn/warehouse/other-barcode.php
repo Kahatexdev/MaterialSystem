@@ -187,7 +187,9 @@
                         <td colspan="3">
                             <div class="barcode-section">
                                 <img src="<?= $barcodeImages[$i] ?>" alt="barcode">
-                                <div style="margin-top: 1px;" class="l-header"> <?= $row['no_model'] ?? '-' ?></div>
+                                <div style="margin-top: 1px;" class="l-header">
+                                    <div class="lot-label">PO :</div> <?= $row['no_model'] ?? '-' ?>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -214,6 +216,8 @@
                 <div class="footer">
                     <div class="footer-left">
                         <!-- <div class="lot-label">LOT</div> -->
+                        <div class="lot-label">LOT CELUP :</div>
+
                         <div class="lot-value"> <?= $row['lot_kirim'] ?></div>
                     </div>
                     <div class="footer-right">
