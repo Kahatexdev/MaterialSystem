@@ -94,24 +94,27 @@
         }
 
         .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
+            position: relative;
             width: 100%;
-            margin-top: 20px;
+            margin-top: 30px;
             padding-left: 5px;
             padding-right: 5px;
             font-size: 11px;
+            height: 50px;
         }
 
         .footer-left {
+            position: absolute;
+            left: 5px;
+            bottom: 0;
+            text-align: left;
+            max-width: 60%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-        }
-
-        .footer-right {
-            text-align: right;
         }
 
         .footer-left>div:first-child {
@@ -121,7 +124,7 @@
         .footer-right {
             position: absolute;
             right: 10px;
-            /* bottom: 0; */
+            bottom: 0;
             text-align: right;
             margin-top: 20px;
             max-width: 35%;
