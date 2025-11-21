@@ -96,7 +96,7 @@
         .footer {
             position: relative;
             width: 100%;
-            margin-top: 30px;
+            margin-top: 25px;
             padding-left: 5px;
             padding-right: 5px;
             font-size: 11px;
@@ -126,9 +126,10 @@
             right: 10px;
             bottom: 0;
             text-align: right;
-            margin-top: 20px;
+            margin-top: 10px;
             max-width: 35%;
         }
+
 
         .lot-label {
             font-size: 11px;
@@ -139,13 +140,21 @@
 
         .lot-value {
             margin: 0;
-            font-size: 40px;
             font-weight: bold;
             line-height: 0.9;
             word-wrap: break-word;
             overflow-wrap: break-word;
             display: inline-block;
             vertical-align: bottom;
+        }
+
+        .lot-normal {
+            font-size: 40px;
+        }
+
+        .lot-small {
+            font-size: 28px;
+            /* adjust sesuai desain */
         }
 
         .no-karung-value {
@@ -176,12 +185,14 @@
             font-weight: bold;
             padding-left: 5px;
             /* padding-right: 5px; */
+            bottom: 0;
             text-align: right;
         }
     </style>
 </head>
 
-<?php foreach ($detailBon as $i => $row): ?>
+<?php
+foreach ($detailBon as $i => $row): ?>
 
     <body>
         <div class="label-container">
@@ -236,13 +247,14 @@
                     <div class="footer-left">
                         <div class="lot-label">LOT CELUP :</div>
                         <!-- <p> <sup> Lot Celup: </sup></p> -->
-                        <div class="lot-value mt-1" style="margin-top: 1px;"> <?= $row['lot_kirim'] ?></div>
+                        <div class="lot-value <?= $row['lotClass'] ?>" style="margin-top: 1px;"> <?= $row['lot_kirim'] ?></div>
 
                     </div>
                     <div class="footer-right">
                         No Karung
                         <div class="no-karung-value"><?= htmlspecialchars($row['no_karung'] ?? '-', ENT_QUOTES) ?></div>
                         <?= htmlspecialchars($row['operator_packing'] ?? '-', ENT_QUOTES) ?> | <?= htmlspecialchars($row['shift'] ?? '-', ENT_QUOTES) ?>
+                        <!-- <div class="tgl-datang"><?= $dataBon['tgl_datang'] ?></div> -->
                     </div>
                 </div>
                 <div class="tgl-datang"><?= $dataBon['tgl_datang'] ?></div>

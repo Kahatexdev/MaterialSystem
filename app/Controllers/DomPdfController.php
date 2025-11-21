@@ -71,6 +71,9 @@ class DomPdfController extends BaseController
             }
             $row['operator_packing'] = $operatorShort;
             $row['no_model'] = $noModel;
+            $lot = $row['lot_kirim'];
+            $lotClass = (strlen($lot) > 10) ? 'lot-small' : 'lot-normal';
+            $row['lotClass'] = (strlen($lot) > 10) ? 'lot-small' : 'lot-normal';
         }
         unset($row); // break the reference
 
@@ -82,6 +85,7 @@ class DomPdfController extends BaseController
             'img' => $img,
             'barcodeImages' => $barcodeImages,
             'operatorShort' => $operatorShort,
+            'lotClass' => $operatorShort,
         ]);
 
         $dompdf->loadHtml($html);
