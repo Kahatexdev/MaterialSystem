@@ -100,7 +100,7 @@
             padding-left: 5px;
             padding-right: 5px;
             font-size: 11px;
-            height: 50px;
+            height: 55px;
         }
 
         .footer-left {
