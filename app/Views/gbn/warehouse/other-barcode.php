@@ -192,7 +192,7 @@
 </head>
 
 <?php
-foreach ($detailBon as $i => $row): ?>
+foreach ($dataList as $i => $row): ?>
 
     <body>
         <div class="label-container">
