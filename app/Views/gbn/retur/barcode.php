@@ -192,7 +192,7 @@
 </head>
 
 <?php
-foreach ($detailBon as $i => $row): ?>
+foreach ($dataList as $i => $row): ?>
 
     <body>
         <div class="label-container">
@@ -224,10 +224,6 @@ foreach ($detailBon as $i => $row): ?>
                             <div class="data-section">
                                 <div>Item : <?= $row['item_type'] ?></div>
                                 <div>Kode : <?= $row['kode_warna'] ?>/ <?= $row['warna'] ?><?= !empty($row['bentuk_celup']) ? ' (' . $row['bentuk_celup'] . ')' : '' ?></div>
-
-                                <!-- <div class="nums">GW : <?= $row['gw_kirim'] ?> kg</div>
-                                <div class="nums">NW : <?= $row['kgs_kirim'] ?> kg</div>
-                                <div class="nums">Cones : <?= $row['cones_kirim'] ?></div> -->
                             </div>
                         </td>
                     </tr>
@@ -253,11 +249,9 @@ foreach ($detailBon as $i => $row): ?>
                     <div class="footer-right">
                         No Karung
                         <div class="no-karung-value"><?= htmlspecialchars($row['no_karung'] ?? '-', ENT_QUOTES) ?></div>
-                        <?= htmlspecialchars($row['operator_packing'] ?? '-', ENT_QUOTES) ?> | <?= htmlspecialchars($row['shift'] ?? '-', ENT_QUOTES) ?>
-                        <!-- <div class="tgl-datang"><?= $dataBon['tgl_datang'] ?></div> -->
+                        <?= $row['kategori'] ?? '-' ?>
                     </div>
                 </div>
-                <div class="tgl-datang"><?= $dataBon['tgl_datang'] ?></div>
             </div>
         </div>
         </div>
