@@ -117,7 +117,7 @@
             <div class="row mt-2">
                 <div class="col-md-3">
                     <label for="">No Model</label>
-                    <input type="text" class="form-control">
+                    <input type="text" class="form-control" id="noModel">
                 </div>
                 <div class="col-md-3">
                     <label for="">Aksi</label><br>
@@ -272,10 +272,12 @@
                             const returTitip = Number(item.retur_titip) || 0;
                             const dipinjam = Number(item.dipinjam) || 0;
                             const pindahOrder = Number(item.pindah_order) || 0;
+                            const returCelup = Number(item.retur_celup) || 0;
 
                             // perhitungan
                             const tagihanGbn = kgs - (datangSolid + plusDatangSolid + kgsStockAwal);
-                            const jatahArea = kgs - pakaiArea;
+                            const jatahArea = kgs + poTambahan - pakaiArea;
+                            // const jatah_area = $id['kgs_pakai_area'] - $id['retur_area'] - $id['retur_stock_area'] - $id['retur_titip_area'] - $id['kg_psn'] - $id['kg_psn_tambahan'];
 
                             // fungsi bantu untuk format
                             const fmt = v => v !== 0 ? v.toFixed(2) : '0';
@@ -296,7 +298,7 @@
                                 fmt(gantiRetur), // ganti retur
                                 fmt(datangLurex), // datang lurex
                                 fmt(plusDatangLurex), // (+) datang lurex
-                                fmt(returPbGbn), // retur pb gbn
+                                fmt(returCelup), // retur pb gbn
                                 fmt(returPbArea), // retur pb area
                                 fmt(pakaiArea), // pakai area 
                                 fmt(kgsOtherOut), // pakai lain-lain
@@ -351,6 +353,14 @@
 
         // Sembunyikan tombol Export Excel
         $('#btnExport').addClass('d-none');
+    });
+
+    // Trigger pencarian saat tombol Enter ditekan di input apa pun
+    $('#noModel').on('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Hindari form submit default (jika ada form)
+            $('#btnSearch').click(); // Trigger tombol Search
+        }
     });
 </script>
 
