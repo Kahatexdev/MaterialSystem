@@ -93,9 +93,6 @@ class ReturController extends BaseController
         // Ambil data hanya jika ada filter
         $retur = $isFiltered ? $this->returModel->getFilteredData($this->request->getGet()) : $dataRetur;
 
-        // ambil data no model untuk acc retur repeat
-        $listModel = $this->materialModel->getAllNoModel();
-
         $data = [
             'title' => 'Retur',
             'retur' => $retur,
@@ -105,8 +102,7 @@ class ReturController extends BaseController
             'role' => $this->role,
             'filters' => $this->filters,
             'isFiltered' => $isFiltered,
-            'tglReq' => $tglReq,
-            'listModel' => $listModel
+            'tglReq' => $tglReq
         ];
 
         return view($data['role'] . '/retur/index', $data);

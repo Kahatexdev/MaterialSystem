@@ -16,21 +16,6 @@
         color: #b02a37;
         transform: scale(1.2);
     }
-
-    .add-more-repeat-btn {
-        background: transparent;
-        border: none;
-        font-size: 16px;
-        line-height: 1;
-        color: #c8f7c5;
-        cursor: pointer;
-        font-weight: bold;
-    }
-
-    .add-more-repeat-btn:hover {
-        color: #2d7a2d;
-        transform: scale(1.2);
-    }
 </style>
 
 
@@ -170,9 +155,9 @@
                                                     <button type="button" class="btn btn-info " data-bs-toggle="modal" data-bs-target="#acceptModal<?= $row['id_retur'] ?>">
                                                         <i class="fas fa-check"></i> Accept
                                                     </button>
-                                                    <!-- <button type="button" class="btn btn-warning open-repeat-modal" data-id-retur="<?= $row['id_retur'] ?>" data-bs-toggle="modal" data-bs-target="#acceptRepeatModal<?= $row['id_retur'] ?>">
+                                                    <button type="button" class="btn btn-warning open-repeat-modal" data-id-retur="<?= $row['id_retur'] ?>" data-bs-toggle="modal" data-bs-target="#acceptRepeatModal<?= $row['id_retur'] ?>">
                                                         <i class="fas fa-check"></i> Repeat
-                                                    </button> -->
+                                                    </button>
                                                     <button type="button" class="btn btn-danger " data-bs-toggle="modal" data-bs-target="#rejectModal<?= $row['id_retur'] ?>">
                                                         <i class="fas fa-times"></i> Reject
                                                     </button>
@@ -341,14 +326,23 @@
                             let old = item.find('.old-model').val() || '';
                             let kode = item.find('.kode-warna').val() || '';
                             return {
-                                q: params.term,
+                                term: params.term,
                                 old: old,
                                 kode: kode
                             };
                         }.bind(this),
-                        processResults: function(data) {
+                        processResults: function(response) {
+                            let arr = response.data || [];
+
+                            let results = arr.map(function(item) {
+                                return {
+                                    id: item.no_model + ' | ' + item.item_type + ' | ' + item.kode_warna + ' | ' + item.color,
+                                    text: item.no_model + ' | ' + item.item_type + ' | ' + item.kode_warna + ' | ' + item.color
+                                };
+                            });
+
                             return {
-                                results: data
+                                results: results
                             };
                         }
                     }
@@ -386,11 +380,11 @@
                             no_model: '',
                             kg: '',
                             cones: '',
-                        }, 0);
+                        }, 0, idRetur);
                         wrapper.append(emptyHtml);
                     } else {
                         res.forEach(function(item, idx) {
-                            let html = buildRepeatItem(item, idx);
+                            let html = buildRepeatItem(item, idx, idRetur);
                             wrapper.append(html);
                         });
                     }
@@ -406,43 +400,45 @@
         });
 
         function renderHeaderReturData(item) {
-            let kgVal = item.kgs_retur ?? item.kg ?? '';
-            let conesVal = item.cns_retur ?? item.cones ?? '';
-            let noKrgVal = item.krg_retur ?? item.no_karung ?? '';
-            let lotVal = item.lot_retur ?? item.lot ?? '';
+            let areaVal = item.area ?? '';
+            let modelVal = item.no_model ?? '';
+            let itemTypeVal = item.item_type ?? '';
+            let kodeWarnaVal = item.kode_warna ?? '';
+            let warnaVal = item.warna ?? '';
 
             $("#headerReturData").html(`
-                <div class="row">
+                <div class="row g-3">
                     <div class="col-lg-3">
-                        <label>KG Retur</label>
-                        <input type="text" class="form-control" value="${kgVal}" readonly>
+                        <label>No Model</label>
+                        <input type="text" class="form-control old-model" value="${modelVal}" readonly>
                     </div>
 
                     <div class="col-lg-3">
-                        <label>Cones Retur</label>
-                        <input type="text" class="form-control" value="${conesVal}" readonly>
+                        <label>Item Type</label>
+                        <input type="text" class="form-control" value="${itemTypeVal}" readonly>
                     </div>
 
                     <div class="col-lg-3">
-                        <label>No Karung Retur</label>
-                        <input type="text" class="form-control" value="${noKrgVal}" readonly>
+                        <label>Kode Warna</label>
+                        <input type="text" class="form-control kode-warna" value="${kodeWarnaVal}" readonly>
                     </div>
 
                     <div class="col-lg-3">
-                        <label>Lot Retur</label>
-                        <input type="text" class="form-control" value="${lotVal}" readonly>
+                        <label>Warna</label>
+                        <input type="text" class="form-control" value="${warnaVal}" readonly>
                     </div>
                 </div>
             `);
         }
 
         // helper build repeat item HTML (string)
-        function buildRepeatItem(item, index) {
+        function buildRepeatItem(item, index, idRetur) {
             console.log(item);
             console.log("INDEX:", index);
             // item: { id_karung, no_model, kg, cones, keterangan }
             // index digunakan untuk menentukan tombol hapus (sembunyikan pada pertama)
             let noModelVal = item.no_model ?? '';
+            let kodeWarnaVal = item.kode_warna ?? '';
             let kgVal = item.kgs_retur ?? item.kg ?? '';
             let conesVal = item.cns_retur ?? item.cones ?? '';
             let noKrgVal = item.krg_retur ?? item.no_karung ?? '';
@@ -450,43 +446,76 @@
 
             return `
                 <div class="repeat-item mb-3 border rounded p-3 position-relative">
+                    <input type="hidden" class="id-retur" value="${idRetur}">
                     <input type="hidden" class="old-model" value="${noModelVal}">
-                    <input type="hidden" class="kode-warna" value="">
+                    <input type="hidden" class="kode-warna" value="${kodeWarnaVal}">
+                    <input type="hidden" class="no-krg" value="${noKrgVal}">
 
-                   ${index === 0 ? `
-                        <button type="button" class="btn btn-success btn-sm mt-2 add-more-repeat-btn" data-id-retur="<?= $row['id_retur'] ?>">
-                            +
-                        </button>
-                    ` : `
-                        <button type="button" class="btn-remove-repeat position-absolute top-0 end-0 p-1 m-1"
-                            style="border:none; background:#f8d7da; color:#a00; border-radius:4px; font-weight:bold;">
-                            ×
-                        </button>
-                    `}
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>KG Retur</label>
+                            <input type="text" class="form-control max-kg" value="${kgVal}" readonly>
+                        </div>
+
+                        <div class="col-lg-3">
+                            <label>Cones Retur</label>
+                            <input type="text" class="form-control max-cns" value="${conesVal}" readonly>
+                        </div>
+
+                        <div class="col-lg-3">
+                            <label>No Karung Retur</label>
+                            <input type="text" class="form-control" value="${noKrgVal}" readonly>
+                        </div>
+
+                        <div class="col-lg-3">
+                            <label>Lot Retur</label>
+                            <input type="text" class="form-control" value="${lotVal}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="repeat-lines mt-4" data-id-retur=${idRetur}">
+                        ${buildRepeatLine(noModelVal, idRetur, 0)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function buildRepeatLine(noModelVal, idRetur, index) {
+            let removeBtn = index > 0 ?
+                `<button type="button" class="btn btn-danger w-100 btn-remove-line" style="border:none; background:#f8d7da; color:#a00; border-radius:4px; font-weight:bold;">
+                    <i class="fas fa-times"></i>
+                </button>` :
+                `<button type="button" class="btn btn-success w-100 add-more-repeat-btn" style="margin-top: 1.8rem; border:none; background:#d4edda; color:#155724; border-radius:4px; font-weight:bold;" data-id-retur="${idRetur}">
+                    <i class="fas fa-plus"></i>
+                </button>`;
+
+            return `
+                <div class="repeat-line mb-3 border p-2 rounded">
 
                     <div class="form-group mb-2">
                         <label>No Model Repeat</label>
                         <select name="model_repeat[]" class="form-control select2-repeat" required>
-                            ${ noModelVal ? `<option value="${noModelVal}" selected>${noModelVal}</option>` : '' }
                         </select>
                     </div>
 
-                    <div class="form-group mb-2">
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <label>KG Repeat</label>
-                                <input type="number" name="kg_repeat[]" step="0.01" min="0"
-                                       class="form-control kg-input"
-                                       value=0 required>
-                            </div>
-                            <div class="col-lg-4">
-                                <label>Cones Repeat</label>
-                                <input type="number" name="cones_repeat[]" step="1" min="0"
-                                       class="form-control cones-input"
-                                       value=0 required>
-                            </div>
+                    <div class="row">
+                        <div class="col-lg-5">
+                            <label>KG Repeat</label>
+                            <input type="number" name="kg_repeat[]" step="0.01" min="0"
+                                class="form-control kg-input" value="0" required>
+                        </div>
+
+                        <div class="col-lg-5">
+                            <label>Cones Repeat</label>
+                            <input type="number" name="cones_repeat[]" step="1" min="0"
+                                class="form-control cones-input" value="0" required>
+                        </div>
+
+                        <div class="col-lg-2 d-flex align-items-end">
+                            ${removeBtn}
                         </div>
                     </div>
+
                 </div>
             `;
         }
@@ -494,58 +523,58 @@
         // add more repeat - delegasi karena button dihasilkan dinamis
         $(document).on('click', '.add-more-repeat-btn', function() {
             let idRetur = $(this).data('id-retur');
-            let wrapper = $('#repeatWrapper' + idRetur);
 
-            // hitung jumlah existing items
-            let newIndex = wrapper.find('.repeat-item').length;
+            // Cari parent repeat-item
+            let container = $(this).closest('.repeat-item').find('.repeat-lines');
 
-            // generate row baru dengan index yg benar
-            let newItemHtml = buildRepeatItem({
-                no_model: '',
-                kg: '',
-                cones: '',
-                keterangan: ''
-            }, newIndex);
+            // Hitung baris yang sudah ada per ID-retur / per repeat-item
+            let index = container.find('.repeat-line').length;
 
-            wrapper.append(newItemHtml);
-            initSelect2In(wrapper.closest('.modal'));
+            // Baris baru
+            container.append(buildRepeatLine("", idRetur, index));
         });
 
-        // remove repeat
-        $(document).on('click', '.btn-remove-repeat', function() {
-            $(this).closest('.repeat-item').remove();
+        $(document).on('click', '.btn-remove-line', function() {
+            $(this).closest('.repeat-line').remove();
         });
 
-        // VALIDASI TOTAL KGS & CONES (delegated input)
-        $(document).on('input', "#repeatWrapper[data-maxkg] input[name='kg_repeat[]'], #repeatWrapper[data-maxcns] input[name='cones_repeat[]']", function() {
-            let modal = $(this).closest('.modal');
-            let wrapper = modal.find("[id^=repeatWrapper]");
 
-            let maxKg = parseFloat(wrapper.data('maxkg')) || 0;
-            let maxCns = parseFloat(wrapper.data('maxcns')) || 0;
+        // VALIDASI TOTAL PER ID_RETUR (menggunakan wrapper spesifik)
+        $(document).on('input', '.kg-input', function() {
 
+            // cari parent repeat-item
+            let item = $(this).closest('.repeat-item');
+
+            // ambil max kg untuk ID retur ini
+            let maxKg = parseFloat(item.find('.max-kg').val()) || 0;
+            let noKrg = parseFloat(item.find('.no-krg').val()) || 0;
+
+            // hitung total semua baris kg di repeat-lines dalam item ini saja
             let totalKg = 0;
-            let totalCns = 0;
-
-            wrapper.find("input[name='kg_repeat[]']").each(function() {
+            item.find('.kg-input').each(function() {
                 totalKg += parseFloat($(this).val()) || 0;
             });
 
-            wrapper.find("input[name='cones_repeat[]']").each(function() {
+            // kalau total melebihi batas
+            if (totalKg > maxKg) {
+                Swal.fire("Warning", "Total KG no karung " + noKrg + " tidak boleh melebihi " + maxKg + "kg", "warning");
+                $(this).val(0);
+            }
+        });
+        $(document).on('input', '.cones-input', function() {
+
+            let item = $(this).closest('.repeat-item');
+            let maxCns = parseFloat(item.find('.max-cns').val()) || 0;
+            let noKrg = parseFloat(item.find('.no-krg').val()) || 0;
+
+            let totalCns = 0;
+            item.find('.cones-input').each(function() {
                 totalCns += parseFloat($(this).val()) || 0;
             });
 
-            // jika melebihi, batalkan perubahan terakhir
-            if (totalKg > maxKg) {
-                Swal.fire('Warning', 'Total KG tidak boleh melebihi ' + maxKg, 'warning');
-                $(this).val('');
-                return;
-            }
-
             if (totalCns > maxCns) {
-                Swal.fire('Warning', 'Total CONES tidak boleh melebihi ' + maxCns, 'warning');
-                $(this).val('');
-                return;
+                Swal.fire("Warning", "Total Cones no karung " + noKrg + " tidak boleh melebihi " + maxCns + "cns", "warning");
+                $(this).val(0);
             }
         });
 

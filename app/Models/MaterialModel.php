@@ -1459,17 +1459,6 @@ class MaterialModel extends Model
 
         return $row ? $row['material_nr'] : null;
     }
-    public function getAllNoModel()
-    {
-        $builder =  $this->select('material.item_type, material.kode_warna, master_order.no_model, material.color')
-            ->join('master_order', 'master_order.id_order = material.id_order')
-            // ->where('master_order.no_model !=', $noModelOld)
-            ->where('material.color IS NOT NULL')
-            // ->where('material.kode_warna', $kodeWarna)
-            ->groupBy('master_order.no_model, material.item_type, material.kode_warna');
-
-        return $builder->get()->getResultArray();
-    }
     public function getPphByBb($data)
     {
         $builder = $this->select('
