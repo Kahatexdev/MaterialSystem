@@ -96,7 +96,7 @@
         .footer {
             position: relative;
             width: 100%;
-            margin-top: 30px;
+            margin-top: 25px;
             padding-left: 5px;
             padding-right: 5px;
             font-size: 11px;
@@ -126,9 +126,10 @@
             right: 10px;
             bottom: 0;
             text-align: right;
-            margin-top: 20px;
+            margin-top: 10px;
             max-width: 35%;
         }
+
 
         .lot-label {
             font-size: 11px;
@@ -139,13 +140,21 @@
 
         .lot-value {
             margin: 0;
-            font-size: 40px;
             font-weight: bold;
             line-height: 0.9;
             word-wrap: break-word;
             overflow-wrap: break-word;
             display: inline-block;
             vertical-align: bottom;
+        }
+
+        .lot-normal {
+            font-size: 40px;
+        }
+
+        .lot-small {
+            font-size: 28px;
+            /* adjust sesuai desain */
         }
 
         .no-karung-value {
@@ -169,10 +178,21 @@
             box-sizing: border-box;
             /* biar border masuk hitungan layout */
         }
+
+        .tgl-datang {
+            margin: 0;
+            font-size: 15px;
+            font-weight: bold;
+            padding-left: 5px;
+            /* padding-right: 5px; */
+            bottom: 0;
+            text-align: right;
+        }
     </style>
 </head>
 
-<?php foreach ($dataList as $i => $row) : ?>
+<?php
+foreach ($dataList as $i => $row): ?>
 
     <body>
         <div class="label-container">
@@ -187,8 +207,14 @@
                         <td colspan="3">
                             <div class="barcode-section">
                                 <img src="<?= $barcodeImages[$i] ?>" alt="barcode">
+                                <?php
+                                $noModel = $row['no_model'] ?? '-';
+                                if (($row['po_plus'] ?? '') === '1') {
+                                    $noModel = '(+)' . $noModel;
+                                }
+                                ?>
                                 <div style="margin-top: 1px;" class="l-header">
-                                    <div class="lot-label">PO :</div> <?= $row['no_model'] ?? '-' ?>
+                                    <div class="lot-label">PO :</div> <?= $noModel ?>
                                 </div>
                             </div>
                         </td>
@@ -197,7 +223,7 @@
                         <td colspan="3">
                             <div class="data-section">
                                 <div>Item : <?= $row['item_type'] ?></div>
-                                <div>Kode : <?= $row['kode_warna'] ?>/ <?= $row['warna'] ?></div>
+                                <div>Kode : <?= $row['kode_warna'] ?>/ <?= $row['warna'] ?><?= !empty($row['bentuk_celup']) ? ' (' . $row['bentuk_celup'] . ')' : '' ?></div>
                             </div>
                         </td>
                     </tr>
@@ -215,10 +241,10 @@
 
                 <div class="footer">
                     <div class="footer-left">
-                        <!-- <div class="lot-label">LOT</div> -->
                         <div class="lot-label">LOT CELUP :</div>
+                        <!-- <p> <sup> Lot Celup: </sup></p> -->
+                        <div class="lot-value <?= $row['lotClass'] ?>" style="margin-top: 1px;"> <?= $row['lot_kirim'] ?></div>
 
-                        <div class="lot-value"> <?= $row['lot_kirim'] ?></div>
                     </div>
                     <div class="footer-right">
                         No Karung
@@ -226,7 +252,9 @@
                         <?= $row['no_surat_jalan'] ?? '-' ?>
                     </div>
                 </div>
+                <div class="tgl-datang"><?= $row['tgl_datang'] ?></div>
             </div>
+        </div>
         </div>
     </body>
 <?php endforeach; ?>

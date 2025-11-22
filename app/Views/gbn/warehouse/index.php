@@ -276,6 +276,7 @@
                                         <option value="Untuk Kelos Warna">Untuk Kelos Warna</option>
                                         <option value="Untuk Doublingan Kelos">Untuk Doublingan Kelos</option>
                                         <option value="Untuk Jahit">Untuk Jahit</option>
+                                        <option value="Retur JS">Retur JS</option>
                                     </select>
                                 </div>
 

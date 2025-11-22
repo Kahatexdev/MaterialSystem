@@ -907,6 +907,9 @@ class CelupController extends BaseController
 
             // dd($group);
             foreach ($group['detailPengiriman'] as $outCelup => $id) {
+                $lot = $id['lot_kirim'];
+                $lotClass = (strlen($lot) > 10) ? 'lot-small' : 'lot-normal';
+
                 // Hasilkan barcode dan encode sebagai base64
                 // $id_out_celup = str_pad($id['id_out_celup'], 12, '0', STR_PAD_LEFT);
                 // $barcode = $generator->getBarcode($id_out_celup, $generator::TYPE_EAN_13);
@@ -925,6 +928,7 @@ class CelupController extends BaseController
                     'operator_packing' => $group['totals']['operator_packing'],
                     // 'ket' => $group['ket'],
                     'barcode' => 'data:image/png;base64,' . base64_encode($barcode),
+                    'lotClass' => $lotClass
                 ];
             }
         }
