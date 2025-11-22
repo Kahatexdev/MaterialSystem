@@ -276,7 +276,7 @@
 
                             // perhitungan
                             const tagihanGbn = kgs - (datangSolid + plusDatangSolid + kgsStockAwal);
-                            const jatahArea = kgs - pakaiArea;
+                            const jatahArea = kgs + poTambahan - pakaiArea;
                             // const jatah_area = $id['kgs_pakai_area'] - $id['retur_area'] - $id['retur_stock_area'] - $id['retur_titip_area'] - $id['kg_psn'] - $id['kg_psn_tambahan'];
 
                             // fungsi bantu untuk format
